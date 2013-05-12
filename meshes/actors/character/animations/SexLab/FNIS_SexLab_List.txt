@@ -1,0 +1,428 @@
+'
+' Unknown Animators Animations
+'
+s -a DoggyStyle_A1_S1 DoggyStyle_A1_S1.hkx
++ DoggyStyle_A1_S2 DoggyStyle_A1_S2.hkx
++ DoggyStyle_A1_S3 DoggyStyle_A1_S3.hkx
++ DoggyStyle_A1_S4 DoggyStyle_A1_S4.hkx
+s -a DoggyStyle_A2_S1 DoggyStyle_A2_S1.hkx
++ DoggyStyle_A2_S2 DoggyStyle_A2_S2.hkx
++ DoggyStyle_A2_S3 DoggyStyle_A2_S3.hkx
++ DoggyStyle_A2_S4 DoggyStyle_A2_S4.hkx
+
+s -a Missionary_A1_S1 Missionary_A1_S1.hkx
++ Missionary_A1_S2 Missionary_A1_S2.hkx
++ Missionary_A1_S3 Missionary_A1_S3.hkx
++ Missionary_A1_S4 Missionary_A1_S4.hkx
+s -a Missionary_A2_S1 Missionary_A2_S1.hkx
++ Missionary_A2_S2 Missionary_A2_S2.hkx
++ Missionary_A2_S3 Missionary_A2_S3.hkx
++ Missionary_A2_S4 Missionary_A2_S4.hkx
+
+s -a Boobjob_A1_S1 Boobjob_A1_S1.hkx
++ Boobjob_A1_S2 Boobjob_A1_S2.hkx
++ Boobjob_A1_S3 Boobjob_A1_S3.hkx
++ Boobjob_A1_S4 Boobjob_A1_S4.hkx
+s -a Boobjob_A2_S1 Boobjob_A2_S1.hkx
++ Boobjob_A2_S2 Boobjob_A2_S2.hkx
++ Boobjob_A2_S3 Boobjob_A2_S3.hkx
++ Boobjob_A2_S4 Boobjob_A2_S4.hkx
+
+s -a Sideways_A1_S1 Sideways_A1_S1.hkx
++ Sideways_A1_S2 Sideways_A1_S2.hkx
++ Sideways_A1_S3 Sideways_A1_S3.hkx
++ Sideways_A1_S4 Sideways_A1_S4.hkx
+s -a Sideways_A2_S1 Sideways_A2_S1.hkx
++ Sideways_A2_S2 Sideways_A2_S2.hkx
++ Sideways_A2_S3 Sideways_A2_S3.hkx
++ Sideways_A2_S4 Sideways_A2_S4.hkx
+
+s -a HuggingSex_A1_S1 HuggingSex_A1_S1.hkx
++ HuggingSex_A1_S2 HuggingSex_A1_S2.hkx
++ HuggingSex_A1_S3 HuggingSex_A1_S3.hkx
++ HuggingSex_A1_S4 HuggingSex_A1_S4.hkx
+s -a HuggingSex_A2_S1 HuggingSex_A2_S1.hkx
++ HuggingSex_A2_S2 HuggingSex_A2_S2.hkx
++ HuggingSex_A2_S3 HuggingSex_A2_S3.hkx
++ HuggingSex_A2_S4 HuggingSex_A2_S4.hkx
+
+s -a ReverseCowgirl_A1_S1 ReverseCowgirl_A1_S1.hkx
++ ReverseCowgirl_A1_S2 ReverseCowgirl_A1_S2.hkx
++ ReverseCowgirl_A1_S3 ReverseCowgirl_A1_S3.hkx
++ ReverseCowgirl_A1_S4 ReverseCowgirl_A1_S4.hkx
+s -a ReverseCowgirl_A2_S1 ReverseCowgirl_A2_S1.hkx
++ ReverseCowgirl_A2_S2 ReverseCowgirl_A2_S2.hkx
++ ReverseCowgirl_A2_S3 ReverseCowgirl_A2_S3.hkx
++ ReverseCowgirl_A2_S4 ReverseCowgirl_A2_S4.hkx
+
+s AggrDoggyStyle_A1_S1 AggrDoggyStyle_A1_S1.hkx
++ AggrDoggyStyle_A1_S2 AggrDoggyStyle_A1_S2.hkx
++ AggrDoggyStyle_A1_S3 AggrDoggyStyle_A1_S3.hkx
++ AggrDoggyStyle_A1_S4 AggrDoggyStyle_A1_S4.hkx
+s AggrDoggyStyle_A2_S1 AggrDoggyStyle_A2_S1.hkx
++ AggrDoggyStyle_A2_S2 AggrDoggyStyle_A2_S2.hkx
++ AggrDoggyStyle_A2_S3 AggrDoggyStyle_A2_S3.hkx
++ AggrDoggyStyle_A2_S4 AggrDoggyStyle_A2_S4.hkx
+
+
+s AggrBehind_A1_S1 AggrBehind_A1_S1.hkx
++ AggrBehind_A1_S2 AggrBehind_A1_S2.hkx
++ AggrBehind_A1_S3 AggrBehind_A1_S3.hkx
++ AggrBehind_A1_S4 AggrBehind_A1_S4.hkx
+s AggrBehind_A2_S1 AggrBehind_A2_S1.hkx
++ AggrBehind_A2_S2 AggrBehind_A2_S2.hkx
++ AggrBehind_A2_S3 AggrBehind_A2_S3.hkx
++ AggrBehind_A2_S4 AggrBehind_A2_S4.hkx
+
+
+s AggrMissionary_A1_S1 AggrMissionary_A1_S1.hkx
++ AggrMissionary_A1_S2 AggrMissionary_A1_S2.hkx
++ AggrMissionary_A1_S3 AggrMissionary_A1_S3.hkx
++ AggrMissionary_A1_S4 AggrMissionary_A1_S4.hkx
+s AggrMissionary_A2_S1 AggrMissionary_A2_S1.hkx
++ AggrMissionary_A2_S2 AggrMissionary_A2_S2.hkx
++ AggrMissionary_A2_S3 AggrMissionary_A2_S3.hkx
++ AggrMissionary_A2_S4 AggrMissionary_A2_S4.hkx
+
+s Standing_A1_S1 Standing_A1_S1.hkx
++ Standing_A1_S2 Standing_A1_S2.hkx
++ Standing_A1_S3 Standing_A1_S3.hkx
++ Standing_A1_S4 Standing_A1_S4.hkx
+s Standing_A2_S1 Standing_A2_S1.hkx
++ Standing_A2_S2 Standing_A2_S2.hkx
++ Standing_A2_S3 Standing_A2_S3.hkx
++ Standing_A2_S4 Standing_A2_S4.hkx
+
+s Tribadism_A1_S1 Tribadism_A1_S1.hkx
++ -B1.2 Tribadism_A1_S2 Tribadism_A1_S2.hkx
+s Tribadism_A2_S1 Tribadism_A2_S1.hkx
++ -B1.2 Tribadism_A2_S2 Tribadism_A2_S2.hkx
+
+'
+' Arrok's Animations
+'
+
+s Arrok_SittingForeplay_A1_S1 Arrok_SittingForeplay_A1_S1.hkx
++ Arrok_SittingForeplay_A1_S2 Arrok_SittingForeplay_A1_S2.hkx
++ Arrok_SittingForeplay_A1_S3 Arrok_SittingForeplay_A1_S3.hkx
++ Arrok_SittingForeplay_A1_S4 Arrok_SittingForeplay_A1_S4.hkx
+s Arrok_SittingForeplay_A2_S1 Arrok_SittingForeplay_A2_S1.hkx
++ Arrok_SittingForeplay_A2_S2 Arrok_SittingForeplay_A2_S2.hkx
++ Arrok_SittingForeplay_A2_S3 Arrok_SittingForeplay_A2_S3.hkx
++ Arrok_SittingForeplay_A2_S4 Arrok_SittingForeplay_A2_S4.hkx
+
+s Arrok_Hugfuck_A1_S1 Arrok_Hugfuck_A1_S1.hkx
++ Arrok_Hugfuck_A1_S2 Arrok_Hugfuck_A1_S2.hkx
++ Arrok_Hugfuck_A1_S3 Arrok_Hugfuck_A1_S3.hkx
++ Arrok_Hugfuck_A1_S4 Arrok_Hugfuck_A1_S4.hkx
+s Arrok_Hugfuck_A2_S1 Arrok_Hugfuck_A2_S1.hkx
++ Arrok_Hugfuck_A2_S2 Arrok_Hugfuck_A2_S2.hkx
++ Arrok_Hugfuck_A2_S3 Arrok_Hugfuck_A2_S3.hkx
++ Arrok_Hugfuck_A2_S4 Arrok_Hugfuck_A2_S4.hkx
+
+s Arrok_Lesbian_A1_S1 Arrok_Lesbian_A1_S1.hkx
++ Arrok_Lesbian_A1_S2 Arrok_Lesbian_A1_S2.hkx
++ Arrok_Lesbian_A1_S3 Arrok_Lesbian_A1_S3.hkx
++ Arrok_Lesbian_A1_S4 Arrok_Lesbian_A1_S4.hkx
+s Arrok_Lesbian_A2_S1 Arrok_Lesbian_A2_S1.hkx
++ Arrok_Lesbian_A2_S2 Arrok_Lesbian_A2_S2.hkx
++ Arrok_Lesbian_A2_S3 Arrok_Lesbian_A2_S3.hkx
++ Arrok_Lesbian_A2_S4 Arrok_Lesbian_A2_S4.hkx
+
+s Arrok_Foreplay_A1_S1 Arrok_Foreplay_A1_S1.hkx
++ Arrok_Foreplay_A1_S2 Arrok_Foreplay_A1_S2.hkx
++ Arrok_Foreplay_A1_S3 Arrok_Foreplay_A1_S3.hkx
++ Arrok_Foreplay_A1_S4 Arrok_Foreplay_A1_S4.hkx
+s Arrok_Foreplay_A2_S1 Arrok_Foreplay_A2_S1.hkx
++ Arrok_Foreplay_A2_S2 Arrok_Foreplay_A2_S2.hkx
++ Arrok_Foreplay_A2_S3 Arrok_Foreplay_A2_S3.hkx
++ Arrok_Foreplay_A2_S4 Arrok_Foreplay_A2_S4.hkx
+
+s Arrok_StandingForeplay_A1_S1 Arrok_StandingForeplay_A1_S1.hkx
++ Arrok_StandingForeplay_A1_S2 Arrok_StandingForeplay_A1_S2.hkx
++ Arrok_StandingForeplay_A1_S3 Arrok_StandingForeplay_A1_S3.hkx
++ Arrok_StandingForeplay_A1_S4 Arrok_StandingForeplay_A1_S4.hkx
++ Arrok_StandingForeplay_A1_S5 Arrok_StandingForeplay_A1_S5.hkx
+s Arrok_StandingForeplay_A2_S1 Arrok_StandingForeplay_A2_S1.hkx
++ Arrok_StandingForeplay_A2_S2 Arrok_StandingForeplay_A2_S2.hkx
++ Arrok_StandingForeplay_A2_S3 Arrok_StandingForeplay_A2_S3.hkx
++ Arrok_StandingForeplay_A2_S4 Arrok_StandingForeplay_A2_S4.hkx
+
+s Arrok_Missionary_A1_S1 Arrok_Missionary_A1_S1.hkx
++ Arrok_Missionary_A1_S2 Arrok_Missionary_A1_S2.hkx
++ Arrok_Missionary_A1_S3 Arrok_Missionary_A1_S3.hkx
++ Arrok_Missionary_A1_S4 Arrok_Missionary_A1_S4.hkx
+s Arrok_Missionary_A2_S1 Arrok_Missionary_A2_S1.hkx
++ Arrok_Missionary_A2_S2 Arrok_Missionary_A2_S2.hkx
++ Arrok_Missionary_A2_S3 Arrok_Missionary_A2_S3.hkx
++ Arrok_Missionary_A2_S4 Arrok_Missionary_A2_S4.hkx
+
+s Arrok_Standing_A1_S1 Arrok_Standing_A1_S1.hkx
++ Arrok_Standing_A1_S2 Arrok_Standing_A1_S2.hkx
++ Arrok_Standing_A1_S3 Arrok_Standing_A1_S3.hkx
++ Arrok_Standing_A1_S4 Arrok_Standing_A1_S4.hkx
+s Arrok_Standing_A2_S1 Arrok_Standing_A2_S1.hkx
++ Arrok_Standing_A2_S2 Arrok_Standing_A2_S2.hkx
++ Arrok_Standing_A2_S3 Arrok_Standing_A2_S3.hkx
++ Arrok_Standing_A2_S4 Arrok_Standing_A2_S4.hkx
+
+s Arrok_Boobjob_A1_S1 Arrok_Boobjob_A1_S1.hkx
++ Arrok_Boobjob_A1_S2 Arrok_Boobjob_A1_S2.hkx
++ Arrok_Boobjob_A1_S3 Arrok_Boobjob_A1_S3.hkx
++ Arrok_Boobjob_A1_S4 Arrok_Boobjob_A1_S4.hkx
+s Arrok_Boobjob_A2_S1 Arrok_Boobjob_A2_S1.hkx
++ Arrok_Boobjob_A2_S2 Arrok_Boobjob_A2_S2.hkx
++ Arrok_Boobjob_A2_S3 Arrok_Boobjob_A2_S3.hkx
++ Arrok_Boobjob_A2_S4 Arrok_Boobjob_A2_S4.hkx
+
+s -a,Tn Arrok_Blowjob_A1_S1 Arrok_Blowjob_A1_S1.hkx
++ Arrok_Blowjob_A1_S2 Arrok_Blowjob_A1_S2.hkx
++ Arrok_Blowjob_A1_S3 Arrok_Blowjob_A1_S3.hkx
+s -a,Tn Arrok_Blowjob_A2_S1 Arrok_Blowjob_A2_S1.hkx
++ Arrok_Blowjob_A2_S2 Arrok_Blowjob_A2_S2.hkx
++ Arrok_Blowjob_A2_S3 Arrok_Blowjob_A2_S3.hkx
+
+s Arrok_Oral_A1_S1 Arrok_Oral_A1_S1.hkx
++ Arrok_Oral_A1_S2 Arrok_Oral_A1_S2.hkx
++ Arrok_Oral_A1_S3 Arrok_Oral_A1_S3.hkx
++ Arrok_Oral_A1_S4 Arrok_Oral_A1_S4.hkx
+s Arrok_Oral_A2_S1 Arrok_Oral_A2_S1.hkx
++ Arrok_Oral_A2_S2 Arrok_Oral_A2_S2.hkx
++ Arrok_Oral_A2_S3 Arrok_Oral_A2_S3.hkx
+
+s Arrok_Doggystyle_A1_S1 Arrok_Doggystyle_A1_S1.hkx
++ Arrok_Doggystyle_A1_S2 Arrok_Doggystyle_A1_S2.hkx
++ Arrok_Doggystyle_A1_S3 Arrok_Doggystyle_A1_S3.hkx
++ Arrok_Doggystyle_A1_S4 Arrok_Doggystyle_A1_S4.hkx
+s Arrok_Doggystyle_A2_S1 Arrok_Doggystyle_A2_S1.hkx
++ Arrok_Doggystyle_A2_S2 Arrok_Doggystyle_A2_S2.hkx
++ Arrok_Doggystyle_A2_S3 Arrok_Doggystyle_A2_S3.hkx
++ Arrok_Doggystyle_A2_S4 Arrok_Doggystyle_A2_S4.hkx
+
+s -a Arrok_Cowgirl_A1_S1 Arrok_Cowgirl_A1_S1.hkx
++ Arrok_Cowgirl_A1_S2 Arrok_Cowgirl_A1_S2.hkx
++ Arrok_Cowgirl_A1_S3 Arrok_Cowgirl_A1_S3.hkx
++ Arrok_Cowgirl_A1_S4 Arrok_Cowgirl_A1_S4.hkx
++ Arrok_Cowgirl_A1_S5 Arrok_Cowgirl_A1_S5.hkx
++ Arrok_Cowgirl_A1_S6 Arrok_Cowgirl_A1_S6.hkx
+s -a Arrok_Cowgirl_A2_S1 Arrok_Cowgirl_A2_S1.hkx
++ Arrok_Cowgirl_A2_S2 Arrok_Cowgirl_A2_S2.hkx
++ Arrok_Cowgirl_A2_S3 Arrok_Cowgirl_A2_S3.hkx
++ Arrok_Cowgirl_A2_S4 Arrok_Cowgirl_A2_S4.hkx
+
+s -a,Tn Arrok_ReverseCowgirl_A1_S1 Arrok_ReverseCowgirl_A1_S1.hkx
++ Arrok_ReverseCowgirl_A1_S2 Arrok_ReverseCowgirl_A1_S2.hkx
++ Arrok_ReverseCowgirl_A1_S3 Arrok_ReverseCowgirl_A1_S3.hkx
++ Arrok_ReverseCowgirl_A1_S4 Arrok_ReverseCowgirl_A1_S4.hkx
+s -a,Tn Arrok_ReverseCowgirl_A2_S1 Arrok_ReverseCowgirl_A2_S1.hkx
++ Arrok_ReverseCowgirl_A2_S2 Arrok_ReverseCowgirl_A2_S2.hkx
++ Arrok_ReverseCowgirl_A2_S3 Arrok_ReverseCowgirl_A2_S3.hkx
++ Arrok_ReverseCowgirl_A2_S4 Arrok_ReverseCowgirl_A2_S4.hkx
+
+s -a,Tn Arrok_Sideways_A1_S1 Arrok_Sideways_A1_S1.hkx
++ Arrok_Sideways_A1_S2 Arrok_Sideways_A1_S2.hkx
++ Arrok_Sideways_A1_S3 Arrok_Sideways_A1_S3.hkx
++ Arrok_Sideways_A1_S4 Arrok_Sideways_A1_S4.hkx
+s -a,Tn Arrok_Sideways_A2_S1 Arrok_Sideways_A2_S1.hkx
++ Arrok_Sideways_A2_S2 Arrok_Sideways_A2_S2.hkx
++ Arrok_Sideways_A2_S3 Arrok_Sideways_A2_S3.hkx
++ Arrok_Sideways_A2_S4 Arrok_Sideways_A2_S4.hkx
+
+s -a,Tn Arrok_LegUp_A1_S1 Arrok_LegUp_A1_S1.hkx
++ Arrok_LegUp_A1_S2 Arrok_LegUp_A1_S2.hkx
++ Arrok_LegUp_A1_S3 Arrok_LegUp_A1_S3.hkx
++ Arrok_LegUp_A1_S4 Arrok_LegUp_A1_S4.hkx
++ Arrok_LegUp_A1_S5 Arrok_LegUp_A1_S5.hkx
+s -a,Tn Arrok_LegUp_A2_S1 Arrok_LegUp_A2_S1.hkx
++ Arrok_LegUp_A2_S2 Arrok_LegUp_A2_S2.hkx
++ Arrok_LegUp_A2_S3 Arrok_LegUp_A2_S3.hkx
++ Arrok_LegUp_A2_S4 Arrok_LegUp_A2_S4.hkx
++ Arrok_LegUp_A2_S5 Arrok_LegUp_A2_S5.hkx
+
+s Arrok_MaleMasturbation_A1_S1 Arrok_MaleMasturbation_A1_S1.hkx
++ Arrok_MaleMasturbation_A1_S2 Arrok_MaleMasturbation_A1_S2.hkx
++ Arrok_MaleMasturbation_A1_S3 Arrok_MaleMasturbation_A1_S3.hkx
++ Arrok_MaleMasturbation_A1_S4 Arrok_MaleMasturbation_A1_S4.hkx
+
+b Arrok_DevilsThreeway_A1_S1 Arrok_DevilsThreeway_A1_S1.hkx
+b Arrok_DevilsThreeway_A2_S1 Arrok_DevilsThreeway_A2_S1.hkx
+b Arrok_DevilsThreeway_A3_S1 Arrok_DevilsThreeway_A3_S1.hkx
+
+'
+' Animated Prostitution Animations
+'
+s AP_Anal_A1_S1 AP_Anal_A1_S1.hkx
++ AP_Anal_A1_S2 AP_Anal_A1_S2.hkx
++ AP_Anal_A1_S3 AP_Anal_A1_S3.hkx
++ AP_Anal_A1_S4 AP_Anal_A1_S4.hkx
++ AP_Anal_A1_S5 AP_Anal_A1_S5.hkx
+s AP_Anal_A2_S1 AP_Anal_A2_S1.hkx
++ AP_Anal_A2_S2 AP_Anal_A2_S2.hkx
++ AP_Anal_A2_S3 AP_Anal_A2_S3.hkx
++ AP_Anal_A2_S4 AP_Anal_A2_S4.hkx
++ AP_Anal_A2_S5 AP_Anal_A2_S5.hkx
+
+s AP_BedMissionary_A1_S1 AP_BedMissionary_A1_S1.hkx
++ AP_BedMissionary_A1_S2 AP_BedMissionary_A1_S2.hkx
++ AP_BedMissionary_A1_S3 AP_BedMissionary_A1_S3.hkx
++ AP_BedMissionary_A1_S4 AP_BedMissionary_A1_S4.hkx
++ AP_BedMissionary_A1_S5 AP_BedMissionary_A1_S5.hkx
++ AP_BedMissionary_A1_S6 AP_BedMissionary_A1_S6.hkx
+s AP_BedMissionary_A2_S1 AP_BedMissionary_A2_S1.hkx
++ AP_BedMissionary_A2_S2 AP_BedMissionary_A2_S2.hkx
++ AP_BedMissionary_A2_S3 AP_BedMissionary_A2_S3.hkx
++ AP_BedMissionary_A2_S4 AP_BedMissionary_A2_S4.hkx
+
+s AP_Blowjob_A1_S1 AP_Blowjob_A1_S1.hkx
++ AP_Blowjob_A1_S2 AP_Blowjob_A1_S2.hkx
++ AP_Blowjob_A1_S3 AP_Blowjob_A1_S3.hkx
++ AP_Blowjob_A1_S4 AP_Blowjob_A1_S4.hkx
++ AP_Blowjob_A1_S5 AP_Blowjob_A1_S5.hkx
+
+s AP_Cowgirl_A1_S1 AP_Cowgirl_A1_S1.hkx
++ AP_Cowgirl_A1_S2 AP_Cowgirl_A1_S2.hkx
++ AP_Cowgirl_A1_S3 AP_Cowgirl_A1_S3.hkx
++ AP_Cowgirl_A1_S4 AP_Cowgirl_A1_S4.hkx
++ AP_Cowgirl_A1_S5 AP_Cowgirl_A1_S5.hkx
++ AP_Cowgirl_A1_S6 AP_Cowgirl_A1_S6.hkx
+s AP_Cowgirl_A2_S1 AP_Cowgirl_A2_S1.hkx
++ AP_Cowgirl_A2_S2 AP_Cowgirl_A2_S2.hkx
++ AP_Cowgirl_A2_S3 AP_Cowgirl_A2_S3.hkx
++ AP_Cowgirl_A2_S4 AP_Cowgirl_A2_S4.hkx
+
+s AP_Fisting_A1_S1 AP_Fisting_A1_S1.hkx
++ AP_Fisting_A1_S2 AP_Fisting_A1_S2.hkx
++ AP_Fisting_A1_S3 AP_Fisting_A1_S3.hkx
++ AP_Fisting_A1_S4 AP_Fisting_A1_S4.hkx
++ AP_Fisting_A1_S5 AP_Fisting_A1_S5.hkx
+s AP_Fisting_A2_S1 AP_Fisting_A2_S1.hkx
++ AP_Fisting_A2_S2 AP_Fisting_A2_S2.hkx
++ AP_Fisting_A2_S3 AP_Fisting_A2_S3.hkx
++ AP_Fisting_A2_S4 AP_Fisting_A2_S4.hkx
+
+s AP_FemaleSolo_A1_S1 AP_FemaleSolo_A1_S1.hkx
++ AP_FemaleSolo_A1_S2 AP_FemaleSolo_A1_S2.hkx
++ AP_FemaleSolo_A1_S3 AP_FemaleSolo_A1_S3.hkx
++ AP_FemaleSolo_A1_S4 AP_FemaleSolo_A1_S4.hkx
++ AP_FemaleSolo_A1_S5 AP_FemaleSolo_A1_S5.hkx
++ AP_FemaleSolo_A1_S6 AP_FemaleSolo_A1_S6.hkx
+
+s AP_Handjob_A1_S1 AP_Handjob_A1_S1.hkx
++ AP_Handjob_A1_S2 AP_Handjob_A1_S2.hkx
++ AP_Handjob_A1_S3 AP_Handjob_A1_S3.hkx
++ AP_Handjob_A1_S4 AP_Handjob_A1_S4.hkx
++ AP_Handjob_A1_S5 AP_Handjob_A1_S5.hkx
+
+s AP_IdleStand_A2_S1 AP_IdleStand_A2_S1.hkx
++ AP_IdleStand_A2_S2 AP_IdleStand_A2_S2.hkx
++ AP_IdleStand_A2_S3 AP_IdleStand_A2_S3.hkx
++ AP_IdleStand_A2_S4 AP_IdleStand_A2_S4.hkx
++ AP_IdleStand_A2_S5 AP_IdleStand_A2_S5.hkx
+
+s AP_KneelBlowjob_A1_S1 AP_KneelBlowjob_A1_S1.hkx
++ AP_KneelBlowjob_A1_S2 AP_KneelBlowjob_A1_S2.hkx
++ AP_KneelBlowjob_A1_S3 AP_KneelBlowjob_A1_S3.hkx
++ AP_KneelBlowjob_A1_S4 AP_KneelBlowjob_A1_S4.hkx
++ AP_KneelBlowjob_A1_S5 AP_KneelBlowjob_A1_S5.hkx
+
+s AP_LegUp_A1_S1 AP_LegUp_A1_S1.hkx
++ AP_LegUp_A1_S2 AP_LegUp_A1_S2.hkx
++ AP_LegUp_A1_S3 AP_LegUp_A1_S3.hkx
++ AP_LegUp_A1_S4 AP_LegUp_A1_S4.hkx
++ AP_LegUp_A1_S5 AP_LegUp_A1_S5.hkx
+s AP_LegUp_A2_S1 AP_LegUp_A2_S1.hkx
++ AP_LegUp_A2_S2 AP_LegUp_A2_S2.hkx
++ AP_LegUp_A2_S3 AP_LegUp_A2_S3.hkx
++ AP_LegUp_A2_S4 AP_LegUp_A2_S4.hkx
++ AP_LegUp_A2_S5 AP_LegUp_A2_S5.hkx
+
+s AP_ReverseCowgirl_A1_S1 AP_ReverseCowgirl_A1_S1.hkx
++ AP_ReverseCowgirl_A1_S2 AP_ReverseCowgirl_A1_S2.hkx
++ AP_ReverseCowgirl_A1_S3 AP_ReverseCowgirl_A1_S3.hkx
++ AP_ReverseCowgirl_A1_S4 AP_ReverseCowgirl_A1_S4.hkx
++ AP_ReverseCowgirl_A1_S5 AP_ReverseCowgirl_A1_S5.hkx
+
+s AP_StandBlowjob_A1_S1 AP_StandBlowjob_A1_S1.hkx
++ AP_StandBlowjob_A1_S2 AP_StandBlowjob_A1_S2.hkx
++ AP_StandBlowjob_A1_S3 AP_StandBlowjob_A1_S3.hkx
++ AP_StandBlowjob_A1_S4 AP_StandBlowjob_A1_S4.hkx
++ AP_StandBlowjob_A1_S5 AP_StandBlowjob_A1_S5.hkx
+
+s AP_Standing_A1_S1 AP_Standing_A1_S1.hkx
++ AP_Standing_A1_S2 AP_Standing_A1_S2.hkx
++ AP_Standing_A1_S3 AP_Standing_A1_S3.hkx
++ AP_Standing_A1_S4 AP_Standing_A1_S4.hkx
++ AP_Standing_A1_S5 AP_Standing_A1_S5.hkx
+s AP_Standing_A2_S1 AP_Standing_A2_S1.hkx
++ AP_Standing_A2_S2 AP_Standing_A2_S2.hkx
++ AP_Standing_A2_S3 AP_Standing_A2_S3.hkx
+
+s AP_Shoulder_A1_S1 AP_Shoulder_A1_S1.hkx
++ AP_Shoulder_A1_S2 AP_Shoulder_A1_S2.hkx
++ AP_Shoulder_A1_S3 AP_Shoulder_A1_S3.hkx
++ AP_Shoulder_A1_S4 AP_Shoulder_A1_S4.hkx
++ AP_Shoulder_A1_S5 AP_Shoulder_A1_S5.hkx
+
+s AP_Boobjob_A1_S1 AP_Boobjob_A1_S1.hkx
++ AP_Boobjob_A1_S2 AP_Boobjob_A1_S2.hkx
++ AP_Boobjob_A1_S3 AP_Boobjob_A1_S3.hkx
++ AP_Boobjob_A1_S4 AP_Boobjob_A1_S4.hkx
++ AP_Boobjob_A1_S5 AP_Boobjob_A1_S5.hkx
+
+s AP_DoggyStyle_A1_S1 AP_DoggyStyle_A1_S1.hkx
++ AP_DoggyStyle_A1_S2 AP_DoggyStyle_A1_S2.hkx
++ AP_DoggyStyle_A1_S3 AP_DoggyStyle_A1_S3.hkx
++ AP_DoggyStyle_A1_S4 AP_DoggyStyle_A1_S4.hkx
++ AP_DoggyStyle_A1_S5 AP_DoggyStyle_A1_S5.hkx
+
+b AP_Scene12_A1_S1 AP_Scene12_A1_S1.hkx
+
+s AP_HoldLegUp_A1_S1 AP_HoldLegUp_A1_S1.hkx
++ AP_HoldLegUp_A1_S2 AP_HoldLegUp_A1_S2.hkx
++ AP_HoldLegUp_A1_S3 AP_HoldLegUp_A1_S3.hkx
++ AP_HoldLegUp_A1_S4 AP_HoldLegUp_A1_S4.hkx
++ AP_HoldLegUp_A1_S5 AP_HoldLegUp_A1_S5.hkx
+s AP_HoldLegUp_A2_S1 AP_HoldLegUp_A2_S1.hkx
++ AP_HoldLegUp_A2_S2 AP_HoldLegUp_A2_S2.hkx
++ AP_HoldLegUp_A2_S3 AP_HoldLegUp_A2_S3.hkx
+
+s AP_FaceDown_A1_S1 AP_FaceDown_A1_S1.hkx
++ AP_FaceDown_A1_S2 AP_FaceDown_A1_S2.hkx
++ AP_FaceDown_A1_S3 AP_FaceDown_A1_S3.hkx
++ AP_FaceDown_A1_S4 AP_FaceDown_A1_S4.hkx
++ AP_FaceDown_A1_S5 AP_FaceDown_A1_S5.hkx
+s AP_FaceDown_A2_S1 AP_FaceDown_A2_S1.hkx
++ AP_FaceDown_A2_S2 AP_FaceDown_A2_S2.hkx
++ AP_FaceDown_A2_S3 AP_FaceDown_A2_S3.hkx
++ AP_FaceDown_A2_S4 AP_FaceDown_A2_S4.hkx
+
+s AP_SkullFuck_A1_S1 AP_SkullFuck_A1_S1.hkx
++ AP_SkullFuck_A1_S2 AP_SkullFuck_A1_S2.hkx
++ AP_SkullFuck_A1_S3 AP_SkullFuck_A1_S3.hkx
++ AP_SkullFuck_A1_S4 AP_SkullFuck_A1_S4.hkx
++ AP_SkullFuck_A1_S5 AP_SkullFuck_A1_S5.hkx
+s AP_SkullFuck_A2_S1 AP_SkullFuck_A2_S1.hkx
++ AP_SkullFuck_A2_S2 AP_SkullFuck_A2_S2.hkx
++ AP_SkullFuck_A2_S3 AP_SkullFuck_A2_S3.hkx
++ AP_SkullFuck_A2_S4 AP_SkullFuck_A2_S4.hkx
++ AP_SkullFuck_A2_S5 AP_SkullFuck_A2_S5.hkx
+
+s AP_Scene16_A1_S1 AP_Scene16_A1_S1.hkx
++ AP_Scene16_A1_S2 AP_Scene16_A1_S2.hkx
++ AP_Scene16_A1_S3 AP_Scene16_A1_S3.hkx
++ AP_Scene16_A1_S4 AP_Scene16_A1_S4.hkx
++ AP_Scene16_A1_S5 AP_Scene16_A1_S5.hkx
+b AP_Scene16_A2_S1 AP_Scene16_A2_S1.hkx
+
+s Arrok_Tricycle_A1_S1 Arrok_Tricycle_A1_S1.hkx
++ Arrok_Tricycle_A1_S2 Arrok_Tricycle_A1_S2.hkx
++ Arrok_Tricycle_A1_S3 Arrok_Tricycle_A1_S3.hkx
++ Arrok_Tricycle_A1_S4 Arrok_Tricycle_A1_S4.hkx
+s Arrok_Tricycle_A2_S1 Arrok_Tricycle_A2_S1.hkx
++ Arrok_Tricycle_A2_S2 Arrok_Tricycle_A2_S2.hkx
++ Arrok_Tricycle_A2_S3 Arrok_Tricycle_A2_S3.hkx
++ Arrok_Tricycle_A2_S4 Arrok_Tricycle_A2_S4.hkx
+s Arrok_Tricycle_A3_S1 Arrok_Tricycle_A3_S1.hkx
++ Arrok_Tricycle_A3_S2 Arrok_Tricycle_A3_S2.hkx
++ Arrok_Tricycle_A3_S3 Arrok_Tricycle_A3_S3.hkx
++ Arrok_Tricycle_A3_S4 Arrok_Tricycle_A3_S4.hkx
