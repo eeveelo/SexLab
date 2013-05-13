@@ -329,7 +329,8 @@ form[] function StripSlots(actor a, bool[] strip, bool allowNudesuit = true)
 	form[] items
 	int mask
 	armor item
-	weapon weap
+	weapon eWeap
+	spell eSpell
 
 	; Use Strip settings
 	int i = 0
@@ -342,16 +343,32 @@ form[] function StripSlots(actor a, bool[] strip, bool allowNudesuit = true)
 				items = sslUtility.PushForm(item, items)
 			endIf 
 		elseif strip[i] && i == 32
-			weap = a.GetEquippedWeapon()
-			if weap != none
-				a.UnequipItem(weap, false, true)
-				items = sslUtility.PushForm(weap, items)
-			endif
-			weap = a.GetEquippedWeapon(true)
-			if weap != none
-				a.UnequipItem(weap, false, true)
-				items = sslUtility.PushForm(weap, items)
-			endif
+			; Left hand
+			int left = a.GetEquippedItemType(0)
+			if left == 11 ; Torch
+				;TODO
+			elseif left == 9 ; Spell
+				eSpell = a.GetEquippedSpell(0)
+				a.UnequipSpell(eSpell, 0)
+				items = sslUtility.PushForm(eSpell, items)
+			elseif left > 0 ; Weapon
+				eWeap = a.GetEquippedWeapon(true)
+				a.UnequipItem(eWeap, false, true)
+				items = sslUtility.PushForm(eWeap, items)
+			endIf
+			; Right hand
+			int right = a.GetEquippedItemType(1)
+			if right == 11 ; Torch
+				;TODO
+			elseif left == 9 ; Spell
+				eSpell = a.GetEquippedSpell(1)
+				a.UnequipSpell(eSpell, 1)
+				items = sslUtility.PushForm(eSpell, items)
+			elseif left > 0 ; Weapon
+				eWeap = a.GetEquippedWeapon(false)
+				a.UnequipItem(eWeap, false, true)
+				items = sslUtility.PushForm(eWeap, items)
+			endIf
 		endIf
 		i += 1
 	endWhile
@@ -367,7 +384,6 @@ form[] function StripSlots(actor a, bool[] strip, bool allowNudesuit = true)
 endFunction
 
 function UnstripActor(actor a, form[] stripped, actor victim = none)
-
 	int i = stripped.Length
 	if i < 1
 		_DebugTrace("EquipStrapon","actor="+a+", stripped="+stripped+", victim="+victim,"No items passed to stripped argument for actor to equip")
@@ -376,18 +392,28 @@ function UnstripActor(actor a, form[] stripped, actor victim = none)
 	; Remove nudesuits
 	int gender = a.GetLeveledActorBase().GetSex()
 	if (gender < 2 && Config.bUseMaleNudeSuit) || (gender == 1  && Config.bUseFemaleNudeSuit)
-		;a.UnequipItem(Config.aNudeSuit, false, true)
+		a.UnequipItem(Data.aNudeSuit, false, true)
 		a.RemoveItem(Data.aNudeSuit, 1, true)
 	endIf
 
 	if a == victim && !Config.bReDressVictim
 		return ; Don't requip victims
 	endIf
-
 	; Requip stripped
+	int hand = 1
+
 	while i
 		i -= 1
-		a.EquipItem(stripped[i], false, true)
+		int type = stripped[i].GetType()
+		if type == 22 || type == 82
+			a.EquipSpell(stripped[i] as spell, hand)
+		else
+			a.EquipItem(stripped[i], false, true)
+		endIf
+		; Move to other hand if weapon, light, spell, or leveledspell
+		if type == 41 || type == 31 || type == 22 || type == 82
+			hand = 0
+		endIf
 	endWhile
 endFunction
 

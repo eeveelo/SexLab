@@ -347,11 +347,6 @@ function PreparePosition(int position, actor a)
 	aliasSlot[position] = SexLab._SlotDoNothing(a)
 	; Disable their movement
 	if SexLab.PlayerRef == a
-		; Stop movement
-		Game.SetPlayerAIDriven()
-		Game.DisablePlayerControls(true, true, true, false, true, false, false, true, 0)
-		Game.SetInChargen(false, true, true)
-		Game.ForceThirdPerson()
 		; toggle collisions?
 		if SexLab.Config.bEnableTCL
 			Debug.ToggleCollisions()
@@ -366,6 +361,11 @@ function PreparePosition(int position, actor a)
 		else
 			SexLab._EnableHotkeys(tid)
 		endIf
+		; Stop movement
+		Game.DisablePlayerControls(true, true, true, false, true, false, false, true, 0)
+		Game.SetInChargen(false, true, true)
+		Game.ForceThirdPerson()
+		Game.SetPlayerAIDriven()
 	else
 		a.SetRestrained()
 		a.SetDontMove()
@@ -425,7 +425,7 @@ function RemoveExtras(int position)
 		int i = 0
 		while i < extrasCount
 			if extras[i] != none
-				;pos[position].UnequipItem(extras[i], false, true)
+				pos[position].UnequipItem(extras[i], false, true)
 				pos[position].RemoveItem(extras[i], 1, true)
 			endIf
 			i += 1
@@ -664,23 +664,16 @@ function ChangeAnimation(bool backwards = false)
 	advance = true
 
 	SexLab._SendEventHook("AnimationChange",tid,hook)
-
-	; stage -= 1
-	; advance = true
-	; Restart the stage with new anim set
-	; GoToState("Animating")
 endFunction
 
 function ChangePositions()
 	if actorCount < 2
 		return ; Solo Animation, nobody to swap with
 	endIf
-
 	int newPos = adjustingPos + 1
 	if newPos >= actorCount
 		newPos = 0 ; Outside range, wrap to start
 	endIf
-
 	; Who are we swapping
 	actor adjustedPos = pos[adjustingPos]
 	actor replacedPos = pos[newPos]
@@ -689,9 +682,6 @@ function ChangePositions()
 	elseif centerRef == replacedPos
 		centerRef = adjustedPos
 	endIf
-	; Get Current coords
-	float[] coordsAdjusted = GetCoords(adjustedPos)
-	float[] coordsReplaced = GetCoords(replacedPos)
 	; Swap Positions
 	RemoveExtras(newPos)
 	RemoveExtras(adjustingPos)
@@ -728,16 +718,10 @@ function ChangePositions()
 	; Keep adjustment choice
 	if adjustingPos == player
 		player = newPos
+	elseif newPos == player
+		player = adjustingPos
 	endIf
 	adjustingPos = newPos
-	; Swap places
-	; replacedPos.SetPosition(coordsAdjusted[0],coordsAdjusted[1],coordsAdjusted[2])
-	; replacedPos.SetAngle(coordsAdjusted[3],coordsAdjusted[4],coordsAdjusted[5])
-	; adjustedPos.SetPosition(coordsReplaced[0],coordsReplaced[1],coordsReplaced[2])
-	; adjustedPos.SetAngle(coordsReplaced[3],coordsReplaced[4],coordsReplaced[5])
-	; Cheap fix:
-	SexLab.StripActor(adjustedPos, victim)
-	SexLab.StripActor(replacedPos, victim)
 	; Restart animations
 	RealignActors()
 	SexLab._SendEventHook("PositionChange",tid,hook)
@@ -751,11 +735,6 @@ function AdjustForward(bool backwards = false)
 		adjustment = 0.5
 	endIf
 	anim.UpdateOffset(adjustingPos, adjustment)
-	;debug.messagebox("Adjusting "+adjustingPos+" to "+anim.GetOffset(adjustingPos))
-	; float posz = 0.0
-	; if adjustingPos == player
-	; 	posz = -10
-	; endIf
 	pos[adjustingPos].MoveTo(pos[adjustingPos], Math.sin(centerLoc[5]) * adjustment, Math.cos(centerLoc[5]) * adjustment, 0.0, true)
 endFunction
 
@@ -766,10 +745,6 @@ function AdjustSideways(bool backwards = false)
 	else
 		adjustment = 0.5
 	endIf
-	; float posz = 0.0
-	; if adjustingPos == player
-	; 	posz = -10
-	; endIf
 	anim.UpdateOffsetSide(adjustingPos, adjustment)
 	pos[adjustingPos].MoveTo(pos[adjustingPos], Math.cos(centerLoc[5]) * adjustment, Math.sin(centerLoc[5]) * adjustment, 0.0, true)
 endFunction
@@ -785,8 +760,6 @@ function AdjustUpward(bool backwards = false)
 	float[] coords = GetCoords(pos[adjustingPos])
 	;MoveActor(adjustingPos)
 	pos[adjustingPos].MoveTo(pos[adjustingPos], 0, 0, adjustment, true)
-	;pos[adjustingPos].SetPosition(coords[0], coords[1], coords[2] + adjustment) 
-	;pos[adjustingPos].SetAngle(coords[3], coords[4], coords[5]) 
 endFunction
 
 function AdjustChange(bool backwards = false)
@@ -795,7 +768,6 @@ function AdjustChange(bool backwards = false)
 		adjustingPos = 0
 	endIf
 	SexLab.Data.mAdjustChange.Show(adjustingPos + 1)
-	; debug.notification("Adjusting Position "+adjustingPos)
 endFunction
 
 function RealignActors()
@@ -960,49 +932,6 @@ state SetStage
 
 	endEvent
 endState
-
-; DEPRECATED: needless, multipurposed animating loop
-; state Orgasm
-; 	event OnBeginState()
-
-; 		if !active
-; 			self.GoToState("Waiting")
-; 		endIf
-
-; 		SexLab._SendEventHook("OrgasmStart",tid,hook)
-
-; 		if player >= 0
-; 			SexLab.UnregisterForAllKeys()
-; 		endIf
-
-; 		PlayAnimations()
-		
-; 		int i
-; 		progress = 0.0
-; 		float stageStart = Utility.GetCurrentRealTime()
-; 		bool end = false
-; 		while !end
-; 			PlaySFX()
-; 			i = 0
-; 			while i < actorCount
-; 				if voice[i] != none && !silence[i]
-; 					PlayVoice(i, 1.0)
-; 				endIf
-; 				i += 1
-; 			endWhile
-; 			progress = Utility.GetCurrentRealTime() - stageStart
-; 			if (progress >= timer[4]) || !active
-; 				end = true
-; 			else
-; 				Utility.Wait(1.5)
-; 			endIf
-; 		endWhile
-
-; 		SexLab._SendEventHook("OrgasmEnd",tid,hook)
-
-; 		EndAnimation()
-; 	endEvent
-; endState
 
 state Waiting
 	event OnBeginState()

@@ -216,7 +216,7 @@ function SetDefaults()
 	fStageTimer[1] = 20.0
 	fStageTimer[2] = 15.0
 	fStageTimer[3] = 15.0
-	fStageTimer[4] = 7.0
+	fStageTimer[4] = 5.0
 
 	fStageTimerAggr = new float[5]
 	oidStageTimerAggr = new int[5]
@@ -285,60 +285,13 @@ event OnConfigInit()
 endEvent
 
 event OnVersionUpdate(int version)
-
 	if CurrentVersion > 0 && !SexLab._CheckClean()
 		SexLab.Data.mDirtyUpgrade.Show(CurrentVersion, version)
 	endIf
 
 	; Rev 4
 	if version >= 4 && CurrentVersion < 4
-		sPureTitles = new string[7]
-		sPureTitles[0] = "Neutral"
-		sPureTitles[1] = "Unsullied"
-		sPureTitles[3] = "Virtuous"
-		sPureTitles[4] = "Ever Faithful"
-		sPureTitles[6] = "Saintly"
-
-		sImpureTitles = new string[7]
-		sImpureTitles[0] = "Neutral"
-		sImpureTitles[1] = "Experimenting"
-		sImpureTitles[2] = "Unusually Horny"
-		sImpureTitles[3] = "Promiscuous"
-		sImpureTitles[4] = "Sexual Deviant"
-
-		sStatTitles = new string[7]
-		sStatTitles[0] = "Unskilled"
-		sStatTitles[1] = "Novice"
-		sStatTitles[2] = "Apprentice"
-		sStatTitles[3] = "Journeyman"
-		sStatTitles[4] = "Expert"
-		sStatTitles[5] = "Master"
-		sStatTitles[6] = "Grand Master"
-
-		Pages = new string[10]
-		Pages[0] = "Animation Settings"
-		Pages[1] = "Player Hotkeys"
-		Pages[2] = "Stage Timers"
-		Pages[3] = "Male/Female Stripping"
-		Pages[4] = "Victim/Aggressor Stripping"
-		Pages[5] = "Toggle Voices"
-		Pages[6] = "Toggle Animations"
-		Pages[7] = "Aggressive Animations"
-		Pages[9] = "Rebuild & Clean"
-
-		if SexLab.PlayerRef.GetLeveledActorBase().GetSex() > 0
-			Pages[8] = "Sex Diary"
-			sPureTitles[2] = "Prim & Proper"
-			sPureTitles[5] = "Ladylike"
-			sImpureTitles[5] = "Debaucherous"
-			sImpureTitles[6] = "Nymphomaniac"
-		else
-			Pages[8] = "Sex Journal"
-			sPureTitles[2] = "Clean Cut"
-			sPureTitles[5] = "Lordly"
-			sImpureTitles[5] = "Depraved"
-			sImpureTitles[6] = "Hypersexual"
-		endIf
+		SetDefaults()
 	endIf
 endEvent
 
