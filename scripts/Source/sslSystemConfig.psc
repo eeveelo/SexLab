@@ -285,7 +285,7 @@ event OnConfigInit()
 endEvent
 
 event OnVersionUpdate(int version)
-	if CurrentVersion > 0 && !SexLab._CheckClean()
+	if CurrentVersion > 1 && !SexLab._CheckClean()
 		SexLab.Data.mDirtyUpgrade.Show(CurrentVersion, version)
 	endIf
 

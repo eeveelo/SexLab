@@ -343,29 +343,13 @@ form[] function StripSlots(actor a, bool[] strip, bool allowNudesuit = true)
 				items = sslUtility.PushForm(item, items)
 			endIf 
 		elseif strip[i] && i == 32
-			; Left hand
-			int left = a.GetEquippedItemType(0)
-			if left == 11 ; Torch
-				;TODO
-			elseif left == 9 ; Spell
-				eSpell = a.GetEquippedSpell(0)
-				a.UnequipSpell(eSpell, 0)
-				items = sslUtility.PushForm(eSpell, items)
-			elseif left > 0 ; Weapon
-				eWeap = a.GetEquippedWeapon(true)
+			eWeap = a.GetEquippedWeapon(true)
+			if eWeap != none
 				a.UnequipItem(eWeap, false, true)
 				items = sslUtility.PushForm(eWeap, items)
 			endIf
-			; Right hand
-			int right = a.GetEquippedItemType(1)
-			if right == 11 ; Torch
-				;TODO
-			elseif left == 9 ; Spell
-				eSpell = a.GetEquippedSpell(1)
-				a.UnequipSpell(eSpell, 1)
-				items = sslUtility.PushForm(eSpell, items)
-			elseif left > 0 ; Weapon
-				eWeap = a.GetEquippedWeapon(false)
+			eWeap = a.GetEquippedWeapon(false)
+			if eWeap != none
 				a.UnequipItem(eWeap, false, true)
 				items = sslUtility.PushForm(eWeap, items)
 			endIf
