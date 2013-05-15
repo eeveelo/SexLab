@@ -819,7 +819,7 @@ float[] function FloatArray(int size) global
 		return new float[128]
 	endIf
 endFunction
-idle[] function idleArray(int size) global
+idle[] function IdleArray(int size) global
 	size = ValidateSize(size)
 	if size == 1
 		return new idle[1]

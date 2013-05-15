@@ -108,7 +108,7 @@ function SetAnimation(sslBaseAnimation animation)
 	if !active
 		return
 	endIf
-anim = animation
+	anim = animation
 	stageCount = anim.StageCount()
 	sfx = anim.GetSFX()
 	sexual = anim.IsSexual()
