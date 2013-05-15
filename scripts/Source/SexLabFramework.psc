@@ -977,20 +977,19 @@ function _CleanSystem()
 	int i = 0
 	while i < threadCount
 		thread[i].EndAnimation(quick = true)
-		utility.Wait(0.3)
+		utility.Wait(0.2)
 		i += 1
 	endWhile
 
-
-	Config.SetDefaults()
 	_ClearAnimations()
 	_ClearVoices()
 	_SetupSystem()
-	
+	Config.SetDefaults()
+
 	Data.mCleanSystemFinish.Show()
 
 	clean = true
-	enabled = false
+	; enabled = false
 	ready = true
 endFunction
 
@@ -1051,6 +1050,7 @@ function _CheckSystem()
 	_ReadyWait()
 	ready = false
 	enabled = true
+	Start()
 
 	; Check Skyrim Version
 	float skyrimNeeded = 1.9
