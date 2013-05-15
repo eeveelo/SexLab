@@ -1074,22 +1074,6 @@ function _CheckSystem()
 	ready = true
 endFunction
 
-string[] function _HookParseArgs(string argString)
-{This isn't used now due to using thread id instead of argstring}
-	string[] args
-	int last = 1
-	int index = 1
-	while index != -1
-		index = StringUtil.Find(argString,"]", last)
-		if index != -1
-			string arg = StringUtil.SubString(argString, last, index - last)
-			args = sslUtility.PushString(arg, args)
-			last = index + 2
-		endIf
-	endWhile
-	return args
-endFunction
-
 function _SendEventHook(string eventName, int threadID, string customHook = "")
 	; Send Custom Event
 	if customHook != ""
