@@ -267,8 +267,8 @@ function SpawnThread(actor[] positions, sslBaseAnimation[] animationList, actor 
 
 	centerLoc = GetCoords(centerOn)
 	if SexLab.Data.BedsList.HasForm(centerOn.GetBaseObject())
-		centerLoc[0] = centerLoc[0] + (70 * Math.sin(centerLoc[5]))
-		centerLoc[1] = centerLoc[1] + (70 * Math.cos(centerLoc[5]))
+		centerLoc[0] = centerLoc[0] + (35 * Math.sin(centerLoc[5]))
+		centerLoc[1] = centerLoc[1] + (35 * Math.cos(centerLoc[5]))
 		centerLoc[2] = centerLoc[2] + 35
 		bed = true
 	endIf
@@ -308,13 +308,7 @@ function MoveActor(int position)
 	; (int position) should be zero indexed
 	actor a = pos[position]
 
-	float animOffset
-	if bed
-		animOffset = anim.GetOffset(position, 45.0)
-	else
-		animOffset = anim.GetOffset(position, 60.0)
-	endIf
-
+	float animOffset = anim.GetOffset(position)
 	float[] offset = new float[3]
 	offset[0] = (Math.sin(centerLoc[5]) * animOffset + Math.cos(centerLoc[5]) * anim.GetOffsetSide(position))
 	offset[1] = (Math.cos(centerLoc[5]) * animOffset + Math.sin(centerLoc[5]) * anim.GetOffsetSide(position))
@@ -561,51 +555,61 @@ function EndAnimation(bool quick = false)
 		endWhile
 	endIf
 
-	; Reset Idle
 	i = 0
 	while i < actorCount
 		actor a = pos[i]
+		; Reset actor
+		SexLab._ClearDoNothing(aliasSlot[i])
+		RemoveExtras(i)
+		a.RemoveFromFaction(SexLab.AnimatingFaction)
+		a.ClearExpressionOverride()
+
+		; Reset scale
 		if actorCount > 1 && SexLab.Config.bScaleActors
 			a.SetScale(1.0)
 		endIf
-		if SexLab.PlayerRef == a
-			Game.SetPlayerAIDriven(false)
-			if SexLab.Config.bEnableTCL
-				Debug.ToggleCollisions()
-			endIf
-		endIf
-		a.PushActorAway(a, 0.2)
-		i += 1
-	endWhile
 
-	; Wait a couple seconds for them to get up
-	if !quick
-		utility.Wait(3.5)
-	endIf
-
-	i = 0
-	while i < actorCount
-		actor a = pos[i]
 		; Enable movement
 		if SexLab.PlayerRef == a
 			SexLab.UnregisterForAllKeys()
 			SexLab.UpdatePlayerStats(anim, total, males, females, victim)
 			Game.EnablePlayerControls()
 			Game.SetInChargen(false, false, false)
+			Game.SetPlayerAIDriven(false)
+			if SexLab.Config.bEnableTCL
+				Debug.ToggleCollisions()
+			endIf
 		else
 			a.SetRestrained(false)
 			a.SetDontMove(false)
 		endIf
-		SexLab._ClearDoNothing(aliasSlot[i])
-		RemoveExtras(i)
-		a.RemoveFromFaction(SexLab.AnimatingFaction)
-		a.ClearExpressionOverride()
+		i += 1
+	endWhile
+
+	; Reset Idle
+	i = 0
+	while i < actorCount
+		actor a = pos[i]
+		a.PushActorAway(a, 0.1)
+		i += 1
+	endWhile
+
+	; Wait a couple seconds for them to get up
+	if !quick
+		utility.Wait(3.0)
+	endIf
+
+	; Requip them
+	i = 0
+	while i < actorCount
+		actor a = pos[i]
 		if !a.IsDead() && !a.IsBleedingOut()
 			form[] equipment = GetEquipment(i)
 			SexLab.UnstripActor(a, equipment, victim)
 		endIf
 		i += 1
 	endWhile
+
 
 	SexLab._EndThread(tid, player)
 	self.GoToState("Waiting")
