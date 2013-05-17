@@ -132,6 +132,39 @@ function SetAnimationList(sslBaseAnimation[] animationList)
 	SetAnimation(animations[aid])
 endFunction
 
+function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, float RotX = 0.0, float RotY = 0.0, float RotZ = 0.0, bool resync = true)
+	float[] coords = new float[6]
+	coords[0] = LocX
+	coords[1] = LocY
+	coords[2] = LocZ
+	coords[3] = RotX
+	coords[4] = RotY
+	coords[5] = RotZ
+	if resync
+		RealignActors()
+		SexLab._SendEventHook("ActorsRelocated",tid,hook)
+	endIf
+endFunction
+
+function CenterOnObject(ObjectReference center, bool resync = true)
+	if center == none
+		Debug.Trace("-----SEXLAB NOTICE: No valid ObjectReference given for sslBaseThread.MoveToObject()")
+		return
+	endIf
+	bed = false
+	centerLoc = GetCoords(center)
+	if SexLab.Data.BedsList.HasForm(center.GetBaseObject())
+		centerLoc[0] = centerLoc[0] + (35 * Math.sin(centerLoc[5]))
+		centerLoc[1] = centerLoc[1] + (35 * Math.cos(centerLoc[5]))
+		centerLoc[2] = centerLoc[2] + 35
+		bed = true
+	endIf
+	if resync
+		RealignActors()
+		SexLab._SendEventHook("ActorsRelocated",tid,hook)
+	endIf
+endFunction
+
 function ChangeActors(actor[] changeTo)
 	if !active
 		return
@@ -265,13 +298,7 @@ function SpawnThread(actor[] positions, sslBaseAnimation[] animationList, actor 
 		timer = SexLab.Config.fStageTimer
 	endIf
 
-	centerLoc = GetCoords(centerOn)
-	if SexLab.Data.BedsList.HasForm(centerOn.GetBaseObject())
-		centerLoc[0] = centerLoc[0] + (35 * Math.sin(centerLoc[5]))
-		centerLoc[1] = centerLoc[1] + (35 * Math.cos(centerLoc[5]))
-		centerLoc[2] = centerLoc[2] + 35
-		bed = true
-	endIf
+	CenterOnObject(centerOn, false)
 
 	; Find if player present
 	int i = 0
@@ -562,7 +589,6 @@ function EndAnimation(bool quick = false)
 		SexLab._ClearDoNothing(aliasSlot[i])
 		RemoveExtras(i)
 		a.RemoveFromFaction(SexLab.AnimatingFaction)
-		a.ClearExpressionOverride()
 
 		; Reset scale
 		if actorCount > 1 && SexLab.Config.bScaleActors
@@ -573,7 +599,6 @@ function EndAnimation(bool quick = false)
 		if SexLab.PlayerRef == a
 			SexLab.UnregisterForAllKeys()
 			SexLab.UpdatePlayerStats(anim, total, males, females, victim)
-			Game.EnablePlayerControls()
 			Game.SetInChargen(false, false, false)
 			Game.SetPlayerAIDriven(false)
 			if SexLab.Config.bEnableTCL
@@ -590,7 +615,8 @@ function EndAnimation(bool quick = false)
 	i = 0
 	while i < actorCount
 		actor a = pos[i]
-		a.PushActorAway(a, 0.1)
+		Debug.SendAnimationEvent(SexLab.PlayerRef, "IdleForceDefaultState")
+		;a.PushActorAway(a, 0.1)
 		i += 1
 	endWhile
 
@@ -603,13 +629,16 @@ function EndAnimation(bool quick = false)
 	i = 0
 	while i < actorCount
 		actor a = pos[i]
+		if SexLab.PlayerRef == a
+			; Give Player control back post push
+			Game.EnablePlayerControls()
+		endIf
 		if !a.IsDead() && !a.IsBleedingOut()
 			form[] equipment = GetEquipment(i)
 			SexLab.UnstripActor(a, equipment, victim)
 		endIf
 		i += 1
 	endWhile
-
 
 	SexLab._EndThread(tid, player)
 	self.GoToState("Waiting")
@@ -774,6 +803,40 @@ function AdjustChange(bool backwards = false)
 	SexLab.Data.mAdjustChange.Show(adjustingPos + 1)
 endFunction
 
+function MoveScene()
+	bool advanceToggle
+	; Toggle auto advance off
+	if autoAdvance
+		autoAdvance = false
+		advanceToggle = true
+	endIf
+	; Enable Controls
+	Game.EnablePlayerControls()
+	Game.SetPlayerAIDriven(false)
+	;.PlayIdle(SexLab.Data.ResetIdle)
+	Debug.SendAnimationEvent(SexLab.PlayerRef, "IdleForceDefaultState")
+	; Lock hotkeys here for timer
+	float started = Utility.GetCurrentRealTime()
+	float waiting = 6
+	while waiting > 0
+		waiting = 6 - (Utility.GetCurrentRealTime() - started)
+		SexLab.Data.mMoveScene.Show(waiting)
+		Utility.Wait(0.8)
+	endWhile
+	; Disable Controls
+	Game.DisablePlayerControls(true, true, true, false, true, false, false, true, 0)
+	Game.ForceThirdPerson()
+	Game.SetPlayerAIDriven()
+	; Give player time to settle if airborne
+	Utility.Wait(1.0)
+	; Recenter + sync
+	CenterOnObject(SexLab.PlayerRef)
+	; Toggle auto advance back
+	if advanceToggle
+		autoAdvance = true
+	endIf
+endFunction
+
 function RealignActors()
 	PlayAnimations()
 	int i = 0
@@ -873,7 +936,7 @@ state Animating
 			while i < actorCount
 
 				; Make sure we're all still among the living
-				if pos[i].IsDead() || pos[i].IsBleedingOut()
+				if pos[i].IsDead() || pos[i].IsBleedingOut() || !pos[i].Is3DLoaded()
 					EndAnimation(quick=true) 
 					return
 				endIf

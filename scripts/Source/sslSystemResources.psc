@@ -11,6 +11,8 @@ message property mDirtyUpgrade auto
 message property mCleanSystemStart auto
 message property mCleanSystemFinish auto
 message property mSystemDisabled auto
+message property mMoveScene auto
+;idle property ResetIdle auto
 armor property aCalypsStrapon auto
 armor property aNudeSuit auto
 spell property SexLabDebugSpell auto

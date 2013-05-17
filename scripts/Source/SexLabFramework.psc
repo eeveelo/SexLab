@@ -253,7 +253,7 @@ int function ValidateActor(actor a)
 	endIf
 	if a.HasKeyWordString("ActorTypeCreature")
 		_DebugTrace("StartSex","actor="+a,"Failed to start animation; actor is a creature that is currently not supported")
-		return -13
+		return -14
 	endIf
 	return 1
 endFunction
@@ -1099,6 +1099,7 @@ function _EnableHotkeys(int tid)
 	;RegisterForKey(Config.kAdjustUpward)
 	RegisterForKey(Config.kRealignActors)
 	RegisterForKey(Config.kRestoreOffsets)
+	RegisterForKey(Config.kMoveScene)
 	playerThread = tid
 	hkReady = true
 endFunction
@@ -1172,6 +1173,9 @@ event OnKeyDown(int keyCode)
 		; Restore animation offsets
 		elseIf keyCode == Config.kRestoreOffsets
 			thread[playerThread].RestoreOffsets()
+		; Move Scene
+		elseIf keyCode == Config.kMoveScene
+			thread[playerThread].MoveScene()
 		endIf
 		hkReady = true
 	endIf

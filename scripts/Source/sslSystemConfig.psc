@@ -58,6 +58,8 @@ int property kAdjustSideways auto hidden
 int oidAdjustSideways
 int property kAdjustUpward auto hidden
 int oidAdjustUpward
+int property kMoveScene auto hidden
+int oidMoveScene
 int property kRestoreOffsets auto hidden
 int oidRestoreOffsets
 bool[] property bStripMale auto hidden
@@ -129,7 +131,8 @@ function SetDefaults()
 	kAdjustSideways = 40 ; '
 	kAdjustUpward = 0 ;  Not used
 	kRealignActors = 26 ; [
-	kRestoreOffsets = 27 ; ]
+	kMoveScene = 27 ; ]
+	kRestoreOffsets = 13 ; =
 
 	oidToggleVoice = new int[128]
 	oidToggleAnimation = new int[128]
