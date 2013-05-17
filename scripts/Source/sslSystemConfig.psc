@@ -30,6 +30,8 @@ bool property bDisablePlayer auto hidden
 int oidDisablePlayer
 bool property bReDressVictim auto hidden
 int oidReDressVictim
+bool property bRagdollEnd auto hidden
+int oidRagdollEnd
 string property sNPCBed auto hidden
 int oidNPCBed
 bool property bUseMaleNudeSuit auto hidden
@@ -114,6 +116,7 @@ function SetDefaults()
 	sNPCBed = "Never"
 	bUseMaleNudeSuit = false
 	bUseFemaleNudeSuit = false
+	bRagdollEnd = true
 
 	fMaleVoiceDelay = 7.0
 	fFemaleVoiceDelay = 6.0
@@ -310,9 +313,9 @@ event OnPageReset(string page)
 
 	if page == "Animation Settings"
 		SetCursorFillMode(TOP_TO_BOTTOM)
-		AddHeaderOption("Global Settings")
 		oidRestrictAggressive = AddToggleOption("Restrict Aggressive Animations", bRestrictAggressive)
 		oidScaleActors = AddToggleOption("Even Actors Height", bScaleActors)
+		oidRagdollEnd = AddToggleOption("Ragdoll Ending", bRagdollEnd)
 		oidEnableTCL = AddToggleOption("Toggle Collisions For Player", bEnableTCL)
 		oidReDressVictim = AddToggleOption("Victim's Re-dress", bReDressVictim)
 		oidNPCBed = AddTextOption("NPCs Use Beds", sNPCBed)
@@ -339,18 +342,19 @@ event OnPageReset(string page)
 
 	elseIf page == "Player Hotkeys"
 		SetCursorFillMode(TOP_TO_BOTTOM)
-		AddHeaderOption("Animation Adjustments")
+		AddHeaderOption("Scene Manipulation")
 		oidBackwards = AddKeyMapOption("Reverse Direction Modifier", kBackwards)
-
 		oidAdvanceAnimation = AddKeyMapOption("Advance Animation Stage", kAdvanceAnimation)
 		oidChangeAnimation = AddKeyMapOption("Change Animation Set", kChangeAnimation)
 		oidChangePositions = AddKeyMapOption("Swap Actor Positions", kChangePositions)
-
-		oidAdjustChange = AddKeyMapOption("Change Actor to Adjust", kAdjustChange)
-		oidAdjustForward = AddKeyMapOption("Adjust Position - Forward/Backward", kAdjustForward)
-		oidAdjustSideways = AddKeyMapOption("Adjust Position - Left/Right", kAdjustSideways)
+		oidMoveScene = AddKeyMapOption("Move Scene Location", kMoveScene)
+		SetCursorPosition(1)
+		AddHeaderOption("Alignment Adjustments")
+		oidAdjustChange = AddKeyMapOption("Change Actor Being Moved", kAdjustChange)
+		oidAdjustForward = AddKeyMapOption("Move Actor - Forward/Backward", kAdjustForward)
+		oidAdjustSideways = AddKeyMapOption("Move Actor - Left/Right", kAdjustSideways)
 		;oidAdjustUpward = AddKeyMapOption("Adjust Position - Upward/Downward", kAdjustUpward)
-		oidRealignActors = AddKeyMapOption("Re-Position Actors", kRealignActors)
+		oidRealignActors = AddKeyMapOption("Realign Actors", kRealignActors)
 		oidRestoreOffsets = AddKeyMapOption("Delete Saved Adjustments", kRestoreOffsets)
 
 
@@ -709,6 +713,10 @@ event OnOptionSelect(int option)
 		bReDressVictim = !bReDressVictim 
 		SetToggleOptionValue(option, bReDressVictim)
 
+	elseIf option == oidRagdollEnd
+		bRagdollEnd = !bRagdollEnd 
+		SetToggleOptionValue(option, bRagdollEnd)
+
 	elseif option == oidNPCBed
 		if sNPCBed == "Never"
 			sNPCBed = "Sometimes"
@@ -955,6 +963,10 @@ event OnOptionHighlight(int option)
 		SetInfoText("Collisions will be toggled automatically when the player is involved, helps align player but can cause other problems")
 	elseIf option == oidScaleActors
 		SetInfoText("Actors will scale to the average height between them during animation, greatly helps many animations line up properly")
+	elseIf option == oidRagdollEnd
+		SetInfoText("If toggled on, actors will collapse at the end of an animation before standing back up")
+	elseIf option == oidMoveScene
+		SetInfoText("Unlocks the players movement during a scene allowing you to move elsewhere, after a timer the other participants of the scene will snap to the players new location, and resume animating.")
 	else
 		; What are we?
 		int i = 0
@@ -1054,6 +1066,8 @@ event OnOptionKeyMapChange(int option, int keyCode, string conflictControl, stri
 		elseIf option == oidRestoreOffsets
 			kRestoreOffsets = keyCode
 
+		elseIf option == oidMoveScene
+			kMoveScene = keyCode
 		endIf
 
 		; Set MCM value

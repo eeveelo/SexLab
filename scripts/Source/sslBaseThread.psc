@@ -114,7 +114,7 @@ function SetAnimation(sslBaseAnimation animation)
 	sexual = anim.IsSexual()
 	silence = anim.GetSilence()
 	if player != -1
-		debug.notification(anim.name)
+		Debug.Notification(anim.name)
 	endIf
 endFunction
 
@@ -209,7 +209,8 @@ function ChangeActors(actor[] changeTo)
 					Debug.ToggleCollisions()
 				endIf
 			endIf
-			a.PushActorAway(a, 0.2)
+			Debug.SendAnimationEvent(a, "IdleForceDefaultState")
+			; a.PushActorAway(a, 0.2)
 		endIf
 		i += 1
 	endWhile
@@ -398,6 +399,8 @@ function PreparePosition(int position, actor a)
 	endIf
 	; Get animation extras
 	EquipExtras(i)
+	; Make sure they aren't doing anything else
+	Debug.SendAnimationEvent(a, "IdleForceDefaultState")
 endFunction
 
 function PrepareActors()
@@ -612,17 +615,22 @@ function EndAnimation(bool quick = false)
 	endWhile
 
 	; Reset Idle
-	i = 0
-	while i < actorCount
-		actor a = pos[i]
-		Debug.SendAnimationEvent(SexLab.PlayerRef, "IdleForceDefaultState")
-		;a.PushActorAway(a, 0.1)
-		i += 1
-	endWhile
+	if SexLab.Config.bRagdollEnd
+		i = 0
+		while i < actorCount
+			pos[i].PushActorAway(pos[i], 0.1)
+			i += 1
+		endWhile
+	else
+		i = 0
+		while i < actorCount
+			Debug.SendAnimationEvent(pos[i], "IdleForceDefaultState")
+			i += 1
+		endWhile
+	endIf
 
-	; Wait a couple seconds for them to get up
 	if !quick
-		utility.Wait(3.0)
+		Utility.Wait(2.0)
 	endIf
 
 	; Requip them
@@ -630,7 +638,7 @@ function EndAnimation(bool quick = false)
 	while i < actorCount
 		actor a = pos[i]
 		if SexLab.PlayerRef == a
-			; Give Player control back post push
+			; Give Player control back post push/reset
 			Game.EnablePlayerControls()
 		endIf
 		if !a.IsDead() && !a.IsBleedingOut()
