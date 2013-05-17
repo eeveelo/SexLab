@@ -748,19 +748,19 @@ function UpdatePlayerStats(sslBaseAnimation anim, float time, int males, int fem
 	; Don't count the player in partner counts
 	int PlayerSex = PlayerRef.GetActorBase().GetSex()
 	if PlayerSex > 0
-		females -= 1
+		Data.iMalePartners = Data.iMalePartners + males
+		Data.iFemalePartners = Data.iFemalePartners + (females - 1)
 	else
-		males -= 1
+		Data.iMalePartners = Data.iMalePartners + (males - 1)
+		Data.iFemalePartners = Data.iFemalePartners + females
 	endIf
-	Data.iMalePartners = Data.iMalePartners + males
-	Data.iFemalePartners = Data.iFemalePartners + females
-	int partners = (males + females)
+	int partners = (males + females) - 1
 	bool anal = anim.HasTag("Anal")
 	bool vaginal = anim.HasTag("Vaginal")
 	bool oral = anim.HasTag("Oral")
 	bool solo = anim.HasTag("Masturbation")
 	; Vaginal tag but no vaginas present, gay male pairing?
-	if vaginal && females == 0
+	if vaginal && females == 0 && !solo
 		vaginal = false
 		anal = true
 	endIf
