@@ -32,7 +32,7 @@ function LoadAnimation()
 	AddTag("Default")
 	AddTag("Sex")
 	AddTag("MF")
-	AddTag("Dirty")
 	AddTag("Standing")
+	AddTag("Sideways")
 	AddTag("Vaginal")
 endFunction
