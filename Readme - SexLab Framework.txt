@@ -3,7 +3,7 @@
 Skryim SexLab Framework
   By Ashal of Loverslab.com
 
-    Revision 4b, released 2013/05/13
+    Version 1.00 / Revision 4C, released 2013/05/17
 
 -- Description --------------------------------------------------------------
 
@@ -19,7 +19,7 @@ Skryim SexLab Framework
 
 -- Modders Resource ---------------------------------------------------------
 
-    API Guide: http://www.loverslab.com/wiki/sexlab/api
+    API Guide: http://git.loverslab.com/sexlab/wikis/home
 
 -- Credits ------------------------------------------------------------------
 

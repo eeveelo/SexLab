@@ -19,7 +19,7 @@ Skryim SexLab Resources
 
 -- Modders Resource ---------------------------------------------------------
 
-    API Guide: http://www.loverslab.com/wiki/sexlab/api
+    API Guide: http://git.loverslab.com/sexlab/wikis/home
 
 -- Credits ------------------------------------------------------------------
 

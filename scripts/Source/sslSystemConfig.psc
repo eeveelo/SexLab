@@ -2,7 +2,7 @@ scriptname sslSystemConfig extends SKI_ConfigBase
 {Skyrim Sex Lab Mod Configuration Menu}
 
 int function GetVersion()
-	return 4
+	return 100
 endFunction
 
 ; Resources
@@ -128,14 +128,14 @@ function SetDefaults()
 	kBackwards = 54 ; Right Shift
 	kAdvanceAnimation = 57 ; Space
 	kChangeAnimation =  24 ; O
-	kChangePositions = 38 ; L
+	kChangePositions = 13 ; =
 	kAdjustChange = 37 ; K
-	kAdjustForward = 39 ; ;
+	kAdjustForward = 38 ; L
 	kAdjustSideways = 40 ; '
-	kAdjustUpward = 0 ;  Not used
+	kAdjustUpward = 39 ; ;
 	kRealignActors = 26 ; [
 	kMoveScene = 27 ; ]
-	kRestoreOffsets = 13 ; =
+	kRestoreOffsets = 12 ; -
 
 	oidToggleVoice = new int[128]
 	oidToggleAnimation = new int[128]
@@ -291,14 +291,16 @@ event OnConfigInit()
 endEvent
 
 event OnVersionUpdate(int version)
+	float current = (CurrentVersion as float / 100.0)
+	float latest = (version as float / 100.0)
 	if CurrentVersion > 1 && !SexLab._CheckClean()
-		SexLab.Data.mDirtyUpgrade.Show(CurrentVersion, version)
+		SexLab.Data.mDirtyUpgrade.Show(current, latest)
 	endIf
-
-	; Rev 4
-	if version >= 4 && CurrentVersion < 4
-		SetDefaults()
-	endIf
+	SetDefaults()
+	; ; Rev 4
+	; if version >= 4 && CurrentVersion < 4
+	; 	SetDefaults()
+	; endIf
 endEvent
 
 event OnPageReset(string page)
@@ -352,8 +354,8 @@ event OnPageReset(string page)
 		AddHeaderOption("Alignment Adjustments")
 		oidAdjustChange = AddKeyMapOption("Change Actor Being Moved", kAdjustChange)
 		oidAdjustForward = AddKeyMapOption("Move Actor - Forward/Backward", kAdjustForward)
+		oidAdjustUpward = AddKeyMapOption("Adjust Position - Upward/Downward", kAdjustUpward)
 		oidAdjustSideways = AddKeyMapOption("Move Actor - Left/Right", kAdjustSideways)
-		;oidAdjustUpward = AddKeyMapOption("Adjust Position - Upward/Downward", kAdjustUpward)
 		oidRealignActors = AddKeyMapOption("Realign Actors", kRealignActors)
 		oidRestoreOffsets = AddKeyMapOption("Delete Saved Adjustments", kRestoreOffsets)
 
@@ -946,7 +948,7 @@ event OnOptionHighlight(int option)
 	elseIf option == oidAdjustSideways
 		SetInfoText("Move adjusted character left or right depending on if modifier key is also held")
 	elseIf option == oidAdjustUpward
-		SetInfoText("Move adjusted character up or down when modifier key is also held")
+		SetInfoText("Move adjusted character up or down when modifier key is also held, will NOT work on the player")
 	elseIf option == oidPlayerVoice
 		SetInfoText("The player character will always use this voice")
 	elseIf option == oidMaleVoiceDelay

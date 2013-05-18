@@ -253,6 +253,7 @@ function ResetActor(int position)
 	else
 		a.SetRestrained(false)
 		a.SetDontMove(false)
+		a.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 	endIf
 	; Clear them out
 	SexLab._ClearDoNothing(aliasSlot[i])
@@ -367,6 +368,7 @@ function PreparePosition(int position, actor a)
 	a.StopCombat()
 	a.SetFactionRank(SexLab.AnimatingFaction, 0)
 	aliasSlot[position] = SexLab._SlotDoNothing(a)
+
 	; Disable their movement
 	if SexLab.PlayerRef == a
 		; toggle collisions?
@@ -391,6 +393,7 @@ function PreparePosition(int position, actor a)
 	else
 		a.SetRestrained()
 		a.SetDontMove()
+		a.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
 	endIf
 	; Auto strip
 	if sexual
@@ -427,6 +430,12 @@ function PrepareActors()
 			pos[i].SetScale((averageScale / pos[i].GetScale()))
 			i += 1
 		endWhile
+	endIf
+	if player == adjustingPos
+		adjustingPos += 1
+		if adjustingPos >= actorCount
+			adjustingPos = 0
+		endIf
 	endIf
 endFunction
 
@@ -610,6 +619,7 @@ function EndAnimation(bool quick = false)
 		else
 			a.SetRestrained(false)
 			a.SetDontMove(false)
+			a.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 		endIf
 		i += 1
 	endWhile
@@ -791,15 +801,16 @@ function AdjustSideways(bool backwards = false)
 endFunction
 
 function AdjustUpward(bool backwards = false)
+	if adjustingPos == player
+		return
+	endIf
 	float adjustment
 	if backwards
-		adjustment = -1.0
+		adjustment = -0.5
 	else
-		adjustment = 1.0
+		adjustment = 0.5
 	endIf
 	anim.UpdateOffsetUp(adjustingPos, adjustment)
-	float[] coords = GetCoords(pos[adjustingPos])
-	;MoveActor(adjustingPos)
 	pos[adjustingPos].MoveTo(pos[adjustingPos], 0, 0, adjustment, true)
 endFunction
 
