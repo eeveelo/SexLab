@@ -502,18 +502,18 @@ function EquipExtras(int position)
 endFunction
 
 function PlayAnimations()
-	pos[0].PlayIdle(anim.Fetch(0, stage))
+	Debug.SendAnimationEvent(pos[0], anim.Fetch(0, stage))
 	if actorCount >= 2
-		pos[1].PlayIdle(anim.Fetch(1, stage))
+		Debug.SendAnimationEvent(pos[1], anim.Fetch(1, stage))
 	endIf
 	if actorCount >= 3
-		pos[2].PlayIdle(anim.Fetch(2, stage))
+		Debug.SendAnimationEvent(pos[2], anim.Fetch(2, stage))
 	endIf
 	if actorCount >= 4
-		pos[3].PlayIdle(anim.Fetch(3, stage))
+		Debug.SendAnimationEvent(pos[3], anim.Fetch(3, stage))
 	endIf
 	if actorCount >= 5
-		pos[4].PlayIdle(anim.Fetch(4, stage))
+		Debug.SendAnimationEvent(pos[4], anim.Fetch(4, stage))
 	endIf
 endFunction
 

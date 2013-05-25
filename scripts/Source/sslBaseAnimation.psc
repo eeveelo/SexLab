@@ -44,11 +44,11 @@ int[] cum
 
 string[] tags
 
-idle[] actor1
-idle[] actor2
-idle[] actor3
-idle[] actor4
-idle[] actor5
+string[] actor1
+string[] actor2
+string[] actor3
+string[] actor4
+string[] actor5
 
 form[] extras1
 form[] extras2
@@ -115,7 +115,7 @@ float function GetRotation(int position)
 	return rotations[position]
 endFunction
 
-idle function Fetch(int position, int stage)
+string function Fetch(int position, int stage)
 	; Zeroindex the stage
 	if stage > 0
 		stage -= 1
@@ -201,22 +201,22 @@ int function AddPosition(int gender = 0, float offset = 0.0, float offsetUp = 0.
 	return aid
 endFunction
 
-int function AddPositionStage(int position, idle animation)
+int function AddPositionStage(int position, string animation)
 	int stage = 0
 	if position == 0
-		actor1 = sslUtility.PushIdle(animation,actor1)
+		actor1 = sslUtility.PushString(animation,actor1)
 		stage = actor1.Length
 	elseIf position == 1
-		actor2 = sslUtility.PushIdle(animation,actor2)
+		actor2 = sslUtility.PushString(animation,actor2)
 		stage = actor2.Length
 	elseIf position == 2
-		actor3 = sslUtility.PushIdle(animation,actor3)
+		actor3 = sslUtility.PushString(animation,actor3)
 		stage = actor3.Length
 	elseIf position == 3
-		actor4 = sslUtility.PushIdle(animation,actor4)
+		actor4 = sslUtility.PushString(animation,actor4)
 		stage = actor4.Length
 	elseIf position == 4
-		actor5 = sslUtility.PushIdle(animation,actor5)
+		actor5 = sslUtility.PushString(animation,actor5)
 		stage = actor5.Length
 	else
 		debug.trace("----SLAB ERROR sslBaseAnimation AddPositionAnimation() "+name+"--- Unknown actor or stage in "+position)
