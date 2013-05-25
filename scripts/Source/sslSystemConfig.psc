@@ -2,7 +2,7 @@ scriptname sslSystemConfig extends SKI_ConfigBase
 {Skyrim Sex Lab Mod Configuration Menu}
 
 int function GetVersion()
-	return 100
+	return 101
 endFunction
 
 ; Resources
@@ -293,7 +293,7 @@ endEvent
 event OnVersionUpdate(int version)
 	float current = (CurrentVersion as float / 100.0)
 	float latest = (version as float / 100.0)
-	if CurrentVersion > 1 && !SexLab._CheckClean()
+	if CurrentVersion > 1 && !SexLab._CheckClean() && (current - latest) > 10
 		SexLab.Data.mDirtyUpgrade.Show(current, latest)
 	endIf
 	SetDefaults()
