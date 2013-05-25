@@ -12,9 +12,9 @@ sound property mild auto
 sound property hot auto
 sound property medium auto
 
-topic property MoanMild auto
-topic property MoanMedium auto
-topic property MoanHot auto
+; topic property MoanMild auto
+; topic property MoanMedium auto
+; topic property MoanHot auto
 
 
 int function PlayMild(actor a)
