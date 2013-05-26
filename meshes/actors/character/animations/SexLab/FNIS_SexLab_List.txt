@@ -244,9 +244,18 @@ s Arrok_MaleMasturbation_A1_S1 Arrok_MaleMasturbation_A1_S1.hkx
 + Arrok_MaleMasturbation_A1_S3 Arrok_MaleMasturbation_A1_S3.hkx
 + Arrok_MaleMasturbation_A1_S4 Arrok_MaleMasturbation_A1_S4.hkx
 
-b Arrok_DevilsThreeway_A1_S1 Arrok_DevilsThreeway_A1_S1.hkx
-b Arrok_DevilsThreeway_A2_S1 Arrok_DevilsThreeway_A2_S1.hkx
-b Arrok_DevilsThreeway_A3_S1 Arrok_DevilsThreeway_A3_S1.hkx
+s Arrok_DevilsThreeway_A1_S1 Arrok_DevilsThreeway_A1_S1.hkx
++ Arrok_DevilsThreeway_A1_S2 Arrok_DevilsThreeway_A1_S2.hkx
++ Arrok_DevilsThreeway_A1_S3 Arrok_DevilsThreeway_A1_S3.hkx
++ Arrok_DevilsThreeway_A1_S4 Arrok_DevilsThreeway_A1_S4.hkx
+s Arrok_DevilsThreeway_A2_S1 Arrok_DevilsThreeway_A2_S1.hkx
++ Arrok_DevilsThreeway_A2_S2 Arrok_DevilsThreeway_A2_S2.hkx
++ Arrok_DevilsThreeway_A2_S3 Arrok_DevilsThreeway_A2_S3.hkx
++ Arrok_DevilsThreeway_A2_S4 Arrok_DevilsThreeway_A2_S4.hkx
+s Arrok_DevilsThreeway_A3_S1 Arrok_DevilsThreeway_A3_S1.hkx
++ Arrok_DevilsThreeway_A3_S2 Arrok_DevilsThreeway_A3_S2.hkx
++ Arrok_DevilsThreeway_A3_S3 Arrok_DevilsThreeway_A3_S3.hkx
++ Arrok_DevilsThreeway_A3_S4 Arrok_DevilsThreeway_A3_S4.hkx
 
 '
 ' Animated Prostitution Animations
