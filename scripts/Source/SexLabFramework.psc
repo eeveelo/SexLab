@@ -139,6 +139,7 @@ int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim 
 		int first = sexActors.Find(sexActors[i])
 		int last = sexActors.RFind(sexActors[i])
 		if first != last
+			ready = true
 			_DebugTrace("StartSex","sexActors="+sexActors,"Failed to start animation; duplicate actor found in list")
 			return -3
 		endIf
@@ -166,6 +167,7 @@ int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim 
 	endIf
 	
 	if anims.Length < 1
+		ready = true
 		_DebugTrace("StartSex","sexActors="+sexActors+", anims="+anims,"Failed to start animation; no valid animations found")
 		return -4
 	endIf
@@ -1031,19 +1033,11 @@ bool function _CheckClean()
 endFunction
 
 function _CheckSystem()
-	_ReadyWait()
+	;_ReadyWait()
 	ready = false
 	enabled = true
 	Start()
 
-	; Check Skyrim Version
-	float skyrimNeeded = 1.9
-	float skyrimMajor = StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float
-	if skyrimMajor < skyrimNeeded
-		Data.mOldSkyrim.Show(skyrimMajor, skyrimNeeded)
-		enabled = false
-	endIf
-	
 	; Check SKSE Version
 	float skseNeeded = 1.0613
 	float skseInstalled = SKSE.GetVersion() + SKSE.GetVersionMinor() * 0.01 + SKSE.GetVersionBeta() * 0.0001
@@ -1052,6 +1046,14 @@ function _CheckSystem()
 		enabled = false
 	elseif skseInstalled < skseNeeded
 		Data.mOldSKSE.Show(skseInstalled, skseNeeded)
+		enabled = false
+	endIf
+	
+	; Check Skyrim Version
+	float skyrimNeeded = 1.9
+	float skyrimMajor = StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float
+	if skyrimMajor < skyrimNeeded
+		Data.mOldSkyrim.Show(skyrimMajor, skyrimNeeded)
 		enabled = false
 	endIf
 
