@@ -25,8 +25,6 @@ int property Misc = 0 autoreadonly hidden
 int property Sexual = 1 autoreadonly hidden
 int property Foreplay = 2 autoreadonly hidden
 
-
-
 int content = 0
 int actors = 0
 int stages = 0
@@ -135,6 +133,22 @@ string function Fetch(int position, int stage)
 		return actor5[stage]
 	else
 		debug.trace("----SLAB ERROR sslBaseAnimation "+name+" Fetch(position="+position+", stage="+Stage+") --- Unknown position")
+	endIf
+endFunction
+
+string[] function FetchPosition(int position)
+	if position == 0
+		return actor1
+	elseIf position == 1
+		return actor2
+	elseIf position == 2
+		return actor3
+	elseIf position == 3
+		return actor4
+	elseIf position == 4
+		return actor5
+	else
+		debug.trace("----SLAB ERROR sslBaseAnimation "+name+" FetchPosition(position="+position+") --- Unknown position")
 	endIf
 endFunction
 

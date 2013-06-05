@@ -51,6 +51,12 @@ form[] extrasA3
 form[] extrasA4
 form[] extrasA5
 
+string[] animsA1
+string[] animsA2
+string[] animsA3
+string[] animsA4
+string[] animsA5
+
 ; Positional actor data:
 ; [0]PosX [1]PosY [2]PosZ [3]RotX [4]RotY [5]RotZ
 float[] centerLoc
@@ -74,7 +80,6 @@ float[] timer
 bool autoAdvance
 int actorCount
 int animCount
-
 
 ;#---------------------------#
 ;#                           #
@@ -113,6 +118,18 @@ function SetAnimation(sslBaseAnimation animation)
 	sfx = anim.GetSFX()
 	sexual = anim.IsSexual()
 	silence = anim.GetSilence()
+
+	animsA1 = anim.FetchPosition(0)
+	if actorCount > 1
+		animsA2 = anim.FetchPosition(1)
+	elseif actorCount > 2
+		animsA3 = anim.FetchPosition(2)
+	elseif actorCount > 3
+		animsA4 = anim.FetchPosition(3)
+	elseif actorCount > 4
+		animsA5 = anim.FetchPosition(4)
+	endIf
+
 	if player != -1
 		Debug.Notification(anim.name)
 	endIf
@@ -371,10 +388,6 @@ function PreparePosition(int position, actor a)
 
 	; Disable their movement
 	if SexLab.PlayerRef == a
-		; toggle collisions?
-		if anim.tcl
-			Debug.ToggleCollisions()
-		endIf
 		; Auto advance?
 		if !SexLab.Config.bAutoAdvance
 			autoAdvance = false
@@ -436,6 +449,10 @@ function PrepareActors()
 		if adjustingPos >= actorCount
 			adjustingPos = 0
 		endIf
+	endIf
+	if player >= 0 && anim.tcl
+		Debug.ToggleCollisions()
+		RealignActors()
 	endIf
 endFunction
 
@@ -500,19 +517,28 @@ function EquipExtras(int position)
 	endIf
 endFunction
 
-function PlayAnimations()
-	Debug.SendAnimationEvent(pos[0], anim.Fetch(0, stage))
-	if actorCount >= 2
-		Debug.SendAnimationEvent(pos[1], anim.Fetch(1, stage))
+function PlayAnimations(int useStage = -1)
+
+	if useStage < 0
+		; Zero Index current stage
+		useStage = (stage - 1)
+	else
+		; Zero Index argument stage
+		useStage -= 1
 	endIf
-	if actorCount >= 3
-		Debug.SendAnimationEvent(pos[2], anim.Fetch(2, stage))
+	
+	Debug.SendAnimationEvent(pos[0], animsA1[useStage])
+	if actorCount > 1
+		Debug.SendAnimationEvent(pos[1], animsA2[useStage])
 	endIf
-	if actorCount >= 4
-		Debug.SendAnimationEvent(pos[3], anim.Fetch(3, stage))
+	if actorCount > 2
+		Debug.SendAnimationEvent(pos[2], animsA3[useStage])
 	endIf
-	if actorCount >= 5
-		Debug.SendAnimationEvent(pos[4], anim.Fetch(4, stage))
+	if actorCount > 3
+		Debug.SendAnimationEvent(pos[3], animsA4[useStage])
+	endIf
+	if actorCount > 4
+		Debug.SendAnimationEvent(pos[4], animsA5[useStage])
 	endIf
 endFunction
 
@@ -695,7 +721,7 @@ function ChangeAnimation(bool backwards = false)
 	endIf
 
 	SetAnimation(animations[aid])
-	
+
 	int i = 0
 	while i < actorCount
 		SexLab.StripActor(pos[i], victim)
@@ -703,10 +729,6 @@ function ChangeAnimation(bool backwards = false)
 		EquipExtras(i)
 		i += 1
 	endWhile
-
-	if player >= 0 && anim.tcl
-		Debug.ToggleCollisions()
-	endIf
 
 	stage -= 1
 	if stageCount <= stage
@@ -717,6 +739,11 @@ function ChangeAnimation(bool backwards = false)
 	endIf
 
 	RealignActors()
+
+	if player >= 0 && anim.tcl
+		Debug.ToggleCollisions()
+		RealignActors()
+	endIf
 
 	; Restart the stage with new animation
 	advance = true
