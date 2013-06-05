@@ -205,7 +205,7 @@ function ChangeActors(actor[] changeTo)
 		if changeTo.Find(a) < 0
 			if SexLab.PlayerRef == a
 				autoAdvance = true
-				if SexLab.Config.bEnableTCL
+				if anim.tcl
 					Debug.ToggleCollisions()
 				endIf
 			endIf
@@ -372,7 +372,7 @@ function PreparePosition(int position, actor a)
 	; Disable their movement
 	if SexLab.PlayerRef == a
 		; toggle collisions?
-		if SexLab.Config.bEnableTCL
+		if anim.tcl
 			Debug.ToggleCollisions()
 		endIf
 		; Auto advance?
@@ -464,7 +464,6 @@ function RemoveExtras(int position)
 			i += 1
 		endWhile
 	endIf
-
 endFunction
 
 function EquipExtras(int position)
@@ -613,7 +612,7 @@ function EndAnimation(bool quick = false)
 			SexLab.UpdatePlayerStats(anim, total, males, females, victim)
 			Game.SetInChargen(false, false, false)
 			Game.SetPlayerAIDriven(false)
-			if SexLab.Config.bEnableTCL
+			if anim.tcl
 				Debug.ToggleCollisions()
 			endIf
 		else
@@ -691,6 +690,10 @@ function ChangeAnimation(bool backwards = false)
 		aid = animCount - 1
 	endIf
 
+	if player >= 0 && anim.tcl
+		Debug.ToggleCollisions()
+	endIf
+
 	SetAnimation(animations[aid])
 	
 	int i = 0
@@ -700,6 +703,10 @@ function ChangeAnimation(bool backwards = false)
 		EquipExtras(i)
 		i += 1
 	endWhile
+
+	if player >= 0 && anim.tcl
+		Debug.ToggleCollisions()
+	endIf
 
 	stage -= 1
 	if stageCount <= stage

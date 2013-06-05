@@ -11,8 +11,8 @@ SexLabFramework property SexLab auto
 ; Config Settings
 bool property bRestrictAggressive auto hidden
 int oidRestrictAggressive
-bool property bEnableTCL auto hidden
-int oidEnableTCL
+bool property bEnableTCL auto hidden ; DEPRECATED for animation specific tcl's in v1.1
+int oidEnableTCL ; DEPRECATED for animation specific tcl's in v1.1
 bool property bScaleActors auto hidden
 int oidScaleActors
 bool property bUseCum auto hidden
@@ -104,7 +104,8 @@ string[] property sImpureTitles auto hidden
 function SetDefaults()
 	bRestrictAggressive = true
 	bUseCum = true
-	bEnableTCL = false
+	; DEPRECATED for animation specific tcl's in v1.1
+	; bEnableTCL = false
 	bScaleActors = true
 	bAllowFFCum = false
 	fCumTimer = 120.0
@@ -318,7 +319,8 @@ event OnPageReset(string page)
 		oidRestrictAggressive = AddToggleOption("Restrict Aggressive Animations", bRestrictAggressive)
 		oidScaleActors = AddToggleOption("Even Actors Height", bScaleActors)
 		oidRagdollEnd = AddToggleOption("Ragdoll Ending", bRagdollEnd)
-		oidEnableTCL = AddToggleOption("Toggle Collisions For Player", bEnableTCL)
+		; DEPRECATED for animation specific tcl's in v1.1
+		; oidEnableTCL = AddToggleOption("Toggle Collisions For Player", bEnableTCL)
 		oidReDressVictim = AddToggleOption("Victim's Re-dress", bReDressVictim)
 		oidNPCBed = AddTextOption("NPCs Use Beds", sNPCBed)
 		oidUseCum = AddToggleOption("Apply Cum Effects", bUseCum)
@@ -695,9 +697,10 @@ event OnOptionSelect(int option)
 		bRestrictAggressive = !bRestrictAggressive 
 		SetToggleOptionValue(option, bRestrictAggressive)
 
-	elseif option == oidEnableTCL
-		bEnableTCL = !bEnableTCL 
-		SetToggleOptionValue(option, bEnableTCL)
+	; DEPRECATED for animation specific tcl's in v1.1
+	; elseif option == oidEnableTCL
+	; 	bEnableTCL = !bEnableTCL 
+	; 	SetToggleOptionValue(option, bEnableTCL)
 
 	elseif option == oidScaleActors
 		bScaleActors = !bScaleActors
@@ -961,8 +964,9 @@ event OnOptionHighlight(int option)
 		SetInfoText("The overall volume of the voices from 0.0 as silent to 1.0 as full volume")
 	elseIf option == oidSFXVolume
 		SetInfoText("The overall volume of the SFX from 0.0 as silent to 1.0 as full volume")
-	elseIf option == oidEnableTCL
-		SetInfoText("Collisions will be toggled automatically when the player is involved, helps align player but can cause other problems")
+	; DEPRECATED for animation specific tcl's in v1.1
+	; elseIf option == oidEnableTCL
+	; 	SetInfoText("Collisions will be toggled automatically when the player is involved, helps align player but can cause other problems")
 	elseIf option == oidScaleActors
 		SetInfoText("Actors will scale to the average height between them during animation, greatly helps many animations line up properly")
 	elseIf option == oidRagdollEnd

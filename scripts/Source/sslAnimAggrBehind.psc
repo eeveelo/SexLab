@@ -5,6 +5,8 @@ function LoadAnimation()
 	
 	SetContent(Sexual)
 	SetSFX(Squishing)
+	
+	tcl = true
 
 	int a1 = AddPosition(Female, 0, addCum=Anal)
 	AddPositionStage(a1, "AggrBehind_A1_S1")

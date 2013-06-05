@@ -2,6 +2,7 @@ scriptname sslBaseAnimation extends quest
 
 string property name = "" auto hidden
 bool property enabled = true auto hidden
+bool property tcl = false auto hidden
 
 ; Gender Types
 int property Male = 0 autoreadonly hidden
@@ -24,6 +25,8 @@ int property Misc = 0 autoreadonly hidden
 int property Sexual = 1 autoreadonly hidden
 int property Foreplay = 2 autoreadonly hidden
 
+
+
 int content = 0
 int actors = 0
 int stages = 0
@@ -39,7 +42,6 @@ float[] rotations
 bool[] silence
 int[] genders
 bool[] noStrapons
-
 int[] cum
 
 string[] tags
