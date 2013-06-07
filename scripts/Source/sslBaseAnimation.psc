@@ -351,26 +351,54 @@ function UnloadAnimation()
 	actors = 0
 	stages = 0
 	sfx = 0
-	offsets = none
-	offsetsUp = none
-	offsetsSide = none
-	offsetsDefault = none
-	offsetsUpDefault = none
-	offsetsSideDefault = none
-	rotations = none
-	silence = none
-	genders = none
-	noStrapons = none
-	cum = none
-	tags = none
-	actor1 = none
-	actor2 = none
-	actor3 = none
-	actor4 = none
-	actor5 = none
-	extras1 = none
-	extras2 = none
-	extras3 = none
-	extras4 = none
-	extras5 = none
+
+	float[] offsetsDel
+	offsets = offsetsDel 
+	float[] offsetsUpDel
+	offsetsUp = offsetsUpDel 
+	float[] offsetsSideDel
+	offsetsSide = offsetsSideDel 
+	float[] offsetsDefaultDel
+	offsetsDefault = offsetsDefaultDel 
+	float[] offsetsUpDefaultDel
+	offsetsUpDefault = offsetsUpDefaultDel 
+	float[] offsetsSideDefaultDel
+	offsetsSideDefault = offsetsSideDefaultDel 
+	float[] rotationsDel
+	rotations = rotationsDel 
+
+	int[] gendersDel
+	genders = gendersDel
+	int[] cumDel
+	cum = cumDel
+
+	bool[] noStraponsDel
+	noStrapons = noStraponsDel
+	bool[] silenceDel
+	silence = silenceDel
+
+	string[] tagsDel
+	tags = tagsDel
+	string[] actor1Del
+	actor1 = actor1Del
+	string[] actor2Del
+	actor2 = actor2Del
+	string[] actor3Del
+	actor3 = actor3Del
+	string[] actor4Del
+	actor4 = actor4Del
+	string[] actor5Del
+	actor5 = actor5Del
+
+	form[] extras1Del
+	extras1 = extras1Del
+	form[] extras2Del
+	extras2 = extras2Del
+	form[] extras3Del
+	extras3 = extras3Del
+	form[] extras4Del
+	extras4 = extras4Del
+	form[] extras5Del
+	extras5 = extras5Del
+
 endFunction

@@ -600,6 +600,10 @@ form[] function GetEquipment(int position)
 endFunction
 
 function EndAnimation(bool quick = false)
+	if !CheckActive()
+		return
+	endIf
+
 	SexLab._SendEventHook("AnimationEnd",tid,hook)
 
 	int i = 0
@@ -904,9 +908,13 @@ function RestoreOffsets()
 	RealignActors()
 endFunction
 
-function CheckActive()
+bool function CheckActive()
 	if !active
+		debug.Trace("SexLab thread["+tid+"] is not active")
 		self.GoToState("Waiting")
+		return false
+	else
+		return true
 	endIf
 endFunction
 ;#---------------------------#

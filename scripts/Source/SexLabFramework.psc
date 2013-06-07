@@ -578,13 +578,15 @@ sslBaseAnimation[] function MergeAnimationLists(sslBaseAnimation[] list1, sslBas
 endFunction
 
 int function FindAnimationByName(string findName)
-	int i = 0
-	while i < animIndex
-		if animation[i] != none && animation[i].name == findName
-			return i
-		endIf
-		i += 1
-	endWhile
+	if animIndex >= 0
+		int i = 0
+		while i < animIndex
+			if animation[i] != none && animation[i].name == findName
+				return i
+			endIf
+			i += 1
+		endWhile
+	endIf
 	return -1
 endFunction
 
@@ -605,9 +607,8 @@ endFunction
 int function RegisterAnimation(sslBaseAnimation anim)
 	_ReadyWait()
 	ready = false
-
 	int aid = FindAnimationByName(anim.name)
-	
+
 	; Animation not found, register it.
 	if aid < 0
 		aid = animIndex
@@ -670,13 +671,15 @@ sslBaseVoice function GetVoiceByName(string findName)
 endFunction
 
 int function FindVoiceByName(string findName)
-	int i = 0
-	while i < voiceIndex
-		if voice[i] != none && voice[i].name == findName
-			return i
-		endIf
-		i += 1
-	endWhile
+	if voiceIndex >= 0
+		int i = 0
+		while i < voiceIndex
+			if voice[i] != none && voice[i].name == findName
+				return i
+			endIf
+			i += 1
+		endWhile
+	endIf
 	return -1
 endFunction
 
@@ -915,6 +918,8 @@ endFunction
 ;#---------------------------#
 
 event OnInit()
+	while PlayerRef.Is3DLoaded()
+	endWhile
 	ready = true
 	_DebugTrace("OnInit","","SYSTEM INITIALIZED")
 endEvent
@@ -927,9 +932,14 @@ function _StopAnimations()
 		endIf
 		i += 1
 	endWhile
+	activeThread = new bool[15]
 endFunction
 
 function _ClearAnimations()
+	if animIndex == 0
+		return
+	endIf
+
 	int i = 0
 	while i < animIndex
 		animation[i].UnloadAnimation()
@@ -941,14 +951,18 @@ function _ClearAnimations()
 endFunction
 
 function _ClearVoices()
+	if voiceIndex == 0
+		return
+	endIf
+
 	int i = 0
-	while i < animIndex
+	while i < voiceIndex
 		voice[i].UnloadVoice()
 		voice[i].Reset()
 		i += 1
 	endWhile
 	voice = new sslBaseVoice[128]
-	animIndex = 0
+	voiceIndex = 0
 endFunction
 
 function _CleanSystem()
@@ -958,12 +972,12 @@ function _CleanSystem()
 	_ReadyWait()
 	ready = false
 
-	Data.mCleanSystemStart.Show()
+	; Data.mCleanSystemStart.Show()
 
 	int i = 0
 	while i < threadCount
 		thread[i].EndAnimation(quick = true)
-		utility.Wait(0.2)
+		utility.Wait(0.1)
 		i += 1
 	endWhile
 
@@ -975,15 +989,17 @@ function _CleanSystem()
 	Data.mCleanSystemFinish.Show()
 
 	clean = true
-	; enabled = false
+	hkReady = true
 	ready = true
 endFunction
 
 function _SetupSystem()
+	; Init animations
 	animation = new sslBaseAnimation[128]
-	voice = new sslBaseVoice[128]
-
 	animIndex = 0
+
+	; Init voices
+	voice = new sslBaseVoice[128]
 	voiceIndex = 0
 
 	; Init thread variables based on current thread count: 15
@@ -1037,7 +1053,6 @@ function _CheckSystem()
 	;_ReadyWait()
 	ready = false
 	enabled = true
-	hkReady = true
 	Start()
 
 	; Check SKSE Version
@@ -1059,6 +1074,13 @@ function _CheckSystem()
 		enabled = false
 	endIf
 
+	; Add debug spell
+	if Config.DebugMode() && !PlayerRef.HasSpell(Data.SexLabDebugSpell)
+		PlayerRef.AddSpell(Data.SexLabDebugSpell, true)
+		DebugActor = none
+	endIf
+
+	hkReady = true
 	ready = true
 endFunction
 

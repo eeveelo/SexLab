@@ -160,7 +160,6 @@ function LoadAnimations()
 	;SexLab.RegisterAnimation(APUNKNOWN)
 endFunction
 
-
 ;
 ; Voices
 ;

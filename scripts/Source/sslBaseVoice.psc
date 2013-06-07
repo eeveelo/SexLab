@@ -97,6 +97,7 @@ endFunction
 
 function UnloadVoice()
 	name = ""
+	enabled = true
 	gender = 1
 	mild = none
 	hot = none

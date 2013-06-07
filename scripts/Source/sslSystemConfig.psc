@@ -5,6 +5,10 @@ int function GetVersion()
 	return 101
 endFunction
 
+bool function DebugMode()
+	return true
+endFunction
+
 ; Resources
 SexLabFramework property SexLab auto
 
@@ -271,7 +275,7 @@ function SetDefaults()
 	Pages[7] = "Aggressive Animations"
 	Pages[9] = "Rebuild & Clean"
 
-	if SexLab.PlayerRef.GetLeveledActorBase().GetSex() > 0
+	if SexLab.PlayerRef.GetActorBase().GetSex() > 0
 		Pages[8] = "Sex Diary"
 		sPureTitles[2] = "Prim & Proper"
 		sPureTitles[5] = "Ladylike"
@@ -287,7 +291,6 @@ function SetDefaults()
 endFunction
 
 event OnConfigInit()
-	;Game.GetPlayer().AddSpell(SexLab.Data.SexLabDebugSpell, true)
 	SetDefaults()
 endEvent
 
@@ -326,7 +329,7 @@ event OnPageReset(string page)
 		oidUseCum = AddToggleOption("Apply Cum Effects", bUseCum)
 		oidAllowFFCum = AddToggleOption("Allow Female/Female Cum", bAllowFFCum)
 		oidCumTimer = AddSliderOption("Cum Effect Timer", fCumTimer, "{0} seconds")
-		oidUseStrapons = AddToggleOption("Females Use Strapons", bUseStrapons)
+		oidUseStrapons = AddToggleOption("Females Use Strap-ons", bUseStrapons)
 		oidUseMaleNudeSuit = AddToggleOption("Use Nude Suit For Males", bUseMaleNudeSuit)
 		oidUseFemaleNudeSuit = AddToggleOption("Use Nude Suit For Females", bUseFemaleNudeSuit)
 
@@ -506,8 +509,8 @@ event OnPageReset(string page)
 		AddHeaderOption("Maintenance")
 		oidStopAnimations = AddTextOption("Stop Current Animations", "Click Here")
 		oidRestoreDefaults = AddTextOption("Restore Default Settings", "Click Here")
-		oidRebuildAnimations = AddTextOption("Clear Animation Registry", "Click Here")
-		oidRebuildVoices = AddTextOption("Clear Voice Registry", "Click Here")
+		oidRebuildAnimations = AddTextOption("Reset Animation Registry", "Click Here")
+		oidRebuildVoices = AddTextOption("Reset Voice Registry", "Click Here")
 		oidResetStats = AddTextOption("Reset Player Sex Stats", "Click Here")
 		AddEmptyOption()
 		AddHeaderOption("Upgrade/Uninstall/Reinstall")
@@ -516,8 +519,8 @@ event OnPageReset(string page)
 		AddHeaderOption("Latest Version Available @ LoversLab.com")
 
 		SetCursorPosition(1)
-		AddHeaderOption("Available Strapons")
-		oidFindStrapons = AddTextOption("Rebuild Strapon List", "Click Here")
+		AddHeaderOption("Available Strap-ons")
+		oidFindStrapons = AddTextOption("Rebuild Strap-on List", "Click Here")
 		i = 0
 		while i < SexLab.Data.strapons.Length
 			if SexLab.Data.strapons[i] != none
@@ -748,9 +751,9 @@ event OnOptionSelect(int option)
 		SexLab.Data.FindStrapons()
 		int found = SexLab.Data.Strapons.Length
 		if found > 0
-			ShowMessage("Found and saved "+found+" strapons for use", false)
+			ShowMessage("Found and saved "+found+" strap-ons for use", false)
 		else
-			ShowMessage("Found no supported strapon mods", false)
+			ShowMessage("Found no supported strap-on mods", false)
 		endIf
 		ForcePageReset()
 	elseif option == oidStopAnimations
@@ -758,25 +761,27 @@ event OnOptionSelect(int option)
 		SexLab._StopAnimations()
 
 	elseif option == oidCleanSystem
-		bool run = ShowMessage("Running this will disable SexLab, stop all animations, and clear the animation and voice registeries. It is suggested you run this when upgrading, uninstalling, or reinstalling the mod. Do you want to continue?")
+		bool run = ShowMessage("Running this will reset SexLab to a default state as much as possible, stop all running animations, and clear the animation and voice registries. It is suggested you run this when upgrading, removing, or reinstalling the mod. Do you want to continue?")
 		if run
 			ShowMessage("Close all menus and return to the game to begin the cleaning process.", false)
 			SexLab._CleanSystem()
 		endIf
 
 	elseif option == oidRebuildAnimations
-		bool run = ShowMessage("Running this will uninstall all animations registered with SexLab, requiring you to reload your game in order to reinstall them. Do you want to continue?")
+		bool run = ShowMessage("Running this will reinstall all animations registered with SexLab which will cause you to lose any saved adjustments related to animations. Do you want to continue?")
 		if run
 			SexLab._StopAnimations()
 			SexLab._ClearAnimations()
-			ShowMessage("Animation registry cleared, save and reload your game to reinstall any animations present.", false)
+			SexLab.Data.LoadAnimations()
+			ShowMessage("Animation registry has successfully been reset.", false)
 		endIf
 
 	elseif option == oidRebuildVoices
-		bool run = ShowMessage("Running this will uninstall all voices registered with SexLab, requiring you to reload your game in order to reinstall them. Do you want to continue?")
+		bool run = ShowMessage("Running this will reinstall all voices registered with SexLab which will cause you to lose any toggled voice preferences. Do you want to continue?")
 		if run
 			SexLab._ClearVoices()
-			ShowMessage("Voice registry cleared, save and reload your game to reinstall any voices present.", false)
+			SexLab.Data.LoadVoices()
+			ShowMessage("Voice registry has successfully been reset.", false)
 		endIf
 
 	elseif option == oidResetStats
@@ -792,7 +797,7 @@ event OnOptionSelect(int option)
 			SexLab.Data.iOralCount = 0
 			SexLab.Data.iVictimCount = 0
 			SexLab.Data.iAggressorCount = 0
-			ShowMessage("Your Sex Diary/Journal has been reset.", false)
+			ShowMessage("Your Sex Diary/Journal stats have been reset.", false)
 		endIf
 
 	elseif option == oidRestoreDefaults
@@ -919,7 +924,7 @@ event OnOptionHighlight(int option)
 	elseIf option == oidCumTimer
 		SetInfoText("How long the above cum effect will display on a character")
 	elseIf option == oidUseStrapons
-		SetInfoText("Females will use strapons when in a male context")
+		SetInfoText("Females will use strap-ons when in a male context")
 	elseIf option == oidAutoAdvance
 		SetInfoText("Animations will not automatically advance by timer when player is involved")
 	elseIf option == oidDisablePlayer
