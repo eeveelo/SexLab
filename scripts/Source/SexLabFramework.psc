@@ -1109,6 +1109,7 @@ endFunction
 function _EndThread(int tid, int player)
 	if player >= 0
 		playerThread = -1
+		hkReady = true
 	endIf
 	_DebugTrace("_EndThread","tid="+tid+", player="+player,"Freeing up animation thread["+tid+"]")
 	activeThread[tid] = false
