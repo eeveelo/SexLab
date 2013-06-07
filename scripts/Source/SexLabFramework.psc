@@ -1024,6 +1024,7 @@ function _SetupSystem()
 	int i = 15
 	while i < 15
 		DoNothing[i].Clear()
+		thread[i].Reset()
 		i += 1
 	endWhile
 endFunction
@@ -1036,10 +1037,11 @@ function _CheckSystem()
 	;_ReadyWait()
 	ready = false
 	enabled = true
+	hkReady = true
 	Start()
 
 	; Check SKSE Version
-	float skseNeeded = 1.0613
+	float skseNeeded = 1.0609
 	float skseInstalled = SKSE.GetVersion() + SKSE.GetVersionMinor() * 0.01 + SKSE.GetVersionBeta() * 0.0001
 	if skseInstalled == 0
 		Data.mNoSKSE.Show()
@@ -1050,7 +1052,7 @@ function _CheckSystem()
 	endIf
 	
 	; Check Skyrim Version
-	float skyrimNeeded = 1.9
+	float skyrimNeeded = 1.8
 	float skyrimMajor = StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float
 	if skyrimMajor < skyrimNeeded
 		Data.mOldSkyrim.Show(skyrimMajor, skyrimNeeded)
@@ -1067,7 +1069,6 @@ function _SendEventHook(string eventName, int threadID, string customHook = "")
 		_DebugTrace("_SendHookEvent","Sending custom event "+customEvent,"eventName="+eventName+", tid="+threadID)
 		SendModEvent(customEvent, threadID, 1)
 	endIf
-
 	; Send Global Event
 	SendModEvent(eventName, threadID, 1)
 endFunction
@@ -1085,6 +1086,9 @@ int function _SlotDoNothing(actor a)
 endFunction
 
 function _ClearDoNothing(int slot)
+	if slot < 0
+		return
+	endIf
 	actor a = DoNothing[slot].GetActorReference()
 	DoNothing[slot].Clear()
 	a.EvaluatePackage()
