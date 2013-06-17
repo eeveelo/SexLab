@@ -7,10 +7,12 @@ int property tid = -1 auto hidden
 ; Starters
 bool active
 bool primed
+bool animating
 
 float total
-int sfx
-int sfxPlaying
+float progress
+float[] sfx
+float[] vfx
 
 ; Thread Variables
 bool advance ; Auto Advance
@@ -24,20 +26,16 @@ ObjectReference centerRef ; The location of this animation, such as a bed, item,
 sslBaseAnimation anim ; Current Animation
 sslBaseAnimation[] animations ; List of passed animations we can cycle through
 int adjustingPos = 1
-int males
-int females
-int[] voicePlaying
 ; The participants
 int player = -1 ; Which position index the player is in, -1 if player not involved
 actor[] pos ; Actors in event
-int[] gender ; -1 unknown, 0 male, 1 female
 sslBaseVoice[] voice ; Actors voice files
-float[] scale ; Actors scale
 int[] aliasSlot ; The index of the DoNothing alias for the actor 
 bool[] silence
 bool bed
 float averageScale
 
+float[] centerLoc
 ; Actor storage
 form[] equipmentA1
 form[] equipmentA2
@@ -51,30 +49,16 @@ form[] extrasA3
 form[] extrasA4
 form[] extrasA5
 
-string[] animsA1
-string[] animsA2
-string[] animsA3
-string[] animsA4
-string[] animsA5
-
-; Positional actor data:
-; [0]PosX [1]PosY [2]PosZ [3]RotX [4]RotY [5]RotZ
-float[] centerLoc
 float[] locA1
 float[] locA2
 float[] locA3
 float[] locA4
 float[] locA5
 
-; Animation info
-bool vaginal = false
-bool oral = false
-bool anal = false
-
 ; TODO: allow seperate
 ; timers per stage
 ; TEMP: static stage time
-float[] timer
+float[] timers
 
 ; Configurations
 bool autoAdvance
@@ -106,7 +90,7 @@ function ForceAnimation(sslBaseAnimation animation)
 	SetAnimationList(forced)
 	RealignActors()
 	stage -= 1
-	advance = true
+	AdvanceStage()
 endFunction
 
 function SetAnimation(sslBaseAnimation animation)
@@ -115,21 +99,8 @@ function SetAnimation(sslBaseAnimation animation)
 	endIf
 	anim = animation
 	stageCount = anim.StageCount()
-	sfx = anim.GetSFX()
 	sexual = anim.IsSexual()
 	silence = anim.GetSilence()
-
-	animsA1 = anim.FetchPosition(0)
-	if actorCount > 1
-		animsA2 = anim.FetchPosition(1)
-	elseif actorCount > 2
-		animsA3 = anim.FetchPosition(2)
-	elseif actorCount > 3
-		animsA4 = anim.FetchPosition(3)
-	elseif actorCount > 4
-		animsA5 = anim.FetchPosition(4)
-	endIf
-
 	if player != -1
 		Debug.Notification(anim.name)
 	endIf
@@ -226,7 +197,7 @@ function ChangeActors(actor[] changeTo)
 					Debug.ToggleCollisions()
 				endIf
 			endIf
-			Debug.SendAnimationEvent(a, "IdleForceDefaultState")
+			; Debug.SendAnimationEvent(a, "IdleForceDefaultState")
 			; a.PushActorAway(a, 0.2)
 		endIf
 		i += 1
@@ -236,8 +207,7 @@ function ChangeActors(actor[] changeTo)
 	PrepareActors()
 	;Restart stage
 	stage -= 1
-	advance = true
-	PlayAnimations()
+	AdvanceStage()
 	SexLab._SendEventHook("ActorChangeEnd",tid,hook)
 endFunction
 
@@ -253,37 +223,6 @@ float function GetTime()
 	return total
 endFunction
 
-function ResetActor(int position)
-	int i = position
-	actor a = pos[position]
-	; Reset scale if needed
-	if actorCount > 1 && SexLab.Config.bScaleActors
-		a.SetScale(1.0)
-	endIf
-	; Enable movement
-	if SexLab.PlayerRef == a
-		SexLab.UnregisterForAllKeys()
-		SexLab.UpdatePlayerStats(anim, total, males, females, victim)
-		Game.EnablePlayerControls()
-		Game.SetInChargen(false, false, false)
-		Game.SetPlayerAIDriven(false)
-	else
-		a.SetRestrained(false)
-		a.SetDontMove(false)
-		a.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
-	endIf
-	; Clear them out
-	SexLab._ClearDoNothing(aliasSlot[i])
-	RemoveExtras(i)
-	a.ClearExpressionOverride()
-	a.RemoveFromFaction(SexLab.AnimatingFaction)
-	; Unstrip items
-	if !a.IsDead() && !a.IsBleedingOut()
-		form[] equipment = GetEquipment(i)
-		SexLab.UnstripActor(a, equipment, victim)
-	endIf
-endFunction
-
 ;#---------------------------#
 ;#                           #
 ;#     END API FUNCTIONS     #
@@ -291,44 +230,54 @@ endFunction
 ;#---------------------------#
 
 function SpawnThread(actor[] positions, sslBaseAnimation[] animationList, actor victimPosition = none, ObjectReference centerOn = none, string customHook = "")
-
 	if !active
 		self.GoToState("Waiting")
 	else
 		return
 	endIf
-
 	; Lock the thread
 	active = true
 	; Set Primary Animation Variables
 	pos = positions
-	animations = animationList
-	victim = victimPosition
 	hook = customHook
 
+	SetAnimationList(animationList)
+	;SetActorList(pos)
+
 	actorCount = positions.Length
-	animCount = animationList.Length
-
-	aid = utility.RandomInt(0, animCount - 1)
-
 	if victim != none
-		timer = SexLab.Config.fStageTimerAggr
+		timers = SexLab.Config.fStageTimerAggr
+		victim = victimPosition
 	else
-		timer = SexLab.Config.fStageTimer
+		timers = SexLab.Config.fStageTimer
 	endIf
-
 	CenterOnObject(centerOn, false)
-
 	; Find if player present
 	int i = 0
 	while i < actorCount
 		if pos[i] == SexLab.PlayerRef
 			player = i
+			; Auto advance?
+			if !SexLab.Config.bAutoAdvance
+				autoAdvance = false
+			endIf
+			; Enable hotkeys, if needed
+			if pos[i] == victim && SexLab.Config.bDisablePlayer
+				autoAdvance = true
+			else
+				SexLab._EnableHotkeys(tid)
+			endIf
+			; Don't start with them as adjustee
+			if i == adjustingPos
+				adjustingPos += 1
+				if adjustingPos >= actorCount
+					adjustingPos = 0
+				endIf
+			endIf
 			i = actorCount
 		endIf
 		i += 1
 	endWhile
-
 	; Start processing
 	SetAnimation(animations[aid])
 	; Store, Disable, Strip, & Move
@@ -338,6 +287,122 @@ function SpawnThread(actor[] positions, sslBaseAnimation[] animationList, actor 
 	self.RegisterForSingleUpdate(0.1)
 endFunction
 
+function SaveLocation(int position, float[] loc)
+	if position == 0
+		locA1 = loc
+	elseIf position == 1
+		locA2 = loc
+	elseIf position == 2
+		locA3 = loc
+	elseIf position == 3
+		locA4 = loc
+	elseIf position == 4
+		locA5 = loc
+	endIf
+endFunction
+
+function MoveActor(int position)
+	; (int position) should be zero indexed
+	float[] offsets = anim.GetPositionOffsets(position)
+	float[] loc = new float[6]
+	; Determine offsets coordinates from center
+	loc[0] = ( centerLoc[0] + ( Math.sin(centerLoc[5]) * offsets[0] + Math.cos(centerLoc[5]) * offsets[1] ) )
+	loc[1] = ( centerLoc[1] + ( Math.cos(centerLoc[5]) * offsets[0] + Math.sin(centerLoc[5]) * offsets[1] ) )
+	loc[2] = ( centerLoc[2] + offsets[2] )
+	; Determine rotation coordinates from center
+	loc[3] = centerLoc[3]
+	loc[4] = centerLoc[4]
+	loc[5] = ( centerLoc[5] + offsets[3] )
+	if loc[5] >= 360
+		loc[5] = ( loc[5] - 360 )
+	elseIf loc[5] < 0
+		loc[5] = ( loc[5] + 360 )
+	endIf
+	pos[position].SetPosition(loc[0], loc[1], loc[2])
+	pos[position].SetAngle(loc[3], loc[4], loc[5])
+	SaveLocation(position, loc)
+endFunction
+
+
+function PrepareActors()
+	int i = 0
+	while i < actorCount
+		actor a = pos[i]
+		; store information
+		voice[i] = SexLab.PickVoice(a)
+		; Stop them from doing stuff
+		aliasSlot[i] = SexLab._SlotDoNothing(a)
+		; Disable their movement
+		a.StopCombat()
+		a.SetFactionRank(SexLab.AnimatingFaction, 0)
+		if SexLab.PlayerRef == a
+			Game.DisablePlayerControls(true, true, true, false, true, false, false, true, 0)
+			Game.SetInChargen(false, true, true)
+			Game.ForceThirdPerson()
+			Game.SetPlayerAIDriven()
+		else
+			a.SetRestrained()
+			a.SetDontMove()
+			a.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
+		endIf
+		Debug.SendAnimationEvent(a, "IdleForceDefaultState")
+		; Auto strip
+		if sexual
+			form[] equipment = SexLab.StripActor(a, victim)
+			SetEquipment(i, equipment)
+		endIf
+		; Get animation extras
+		EquipExtras(i)	
+		i += 1
+	endWhile
+	; Scale them to average size, if enabled
+	if actorCount > 1 && SexLab.Config.bScaleActors
+		int count = pos.Length
+		float[] scales = sslUtility.FloatArray(count)
+		float average = 0.0
+		i = 0
+		while i < count
+			scales[i] = pos[i].GetScale()
+			average += scales[i]
+			i += 1
+		endWhile
+		average = ( average / count )
+		i = 0
+		while i < count
+			pos[i].SetScale((average / scales[i]))
+			i += 1
+		endWhile
+	endIf
+endFunction
+
+function ResetActor(int i)
+	actor a = pos[i]
+	; Reset scale if needed
+	if actorCount > 1 && SexLab.Config.bScaleActors
+		a.SetScale(1.0)
+	endIf
+	; Enable movement
+	if SexLab.PlayerRef == a
+		SexLab.UnregisterForAllKeys()
+		Game.EnablePlayerControls()
+		Game.SetInChargen(false, false, false)
+		Game.SetPlayerAIDriven(false)
+		SexLab.UpdatePlayerStats(anim, total, pos, victim)
+	else
+		a.SetRestrained(false)
+		a.SetDontMove(false)
+		a.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
+	endIf
+	; Clear them out
+	a.RemoveFromFaction(SexLab.AnimatingFaction)
+	SexLab._ClearDoNothing(aliasSlot[i])
+	RemoveExtras(i)
+	if !SexLab.Config.bRagdollEnd
+		Debug.SendAnimationEvent(a, "IdleForceDefaultState")
+	else
+		a.PushActorAway(a, 0.1)
+	endIf
+endFunction
 
 float[] function GetCoords(ObjectReference loc)
 	float[] coords = new float[6]
@@ -348,112 +413,6 @@ float[] function GetCoords(ObjectReference loc)
 	coords[4] = loc.GetAngleY()
 	coords[5] = loc.GetAngleZ()
 	return coords
-endFunction
-
-function MoveActor(int position)
-	; (int position) should be zero indexed
-	actor a = pos[position]
-
-	float animOffset = anim.GetOffset(position)
-	float[] offset = new float[3]
-	offset[0] = (Math.sin(centerLoc[5]) * animOffset + Math.cos(centerLoc[5]) * anim.GetOffsetSide(position))
-	offset[1] = (Math.cos(centerLoc[5]) * animOffset + Math.sin(centerLoc[5]) * anim.GetOffsetSide(position))
-	offset[2] = anim.GetOffsetUp(position)
-
-	float[] to = new float[3]
-	to[0] = centerLoc[0] + offset[0]
-	to[1] = centerLoc[1] + offset[1]
-	to[2] = centerLoc[2] + offset[2]
-
-	float rotation = centerLoc[5] + anim.GetRotation(position)
-	if rotation >= 360
-		rotation = rotation - 360
-	elseIf rotation < 0
-		rotation = rotation + 360
-	endIf
-
-	a.SetPosition(to[0], to[1], to[2])
-	a.SetAngle(centerLoc[3], centerLoc[4], rotation)
-endFunction
-
-function PreparePosition(int position, actor a)
-	int i = position
-	; store information
-	voice[position] = SexLab.PickVoice(a)
-	gender[position] = a.GetLeveledActorBase().GetSex()
-	; Stop them from doing stuff
-	a.StopCombat()
-	a.SetFactionRank(SexLab.AnimatingFaction, 0)
-	aliasSlot[position] = SexLab._SlotDoNothing(a)
-
-	; Disable their movement
-	if SexLab.PlayerRef == a
-		; Auto advance?
-		if !SexLab.Config.bAutoAdvance
-			autoAdvance = false
-		endIf
-		; Enable hotkeys, if needed
-		if a == victim && SexLab.Config.bDisablePlayer
-			autoAdvance = true
-		else
-			SexLab._EnableHotkeys(tid)
-		endIf
-		; Stop movement
-		Game.DisablePlayerControls(true, true, true, false, true, false, false, true, 0)
-		Game.SetInChargen(false, true, true)
-		Game.ForceThirdPerson()
-		Game.SetPlayerAIDriven()
-	else
-		a.SetRestrained()
-		a.SetDontMove()
-		a.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
-	endIf
-	; Auto strip
-	if sexual
-		form[] equipment = SexLab.StripActor(a, victim)
-		SetEquipment(i, equipment)
-	endIf
-	; Get animation extras
-	EquipExtras(i)
-	; Make sure they aren't doing anything else
-	Debug.SendAnimationEvent(a, "IdleForceDefaultState")
-endFunction
-
-function PrepareActors()
-	males = 0
-	females = 0
-	averageScale = 0.0
-	int i = 0
-	while i < actorCount
-		PreparePosition(i, pos[i])
-		MoveActor(i)
-		if gender[i] < 1
-			males += 1
-		else
-			females += 1
-		endIf
-		averageScale = averageScale + pos[i].GetScale()
-		i += 1
-	endWhile
-	averageScale = averageScale / actorCount
-	; Scale them to average size, if enabled
-	if actorCount > 1 && SexLab.Config.bScaleActors
-		i = 0
-		while i < actorCount
-			pos[i].SetScale((averageScale / pos[i].GetScale()))
-			i += 1
-		endWhile
-	endIf
-	if player == adjustingPos
-		adjustingPos += 1
-		if adjustingPos >= actorCount
-			adjustingPos = 0
-		endIf
-	endIf
-	if player >= 0 && anim.tcl
-		Debug.ToggleCollisions()
-		RealignActors()
-	endIf
 endFunction
 
 function RemoveExtras(int position)
@@ -499,7 +458,7 @@ function EquipExtras(int position)
 	endIf
 
 	; Strapons are enabled for this position, and they are female in a male position
-	if SexLab.Config.bUseStrapons && anim.UseStrapon(position) && anim.GetGender(position) == 0 && gender[position] == 1
+	if SexLab.Config.bUseStrapons && anim.UseStrapon(position) && anim.GetGender(position) == 0 && pos[position].GetLeveledActorBase().GetSex() == 1
 		form strapon = SexLab.EquipStrapon(pos[position])
 		extras = sslUtility.PushForm(strapon,extras)
 	endIf
@@ -517,58 +476,13 @@ function EquipExtras(int position)
 	endIf
 endFunction
 
-function PlayAnimations(int useStage = -1)
-
-	if useStage < 0
-		; Zero Index current stage
-		useStage = (stage - 1)
-	else
-		; Zero Index argument stage
-		useStage -= 1
-	endIf
-	
-	Debug.SendAnimationEvent(pos[0], animsA1[useStage])
-	if actorCount > 1
-		Debug.SendAnimationEvent(pos[1], animsA2[useStage])
-	endIf
-	if actorCount > 2
-		Debug.SendAnimationEvent(pos[2], animsA3[useStage])
-	endIf
-	if actorCount > 3
-		Debug.SendAnimationEvent(pos[3], animsA4[useStage])
-	endIf
-	if actorCount > 4
-		Debug.SendAnimationEvent(pos[4], animsA5[useStage])
-	endIf
-endFunction
-
-function PlaySFX()
-	if sfxPlaying > 0
-		Sound.StopInstance(sfxPlaying)
-	endIf
-	if sfx < 1 ; Silent
-		return
-	elseIf sfx == 1 ; Squishing
-		sfxPlaying = SexLab.Data.sfxSquishing01.Play(pos[0])
-	elseIf sfx == 2 ; Sucking
-		sfxPlaying = SexLab.Data.sfxSucking01.Play(pos[0])
-	elseIf sfx == 3 ; SexMix
-		int r = utility.RandomInt(0,1)
-		if r == 0
-			sfxPlaying = SexLab.Data.sfxSquishing01.Play(pos[0])
-		else
-			sfxPlaying = SexLab.Data.sfxSucking01.Play(pos[0])
-		endIf
-	endIf
-	Sound.SetInstanceVolume(sfxPlaying, SexLab.Config.fSFXVolume)
-endFunction
-
 function PlayVoice(int pid, float strength)
-	if voicePlaying[pid] > 0
-		Sound.StopInstance(voicePlaying[pid])
+	int playing = (pid * 3) + 2
+	if vfx[playing] > 0
+		Sound.StopInstance(vfx[playing] as int)
 	endIf
-	voicePlaying[pid] = voice[pid].Moan(pos[pid], strength, victim)
-	Sound.SetInstanceVolume(voicePlaying[pid], SexLab.Config.fVoiceVolume)
+	vfx[playing] = voice[pid].Moan(pos[pid], strength, victim)
+	Sound.SetInstanceVolume(vfx[playing] as int, SexLab.Config.fVoiceVolume)
 endFunction
 
 function SetEquipment(int position, form[] equipment)
@@ -604,19 +518,18 @@ function EndAnimation(bool quick = false)
 		return
 	endIf
 
-	SexLab._SendEventHook("AnimationEnd",tid,hook)
-
 	int i = 0
 	; Apply cum
 	if !quick && sexual
 		while i < actorCount
-			if SexLab.Config.bUseCum && anim.GetCum(i) > 0 && gender[i] == anim.female
-				if males > 0
+			if SexLab.Config.bUseCum && anim.GetCum(i) > 0 && pos[i].GetLeveledActorBase().GetSex() == 1
+				int[] genders = SexLab.GenderCount(pos)
+				if genders[0] > 0
 					PlayVoice(i, 1.0)
-					SexLab.ApplyCum(pos[i],anim.GetCum(i))
-				elseIf SexLab.Config.bAllowFFCum && females > 1
+					SexLab.ApplyCum(pos[i], anim.GetCum(i))
+				elseIf SexLab.Config.bAllowFFCum && genders[0] > 1
 					PlayVoice(i, 1.0)
-					SexLab.ApplyCum(pos[i],anim.GetCum(i))
+					SexLab.ApplyCum(pos[i], anim.GetCum(i))
 				endIf
 			endIf
 			i += 1
@@ -625,49 +538,21 @@ function EndAnimation(bool quick = false)
 
 	i = 0
 	while i < actorCount
-		actor a = pos[i]
-		; Reset actor
-		SexLab._ClearDoNothing(aliasSlot[i])
-		RemoveExtras(i)
-		a.RemoveFromFaction(SexLab.AnimatingFaction)
-
-		; Reset scale
-		if actorCount > 1 && SexLab.Config.bScaleActors
-			a.SetScale(1.0)
-		endIf
-
-		; Enable movement
-		if SexLab.PlayerRef == a
-			SexLab.UnregisterForAllKeys()
-			SexLab.UpdatePlayerStats(anim, total, males, females, victim)
-			Game.SetInChargen(false, false, false)
-			Game.SetPlayerAIDriven(false)
-			if anim.tcl
-				Debug.ToggleCollisions()
-			endIf
-		else
-			a.SetRestrained(false)
-			a.SetDontMove(false)
-			a.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
-		endIf
+		ResetActor(i)
 		i += 1
 	endWhile
 
 	; Reset Idle
-	if SexLab.Config.bRagdollEnd
-		i = 0
-		while i < actorCount
-			pos[i].PushActorAway(pos[i], 0.1)
-			i += 1
-		endWhile
-	else
-		i = 0
-		while i < actorCount
+	;/ i = 0
+	while i < actorCount
+		if !SexLab.Config.bRagdollEnd
 			Debug.SendAnimationEvent(pos[i], "IdleForceDefaultState")
-			i += 1
-		endWhile
-	endIf
-
+		else
+			pos[i].PushActorAway(pos[i], 0.1)
+		endIf
+		i += 1
+	endWhile /;
+	
 	if !quick
 		Utility.Wait(2.0)
 	endIf
@@ -675,31 +560,24 @@ function EndAnimation(bool quick = false)
 	; Requip them
 	i = 0
 	while i < actorCount
-		actor a = pos[i]
-		if SexLab.PlayerRef == a
-			; Give Player control back post push/reset
-			Game.EnablePlayerControls()
-		endIf
-		if !a.IsDead() && !a.IsBleedingOut()
-			form[] equipment = GetEquipment(i)
-			SexLab.UnstripActor(a, equipment, victim)
+		if !pos[i].IsDead() && !pos[i].IsBleedingOut()
+			SexLab.UnstripActor(pos[i], GetEquipment(i), victim)
 		endIf
 		i += 1
 	endWhile
-
+	SexLab._SendEventHook("AnimationEnd",tid,hook)
+	Utility.Wait(4.0)
 	SexLab._EndThread(tid, player)
 	self.GoToState("Waiting")
 endFunction
 
-function AdvanceStage(bool backwards = false)	
+function AdvanceStage(bool backwards = false)
 	if backwards && stage == 1
-		return
+		stage = 0
 	elseIf backwards
 		stage -= 2 ; Account for stage increase on advance
-		advance = true
-	else
-		advance = true
 	endIf
+	advance = true
 endFunction
 
 function ChangeAnimation(bool backwards = false)
@@ -725,32 +603,21 @@ function ChangeAnimation(bool backwards = false)
 	endIf
 
 	SetAnimation(animations[aid])
-
+	
 	int i = 0
 	while i < actorCount
-		SexLab.StripActor(pos[i], victim)
+		;SexLab.StripActor(pos[i], victim)
 		RemoveExtras(i)
 		EquipExtras(i)
 		i += 1
 	endWhile
-
-	stage -= 1
-	if stageCount <= stage
-		stage = stageCount - 2
-		if stage < 0
-			stage = 0
-		endIf
+	
+	; TCL if needed
+	if player >= 0 && anim.tcl
+		Debug.ToggleCollisions()
 	endIf
 
 	RealignActors()
-
-	if player >= 0 && anim.tcl
-		Debug.ToggleCollisions()
-		RealignActors()
-	endIf
-
-	; Restart the stage with new animation
-	advance = true
 
 	SexLab._SendEventHook("AnimationChange",tid,hook)
 endFunction
@@ -776,21 +643,11 @@ function ChangePositions()
 	RemoveExtras(adjustingPos)
 	pos[newPos] = adjustedPos
 	pos[adjustingPos] = replacedPos
-	; Swap Gender
-	int adjustedGender = gender[adjustingPos]
-	int replacedGender = gender[newPos]
-	gender[newPos] = adjustedGender
-	gender[adjustingPos] = replacedGender
 	; Swap Alias
 	int adjustedAlias = aliasSlot[adjustingPos]
 	int replacedAlias = aliasSlot[newPos]
 	aliasSlot[newPos] = replacedAlias
 	aliasSlot[adjustingPos] = adjustedAlias
-	; Swap Scales
-	float adjustedScale = scale[adjustingPos]
-	float replacedScale = scale[newPos]
-	scale[newPos] = adjustedScale
-	scale[adjustingPos] = replacedScale
 	; Swap Voices
 	sslBaseVoice adjustedVoice = voice[adjustingPos]
 	sslBaseVoice replacedVoice = voice[newPos]
@@ -870,21 +727,18 @@ function MoveScene()
 	; Enable Controls
 	Game.EnablePlayerControls()
 	Game.SetPlayerAIDriven(false)
-	;.PlayIdle(SexLab.Data.ResetIdle)
 	Debug.SendAnimationEvent(SexLab.PlayerRef, "IdleForceDefaultState")
 	; Lock hotkeys here for timer
-	float started = Utility.GetCurrentRealTime()
-	float waiting = 6
-	while waiting > 0
-		waiting = 6 - (Utility.GetCurrentRealTime() - started)
-		SexLab.Data.mMoveScene.Show(waiting)
+	SexLab.Data.mMoveScene.Show(6)
+	float stop = Utility.GetCurrentRealTime() + 6
+	while stop > Utility.GetCurrentRealTime()
 		Utility.Wait(0.8)
 	endWhile
 	; Disable Controls
 	Game.DisablePlayerControls(true, true, true, false, true, false, false, true, 0)
 	Game.ForceThirdPerson()
 	Game.SetPlayerAIDriven()
-	; Give player time to settle if airborne
+	; Give player time to settle incase airborne
 	Utility.Wait(1.0)
 	; Recenter + sync
 	CenterOnObject(SexLab.PlayerRef)
@@ -895,7 +749,7 @@ function MoveScene()
 endFunction
 
 function RealignActors()
-	PlayAnimations()
+	anim.PlayAnimations(pos, stage)
 	int i = 0
 	while i < actorCount
 		MoveActor(i)
@@ -917,164 +771,146 @@ bool function CheckActive()
 		return true
 	endIf
 endFunction
+
+float function GetStageTimer()
+	int last = ( timers.Length - 1 )
+	if stage == stageCount
+		return timers[last]
+	elseif stage < last
+		return timers[(stage - 1)]
+	endIf
+	return timers[(last - 1)]
+endfunction
+
 ;#---------------------------#
 ;#  ANIMATION PROCESS EVENT  #
 ;#---------------------------#
-state Animating
+state PlayingStage
 	event OnBeginState()
-
 		CheckActive()
-
 		int i
-		bool orgasm
+		float strength = (stage as float) / (stageCount as float)
+		if stageCount == 1 && stage == 1
+			strength = 0.50		
+		endIf
 
 		if stage == stageCount && stageCount >= 2 && sexual
 			SexLab._SendEventHook("OrgasmStart",tid,hook)
-			if player >= 0
-				autoAdvance = true
-				SexLab.UnregisterForAllKeys()
-			endIf
-			orgasm = true
+			strength = 1.0
 		else
 			SexLab._SendEventHook("StageStart",tid,hook)
-			orgasm = false
-		endIf
-		
-		; Set the stage
-		float sfxDelay = SexLab.Config.fSFXDelay - (stage * 0.75)  
-		if sfxDelay < 0.8 || orgasm
-			sfxDelay = 0.8
-		endIf
-		float sfxCheck = 0.0
-		float sfxLast = 0.0
-
-		; Moan strength
-		float strength = (stage as float) / (stageCount as float)
-		if stageCount == 1 && stage == 1
-			strength = 0.50
-		elseIf orgasm
-			strength = 1.0
 		endIf
 
-		float[] voiceLast = new float[5]
-		float[] voiceDelay = new float[5]
+		; Set the sfx
+		int sfxType = anim.GetSFX()
+		int sfxInstance
+		sfx = new float[2]
+		sfx[0] = SexLab.Config.fSFXDelay - (stage * 0.75)
+		if sfx[0] < 0.8
+			sfx[0] = 0.8
+		endIf
+
+		; Set the voice delay & strength
+		vfx = sslUtility.FloatArray(pos.Length * 3)
 		i = 0
-		while i < actorCount
-			if gender[i] < 1
-				voiceDelay[i] = SexLab.Config.fMaleVoiceDelay - (stage * 0.8) + Utility.RandomFloat(-0.8,0.8)
+		while i < pos.Length
+			int index = i * 3
+			if pos[i].GetLeveledActorBase().GetSex() < 1
+				vfx[index] = SexLab.Config.fMaleVoiceDelay - (stage * 0.8) + Utility.RandomFloat(-0.8,0.8)
 			else
-				voiceDelay[i] = SexLab.Config.fFemaleVoiceDelay - (stage * 0.8) + Utility.RandomFloat(-0.8,0.8)
+				vfx[index] = SexLab.Config.fFemaleVoiceDelay - (stage * 0.8) + Utility.RandomFloat(-0.8,0.8)
 			endIf
-
-			if voiceDelay[i] < 1.5 || orgasm
-				voiceDelay[i] = 1.5
+			if vfx[index] < 1.5
+				vfx[index] = 1.5
 			endIf
-
-			voiceLast[i] = Utility.RandomFloat(-0.8,1.5)
+			vfx[index + 1] = Utility.RandomFloat(-0.8,1.5)
+			vfx[index + 2] = 0
 			i += 1
-		endWhile 
+		endWhile
 
-		; Hold actors here for alloted time
-		float stageTimer
-
-		if stage == stageCount
-			stageTimer = timer[4]
-		elseif stage < 4
-			stageTimer = timer[stage - 1]
-		else
-			stageTimer = timer[3]
-		endIf
-
-		; Play idles
-		PlayAnimations()
-
-		float stageStart = Utility.GetCurrentRealTime()
-		float progress = 0.0
+		progress = 0.0
+		float started = Utility.GetCurrentRealTime()
 		advance = false
-		while !advance
-
+		while ( !advance || (autoAdvance && progress > GetStageTimer()) )
+			CheckActive()
 			i = 0
 			while i < actorCount
-
 				; Make sure we're all still among the living
 				if pos[i].IsDead() || pos[i].IsBleedingOut() || !pos[i].Is3DLoaded()
 					EndAnimation(quick=true) 
 					return
 				endIf
 
-				; Play Voice
-				if voice[i] != none && (progress - voiceLast[i]) > voiceDelay[i] && !silence[i]
+				int vid = i * 3
+				if voice[i] != none && (progress - vfx[vid + 1]) > vfx[vid] && !silence[i]
 					PlayVoice(i, strength)
-					voiceLast[i] = progress
+					vfx[vid + 1] = progress
 				endIf
-
 				i += 1
 			endWhile
-
 			; Play SFX
-			sfxCheck = progress - sfxLast
-			if sfxCheck > sfxDelay || progress == 0.0
-				PlaySFX()
-				sfxLast = progress
+			if sfxType > 0 && ( progress - sfx[1] > sfx[0] || progress == 0.0)
+				;if sfxInstance > 0
+				;	Sound.StopInstance(sfxInstance)
+				;endIf
+				sfxInstance = SexLab.PlaySFX(pos[0], sfxType)
+				sfx[1] = progress
 			endIf
-
-			; Check Advance
-			progress = Utility.GetCurrentRealTime() - stageStart
-			if (autoAdvance && progress >= stageTimer) || !active
-				advance = true
-			else
-				Utility.Wait(0.2)
-			endIf
+			; Update progress
+			progress = Utility.GetCurrentRealTime() - started
+			; Delay loop
+			Utility.Wait(0.5)
 		endWhile
+		RegisterForSingleUpdate(0.1)
+	endEvent
 
+	event OnUpdate()
+		advance = true
+		self.GoToState("AdvancingStage")
+	endEvent
+
+	event OnEndState()
 		total = total + progress
-
-		CheckActive()
-
-		; Stage End hook
-		if orgasm
+		if stage == stageCount && stageCount >= 2 && sexual
 			SexLab._SendEventHook("OrgasmEnd",tid,hook)
 		else
 			SexLab._SendEventHook("StageEnd",tid,hook)
 		endIf
-
-		; Move on
-		self.GoToState("SetStage")
 	endEvent
+
 endState
 
-state SetStage
+state AdvancingStage
 	event OnBeginState()
-
 		CheckActive()
-
 		; Increase stage
 		stage += 1
 		; Make sure stage exists first
 		if stage <= stageCount
-			self.GoToState("Animating")
+			; Play idles
+			anim.PlayAnimations(pos, stage)
+			; Position Actors
+			int i = 0
+			while i < actorCount
+				MoveActor(i)
+				i += 1
+			endWhile
+			; Start stage
+			self.GoToState("PlayingStage")
 		; If it doesn't skip straight to end
 		else
 			EndAnimation()
 		endIf
-
 	endEvent
 endState
 
-state Waiting
+auto state Waiting
 	event OnBeginState()
 		active = false
 		primed = false
 		aid = -1
-		males = 0
-		females = 0
-		gender = new int[5]
 		voice = new sslBaseVoice[5]
-		voicePlaying = new int[5]
-		scale = new float[5]
 		aliasSlot = new int[5]
-		averageScale = 0.0
-		sfxPlaying = 0
 		hook = ""
 		total = 0.0
 		adjustingPos = 1
@@ -1093,7 +929,7 @@ state Waiting
 	event OnUpdate()
 		if active && primed
 			SexLab._SendEventHook("AnimationStart",tid,hook)
-			self.GoToState("SetStage")
+			self.GoToState("AdvancingStage")
 			primed = false
 		endIf
 	endEvent
