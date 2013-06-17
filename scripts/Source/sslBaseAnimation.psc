@@ -56,141 +56,9 @@ form[] extras3
 form[] extras4
 form[] extras5
 
-float function GetOffset(int position)
-	if position > actors || position < 0
-		debug.trace("----SexLab ERROR sslBaseAnimation--- Unknown "+name+" position ["+position+"]")
-		return 0.0
-	endIf
-	if actors == 1
-		return offsets[position]
-	endIf
-	float highest
-	float lowest
-	int i = 0
-	while i < actors
-		if offsets[i] > highest
-			highest = offsets[i]
-		elseif offsets[i] < lowest
-			lowest = offsets[i]
-		endIf
-		i += 1
-	endWhile
-	float adjust
-	float offset
-	if highest > -lowest && highest > 50
-		return (offsets[position] - (highest * 0.5))
-	elseif -lowest > highest && lowest < -50
-		return (offsets[position] + (lowest * -0.5))
-	elseif highest > -lowest
-		return (offsets[position] - highest)
-	else
-		return (offsets[position] + lowest)
-	endIf
-	return offsets[position]
-endFunction
-
-float function GetOffsetSide(int position)
-	if position > actors || position < 0
-		debug.trace("----SexLab ERROR sslBaseAnimation--- Unknown "+name+" position ["+position+"]")
-		return 0.0
-	endIf
-	return offsetsSide[position]
-endFunction
-
-
-float function GetOffsetUp(int position)
-	if position > actors || position < 0
-		debug.trace("----SexLab ERROR sslBaseAnimation--- Unknown "+name+" position ["+position+"]")
-		return 0.0
-	endIf
-	return offsetsUp[position]
-endFunction
-
-float function GetRotation(int position)
-	if position > actors || position < 0
-		debug.trace("----SexLab ERROR sslBaseAnimation--- Unknown "+name+" position ["+position+"]")
-		return 0.0
-	endIf
-	; Return unaltered
-	return rotations[position]
-endFunction
-
-string function Fetch(int position, int stage)
-	; Zeroindex the stage
-	if stage > 0
-		stage -= 1
-	endIf
-	; Get position stage idle
-	if position == 0
-		return actor1[stage]
-	elseIf position == 1
-		return actor2[stage]
-	elseIf position == 2
-		return actor3[stage]
-	elseIf position == 3
-		return actor4[stage]
-	elseIf position == 4
-		return actor5[stage]
-	else
-		debug.trace("----SLAB ERROR sslBaseAnimation "+name+" Fetch(position="+position+", stage="+Stage+") --- Unknown position")
-	endIf
-endFunction
-
-string[] function FetchPosition(int position)
-	if position == 0
-		return actor1
-	elseIf position == 1
-		return actor2
-	elseIf position == 2
-		return actor3
-	elseIf position == 3
-		return actor4
-	elseIf position == 4
-		return actor5
-	else
-		debug.trace("----SLAB ERROR sslBaseAnimation "+name+" FetchPosition(position="+position+") --- Unknown position")
-	endIf
-endFunction
-
-function SetSFX(int iSFX)
-	sfx = iSFX
-endFunction
-
-int function GetSFX()
-	return sfx
-endFunction
-
-int function ActorCount()
-	return actors
-endFunction
-
-int function StageCount()
-	return stages
-endFunction
-
-bool[] function GetSilence()
-	return silence
-endFunction
-
-int function GetGender(int position)
-	return genders[position]
-endFunction
-
-int function GetCum(int position)
-	return cum[position]
-endFunction
-
-bool function IsSexual()
-	if content == 1 || content == 2
-		return true
-	else
-		return false
-	endIf
-endFunction
-
-function SetContent(int contentType)
-	content = contentType
-endFunction
+;/-----------------------------------------------
+	Animation Position Functions
+------------------------------------------------/;
 
 int function AddPosition(int gender = 0, float offset = 0.0, float offsetUp = 0.0, float offsetSide = 0.0, float rotation = 0.0,  bool noStrapon = false, bool noVoice = false, int addCum = -1)
 	if actors >= 6
@@ -260,25 +128,201 @@ function AddExtra(int position, form extra)
 	endIf
 endFunction
 
+;/-----------------------------------------------
+	Animation Offset Functions
+------------------------------------------------/;
+
+float[] function GetPositionOffsets(int position)
+	float[] off = new float[4]
+	off[0] = GetOffset(position)
+	off[1] = GetOffsetSide(position)
+	off[2] = GetOffsetUp(position)
+	off[3] = GetRotation(position)
+	return off
+endFunction
+
+float function GetOffset(int position)
+	if position > actors || position < 0
+		debug.trace("----SexLab ERROR sslBaseAnimation--- Unknown "+name+" position ["+position+"]")
+		return 0.0
+	endIf
+	if actors == 1
+		return offsets[position]
+	endIf
+	float highest
+	float lowest
+	int i = 0
+	while i < actors
+		if offsets[i] > highest
+			highest = offsets[i]
+		elseif offsets[i] < lowest
+			lowest = offsets[i]
+		endIf
+		i += 1
+	endWhile
+	debug.trace("getoffset("+position+"): H: "+highest+" L: "+lowest)
+	float adjust
+	float offset
+	if highest > -lowest && highest > 50
+		return (offsets[position] - (highest * 0.5))
+	elseif -lowest > highest && lowest < -50
+		return (offsets[position] + (lowest * -0.5))
+	elseif highest > -lowest
+		return (offsets[position] - highest)
+	else
+		return (offsets[position] + lowest)
+	endIf
+	return offsets[position]
+endFunction
+
+float function GetOffsetSide(int position)
+	if position > actors || position < 0
+		debug.trace("----SexLab ERROR sslBaseAnimation--- Unknown "+name+" position ["+position+"]")
+		return 0.0
+	endIf
+	return offsetsSide[position]
+endFunction
+
+
+float function GetOffsetUp(int position)
+	if position > actors || position < 0
+		debug.trace("----SexLab ERROR sslBaseAnimation--- Unknown "+name+" position ["+position+"]")
+		return 0.0
+	endIf
+	return offsetsUp[position]
+endFunction
+
+float function GetRotation(int position)
+	if position > actors || position < 0
+		debug.trace("----SexLab ERROR sslBaseAnimation--- Unknown "+name+" position ["+position+"]")
+		return 0.0
+	endIf
+	; Return unaltered
+	return rotations[position]
+endFunction
+
+;/-----------------------------------------------
+	Animation Event Functions
+------------------------------------------------/;
+
+function PlayAnimations(actor[] pos, int stage)
+	; Zeroindex the stage
+	if stage > 0
+		stage -= 1
+	endIf
+	string[] stageAnims = FetchStage(stage)
+	int i = 0
+	while i < stageAnims.Length
+		Debug.SendAnimationEvent(pos[i], stageAnims[i])
+		i += 1
+	endWhile
+endFunction
+
+string[] function FetchStage(int stage)
+	string[] anims = sslUtility.StringArray(actors)
+	anims[0] = actor1[stage]
+	if actors == 1
+		return anims
+	endIf
+	anims[1] = actor2[stage]
+	if actors == 2
+		return anims
+	endIf
+	anims[2] = actor3[stage]
+	if actors == 3
+		return anims
+	endIf
+	anims[3] = actor4[stage]
+	if actors == 4
+		return anims
+	endIf
+	anims[4] = actor5[stage]
+	return anims
+endFunction
+
+string function Fetch(int position, int stage)
+	; Zeroindex the stage
+	if stage > 0
+		stage -= 1
+	endIf
+	; Get position stage idle
+	if position == 0
+		return actor1[stage]
+	elseIf position == 1
+		return actor2[stage]
+	elseIf position == 2
+		return actor3[stage]
+	elseIf position == 3
+		return actor4[stage]
+	elseIf position == 4
+		return actor5[stage]
+	else
+		debug.trace("----SLAB ERROR sslBaseAnimation "+name+" Fetch(position="+position+", stage="+Stage+") --- Unknown position")
+	endIf
+endFunction
+
+string[] function FetchPosition(int position)
+	if position == 0
+		return actor1
+	elseIf position == 1
+		return actor2
+	elseIf position == 2
+		return actor3
+	elseIf position == 3
+		return actor4
+	elseIf position == 4
+		return actor5
+	else
+		debug.trace("----SLAB ERROR sslBaseAnimation "+name+" FetchPosition(position="+position+") --- Unknown position")
+	endIf
+endFunction
+
+;/-----------------------------------------------
+	Animation Configuration Functions
+------------------------------------------------/;
+
+function SetSFX(int iSFX)
+	sfx = iSFX
+endFunction
+
+int function GetSFX()
+	return sfx
+endFunction
+
+int function ActorCount()
+	return actors
+endFunction
+
+int function StageCount()
+	return stages
+endFunction
+
+bool[] function GetSilence()
+	return silence
+endFunction
+
+int function GetGender(int position)
+	return genders[position]
+endFunction
+
+int function GetCum(int position)
+	return cum[position]
+endFunction
+
+bool function IsSexual()
+	if content == 1 || content == 2
+		return true
+	else
+		return false
+	endIf
+endFunction
+
+function SetContent(int contentType)
+	content = contentType
+endFunction
+
 bool function UseStrapon(int position)
 	return !noStrapons[position]
-endFunction
-
-function UpdateOffset(int position, float adjust)
-	float offset = offsets[position] + adjust
-	offsets[position] = offset
-endFunction
-
-function UpdateOffsetSide(int position, float adjust)
-	float offsetSide = offsetsSide[position] + adjust
-	offsetsSide[position] = offsetSide
-	debug.trace("Side Adjust "+adjust+" to "+offsetSide)
-endFunction
-
-function UpdateOffsetUp(int position, float adjust)
-	float offsetUp = offsetsUp[position] + adjust
-	offsetsUp[position] = offsetUp
-	debug.trace("Up Adjust "+adjust+" to "+offsetUp)
 endFunction
 
 form[] function GetExtras(int position)
@@ -296,6 +340,8 @@ form[] function GetExtras(int position)
 		debug.trace("----SLAB ERROR sslBaseAnimation GetExtras() "+name+"--- Unknown position "+position)
 	endIf
 endFunction
+
+
 
 bool function AddTag(string tag)
 	bool check = HasTag(tag)
@@ -332,6 +378,26 @@ bool function HasTag(string tag)
 	else
 		return false
 	endIf
+endFunction
+
+
+
+
+function UpdateOffset(int position, float adjust)
+	float offset = offsets[position] + adjust
+	offsets[position] = offset
+endFunction
+
+function UpdateOffsetSide(int position, float adjust)
+	float offsetSide = offsetsSide[position] + adjust
+	offsetsSide[position] = offsetSide
+	debug.trace("Side Adjust "+adjust+" to "+offsetSide)
+endFunction
+
+function UpdateOffsetUp(int position, float adjust)
+	float offsetUp = offsetsUp[position] + adjust
+	offsetsUp[position] = offsetUp
+	debug.trace("Up Adjust "+adjust+" to "+offsetUp)
 endFunction
 
 function RestoreOffsets()
@@ -400,5 +466,4 @@ function UnloadAnimation()
 	extras4 = extras4Del
 	form[] extras5Del
 	extras5 = extras5Del
-
 endFunction
