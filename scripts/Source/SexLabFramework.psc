@@ -419,6 +419,30 @@ form function EquipStrapon(actor a)
 	endIf
 endFunction
 
+int[] function GenderCount(actor[] pos)
+	int[] genders = new int[2]
+	int i = 0
+	while i < pos.Length
+		if pos[i].GetLeveledActorBase().GetSex() > 0
+			genders[1] = ( genders[1] + 1 )
+		else
+			genders[0] = ( genders[0] + 1 )
+		endIf
+		i += 1
+	endWhile
+	return genders
+endFunction
+
+int function MaleCount(actor[] pos)
+	int[] gender = GenderCount(pos)
+	return gender[0]
+endFunction
+
+int function FemaleCount(actor[] pos)
+	int[] gender = GenderCount(pos)
+	return gender[1]
+endFunction
+
 ;#---------------------------#
 ;#  BEGIN THREAD FUNCTIONS   #
 ;#---------------------------#
@@ -460,6 +484,23 @@ endFunction
 
 sslBaseThread function GetThread(int tid)
 	return thread[tid]
+endFunction
+
+int function PlaySFX(actor a, int type)
+	int instance
+	if type == 1 ; Squishing
+		instance = Data.sfxSquishing01.Play(a)
+	elseIf type == 2 ; Sucking
+		instance = Data.sfxSucking01.Play(a)
+	elseIf type == 3 ; SexMix
+		if utility.RandomInt(0,1)
+			instance =  Data.sfxSquishing01.Play(a)
+		else
+			instance =  Data.sfxSucking01.Play(a)
+		endIf
+	endIf
+	Sound.SetInstanceVolume(instance, Config.fSFXVolume)
+	return instance
 endFunction
 
 ;#---------------------------#
@@ -744,7 +785,7 @@ endFunction
 ;#   START STAT FUNCTIONS    #
 ;#---------------------------#
 
-function UpdatePlayerStats(sslBaseAnimation anim, float time, int males, int females, actor victim)
+function UpdatePlayerStats(sslBaseAnimation anim, float time, actor[] pos, actor victim)
 	if !anim.IsSexual()
 		return
 	endIf
@@ -752,6 +793,11 @@ function UpdatePlayerStats(sslBaseAnimation anim, float time, int males, int fem
 	Data.fTimeSpent = Data.fTimeSpent + time
 	; Don't count the player in partner counts
 	int PlayerSex = PlayerRef.GetActorBase().GetSex()
+
+	int[] genders = GenderCount(pos)
+	int males = genders[0]
+	int females = genders[1]
+
 	if PlayerSex > 0
 		Data.iMalePartners = Data.iMalePartners + males
 		Data.iFemalePartners = Data.iFemalePartners + (females - 1)
@@ -918,8 +964,6 @@ endFunction
 ;#---------------------------#
 
 event OnInit()
-	while PlayerRef.Is3DLoaded()
-	endWhile
 	ready = true
 	_DebugTrace("OnInit","","SYSTEM INITIALIZED")
 endEvent
@@ -994,6 +1038,7 @@ function _CleanSystem()
 endFunction
 
 function _SetupSystem()
+	Start()
 	; Init animations
 	animation = new sslBaseAnimation[128]
 	animIndex = 0
@@ -1050,10 +1095,9 @@ bool function _CheckClean()
 endFunction
 
 function _CheckSystem()
-	;_ReadyWait()
+	_ReadyWait()
 	ready = false
 	enabled = true
-	Start()
 
 	; Check SKSE Version
 	float skseNeeded = 1.0609
@@ -1073,6 +1117,9 @@ function _CheckSystem()
 		Data.mOldSkyrim.Show(skyrimMajor, skyrimNeeded)
 		enabled = false
 	endIf
+
+	; Load Strapons
+	Data.FindStrapons()
 
 	; Add debug spell
 	if Config.DebugMode() && !PlayerRef.HasSpell(Data.SexLabDebugSpell)
