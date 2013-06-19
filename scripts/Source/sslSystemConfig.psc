@@ -238,7 +238,6 @@ function SetDefaults()
 	fStageTimerAggr[3] = 10.0
 	fStageTimerAggr[4] = 3.0
 
-	SexLab.Data.FindStrapons()
 	oidRemoveStrapon = new int[10]
 
 	sPureTitles = new string[7]
@@ -292,6 +291,17 @@ endFunction
 
 event OnConfigInit()
 	SetDefaults()
+	SexLab._CheckSystem()
+	SexLab._SetupSystem()
+	SexLab.Data.LoadAnimations()
+	SexLab.Data.LoadVoices()
+endEvent
+
+event OnPlayerLoadGame()
+	SexLab._CheckSystem()
+	Sexlab._StopAnimations()
+	SexLab.Data.LoadAnimations()
+	SexLab.Data.LoadVoices()
 endEvent
 
 event OnVersionUpdate(int version)
