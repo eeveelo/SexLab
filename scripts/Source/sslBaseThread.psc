@@ -546,7 +546,6 @@ function EndAnimation(bool quick = false)
 		ResetActor(i)
 		i += 1
 	endWhile
-	
 	if !quick
 		Utility.Wait(2.0)
 	endIf
@@ -566,16 +565,12 @@ function EndAnimation(bool quick = false)
 endFunction
 
 function AdvanceStage(bool backwards = false)
-	if stage >= stageCount
-		return
-	endIf
 	if backwards && stage == 1
 		stage = 0
 	elseIf backwards
 		stage -= 2 ; Account for stage increase on advance
 	endIf
 	advance = true
-	RegisterForSingleUpdate(0.01)
 endFunction
 
 function ChangeAnimation(bool backwards = false)
@@ -820,7 +815,6 @@ state PlayingStage
 			vfx[index + 2] = 0
 			i += 1
 		endWhile
-
 
 		if autoAdvance
 			RegisterForSingleUpdate(GetStageTimer())

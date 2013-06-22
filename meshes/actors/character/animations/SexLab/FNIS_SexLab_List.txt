@@ -102,6 +102,24 @@ s Tribadism_A2_S1 Tribadism_A2_S1.hkx
 ' Arrok's Animations
 '
 
+s Arrok_Anal_A1_S1 Arrok_Anal_A1_S1.hkx
++ Arrok_Anal_A1_S2 Arrok_Anal_A1_S2.hkx
++ Arrok_Anal_A1_S3 Arrok_Anal_A1_S3.hkx
++ Arrok_Anal_A1_S4 Arrok_Anal_A1_S4.hkx
+s Arrok_Anal_A2_S1 Arrok_Anal_A2_S1.hkx
++ Arrok_Anal_A2_S2 Arrok_Anal_A2_S2.hkx
++ Arrok_Anal_A2_S3 Arrok_Anal_A2_S3.hkx
++ Arrok_Anal_A2_S4 Arrok_Anal_A2_S4.hkx
+
+s -a Arrok_Rape_A1_S1 Arrok_Rape_A1_S1.hkx
++ Arrok_Rape_A1_S2 Arrok_Rape_A1_S2.hkx
++ Arrok_Rape_A1_S3 Arrok_Rape_A1_S3.hkx
++ Arrok_Rape_A1_S4 Arrok_Rape_A1_S4.hkx
+s -a Arrok_Rape_A2_S1 Arrok_Rape_A2_S1.hkx
++ Arrok_Rape_A2_S2 Arrok_Rape_A2_S2.hkx
++ Arrok_Rape_A2_S3 Arrok_Rape_A2_S3.hkx
++ Arrok_Rape_A2_S4 Arrok_Rape_A2_S4.hkx
+
 s Arrok_SittingForeplay_A1_S1 Arrok_SittingForeplay_A1_S1.hkx
 + Arrok_SittingForeplay_A1_S2 Arrok_SittingForeplay_A1_S2.hkx
 + Arrok_SittingForeplay_A1_S3 Arrok_SittingForeplay_A1_S3.hkx
