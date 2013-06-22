@@ -253,8 +253,8 @@ int function ValidateActor(actor a)
 		_DebugTrace("StartSex","actor="+a,"Failed to start animation; actor is child")
 		return -13
 	endIf
-	if a.HasKeyWordString("ActorTypeCreature")
-		_DebugTrace("StartSex","actor="+a,"Failed to start animation; actor is a creature that is currently not supported")
+	if a.HasKeyWordString("ActorTypeCreature") || a.HasKeyWordString("ActorTypeDwarven")
+		_DebugTrace("StartSex","actor="+a,"Failed to start animation; actor is a creature or Dwemer that is currently not supported")
 		return -14
 	endIf
 	return 1
