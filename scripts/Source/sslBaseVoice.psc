@@ -12,23 +12,62 @@ sound property mild auto
 sound property hot auto
 sound property medium auto
 
-; topic property MoanMild auto
-; topic property MoanMedium auto
-; topic property MoanHot auto
+topic property SexLabMoanMild auto
+topic property SexLabMoanMedium auto
+topic property SexLabMoanHot auto
 
+VoiceType property SexLabVoiceM auto
+VoiceType property SexLabVoiceF auto
+FormList property VoicesPlayer auto
 
 int function PlayMild(actor a)
-	; a.Say(MoanMild)
+	ActorBase base = a.GetLeveledActorBase()
+	VoiceType type = base.GetVoiceType()
+	if type != none && !VoicesPlayer.HasForm(type)
+		if base.GetSex() > 0
+			base.SetVoiceType(SexLabVoiceF)
+		else
+			base.SetVoiceType(SexLabVoiceM)
+		endIf
+		a.Say(SexLabMoanMild)
+		base.SetVoiceType(type)
+	else
+		a.Say(SexLabMoanMild)
+	endIf
 	return mild.Play(a)
 endFunction
 
 int function PlayMedium(actor a)
-	; a.Say(MoanMedium)
+	ActorBase base = a.GetLeveledActorBase()
+	VoiceType type = base.GetVoiceType()
+	if type != none && !VoicesPlayer.HasForm(type)
+		if base.GetSex() > 0
+			base.SetVoiceType(SexLabVoiceF)
+		else
+			base.SetVoiceType(SexLabVoiceM)
+		endIf
+		a.Say(SexLabMoanMedium)
+		base.SetVoiceType(type)
+	else
+		a.Say(SexLabMoanMedium)
+	endIf
 	return medium.Play(a)
 endFunction
 
 int function PlayHot(actor a)
-	; a.Say(MoanHot)
+	ActorBase base = a.GetLeveledActorBase()
+	VoiceType type = base.GetVoiceType()
+	if type != none && !VoicesPlayer.HasForm(type)
+		if base.GetSex() > 0
+			base.SetVoiceType(SexLabVoiceF)
+		else
+			base.SetVoiceType(SexLabVoiceM)
+		endIf
+		a.Say(SexLabMoanHot)
+		base.SetVoiceType(type)
+	else
+		a.Say(SexLabMoanHot)
+	endIf
 	return hot.Play(a)
 endFunction
 
