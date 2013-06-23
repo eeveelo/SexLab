@@ -234,7 +234,7 @@ endFunction
 
 function SpawnThread(actor[] positions, sslBaseAnimation[] animationList, actor victimPosition = none, ObjectReference centerOn = none, string customHook = "")
 	if !active
-		self.GoToState("Waiting")
+		GoToState("Waiting")
 	else
 		return
 	endIf
@@ -287,7 +287,7 @@ function SpawnThread(actor[] positions, sslBaseAnimation[] animationList, actor 
 	PrepareActors()
 	; Begin animating
 	primed = true
-	self.RegisterForSingleUpdate(0.1)
+	RegisterForSingleUpdate(0.1)
 endFunction
 
 function SaveLocation(int position, float[] loc)
@@ -301,6 +301,20 @@ function SaveLocation(int position, float[] loc)
 		locA4 = loc
 	elseIf position == 4
 		locA5 = loc
+	endIf
+endFunction
+
+float[] function GetLocation(int position)
+	if position == 0
+		return locA1
+	elseIf position == 1
+		return locA2
+	elseIf position == 2
+		return locA3
+	elseIf position == 3
+		return locA4
+	elseIf position == 4
+		return locA5
 	endIf
 endFunction
 
@@ -337,7 +351,7 @@ function PrepareActors()
 		aliasSlot[i] = SexLab._SlotDoNothing(a)
 		; Disable their movement
 		a.StopCombat()
-		a.SetFactionRank(SexLab.AnimatingFaction, 0)
+		a.SetFactionRank(SexLab.AnimatingFaction, 1)
 		if SexLab.PlayerRef == a
 			Game.DisablePlayerControls(true, true, true, false, true, false, false, true, 0)
 			Game.SetInChargen(false, true, true)
@@ -561,7 +575,7 @@ function EndAnimation(bool quick = false)
 	SexLab._SendEventHook("AnimationEnd",tid,hook)
 	Utility.Wait(4.0)
 	SexLab._EndThread(tid, player)
-	self.GoToState("Waiting")
+	GoToState("Waiting")
 endFunction
 
 function AdvanceStage(bool backwards = false)
@@ -570,6 +584,7 @@ function AdvanceStage(bool backwards = false)
 	elseIf backwards
 		stage -= 2 ; Account for stage increase on advance
 	endIf
+	debug.trace("Advance Call "+tid)
 	advance = true
 endFunction
 
@@ -709,7 +724,7 @@ function MoveScene()
 	bool advanceToggle
 	; Toggle auto advance off
 	if autoAdvance
-		autoAdvance = false
+		UnregisterForUpdate()
 		advanceToggle = true
 	endIf
 	; Enable Controls
@@ -732,7 +747,7 @@ function MoveScene()
 	CenterOnObject(SexLab.PlayerRef)
 	; Toggle auto advance back
 	if advanceToggle
-		autoAdvance = true
+		RegisterForSingleUpdate(GetStageTimer())
 	endIf
 endFunction
 
@@ -753,7 +768,7 @@ endFunction
 bool function CheckActive()
 	if !active
 		debug.Trace("SexLab thread["+tid+"] is not active")
-		self.GoToState("Waiting")
+		GoToState("Waiting")
 		return false
 	else
 		return true
@@ -774,6 +789,7 @@ endfunction
 ;#  ANIMATION PROCESS EVENT  #
 ;#---------------------------#
 state PlayingStage
+
 	event OnBeginState()
 		CheckActive()
 		int i
@@ -853,12 +869,14 @@ state PlayingStage
 			; Update progress
 			progress = Utility.GetCurrentRealTime() - started
 		endWhile
+		debug.trace("Loop End "+tid)
 		RegisterForSingleUpdate(0.01)
 	endEvent
 
 	event OnUpdate()
 		advance = true
-		self.GoToState("AdvancingStage")
+		debug.trace("Update call "+tid)
+		GoToState("AdvancingStage")
 	endEvent
 
 	event OnEndState()
@@ -869,7 +887,6 @@ state PlayingStage
 			SexLab._SendEventHook("StageEnd",tid,hook)
 		endIf
 	endEvent
-
 endState
 
 state AdvancingStage
@@ -882,7 +899,7 @@ state AdvancingStage
 			; Play idles
 			anim.PlayAnimations(pos, stage)
 			; Start stage
-			self.GoToState("PlayingStage")
+			GoToState("PlayingStage")
 		; If it doesn't skip straight to end
 		else
 			EndAnimation()
@@ -915,7 +932,7 @@ auto state Waiting
 	event OnUpdate()
 		if active && primed
 			SexLab._SendEventHook("AnimationStart",tid,hook)
-			self.GoToState("AdvancingStage")
+			GoToState("AdvancingStage")
 			primed = false
 		endIf
 	endEvent
