@@ -1,7 +1,7 @@
 scriptname sslAnimArrokRape extends sslBaseAnimation
 
 function LoadAnimation()
-	name = "ArrokRape"
+	name = "Arrok Rape"
 	
 	SetContent(Sexual)
 	SetSFX(Squishing)

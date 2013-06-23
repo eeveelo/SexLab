@@ -78,6 +78,8 @@ sslAnimArrokTricycle property ArrokTricycle auto
 sslAnimArrokHugFuck property ArrokHugFuck auto
 sslAnimArrokLesbian property ArrokLesbian auto
 sslAnimArrokSittingForeplay property ArrokSittingForeplay auto
+sslAnimArrokAnal property ArrokAnal auto
+sslAnimArrokRape property ArrokRape auto
 
 sslAnimAPAnal property APAnal auto
 sslAnimAPBedMissionary property APBedMissionary auto
@@ -134,6 +136,8 @@ function LoadAnimations()
 	SexLab.RegisterAnimation(ArrokHugFuck)
 	SexLab.RegisterAnimation(ArrokLesbian)
 	SexLab.RegisterAnimation(ArrokSittingForeplay)
+	SexLab.RegisterAnimation(ArrokAnal)
+	SexLab.RegisterAnimation(ArrokRape)
 
 	; AP
 	SexLab.RegisterAnimation(APAnal)

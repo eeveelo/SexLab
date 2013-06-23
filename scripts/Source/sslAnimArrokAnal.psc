@@ -1,7 +1,7 @@
 scriptname sslAnimArrokAnal extends sslBaseAnimation
 
 function LoadAnimation()
-	name = "ArrokAnal"
+	name = "Arrok Anal"
 
 	SetContent(Sexual)
 	SetSFX(Squishing)
