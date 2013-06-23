@@ -57,24 +57,20 @@ event OnEffectStart(actor target, actor caster)
 	; SexLab.StartSex(activeActors, anims)
 	
 	; Duo Test
-	; actor[] activeActors = new actor[2]
-
-	; ; if SexLab.DebugActor != none
-	; ; 	activeActors[0] = target
-	; ; 	activeActors[1] = SexLab.DebugActor
-	; ; 	sslBaseAnimation[] anims
-	; ; 	SexLab.StartSex(activeActors, anims, target)
-	; ; 	SexLab.DebugActor = none
-	; ; else
-	; ; 	SexLab.DebugActor = target
-	; ; endIf
-	; activeActors[0] = SexLab.PlayerRef
-	; activeActors[1] = target
-	; sslBaseAnimation[] anims = new sslBaseAnimation[1]
-	; anims[0] = SexLab.GetAnimationByName("AP Holding Leg Up")
-	; anims[1] = SexLab.GetAnimationByName("AP Face Down Anal")
-	; anims[2] = SexLab.GetAnimationByName("AP Skull Fuck")
-	; SexLab.StartSex(activeActors, anims)
+	actor[] activeActors = new actor[2]
+	; if SexLab.DebugActor != none
+	; 	activeActors[0] = target
+	; 	activeActors[1] = SexLab.DebugActor
+	; 	sslBaseAnimation[] anims
+	; 	SexLab.StartSex(activeActors, anims, target)
+	; 	SexLab.DebugActor = none
+	; else
+	; 	SexLab.DebugActor = target
+	; endIf
+	activeActors[0] = SexLab.PlayerRef
+	activeActors[1] = target
+	sslBaseAnimation[] anims
+	SexLab.StartSex(activeActors, anims)
 
 	; Threeway Test
 	; actor[] activeActors = new actor[3]
@@ -89,24 +85,24 @@ event OnEffectStart(actor target, actor caster)
 	; endIf
 
 	; Actor Change Test
-	actor[] activeActors = new actor[2]
-	if SexLab.DebugActor != none
-		activeActors[0] = SexLab.PlayerRef
-		activeActors[1] = target
-		sslBaseAnimation[] anims
-		SexLab.StartSex(activeActors, anims, hook="debug")
-		utility.Wait(4.0)
-		debug.trace("Swapping ACTOR NOW")
-		sslBaseThread thread = SexLab.GetPlayerThread()
-		;activeActors = sslUtility.PushActor(SexLab.DebugActor, activeActors)
-		actor[] newActors = new actor[1]
-		newActors[0] = SexLab.PlayerRef
-		thread.ChangeActors(newActors)
-		;thread.ForceAnimation(newAnim)
-		;debug.messagebox(thread.GetAnimationList())
-	else
-		SexLab.DebugActor = target
-	endIf
+	; actor[] activeActors = new actor[2]
+	; if SexLab.DebugActor != none
+	; 	activeActors[0] = SexLab.PlayerRef
+	; 	activeActors[1] = target
+	; 	sslBaseAnimation[] anims
+	; 	SexLab.StartSex(activeActors, anims, hook="debug")
+	; 	utility.Wait(4.0)
+	; 	debug.trace("Swapping ACTOR NOW")
+	; 	sslBaseThread thread = SexLab.GetPlayerThread()
+	; 	;activeActors = sslUtility.PushActor(SexLab.DebugActor, activeActors)
+	; 	actor[] newActors = new actor[1]
+	; 	newActors[0] = SexLab.PlayerRef
+	; 	thread.ChangeActors(newActors)
+	; 	;thread.ForceAnimation(newAnim)
+	; 	;debug.messagebox(thread.GetAnimationList())
+	; else
+	; 	SexLab.DebugActor = target
+	; endIf
 
 	;form[] equipment = SexLab.StripActor(target)
 	;utility.wait(5.0)

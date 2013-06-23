@@ -486,23 +486,6 @@ sslBaseThread function GetThread(int tid)
 	return thread[tid]
 endFunction
 
-int function PlaySFX(actor a, int type)
-	int instance
-	if type == 1 ; Squishing
-		instance = Data.sfxSquishing01.Play(a)
-	elseIf type == 2 ; Sucking
-		instance = Data.sfxSucking01.Play(a)
-	elseIf type == 3 ; SexMix
-		if utility.RandomInt(0,1)
-			instance =  Data.sfxSquishing01.Play(a)
-		else
-			instance =  Data.sfxSucking01.Play(a)
-		endIf
-	endIf
-	Sound.SetInstanceVolume(instance, Config.fSFXVolume)
-	return instance
-endFunction
-
 ;#---------------------------#
 ;#   END THREAD FUNCTIONS    #
 ;#---------------------------#

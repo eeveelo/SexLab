@@ -1,5 +1,5 @@
 scriptname sslThread05 extends sslBaseThread
 
-event OnInit()
-	tid = 5
-endEvent
+int function tid()
+	return 5
+endFunction

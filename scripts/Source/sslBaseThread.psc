@@ -2,16 +2,22 @@ scriptname sslBaseThread extends quest
 
 ; quest property sslSys auto
 SexLabFramework property SexLab auto
-int property tid = -1 auto hidden
+int function tid()
+	return -1
+endFunction
 
 ; Starters
 bool active
 bool primed
 bool animating
 
-float total
+float timer
 float progress
+int sfxType
 float[] sfx
+
+float strength
+int[] vfxInstance
 float[] vfx
 
 ; Thread Variables
@@ -101,6 +107,7 @@ function SetAnimation(sslBaseAnimation animation)
 	stageCount = anim.StageCount()
 	sexual = anim.IsSexual()
 	silence = anim.GetSilence()
+	sfxType = anim.GetSFX()
 	if anim.tcl
 		Debug.ToggleCollisions()
 	endIf
@@ -133,7 +140,7 @@ function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, fl
 	coords[5] = RotZ
 	if resync
 		RealignActors()
-		SexLab._SendEventHook("ActorsRelocated",tid,hook)
+		SexLab._SendEventHook("ActorsRelocated", tid(), hook)
 	endIf
 endFunction
 
@@ -152,7 +159,7 @@ function CenterOnObject(ObjectReference center, bool resync = true)
 	endIf
 	if resync
 		RealignActors()
-		SexLab._SendEventHook("ActorsRelocated",tid,hook)
+		SexLab._SendEventHook("ActorsRelocated", tid(), hook)
 	endIf
 endFunction
 
@@ -187,7 +194,7 @@ function ChangeActors(actor[] changeTo)
 		; Set our new list
 		SetAnimationList(newList)
 	endIf
-	SexLab._SendEventHook("ActorChangeStart",tid,hook)
+	SexLab._SendEventHook("ActorChangeStart", tid(), hook)
 	i = 0
 	; reset current actors
 	while i < actorCount
@@ -211,7 +218,7 @@ function ChangeActors(actor[] changeTo)
 	;Restart stage
 	stage -= 1
 	AdvanceStage()
-	SexLab._SendEventHook("ActorChangeEnd",tid,hook)
+	SexLab._SendEventHook("ActorChangeEnd", tid(), hook)
 endFunction
 
 actor function GetVictim()
@@ -223,7 +230,7 @@ actor[] function GetActors()
 endFunction
 
 float function GetTime()
-	return total
+	return timer
 endFunction
 
 ;#---------------------------#
@@ -268,7 +275,7 @@ function SpawnThread(actor[] positions, sslBaseAnimation[] animationList, actor 
 			if pos[i] == victim && SexLab.Config.bDisablePlayer
 				autoAdvance = true
 			else
-				SexLab._EnableHotkeys(tid)
+				SexLab._EnableHotkeys(tid())
 			endIf
 			; Don't start with them as adjustee
 			if i == adjustingPos
@@ -406,7 +413,7 @@ function ResetActor(int i)
 		Game.EnablePlayerControls()
 		Game.SetInChargen(false, false, false)
 		Game.SetPlayerAIDriven(false)
-		SexLab.UpdatePlayerStats(anim, total, pos, victim)
+		SexLab.UpdatePlayerStats(anim, timer, pos, victim)
 	else
 		a.SetRestrained(false)
 		a.SetDontMove(false)
@@ -495,14 +502,6 @@ function EquipExtras(int position)
 	endIf
 endFunction
 
-function PlayVoice(int pid, float strength)
-	int playing = (pid * 3) + 2
-	if vfx[playing] > 0
-		Sound.StopInstance(vfx[playing] as int)
-	endIf
-	vfx[playing] = voice[pid].Moan(pos[pid], strength, victim)
-	Sound.SetInstanceVolume(vfx[playing] as int, SexLab.Config.fVoiceVolume)
-endFunction
 
 function SetEquipment(int position, form[] equipment)
 	if position == 0
@@ -544,16 +543,16 @@ function EndAnimation(bool quick = false)
 			if SexLab.Config.bUseCum && anim.GetCum(i) > 0 && pos[i].GetLeveledActorBase().GetSex() == 1
 				int[] genders = SexLab.GenderCount(pos)
 				if genders[0] > 0
-					PlayVoice(i, 1.0)
 					SexLab.ApplyCum(pos[i], anim.GetCum(i))
 				elseIf SexLab.Config.bAllowFFCum && genders[0] > 1
-					PlayVoice(i, 1.0)
 					SexLab.ApplyCum(pos[i], anim.GetCum(i))
 				endIf
 			endIf
 			i += 1
 		endWhile
 	endIf
+
+	animating = false
 
 	i = 0
 	while i < actorCount
@@ -572,9 +571,9 @@ function EndAnimation(bool quick = false)
 		endIf
 		i += 1
 	endWhile
-	SexLab._SendEventHook("AnimationEnd",tid,hook)
+	SexLab._SendEventHook("AnimationEnd", tid(), hook)
 	Utility.Wait(4.0)
-	SexLab._EndThread(tid, player)
+	SexLab._EndThread(tid(), player)
 	GoToState("Waiting")
 endFunction
 
@@ -584,7 +583,7 @@ function AdvanceStage(bool backwards = false)
 	elseIf backwards
 		stage -= 2 ; Account for stage increase on advance
 	endIf
-	debug.trace("Advance Call "+tid)
+	debug.trace("Advance Call "+tid())
 	advance = true
 endFunction
 
@@ -622,7 +621,7 @@ function ChangeAnimation(bool backwards = false)
 	
 	RealignActors()
 
-	SexLab._SendEventHook("AnimationChange",tid,hook)
+	SexLab._SendEventHook("AnimationChange", tid(), hook)
 endFunction
 
 function ChangePositions()
@@ -673,7 +672,7 @@ function ChangePositions()
 	adjustingPos = newPos
 	; Restart animations
 	RealignActors()
-	SexLab._SendEventHook("PositionChange",tid,hook)
+	SexLab._SendEventHook("PositionChange", tid(), hook)
 endFunction
 
 function AdjustForward(bool backwards = false)
@@ -767,7 +766,7 @@ endFunction
 
 bool function CheckActive()
 	if !active
-		debug.Trace("SexLab thread["+tid+"] is not active")
+		debug.Trace("SexLab thread["+tid()+"] is not active")
 		GoToState("Waiting")
 		return false
 	else
@@ -788,109 +787,67 @@ endfunction
 ;#---------------------------#
 ;#  ANIMATION PROCESS EVENT  #
 ;#---------------------------#
-state PlayingStage
 
-	event OnBeginState()
-		CheckActive()
-		int i
-		float strength = (stage as float) / (stageCount as float)
-		if stageCount == 1 && stage == 1
-			strength = 0.50		
-		endIf
+state BeginLoop
+	event OnUpdate()
+		animating = true
 
-		if stage == stageCount && stageCount >= 2 && sexual
-			SexLab._SendEventHook("OrgasmStart",tid,hook)
-			strength = 1.0
-		else
-			SexLab._SendEventHook("StageStart",tid,hook)
-		endIf
-
-		; Set the sfx
-		int sfxType = anim.GetSFX()
-		int sfxInstance
+		; Set the SFX
+		int instance
+		float volume = SexLab.Config.fSFXVolume
 		sfx = new float[2]
-		sfx[0] = SexLab.Config.fSFXDelay - (stage * 0.75)
-		if sfx[0] < 0.8
-			sfx[0] = 0.8
-		endIf
 
-		; Set the voice delay & strength
-		vfx = sslUtility.FloatArray(pos.Length * 3)
-		i = 0
-		while i < pos.Length
-			int index = i * 3
-			if pos[i].GetLeveledActorBase().GetSex() < 1
-				vfx[index] = SexLab.Config.fMaleVoiceDelay - (stage * 0.8) + Utility.RandomFloat(-0.8,0.8)
-			else
-				vfx[index] = SexLab.Config.fFemaleVoiceDelay - (stage * 0.8) + Utility.RandomFloat(-0.8,0.8)
-			endIf
-			if vfx[index] < 1.5
-				vfx[index] = 1.5
-			endIf
-			vfx[index + 1] = Utility.RandomFloat(-0.8,1.5)
-			vfx[index + 2] = 0
-			i += 1
-		endWhile
+		; Set the voices
+		vfx = sslUtility.FloatArray(pos.Length * 2)
 
-		if autoAdvance
-			RegisterForSingleUpdate(GetStageTimer())
-		endIf
+		self.GoToState("Advance")
+		self.RegisterForSingleUpdate(0.1)
 
 		float started = Utility.GetCurrentRealTime()
-		progress = 0.0
-		advance = false
-		while !advance
-			CheckActive()
-			; Delay loop
-			Utility.Wait(0.5)
-			i = 0
-			while i < actorCount
-				; Make sure we're all still among the living
-				if pos[i].IsDead() || pos[i].IsBleedingOut() || !pos[i].Is3DLoaded()
-					EndAnimation(quick=true) 
-					return
+		while animating
+			; Play SFX
+			if sfx[0] <= timer - sfx[1] && sfxType > 0
+				if sfxType == 1 ; Squishing
+					instance = SexLab.Data.sfxSquishing01.Play(pos[0])
+				elseIf sfxType == 2 ; Sucking
+					instance = SexLab.Data.sfxSucking01.Play(pos[0])
+				elseIf sfxType == 3 ; SexMix
+					if utility.RandomInt(0,1)
+						instance =  SexLab.Data.sfxSquishing01.Play(pos[0])
+					else
+						instance =  SexLab.Data.sfxSucking01.Play(pos[0])
+					endIf
 				endIf
+				Sound.SetInstanceVolume(instance, volume)
+				sfx[1] = timer
+			endIf
 
-				int vid = i * 3
-				if voice[i] != none && (progress - vfx[vid + 1]) > vfx[vid] && !silence[i]
-					PlayVoice(i, strength)
-					vfx[vid + 1] = progress
+			; Play Voices
+			int i = 0
+			while i < actorCount
+				int vid = i * 2
+				if voice[i] != none && (timer - vfx[vid + 1]) > vfx[vid] && !silence[i]
+					if vfxInstance[i] > 0
+						Sound.StopInstance(vfxInstance[i])
+					endIf
+					vfxInstance[i] = voice[i].Moan(pos[i], strength, victim)
+					Sound.SetInstanceVolume(vfxInstance[i], SexLab.Config.fVoiceVolume)
+					vfx[vid + 1] = timer
 				endIf
 				i += 1
 			endWhile
-			; Play SFX
-			if sfxType > 0 && ( progress - sfx[1] > sfx[0] || progress == 0.0)
-				;if sfxInstance > 0
-				;	Sound.StopInstance(sfxInstance)
-				;endIf
-				sfxInstance = SexLab.PlaySFX(pos[0], sfxType)
-				sfx[1] = progress
-			endIf
-			; Update progress
-			progress = Utility.GetCurrentRealTime() - started
+			debug.trace("VFX: "+vfx)
+			debug.trace("SFX: "+sfx)
+			debug.trace("timer: "+timer)
+			timer = Utility.GetCurrentRealTime() - started
+
+			Utility.Wait(0.4)
 		endWhile
-		debug.trace("Loop End "+tid)
-		RegisterForSingleUpdate(0.01)
-	endEvent
-
-	event OnUpdate()
-		advance = true
-		debug.trace("Update call "+tid)
-		GoToState("AdvancingStage")
-	endEvent
-
-	event OnEndState()
-		total = total + progress
-		if stage == stageCount && stageCount >= 2 && sexual
-			SexLab._SendEventHook("OrgasmEnd",tid,hook)
-		else
-			SexLab._SendEventHook("StageEnd",tid,hook)
-		endIf
 	endEvent
 endState
 
-state AdvancingStage
-	event OnBeginState()
+state Advance
+	event OnUpdate()
 		CheckActive()
 		; Increase stage
 		stage += 1
@@ -899,15 +856,110 @@ state AdvancingStage
 			; Play idles
 			anim.PlayAnimations(pos, stage)
 			; Start stage
-			GoToState("PlayingStage")
+			self.GoToState("Animating")
 		; If it doesn't skip straight to end
 		else
 			EndAnimation()
 		endIf
 	endEvent
+
+
+	event OnEndState()
+		; Set SFX
+		sfx = new float[2]
+		; Base Delay
+		sfx[0] = SexLab.Config.fSFXDelay
+		; Stage Delay
+		if stage > 1
+			sfx[0] = sfx[0] - (stage * 0.5)
+		endIf
+		; min 0.8 delay
+		if sfx[0] < 0.8
+			sfx[0] = 0.8
+		endIf
+
+		; Set voice strength
+		strength = (stage as float) / (stageCount as float)
+		if stageCount == 1 && stage == 1
+			strength = 0.50		
+		endIf
+
+		; Set VFX
+		vfxInstance = sslUtility.IntArray(actorCount)
+		vfx = sslUtility.FloatArray(actorCount * 2)
+		int i = 0
+		while i < actorCount
+			int index = i * 2
+			; Base Delay
+			if pos[i].GetLeveledActorBase().GetSex() < 1
+				vfx[index] = SexLab.Config.fMaleVoiceDelay + Utility.RandomFloat(-0.8,0.8)
+			else
+				vfx[index] = SexLab.Config.fFemaleVoiceDelay + Utility.RandomFloat(-0.8,0.8)
+			endIf
+			; Stage Delay
+			if stage > 1
+				vfx[index] = vfx[index] - (stage * 0.8)
+			endIf
+			; Min 1.3 delay
+			if vfx[index] < 1.3
+				vfx[index] = 1.3
+			endIf
+			; Randomize starting points
+			vfx[index + 1] = Utility.RandomFloat(-0.5,0.5)
+			i += 1
+		endWhile
+	endEvent
 endState
 
-auto state Waiting
+state Animating
+	event OnBeginState()
+		CheckActive()
+
+		if stage == stageCount && stageCount >= 2 && sexual
+			SexLab._SendEventHook("OrgasmStart", tid(), hook)
+			strength = 1.0
+		else
+			SexLab._SendEventHook("StageStart", tid(), hook)
+		endIf
+	
+		float stageAdvance = Utility.GetCurrentRealTime() + GetStageTimer()
+
+		advance = false
+		while !advance && animating
+			CheckActive()
+
+			int i = 0
+			while i < actorCount
+				; Make sure we're all still among the living
+				if pos[i].IsDead() || pos[i].IsBleedingOut() || !pos[i].Is3DLoaded()
+					EndAnimation(quick=true)
+					return
+				endIf
+				i += 1
+			endWhile
+
+			; Delay loop
+			Utility.Wait(0.8)
+
+			; Auto Advance
+			if autoAdvance && stageAdvance < Utility.GetCurrentRealTime()
+				advance = true
+			endIf
+		endWhile
+
+		if stage == stageCount && stageCount >= 2 && sexual
+			SexLab._SendEventHook("OrgasmEnd", tid(), hook)
+		else
+			SexLab._SendEventHook("StageEnd", tid(), hook)
+		endIf
+
+		self.GoToState("Advance")
+		self.RegisterForSingleUpdate(0.01)
+	endEvent
+
+endState
+
+state Waiting
 	event OnBeginState()
 		active = false
 		primed = false
@@ -915,7 +967,7 @@ auto state Waiting
 		voice = new sslBaseVoice[5]
 		aliasSlot = new int[5]
 		hook = ""
-		total = 0.0
+		timer = 0.0
 		adjustingPos = 1
 		autoAdvance = true
 		actorCount = 0
@@ -931,8 +983,9 @@ auto state Waiting
 	endEvent
 	event OnUpdate()
 		if active && primed
-			SexLab._SendEventHook("AnimationStart",tid,hook)
-			GoToState("AdvancingStage")
+			SexLab._SendEventHook("AnimationStart", tid(), hook)
+			self.GoToState("BeginLoop")
+			self.RegisterForSingleUpdate(0.1)
 			primed = false
 		endIf
 	endEvent
