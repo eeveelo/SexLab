@@ -29,7 +29,7 @@ EffectShader property CumVaginal auto
 EffectShader property CumOral auto
 EffectShader property CumAnal auto
 Static property LocationMarker auto
-
+Keyword property SexLabNoStrip auto
 ;
 ; Player Stats
 ;

@@ -19,7 +19,7 @@ sslSystemResources property data auto
 ;#---------------------------#
 ;# Start Animation Variables #
 ;#---------------------------#
-;Current number of default threads available
+; Current number of default threads available
 int threadCount = 15
 sslBaseThread[] thread
 sslThread00 property Thread00 auto
@@ -81,7 +81,7 @@ bool ready = false
 bool hkready = false
 bool clean = false
 
-;The Player (That's you!)
+; The Player (That's you!)
 actor property PlayerRef auto
 int playerThread = -1
 
@@ -195,7 +195,6 @@ int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim 
 			centerOn = bed
 		endIf
 	endIf
-
 
 	; Find a marker near one of our actors and center there
 	if centerOn == none
@@ -340,18 +339,18 @@ form[] function StripSlots(actor a, bool[] strip, bool allowNudesuit = true)
 		if strip[i] && i != 32
 			mask = armor.GetMaskForSlot(i + 30)
 			item = a.GetWornForm(mask) as armor
-			if item != none
+			if item != none && !item.HasKeyWordString("SexLabNoStrip")
 				a.UnequipItem(item, false, true)
 				items = sslUtility.PushForm(item, items)
 			endIf 
 		elseif strip[i] && i == 32
 			eWeap = a.GetEquippedWeapon(true)
-			if eWeap != none
+			if eWeap != none && !item.HasKeyWordString("SexLabNoStrip")
 				a.UnequipItem(eWeap, false, true)
 				items = sslUtility.PushForm(eWeap, items)
 			endIf
 			eWeap = a.GetEquippedWeapon(false)
-			if eWeap != none
+			if eWeap != none && !item.HasKeyWordString("SexLabNoStrip")
 				a.UnequipItem(eWeap, false, true)
 				items = sslUtility.PushForm(eWeap, items)
 			endIf
