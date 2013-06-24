@@ -106,7 +106,6 @@ function SetAnimation(sslBaseAnimation animation)
 	anim = animation
 	stageCount = anim.StageCount()
 	sexual = anim.IsSexual()
-	silence = anim.GetSilence()
 	sfxType = anim.GetSFX()
 	if anim.tcl
 		Debug.ToggleCollisions()
@@ -327,7 +326,7 @@ endFunction
 
 function MoveActor(int position)
 	; (int position) should be zero indexed
-	float[] offsets = anim.GetPositionOffsets(position)
+	float[] offsets = anim.GetPositionOffsets(position, stage)
 	float[] loc = new float[6]
 	; Determine offsets coordinates from center
 	loc[0] = ( centerLoc[0] + ( Math.sin(centerLoc[5]) * offsets[0] + Math.cos(centerLoc[5]) * offsets[1] ) )
@@ -484,7 +483,7 @@ function EquipExtras(int position)
 	endIf
 
 	; Strapons are enabled for this position, and they are female in a male position
-	if SexLab.Config.bUseStrapons && anim.UseStrapon(position) && anim.GetGender(position) == 0 && pos[position].GetLeveledActorBase().GetSex() == 1
+	if SexLab.Config.bUseStrapons && anim.UseStrapon(position, stage) && anim.GetGender(position) == 0 && pos[position].GetLeveledActorBase().GetSex() == 1
 		form strapon = SexLab.EquipStrapon(pos[position])
 		extras = sslUtility.PushForm(strapon,extras)
 	endIf
@@ -583,7 +582,6 @@ function AdvanceStage(bool backwards = false)
 	elseIf backwards
 		stage -= 2 ; Account for stage increase on advance
 	endIf
-	debug.trace("Advance Call "+tid())
 	advance = true
 endFunction
 
@@ -682,7 +680,7 @@ function AdjustForward(bool backwards = false)
 	else
 		adjustment = 0.5
 	endIf
-	anim.UpdateOffset(adjustingPos, adjustment)
+	anim.UpdateForward(adjustingPos, stage, adjustment)
 	pos[adjustingPos].MoveTo(pos[adjustingPos], Math.sin(centerLoc[5]) * adjustment, Math.cos(centerLoc[5]) * adjustment, 0.0, true)
 endFunction
 
@@ -693,7 +691,7 @@ function AdjustSideways(bool backwards = false)
 	else
 		adjustment = 0.5
 	endIf
-	anim.UpdateOffsetSide(adjustingPos, adjustment)
+	anim.UpdateSide(adjustingPos, stage, adjustment)
 	pos[adjustingPos].MoveTo(pos[adjustingPos], Math.cos(centerLoc[5]) * adjustment, Math.sin(centerLoc[5]) * adjustment, 0.0, true)
 endFunction
 
@@ -707,7 +705,7 @@ function AdjustUpward(bool backwards = false)
 	else
 		adjustment = 0.5
 	endIf
-	anim.UpdateOffsetUp(adjustingPos, adjustment)
+	anim.UpdateUp(adjustingPos, stage, adjustment)
 	pos[adjustingPos].MoveTo(pos[adjustingPos], 0, 0, adjustment, true)
 endFunction
 
@@ -801,7 +799,7 @@ state BeginLoop
 		vfx = sslUtility.FloatArray(pos.Length * 2)
 
 		self.GoToState("Advance")
-		self.RegisterForSingleUpdate(0.1)
+		self.RegisterForSingleUpdate(0.01)
 
 		float started = Utility.GetCurrentRealTime()
 		while animating
@@ -836,11 +834,8 @@ state BeginLoop
 				endIf
 				i += 1
 			endWhile
-			debug.trace("VFX: "+vfx)
-			debug.trace("SFX: "+sfx)
-			debug.trace("timer: "+timer)
-			timer = Utility.GetCurrentRealTime() - started
 
+			timer = Utility.GetCurrentRealTime() - started
 			Utility.Wait(0.4)
 		endWhile
 	endEvent
@@ -877,6 +872,9 @@ state Advance
 		if sfx[0] < 0.8
 			sfx[0] = 0.8
 		endIf
+
+		; Stage silence
+		silence = anim.GetSilence(stage)
 
 		; Set voice strength
 		strength = (stage as float) / (stageCount as float)

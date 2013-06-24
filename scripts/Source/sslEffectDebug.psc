@@ -69,8 +69,11 @@ event OnEffectStart(actor target, actor caster)
 	; endIf
 	activeActors[0] = SexLab.PlayerRef
 	activeActors[1] = target
-	sslBaseAnimation[] anims
-	SexLab.StartSex(activeActors, anims)
+	sslBaseAnimation anim = SexLab.GetAnimationByName("Arrok Blowjob")
+	bool[] silence = anim.GetSilence(1)
+	debug.messagebox(silence)
+
+	; SexLab.StartSex(activeActors, anims)
 
 	; Threeway Test
 	; actor[] activeActors = new actor[3]

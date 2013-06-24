@@ -16,7 +16,6 @@ int property VaginalAnal = 5 autoreadonly hidden
 int property OralAnal = 6 autoreadonly hidden
 int property VaginalOralAnal = 7 autoreadonly hidden
 ; SFX Types
-int property Silent = 0 autoreadonly hidden
 int property Squishing = 1 autoreadonly hidden
 int property Sucking = 2 autoreadonly hidden
 int property SexMix = 3 autoreadonly hidden
@@ -25,30 +24,28 @@ int property Misc = 0 autoreadonly hidden
 int property Sexual = 1 autoreadonly hidden
 int property Foreplay = 2 autoreadonly hidden
 
+; Animation Information
 int content = 0
 int actors = 0
 int stages = 0
 int sfx = 0
 
-float[] offsets
-float[] offsetsUp
-float[] offsetsSide
-float[] offsetsDefault
-float[] offsetsUpDefault
-float[] offsetsSideDefault
-float[] rotations
-bool[] silence
-int[] genders
-bool[] noStrapons
-int[] cum
-
-string[] tags
-
+; Animation Events
 string[] actor1
 string[] actor2
 string[] actor3
 string[] actor4
 string[] actor5
+
+; Data storage
+float[] offsetData
+float[] offsetDefaults
+bool[] switchData
+
+int[] genders
+int[] cum
+
+string[] tags
 
 form[] extras1
 form[] extras2
@@ -57,50 +54,75 @@ form[] extras4
 form[] extras5
 
 ;/-----------------------------------------------
+	Data Accessor Functions
+------------------------------------------------/;
+
+int function DataIndex(int slots, int position, int stage, int slot)
+	; Zeroindex the stage
+	if stage > 0
+		stage -= 1
+	endIf
+	; Return calculated index
+	return ( position * (stages * slots) ) + ( stage * slots ) + slot
+endFunction
+
+float function AccessOffset(int position, int stage, int slot)
+	return offsetData[DataIndex(4, position, stage, slot)]
+endFunction
+
+bool function AccessSwitch(int position, int stage, int slot)
+	debug.trace("Index: "+DataIndex(3, position, stage, slot))
+	Debug.trace("Data: "+switchData)
+	debug.tracE("Result: "+switchData[DataIndex(3, position, stage, slot)])
+	return switchData[DataIndex(3, position, stage, slot)]
+endFunction
+
+bool[] function GetSwitchSlot(int stage, int slot)
+	bool[] switch = sslUtility.BoolArray(actors)
+	debug.trace("Stage: "+stage+" Slot: "+slot+" Actors:"+actors)
+	int i = 0
+	while i < actors
+		switch[i] = AccessSwitch(i, stage, slot)
+		i += 1
+	endWhile
+	return switch
+endFunction
+
+;/-----------------------------------------------
 	Animation Position Functions
 ------------------------------------------------/;
 
-int function AddPosition(int gender = 0, float offset = 0.0, float offsetUp = 0.0, float offsetSide = 0.0, float rotation = 0.0,  bool noStrapon = false, bool noVoice = false, int addCum = -1)
-	if actors >= 6
+int function AddPosition(int gender = 0, int addCum = -1)
+	if actors >= 5
 		debug.trace("----SLAB ERROR sslBaseAnimation AddPosition() "+name+"--- Over max actor limit of 5")
 		return -1
 	endIf
-	genders = sslUtility.PushInt(gender,genders)
 
-	offsets = sslUtility.PushFloat(offset,offsets)
-	offsetsDefault = offsets
+	genders = sslUtility.PushInt(gender, genders)
+	cum = sslUtility.PushInt(addCum, cum)
 
-	offsetsUp = sslUtility.PushFloat(offsetUp,offsetsUp)
-	offsetsUpDefault = offsetsUp
-
-	offsetsSide = sslUtility.PushFloat(offsetSide,offsetsSide)
-	offsetsSideDefault = offsetsSide
-
-	rotations = sslUtility.PushFloat(rotation,rotations)
-	noStrapons = sslUtility.PushBool(noStrapon,noStrapons)
-	silence = sslUtility.PushBool(noVoice,silence)
-	cum = sslUtility.PushInt(addCum,cum)
 	int aid = actors
 	actors += 1
+
 	return aid
 endFunction
 
-int function AddPositionStage(int position, string animation)
-	int stage = 0
+int function AddPositionStage(int position, string animation, float forward = 0.0, float side = 0.0, float up = 0.0, float rotate = 0.0, bool silent = false, bool openMouth = false, bool strapon = true, string sos = "")
+	int stage
 	if position == 0
-		actor1 = sslUtility.PushString(animation,actor1)
+		actor1 = sslUtility.PushString(animation, actor1)
 		stage = actor1.Length
 	elseIf position == 1
-		actor2 = sslUtility.PushString(animation,actor2)
+		actor2 = sslUtility.PushString(animation, actor2)
 		stage = actor2.Length
 	elseIf position == 2
-		actor3 = sslUtility.PushString(animation,actor3)
+		actor3 = sslUtility.PushString(animation, actor3)
 		stage = actor3.Length
 	elseIf position == 3
-		actor4 = sslUtility.PushString(animation,actor4)
+		actor4 = sslUtility.PushString(animation, actor4)
 		stage = actor4.Length
 	elseIf position == 4
-		actor5 = sslUtility.PushString(animation,actor5)
+		actor5 = sslUtility.PushString(animation, actor5)
 		stage = actor5.Length
 	else
 		debug.trace("----SLAB ERROR sslBaseAnimation AddPositionAnimation() "+name+"--- Unknown actor or stage in "+position)
@@ -109,20 +131,38 @@ int function AddPositionStage(int position, string animation)
 	if stage > stages
 		stages = stage
 	endIf
+
+	offsetData = sslUtility.PushFloat(forward, offsetData)
+	offsetData = sslUtility.PushFloat(side, offsetData)
+	offsetData = sslUtility.PushFloat(up, offsetData)
+	offsetData = sslUtility.PushFloat(rotate, offsetData)
+	offsetDefaults = sslUtility.PushFloat(forward, offsetDefaults)
+	offsetDefaults = sslUtility.PushFloat(side, offsetDefaults)
+	offsetDefaults = sslUtility.PushFloat(up, offsetDefaults)
+	offsetDefaults = sslUtility.PushFloat(rotate, offsetDefaults)
+
+	if !IsSexual()
+		strapon = false
+	endIf
+
+	switchData = sslUtility.PushBool(silent, switchData)
+	switchData = sslUtility.PushBool(openMouth, switchData)
+	switchData = sslUtility.PushBool(strapon, switchData)
+
 	return stage
 endFunction
 
 function AddExtra(int position, form extra)
 	if position == 0
-		extras1 = sslUtility.PushForm(extra,extras1)
+		extras1 = sslUtility.PushForm(extra, extras1)
 	elseIf position == 1
-		extras2 = sslUtility.PushForm(extra,extras2)
+		extras2 = sslUtility.PushForm(extra, extras2)
 	elseIf position == 2
-		extras3 = sslUtility.PushForm(extra,extras3)
+		extras3 = sslUtility.PushForm(extra, extras3)
 	elseIf position == 3
-		extras4 = sslUtility.PushForm(extra,extras4)
+		extras4 = sslUtility.PushForm(extra, extras4)
 	elseIf position == 4
-		extras5 = sslUtility.PushForm(extra,extras5)
+		extras5 = sslUtility.PushForm(extra, extras5)
 	else
 		debug.trace("----SLAB ERROR sslBaseAnimation "+name+" GetOffset(position="+position+") --- Unknown position")
 	endIf
@@ -132,26 +172,40 @@ endFunction
 	Animation Offset Functions
 ------------------------------------------------/;
 
-float[] function GetPositionOffsets(int position)
+float[] function GetPositionOffsets(int position, int stage)
+	if position > actors || position < 0
+		debug.trace("----SexLab ERROR sslBaseAnimation--- Unknown "+name+" position ["+position+"]")
+		return none
+	endIf
+
 	float[] off = new float[4]
-	off[0] = GetOffset(position)
-	off[1] = GetOffsetSide(position)
-	off[2] = GetOffsetUp(position)
-	off[3] = GetRotation(position)
+	off[0] = CalculateForward(position, stage)
+	off[1] = AccessOffset(position, stage, 1)
+	off[2] = AccessOffset(position, stage, 2)
+	off[3] = AccessOffset(position, stage, 3)
 	return off
 endFunction
 
-float function GetOffset(int position)
+float function CalculateForward(int position, int stage)
 	if position > actors || position < 0
 		debug.trace("----SexLab ERROR sslBaseAnimation--- Unknown "+name+" position ["+position+"]")
 		return 0.0
 	endIf
+	; Just get single actors raw forward offset
 	if actors == 1
-		return offsets[position]
+		return AccessOffset(position, stage, 0)
 	endIf
+	; Get all actors forwad offset
+	float[] offsets = sslUtility.FloatArray(actors)
+	int i = 0
+	while i < actors
+		offsets[i] = AccessOffset(i, stage, 0)
+		i += 1
+	endWhile
+	; Determine highest or lowest offset
 	float highest
 	float lowest
-	int i = 0
+	i = 0
 	while i < actors
 		if offsets[i] > highest
 			highest = offsets[i]
@@ -160,7 +214,7 @@ float function GetOffset(int position)
 		endIf
 		i += 1
 	endWhile
-	debug.trace("getoffset("+position+"): H: "+highest+" L: "+lowest)
+	; Adjust offset by highest or lowest
 	float adjust
 	float offset
 	if highest > -lowest && highest > 50
@@ -172,53 +226,42 @@ float function GetOffset(int position)
 	else
 		return (offsets[position] + lowest)
 	endIf
+	; Return Adjusted offset
 	return offsets[position]
 endFunction
 
-float function GetOffsetSide(int position)
-	if position > actors || position < 0
-		debug.trace("----SexLab ERROR sslBaseAnimation--- Unknown "+name+" position ["+position+"]")
-		return 0.0
-	endIf
-	return offsetsSide[position]
+function UpdateForward(int position, int stage, float adjust)
+	int index = DataIndex(4, position, stage, 0)
+	float offset = offsetData[index] + adjust
+	offsetData[index] = offset
 endFunction
 
-
-float function GetOffsetUp(int position)
-	if position > actors || position < 0
-		debug.trace("----SexLab ERROR sslBaseAnimation--- Unknown "+name+" position ["+position+"]")
-		return 0.0
-	endIf
-	return offsetsUp[position]
+function UpdateSide(int position, int stage, float adjust)
+	int index = DataIndex(4, position, stage, 1)
+	float offset = offsetData[index] + adjust
+	offsetData[index] = offset
 endFunction
 
-float function GetRotation(int position)
-	if position > actors || position < 0
-		debug.trace("----SexLab ERROR sslBaseAnimation--- Unknown "+name+" position ["+position+"]")
-		return 0.0
-	endIf
-	; Return unaltered
-	return rotations[position]
+function UpdateUp(int position, int stage, float adjust)
+	int index = DataIndex(4, position, stage, 2)
+	float offset = offsetData[index] + adjust
+	offsetData[index] = offset
+endFunction
+
+function RestoreOffsets()
+	float[] defaults = offsetDefaults
+	offsetData = offsetDefaults
 endFunction
 
 ;/-----------------------------------------------
 	Animation Event Functions
 ------------------------------------------------/;
 
-function PlayAnimations(actor[] pos, int stage)
+string[] function FetchStage(int stage)
 	; Zeroindex the stage
 	if stage > 0
 		stage -= 1
 	endIf
-	string[] stageAnims = FetchStage(stage)
-	int i = 0
-	while i < stageAnims.Length
-		Debug.SendAnimationEvent(pos[i], stageAnims[i])
-		i += 1
-	endWhile
-endFunction
-
-string[] function FetchStage(int stage)
 	string[] anims = sslUtility.StringArray(actors)
 	anims[0] = actor1[stage]
 	if actors == 1
@@ -240,49 +283,54 @@ string[] function FetchStage(int stage)
 	return anims
 endFunction
 
-string function Fetch(int position, int stage)
-	; Zeroindex the stage
-	if stage > 0
-		stage -= 1
+function PlayAnimations(actor[] pos, int stage)
+	string[] stageAnims = FetchStage(stage)
+	; For some reason looping makes them slightly out of sync.
+	if actors == 1
+		Debug.SendAnimationEvent(pos[0], stageAnims[0])
+	elseif actors == 2
+		Debug.SendAnimationEvent(pos[0], stageAnims[0])
+		Debug.SendAnimationEvent(pos[1], stageAnims[1])
+	elseif actors == 3
+		Debug.SendAnimationEvent(pos[0], stageAnims[0])
+		Debug.SendAnimationEvent(pos[1], stageAnims[1])
+		Debug.SendAnimationEvent(pos[2], stageAnims[2])
+	elseif actors == 4
+		Debug.SendAnimationEvent(pos[0], stageAnims[0])
+		Debug.SendAnimationEvent(pos[1], stageAnims[1])
+		Debug.SendAnimationEvent(pos[2], stageAnims[2])
+		Debug.SendAnimationEvent(pos[3], stageAnims[3])
+	elseif actors == 5
+		Debug.SendAnimationEvent(pos[0], stageAnims[0])
+		Debug.SendAnimationEvent(pos[1], stageAnims[1])
+		Debug.SendAnimationEvent(pos[2], stageAnims[2])
+		Debug.SendAnimationEvent(pos[3], stageAnims[3])
+		Debug.SendAnimationEvent(pos[4], stageAnims[4])
 	endIf
-	; Get position stage idle
-	if position == 0
-		return actor1[stage]
-	elseIf position == 1
-		return actor2[stage]
-	elseIf position == 2
-		return actor3[stage]
-	elseIf position == 3
-		return actor4[stage]
-	elseIf position == 4
-		return actor5[stage]
-	else
-		debug.trace("----SLAB ERROR sslBaseAnimation "+name+" Fetch(position="+position+", stage="+Stage+") --- Unknown position")
-	endIf
-endFunction
 
-string[] function FetchPosition(int position)
-	if position == 0
-		return actor1
-	elseIf position == 1
-		return actor2
-	elseIf position == 2
-		return actor3
-	elseIf position == 3
-		return actor4
-	elseIf position == 4
-		return actor5
-	else
-		debug.trace("----SLAB ERROR sslBaseAnimation "+name+" FetchPosition(position="+position+") --- Unknown position")
-	endIf
+	; Open mouth, if needed
+	bool[] open = GetSwitchSlot(stage, 1)
+	int i = 0
+	while i < actors
+		if open[i]
+			pos[i].SetExpressionOverride(16, 100)
+		else
+			pos[i].ClearExpressionOverride()
+		endIf
+		i += 1
+	endWhile
 endFunction
 
 ;/-----------------------------------------------
 	Animation Configuration Functions
 ------------------------------------------------/;
 
-function SetSFX(int iSFX)
-	sfx = iSFX
+bool[] function GetSilence(int stage)
+	return GetSwitchSlot(stage, 0)
+endFunction
+
+bool function UseStrapon(int position, int stage)
+	return AccessSwitch(position, stage, 2)
 endFunction
 
 int function GetSFX()
@@ -297,32 +345,12 @@ int function StageCount()
 	return stages
 endFunction
 
-bool[] function GetSilence()
-	return silence
-endFunction
-
 int function GetGender(int position)
 	return genders[position]
 endFunction
 
 int function GetCum(int position)
 	return cum[position]
-endFunction
-
-bool function IsSexual()
-	if content == 1 || content == 2
-		return true
-	else
-		return false
-	endIf
-endFunction
-
-function SetContent(int contentType)
-	content = contentType
-endFunction
-
-bool function UseStrapon(int position)
-	return !noStrapons[position]
 endFunction
 
 form[] function GetExtras(int position)
@@ -342,6 +370,25 @@ form[] function GetExtras(int position)
 endFunction
 
 
+bool function IsSexual()
+	if content == 1 || content == 2
+		return true
+	else
+		return false
+	endIf
+endFunction
+
+function SetSFX(int iSFX)
+	sfx = iSFX
+endFunction
+
+function SetContent(int contentType)
+	content = contentType
+endFunction
+
+;/-----------------------------------------------
+	Animation Tag Functions
+------------------------------------------------/;
 
 bool function AddTag(string tag)
 	bool check = HasTag(tag)
@@ -380,31 +427,9 @@ bool function HasTag(string tag)
 	endIf
 endFunction
 
-
-
-
-function UpdateOffset(int position, float adjust)
-	float offset = offsets[position] + adjust
-	offsets[position] = offset
-endFunction
-
-function UpdateOffsetSide(int position, float adjust)
-	float offsetSide = offsetsSide[position] + adjust
-	offsetsSide[position] = offsetSide
-	debug.trace("Side Adjust "+adjust+" to "+offsetSide)
-endFunction
-
-function UpdateOffsetUp(int position, float adjust)
-	float offsetUp = offsetsUp[position] + adjust
-	offsetsUp[position] = offsetUp
-	debug.trace("Up Adjust "+adjust+" to "+offsetUp)
-endFunction
-
-function RestoreOffsets()
-	offsets = offsetsDefault
-	offsetsSide = offsetsSideDefault
-	offsetsUp = offsetsUpDefault
-endFunction
+;/-----------------------------------------------
+	Animation System Functions
+------------------------------------------------/;
 
 function LoadAnimation()
 	return
@@ -418,30 +443,17 @@ function UnloadAnimation()
 	stages = 0
 	sfx = 0
 
-	float[] offsetsDel
-	offsets = offsetsDel 
-	float[] offsetsUpDel
-	offsetsUp = offsetsUpDel 
-	float[] offsetsSideDel
-	offsetsSide = offsetsSideDel 
-	float[] offsetsDefaultDel
-	offsetsDefault = offsetsDefaultDel 
-	float[] offsetsUpDefaultDel
-	offsetsUpDefault = offsetsUpDefaultDel 
-	float[] offsetsSideDefaultDel
-	offsetsSideDefault = offsetsSideDefaultDel 
-	float[] rotationsDel
-	rotations = rotationsDel 
+	float[] floatDel
+	offsetData = floatDel
+	offsetDefaults = floatDel
 
 	int[] gendersDel
 	genders = gendersDel
 	int[] cumDel
 	cum = cumDel
 
-	bool[] noStraponsDel
-	noStrapons = noStraponsDel
-	bool[] silenceDel
-	silence = silenceDel
+	bool[] switchDel
+	switchData = switchDel
 
 	string[] tagsDel
 	tags = tagsDel

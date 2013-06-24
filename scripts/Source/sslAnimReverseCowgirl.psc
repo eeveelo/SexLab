@@ -6,17 +6,17 @@ function LoadAnimation()
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
-	int a1 = AddPosition(Female, 0, addCum=VaginalAnal)
-	AddPositionStage(a1, "ReverseCowgirl_A1_S1")
-	AddPositionStage(a1, "ReverseCowgirl_A1_S2")
-	AddPositionStage(a1, "ReverseCowgirl_A1_S3")
-	AddPositionStage(a1, "ReverseCowgirl_A1_S4")
+	int a1 = AddPosition(Female, addCum=VaginalAnal)
+	AddPositionStage(a1, "ReverseCowgirl_A1_S1", 0)
+	AddPositionStage(a1, "ReverseCowgirl_A1_S2", 0)
+	AddPositionStage(a1, "ReverseCowgirl_A1_S3", 0)
+	AddPositionStage(a1, "ReverseCowgirl_A1_S4", 0)
 
-	int a2 = AddPosition(Male, -107) ; -102
-	AddPositionStage(a2, "ReverseCowgirl_A2_S1")
-	AddPositionStage(a2, "ReverseCowgirl_A2_S2")
-	AddPositionStage(a2, "ReverseCowgirl_A2_S3")
-	AddPositionStage(a2, "ReverseCowgirl_A2_S4")
+	int a2 = AddPosition(Male) ; -102
+	AddPositionStage(a2, "ReverseCowgirl_A2_S1", -107)
+	AddPositionStage(a2, "ReverseCowgirl_A2_S2", -107)
+	AddPositionStage(a2, "ReverseCowgirl_A2_S3", -107)
+	AddPositionStage(a2, "ReverseCowgirl_A2_S4", -107)
 
 	AddTag("Default")
 	AddTag("Sex")

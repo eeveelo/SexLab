@@ -6,17 +6,17 @@ function LoadAnimation()
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
-	int a1 = AddPosition(Female, 0, addCum=VaginalAnal)
-	AddPositionStage(a1, "Arrok_Sideways_A1_S1")
-	AddPositionStage(a1, "Arrok_Sideways_A1_S2")
-	AddPositionStage(a1, "Arrok_Sideways_A1_S3")
-	AddPositionStage(a1, "Arrok_Sideways_A1_S4")
+	int a1 = AddPosition(Female, addCum=VaginalAnal)
+	AddPositionStage(a1, "Arrok_Sideways_A1_S1", 0)
+	AddPositionStage(a1, "Arrok_Sideways_A1_S2", 0)
+	AddPositionStage(a1, "Arrok_Sideways_A1_S3", 0)
+	AddPositionStage(a1, "Arrok_Sideways_A1_S4", 0)
 
-	int a2 = AddPosition(Male, -114) ; -100
-	AddPositionStage(a2, "Arrok_Sideways_A2_S1")
-	AddPositionStage(a2, "Arrok_Sideways_A2_S2")
-	AddPositionStage(a2, "Arrok_Sideways_A2_S3")
-	AddPositionStage(a2, "Arrok_Sideways_A2_S4")
+	int a2 = AddPosition(Male) ; -100
+	AddPositionStage(a2, "Arrok_Sideways_A2_S1", -114)
+	AddPositionStage(a2, "Arrok_Sideways_A2_S2", -114)
+	AddPositionStage(a2, "Arrok_Sideways_A2_S3", -114)
+	AddPositionStage(a2, "Arrok_Sideways_A2_S4", -114)
 
 	AddTag("Arrok")
 	AddTag("BBP")

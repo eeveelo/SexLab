@@ -4,13 +4,12 @@ function LoadAnimation()
 	name = "Arrok Male Masturbation"
 	
 	SetContent(Sexual)
-	SetSFX(Silent)
 
-	int a1 = AddPosition(Male, 0)
-	AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S1")
-	AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S2")
-	AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S3")
-	AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S4")
+	int a1 = AddPosition(Male)
+	AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S1", 0)
+	AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S2", 0)
+	AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S3", 0)
+	AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S4", 0)
 
 	AddTag("Sex")
 	AddTag("Solo")
