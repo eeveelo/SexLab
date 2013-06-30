@@ -957,11 +957,11 @@ state Animating
 				endIf
 
 				; Check if they've moved.
-				float[] coords = GetCoords(pos[i])
-				float[] saved = GetLocation(i)
-				if (coords[0] - saved[0]) > 0.4 || (coords[0] - saved[0]) < -0.4 || (coords[1] - saved[1]) > 0.4 || (coords[1] - saved[1]) < -0.4 
-					MoveActor(i)
-				endIf
+				; float[] coords = GetCoords(pos[i])
+				; float[] saved = GetLocation(i)
+				; if (coords[0] - saved[0]) > 0.4 || (coords[0] - saved[0]) < -0.4 || (coords[1] - saved[1]) > 0.4 || (coords[1] - saved[1]) < -0.4 
+				; 	MoveActor(i)
+				; endIf
 
 				i += 1
 			endWhile
