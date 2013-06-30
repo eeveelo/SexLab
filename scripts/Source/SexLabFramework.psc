@@ -135,7 +135,6 @@ int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim 
 			males += 1
 		endIf
 
-
 		int first = sexActors.Find(sexActors[i])
 		int last = sexActors.RFind(sexActors[i])
 		if first != last
@@ -209,6 +208,12 @@ int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim 
 		endWhile
 	endIf
 
+	; Determine if foreplay should be used
+	sslBaseAnimation[] foreplay
+	if !aggr && actorCount > 1 && Config.bForeplayStage
+		foreplay = GetAnimationsByTag(actorCount, "Foreplay")
+	endIf
+
 	; Center on actor[0] and place victim there if still none
 	if centerOn == none && victim != none
 		centerOn = victim
@@ -221,7 +226,7 @@ int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim 
 	int SexThread = PickThread(true)
 	if SexThread >= 0
 		_DebugTrace("StartSex","sexActors="+sexActors,"Starting animation thread["+sexThread+"]")
-		thread[SexThread].SpawnThread(sexActors, anims, victim, centerOn, hook)
+		thread[SexThread].SpawnThread(sexActors, anims, foreplay, victim, centerOn, hook)
 	else
 		_DebugTrace("StartSex","sexActors="+sexActors,"Failed to start animation; no available animation slots")
 	endIf
@@ -243,23 +248,23 @@ endFunction
 
 int function ValidateActor(actor a)
 	if a.IsInFaction(AnimatingFaction)
-		_DebugTrace("StartSex.ValidateActor","actor="+a,"Failed to start animation; actor appears to already be in an animation")
+		_DebugTrace("ValidateActor","actor="+a,"Failed to start animation; actor appears to already be in an animation")
 		return -10
 	endIf
 	if a.IsDead()
-		_DebugTrace("StartSex","actor="+a,"Failed to start animation; actor is dead")
+		_DebugTrace("ValidateActor","actor="+a,"Failed to start animation; actor is dead")
 		return -11
 	endIf
 	if a.IsDisabled()
-		_DebugTrace("StartSex","actor="+a,"Failed to start animation; actor is disabled")
+		_DebugTrace("ValidateActor","actor="+a,"Failed to start animation; actor is disabled")
 		return -12
 	endIf
 	if a.IsChild() || a.GetLeveledActorBase().GetRace().IsRaceFlagSet(0x00000004)
-		_DebugTrace("StartSex","actor="+a,"Failed to start animation; actor is child")
+		_DebugTrace("ValidateActor","actor="+a,"Failed to start animation; actor is child")
 		return -13
 	endIf
 	if a.HasKeyWordString("ActorTypeCreature") || a.HasKeyWordString("ActorTypeDwarven")
-		_DebugTrace("StartSex","actor="+a,"Failed to start animation; actor is a creature or Dwemer that is currently not supported")
+		_DebugTrace("ValidateActor","actor="+a,"Failed to start animation; actor is a creature or Dwemer that is currently not supported")
 		return -14
 	endIf
 	return 1

@@ -36,6 +36,8 @@ bool property bReDressVictim auto hidden
 int oidReDressVictim
 bool property bRagdollEnd auto hidden
 int oidRagdollEnd
+bool property bForeplayStage auto hidden
+int oidForeplayStage
 string property sNPCBed auto hidden
 int oidNPCBed
 bool property bUseMaleNudeSuit auto hidden
@@ -124,6 +126,7 @@ function SetDefaults()
 	bUseMaleNudeSuit = false
 	bUseFemaleNudeSuit = false
 	bRagdollEnd = true
+	bForeplayStage = true
 
 	fMaleVoiceDelay = 7.0
 	fFemaleVoiceDelay = 6.0
@@ -333,6 +336,8 @@ event OnPageReset(string page)
 	if page == "Animation Settings"
 		SetCursorFillMode(TOP_TO_BOTTOM)
 		oidRestrictAggressive = AddToggleOption("Restrict Aggressive Animations", bRestrictAggressive)
+		oidForeplayStage = AddToggleOption("Pre-Sex Foreplay", bForeplayStage)
+
 		oidScaleActors = AddToggleOption("Even Actors Height", bScaleActors)
 		oidRagdollEnd = AddToggleOption("Ragdoll Ending", bRagdollEnd)
 		; DEPRECATED for animation specific tcl's in v1.1
@@ -713,6 +718,10 @@ event OnOptionSelect(int option)
 	if option == oidRestrictAggressive
 		bRestrictAggressive = !bRestrictAggressive 
 		SetToggleOptionValue(option, bRestrictAggressive)
+
+	elseif option == oidForeplayStage
+		bForeplayStage = !bForeplayStage 
+		SetToggleOptionValue(option, bForeplayStage)
 
 	; DEPRECATED for animation specific tcl's in v1.1
 	; elseif option == oidEnableTCL

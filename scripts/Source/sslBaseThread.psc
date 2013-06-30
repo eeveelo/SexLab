@@ -22,6 +22,7 @@ float[] vfx
 
 ; Thread Variables
 bool advance ; Auto Advance
+bool leadIn ; If playing leadIn animations.
 int aid ; Current Animation Index for accessing it from registry 
 string hook ; Custom hook for this instance
 int stage ; Current animation stage
@@ -31,6 +32,7 @@ actor victim ; The actor position treated as a victim of aggressive/roughing/rap
 ObjectReference centerRef ; The location of this animation, such as a bed, item, or actor
 sslBaseAnimation anim ; Current Animation
 sslBaseAnimation[] animations ; List of passed animations we can cycle through
+sslBaseAnimation[] leadInto ; leadIn animations save
 int adjustingPos = 1
 ; The participants
 int player = -1 ; Which position index the player is in, -1 if player not involved
@@ -238,7 +240,7 @@ endFunction
 ;#                           #
 ;#---------------------------#
 
-function SpawnThread(actor[] positions, sslBaseAnimation[] animationList, actor victimPosition = none, ObjectReference centerOn = none, string customHook = "")
+function SpawnThread(actor[] positions, sslBaseAnimation[] animationList, sslBaseAnimation[] leadInAnimations, actor victimPosition = none, ObjectReference centerOn = none, string customHook = "")
 	if !active
 		GoToState("Waiting")
 	else
@@ -250,7 +252,14 @@ function SpawnThread(actor[] positions, sslBaseAnimation[] animationList, actor 
 	pos = positions
 	hook = customHook
 
-	SetAnimationList(animationList)
+	if leadInAnimations.Length == 0
+		leadIn = false
+		SetAnimationList(animationList)
+	else
+		leadIn = true
+		SetAnimationList(leadInAnimations)
+		leadInto = animationList
+	endIf
 	;SetActorList(pos)
 
 	actorCount = positions.Length
@@ -870,11 +879,16 @@ state Advance
 		stage += 1
 		; Make sure stage exists first
 		if stage <= stageCount
-			; Play idles
 			anim.PlayAnimations(pos, stage)
-			; Start stage
 			self.GoToState("Animating")
-		; If it doesn't skip straight to end
+		; End leadIn animations and go into normal animations
+		elseIf leadIn && stage > stageCount
+			stage = 1
+			leadIn = false
+			SetAnimationList(leadInto)
+			anim.PlayAnimations(pos, stage)
+			self.GoToState("Animating")
+		; No valid stages left
 		else
 			EndAnimation()
 		endIf
@@ -935,9 +949,12 @@ state Animating
 	event OnBeginState()
 		CheckActive()
 
-		if stage == stageCount && stageCount >= 2 && sexual
+		if stage == stageCount && stageCount >= 2 && sexual && !leadIn
 			SexLab._SendEventHook("OrgasmStart", tid(), hook)
 			strength = 1.0
+		elseIf leadIn
+			SexLab._SendEventHook("LeadInStageStart", tid(), hook)
+			strength = 0.01
 		else
 			SexLab._SendEventHook("StageStart", tid(), hook)
 		endIf
@@ -975,8 +992,10 @@ state Animating
 			endIf
 		endWhile
 
-		if stage == stageCount && stageCount >= 2 && sexual
+		if stage == stageCount && stageCount >= 2 && sexual && !leadIn
 			SexLab._SendEventHook("OrgasmEnd", tid(), hook)
+		elseIf leadIn
+			SexLab._SendEventHook("LeadInStageEnd", tid(), hook)
 		else
 			SexLab._SendEventHook("StageEnd", tid(), hook)
 		endIf
@@ -991,23 +1010,29 @@ state Waiting
 	event OnBeginState()
 		active = false
 		primed = false
-		aid = -1
+		leadIn = false
+		autoAdvance = true
+		advance = true
+		sexual = false
+		bed = false
+
+		centerRef = none
+		victim = none
+
+		hook = ""
+
 		voice = new sslBaseVoice[5]
 		aliasSlot = new int[5]
-		hook = ""
+
+		aid = -1
+
 		timer = 0.0
 		adjustingPos = 1
-		autoAdvance = true
 		actorCount = 0
 		stageCount = 0
 		animCount = 0
-		advance = true
 		player = -1
 		stage = 0
-		sexual = false
-		victim = none
-		centerRef = none
-		bed = false
 	endEvent
 	event OnUpdate()
 		if active && primed
