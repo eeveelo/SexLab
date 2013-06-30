@@ -218,20 +218,26 @@ int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim 
 		centerOn = sexActors[playerPosition]
 	endIf
 
-	i = 0
+	int SexThread = PickThread(true)
+	if SexThread >= 0
+		_DebugTrace("StartSex","sexActors="+sexActors,"Starting animation thread["+sexThread+"]")
+		thread[SexThread].SpawnThread(sexActors, anims, victim, centerOn, hook)
+	else
+		_DebugTrace("StartSex","sexActors="+sexActors,"Failed to start animation; no available animation slots")
+	endIf
+	ready = true
+	return SexThread
+endFunction
+
+int function PickThread(bool claim = false)
+	int i = 0
 	while i < threadCount
 		if !activeThread[i]
-			activeThread[i] = true
-			_DebugTrace("StartSex","sexActors="+sexActors,"Starting animation thread["+i+"]")
-			thread[i].SpawnThread(sexActors, anims, victim, centerOn, hook)
-			ready = true
+			activeThread[i] = claim
 			return i
 		endIf
-		i += 1
 	endWhile
-	_DebugTrace("StartSex","sexActors="+sexActors,"Failed to start animation; no available animation slots")
-
-	ready = true
+	_DebugTrace("PickThread","claim="+claim,"Failed to find a non-active animation thread.")
 	return -1
 endFunction
 
