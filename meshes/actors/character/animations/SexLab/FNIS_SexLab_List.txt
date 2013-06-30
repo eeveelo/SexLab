@@ -102,6 +102,9 @@ s Tribadism_A2_S1 Tribadism_A2_S1.hkx
 ' Arrok's Animations
 '
 
+b Arrok_MaleUndress Arrok_MaleUndress.hkx
+b Arrok_FemaleUndress Arrok_FemaleUndress.hkx
+
 s Arrok_Anal_A1_S1 Arrok_Anal_A1_S1.hkx
 + Arrok_Anal_A1_S2 Arrok_Anal_A1_S2.hkx
 + Arrok_Anal_A1_S3 Arrok_Anal_A1_S3.hkx

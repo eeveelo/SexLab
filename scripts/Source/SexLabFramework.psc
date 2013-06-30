@@ -333,6 +333,12 @@ form[] function StripSlots(actor a, bool[] strip, bool allowNudesuit = true)
 	weapon eWeap
 	spell eSpell
 
+	if gender > 0
+		Debug.SendAnimationEvent(a, "Arrok_FemaleUndress")
+	else
+		Debug.SendAnimationEvent(a, "Arrok_MaleUndress")
+	endIf
+
 	; Use Strip settings
 	int i = 0
 	while i < 33
@@ -342,6 +348,7 @@ form[] function StripSlots(actor a, bool[] strip, bool allowNudesuit = true)
 			if item != none && !item.HasKeyWordString("SexLabNoStrip")
 				a.UnequipItem(item, false, true)
 				items = sslUtility.PushForm(item, items)
+				utility.wait(0.3)
 			endIf 
 		elseif strip[i] && i == 32
 			eWeap = a.GetEquippedWeapon(true)
@@ -364,6 +371,8 @@ form[] function StripSlots(actor a, bool[] strip, bool allowNudesuit = true)
 			a.EquipItem(Data.aNudeSuit, false, true)
 		endIf
 	endIf
+
+	Debug.SendAnimationEvent(a, "IdleForceDefaultState")
 
 	return items
 endFunction
@@ -1157,6 +1166,7 @@ function _EnableHotkeys(int tid)
 	RegisterForKey(Config.kRealignActors)
 	RegisterForKey(Config.kRestoreOffsets)
 	RegisterForKey(Config.kMoveScene)
+	RegisterForKey(Config.kRotateScene)
 	playerThread = tid
 	hkReady = true
 endFunction
@@ -1234,6 +1244,9 @@ event OnKeyDown(int keyCode)
 		; Move Scene
 		elseIf keyCode == Config.kMoveScene
 			thread[playerThread].MoveScene()
+		; Rotate Scene
+		elseIf keyCode == Config.kRotateScene
+			thread[playerThread].RotateScene(backwards)
 		endIf
 		hkReady = true
 	endIf

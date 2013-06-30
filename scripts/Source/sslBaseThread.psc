@@ -324,9 +324,7 @@ float[] function GetLocation(int position)
 	endIf
 endFunction
 
-function MoveActor(int position)
-	; (int position) should be zero indexed
-	float[] offsets = anim.GetPositionOffsets(position, stage)
+float[] function OffsetCoords(float[] offsets)
 	float[] loc = new float[6]
 	; Determine offsets coordinates from center
 	loc[0] = ( centerLoc[0] + ( Math.sin(centerLoc[5]) * offsets[0] + Math.cos(centerLoc[5]) * offsets[1] ) )
@@ -341,6 +339,12 @@ function MoveActor(int position)
 	elseIf loc[5] < 0
 		loc[5] = ( loc[5] + 360 )
 	endIf
+	return loc
+endFunction
+
+function MoveActor(int position)
+	; (int position) should be zero indexed
+	float[] loc = OffsetCoords(anim.GetPositionOffsets(position, stage))	
 	pos[position].SetPosition(loc[0], loc[1], loc[2])
 	pos[position].SetAngle(loc[3], loc[4], loc[5])
 	SaveLocation(position, loc)
@@ -368,7 +372,6 @@ function PrepareActors()
 			a.SetDontMove()
 			a.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
 		endIf
-		Debug.SendAnimationEvent(a, "IdleForceDefaultState")
 		; Auto strip
 		if sexual
 			form[] equipment = SexLab.StripActor(a, victim)
@@ -380,6 +383,7 @@ function PrepareActors()
 		MoveActor(i)
 		i += 1
 	endWhile
+	utility.wait(1.0)
 	; Scale them to average size, if enabled
 	if actorCount > 1 && SexLab.Config.bScaleActors
 		int count = pos.Length
@@ -717,6 +721,24 @@ function AdjustChange(bool backwards = false)
 	SexLab.Data.mAdjustChange.Show(adjustingPos + 1)
 endFunction
 
+function RotateScene(bool backwards = false)
+	if backwards
+		centerLoc[5] = centerLoc[5] - 45 
+	else
+		centerLoc[5] = centerLoc[5] + 45
+	endIf
+	if centerLoc[5] >= 360
+		centerLoc[5] = ( centerLoc[5] - 360 )
+	elseIf centerLoc[5] < 0
+		centerLoc[5] = ( centerLoc[5] + 360 )
+	endIf
+	int i = 0
+	while i < actorCount
+		MoveActor(i)
+		i += 1
+	endWhile
+endFunction
+
 function MoveScene()
 	bool advanceToggle
 	; Toggle auto advance off
@@ -933,6 +955,14 @@ state Animating
 					EndAnimation(quick=true)
 					return
 				endIf
+
+				; Check if they've moved.
+				float[] coords = GetCoords(pos[i])
+				float[] saved = GetLocation(i)
+				if (coords[0] - saved[0]) > 0.4 || (coords[0] - saved[0]) < -0.4 || (coords[1] - saved[1]) > 0.4 || (coords[1] - saved[1]) < -0.4 
+					MoveActor(i)
+				endIf
+
 				i += 1
 			endWhile
 

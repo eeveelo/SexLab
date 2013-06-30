@@ -71,15 +71,11 @@ float function AccessOffset(int position, int stage, int slot)
 endFunction
 
 bool function AccessSwitch(int position, int stage, int slot)
-	debug.trace("Index: "+DataIndex(3, position, stage, slot))
-	Debug.trace("Data: "+switchData)
-	debug.tracE("Result: "+switchData[DataIndex(3, position, stage, slot)])
 	return switchData[DataIndex(3, position, stage, slot)]
 endFunction
 
 bool[] function GetSwitchSlot(int stage, int slot)
 	bool[] switch = sslUtility.BoolArray(actors)
-	debug.trace("Stage: "+stage+" Slot: "+slot+" Actors:"+actors)
 	int i = 0
 	while i < actors
 		switch[i] = AccessSwitch(i, stage, slot)

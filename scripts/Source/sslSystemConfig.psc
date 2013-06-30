@@ -66,6 +66,8 @@ int property kAdjustUpward auto hidden
 int oidAdjustUpward
 int property kMoveScene auto hidden
 int oidMoveScene
+int property kRotateScene auto hidden
+int oidRotateScene
 int property kRestoreOffsets auto hidden
 int oidRestoreOffsets
 bool[] property bStripMale auto hidden
@@ -141,6 +143,7 @@ function SetDefaults()
 	kRealignActors = 26 ; [
 	kMoveScene = 27 ; ]
 	kRestoreOffsets = 12 ; -
+	kRotateScene = 22 ; U
 
 	oidToggleVoice = new int[128]
 	oidToggleAnimation = new int[128]
@@ -365,6 +368,7 @@ event OnPageReset(string page)
 		oidChangeAnimation = AddKeyMapOption("Change Animation Set", kChangeAnimation)
 		oidChangePositions = AddKeyMapOption("Swap Actor Positions", kChangePositions)
 		oidMoveScene = AddKeyMapOption("Move Scene Location", kMoveScene)
+		oidRotateScene = AddKeyMapOption("Rotate Scene", kRotateScene)
 		SetCursorPosition(1)
 		AddHeaderOption("Alignment Adjustments")
 		oidAdjustChange = AddKeyMapOption("Change Actor Being Moved", kAdjustChange)
@@ -1089,6 +1093,10 @@ event OnOptionKeyMapChange(int option, int keyCode, string conflictControl, stri
 
 		elseIf option == oidMoveScene
 			kMoveScene = keyCode
+
+		elseIf option == oidRotateScene
+			kRotateScene = keyCode
+
 		endIf
 
 		; Set MCM value
