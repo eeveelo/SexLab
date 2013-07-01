@@ -184,9 +184,9 @@ int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim 
 		int useBed = 0
 		if playerPosition != -1 && PlayerRef != victim
 			useBed = Data.mUseBed.Show()
-		elseif Config.sNPCBed == "Always"
+		elseif Config.sNPCBed == "$SSL_Always"
 			useBed = 1
-		elseif Config.sNPCBed == "Sometimes"
+		elseif Config.sNPCBed == "$SSL_Sometimes"
 			useBed = utility.RandomInt(0,1)
 		endIf
 
@@ -678,7 +678,7 @@ endFunction
 
 sslBaseVoice function PickVoice(actor a)
 	int g = a.GetLeveledActorBase().GetSex()
-	if a == PlayerRef && Config.sPlayerVoice != "Random"
+	if a == PlayerRef && Config.sPlayerVoice != "$SSL_Random"
 		return GetVoiceByName(Config.sPlayerVoice)
 	else
 		return GetVoiceByGender(g)
@@ -890,14 +890,12 @@ string function GetPlayerPurityTitle()
 	; Clamp levels to titles array
 	string title
 	if level > 6
-		title = titles[6]
+		return titles[6]
 	elseif level < 0
-		title = titles[0]
+		return titles[0]
 	else
-		title = titles[level]
+		return titles[level]
 	endIf
-	; Return title
-	return title+" ("+level+")"
 endFunction
 
 string function GetPlayerSexuality()
@@ -912,13 +910,13 @@ string function GetPlayerSexuality()
 		ratio = ((females + 1.0) / partners as float) * 100.0
 	endIf
 	if ratio <= 35 && gender > 0
-		return "Lesbian"
+		return "$SSL_Lesbian"
 	elseIf ratio <= 35 && gender < 1
-		return "Gay"
+		return "$SSL_Gay"
 	elseIf ratio > 35 && ratio < 65
-		return "Bisexual"
+		return "$SSL_Bisexual"
 	else
-		return "Straight"
+		return "$SSL_Heterosexual"
 	endIf
 endFunction
 
@@ -942,14 +940,12 @@ string function GetPlayerStatTitle(string type)
 	; Clamp levels to titles array
 	string title
 	if level > 6
-		title = Config.sStatTitles[6]
+		return Config.sStatTitles[6]
 	elseif level < 0
-		title = Config.sStatTitles[0]
+		return Config.sStatTitles[0]
 	else
-		title = Config.sStatTitles[level]
+		return Config.sStatTitles[level]
 	endIf
-	; Return title
-	return title+" ("+level+")"
 endFunction
 
 ;#---------------------------#

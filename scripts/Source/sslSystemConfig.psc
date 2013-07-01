@@ -2,7 +2,7 @@ scriptname sslSystemConfig extends SKI_ConfigBase
 {Skyrim Sex Lab Mod Configuration Menu}
 
 int function GetVersion()
-	return 101
+	return 110
 endFunction
 
 bool function DebugMode()
@@ -123,12 +123,12 @@ function SetDefaults()
 	bScaleActors = true
 	bAllowFFCum = false
 	fCumTimer = 120.0
-	sPlayerVoice = "Random"
+	sPlayerVoice = "$SSL_Random"
 	bUseStrapons = true
 	bAutoAdvance = true
 	bDisablePlayer = true
 	bReDressVictim = true
-	sNPCBed = "Never"
+	sNPCBed = "$SSL_Never"
 	bUseMaleNudeSuit = false
 	bUseFemaleNudeSuit = false
 	bRagdollEnd = true
@@ -275,58 +275,58 @@ function SetDefaults()
 	oidRemoveStrapon = new int[10]
 
 	sPureTitles = new string[7]
-	sPureTitles[0] = "Neutral"
-	sPureTitles[1] = "Unsullied"
-	sPureTitles[3] = "Virtuous"
-	sPureTitles[4] = "Ever Faithful"
-	sPureTitles[6] = "Saintly"
+	sPureTitles[0] = "$SSL_Neutral"
+	sPureTitles[1] = "$SSL_Unsullied"
+	sPureTitles[3] = "$SSL_Virtuous"
+	sPureTitles[4] = "$SSL_EverFaithful"
+	sPureTitles[6] = "$SSL_Saintly"
 
 	sImpureTitles = new string[7]
-	sImpureTitles[0] = "Neutral"
-	sImpureTitles[1] = "Experimenting"
-	sImpureTitles[2] = "Unusually Horny"
-	sImpureTitles[3] = "Promiscuous"
-	sImpureTitles[4] = "Sexual Deviant"
+	sImpureTitles[0] = "$SSL_Neutral"
+	sImpureTitles[1] = "$SSL_Experimenting"
+	sImpureTitles[2] = "$SSL_UnusuallyHorny"
+	sImpureTitles[3] = "$SSL_Promiscuous"
+	sImpureTitles[4] = "$SSL_SexualDeviant"
 
 	sStatTitles = new string[7]
-	sStatTitles[0] = "Unskilled"
-	sStatTitles[1] = "Novice"
-	sStatTitles[2] = "Apprentice"
-	sStatTitles[3] = "Journeyman"
-	sStatTitles[4] = "Expert"
-	sStatTitles[5] = "Master"
-	sStatTitles[6] = "Grand Master"
+	sStatTitles[0] = "$SSL_Unskilled"
+	sStatTitles[1] = "$SSL_Novice"
+	sStatTitles[2] = "$SSL_Apprentice"
+	sStatTitles[3] = "$SSL_Journeyman"
+	sStatTitles[4] = "$SSL_Expert"
+	sStatTitles[5] = "$SSL_Master"
+	sStatTitles[6] = "$SSL_GrandMaster"
 
-	Pages = new string[11]
-	Pages[0] = "Animation Settings"
-	Pages[1] = "Player Hotkeys"
-	Pages[2] = "Normal Timers & Stripping"
-	Pages[3] = "Foreplay Timers & Stripping"
-	Pages[4] = "Aggressive Timers & Stripping"
-	Pages[5] = "Toggle Voices"
-	Pages[6] = "Toggle Animations"
-	Pages[7] = "Aggressive Animations"
-	Pages[9] = "Rebuild & Clean"
+	Pages = new string[10]
+	Pages[0] = "$SSL_AnimationSettings"
+	Pages[1] = "$SSL_PlayerHotkeys"
+	Pages[2] = "$SSL_NormalTimersStripping"
+	Pages[3] = "$SSL_ForeplayTimersStripping"
+	Pages[4] = "$SSL_AggressiveTimersStripping"
+	Pages[5] = "$SSL_ToggleVoices"
+	Pages[6] = "$SSL_ToggleAnimations"
+	Pages[7] = "$SSL_AggressiveAnimations"
+	Pages[9] = "$SSL_RebuildClean"
 
 	if SexLab.PlayerRef.GetActorBase().GetSex() > 0
-		Pages[8] = "Sex Diary"
-		sPureTitles[2] = "Prim & Proper"
-		sPureTitles[5] = "Ladylike"
-		sImpureTitles[5] = "Debaucherous"
-		sImpureTitles[6] = "Nymphomaniac"
+		Pages[8] = "$SSL_SexDiary"
+		sPureTitles[2] = "$SSL_PrimProper"
+		sPureTitles[5] = "$SSL_Ladylike"
+		sImpureTitles[5] = "$SSL_Debaucherous"
+		sImpureTitles[6] = "$SSL_Nymphomaniac"
 	else
-		Pages[8] = "Sex Journal"
-		sPureTitles[2] = "Clean Cut"
-		sPureTitles[5] = "Lordly"
-		sImpureTitles[5] = "Depraved"
-		sImpureTitles[6] = "Hypersexual"
+		Pages[8] = "$SSL_SexJournal"
+		sPureTitles[2] = "$SSL_CleanCut"
+		sPureTitles[5] = "$SSL_Lordly"
+		sImpureTitles[5] = "$SSL_Depraved"
+		sImpureTitles[6] = "$SSL_Hypersexual"
 	endIf
 endFunction
 
 event OnConfigInit()
-	SetDefaults()
 	SexLab._CheckSystem()
 	SexLab._SetupSystem()
+	SetDefaults()
 	SexLab.Data.LoadAnimations()
 	SexLab.Data.LoadVoices()
 endEvent
@@ -336,6 +336,7 @@ event OnPlayerLoadGame()
 	Sexlab._StopAnimations()
 	SexLab.Data.LoadAnimations()
 	SexLab.Data.LoadVoices()
+	SetDefaults()
 endEvent
 
 event OnVersionUpdate(int version)
@@ -344,51 +345,7 @@ event OnVersionUpdate(int version)
 	if CurrentVersion > 1 && !SexLab._CheckClean() && (current - latest) > 10
 		SexLab.Data.mDirtyUpgrade.Show(current, latest)
 	endIf
-
-	if current < 1.1
-		bForeplayStage = true
-		Pages[2] = "Normal Timers & Stripping"
-		Pages[3] = "Foreplay Timers & Stripping"
-		Pages[4] = "Aggressive Timers & Stripping"
-
-		fStageTimerLeadIn = new float[5]
-		oidStageTimerLeadIn = new int[5]
-		fStageTimerLeadIn[0] = 10.0
-		fStageTimerLeadIn[1] = 10.0
-		fStageTimerLeadIn[2] = 10.0
-		fStageTimerLeadIn[3] = 8.0
-		fStageTimerLeadIn[4] = 8.0
-
-		bStripLeadInFemale = new bool[33]
-		oidStripLeadInFemale = new int[33]
-		bStripLeadInMale = new bool[33]
-		oidStripLeadInMale = new int[33]
-
-		bStripLeadInFemale[0] = true
-		bStripLeadInFemale[2] = true
-		bStripLeadInFemale[9] = true
-		bStripLeadInFemale[14] = true
-		bStripLeadInFemale[32] = true
-
-		bStripLeadInMale[0] = true
-		bStripLeadInMale[2] = true
-		bStripLeadInMale[9] = true
-		bStripLeadInMale[14] = true
-		bStripLeadInMale[32] = true
-
-		kBackwards = 54 ; Right Shift
-		kAdvanceAnimation = 57 ; Space
-		kChangeAnimation =  24 ; O
-		kChangePositions = 13 ; =
-		kAdjustChange = 37 ; K
-		kAdjustForward = 38 ; L
-		kAdjustSideways = 40 ; '
-		kAdjustUpward = 39 ; ;
-		kRealignActors = 26 ; [
-		kMoveScene = 27 ; ]
-		kRestoreOffsets = 12 ; -
-		kRotateScene = 22 ; U
-	endIf
+	SetDefaults()
 
 	; ; Rev 4
 	; if version >= 4 && CurrentVersion < 4
@@ -406,68 +363,67 @@ event OnPageReset(string page)
 		UnloadCustomContent()
 	endIf
 
-	if page == "Animation Settings"
+	if page == "$SSL_AnimationSettings"
 		SetCursorFillMode(TOP_TO_BOTTOM)
-		oidRestrictAggressive = AddToggleOption("Restrict Aggressive Animations", bRestrictAggressive)
-		oidForeplayStage = AddToggleOption("Pre-Sex Foreplay", bForeplayStage)
-
-		oidScaleActors = AddToggleOption("Even Actors Height", bScaleActors)
-		oidRagdollEnd = AddToggleOption("Ragdoll Ending", bRagdollEnd)
+		oidRestrictAggressive = AddToggleOption("$SSL_RestrictAggressive", bRestrictAggressive)
+		oidForeplayStage = AddToggleOption("$SSL_PreSexForeplay", bForeplayStage)
+		oidScaleActors = AddToggleOption("$SSL_EvenActorsHeight", bScaleActors)
+		oidRagdollEnd = AddToggleOption("$SSL_RagdollEnding", bRagdollEnd)
 		; DEPRECATED for animation specific tcl's in v1.1
 		; oidEnableTCL = AddToggleOption("Toggle Collisions For Player", bEnableTCL)
-		oidReDressVictim = AddToggleOption("Victim's Re-dress", bReDressVictim)
-		oidNPCBed = AddTextOption("NPCs Use Beds", sNPCBed)
-		oidUseCum = AddToggleOption("Apply Cum Effects", bUseCum)
-		oidAllowFFCum = AddToggleOption("Allow Female/Female Cum", bAllowFFCum)
-		oidCumTimer = AddSliderOption("Cum Effect Timer", fCumTimer, "{0} seconds")
-		oidUseStrapons = AddToggleOption("Females Use Strap-ons", bUseStrapons)
-		oidUseMaleNudeSuit = AddToggleOption("Use Nude Suit For Males", bUseMaleNudeSuit)
-		oidUseFemaleNudeSuit = AddToggleOption("Use Nude Suit For Females", bUseFemaleNudeSuit)
+		oidReDressVictim = AddToggleOption("$SSL_VictimsRedress", bReDressVictim)
+		oidNPCBed = AddTextOption("$SSL_NPCsUseBeds", sNPCBed)
+		oidUseCum = AddToggleOption("$SSL_ApplyCumEffects", bUseCum)
+		oidAllowFFCum = AddToggleOption("$SSL_AllowFemaleFemaleCum", bAllowFFCum)
+		oidCumTimer = AddSliderOption("$SSL_CumEffectTimer", fCumTimer, "$SSL_Seconds")
+		oidUseStrapons = AddToggleOption("$SSL_FemalesUseStrapons", bUseStrapons)
+		oidUseMaleNudeSuit = AddToggleOption("$SSL_UseNudeSuitMales", bUseMaleNudeSuit)
+		oidUseFemaleNudeSuit = AddToggleOption("$SSL_UseNudeSuitFemales", bUseFemaleNudeSuit)
 
 		SetCursorPosition(1)
-		AddHeaderOption("Player Settings")
-		oidAutoAdvance = AddToggleOption("Auto Advance Stages", bAutoAdvance)
-		oidDisablePlayer = AddToggleOption("Disable Victim Controls", bDisablePlayer)
+		AddHeaderOption("$SSL_PlayerSettings")
+		oidAutoAdvance = AddToggleOption("$SSL_AutoAdvanceStages", bAutoAdvance)
+		oidDisablePlayer = AddToggleOption("$SSL_DisableVictimControls", bDisablePlayer)
 		AddEmptyOption()
-		AddHeaderOption("Sounds/Voices")
-		oidPlayerVoice = AddTextOption("PC Voice", sPlayerVoice)
-		oidVoiceVolume = AddSliderOption("Voice Volume", fVoiceVolume, "{2}")
-		oidMaleVoiceDelay = AddSliderOption("Male Voice Delay", fMaleVoiceDelay, "{0} seconds")
-		oidFemaleVoiceDelay = AddSliderOption("Female Voice Delay", fFemaleVoiceDelay, "{0} seconds")
-		oidSFXVolume = AddSliderOption("SFX Volume", fSFXVolume, "{2}")
-		oidSFXDelay = AddSliderOption("SFX Delay", fSFXDelay, "{0} seconds")
+		AddHeaderOption("$SSL_SoundsVoices")
+		oidPlayerVoice = AddTextOption("$SSL_PCVoice", sPlayerVoice)
+		oidVoiceVolume = AddSliderOption("$SSL_VoiceVolume", fVoiceVolume, "{2}")
+		oidMaleVoiceDelay = AddSliderOption("$SSL_MaleVoiceDelay", fMaleVoiceDelay, "$SSL_Seconds")
+		oidFemaleVoiceDelay = AddSliderOption("$SSL_FemaleVoiceDelay", fFemaleVoiceDelay, "$SSL_Seconds")
+		oidSFXVolume = AddSliderOption("$SSL_SFXVolume", fSFXVolume, "{2}")
+		oidSFXDelay = AddSliderOption("$SSL_SFXDelay", fSFXDelay, "$SSL_Seconds")
 		
 
-	elseIf page == "Player Hotkeys"
+	elseIf page == "$SSL_PlayerHotkeys"
 		SetCursorFillMode(TOP_TO_BOTTOM)
-		AddHeaderOption("Scene Manipulation")
-		oidBackwards = AddKeyMapOption("Reverse Direction Modifier", kBackwards)
-		oidAdvanceAnimation = AddKeyMapOption("Advance Animation Stage", kAdvanceAnimation)
-		oidChangeAnimation = AddKeyMapOption("Change Animation Set", kChangeAnimation)
-		oidChangePositions = AddKeyMapOption("Swap Actor Positions", kChangePositions)
-		oidMoveScene = AddKeyMapOption("Move Scene Location", kMoveScene)
-		oidRotateScene = AddKeyMapOption("Rotate Scene", kRotateScene)
+		AddHeaderOption("$SSL_SceneManipulation")
+		oidBackwards = AddKeyMapOption("$SSL_ReverseDirectionModifier", kBackwards)
+		oidAdvanceAnimation = AddKeyMapOption("$SSL_AdvanceAnimationStage", kAdvanceAnimation)
+		oidChangeAnimation = AddKeyMapOption("$SSL_ChangeAnimationSet", kChangeAnimation)
+		oidChangePositions = AddKeyMapOption("$SSL_SwapActorPositions", kChangePositions)
+		oidMoveScene = AddKeyMapOption("$SSL_MoveSceneLocation", kMoveScene)
+		oidRotateScene = AddKeyMapOption("$SSL_RotateScene", kRotateScene)
 		SetCursorPosition(1)
-		AddHeaderOption("Alignment Adjustments")
-		oidAdjustChange = AddKeyMapOption("Change Actor Being Moved", kAdjustChange)
-		oidAdjustForward = AddKeyMapOption("Move Actor - Forward/Backward", kAdjustForward)
-		oidAdjustUpward = AddKeyMapOption("Adjust Position - Upward/Downward", kAdjustUpward)
-		oidAdjustSideways = AddKeyMapOption("Move Actor - Left/Right", kAdjustSideways)
-		oidRealignActors = AddKeyMapOption("Realign Actors", kRealignActors)
-		oidRestoreOffsets = AddKeyMapOption("Delete Saved Adjustments", kRestoreOffsets)
+		AddHeaderOption("$SSL_AlignmentAdjustments")
+		oidAdjustChange = AddKeyMapOption("$SSL_ChangeActorBeingMoved", kAdjustChange)
+		oidAdjustForward = AddKeyMapOption("$SSL_MoveActorForwardBackward", kAdjustForward)
+		oidAdjustUpward = AddKeyMapOption("$SSL_AdjustPositionUpwardDownward", kAdjustUpward)
+		oidAdjustSideways = AddKeyMapOption("$SSL_MoveActorLeftRight", kAdjustSideways)
+		oidRealignActors = AddKeyMapOption("$SSL_RealignActors", kRealignActors)
+		oidRestoreOffsets = AddKeyMapOption("$SSL_DeleteSavedAdjustments", kRestoreOffsets)
 
-	elseIf page == "Normal Timers & Stripping"
+	elseIf page == "$SSL_NormalTimersStripping"
 
 		SetCursorFillMode(TOP_TO_BOTTOM)
 
-		AddHeaderOption("Consensual Stage Timers")
-		oidStageTimer[0] = AddSliderOption("Stage 1 Length", fStageTimer[0], "{0} seconds")
-		oidStageTimer[1] = AddSliderOption("Stage 2 Length", fStageTimer[1], "{0} seconds")
-		oidStageTimer[2] = AddSliderOption("Stage 3 Length", fStageTimer[2], "{0} seconds")
+		AddHeaderOption("$SSL_ConsensualStageTimers")
+		oidStageTimer[0] = AddSliderOption("$SSL_Stage1Length", fStageTimer[0], "$SSL_Seconds")
+		oidStageTimer[1] = AddSliderOption("$SSL_Stage2Length", fStageTimer[1], "$SSL_Seconds")
+		oidStageTimer[2] = AddSliderOption("$SSL_Stage3Length", fStageTimer[2], "$SSL_Seconds")
 		AddEmptyOption()
 
-		AddHeaderOption("Female Strip From:")
-		oidStripFemale[32] = AddToggleOption("Weapons", bStripFemale[32])
+		AddHeaderOption("$SSL_FemaleStripFrom")
+		oidStripFemale[32] = AddToggleOption("$SSL_Weapons", bStripFemale[32])
 		i = 0
 		while i < 32
 			int slot = i + 30
@@ -476,20 +432,20 @@ event OnPageReset(string page)
 				oidStripFemale[i] = AddToggleOption(name, bStripFemale[i])
 			endIf
 			if slot == 43
-				AddHeaderOption("Extra Slots, not always accurately labeled")
+				AddHeaderOption("$SSL_ExtraSlots")
 			endIf
 			i += 1
 		endWhile
 
 		SetCursorPosition(1)
 		AddHeaderOption("")
-		oidStageTimer[3] = AddSliderOption("Stage 4+ Length", fStageTimer[3], "{0} seconds")
-		oidStageTimer[4] = AddSliderOption("Stage Ending Length", fStageTimer[4], "{0} seconds")
+		oidStageTimer[3] = AddSliderOption("$SSL_Stage4Length", fStageTimer[3], "$SSL_Seconds")
+		oidStageTimer[4] = AddSliderOption("$SSL_StageEndingLength", fStageTimer[4], "$SSL_Seconds")
 		AddEmptyOption()
 		AddEmptyOption()
 
-		AddHeaderOption("Male Strip From:")
-		oidStripMale[32] = AddToggleOption("Weapons", bStripMale[32])
+		AddHeaderOption("$SSL_MaleStripFrom")
+		oidStripMale[32] = AddToggleOption("$SSL_Weapons", bStripMale[32])
 		i = 0
 		while i < 32
 			int slot = i + 30
@@ -498,21 +454,21 @@ event OnPageReset(string page)
 				oidStripMale[i] = AddToggleOption(name, bStripMale[i])
 			endIf
 			if slot == 43
-				AddHeaderOption("Extra Slots, not always accurately labeled")
+				AddHeaderOption("$SSL_ExtraSlots")
 			endIf
 			i += 1
 		endWhile
 
-	elseIf page == "Foreplay Timers & Stripping"
+	elseIf page == "$SSL_ForeplayTimersStripping"
 		SetCursorFillMode(TOP_TO_BOTTOM)
-		AddHeaderOption("Foreplay Intro Animation Timers")
-		oidStageTimerLeadIn[0] = AddSliderOption("Stage 1 Length", fStageTimerLeadIn[0], "{0} seconds")
-		oidStageTimerLeadIn[1] = AddSliderOption("Stage 2 Length", fStageTimerLeadIn[1], "{0} seconds")
-		oidStageTimerLeadIn[2] = AddSliderOption("Stage 3 Length", fStageTimerLeadIn[2], "{0} seconds")
+		AddHeaderOption("$SSL_ForeplayIntroAnimationTimers")
+		oidStageTimerLeadIn[0] = AddSliderOption("$SSL_Stage1Length", fStageTimerLeadIn[0], "$SSL_Seconds")
+		oidStageTimerLeadIn[1] = AddSliderOption("$SSL_Stage2Length", fStageTimerLeadIn[1], "$SSL_Seconds")
+		oidStageTimerLeadIn[2] = AddSliderOption("$SSL_Stage3Length", fStageTimerLeadIn[2], "$SSL_Seconds")
 		AddEmptyOption()
 
-		AddHeaderOption("Female Strip From:")
-		oidStripVictim[32] = AddToggleOption("Weapons", bStripLeadInFemale[32])
+		AddHeaderOption("$SSL_FemaleStripFrom")
+		oidStripVictim[32] = AddToggleOption("$SSL_Weapons", bStripLeadInFemale[32])
 		i = 0
 		while i < 32
 			int slot = i + 30
@@ -521,20 +477,20 @@ event OnPageReset(string page)
 				oidStripLeadInFemale[i] = AddToggleOption(name, bStripLeadInFemale[i])
 			endIf
 			if slot == 43
-				AddHeaderOption("Extra Slots, not always accurately labeled")
+				AddHeaderOption("$SSL_ExtraSlots")
 			endIf
 			i += 1
 		endWhile
 
 		SetCursorPosition(1)
 		AddHeaderOption("")
-		oidStageTimerLeadIn[3] = AddSliderOption("Stage 4+ Length", fStageTimerLeadIn[3], "{0} seconds")
-		oidStageTimerLeadIn[4] = AddSliderOption("Stage Ending Length", fStageTimerLeadIn[4], "{0} seconds")
+		oidStageTimerLeadIn[3] = AddSliderOption("$SSL_Stage4Length", fStageTimerLeadIn[3], "$SSL_Seconds")
+		oidStageTimerLeadIn[4] = AddSliderOption("$SSL_StageEndingLength", fStageTimerLeadIn[4], "$SSL_Seconds")
 		AddEmptyOption()
 		AddEmptyOption()
 
-		AddHeaderOption("Male Strip From:")
-		oidStripAggressor[32] = AddToggleOption("Weapons", bStripLeadInMale[32])
+		AddHeaderOption("$SSL_MaleStripFrom")
+		oidStripAggressor[32] = AddToggleOption("$SSL_Weapons", bStripLeadInMale[32])
 		i = 0
 		while i < 32
 			int slot = i + 30
@@ -543,23 +499,23 @@ event OnPageReset(string page)
 				oidStripLeadInMale[i] = AddToggleOption(name, bStripLeadInMale[i])
 			endIf
 			if slot == 43
-				AddHeaderOption("Extra Slots, not always accurately labeled")
+				AddHeaderOption("$SSL_ExtraSlots")
 			endIf
 			i += 1
 		endWhile
 
 
-	elseIf page == "Aggressive Timers & Stripping"
+	elseIf page == "$SSL_AggressiveTimersStripping"
 
 		SetCursorFillMode(TOP_TO_BOTTOM)
-		AddHeaderOption("Aggressive Animation Timers")
-		oidStageTimerAggr[0] = AddSliderOption("Stage 1 Length", fStageTimerAggr[0], "{0} seconds")
-		oidStageTimerAggr[1] = AddSliderOption("Stage 2 Length", fStageTimerAggr[1], "{0} seconds")
-		oidStageTimerAggr[2] = AddSliderOption("Stage 3 Length", fStageTimerAggr[2], "{0} seconds")
+		AddHeaderOption("$SSL_AggressiveAnimationTimers")
+		oidStageTimerAggr[0] = AddSliderOption("$SSL_Stage1Length", fStageTimerAggr[0], "$SSL_Seconds")
+		oidStageTimerAggr[1] = AddSliderOption("$SSL_Stage2Length", fStageTimerAggr[1], "$SSL_Seconds")
+		oidStageTimerAggr[2] = AddSliderOption("$SSL_Stage3Length", fStageTimerAggr[2], "$SSL_Seconds")
 		AddEmptyOption()
 
-		AddHeaderOption("Victim Strip From:")
-		oidStripVictim[32] = AddToggleOption("Weapons", bStripVictim[32])
+		AddHeaderOption("$SSL_VictimStripFrom")
+		oidStripVictim[32] = AddToggleOption("$SSL_Weapons", bStripVictim[32])
 		i = 0
 		while i < 32
 			int slot = i + 30
@@ -568,20 +524,20 @@ event OnPageReset(string page)
 				oidStripVictim[i] = AddToggleOption(name, bStripVictim[i])
 			endIf
 			if slot == 43
-				AddHeaderOption("Extra Slots, not always accurately labeled")
+				AddHeaderOption("$SSL_ExtraSlots")
 			endIf
 			i += 1
 		endWhile
 
 		SetCursorPosition(1)
 		AddHeaderOption("")
-		oidStageTimerAggr[3] = AddSliderOption("Stage 4+ Length", fStageTimerAggr[3], "{0} seconds")
-		oidStageTimerAggr[4] = AddSliderOption("Stage Ending Length", fStageTimerAggr[4], "{0} seconds")
+		oidStageTimerAggr[3] = AddSliderOption("$SSL_Stage4Length", fStageTimerAggr[3], "$SSL_Seconds")
+		oidStageTimerAggr[4] = AddSliderOption("$SSL_StageEndingLength", fStageTimerAggr[4], "$SSL_Seconds")
 		AddEmptyOption()
 		AddEmptyOption()
 
-		AddHeaderOption("Aggressor Strip From:")
-		oidStripAggressor[32] = AddToggleOption("Weapons", bStripAggressor[32])
+		AddHeaderOption("$SSL_AggressorStripFrom")
+		oidStripAggressor[32] = AddToggleOption("$SSL_Weapons", bStripAggressor[32])
 		i = 0
 		while i < 32
 			int slot = i + 30
@@ -590,12 +546,12 @@ event OnPageReset(string page)
 				oidStripAggressor[i] = AddToggleOption(name, bStripAggressor[i])
 			endIf
 			if slot == 43
-				AddHeaderOption("Extra Slots, not always accurately labeled")
+				AddHeaderOption("$SSL_ExtraSlots")
 			endIf
 			i += 1
 		endWhile
 
-	elseIf page == "Toggle Animations"
+	elseIf page == "$SSL_ToggleAnimations"
 		SetCursorFillMode(LEFT_TO_RIGHT)
 		i = 0
 		while i < SexLab.animation.Length
@@ -604,7 +560,7 @@ event OnPageReset(string page)
 			endIf
 			i += 1
 		endWhile
-	elseIf page == "Aggressive Animations"
+	elseIf page == "$SSL_AggressiveAnimations"
 		SetCursorFillMode(LEFT_TO_RIGHT)
 		i = 0
 		while i < SexLab.animation.Length
@@ -613,7 +569,7 @@ event OnPageReset(string page)
 			endIf
 			i += 1
 		endWhile
-	elseIf page == "Toggle Voices"
+	elseIf page == "$SSL_ToggleVoices"
 		SetCursorFillMode(LEFT_TO_RIGHT)
 		i = 0
 		while i < SexLab.voice.Length
@@ -622,59 +578,62 @@ event OnPageReset(string page)
 			endIf
 			i += 1
 		endWhile
-	elseIf page == "Sex Diary" || page == "Sex Journal"
+	elseIf page == "$SSL_SexDiary" || page == "$SSL_SexJournal"
 		SetCursorFillMode(TOP_TO_BOTTOM)
-		AddHeaderOption("Sexual Experience")
+		AddHeaderOption("$SSL_SexualExperience")
 		int full = SexLab.Data.fTimeSpent as int
 		int seconds = full % 60
 		int minutes = Math.Floor((full / 60) % 60)
 		int hours = Math.Floor(full / 3600)
-		AddTextOption("Time Spent Having Sex", hours+":"+minutes+":"+seconds)
-		AddTextOption("Male Sexual Partners", SexLab.Data.iMalePartners)
-		AddTextOption("Female Sexual Partners", SexLab.Data.iFemalePartners)
-		AddTextOption("Times Masturbated", SexLab.Data.iMasturbationCount)
-		AddTextOption("Vaginal Experience", SexLab.Data.iVaginalCount)
-		AddTextOption("Anal Experience", SexLab.Data.iAnalCount)
-		AddTextOption("Oral Experience", SexLab.Data.iOralCount)
-		AddTextOption("Times Victim", SexLab.Data.iVictimCount)
-		AddTextOption("Times Aggressive", SexLab.Data.iAggressorCount)
+		AddTextOption("$SSL_TimeSpentHavingSex", hours+":"+minutes+":"+seconds)
+		AddTextOption("$SSL_MaleSexualPartners", SexLab.Data.iMalePartners)
+		AddTextOption("$SSL_FemaleSexualPartners", SexLab.Data.iFemalePartners)
+		AddTextOption("$SSL_TimesMasturbated", SexLab.Data.iMasturbationCount)
+		AddTextOption("$SSL_VaginalExperience", SexLab.Data.iVaginalCount)
+		AddTextOption("$SSL_AnalExperience", SexLab.Data.iAnalCount)
+		AddTextOption("$SSL_OralExperience", SexLab.Data.iOralCount)
+		AddTextOption("$SSL_TimesVictim", SexLab.Data.iVictimCount)
+		AddTextOption("$SSL_TimesAggressive", SexLab.Data.iAggressorCount)
 
 		SetCursorPosition(1)
-		AddHeaderOption("Sexual Stats")
-		AddTextOption("Sexuality", SexLab.GetPlayerSexuality())
+		AddHeaderOption("$SSL_SexualStats")
+		AddTextOption("$SSL_Sexuality", SexLab.GetPlayerSexuality())
 		if SexLab.GetPlayerPurityLevel() < 0
-			AddTextOption("Sexual Perversion", SexLab.GetPlayerPurityTitle())
+			AddTextOption("$SSL_SexualPerversion", SexLab.GetPlayerPurityTitle())
 		else
-			AddTextOption("Sexual Purity", SexLab.GetPlayerPurityTitle())
+			AddTextOption("$SSL_SexualPurity", SexLab.GetPlayerPurityTitle())
 		endIf
-		AddTextOption("Vaginal Proficiency", SexLab.GetPlayerStatTitle("Vaginal"))
-		AddTextOption("Anal Proficiency", SexLab.GetPlayerStatTitle("Anal"))
-		AddTextOption("Oral Proficiency", SexLab.GetPlayerStatTitle("Oral"))
+		AddTextOption("$SSL_VaginalProficiency", SexLab.GetPlayerStatTitle("Vaginal"))
+		AddTextOption("$SSL_AnalProficiency", SexLab.GetPlayerStatTitle("Anal"))
+		AddTextOption("$SSL_OralProficiency", SexLab.GetPlayerStatTitle("Oral"))
 
-	elseIf page == "Rebuild & Clean"
+	elseIf page == "$SSL_RebuildClean"
 		SetCursorFillMode(TOP_TO_BOTTOM)
-		AddHeaderOption("Maintenance")
-		oidStopAnimations = AddTextOption("Stop Current Animations", "Click Here")
-		oidRestoreDefaults = AddTextOption("Restore Default Settings", "Click Here")
-		oidRebuildAnimations = AddTextOption("Reset Animation Registry", "Click Here")
-		oidRebuildVoices = AddTextOption("Reset Voice Registry", "Click Here")
-		oidResetStats = AddTextOption("Reset Player Sex Stats", "Click Here")
+		AddHeaderOption("Created By Ashal@LoversLab.com")
 		AddEmptyOption()
-		AddHeaderOption("Upgrade/Uninstall/Reinstall")
-		oidCleanSystem = AddTextOption("Clean System", "Click Here")
+		AddHeaderOption("$SSL_Maintenance")
+		oidStopAnimations = AddTextOption("$SSL_StopCurrentAnimations", "$SSL_ClickHere")
+		oidRestoreDefaults = AddTextOption("$SSL_RestoreDefaultSettings", "$SSL_ClickHere")
+		oidRebuildAnimations = AddTextOption("$SSL_ResetAnimationRegistry", "$SSL_ClickHere")
+		oidRebuildVoices = AddTextOption("$SSL_ResetVoiceRegistry", "$SSL_ClickHere")
+		oidResetStats = AddTextOption("$SSL_ResetPlayerSexStats", "$SSL_ClickHere")
 		AddEmptyOption()
-		AddHeaderOption("Latest Version Available @ LoversLab.com")
+		AddHeaderOption("$SSL_UpgradeUninstallReinstall")
+		oidCleanSystem = AddTextOption("$SSL_CleanSystem", "$SSL_ClickHere")
+		AddEmptyOption()
 
 		SetCursorPosition(1)
-		AddHeaderOption("Available Strap-ons")
-		oidFindStrapons = AddTextOption("Rebuild Strap-on List", "Click Here")
+		AddHeaderOption("$SSL_TranslatedBy")
+		AddEmptyOption()
+		AddHeaderOption("$SSL_AvailableStrapons")
+		oidFindStrapons = AddTextOption("$SSL_RebuildStraponList", "$SSL_ClickHere")
 		i = 0
 		while i < SexLab.Data.strapons.Length
 			if SexLab.Data.strapons[i] != none
 				if SexLab.Data.strapons[i].GetName() == "strapon"
-					oidRemoveStrapon[i] = AddTextOption("Aeon/Horker", "Remove")
+					oidRemoveStrapon[i] = AddTextOption("Aeon/Horker", "$SSL_Remove")
 				else
-					oidRemoveStrapon[i] = AddTextOption(SexLab.Data.strapons[i].GetName(), "Remove")
+					oidRemoveStrapon[i] = AddTextOption(SexLab.Data.strapons[i].GetName(), "$SSL_Remove")
 				endIf
 			endIf
 			i += 1
@@ -809,15 +768,15 @@ endEvent
 event OnOptionSliderAccept(int option, float value)
 	if option == oidCumTimer
 		fCumTimer = value
-		SetSliderOptionValue(oidCumTimer, fCumTimer, "{0} Seconds")
+		SetSliderOptionValue(oidCumTimer, fCumTimer, "$SSL_Seconds")
 
 	elseIf option == oidMaleVoiceDelay
 		fMaleVoiceDelay = value
-		SetSliderOptionValue(oidMaleVoiceDelay, fMaleVoiceDelay, "{0} Seconds")
+		SetSliderOptionValue(oidMaleVoiceDelay, fMaleVoiceDelay, "$SSL_Seconds")
 
 	elseIf option == oidFemaleVoiceDelay
 		fFemaleVoiceDelay = value
-		SetSliderOptionValue(oidFemaleVoiceDelay, fFemaleVoiceDelay, "{0} Seconds")
+		SetSliderOptionValue(oidFemaleVoiceDelay, fFemaleVoiceDelay, "$SSL_Seconds")
 
 	elseIf option == oidVoiceVolume
 		fVoiceVolume = value
@@ -829,55 +788,55 @@ event OnOptionSliderAccept(int option, float value)
 
 	elseIf option == oidSFXDelay
 		fSFXDelay = value
-		SetSliderOptionValue(oidSFXDelay, fSFXDelay, "{0} Seconds")
+		SetSliderOptionValue(oidSFXDelay, fSFXDelay, "$SSL_Seconds")
 
 	elseIf option == oidStageTimer[0]
 		fStageTimer[0] = value
-		SetSliderOptionValue(oidStageTimer[0], fStageTimer[0], "{0} Seconds")
+		SetSliderOptionValue(oidStageTimer[0], fStageTimer[0], "$SSL_Seconds")
 	elseIf option == oidStageTimer[1]
 		fStageTimer[1] = value
-		SetSliderOptionValue(oidStageTimer[1], fStageTimer[1], "{0} Seconds")
+		SetSliderOptionValue(oidStageTimer[1], fStageTimer[1], "$SSL_Seconds")
 	elseIf option == oidStageTimer[2]
 		fStageTimer[2] = value
-		SetSliderOptionValue(oidStageTimer[2], fStageTimer[2], "{0} Seconds")
+		SetSliderOptionValue(oidStageTimer[2], fStageTimer[2], "$SSL_Seconds")
 	elseIf option == oidStageTimer[3]
 		fStageTimer[3] = value
-		SetSliderOptionValue(oidStageTimer[3], fStageTimer[3], "{0} Seconds")
+		SetSliderOptionValue(oidStageTimer[3], fStageTimer[3], "$SSL_Seconds")
 	elseIf option == oidStageTimer[4]
 		fStageTimer[4] = value
-		SetSliderOptionValue(oidStageTimer[4], fStageTimer[4], "{0} Seconds")
+		SetSliderOptionValue(oidStageTimer[4], fStageTimer[4], "$SSL_Seconds")
 
 	elseIf option == oidStageTimerLeadIn[0]
 		fStageTimerLeadIn[0] = value
-		SetSliderOptionValue(oidStageTimerLeadIn[0], fStageTimerLeadIn[0], "{0} Seconds")
+		SetSliderOptionValue(oidStageTimerLeadIn[0], fStageTimerLeadIn[0], "$SSL_Seconds")
 	elseIf option == oidStageTimerLeadIn[1]
 		fStageTimerLeadIn[1] = value
-		SetSliderOptionValue(oidStageTimerLeadIn[1], fStageTimerLeadIn[1], "{0} Seconds")
+		SetSliderOptionValue(oidStageTimerLeadIn[1], fStageTimerLeadIn[1], "$SSL_Seconds")
 	elseIf option == oidStageTimerLeadIn[2]
 		fStageTimerLeadIn[2] = value
-		SetSliderOptionValue(oidStageTimerLeadIn[2], fStageTimerLeadIn[2], "{0} Seconds")
+		SetSliderOptionValue(oidStageTimerLeadIn[2], fStageTimerLeadIn[2], "$SSL_Seconds")
 	elseIf option == oidStageTimerLeadIn[3]
 		fStageTimerLeadIn[3] = value
-		SetSliderOptionValue(oidStageTimerLeadIn[3], fStageTimerLeadIn[3], "{0} Seconds")
+		SetSliderOptionValue(oidStageTimerLeadIn[3], fStageTimerLeadIn[3], "$SSL_Seconds")
 	elseIf option == oidStageTimerLeadIn[4]
 		fStageTimerLeadIn[4] = value
-		SetSliderOptionValue(oidStageTimerLeadIn[4], fStageTimerLeadIn[4], "{0} Seconds")
+		SetSliderOptionValue(oidStageTimerLeadIn[4], fStageTimerLeadIn[4], "$SSL_Seconds")
 
 	elseIf option == oidStageTimerAggr[0]
 		fStageTimerAggr[0] = value
-		SetSliderOptionValue(oidStageTimerAggr[0], fStageTimerAggr[0], "{0} Seconds")
+		SetSliderOptionValue(oidStageTimerAggr[0], fStageTimerAggr[0], "$SSL_Seconds")
 	elseIf option == oidStageTimerAggr[1]
 		fStageTimerAggr[1] = value
-		SetSliderOptionValue(oidStageTimerAggr[1], fStageTimerAggr[1], "{0} Seconds")
+		SetSliderOptionValue(oidStageTimerAggr[1], fStageTimerAggr[1], "$SSL_Seconds")
 	elseIf option == oidStageTimerAggr[2]
 		fStageTimerAggr[2] = value
-		SetSliderOptionValue(oidStageTimerAggr[2], fStageTimerAggr[2], "{0} Seconds")
+		SetSliderOptionValue(oidStageTimerAggr[2], fStageTimerAggr[2], "$SSL_Seconds")
 	elseIf option == oidStageTimerAggr[3]
 		fStageTimerAggr[3] = value
-		SetSliderOptionValue(oidStageTimerAggr[3], fStageTimerAggr[3], "{0} Seconds")
+		SetSliderOptionValue(oidStageTimerAggr[3], fStageTimerAggr[3], "$SSL_Seconds")
 	elseIf option == oidStageTimerAggr[4]
 		fStageTimerAggr[4] = value
-		SetSliderOptionValue(oidStageTimerAggr[4], fStageTimerAggr[4], "{0} Seconds")
+		SetSliderOptionValue(oidStageTimerAggr[4], fStageTimerAggr[4], "$SSL_Seconds")
 	endIf
 endEvent
 
@@ -919,12 +878,12 @@ event OnOptionSelect(int option)
 		SetToggleOptionValue(option, bRagdollEnd)
 
 	elseif option == oidNPCBed
-		if sNPCBed == "Never"
-			sNPCBed = "Sometimes"
-		elseif sNPCBed == "Sometimes"
-			sNPCBed = "Always"
+		if sNPCBed == "$SSL_Never"
+			sNPCBed = "$SSL_Sometimes"
+		elseif sNPCBed == "$SSL_Sometimes"
+			sNPCBed = "$SSL_Always"
 		else
-			sNPCBed = "Never"
+			sNPCBed = "$SSL_Never"
 		endIf
 		SetTextOptionValue(option, sNPCBed)
 
@@ -944,41 +903,41 @@ event OnOptionSelect(int option)
 		SexLab.Data.FindStrapons()
 		int found = SexLab.Data.Strapons.Length
 		if found > 0
-			ShowMessage("Found and saved "+found+" strap-ons for use", false)
+			ShowMessage("$SSL_FoundStrapon", false)
 		else
-			ShowMessage("Found no supported strap-on mods", false)
+			ShowMessage("$SSL_NoStrapons", false)
 		endIf
 		ForcePageReset()
 	elseif option == oidStopAnimations
-		ShowMessage("All currently running animations are now halting.", false)
+		ShowMessage("$SSL_StopRunningAnimations", false)
 		SexLab._StopAnimations()
 
 	elseif option == oidCleanSystem
-		bool run = ShowMessage("Running this will reset SexLab to a default state as much as possible, stop all running animations, and clear the animation and voice registries. It is suggested you run this when upgrading, removing, or reinstalling the mod. Do you want to continue?")
+		bool run = ShowMessage("$SSL_WarnCleanSystem")
 		if run
-			ShowMessage("Close all menus and return to the game to begin the cleaning process.", false)
+			ShowMessage("$SSL_RunCleanSystem", false)
 			SexLab._CleanSystem()
 		endIf
 
 	elseif option == oidRebuildAnimations
-		bool run = ShowMessage("Running this will reinstall all animations registered with SexLab which will cause you to lose any saved adjustments related to animations. Do you want to continue?")
+		bool run = ShowMessage("$SSL_WarnRebuildAnimations")
 		if run
 			SexLab._StopAnimations()
 			SexLab._ClearAnimations()
 			SexLab.Data.LoadAnimations()
-			ShowMessage("Animation registry has successfully been reset.", false)
+			ShowMessage("$SSL_RunRebuildAnimations", false)
 		endIf
 
 	elseif option == oidRebuildVoices
-		bool run = ShowMessage("Running this will reinstall all voices registered with SexLab which will cause you to lose any toggled voice preferences. Do you want to continue?")
+		bool run = ShowMessage("$SSL_WarnRebuildVoices")
 		if run
 			SexLab._ClearVoices()
 			SexLab.Data.LoadVoices()
-			ShowMessage("Voice registry has successfully been reset.", false)
+			ShowMessage("$SSL_RunRebuildVoices", false)
 		endIf
 
 	elseif option == oidResetStats
-		bool run = ShowMessage("Running this will reset all your experience and stats saved in your Sex Diary/Journal. Do you want to continue?")
+		bool run = ShowMessage("$SSL_WarnResetStats")
 		if run
 			SexLab.Data.fTimeSpent = 0.0
 			SexLab.Data.fSexualPurity = 0.0
@@ -990,14 +949,14 @@ event OnOptionSelect(int option)
 			SexLab.Data.iOralCount = 0
 			SexLab.Data.iVictimCount = 0
 			SexLab.Data.iAggressorCount = 0
-			ShowMessage("Your Sex Diary/Journal stats have been reset.", false)
+			ShowMessage("$SSL_RunResetStats", false)
 		endIf
 
 	elseif option == oidRestoreDefaults
-		bool run = ShowMessage("Restore SexLab's settings to default?")
+		bool run = ShowMessage("$SSL_WarnRestoreDefaults")
 		if run
 			SetDefaults()			
-			ShowMessage("Defaults restored.", false)
+			ShowMessage("$SSL_RunRestoreDefaults", false)
 			ForcePageReset()
 		endIf
 
@@ -1034,7 +993,7 @@ event OnOptionSelect(int option)
 		endIf
 
 		if current == -1
-			sPlayerVoice = "Random"
+			sPlayerVoice = "$SSL_Random"
 		else
 			voice = voices[current] as sslBaseVoice
 			sPlayerVoice = voice.name
@@ -1119,123 +1078,125 @@ endEvent
 
 event OnOptionHighlight(int option)
 	if option == oidRestrictAggressive
-		SetInfoText("Animations marked aggressive will only show in victim/aggressor animations")
+		SetInfoText("$SSL_InfoRestrictAggressive")
 	elseIf option == oidUseCum
-		SetInfoText("Apply a cum effect to female characters after sex with a male")
+		SetInfoText("$SSL_InfoUseCum")
 	elseIf option == oidAllowFFCum
-		SetInfoText("Apply a cum effect to female characters after sex even if with another female")
+		SetInfoText("$SSL_InfoAllowFFCum")
 	elseIf option == oidCumTimer
-		SetInfoText("How long the above cum effect will display on a character")
+		SetInfoText("$SSL_InfoCumTimer")
 	elseIf option == oidUseStrapons
-		SetInfoText("Females will use strap-ons when in a male context")
+		SetInfoText("$SSL_InfoUseStrapons")
 	elseIf option == oidAutoAdvance
-		SetInfoText("Animations will not automatically advance by timer when player is involved")
+		SetInfoText("$SSL_InfoAutoAdvance")
 	elseIf option == oidDisablePlayer
-		SetInfoText("When player is the victim in an animation animation controls are not enabled")
+		SetInfoText("$SSL_InfoDisablePlayer")
 	elseIf option == oidReDressVictim
-		SetInfoText("Victims in animations will not automatically dress after the animation ends")
+		SetInfoText("$SSL_InfoReDressVictim")
 	elseIf option == oidNPCBed
-		SetInfoText("How often animations not involving the player will opt to use a nearby bed")
+		SetInfoText("$SSL_InfoNPCBed")
 	elseIf option == oidUseMaleNudeSuit
-		SetInfoText("Males will equip a nude appearing outfit instead of using their normal nude model")
+		SetInfoText("$SSL_InfoMaleNudeSuit")
 	elseIf option == oidUseFemaleNudeSuit
-		SetInfoText("Females will equip a nude appearing outfit instead of using their normal nude model")
+		SetInfoText("$SSL_InfoFemaleNudeSuit")
 	elseIf option == oidBackwards
-		SetInfoText("Will make many of the other hotkeys go backwards when used with this key")
+		SetInfoText("$SSL_InfoBackwards")
 	elseIf option == oidAdvanceAnimation
-		SetInfoText("Forces the current animation to advance to it's next stage")
+		SetInfoText("$SSL_InfoAdvanceAnimation")
 	elseIf option == oidChangeAnimation
-		SetInfoText("Cycle through list of animation sets available to the current animation process")
+		SetInfoText("$SSL_InfoChangeAnimation")
 	elseIf option == oidChangePositions
-		SetInfoText("Swap adjusted character with another character in the animation")
+		SetInfoText("$SSL_InfoChangePositions")
 	elseIf option == oidRealignActors
-		SetInfoText("Reposition all characters in the animation according to their saved offsets")
+		SetInfoText("$SSL_InfoRealignActors")
 	elseIf option == oidAdjustChange
-		SetInfoText("Change which character you are adjusting within the animation")
+		SetInfoText("$SSL_InfoAdjustChange")
 	elseIf option == oidRestoreOffsets
-		SetInfoText("Revert the current animations adjustments to their default setting")
+		SetInfoText("$SSL_InfoRestoreOffsets")
 	elseIf option == oidAdjustForward
-		SetInfoText("Move adjusted character forward or backward when modifier key is also held")
+		SetInfoText("$SSL_InfoAdjustForward")
 	elseIf option == oidAdjustSideways
-		SetInfoText("Move adjusted character left or right depending on if modifier key is also held")
+		SetInfoText("$SSL_InfoAdjustSideways")
 	elseIf option == oidAdjustUpward
-		SetInfoText("Move adjusted character up or down when modifier key is also held, will NOT work on the player")
+		SetInfoText("$SSL_InfoAdjustUpward")
 	elseIf option == oidPlayerVoice
-		SetInfoText("The player character will always use this voice")
+		SetInfoText("$SSL_InfoPlayerVoice")
 	elseIf option == oidMaleVoiceDelay
-		SetInfoText("Male's will start out voicing at this interval and will decrease with each stage")
+		SetInfoText("$SSL_InfoMaleVoiceDelay")
 	elseIf option == oidFemaleVoiceDelay
-		SetInfoText("Female's will start out voicing at this interval and will decrease with each stage")
+		SetInfoText("$SSL_InfoFemaleVoiceDelay")
 	elseIf option == oidSFXDelay
-		SetInfoText("Applicable sound effects will start out at this interval and will decrease with each stage")
+		SetInfoText("$SSL_InfoSFXDelay")
 	elseIf option == oidVoiceVolume
-		SetInfoText("The overall volume of the voices from 0.0 as silent to 1.0 as full volume")
+		SetInfoText("$SSL_InfoVoiceVolume")
 	elseIf option == oidSFXVolume
-		SetInfoText("The overall volume of the SFX from 0.0 as silent to 1.0 as full volume")
+		SetInfoText("$SSL_InfoSFXVolume")
 	; DEPRECATED for animation specific tcl's in v1.1
 	; elseIf option == oidEnableTCL
 	; 	SetInfoText("Collisions will be toggled automatically when the player is involved, helps align player but can cause other problems")
 	elseIf option == oidScaleActors
-		SetInfoText("Actors will scale to the average height between them during animation, greatly helps many animations line up properly")
+		SetInfoText("$SSL_InfoScaleActors")
 	elseIf option == oidRagdollEnd
-		SetInfoText("If toggled on, actors will collapse at the end of an animation before standing back up")
+		SetInfoText("$SSL_InfoRagdollEnd")
 	elseIf option == oidMoveScene
-		SetInfoText("Unlocks the players movement during a scene allowing you to move elsewhere, after a timer the other participants of the scene will snap to the players new location, and resume animating.")
+		SetInfoText("$SSL_InfoMoveScene")
+	elseIf option == oidRotateScene
+		SetInfoText("$SSL_InfoRotateScene")
 	else
 		; What are we?
 		int i = 0
 		while i < 128
 			if option == oidToggleVoice[i]
-				SetInfoText("Enable the voice "+SexLab.voice[i].name+" for selection")
+				SetInfoText("$SSL_EnableVoice")
 				i = 128
 			elseif option == oidToggleAnimation[i]
-				SetInfoText("Enable the animation "+SexLab.animation[i].name+" for selection")
+				SetInfoText("$SSL_EnableAnimation")
 				i = 128
 			elseif option == oidAggrAnimation[i]
-				SetInfoText("Use the animation "+SexLab.animation[i].name+" in victim/aggressor animations")
+				SetInfoText("$SSL_ToggleAggressive")
 				i = 128
 			elseIf i < 33 && option == oidStripMale[i]
 				if i != 32
-					SetInfoText("Remove armor/clothing covering a male's bipped slot #"+(i + 30)+" during consensual animations")
+					SetInfoText("$SSL_StripMale")
 				else
-					SetInfoText("Disarm the male's of weapons during consensual animations")
+					SetInfoText("$SSL_StripMaleWeapon")
 				endIf
 				i = 128
 			elseIf i < 33 && option == oidStripFemale[i]
 				if i != 32
-					SetInfoText("Remove armor/clothing covering a female's bipped slot #"+(i + 30)+" during consensual animations")
+					SetInfoText("$SSL_StripFemale")
 				else
-					SetInfoText("Disarm female's of weapons during consensual animations")
+					SetInfoText("$SSL_StripFemaleWeapon")
 				endIf
 				i = 128
 
 			elseIf i < 33 && option == oidStripLeadInFemale[i]
 				if i != 32
-					SetInfoText("Remove armor/clothing covering a female's bipped slot #"+(i + 30)+" during foreplay intro animations")
+					SetInfoText("$SSL_StripLeadInFemale")
 				else
-					SetInfoText("Disarm female's of weapons during foreplay intro animations")
+					SetInfoText("$SSL_StripLeadInFemaleWeapon")
 				endIf
 				i = 128
 			elseIf i < 33 && option == oidStripLeadInMale[i]
 				if i != 32
-					SetInfoText("Remove armor/clothing covering a female's bipped slot #"+(i + 30)+" during foreplay intro animations")
+					SetInfoText("$SSL_StripLeadInMale")
 				else
-					SetInfoText("Disarm male's of weapons during foreplay intro animations")
+					SetInfoText("$SSL_StripLeadInMaleWeapon")
 				endIf
 				i = 128
 
 			elseIf i < 33 && option == oidStripVictim[i]
 				if i != 32
-					SetInfoText("Remove armor/clothing covering the victim's bipped slot #"+(i + 30)+" during aggressive animations")
+					SetInfoText("$SSL_StripVictim")
 				else
-					SetInfoText("Disarm the victim of weapons during aggressive animations")
+					SetInfoText("$SSL_StripVictimWeapon")
 				endIf
 				i = 128
 			elseIf i < 33 && option == oidStripAggressor[i]
 				if i != 32
-					SetInfoText("Remove armor/clothing covering a females bipped slot #"+(i + 30)+" during aggressive animations")
+					SetInfoText("$SSL_StripAggressor")
 				else
-					SetInfoText("Disarm the aggressor of weapons during aggressive animations")
+					SetInfoText("$SSL_StripAggressorWeapon")
 				endIf
 				i = 128
 			endIf
@@ -1314,73 +1275,73 @@ endEvent
 
 string function GetSlotName(int slot)
 	if slot == 30
-		return "Head "
+		return "$SSL_Head"
 	elseif slot == 31
-		return "Hair"
+		return "$SSL_Hair"
 	elseif slot == 32
-		return "Torso "
+		return "$SSL_Torso"
 	elseif slot == 33
-		return "Hands"
+		return "$SSL_Hands"
 	elseif slot == 34
-		return "Forearms"
+		return "$SSL_Forearms"
 	elseif slot == 35
-		return "Amulet"
+		return "$SSL_Amulet"
 	elseif slot == 36
-		return "Ring "
+		return "$SSL_Ring"
 	elseif slot == 37
-		return "Feet"
+		return "$SSL_Feet"
 	elseif slot == 38
-		return "Calves"
+		return "$SSL_Calves"
 	elseif slot == 39
-		return "Shield "
+		return "$SSL_Shield"
 	elseif slot == 40
-		return "Tail "
+		return "$SSL_Tail"
 	elseif slot == 41
-		return "Long Hair"
+		return "$SSL_LongHair"
 	elseif slot == 42
-		return "Circlet"
+		return "$SSL_Circlet"
 	elseif slot == 43
-		return "Ears"
+		return "$SSL_Ears"
 	elseif slot == 44
-		return "Face/Mouth"
+		return "$SSL_FaceMouth"
 	elseif slot == 45
-		return "Neck"
+		return "$SSL_Neck"
 	elseif slot == 46
-		return "Chest "
+		return "$SSL_Chest"
 	elseif slot == 47
-		return "Back"
+		return "$SSL_Back"
 	elseif slot == 48
-		return "Misc"
+		return "$SSL_Misc"
 	elseif slot == 49
-		return "Pelvis/Outergarnments"
+		return "$SSL_PelvisOutergarnments"
 	elseif slot == 50
 		return "IGNORE" ; decapitated head [NordRace]
 	elseif slot == 51
 		return "IGNORE" ; decapitate [NordRace]
 	elseif slot == 52
-		return "Pelvis/Undergarnments"
+		return "$SSL_PelvisUndergarnments"
 	elseif slot == 53
-		return "Legs/Right Leg"
+		return "$SSL_LegsRightLeg"
 	elseif slot == 54
-		return "Legs/Left Leg"
+		return "$SSL_LegsLeftLeg"
 	elseif slot == 55
-		return "Face/Jewelry"
+		return "$SSL_FaceJewelry"
 	elseif slot == 56
-		return "Chest/Undergarnments"
+		return "$SSL_ChestUndergarnments"
 	elseif slot == 57
-		return "Shoulders"
+		return "$SSL_Shoulders"
 	elseif slot == 58
-		return "Arms/Left Arm/Undergarnments"
+		return "$SSL_ArmsLeftArmUndergarnments"
 	elseif slot == 59
-		return "Arms/Right Arm/Outergarnments"
+		return "$SSL_ArmsRightArmOutergarnments"
 	elseif slot == 60
-		return "Misc Slot"
+		return "$SSL_MiscSlot"
 	elseif slot == 61
-		return "Misc Slot"
+		return "$SSL_MiscSlot"
 	elseif slot == 62
-		return "Weapons"
+		return "$SSL_Weapons"
 	else
-		return "Unknown"
+		return "$SSL_Unknown"
 	endIf
 endFunction
 
