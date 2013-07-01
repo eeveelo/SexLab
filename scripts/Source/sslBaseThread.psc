@@ -254,22 +254,26 @@ function SpawnThread(actor[] positions, sslBaseAnimation[] animationList, sslBas
 
 	if leadInAnimations.Length == 0
 		leadIn = false
+		if victimPosition != none
+			timers = SexLab.Config.fStageTimerAggr
+		else
+			timers = SexLab.Config.fStageTimer
+		endIf
 		SetAnimationList(animationList)
 	else
 		leadIn = true
 		SetAnimationList(leadInAnimations)
+		timers = SexLab.Config.fStageTimerLeadIn
 		leadInto = animationList
 	endIf
-	;SetActorList(pos)
 
 	actorCount = positions.Length
-	if victim != none
-		timers = SexLab.Config.fStageTimerAggr
+	if victimPosition != none
 		victim = victimPosition
-	else
-		timers = SexLab.Config.fStageTimer
 	endIf
+
 	CenterOnObject(centerOn, false)
+
 	; Find if player present
 	int i = 0
 	while i < actorCount
@@ -359,7 +363,6 @@ function MoveActor(int position)
 	SaveLocation(position, loc)
 endFunction
 
-
 function PrepareActors()
 	int i = 0
 	while i < actorCount
@@ -383,7 +386,7 @@ function PrepareActors()
 		endIf
 		; Auto strip
 		if sexual
-			form[] equipment = SexLab.StripActor(a, victim)
+			form[] equipment = SexLab.StripActor(a, victim, leadIn)
 			SetEquipment(i, equipment)
 		endIf
 		; Get animation extras
@@ -435,6 +438,7 @@ function ResetActor(int i)
 	a.RemoveFromFaction(SexLab.AnimatingFaction)
 	SexLab._ClearDoNothing(aliasSlot[i])
 	RemoveExtras(i)
+	; Reset idle
 	if !SexLab.Config.bRagdollEnd
 		Debug.SendAnimationEvent(a, "IdleForceDefaultState")
 	else
@@ -514,7 +518,6 @@ function EquipExtras(int position)
 	endIf
 endFunction
 
-
 function SetEquipment(int position, form[] equipment)
 	if position == 0
 		equipmentA1 = equipment
@@ -566,6 +569,10 @@ function EndAnimation(bool quick = false)
 
 	animating = false
 
+	if player >= 0 && anim.tcl
+		Debug.ToggleCollisions()
+	endIf
+
 	i = 0
 	while i < actorCount
 		ResetActor(i)
@@ -599,9 +606,12 @@ function AdvanceStage(bool backwards = false)
 endFunction
 
 function ChangeAnimation(bool backwards = false)
-
 	if animCount == 1
 		return ; Single animation selected, nothing to change to
+	endIf
+
+	if player >= 0 && anim.tcl
+		Debug.ToggleCollisions()
 	endIf
 
 	if !backwards
@@ -614,10 +624,6 @@ function ChangeAnimation(bool backwards = false)
 		aid = 0
 	elseIf aid < 0
 		aid = animCount - 1
-	endIf
-
-	if player >= 0 && anim.tcl
-		Debug.ToggleCollisions()
 	endIf
 
 	SetAnimation(animations[aid])
@@ -731,11 +737,13 @@ function AdjustChange(bool backwards = false)
 endFunction
 
 function RotateScene(bool backwards = false)
+	; Adjust current center's Z angle
 	if backwards
 		centerLoc[5] = centerLoc[5] - 45 
 	else
 		centerLoc[5] = centerLoc[5] + 45
 	endIf
+	; Clamp rotation to 0 - 360
 	if centerLoc[5] >= 360
 		centerLoc[5] = ( centerLoc[5] - 360 )
 	elseIf centerLoc[5] < 0
@@ -883,10 +891,31 @@ state Advance
 			self.GoToState("Animating")
 		; End leadIn animations and go into normal animations
 		elseIf leadIn && stage > stageCount
+			if victim != none
+				timers = SexLab.Config.fStageTimerAggr
+			else
+				timers = SexLab.Config.fStageTimer
+			endIf
 			stage = 1
 			leadIn = false
 			SetAnimationList(leadInto)
-			anim.PlayAnimations(pos, stage)
+
+			if sexual
+				int i = 0
+				while i < actorCount
+					form[] equipment = SexLab.StripActor(pos[i], victim, false)
+					form[] current = GetEquipment(i)
+					int e = 0
+					while e < current.Length
+						equipment = sslUtility.PushForm(current[e], equipment)
+						e += 1
+					endWhile
+					SetEquipment(i, equipment)
+					i += 1
+				endWhile
+			endIf
+
+			RealignActors()
 			self.GoToState("Animating")
 		; No valid stages left
 		else
@@ -984,7 +1013,7 @@ state Animating
 			endWhile
 
 			; Delay loop
-			Utility.Wait(0.8)
+			Utility.Wait(1.0)
 
 			; Auto Advance
 			if autoAdvance && stageAdvance < Utility.GetCurrentRealTime()

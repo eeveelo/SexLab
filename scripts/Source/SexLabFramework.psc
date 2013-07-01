@@ -315,10 +315,14 @@ function ApplyCum(actor a, int cumID)
 	endIf
 endFunction
 
-form[] function StripActor(actor a, actor victim = none)
+form[] function StripActor(actor a, actor victim = none, bool leadIn = false)
 	int gender = a.GetLeveledActorBase().GetSex()
 	bool[] strip
-	if victim != none && a == victim
+	if leadIn && gender < 1
+		strip = Config.bStripLeadInMale
+	elseif leadIn && gender > 0
+		strip = Config.bStripLeadInFemale
+	elseif victim != none && a == victim
 		strip = Config.bStripVictim
 	elseif victim != none && a != victim
 		strip = Config.bStripAggressor

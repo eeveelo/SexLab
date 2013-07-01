@@ -46,6 +46,8 @@ bool property bUseFemaleNudeSuit auto hidden
 int oidUseFemaleNudeSuit
 float[] property fStageTimer auto hidden
 int[] oidStageTimer
+float[] property fStageTimerLeadIn auto hidden
+int[] oidStageTimerLeadIn
 float[] property fStageTimerAggr auto hidden
 int[] oidStageTimerAggr
 int property kBackwards auto hidden
@@ -76,6 +78,10 @@ bool[] property bStripMale auto hidden
 int[] oidStripMale
 bool[] property bStripFemale auto hidden
 int[] oidStripFemale
+bool[] property bStripLeadInFemale auto hidden
+int[] oidStripLeadInFemale
+bool[] property bStripLeadInMale auto hidden
+int[] oidStripLeadInMale
 bool[] property bStripVictim auto hidden
 int[] oidStripVictim
 bool[] property bStripAggressor auto hidden
@@ -170,7 +176,6 @@ function SetDefaults()
 	bStripMale[16] = true
 	bStripMale[17] = true
 	bStripMale[19] = true
-	bStripMale[22] = true
 	bStripMale[23] = true
 	bStripMale[24] = true
 	bStripMale[26] = true
@@ -192,7 +197,6 @@ function SetDefaults()
 	bStripFemale[16] = true
 	bStripFemale[17] = true
 	bStripFemale[19] = true
-	bStripFemale[22] = true
 	bStripFemale[23] = true
 	bStripFemale[24] = true
 	bStripFemale[26] = true
@@ -200,6 +204,23 @@ function SetDefaults()
 	bStripFemale[28] = true
 	bStripFemale[29] = true
 	bStripFemale[32] = true
+
+	bStripLeadInFemale = new bool[33]
+	oidStripLeadInFemale = new int[33]
+	bStripLeadInMale = new bool[33]
+	oidStripLeadInMale = new int[33]
+
+	bStripLeadInFemale[0] = true
+	bStripLeadInFemale[2] = true
+	bStripLeadInFemale[9] = true
+	bStripLeadInFemale[14] = true
+	bStripLeadInFemale[32] = true
+
+	bStripLeadInMale[0] = true
+	bStripLeadInMale[2] = true
+	bStripLeadInMale[9] = true
+	bStripLeadInMale[14] = true
+	bStripLeadInMale[32] = true
 
 	bStripVictim = new bool[33]
 	oidStripVictim = new int[33]
@@ -212,7 +233,6 @@ function SetDefaults()
 	bStripVictim[9] = true
 	bStripVictim[11] = true
 	bStripVictim[16] = true
-	bStripVictim[22] = true
 	bStripVictim[24] = true
 	bStripVictim[26] = true
 	bStripVictim[28] = true
@@ -222,7 +242,6 @@ function SetDefaults()
 	bStripAggressor[4] = true
 	bStripAggressor[9] = true
 	bStripAggressor[16] = true
-	bStripAggressor[22] = true
 	bStripAggressor[24] = true
 	bStripAggressor[26] = true
 
@@ -233,7 +252,16 @@ function SetDefaults()
 	fStageTimer[1] = 20.0
 	fStageTimer[2] = 15.0
 	fStageTimer[3] = 15.0
-	fStageTimer[4] = 5.0
+	fStageTimer[4] = 9.0
+
+	fStageTimerLeadIn = new float[5]
+	oidStageTimerLeadIn = new int[5]
+
+	fStageTimerLeadIn[0] = 10.0
+	fStageTimerLeadIn[1] = 10.0
+	fStageTimerLeadIn[2] = 10.0
+	fStageTimerLeadIn[3] = 8.0
+	fStageTimerLeadIn[4] = 8.0
 
 	fStageTimerAggr = new float[5]
 	oidStageTimerAggr = new int[5]
@@ -269,12 +297,12 @@ function SetDefaults()
 	sStatTitles[5] = "Master"
 	sStatTitles[6] = "Grand Master"
 
-	Pages = new string[10]
+	Pages = new string[11]
 	Pages[0] = "Animation Settings"
 	Pages[1] = "Player Hotkeys"
-	Pages[2] = "Stage Timers"
-	Pages[3] = "Male/Female Stripping"
-	Pages[4] = "Victim/Aggressor Stripping"
+	Pages[2] = "Normal Timers & Stripping"
+	Pages[3] = "Foreplay Timers & Stripping"
+	Pages[4] = "Aggressive Timers & Stripping"
 	Pages[5] = "Toggle Voices"
 	Pages[6] = "Toggle Animations"
 	Pages[7] = "Aggressive Animations"
@@ -316,7 +344,52 @@ event OnVersionUpdate(int version)
 	if CurrentVersion > 1 && !SexLab._CheckClean() && (current - latest) > 10
 		SexLab.Data.mDirtyUpgrade.Show(current, latest)
 	endIf
-	SetDefaults()
+
+	if current < 1.1
+		bForeplayStage = true
+		Pages[2] = "Normal Timers & Stripping"
+		Pages[3] = "Foreplay Timers & Stripping"
+		Pages[4] = "Aggressive Timers & Stripping"
+
+		fStageTimerLeadIn = new float[5]
+		oidStageTimerLeadIn = new int[5]
+		fStageTimerLeadIn[0] = 10.0
+		fStageTimerLeadIn[1] = 10.0
+		fStageTimerLeadIn[2] = 10.0
+		fStageTimerLeadIn[3] = 8.0
+		fStageTimerLeadIn[4] = 8.0
+
+		bStripLeadInFemale = new bool[33]
+		oidStripLeadInFemale = new int[33]
+		bStripLeadInMale = new bool[33]
+		oidStripLeadInMale = new int[33]
+
+		bStripLeadInFemale[0] = true
+		bStripLeadInFemale[2] = true
+		bStripLeadInFemale[9] = true
+		bStripLeadInFemale[14] = true
+		bStripLeadInFemale[32] = true
+
+		bStripLeadInMale[0] = true
+		bStripLeadInMale[2] = true
+		bStripLeadInMale[9] = true
+		bStripLeadInMale[14] = true
+		bStripLeadInMale[32] = true
+
+		kBackwards = 54 ; Right Shift
+		kAdvanceAnimation = 57 ; Space
+		kChangeAnimation =  24 ; O
+		kChangePositions = 13 ; =
+		kAdjustChange = 37 ; K
+		kAdjustForward = 38 ; L
+		kAdjustSideways = 40 ; '
+		kAdjustUpward = 39 ; ;
+		kRealignActors = 26 ; [
+		kMoveScene = 27 ; ]
+		kRestoreOffsets = 12 ; -
+		kRotateScene = 22 ; U
+	endIf
+
 	; ; Rev 4
 	; if version >= 4 && CurrentVersion < 4
 	; 	SetDefaults()
@@ -383,28 +456,39 @@ event OnPageReset(string page)
 		oidRealignActors = AddKeyMapOption("Realign Actors", kRealignActors)
 		oidRestoreOffsets = AddKeyMapOption("Delete Saved Adjustments", kRestoreOffsets)
 
+	elseIf page == "Normal Timers & Stripping"
 
-	elseIf page == "Stage Timers"
 		SetCursorFillMode(TOP_TO_BOTTOM)
-		AddHeaderOption("Consensual Animation Timers")
+
+		AddHeaderOption("Consensual Stage Timers")
 		oidStageTimer[0] = AddSliderOption("Stage 1 Length", fStageTimer[0], "{0} seconds")
 		oidStageTimer[1] = AddSliderOption("Stage 2 Length", fStageTimer[1], "{0} seconds")
 		oidStageTimer[2] = AddSliderOption("Stage 3 Length", fStageTimer[2], "{0} seconds")
-		oidStageTimer[3] = AddSliderOption("Stage 4+ Length", fStageTimer[3], "{0} seconds")
-		oidStageTimer[4] = AddSliderOption("Stage Ending Length", fStageTimer[4], "{0} seconds")
+		AddEmptyOption()
+
+		AddHeaderOption("Female Strip From:")
+		oidStripFemale[32] = AddToggleOption("Weapons", bStripFemale[32])
+		i = 0
+		while i < 32
+			int slot = i + 30
+			string name = GetSlotName(slot)
+			if name != "IGNORE"
+				oidStripFemale[i] = AddToggleOption(name, bStripFemale[i])
+			endIf
+			if slot == 43
+				AddHeaderOption("Extra Slots, not always accurately labeled")
+			endIf
+			i += 1
+		endWhile
 
 		SetCursorPosition(1)
-		AddHeaderOption("Aggressive Animation Timers")
-		oidStageTimerAggr[0] = AddSliderOption("Stage 1 Length", fStageTimerAggr[0], "{0} seconds")
-		oidStageTimerAggr[1] = AddSliderOption("Stage 2 Length", fStageTimerAggr[1], "{0} seconds")
-		oidStageTimerAggr[2] = AddSliderOption("Stage 3 Length", fStageTimerAggr[2], "{0} seconds")
-		oidStageTimerAggr[3] = AddSliderOption("Stage 4+ Length", fStageTimerAggr[3], "{0} seconds")
-		oidStageTimerAggr[4] = AddSliderOption("Stage Ending Length", fStageTimerAggr[4], "{0} seconds")
+		AddHeaderOption("")
+		oidStageTimer[3] = AddSliderOption("Stage 4+ Length", fStageTimer[3], "{0} seconds")
+		oidStageTimer[4] = AddSliderOption("Stage Ending Length", fStageTimer[4], "{0} seconds")
+		AddEmptyOption()
+		AddEmptyOption()
 
-	elseIf page == "Male/Female Stripping"
-		SetCursorFillMode(TOP_TO_BOTTOM)
-
-		AddHeaderOption("Male: Strip From")
+		AddHeaderOption("Male Strip From:")
 		oidStripMale[32] = AddToggleOption("Weapons", bStripMale[32])
 		i = 0
 		while i < 32
@@ -419,25 +503,62 @@ event OnPageReset(string page)
 			i += 1
 		endWhile
 
-		SetCursorPosition(1)
-		AddHeaderOption("Female: Strip From")
-		oidStripFemale[32] = AddToggleOption("Weapons", bStripFemale[32])
+	elseIf page == "Foreplay Timers & Stripping"
+		SetCursorFillMode(TOP_TO_BOTTOM)
+		AddHeaderOption("Foreplay Intro Animation Timers")
+		oidStageTimerLeadIn[0] = AddSliderOption("Stage 1 Length", fStageTimerLeadIn[0], "{0} seconds")
+		oidStageTimerLeadIn[1] = AddSliderOption("Stage 2 Length", fStageTimerLeadIn[1], "{0} seconds")
+		oidStageTimerLeadIn[2] = AddSliderOption("Stage 3 Length", fStageTimerLeadIn[2], "{0} seconds")
+		AddEmptyOption()
+
+		AddHeaderOption("Female Strip From:")
+		oidStripVictim[32] = AddToggleOption("Weapons", bStripLeadInFemale[32])
 		i = 0
 		while i < 32
 			int slot = i + 30
 			string name = GetSlotName(slot)
 			if name != "IGNORE"
-				oidStripFemale[i] = AddToggleOption(name, bStripFemale[i])
+				oidStripLeadInFemale[i] = AddToggleOption(name, bStripLeadInFemale[i])
 			endIf
 			if slot == 43
 				AddHeaderOption("Extra Slots, not always accurately labeled")
 			endIf
 			i += 1
 		endWhile
-	elseIf page == "Victim/Aggressor Stripping"
-		SetCursorFillMode(TOP_TO_BOTTOM)
 
-		AddHeaderOption("Victim: Strip From")
+		SetCursorPosition(1)
+		AddHeaderOption("")
+		oidStageTimerLeadIn[3] = AddSliderOption("Stage 4+ Length", fStageTimerLeadIn[3], "{0} seconds")
+		oidStageTimerLeadIn[4] = AddSliderOption("Stage Ending Length", fStageTimerLeadIn[4], "{0} seconds")
+		AddEmptyOption()
+		AddEmptyOption()
+
+		AddHeaderOption("Male Strip From:")
+		oidStripAggressor[32] = AddToggleOption("Weapons", bStripLeadInMale[32])
+		i = 0
+		while i < 32
+			int slot = i + 30
+			string name = GetSlotName(slot)
+			if name != "IGNORE"
+				oidStripLeadInMale[i] = AddToggleOption(name, bStripLeadInMale[i])
+			endIf
+			if slot == 43
+				AddHeaderOption("Extra Slots, not always accurately labeled")
+			endIf
+			i += 1
+		endWhile
+
+
+	elseIf page == "Aggressive Timers & Stripping"
+
+		SetCursorFillMode(TOP_TO_BOTTOM)
+		AddHeaderOption("Aggressive Animation Timers")
+		oidStageTimerAggr[0] = AddSliderOption("Stage 1 Length", fStageTimerAggr[0], "{0} seconds")
+		oidStageTimerAggr[1] = AddSliderOption("Stage 2 Length", fStageTimerAggr[1], "{0} seconds")
+		oidStageTimerAggr[2] = AddSliderOption("Stage 3 Length", fStageTimerAggr[2], "{0} seconds")
+		AddEmptyOption()
+
+		AddHeaderOption("Victim Strip From:")
 		oidStripVictim[32] = AddToggleOption("Weapons", bStripVictim[32])
 		i = 0
 		while i < 32
@@ -453,7 +574,13 @@ event OnPageReset(string page)
 		endWhile
 
 		SetCursorPosition(1)
-		AddHeaderOption("Aggressor: Strip From")
+		AddHeaderOption("")
+		oidStageTimerAggr[3] = AddSliderOption("Stage 4+ Length", fStageTimerAggr[3], "{0} seconds")
+		oidStageTimerAggr[4] = AddSliderOption("Stage Ending Length", fStageTimerAggr[4], "{0} seconds")
+		AddEmptyOption()
+		AddEmptyOption()
+
+		AddHeaderOption("Aggressor Strip From:")
 		oidStripAggressor[32] = AddToggleOption("Weapons", bStripAggressor[32])
 		i = 0
 		while i < 32
@@ -467,6 +594,7 @@ event OnPageReset(string page)
 			endIf
 			i += 1
 		endWhile
+
 	elseIf page == "Toggle Animations"
 		SetCursorFillMode(LEFT_TO_RIGHT)
 		i = 0
@@ -622,6 +750,32 @@ event OnOptionSliderOpen(int option)
 		SetSliderDialogRange(3.0, 300.0)
 		SetSliderDialogInterval(1.0)
 
+	elseIf option == oidStageTimerLeadIn[0]
+		SetSliderDialogStartValue(fStageTimerLeadIn[0])
+		SetSliderDialogDefaultValue(30.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+	elseIf option == oidStageTimerLeadIn[1]
+		SetSliderDialogStartValue(fStageTimerLeadIn[1])
+		SetSliderDialogDefaultValue(20.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+	elseIf option == oidStageTimerLeadIn[2]
+		SetSliderDialogStartValue(fStageTimerLeadIn[2])
+		SetSliderDialogDefaultValue(15.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+	elseIf option == oidStageTimerLeadIn[3]
+		SetSliderDialogStartValue(fStageTimerLeadIn[3])
+		SetSliderDialogDefaultValue(15.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+	elseIf option == oidStageTimerLeadIn[4]
+		SetSliderDialogStartValue(fStageTimerLeadIn[4])
+		SetSliderDialogDefaultValue(7.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+
 	elseIf option == oidStageTimerAggr[0]
 		SetSliderDialogStartValue(fStageTimerAggr[0])
 		SetSliderDialogDefaultValue(30.0)
@@ -692,6 +846,22 @@ event OnOptionSliderAccept(int option, float value)
 	elseIf option == oidStageTimer[4]
 		fStageTimer[4] = value
 		SetSliderOptionValue(oidStageTimer[4], fStageTimer[4], "{0} Seconds")
+
+	elseIf option == oidStageTimerLeadIn[0]
+		fStageTimerLeadIn[0] = value
+		SetSliderOptionValue(oidStageTimerLeadIn[0], fStageTimerLeadIn[0], "{0} Seconds")
+	elseIf option == oidStageTimerLeadIn[1]
+		fStageTimerLeadIn[1] = value
+		SetSliderOptionValue(oidStageTimerLeadIn[1], fStageTimerLeadIn[1], "{0} Seconds")
+	elseIf option == oidStageTimerLeadIn[2]
+		fStageTimerLeadIn[2] = value
+		SetSliderOptionValue(oidStageTimerLeadIn[2], fStageTimerLeadIn[2], "{0} Seconds")
+	elseIf option == oidStageTimerLeadIn[3]
+		fStageTimerLeadIn[3] = value
+		SetSliderOptionValue(oidStageTimerLeadIn[3], fStageTimerLeadIn[3], "{0} Seconds")
+	elseIf option == oidStageTimerLeadIn[4]
+		fStageTimerLeadIn[4] = value
+		SetSliderOptionValue(oidStageTimerLeadIn[4], fStageTimerLeadIn[4], "{0} Seconds")
 
 	elseIf option == oidStageTimerAggr[0]
 		fStageTimerAggr[0] = value
@@ -908,6 +1078,16 @@ event OnOptionSelect(int option)
 				bStripFemale[i] = !bStripFemale[i] 
 				SetToggleOptionValue(option, bStripFemale[i])
 				i = 128
+
+			elseIf i < 33 && option == oidStripLeadInMale[i]
+				bStripLeadInMale[i] = !bStripLeadInMale[i] 
+				SetToggleOptionValue(option, bStripLeadInMale[i])
+				i = 128
+			elseIf i < 33 && option == oidStripLeadInFemale[i]
+				bStripLeadInFemale[i] = !bStripLeadInFemale[i] 
+				SetToggleOptionValue(option, bStripLeadInFemale[i])
+				i = 128
+
 			elseIf i < 33 && option == oidStripVictim[i]
 				bStripVictim[i] = !bStripVictim[i] 
 				SetToggleOptionValue(option, bStripVictim[i])
@@ -1028,6 +1208,22 @@ event OnOptionHighlight(int option)
 					SetInfoText("Disarm female's of weapons during consensual animations")
 				endIf
 				i = 128
+
+			elseIf i < 33 && option == oidStripLeadInFemale[i]
+				if i != 32
+					SetInfoText("Remove armor/clothing covering a female's bipped slot #"+(i + 30)+" during foreplay intro animations")
+				else
+					SetInfoText("Disarm female's of weapons during foreplay intro animations")
+				endIf
+				i = 128
+			elseIf i < 33 && option == oidStripLeadInMale[i]
+				if i != 32
+					SetInfoText("Remove armor/clothing covering a female's bipped slot #"+(i + 30)+" during foreplay intro animations")
+				else
+					SetInfoText("Disarm male's of weapons during foreplay intro animations")
+				endIf
+				i = 128
+
 			elseIf i < 33 && option == oidStripVictim[i]
 				if i != 32
 					SetInfoText("Remove armor/clothing covering the victim's bipped slot #"+(i + 30)+" during aggressive animations")
