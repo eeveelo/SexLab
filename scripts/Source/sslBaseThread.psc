@@ -386,7 +386,7 @@ function PrepareActors()
 		endIf
 		; Auto strip
 		if sexual
-			form[] equipment = SexLab.StripActor(a, victim, leadIn)
+			form[] equipment = SexLab.StripActor(a, victim, true, leadIn)
 			SetEquipment(i, equipment)
 		endIf
 		; Get animation extras
@@ -760,7 +760,7 @@ function MoveScene()
 	bool advanceToggle
 	; Toggle auto advance off
 	if autoAdvance
-		UnregisterForUpdate()
+		autoAdvance = false
 		advanceToggle = true
 	endIf
 	; Enable Controls
@@ -769,8 +769,8 @@ function MoveScene()
 	Debug.SendAnimationEvent(SexLab.PlayerRef, "IdleForceDefaultState")
 	; Lock hotkeys here for timer
 	SexLab.Data.mMoveScene.Show(6)
-	float stop = Utility.GetCurrentRealTime() + 6
-	while stop > Utility.GetCurrentRealTime()
+	float stopat = Utility.GetCurrentRealTime() + 6
+	while stopat > Utility.GetCurrentRealTime()
 		Utility.Wait(0.8)
 	endWhile
 	; Disable Controls
@@ -783,7 +783,7 @@ function MoveScene()
 	CenterOnObject(SexLab.PlayerRef)
 	; Toggle auto advance back
 	if advanceToggle
-		RegisterForSingleUpdate(GetStageTimer())
+		autoAdvance = true
 	endIf
 endFunction
 
@@ -903,7 +903,7 @@ state Advance
 			if sexual
 				int i = 0
 				while i < actorCount
-					form[] equipment = SexLab.StripActor(pos[i], victim, false)
+					form[] equipment = SexLab.StripActor(pos[i], victim, false, false)
 					form[] current = GetEquipment(i)
 					int e = 0
 					while e < current.Length

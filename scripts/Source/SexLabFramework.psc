@@ -315,7 +315,7 @@ function ApplyCum(actor a, int cumID)
 	endIf
 endFunction
 
-form[] function StripActor(actor a, actor victim = none, bool leadIn = false)
+form[] function StripActor(actor a, actor victim = none, bool animate = true, bool leadIn = false)
 	int gender = a.GetLeveledActorBase().GetSex()
 	bool[] strip
 	if leadIn && gender < 1
@@ -331,10 +331,10 @@ form[] function StripActor(actor a, actor victim = none, bool leadIn = false)
 	else
 		strip = Config.bstripFemale
 	endIf
-	return StripSlots(a, strip)
+	return StripSlots(a, strip, animate)
 endFunction
 
-form[] function StripSlots(actor a, bool[] strip, bool allowNudesuit = true)
+form[] function StripSlots(actor a, bool[] strip, bool allowNudesuit = true, bool animate = false)
 
 	if strip.Length != 33
 		_DebugTrace("StripSlots","actor="+a+", strip="+strip+", allowNudesuit="+allowNudesuit,"Not enough strip slots passed, should be bool size 33")
@@ -348,12 +348,12 @@ form[] function StripSlots(actor a, bool[] strip, bool allowNudesuit = true)
 	weapon eWeap
 	spell eSpell
 
-	if gender > 0
+	if animate && gender >= 1 
 		Debug.SendAnimationEvent(a, "Arrok_FemaleUndress")
-	else
+	elseif animate && gender <= 0
 		Debug.SendAnimationEvent(a, "Arrok_MaleUndress")
 	endIf
-
+	
 	; Use Strip settings
 	int i = 0
 	while i < 33
@@ -363,16 +363,18 @@ form[] function StripSlots(actor a, bool[] strip, bool allowNudesuit = true)
 			if item != none && !item.HasKeyWordString("SexLabNoStrip")
 				a.UnequipItem(item, false, true)
 				items = sslUtility.PushForm(item, items)
-				utility.wait(0.3)
+				if animate
+					utility.wait(0.3)
+				endIf
 			endIf 
 		elseif strip[i] && i == 32
 			eWeap = a.GetEquippedWeapon(true)
-			if eWeap != none && !item.HasKeyWordString("SexLabNoStrip")
+			if eWeap != none && !eWeap.HasKeyWordString("SexLabNoStrip")
 				a.UnequipItem(eWeap, false, true)
 				items = sslUtility.PushForm(eWeap, items)
 			endIf
 			eWeap = a.GetEquippedWeapon(false)
-			if eWeap != none && !item.HasKeyWordString("SexLabNoStrip")
+			if eWeap != none && !eWeap.HasKeyWordString("SexLabNoStrip")
 				a.UnequipItem(eWeap, false, true)
 				items = sslUtility.PushForm(eWeap, items)
 			endIf
@@ -387,7 +389,9 @@ form[] function StripSlots(actor a, bool[] strip, bool allowNudesuit = true)
 		endIf
 	endIf
 
-	Debug.SendAnimationEvent(a, "IdleForceDefaultState")
+	if animate
+		Debug.SendAnimationEvent(a, "IdleForceDefaultState")
+	endIf
 
 	return items
 endFunction
