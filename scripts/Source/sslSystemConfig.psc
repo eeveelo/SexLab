@@ -44,12 +44,16 @@ bool property bUseMaleNudeSuit auto hidden
 int oidUseMaleNudeSuit
 bool property bUseFemaleNudeSuit auto hidden
 int oidUseFemaleNudeSuit
+bool property bUndressAnimation auto hidden
+int oidUndressAnimation
+
 float[] property fStageTimer auto hidden
 int[] oidStageTimer
 float[] property fStageTimerLeadIn auto hidden
 int[] oidStageTimerLeadIn
 float[] property fStageTimerAggr auto hidden
 int[] oidStageTimerAggr
+
 int property kBackwards auto hidden
 int oidBackwards
 int property kAdvanceAnimation auto hidden
@@ -74,6 +78,7 @@ int property kRotateScene auto hidden
 int oidRotateScene
 int property kRestoreOffsets auto hidden
 int oidRestoreOffsets
+
 bool[] property bStripMale auto hidden
 int[] oidStripMale
 bool[] property bStripFemale auto hidden
@@ -87,10 +92,12 @@ int[] oidStripVictim
 bool[] property bStripAggressor auto hidden
 int[] oidStripAggressor
 string property sPlayerVoice auto hidden
+
 int oidPlayerVoice
 int[] oidToggleVoice
 int[] oidToggleAnimation
 int[] oidAggrAnimation
+
 float property fMaleVoiceDelay auto hidden
 int oidMaleVoiceDelay
 float property fFemaleVoiceDelay auto hidden
@@ -133,6 +140,7 @@ function SetDefaults()
 	bUseFemaleNudeSuit = false
 	bRagdollEnd = true
 	bForeplayStage = true
+	bUndressAnimation = true
 
 	fMaleVoiceDelay = 7.0
 	fFemaleVoiceDelay = 6.0
@@ -369,6 +377,7 @@ event OnPageReset(string page)
 		oidForeplayStage = AddToggleOption("$SSL_PreSexForeplay", bForeplayStage)
 		oidScaleActors = AddToggleOption("$SSL_EvenActorsHeight", bScaleActors)
 		oidRagdollEnd = AddToggleOption("$SSL_RagdollEnding", bRagdollEnd)
+		oidUndressAnimation = AddToggleOption("$SSL_UndressAnimation", bUndressAnimation)
 		; DEPRECATED for animation specific tcl's in v1.1
 		; oidEnableTCL = AddToggleOption("Toggle Collisions For Player", bEnableTCL)
 		oidReDressVictim = AddToggleOption("$SSL_VictimsRedress", bReDressVictim)
@@ -877,6 +886,10 @@ event OnOptionSelect(int option)
 		bRagdollEnd = !bRagdollEnd 
 		SetToggleOptionValue(option, bRagdollEnd)
 
+	elseIf option == oidUndressAnimation
+		bUndressAnimation = !bUndressAnimation 
+		SetToggleOptionValue(option, bUndressAnimation)
+
 	elseif option == oidNPCBed
 		if sNPCBed == "$SSL_Never"
 			sNPCBed = "$SSL_Sometimes"
@@ -1142,6 +1155,8 @@ event OnOptionHighlight(int option)
 		SetInfoText("$SSL_InfoMoveScene")
 	elseIf option == oidRotateScene
 		SetInfoText("$SSL_InfoRotateScene")
+	elseIf option == oidUndressAnimation
+		SetInfoText("$SSL_InfoUndressAnimation")
 	else
 		; What are we?
 		int i = 0

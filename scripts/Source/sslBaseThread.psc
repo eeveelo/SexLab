@@ -882,7 +882,9 @@ endState
 
 state Advance
 	event OnUpdate()
-		CheckActive()
+		if !CheckActive()
+			return
+		endIf
 		; Increase stage
 		stage += 1
 		; Make sure stage exists first
@@ -925,6 +927,9 @@ state Advance
 
 
 	event OnEndState()
+		if !animating
+			return
+		endIf
 		; Set SFX
 		sfx = new float[2]
 		; Base Delay
@@ -976,7 +981,9 @@ endState
 
 state Animating
 	event OnBeginState()
-		CheckActive()
+		if !CheckActive()
+			return
+		endIf
 
 		if stage == stageCount && stageCount >= 2 && sexual && !leadIn
 			SexLab._SendEventHook("OrgasmStart", tid(), hook)

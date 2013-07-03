@@ -334,7 +334,7 @@ form[] function StripActor(actor a, actor victim = none, bool animate = true, bo
 	return StripSlots(a, strip, animate)
 endFunction
 
-form[] function StripSlots(actor a, bool[] strip, bool allowNudesuit = true, bool animate = false)
+form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool allowNudesuit = true)
 
 	if strip.Length != 33
 		_DebugTrace("StripSlots","actor="+a+", strip="+strip+", allowNudesuit="+allowNudesuit,"Not enough strip slots passed, should be bool size 33")
@@ -346,12 +346,15 @@ form[] function StripSlots(actor a, bool[] strip, bool allowNudesuit = true, boo
 	int mask
 	armor item
 	weapon eWeap
-	spell eSpell
 
-	if animate && gender >= 1 
-		Debug.SendAnimationEvent(a, "Arrok_FemaleUndress")
-	elseif animate && gender <= 0
-		Debug.SendAnimationEvent(a, "Arrok_MaleUndress")
+	if Config.bUndressAnimation && animate
+		if gender > 0 
+			Debug.SendAnimationEvent(a, "Arrok_FemaleUndress")
+		else
+			Debug.SendAnimationEvent(a, "Arrok_MaleUndress")
+		endIf
+	else
+		animate = false
 	endIf
 	
 	; Use Strip settings
