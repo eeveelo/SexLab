@@ -339,12 +339,14 @@ event OnConfigInit()
 	SexLab.Data.LoadVoices()
 endEvent
 
-event OnPlayerLoadGame()
+event OnGameReload()
+	parent.OnGameReload()
+
 	SexLab._CheckSystem()
 	Sexlab._StopAnimations()
+	SetDefaults() ; Reset on load for development builds
 	SexLab.Data.LoadAnimations()
 	SexLab.Data.LoadVoices()
-	SetDefaults()
 endEvent
 
 event OnVersionUpdate(int version)

@@ -85,6 +85,9 @@ bool clean = false
 actor property PlayerRef auto
 int playerThread = -1
 
+; Schlongs of Skyrim integration
+bool property sosEnabled = false auto hidden
+
 ;#---------------------------#
 ;#                           #
 ;#   API RELATED FUNCTIONS   #
@@ -1129,6 +1132,20 @@ function _CheckSystem()
 
 	; Load Strapons
 	Data.FindStrapons()
+
+	; Check for Schlongs of Skyrim
+	sosEnabled = false
+	form check = Game.GetFormFromFile(0x0D64, "Schlongs of Skyrim.esp") ; Armor SkinNaked
+	if check != none
+		sosEnabled = true
+		_DebugTrace("_CheckSystem","SexLab Compatibility: 'Schlongs of Skyrim.esp' was found")
+	else
+		check = Game.GetFormFromFile(0x0D67, "Schlongs of Skyrim - Light.esp") ; ArmorAddon NakedTorso
+		if check != none
+			sosEnabled = true
+			_DebugTrace("_CheckSystem","SexLab Compatibility: 'Schlongs of Skyrim - Light.esp' was found")
+		endIf
+	endIf
 
 	; Add debug spell
 	if Config.DebugMode() && !PlayerRef.HasSpell(Data.SexLabDebugSpell)
