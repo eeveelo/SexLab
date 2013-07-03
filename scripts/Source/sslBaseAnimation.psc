@@ -41,6 +41,8 @@ string[] actor5
 float[] offsetData
 float[] offsetDefaults
 bool[] switchData
+int[] schlongData
+
 
 int[] genders
 int[] cum
@@ -84,6 +86,16 @@ bool[] function GetSwitchSlot(int stage, int slot)
 	return switch
 endFunction
 
+int[] function GetSchlongSlot(int stage)
+	int[] schlongs = sslUtility.IntArray(actors)
+	int i = 0
+	while i < actors
+		schlongs[i] = schlongData[DataIndex(1, i, stage, 0)]
+		i += 1
+	endWhile
+	return schlongs
+endFunction
+
 ;/-----------------------------------------------
 	Animation Position Functions
 ------------------------------------------------/;
@@ -103,7 +115,7 @@ int function AddPosition(int gender = 0, int addCum = -1)
 	return aid
 endFunction
 
-int function AddPositionStage(int position, string animation, float forward = 0.0, float side = 0.0, float up = 0.0, float rotate = 0.0, bool silent = false, bool openMouth = false, bool strapon = true, string sos = "")
+int function AddPositionStage(int position, string animation, float forward = 0.0, float side = 0.0, float up = 0.0, float rotate = 0.0, bool silent = false, bool openMouth = false, bool strapon = true, int sos = 0)
 	int stage
 	if position == 0
 		actor1 = sslUtility.PushString(animation, actor1)
@@ -144,6 +156,8 @@ int function AddPositionStage(int position, string animation, float forward = 0.
 	switchData = sslUtility.PushBool(silent, switchData)
 	switchData = sslUtility.PushBool(openMouth, switchData)
 	switchData = sslUtility.PushBool(strapon, switchData)
+
+	schlongData = sslUtility.PushInt(sos, schlongData)
 
 	return stage
 endFunction
@@ -279,44 +293,6 @@ string[] function FetchStage(int stage)
 	return anims
 endFunction
 
-function PlayAnimations(actor[] pos, int stage)
-	string[] stageAnims = FetchStage(stage)
-	; For some reason looping makes them slightly out of sync.
-	if actors == 1
-		Debug.SendAnimationEvent(pos[0], stageAnims[0])
-	elseif actors == 2
-		Debug.SendAnimationEvent(pos[0], stageAnims[0])
-		Debug.SendAnimationEvent(pos[1], stageAnims[1])
-	elseif actors == 3
-		Debug.SendAnimationEvent(pos[0], stageAnims[0])
-		Debug.SendAnimationEvent(pos[1], stageAnims[1])
-		Debug.SendAnimationEvent(pos[2], stageAnims[2])
-	elseif actors == 4
-		Debug.SendAnimationEvent(pos[0], stageAnims[0])
-		Debug.SendAnimationEvent(pos[1], stageAnims[1])
-		Debug.SendAnimationEvent(pos[2], stageAnims[2])
-		Debug.SendAnimationEvent(pos[3], stageAnims[3])
-	elseif actors == 5
-		Debug.SendAnimationEvent(pos[0], stageAnims[0])
-		Debug.SendAnimationEvent(pos[1], stageAnims[1])
-		Debug.SendAnimationEvent(pos[2], stageAnims[2])
-		Debug.SendAnimationEvent(pos[3], stageAnims[3])
-		Debug.SendAnimationEvent(pos[4], stageAnims[4])
-	endIf
-
-	; Open mouth, if needed
-	bool[] open = GetSwitchSlot(stage, 1)
-	int i = 0
-	while i < actors
-		if open[i]
-			pos[i].SetExpressionOverride(16, 100)
-		else
-			pos[i].ClearExpressionOverride()
-		endIf
-		i += 1
-	endWhile
-endFunction
-
 ;/-----------------------------------------------
 	Animation Configuration Functions
 ------------------------------------------------/;
@@ -447,6 +423,9 @@ function UnloadAnimation()
 	genders = gendersDel
 	int[] cumDel
 	cum = cumDel
+
+	int[] schlongDel
+	schlongData = schlongDel
 
 	bool[] switchDel
 	switchData = switchDel

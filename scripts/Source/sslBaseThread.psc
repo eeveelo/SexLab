@@ -552,11 +552,12 @@ function EndAnimation(bool quick = false)
 	endIf
 
 	int i = 0
+
 	; Apply cum
 	if !quick && sexual
+		int[] genders = SexLab.GenderCount(pos)
 		while i < actorCount
 			if SexLab.Config.bUseCum && anim.GetCum(i) > 0 && pos[i].GetLeveledActorBase().GetSex() == 1
-				int[] genders = SexLab.GenderCount(pos)
 				if genders[0] > 0
 					SexLab.ApplyCum(pos[i], anim.GetCum(i))
 				elseIf SexLab.Config.bAllowFFCum && genders[0] > 1
@@ -788,7 +789,7 @@ function MoveScene()
 endFunction
 
 function RealignActors()
-	anim.PlayAnimations(pos, stage)
+	PlayAnimations()
 	int i = 0
 	while i < actorCount
 		MoveActor(i)
@@ -820,6 +821,49 @@ float function GetStageTimer()
 	endIf
 	return timers[(last - 1)]
 endfunction
+
+function PlayAnimations()
+	string[] stageAnims = anim.FetchStage(stage)
+	if actorCount == 1
+		Debug.SendAnimationEvent(pos[0], stageAnims[0])
+	elseif actorCount == 2
+		Debug.SendAnimationEvent(pos[0], stageAnims[0])
+		Debug.SendAnimationEvent(pos[1], stageAnims[1])
+	elseif actorCount == 3
+		Debug.SendAnimationEvent(pos[0], stageAnims[0])
+		Debug.SendAnimationEvent(pos[1], stageAnims[1])
+		Debug.SendAnimationEvent(pos[2], stageAnims[2])
+	elseif actorCount == 4
+		Debug.SendAnimationEvent(pos[0], stageAnims[0])
+		Debug.SendAnimationEvent(pos[1], stageAnims[1])
+		Debug.SendAnimationEvent(pos[2], stageAnims[2])
+		Debug.SendAnimationEvent(pos[3], stageAnims[3])
+	elseif actorCount == 5
+		Debug.SendAnimationEvent(pos[0], stageAnims[0])
+		Debug.SendAnimationEvent(pos[1], stageAnims[1])
+		Debug.SendAnimationEvent(pos[2], stageAnims[2])
+		Debug.SendAnimationEvent(pos[3], stageAnims[3])
+		Debug.SendAnimationEvent(pos[4], stageAnims[4])
+	endIf
+
+	bool[] openMouth = anim.GetSwitchSlot(stage, 1)
+	int[] sos = anim.GetSchlongSlot(stage)
+	int i = 0
+	while i < actorCount
+		; Open mouth, if needed
+		if !openMouth[i]
+			pos[i].ClearExpressionOverride()
+		else
+			pos[i].SetExpressionOverride(16, 100)
+		endIf
+		; Send SOS event
+		if SexLab.sosEnabled && anim.GetGender(i) < 1
+			Debug.SendAnimationEvent(pos[i], "SOSBend"+sos[i])
+		endIf
+		i += 1
+	endWhile
+
+endFunction
 
 ;#---------------------------#
 ;#  ANIMATION PROCESS EVENT  #
@@ -889,7 +933,7 @@ state Advance
 		stage += 1
 		; Make sure stage exists first
 		if stage <= stageCount
-			anim.PlayAnimations(pos, stage)
+			PlayAnimations()
 			self.GoToState("Animating")
 		; End leadIn animations and go into normal animations
 		elseIf leadIn && stage > stageCount
