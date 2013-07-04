@@ -12,10 +12,10 @@ function LoadAnimation()
 	AddPositionStage(a1, "Arrok_Foreplay_A1_S4", 0)
 
 	int a2 = AddPosition(Male) ; -104
-	AddPositionStage(a2, "Arrok_Foreplay_A2_S1", -108, strapon = false)
-	AddPositionStage(a2, "Arrok_Foreplay_A2_S2", -108, strapon = false)
-	AddPositionStage(a2, "Arrok_Foreplay_A2_S3", -108, strapon = false)
-	AddPositionStage(a2, "Arrok_Foreplay_A2_S4", -108, strapon = false)
+	AddPositionStage(a2, "Arrok_Foreplay_A2_S1", -106, strapon = false, sos = 0)
+	AddPositionStage(a2, "Arrok_Foreplay_A2_S2", -106, strapon = false, sos = 0)
+	AddPositionStage(a2, "Arrok_Foreplay_A2_S3", -106, strapon = false, sos = 5)
+	AddPositionStage(a2, "Arrok_Foreplay_A2_S4", -106, strapon = false, sos = 5)
 
 	AddTag("Arrok")
 	AddTag("BBP")

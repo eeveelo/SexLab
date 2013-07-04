@@ -13,10 +13,10 @@ function LoadAnimation()
 	AddPositionStage(a1, "Arrok_Hugfuck_A1_S4", 0)
 
 	int a2 = AddPosition(Male) ; -99
-	AddPositionStage(a2, "Arrok_Hugfuck_A2_S1", -100)
-	AddPositionStage(a2, "Arrok_Hugfuck_A2_S2", -100)
-	AddPositionStage(a2, "Arrok_Hugfuck_A2_S3", -100)
-	AddPositionStage(a2, "Arrok_Hugfuck_A2_S4", -100)
+	AddPositionStage(a2, "Arrok_Hugfuck_A2_S1", -103.5, sos = 9)
+	AddPositionStage(a2, "Arrok_Hugfuck_A2_S2", -103.5, sos = 9)
+	AddPositionStage(a2, "Arrok_Hugfuck_A2_S3", -103.5, sos = 9)
+	AddPositionStage(a2, "Arrok_Hugfuck_A2_S4", -103.5, sos = 9)
 
 	AddTag("Arrok")
 	AddTag("BBP")

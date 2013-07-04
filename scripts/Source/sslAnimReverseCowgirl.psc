@@ -13,10 +13,10 @@ function LoadAnimation()
 	AddPositionStage(a1, "ReverseCowgirl_A1_S4", 0)
 
 	int a2 = AddPosition(Male) ; -102
-	AddPositionStage(a2, "ReverseCowgirl_A2_S1", -107)
-	AddPositionStage(a2, "ReverseCowgirl_A2_S2", -107)
-	AddPositionStage(a2, "ReverseCowgirl_A2_S3", -107)
-	AddPositionStage(a2, "ReverseCowgirl_A2_S4", -107)
+	AddPositionStage(a2, "ReverseCowgirl_A2_S1", -107, sos = 3)
+	AddPositionStage(a2, "ReverseCowgirl_A2_S2", -107, sos = 3)
+	AddPositionStage(a2, "ReverseCowgirl_A2_S3", -107, sos = 3)
+	AddPositionStage(a2, "ReverseCowgirl_A2_S4", -107, sos = 3)
 
 	AddTag("Default")
 	AddTag("Sex")

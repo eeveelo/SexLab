@@ -13,10 +13,10 @@ function LoadAnimation()
 	AddPositionStage(a1, "HuggingSex_A1_S4", 0)
 
 	int a2 = AddPosition(Male) ; -99
-	AddPositionStage(a2, "HuggingSex_A2_S1", -102)
-	AddPositionStage(a2, "HuggingSex_A2_S2", -102)
-	AddPositionStage(a2, "HuggingSex_A2_S3", -102)
-	AddPositionStage(a2, "HuggingSex_A2_S4", -102)
+	AddPositionStage(a2, "HuggingSex_A2_S1", -102, sos = 9)
+	AddPositionStage(a2, "HuggingSex_A2_S2", -102, sos = 9)
+	AddPositionStage(a2, "HuggingSex_A2_S3", -102, sos = 9)
+	AddPositionStage(a2, "HuggingSex_A2_S4", -102, sos = 9)
 
 	AddTag("Default")
 	AddTag("Sex")

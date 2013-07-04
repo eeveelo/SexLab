@@ -7,6 +7,7 @@ function LoadAnimation()
 	SetSFX(Squishing)
 	
 	tcl = true
+	enabled = false
 
 	int a1 = AddPosition(Female, addCum=Anal)
 	AddPositionStage(a1, "AggrBehind_A1_S1", 0)
