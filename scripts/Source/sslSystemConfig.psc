@@ -344,7 +344,7 @@ event OnGameReload()
 
 	SexLab._CheckSystem()
 	Sexlab._StopAnimations()
-	SetDefaults() ; Reset on load for development builds
+	;SetDefaults() ; Reset on load for development builds
 	SexLab.Data.LoadAnimations()
 	SexLab.Data.LoadVoices()
 endEvent

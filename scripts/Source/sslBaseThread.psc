@@ -168,8 +168,8 @@ function ChangeActors(actor[] changeTo)
 	if !active
 		return
 	endIf
-	int newCount = changeTo.Length
 	int i = 0
+	int newCount = changeTo.Length
 	; Make sure all new actors are vaild.
 	while i < newCount
 		if pos.Find(changeTo[i]) < 0 && SexLab.ValidateActor(changeTo[i]) < 0
@@ -215,6 +215,7 @@ function ChangeActors(actor[] changeTo)
 	endWhile
 	actorCount = newCount
 	pos = changeTo
+
 	PrepareActors()
 	;Restart stage
 	stage -= 1
@@ -435,6 +436,7 @@ function ResetActor(int i)
 		a.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 	endIf
 	; Clear them out
+	a.ClearExpressionOverride()
 	a.RemoveFromFaction(SexLab.AnimatingFaction)
 	SexLab._ClearDoNothing(aliasSlot[i])
 	RemoveExtras(i)
@@ -552,6 +554,27 @@ function EndAnimation(bool quick = false)
 	endIf
 
 	int i = 0
+	debug.trace("-----------------------------------------------------------")
+	debug.trace("------------SEXLAB ALIGNMENTS FOR "+anim.name+"------------")
+	i = 0
+	while i < actorCount
+		debug.trace("------Start Actor "+(i + 1)+"------")
+		int s = 1
+		while s <= anim.StageCount()
+			debug.trace("----Start Stage #"+s+"----")
+			string[] stages = anim.FetchStage(s)
+			debug.trace("--"+stages[i]+"--")
+			debug.trace("Forward: "+anim.AccessOffset(i, s, 0))
+			debug.trace("Side: "+anim.AccessOffset(i, s, 1))
+			debug.trace("Up: "+anim.AccessOffset(i, s, 2))
+			debug.trace("----End Stage #"+s+"----")
+			s += 1
+		endWhile
+		debug.trace("------End Actor "+(i + 1)+"------")
+		i += 1
+	endWhile
+	debug.trace("-----------------------------------------------------------")
+
 
 	; Apply cum
 	if !quick && sexual
@@ -579,6 +602,7 @@ function EndAnimation(bool quick = false)
 		ResetActor(i)
 		i += 1
 	endWhile
+	
 	if !quick
 		Utility.Wait(2.0)
 	endIf
@@ -862,7 +886,6 @@ function PlayAnimations()
 		endIf
 		i += 1
 	endWhile
-
 endFunction
 
 ;#---------------------------#

@@ -189,7 +189,8 @@ float[] function GetPositionOffsets(int position, int stage)
 	endIf
 
 	float[] off = new float[4]
-	off[0] = CalculateForward(position, stage)
+	;off[0] = CalculateForward(position, stage)
+	off[0] = AccessOffset(position, stage, 0)
 	off[1] = AccessOffset(position, stage, 1)
 	off[2] = AccessOffset(position, stage, 2)
 	off[3] = AccessOffset(position, stage, 3)
