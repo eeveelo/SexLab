@@ -19,6 +19,14 @@ sslSystemResources property data auto
 ;#---------------------------#
 ;# Start Animation Variables #
 ;#---------------------------#
+
+sslThreadView00 property ThreadView00 auto
+sslThreadView01 property ThreadView01 auto
+sslThreadView02 property ThreadView02 auto
+sslThreadView03 property ThreadView03 auto
+sslThreadView04 property ThreadView04 auto
+sslThreadController[] property controller auto
+
 ; Current number of default threads available
 int threadCount = 15
 sslBaseThread[] thread
@@ -93,6 +101,18 @@ bool property sosEnabled = false auto hidden
 ;#   API RELATED FUNCTIONS   #
 ;#                           #
 ;#---------------------------#
+
+sslThreadModel function NewThread()
+	int i = 0
+	sslThreadModel make
+	while make == none && i < controller.Length
+		make = controller[i].Make()
+		debug.trace(make)
+		i += 1
+	endWhile
+	return make
+endFunction
+
 
 int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim = none, ObjectReference centerOn = none, bool allowBed = true, string hook = "")
 	if !enabled
@@ -235,6 +255,18 @@ int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim 
 	endIf
 	ready = true
 	return SexThread
+endFunction
+
+int function SelectThread(bool claim = false)
+	int i = 0
+	while i < threadCount
+		if !activeThread[i]
+			activeThread[i] = claim
+			return i
+		endIf
+	endWhile
+	_DebugTrace("PickThread","claim="+claim,"Failed to find a non-active animation thread.")
+	return -1
 endFunction
 
 int function PickThread(bool claim = false)
@@ -1058,6 +1090,13 @@ function _SetupSystem()
 	; Init voices
 	voice = new sslBaseVoice[128]
 	voiceIndex = 0
+
+	controller = new sslThreadController[5]
+	controller[0] = ThreadView00 as sslThreadView00
+	controller[1] = ThreadView01 as sslThreadView01
+	controller[2] = ThreadView02 as sslThreadView02
+	controller[3] = ThreadView03 as sslThreadView03
+	controller[4] = ThreadView04 as sslThreadView04
 
 	; Init thread variables based on current thread count: 15
 	thread = new sslBaseThread[15]

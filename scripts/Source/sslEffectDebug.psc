@@ -1,10 +1,17 @@
 Scriptname sslEffectDebug extends ActiveMagicEffect  
 
 SexLabFramework property SexLab Auto
-actor a2
 
 event OnEffectStart(actor target, actor caster)
 
+	sslThreadModel make = SexLab.NewThread()
+ 	actor position = target
+	debug.messagebox("effect "+position)
+	int a1 = make.AddActor(position)
+	int a2 = make.AddActor(SexLab.PlayerRef)
+	debug.trace("effect: actor["+a1+"] - actor["+a2+"]")
+	sslThreadController thread = make.StartThread()
+	debug.messagebox(thread+" "+thread.tid()+" "+thread.GetPlayer())
 	; debug.messagebox(target.GetPositionZ() +" " + caster.GetPositionZ())
 
 	; Voice Test
@@ -57,7 +64,7 @@ event OnEffectStart(actor target, actor caster)
 	; SexLab.StartSex(activeActors, anims)
 	
 	; Duo Test
-	actor[] activeActors = new actor[2]
+	; actor[] activeActors = new actor[2]
 	; if SexLab.DebugActor != none
 	; 	activeActors[0] = target
 	; 	activeActors[1] = SexLab.DebugActor
@@ -67,11 +74,11 @@ event OnEffectStart(actor target, actor caster)
 	; else
 	; 	SexLab.DebugActor = target
 	; endIf
-	activeActors[0] = SexLab.PlayerRef
-	activeActors[1] = target
-	sslBaseAnimation anim = SexLab.GetAnimationByName("Arrok Blowjob")
-	bool[] silence = anim.GetSilence(1)
-	debug.messagebox(silence)
+	; activeActors[0] = SexLab.PlayerRef
+	; activeActors[1] = target
+	; sslBaseAnimation anim = SexLab.GetAnimationByName("Arrok Blowjob")
+	; bool[] silence = anim.GetSilence(1)
+	; debug.messagebox(silence)
 
 	; SexLab.StartSex(activeActors, anims)
 
