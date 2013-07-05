@@ -1,7 +1,8 @@
 scriptname sslBaseThread extends quest
 
-; quest property sslSys auto
+; Main script
 SexLabFramework property SexLab auto
+; thread index number, parent invalid
 int function tid()
 	return -1
 endFunction
@@ -105,13 +106,20 @@ function SetAnimation(sslBaseAnimation animation)
 	if !active
 		return
 	endIf
+	; Turn off TCL if before changing
+	if anim != none && player >= 0 && anim.tcl
+		Debug.ToggleCollisions()
+	endIf
+	; Setup animation enviroment
 	anim = animation
 	stageCount = anim.StageCount()
 	sexual = anim.IsSexual()
 	sfxType = anim.GetSFX()
+	; Turn on TCL if anim needs it
 	if anim.tcl
 		Debug.ToggleCollisions()
 	endIf
+	; Notify player of anim name
 	if player != -1
 		Debug.Notification(anim.name)
 	endIf
@@ -419,12 +427,17 @@ endFunction
 
 function ResetActor(int i)
 	actor a = pos[i]
+	; Reset openmouth
+	a.ClearExpressionOverride()
 	; Reset scale if needed
 	if actorCount > 1 && SexLab.Config.bScaleActors
 		a.SetScale(1.0)
 	endIf
 	; Enable movement
 	if SexLab.PlayerRef == a
+		if anim.tcl
+			Debug.ToggleCollisions()
+		endIf
 		SexLab.UnregisterForAllKeys()
 		Game.EnablePlayerControls()
 		Game.SetInChargen(false, false, false)
@@ -436,7 +449,6 @@ function ResetActor(int i)
 		a.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 	endIf
 	; Clear them out
-	a.ClearExpressionOverride()
 	a.RemoveFromFaction(SexLab.AnimatingFaction)
 	SexLab._ClearDoNothing(aliasSlot[i])
 	RemoveExtras(i)
@@ -552,31 +564,14 @@ function EndAnimation(bool quick = false)
 	if !CheckActive()
 		return
 	endIf
-
-	int i = 0
-	debug.trace("-----------------------------------------------------------")
-	debug.trace("------------SEXLAB ALIGNMENTS FOR "+anim.name+"------------")
-	i = 0
-	while i < actorCount
-		debug.trace("------Start Actor "+(i + 1)+"------")
-		int s = 1
-		while s <= anim.StageCount()
-			debug.trace("----Start Stage #"+s+"----")
-			string[] stages = anim.FetchStage(s)
-			debug.trace("--"+stages[i]+"--")
-			debug.trace("Forward: "+anim.AccessOffset(i, s, 0))
-			debug.trace("Side: "+anim.AccessOffset(i, s, 1))
-			debug.trace("Up: "+anim.AccessOffset(i, s, 2))
-			debug.trace("----End Stage #"+s+"----")
-			s += 1
-		endWhile
-		debug.trace("------End Actor "+(i + 1)+"------")
-		i += 1
-	endWhile
-	debug.trace("-----------------------------------------------------------")
-
-
+	animating = false
+	; Force player camera back to 3rd person mode
+	; Prevents potential TFC locking with player
+	if player >= 0
+		Game.ForceThirdPerson()
+	endIf
 	; Apply cum
+	int i = 0
 	if !quick && sexual
 		int[] genders = SexLab.GenderCount(pos)
 		while i < actorCount
@@ -589,12 +584,6 @@ function EndAnimation(bool quick = false)
 			endIf
 			i += 1
 		endWhile
-	endIf
-
-	animating = false
-
-	if player >= 0 && anim.tcl
-		Debug.ToggleCollisions()
 	endIf
 
 	i = 0
@@ -633,10 +622,6 @@ endFunction
 function ChangeAnimation(bool backwards = false)
 	if animCount == 1
 		return ; Single animation selected, nothing to change to
-	endIf
-
-	if player >= 0 && anim.tcl
-		Debug.ToggleCollisions()
 	endIf
 
 	if !backwards
@@ -960,6 +945,9 @@ state Advance
 			self.GoToState("Animating")
 		; End leadIn animations and go into normal animations
 		elseIf leadIn && stage > stageCount
+			if player >= 0
+				Game.ForceThirdPerson()
+			endIf
 			if victim != none
 				timers = SexLab.Config.fStageTimerAggr
 			else
