@@ -5,13 +5,32 @@ SexLabFramework property SexLab Auto
 event OnEffectStart(actor target, actor caster)
 
 	sslThreadModel make = SexLab.NewThread()
- 	actor position = target
-	debug.messagebox("effect "+position)
-	int a1 = make.AddActor(position)
-	int a2 = make.AddActor(SexLab.PlayerRef)
-	debug.trace("effect: actor["+a1+"] - actor["+a2+"]")
+	make.AddActor(target)
+	make.AddActor(SexLab.PlayerRef)
 	sslThreadController thread = make.StartThread()
-	debug.messagebox(thread+" "+thread.tid()+" "+thread.GetPlayer())
+	; Utility.Wait(4.0)
+	; sslThreadModel make2 = SexLab.NewThread()
+	; make2.AddActor(SexLab.PlayerRef)
+	; sslThreadController thread2 = make2.StartThread()
+	; Utility.Wait(4.0)
+	; debug.messagebox("Thread["+thread.tid()+"]"+thread.GetActors())
+	; debug.messagebox("Thread["+thread2.tid()+"]"+thread2.GetActors())
+
+
+	; sslThreadModel make = SexLab.NewThread()
+	; debug.messagebox(make.tid() + " in state "+make.GetState())
+	; debug.messagebox(SexLab.Controller[1].tid()+ " in state "+SexLab.Controller[1].GetState())
+	; utility.wait(5.0)
+	; sslThreadModel make2 = SexLab.NewThread()
+	; debug.messagebox(make.tid() + " in state "+make.GetState())
+	; debug.messagebox(make2.tid() + " in state "+make2.GetState())
+ 	; actor position = target
+	; debug.messagebox("effect "+position)
+	; int a1 = make.AddActor(position)
+	; int a2 = make.AddActor(SexLab.PlayerRef)
+	; debug.trace("effect: actor["+a1+"] - actor["+a2+"]")
+	; sslThreadController thread = make.StartThread()
+	; debug.messagebox(thread+" "+thread.tid()+" "+thread.GetPlayer())
 	; debug.messagebox(target.GetPositionZ() +" " + caster.GetPositionZ())
 
 	; Voice Test

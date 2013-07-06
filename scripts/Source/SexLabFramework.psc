@@ -104,13 +104,14 @@ bool property sosEnabled = false auto hidden
 
 sslThreadModel function NewThread()
 	int i = 0
-	sslThreadModel make
-	while make == none && i < controller.Length
-		make = controller[i].Make()
-		debug.trace(make)
+	while i < controller.Length
+		if !controller[i].IsLocked
+			debug.trace("Making thread["+controller[i].tid()+"] "+controller[i])
+			return controller[i].Make()
+		endIf
 		i += 1
 	endWhile
-	return make
+	return none
 endFunction
 
 
