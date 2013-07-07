@@ -64,17 +64,17 @@ state Making
 		making = false
 		; Make timer
 		float expire = Utility.GetCurrentRealTime() + timeout
-		while expire > Utility.GetCurrentRealTime() && locked
-			if active
+		while expire > Utility.GetCurrentRealTime()
+			if active || !locked
 				return
 			endIf
 		  Utility.wait(0.5)
 		endwhile
 		; Check if need to reset
-		if !active || !locked
-			Debug.MessageBox("Thread["+tid+"] Timer Expire")
+		if !active
 			_Log("Thread["+tid+"] has timed out; resetting model and reentering selection pool", "Make", "NOTICE")
 			GoToState("Idle")
+			return
 		endIf
 	endEvent
 endState
@@ -255,8 +255,10 @@ function SetHook(string hookName)
 	hook = hookName
 endFunction
 
-float[] function SetCenterReference(ObjectReference centerOn)
+function SetCenterReference(ObjectReference centerOn)
 	if !_MakeWait("SetCenterReference")
+		return none
+	elseIf centerOn == none
 		return none
 	endIf
 	centerRef = centerOn
@@ -273,11 +275,9 @@ float[] function SetCenterReference(ObjectReference centerOn)
 		centerLoc[1] = centerLoc[1] + (35 * Math.cos(centerLoc[5]))
 		centerLoc[2] = centerLoc[2] + 35
 	endIf
-
-	return centerLoc
 endFunction
 
-float function UpdateRotation(float adjust)
+function UpdateRotation(float adjust)
 	centerLoc[5] = centerLoc[5] + adjust
 	if centerLoc[5] >= 360
 		centerLoc[5] = ( centerLoc[5] - 360 )
@@ -348,9 +348,10 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 		_Log("No available actor positions", "AddActor")
 		return -1
 	elseIf SexLab.ValidateActor(position) < 1
+		_Log("Actor has failed validation", "AddActor", "FATAL")
 		return -1
 	elseIf SexLab.FindActorController(position) != -1
-		_Log("Actor already claimed by a making thread", "AddActor")
+		_Log("Actor already claimed by a pending thread", "AddActor", "FATAL")
 		return -1
 	endIf
 	waiting = true
@@ -409,20 +410,14 @@ sslBaseAnimation[] property animations hidden
 endProperty
 
 function SetAnimations(sslBaseAnimation[] animationList)
-	if !_MakeWait("SetAnimations")
-		return
-	elseIf animationList.Length == 0
-		_Log("No animations available in given list", "SetAnimations")
+	if !_MakeWait("SetAnimations") || animationList.Length == 0
 		return
 	endIf
 	primaryAnimations = animationList
 endFunction
 
 function SetLeadAnimations(sslBaseAnimation[] animationList)
-	if !_MakeWait("SetLeadAnimations")
-		return
-	elseIf animationList.Length == 0
-		_Log("No animations available in given animation list", "SetLeadAnimations")
+	if !_MakeWait("SetLeadAnimations") || animationList.Length == 0
 		return
 	endIf
 	leadIn = true
@@ -627,10 +622,10 @@ function SendThreadEvent(string eventName)
 	if hook != ""
 		string customEvent = eventName+"_"+hook
 		Debug.Trace("SexLab Thread["+tid+"]: Sending custom event hook '"+customEvent+"'")
-		SendModEvent(customEvent, tid, 1)
+		SendModEvent(customEvent, (tid as string), 1)
 	endIf
 	; Send Global Event
-	SendModEvent(eventName, tid, 1)
+	SendModEvent(eventName, (tid as string), 1)
 endFunction
 
 ;/-----------------------------------------------\;
@@ -641,8 +636,14 @@ auto state Idle
 	event OnBeginState()
 		InitializeThread()
 		locked = false
+		Debug.Trace("SexLab Thread["+tid+"]: Ready")
 	endEvent
 endState
+
+function UnlockThread()
+	InitializeThread()
+	GoToState("Idle")
+endFunction
 
 function InitializeThread()
 	; Set states

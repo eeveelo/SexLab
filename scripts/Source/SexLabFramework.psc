@@ -113,7 +113,7 @@ bool property sosEnabled = false auto hidden
 ;#                           #
 ;#---------------------------#
 
-sslThreadModel function NewThread(float timeout = 25.0)
+sslThreadModel function NewThread(float timeout = 10.0)
 	int i = 0
 	while i < Controllers.Length
 		if !Controllers[i].IsLocked
@@ -125,171 +125,35 @@ sslThreadModel function NewThread(float timeout = 25.0)
 	return none
 endFunction
 
-
 int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim = none, ObjectReference centerOn = none, bool allowBed = true, string hook = "")
 	if !enabled
 		Data.mSystemDisabled.Show()
 		_DebugTrace("StartSex","","Failed to start animation; system is currently disabled")
 		return -99
 	endIf
-
 	_ReadyWait()
 	ready = false
 	clean = false
-
+	sslThreadModel Make = NewThread()
 	int i = 0
-	int playerPosition = -1
-	bool aggr = false
-	int actorCount = sexActors.Length
-	int animCount = anims.Length
-	int males = 0
-	int females = 0
-
-	if actorCount == 0
-		ready = true
-		_DebugTrace("StartSex","sexActors="+sexActors,"Failed to start animation; no actors passed")
-		return -2 ; No Actors passed
-	endIf
-
-	if victim != none
-		aggr = true
-	endIf
-
-	; Validate Actors & get genders
-	i = 0
-	while i < actorCount
-		int validate = ValidateActor(sexActors[i])
-		if validate < 0
+	while i < sexActors.Length
+		if Make.AddActor(sexActors[i], (victim == sexActors[i])) < 0
 			ready = true
-			return validate ; Failed Validation
-		endIf
-
-		if sexActors[i].GetLeveledActorBase().GetSex() == 1
-			females += 1
-		else
-			males += 1
-		endIf
-
-		int first = sexActors.Find(sexActors[i])
-		int last = sexActors.RFind(sexActors[i])
-		if first != last
-			ready = true
-			_DebugTrace("StartSex","sexActors="+sexActors,"Failed to start animation; duplicate actor found in list")
-			return -3
-		endIf
-
-		if sexActors[i] == PlayerRef
-			playerPosition = i
+			return -1
 		endIf
 		i += 1
 	endWhile
-
-	; No animations passed, get some
-	if animCount == 0
-		if (females == 2 && males == 0) || (males == 2 && females == 0)
-			; Don't limit to just same sex animations for same sex pairings
-			anims = GetAnimationsByType(actorCount, 1, 1, aggressive=aggr)
-			sslBaseAnimation[] animsSameSex = GetAnimationsByType(actorCount, males, females, aggressive=aggr)
-			anims = MergeAnimationLists(anims, animsSameSex)
-		elseif actorCount < 3
-			; Grab animations like normal
-			anims = GetAnimationsByType(actorCount, males, females, aggressive=aggr)
-		elseif actorCount >= 3
-			; Get 3p + animations ignoring gender
-			anims = GetAnimationsByType(actorCount, aggressive=aggr)
-		endIf
+	Make.SetAnimations(anims)
+	Make.SetCenterReference(centerOn)
+	if allowBed == false
+		Make.SetBedding(-1)
 	endIf
-	
-	if anims.Length < 1
-		ready = true
-		_DebugTrace("StartSex","sexActors="+sexActors+", anims="+anims,"Failed to start animation; no valid animations found")
-		return -4
-	endIf
-
-	; Find a bed to center on if we can use one
-	ObjectReference bed
-	if allowBed && playerPosition != -1 && centerOn == none
-		bed = Game.FindClosestReferenceOfAnyTypeInListFromRef(Data.BedsList, PlayerRef, 500.0)
-	elseif allowBed && playerPosition == -1 && centerOn == none
-		bed = Game.FindClosestReferenceOfAnyTypeInListFromRef(Data.BedsList, sexActors[0], 500.0)
-	endIf
-
-	; A bed was selected, should we use it?
-	if bed != none && centerOn == none
-		int useBed = 0
-		if playerPosition != -1 && PlayerRef != victim
-			useBed = Data.mUseBed.Show()
-		elseif Config.sNPCBed == "$SSL_Always"
-			useBed = 1
-		elseif Config.sNPCBed == "$SSL_Sometimes"
-			useBed = utility.RandomInt(0,1)
-		endIf
-
-		if useBed == 1
-			centerOn = bed
-		endIf
-	endIf
-
-	; Find a marker near one of our actors and center there
-	if centerOn == none
-		i = 0
-		while i < actorCount
-			form marker = Game.FindRandomReferenceOfTypeFromRef(Data.LocationMarker, sexActors[i], 600.0)
-			if marker != none
-				centerOn = marker as ObjectReference
-				i = actorCount
-			endIf
-			i += 1
-		endWhile
-	endIf
-
-	; Determine if foreplay should be used
-	sslBaseAnimation[] foreplay
-	if !aggr && actorCount > 1 && Config.bForeplayStage
-		foreplay = GetAnimationsByTag(actorCount, "Foreplay")
-	endIf
-
-	; Center on actor[0] and place victim there if still none
-	if centerOn == none && victim != none
-		centerOn = victim
-	elseif centerOn == none && victim == none && playerPosition == -1
-		centerOn = sexActors[0]
-	elseIf centerOn == none && victim == none && playerPosition != -1
-		centerOn = sexActors[playerPosition]
-	endIf
-
-	int SexThread = PickThread(true)
-	if SexThread >= 0
-		_DebugTrace("StartSex","sexActors="+sexActors,"Starting animation thread["+sexThread+"]")
-		thread[SexThread].SpawnThread(sexActors, anims, foreplay, victim, centerOn, hook)
-	else
-		_DebugTrace("StartSex","sexActors="+sexActors,"Failed to start animation; no available animation slots")
-	endIf
+	Make.SetHook(hook)
+	sslThreadController Controller = Make.StartThread()
 	ready = true
-	return SexThread
-endFunction
-
-int function SelectThread(bool claim = false)
-	int i = 0
-	while i < threadCount
-		if !activeThread[i]
-			activeThread[i] = claim
-			return i
-		endIf
-	endWhile
-	_DebugTrace("PickThread","claim="+claim,"Failed to find a non-active animation thread.")
-	return -1
-endFunction
-
-int function PickThread(bool claim = false)
-	int i = 0
-	while i < threadCount
-		if !activeThread[i]
-			activeThread[i] = claim
-			return i
-		endIf
-	endWhile
-	_DebugTrace("PickThread","claim="+claim,"Failed to find a non-active animation thread.")
+	if Controller != none
+		return Controller.tid
+	endIf
 	return -1
 endFunction
 
@@ -904,6 +768,7 @@ actor function HookVictim(string argString)
 endFunction
 
 actor[] function HookActors(string argString)
+	debug.trace("HOOK ACTORS ARGUMENT: "+argString)
 	return Controllers[(argString as int)].Positions
 endFunction
 

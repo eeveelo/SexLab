@@ -341,12 +341,11 @@ endEvent
 
 event OnGameReload()
 	parent.OnGameReload()
-
 	SexLab._CheckSystem()
 	Sexlab._StopAnimations()
+	;SexLab.Data.LoadAnimations()
+	;SexLab.Data.LoadVoices()
 	;SetDefaults() ; Reset on load for development builds
-	SexLab.Data.LoadAnimations()
-	SexLab.Data.LoadVoices()
 endEvent
 
 event OnVersionUpdate(int version)
@@ -355,7 +354,10 @@ event OnVersionUpdate(int version)
 	if CurrentVersion > 1 && !SexLab._CheckClean() && (current - latest) > 10
 		SexLab.Data.mDirtyUpgrade.Show(current, latest)
 	endIf
-	SetDefaults()
+	;SexLab._SetupSystem()
+	;SetDefaults()
+	;SexLab.Data.LoadAnimations()
+	;SexLab.Data.LoadVoices()
 
 	; ; Rev 4
 	; if version >= 4 && CurrentVersion < 4

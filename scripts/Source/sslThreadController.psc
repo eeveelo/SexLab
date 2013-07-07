@@ -145,7 +145,6 @@ state Advance
 				orgasm = false
 			endIf
 			; Start Animations loop
-			PlayAnimation()
 			GoToState("Animating")
 		elseIf leadIn && stage > Animation.StageCount()
 			; End leadIn animations and go into normal animations
@@ -165,7 +164,6 @@ state Advance
 				endWhile
 			endIf
 			; Start Animations loop
-			PlayAnimation()
 			GoToState("Animating")
 		else
 			if HasPlayer()
@@ -210,6 +208,8 @@ state Animating
 		if !animating
 			return
 		endIf
+		
+		RealignActors()
 
 		if orgasm
 			SendThreadEvent("OrgasmStart")
@@ -330,7 +330,7 @@ endFunction
 function AdjustForward(bool backwards = false)
 	float adjustment = 0.5
 	if backwards
-		adjustment *= -1
+		adjustment = adjustment * -1
 	endIf
 	Animation.UpdateForward(adjustingPos, stage, adjustment)
 	MoveActor(adjustingPos)
@@ -339,7 +339,7 @@ endFunction
 function AdjustSideways(bool backwards = false)
 	float adjustment = 0.5
 	if backwards
-		adjustment *= -1
+		adjustment = adjustment * -1
 	endIf
 	Animation.UpdateSide(adjustingPos, stage, adjustment)
 	MoveActor(adjustingPos)
@@ -351,7 +351,7 @@ function AdjustUpward(bool backwards = false)
 	endIf
 	float adjustment = 0.5
 	if backwards
-		adjustment *= -1
+		adjustment = adjustment * -1
 	endIf
 	Animation.UpdateUp(adjustingPos, stage, adjustment)
 	MoveActor(adjustingPos)
@@ -361,7 +361,7 @@ function RotateScene(bool backwards = false)
 	; Adjust current center's Z angle
 	float adjustment = 45
 	if backwards
-		adjustment *= -1
+		adjustment = adjustment * -1
 	endIf
 	UpdateRotation(adjustment) 
 	MoveActors()
@@ -690,7 +690,7 @@ function EndAnimation(bool quick = false)
 	endWhile
 	
 	if !quick
-		Utility.Wait(2.0)
+		Utility.Wait(3.0)
 	endIf
 
 	; Requip them
@@ -704,8 +704,7 @@ function EndAnimation(bool quick = false)
 	endWhile
 
 	Utility.Wait(4.0)
-	InitializeThread()
-	GoToState("Idle")
+	UnlockThread()
 endFunction
 
 function InitializeThread()
