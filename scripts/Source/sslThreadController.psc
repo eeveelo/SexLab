@@ -181,11 +181,11 @@ state Advance
 		endIf
 		; Stage Delay
 		if stage > 1
-			sfx[0] = sfx[0] - (stage * 0.5)
+			sfx[0] = sfx[0] - (stage * 0.2)
 		endIf
 		; min 0.8 delay
-		if sfx[0] < 0.8
-			sfx[0] = 0.8
+		if sfx[0] < 1.0
+			sfx[0] = 1.0
 		endIf
 
 		; Stage silence
