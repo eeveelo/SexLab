@@ -1,4 +1,5 @@
 scriptname sslThreadModel extends Quest
+{Animation Thread Model: Runs storage and information about a thread}
 
 SexLabFramework property SexLab auto
 
@@ -141,7 +142,7 @@ sslThreadController function StartThread()
 
 	; Determine if foreplay lead in should be used
 	if leadAnimations.Length == 0 && !IsAggressive && ActorCount > 1 && SexLab.Config.bForeplayStage
-		SetLeadAnimations(SexLab.GetAnimationsByTag(ActorCount, "Foreplay"))
+		SetLeadAnimations(SexLab.GetAnimationsByTag(ActorCount, "LeadIn"))
 	endIf
 
 	; Check for center
@@ -164,7 +165,7 @@ sslThreadController function StartThread()
 				useBed = utility.RandomInt(0,1)
 			endIf
 			if useBed == 1
-				SetCenterReference(BedRef)
+				CenterOnObject(BedRef)
 			endIf
 		endIf
 	endIf
@@ -175,7 +176,7 @@ sslThreadController function StartThread()
 		while i < ActorCount
 			ObjectReference marker = Game.FindRandomReferenceOfTypeFromRef(SexLab.Data.LocationMarker, positionslots[i], 750.0) as ObjectReference
 			if marker != none
-				SetCenterReference(marker)
+				CenterOnObject(marker)
 				i = ActorCount
 			endIf
 			i += 1
@@ -186,13 +187,13 @@ sslThreadController function StartThread()
 	if centerRef == none || centerLoc == none
 		; Fallback to victim
 		if victim != none
-			SetCenterReference(victim)
+			CenterOnObject(victim)
 		; Fallback to player
 		elseif player > 0
-			SetCenterReference(GetPlayer())
+			CenterOnObject(GetPlayer())
 		; Fallback to first position actor
 		else
-			SetCenterReference(positionslots[0])
+			CenterOnObject(positionslots[0])
 		endIf
 	endIf
 
@@ -255,8 +256,8 @@ function SetHook(string hookName)
 	hook = hookName
 endFunction
 
-function SetCenterReference(ObjectReference centerOn)
-	if !_MakeWait("SetCenterReference")
+function CenterOnObject(ObjectReference centerOn, bool resync = true)
+	if !_MakeWait("CenterOnObject")
 		return none
 	elseIf centerOn == none
 		return none
@@ -274,6 +275,24 @@ function SetCenterReference(ObjectReference centerOn)
 		centerLoc[0] = centerLoc[0] + (35 * Math.sin(centerLoc[5]))
 		centerLoc[1] = centerLoc[1] + (35 * Math.cos(centerLoc[5]))
 		centerLoc[2] = centerLoc[2] + 35
+	endIf
+	if active && resync
+		RealignActors()
+		SendThreadEvent("ActorsRelocated")
+	endIf
+endFunction
+
+function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, float RotX = 0.0, float RotY = 0.0, float RotZ = 0.0, bool resync = true)
+	float[] coords = new float[6]
+	coords[0] = LocX
+	coords[1] = LocY
+	coords[2] = LocZ
+	coords[3] = RotX
+	coords[4] = RotY
+	coords[5] = RotZ
+	if active && resync
+		RealignActors()
+		SendThreadEvent("ActorsRelocated")
 	endIf
 endFunction
 
@@ -390,6 +409,69 @@ function SwapPositions(actor adjusting, actor moved)
 	EquipExtras(moved)
 endFunction
 
+function ChangeActors(actor[] changeTo)
+	if !active
+		return
+	endIf
+	; Make sure all new actors are vaild.
+	int i = 0
+	while i < changeTo.Length
+		if positionslots.Find(changeTo[i]) < 0 && SexLab.ValidateActor(changeTo[i]) < 0
+			return 
+		endIf
+		i += 1
+	endWhile
+	; Actor count has changed, get new default animation list
+	if changeTo.Length != ActorCount
+		sslBaseAnimation[] newList
+		; Try aggressive animations first if we need them
+		if victim != none
+			newList = SexLab.GetAnimationsByType(changeTo.Length, aggressive=true)
+		endIf
+		; Runs if no victim or victim search didn't find any
+		if newList.Length == 0
+			newList = SexLab.GetAnimationsByType(changeTo.Length)
+		endIf
+		; Still none? We have no animations for this count, bail
+		if newList.Length == 0
+			return	
+		endIf
+		; Set our new list
+		SetAnimations(newList)
+		SetAnimation()
+	endIf
+	SendThreadEvent("ActorChangeStart")
+	i = 0
+	while i < ActorCount
+		actor a = positionslots[i]
+		ResetActor(a)
+		if !a.IsDead() && !a.IsBleedingOut()
+			SexLab.UnstripActor(a, GetEquipment(a), GetVictim())
+		endIf
+		if changeTo.Find(a) < 0
+			if IsPlayerActor(a)
+				autoAdvance = true
+			endIf
+		endIf
+		i += 1
+	endWhile
+	positionslots = changeTo
+	storageslots = changeTo
+	form[] foDel
+	equipment0 = foDel
+	equipment1 = foDel
+	equipment2 = foDel
+	equipment3 = foDel
+	equipment4 = foDel
+	i = 0
+	while i < ActorCount
+		SetupActor(positionslots[i])
+		i += 1
+	endWhile
+	stage -= 1
+	AdvanceStage()
+	SendThreadEvent("ActorChangeEnd")
+endFunction
 
 ;/-----------------------------------------------\;
 ;|	Animation Functions                          |;
@@ -547,9 +629,15 @@ endFunction
 actor function GetPlayer()
 	if player > 0
 		return positionslots[(player - 1)]
-	else
-		return none
 	endIf
+	return none
+endFunction
+
+int function GetPlayerPosition()
+	if player > 0
+		return (player - 1)
+	endIf
+	return -1
 endFunction
 
 bool function IsPlayerActor(actor position)
@@ -706,4 +794,14 @@ endFunction
 function EquipExtras(actor position)
 endFunction
 function RemoveExtras(actor position)
+endFunction
+function RealignActors()
+endFunction
+function ResetActor(actor position)
+endFunction
+function SetupActor(actor position)
+endFunction
+function AdvanceStage(bool backwards = false)
+endFunction
+function SetAnimation(int aid = -1)
 endFunction

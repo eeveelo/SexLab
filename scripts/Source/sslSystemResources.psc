@@ -32,6 +32,7 @@ EffectShader property CumAnal auto
 Static property LocationMarker auto
 Keyword property SexLabForbid auto
 Keyword property SexLabNoStrip auto
+Weapon property DummyWeapon auto
 ;
 ; Player Stats
 ;

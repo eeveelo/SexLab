@@ -1,4 +1,5 @@
 scriptname sslThreadController extends sslThreadModel
+{Animation Thread Controller: Runs manipulation logic of thread based on information from model}
 
 ;/-----------------------------------------------\;
 ;|	Primary Starter                              |;
@@ -405,12 +406,11 @@ function MoveScene()
 	; Give player time to settle incase airborne
 	Utility.Wait(1.0)
 	; Recenter + sync
-	SetCenterReference(GetPlayer())
+	CenterOnObject(GetPlayer(), true)
 	; Toggle auto advance back
 	if advanceToggle
 		autoAdvance = true
 	endIf
-	RealignActors()
 endFunction
 
 function RealignActors()
@@ -453,8 +453,6 @@ function SetupActor(actor position)
 endFunction
 
 function ResetActor(actor position)
-	; Reset openmouth
-	position.ClearExpressionOverride()
 	; Reset scale if needed
 	if scaled
 		position.SetScale(1.0)
@@ -477,9 +475,9 @@ function ResetActor(actor position)
 	; Clear them out
 	position.RemoveFromFaction(SexLab.AnimatingFaction)
 	SexLab._ClearDoNothing(position)
-
 	RemoveExtras(position)
-	
+	; Reset openmouth
+	Position.ClearExpressionOverride()
 	; Reset idle
 	if !SexLab.Config.bRagdollEnd
 		Debug.SendAnimationEvent(position, "IdleForceDefaultState")
@@ -642,9 +640,8 @@ function PlayAnimation()
 	int i = 0
 	while i < actorCount
 		; Open mouth, if needed
-		if !openMouth[i]
-			Positions[i].ClearExpressionOverride()
-		else
+		Positions[i].ClearExpressionOverride()
+		if openMouth[i]
 			Positions[i].SetExpressionOverride(16, 100)
 		endIf
 		; Send SOS event

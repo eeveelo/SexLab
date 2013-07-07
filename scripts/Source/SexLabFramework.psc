@@ -19,7 +19,6 @@ sslSystemResources property data auto
 ;#---------------------------#
 ;# Start Animation Variables #
 ;#---------------------------#
-
 sslThreadView00 property ThreadView00 auto
 sslThreadView01 property ThreadView01 auto
 sslThreadView02 property ThreadView02 auto
@@ -37,6 +36,8 @@ sslThreadView13 property ThreadView13 auto
 sslThreadView14 property ThreadView14 auto
 sslThreadController[] property Controllers auto hidden
 
+
+; START DEPRECATED, to be removed in 1.2
 ; Current number of default threads available
 int threadCount = 15
 sslBaseThread[] thread
@@ -57,6 +58,9 @@ sslThread13 property Thread13 auto
 sslThread14 property Thread14 auto
 ; Available animation slots/threads
 bool[] activeThread
+int playerThread 
+; END DEPRECATED, to be removed in 1.2
+
 
 ; Animation Sets
 sslBaseAnimation[] property animation auto hidden
@@ -102,7 +106,6 @@ bool clean = false
 ; The Player (That's you!)
 actor property PlayerRef auto
 sslThreadController PlayerController
-int playerThread ; DEPRECATED, to be removed in 1.2
 
 ; Schlongs of Skyrim integration
 bool property sosEnabled = false auto hidden
@@ -144,7 +147,7 @@ int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim 
 		i += 1
 	endWhile
 	Make.SetAnimations(anims)
-	Make.SetCenterReference(centerOn)
+	Make.CenterOnObject(centerOn)
 	if allowBed == false
 		Make.SetBedding(-1)
 	endIf
@@ -281,10 +284,18 @@ form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool all
 					utility.wait(0.3)
 				endIf
 			endIf 
-		elseif strip[i] && i == 32
+		elseif strip[i] && i == 32			
 			eWeap = a.GetEquippedWeapon(true)
 			if eWeap != none && !eWeap.HasKeyWordString("SexLabNoStrip")
-				a.UnequipItem(eWeap, false, true)
+				int type = a.GetEquippedItemType(1)
+				if type == 5 || type == 6 || type == 7
+					a.AddItem(Data.DummyWeapon, abSilent = true)
+					a.EquipItem(Data.DummyWeapon, abSilent = true)
+					a.UnEquipItem(Data.DummyWeapon, abSilent = true)
+					a.RemoveItem(Data.DummyWeapon, abSilent = true)
+				else
+					a.UnequipItem(eWeap, false, true)
+				endIf
 				items = sslUtility.PushForm(eWeap, items)
 			endIf
 			eWeap = a.GetEquippedWeapon(false)
@@ -965,13 +976,12 @@ endEvent
 
 function _StopAnimations()
 	int i = 0
-	while i < threadCount
-		if activeThread[i]
-			thread[i].EndAnimation(quick = true)
+	while i < 15
+		if Controllers[i].IsLocked
+			Controllers[i].EndAnimation(quick = true)
 		endIf
 		i += 1
 	endWhile
-	activeThread = new bool[15]
 endFunction
 
 function _ClearAnimations()
@@ -1014,8 +1024,8 @@ function _CleanSystem()
 	; Data.mCleanSystemStart.Show()
 
 	int i = 0
-	while i < threadCount
-		thread[i].EndAnimation(quick = true)
+	while i < 15
+		Controllers[i].EndAnimation(quick = true)
 		utility.Wait(0.1)
 		i += 1
 	endWhile
@@ -1224,7 +1234,7 @@ function _DebugTrace(string functionName, string str, string args = "")
 endFunction
 
 function _Deprecate(string deprecated, string replacer)
-	Debug.Notification(deprecated+"() has been deprecated; check trace log")
+	;Debug.Notification(deprecated+"() has been deprecated; check trace log")
 	Debug.Trace("--------------------------------------------------------------------------------------------", 1)
 	Debug.Trace("-- ATTENTION MODDER: SEXLAB DEPRECATION NOTICE ---------------------------------------------", 1)
 	Debug.Trace("--------------------------------------------------------------------------------------------", 1)
