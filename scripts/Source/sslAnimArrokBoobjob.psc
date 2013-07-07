@@ -24,4 +24,5 @@ function LoadAnimation()
 	AddTag("Dirty")
 	AddTag("Boobjob")
 	AddTag("Breast")
+	AddTag("LeadIn")
 endFunction

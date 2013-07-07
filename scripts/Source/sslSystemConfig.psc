@@ -97,6 +97,7 @@ int oidPlayerVoice
 int[] oidToggleVoice
 int[] oidToggleAnimation
 int[] oidAggrAnimation
+int[] oidForeplayAnimation
 
 float property fMaleVoiceDelay auto hidden
 int oidMaleVoiceDelay
@@ -165,6 +166,7 @@ function SetDefaults()
 	oidToggleVoice = new int[128]
 	oidToggleAnimation = new int[128]
 	oidAggrAnimation = new int[128]
+	oidForeplayAnimation = new int[128]
 
 	bStripMale = new bool[33]
 	oidStripMale = new int[33]
@@ -305,7 +307,7 @@ function SetDefaults()
 	sStatTitles[5] = "$SSL_Master"
 	sStatTitles[6] = "$SSL_GrandMaster"
 
-	Pages = new string[10]
+	Pages = new string[11]
 	Pages[0] = "$SSL_AnimationSettings"
 	Pages[1] = "$SSL_PlayerHotkeys"
 	Pages[2] = "$SSL_NormalTimersStripping"
@@ -313,17 +315,18 @@ function SetDefaults()
 	Pages[4] = "$SSL_AggressiveTimersStripping"
 	Pages[5] = "$SSL_ToggleVoices"
 	Pages[6] = "$SSL_ToggleAnimations"
-	Pages[7] = "$SSL_AggressiveAnimations"
-	Pages[9] = "$SSL_RebuildClean"
+	Pages[7] = "$SSL_ForeplayAnimations"
+	Pages[8] = "$SSL_AggressiveAnimations"
+	Pages[10] = "$SSL_RebuildClean"
 
 	if SexLab.PlayerRef.GetActorBase().GetSex() > 0
-		Pages[8] = "$SSL_SexDiary"
+		Pages[9] = "$SSL_SexDiary"
 		sPureTitles[2] = "$SSL_PrimProper"
 		sPureTitles[5] = "$SSL_Ladylike"
 		sImpureTitles[5] = "$SSL_Debaucherous"
 		sImpureTitles[6] = "$SSL_Nymphomaniac"
 	else
-		Pages[8] = "$SSL_SexJournal"
+		Pages[9] = "$SSL_SexJournal"
 		sPureTitles[2] = "$SSL_CleanCut"
 		sPureTitles[5] = "$SSL_Lordly"
 		sImpureTitles[5] = "$SSL_Depraved"
@@ -570,6 +573,15 @@ event OnPageReset(string page)
 		while i < SexLab.animation.Length
 			if SexLab.animation[i] != none
 				oidToggleAnimation[i] = AddToggleOption(SexLab.animation[i].name, SexLab.animation[i].enabled)
+			endIf
+			i += 1
+		endWhile
+	elseIf page == "$SSL_ForeplayAnimations"
+		SetCursorFillMode(LEFT_TO_RIGHT)
+		i = 0
+		while i < SexLab.animation.Length
+			if SexLab.animation[i] != none
+				oidForeplayAnimation[i] = AddToggleOption(SexLab.animation[i].name, SexLab.animation[i].HasTag("LeadIn"))
 			endIf
 			i += 1
 		endWhile
@@ -1046,6 +1058,14 @@ event OnOptionSelect(int option)
 				endIf
 				SetToggleOptionValue(option, SexLab.animation[i].HasTag("Aggressive"))
 				i = 128
+			elseif option == oidForeplayAnimation[i]
+				if !SexLab.animation[i].HasTag("LeadIn")
+					SexLab.animation[i].AddTag("LeadIn")
+				else
+					SexLab.animation[i].RemoveTag("LeadIn")
+				endIf
+				SetToggleOptionValue(option, SexLab.animation[i].HasTag("LeadIn"))
+				i = 128
 			elseIf i < 33 && option == oidStripMale[i]
 				bStripMale[i] = !bStripMale[i] 
 				SetToggleOptionValue(option, bStripMale[i])
@@ -1170,6 +1190,9 @@ event OnOptionHighlight(int option)
 				i = 128
 			elseif option == oidToggleAnimation[i]
 				SetInfoText("$SSL_EnableAnimation")
+				i = 128
+			elseif option == oidForeplayAnimation[i]
+				SetInfoText("$SSL_ToggleForeplay")
 				i = 128
 			elseif option == oidAggrAnimation[i]
 				SetInfoText("$SSL_ToggleAggressive")

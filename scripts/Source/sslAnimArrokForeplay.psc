@@ -24,4 +24,5 @@ function LoadAnimation()
 	AddTag("Laying")
 	AddTag("Loving")
 	AddTag("Cuddling")
+	AddTag("LeadIn")
 endFunction

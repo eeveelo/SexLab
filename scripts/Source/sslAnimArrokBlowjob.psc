@@ -25,4 +25,5 @@ function LoadAnimation()
 	AddTag("Oral")
 	AddTag("Dirty")
 	AddTag("Blowjob")
+	AddTag("LeadIn")
 endFunction
