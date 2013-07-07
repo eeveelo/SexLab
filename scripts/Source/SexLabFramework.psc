@@ -102,12 +102,12 @@ bool property sosEnabled = false auto hidden
 ;#                           #
 ;#---------------------------#
 
-sslThreadModel function NewThread()
+sslThreadModel function NewThread(float timeout = 25.0)
 	int i = 0
 	while i < controller.Length
 		if !controller[i].IsLocked
 			debug.trace("Making thread["+controller[i].tid()+"] "+controller[i])
-			return controller[i].Make()
+			return controller[i].Make(timeout)
 		endIf
 		i += 1
 	endWhile
@@ -444,7 +444,7 @@ function UnstripActor(actor a, form[] stripped, actor victim = none)
 	; Remove nudesuits
 	int gender = a.GetLeveledActorBase().GetSex()
 	if (gender < 2 && Config.bUseMaleNudeSuit) || (gender == 1  && Config.bUseFemaleNudeSuit)
-		a.UnequipItem(Data.aNudeSuit, false, true)
+		a.UnequipItem(Data.aNudeSuit, true, true)
 		a.RemoveItem(Data.aNudeSuit, 1, true)
 	endIf
 
@@ -477,13 +477,33 @@ form function EquipStrapon(actor a)
 
 	if a.GetLeveledActorBase().GetSex() == 1
 		int sid = utility.RandomInt(0, straponCount - 1)
-		a.EquipItem(Data.strapons[sid], false, true)
+		a.EquipItem(Data.strapons[sid], true, true)
 		return Data.strapons[sid]
 	else
 		_DebugTrace("EquipStrapon","actor="+a+"","Is male and cannot use strapons")
 		return none
 	endIf
 endFunction
+
+function UnequipStrapon(actor a)
+	int straponCount = Data.strapons.Length
+	if straponCount == 0
+		return
+	endIf
+
+	if a.GetLeveledActorBase().GetSex() == 1
+		int i = 0
+		while i < straponCount
+			Form strapon = Data.strapons[i]
+			if a.IsEquipped(strapon)
+				a.UnequipItem(strapon, true, true)
+				a.RemoveItem(strapon, 1, true)
+			endIf
+			i += 1
+		endWhile
+	endIf
+endFunction
+
 
 int[] function GenderCount(actor[] pos)
 	int[] genders = new int[2]
@@ -1220,13 +1240,16 @@ int function _SlotDoNothing(actor a)
 	return -1
 endFunction
 
-function _ClearDoNothing(int slot)
-	if slot < 0
-		return
-	endIf
-	actor a = DoNothing[slot].GetActorReference()
-	DoNothing[slot].Clear()
-	a.EvaluatePackage()
+function _ClearDoNothing(actor a)
+	int i = 0
+	while i < 15
+		if DoNothing[i].GetActorReference() == a
+			DoNothing[i].Clear()
+			a.EvaluatePackage()
+			return
+		endIf
+		i += 1
+	endWhile
 endFunction
 
 function _EnableHotkeys(int tid)
@@ -1291,37 +1314,37 @@ event OnKeyDown(int keyCode)
 		
 		; Advance Stage
 		if keyCode == Config.kAdvanceAnimation
-			thread[playerThread].AdvanceStage(backwards)
+			controller[playerThread].AdvanceStage(backwards)
 		; Change Animation
 		elseIf keyCode == Config.kChangeAnimation
-			thread[playerThread].ChangeAnimation(backwards)
+			controller[playerThread].ChangeAnimation(backwards)
 		; Change Positions
 		elseIf keyCode == Config.kChangePositions
-			thread[playerThread].ChangePositions()
+			controller[playerThread].ChangePositions()
 		; Forward / Backward adjustments
 		elseIf keyCode == Config.kAdjustForward
-			thread[playerThread].AdjustForward(backwards)
+			controller[playerThread].AdjustForward(backwards)
 		; Left / Right adjustments
 		elseIf keyCode == Config.kAdjustSideways
-			thread[playerThread].AdjustSideways(backwards)
+			controller[playerThread].AdjustSideways(backwards)
 		; Up / Down adjustments
 		elseIf keyCode == Config.kAdjustUpward
-			thread[playerThread].AdjustUpward(backwards)
+			controller[playerThread].AdjustUpward(backwards)
 		; Change Adjusted Actor
 		elseIf keyCode == Config.kAdjustChange
-			thread[playerThread].AdjustChange(backwards)
+			controller[playerThread].AdjustChange(backwards)
 		; Reposition Actors
 		elseIf keyCode == Config.kRealignActors
-			thread[playerThread].RealignActors()
+			controller[playerThread].RealignActors()
 		; Restore animation offsets
 		elseIf keyCode == Config.kRestoreOffsets
-			thread[playerThread].RestoreOffsets()
+			controller[playerThread].RestoreOffsets()
 		; Move Scene
 		elseIf keyCode == Config.kMoveScene
-			thread[playerThread].MoveScene()
+			controller[playerThread].MoveScene()
 		; Rotate Scene
 		elseIf keyCode == Config.kRotateScene
-			thread[playerThread].RotateScene(backwards)
+			controller[playerThread].RotateScene(backwards)
 		endIf
 		hkReady = true
 	endIf

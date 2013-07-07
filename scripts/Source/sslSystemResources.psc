@@ -21,6 +21,7 @@ FormList property BedsList auto
 form[] property strapons auto hidden
 sound property sfxSquishing01 auto
 sound property sfxSucking01 auto
+sound property sfxSexMix01 auto
 EffectShader property CumVaginalOralAnal auto
 EffectShader property CumOralAnal auto
 EffectShader property CumVaginalOral auto

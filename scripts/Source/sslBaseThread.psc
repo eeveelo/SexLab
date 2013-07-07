@@ -450,7 +450,7 @@ function ResetActor(int i)
 	endIf
 	; Clear them out
 	a.RemoveFromFaction(SexLab.AnimatingFaction)
-	SexLab._ClearDoNothing(aliasSlot[i])
+	SexLab._ClearDoNothing(a)
 	RemoveExtras(i)
 	; Reset idle
 	if !SexLab.Config.bRagdollEnd
