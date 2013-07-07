@@ -595,19 +595,27 @@ bool function _MakeWait(string method)
 endFunction
 
 function _Log(string log, string method, string type = "ERROR")
+
+	int severity = 0
+	if type == "ERROR" || type == "FATAL"
+		severity = 2
+	elseif type == "NOTICE"
+		severity = 1
+	endIf
+
 	if logType == "notification"
 		Debug.Notification(type+": "+log)
 	elseif logType == "messagebox"
 		Debug.MessageBox(method+"() "+type+": "+log)
 	elseif logType == "trace-minimal"
-		Debug.Trace("SexLab "+method+"() "+type+": "+log)
+		Debug.Trace("SexLab "+method+"() "+type+": "+log, severity)
 	else
-		Debug.Trace("--------------------------------------------------------------------------------------------")
-		Debug.Trace("--- SexLab Thread["+tid+"] -----------------------------------------------------------------------")
-		Debug.Trace("--------------------------------------------------------------------------------------------")
+		Debug.Trace("--------------------------------------------------------------------------------------------", severity)
+		Debug.Trace("--- SexLab Thread["+tid+"] -----------------------------------------------------------------------", severity)
+		Debug.Trace("--------------------------------------------------------------------------------------------", severity)
 		Debug.Trace(" "+type+": "+method+"()" )
 		Debug.Trace("   "+log)
-		Debug.Trace("--------------------------------------------------------------------------------------------")
+		Debug.Trace("--------------------------------------------------------------------------------------------", severity)
 	endIf
 	if type == "FATAL"
 		GoToState("Idle")

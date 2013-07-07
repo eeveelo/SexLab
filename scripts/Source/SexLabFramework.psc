@@ -25,7 +25,17 @@ sslThreadView01 property ThreadView01 auto
 sslThreadView02 property ThreadView02 auto
 sslThreadView03 property ThreadView03 auto
 sslThreadView04 property ThreadView04 auto
-sslThreadController[] property controller auto
+sslThreadView05 property ThreadView05 auto
+sslThreadView06 property ThreadView06 auto
+sslThreadView07 property ThreadView07 auto
+sslThreadView08 property ThreadView08 auto
+sslThreadView09 property ThreadView09 auto
+sslThreadView10 property ThreadView10 auto
+sslThreadView11 property ThreadView11 auto
+sslThreadView12 property ThreadView12 auto
+sslThreadView13 property ThreadView13 auto
+sslThreadView14 property ThreadView14 auto
+sslThreadController[] property Controllers auto hidden
 
 ; Current number of default threads available
 int threadCount = 15
@@ -49,7 +59,7 @@ sslThread14 property Thread14 auto
 bool[] activeThread
 
 ; Animation Sets
-sslBaseAnimation[] property animation auto
+sslBaseAnimation[] property animation auto hidden
 int animIndex = 0
 
 ; Animation Faction
@@ -80,7 +90,7 @@ ReferenceAlias[] property DoNothing auto
 actor property DebugActor auto hidden
 
 ; Voice Files
-sslBaseVoice[] property voice auto
+sslBaseVoice[] property voice auto hidden
 int voiceIndex = 0
 
 ; local vars
@@ -91,7 +101,8 @@ bool clean = false
 
 ; The Player (That's you!)
 actor property PlayerRef auto
-int playerThread = -1
+sslThreadController PlayerController
+int playerThread ; DEPRECATED, to be removed in 1.2
 
 ; Schlongs of Skyrim integration
 bool property sosEnabled = false auto hidden
@@ -104,10 +115,10 @@ bool property sosEnabled = false auto hidden
 
 sslThreadModel function NewThread(float timeout = 25.0)
 	int i = 0
-	while i < controller.Length
-		if !controller[i].IsLocked
-			debug.trace("Making thread["+controller[i].tid()+"] "+controller[i])
-			return controller[i].Make(timeout)
+	while i < Controllers.Length
+		if !Controllers[i].IsLocked
+			debug.trace("Making thread["+Controllers[i].tid+"] "+Controllers[i])
+			return Controllers[i].Make(timeout)
 		endIf
 		i += 1
 	endWhile
@@ -534,6 +545,8 @@ endFunction
 ;#---------------------------#
 
 int function FindActorThread(actor toFind)
+{DEPRECATED: TO BE REMOVED IN 1.2}
+	_Deprecate("FindActorThread", "FindActorController")
 	int i = 0
 	while i < threadCount
 		if activeThread[i]
@@ -552,6 +565,8 @@ int function FindActorThread(actor toFind)
 endFunction
 
 sslBaseThread function GetActorThread(actor toFind)
+{DEPRECATED: TO BE REMOVED IN 1.2}
+	_Deprecate("GetActorThread", "GetActorController")
 	int tid = FindActorThread(toFind)
 	if tid != -1
 		return thread[tid]
@@ -561,15 +576,59 @@ sslBaseThread function GetActorThread(actor toFind)
 endFunction
 
 int function FindPlayerThread()
-	return playerThread
+{DEPRECATED: TO BE REMOVED IN 1.2}
+	_Deprecate("FindPlayerThread", "FindPlayerController")
+	return FindPlayerController()
 endFunction
 
 sslBaseThread function GetPlayerThread()
+{DEPRECATED: TO BE REMOVED IN 1.2}
+	_Deprecate("GetPlayerThread", "GetPlayerController")
 	return thread[playerThread]
 endFunction
 
 sslBaseThread function GetThread(int tid)
+{DEPRECATED: TO BE REMOVED IN 1.2}
+	_Deprecate("GetThread", "GetController")
 	return thread[tid]
+endFunction
+
+;#------------------------------#
+;#  BEGIN CONTROLLER FUNCTIONS  #
+;#------------------------------#
+
+int function FindActorController(actor toFind)
+	int i = 0
+	while i < 15
+		if Controllers[i].HasActor(toFind)
+			return i
+		endIf
+		i += 1
+	endWhile
+	return -1
+endFunction
+
+sslThreadController function GetActorController(actor toFind)
+	int tid = FindActorController(toFind)
+	if tid != -1
+		return Controllers[tid]
+	endIf
+	return none
+endFunction
+
+int function FindPlayerController()
+	return PlayerController.tid
+endFunction
+
+sslThreadController function GetPlayerController()
+	if PlayerController != none
+		return Controllers[PlayerController.tid]
+	endIf
+	return none
+endFunction
+
+sslThreadController function GetController(int tid)
+	return Controllers[tid]
 endFunction
 
 ;#---------------------------#
@@ -823,27 +882,33 @@ endFunction
 ;#---------------------------#
 
 sslBaseThread function HookThread(string argString)
+{DEPRECATED: TO BE REMOVED IN 1.2}
+	_Deprecate("HookThread", "HookController")
 	return thread[(argString as int)]
 endFunction
 
+sslThreadController function HookController(string argString)
+	return Controllers[(argString as int)]
+endFunction
+
 sslBaseAnimation function HookAnimation(string argString)
-	return thread[(argString as int)].GetAnimation()
+	return Controllers[(argString as int)].Animation
 endFunction
 
 int function HookStage(string argString)
-	return thread[(argString as int)].GetStage()
+	return Controllers[(argString as int)].Stage
 endFunction
 
 actor function HookVictim(string argString)
-	return thread[(argString as int)].GetVictim()
+	return Controllers[(argString as int)].GetVictim()
 endFunction
 
 actor[] function HookActors(string argString)
-	return thread[(argString as int)].GetActors()
+	return Controllers[(argString as int)].Positions
 endFunction
 
 float function HookTime(string argString)
-	return thread[(argString as int)].GetTime()
+	return Controllers[(argString as int)].GetTime()
 endFunction
 
 ;#---------------------------#
@@ -1112,12 +1177,22 @@ function _SetupSystem()
 	voice = new sslBaseVoice[128]
 	voiceIndex = 0
 
-	controller = new sslThreadController[5]
-	controller[0] = ThreadView00 as sslThreadView00
-	controller[1] = ThreadView01 as sslThreadView01
-	controller[2] = ThreadView02 as sslThreadView02
-	controller[3] = ThreadView03 as sslThreadView03
-	controller[4] = ThreadView04 as sslThreadView04
+	Controllers = new sslThreadController[15]
+	Controllers[0] = ThreadView00 as sslThreadView00
+	Controllers[1] = ThreadView01 as sslThreadView01
+	Controllers[2] = ThreadView02 as sslThreadView02
+	Controllers[3] = ThreadView03 as sslThreadView03
+	Controllers[4] = ThreadView04 as sslThreadView04
+	Controllers[5] = ThreadView05 as sslThreadView05
+	Controllers[6] = ThreadView06 as sslThreadView06
+	Controllers[7] = ThreadView07 as sslThreadView07
+	Controllers[8] = ThreadView08 as sslThreadView08
+	Controllers[9] = ThreadView09 as sslThreadView09
+	Controllers[10] = ThreadView10 as sslThreadView10
+	Controllers[11] = ThreadView11 as sslThreadView11
+	Controllers[12] = ThreadView12 as sslThreadView12
+	Controllers[13] = ThreadView13 as sslThreadView13
+	Controllers[14] = ThreadView14 as sslThreadView14
 
 	; Init thread variables based on current thread count: 15
 	thread = new sslBaseThread[15]
@@ -1265,7 +1340,8 @@ function _EnableHotkeys(int tid)
 	RegisterForKey(Config.kRestoreOffsets)
 	RegisterForKey(Config.kMoveScene)
 	RegisterForKey(Config.kRotateScene)
-	playerThread = tid
+	playerThread = tid ; DEPRECATED, to be removed in 1.2
+	PlayerController = Controllers[tid]
 	hkReady = true
 endFunction
 
@@ -1280,6 +1356,18 @@ endFunction
 
 function _DebugTrace(string functionName, string str, string args = "")
 	debug.trace("--SEXLAB NOTICE "+functionName+"("+args+") --- "+str)
+endFunction
+
+function _Deprecate(string deprecated, string replacer)
+	Debug.Notification(deprecated+"() has been deprecated; check trace log")
+	Debug.Trace("--------------------------------------------------------------------------------------------", 1)
+	Debug.Trace("-- ATTENTION MODDER: SEXLAB DEPRECATION NOTICE ---------------------------------------------", 1)
+	Debug.Trace("--------------------------------------------------------------------------------------------", 1)
+	Debug.Trace(" "+deprecated+"() is deprecated and will be removed in the next major update of SexLab.", 1)
+	Debug.Trace(" Update your mod to use "+replacer+"() instead, or notify the creator", 1)
+	Debug.Trace(" of the mod which is calling it", 1)
+	Debug.TraceStack(" "+deprecated+"() Called By: ", 1)
+	Debug.Trace("--------------------------------------------------------------------------------------------", 1)
 endFunction
 
 function _ReadyWait()
@@ -1314,37 +1402,37 @@ event OnKeyDown(int keyCode)
 		
 		; Advance Stage
 		if keyCode == Config.kAdvanceAnimation
-			controller[playerThread].AdvanceStage(backwards)
+			PlayerController.AdvanceStage(backwards)
 		; Change Animation
 		elseIf keyCode == Config.kChangeAnimation
-			controller[playerThread].ChangeAnimation(backwards)
+			PlayerController.ChangeAnimation(backwards)
 		; Change Positions
 		elseIf keyCode == Config.kChangePositions
-			controller[playerThread].ChangePositions()
+			PlayerController.ChangePositions()
 		; Forward / Backward adjustments
 		elseIf keyCode == Config.kAdjustForward
-			controller[playerThread].AdjustForward(backwards)
+			PlayerController.AdjustForward(backwards)
 		; Left / Right adjustments
 		elseIf keyCode == Config.kAdjustSideways
-			controller[playerThread].AdjustSideways(backwards)
+			PlayerController.AdjustSideways(backwards)
 		; Up / Down adjustments
 		elseIf keyCode == Config.kAdjustUpward
-			controller[playerThread].AdjustUpward(backwards)
+			PlayerController.AdjustUpward(backwards)
 		; Change Adjusted Actor
 		elseIf keyCode == Config.kAdjustChange
-			controller[playerThread].AdjustChange(backwards)
+			PlayerController.AdjustChange(backwards)
 		; Reposition Actors
 		elseIf keyCode == Config.kRealignActors
-			controller[playerThread].RealignActors()
+			PlayerController.RealignActors()
 		; Restore animation offsets
 		elseIf keyCode == Config.kRestoreOffsets
-			controller[playerThread].RestoreOffsets()
+			PlayerController.RestoreOffsets()
 		; Move Scene
 		elseIf keyCode == Config.kMoveScene
-			controller[playerThread].MoveScene()
+			PlayerController.MoveScene()
 		; Rotate Scene
 		elseIf keyCode == Config.kRotateScene
-			controller[playerThread].RotateScene(backwards)
+			PlayerController.RotateScene(backwards)
 		endIf
 		hkReady = true
 	endIf
