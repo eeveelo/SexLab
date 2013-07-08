@@ -73,7 +73,7 @@ state Making
 		endwhile
 		; Check if need to reset
 		if !active
-			_Log("Thread["+tid+"] has timed out; resetting model and reentering selection pool", "Make", "NOTICE")
+			_Log("ThreadController["+tid+"] has timed out; resetting model and reentering selection pool", "Make", "NOTICE")
 			GoToState("Idle")
 			return
 		endIf
@@ -402,8 +402,10 @@ function SwapPositions(actor adjusting, actor moved)
 	RemoveExtras(adjusting)
 	RemoveExtras(moved)
 	; Move in array
-	positionslots[GetPosition(adjusting)] = moved
-	positionslots[GetPosition(moved)] = adjusting
+	actor[] newpositions = positionslots
+	newpositions[GetPosition(adjusting)] = moved
+	newpositions[GetPosition(moved)] = adjusting
+	positionslots = newpositions
 	; Equip new extras
 	EquipExtras(adjusting)
 	EquipExtras(moved)
@@ -476,6 +478,7 @@ endFunction
 ;/-----------------------------------------------\;
 ;|	Animation Functions                          |;
 ;\-----------------------------------------------/;
+
 bool property autoAdvance auto hidden
 bool property leadIn auto hidden
 
@@ -698,14 +701,14 @@ function _Log(string log, string method, string type = "ERROR")
 		Debug.Trace("SexLab "+method+"() "+type+": "+log, severity)
 	else
 		Debug.Trace("--------------------------------------------------------------------------------------------", severity)
-		Debug.Trace("--- SexLab Thread["+tid+"] -----------------------------------------------------------------------", severity)
+		Debug.Trace("--- SexLab ThreadController["+tid+"] --------------------------------------------------------------", severity)
 		Debug.Trace("--------------------------------------------------------------------------------------------", severity)
 		Debug.Trace(" "+type+": "+method+"()" )
 		Debug.Trace("   "+log)
 		Debug.Trace("--------------------------------------------------------------------------------------------", severity)
 	endIf
 	if type == "FATAL"
-		GoToState("Idle")
+		UnlockThread()
 	endIf
 endFunction
 

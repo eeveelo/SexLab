@@ -80,7 +80,6 @@ endFunction
 int function Moan(actor a, float strength = 0.3, bool victim = false)
 	int seed = ((1.0 - strength) * 100.0) as int
 	int randomizer = Utility.RandomInt(0, seed)
-	debug.trace("Seed: "+seed+" Randomizer: "+randomizer)
 	if randomizer <= 10 && !victim
 		return PlayHot(a)
 	elseif randomizer <= 20 || victim
@@ -122,7 +121,7 @@ bool function RemoveTag(string tag)
 endFunction
 
 bool function HasTag(string tag)
-		return tags.Find(tag) != -1
+		return tags.Find(tag) >= 0
 endFunction
 
 ;/-----------------------------------------------\;

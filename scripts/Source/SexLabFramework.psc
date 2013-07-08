@@ -149,15 +149,18 @@ int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim 
 		_DebugTrace("StartSex","","Failed to start animation; system is currently disabled")
 		return -99
 	endIf
-	_ReadyWait()
-	ready = false
-	clean = false
-	sslThreadModel Make = NewThread()
 	int i = 0
 	while i < sexActors.Length
+		if ValidateActor(sexActors[i]) != 1
+			return -1 ; Don't both locking a thread, bad actor passed
+		endIf
+		i += 1
+	endWhile
+	sslThreadModel Make = NewThread()
+	i = 0
+	while i < sexActors.Length
 		if Make.AddActor(sexActors[i], (victim == sexActors[i])) < 0
-			ready = true
-			return -1
+			return -1 ; Actor failed to add
 		endIf
 		i += 1
 	endWhile
@@ -168,7 +171,7 @@ int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim 
 	endIf
 	Make.SetHook(hook)
 	sslThreadController Controller = Make.StartThread()
-	ready = true
+
 	if Controller != none
 		return Controller.tid
 	endIf
@@ -204,12 +207,10 @@ actor[] function SortActors(actor[] actorList, bool femaleFirst = true)
 	if actorCount == 1
 		return actorList ; Why reorder a single actor?
 	endIf
-
 	int priorityGender = 1
 	if !femaleFirst
 		priorityGender = 0
 	endIf
-
 	int orderSlot = 0
 	int i = 0
 	while i < actorCount
@@ -222,7 +223,6 @@ actor[] function SortActors(actor[] actorList, bool femaleFirst = true)
 		endIf
 		i += 1
 	endWhile
-	
 	return actorList
 endFunction 
 
@@ -405,7 +405,6 @@ function UnequipStrapon(actor a)
 	endIf
 endFunction
 
-
 int[] function GenderCount(actor[] pos)
 	int[] genders = new int[2]
 	int i = 0
@@ -543,7 +542,6 @@ endFunction
 sslBaseAnimation[] function GetAnimationsByType(int actors, int males = -1, int females = -1, int stages = -1, bool aggressive = false, bool sexual = true)
 	sslBaseAnimation[] animReturn
 	int i = 0
-
 	while i < animIndex
 		if animation[i] != none && animation[i].enabled
 			int actorCount = animation[i].ActorCount()
@@ -552,7 +550,6 @@ sslBaseAnimation[] function GetAnimationsByType(int actors, int males = -1, int 
 			bool aggressiveAnim = animation[i].HasTag("Aggressive")
 			int maleCount = 0
 			int femaleCount = 0
-
 			int g = 0
 			while g < actorCount
 				if animation[i].GetGender(g) == 1
@@ -562,7 +559,6 @@ sslBaseAnimation[] function GetAnimationsByType(int actors, int males = -1, int 
 				endIf
 				g += 1
 			endWhile
-
 			bool accepted = true
 			if actors != actorCount
 				accepted = false
@@ -604,7 +600,7 @@ sslBaseAnimation[] function GetAnimationsByTag(int actors, string tag1, string t
 			bool check2 = animation[i].HasTag(tag2)
 			bool check3 = animation[i].HasTag(tag3)
 			bool supress = animation[i].HasTag(tagSuppress)
-			if requireAll && check1 && check2 && check3 && !(supress && tagSuppress != "")
+			if requireAll && check1 && (check2 || tag2 == "") && (check3 || tag3 == "") && !(supress && tagSuppress != "")
 				animReturn = sslUtility.PushAnimation(animation[i], animReturn)
 			elseif !requireAll && (check1 || check2 || check3) && !(supress && tagSuppress != "")
 				animReturn = sslUtility.PushAnimation(animation[i], animReturn)
@@ -1051,6 +1047,7 @@ function _SetupSystem()
 	Controllers[14] = ThreadView14 as sslThreadView14
 
 	; Init thread variables based on current thread count: 15
+	; Deprecated
 	thread = new sslBaseThread[15]
 	thread[0] = Thread00 as sslThread00
 	thread[1] = Thread01 as sslThread01

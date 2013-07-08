@@ -385,7 +385,7 @@ bool function RemoveTag(string tag)
 endFunction
 
 bool function HasTag(string tag)
-	return tags.Find(tag) != 0
+	return tags.Find(tag) >= 0
 endFunction
 
 ;/-----------------------------------------------
@@ -394,7 +394,6 @@ endFunction
 
 function _WaitLock()
 	while waiting
-		Debug.Trace("Wait lock on "+name)
 	endWhile
 	waiting = true
 endFunction

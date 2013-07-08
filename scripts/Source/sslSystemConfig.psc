@@ -337,6 +337,7 @@ endFunction
 event OnConfigInit()
 	SexLab._CheckSystem()
 	SexLab._SetupSystem()
+	SetDefaults()
 endEvent
 
 event OnGameReload()
@@ -355,10 +356,10 @@ event OnVersionUpdate(int version)
 	;SetDefaults()
 	;SexLab.Data.LoadAnimations()
 	;SexLab.Data.LoadVoices()
-	debug.messagebox("Current: "+current+"")
 	; v1.0 +
 	if version >= 110  && CurrentVersion > 1
 	 	SexLab._SetupSystem()
+	 	SetDefaults()
 	endIf
 endEvent
 
