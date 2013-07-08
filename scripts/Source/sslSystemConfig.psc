@@ -349,9 +349,9 @@ endEvent
 event OnVersionUpdate(int version)
 	float current = (CurrentVersion as float / 100.0)
 	float latest = (version as float / 100.0)
-	if CurrentVersion > 1 && !SexLab._CheckClean() && (current - latest) > 10
-		SexLab.Data.mDirtyUpgrade.Show(current, latest)
-	endIf
+	;if CurrentVersion > 1 && !SexLab._CheckClean() && (current - latest) > 10
+		;SexLab.Data.mDirtyUpgrade.Show(current, latest)
+	;endIf
 	;SexLab._SetupSystem()
 	;SetDefaults()
 	;SexLab.Data.LoadAnimations()
@@ -360,6 +360,7 @@ event OnVersionUpdate(int version)
 	if version >= 110  && CurrentVersion > 1
 	 	SexLab._SetupSystem()
 	 	SetDefaults()
+	 	SexLab.Data.mSystemUpdated.Show(current, latest)
 	endIf
 endEvent
 
@@ -941,8 +942,6 @@ event OnOptionSelect(int option)
 		if run
 			ShowMessage("$SSL_RunCleanSystem", false)
 			SexLab._CleanSystem()
-			SexLab.Data.mCleanSystemFinish.Show()
-
 		endIf
 
 	elseif option == oidRebuildAnimations

@@ -1021,8 +1021,9 @@ function _CleanSystem()
 	ready = false
 	_ClearAnimations()
 	_ClearVoices()
-	Config.SetDefaults()
 	_SetupSystem()
+	Config.SetDefaults()
+	Data.mCleanSystemFinish.Show()
 	ready = true
 endFunction
 
