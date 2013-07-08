@@ -1,12 +1,12 @@
 scriptname sslBaseVoice extends quest
 
-bool property enabled = true auto
+bool property enabled = true auto hidden
 
 int property Male = 0 autoreadonly
 int property Female = 1 autoreadonly
 
-string property name = "" auto
-int property gender = 1 auto
+string property name = "" auto hidden
+int property gender = 1 auto hidden
 
 sound property mild auto
 sound property hot auto
@@ -19,6 +19,12 @@ topic property SexLabMoanHot auto
 VoiceType property SexLabVoiceM auto
 VoiceType property SexLabVoiceF auto
 FormList property VoicesPlayer auto
+
+string[] tags
+
+;/-----------------------------------------------\;
+;|	API Functions                                |;
+;\-----------------------------------------------/;
 
 int function PlayMild(actor a)
 	ActorBase base = a.GetLeveledActorBase()
@@ -71,64 +77,63 @@ int function PlayHot(actor a)
 	return hot.Play(a)
 endFunction
 
-int function Moan(actor a, float strength = 0.3, actor victim = none)
-	; Non rough selection
-	if victim != a
-		if strength <= 0.25
-			return PlayMild(a)
-		; Mostly Mild, occasionalyl rough/hot
-		elseif strength <= 0.45
-			int random = utility.RandomInt(1,10)
-			if random == 1
-				return PlayHot(a)
-			else
-				return PlayMild(a)
-			endIf
-		; Slightly more mixed
-		elseif strength <= 0.50
-			int random = utility.RandomInt(1,8)	
-			if random == 1
-				return PlayHot(a)
-			else
-				return PlayMild(a)
-			endIf
-		; Slightly more more mixed
-		elseif strength <= 0.70
-			int random = utility.RandomInt(1,7)	
-			if random == 1
-				return PlayHot(a)
-			else
-				return PlayMild(a)
-			endIf
-		; Almost split mild and hot/medium
-		elseif strength <= 0.85
-			int random = utility.RandomInt(1,5)	
-			if random == 1
-				return PlayMedium(a)
-			elseif random == 2
-				return PlayHot(a)
-			else
-				return PlayMild(a)
-			endIf
-		; split mild and hot/medium
-		elseif strength <= 0.99
-			int random = utility.RandomInt(1,4)	
-			if random == 1
-				return PlayMedium(a)
-			elseif random == 2
-				return PlayHot(a)
-			else
-				return PlayMild(a)
-			endIf
-		; Full strength, all hot
-		else
-			return PlayHot(a)
-		endIf
-	else
+int function Moan(actor a, float strength = 0.3, bool victim = false)
+	int seed = ((1.0 - strength) * 100.0) as int
+	int randomizer = Utility.RandomInt(0, seed)
+	debug.trace("Seed: "+seed+" Randomizer: "+randomizer)
+	if randomizer <= 10 && !victim
+		return PlayHot(a)
+	elseif randomizer <= 20 || victim
 		return PlayMedium(a)
+	else
+		return PlayMild(a)
 	endIf
 endFunction
 
+;/-----------------------------------------------\;
+;|	Tag Functions                                |;
+;\-----------------------------------------------/;
+
+bool function AddTag(string tag)
+	bool check = HasTag(tag)
+	if check
+		return false
+	else
+		int tagCount = tags.Length
+		tags = sslUtility.PushString(tag,tags)
+		return true
+	endIf
+endFunction
+
+bool function RemoveTag(string tag)
+	bool check = HasTag(tag)
+	if !check
+		return false
+	else
+		string[] newTags
+		int i = 0
+		while i < tags.Length
+			if tags[i] != tag
+				newTags = sslUtility.PushString(tags[i],newTags)
+			endIf
+			i += 1
+		endWhile
+		tags = newTags
+		return true
+	endIf
+endFunction
+
+bool function HasTag(string tag)
+	if tags.Find(tag) >= 0 || tag == ""
+		return true
+	else
+		return false
+	endIf
+endFunction
+
+;/-----------------------------------------------\;
+;|	Child loaders                                |;
+;\-----------------------------------------------/;
 
 function LoadVoice()
 	return

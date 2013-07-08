@@ -655,6 +655,10 @@ actor function GetActor(int position)
 	return positionslots[position]
 endFunction
 
+bool function IsVictim(actor a)
+	return victim == a
+endFunction
+
 actor function GetVictim()
 	return victim
 endFunction

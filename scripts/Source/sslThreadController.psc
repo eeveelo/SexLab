@@ -111,7 +111,7 @@ state BeginLoop
 					if vfxInstance[i] > 0
 						Sound.StopInstance(vfxInstance[i])
 					endIf
-					vfxInstance[i] = voice.Moan(a, vfxStrength, GetVictim())
+					vfxInstance[i] = voice.Moan(a, vfxStrength, IsVictim(a))
 					Sound.SetInstanceVolume(vfxInstance[i], vfxVolume)
 					vfx[vid + 1] = timer
 				endIf
@@ -428,7 +428,7 @@ function SetupActor(actor position)
 	position.SetFactionRank(SexLab.AnimatingFaction, 1)
 	if IsPlayerActor(position)
 		; Enable hotkeys, if needed
-		if SexLab.Config.bDisablePlayer && position == GetVictim()
+		if SexLab.Config.bDisablePlayer && IsVictim(position)
 			autoAdvance = true
 		else
 			SexLab._EnableHotkeys(tid)
