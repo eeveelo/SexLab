@@ -294,6 +294,10 @@ function ChangeAnimation(bool backwards = false)
 		i += 1
 	endWhile
 
+	if HasPlayer() && Animation.tcl
+		Debug.ToggleCollisions()
+	endIf
+
 	SetAnimation(aid)
 	PlayAnimation()
 
@@ -462,7 +466,7 @@ function ResetActor(actor position)
 		if Animation.tcl
 			Debug.ToggleCollisions()
 		endIf
-		SexLab.UnregisterForAllKeys()
+		SexLab._DisableHotkeys()
 		Game.EnablePlayerControls()
 		;Game.SetInChargen(false, false, false)
 		Game.SetPlayerAIDriven(false)
@@ -612,6 +616,9 @@ function SetAnimation(int anim = -1)
 	endIf
 	if HasPlayer()
 		Debug.Notification(Animation.name)
+		if Animation.tcl
+			Debug.ToggleCollisions()
+		endIf
 	endIf
 endFunction
 
@@ -663,9 +670,9 @@ endFunction
 
 function EndAnimation(bool quick = false)
 	if !animating
+		UnlockThread()
 		return
 	endIf
-	animating = false
 
 	SendThreadEvent("AnimationEnd")
 
@@ -705,7 +712,10 @@ function EndAnimation(bool quick = false)
 		i += 1
 	endWhile
 
-	Utility.Wait(4.0)
+	if !quick
+		Utility.Wait(2.0)
+	endIf
+
 	UnlockThread()
 endFunction
 

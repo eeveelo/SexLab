@@ -713,7 +713,7 @@ function SendThreadEvent(string eventName)
 	; Send Custom Event
 	if hook != ""
 		string customEvent = eventName+"_"+hook
-		Debug.Trace("SexLab Thread["+tid+"]: Sending custom event hook '"+customEvent+"'")
+		Debug.Trace("SexLab ThreadController["+tid+"]: Sending custom event hook '"+customEvent+"'")
 		SendModEvent(customEvent, (tid as string), 1)
 	endIf
 	; Send Global Event
@@ -728,7 +728,7 @@ auto state Idle
 	event OnBeginState()
 		InitializeThread()
 		locked = false
-		Debug.Trace("SexLab Thread["+tid+"]: Ready")
+		Debug.Trace("SexLab ThreadController["+tid+"]: Ready")
 	endEvent
 endState
 

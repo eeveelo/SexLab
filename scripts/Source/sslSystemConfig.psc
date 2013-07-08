@@ -337,18 +337,12 @@ endFunction
 event OnConfigInit()
 	SexLab._CheckSystem()
 	SexLab._SetupSystem()
-	SetDefaults()
-	SexLab.Data.LoadAnimations()
-	SexLab.Data.LoadVoices()
 endEvent
 
 event OnGameReload()
 	parent.OnGameReload()
 	SexLab._CheckSystem()
 	Sexlab._StopAnimations()
-	;SexLab.Data.LoadAnimations()
-	;SexLab.Data.LoadVoices()
-	;SetDefaults() ; Reset on load for development builds
 endEvent
 
 event OnVersionUpdate(int version)
@@ -361,11 +355,11 @@ event OnVersionUpdate(int version)
 	;SetDefaults()
 	;SexLab.Data.LoadAnimations()
 	;SexLab.Data.LoadVoices()
-
-	; ; Rev 4
-	; if version >= 4 && CurrentVersion < 4
-	; 	SetDefaults()
-	; endIf
+	debug.messagebox("Current: "+current+"")
+	; v1.0 +
+	if version >= 110  && CurrentVersion > 1
+	 	SexLab._SetupSystem()
+	endIf
 endEvent
 
 event OnPageReset(string page)
@@ -946,6 +940,8 @@ event OnOptionSelect(int option)
 		if run
 			ShowMessage("$SSL_RunCleanSystem", false)
 			SexLab._CleanSystem()
+			SexLab.Data.mCleanSystemFinish.Show()
+
 		endIf
 
 	elseif option == oidRebuildAnimations

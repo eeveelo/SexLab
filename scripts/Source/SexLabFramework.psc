@@ -12,10 +12,9 @@ scriptname SexLabFramework extends Quest
 ;####################################################
 
 ;Load our configuration settings from MCM
-sslSystemConfig property config auto
+sslSystemConfig property Config auto
 ;Load our resources data
-sslSystemResources property data auto
-Quest property SexLabVoice auto
+sslSystemResources property Data auto
 
 ;#---------------------------#
 ;# Start Animation Variables #
@@ -86,7 +85,22 @@ ReferenceAlias property DoNothing11 auto
 ReferenceAlias property DoNothing12 auto
 ReferenceAlias property DoNothing13 auto
 ReferenceAlias property DoNothing14 auto
-ReferenceAlias[] property DoNothing auto
+ReferenceAlias property DoNothing15 auto
+ReferenceAlias property DoNothing16 auto
+ReferenceAlias property DoNothing17 auto
+ReferenceAlias property DoNothing18 auto
+ReferenceAlias property DoNothing19 auto
+ReferenceAlias property DoNothing20 auto
+ReferenceAlias property DoNothing21 auto
+ReferenceAlias property DoNothing22 auto
+ReferenceAlias property DoNothing23 auto
+ReferenceAlias property DoNothing24 auto
+ReferenceAlias property DoNothing25 auto
+ReferenceAlias property DoNothing26 auto
+ReferenceAlias property DoNothing27 auto
+ReferenceAlias property DoNothing28 auto
+ReferenceAlias property DoNothing29 auto
+ReferenceAlias[] DoNothing
 ;#---------------------------#
 ;#  End Animation Variables  #
 ;#---------------------------#
@@ -282,7 +296,7 @@ form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool all
 				a.UnequipItem(item, false, true)
 				items = sslUtility.PushForm(item, items)
 				if animate
-					utility.wait(0.3)
+					utility.wait(0.35)
 				endIf
 			endIf 
 		elseif strip[i] && i == 32			
@@ -974,10 +988,8 @@ endEvent
 
 function _StopAnimations()
 	int i = 0
-	while i < 15
-		if Controllers[i].IsLocked
-			Controllers[i].EndAnimation(quick = true)
-		endIf
+	while i < Controllers.Length
+		Controllers[i].EndAnimation(quick = true)
 		i += 1
 	endWhile
 endFunction
@@ -986,11 +998,10 @@ function _ClearAnimations()
 	if animIndex == 0
 		return
 	endIf
-
+	_StopAnimations()
 	int i = 0
 	while i < animIndex
 		animation[i].UnloadAnimation()
-		animation[i].Reset()
 		i += 1
 	endWhile
 	animation = new sslBaseAnimation[128]
@@ -1001,14 +1012,9 @@ function _ClearVoices()
 	if voiceIndex == 0
 		return
 	endIf
-
-	SexLabVoice.Stop()
-	SexLabVoice.Start()
-
 	int i = 0
 	while i < voiceIndex
 		voice[i].UnloadVoice()
-		voice[i].Reset()
 		i += 1
 	endWhile
 	voice = new sslBaseVoice[128]
@@ -1016,43 +1022,17 @@ function _ClearVoices()
 endFunction
 
 function _CleanSystem()
-	while Utility.IsInMenuMode()
-	endWhile
-
-	_ReadyWait()
 	ready = false
-
-	; Data.mCleanSystemStart.Show()
-
-	int i = 0
-	while i < 15
-		Controllers[i].EndAnimation(quick = true)
-		utility.Wait(0.1)
-		i += 1
-	endWhile
-
 	_ClearAnimations()
 	_ClearVoices()
-	_SetupSystem()
 	Config.SetDefaults()
-
-	Data.mCleanSystemFinish.Show()
-
-	clean = true
-	hkReady = true
+	_SetupSystem()
 	ready = true
 endFunction
 
 function _SetupSystem()
-	Start()
-	; Init animations
-	animation = new sslBaseAnimation[128]
-	animIndex = 0
-
-	; Init voices
-	voice = new sslBaseVoice[128]
-	voiceIndex = 0
-
+	ready = false
+	; Init controllers
 	Controllers = new sslThreadController[15]
 	Controllers[0] = ThreadView00 as sslThreadView00
 	Controllers[1] = ThreadView01 as sslThreadView01
@@ -1089,7 +1069,7 @@ function _SetupSystem()
 	thread[14] = Thread14 as sslThread14
 	activeThread = new bool[15]
 
-	DoNothing = new ReferenceAlias[15]
+	DoNothing = new ReferenceAlias[30]
 	DoNothing[0] = DoNothing00
 	DoNothing[1] = DoNothing01
 	DoNothing[2] = DoNothing02
@@ -1105,12 +1085,39 @@ function _SetupSystem()
 	DoNothing[12] = DoNothing12
 	DoNothing[13] = DoNothing13
 	DoNothing[14] = DoNothing14
-	int i = 15
-	while i < 15
+	DoNothing[15] = DoNothing15
+	DoNothing[16] = DoNothing16
+	DoNothing[17] = DoNothing17
+	DoNothing[18] = DoNothing18
+	DoNothing[19] = DoNothing19
+	DoNothing[20] = DoNothing20
+	DoNothing[21] = DoNothing21
+	DoNothing[22] = DoNothing22
+	DoNothing[23] = DoNothing23
+	DoNothing[24] = DoNothing24
+	DoNothing[25] = DoNothing25
+	DoNothing[26] = DoNothing26
+	DoNothing[27] = DoNothing27
+	DoNothing[28] = DoNothing28
+	DoNothing[29] = DoNothing29
+
+	int i = 0
+	while i < 30
 		DoNothing[i].Clear()
-		thread[i].Reset()
 		i += 1
 	endWhile
+
+	ready = true
+
+	; Init animations
+	animIndex = 0
+	animation = new sslBaseAnimation[128]
+	Data.LoadAnimations()
+
+	; Init voices
+	voiceIndex = 0
+	voice = new sslBaseVoice[128]
+	Data.LoadVoices()
 endFunction
 
 bool function _CheckClean()
@@ -1118,10 +1125,8 @@ bool function _CheckClean()
 endFunction
 
 function _CheckSystem()
-	_ReadyWait()
 	ready = false
 	enabled = true
-
 	; Check SKSE Version
 	float skseNeeded = 1.0609
 	float skseInstalled = SKSE.GetVersion() + SKSE.GetVersionMinor() * 0.01 + SKSE.GetVersionBeta() * 0.0001
@@ -1163,7 +1168,6 @@ function _CheckSystem()
 		PlayerRef.AddSpell(Data.SexLabDebugSpell, true)
 		DebugActor = none
 	endIf
-
 	hkReady = true
 	ready = true
 endFunction
@@ -1221,13 +1225,11 @@ function _EnableHotkeys(int tid)
 	hkReady = true
 endFunction
 
-function _EndThread(int tid, int player)
-	if player >= 0
-		playerThread = -1
-		hkReady = true
-	endIf
-	_DebugTrace("_EndThread","tid="+tid+", player="+player,"Freeing up animation thread["+tid+"]")
-	activeThread[tid] = false
+function _DisableHotkeys()
+	UnregisterForAllKeys()
+	PlayerController = none
+	PlayerThread = -1
+	hkready = true
 endFunction
 
 function _DebugTrace(string functionName, string str, string args = "")
