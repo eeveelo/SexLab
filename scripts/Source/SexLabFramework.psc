@@ -15,6 +15,7 @@ scriptname SexLabFramework extends Quest
 sslSystemConfig property config auto
 ;Load our resources data
 sslSystemResources property data auto
+Quest property SexLabVoice auto
 
 ;#---------------------------#
 ;# Start Animation Variables #
@@ -779,7 +780,6 @@ actor function HookVictim(string argString)
 endFunction
 
 actor[] function HookActors(string argString)
-	debug.trace("HOOK ACTORS ARGUMENT: "+argString)
 	return Controllers[(argString as int)].Positions
 endFunction
 
@@ -1003,6 +1003,9 @@ function _ClearVoices()
 	if voiceIndex == 0
 		return
 	endIf
+
+	SexLabVoice.Stop()
+	SexLabVoice.Start()
 
 	int i = 0
 	while i < voiceIndex

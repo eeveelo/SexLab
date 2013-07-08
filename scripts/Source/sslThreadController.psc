@@ -478,6 +478,10 @@ function ResetActor(actor position)
 	RemoveExtras(position)
 	; Reset openmouth
 	Position.ClearExpressionOverride()
+	; SOS flaccid
+	if SexLab.sosEnabled && Animation.GetGender(GetPosition(position)) < 1
+		Debug.SendAnimationEvent(position, "SOSFlaccid")
+	endIf
 	; Reset idle
 	if !SexLab.Config.bRagdollEnd
 		Debug.SendAnimationEvent(position, "IdleForceDefaultState")
@@ -646,6 +650,7 @@ function PlayAnimation()
 		endIf
 		; Send SOS event
 		if SexLab.sosEnabled && Animation.GetGender(i) < 1
+			Debug.SendAnimationEvent(Positions[i], "SOSFastErect")
 			Debug.SendAnimationEvent(Positions[i], "SOSBend"+sos[i])
 		endIf
 		i += 1
@@ -728,7 +733,6 @@ function InitializeThread()
 	; Empty bools
 	bool[] bDel
 	silence = bDel
-
 	; Empty integers
 	int[] iDel
 	vfxInstance = iDel
