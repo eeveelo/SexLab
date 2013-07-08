@@ -106,29 +106,23 @@ bool function AddTag(string tag)
 endFunction
 
 bool function RemoveTag(string tag)
-	bool check = HasTag(tag)
-	if !check
+	if !HasTag(tag)
 		return false
-	else
-		string[] newTags
-		int i = 0
-		while i < tags.Length
-			if tags[i] != tag
-				newTags = sslUtility.PushString(tags[i],newTags)
-			endIf
-			i += 1
-		endWhile
-		tags = newTags
-		return true
 	endIf
+	string[] newTags
+	int i = 0
+	while i < tags.Length
+		if tags[i] != tag
+			newTags = sslUtility.PushString(tags[i],newTags)
+		endIf
+		i += 1
+	endWhile
+	tags = newTags
+	return true
 endFunction
 
 bool function HasTag(string tag)
-	if tags.Find(tag) >= 0 || tag == ""
-		return true
-	else
-		return false
-	endIf
+		return tags.Find(tag) != -1
 endFunction
 
 ;/-----------------------------------------------\;

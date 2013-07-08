@@ -55,6 +55,8 @@ form[] extras3
 form[] extras4
 form[] extras5
 
+bool waiting
+
 ;/-----------------------------------------------
 	Data Accessor Functions
 ------------------------------------------------/;
@@ -105,17 +107,17 @@ int function AddPosition(int gender = 0, int addCum = -1)
 		debug.trace("----SLAB ERROR sslBaseAnimation AddPosition() "+name+"--- Over max actor limit of 5")
 		return -1
 	endIf
-
+	_WaitLock()
 	genders = sslUtility.PushInt(gender, genders)
 	cum = sslUtility.PushInt(addCum, cum)
-
 	int aid = actors
 	actors += 1
-
+	waiting = false
 	return aid
 endFunction
 
 int function AddPositionStage(int position, string animation, float forward = 0.0, float side = 0.0, float up = 0.0, float rotate = 0.0, bool silent = false, bool openMouth = false, bool strapon = true, int sos = 0)
+	_WaitLock()
 	int stage
 	if position == 0
 		actor1 = sslUtility.PushString(animation, actor1)
@@ -134,12 +136,12 @@ int function AddPositionStage(int position, string animation, float forward = 0.
 		stage = actor5.Length
 	else
 		debug.trace("----SLAB ERROR sslBaseAnimation AddPositionAnimation() "+name+"--- Unknown actor or stage in "+position)
+		waiting = false
 		return -1
 	endIf
 	if stage > stages
 		stages = stage
 	endIf
-
 	offsetData = sslUtility.PushFloat(forward, offsetData)
 	offsetData = sslUtility.PushFloat(side, offsetData)
 	offsetData = sslUtility.PushFloat(up, offsetData)
@@ -148,17 +150,14 @@ int function AddPositionStage(int position, string animation, float forward = 0.
 	offsetDefaults = sslUtility.PushFloat(side, offsetDefaults)
 	offsetDefaults = sslUtility.PushFloat(up, offsetDefaults)
 	offsetDefaults = sslUtility.PushFloat(rotate, offsetDefaults)
-
 	if !IsSexual()
 		strapon = false
 	endIf
-
 	switchData = sslUtility.PushBool(silent, switchData)
 	switchData = sslUtility.PushBool(openMouth, switchData)
 	switchData = sslUtility.PushBool(strapon, switchData)
-
 	schlongData = sslUtility.PushInt(sos, schlongData)
-
+	waiting = false
 	return stage
 endFunction
 
@@ -243,25 +242,22 @@ endFunction
 
 function UpdateForward(int position, int stage, float adjust)
 	int index = DataIndex(4, position, stage, 0)
-	float offset = offsetData[index] + adjust
-	offsetData[index] = offset
+	offsetData[index] = ( offsetData[index] + adjust )
 endFunction
 
 function UpdateSide(int position, int stage, float adjust)
 	int index = DataIndex(4, position, stage, 1)
-	float offset = offsetData[index] + adjust
-	offsetData[index] = offset
+	offsetData[index] = ( offsetData[index] + adjust )
 endFunction
 
 function UpdateUp(int position, int stage, float adjust)
 	int index = DataIndex(4, position, stage, 2)
-	float offset = offsetData[index] + adjust
-	offsetData[index] = offset
+	offsetData[index] = ( offsetData[index] + adjust )
 endFunction
 
 function RestoreOffsets()
 	float[] defaults = offsetDefaults
-	offsetData = offsetDefaults
+	offsetData = defaults
 endFunction
 
 ;/-----------------------------------------------
@@ -364,45 +360,45 @@ endFunction
 ------------------------------------------------/;
 
 bool function AddTag(string tag)
-	bool check = HasTag(tag)
-	if check
+	if HasTag(tag)
 		return false
-	else
-		int tagCount = tags.Length
-		tags = sslUtility.PushString(tag,tags)
-		return true
 	endIf
+	int tagCount = tags.Length
+	tags = sslUtility.PushString(tag,tags)
+	return true
 endFunction
 
 bool function RemoveTag(string tag)
-	bool check = HasTag(tag)
-	if !check
+	if !HasTag(tag)
 		return false
-	else
-		string[] newTags
-		int i = 0
-		while i < tags.Length
-			if tags[i] != tag
-				newTags = sslUtility.PushString(tags[i],newTags)
-			endIf
-			i += 1
-		endWhile
-		tags = newTags
-		return true
 	endIf
+	string[] newTags
+	int i = 0
+	while i < tags.Length
+		if tags[i] != tag
+			newTags = sslUtility.PushString(tags[i],newTags)
+		endIf
+		i += 1
+	endWhile
+	tags = newTags
+	return true
 endFunction
 
 bool function HasTag(string tag)
-	if tags.Find(tag) >= 0 || tag == ""
-		return true
-	else
-		return false
-	endIf
+	return tags.Find(tag) != 0
 endFunction
 
 ;/-----------------------------------------------
 	Animation System Functions
 ------------------------------------------------/;
+
+function _WaitLock()
+	while waiting
+		Debug.Trace("Wait lock on "+name)
+	endWhile
+	waiting = true
+endFunction
+
 
 function LoadAnimation()
 	return

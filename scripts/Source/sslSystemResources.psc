@@ -171,6 +171,9 @@ endFunction
 ; Voices
 ;
 sslVoiceMaleMoan01 property malemoan01 auto
+sslVoiceMaleMoan02 property malemoan02 auto
+sslVoiceMaleMoan03 property malemoan03 auto
+sslVoiceMaleMoan04 property malemoan04 auto
 
 sslVoiceFemaleMoan01 property femalemoan01 auto
 sslVoiceFemaleMoan02 property femalemoan02 auto
@@ -185,6 +188,9 @@ sslVoiceFemaleMoan09 property femalemoan09 auto
 function LoadVoices()
 	; Male Voices
 	SexLab.RegisterVoice(malemoan01)
+	SexLab.RegisterVoice(malemoan02)
+	SexLab.RegisterVoice(malemoan03)
+	SexLab.RegisterVoice(malemoan04)
 
 	; Female Voices
 	SexLab.RegisterVoice(femalemoan01) 

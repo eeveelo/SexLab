@@ -117,7 +117,7 @@ bool property sosEnabled = false auto hidden
 ;#                           #
 ;#---------------------------#
 
-sslThreadModel function NewThread(float timeout = 10.0)
+sslThreadModel function NewThread(float timeout = 5.0)
 	int i = 0
 	while i < Controllers.Length
 		if !Controllers[i].IsLocked
@@ -653,7 +653,6 @@ int function RegisterAnimation(sslBaseAnimation anim)
 	_ReadyWait()
 	ready = false
 	int aid = FindAnimationByName(anim.name)
-
 	; Animation not found, register it.
 	if aid < 0
 		aid = animIndex
@@ -662,7 +661,6 @@ int function RegisterAnimation(sslBaseAnimation anim)
 		_DebugTrace("RegisterAnimation","Animation script successfully registered",anim.name)
 		animIndex += 1
 	endIf
-
 	ready = true
 	return aid
 endFunction
@@ -1263,17 +1261,13 @@ endFunction
 ;#    Hotkeys For Player     #
 ;#---------------------------#
 event OnKeyDown(int keyCode)
-	if playerThread >= 0 && hkReady
+	if PlayerController != none && hkReady
 		hkReady = false
 
 		bool backwards
 		if Config.kBackwards == 42 || Config.kBackwards == 54
 			; Check both shift keys
-			bool lShift = input.IsKeyPressed(42)
-			bool rShift = input.IsKeyPressed(54)
-			if lShift || rShift
-				backwards = true
-			endIf
+			backwards = ( input.IsKeyPressed(42) || input.IsKeyPressed(54) )
 		else
 			backwards = input.IsKeyPressed(Config.kBackwards)
 		endIf
