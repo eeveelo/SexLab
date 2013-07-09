@@ -6,7 +6,7 @@ int function GetVersion()
 endFunction
 
 bool function DebugMode()
-	return true
+	return false
 endFunction
 
 ; Resources
