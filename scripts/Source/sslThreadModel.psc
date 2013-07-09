@@ -475,7 +475,7 @@ bool property leadIn auto hidden
 
 sslBaseAnimation[] primaryAnimations
 sslBaseAnimation[] leadAnimations
-sslBaseAnimation[] property animations hidden
+sslBaseAnimation[] property Animations hidden
 	sslBaseAnimation[] function get()
 		if leadIn
 			return leadAnimations
