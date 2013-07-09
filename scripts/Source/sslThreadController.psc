@@ -183,7 +183,7 @@ state Advance
 		if stage > 1
 			sfx[0] = sfx[0] - (stage * 0.2)
 		endIf
-		; min 0.8 delay
+		; min 1.0 delay
 		if sfx[0] < 1.0
 			sfx[0] = 1.0
 		endIf
@@ -262,7 +262,7 @@ endState
 ;|	Hotkey Functions                             |;
 ;\-----------------------------------------------/;
 
-int adjustingPos
+int AdjustingPosition
 
 function AdvanceStage(bool backwards = false)
 	if backwards && stage == 1
@@ -312,33 +312,44 @@ function ChangeAnimation(bool backwards = false)
 	SendThreadEvent("AnimationChange")
 endFunction
 
-
-function ChangePositions()
+function ChangePositions(bool backwards = false)
 	if ActorCount < 2
 		return ; Solo Animation, nobody to swap with
 	endIf
-	int newPos = adjustingPos + 1
-	if newPos >= ActorCount
-		newPos = 0 ; Outside range, wrap to start
+	; Set direction of swapping
+	int MovedTo
+	if backwards
+		MovedTo = PositionClamp((AdjustingPosition - 1))
+	else
+		MovedTo = PositionClamp((AdjustingPosition + 1))
 	endIf
-	; Set Actors
-	SwapPositions(Positions[adjustingPos], Positions[newPos])
-	; Keep adjustment choice
-	adjustingPos = newPos
+	; Actors to swap
+	actor adjusting = Positions[AdjustingPosition]
+	actor moved = Positions[MovedTo]
+	; Removed extras/strapons
+	RemoveExtras(adjusting)
+	RemoveExtras(moved)
+	; Shuffle
+	actor[] NewPositions = Positions
+	NewPositions[AdjustingPosition] = moved
+	NewPositions[MovedTo] = adjusting
+	Positions = NewPositions
+	; Equip new extras
+	EquipExtras(adjusting)
+	EquipExtras(moved)
+	AdjustChange(backwards)
 	; Restart animations
-	; MoveActors()
 	RealignActors()
 	SendThreadEvent("PositionChange")
 endFunction
-
 
 function AdjustForward(bool backwards = false)
 	float adjustment = 0.5
 	if backwards
 		adjustment = adjustment * -1
 	endIf
-	Animation.UpdateForward(adjustingPos, stage, adjustment)
-	MoveActor(adjustingPos)
+	Animation.UpdateForward(AdjustingPosition, stage, adjustment)
+	MoveActor(AdjustingPosition)
 endFunction
 
 function AdjustSideways(bool backwards = false)
@@ -346,20 +357,20 @@ function AdjustSideways(bool backwards = false)
 	if backwards
 		adjustment = adjustment * -1
 	endIf
-	Animation.UpdateSide(adjustingPos, stage, adjustment)
-	MoveActor(adjustingPos)
+	Animation.UpdateSide(AdjustingPosition, stage, adjustment)
+	MoveActor(AdjustingPosition)
 endFunction
 
 function AdjustUpward(bool backwards = false)
-	if IsPlayerPosition(adjustingPos)
+	if IsPlayerPosition(AdjustingPosition)
 		return
 	endIf
 	float adjustment = 0.5
 	if backwards
 		adjustment = adjustment * -1
 	endIf
-	Animation.UpdateUp(adjustingPos, stage, adjustment)
-	MoveActor(adjustingPos)
+	Animation.UpdateUp(AdjustingPosition, stage, adjustment)
+	MoveActor(AdjustingPosition)
 endFunction
 
 function RotateScene(bool backwards = false)
@@ -373,11 +384,13 @@ function RotateScene(bool backwards = false)
 endFunction
 
 function AdjustChange(bool backwards = false)
-	adjustingPos += 1
-	if adjustingPos >= actorCount
-		adjustingPos = 0
+	if backwards
+		AdjustingPosition += 1 
+	else
+		AdjustingPosition -= 1
 	endIf
-	SexLab.Data.mAdjustChange.Show(adjustingPos + 1)
+	AdjustingPosition = PositionClamp(AdjustingPosition)
+	SexLab.Data.mAdjustChange.Show((AdjustingPosition + 1))
 endFunction
 
 function RestoreOffsets()
@@ -438,7 +451,7 @@ function SetupActor(actor position)
 			SexLab._EnableHotkeys(tid)
 		endIf
 		Game.DisablePlayerControls(true, true, true, false, true, false, false, true, 0)
-		;Game.SetInChargen(false, true, true)
+		Game.SetInChargen(false, true, true)
 		Game.ForceThirdPerson()
 		Game.SetPlayerAIDriven()
 	else
@@ -468,7 +481,7 @@ function ResetActor(actor position)
 		endIf
 		SexLab._DisableHotkeys()
 		Game.EnablePlayerControls()
-		;Game.SetInChargen(false, false, false)
+		Game.SetInChargen(false, false, false)
 		Game.SetPlayerAIDriven(false)
 		SexLab.UpdatePlayerStats(Animation, timer, Positions, GetVictim())
 	else
@@ -490,7 +503,7 @@ function ResetActor(actor position)
 	if !SexLab.Config.bRagdollEnd
 		Debug.SendAnimationEvent(position, "IdleForceDefaultState")
 	else
-		position.PushActorAway(position, 0.1)
+		position.PushActorAway(position, 1.0)
 	endIf
 endFunction
 
@@ -546,19 +559,20 @@ function RemoveExtras(actor position)
 		endWhile
 	endIf
 	; Strapons are enabled for this position, and they are female in a male position
-	if position.GetLeveledActorBase().GetSex() == 1 && Animation.GetGender(slot) == 0 && SexLab.Config.bUseStrapons && Animation.UseStrapon(slot, stage)
-		SexLab.UnequipStrapon(position)
-	endIf
+	SexLab.UnequipStrapon(position)
 endFunction
 
 function MoveActor(int position)
-	actor a = positions[position]
+	actor a = Positions[position]
 	float[] offsets = Animation.GetPositionOffsets(position, stage)
 	float[] loc = new float[6]
 	; Determine offsets coordinates from center
 	loc[0] = ( CenterLocation[0] + ( Math.sin(CenterLocation[5]) * offsets[0] + Math.cos(CenterLocation[5]) * offsets[1] ) )
 	loc[1] = ( CenterLocation[1] + ( Math.cos(CenterLocation[5]) * offsets[0] + Math.sin(CenterLocation[5]) * offsets[1] ) )
 	loc[2] = ( CenterLocation[2] + offsets[2] )
+	if IsPlayerActor(a)
+		loc[2] = loc[2] - 3
+	endIf
 	; Determine rotation coordinates from center
 	loc[3] = CenterLocation[3]
 	loc[4] = CenterLocation[4]
@@ -673,23 +687,20 @@ function EndAnimation(bool quick = false)
 		UnlockThread()
 		return
 	endIf
-
+	animating = false
 	SendThreadEvent("AnimationEnd")
+	
+	int i = 0
 
 	; Apply cum
-	int i = 0
-	if !quick && Animation.IsSexual()
+	if !quick && Animation.IsSexual() && SexLab.Config.bUseCum
 		int[] genders = SexLab.GenderCount(positions)
-		while i < ActorCount
-			if SexLab.Config.bUseCum && Animation.GetCum(i) > 0 && Positions[i].GetLeveledActorBase().GetSex() == 1
-				if genders[0] > 0
-					SexLab.ApplyCum(Positions[i], Animation.GetCum(i))
-				elseIf SexLab.Config.bAllowFFCum && genders[0] > 1
-					SexLab.ApplyCum(Positions[i], Animation.GetCum(i))
-				endIf
-			endIf
-			i += 1
-		endWhile
+		if genders[0] > 0 || SexLab.Config.bAllowFFCum
+			while i < ActorCount
+				SexLab.ApplyCum(Positions[i], Animation.GetCum(i))
+				i += 1
+			endWhile
+		endIf
 	endIf
 
 	i = 0
@@ -726,7 +737,6 @@ function InitializeThread()
 	animating = false
 	primed = false
 	scaled = false
-	animating = false
 	advance = false
 	orgasm = false
 	; Empty Strings
@@ -746,7 +756,7 @@ function InitializeThread()
 	; Empty integers
 	int[] iDel
 	vfxInstance = iDel
-	adjustingPos = 0
+	AdjustingPosition = 0
 	aid = 0
 	; Empty voice slots
 	; Empty animations

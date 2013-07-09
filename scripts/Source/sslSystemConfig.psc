@@ -115,6 +115,7 @@ int[] oidRemoveStrapon
 int oidStopAnimations  
 int oidRestoreDefaults
 int oidCleanSystem
+int oidToggleSystem
 int oidRebuildAnimations
 int oidRebuildVoices
 int oidResetStats
@@ -356,7 +357,6 @@ event OnVersionUpdate(int version)
 	;SetDefaults()
 	;SexLab.Data.LoadAnimations()
 	;SexLab.Data.LoadVoices()
-	; v1.0 +
 	if version >= 110  && CurrentVersion > 1
 	 	SexLab._SetupSystem()
 	 	SetDefaults()
@@ -377,7 +377,6 @@ event OnPageReset(string page)
 	if page == "$SSL_AnimationSettings"
 		SetCursorFillMode(TOP_TO_BOTTOM)
 		oidRestrictAggressive = AddToggleOption("$SSL_RestrictAggressive", bRestrictAggressive)
-		oidForeplayStage = AddToggleOption("$SSL_PreSexForeplay", bForeplayStage)
 		oidScaleActors = AddToggleOption("$SSL_EvenActorsHeight", bScaleActors)
 		oidRagdollEnd = AddToggleOption("$SSL_RagdollEnding", bRagdollEnd)
 		oidUndressAnimation = AddToggleOption("$SSL_UndressAnimation", bUndressAnimation)
@@ -391,8 +390,8 @@ event OnPageReset(string page)
 		oidUseStrapons = AddToggleOption("$SSL_FemalesUseStrapons", bUseStrapons)
 		oidUseMaleNudeSuit = AddToggleOption("$SSL_UseNudeSuitMales", bUseMaleNudeSuit)
 		oidUseFemaleNudeSuit = AddToggleOption("$SSL_UseNudeSuitFemales", bUseFemaleNudeSuit)
-
 		SetCursorPosition(1)
+		oidForeplayStage = AddToggleOption("$SSL_PreSexForeplay", bForeplayStage)
 		AddHeaderOption("$SSL_PlayerSettings")
 		oidAutoAdvance = AddToggleOption("$SSL_AutoAdvanceStages", bAutoAdvance)
 		oidDisablePlayer = AddToggleOption("$SSL_DisableVictimControls", bDisablePlayer)
@@ -630,9 +629,14 @@ event OnPageReset(string page)
 
 	elseIf page == "$SSL_RebuildClean"
 		SetCursorFillMode(TOP_TO_BOTTOM)
-		AddHeaderOption("Created By Ashal@LoversLab.com")
+		AddHeaderOption("SexLab v1.10 By Ashal@LoversLab.com")
 		AddEmptyOption()
 		AddHeaderOption("$SSL_Maintenance")
+		if SexLab.Enabled
+			oidToggleSystem = AddTextOption("$SSL_EnabledSystem", "$SSL_DoDisable")
+		else
+			oidToggleSystem = AddTextOption("$SSL_DisabledSystem", "$SSL_DoEnable")
+		endIf
 		oidStopAnimations = AddTextOption("$SSL_StopCurrentAnimations", "$SSL_ClickHere")
 		oidRestoreDefaults = AddTextOption("$SSL_RestoreDefaultSettings", "$SSL_ClickHere")
 		oidRebuildAnimations = AddTextOption("$SSL_ResetAnimationRegistry", "$SSL_ClickHere")
@@ -644,10 +648,11 @@ event OnPageReset(string page)
 		AddEmptyOption()
 
 		SetCursorPosition(1)
-		AddHeaderOption("$SSL_TranslatedBy")
+		AddHeaderOption("$SSL_TranslatorCredit")
+		AddEmptyOption()
+		oidFindStrapons = AddTextOption("$SSL_RebuildStraponList", "$SSL_ClickHere")
 		AddEmptyOption()
 		AddHeaderOption("$SSL_AvailableStrapons")
-		oidFindStrapons = AddTextOption("$SSL_RebuildStraponList", "$SSL_ClickHere")
 		i = 0
 		while i < SexLab.Data.strapons.Length
 			if SexLab.Data.strapons[i] != none
@@ -660,7 +665,6 @@ event OnPageReset(string page)
 			i += 1
 		endWhile
 	endIf
-
 endEvent
 
 ;#---------------------------#
@@ -942,6 +946,18 @@ event OnOptionSelect(int option)
 		if run
 			ShowMessage("$SSL_RunCleanSystem", false)
 			SexLab._CleanSystem()
+		endIf
+
+	elseif option == oidToggleSystem
+		bool run
+		if SexLab.Enabled
+			run = ShowMessage("$SSL_WarnDisableSexLab")
+		else
+			run = ShowMessage("$SSL_WarnEnableSexLab")
+		endIf
+		if run
+			SexLab._EnableSystem(!SexLab.Enabled)
+			ForcePageReset()
 		endIf
 
 	elseif option == oidRebuildAnimations

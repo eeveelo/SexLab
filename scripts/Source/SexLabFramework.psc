@@ -16,6 +16,12 @@ sslSystemConfig property Config auto
 ;Load our resources data
 sslSystemResources property Data auto
 
+bool property Enabled hidden
+	bool function get()
+		return systemenabled
+	endFunction
+endProperty
+
 ;#---------------------------#
 ;# Start Animation Variables #
 ;#---------------------------#
@@ -70,36 +76,36 @@ int animIndex = 0
 faction property AnimatingFaction auto
 
 ; Reference Alias for DoNothing package
-ReferenceAlias property DoNothing00 auto
-ReferenceAlias property DoNothing01 auto
-ReferenceAlias property DoNothing02 auto
-ReferenceAlias property DoNothing03 auto
-ReferenceAlias property DoNothing04 auto
-ReferenceAlias property DoNothing05 auto
-ReferenceAlias property DoNothing06 auto
-ReferenceAlias property DoNothing07 auto
-ReferenceAlias property DoNothing08 auto
-ReferenceAlias property DoNothing09 auto
-ReferenceAlias property DoNothing10 auto
-ReferenceAlias property DoNothing11 auto
-ReferenceAlias property DoNothing12 auto
-ReferenceAlias property DoNothing13 auto
-ReferenceAlias property DoNothing14 auto
-ReferenceAlias property DoNothing15 auto
-ReferenceAlias property DoNothing16 auto
-ReferenceAlias property DoNothing17 auto
-ReferenceAlias property DoNothing18 auto
-ReferenceAlias property DoNothing19 auto
-ReferenceAlias property DoNothing20 auto
-ReferenceAlias property DoNothing21 auto
-ReferenceAlias property DoNothing22 auto
-ReferenceAlias property DoNothing23 auto
-ReferenceAlias property DoNothing24 auto
-ReferenceAlias property DoNothing25 auto
-ReferenceAlias property DoNothing26 auto
-ReferenceAlias property DoNothing27 auto
-ReferenceAlias property DoNothing28 auto
-ReferenceAlias property DoNothing29 auto
+ReferenceAlias property DoNothingAlias00 auto
+ReferenceAlias property DoNothingAlias01 auto
+ReferenceAlias property DoNothingAlias02 auto
+ReferenceAlias property DoNothingAlias03 auto
+ReferenceAlias property DoNothingAlias04 auto
+ReferenceAlias property DoNothingAlias05 auto
+ReferenceAlias property DoNothingAlias06 auto
+ReferenceAlias property DoNothingAlias07 auto
+ReferenceAlias property DoNothingAlias08 auto
+ReferenceAlias property DoNothingAlias09 auto
+ReferenceAlias property DoNothingAlias10 auto
+ReferenceAlias property DoNothingAlias11 auto
+ReferenceAlias property DoNothingAlias12 auto
+ReferenceAlias property DoNothingAlias13 auto
+ReferenceAlias property DoNothingAlias14 auto
+ReferenceAlias property DoNothingAlias15 auto
+ReferenceAlias property DoNothingAlias16 auto
+ReferenceAlias property DoNothingAlias17 auto
+ReferenceAlias property DoNothingAlias18 auto
+ReferenceAlias property DoNothingAlias19 auto
+ReferenceAlias property DoNothingAlias20 auto
+ReferenceAlias property DoNothingAlias21 auto
+ReferenceAlias property DoNothingAlias22 auto
+ReferenceAlias property DoNothingAlias23 auto
+ReferenceAlias property DoNothingAlias24 auto
+ReferenceAlias property DoNothingAlias25 auto
+ReferenceAlias property DoNothingAlias26 auto
+ReferenceAlias property DoNothingAlias27 auto
+ReferenceAlias property DoNothingAlias28 auto
+ReferenceAlias property DoNothingAlias29 auto
 ReferenceAlias[] DoNothing
 ;#---------------------------#
 ;#  End Animation Variables  #
@@ -113,7 +119,7 @@ sslBaseVoice[] property voice auto hidden
 int voiceIndex = 0
 
 ; local vars
-bool enabled = false
+bool systemenabled = false
 bool ready = false
 bool hkready = false
 bool clean = false
@@ -132,6 +138,10 @@ bool property sosEnabled = false auto hidden
 ;#---------------------------#
 
 sslThreadModel function NewThread(float timeout = 5.0)
+	if !systemenabled
+		_DebugTrace("NewThread","","Failed to make new thread model; system is currently disabled")
+		return none
+	endIf
 	int i = 0
 	while i < Controllers.Length
 		if !Controllers[i].IsLocked
@@ -144,8 +154,7 @@ sslThreadModel function NewThread(float timeout = 5.0)
 endFunction
 
 int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim = none, ObjectReference centerOn = none, bool allowBed = true, string hook = "")
-	if !enabled
-		Data.mSystemDisabled.Show()
+	if !Enabled
 		_DebugTrace("StartSex","","Failed to start animation; system is currently disabled")
 		return -99
 	endIf
@@ -227,7 +236,10 @@ actor[] function SortActors(actor[] actorList, bool femaleFirst = true)
 endFunction 
 
 function ApplyCum(actor a, int cumID)
-	if cumID == 1
+	Debug.Trace("Applying "+cumID+" to "+a.GetLeveledActorBase().GetName())
+	if cumID < 1
+		return
+	elseif cumID == 1
 		Data.CumVaginal.Play(a, Config.fCumTimer)
 	elseif cumID == 2
 		Data.CumOral.Play(a, Config.fCumTimer)
@@ -662,9 +674,9 @@ endFunction
 int function RegisterAnimation(sslBaseAnimation anim)
 	_ReadyWait()
 	ready = false
-	int aid = FindAnimationByName(anim.name)
+	int aid
 	; Animation not found, register it.
-	if aid < 0
+	if FindAnimationByName(anim.name) == -1
 		aid = animIndex
 		animation[aid] = anim
 		animation[aid].LoadAnimation()
@@ -739,21 +751,14 @@ endFunction
 int function RegisterVoice(sslBaseVoice vc)
 	_ReadyWait()
 	ready = false
-
-	int vid = FindVoiceByName(vc.name)
-
-	; Animation already registered, return it's index
-	if vid >= 0
-		; debug.trace("----SexLab---- Skipping Voice '"+vc.name+"'. Already registered under index ["+vid+"]")
-	; Appears to be new, register it and return new index
-	else
+	int vid
+	if FindVoiceByName(vc.name) == -1
 		vid = voiceIndex
 		voice[vid] = vc
 		voice[vid].LoadVoice()
-		_DebugTrace("RegisterVoice",vc.name,"Voice script successfully registered")
+		_DebugTrace("RegisterVoice","Voice script successfully registered",vc.name)
 		voiceIndex += 1
 	endIf
-
 	ready = true
 	return vid
 endFunction
@@ -979,22 +984,22 @@ endFunction
 
 event OnInit()
 	ready = true
+	systemenabled = true
 	_DebugTrace("OnInit","","SYSTEM INITIALIZED")
 endEvent
 
 function _StopAnimations()
+	ready = false
 	int i = 0
 	while i < Controllers.Length
 		Controllers[i].EndAnimation(quick = true)
 		i += 1
 	endWhile
+	ready = false
 endFunction
 
 function _ClearAnimations()
-	if animIndex == 0
-		return
-	endIf
-	_StopAnimations()
+	ready = false
 	int i = 0
 	while i < animIndex
 		animation[i].UnloadAnimation()
@@ -1002,12 +1007,11 @@ function _ClearAnimations()
 	endWhile
 	animation = new sslBaseAnimation[128]
 	animIndex = 0
+	ready = true
 endFunction
 
 function _ClearVoices()
-	if voiceIndex == 0
-		return
-	endIf
+	ready = false
 	int i = 0
 	while i < voiceIndex
 		voice[i].UnloadVoice()
@@ -1015,12 +1019,11 @@ function _ClearVoices()
 	endWhile
 	voice = new sslBaseVoice[128]
 	voiceIndex = 0
+	ready = true
 endFunction
 
 function _CleanSystem()
 	ready = false
-	_ClearAnimations()
-	_ClearVoices()
 	_SetupSystem()
 	Config.SetDefaults()
 	Data.mCleanSystemFinish.Show()
@@ -1068,54 +1071,63 @@ function _SetupSystem()
 	activeThread = new bool[15]
 
 	DoNothing = new ReferenceAlias[30]
-	DoNothing[0] = DoNothing00
-	DoNothing[1] = DoNothing01
-	DoNothing[2] = DoNothing02
-	DoNothing[3] = DoNothing03
-	DoNothing[4] = DoNothing04
-	DoNothing[5] = DoNothing05
-	DoNothing[6] = DoNothing06
-	DoNothing[7] = DoNothing07
-	DoNothing[8] = DoNothing08
-	DoNothing[9] = DoNothing09
-	DoNothing[10] = DoNothing10
-	DoNothing[11] = DoNothing11
-	DoNothing[12] = DoNothing12
-	DoNothing[13] = DoNothing13
-	DoNothing[14] = DoNothing14
-	DoNothing[15] = DoNothing15
-	DoNothing[16] = DoNothing16
-	DoNothing[17] = DoNothing17
-	DoNothing[18] = DoNothing18
-	DoNothing[19] = DoNothing19
-	DoNothing[20] = DoNothing20
-	DoNothing[21] = DoNothing21
-	DoNothing[22] = DoNothing22
-	DoNothing[23] = DoNothing23
-	DoNothing[24] = DoNothing24
-	DoNothing[25] = DoNothing25
-	DoNothing[26] = DoNothing26
-	DoNothing[27] = DoNothing27
-	DoNothing[28] = DoNothing28
-	DoNothing[29] = DoNothing29
+	DoNothing[0] = DoNothingAlias00
+	DoNothing[1] = DoNothingAlias01
+	DoNothing[2] = DoNothingAlias02
+	DoNothing[3] = DoNothingAlias03
+	DoNothing[4] = DoNothingAlias04
+	DoNothing[5] = DoNothingAlias05
+	DoNothing[6] = DoNothingAlias06
+	DoNothing[7] = DoNothingAlias07
+	DoNothing[8] = DoNothingAlias08
+	DoNothing[9] = DoNothingAlias09
+	DoNothing[10] = DoNothingAlias10
+	DoNothing[11] = DoNothingAlias11
+	DoNothing[12] = DoNothingAlias12
+	DoNothing[13] = DoNothingAlias13
+	DoNothing[14] = DoNothingAlias14
+	DoNothing[15] = DoNothingAlias15
+	DoNothing[16] = DoNothingAlias16
+	DoNothing[17] = DoNothingAlias17
+	DoNothing[18] = DoNothingAlias18
+	DoNothing[19] = DoNothingAlias19
+	DoNothing[20] = DoNothingAlias20
+	DoNothing[21] = DoNothingAlias21
+	DoNothing[22] = DoNothingAlias22
+	DoNothing[23] = DoNothingAlias23
+	DoNothing[24] = DoNothingAlias24
+	DoNothing[25] = DoNothingAlias25
+	DoNothing[26] = DoNothingAlias26
+	DoNothing[27] = DoNothingAlias27
+	DoNothing[28] = DoNothingAlias28
+	DoNothing[29] = DoNothingAlias29
 
 	int i = 0
 	while i < 30
-		DoNothing[i].Clear()
+		DoNothing[i].TryToClear()
 		i += 1
 	endWhile
 
 	ready = true
+	systemenabled = true
 
 	; Init animations
-	animIndex = 0
-	animation = new sslBaseAnimation[128]
+	_ClearAnimations()
 	Data.LoadAnimations()
 
 	; Init voices
-	voiceIndex = 0
-	voice = new sslBaseVoice[128]
+	_ClearVoices()
 	Data.LoadVoices()
+
+endFunction
+
+function _EnableSystem(bool EnableSexLab = true)
+	systemenabled = EnableSexLab
+	if !EnableSexLab
+		_StopAnimations()
+	else
+		_CheckSystem()
+	endIf
 endFunction
 
 bool function _CheckClean()
@@ -1124,29 +1136,25 @@ endFunction
 
 function _CheckSystem()
 	ready = false
-	enabled = true
 	; Check SKSE Version
 	float skseNeeded = 1.0609
 	float skseInstalled = SKSE.GetVersion() + SKSE.GetVersionMinor() * 0.01 + SKSE.GetVersionBeta() * 0.0001
 	if skseInstalled == 0
 		Data.mNoSKSE.Show()
-		enabled = false
+		systemenabled = false
 	elseif skseInstalled < skseNeeded
 		Data.mOldSKSE.Show(skseInstalled, skseNeeded)
-		enabled = false
+		systemenabled = false
 	endIf
-	
 	; Check Skyrim Version
 	float skyrimNeeded = 1.8
 	float skyrimMajor = StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float
 	if skyrimMajor < skyrimNeeded
 		Data.mOldSkyrim.Show(skyrimMajor, skyrimNeeded)
-		enabled = false
+		systemenabled = false
 	endIf
-
 	; Load Strapons
 	Data.FindStrapons()
-
 	; Check for Schlongs of Skyrim
 	sosEnabled = false
 	form check = Game.GetFormFromFile(0x0D64, "Schlongs of Skyrim.esp") ; Armor SkinNaked
@@ -1160,7 +1168,6 @@ function _CheckSystem()
 			_DebugTrace("_CheckSystem","SexLab Compatibility: 'Schlongs of Skyrim - Light.esp' was found")
 		endIf
 	endIf
-
 	; Add debug spell
 	if Config.DebugMode() && !PlayerRef.HasSpell(Data.SexLabDebugSpell)
 		PlayerRef.AddSpell(Data.SexLabDebugSpell, true)
@@ -1280,7 +1287,7 @@ event OnKeyDown(int keyCode)
 			PlayerController.ChangeAnimation(backwards)
 		; Change Positions
 		elseIf keyCode == Config.kChangePositions
-			PlayerController.ChangePositions()
+			PlayerController.ChangePositions(backwards)
 		; Forward / Backward adjustments
 		elseIf keyCode == Config.kAdjustForward
 			PlayerController.AdjustForward(backwards)

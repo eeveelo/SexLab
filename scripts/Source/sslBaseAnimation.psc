@@ -63,8 +63,9 @@ bool waiting
 
 int function DataIndex(int slots, int position, int stage, int slot)
 	; Zeroindex the stage
-	if stage > 0
-		stage -= 1
+	stage -= 1
+	if stage < 0
+		stage = 0
 	endIf
 	; Return calculated index
 	return ( position * (stages * slots) ) + ( stage * slots ) + slot
@@ -135,7 +136,7 @@ int function AddPositionStage(int position, string animation, float forward = 0.
 		actor5 = sslUtility.PushString(animation, actor5)
 		stage = actor5.Length
 	else
-		debug.trace("----SLAB ERROR sslBaseAnimation AddPositionAnimation() "+name+"--- Unknown actor or stage in "+position)
+		debug.trace("----SLAB ERROR sslBaseAnimation AddPositionStage() "+name+"--- Unknown actor or stage in "+position)
 		waiting = false
 		return -1
 	endIf
@@ -266,8 +267,9 @@ endFunction
 
 string[] function FetchStage(int stage)
 	; Zeroindex the stage
-	if stage > 0
-		stage -= 1
+	stage -= 1
+	if stage < 0
+		stage = 0
 	endIf
 	string[] anims = sslUtility.StringArray(actors)
 	anims[0] = actor1[stage]
