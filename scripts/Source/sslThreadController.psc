@@ -319,9 +319,9 @@ function ChangePositions(bool backwards = false)
 	; Set direction of swapping
 	int MovedTo
 	if backwards
-		MovedTo = PositionClamp((AdjustingPosition - 1))
+		MovedTo = PositionWrap((AdjustingPosition - 1))
 	else
-		MovedTo = PositionClamp((AdjustingPosition + 1))
+		MovedTo = PositionWrap((AdjustingPosition + 1))
 	endIf
 	; Actors to swap
 	actor adjusting = Positions[AdjustingPosition]
@@ -385,11 +385,11 @@ endFunction
 
 function AdjustChange(bool backwards = false)
 	if backwards
-		AdjustingPosition += 1 
+		AdjustingPosition -= 1 
 	else
-		AdjustingPosition -= 1
+		AdjustingPosition += 1
 	endIf
-	AdjustingPosition = PositionClamp(AdjustingPosition)
+	AdjustingPosition = PositionWrap(AdjustingPosition)
 	SexLab.Data.mAdjustChange.Show((AdjustingPosition + 1))
 endFunction
 

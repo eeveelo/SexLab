@@ -708,11 +708,11 @@ function SendThreadEvent(string eventName)
 	SexLab.SendModEvent(eventName, (tid as string), 1)
 endFunction
 
-int function PositionClamp(int value)
+int function PositionWrap(int value)
 	if value < 0
-		return 0
-	elseif value > (ActorCount - 1)
 		return (ActorCount - 1)
+	elseif value >= ActorCount
+		return 0
 	endIf
 	return value
 endFunction
