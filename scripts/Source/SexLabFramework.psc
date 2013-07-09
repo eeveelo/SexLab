@@ -773,6 +773,8 @@ endFunction
 sslBaseThread function HookThread(string argString)
 {DEPRECATED: TO BE REMOVED IN 1.2}
 	_Deprecate("HookThread", "HookController")
+
+	debug.trace("BACKWARDS CHECK, HOOKTHREAD("+argString+"): "+thread[(argString as int)].Controller)
 	return thread[(argString as int)]
 endFunction
 

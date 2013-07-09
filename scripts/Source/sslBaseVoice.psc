@@ -29,7 +29,9 @@ string[] tags
 int function PlayMild(actor a)
 	ActorBase base = a.GetLeveledActorBase()
 	VoiceType type = base.GetVoiceType()
-	if type != none && !VoicesPlayer.HasForm(type)
+	if VoicesPlayer.HasForm(type) || type == SexLabVoiceM || type == SexLabVoiceF
+		a.Say(SexLabMoanMild)
+	else
 		if base.GetSex() > 0
 			base.SetVoiceType(SexLabVoiceF)
 		else
@@ -37,8 +39,6 @@ int function PlayMild(actor a)
 		endIf
 		a.Say(SexLabMoanMild)
 		base.SetVoiceType(type)
-	else
-		a.Say(SexLabMoanMild)
 	endIf
 	return mild.Play(a)
 endFunction
@@ -46,7 +46,9 @@ endFunction
 int function PlayMedium(actor a)
 	ActorBase base = a.GetLeveledActorBase()
 	VoiceType type = base.GetVoiceType()
-	if type != none && !VoicesPlayer.HasForm(type)
+	if VoicesPlayer.HasForm(type) || type == SexLabVoiceM || type == SexLabVoiceF
+		a.Say(SexLabMoanMedium)
+	else
 		if base.GetSex() > 0
 			base.SetVoiceType(SexLabVoiceF)
 		else
@@ -54,8 +56,6 @@ int function PlayMedium(actor a)
 		endIf
 		a.Say(SexLabMoanMedium)
 		base.SetVoiceType(type)
-	else
-		a.Say(SexLabMoanMedium)
 	endIf
 	return medium.Play(a)
 endFunction
@@ -63,7 +63,9 @@ endFunction
 int function PlayHot(actor a)
 	ActorBase base = a.GetLeveledActorBase()
 	VoiceType type = base.GetVoiceType()
-	if type != none && !VoicesPlayer.HasForm(type)
+	if VoicesPlayer.HasForm(type) || type == SexLabVoiceM || type == SexLabVoiceF
+		a.Say(SexLabMoanHot)
+	else
 		if base.GetSex() > 0
 			base.SetVoiceType(SexLabVoiceF)
 		else
@@ -71,8 +73,6 @@ int function PlayHot(actor a)
 		endIf
 		a.Say(SexLabMoanHot)
 		base.SetVoiceType(type)
-	else
-		a.Say(SexLabMoanHot)
 	endIf
 	return hot.Play(a)
 endFunction

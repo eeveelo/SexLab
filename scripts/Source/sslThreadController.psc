@@ -69,9 +69,11 @@ endState
 ;\-----------------------------------------------/;
 
 bool animating
+bool stageBack
 bool advance
 bool orgasm
 float advanceTimer
+int previousStage
 
 float[] sfx
 float[] vfx
@@ -135,19 +137,23 @@ state Advance
 		if !advance
 			return
 		endIf
+		
+		previousStage = stage
+
+		; Next stage
+		if stageBack
+			stage -= 1
+		else
+			stage += 1
+		endIf
+		if stage < 1
+			stage = 1
+		endIf
+
 		advance = false
-		; Increase stage
-		stage += 1
-		if stage <= Animation.StageCount()
-			; Make sure stage exists first
-			if !leadIn && stage == Animation.StageCount()
-				orgasm = true
-			else
-				orgasm = false
-			endIf
-			; Start Animations loop
-			GoToState("Animating")
-		elseIf leadIn && stage > Animation.StageCount()
+		stageBack = false
+
+		if leadIn && stage > Animation.StageCount()
 			; End leadIn animations and go into normal animations
 			stage = 1
 			leadIn = false
@@ -166,10 +172,16 @@ state Advance
 			endIf
 			; Start Animations loop
 			GoToState("Animating")
-		else
-			if HasPlayer()
-				Game.ForceThirdPerson()
+		elseIf stage <= Animation.StageCount()
+			; Make sure stage exists first
+			if !leadIn && stage == Animation.StageCount()
+				orgasm = true
+			else
+				orgasm = false
 			endIf
+			; Start Animations loop
+			GoToState("Animating")
+		else
 			; No valid stages left
 			EndAnimation()
 		endIf
@@ -209,8 +221,6 @@ state Animating
 		if !animating
 			return
 		endIf
-		
-		RealignActors()
 
 		if orgasm
 			SendThreadEvent("OrgasmStart")
@@ -220,13 +230,32 @@ state Animating
 			SendThreadEvent("StageStart")
 		endIf
 
+		PlayAnimation()
+
+		; Check if actor needs to be realigned for stage
+		if previousStage != 0
+			int position = 0
+			while position < ActorCount
+				float[] current = Animation.GetPositionOffsets(position, stage)
+				float[] previous = Animation.GetPositionOffsets(position, previousStage)
+				int offset = 0
+				while offset < 4
+					if current[offset] != previous[offset]
+						MoveActor(position)
+						offset = 4
+					endIf
+					offset += 1
+				endWhile
+				position += 1
+			endWhile
+		endIf
+
 		advanceTimer = Utility.GetCurrentRealTime() + GetStageTimer(Animation.StageCount())
 
 		advance = false
 		while !advance && animating
-			int i = 0
-
 			; Check actors
+			int i = 0
 			while i < actorCount
 				actor a = GetActor(i)
 				if a.IsDead() || a.IsBleedingOut() || !a.Is3DLoaded()
@@ -266,9 +295,9 @@ int AdjustingPosition
 
 function AdvanceStage(bool backwards = false)
 	if backwards && stage == 1
-		stage = 0
-	elseIf backwards
-		stage -= 2 ; Account for stage increase on advance
+		return
+	elseif backwards && stage > 1
+		stageBack = true
 	endIf
 	advance = true
 endFunction
@@ -735,6 +764,7 @@ function InitializeThread()
 	parent.InitializeThread()
 	; Set states
 	animating = false
+	stageBack = false
 	primed = false
 	scaled = false
 	advance = false
@@ -757,6 +787,7 @@ function InitializeThread()
 	int[] iDel
 	vfxInstance = iDel
 	AdjustingPosition = 0
+	previousStage = 0
 	aid = 0
 	; Empty voice slots
 	; Empty animations
