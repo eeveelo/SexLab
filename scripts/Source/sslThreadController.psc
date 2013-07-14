@@ -539,7 +539,7 @@ endFunction
 function SetVFX(actor position)
 	int index = GetSlot(position) * 2
 	; Base Delay
-	if position.GetLeveledActorBase().GetSex() < 1
+	if SexLab.GetGender(position) < 1
 		vfx[index] = SexLab.Config.fMaleVoiceDelay + Utility.RandomFloat(-0.5, 0.5)
 	else
 		vfx[index] = SexLab.Config.fFemaleVoiceDelay + Utility.RandomFloat(-0.5, 0.5)
@@ -569,7 +569,7 @@ function EquipExtras(actor position)
 		endWhile
 	endIf
 	; Strapons are enabled for this position, and they are female in a male position
-	if position.GetLeveledActorBase().GetSex() == 1 && Animation.GetGender(slot) == 0 && SexLab.Config.bUseStrapons && Animation.UseStrapon(slot, stage)
+	if SexLab.GetGender(position) == 1 && Animation.GetGender(slot) == 0 && SexLab.Config.bUseStrapons && Animation.UseStrapon(slot, stage)
 		SexLab.EquipStrapon(position)
 	endIf
 endFunction

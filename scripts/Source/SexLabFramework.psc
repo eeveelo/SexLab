@@ -224,7 +224,7 @@ actor[] function SortActors(actor[] actorList, bool femaleFirst = true)
 	int i = 0
 	while i < actorCount
 		actor a = actorList[i]
-		if a.GetLeveledActorBase().GetSex() == priorityGender && i > orderSlot
+		if GetGender(a) == priorityGender && i > orderSlot
 			actor moved = actorList[orderSlot]
 			actorList[orderSlot] = a
 			actorList[i] = moved
@@ -257,7 +257,7 @@ function ApplyCum(actor a, int cumID)
 endFunction
 
 form[] function StripActor(actor a, actor victim = none, bool animate = true, bool leadIn = false)
-	int gender = a.GetLeveledActorBase().GetSex()
+	int gender = GetGender(a)
 	bool[] strip
 	if leadIn && gender < 1
 		strip = Config.bStripLeadInMale
@@ -282,7 +282,7 @@ form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool all
 		return none
 	endIf
 
-	int gender = a.GetLeveledActorBase().GetSex()
+	int gender = GetGender(a)
 	form[] items
 	int mask
 	armor item
@@ -355,7 +355,7 @@ function UnstripActor(actor a, form[] stripped, actor victim = none)
 	endIf
 
 	; Remove nudesuits
-	int gender = a.GetLeveledActorBase().GetSex()
+	int gender = GetGender(a)
 	if (gender < 2 && Config.bUseMaleNudeSuit) || (gender == 1  && Config.bUseFemaleNudeSuit)
 		a.UnequipItem(Data.aNudeSuit, true, true)
 		a.RemoveItem(Data.aNudeSuit, 1, true)
@@ -388,7 +388,7 @@ form function EquipStrapon(actor a)
 		return none
 	endIf
 
-	if a.GetLeveledActorBase().GetSex() == 1
+	if GetGender(a) == 1
 		int sid = utility.RandomInt(0, straponCount - 1)
 		a.EquipItem(Data.strapons[sid], true, true)
 		return Data.strapons[sid]
@@ -404,7 +404,7 @@ function UnequipStrapon(actor a)
 		return
 	endIf
 
-	if a.GetLeveledActorBase().GetSex() == 1
+	if GetGender(a) == 1
 		int i = 0
 		while i < straponCount
 			Form strapon = Data.strapons[i]
@@ -417,11 +417,23 @@ function UnequipStrapon(actor a)
 	endIf
 endFunction
 
+
+int function GetGender(actor a)
+	ActorBase base = a.GetLeveledActorBase()
+	if a.HasKeyWordString("SexLabTreatMale") || base.HasKeyWordString("SexLabTreatMale")
+		return 0
+	elseif a.HasKeyWordString("SexLabTreatFemale") || base.HasKeyWordString("SexLabTreatFemale")
+		return 1
+	else
+		return base.GetSex()
+	endIf
+endFunction
+
 int[] function GenderCount(actor[] pos)
 	int[] genders = new int[2]
 	int i = 0
 	while i < pos.Length
-		if pos[i].GetLeveledActorBase().GetSex() > 0
+		if GetGender(pos[i]) > 0
 			genders[1] = ( genders[1] + 1 )
 		else
 			genders[0] = ( genders[0] + 1 )
@@ -695,11 +707,10 @@ endFunction
 ;#---------------------------#
 
 sslBaseVoice function PickVoice(actor a)
-	int g = a.GetLeveledActorBase().GetSex()
 	if a == PlayerRef && Config.sPlayerVoice != "$SSL_Random"
 		return GetVoiceByName(Config.sPlayerVoice)
 	else
-		return GetVoiceByGender(g)
+		return GetVoiceByGender(a.GetLeveledActorBase().GetSex())
 	endIf
 endFunction
 
@@ -814,20 +825,19 @@ function UpdatePlayerStats(sslBaseAnimation anim, float time, actor[] pos, actor
 	endIf
 	; Update time spent
 	Data.fTimeSpent = Data.fTimeSpent + time
-	; Don't count the player in partner counts
-	int PlayerSex = PlayerRef.GetActorBase().GetSex()
 
 	int[] genders = GenderCount(pos)
 	int males = genders[0]
 	int females = genders[1]
 
-	if PlayerSex > 0
+	if GetGender(PlayerRef) > 0
 		Data.iMalePartners = Data.iMalePartners + males
 		Data.iFemalePartners = Data.iFemalePartners + (females - 1)
 	else
 		Data.iMalePartners = Data.iMalePartners + (males - 1)
 		Data.iFemalePartners = Data.iFemalePartners + females
 	endIf
+
 	int partners = (males + females) - 1
 	bool anal = anim.HasTag("Anal")
 	bool vaginal = anim.HasTag("Vaginal")
@@ -919,7 +929,7 @@ string function GetPlayerSexuality()
 	int males = Data.iMalePartners
 	int females = Data.iFemalePartners
 	int partners = 1 + (males + females)
-	int gender = PlayerRef.GetActorBase().GetSex()
+	int gender = GetGender(PlayerRef)
 	float ratio
 	if gender > 0
 		ratio = ((males + 1.0) / partners as float) * 100.0

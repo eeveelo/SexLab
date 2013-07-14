@@ -555,7 +555,7 @@ bool[] function GetStrip(actor position)
 		return strip
 	endIf
 	; Fallback to default
-	int gender = position.GetLeveledActorBase().GetSex()
+	int gender = SexLab.GetGender(position)
 	if leadIn && gender < 1
 		strip = SexLab.Config.bStripLeadInMale
 	elseif leadIn && gender > 0
