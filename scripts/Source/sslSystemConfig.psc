@@ -15,8 +15,8 @@ SexLabFramework property SexLab auto
 ; Config Settings
 bool property bRestrictAggressive auto hidden
 int oidRestrictAggressive
-bool property bEnableTCL auto hidden ; DEPRECATED for animation specific tcl's in v1.1
-int oidEnableTCL ; DEPRECATED for animation specific tcl's in v1.1
+bool property bEnableTCL auto hidden 
+int oidEnableTCL
 bool property bScaleActors auto hidden
 int oidScaleActors
 bool property bUseCum auto hidden
@@ -46,6 +46,8 @@ bool property bUseFemaleNudeSuit auto hidden
 int oidUseFemaleNudeSuit
 bool property bUndressAnimation auto hidden
 int oidUndressAnimation
+bool property bAdjustAlignStage auto hidden
+int oidAdjustAlignStage
 
 float[] property fStageTimer auto hidden
 int[] oidStageTimer
@@ -127,8 +129,7 @@ string[] property sImpureTitles auto hidden
 function SetDefaults()
 	bRestrictAggressive = true
 	bUseCum = true
-	; DEPRECATED for animation specific tcl's in v1.1
-	; bEnableTCL = false
+	bEnableTCL = false
 	bScaleActors = true
 	bAllowFFCum = false
 	fCumTimer = 120.0
@@ -143,6 +144,7 @@ function SetDefaults()
 	bRagdollEnd = true
 	bForeplayStage = true
 	bUndressAnimation = true
+	bAdjustAlignStage = false
 
 	fMaleVoiceDelay = 7.0
 	fFemaleVoiceDelay = 6.0
@@ -380,8 +382,6 @@ event OnPageReset(string page)
 		oidScaleActors = AddToggleOption("$SSL_EvenActorsHeight", bScaleActors)
 		oidRagdollEnd = AddToggleOption("$SSL_RagdollEnding", bRagdollEnd)
 		oidUndressAnimation = AddToggleOption("$SSL_UndressAnimation", bUndressAnimation)
-		; DEPRECATED for animation specific tcl's in v1.1
-		; oidEnableTCL = AddToggleOption("Toggle Collisions For Player", bEnableTCL)
 		oidReDressVictim = AddToggleOption("$SSL_VictimsRedress", bReDressVictim)
 		oidNPCBed = AddTextOption("$SSL_NPCsUseBeds", sNPCBed)
 		oidUseCum = AddToggleOption("$SSL_ApplyCumEffects", bUseCum)
@@ -392,10 +392,10 @@ event OnPageReset(string page)
 		oidUseFemaleNudeSuit = AddToggleOption("$SSL_UseNudeSuitFemales", bUseFemaleNudeSuit)
 		SetCursorPosition(1)
 		oidForeplayStage = AddToggleOption("$SSL_PreSexForeplay", bForeplayStage)
+		oidEnableTCL = AddToggleOption("$SSL_PlayerTCL", bEnableTCL)
 		AddHeaderOption("$SSL_PlayerSettings")
 		oidAutoAdvance = AddToggleOption("$SSL_AutoAdvanceStages", bAutoAdvance)
 		oidDisablePlayer = AddToggleOption("$SSL_DisableVictimControls", bDisablePlayer)
-		AddEmptyOption()
 		AddHeaderOption("$SSL_SoundsVoices")
 		oidPlayerVoice = AddTextOption("$SSL_PCVoice", sPlayerVoice)
 		oidVoiceVolume = AddSliderOption("$SSL_VoiceVolume", fVoiceVolume, "{2}")
@@ -414,7 +414,9 @@ event OnPageReset(string page)
 		oidChangePositions = AddKeyMapOption("$SSL_SwapActorPositions", kChangePositions)
 		oidMoveScene = AddKeyMapOption("$SSL_MoveSceneLocation", kMoveScene)
 		oidRotateScene = AddKeyMapOption("$SSL_RotateScene", kRotateScene)
+
 		SetCursorPosition(1)
+
 		AddHeaderOption("$SSL_AlignmentAdjustments")
 		oidAdjustChange = AddKeyMapOption("$SSL_ChangeActorBeingMoved", kAdjustChange)
 		oidAdjustForward = AddKeyMapOption("$SSL_MoveActorForwardBackward", kAdjustForward)
@@ -422,6 +424,8 @@ event OnPageReset(string page)
 		oidAdjustSideways = AddKeyMapOption("$SSL_MoveActorLeftRight", kAdjustSideways)
 		oidRealignActors = AddKeyMapOption("$SSL_RealignActors", kRealignActors)
 		oidRestoreOffsets = AddKeyMapOption("$SSL_DeleteSavedAdjustments", kRestoreOffsets)
+		AddEmptyOption()
+		oidAdjustAlignStage = AddToggleOption("$SSL_AdjustAlignStage", bAdjustAlignStage)
 
 	elseIf page == "$SSL_NormalTimersStripping"
 
@@ -877,10 +881,9 @@ event OnOptionSelect(int option)
 		bForeplayStage = !bForeplayStage 
 		SetToggleOptionValue(option, bForeplayStage)
 
-	; DEPRECATED for animation specific tcl's in v1.1
-	; elseif option == oidEnableTCL
-	; 	bEnableTCL = !bEnableTCL 
-	; 	SetToggleOptionValue(option, bEnableTCL)
+	elseif option == oidEnableTCL
+	 	bEnableTCL = !bEnableTCL 
+	 	SetToggleOptionValue(option, bEnableTCL)
 
 	elseif option == oidScaleActors
 		bScaleActors = !bScaleActors
@@ -1050,6 +1053,10 @@ event OnOptionSelect(int option)
 		bUseFemaleNudesuit = !bUseFemaleNudesuit 
 		SetToggleOptionValue(option, bUseFemaleNudesuit)
 
+	elseIf option == oidAdjustAlignStage
+		bAdjustAlignStage = !bAdjustAlignStage 
+		SetToggleOptionValue(option, bAdjustAlignStage)
+
 	else
 		; What are we?
 		int i = 0
@@ -1180,9 +1187,8 @@ event OnOptionHighlight(int option)
 		SetInfoText("$SSL_InfoVoiceVolume")
 	elseIf option == oidSFXVolume
 		SetInfoText("$SSL_InfoSFXVolume")
-	; DEPRECATED for animation specific tcl's in v1.1
-	; elseIf option == oidEnableTCL
-	; 	SetInfoText("Collisions will be toggled automatically when the player is involved, helps align player but can cause other problems")
+	elseIf option == oidEnableTCL
+	 	SetInfoText("$SSL_InfoPlayerTCL")
 	elseIf option == oidScaleActors
 		SetInfoText("$SSL_InfoScaleActors")
 	elseIf option == oidRagdollEnd
@@ -1193,6 +1199,8 @@ event OnOptionHighlight(int option)
 		SetInfoText("$SSL_InfoRotateScene")
 	elseIf option == oidUndressAnimation
 		SetInfoText("$SSL_InfoUndressAnimation")
+	elseIf option == oidAdjustAlignStage
+		SetInfoText("$SSL_InfoAdjustAlignStage")
 	else
 		; What are we?
 		int i = 0
@@ -1287,6 +1295,9 @@ event OnOptionKeyMapChange(int option, int keyCode, string conflictControl, stri
 		if option == oidAdvanceAnimation
 			kAdvanceAnimation = keyCode
 
+		elseif option == oidBackwards
+			kBackwards = keyCode
+
 		elseIf option == oidChangeAnimation
 			kChangeAnimation = keyCode
 
@@ -1365,7 +1376,7 @@ string function GetSlotName(int slot)
 	elseif slot == 47
 		return "$SSL_Back"
 	elseif slot == 48
-		return "$SSL_Misc"
+		return "$SSL_MiscSlot48"
 	elseif slot == 49
 		return "$SSL_PelvisOutergarnments"
 	elseif slot == 50
@@ -1389,9 +1400,9 @@ string function GetSlotName(int slot)
 	elseif slot == 59
 		return "$SSL_ArmsRightArmOutergarnments"
 	elseif slot == 60
-		return "$SSL_MiscSlot"
+		return "$SSL_MiscSlot60"
 	elseif slot == 61
-		return "$SSL_MiscSlot"
+		return "$SSL_MiscSlot61"
 	elseif slot == 62
 		return "$SSL_Weapons"
 	else

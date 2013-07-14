@@ -1153,8 +1153,6 @@ function _CheckSystem()
 		Data.mOldSkyrim.Show(skyrimMajor, skyrimNeeded)
 		systemenabled = false
 	endIf
-	; Load Strapons
-	Data.FindStrapons()
 	; Check for Schlongs of Skyrim
 	sosEnabled = false
 	form check = Game.GetFormFromFile(0x0D64, "Schlongs of Skyrim.esp") ; Armor SkinNaked
