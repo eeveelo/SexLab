@@ -136,7 +136,7 @@ function SetDefaults()
 	sPlayerVoice = "$SSL_Random"
 	bUseStrapons = true
 	bAutoAdvance = true
-	bDisablePlayer = true
+	bDisablePlayer = false
 	bReDressVictim = true
 	sNPCBed = "$SSL_Never"
 	bUseMaleNudeSuit = false
