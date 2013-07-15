@@ -2,7 +2,7 @@ scriptname sslSystemConfig extends SKI_ConfigBase
 {Skyrim Sex Lab Mod Configuration Menu}
 
 int function GetVersion()
-	return 111
+	return 112
 endFunction
 
 bool function DebugMode()
@@ -335,6 +335,8 @@ function SetDefaults()
 		sImpureTitles[5] = "$SSL_Depraved"
 		sImpureTitles[6] = "$SSL_Hypersexual"
 	endIf
+
+	SexLab.Data.FindStrapons()
 endFunction
 
 event OnConfigInit()
