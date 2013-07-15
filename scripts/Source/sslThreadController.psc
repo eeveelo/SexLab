@@ -58,8 +58,16 @@ state Preparing
 				i += 1
 			endWhile
 		endIf
+		
+		if IsPlayerPosition(AdjustingPosition)
+			AdjustingPosition = PositionWrap((AdjustingPosition + 1))
+		endIf
+
 		RealignActors()
 		SendThreadEvent("AnimationStart")
+		if leadIn
+			SendThreadEvent("LeadInStart")
+		endIf
 		GotoState("BeginLoop")
 	endEvent
 endState
@@ -158,6 +166,7 @@ state Advance
 			stage = 1
 			leadIn = false
 			SetAnimation()
+			SendThreadEvent("LeadInEnd")
 			; Restrip with new strip options
 			if Animation.IsSexual()
 				int i = 0
@@ -171,6 +180,7 @@ state Advance
 				endWhile
 			endIf
 			; Start Animations loop
+			RealignActors()
 			GoToState("Animating")
 		elseIf stage <= Animation.StageCount()
 			; Make sure stage exists first
@@ -224,8 +234,6 @@ state Animating
 
 		if orgasm
 			SendThreadEvent("OrgasmStart")
-		elseIf leadIn
-			SendThreadEvent("LeadInStageStart")
 		else
 			SendThreadEvent("StageStart")
 		endIf
@@ -276,8 +284,6 @@ state Animating
 
 		if orgasm
 			SendThreadEvent("OrgasmEnd")
-		elseIf leadIn
-			SendThreadEvent("LeadInStageEnd")
 		else
 			SendThreadEvent("StageEnd")
 		endIf
@@ -292,9 +298,10 @@ endState
 ;\-----------------------------------------------/;
 
 int AdjustingPosition
+bool MovingScene
 
 function AdvanceStage(bool backwards = false)
-	if backwards && stage == 1
+	if ( backwards && stage == 1 ) || ( !backwards && stage >= Animation.StageCount() )
 		return
 	elseif backwards && stage > 1
 		stageBack = true
@@ -373,7 +380,11 @@ function AdjustForward(bool backwards = false)
 	if backwards
 		adjustment = adjustment * -1
 	endIf
-	Animation.UpdateForward(AdjustingPosition, stage, adjustment)
+	if SexLab.Config.bAdjustAlignStage
+		Animation.UpdateForward(AdjustingPosition, stage, adjustment)
+	else
+		Animation.UpdateAllForward(AdjustingPosition, adjustment)
+	endIf
 	MoveActor(AdjustingPosition)
 endFunction
 
@@ -382,7 +393,11 @@ function AdjustSideways(bool backwards = false)
 	if backwards
 		adjustment = adjustment * -1
 	endIf
-	Animation.UpdateSide(AdjustingPosition, stage, adjustment)
+	if SexLab.Config.bAdjustAlignStage
+		Animation.UpdateSide(AdjustingPosition, stage, adjustment)
+	else
+		Animation.UpdateAllSide(AdjustingPosition, adjustment)
+	endIf
 	MoveActor(AdjustingPosition)
 endFunction
 
@@ -394,7 +409,11 @@ function AdjustUpward(bool backwards = false)
 	if backwards
 		adjustment = adjustment * -1
 	endIf
-	Animation.UpdateUp(AdjustingPosition, stage, adjustment)
+	if SexLab.Config.bAdjustAlignStage
+		Animation.UpdateUp(AdjustingPosition, stage, adjustment)
+	else
+		Animation.UpdateAllUp(AdjustingPosition, adjustment)
+	endIf
 	MoveActor(AdjustingPosition)
 endFunction
 
@@ -432,6 +451,7 @@ function MoveScene()
 		advanceToggle = true
 	endIf
 	; Enable Controls
+	MovingScene = true
 	Game.EnablePlayerControls()
 	Game.SetPlayerAIDriven(false)
 	Debug.SendAnimationEvent(SexLab.PlayerRef, "IdleForceDefaultState")
@@ -453,11 +473,12 @@ function MoveScene()
 	if advanceToggle
 		autoAdvance = true
 	endIf
+	MovingScene = false
 endFunction
 
 function RealignActors()
-	MoveActors()
 	PlayAnimation()
+	MoveActors()
 endFunction
 
 ;/-----------------------------------------------\;
@@ -465,7 +486,12 @@ endFunction
 ;\-----------------------------------------------/;
 
 function SetupActor(actor position)
-	position.StopCombat()
+	if position.IsWeaponDrawn()
+		position.SheatheWeapon()
+	endIf
+	if position.IsInCombat()
+		position.StopCombat()
+	endIf
 	SexLab._SlotDoNothing(position)
 	position.SetFactionRank(SexLab.AnimatingFaction, 1)
 	if IsPlayerActor(position)
@@ -498,24 +524,24 @@ function SetupActor(actor position)
 endFunction
 
 function ResetActor(actor position)
-	; Reset scale if needed
-	if scaled
-		position.SetScale(1.0)
-	endIf
 	; Enable movement
 	if IsPlayerActor(position)
-		if SexLab.Config.bEnableTCL
-			Debug.ToggleCollisions()
-		endIf
 		SexLab._DisableHotkeys()
 		Game.EnablePlayerControls()
 		Game.SetInChargen(false, false, false)
 		Game.SetPlayerAIDriven(false)
 		SexLab.UpdatePlayerStats(Animation, timer, Positions, GetVictim())
+		if SexLab.Config.bEnableTCL
+			Debug.ToggleCollisions()
+		endIf
 	else
+		position.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 		position.SetRestrained(false)
 		position.SetDontMove(false)
-		position.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
+	endIf
+	; Reset scale if needed
+	if scaled
+		position.SetScale(1.0)
 	endIf
 	; Clear them out
 	position.RemoveFromFaction(SexLab.AnimatingFaction)
@@ -527,11 +553,14 @@ function ResetActor(actor position)
 	if SexLab.sosEnabled && Animation.GetGender(GetPosition(position)) < 1
 		Debug.SendAnimationEvent(position, "SOSFlaccid")
 	endIf
+	if !position.IsDead() && !position.IsBleedingOut()
+		SexLab.UnstripActor(position, GetEquipment(position), GetVictim())
+	endIf
 	; Reset idle
 	if !SexLab.Config.bRagdollEnd
 		Debug.SendAnimationEvent(position, "IdleForceDefaultState")
 	else
-		position.PushActorAway(position, 1.0)
+		position.PushActorAway(position, 0.01)
 	endIf
 endFunction
 
@@ -599,7 +628,7 @@ function MoveActor(int position)
 	loc[1] = ( CenterLocation[1] + ( Math.cos(CenterLocation[5]) * offsets[0] + Math.sin(CenterLocation[5]) * offsets[1] ) )
 	loc[2] = ( CenterLocation[2] + offsets[2] )
 	if IsPlayerActor(a)
-		loc[2] = loc[2] - 3
+		loc[2] = loc[2] - 8
 	endIf
 	; Determine rotation coordinates from center
 	loc[3] = CenterLocation[3]
@@ -656,7 +685,7 @@ function SetAnimation(int anim = -1)
 	else
 		sfxType = none
 	endIf
-	if HasPlayer()
+	if HasPlayer() && animating
 		Debug.Notification(Animation.name)
 	endIf
 endFunction
@@ -733,22 +762,10 @@ function EndAnimation(bool quick = false)
 		ResetActor(Positions[i])
 		i += 1
 	endWhile
-	
-	if !quick
-		Utility.Wait(3.0)
-	endIf
 
-	; Requip them
-	i = 0
-	while i < ActorCount
-		actor a = Positions[i]
-		if !a.IsDead() && !a.IsBleedingOut()
-			SexLab.UnstripActor(a, GetEquipment(a), GetVictim())
-		endIf
-		i += 1
-	endWhile
-
+	; Dirty fix for broken controls when TFC is enabled at end.
 	if HasPlayer()
+		Game.ForceThirdPerson()
 		Game.EnablePlayerControls()
 	endIf
 

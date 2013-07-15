@@ -210,6 +210,7 @@ float function CalculateForward(int position, int stage)
 	float[] offsets = sslUtility.FloatArray(actors)
 	int i = 0
 	while i < actors
+		;debug.trace(name+" getting forward for position "+i+" stage "+stage+ " actorcount "+actorcount())
 		offsets[i] = AccessOffset(i, stage, 0)
 		i += 1
 	endWhile
@@ -246,14 +247,38 @@ function UpdateForward(int position, int stage, float adjust)
 	offsetData[index] = ( offsetData[index] + adjust )
 endFunction
 
+function UpdateAllForward(int position, float adjust)
+	int stage = 1
+	while stage <= StageCount()
+		UpdateForward(position, stage, adjust)
+		stage += 1
+	endWhile
+endFunction
+
 function UpdateSide(int position, int stage, float adjust)
 	int index = DataIndex(4, position, stage, 1)
 	offsetData[index] = ( offsetData[index] + adjust )
 endFunction
 
+function UpdateAllSide(int position, float adjust)
+	int stage = 1
+	while stage <= StageCount()
+		UpdateSide(position, stage, adjust)
+		stage += 1
+	endWhile
+endFunction
+
 function UpdateUp(int position, int stage, float adjust)
 	int index = DataIndex(4, position, stage, 2)
 	offsetData[index] = ( offsetData[index] + adjust )
+endFunction
+
+function UpdateAllUp(int position, float adjust)
+	int stage = 1
+	while stage <= StageCount()
+		UpdateUp(position, stage, adjust)
+		stage += 1
+	endWhile
 endFunction
 
 function RestoreOffsets()
@@ -378,7 +403,7 @@ bool function RemoveTag(string tag)
 	int i = 0
 	while i < tags.Length
 		if tags[i] != tag
-			newTags = sslUtility.PushString(tags[i],newTags)
+			newTags = sslUtility.PushString(tags[i], newTags)
 		endIf
 		i += 1
 	endWhile

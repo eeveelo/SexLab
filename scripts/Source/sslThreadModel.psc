@@ -141,7 +141,7 @@ sslThreadController function StartThread()
 	endWhile
 
 	; Determine if foreplay lead in should be used
-	if leadAnimations.Length == 0 && !IsAggressive && ActorCount > 1 && SexLab.Config.bForeplayStage
+	if leadAnimations.Length == 0 && !IsAggressive && ActorCount > 1 && SexLab.Config.bForeplayStage && !leadInDisabled
 		SetLeadAnimations(SexLab.GetAnimationsByTag(ActorCount, "LeadIn"))
 	endIf
 
@@ -365,6 +365,12 @@ form[] equipment2
 form[] equipment3
 form[] equipment4
 
+float[] loc0
+float[] loc1
+float[] loc2
+float[] loc3
+float[] loc4
+
 int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice = none, bool forceSilent = false)
 	if !_MakeWait("AddActor")
 		return -1
@@ -466,18 +472,78 @@ function ChangeActors(actor[] changeTo)
 	SendThreadEvent("ActorChangeEnd")
 endFunction
 
+function SaveLocation(actor position)
+	float[] loc = new float[3]
+	loc[0] = position.GetPositionX()
+	loc[1] = position.GetPositionY()
+	loc[2] = position.GetPositionZ()
+	int slot = GetSlot(position)
+	if slot == 0
+		loc0 = loc
+	elseIf slot == 1
+		loc1 = loc
+	elseIf slot == 2
+		loc2 = loc
+	elseIf slot == 3
+		loc3 = loc
+	elseIf slot == 4
+		loc4 = loc
+	else
+		_Log("Unknown position given, '"+position+"' ", "SaveLocation")
+	endIf
+endFunction
+
+float[] function GetLocation(actor position)
+	int slot = GetSlot(position)
+	if slot == 0
+		return loc0
+	elseIf slot == 1
+		return loc1
+	elseIf slot == 2
+		return loc2
+	elseIf slot == 3
+		return loc3
+	elseIf slot == 4
+		return loc4
+	else
+		_Log("Unknown position given, '"+position+"' ", "SaveLocation")
+		return none
+	endIf
+endFunction
+
+bool function HasMoved(actor position)
+	float[] current = new float[3]
+	current[0] = position.GetPositionX()
+	current[1] = position.GetPositionY()
+	current[2] = position.GetPositionZ()
+	float[] saved = GetLocation(position)
+
+	int i = 0
+	while i < 3
+		if ( (current[i] - saved[i]) > 2 ) || ( (current[i] - saved[i]) < -2 )
+			return true
+		endIf
+		i += 1
+	endWhile
+	return false
+endFunction
+
 ;/-----------------------------------------------\;
 ;|	Animation Functions                          |;
 ;\-----------------------------------------------/;
 
 bool property autoAdvance auto hidden
 bool property leadIn auto hidden
+bool leadInDisabled
 
+sslBaseAnimation[] customAnimations
 sslBaseAnimation[] primaryAnimations
 sslBaseAnimation[] leadAnimations
 sslBaseAnimation[] property Animations hidden
 	sslBaseAnimation[] function get()
-		if leadIn
+		if customAnimations.Length > 0
+			return customAnimations
+		elseIf leadIn
 			return leadAnimations
 		else
 			return primaryAnimations
@@ -485,19 +551,27 @@ sslBaseAnimation[] property Animations hidden
 	endFunction
 endProperty
 
+function SetForcedAnimations(sslBaseAnimation[] animationList)
+	customAnimations = animationList
+	SetAnimation()
+endFunction
+
 function SetAnimations(sslBaseAnimation[] animationList)
-	if !_MakeWait("SetAnimations") || animationList.Length == 0
-		return
-	endIf
 	primaryAnimations = animationList
+	SetAnimation()
 endFunction
 
 function SetLeadAnimations(sslBaseAnimation[] animationList)
-	if !_MakeWait("SetLeadAnimations") || animationList.Length == 0
-		return
-	endIf
 	leadIn = true
-	leadAnimations = animationList	
+	leadAnimations = animationList
+	SetAnimation()
+endFunction
+
+function DisableLeadIn(bool disableIt = false)
+	leadInDisabled = disableIt
+	if !disableIt
+		leadIn = false
+	endIf
 endFunction
 
 ;/-----------------------------------------------\;
@@ -611,10 +685,13 @@ form[] function GetEquipment(actor position)
 	endIf
 endFunction
 
+function SetVoice(actor position, sslBaseVoice voice)
+	voices[GetSlot(position)] = voice
+endFunction
+
 sslBaseVoice function GetVoice(actor position)
 	return voices[GetSlot(position)]
 endFunction
-
 
 bool function HasPlayer()
 	return PlayerRef != none
@@ -631,6 +708,7 @@ endFunction
 bool function IsPlayerActor(actor position)
 	return position == PlayerRef
 endFunction
+
 bool function IsPlayerPosition(int position)
 	return position == GetPlayerPosition()
 endFunction
@@ -705,6 +783,7 @@ function SendThreadEvent(string eventName)
 		SexLab.SendModEvent(customEvent, (tid as string), 1)
 	endIf
 	; Send Global Event
+	;Debug.Trace("SexLab ThreadController["+tid+"]: Sending event hook '"+eventName+"'")
 	SexLab.SendModEvent(eventName, (tid as string), 1)
 endFunction
 
@@ -750,6 +829,11 @@ function InitializeThread()
 	float[] fDel
 	centerLoc = fDel
 	customtimers = fDel
+	loc0 = fDel
+	loc1 = fDel
+	loc2 = fDel
+	loc3 = fDel
+	loc4 = fDel
 	timeout = 0
 	; Empty bools
 	bool[] bDel
@@ -759,6 +843,7 @@ function InitializeThread()
 	strip3 = bDel
 	strip4 = bDel
 	leadIn = false
+	leadInDisabled = false
 	autoAdvance = false
 	; Empty forms
 	form[] foDel
@@ -775,6 +860,7 @@ function InitializeThread()
 	voices = voDel
 	; Empty animations
 	sslBaseAnimation[] anDel
+	customAnimations = anDel
 	primaryAnimations = anDel
 	leadAnimations = anDel
 	; Clear Forms
