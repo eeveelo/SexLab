@@ -301,7 +301,7 @@ int AdjustingPosition
 bool MovingScene
 
 function AdvanceStage(bool backwards = false)
-	if ( backwards && stage == 1 ) || ( !backwards && stage >= Animation.StageCount() && !leadIn )
+	if backwards && stage == 1
 		return
 	elseif backwards && stage > 1
 		stageBack = true
