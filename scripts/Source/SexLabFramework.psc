@@ -1230,6 +1230,7 @@ function _ClearDoNothing(actor a)
 	int i = 0
 	while i < 15
 		if DoNothing[i].GetActorReference() == a
+			Debug.Trace("Clearing DoNothing["+i+"] of "+a)
 			DoNothing[i].Clear()
 			a.EvaluatePackage()
 			return
