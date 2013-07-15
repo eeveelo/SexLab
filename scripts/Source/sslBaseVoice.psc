@@ -136,4 +136,6 @@ function UnloadVoice()
 	name = ""
 	enabled = true
 	gender = 1
+	string[] tagsDel
+	tags = tagsDel
 endFunction

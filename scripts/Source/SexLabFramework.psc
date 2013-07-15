@@ -759,6 +759,24 @@ int function FindVoiceByName(string findName)
 	return -1
 endFunction
 
+sslBaseVoice function GetVoiceByTag(string tag1, string tag2 = "", string tagSuppress = "", bool requireAll = true)
+	int i = 0
+	while i < voiceIndex
+		if voice[i].enabled
+			bool check1 = voice[i].HasTag(tag1)
+			bool check2 = voice[i].HasTag(tag2)
+			bool supress = voice[i].HasTag(tagSuppress)
+			if requireAll && check1 && (check2 || tag2 == "") && !(supress && tagSuppress != "")
+				return voice[i]
+			elseif !requireAll && (check1 || check2) && !(supress && tagSuppress != "")
+				return voice[i]
+			endIf
+		endIf
+		i += 1
+	endWhile
+	return none
+endFunction
+
 int function RegisterVoice(sslBaseVoice vc)
 	_ReadyWait()
 	ready = false
