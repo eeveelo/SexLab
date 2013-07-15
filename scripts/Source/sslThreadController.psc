@@ -376,7 +376,7 @@ function ChangePositions(bool backwards = false)
 endFunction
 
 function AdjustForward(bool backwards = false)
-	float adjustment = 0.5
+	float adjustment = 0.75
 	if backwards
 		adjustment = adjustment * -1
 	endIf
@@ -385,11 +385,11 @@ function AdjustForward(bool backwards = false)
 	else
 		Animation.UpdateAllForward(AdjustingPosition, adjustment)
 	endIf
-	MoveActor(AdjustingPosition)
+	MoveActors()
 endFunction
 
 function AdjustSideways(bool backwards = false)
-	float adjustment = 0.5
+	float adjustment = 0.75
 	if backwards
 		adjustment = adjustment * -1
 	endIf
@@ -405,7 +405,7 @@ function AdjustUpward(bool backwards = false)
 	if IsPlayerPosition(AdjustingPosition)
 		return
 	endIf
-	float adjustment = 0.5
+	float adjustment = 0.75
 	if backwards
 		adjustment = adjustment * -1
 	endIf
@@ -743,7 +743,7 @@ function EndAnimation(bool quick = false)
 	endIf
 	animating = false
 	SendThreadEvent("AnimationEnd")
-	
+
 	int i = 0
 
 	; Apply cum
