@@ -146,7 +146,7 @@ sslThreadController function StartThread()
 	endIf
 
 	; Check for center
-	if CenterRef == none && bed != -1
+	if centerObj == none && bed != -1
 		ObjectReference BedRef
 		; Select a bed
 		if PlayerRef != none
@@ -171,7 +171,7 @@ sslThreadController function StartThread()
 	endIf
 
 	; Find a marker near one of our actors and center there
-	if CenterRef == none 
+	if centerObj == none 
 		i = 0
 		while i < ActorCount
 			ObjectReference marker = Game.FindRandomReferenceOfTypeFromRef(SexLab.Data.LocationMarker, Positions[i], 750.0) as ObjectReference
@@ -184,7 +184,7 @@ sslThreadController function StartThread()
 	endIf
 
 	; Still no center, fallback to something
-	if CenterRef == none || centerLoc == none
+	if centerObj == none || centerLoc == none
 		; Fallback to victim
 		if victim != none
 			CenterOnObject(victim)
@@ -223,7 +223,14 @@ endFunction
 
 string hook
 int property stage auto hidden
-ObjectReference CenterRef
+
+ObjectReference centerObj
+ObjectReference property CenterRef hidden
+	ObjectReference function get()
+		return centerObj
+	endFunction
+endProperty
+
 float[] centerLoc
 float[] property CenterLocation hidden
 	float[] function get()
@@ -263,12 +270,12 @@ endFunction
 
 float[] function GetCoords(ObjectReference Object)
 	float[] loc = new float[6]
-	loc[0] = CenterRef.GetPositionX()
-	loc[1] = CenterRef.GetPositionY()
-	loc[2] = CenterRef.GetPositionZ()
-	loc[3] = CenterRef.GetAngleX()
-	loc[4] = CenterRef.GetAngleY()
-	loc[5] = CenterRef.GetAngleZ()
+	loc[0] = centerObj.GetPositionX()
+	loc[1] = centerObj.GetPositionY()
+	loc[2] = centerObj.GetPositionZ()
+	loc[3] = centerObj.GetAngleX()
+	loc[4] = centerObj.GetAngleY()
+	loc[5] = centerObj.GetAngleZ()
 	return loc
 endFunction
 
@@ -278,9 +285,9 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 	elseIf centerOn == none
 		return none
 	endIf
-	CenterRef = centerOn
+	centerObj = centerOn
 	centerLoc = GetCoords(centerOn)
-	if SexLab.Data.BedsList.HasForm(CenterRef.GetBaseObject())
+	if SexLab.Data.BedsList.HasForm(centerObj.GetBaseObject())
 		bed = 1
 		centerLoc[0] = centerLoc[0] + (35 * Math.sin(centerLoc[5]))
 		centerLoc[1] = centerLoc[1] + (35 * Math.cos(centerLoc[5]))
@@ -864,7 +871,7 @@ function InitializeThread()
 	primaryAnimations = anDel
 	leadAnimations = anDel
 	; Clear Forms
-	CenterRef = none
+	centerObj = none
 	PlayerRef = none
 endFunction
 
