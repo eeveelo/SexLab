@@ -5,61 +5,133 @@ scriptname sslThreadController extends sslThreadModel
 ;|	Primary Starter                              |;
 ;\-----------------------------------------------/;
 
-bool primed
+bool[] ready
+bool primer
 bool scaled
 
 sslThreadController function PrimeThread()
 	if GetState() != "Making"
 		return none
 	endIf
+	SetAnimation()
 	stage = 0
 	sfx = new float[2]
 	vfx = new float[10]
 	vfxInstance = new int[5]
-	GotoState("Preparing")
-	primed = true
+	ready = new bool[5]
+	GotoState("PrimeStep0")
 	RegisterForSingleUpdate(0.01)
 	return self
 endFunction
 
-state Preparing
+bool function ReadyStep(int prep)
+	_Log("On State "+GetState()+" checking for state PrimeStep'"+prep+"'", "ReadyStep", "DEBUG")
+	if GetState() == "PrimeStep"+prep
+		GoToState("PrimeStep"+(prep + 1))
+		RegisterForSingleUpdate(0.01)
+		return true
+	else
+		_Log("Returning FALSE", "ReadyStep", "DEBUG")
+		return false
+	endIf
+endFunction
+
+state PrimeStep0
 	event OnUpdate()
-		if !primed
+		if !ReadyStep(0)
 			return
 		endIf
-		primed = false
-
-		SetAnimation()
-		; Set starting animation
-		; Init scale
-		float[] scales
-		float average
-		if ActorCount > 1 && SexLab.Config.bScaleActors
-			scales = sslUtility.FloatArray(ActorCount)
-			scaled = true
+		SetupActor(Positions[0])
+		ready[0] = true
+	endEvent
+endState
+state PrimeStep1
+	event OnUpdate()
+		if !ReadyStep(1)
+			return
 		endIf
-		; Prepare actors and store scale
-		int i = 0
-		while i < ActorCount
-			actor position = Positions[i]
-			SetupActor(position)
-			if scaled
-				scales[i] = position.GetScale()
-				average += scales[i]
-			endIf
-			i += 1
+		if ActorCount > 1
+			SetupActor(Positions[1])
+		endIf
+		ready[1] = true
+	endEvent
+endState
+state PrimeStep2
+	event OnUpdate()
+		if !ReadyStep(2)
+			return
+		endIf
+		if ActorCount > 2
+			SetupActor(Positions[2])
+		endIf
+		ready[2] = true
+	endEvent
+endState
+state PrimeStep3
+	event OnUpdate()
+		if !ReadyStep(3)
+			return
+		endIf
+		if ActorCount > 3
+			SetupActor(Positions[3])
+		endIf
+		ready[3] = true
+	endEvent
+endState
+state PrimeStep4
+	event OnUpdate()
+		if !ReadyStep(4)
+			return
+		endIf
+		if ActorCount > 4
+			SetupActor(Positions[4])
+		endIf
+		ready[4] = true
+	endEvent
+endState
+
+state PrimeStep5
+	event OnUpdate()
+		if GetState() != "PrimeStep5"
+			return
+		endIf
+
+		; Wait for ready signals from all actors
+		while !ready[0] || !ready[1] || !ready[2] || !ready[3] || !ready[4]
+			Debug.Trace(ready)
+			Utility.Wait(0.1)
 		endWhile
-		; Average scale actors
-		if scaled
+
+		int i
+		; Perform scaling
+		if ActorCount > 1 && SexLab.Config.bScaleActors
+			; Setup scaling for actors
+			float[] scales = sslUtility.FloatArray(ActorCount)
+			float average
+			scaled = true
+			; Get current scales
+			i = 0
+			while i < ActorCount
+				scales[i] = Positions[i].GetScale()
+				average += scales[i]
+				i += 1
+			endWhile
+			; Calculate average scale
 			average = ( average / ActorCount )
+			; Scale actors to average
 			i = 0
 			while i < ActorCount
 				Positions[i].SetScale((average / scales[i]))
+				; Reset center coords if actor is center object
+				; center actor Z axis likely changed from scaling
+				if Positions[i] == CenterRef
+					CenterOnObject(CenterRef)
+				endIf
 				i += 1
 			endWhile
 		endIf
-		
-		if IsPlayerPosition(AdjustingPosition)
+
+		if IsPlayerPosition(AdjustingPosition) && ActorCount > 1
 			AdjustingPosition = PositionWrap((AdjustingPosition + 1))
 		endIf
 
@@ -301,7 +373,7 @@ int AdjustingPosition
 bool MovingScene
 
 function AdvanceStage(bool backwards = false)
-	if ( backwards && stage == 1 ) || ( !backwards && stage >= Animation.StageCount() && !leadIn )
+	if backwards && stage == 1
 		return
 	elseif backwards && stage > 1
 		stageBack = true
@@ -782,7 +854,7 @@ function InitializeThread()
 	; Set states
 	animating = false
 	stageBack = false
-	primed = false
+	primer = false
 	scaled = false
 	advance = false
 	orgasm = false
