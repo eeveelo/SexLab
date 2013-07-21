@@ -524,8 +524,8 @@ function MoveScene()
 	endIf
 	; Enable Controls
 	MovingScene = true
-	Game.EnablePlayerControls()
 	Game.SetPlayerAIDriven(false)
+	Game.EnablePlayerControls()
 	Debug.SendAnimationEvent(SexLab.PlayerRef, "IdleForceDefaultState")
 	; Lock hotkeys here for timer
 	SexLab.Data.mMoveScene.Show(6)
@@ -534,8 +534,8 @@ function MoveScene()
 		Utility.Wait(0.8)
 	endWhile
 	; Disable Controls
-	Game.DisablePlayerControls(true, true, true, false, true, false, false, true, 0)
 	Game.ForceThirdPerson()
+	Game.DisablePlayerControls(true, true, true, false, true, false, false, true, 0)
 	Game.SetPlayerAIDriven()
 	; Give player time to settle incase airborne
 	Utility.Wait(1.0)
@@ -599,9 +599,9 @@ function ResetActor(actor position)
 	; Enable movement
 	if IsPlayerActor(position)
 		SexLab._DisableHotkeys()
-		Game.EnablePlayerControls()
 		Game.SetInChargen(false, false, false)
 		Game.SetPlayerAIDriven(false)
+		Game.EnablePlayerControls()
 		SexLab.UpdatePlayerStats(Animation, timer, Positions, GetVictim())
 		if SexLab.Config.bEnableTCL
 			Debug.ToggleCollisions()
@@ -834,12 +834,6 @@ function EndAnimation(bool quick = false)
 		ResetActor(Positions[i])
 		i += 1
 	endWhile
-
-	; Dirty fix for broken controls when TFC is enabled at end.
-	if HasPlayer()
-		Game.ForceThirdPerson()
-		Game.EnablePlayerControls()
-	endIf
 
 	if !quick
 		Utility.Wait(2.0)
