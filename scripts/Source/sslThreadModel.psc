@@ -270,12 +270,12 @@ endFunction
 
 float[] function GetCoords(ObjectReference Object)
 	float[] loc = new float[6]
-	loc[0] = centerObj.GetPositionX()
-	loc[1] = centerObj.GetPositionY()
-	loc[2] = centerObj.GetPositionZ()
-	loc[3] = centerObj.GetAngleX()
-	loc[4] = centerObj.GetAngleY()
-	loc[5] = centerObj.GetAngleZ()
+	loc[0] = Object.GetPositionX()
+	loc[1] = Object.GetPositionY()
+	loc[2] = Object.GetPositionZ()
+	loc[3] = Object.GetAngleX()
+	loc[4] = Object.GetAngleY()
+	loc[5] = Object.GetAngleZ()
 	return loc
 endFunction
 
