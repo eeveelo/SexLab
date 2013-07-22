@@ -5,102 +5,37 @@ scriptname sslThreadController extends sslThreadModel
 ;|	Primary Starter                              |;
 ;\-----------------------------------------------/;
 
-bool[] ready
-bool primer
+bool primed
 bool scaled
 
 sslThreadController function PrimeThread()
 	if GetState() != "Making"
 		return none
 	endIf
-	SetAnimation()
 	stage = 0
 	sfx = new float[2]
 	vfx = new float[10]
 	vfxInstance = new int[5]
-	ready = new bool[5]
-	GotoState("PrimeStep0")
-	RegisterForSingleUpdate(0.01)
+	GotoState("Preparing")
 	return self
 endFunction
 
-bool function ReadyStep(int prep)
-	_Log("On State "+GetState()+" checking for state PrimeStep'"+prep+"'", "ReadyStep", "DEBUG")
-	if GetState() == "PrimeStep"+prep
-		GoToState("PrimeStep"+(prep + 1))
+state Preparing
+	event OnBeginState()
+		primed = true
 		RegisterForSingleUpdate(0.01)
-		return true
-	else
-		_Log("Returning FALSE", "ReadyStep", "DEBUG")
-		return false
-	endIf
-endFunction
+	endEvent
+	event OnUpdate()
+		if !primed
+			return
+		endIf
+		primed = false
 
-state PrimeStep0
-	event OnUpdate()
-		if !ReadyStep(0)
-			return
-		endIf
-		SetupActor(Positions[0])
-		ready[0] = true
-	endEvent
-endState
-state PrimeStep1
-	event OnUpdate()
-		if !ReadyStep(1)
-			return
-		endIf
-		if ActorCount > 1
-			SetupActor(Positions[1])
-		endIf
-		ready[1] = true
-	endEvent
-endState
-state PrimeStep2
-	event OnUpdate()
-		if !ReadyStep(2)
-			return
-		endIf
-		if ActorCount > 2
-			SetupActor(Positions[2])
-		endIf
-		ready[2] = true
-	endEvent
-endState
-state PrimeStep3
-	event OnUpdate()
-		if !ReadyStep(3)
-			return
-		endIf
-		if ActorCount > 3
-			SetupActor(Positions[3])
-		endIf
-		ready[3] = true
-	endEvent
-endState
-state PrimeStep4
-	event OnUpdate()
-		if !ReadyStep(4)
-			return
-		endIf
-		if ActorCount > 4
-			SetupActor(Positions[4])
-		endIf
-		ready[4] = true
-	endEvent
-endState
+		; Set random starting animation
+		SetAnimation()
 
-state PrimeStep5
-	event OnUpdate()
-		if GetState() != "PrimeStep5"
-			return
-		endIf
-
-		; Wait for ready signals from all actors
-		while !ready[0] || !ready[1] || !ready[2] || !ready[3] || !ready[4]
-			Debug.Trace(ready)
-			Utility.Wait(0.1)
-		endWhile
+		; Setup actors
+		ActorChain("Prepare")
 
 		int i
 		; Perform scaling
@@ -125,7 +60,7 @@ state PrimeStep5
 				; Reset center coords if actor is center object
 				; center actor Z axis likely changed from scaling
 				if Positions[i] == CenterRef
-					CenterOnObject(CenterRef)
+					CenterOnObject(CenterRef, false)
 				endIf
 				i += 1
 			endWhile
@@ -136,18 +71,32 @@ state PrimeStep5
 		endIf
 
 		RealignActors()
+
 		SendThreadEvent("AnimationStart")
 		if leadIn
 			SendThreadEvent("LeadInStart")
 		endIf
+		primed = true
 		GotoState("BeginLoop")
 	endEvent
 endState
+
+event Prepare_Actor(string eventName, string actorSlot, float argNum, form sender)
+	if ValidateThread(eventName)
+		int slot = (actorSlot as int)
+		if slot < ActorCount
+			SetupActor(Positions[slot])
+		endIf
+		linkready[slot] = true
+	endIf
+endEvent
 
 ;/-----------------------------------------------\;
 ;|	Animation Loops                              |;
 ;\-----------------------------------------------/;
 
+bool beginLoop
+bool beginStage
 bool animating
 bool stageBack
 bool advance
@@ -164,6 +113,15 @@ float timer
 
 state BeginLoop
 	event OnBeginState()
+		beginLoop = true
+		RegisterForSingleUpdate(0.01)
+	endEvent
+	event OnUpdate()
+		if !beginLoop
+			return
+		endIf
+		beginLoop = false
+
 		animating = true
 		advance = true
 		GoToState("Advance")
@@ -178,8 +136,8 @@ state BeginLoop
 			; Play SFX
 			if sfx[0] <= timer - sfx[1] && sfxType != none
 				sfxInstance = sfxType.Play(Positions[0])
-				Sound.SetInstanceVolume(sfxInstance, sfxVolume)
-				sfx[1] = timer
+					Sound.SetInstanceVolume(sfxInstance, sfxVolume)
+					sfx[1] = timer
 			endIf
 
 			; Play Voices
@@ -210,6 +168,8 @@ state Advance
 	event OnBeginState()
 		if advance == true
 			RegisterForSingleUpdate(0.01)
+		else
+			EndAnimation(true)
 		endIf
 	endEvent
 
@@ -217,7 +177,8 @@ state Advance
 		if !advance
 			return
 		endIf
-		
+		advance = false
+
 		previousStage = stage
 
 		; Next stage
@@ -230,7 +191,6 @@ state Advance
 			stage = 1
 		endIf
 
-		advance = false
 		stageBack = false
 
 		if leadIn && stage > Animation.StageCount()
@@ -300,9 +260,17 @@ endState
 
 state Animating
 	event OnBeginState()
-		if !animating
+		if animating
+			beginStage = true
+			RegisterForSingleUpdate(0.01)
+		endIf
+	endEvent
+
+	event OnUpdate()
+		if !beginStage
 			return
 		endIf
+		beginStage = false
 
 		if orgasm
 			SendThreadEvent("OrgasmStart")
@@ -310,7 +278,7 @@ state Animating
 			SendThreadEvent("StageStart")
 		endIf
 
-		PlayAnimation()
+		ActorChain("Animate")
 
 		; Check if actor needs to be realigned for stage
 		if previousStage != 0
@@ -403,7 +371,7 @@ function ChangeAnimation(bool backwards = false)
 	endWhile
 
 	SetAnimation(aid)
-	PlayAnimation()
+	ActorChain("Animate")
 
 	i = 0
 	while i < ActorCount
@@ -549,7 +517,7 @@ function MoveScene()
 endFunction
 
 function RealignActors()
-	PlayAnimation()
+	ActorChain("Animate")
 	MoveActors()
 endFunction
 
@@ -591,6 +559,9 @@ function SetupActor(actor position)
 		if equipment.Length > 0
 			StoreEquipment(position, equipment)
 		endIf
+		if SexLab.sosEnabled && Animation.GetGender(GetPosition(position)) < 1
+			Debug.SendAnimationEvent(position, "SOSFastErect")
+		endIf
 	endIf
 	EquipExtras(position)
 endFunction
@@ -630,9 +601,10 @@ function ResetActor(actor position)
 	endIf
 	; Reset idle
 	if !SexLab.Config.bRagdollEnd
+
 		Debug.SendAnimationEvent(position, "IdleForceDefaultState")
 	else
-		position.PushActorAway(position, 0.01)
+		position.PushActorAway(Positions[PositionWrap(GetPosition(position) + 1)], 1)
 	endIf
 endFunction
 
@@ -763,50 +735,74 @@ function SetAnimation(int anim = -1)
 endFunction
 
 function PlayAnimation()
-	string[] events = Animation.FetchStage(stage)
-	if actorCount == 1
-		Debug.SendAnimationEvent(Positions[0], events[0])
-	elseif actorCount == 2
-		Debug.SendAnimationEvent(Positions[0], events[0])
-		Debug.SendAnimationEvent(Positions[1], events[1])
-	elseif actorCount == 3
-		Debug.SendAnimationEvent(Positions[0], events[0])
-		Debug.SendAnimationEvent(Positions[1], events[1])
-		Debug.SendAnimationEvent(Positions[2], events[2])
-	elseif actorCount == 4
-		Debug.SendAnimationEvent(Positions[0], events[0])
-		Debug.SendAnimationEvent(Positions[1], events[1])
-		Debug.SendAnimationEvent(Positions[2], events[2])
-		Debug.SendAnimationEvent(Positions[3], events[3])
-	elseif actorCount == 5
-		Debug.SendAnimationEvent(Positions[0], events[0])
-		Debug.SendAnimationEvent(Positions[1], events[1])
-		Debug.SendAnimationEvent(Positions[2], events[2])
-		Debug.SendAnimationEvent(Positions[3], events[3])
-		Debug.SendAnimationEvent(Positions[4], events[4])
-	endIf
+	ActorChain("Animate")
 
-	bool[] openMouth = Animation.GetSwitchSlot(stage, 1)
-	int[] sos = Animation.GetSchlongSlot(stage)
-	int i = 0
-	while i < actorCount
-		; Open mouth, if needed
-		Positions[i].ClearExpressionOverride()
-		if openMouth[i]
-			Positions[i].SetExpressionOverride(16, 100)
-		endIf
-		; Send SOS event
-		if SexLab.sosEnabled && Animation.GetGender(i) < 1
-			Debug.SendAnimationEvent(Positions[i], "SOSFastErect")
-			Debug.SendAnimationEvent(Positions[i], "SOSBend"+sos[i])
-		endIf
-		i += 1
-	endWhile
+	; string[] events = Animation.FetchStage(stage)
+	; if actorCount == 1
+	; 	Debug.SendAnimationEvent(Positions[0], events[0])
+	; elseif actorCount == 2
+	; 	Debug.SendAnimationEvent(Positions[0], events[0])
+	; 	Debug.SendAnimationEvent(Positions[1], events[1])
+	; elseif actorCount == 3
+	; 	Debug.SendAnimationEvent(Positions[0], events[0])
+	; 	Debug.SendAnimationEvent(Positions[1], events[1])
+	; 	Debug.SendAnimationEvent(Positions[2], events[2])
+	; elseif actorCount == 4
+	; 	Debug.SendAnimationEvent(Positions[0], events[0])
+	; 	Debug.SendAnimationEvent(Positions[1], events[1])
+	; 	Debug.SendAnimationEvent(Positions[2], events[2])
+	; 	Debug.SendAnimationEvent(Positions[3], events[3])
+	; elseif actorCount == 5
+	; 	Debug.SendAnimationEvent(Positions[0], events[0])
+	; 	Debug.SendAnimationEvent(Positions[1], events[1])
+	; 	Debug.SendAnimationEvent(Positions[2], events[2])
+	; 	Debug.SendAnimationEvent(Positions[3], events[3])
+	; 	Debug.SendAnimationEvent(Positions[4], events[4])
+	; endIf
+
+	; bool[] openMouth = Animation.GetSwitchSlot(stage, 1)
+	; int[] sos = Animation.GetSchlongSlot(stage)
+	; int i = 0
+	; while i < actorCount
+	; 	; Open mouth, if needed
+	; 	Positions[i].ClearExpressionOverride()
+	; 	if openMouth[i]
+	; 		Positions[i].SetExpressionOverride(16, 100)
+	; 	endIf
+	; 	; Send SOS event
+	; 	if SexLab.sosEnabled && Animation.GetGender(i) < 1
+	; 		Debug.SendAnimationEvent(Positions[i], "SOSFastErect")
+	; 		Debug.SendAnimationEvent(Positions[i], "SOSBend"+sos[i])
+	; 	endIf
+	; 	i += 1
+	; endWhile
 endFunction
+
+event Animate_Actor(string eventName, string actorSlot, float argNum, form sender)
+	if animating && ValidateThread(eventName)
+		int slot = (actorSlot as int)
+		if slot < ActorCount
+			; Sex animation
+			Debug.SendAnimationEvent(Positions[slot], Animation.FetchPositionStage(slot, stage))
+			; Open mouth
+			Positions[slot].ClearExpressionOverride()
+			if Animation.UseOpenMouth(slot, stage)
+				Positions[slot].SetExpressionOverride(16, 100)
+			endIf
+			; Schlongs of Skyrim integration
+			if SexLab.sosEnabled && Animation.GetGender(slot) < 1
+				Debug.SendAnimationEvent(Positions[slot], "SOSBend"+Animation.GetSchlong(slot, stage))
+			endIf
+		endIf
+		linkready[slot] = true
+	endIf
+endEvent
 
 ;/-----------------------------------------------\;
 ;|	Ending Functions                             |;
 ;\-----------------------------------------------/;
+
+bool[] ending
 
 function EndAnimation(bool quick = false)
 	if !animating
@@ -829,11 +825,7 @@ function EndAnimation(bool quick = false)
 		endIf
 	endIf
 
-	i = 0
-	while i < ActorCount
-		ResetActor(Positions[i])
-		i += 1
-	endWhile
+	ActorChain("Reset")
 
 	if !quick
 		Utility.Wait(2.0)
@@ -842,13 +834,23 @@ function EndAnimation(bool quick = false)
 	UnlockThread()
 endFunction
 
+event Reset_Actor(string eventName, string actorSlot, float argNum, form sender)
+	if ValidateThread(eventName)
+		int slot = (actorSlot as int)
+		if slot < ActorCount
+			ResetActor(Positions[slot])
+		endIf
+		linkready[slot] = true
+	endIf
+endEvent
+
 function InitializeThread()
 	; Clear model
 	parent.InitializeThread()
 	; Set states
 	animating = false
 	stageBack = false
-	primer = false
+	primed = false
 	scaled = false
 	advance = false
 	orgasm = false
@@ -877,6 +879,38 @@ function InitializeThread()
 	animationCurrent = none
 	; Empty forms
 	sfxType = none
+endFunction
+
+;/-----------------------------------------------\;
+;|	Chain Events                                 |;
+;\-----------------------------------------------/;
+
+bool padlock
+bool[] linkready
+
+function ActorChain(string callback)
+	while padlock
+		Utility.Wait(0.1)
+	endWhile
+	padlock = true
+	linkready = new bool[5]
+	string ChainLinkActor = "ChainLinkActor"+tid
+	RegisterForModEvent(ChainLinkActor, callback+"_Actor")
+	int i
+	while i < 5
+		SendModEvent(ChainLinkActor, (i as string), 1)
+		i += 1
+	endWhile
+	UnregisterForModEvent(ChainLinkActor)
+	; Wait for ready signals from all chain links
+	while !linkready[0] || !linkready[1] || !linkready[2] || !linkready[3] || !linkready[4]
+		Utility.Wait(0.1)
+	endWhile
+	padlock = false
+endFunction
+
+bool function ValidateThread(string eventName)
+	return eventName == "ChainLinkActor"+tid
 endFunction
 
 ;/-----------------------------------------------\;
