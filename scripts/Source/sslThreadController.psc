@@ -278,7 +278,7 @@ state Animating
 			SendThreadEvent("StageStart")
 		endIf
 
-		ActorChain("Animate")
+		PlayAnimation()
 
 		; Check if actor needs to be realigned for stage
 		if previousStage != 0
@@ -371,7 +371,7 @@ function ChangeAnimation(bool backwards = false)
 	endWhile
 
 	SetAnimation(aid)
-	ActorChain("Animate")
+	PlayAnimation()
 
 	i = 0
 	while i < ActorCount
@@ -517,7 +517,7 @@ function MoveScene()
 endFunction
 
 function RealignActors()
-	ActorChain("Animate")
+	PlayAnimation()
 	MoveActors()
 endFunction
 
@@ -735,47 +735,45 @@ function SetAnimation(int anim = -1)
 endFunction
 
 function PlayAnimation()
-	ActorChain("Animate")
+	string[] events = Animation.FetchStage(stage)
+	if actorCount == 1
+		Debug.SendAnimationEvent(Positions[0], events[0])
+	elseif actorCount == 2
+		Debug.SendAnimationEvent(Positions[0], events[0])
+		Debug.SendAnimationEvent(Positions[1], events[1])
+	elseif actorCount == 3
+		Debug.SendAnimationEvent(Positions[0], events[0])
+		Debug.SendAnimationEvent(Positions[1], events[1])
+		Debug.SendAnimationEvent(Positions[2], events[2])
+	elseif actorCount == 4
+		Debug.SendAnimationEvent(Positions[0], events[0])
+		Debug.SendAnimationEvent(Positions[1], events[1])
+		Debug.SendAnimationEvent(Positions[2], events[2])
+		Debug.SendAnimationEvent(Positions[3], events[3])
+	elseif actorCount == 5
+		Debug.SendAnimationEvent(Positions[0], events[0])
+		Debug.SendAnimationEvent(Positions[1], events[1])
+		Debug.SendAnimationEvent(Positions[2], events[2])
+		Debug.SendAnimationEvent(Positions[3], events[3])
+		Debug.SendAnimationEvent(Positions[4], events[4])
+	endIf
 
-	; string[] events = Animation.FetchStage(stage)
-	; if actorCount == 1
-	; 	Debug.SendAnimationEvent(Positions[0], events[0])
-	; elseif actorCount == 2
-	; 	Debug.SendAnimationEvent(Positions[0], events[0])
-	; 	Debug.SendAnimationEvent(Positions[1], events[1])
-	; elseif actorCount == 3
-	; 	Debug.SendAnimationEvent(Positions[0], events[0])
-	; 	Debug.SendAnimationEvent(Positions[1], events[1])
-	; 	Debug.SendAnimationEvent(Positions[2], events[2])
-	; elseif actorCount == 4
-	; 	Debug.SendAnimationEvent(Positions[0], events[0])
-	; 	Debug.SendAnimationEvent(Positions[1], events[1])
-	; 	Debug.SendAnimationEvent(Positions[2], events[2])
-	; 	Debug.SendAnimationEvent(Positions[3], events[3])
-	; elseif actorCount == 5
-	; 	Debug.SendAnimationEvent(Positions[0], events[0])
-	; 	Debug.SendAnimationEvent(Positions[1], events[1])
-	; 	Debug.SendAnimationEvent(Positions[2], events[2])
-	; 	Debug.SendAnimationEvent(Positions[3], events[3])
-	; 	Debug.SendAnimationEvent(Positions[4], events[4])
-	; endIf
-
-	; bool[] openMouth = Animation.GetSwitchSlot(stage, 1)
-	; int[] sos = Animation.GetSchlongSlot(stage)
-	; int i = 0
-	; while i < actorCount
-	; 	; Open mouth, if needed
-	; 	Positions[i].ClearExpressionOverride()
-	; 	if openMouth[i]
-	; 		Positions[i].SetExpressionOverride(16, 100)
-	; 	endIf
-	; 	; Send SOS event
-	; 	if SexLab.sosEnabled && Animation.GetGender(i) < 1
-	; 		Debug.SendAnimationEvent(Positions[i], "SOSFastErect")
-	; 		Debug.SendAnimationEvent(Positions[i], "SOSBend"+sos[i])
-	; 	endIf
-	; 	i += 1
-	; endWhile
+	bool[] openMouth = Animation.GetSwitchSlot(stage, 1)
+	int[] sos = Animation.GetSchlongSlot(stage)
+	int i = 0
+	while i < actorCount
+		; Open mouth, if needed
+		Positions[i].ClearExpressionOverride()
+		if openMouth[i]
+			Positions[i].SetExpressionOverride(16, 100)
+		endIf
+		; Send SOS event
+		if SexLab.sosEnabled && Animation.GetGender(i) < 1
+			Debug.SendAnimationEvent(Positions[i], "SOSFastErect")
+			Debug.SendAnimationEvent(Positions[i], "SOSBend"+sos[i])
+		endIf
+		i += 1
+	endWhile
 endFunction
 
 event Animate_Actor(string eventName, string actorSlot, float argNum, form sender)
