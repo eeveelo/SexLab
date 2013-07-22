@@ -2,7 +2,7 @@ scriptname sslSystemConfig extends SKI_ConfigBase
 {Skyrim Sex Lab Mod Configuration Menu}
 
 int function GetVersion()
-	return 112
+	return 113
 endFunction
 
 bool function DebugMode()
@@ -635,7 +635,7 @@ event OnPageReset(string page)
 
 	elseIf page == "$SSL_RebuildClean"
 		SetCursorFillMode(TOP_TO_BOTTOM)
-		AddHeaderOption("SexLab v1.11 By Ashal@LoversLab.com")
+		AddHeaderOption("SexLab v1.13 By Ashal@LoversLab.com")
 		AddEmptyOption()
 		AddHeaderOption("$SSL_Maintenance")
 		if SexLab.Enabled
@@ -656,8 +656,8 @@ event OnPageReset(string page)
 		SetCursorPosition(1)
 		AddHeaderOption("$SSL_TranslatorCredit")
 		AddEmptyOption()
-		oidFindStrapons = AddTextOption("$SSL_RebuildStraponList", "$SSL_ClickHere")
 		AddHeaderOption("$SSL_AvailableStrapons")
+		oidFindStrapons = AddTextOption("$SSL_RebuildStraponList", "$SSL_ClickHere")
 		i = 0
 		while i < SexLab.Data.strapons.Length
 			if SexLab.Data.strapons[i] != none
