@@ -657,7 +657,6 @@ event OnPageReset(string page)
 		AddHeaderOption("$SSL_TranslatorCredit")
 		AddEmptyOption()
 		oidFindStrapons = AddTextOption("$SSL_RebuildStraponList", "$SSL_ClickHere")
-		AddEmptyOption()
 		AddHeaderOption("$SSL_AvailableStrapons")
 		i = 0
 		while i < SexLab.Data.strapons.Length
