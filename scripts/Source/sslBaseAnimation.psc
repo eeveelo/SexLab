@@ -233,14 +233,10 @@ float function CalculateForward(int position, int stage)
 	; Adjust offset by highest or lowest
 	float adjust
 	float offset
-	if highest > -lowest && highest > 50
+	if highest > -lowest
 		return (offsets[position] - (highest * 0.5))
-	elseif -lowest > highest && lowest < -50
-		return (offsets[position] + (lowest * -0.5))
-	elseif highest > -lowest
-		return (offsets[position] - highest)
 	else
-		return (offsets[position] + lowest)
+		return (offsets[position] + (lowest * -0.5))
 	endIf
 	; Return Adjusted offset
 	return offsets[position]
@@ -253,7 +249,7 @@ endFunction
 
 function UpdateAllForward(int position, float adjust)
 	int stage = 1
-	while stage <= StageCount()
+	while stage <= stages
 		UpdateForward(position, stage, adjust)
 		stage += 1
 	endWhile
@@ -266,7 +262,7 @@ endFunction
 
 function UpdateAllSide(int position, float adjust)
 	int stage = 1
-	while stage <= StageCount()
+	while stage <= stages
 		UpdateSide(position, stage, adjust)
 		stage += 1
 	endWhile
@@ -279,7 +275,7 @@ endFunction
 
 function UpdateAllUp(int position, float adjust)
 	int stage = 1
-	while stage <= StageCount()
+	while stage <= stages
 		UpdateUp(position, stage, adjust)
 		stage += 1
 	endWhile
