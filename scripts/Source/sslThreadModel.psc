@@ -155,7 +155,7 @@ sslThreadController function StartThread()
 			BedRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(SexLab.Data.BedsList, Positions[0], 500.0)
 		endIf
 		; A bed was selected, should we use it?
-		if BedRef != none
+		if BedRef != none && !BedRef.IsFurnitureInUse(true)
 			int useBed = 0
 			if bed == 2 || SexLab.Config.sNPCBed == "$SSL_Always"
 				useBed = 1
