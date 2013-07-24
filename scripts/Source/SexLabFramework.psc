@@ -1230,7 +1230,7 @@ function _ClearDoNothing(actor a)
 	int i = 0
 	while i < 15
 		if DoNothing[i].GetActorReference() == a
-			Debug.Trace("Clearing DoNothing["+i+"] of "+a)
+			Debug.Trace("Clearing SexLabDoNothing["+i+"] of "+a)
 			DoNothing[i].Clear()
 			a.EvaluatePackage()
 			return
@@ -1241,6 +1241,7 @@ endFunction
 
 function _EnableHotkeys(int tid)
 	RegisterForKey(Config.kBackwards)
+	RegisterForKey(Config.kAdjustStage)
 	RegisterForKey(Config.kAdvanceAnimation)
 	RegisterForKey(Config.kChangeAnimation)
 	RegisterForKey(Config.kChangePositions)
@@ -1305,6 +1306,14 @@ event OnKeyDown(int keyCode)
 		else
 			backwards = input.IsKeyPressed(Config.kBackwards)
 		endIf
+
+		bool adjustingstage
+		if Config.kAdjustStage == 157 || Config.kAdjustStage == 29
+			; Check both ctrl keys
+			adjustingstage = ( input.IsKeyPressed(157) || input.IsKeyPressed(29) )
+		else
+			adjustingstage = input.IsKeyPressed(Config.kBackwards)
+		endIf
 		
 		; Advance Stage
 		if keyCode == Config.kAdvanceAnimation
@@ -1317,13 +1326,13 @@ event OnKeyDown(int keyCode)
 			PlayerController.ChangePositions(backwards)
 		; Forward / Backward adjustments
 		elseIf keyCode == Config.kAdjustForward
-			PlayerController.AdjustForward(backwards)
+			PlayerController.AdjustForward(backwards, adjustingstage)
 		; Left / Right adjustments
 		elseIf keyCode == Config.kAdjustSideways
-			PlayerController.AdjustSideways(backwards)
+			PlayerController.AdjustSideways(backwards, adjustingstage)
 		; Up / Down adjustments
 		elseIf keyCode == Config.kAdjustUpward
-			PlayerController.AdjustUpward(backwards)
+			PlayerController.AdjustUpward(backwards, adjustingstage)
 		; Change Adjusted Actor
 		elseIf keyCode == Config.kAdjustChange
 			PlayerController.AdjustChange(backwards)

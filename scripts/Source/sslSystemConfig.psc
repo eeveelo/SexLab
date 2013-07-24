@@ -46,8 +46,8 @@ bool property bUseFemaleNudeSuit auto hidden
 int oidUseFemaleNudeSuit
 bool property bUndressAnimation auto hidden
 int oidUndressAnimation
-bool property bAdjustAlignStage auto hidden
-int oidAdjustAlignStage
+bool property bAdjustAlignStage auto hidden ; No longer used as of v1.13
+int oidAdjustAlignStage ; No longer used as of v1.13
 
 float[] property fStageTimer auto hidden
 int[] oidStageTimer
@@ -58,6 +58,8 @@ int[] oidStageTimerAggr
 
 int property kBackwards auto hidden
 int oidBackwards
+int property kAdjustStage auto hidden
+int oidAdjustStage
 int property kAdvanceAnimation auto hidden
 int oidAdvanceAnimation
 int property kChangeAnimation auto hidden
@@ -144,7 +146,7 @@ function SetDefaults()
 	bRagdollEnd = true
 	bForeplayStage = true
 	bUndressAnimation = true
-	bAdjustAlignStage = false
+	bAdjustAlignStage = false ; No longer used as of v1.13
 
 	fMaleVoiceDelay = 7.0
 	fFemaleVoiceDelay = 6.0
@@ -154,6 +156,7 @@ function SetDefaults()
 
 	; Controls Page
 	kBackwards = 54 ; Right Shift
+	kAdjustStage = 157; Right Ctrl
 	kAdvanceAnimation = 57 ; Space
 	kChangeAnimation =  24 ; O
 	kChangePositions = 13 ; =
@@ -420,6 +423,7 @@ event OnPageReset(string page)
 		SetCursorPosition(1)
 
 		AddHeaderOption("$SSL_AlignmentAdjustments")
+		oidAdjustStage = AddKeyMapOption("$SSL_AdjustStage", kAdjustStage)
 		oidAdjustChange = AddKeyMapOption("$SSL_ChangeActorBeingMoved", kAdjustChange)
 		oidAdjustForward = AddKeyMapOption("$SSL_MoveActorForwardBackward", kAdjustForward)
 		oidAdjustUpward = AddKeyMapOption("$SSL_AdjustPositionUpwardDownward", kAdjustUpward)
@@ -427,7 +431,7 @@ event OnPageReset(string page)
 		oidRealignActors = AddKeyMapOption("$SSL_RealignActors", kRealignActors)
 		oidRestoreOffsets = AddKeyMapOption("$SSL_DeleteSavedAdjustments", kRestoreOffsets)
 		AddEmptyOption()
-		oidAdjustAlignStage = AddToggleOption("$SSL_AdjustAlignStage", bAdjustAlignStage)
+		;oidAdjustAlignStage = AddToggleOption("$SSL_AdjustAlignStage", bAdjustAlignStage)
 
 	elseIf page == "$SSL_NormalTimersStripping"
 
@@ -1054,10 +1058,6 @@ event OnOptionSelect(int option)
 		bUseFemaleNudesuit = !bUseFemaleNudesuit 
 		SetToggleOptionValue(option, bUseFemaleNudesuit)
 
-	elseIf option == oidAdjustAlignStage
-		bAdjustAlignStage = !bAdjustAlignStage 
-		SetToggleOptionValue(option, bAdjustAlignStage)
-
 	else
 		; What are we?
 		int i = 0
@@ -1200,8 +1200,8 @@ event OnOptionHighlight(int option)
 		SetInfoText("$SSL_InfoRotateScene")
 	elseIf option == oidUndressAnimation
 		SetInfoText("$SSL_InfoUndressAnimation")
-	elseIf option == oidAdjustAlignStage
-		SetInfoText("$SSL_InfoAdjustAlignStage")
+	elseIf option == oidAdjustStage
+		SetInfoText("$SSL_InfoAdjustStage")
 	else
 		; What are we?
 		int i = 0
@@ -1308,6 +1308,9 @@ event OnOptionKeyMapChange(int option, int keyCode, string conflictControl, stri
 		elseIf option == oidRealignActors
 			kRealignActors = keyCode
 
+		elseIf option == oidAdjustStage
+			kAdjustStage = keyCode
+
 		elseIf option == oidAdjustChange
 			kAdjustChange = keyCode
 
@@ -1328,7 +1331,7 @@ event OnOptionKeyMapChange(int option, int keyCode, string conflictControl, stri
 
 		elseIf option == oidRotateScene
 			kRotateScene = keyCode
-
+			
 		endIf
 
 		; Set MCM value

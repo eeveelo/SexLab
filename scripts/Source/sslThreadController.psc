@@ -415,12 +415,12 @@ function ChangePositions(bool backwards = false)
 	SendThreadEvent("PositionChange")
 endFunction
 
-function AdjustForward(bool backwards = false)
+function AdjustForward(bool backwards = false, bool adjuststage = false)
 	float adjustment = 0.75
 	if backwards
 		adjustment = adjustment * -1
 	endIf
-	if SexLab.Config.bAdjustAlignStage
+	if adjuststage
 		Animation.UpdateForward(AdjustingPosition, stage, adjustment)
 	else
 		Animation.UpdateAllForward(AdjustingPosition, adjustment)
@@ -428,12 +428,12 @@ function AdjustForward(bool backwards = false)
 	MoveActor(AdjustingPosition)
 endFunction
 
-function AdjustSideways(bool backwards = false)
+function AdjustSideways(bool backwards = false, bool adjuststage = false)
 	float adjustment = 0.75
 	if backwards
 		adjustment = adjustment * -1
 	endIf
-	if SexLab.Config.bAdjustAlignStage
+	if adjuststage
 		Animation.UpdateSide(AdjustingPosition, stage, adjustment)
 	else
 		Animation.UpdateAllSide(AdjustingPosition, adjustment)
@@ -441,7 +441,7 @@ function AdjustSideways(bool backwards = false)
 	MoveActor(AdjustingPosition)
 endFunction
 
-function AdjustUpward(bool backwards = false)
+function AdjustUpward(bool backwards = false, bool adjuststage = false)
 	if IsPlayerPosition(AdjustingPosition)
 		return
 	endIf
@@ -449,7 +449,7 @@ function AdjustUpward(bool backwards = false)
 	if backwards
 		adjustment = adjustment * -1
 	endIf
-	if SexLab.Config.bAdjustAlignStage
+	if adjuststage
 		Animation.UpdateUp(AdjustingPosition, stage, adjustment)
 	else
 		Animation.UpdateAllUp(AdjustingPosition, adjustment)
