@@ -2,7 +2,7 @@ scriptname sslSystemConfig extends SKI_ConfigBase
 {Skyrim Sex Lab Mod Configuration Menu}
 
 int function GetVersion()
-	return 113
+	return 114
 endFunction
 
 bool function DebugMode()
@@ -46,8 +46,8 @@ bool property bUseFemaleNudeSuit auto hidden
 int oidUseFemaleNudeSuit
 bool property bUndressAnimation auto hidden
 int oidUndressAnimation
-bool property bAdjustAlignStage auto hidden ; No longer used as of v1.13
-int oidAdjustAlignStage ; No longer used as of v1.13
+bool property bAdjustAlignStage auto hidden ; No longer used as of v1.14
+int oidAdjustAlignStage ; No longer used as of v1.14
 
 float[] property fStageTimer auto hidden
 int[] oidStageTimer
@@ -146,7 +146,7 @@ function SetDefaults()
 	bRagdollEnd = true
 	bForeplayStage = true
 	bUndressAnimation = true
-	bAdjustAlignStage = false ; No longer used as of v1.13
+	bAdjustAlignStage = false ; No longer used as of v1.14
 
 	fMaleVoiceDelay = 7.0
 	fFemaleVoiceDelay = 6.0
@@ -639,7 +639,7 @@ event OnPageReset(string page)
 
 	elseIf page == "$SSL_RebuildClean"
 		SetCursorFillMode(TOP_TO_BOTTOM)
-		AddHeaderOption("SexLab v1.13 By Ashal@LoversLab.com")
+		AddHeaderOption("SexLab v1.14 By Ashal@LoversLab.com")
 		AddEmptyOption()
 		AddHeaderOption("$SSL_Maintenance")
 		if SexLab.Enabled
