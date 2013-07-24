@@ -371,16 +371,14 @@ function ChangeAnimation(bool backwards = false)
 	endWhile
 
 	SetAnimation(aid)
-	PlayAnimation()
+	RealignActors()
 
 	i = 0
 	while i < ActorCount
 		;SexLab.StripActor(pos[i], victim)
 		EquipExtras(GetActor(i))
-		MoveActor(i)
 		i += 1
 	endWhile
-
 	SendThreadEvent("AnimationChange")
 endFunction
 
@@ -502,7 +500,6 @@ function MoveScene()
 		Utility.Wait(0.8)
 	endWhile
 	; Disable Controls
-	Game.ForceThirdPerson()
 	Game.DisablePlayerControls(true, true, true, false, true, false, false, true, 0)
 	Game.SetPlayerAIDriven()
 	; Give player time to settle incase airborne
@@ -532,7 +529,6 @@ function SetupActor(actor position)
 	if position.IsInCombat()
 		position.StopCombat()
 	endIf
-	SexLab._SlotDoNothing(position)
 	position.SetFactionRank(SexLab.AnimatingFaction, 1)
 	if IsPlayerActor(position)
 		; Enable hotkeys, if needed
@@ -544,13 +540,14 @@ function SetupActor(actor position)
 		if SexLab.Config.bEnableTCL
 			Debug.ToggleCollisions()
 		endIf
-		Game.DisablePlayerControls(true, true, true, false, true, false, false, true, 0)
-		Game.SetInChargen(false, true, true)
 		Game.ForceThirdPerson()
+		Game.DisablePlayerControls(true, true, false, false, true, false, false, true, 0)
+		Game.SetInChargen(false, true, true)
 		Game.SetPlayerAIDriven()
 	else
 		position.SetRestrained()
 		position.SetDontMove()
+		SexLab._SlotDoNothing(position)
 		position.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
 	endIf
 	; Auto strip
@@ -567,6 +564,15 @@ function SetupActor(actor position)
 endFunction
 
 function ResetActor(actor position)
+	; Reset scale if needed
+	if scaled
+		position.SetScale(1.0)
+	endIf
+	; Clear them out
+	position.RemoveFromFaction(SexLab.AnimatingFaction)
+	RemoveExtras(position)
+	; Reset openmouth
+	Position.ClearExpressionOverride()
 	; Enable movement
 	if IsPlayerActor(position)
 		SexLab._DisableHotkeys()
@@ -578,20 +584,11 @@ function ResetActor(actor position)
 			Debug.ToggleCollisions()
 		endIf
 	else
+		SexLab._ClearDoNothing(position)
 		position.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 		position.SetRestrained(false)
 		position.SetDontMove(false)
 	endIf
-	; Reset scale if needed
-	if scaled
-		position.SetScale(1.0)
-	endIf
-	; Clear them out
-	position.RemoveFromFaction(SexLab.AnimatingFaction)
-	SexLab._ClearDoNothing(position)
-	RemoveExtras(position)
-	; Reset openmouth
-	Position.ClearExpressionOverride()
 	; SOS flaccid
 	if SexLab.sosEnabled && Animation.GetGender(GetPosition(position)) < 1
 		Debug.SendAnimationEvent(position, "SOSFlaccid")
@@ -666,18 +663,17 @@ endFunction
 function MoveActor(int position)
 	actor a = Positions[position]
 	float[] offsets = Animation.GetPositionOffsets(position, stage)
+	float[] center = CenterLocation
 	float[] loc = new float[6]
+
 	; Determine offsets coordinates from center
-	loc[0] = ( CenterLocation[0] + ( Math.sin(CenterLocation[5]) * offsets[0] + Math.cos(CenterLocation[5]) * offsets[1] ) )
-	loc[1] = ( CenterLocation[1] + ( Math.cos(CenterLocation[5]) * offsets[0] + Math.sin(CenterLocation[5]) * offsets[1] ) )
-	loc[2] = ( CenterLocation[2] + offsets[2] )
-	if IsPlayerActor(a)
-		loc[2] = loc[2] - 8
-	endIf
+	loc[0] = ( center[0] + ( Math.sin(center[5]) * offsets[0] + Math.cos(center[5]) * offsets[1] ) )
+	loc[1] = ( center[1] + ( Math.cos(center[5]) * offsets[0] + Math.sin(center[5]) * offsets[1] ) )
+	loc[2] = ( center[2] + offsets[2] )
 	; Determine rotation coordinates from center
-	loc[3] = CenterLocation[3]
-	loc[4] = CenterLocation[4]
-	loc[5] = ( CenterLocation[5] + offsets[3] )
+	loc[3] = center[3]
+	loc[4] = center[4]
+	loc[5] = ( center[5] + offsets[3] )
 	if loc[5] >= 360
 		loc[5] = ( loc[5] - 360 )
 	elseIf loc[5] < 0
