@@ -205,42 +205,40 @@ function LoadVoices()
 	SexLab.RegisterVoice(femalemoan09) 
 endFunction
 
+
+armor function LoadStrapon(string esp, int id)
+	armor strapon = Game.GetFormFromFile(id, esp) as armor
+	if strapon != none
+		strapons = sslUtility.PushForm(strapon, strapons)
+	endif
+	return strapon
+endFunction
+
 function FindStrapons()
 {Find strapons from other mods and register it for use as an available resource}
+	strapons = new form[1]
+	strapons[0] = aCalypsStrapon
 
-	string[] straponMod = new string[8]
-	int[] straponForm = new int[8]
-	; Horker Tusk / Aeon
-	straponMod[0] = "StrapOnbyaeonv1.1.esp"
-	straponForm[0] = 0x0D65
-	; Futa Equippable
-	straponMod[1] = "Futa equippable.esp"
-	straponForm[1] = 0x0D66
-	straponMod[2] = "Futa equippable.esp"
-	straponForm[2] = 0x0D67
-	straponMod[3] = "Futa equippable.esp"
-	straponForm[3] = 0x01D96
-	straponMod[4] = "Futa equippable.esp"
-	straponForm[4] = 0x022FB
-	straponMod[5] = "Futa equippable.esp"
-	straponForm[5] = 0x022FC
-	straponMod[6] = "Futa equippable.esp"
-	straponForm[6] = 0x022FD
-	; Cozy & Rebels Futa
-	straponMod[7] = "TG.esp"
-	straponForm[7] = 0x0182B
+	LoadStrapon("StrapOnbyaeonv1.1.esp", 0x0D65)
+	LoadStrapon("TG.esp", 0x0182B)
 
-	form[] straponsFound
-	straponsFound = sslUtility.PushForm(aCalypsStrapon, straponsFound)
-	int i = 0
-	while i < 8
-		armor strapon = Game.GetFormFromFile(straponForm[i], straponMod[i]) as armor
-		if strapon != none
-			straponsFound = sslUtility.PushForm(strapon, straponsFound)
-		elseif strapon == none && i == 1
-			i = 6 ; Futa equippable.esp missing, don't bother with checking others
-		endIf
-		i += 1
-	endWhile
-	strapons = straponsFound
+	armor check = LoadStrapon("Futa equippable.esp", 0x0D66)
+	if check != none
+		LoadStrapon("Futa equippable.esp", 0x0D67)
+		LoadStrapon("Futa equippable.esp", 0x01D96)
+		LoadStrapon("Futa equippable.esp", 0x022FB)
+		LoadStrapon("Futa equippable.esp", 0x022FC)
+		LoadStrapon("Futa equippable.esp", 0x022FD)
+	endIf
+
+	check = LoadStrapon("Skyrim_Strap_Ons.esp", 0x00D65)
+	if check != none
+		LoadStrapon("Skyrim_Strap_Ons.esp", 0x02859)
+		LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285A)
+		LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285B)
+		LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285C)
+		LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285D)
+		LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285E)
+		LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285F)
+	endIf
 endFunction

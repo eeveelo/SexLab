@@ -93,10 +93,14 @@ int[] function GetSchlongSlot(int stage)
 	int[] schlongs = sslUtility.IntArray(actors)
 	int i = 0
 	while i < actors
-		schlongs[i] = schlongData[DataIndex(1, i, stage, 0)]
+		schlongs[i] = GetSchlong(i, stage)
 		i += 1
 	endWhile
 	return schlongs
+endFunction
+
+int function GetSchlong(int position, int stage)
+	return schlongData[DataIndex(1, position, stage, 0)]
 endFunction
 
 ;/-----------------------------------------------
@@ -229,14 +233,10 @@ float function CalculateForward(int position, int stage)
 	; Adjust offset by highest or lowest
 	float adjust
 	float offset
-	if highest > -lowest && highest > 50
+	if highest > -lowest
 		return (offsets[position] - (highest * 0.5))
-	elseif -lowest > highest && lowest < -50
-		return (offsets[position] + (lowest * -0.5))
-	elseif highest > -lowest
-		return (offsets[position] - highest)
 	else
-		return (offsets[position] + lowest)
+		return (offsets[position] + (lowest * -0.5))
 	endIf
 	; Return Adjusted offset
 	return offsets[position]
@@ -249,7 +249,7 @@ endFunction
 
 function UpdateAllForward(int position, float adjust)
 	int stage = 1
-	while stage <= StageCount()
+	while stage <= stages
 		UpdateForward(position, stage, adjust)
 		stage += 1
 	endWhile
@@ -262,7 +262,7 @@ endFunction
 
 function UpdateAllSide(int position, float adjust)
 	int stage = 1
-	while stage <= StageCount()
+	while stage <= stages
 		UpdateSide(position, stage, adjust)
 		stage += 1
 	endWhile
@@ -275,7 +275,7 @@ endFunction
 
 function UpdateAllUp(int position, float adjust)
 	int stage = 1
-	while stage <= StageCount()
+	while stage <= stages
 		UpdateUp(position, stage, adjust)
 		stage += 1
 	endWhile
@@ -289,6 +289,31 @@ endFunction
 ;/-----------------------------------------------
 	Animation Event Functions
 ------------------------------------------------/;
+
+
+string function FetchPositionStage(int position, int stage)
+	; Zeroindex the stage
+	stage -= 1
+	if stage < 0
+		stage = 0
+	endIf
+
+	if position == 0
+		return actor1[stage]
+	elseif position == 1
+		return actor2[stage]
+	elseif position == 2
+		return actor3[stage]
+	elseif position == 3
+		return actor4[stage]
+	elseif position == 4
+		return actor5[stage]
+	else
+		debug.trace("----SexLab ERROR sslBaseAnimation--- Unknown "+name+" position ["+position+"]")
+		return ""
+	endIf
+
+endFunction
 
 string[] function FetchStage(int stage)
 	; Zeroindex the stage
@@ -323,6 +348,10 @@ endFunction
 
 bool[] function GetSilence(int stage)
 	return GetSwitchSlot(stage, 0)
+endFunction
+
+bool function UseOpenMouth(int position, int stage)
+	return AccessSwitch(position, stage, 1)
 endFunction
 
 bool function UseStrapon(int position, int stage)

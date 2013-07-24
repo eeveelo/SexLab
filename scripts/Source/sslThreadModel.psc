@@ -141,12 +141,12 @@ sslThreadController function StartThread()
 	endWhile
 
 	; Determine if foreplay lead in should be used
-	if leadAnimations.Length == 0 && !IsAggressive && ActorCount > 1 && SexLab.Config.bForeplayStage && !leadInDisabled
+	if leadAnimations.Length == 0 && !IsAggressive && ActorCount == 2 && SexLab.Config.bForeplayStage && !leadInDisabled
 		SetLeadAnimations(SexLab.GetAnimationsByTag(ActorCount, "LeadIn"))
 	endIf
 
 	; Check for center
-	if CenterRef == none && bed != -1
+	if centerObj == none && bed != -1
 		ObjectReference BedRef
 		; Select a bed
 		if PlayerRef != none
@@ -155,7 +155,7 @@ sslThreadController function StartThread()
 			BedRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(SexLab.Data.BedsList, Positions[0], 500.0)
 		endIf
 		; A bed was selected, should we use it?
-		if BedRef != none
+		if BedRef != none && !BedRef.IsFurnitureInUse(true)
 			int useBed = 0
 			if bed == 2 || SexLab.Config.sNPCBed == "$SSL_Always"
 				useBed = 1
@@ -171,7 +171,7 @@ sslThreadController function StartThread()
 	endIf
 
 	; Find a marker near one of our actors and center there
-	if CenterRef == none 
+	if centerObj == none 
 		i = 0
 		while i < ActorCount
 			ObjectReference marker = Game.FindRandomReferenceOfTypeFromRef(SexLab.Data.LocationMarker, Positions[i], 750.0) as ObjectReference
@@ -184,7 +184,7 @@ sslThreadController function StartThread()
 	endIf
 
 	; Still no center, fallback to something
-	if CenterRef == none || centerLoc == none
+	if centerObj == none || centerLoc == none
 		; Fallback to victim
 		if victim != none
 			CenterOnObject(victim)
@@ -223,7 +223,14 @@ endFunction
 
 string hook
 int property stage auto hidden
-ObjectReference CenterRef
+
+ObjectReference centerObj
+ObjectReference property CenterRef hidden
+	ObjectReference function get()
+		return centerObj
+	endFunction
+endProperty
+
 float[] centerLoc
 float[] property CenterLocation hidden
 	float[] function get()
@@ -261,14 +268,18 @@ function SetHook(string hookName)
 	hook = hookName
 endFunction
 
+string function GetHook()
+	return hook
+endFunction
+
 float[] function GetCoords(ObjectReference Object)
 	float[] loc = new float[6]
-	loc[0] = CenterRef.GetPositionX()
-	loc[1] = CenterRef.GetPositionY()
-	loc[2] = CenterRef.GetPositionZ()
-	loc[3] = CenterRef.GetAngleX()
-	loc[4] = CenterRef.GetAngleY()
-	loc[5] = CenterRef.GetAngleZ()
+	loc[0] = Object.GetPositionX()
+	loc[1] = Object.GetPositionY()
+	loc[2] = Object.GetPositionZ()
+	loc[3] = Object.GetAngleX()
+	loc[4] = Object.GetAngleY()
+	loc[5] = Object.GetAngleZ()
 	return loc
 endFunction
 
@@ -278,9 +289,9 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 	elseIf centerOn == none
 		return none
 	endIf
-	CenterRef = centerOn
+	centerObj = centerOn
 	centerLoc = GetCoords(centerOn)
-	if SexLab.Data.BedsList.HasForm(CenterRef.GetBaseObject())
+	if SexLab.Data.BedsList.HasForm(centerObj.GetBaseObject())
 		bed = 1
 		centerLoc[0] = centerLoc[0] + (35 * Math.sin(centerLoc[5]))
 		centerLoc[1] = centerLoc[1] + (35 * Math.cos(centerLoc[5]))
@@ -552,16 +563,25 @@ sslBaseAnimation[] property Animations hidden
 endProperty
 
 function SetForcedAnimations(sslBaseAnimation[] animationList)
+	if AnimationList.Length == 0
+		return
+	endIf
 	customAnimations = animationList
 	SetAnimation()
 endFunction
 
 function SetAnimations(sslBaseAnimation[] animationList)
+	if AnimationList.Length == 0
+		return
+	endIf
 	primaryAnimations = animationList
 	SetAnimation()
 endFunction
 
 function SetLeadAnimations(sslBaseAnimation[] animationList)
+	if AnimationList.Length == 0
+		return
+	endIf
 	leadIn = true
 	leadAnimations = animationList
 	SetAnimation()
@@ -864,7 +884,7 @@ function InitializeThread()
 	primaryAnimations = anDel
 	leadAnimations = anDel
 	; Clear Forms
-	CenterRef = none
+	centerObj = none
 	PlayerRef = none
 endFunction
 
