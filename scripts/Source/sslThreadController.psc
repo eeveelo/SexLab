@@ -902,7 +902,6 @@ function ActorChain(string callback)
 	UnregisterForModEvent(ChainLinkActor)
 	; Wait for ready signals from all chain links
 	while !linkready[0] || !linkready[1] || !linkready[2] || !linkready[3] || !linkready[4]
-		;debug.trace(callback+" "+linkready)
 		Utility.Wait(0.1)
 	endWhile
 	padlock = false

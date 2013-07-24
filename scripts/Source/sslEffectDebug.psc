@@ -5,14 +5,14 @@ SexLabFramework property SexLab Auto
 event OnEffectStart(actor target, actor caster)
 
 
-	sslBaseVoice voice = SexLab.GetVoiceByTag("Female", "Loud")
-	sslThreadModel make = SexLab.NewThread()
-	make.AddActor(SexLab.PlayerRef)
-	make.AddActor(target, false, none, true)
-	make.SetVoice(SexLab.PlayerRef, voice)
-	;make.SetForcedAnimations(SexLab.GetAnimationsByTag(2, "Foreplay"))
-	;make.AllowLeadIn(true)
-	sslThreadController Thread = make.StartThread()
+	; sslBaseVoice voice = SexLab.GetVoiceByTag("Female", "Loud")
+	; sslThreadModel make = SexLab.NewThread()
+	; make.AddActor(SexLab.PlayerRef)
+	; make.AddActor(target, false, none, true)
+	; make.SetVoice(SexLab.PlayerRef, voice)
+	; ;make.SetForcedAnimations(SexLab.GetAnimationsByTag(2, "Foreplay"))
+	; ;make.AllowLeadIn(true)
+	; sslThreadController Thread = make.StartThread()
 	;debug.traceandbox("Aggressive: "+Thread.IsAggressive)
 	;debug.traceandbox("Lead: "+Thread.leadIn)
 	; sslThreadModel make = SexLab.NewThread()
@@ -113,16 +113,16 @@ event OnEffectStart(actor target, actor caster)
 	; SexLab.StartSex(activeActors, anims)
 
 	; Threeway Test
-	; actor[] activeActors = new actor[3]
-	; if SexLab.DebugActor != none
-	; 	activeActors[0] = target
-	; 	activeActors[1] = SexLab.PlayerRef
-	; 	activeActors[2] = SexLab.DebugActor
-	; 	sslBaseAnimation[] anims = SexLab.GetAnimationsByType(actors=3,males=2,females=1)
-	; 	SexLab.StartSex(activeActors, anims)
-	; else
-	; 	SexLab.DebugActor = target
-	; endIf
+	actor[] activeActors = new actor[3]
+	if SexLab.DebugActor != none
+		activeActors[0] = target
+		activeActors[1] = SexLab.PlayerRef
+		activeActors[2] = SexLab.DebugActor
+		sslBaseAnimation[] anims = SexLab.GetAnimationsByType(actors=3)
+		SexLab.StartSex(activeActors, anims)
+	else
+		SexLab.DebugActor = target
+	endIf
 
 	; Actor Change Test
 	; actor[] activeActors = new actor[2]

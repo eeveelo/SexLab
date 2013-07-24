@@ -141,7 +141,7 @@ sslThreadController function StartThread()
 	endWhile
 
 	; Determine if foreplay lead in should be used
-	if leadAnimations.Length == 0 && !IsAggressive && ActorCount > 1 && SexLab.Config.bForeplayStage && !leadInDisabled
+	if leadAnimations.Length == 0 && !IsAggressive && ActorCount == 2 && SexLab.Config.bForeplayStage && !leadInDisabled
 		SetLeadAnimations(SexLab.GetAnimationsByTag(ActorCount, "LeadIn"))
 	endIf
 
@@ -559,16 +559,25 @@ sslBaseAnimation[] property Animations hidden
 endProperty
 
 function SetForcedAnimations(sslBaseAnimation[] animationList)
+	if AnimationList.Length == 0
+		return
+	endIf
 	customAnimations = animationList
 	SetAnimation()
 endFunction
 
 function SetAnimations(sslBaseAnimation[] animationList)
+	if AnimationList.Length == 0
+		return
+	endIf
 	primaryAnimations = animationList
 	SetAnimation()
 endFunction
 
 function SetLeadAnimations(sslBaseAnimation[] animationList)
+	if AnimationList.Length == 0
+		return
+	endIf
 	leadIn = true
 	leadAnimations = animationList
 	SetAnimation()
