@@ -268,6 +268,10 @@ function SetHook(string hookName)
 	hook = hookName
 endFunction
 
+string function GetHook()
+	return hook
+endFunction
+
 float[] function GetCoords(ObjectReference Object)
 	float[] loc = new float[6]
 	loc[0] = Object.GetPositionX()
