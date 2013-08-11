@@ -1023,7 +1023,7 @@ function _StopAnimations()
 		Controllers[i].EndAnimation(quick = true)
 		i += 1
 	endWhile
-	ready = false
+	ready = true
 endFunction
 
 function _ClearAnimations()
