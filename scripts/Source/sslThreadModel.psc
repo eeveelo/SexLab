@@ -290,13 +290,23 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 		return none
 	endIf
 	centerObj = centerOn
-	centerLoc = GetCoords(centerOn)
 	if SexLab.Data.BedsList.HasForm(centerObj.GetBaseObject())
 		bed = 1
 		centerLoc[0] = centerLoc[0] + (35 * Math.sin(centerLoc[5]))
 		centerLoc[1] = centerLoc[1] + (35 * Math.cos(centerLoc[5]))
 		centerLoc[2] = centerLoc[2] + 35
+		centerLoc = GetCoords(centerOn)
+	else
+		ObjectReference StageBox = centerObj.PlaceAtMe(SexLab.Data.SexLabStageBox)
+		debug.trace(StageBox.GetScale()+" -> "+(centerObj.GetScale() / StageBox.GetScale()))
+		;StageBox.SetScale((centerObj.GetScale() / StageBox.GetScale()))
+		;StageBox.MoveTo(centerObj)
+		centerLoc = GetCoords(StageBox)
+		StageBox.Disable()
+		StageBox.Delete()
 	endIf
+
+
 	if active && resync
 		RealignActors()
 		SendThreadEvent("ActorsRelocated")

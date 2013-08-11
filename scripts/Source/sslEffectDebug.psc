@@ -5,6 +5,40 @@ SexLabFramework property SexLab Auto
 event OnEffectStart(actor target, actor caster)
 
 
+
+
+	ObjectReference StageBox = caster.PlaceAtMe(SexLab.Data.SexLabStageBox)
+	utility.wait(2.0)
+	StageBox.SetScale((caster.GetScale() / StageBox.GetScale()))
+	utility.wait(2.0)
+	StageBox.MoveTo(caster)
+	utility.wait(2.0)
+
+	float[] center = new float[6]
+	center[0] = StageBox.GetPositionX()
+	center[1] = StageBox.GetPositionY()
+	center[2] = StageBox.GetPositionZ()
+	center[3] = StageBox.GetAngleX()
+	center[4] = StageBox.GetAngleY()
+	center[5] = StageBox.GetAngleZ()
+
+	StageBox.Disable()
+	StageBox.Delete()
+
+	float[] loc = new float[6]
+	loc[0] = ( center[0] + ( Math.sin(center[5]) * -105) )
+	loc[1] = ( center[1] + ( Math.cos(center[5]) * -105) )
+	loc[2] = ( center[2] + 0 )
+	loc[3] = center[3]
+	loc[4] = center[4]
+	loc[5] = ( center[5] + 0 )
+
+	target.SetPosition(loc[0], loc[1], loc[2])
+	target.SetAngle(loc[3], loc[4], loc[5])
+
+	Debug.SendAnimationEvent(caster, "Arrok_Missionary_A1_S2")
+	Debug.SendAnimationEvent(target, "Arrok_Missionary_A2_S2")
+
 	; sslBaseVoice voice = SexLab.GetVoiceByTag("Female", "Loud")
 	; sslThreadModel make = SexLab.NewThread()
 	; make.AddActor(SexLab.PlayerRef)
@@ -113,16 +147,16 @@ event OnEffectStart(actor target, actor caster)
 	; SexLab.StartSex(activeActors, anims)
 
 	; Threeway Test
-	actor[] activeActors = new actor[3]
-	if SexLab.DebugActor != none
-		activeActors[0] = target
-		activeActors[1] = SexLab.PlayerRef
-		activeActors[2] = SexLab.DebugActor
-		sslBaseAnimation[] anims = SexLab.GetAnimationsByType(actors=3)
-		SexLab.StartSex(activeActors, anims)
-	else
-		SexLab.DebugActor = target
-	endIf
+	; actor[] activeActors = new actor[3]
+	; if SexLab.DebugActor != none
+	; 	activeActors[0] = target
+	; 	activeActors[1] = SexLab.PlayerRef
+	; 	activeActors[2] = SexLab.DebugActor
+	; 	sslBaseAnimation[] anims = SexLab.GetAnimationsByType(actors=3)
+	; 	SexLab.StartSex(activeActors, anims)
+	; else
+	; 	SexLab.DebugActor = target
+	; endIf
 
 	; Actor Change Test
 	; actor[] activeActors = new actor[2]
