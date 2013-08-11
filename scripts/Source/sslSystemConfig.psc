@@ -2,11 +2,11 @@ scriptname sslSystemConfig extends SKI_ConfigBase
 {Skyrim Sex Lab Mod Configuration Menu}
 
 int function GetVersion()
-	return 114
+	return 115
 endFunction
 
 bool function DebugMode()
-	return true
+	return false
 endFunction
 
 ; Resources
