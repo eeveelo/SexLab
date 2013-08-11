@@ -289,22 +289,22 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 	elseIf centerOn == none
 		return none
 	endIf
+	
 	centerObj = centerOn
 	if SexLab.Data.BedsList.HasForm(centerObj.GetBaseObject())
 		bed = 1
+		centerLoc = GetCoords(centerObj)
 		centerLoc[0] = centerLoc[0] + (35 * Math.sin(centerLoc[5]))
 		centerLoc[1] = centerLoc[1] + (35 * Math.cos(centerLoc[5]))
 		centerLoc[2] = centerLoc[2] + 35
-		centerLoc = GetCoords(centerOn)
-	else
+	elseif centerObj == SexLab.PlayerRef || centerObj.HasKeyWordString("ActorTypeNPC")
 		ObjectReference Stager = centerObj.PlaceAtMe(SexLab.Data.SexLabStager)
-		;Stager.SetScale((centerObj.GetScale() / Stager.GetScale()))
-		;Stager.MoveTo(centerObj)
 		centerLoc = GetCoords(Stager)
 		Stager.Disable()
 		Stager.Delete()
+	else
+		centerLoc = GetCoords(centerObj)
 	endIf
-
 
 	if active && resync
 		RealignActors()
