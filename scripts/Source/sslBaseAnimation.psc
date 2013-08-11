@@ -450,6 +450,7 @@ endFunction
 
 function _WaitLock()
 	while waiting
+		Utility.Wait(0.1)
 	endWhile
 	waiting = true
 endFunction
