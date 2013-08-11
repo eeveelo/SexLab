@@ -571,7 +571,7 @@ endFunction
 function ResetActor(actor position)
 	; Reset scale if needed
 	if scaled
-		position.SetScale(displayScales[GetPosition(position)])
+		position.SetScale(displayScales[GetPosition(position)] / bases[GetPosition(position)])
 	endIf
 	; Clear them out
 	position.RemoveFromFaction(SexLab.AnimatingFaction)
