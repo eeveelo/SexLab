@@ -31,7 +31,7 @@ EffectShader property CumVaginal auto
 EffectShader property CumOral auto
 EffectShader property CumAnal auto
 Static property LocationMarker auto
-Form property SexLabStageBox auto
+ActorBase property SexLabStager auto
 Keyword property SexLabForbid auto
 Keyword property SexLabNoStrip auto
 Weapon property DummyWeapon auto

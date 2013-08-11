@@ -297,13 +297,12 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 		centerLoc[2] = centerLoc[2] + 35
 		centerLoc = GetCoords(centerOn)
 	else
-		ObjectReference StageBox = centerObj.PlaceAtMe(SexLab.Data.SexLabStageBox)
-		debug.trace(StageBox.GetScale()+" -> "+(centerObj.GetScale() / StageBox.GetScale()))
-		;StageBox.SetScale((centerObj.GetScale() / StageBox.GetScale()))
-		;StageBox.MoveTo(centerObj)
-		centerLoc = GetCoords(StageBox)
-		StageBox.Disable()
-		StageBox.Delete()
+		ObjectReference Stager = centerObj.PlaceAtMe(SexLab.Data.SexLabStager)
+		;Stager.SetScale((centerObj.GetScale() / Stager.GetScale()))
+		;Stager.MoveTo(centerObj)
+		centerLoc = GetCoords(Stager)
+		Stager.Disable()
+		Stager.Delete()
 	endIf
 
 

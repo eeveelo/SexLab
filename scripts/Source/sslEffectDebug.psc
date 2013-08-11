@@ -7,23 +7,23 @@ event OnEffectStart(actor target, actor caster)
 
 
 
-	ObjectReference StageBox = caster.PlaceAtMe(SexLab.Data.SexLabStageBox)
+	ObjectReference Stager = caster.PlaceAtMe(SexLab.Data.SexLabStager)
 	utility.wait(2.0)
-	StageBox.SetScale((caster.GetScale() / StageBox.GetScale()))
+	Stager.SetScale((caster.GetScale() / Stager.GetScale()))
 	utility.wait(2.0)
-	StageBox.MoveTo(caster)
+	Stager.MoveTo(caster)
 	utility.wait(2.0)
 
 	float[] center = new float[6]
-	center[0] = StageBox.GetPositionX()
-	center[1] = StageBox.GetPositionY()
-	center[2] = StageBox.GetPositionZ()
-	center[3] = StageBox.GetAngleX()
-	center[4] = StageBox.GetAngleY()
-	center[5] = StageBox.GetAngleZ()
+	center[0] = Stager.GetPositionX()
+	center[1] = Stager.GetPositionY()
+	center[2] = Stager.GetPositionZ()
+	center[3] = Stager.GetAngleX()
+	center[4] = Stager.GetAngleY()
+	center[5] = Stager.GetAngleZ()
 
-	StageBox.Disable()
-	StageBox.Delete()
+	Stager.Disable()
+	Stager.Delete()
 
 	float[] loc = new float[6]
 	loc[0] = ( center[0] + ( Math.sin(center[5]) * -105) )
