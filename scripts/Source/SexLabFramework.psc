@@ -686,9 +686,9 @@ endFunction
 int function RegisterAnimation(sslBaseAnimation anim)
 	_ReadyWait()
 	ready = false
-	int aid
+	int aid = FindAnimationByName(anim.name)
 	; Animation not found, register it.
-	if FindAnimationByName(anim.name) == -1
+	if aid == -1
 		aid = animIndex
 		animation[aid] = anim
 		animation[aid].LoadAnimation()
@@ -780,8 +780,8 @@ endFunction
 int function RegisterVoice(sslBaseVoice vc)
 	_ReadyWait()
 	ready = false
-	int vid
-	if FindVoiceByName(vc.name) == -1
+	int vid = FindVoiceByName(vc.name)
+	if vid == -1
 		vid = voiceIndex
 		voice[vid] = vc
 		voice[vid].LoadVoice()
