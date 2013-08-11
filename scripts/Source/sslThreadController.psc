@@ -7,6 +7,8 @@ scriptname sslThreadController extends sslThreadModel
 
 bool primed
 bool scaled
+float[] displayScales
+float[] bases
 
 sslThreadController function PrimeThread()
 	if GetState() != "Making"
@@ -41,22 +43,25 @@ state Preparing
 		; Perform scaling
 		if ActorCount > 1 && SexLab.Config.bScaleActors
 			; Setup scaling for actors
-			float[] scales = sslUtility.FloatArray(ActorCount)
-			float average
+			displayScales = sslUtility.FloatArray(ActorCount)
+			bases = sslUtility.FloatArray(ActorCount)
 			scaled = true
 			; Get current scales
 			i = 0
 			while i < ActorCount
-				scales[i] = Positions[i].GetScale()
-				average += scales[i]
+				; Actor size equation: D (display size) = S (SetScale size) * B (base size)
+				; GetScale (papyrus) returns D, SetScale sets S part.
+				; GetScale (console) returns S and D (not S and B as the text implies).
+				displayScales[i] = Positions[i].GetScale()
+				Positions[i].SetScale(1.0)
+				bases[i] = Positions[i].GetScale()
+				Positions[i].SetScale(displayScales[i] / bases[i])
 				i += 1
 			endWhile
-			; Calculate average scale
-			average = ( average / ActorCount )
-			; Scale actors to average
+			; Scale actors to D = 1.0
 			i = 0
 			while i < ActorCount
-				Positions[i].SetScale((average / scales[i]))
+				Positions[i].SetScale(1.0 / bases[i])
 				; Reset center coords if actor is center object
 				; center actor Z axis likely changed from scaling
 				if Positions[i] == CenterRef
@@ -566,7 +571,7 @@ endFunction
 function ResetActor(actor position)
 	; Reset scale if needed
 	if scaled
-		position.SetScale(1.0)
+		position.SetScale(displayScales[GetPosition(position)])
 	endIf
 	; Clear them out
 	position.RemoveFromFaction(SexLab.AnimatingFaction)
