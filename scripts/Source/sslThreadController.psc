@@ -569,9 +569,10 @@ function SetupActor(actor position)
 endFunction
 
 function ResetActor(actor position)
+	int slot = GetSlot(position)
 	; Reset scale if needed
 	if scaled
-		position.SetScale(displayScales[GetPosition(position)] / bases[GetPosition(position)])
+		position.SetScale(displayScales[slot] / bases[slot])
 	endIf
 	; Clear them out
 	position.RemoveFromFaction(SexLab.AnimatingFaction)
