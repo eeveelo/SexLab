@@ -5,39 +5,47 @@ SexLabFramework property SexLab Auto
 event OnEffectStart(actor target, actor caster)
 
 
+	; SexLab.StripActor(target, none, false, false)
+	; SexLab.Data.CumOralSpell.Cast(target, caster)
+	; SexLab.Data.CumVaginalOralAnal.Play(target, SexLab.Config.fCumTimer)
 
+	; SexLab.StripActor(caster, none, false, false)
+	; SexLab.Data.CumOralSpell.Cast(caster, target)
+	; SexLab.Data.CumVaginalOralAnal.Play(caster, SexLab.Config.fCumTimer)
 
-	ObjectReference Stager = caster.PlaceAtMe(SexLab.Data.SexLabStager)
-	utility.wait(2.0)
-	Stager.SetScale((caster.GetScale() / Stager.GetScale()))
-	utility.wait(2.0)
-	Stager.MoveTo(caster)
-	utility.wait(2.0)
+	
 
-	float[] center = new float[6]
-	center[0] = Stager.GetPositionX()
-	center[1] = Stager.GetPositionY()
-	center[2] = Stager.GetPositionZ()
-	center[3] = Stager.GetAngleX()
-	center[4] = Stager.GetAngleY()
-	center[5] = Stager.GetAngleZ()
+	; ObjectReference Stager = caster.PlaceAtMe(SexLab.Data.SexLabStager)
+	; utility.wait(2.0)
+	; Stager.SetScale((caster.GetScale() / Stager.GetScale()))
+	; utility.wait(2.0)
+	; Stager.MoveTo(caster)
+	; utility.wait(2.0)
 
-	Stager.Disable()
-	Stager.Delete()
+	; float[] center = new float[6]
+	; center[0] = Stager.GetPositionX()
+	; center[1] = Stager.GetPositionY()
+	; center[2] = Stager.GetPositionZ()
+	; center[3] = Stager.GetAngleX()
+	; center[4] = Stager.GetAngleY()
+	; center[5] = Stager.GetAngleZ()
 
-	float[] loc = new float[6]
-	loc[0] = ( center[0] + ( Math.sin(center[5]) * -105) )
-	loc[1] = ( center[1] + ( Math.cos(center[5]) * -105) )
-	loc[2] = ( center[2] + 0 )
-	loc[3] = center[3]
-	loc[4] = center[4]
-	loc[5] = ( center[5] + 0 )
+	; Stager.Disable()
+	; Stager.Delete()
 
-	target.SetPosition(loc[0], loc[1], loc[2])
-	target.SetAngle(loc[3], loc[4], loc[5])
+	; float[] loc = new float[6]
+	; loc[0] = ( center[0] + ( Math.sin(center[5]) * -105) )
+	; loc[1] = ( center[1] + ( Math.cos(center[5]) * -105) )
+	; loc[2] = ( center[2] + 0 )
+	; loc[3] = center[3]
+	; loc[4] = center[4]
+	; loc[5] = ( center[5] + 0 )
 
-	Debug.SendAnimationEvent(caster, "Arrok_Missionary_A1_S2")
-	Debug.SendAnimationEvent(target, "Arrok_Missionary_A2_S2")
+	; target.SetPosition(loc[0], loc[1], loc[2])
+	; target.SetAngle(loc[3], loc[4], loc[5])
+
+	; Debug.SendAnimationEvent(caster, "Arrok_Missionary_A1_S2")
+	; Debug.SendAnimationEvent(target, "Arrok_Missionary_A2_S2")
 
 	; sslBaseVoice voice = SexLab.GetVoiceByTag("Female", "Loud")
 	; sslThreadModel make = SexLab.NewThread()

@@ -23,6 +23,15 @@ form[] property strapons auto hidden
 sound property sfxSquishing01 auto
 sound property sfxSucking01 auto
 sound property sfxSexMix01 auto
+
+Spell property CumVaginalOralAnalSpell auto
+Spell property CumOralAnalSpell auto
+Spell property CumVaginalOralSpell auto
+Spell property CumVaginalAnalSpell auto
+Spell property CumVaginalSpell auto
+Spell property CumOralSpell auto
+Spell property CumAnalSpell auto
+
 EffectShader property CumVaginalOralAnal auto
 EffectShader property CumOralAnal auto
 EffectShader property CumVaginalOral auto
@@ -30,6 +39,7 @@ EffectShader property CumVaginalAnal auto
 EffectShader property CumVaginal auto
 EffectShader property CumOral auto
 EffectShader property CumAnal auto
+
 Static property LocationMarker auto
 ActorBase property SexLabStager auto
 Keyword property SexLabForbid auto
