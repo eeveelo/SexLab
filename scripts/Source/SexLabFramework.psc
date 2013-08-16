@@ -43,29 +43,29 @@ sslThreadView14 property ThreadView14 auto
 sslThreadController[] property Controllers auto hidden
 
 
-; START DEPRECATED, to be removed in 1.2
-; Current number of default threads available
-int threadCount = 15
-sslBaseThread[] thread
-sslThread00 property Thread00 auto
-sslThread01 property Thread01 auto
-sslThread02 property Thread02 auto
-sslThread03 property Thread03 auto
-sslThread04 property Thread04 auto
-sslThread05 property Thread05 auto
-sslThread06 property Thread06 auto
-sslThread07 property Thread07 auto
-sslThread08 property Thread08 auto
-sslThread09 property Thread09 auto
-sslThread10 property Thread10 auto
-sslThread11 property Thread11 auto
-sslThread12 property Thread12 auto
-sslThread13 property Thread13 auto
-sslThread14 property Thread14 auto
-; Available animation slots/threads
-bool[] activeThread
-int playerThread 
-; END DEPRECATED, to be removed in 1.2
+; ; START DEPRECATED, to be removed in 1.2
+; ; Current number of default threads available
+; int threadCount = 15
+; sslBaseThread[] thread
+; sslThread00 property Thread00 auto
+; sslThread01 property Thread01 auto
+; sslThread02 property Thread02 auto
+; sslThread03 property Thread03 auto
+; sslThread04 property Thread04 auto
+; sslThread05 property Thread05 auto
+; sslThread06 property Thread06 auto
+; sslThread07 property Thread07 auto
+; sslThread08 property Thread08 auto
+; sslThread09 property Thread09 auto
+; sslThread10 property Thread10 auto
+; sslThread11 property Thread11 auto
+; sslThread12 property Thread12 auto
+; sslThread13 property Thread13 auto
+; sslThread14 property Thread14 auto
+; ; Available animation slots/threads
+; bool[] activeThread
+; int playerThread 
+; ; END DEPRECATED, to be removed in 1.2
 
 
 ; Animation Sets
@@ -457,54 +457,54 @@ endFunction
 ;#  BEGIN THREAD FUNCTIONS   #
 ;#---------------------------#
 
-int function FindActorThread(actor toFind)
-{DEPRECATED: TO BE REMOVED IN 1.2}
-	_Deprecate("FindActorThread", "FindActorController")
-	int i = 0
-	while i < threadCount
-		if activeThread[i]
-			actor[] actorList = thread[i].GetActors()
-			int p = 0
-			while p < actorList.Length
-				if actorList[p] == toFind
-					return i
-				endIf
-				p += 1
-			endWhile
-		endIf
-		i += 1
-	endWhile
-	return -1
-endFunction
+; int function FindActorThread(actor toFind)
+; {DEPRECATED: TO BE REMOVED IN 1.2}
+; 	_Deprecate("FindActorThread", "FindActorController")
+; 	int i = 0
+; 	while i < threadCount
+; 		if activeThread[i]
+; 			actor[] actorList = thread[i].GetActors()
+; 			int p = 0
+; 			while p < actorList.Length
+; 				if actorList[p] == toFind
+; 					return i
+; 				endIf
+; 				p += 1
+; 			endWhile
+; 		endIf
+; 		i += 1
+; 	endWhile
+; 	return -1
+; endFunction
 
-sslBaseThread function GetActorThread(actor toFind)
-{DEPRECATED: TO BE REMOVED IN 1.2}
-	_Deprecate("GetActorThread", "GetActorController")
-	int tid = FindActorThread(toFind)
-	if tid != -1
-		return thread[tid]
-	else
-		return none
-	endIf
-endFunction
+; sslBaseThread function GetActorThread(actor toFind)
+; {DEPRECATED: TO BE REMOVED IN 1.2}
+; 	_Deprecate("GetActorThread", "GetActorController")
+; 	int tid = FindActorThread(toFind)
+; 	if tid != -1
+; 		return thread[tid]
+; 	else
+; 		return none
+; 	endIf
+; endFunction
 
-int function FindPlayerThread()
-{DEPRECATED: TO BE REMOVED IN 1.2}
-	_Deprecate("FindPlayerThread", "FindPlayerController")
-	return FindPlayerController()
-endFunction
+; int function FindPlayerThread()
+; {DEPRECATED: TO BE REMOVED IN 1.2}
+; 	_Deprecate("FindPlayerThread", "FindPlayerController")
+; 	return FindPlayerController()
+; endFunction
 
-sslBaseThread function GetPlayerThread()
-{DEPRECATED: TO BE REMOVED IN 1.2}
-	_Deprecate("GetPlayerThread", "GetPlayerController")
-	return thread[playerThread]
-endFunction
+; sslBaseThread function GetPlayerThread()
+; {DEPRECATED: TO BE REMOVED IN 1.2}
+; 	_Deprecate("GetPlayerThread", "GetPlayerController")
+; 	return thread[playerThread]
+; endFunction
 
-sslBaseThread function GetThread(int tid)
-{DEPRECATED: TO BE REMOVED IN 1.2}
-	_Deprecate("GetThread", "GetController")
-	return thread[tid]
-endFunction
+; sslBaseThread function GetThread(int tid)
+; {DEPRECATED: TO BE REMOVED IN 1.2}
+; 	_Deprecate("GetThread", "GetController")
+; 	return thread[tid]
+; endFunction
 
 ;#------------------------------#
 ;#  BEGIN CONTROLLER FUNCTIONS  #
@@ -799,11 +799,11 @@ endFunction
 ;#    START HOOK FUNCTIONS   #
 ;#---------------------------#
 
-sslBaseThread function HookThread(string argString)
-{DEPRECATED: TO BE REMOVED IN 1.2}
-	_Deprecate("HookThread", "HookController")
-	return thread[(argString as int)]
-endFunction
+; sslBaseThread function HookThread(string argString)
+; {DEPRECATED: TO BE REMOVED IN 1.2}
+; 	_Deprecate("HookThread", "HookController")
+; 	return thread[(argString as int)]
+; endFunction
 
 sslThreadController function HookController(string argString)
 	return Controllers[(argString as int)]
@@ -1080,23 +1080,23 @@ function _SetupSystem()
 
 	; Init thread variables based on current thread count: 15
 	; Deprecated
-	thread = new sslBaseThread[15]
-	thread[0] = Thread00 as sslThread00
-	thread[1] = Thread01 as sslThread01
-	thread[2] = Thread02 as sslThread02
-	thread[3] = Thread03 as sslThread03
-	thread[4] = Thread04 as sslThread04
-	thread[5] = Thread05 as sslThread05
-	thread[6] = Thread06 as sslThread06
-	thread[7] = Thread07 as sslThread07
-	thread[8] = Thread08 as sslThread08
-	thread[9] = Thread09 as sslThread09
-	thread[10] = Thread10 as sslThread10
-	thread[11] = Thread11 as sslThread11
-	thread[12] = Thread12 as sslThread12
-	thread[13] = Thread13 as sslThread13
-	thread[14] = Thread14 as sslThread14
-	activeThread = new bool[15]
+	; thread = new sslBaseThread[15]
+	; thread[0] = Thread00 as sslThread00
+	; thread[1] = Thread01 as sslThread01
+	; thread[2] = Thread02 as sslThread02
+	; thread[3] = Thread03 as sslThread03
+	; thread[4] = Thread04 as sslThread04
+	; thread[5] = Thread05 as sslThread05
+	; thread[6] = Thread06 as sslThread06
+	; thread[7] = Thread07 as sslThread07
+	; thread[8] = Thread08 as sslThread08
+	; thread[9] = Thread09 as sslThread09
+	; thread[10] = Thread10 as sslThread10
+	; thread[11] = Thread11 as sslThread11
+	; thread[12] = Thread12 as sslThread12
+	; thread[13] = Thread13 as sslThread13
+	; thread[14] = Thread14 as sslThread14
+	; activeThread = new bool[15]
 
 	DoNothing = new ReferenceAlias[30]
 	DoNothing[0] = DoNothingAlias00
@@ -1253,7 +1253,7 @@ function _EnableHotkeys(int tid)
 	RegisterForKey(Config.kRestoreOffsets)
 	RegisterForKey(Config.kMoveScene)
 	RegisterForKey(Config.kRotateScene)
-	playerThread = tid ; DEPRECATED, to be removed in 1.2
+	; playerThread = tid ; DEPRECATED, to be removed in 1.2
 	PlayerController = Controllers[tid]
 	hkReady = true
 endFunction
@@ -1261,7 +1261,7 @@ endFunction
 function _DisableHotkeys()
 	UnregisterForAllKeys()
 	PlayerController = none
-	PlayerThread = -1
+	; PlayerThread = -1
 	hkready = true
 endFunction
 
