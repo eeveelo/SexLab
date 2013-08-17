@@ -1,7 +1,10 @@
 scriptname sslThreadModel extends Quest
 {Animation Thread Model: Runs storage and information about a thread}
 
+; Framework
 SexLabFramework property SexLab auto
+; Thread Actor Handler
+sslActorSlots property ActorAlias auto
 
 int property tid hidden
 	int function get()

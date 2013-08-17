@@ -11,9 +11,9 @@ scriptname SexLabFramework extends Quest
 ;#--------------------------------------------------#
 ;####################################################
 
-;Load our configuration settings from MCM
+; Load our configuration settings from MCM
 sslSystemConfig property Config auto
-;Load our resources data
+; Load our resources data
 sslSystemResources property Data auto
 
 bool property Enabled hidden
@@ -25,48 +25,8 @@ endProperty
 ;#---------------------------#
 ;# Start Animation Variables #
 ;#---------------------------#
-sslThreadView00 property ThreadView00 auto
-sslThreadView01 property ThreadView01 auto
-sslThreadView02 property ThreadView02 auto
-sslThreadView03 property ThreadView03 auto
-sslThreadView04 property ThreadView04 auto
-sslThreadView05 property ThreadView05 auto
-sslThreadView06 property ThreadView06 auto
-sslThreadView07 property ThreadView07 auto
-sslThreadView08 property ThreadView08 auto
-sslThreadView09 property ThreadView09 auto
-sslThreadView10 property ThreadView10 auto
-sslThreadView11 property ThreadView11 auto
-sslThreadView12 property ThreadView12 auto
-sslThreadView13 property ThreadView13 auto
-sslThreadView14 property ThreadView14 auto
-sslThreadController[] property Controllers auto hidden
-
-
-; ; START DEPRECATED, to be removed in 1.2
-; ; Current number of default threads available
-; int threadCount = 15
-; sslBaseThread[] thread
-; sslThread00 property Thread00 auto
-; sslThread01 property Thread01 auto
-; sslThread02 property Thread02 auto
-; sslThread03 property Thread03 auto
-; sslThread04 property Thread04 auto
-; sslThread05 property Thread05 auto
-; sslThread06 property Thread06 auto
-; sslThread07 property Thread07 auto
-; sslThread08 property Thread08 auto
-; sslThread09 property Thread09 auto
-; sslThread10 property Thread10 auto
-; sslThread11 property Thread11 auto
-; sslThread12 property Thread12 auto
-; sslThread13 property Thread13 auto
-; sslThread14 property Thread14 auto
-; ; Available animation slots/threads
-; bool[] activeThread
-; int playerThread 
-; ; END DEPRECATED, to be removed in 1.2
-
+sslThreadSlots property ThreadSlots auto
+sslActorSlots property ActorSlots auto
 
 ; Animation Sets
 sslBaseAnimation[] property animation auto hidden
@@ -75,38 +35,6 @@ int animIndex = 0
 ; Animation Faction
 faction property AnimatingFaction auto
 
-; Reference Alias for DoNothing package
-ReferenceAlias property DoNothingAlias00 auto
-ReferenceAlias property DoNothingAlias01 auto
-ReferenceAlias property DoNothingAlias02 auto
-ReferenceAlias property DoNothingAlias03 auto
-ReferenceAlias property DoNothingAlias04 auto
-ReferenceAlias property DoNothingAlias05 auto
-ReferenceAlias property DoNothingAlias06 auto
-ReferenceAlias property DoNothingAlias07 auto
-ReferenceAlias property DoNothingAlias08 auto
-ReferenceAlias property DoNothingAlias09 auto
-ReferenceAlias property DoNothingAlias10 auto
-ReferenceAlias property DoNothingAlias11 auto
-ReferenceAlias property DoNothingAlias12 auto
-ReferenceAlias property DoNothingAlias13 auto
-ReferenceAlias property DoNothingAlias14 auto
-ReferenceAlias property DoNothingAlias15 auto
-ReferenceAlias property DoNothingAlias16 auto
-ReferenceAlias property DoNothingAlias17 auto
-ReferenceAlias property DoNothingAlias18 auto
-ReferenceAlias property DoNothingAlias19 auto
-ReferenceAlias property DoNothingAlias20 auto
-ReferenceAlias property DoNothingAlias21 auto
-ReferenceAlias property DoNothingAlias22 auto
-ReferenceAlias property DoNothingAlias23 auto
-ReferenceAlias property DoNothingAlias24 auto
-ReferenceAlias property DoNothingAlias25 auto
-ReferenceAlias property DoNothingAlias26 auto
-ReferenceAlias property DoNothingAlias27 auto
-ReferenceAlias property DoNothingAlias28 auto
-ReferenceAlias property DoNothingAlias29 auto
-ReferenceAlias[] DoNothing
 ;#---------------------------#
 ;#  End Animation Variables  #
 ;#---------------------------#
@@ -142,14 +70,11 @@ sslThreadModel function NewThread(float timeout = 5.0)
 		_DebugTrace("NewThread","","Failed to make new thread model; system is currently disabled")
 		return none
 	endIf
-	int i = 0
-	while i < Controllers.Length
-		if !Controllers[i].IsLocked
-			debug.trace("Making thread["+Controllers[i].tid+"] "+Controllers[i])
-			return Controllers[i].Make(timeout)
-		endIf
-		i += 1
-	endWhile
+	sslThreadController ThreadView = ThreadSlots.PickController()
+	if ThreadView != none
+		debug.trace("Making thread["+ThreadView.tid+"] "+ThreadView)
+		return ThreadView.Make(timeout)
+	endIf
 	return none
 endFunction
 
@@ -482,7 +407,7 @@ endFunction
 ; 	_Deprecate("GetActorThread", "GetActorController")
 ; 	int tid = FindActorThread(toFind)
 ; 	if tid != -1
-; 		return thread[tid]
+; 		return thread[tid)
 ; 	else
 ; 		return none
 ; 	endIf
@@ -503,7 +428,7 @@ endFunction
 ; sslBaseThread function GetThread(int tid)
 ; {DEPRECATED: TO BE REMOVED IN 1.2}
 ; 	_Deprecate("GetThread", "GetController")
-; 	return thread[tid]
+; 	return thread[tid)
 ; endFunction
 
 ;#------------------------------#
@@ -513,7 +438,7 @@ endFunction
 int function FindActorController(actor toFind)
 	int i = 0
 	while i < 15
-		if Controllers[i].HasActor(toFind)
+		if ThreadSlots.GetController(i).HasActor(toFind)
 			return i
 		endIf
 		i += 1
@@ -524,7 +449,7 @@ endFunction
 sslThreadController function GetActorController(actor toFind)
 	int tid = FindActorController(toFind)
 	if tid != -1
-		return Controllers[tid]
+		return ThreadSlots.GetController(tid)
 	endIf
 	return none
 endFunction
@@ -535,13 +460,13 @@ endFunction
 
 sslThreadController function GetPlayerController()
 	if PlayerController != none
-		return Controllers[PlayerController.tid]
+		return ThreadSlots.GetController(PlayerController.tid)
 	endIf
 	return none
 endFunction
 
 sslThreadController function GetController(int tid)
-	return Controllers[tid]
+	return ThreadSlots.GetController(tid)
 endFunction
 
 ;#---------------------------#
@@ -806,27 +731,27 @@ endFunction
 ; endFunction
 
 sslThreadController function HookController(string argString)
-	return Controllers[(argString as int)]
+	return ThreadSlots.GetController(argString as int)
 endFunction
 
 sslBaseAnimation function HookAnimation(string argString)
-	return Controllers[(argString as int)].Animation
+	return ThreadSlots.GetController(argString as int).Animation
 endFunction
 
 int function HookStage(string argString)
-	return Controllers[(argString as int)].Stage
+	return ThreadSlots.GetController(argString as int).Stage
 endFunction
 
 actor function HookVictim(string argString)
-	return Controllers[(argString as int)].GetVictim()
+	return ThreadSlots.GetController(argString as int).GetVictim()
 endFunction
 
 actor[] function HookActors(string argString)
-	return Controllers[(argString as int)].Positions
+	return ThreadSlots.GetController(argString as int).Positions
 endFunction
 
 float function HookTime(string argString)
-	return Controllers[(argString as int)].GetTime()
+	return ThreadSlots.GetController(argString as int).GetTime()
 endFunction
 
 ;#---------------------------#
@@ -1019,8 +944,8 @@ endEvent
 function _StopAnimations()
 	ready = false
 	int i = 0
-	while i < Controllers.Length
-		Controllers[i].EndAnimation(quick = true)
+	while i < ThreadSlots.Count
+		ThreadSlots.GetController(i).EndAnimation(quick = true)
 		i += 1
 	endWhile
 	ready = true
@@ -1060,81 +985,11 @@ endFunction
 
 function _SetupSystem()
 	ready = false
-	; Init controllers
-	Controllers = new sslThreadController[15]
-	Controllers[0] = ThreadView00 as sslThreadView00
-	Controllers[1] = ThreadView01 as sslThreadView01
-	Controllers[2] = ThreadView02 as sslThreadView02
-	Controllers[3] = ThreadView03 as sslThreadView03
-	Controllers[4] = ThreadView04 as sslThreadView04
-	Controllers[5] = ThreadView05 as sslThreadView05
-	Controllers[6] = ThreadView06 as sslThreadView06
-	Controllers[7] = ThreadView07 as sslThreadView07
-	Controllers[8] = ThreadView08 as sslThreadView08
-	Controllers[9] = ThreadView09 as sslThreadView09
-	Controllers[10] = ThreadView10 as sslThreadView10
-	Controllers[11] = ThreadView11 as sslThreadView11
-	Controllers[12] = ThreadView12 as sslThreadView12
-	Controllers[13] = ThreadView13 as sslThreadView13
-	Controllers[14] = ThreadView14 as sslThreadView14
 
-	; Init thread variables based on current thread count: 15
-	; Deprecated
-	; thread = new sslBaseThread[15]
-	; thread[0] = Thread00 as sslThread00
-	; thread[1] = Thread01 as sslThread01
-	; thread[2] = Thread02 as sslThread02
-	; thread[3] = Thread03 as sslThread03
-	; thread[4] = Thread04 as sslThread04
-	; thread[5] = Thread05 as sslThread05
-	; thread[6] = Thread06 as sslThread06
-	; thread[7] = Thread07 as sslThread07
-	; thread[8] = Thread08 as sslThread08
-	; thread[9] = Thread09 as sslThread09
-	; thread[10] = Thread10 as sslThread10
-	; thread[11] = Thread11 as sslThread11
-	; thread[12] = Thread12 as sslThread12
-	; thread[13] = Thread13 as sslThread13
-	; thread[14] = Thread14 as sslThread14
-	; activeThread = new bool[15]
-
-	DoNothing = new ReferenceAlias[30]
-	DoNothing[0] = DoNothingAlias00
-	DoNothing[1] = DoNothingAlias01
-	DoNothing[2] = DoNothingAlias02
-	DoNothing[3] = DoNothingAlias03
-	DoNothing[4] = DoNothingAlias04
-	DoNothing[5] = DoNothingAlias05
-	DoNothing[6] = DoNothingAlias06
-	DoNothing[7] = DoNothingAlias07
-	DoNothing[8] = DoNothingAlias08
-	DoNothing[9] = DoNothingAlias09
-	DoNothing[10] = DoNothingAlias10
-	DoNothing[11] = DoNothingAlias11
-	DoNothing[12] = DoNothingAlias12
-	DoNothing[13] = DoNothingAlias13
-	DoNothing[14] = DoNothingAlias14
-	DoNothing[15] = DoNothingAlias15
-	DoNothing[16] = DoNothingAlias16
-	DoNothing[17] = DoNothingAlias17
-	DoNothing[18] = DoNothingAlias18
-	DoNothing[19] = DoNothingAlias19
-	DoNothing[20] = DoNothingAlias20
-	DoNothing[21] = DoNothingAlias21
-	DoNothing[22] = DoNothingAlias22
-	DoNothing[23] = DoNothingAlias23
-	DoNothing[24] = DoNothingAlias24
-	DoNothing[25] = DoNothingAlias25
-	DoNothing[26] = DoNothingAlias26
-	DoNothing[27] = DoNothingAlias27
-	DoNothing[28] = DoNothingAlias28
-	DoNothing[29] = DoNothingAlias29
-
-	int i = 0
-	while i < 30
-		DoNothing[i].TryToClear()
-		i += 1
-	endWhile
+	; Init Thread Controllers
+	ThreadSlots._Setup()
+	; Init Alias Slots
+	ActorSlots._Setup()
 
 	ready = true
 	systemenabled = true
@@ -1215,28 +1070,28 @@ function _SendEventHook(string eventName, int threadID, string customHook = "")
 endFunction
 
 int function _SlotDoNothing(actor a)
-	int i = 0
-	while i < 15
-		if DoNothing[i].ForceRefIfEmpty(a)
-			DoNothing[i].TryToEvaluatePackage()
-			return i
-		endIf
-		i += 1
-	endWhile
+	; int i = 0
+	; while i < 15
+	; 	if DoNothing[i].ForceRefIfEmpty(a)
+	; 		DoNothing[i].TryToEvaluatePackage()
+	; 		return i
+	; 	endIf
+	; 	i += 1
+	; endWhile
 	return -1
 endFunction
 
 function _ClearDoNothing(actor a)
-	int i = 0
-	while i < 15
-		if DoNothing[i].GetActorReference() == a
-			Debug.Trace("Clearing SexLabDoNothing["+i+"] of "+a)
-			DoNothing[i].Clear()
-			a.EvaluatePackage()
-			return
-		endIf
-		i += 1
-	endWhile
+	; int i = 0
+	; while i < 15
+	; 	if DoNothing[i].GetActorReference() == a
+	; 		Debug.Trace("Clearing SexLabDoNothing["+i+"] of "+a)
+	; 		DoNothing[i].Clear()
+	; 		a.EvaluatePackage()
+	; 		return
+	; 	endIf
+	; 	i += 1
+	; endWhile
 endFunction
 
 function _EnableHotkeys(int tid)
@@ -1254,7 +1109,7 @@ function _EnableHotkeys(int tid)
 	RegisterForKey(Config.kMoveScene)
 	RegisterForKey(Config.kRotateScene)
 	; playerThread = tid ; DEPRECATED, to be removed in 1.2
-	PlayerController = Controllers[tid]
+	PlayerController = ThreadSlots.GetController(tid)
 	hkReady = true
 endFunction
 

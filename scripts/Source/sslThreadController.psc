@@ -534,7 +534,10 @@ function SetupActor(actor position)
 	if position.IsInCombat()
 		position.StopCombat()
 	endIf
+
 	position.SetFactionRank(SexLab.AnimatingFaction, 1)
+	ActorAlias.SlotActor(position)
+
 	if IsPlayerActor(position)
 		; Enable hotkeys, if needed
 		if SexLab.Config.bDisablePlayer && IsVictim(position)
@@ -552,7 +555,6 @@ function SetupActor(actor position)
 	else
 		position.SetRestrained()
 		position.SetDontMove()
-		SexLab._SlotDoNothing(position)
 		position.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
 	endIf
 	; Auto strip
@@ -569,6 +571,8 @@ function SetupActor(actor position)
 endFunction
 
 function ResetActor(actor position)
+	; Clear slot
+	ActorAlias.ClearActor(position)
 	; Reset scale if needed
 	if scaled
 		position.SetScale(displayScales[GetPosition(position)] / bases[GetPosition(position)])
@@ -589,7 +593,6 @@ function ResetActor(actor position)
 			Debug.ToggleCollisions()
 		endIf
 	else
-		SexLab._ClearDoNothing(position)
 		position.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 		position.SetRestrained(false)
 		position.SetDontMove(false)
