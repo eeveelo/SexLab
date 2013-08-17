@@ -2,17 +2,17 @@ scriptname sslActorSlots extends Quest
 
 ReferenceAlias[] ActorSlot
 
-int function SlotActor(actor position)
+ReferenceAlias function SlotActor(actor position, sslThreadController ThreadView)
 	int i = 0
 	while i < ActorSlot.Length
 		if ActorSlot[i].ForceRefIfEmpty(position)
-			ActorSlot[i].TryToEvaluatePackage()
 			Debug.Trace("SexLab: Slotting ActorSlot["+i+"] with "+position)
-			return i
+			(ActorSlot[i] as sslActorAlias).SetAlias(ThreadView)
+			return ActorSlot[i]
 		endIf
 		i += 1
 	endWhile
-	return -1
+	return none
 endFunction
 
 
@@ -24,7 +24,7 @@ int function FindSlot(actor position)
 				return i
 			endIf
 			i += 1
-		endWhile		
+		endWhile
 	endIf
 	return -1
 endFunction
@@ -33,7 +33,8 @@ function ClearSlot(int slot)
 	if slot >= 0 && slot < ActorSlot.Length
 		actor position = ActorSlot[slot].GetReference() as actor
 		Debug.Trace("SexLab: Clearing ActorSlot["+slot+"] of "+position)
-		ActorSlot[slot].Clear()
+		ActorSlot[slot].TryToClear()
+		ActorSlot[slot].TryToReset()
 		position.EvaluatePackage()
 	endIf
 endFunction

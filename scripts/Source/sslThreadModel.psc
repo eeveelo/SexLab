@@ -55,6 +55,7 @@ sslThreadModel function Make(float timeoutIn = 5.0)
 	timeout = timeoutIn
 	voices = new sslBaseVoice[5]
 	storageslots = new actor[5]
+	ActorSlots = new ReferenceAlias[5]
 	GoToState("Making")
 	RegisterForSingleUpdate(0.01)
 	return self
@@ -371,6 +372,8 @@ endfunction
 
 actor[] property Positions auto hidden 
 actor[] storageslots
+ReferenceAlias[] ActorSlots
+
 actor PlayerRef
 
 actor victim
@@ -394,6 +397,7 @@ float[] loc2
 float[] loc3
 float[] loc4
 
+
 int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice = none, bool forceSilent = false)
 	if !_MakeWait("AddActor")
 		return -1
@@ -408,25 +412,38 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 		return -1
 	endIf
 	waiting = true
-	; Set as victim
-	if isVictim
-		victim = position
+
+
+	int id = -1
+	ReferenceAlias slot = ActorAlias.SlotActor(position, self as sslThreadController)
+	if slot != none
+		; Push actor to positions array
+		Positions = sslUtility.PushActor(position, Positions)
+		id = ActorCount - 1
+		; Save Alias slot
+		ActorSlots[id] = slot
+
+		; Save static storage slot
+		storageslots[id] = position
+		; Set as victim
+		if isVictim
+			victim = position
+		endIf
+		; Check for player
+		if position == SexLab.PlayerRef
+			PlayerRef = position
+		endIf
+		; Find voice or use given voice
+		if voice == none && !forceSilent
+			voice = SexLab.PickVoice(position)
+		endIf
+		(slot as sslActorAlias).Voice = voice
+		; To be removed
+		voices[id] = voice
+	else
+		_Log("Failed to slot actor '"+position.GetName()+"'", "AddActor", "FATAL")
 	endIf
-	; Push actor to positions array
-	Positions = sslUtility.PushActor(position, Positions)
-	int id = ActorCount - 1
-	; Save static storage slot
-	storageslots[id] = position
-	; Check for player
-	if position == SexLab.PlayerRef
-		PlayerRef = position
-	endIf
-	; Find voice or use given voice
-	if voice == none && !forceSilent
-		voice = SexLab.PickVoice(position)
-	endIf
-	voices[id] = voice
-	; Return position index
+
 	waiting = false
 	return id
 endFunction
@@ -551,6 +568,10 @@ bool function HasMoved(actor position)
 	return false
 endFunction
 
+sslActorAlias function GetActorAlias(actor position)
+	return ActorSlots[GetSlot(position)] as sslActorAlias
+endFunction
+
 ;/-----------------------------------------------\;
 ;|	Animation Functions                          |;
 ;\-----------------------------------------------/;
@@ -605,6 +626,7 @@ function DisableLeadIn(bool disableIt = false)
 		leadIn = false
 	endIf
 endFunction
+
 
 ;/-----------------------------------------------\;
 ;|	Storage Functions                            |;
@@ -718,6 +740,8 @@ form[] function GetEquipment(actor position)
 endFunction
 
 function SetVoice(actor position, sslBaseVoice voice)
+	GetActorAlias(position).Voice = voice
+	; To be removed
 	voices[GetSlot(position)] = voice
 endFunction
 
@@ -857,6 +881,9 @@ function InitializeThread()
 	Positions = acDel
 	storageslots = acDel
 	victim = none
+	; Empty alias slots
+	ReferenceAlias[] aaDel
+	ActorSlots = aaDel
 	; Empty Floats
 	float[] fDel
 	centerLoc = fDel
@@ -898,6 +925,7 @@ function InitializeThread()
 	; Clear Forms
 	centerObj = none
 	PlayerRef = none
+
 endFunction
 
 ;/-----------------------------------------------\;

@@ -37,39 +37,7 @@ state Preparing
 		SetAnimation()
 
 		; Setup actors
-		ActorChain("Prepare")
-
-		int i
-		; Perform scaling
-		if ActorCount > 1 && SexLab.Config.bScaleActors
-			; Setup scaling for actors
-			displayScales = sslUtility.FloatArray(ActorCount)
-			bases = sslUtility.FloatArray(ActorCount)
-			scaled = true
-			; Get current scales
-			i = 0
-			while i < ActorCount
-				; Actor size equation: D (display size) = S (SetScale size) * B (base size)
-				; GetScale (papyrus) returns D, SetScale sets S part.
-				; GetScale (console) returns S and D (not S and B as the text implies).
-				displayScales[i] = Positions[i].GetScale()
-				Positions[i].SetScale(1.0)
-				bases[i] = Positions[i].GetScale()
-				Positions[i].SetScale(displayScales[i] / bases[i])
-				i += 1
-			endWhile
-			; Scale actors to D = 1.0
-			i = 0
-			while i < ActorCount
-				Positions[i].SetScale(1.0 / bases[i])
-				; Reset center coords if actor is center object
-				; center actor Z axis likely changed from scaling
-				if Positions[i] == CenterRef
-					CenterOnObject(CenterRef, false)
-				endIf
-				i += 1
-			endWhile
-		endIf
+		ActorChain("Prepare")		
 
 		if IsPlayerPosition(AdjustingPosition) && ActorCount > 1
 			AdjustingPosition = PositionWrap((AdjustingPosition + 1))
@@ -528,90 +496,16 @@ endFunction
 ;\-----------------------------------------------/;
 
 function SetupActor(actor position)
-	if position.IsWeaponDrawn()
-		position.SheatheWeapon()
-	endIf
-	if position.IsInCombat()
-		position.StopCombat()
-	endIf
-
-	position.SetFactionRank(SexLab.AnimatingFaction, 1)
-	ActorAlias.SlotActor(position)
-
-	if IsPlayerActor(position)
-		; Enable hotkeys, if needed
-		if SexLab.Config.bDisablePlayer && IsVictim(position)
-			autoAdvance = true
-		else
-			SexLab._EnableHotkeys(tid)
-		endIf
-		if SexLab.Config.bEnableTCL
-			Debug.ToggleCollisions()
-		endIf
-		Game.ForceThirdPerson()
-		Game.DisablePlayerControls(true, true, false, false, true, false, false, true, 0)
-		Game.SetInChargen(false, true, true)
-		Game.SetPlayerAIDriven()
-	else
-		position.SetRestrained()
-		position.SetDontMove()
-		position.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
-	endIf
-	; Auto strip
-	if Animation.IsSexual()
-		form[] equipment = SexLab.StripSlots(position, GetStrip(position), true)
-		if equipment.Length > 0
-			StoreEquipment(position, equipment)
-		endIf
-		if SexLab.sosEnabled && Animation.GetGender(GetPosition(position)) < 1
-			Debug.SendAnimationEvent(position, "SOSFastErect")
-		endIf
-	endIf
+	sslActorAlias ActorSlot = GetActorAlias(position)
+	ActorSlot.PrepareActor()
 	EquipExtras(position)
 endFunction
 
 function ResetActor(actor position)
-	; Clear alias
-	ActorAlias.ClearActor(position)
-	; Reset scale if needed
-	if scaled
-		int slot = GetSlot(position)
-		position.SetScale(displayScales[slot] / bases[slot])
-	endIf
-	; Clear them out
-	position.RemoveFromFaction(SexLab.AnimatingFaction)
+	sslActorAlias ActorSlot = GetActorAlias(position)
+	ActorSlot.ResetActor()
 	RemoveExtras(position)
-	; Reset openmouth
-	Position.ClearExpressionOverride()
-	; Enable movement
-	if IsPlayerActor(position)
-		SexLab._DisableHotkeys()
-		Game.SetInChargen(false, false, false)
-		Game.SetPlayerAIDriven(false)
-		Game.EnablePlayerControls()
-		SexLab.UpdatePlayerStats(Animation, timer, Positions, GetVictim())
-		if SexLab.Config.bEnableTCL
-			Debug.ToggleCollisions()
-		endIf
-	else
-		position.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
-		position.SetRestrained(false)
-		position.SetDontMove(false)
-	endIf
-	; SOS flaccid
-	if SexLab.sosEnabled && Animation.GetGender(GetPosition(position)) < 1
-		Debug.SendAnimationEvent(position, "SOSFlaccid")
-	endIf
-	if !position.IsDead() && !position.IsBleedingOut()
-		SexLab.UnstripActor(position, GetEquipment(position), GetVictim())
-	endIf
-	; Reset idle
-	if !SexLab.Config.bRagdollEnd
-
-		Debug.SendAnimationEvent(position, "IdleForceDefaultState")
-	else
-		position.PushActorAway(Positions[PositionWrap(GetPosition(position) + 1)], 1)
-	endIf
+	ActorAlias.ClearActor(position)
 endFunction
 
 function SetVFX(actor position)
