@@ -350,6 +350,10 @@ bool[] function GetSilence(int stage)
 	return GetSwitchSlot(stage, 0)
 endFunction
 
+bool function IsSilent(int position, int stage)
+	return AccessSwitch(position, stage, 0)
+endFunction
+
 bool function UseOpenMouth(int position, int stage)
 	return AccessSwitch(position, stage, 1)
 endFunction

@@ -16,8 +16,6 @@ sslThreadController function PrimeThread()
 	endIf
 	stage = 0
 	sfx = new float[2]
-	vfx = new float[10]
-	vfxInstance = new int[5]
 	GotoState("Preparing")
 	return self
 endFunction
@@ -78,9 +76,6 @@ float advanceTimer
 int previousStage
 
 float[] sfx
-float[] vfx
-float vfxStrength
-int[] vfxInstance
 float started
 float timer
 
@@ -95,6 +90,12 @@ state BeginLoop
 		endIf
 		beginLoop = false
 
+		int i = 0
+		while i < ActorCount
+			GetActorAlias(Positions[i]).StartAnimating()
+			i += 1
+		endWhile
+
 		animating = true
 		advance = true
 		GoToState("Advance")
@@ -102,7 +103,6 @@ state BeginLoop
 		; Set the SFX
 		int sfxInstance
 		float sfxVolume = SexLab.Config.fSFXVolume
-		float vfxVolume = SexLab.Config.fVoiceVolume
 
 		started = Utility.GetCurrentRealTime()
 		while animating
@@ -112,25 +112,6 @@ state BeginLoop
 					Sound.SetInstanceVolume(sfxInstance, sfxVolume)
 					sfx[1] = timer
 			endIf
-
-			; Play Voices
-			int i = 0
-			while i < ActorCount
-				actor a = Positions[i]
-				sslBaseVoice voice = GetVoice(a)
-				int vid = GetSlot(a) * 2
-
-				if (timer - vfx[vid + 1]) > vfx[vid] && !silence[i] && voice != none
-					if vfxInstance[i] > 0
-						Sound.StopInstance(vfxInstance[i])
-					endIf
-					vfxInstance[i] = voice.Moan(a, vfxStrength, IsVictim(a))
-					Sound.SetInstanceVolume(vfxInstance[i], vfxVolume)
-					vfx[vid + 1] = timer
-				endIf
-				i += 1
-			endWhile
-
 			timer = Utility.GetCurrentRealTime() - started
 			Utility.Wait(0.4)
 		endWhile
@@ -214,18 +195,10 @@ state Advance
 		if sfx[0] < 1.0
 			sfx[0] = 1.0
 		endIf
-
-		; Stage silence
-		silence = Animation.GetSilence(stage)
-		vfxStrength = (stage as float) / (Animation.StageCount() as float)
-		if Animation.StageCount() == 1 && stage == 1
-			vfxStrength = 0.50		
-		endIf
-
-		; Set VFX
+		; Inform ActorAlias of change
 		int i = 0
 		while i < ActorCount
-			SetVFX(GetActor(i))
+			GetActorAlias(Positions[i]).ChangeStage()
 			i += 1
 		endWhile
 	endEvent
@@ -508,26 +481,6 @@ function ResetActor(actor position)
 	ActorAlias.ClearActor(position)
 endFunction
 
-function SetVFX(actor position)
-	int index = GetSlot(position) * 2
-	; Base Delay
-	if SexLab.GetGender(position) < 1
-		vfx[index] = SexLab.Config.fMaleVoiceDelay + Utility.RandomFloat(-0.5, 0.5)
-	else
-		vfx[index] = SexLab.Config.fFemaleVoiceDelay + Utility.RandomFloat(-0.5, 0.5)
-	endIf
-	; Stage Delay
-	if stage > 1
-		vfx[index] = vfx[index] - (stage * 0.8)
-	endIf
-	; Min 1.3 delay
-	if vfx[index] < 1.3
-		vfx[index] = 1.3
-	endIf
-	; Randomize starting points
-	vfx[index + 1] = Utility.RandomFloat(-0.5, 0.6)
-endFunction
-
 function EquipExtras(actor position)
 	int slot = GetPosition(position)
 	form[] extras = Animation.GetExtras(slot)
@@ -757,8 +710,6 @@ function InitializeThread()
 	; Empty Floats
 	float[] fDel
 	sfx = fDel
-	vfx = fDel
-	vfxStrength = 0.0
 	timer = 0.0
 	started = 0.0
 	advanceTimer = 0.0
@@ -767,7 +718,6 @@ function InitializeThread()
 	silence = bDel
 	; Empty integers
 	int[] iDel
-	vfxInstance = iDel
 	AdjustingPosition = 0
 	previousStage = 0
 	aid = 0
