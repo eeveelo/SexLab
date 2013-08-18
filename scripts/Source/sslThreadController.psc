@@ -20,6 +20,17 @@ sslThreadController function PrimeThread()
 	return self
 endFunction
 
+bool function ActorsReady()
+	int i = 0
+	while i < ActorCount
+		if GetActorAlias(Positions[i]).GetState() != "Ready"
+			return false
+		endIf
+		i += 1
+	endWhile
+	return true
+endFunction
+
 state Preparing
 	event OnBeginState()
 		primed = true
@@ -35,7 +46,13 @@ state Preparing
 		SetAnimation()
 
 		; Setup actors
-		ActorChain("Prepare")		
+		ActorEvent("StartThread")
+
+		; Wait for actors ready, or for 5 seconds to pass
+		float failsafe = Utility.GetCurrentRealTime() + 5.0
+		while !ActorsReady() && failsafe > Utility.GetCurrentRealTime()
+			Utility.Wait(0.5)
+		endWhile
 
 		if IsPlayerPosition(AdjustingPosition) && ActorCount > 1
 			AdjustingPosition = PositionWrap((AdjustingPosition + 1))
@@ -51,16 +68,6 @@ state Preparing
 		GotoState("BeginLoop")
 	endEvent
 endState
-
-event Prepare_Actor(string eventName, string actorSlot, float argNum, form sender)
-	if ValidateThread(eventName)
-		int slot = (actorSlot as int)
-		if slot < ActorCount
-			SetupActor(Positions[slot])
-		endIf
-		linkready[slot] = true
-	endIf
-endEvent
 
 ;/-----------------------------------------------\;
 ;|	Animation Loops                              |;
@@ -250,7 +257,6 @@ state Animating
 		while !advance && animating
 			; Delay loop
 			Utility.Wait(1.0)
-
 			; Auto Advance
 			if autoAdvance && advanceTimer < Utility.GetCurrentRealTime()
 				advance = true
@@ -664,7 +670,7 @@ function EndAnimation(bool quick = false)
 		endIf
 	endIf
 
-	ActorChain("Reset")
+	ActorEvent("EndThread")
 
 	if !quick
 		Utility.Wait(2.0)
@@ -672,16 +678,6 @@ function EndAnimation(bool quick = false)
 
 	UnlockThread()
 endFunction
-
-event Reset_Actor(string eventName, string actorSlot, float argNum, form sender)
-	if ValidateThread(eventName)
-		int slot = (actorSlot as int)
-		if slot < ActorCount
-			ResetActor(Positions[slot])
-		endIf
-		linkready[slot] = true
-	endIf
-endEvent
 
 function InitializeThread()
 	; Clear model
@@ -743,6 +739,14 @@ function ActorChain(string callback)
 		Utility.Wait(0.1)
 	endWhile
 	padlock = false
+endFunction
+
+function ActorEvent(string callback)
+	int i
+	while i < ActorCount
+		GetActorAlias(Positions[i]).ActorEvent(callback, i)
+		i += 1
+	endWhile
 endFunction
 
 bool function ValidateThread(string eventName)

@@ -223,6 +223,28 @@ function ChangeStage()
 	IsSilent = Animation.IsSilent(position, stage)
 endFunction
 
+
+;/-----------------------------------------------\;
+;|	Actor Callbacks                              |;
+;\-----------------------------------------------/;
+
+function ActorEvent(string callback, int position)
+	;Debug.TraceAndBox("Sending Event "+callback+": "+ActorRef)
+	RegisterForModEvent(callback, "On"+callback)
+	SendModEvent(callback)
+endFunction
+
+event OnStartThread(string eventName, string actorSlot, float argNum, form sender)
+	;Debug.TraceAndBox("OnStartThread: "+ActorRef)
+	PrepareActor()
+	UnregisterForModEvent(eventName)
+endEvent
+
+event OnEndThread(string eventName, string actorSlot, float argNum, form sender)
+	ResetActor()
+	UnregisterForModEvent(eventName)
+endEvent
+
 ;/-----------------------------------------------\;
 ;|	Misc Functions                               |;
 ;\-----------------------------------------------/;
