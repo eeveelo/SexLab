@@ -156,7 +156,6 @@ endFunction
 
 state Ready
 	event OnBeginState()
-		debug.traceandbox("READY: "+ActorRef)
 		UnregisterForUpdate()
 	endEvent
 	function StartAnimating()
@@ -164,13 +163,17 @@ state Ready
 		ChangeStage()
 		GoToState("Animating")
 		RegisterForSingleUpdate(Utility.RandomFloat(0.0, 0.8))
-		debug.traceandbox("STARTING: "+ActorRef+" -> "+VoiceDelay)
 	endFunction
 endState
 
 state Animating
 	event OnUpdate()
 		if !Active || ActorRef == none
+			return
+		endIf
+
+		if ActorRef.IsDead() || ActorRef.IsBleedingOut() || !ActorRef.Is3DLoaded()
+			Controller.EndAnimation(true)
 			return
 		endIf
 
@@ -182,8 +185,8 @@ state Animating
 			Sound.SetInstanceVolume(VoiceInstance, Config.fVoiceVolume)
 		endIf
 
+		; Dev Temp
 		debug.trace(ActorRef+" -> "+VoiceDelay)
-
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent
 endState

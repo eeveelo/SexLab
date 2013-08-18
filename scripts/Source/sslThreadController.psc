@@ -248,17 +248,6 @@ state Animating
 
 		advance = false
 		while !advance && animating
-			; Check actors
-			int i = 0
-			while i < actorCount
-				actor a = GetActor(i)
-				if a.IsDead() || a.IsBleedingOut() || !a.Is3DLoaded()
-					EndAnimation(true)
-					return
-				endIf
-				i += 1
-			endWhile
-
 			; Delay loop
 			Utility.Wait(1.0)
 
