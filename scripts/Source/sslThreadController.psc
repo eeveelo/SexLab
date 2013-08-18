@@ -114,8 +114,8 @@ state BeginLoop
 			; Play SFX
 			if sfx[0] <= timer - sfx[1] && sfxType != none
 				sfxInstance = sfxType.Play(Positions[0])
-					Sound.SetInstanceVolume(sfxInstance, sfxVolume)
-					sfx[1] = timer
+				Sound.SetInstanceVolume(sfxInstance, sfxVolume)
+				sfx[1] = timer
 			endIf
 			timer = Utility.GetCurrentRealTime() - started
 			Utility.Wait(0.4)
@@ -315,6 +315,7 @@ function ChangeAnimation(bool backwards = false)
 	i = 0
 	while i < ActorCount
 		;SexLab.StripActor(pos[i], victim)
+		GetPositionAlias(i).ChangeStage(Animation, i, stage)
 		EquipExtras(GetActor(i))
 		i += 1
 	endWhile
@@ -430,7 +431,7 @@ function MoveScene()
 	; Enable Controls
 	MovingScene = true
 	Game.SetPlayerAIDriven(false)
-	Game.EnablePlayerControls()
+	;Game.EnablePlayerControls()
 	Debug.SendAnimationEvent(SexLab.PlayerRef, "IdleForceDefaultState")
 	; Lock hotkeys here for timer
 	SexLab.Data.mMoveScene.Show(6)
@@ -439,7 +440,7 @@ function MoveScene()
 		Utility.Wait(0.8)
 	endWhile
 	; Disable Controls
-	Game.DisablePlayerControls(true, true, true, false, true, false, false, true, 0)
+	;Game.DisablePlayerControls(true, true, true, false, true, false, false, true, 0)
 	Game.SetPlayerAIDriven()
 	; Give player time to settle incase airborne
 	Utility.Wait(1.0)

@@ -164,14 +164,12 @@ function StoreEquipment(form[] equipment)
 	EquipmentStorage = equipment
 endFunction
 
-function ChangeStage()
+
+; TODO: Needs to be integrated with ChangeAnimtion() in contorller, or maybe PlayAnimation() here.
+function ChangeStage(sslBaseAnimation Animation, int position, int stage)
 	if !Active || ActorRef == none
 		return
 	endIf
-
-	sslBaseAnimation Animation = Controller.Animation
-	int stage = Controller.Stage
-	int position = Controller.Positions.Find(ActorRef)
 
 	; Update Strength
 	VoiceStrength = (stage as float) / (Animation.StageCount() as float)
@@ -206,7 +204,7 @@ state Ready
 	endEvent
 	function StartAnimating()
 		Active = true
-		ChangeStage()
+		ChangeStage(Controller.Animation, Controller.Positions.Find(ActorRef), Controller.Stage)
 		GoToState("Animating")
 		RegisterForSingleUpdate(Utility.RandomFloat(0.0, 0.8))
 	endFunction
