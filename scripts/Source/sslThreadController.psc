@@ -21,9 +21,9 @@ sslThreadController function PrimeThread()
 endFunction
 
 bool function ActorsReady()
-	int i = 0
+	int i
 	while i < ActorCount
-		if GetActorAlias(Positions[i]).GetState() != "Ready"
+		if GetPositionAlias(i).GetState() != "Ready"
 			return false
 		endIf
 		i += 1
@@ -97,9 +97,9 @@ state BeginLoop
 		endIf
 		beginLoop = false
 
-		int i = 0
+		int i
 		while i < ActorCount
-			GetActorAlias(Positions[i]).StartAnimating()
+			GetPositionAlias(i).StartAnimating()
 			i += 1
 		endWhile
 
@@ -162,7 +162,7 @@ state Advance
 			SendThreadEvent("LeadInEnd")
 			; Restrip with new strip options
 			if Animation.IsSexual()
-				int i = 0
+				int i
 				while i < ActorCount
 					actor position = GetActor(i)
 					form[] equipment = SexLab.StripSlots(position, GetStrip(position), false)
@@ -203,9 +203,9 @@ state Advance
 			sfx[0] = 1.0
 		endIf
 		; Inform ActorAlias of change
-		int i = 0
+		int i
 		while i < ActorCount
-			GetActorAlias(Positions[i]).ChangeStage()
+			GetPositionAlias(i).ChangeStage()
 			i += 1
 		endWhile
 	endEvent
@@ -305,7 +305,7 @@ function ChangeAnimation(bool backwards = false)
 		aid = animations.Length - 1
 	endIf
 
-	int i = 0
+	int i
 	while i < ActorCount
 		RemoveExtras(GetActor(i))
 		i += 1
@@ -480,7 +480,7 @@ function EquipExtras(actor position)
 	int slot = GetPosition(position)
 	form[] extras = Animation.GetExtras(slot)
 	if extras.Length > 0
-		int i = 0
+		int i
 		while i < extras.Length
 			if extras[i] != none
 				position.EquipItem(extras[i], true, true)
@@ -498,7 +498,7 @@ function RemoveExtras(actor position)
 	int slot = GetPosition(position)
 	form[] extras = Animation.GetExtras(slot)
 	if extras.Length > 0
-		int i = 0
+		int i
 		while i < extras.Length
 			if extras[i] != none
 				position.UnequipItem(extras[i], true, true)
@@ -535,7 +535,7 @@ function MoveActor(int position)
 endFunction
 
 function MoveActors()
-	int i = 0
+	int i
 	while i < actorCount
 		MoveActor(i)
 		i += 1
@@ -582,66 +582,12 @@ function SetAnimation(int anim = -1)
 endFunction
 
 function PlayAnimation()
-	string[] events = Animation.FetchStage(stage)
-	if actorCount == 1
-		Debug.SendAnimationEvent(Positions[0], events[0])
-	elseif actorCount == 2
-		Debug.SendAnimationEvent(Positions[0], events[0])
-		Debug.SendAnimationEvent(Positions[1], events[1])
-	elseif actorCount == 3
-		Debug.SendAnimationEvent(Positions[0], events[0])
-		Debug.SendAnimationEvent(Positions[1], events[1])
-		Debug.SendAnimationEvent(Positions[2], events[2])
-	elseif actorCount == 4
-		Debug.SendAnimationEvent(Positions[0], events[0])
-		Debug.SendAnimationEvent(Positions[1], events[1])
-		Debug.SendAnimationEvent(Positions[2], events[2])
-		Debug.SendAnimationEvent(Positions[3], events[3])
-	elseif actorCount == 5
-		Debug.SendAnimationEvent(Positions[0], events[0])
-		Debug.SendAnimationEvent(Positions[1], events[1])
-		Debug.SendAnimationEvent(Positions[2], events[2])
-		Debug.SendAnimationEvent(Positions[3], events[3])
-		Debug.SendAnimationEvent(Positions[4], events[4])
-	endIf
-
-	bool[] openMouth = Animation.GetSwitchSlot(stage, 1)
-	int[] sos = Animation.GetSchlongSlot(stage)
-	int i = 0
-	while i < actorCount
-		; Open mouth, if needed
-		Positions[i].ClearExpressionOverride()
-		if openMouth[i]
-			Positions[i].SetExpressionOverride(16, 100)
-		endIf
-		; Send SOS event
-		if SexLab.sosEnabled && Animation.GetGender(i) < 1
-			Debug.SendAnimationEvent(Positions[i], "SOSFastErect")
-			Debug.SendAnimationEvent(Positions[i], "SOSBend"+sos[i])
-		endIf
+	int i
+	while i < ActorCount
+		GetPositionAlias(i).PlayAnimation(Animation, i, stage)
 		i += 1
 	endWhile
 endFunction
-
-event Animate_Actor(string eventName, string actorSlot, float argNum, form sender)
-	if animating && ValidateThread(eventName)
-		int slot = (actorSlot as int)
-		if slot < ActorCount
-			; Sex animation
-			Debug.SendAnimationEvent(Positions[slot], Animation.FetchPositionStage(slot, stage))
-			; Open mouth
-			Positions[slot].ClearExpressionOverride()
-			if Animation.UseOpenMouth(slot, stage)
-				Positions[slot].SetExpressionOverride(16, 100)
-			endIf
-			; Schlongs of Skyrim integration
-			if SexLab.sosEnabled && Animation.GetGender(slot) < 1
-				Debug.SendAnimationEvent(Positions[slot], "SOSBend"+Animation.GetSchlong(slot, stage))
-			endIf
-		endIf
-		linkready[slot] = true
-	endIf
-endEvent
 
 ;/-----------------------------------------------\;
 ;|	Ending Functions                             |;
@@ -657,7 +603,7 @@ function EndAnimation(bool quick = false)
 	animating = false
 	SendThreadEvent("AnimationEnd")
 
-	int i = 0
+	int i
 
 	; Apply cum
 	if !quick && Animation.IsSexual() && SexLab.Config.bUseCum
@@ -744,7 +690,7 @@ endFunction
 function ActorEvent(string callback)
 	int i
 	while i < ActorCount
-		GetActorAlias(Positions[i]).ActorEvent(callback, i)
+		GetPositionAlias(i).ActorEvent(callback, i)
 		i += 1
 	endWhile
 endFunction

@@ -568,6 +568,10 @@ bool function HasMoved(actor position)
 	return false
 endFunction
 
+sslActorAlias function GetPositionAlias(int position)
+	return ActorSlots[position] as sslActorAlias
+endFunction
+
 sslActorAlias function GetActorAlias(actor position)
 	return ActorSlots[GetSlot(position)] as sslActorAlias
 endFunction

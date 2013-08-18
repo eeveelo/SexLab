@@ -122,6 +122,21 @@ function ResetActor()
 	endIf
 endFunction
 
+function PlayAnimation(sslBaseAnimation Animation, int position, int stage)
+	; Play Idle
+	Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(position, stage))
+	; Open Mouth
+	if Animation.UseOpenMouth(position, stage)
+		ActorRef.SetExpressionOverride(16, 100)
+	else
+		ActorRef.ClearExpressionOverride()
+	endIf
+	; Send SOS event
+	if SexLab.sosEnabled && Animation.GetGender(position) < 1
+		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Animation.GetSchlong(position, stage))
+	endif
+endfunction
+
 function SetAlias(sslThreadController ThreadView)
 	_Init()
 	TryToStopCombat()
@@ -149,6 +164,37 @@ function StoreEquipment(form[] equipment)
 	EquipmentStorage = equipment
 endFunction
 
+function ChangeStage()
+	if !Active || ActorRef == none
+		return
+	endIf
+
+	sslBaseAnimation Animation = Controller.Animation
+	int stage = Controller.Stage
+	int position = Controller.Positions.Find(ActorRef)
+
+	; Update Strength
+	VoiceStrength = (stage as float) / (Animation.StageCount() as float)
+	if Animation.StageCount() == 1 && stage == 1
+		VoiceStrength = 0.50
+	endIf
+	; Base Delay
+	if SexLab.GetGender(ActorRef) < 1
+		VoiceDelay = Config.fMaleVoiceDelay
+	else
+		VoiceDelay = Config.fFemaleVoiceDelay
+	endIf
+	; Stage Delay
+	if stage > 1
+		VoiceDelay = (VoiceDelay - (stage * 0.8)) + Utility.RandomFloat(-0.3, 0.3)
+	endIf
+	; Min 1.3 delay
+	if VoiceDelay < 1.3
+		VoiceDelay = 1.3
+	endIf
+	; Update Silence
+	IsSilent = Animation.IsSilent(position, stage)
+endFunction
 
 ;/-----------------------------------------------\;
 ;|	Animation/Voice Loop                         |;
@@ -190,39 +236,6 @@ state Animating
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent
 endState
-
-function ChangeStage()
-	if !Active || ActorRef == none
-		return
-	endIf
-
-	sslBaseAnimation Animation = Controller.Animation
-	int stage = Controller.Stage
-	int position = Controller.Positions.Find(ActorRef)
-
-	; Update Strength
-	VoiceStrength = (stage as float) / (Animation.StageCount() as float)
-	if Animation.StageCount() == 1 && stage == 1
-		VoiceStrength = 0.50
-	endIf
-	; Base Delay
-	if SexLab.GetGender(ActorRef) < 1
-		VoiceDelay = Config.fMaleVoiceDelay
-	else
-		VoiceDelay = Config.fFemaleVoiceDelay
-	endIf
-	; Stage Delay
-	if stage > 1
-		VoiceDelay = (VoiceDelay - (stage * 0.8)) + Utility.RandomFloat(-0.3, 0.3)
-	endIf
-	; Min 1.3 delay
-	if VoiceDelay < 1.3
-		VoiceDelay = 1.3
-	endIf
-	; Update Silence
-	IsSilent = Animation.IsSilent(position, stage)
-endFunction
-
 
 ;/-----------------------------------------------\;
 ;|	Actor Callbacks                              |;
