@@ -7,8 +7,6 @@ scriptname sslThreadController extends sslThreadModel
 
 bool primed
 bool scaled
-float[] displayScales
-float[] bases
 
 sslThreadController function PrimeThread()
 	if GetState() != "Making"
@@ -34,7 +32,7 @@ endFunction
 state Preparing
 	event OnBeginState()
 		primed = true
-		RegisterForSingleUpdate(0.01)
+		RegisterForSingleUpdate(0.15)
 	endEvent
 	event OnUpdate()
 		if !primed
@@ -89,7 +87,7 @@ float timer
 state BeginLoop
 	event OnBeginState()
 		beginLoop = true
-		RegisterForSingleUpdate(0.01)
+		RegisterForSingleUpdate(0.15)
 	endEvent
 	event OnUpdate()
 		if !beginLoop
@@ -128,7 +126,7 @@ endState
 state Advance
 	event OnBeginState()
 		if advance == true
-			RegisterForSingleUpdate(0.01)
+			RegisterForSingleUpdate(0.15)
 		else
 			EndAnimation(true)
 		endIf
@@ -205,7 +203,7 @@ state Advance
 		; Inform ActorAlias of change
 		int i
 		while i < ActorCount
-			GetPositionAlias(i).ChangeStage()
+			GetPositionAlias(i).ChangeStage(Animation, i, stage)
 			i += 1
 		endWhile
 	endEvent
@@ -215,7 +213,7 @@ state Animating
 	event OnBeginState()
 		if animating
 			beginStage = true
-			RegisterForSingleUpdate(0.01)
+			RegisterForSingleUpdate(0.15)
 		endIf
 	endEvent
 
