@@ -106,6 +106,8 @@ function ResetActor()
 		ActorRef.SetDontMove(false)
 		ActorRef.SetRestrained(false)
 	endIf
+	; Remove from animation faction
+	ActorRef.RemoveFromFaction(SexLab.AnimatingFaction)
 	; Make flaccid
 	if SexLab.sosEnabled && Controller.Animation.GetGender(Controller.GetPosition(ActorRef)) < 1
 		Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
@@ -229,8 +231,6 @@ state Animating
 			Sound.SetInstanceVolume(VoiceInstance, Config.fVoiceVolume)
 		endIf
 
-		; Dev Temp
-		debug.trace(ActorRef+" -> "+VoiceDelay)
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent
 endState
