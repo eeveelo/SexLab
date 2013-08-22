@@ -113,27 +113,7 @@ int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim 
 endFunction
 
 int function ValidateActor(actor a)
-	if a.IsInFaction(AnimatingFaction)
-		_DebugTrace("ValidateActor","actor="+a,"Failed to start animation; actor appears to already be in an animation")
-		return -10
-	endIf
-	if a.IsDead()
-		_DebugTrace("ValidateActor","actor="+a,"Failed to start animation; actor is dead")
-		return -11
-	endIf
-	if a.IsDisabled()
-		_DebugTrace("ValidateActor","actor="+a,"Failed to start animation; actor is disabled")
-		return -12
-	endIf
-	if a.IsChild() || a.GetLeveledActorBase().GetRace().IsRaceFlagSet(0x00000004)
-		_DebugTrace("ValidateActor","actor="+a,"Failed to start animation; actor is child")
-		return -13
-	endIf
-	if a.HasKeyWordString("ActorTypeCreature") || a.HasKeyWordString("ActorTypeDwarven")
-		_DebugTrace("ValidateActor","actor="+a,"Failed to start animation; actor is a creature or Dwemer that is currently not supported")
-		return -14
-	endIf
-	return 1
+	return ActorSlots.ValidateActor(a)
 endFunction
 
 actor[] function SortActors(actor[] actorList, bool femaleFirst = true)

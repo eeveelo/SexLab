@@ -404,15 +404,8 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 	elseIf ActorCount >= 5
 		_Log("No available actor positions", "AddActor")
 		return -1
-	elseIf SexLab.ValidateActor(position) < 1
-		_Log("Actor has failed validation", "AddActor", "FATAL")
-		return -1
-	elseIf SexLab.FindActorController(position) != -1
-		_Log("Actor already claimed by a pending thread", "AddActor", "FATAL")
-		return -1
 	endIf
 	waiting = true
-
 
 	int id = -1
 	ReferenceAlias slot = ActorAlias.SlotActor(position, self as sslThreadController)
