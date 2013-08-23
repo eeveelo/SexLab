@@ -659,32 +659,8 @@ function InitializeThread()
 endFunction
 
 ;/-----------------------------------------------\;
-;|	Chain Events                                 |;
+;|	Actor Events                                 |;
 ;\-----------------------------------------------/;
-
-bool padlock
-bool[] linkready
-
-function ActorChain(string callback)
-	while padlock
-		Utility.Wait(0.1)
-	endWhile
-	padlock = true
-	linkready = new bool[5]
-	string ChainLinkActor = "ChainLinkActor"+tid
-	RegisterForModEvent(ChainLinkActor, callback+"_Actor")
-	int i
-	while i < 5
-		SendModEvent(ChainLinkActor, (i as string), 1)
-		i += 1
-	endWhile
-	UnregisterForModEvent(ChainLinkActor)
-	; Wait for ready signals from all chain links
-	while !linkready[0] || !linkready[1] || !linkready[2] || !linkready[3] || !linkready[4]
-		Utility.Wait(0.1)
-	endWhile
-	padlock = false
-endFunction
 
 function ActorEvent(string callback)
 	int i
@@ -692,10 +668,6 @@ function ActorEvent(string callback)
 		GetPositionAlias(i).ActorEvent(callback, i)
 		i += 1
 	endWhile
-endFunction
-
-bool function ValidateThread(string eventName)
-	return eventName == "ChainLinkActor"+tid
 endFunction
 
 ;/-----------------------------------------------\;
