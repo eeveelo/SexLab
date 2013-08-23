@@ -44,7 +44,7 @@ state Preparing
 		SetAnimation()
 
 		; Setup actors
-		ActorEvent("StartThread")
+		SendActorEvent("StartThread")
 
 		; Wait for actors ready, or for 5 seconds to pass
 		float failsafe = Utility.GetCurrentRealTime() + 5.0
@@ -607,23 +607,24 @@ function EndAnimation(bool quick = false)
 	animating = false
 	SendThreadEvent("AnimationEnd")
 
-	int i
-
-	; Apply cum
-	if !quick && Animation.IsSexual() && SexLab.Config.bUseCum
-		int[] genders = SexLab.GenderCount(positions)
-		if genders[0] > 0 || SexLab.Config.bAllowFFCum
-			while i < ActorCount
-				SexLab.ApplyCum(Positions[i], Animation.GetCum(i))
-				i += 1
-			endWhile
-		endIf
-	endIf
-
-	ActorEvent("EndThread")
-
 	if !quick
+		; Apply Cum
+		if Animation.IsSexual() && SexLab.Config.bUseCum
+			int[] genders = SexLab.GenderCount(positions)
+			if genders[0] > 0 || SexLab.Config.bAllowFFCum
+				int i
+				while i < ActorCount
+					SexLab.ApplyCum(Positions[i], Animation.GetCum(i))
+					i += 1
+				endWhile
+			endIf
+		endIf
+		; Reset Actor & Clear Alias
+		SendActorEvent("EndThread")
 		Utility.Wait(2.0)
+	else
+		; Reset Actor & Clear Alias (Quickly)
+		SendActorEvent("QuickEndThread")
 	endIf
 
 	UnlockThread()
@@ -667,7 +668,7 @@ endFunction
 ;|	Chain Events                                 |;
 ;\-----------------------------------------------/;
 
-function ActorEvent(string callback)
+function SendActorEvent(string callback)
 	int i
 	while i < ActorCount
 		GetPositionAlias(i).ActorEvent(callback)

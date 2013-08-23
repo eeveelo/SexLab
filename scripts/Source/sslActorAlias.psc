@@ -119,18 +119,6 @@ function ResetActor()
 	if !ActorRef.IsDead() && !ActorRef.IsBleedingOut()
 		SexLab.UnstripActor(ActorRef, EquipmentStorage, Controller.GetVictim())
 	endIf
-	; Reset Idle
-	if !Config.bRagdollEnd
-		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
-	else
-		ActorRef.PushActorAway(ActorRef, 1)
-	endIf
-
-	Debug.Trace("SexLab: Clearing Actor Slot '"+GetName()+"'' of "+ActorRef)
-	TryToClear()
-	TryToReset()
-	ActorRef.EvaluatePackage()
-	_Init()
 endFunction
 
 function PlayAnimation()
@@ -147,13 +135,34 @@ function PlayAnimation()
 	endif
 endfunction
 
+function StopAnimating(bool quick = false)
+	; Reset Idle
+	if quick
+		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
+	else
+		ActorRef.PushActorAway(ActorRef, 1)
+	endIf
+endFunction
+
 function SetAlias(sslThreadController ThreadView)
-	_Init()
-	TryToStopCombat()
-	ActorRef = GetReference() as actor
-	Controller = ThreadView
-	IsPlayer = ActorRef == SexLab.PlayerRef
-	IsVictim = ActorRef == ThreadView.GetVictim()
+	if GetReference() != none
+		_Init()
+		TryToStopCombat()
+		ActorRef = GetReference() as actor
+		Controller = ThreadView
+		IsPlayer = ActorRef == SexLab.PlayerRef
+		IsVictim = ActorRef == ThreadView.GetVictim()
+	endIf
+endFunction
+
+function ClearAlias()
+	if GetReference() != none
+		Debug.Trace("SexLab: Clearing Actor Slot '"+GetName()+"'' of "+ActorRef)
+		TryToClear()
+		TryToReset()
+		ActorRef.EvaluatePackage()
+		_Init()
+	endIf
 endFunction
 
 ;/-----------------------------------------------\;
@@ -164,8 +173,6 @@ function StoreEquipment(form[] equipment)
 	if equipment.Length < 1
 		return
 	endIf
-	Debug.Trace(GetName()+" Current Storage: "+EquipmentStorage)
-	Debug.Trace(GetName()+" Storing: "+ equipment)
 	; Addon existing storage
 	int i
 	while i < EquipmentStorage.Length
@@ -174,7 +181,6 @@ function StoreEquipment(form[] equipment)
 	endWhile
 	; Save new storage
 	EquipmentStorage = equipment
-	Debug.Trace(GetName()+" New Storage: "+EquipmentStorage)
 endFunction
 
 function ThreadAnimation(sslBaseAnimation toAnimation)
@@ -195,7 +201,6 @@ function ThreadPosition(int toPosition)
 	position = toPosition
 endFunction
 
-; TODO: Needs to be integrated with ChangeAnimtion() in contorller, or maybe PlayAnimation() here.
 function ThreadStage(int toStage)
 	if !Active || ActorRef == none
 		return
@@ -203,27 +208,30 @@ function ThreadStage(int toStage)
 	
 	stage = toStage
 
-	; Update Strength
-	VoiceStrength = (stage as float) / (Animation.StageCount() as float)
-	if Animation.StageCount() == 1 && stage == 1
-		VoiceStrength = 0.50
-	endIf
-	; Base Delay
-	if SexLab.GetGender(ActorRef) < 1
-		VoiceDelay = Config.fMaleVoiceDelay
-	else
-		VoiceDelay = Config.fFemaleVoiceDelay
-	endIf
-	; Stage Delay
-	if stage > 1
-		VoiceDelay = (VoiceDelay - (stage * 0.8)) + Utility.RandomFloat(-0.3, 0.3)
-	endIf
-	; Min 1.3 delay
-	if VoiceDelay < 1.3
-		VoiceDelay = 1.3
-	endIf
 	; Update Silence
 	IsSilent = Animation.IsSilent(position, stage)
+
+	if !IsSilent
+		; Update Strength
+		VoiceStrength = (stage as float) / (Animation.StageCount() as float)
+		if Animation.StageCount() == 1 && stage == 1
+			VoiceStrength = 0.50
+		endIf
+		; Base Delay
+		if SexLab.GetGender(ActorRef) < 1
+			VoiceDelay = Config.fMaleVoiceDelay
+		else
+			VoiceDelay = Config.fFemaleVoiceDelay
+		endIf
+		; Stage Delay
+		if stage > 1
+			VoiceDelay = (VoiceDelay - (stage * 0.8)) + Utility.RandomFloat(-0.3, 0.3)
+		endIf
+		; Min 1.3 delay
+		if VoiceDelay < 1.3
+			VoiceDelay = 1.3
+		endIf
+	endIf
 endFunction
 
 ;/-----------------------------------------------\;
@@ -275,17 +283,26 @@ function ActorEvent(string callback)
 	;Debug.TraceAndBox("Sending Event "+callback+": "+ActorRef)
 	RegisterForModEvent(callback, "On"+callback)
 	SendModEvent(callback)
+	UnregisterForModEvent("On"+callback)
 endFunction
 
 event OnStartThread(string eventName, string actorSlot, float argNum, form sender)
 	;Debug.TraceAndBox("OnStartThread: "+ActorRef)
 	PrepareActor()
-	UnregisterForModEvent(eventName)
 endEvent
 
 event OnEndThread(string eventName, string actorSlot, float argNum, form sender)
 	ResetActor()
-	UnregisterForModEvent(eventName)
+	StopAnimating(!Config.bRagDollEnd)
+	Utility.Wait(3.0)
+	ClearAlias()
+endEvent
+
+event OnQuickEndThread(string eventName, string actorSlot, float argNum, form sender)
+	ResetActor()
+	StopAnimating(true)
+	Utility.Wait(3.0)
+	ClearAlias()
 endEvent
 
 ;/-----------------------------------------------\;
