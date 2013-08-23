@@ -162,11 +162,9 @@ state Advance
 			if Animation.IsSexual()
 				int i
 				while i < ActorCount
-					actor position = GetActor(i)
+					actor position = Positions[i]
 					form[] equipment = SexLab.StripSlots(position, GetStrip(position), false)
-					if equipment.Length > 0
-						StoreEquipment(position, equipment)
-					endIf
+					GetActorAlias(position).StoreEquipment(equipment)
 					i += 1
 				endWhile
 			endIf

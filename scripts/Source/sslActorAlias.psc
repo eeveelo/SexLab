@@ -134,15 +134,12 @@ function ResetActor()
 endFunction
 
 function PlayAnimation()
-	Animation = Animation
-
 	; Play Idle
 	Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(position, stage))
 	; Open Mouth
+	ActorRef.ClearExpressionOverride()
 	if Animation.UseOpenMouth(position, stage)
 		ActorRef.SetExpressionOverride(16, 100)
-	else
-		ActorRef.ClearExpressionOverride()
 	endIf
 	; Send SOS event
 	if SexLab.sosEnabled && Animation.GetGender(position) < 1
@@ -167,6 +164,8 @@ function StoreEquipment(form[] equipment)
 	if equipment.Length < 1
 		return
 	endIf
+	Debug.Trace(GetName()+" Current Storage: "+EquipmentStorage)
+	Debug.Trace(GetName()+" Storing: "+ equipment)
 	; Addon existing storage
 	int i
 	while i < EquipmentStorage.Length
@@ -175,6 +174,7 @@ function StoreEquipment(form[] equipment)
 	endWhile
 	; Save new storage
 	EquipmentStorage = equipment
+	Debug.Trace(GetName()+" New Storage: "+EquipmentStorage)
 endFunction
 
 function ThreadAnimation(sslBaseAnimation toAnimation)
@@ -303,7 +303,7 @@ function _Init()
 endFunction
 
 event OnPackageStart(package newPackage)
-	Debug.Trace("Evaluated "+GetActorRef()+"'s package to "+newPackage)
+	Debug.Trace(GetName()+" evaluated "+GetActorRef()+"'s package to "+newPackage)
 endEvent
 
 function StartAnimating()
