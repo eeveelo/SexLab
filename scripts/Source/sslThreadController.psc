@@ -203,7 +203,7 @@ state Advance
 		; Inform ActorAlias of change
 		int i
 		while i < ActorCount
-			GetPositionAlias(i).ChangeStage(Animation, i, stage)
+			GetPositionAlias(i).ThreadStage(stage)
 			i += 1
 		endWhile
 	endEvent
@@ -315,7 +315,10 @@ function ChangeAnimation(bool backwards = false)
 	i = 0
 	while i < ActorCount
 		;SexLab.StripActor(pos[i], victim)
-		GetPositionAlias(i).ChangeStage(Animation, i, stage)
+		sslActorAlias Slot = GetPositionAlias(i)
+		Slot.ThreadAnimation(Animation)
+		Slot.ThreadPosition(i)
+		Slot.ThreadStage(Stage)
 		EquipExtras(GetActor(i))
 		i += 1
 	endWhile
@@ -565,7 +568,7 @@ function SetAnimation(int anim = -1)
 		aid = utility.RandomInt(0, animations.Length - 1)
 	endIf
 	animationCurrent = animations[aid]
-	silence = Animation.GetSilence(stage)
+
 	if Animation.GetSFX() == 1 ; Squishing
 		sfxType = SexLab.Data.sfxSquishing01
 	elseIf Animation.GetSFX() == 2 ; Sucking
@@ -575,15 +578,19 @@ function SetAnimation(int anim = -1)
 	else
 		sfxType = none
 	endIf
-	if HasPlayer() && animating
-		Debug.Notification(Animation.name)
-	endIf
+
+	int i = 0
+	while i < ActorCount
+		GetPositionAlias(i).ThreadAnimation(animationCurrent)
+		i += 1
+	endWhile
+
 endFunction
 
 function PlayAnimation()
 	int i
 	while i < ActorCount
-		GetPositionAlias(i).PlayAnimation(Animation, i, stage)
+		GetPositionAlias(i).PlayAnimation()
 		i += 1
 	endWhile
 endFunction
@@ -659,16 +666,17 @@ function InitializeThread()
 endFunction
 
 ;/-----------------------------------------------\;
-;|	Actor Events                                 |;
+;|	Chain Events                                 |;
 ;\-----------------------------------------------/;
 
 function ActorEvent(string callback)
 	int i
 	while i < ActorCount
-		GetPositionAlias(i).ActorEvent(callback, i)
+		GetPositionAlias(i).ActorEvent(callback)
 		i += 1
 	endWhile
 endFunction
+
 
 ;/-----------------------------------------------\;
 ;|	API Functions                                |;

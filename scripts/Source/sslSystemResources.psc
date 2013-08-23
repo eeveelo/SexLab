@@ -44,6 +44,7 @@ Static property LocationMarker auto
 ActorBase property SexLabStager auto
 Keyword property SexLabForbid auto
 Keyword property SexLabNoStrip auto
+Keyword property SexLabActive auto
 Weapon property DummyWeapon auto
 ;
 ; Player Stats

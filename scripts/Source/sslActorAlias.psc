@@ -22,6 +22,9 @@ bool IsScaled
 
 float Scale
 
+sslBaseAnimation Animation
+int position
+int stage
 
 form[] EquipmentStorage
 
@@ -122,9 +125,17 @@ function ResetActor()
 	else
 		ActorRef.PushActorAway(ActorRef, 1)
 	endIf
+
+	Debug.Trace("SexLab: Clearing Actor Slot '"+GetName()+"'' of "+ActorRef)
+	TryToClear()
+	TryToReset()
+	ActorRef.EvaluatePackage()
+	_Init()
 endFunction
 
-function PlayAnimation(sslBaseAnimation Animation, int position, int stage)
+function PlayAnimation()
+	Animation = Animation
+
 	; Play Idle
 	Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(position, stage))
 	; Open Mouth
@@ -166,12 +177,31 @@ function StoreEquipment(form[] equipment)
 	EquipmentStorage = equipment
 endFunction
 
-
-; TODO: Needs to be integrated with ChangeAnimtion() in contorller, or maybe PlayAnimation() here.
-function ChangeStage(sslBaseAnimation Animation, int position, int stage)
+function ThreadAnimation(sslBaseAnimation toAnimation)
 	if !Active || ActorRef == none
 		return
 	endIf
+	Animation = toAnimation
+
+	if IsPlayer
+		Debug.Notification(Animation.name)
+	endIf
+endFunction
+
+function ThreadPosition(int toPosition)
+	if !Active || ActorRef == none
+		return
+	endIf
+	position = toPosition
+endFunction
+
+; TODO: Needs to be integrated with ChangeAnimtion() in contorller, or maybe PlayAnimation() here.
+function ThreadStage(int toStage)
+	if !Active || ActorRef == none
+		return
+	endIf
+	
+	stage = toStage
 
 	; Update Strength
 	VoiceStrength = (stage as float) / (Animation.StageCount() as float)
@@ -206,7 +236,9 @@ state Ready
 	endEvent
 	function StartAnimating()
 		Active = true
-		ChangeStage(Controller.Animation, Controller.Positions.Find(ActorRef), Controller.Stage)
+		ThreadAnimation(Controller.Animation)
+		ThreadPosition(Controller.Positions.Find(ActorRef))
+		ThreadStage(Controller.Stage)
 		GoToState("Animating")
 		RegisterForSingleUpdate(Utility.RandomFloat(0.0, 0.8))
 	endFunction
@@ -239,7 +271,7 @@ endState
 ;|	Actor Callbacks                              |;
 ;\-----------------------------------------------/;
 
-function ActorEvent(string callback, int position)
+function ActorEvent(string callback)
 	;Debug.TraceAndBox("Sending Event "+callback+": "+ActorRef)
 	RegisterForModEvent(callback, "On"+callback)
 	SendModEvent(callback)
@@ -264,9 +296,8 @@ function _Init()
 	ActorRef = none
 	Controller = none
 	Voice = none
-
+	Animation = none
 	IsScaled = false
-
 	form[] formDel
 	EquipmentStorage = formDel
 endFunction

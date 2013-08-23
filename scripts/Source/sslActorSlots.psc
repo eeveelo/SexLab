@@ -2,10 +2,9 @@ scriptname sslActorSlots extends Quest
 
 ReferenceAlias[] ActorSlot
 
-
 int function ValidateActor(actor position)
 
-	if position.HasKeyWordString("SexLabActive")
+	if FindSlot(position) != -1
 		Debug.TraceAndBox("Failed to add actor to animation; actor appears to already be animating")
 		return -10
 	endIf
@@ -78,6 +77,7 @@ int function FindSlot(actor position)
 endFunction
 
 function ClearSlot(int slot)
+	debug.traceandbox("ClearSlot("+slot+")")
 	if slot >= 0 && slot < ActorSlot.Length
 		actor position = ActorSlot[slot].GetReference() as actor
 		Debug.Trace("SexLab: Clearing ActorSlot["+slot+"] of "+position)
@@ -88,7 +88,9 @@ function ClearSlot(int slot)
 endFunction
 
 function ClearActor(actor position)
+
 	int slot = FindSlot(position)
+	debug.traceandbox("ClearActor("+position+") -> "+slot)
 	if slot != -1
 		ClearSlot(slot)
 	endIf
