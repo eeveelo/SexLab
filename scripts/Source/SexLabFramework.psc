@@ -295,7 +295,7 @@ form function EquipStrapon(actor a)
 
 	if GetGender(a) == 1
 		int sid = utility.RandomInt(0, straponCount - 1)
-		a.EquipItem(Data.strapons[sid], true, true)
+		a.EquipItem(Data.strapons[sid], false, true)
 		return Data.strapons[sid]
 	else
 		_DebugTrace("EquipStrapon","actor="+a+"","Is male and cannot use strapons")
@@ -314,7 +314,7 @@ function UnequipStrapon(actor a)
 		while i < straponCount
 			Form strapon = Data.strapons[i]
 			if a.IsEquipped(strapon)
-				a.UnequipItem(strapon, true, true)
+				a.UnequipItem(strapon, false, true)
 				a.RemoveItem(strapon, 1, true)
 			endIf
 			i += 1

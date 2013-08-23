@@ -92,6 +92,9 @@ function ResetActor()
 	if IsScaled
 		ActorRef.SetScale(Scale)
 	endIf
+	; Remove from animation faction
+	ActorRef.RemoveFromFaction(SexLab.AnimatingFaction)
+	RemoveExtras()
 	; Reset openmouth
 	ActorRef.ClearExpressionOverride()
 	; Enable movement
@@ -109,8 +112,7 @@ function ResetActor()
 		ActorRef.SetDontMove(false)
 		ActorRef.SetRestrained(false)
 	endIf
-	; Remove from animation faction
-	ActorRef.RemoveFromFaction(SexLab.AnimatingFaction)
+	
 	; Make flaccid
 	if SexLab.sosEnabled && Controller.Animation.GetGender(Controller.GetPosition(ActorRef)) < 1
 		Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
@@ -142,6 +144,47 @@ function StopAnimating(bool quick = false)
 	else
 		ActorRef.PushActorAway(ActorRef, 1)
 	endIf
+endFunction
+
+function EquipExtras()
+	if Animation == none
+		return
+	endIf
+	
+	form[] extras = Animation.GetExtras(position)
+	if extras.Length > 0
+		int i
+		while i < extras.Length
+			if extras[i] != none
+				ActorRef.EquipItem(extras[i], false, true)
+			endIf
+			i += 1
+		endWhile
+	endIf
+	; Strapons are enabled for this position, and they are female in a male position
+	if Animation.GetGender(position) == 0 && Config.bUseStrapons && Animation.UseStrapon(position, stage)
+		SexLab.EquipStrapon(ActorRef)
+	endIf
+endFunction
+
+function RemoveExtras()
+	if Animation == none
+		return
+	endIf
+
+	form[] extras = Animation.GetExtras(position)
+	if extras.Length > 0
+		int i
+		while i < extras.Length
+			if extras[i] != none
+				ActorRef.UnequipItem(extras[i], false, true)
+				ActorRef.RemoveItem(extras[i], 1, true)
+			endIf
+			i += 1
+		endWhile
+	endIf
+	; Strapons are enabled for this position, and they are female in a male position
+	SexLab.UnequipStrapon(ActorRef)
 endFunction
 
 function SetAlias(sslThreadController ThreadView)
@@ -187,7 +230,12 @@ function ThreadAnimation(sslBaseAnimation toAnimation)
 	if !Active || ActorRef == none
 		return
 	endIf
+
+	RemoveExtras()
+
 	Animation = toAnimation
+
+	EquipExtras()
 
 	if IsPlayer
 		Debug.Notification(Animation.name)

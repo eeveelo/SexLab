@@ -55,7 +55,7 @@ sslThreadModel function Make(float timeoutIn = 5.0)
 	timeout = timeoutIn
 	voices = new sslBaseVoice[5]
 	storageslots = new actor[5]
-	ActorSlots = new ReferenceAlias[5]
+	ActorSlots = new sslActorAlias[5]
 	GoToState("Making")
 	RegisterForSingleUpdate(0.01)
 	return self
@@ -372,7 +372,7 @@ endfunction
 
 actor[] property Positions auto hidden 
 actor[] storageslots
-ReferenceAlias[] ActorSlots
+sslActorAlias[] property ActorSlots auto hidden
 
 actor PlayerRef
 
@@ -404,18 +404,20 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 	elseIf ActorCount >= 5
 		_Log("No available actor positions", "AddActor")
 		return -1
+	elseif Positions.Find(position) != -1
+		_Log("Duplicate actor", "AddActor")
+		return -1
 	endIf
 	waiting = true
 
 	int id = -1
-	ReferenceAlias slot = ActorAlias.SlotActor(position, self as sslThreadController)
+	sslActorAlias slot = ActorAlias.SlotActor(position, self as sslThreadController) as sslActorAlias
 	if slot != none
 		; Push actor to positions array
 		Positions = sslUtility.PushActor(position, Positions)
 		id = ActorCount - 1
 		; Save Alias slot
 		ActorSlots[id] = slot
-
 		; Save static storage slot
 		storageslots[id] = position
 		; Set as victim
@@ -430,9 +432,7 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 		if voice == none && !forceSilent
 			voice = SexLab.PickVoice(position)
 		endIf
-		(slot as sslActorAlias).Voice = voice
-		; To be removed
-		voices[id] = voice
+		slot.Voice = voice
 	else
 		_Log("Failed to slot actor '"+position.GetName()+"'", "AddActor", "FATAL")
 	endIf
@@ -561,12 +561,8 @@ bool function HasMoved(actor position)
 	return false
 endFunction
 
-sslActorAlias function GetPositionAlias(int position)
-	return ActorSlots[position] as sslActorAlias
-endFunction
-
 sslActorAlias function GetActorAlias(actor position)
-	return ActorSlots[GetSlot(position)] as sslActorAlias
+	return ActorSlots[GetSlot(position)]
 endFunction
 
 ;/-----------------------------------------------\;
@@ -879,7 +875,7 @@ function InitializeThread()
 	storageslots = acDel
 	victim = none
 	; Empty alias slots
-	ReferenceAlias[] aaDel
+	sslActorAlias[] aaDel
 	ActorSlots = aaDel
 	; Empty Floats
 	float[] fDel

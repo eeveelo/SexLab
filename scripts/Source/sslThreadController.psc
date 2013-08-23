@@ -21,7 +21,7 @@ endFunction
 bool function ActorsReady()
 	int i
 	while i < ActorCount
-		if GetPositionAlias(i).GetState() != "Ready"
+		if ActorSlots[i].GetState() != "Ready"
 			return false
 		endIf
 		i += 1
@@ -97,7 +97,7 @@ state BeginLoop
 
 		int i
 		while i < ActorCount
-			GetPositionAlias(i).StartAnimating()
+			ActorSlots[i].StartAnimating()
 			i += 1
 		endWhile
 
@@ -162,9 +162,8 @@ state Advance
 			if Animation.IsSexual()
 				int i
 				while i < ActorCount
-					actor position = Positions[i]
-					form[] equipment = SexLab.StripSlots(position, GetStrip(position), false)
-					GetActorAlias(position).StoreEquipment(equipment)
+					form[] equipment = SexLab.StripSlots(Positions[i], GetStrip(Positions[i]), false)
+					ActorSlots[i].StoreEquipment(equipment)
 					i += 1
 				endWhile
 			endIf
@@ -201,7 +200,7 @@ state Advance
 		; Inform ActorAlias of change
 		int i
 		while i < ActorCount
-			GetPositionAlias(i).ThreadStage(stage)
+			ActorSlots[i].ThreadStage(stage)
 			i += 1
 		endWhile
 	endEvent
@@ -278,6 +277,9 @@ int AdjustingPosition
 bool MovingScene
 
 function AdvanceStage(bool backwards = false)
+	if !animating
+		return
+	endIf
 	if backwards && stage == 1
 		return
 	elseif backwards && stage > 1
@@ -287,7 +289,7 @@ function AdvanceStage(bool backwards = false)
 endFunction
 
 function ChangeAnimation(bool backwards = false)
-	if animations.Length == 1
+	if !animating || animations.Length == 1
 		return ; Single animation selected, nothing to change to
 	endIf
 	if !backwards
@@ -301,30 +303,15 @@ function ChangeAnimation(bool backwards = false)
 		aid = animations.Length - 1
 	endIf
 
-	int i
-	while i < ActorCount
-		RemoveExtras(GetActor(i))
-		i += 1
-	endWhile
-
 	SetAnimation(aid)
+
 	RealignActors()
 
-	i = 0
-	while i < ActorCount
-		;SexLab.StripActor(pos[i], victim)
-		sslActorAlias Slot = GetPositionAlias(i)
-		Slot.ThreadAnimation(Animation)
-		Slot.ThreadPosition(i)
-		Slot.ThreadStage(Stage)
-		EquipExtras(GetActor(i))
-		i += 1
-	endWhile
 	SendThreadEvent("AnimationChange")
 endFunction
 
 function ChangePositions(bool backwards = false)
-	if ActorCount < 2
+	if !animating || ActorCount < 2
 		return ; Solo Animation, nobody to swap with
 	endIf
 	; Set direction of swapping
@@ -337,24 +324,33 @@ function ChangePositions(bool backwards = false)
 	; Actors to swap
 	actor adjusting = Positions[AdjustingPosition]
 	actor moved = Positions[MovedTo]
-	; Removed extras/strapons
-	RemoveExtras(adjusting)
-	RemoveExtras(moved)
+	; Actor slots
+	sslActorAlias AdjustAlias = GetActorAlias(adjusting)
+	sslActorAlias MovedAlias = GetActorAlias(moved)
 	; Shuffle
 	actor[] NewPositions = Positions
 	NewPositions[AdjustingPosition] = moved
 	NewPositions[MovedTo] = adjusting
 	Positions = NewPositions
+	; Removed extras/strapons
+	AdjustAlias.RemoveExtras()
+	MovedAlias.RemoveExtras()
+	; Update positions
+	AdjustAlias.ThreadPosition(GetPosition(adjusting))
+	MovedAlias.ThreadPosition(GetPosition(moved))
 	; Equip new extras
-	EquipExtras(adjusting)
-	EquipExtras(moved)
-	AdjustChange(backwards)
+	AdjustAlias.EquipExtras()
+	MovedAlias.EquipExtras()
 	; Restart animations
 	RealignActors()
+	AdjustChange(backwards)
 	SendThreadEvent("PositionChange")
 endFunction
 
 function AdjustForward(bool backwards = false, bool adjuststage = false)
+	if !animating
+		return
+	endIf
 	float adjustment = 0.75
 	if backwards
 		adjustment = adjustment * -1
@@ -368,6 +364,9 @@ function AdjustForward(bool backwards = false, bool adjuststage = false)
 endFunction
 
 function AdjustSideways(bool backwards = false, bool adjuststage = false)
+	if !animating
+		return
+	endIf
 	float adjustment = 0.75
 	if backwards
 		adjustment = adjustment * -1
@@ -381,7 +380,7 @@ function AdjustSideways(bool backwards = false, bool adjuststage = false)
 endFunction
 
 function AdjustUpward(bool backwards = false, bool adjuststage = false)
-	if IsPlayerPosition(AdjustingPosition)
+	if !animating || IsPlayerPosition(AdjustingPosition)
 		return
 	endIf
 	float adjustment = 0.75
@@ -397,6 +396,9 @@ function AdjustUpward(bool backwards = false, bool adjuststage = false)
 endFunction
 
 function RotateScene(bool backwards = false)
+	if !animating
+		return
+	endIf
 	; Adjust current center's Z angle
 	float adjustment = 45
 	if backwards
@@ -407,6 +409,9 @@ function RotateScene(bool backwards = false)
 endFunction
 
 function AdjustChange(bool backwards = false)
+	if !animating
+		return
+	endIf
 	if backwards
 		AdjustingPosition -= 1 
 	else
@@ -417,11 +422,17 @@ function AdjustChange(bool backwards = false)
 endFunction
 
 function RestoreOffsets()
+	if !animating
+		return
+	endIf
 	Animation.RestoreOffsets()
 	RealignActors()
 endFunction
 
 function MoveScene()
+	if !animating
+		return
+	endIf
 	bool advanceToggle
 	; Toggle auto advance off
 	if autoAdvance
@@ -462,54 +473,6 @@ endFunction
 ;/-----------------------------------------------\;
 ;|	Actor Manipulation                           |;
 ;\-----------------------------------------------/;
-
-function SetupActor(actor position)
-	sslActorAlias ActorSlot = GetActorAlias(position)
-	ActorSlot.PrepareActor()
-	EquipExtras(position)
-endFunction
-
-function ResetActor(actor position)
-	sslActorAlias ActorSlot = GetActorAlias(position)
-	ActorSlot.ResetActor()
-	RemoveExtras(position)
-	ActorAlias.ClearActor(position)
-endFunction
-
-function EquipExtras(actor position)
-	int slot = GetPosition(position)
-	form[] extras = Animation.GetExtras(slot)
-	if extras.Length > 0
-		int i
-		while i < extras.Length
-			if extras[i] != none
-				position.EquipItem(extras[i], true, true)
-			endIf
-			i += 1
-		endWhile
-	endIf
-	; Strapons are enabled for this position, and they are female in a male position
-	if SexLab.GetGender(position) == 1 && Animation.GetGender(slot) == 0 && SexLab.Config.bUseStrapons && Animation.UseStrapon(slot, stage)
-		SexLab.EquipStrapon(position)
-	endIf
-endFunction
-
-function RemoveExtras(actor position)
-	int slot = GetPosition(position)
-	form[] extras = Animation.GetExtras(slot)
-	if extras.Length > 0
-		int i
-		while i < extras.Length
-			if extras[i] != none
-				position.UnequipItem(extras[i], true, true)
-				position.RemoveItem(extras[i], 1, true)
-			endIf
-			i += 1
-		endWhile
-	endIf
-	; Strapons are enabled for this position, and they are female in a male position
-	SexLab.UnequipStrapon(position)
-endFunction
 
 function MoveActor(int position)
 	actor a = Positions[position]
@@ -579,7 +542,11 @@ function SetAnimation(int anim = -1)
 
 	int i = 0
 	while i < ActorCount
-		GetPositionAlias(i).ThreadAnimation(animationCurrent)
+		;SexLab.StripActor(pos[i], victim)
+		sslActorAlias Slot = GetActorAlias(Positions[i])
+		Slot.ThreadPosition(i)
+		Slot.ThreadAnimation(Animation)
+		Slot.ThreadStage(Stage)
 		i += 1
 	endWhile
 
@@ -588,7 +555,7 @@ endFunction
 function PlayAnimation()
 	int i
 	while i < ActorCount
-		GetPositionAlias(i).PlayAnimation()
+		ActorSlots[i].PlayAnimation()
 		i += 1
 	endWhile
 endFunction
@@ -671,7 +638,7 @@ endFunction
 function SendActorEvent(string callback)
 	int i
 	while i < ActorCount
-		GetPositionAlias(i).ActorEvent(callback)
+		ActorSlots[i].ActorEvent(callback)
 		i += 1
 	endWhile
 endFunction
