@@ -103,6 +103,7 @@ function ResetActor()
 			Debug.ToggleCollisions()
 		endIf
 		SexLab._DisableHotkeys()
+		;Game.ForceThirdPerson()
 		;Game.SetInChargen(false, false, false)
 		Game.SetPlayerAIDriven(false)
 		;Game.EnablePlayerControls()
@@ -139,7 +140,7 @@ endfunction
 
 function StopAnimating(bool quick = false)
 	; Reset Idle
-	if quick
+	if quick || Game.GetCameraState() == 3
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 	else
 		ActorRef.PushActorAway(ActorRef, 1)
@@ -253,7 +254,7 @@ function ThreadStage(int toStage)
 	if !Active || ActorRef == none
 		return
 	endIf
-	
+
 	stage = toStage
 
 	; Update Silence
