@@ -210,7 +210,7 @@ function ClearAlias()
 endFunction
 
 ;/-----------------------------------------------\;
-;|	Storage Functions                             |;
+;|	Storage Functions                            |;
 ;\-----------------------------------------------/;
 
 function StoreEquipment(form[] equipment)
@@ -343,14 +343,12 @@ endEvent
 event OnEndThread(string eventName, string actorSlot, float argNum, form sender)
 	ResetActor()
 	StopAnimating(!Config.bRagDollEnd)
-	Utility.Wait(3.0)
 	ClearAlias()
 endEvent
 
 event OnQuickEndThread(string eventName, string actorSlot, float argNum, form sender)
 	ResetActor()
 	StopAnimating(true)
-	Utility.Wait(3.0)
 	ClearAlias()
 endEvent
 

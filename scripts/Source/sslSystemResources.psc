@@ -24,14 +24,6 @@ sound property sfxSquishing01 auto
 sound property sfxSucking01 auto
 sound property sfxSexMix01 auto
 
-Spell property CumVaginalOralAnalSpell auto
-Spell property CumOralAnalSpell auto
-Spell property CumVaginalOralSpell auto
-Spell property CumVaginalAnalSpell auto
-Spell property CumVaginalSpell auto
-Spell property CumOralSpell auto
-Spell property CumAnalSpell auto
-
 EffectShader property CumVaginalOralAnal auto
 EffectShader property CumOralAnal auto
 EffectShader property CumVaginalOral auto
@@ -61,124 +53,6 @@ int property iVictimCount = 0 auto hidden
 int property iAggressorCount = 0 auto hidden
 string[] property sCustomStatName auto hidden
 string[] property sCustomStatValue auto hidden
-;
-; Animations
-; 
-sslAnimAggrBehind property SexLabAggrBehind auto
-sslAnimAggrDoggyStyle property SexLabAggrDoggyStyle auto
-sslAnimAggrMissionary property SexLabAggrMissonary auto
-sslAnimBoobjob property SexLabBoobjob auto
-sslAnimDoggyStyle property SexLabDoggyStyle auto
-sslAnimHuggingSex property SexLabHuggingSex auto
-sslAnimMissionary property SexLabMissonary auto
-sslAnimReverseCowgirl property SexLabReverseCowgirl auto
-sslAnimSideways property SexLabSideways auto
-sslAnimStanding property SexLabStanding auto
-sslAnimTribadism property SexLabTribadism auto
-
-sslAnimArrokBlowjob property ArrokBlowjob auto
-sslAnimArrokBoobJob property ArrokBoobJob auto
-sslAnimArrokCowgirl property ArrokCowgirl auto
-sslAnimArrokDevilsThreeway property ArrokDevilsThreeway auto
-sslAnimArrokDoggyStyle property ArrokDoggyStyle auto
-sslAnimArrokForeplay property ArrokForeplay auto
-sslAnimArrokLegUp property ArrokLegUp auto
-sslAnimArrokMaleMasturbation property ArrokMaleMasturbation auto
-sslAnimArrokMissionary property ArrokMissionary auto
-sslAnimArrokOral property ArrokOral auto
-sslAnimArrokReverseCowgirl property ArrokReverseCowgirl auto
-sslAnimArrokSideways property ArrokSideways auto
-sslAnimArrokStanding property ArrokStanding auto
-sslAnimArrokStandingForeplay property ArrokStandingForeplay auto
-sslAnimArrokTricycle property ArrokTricycle auto
-sslAnimArrokHugFuck property ArrokHugFuck auto
-sslAnimArrokLesbian property ArrokLesbian auto
-sslAnimArrokSittingForeplay property ArrokSittingForeplay auto
-sslAnimArrokAnal property ArrokAnal auto
-sslAnimArrokRape property ArrokRape auto
-
-sslAnimAPAnal property APAnal auto
-sslAnimAPBedMissionary property APBedMissionary auto
-sslAnimAPBlowjob property APBlowjob auto
-sslAnimAPBoobjob property APBoobjob auto
-sslAnimAPCowgirl property APCowgirl auto
-sslAnimAPFemaleSolo property APFemaleSolo auto
-sslAnimAPFisting property APFisting auto
-sslAnimAPHandjob property APHandjob auto
-sslAnimAPKneelBlowjob property APKneelBlowjob auto
-sslAnimAPLegUp property APLegUp auto
-; sslAnimAPReverseCowgirl property APReverseCowgirl auto ; Buggy Rotation, not used
-sslAnimAPShoulder property APShoulder auto
-sslAnimAPStandBlowjob property APStandBlowjob auto
-sslAnimAPStanding property APStanding auto
-
-sslAnimAPDoggyStyle property APDoggyStyle auto
-sslAnimAPHoldLegUp property APHoldLegUp auto
-sslAnimAPFaceDown property APFaceDown auto
-sslAnimAPSkullFuck property APSkullFuck auto
-
-sslAnimAPUnknown property APUNKNOWN auto
-
-function LoadAnimations()
-	; MiniLovers
-	SexLab.RegisterAnimation(SexLabAggrBehind)
-	SexLab.RegisterAnimation(SexLabAggrDoggyStyle)
-	SexLab.RegisterAnimation(SexLabAggrMissonary)
-	SexLab.RegisterAnimation(SexLabBoobjob)
-	SexLab.RegisterAnimation(SexLabDoggyStyle)
-	SexLab.RegisterAnimation(SexLabHuggingSex)
-	SexLab.RegisterAnimation(SexLabMissonary)
-	SexLab.RegisterAnimation(SexLabReverseCowgirl)
-	SexLab.RegisterAnimation(SexLabSideways)
-	SexLab.RegisterAnimation(SexLabStanding)
-	SexLab.RegisterAnimation(SexLabTribadism)
-
-	; Arrok
-	SexLab.RegisterAnimation(ArrokBlowjob)
-	SexLab.RegisterAnimation(ArrokBoobJob)
-	SexLab.RegisterAnimation(ArrokCowgirl)
-	SexLab.RegisterAnimation(ArrokDevilsThreeway)
-	SexLab.RegisterAnimation(ArrokDoggyStyle)
-	SexLab.RegisterAnimation(ArrokForeplay)
-	SexLab.RegisterAnimation(ArrokLegUp)
-	SexLab.RegisterAnimation(ArrokMaleMasturbation)
-	SexLab.RegisterAnimation(ArrokMissionary)
-	SexLab.RegisterAnimation(ArrokOral)
-	SexLab.RegisterAnimation(ArrokReverseCowgirl)
-	SexLab.RegisterAnimation(ArrokSideways)
-	SexLab.RegisterAnimation(ArrokStanding)
-	SexLab.RegisterAnimation(ArrokStandingForeplay)
-	SexLab.RegisterAnimation(ArrokTricycle)
-	SexLab.RegisterAnimation(ArrokHugFuck)
-	SexLab.RegisterAnimation(ArrokLesbian)
-	SexLab.RegisterAnimation(ArrokSittingForeplay)
-	SexLab.RegisterAnimation(ArrokAnal)
-	SexLab.RegisterAnimation(ArrokRape)
-
-	; AP
-	SexLab.RegisterAnimation(APAnal)
-	SexLab.RegisterAnimation(APBedMissionary)
-	SexLab.RegisterAnimation(APBlowjob)
-	SexLab.RegisterAnimation(APBoobjob)
-	SexLab.RegisterAnimation(APCowgirl)
-	SexLab.RegisterAnimation(APFemaleSolo)
-	SexLab.RegisterAnimation(APFisting)
-	SexLab.RegisterAnimation(APHandjob)
-	SexLab.RegisterAnimation(APKneelBlowjob)
-	SexLab.RegisterAnimation(APLegUp)
-	; SexLab.RegisterAnimation(APReverseCowgirl) ; Buggy Rotation, not used
-	SexLab.RegisterAnimation(APShoulder)
-	SexLab.RegisterAnimation(APStandBlowjob)
-	SexLab.RegisterAnimation(APStanding)
-
-	;SexLab.RegisterAnimation(APDoggyStyle) ; Unsure of male position idles
-	SexLab.RegisterAnimation(APHoldLegUp)
-	SexLab.RegisterAnimation(APFaceDown)
-	SexLab.RegisterAnimation(APSkullFuck)
-
-	; Tester
-	;SexLab.RegisterAnimation(APUNKNOWN)
-endFunction
 
 ;
 ; Voices

@@ -378,6 +378,30 @@ int function GetGender(int position)
 	return genders[position]
 endFunction
 
+int function FemaleCount()
+	int count = 0
+	int i = 0
+	while i < ActorCount()
+		if genders[i] == 1
+			count += 1
+		endIf
+		i += 1
+	endWhile
+	return count
+endFunction
+
+int function MaleCount()
+	int count = 0
+	int i = 0
+	while i < ActorCount()
+		if genders[i] == 0
+			count += 1
+		endIf
+		i += 1
+	endWhile
+	return count
+endFunction
+
 int function GetCum(int position)
 	return cum[position]
 endFunction

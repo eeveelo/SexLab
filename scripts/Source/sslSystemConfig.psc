@@ -973,7 +973,7 @@ event OnOptionSelect(int option)
 		if run
 			SexLab._StopAnimations()
 			SexLab._ClearAnimations()
-			SexLab.Data.LoadAnimations()
+			SexLab._LoadAnimations()
 			ShowMessage("$SSL_RunRebuildAnimations", false)
 		endIf
 

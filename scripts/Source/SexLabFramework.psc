@@ -25,6 +25,7 @@ endProperty
 ;#---------------------------#
 ;# Start Animation Variables #
 ;#---------------------------#
+sslAnimationRegistry property AnimationRegistry auto
 sslThreadSlots property ThreadSlots auto
 sslActorSlots property ActorSlots auto
 
@@ -358,59 +359,6 @@ int function FemaleCount(actor[] pos)
 	return gender[1]
 endFunction
 
-;#---------------------------#
-;#  BEGIN THREAD FUNCTIONS   #
-;#---------------------------#
-
-; int function FindActorThread(actor toFind)
-; {DEPRECATED: TO BE REMOVED IN 1.2}
-; 	_Deprecate("FindActorThread", "FindActorController")
-; 	int i = 0
-; 	while i < threadCount
-; 		if activeThread[i]
-; 			actor[] actorList = thread[i].GetActors()
-; 			int p = 0
-; 			while p < actorList.Length
-; 				if actorList[p] == toFind
-; 					return i
-; 				endIf
-; 				p += 1
-; 			endWhile
-; 		endIf
-; 		i += 1
-; 	endWhile
-; 	return -1
-; endFunction
-
-; sslBaseThread function GetActorThread(actor toFind)
-; {DEPRECATED: TO BE REMOVED IN 1.2}
-; 	_Deprecate("GetActorThread", "GetActorController")
-; 	int tid = FindActorThread(toFind)
-; 	if tid != -1
-; 		return thread[tid)
-; 	else
-; 		return none
-; 	endIf
-; endFunction
-
-; int function FindPlayerThread()
-; {DEPRECATED: TO BE REMOVED IN 1.2}
-; 	_Deprecate("FindPlayerThread", "FindPlayerController")
-; 	return FindPlayerController()
-; endFunction
-
-; sslBaseThread function GetPlayerThread()
-; {DEPRECATED: TO BE REMOVED IN 1.2}
-; 	_Deprecate("GetPlayerThread", "GetPlayerController")
-; 	return thread[playerThread]
-; endFunction
-
-; sslBaseThread function GetThread(int tid)
-; {DEPRECATED: TO BE REMOVED IN 1.2}
-; 	_Deprecate("GetThread", "GetController")
-; 	return thread[tid)
-; endFunction
-
 ;#------------------------------#
 ;#  BEGIN CONTROLLER FUNCTIONS  #
 ;#------------------------------#
@@ -458,151 +406,33 @@ endFunction
 ;#---------------------------#
 
 sslBaseAnimation function GetAnimationByName(string findName)
-	int i = 0
-	while i < animIndex
-		if animation[i].name == findName
-			return animation[i]
-		endIf
-		i += 1
-	endWhile
-	return none
+	return AnimationRegistry.GetByName(findName)
 endFunction
 
 sslBaseAnimation[] function GetAnimationsByType(int actors, int males = -1, int females = -1, int stages = -1, bool aggressive = false, bool sexual = true)
-	sslBaseAnimation[] animReturn
-	int i = 0
-	while i < animIndex
-		if animation[i] != none && animation[i].enabled
-			int actorCount = animation[i].ActorCount()
-			int stageCount = animation[i].StageCount()
-			bool sexualAnim = animation[i].IsSexual()
-			bool aggressiveAnim = animation[i].HasTag("Aggressive")
-			int maleCount = 0
-			int femaleCount = 0
-			int g = 0
-			while g < actorCount
-				if animation[i].GetGender(g) == 1
-					femaleCount += 1
-				else
-					maleCount += 1
-				endIf
-				g += 1
-			endWhile
-			bool accepted = true
-			if actors != actorCount
-				accepted = false
-			endIf
-			if accepted && males != -1 && males != maleCount
-				accepted = false
-			endIf
-			if accepted && females != -1 && females != femaleCount
-				accepted = false
-			endIf
-			if accepted && stages != -1 && stages != stageCount
-				accepted = false
-			endIf
-			if accepted && (aggressive != aggressiveAnim && Config.bRestrictAggressive)
-				accepted = false
-			endIf
-			if accepted && sexual != sexualAnim
-				accepted = false
-			endIf
-
-			; Still accepted? Push it's return
-			if accepted
-				animReturn = sslUtility.PushAnimation(animation[i], animReturn)
-			endIf
-		endIf
-		i += 1
-	endWhile
-	_DebugTrace("GetAnimationsByType","actors="+actors+", males="+males+", females="+females+", stages="+stages+", aggress="+aggressive+", sexual="+sexual,"Selected "+animReturn)
-	return animReturn
+	return AnimationRegistry.GetByType(actors, males, females, stages, aggressive, sexual, Config.bRestrictAggressive)
 endFunction
 
 sslBaseAnimation[] function GetAnimationsByTag(int actors, string tag1, string tag2 = "", string tag3 = "", string tagSuppress = "", bool requireAll = true)
-	sslBaseAnimation[] animReturn
-
-	int i = 0
-	while i < animIndex
-		if animation[i].enabled && animation[i].ActorCount() == actors
-			bool check1 = animation[i].HasTag(tag1)
-			bool check2 = animation[i].HasTag(tag2)
-			bool check3 = animation[i].HasTag(tag3)
-			bool supress = animation[i].HasTag(tagSuppress)
-			if requireAll && check1 && (check2 || tag2 == "") && (check3 || tag3 == "") && !(supress && tagSuppress != "")
-				animReturn = sslUtility.PushAnimation(animation[i], animReturn)
-			elseif !requireAll && (check1 || check2 || check3) && !(supress && tagSuppress != "")
-				animReturn = sslUtility.PushAnimation(animation[i], animReturn)
-			else
-				; debug.trace("Rejecting "+animation[i].name+" based on "+check1+check2+check3+supress)
-			endIf
-		endIf
-		i += 1
-	endWhile
-	_DebugTrace("GetAnimationsByTag","tag1="+tag1+", tag2="+tag2+", tag3="+tag3+", tagSuppress="+tagSuppress,"Selected "+animReturn)
-	return animReturn
+	return AnimationRegistry.GetByTag(actors, tag1, tag2, tag3, tagSuppress, requireAll)
 endFunction
 
 sslBaseAnimation[] function MergeAnimationLists(sslBaseAnimation[] list1, sslBaseAnimation[] list2)
-	int list1Count = list1.Length
-	int list2Count = list2.Length
-	int newCount = list1Count + list2Count
-	sslBaseAnimation[] anims
-	int i = 0
-	while i < list1Count
-		anims = sslUtility.PushAnimation(list1[i],anims)
-		i+= 1
-	endWhile
-	i = 0
-	while i < list2Count
-		anims = sslUtility.PushAnimation(list2[i],anims)
-		i+= 1
-	endWhile
-	return anims
+	return AnimationRegistry.MergeLists(list1, list2)
 endFunction
 
 int function FindAnimationByName(string findName)
-	if animIndex >= 0
-		int i = 0
-		while i < animIndex
-			if animation[i] != none && animation[i].name == findName
-				return i
-			endIf
-			i += 1
-		endWhile
-	endIf
-	return -1
+	return AnimationRegistry.FindByName(findName)
 endFunction
 
 int function GetAnimationCount(bool ignoreDisabled = true)
-	int count = 0
-	int i = 0
-	while i < animIndex
-		if animation[i] != none && ignoreDisabled && animation[i].enabled
-			count += 1
-		elseif animation[i] != none && !ignoreDisabled
-			count += 1
-		endIf
-		i += 1
-	endWhile
-	return count
+	return AnimationRegistry.GetCount(ignoreDisabled)
 endFunction
 
 int function RegisterAnimation(sslBaseAnimation anim)
-	_ReadyWait()
-	ready = false
-	int aid = FindAnimationByName(anim.name)
-	; Animation not found, register it.
-	if aid == -1
-		aid = animIndex
-		animation[aid] = anim
-		animation[aid].LoadAnimation()
-		_DebugTrace("RegisterAnimation","Animation script successfully registered",anim.name)
-		animIndex += 1
-	endIf
-	ready = true
-	return aid
+	return AnimationRegistry.Register(anim)
 endFunction
+
 ;#---------------------------#
 ;#  END ANIMATION FUNCTIONS  #
 ;#---------------------------#
@@ -933,13 +763,14 @@ endFunction
 
 function _ClearAnimations()
 	ready = false
-	int i = 0
-	while i < animIndex
-		animation[i].UnloadAnimation()
-		i += 1
-	endWhile
-	animation = new sslBaseAnimation[128]
-	animIndex = 0
+	AnimationRegistry._Setup()
+	ready = true
+endFunction
+
+
+function _LoadAnimations()
+	ready = false
+	AnimationRegistry._Load()
 	ready = true
 endFunction
 
@@ -976,7 +807,7 @@ function _SetupSystem()
 
 	; Init animations
 	_ClearAnimations()
-	Data.LoadAnimations()
+	_LoadAnimations()
 
 	; Init voices
 	_ClearVoices()
