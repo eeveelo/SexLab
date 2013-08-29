@@ -183,8 +183,10 @@ ReferenceAlias property ActorSlot072 auto
 ReferenceAlias property ActorSlot073 auto
 ReferenceAlias property ActorSlot074 auto
 
-
 function _Setup()
+	Stop()
+	Start()
+
 	ActorSlot = new ReferenceAlias[75]
 	ActorSlot[0] = ActorSlot000
 	ActorSlot[1] = ActorSlot001

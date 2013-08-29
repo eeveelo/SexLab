@@ -91,7 +91,6 @@ function LoadVoices()
 	SexLab.RegisterVoice(femalemoan09) 
 endFunction
 
-
 armor function LoadStrapon(string esp, int id)
 	armor strapon = Game.GetFormFromFile(id, esp) as armor
 	if strapon != none

@@ -1,4 +1,4 @@
-scriptname sslBaseAnimation extends Scene
+scriptname sslAnimationModel extends Scene
 
 sslAnimationRegistry property AnimationRegistry auto
 
