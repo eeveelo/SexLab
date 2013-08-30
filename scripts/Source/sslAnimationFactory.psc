@@ -55,3 +55,29 @@ function _FactoryWait()
 		Utility.Wait(0.25)
 	endWhile
 endFunction
+
+int function AddPosition(int gender = 0, int addCum = -1)
+	return Animation.AddPosition(gender, addCum)
+endFunction
+
+int function AddPositionStage(int position, string animationEvent, float forward = 0.0, float side = 0.0, float up = 0.0, float rotate = 0.0, bool silent = false, bool openMouth = false, bool strapon = true, int sos = 0)
+	return Animation.AddPositionStage(position, animationEvent, forward, side, up, rotate, silent, openMouth, strapon, sos)
+endFunction
+
+function SetContent(int contentType)
+	return Animation.SetContent(contentType)
+endFunction
+
+function SetSFX(int iSFX)
+	return Animation.SetSFX(iSFX)
+endFunction
+
+bool function AddTag(string tag)
+	return Animation.AddTag(tag)
+endFunction
+
+string property Name hidden
+	function set(string value)
+		Animation.Name = value
+	endFunction
+endProperty
