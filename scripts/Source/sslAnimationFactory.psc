@@ -81,3 +81,15 @@ string property Name hidden
 		Animation.Name = value
 	endFunction
 endProperty
+
+bool property TCL hidden
+	function set(bool value)
+		Animation.TCL = value
+	endFunction
+endProperty
+
+bool property Enabled hidden
+	function set(bool value)
+		Animation.Enabled = value
+	endFunction
+endProperty

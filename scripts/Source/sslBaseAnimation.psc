@@ -83,8 +83,6 @@ float function CalculateForward(int position, int stage)
 	endIf
 endFunction
 
-
-
 ;/-----------------------------------------------\;
 ;|	Animation Setup                              |;
 ;\-----------------------------------------------/;

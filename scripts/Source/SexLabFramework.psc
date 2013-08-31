@@ -430,7 +430,8 @@ int function GetAnimationCount(bool ignoreDisabled = true)
 endFunction
 
 int function RegisterAnimation(sslBaseAnimation anim)
-	return AnimationRegistry.Register(anim)
+	return -1
+	;return AnimationRegistry.Register(anim)
 endFunction
 
 ;#---------------------------#
