@@ -50,6 +50,7 @@ int function RegisterAnimation(string registrar)
 	RegisterForModEvent("RegisterAnimation", registrar)
 	SendModEvent("RegisterAnimation", registrar, 1)
 	UnregisterForAllModEvents()
+	return slot
 endFunction
 
 ; Unlocks factory for next callback, MUST be called at end of callback

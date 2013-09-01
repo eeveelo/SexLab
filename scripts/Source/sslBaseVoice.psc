@@ -1,81 +1,27 @@
-scriptname sslBaseVoice extends quest
+scriptname sslBaseVoice extends ReferenceAlias
 
-bool property enabled = true auto hidden
+sslVoiceRegistry property Registry auto
 
-int property Male = 0 autoreadonly
-int property Female = 1 autoreadonly
+string property Name = "" auto hidden
+string property Registrar = "" auto hidden
+bool property Enabled = true auto hidden
+int property Gender auto hidden
 
-string property name = "" auto hidden
-int property gender = 1 auto hidden
+bool property Slotted hidden
+	bool function get()
+		return Registrar != "" && Name != ""
+	endFunction
+endProperty
 
-sound property mild auto
-sound property hot auto
-sound property medium auto
-
-topic property SexLabMoanMild auto
-topic property SexLabMoanMedium auto
-topic property SexLabMoanHot auto
-
-VoiceType property SexLabVoiceM auto
-VoiceType property SexLabVoiceF auto
-FormList property VoicesPlayer auto
+Sound property Mild auto hidden
+Sound property Hot auto hidden
+Sound property Medium auto hidden
 
 string[] tags
 
 ;/-----------------------------------------------\;
 ;|	API Functions                                |;
 ;\-----------------------------------------------/;
-
-int function PlayMild(actor a)
-	ActorBase base = a.GetLeveledActorBase()
-	VoiceType type = base.GetVoiceType()
-	if VoicesPlayer.HasForm(type) || type == SexLabVoiceM || type == SexLabVoiceF
-		a.Say(SexLabMoanMild)
-	else
-		if base.GetSex() > 0
-			base.SetVoiceType(SexLabVoiceF)
-		else
-			base.SetVoiceType(SexLabVoiceM)
-		endIf
-		a.Say(SexLabMoanMild)
-		base.SetVoiceType(type)
-	endIf
-	return mild.Play(a)
-endFunction
-
-int function PlayMedium(actor a)
-	ActorBase base = a.GetLeveledActorBase()
-	VoiceType type = base.GetVoiceType()
-	if VoicesPlayer.HasForm(type) || type == SexLabVoiceM || type == SexLabVoiceF
-		a.Say(SexLabMoanMedium)
-	else
-		if base.GetSex() > 0
-			base.SetVoiceType(SexLabVoiceF)
-		else
-			base.SetVoiceType(SexLabVoiceM)
-		endIf
-		a.Say(SexLabMoanMedium)
-		base.SetVoiceType(type)
-	endIf
-	return medium.Play(a)
-endFunction
-
-int function PlayHot(actor a)
-	ActorBase base = a.GetLeveledActorBase()
-	VoiceType type = base.GetVoiceType()
-	if VoicesPlayer.HasForm(type) || type == SexLabVoiceM || type == SexLabVoiceF
-		a.Say(SexLabMoanHot)
-	else
-		if base.GetSex() > 0
-			base.SetVoiceType(SexLabVoiceF)
-		else
-			base.SetVoiceType(SexLabVoiceM)
-		endIf
-		a.Say(SexLabMoanHot)
-		base.SetVoiceType(type)
-	endIf
-	return hot.Play(a)
-endFunction
 
 int function Moan(actor a, float strength = 0.3, bool victim = false)
 	int seed = ((1.0 - strength) * 100.0) as int
@@ -88,6 +34,36 @@ int function Moan(actor a, float strength = 0.3, bool victim = false)
 		return PlayMild(a)
 	endIf
 endFunction
+
+int function PlaySound(actor a, sound soundset, topic lipsync)
+	ActorBase base = a.GetLeveledActorBase()
+	VoiceType type = base.GetVoiceType()
+	if Registry.VoicesPlayer.HasForm(type) || type == Registry.SexLabVoiceM || type == Registry.SexLabVoiceF
+		a.Say(lipsync)
+	else
+		if base.GetSex() > 0
+			base.SetVoiceType(Registry.SexLabVoiceF)
+		else
+			base.SetVoiceType(Registry.SexLabVoiceM)
+		endIf
+		a.Say(lipsync)
+		base.SetVoiceType(type)
+	endIf
+	return soundset.Play(a)
+endFunction
+
+int function PlayMild(actor a)
+	return PlaySound(a, Mild, Registry.SexLabMoanMild)
+endFunction
+
+int function PlayMedium(actor a)
+	return PlaySound(a, Medium, Registry.SexLabMoanMedium)
+endFunction
+
+int function PlayHot(actor a)
+	return PlaySound(a, Hot, Registry.SexLabMoanHot)
+endFunction
+
 
 ;/-----------------------------------------------\;
 ;|	Tag Functions                                |;
@@ -132,7 +108,7 @@ function LoadVoice()
 	return
 endFunction
 
-function UnloadVoice()
+function InitializeVoice()
 	name = ""
 	enabled = true
 	gender = 1

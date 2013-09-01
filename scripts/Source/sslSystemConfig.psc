@@ -577,7 +577,7 @@ event OnPageReset(string page)
 		i = 0
 		while i < SexLab.Animation.Length
 			if SexLab.Animation[i].Slotted
-				oidToggleAnimation[i] = AddToggleOption(SexLab.Animation[i].name, SexLab.Animation[i].Enabled)
+				oidToggleAnimation[i] = AddToggleOption(SexLab.Animation[i].Name, SexLab.Animation[i].Enabled)
 			endIf
 			i += 1
 		endWhile
@@ -586,7 +586,7 @@ event OnPageReset(string page)
 		i = 0
 		while i < SexLab.Animation.Length
 			if SexLab.Animation[i].Slotted
-				oidForeplayAnimation[i] = AddToggleOption(SexLab.Animation[i].name, SexLab.Animation[i].HasTag("LeadIn"))
+				oidForeplayAnimation[i] = AddToggleOption(SexLab.Animation[i].Name, SexLab.Animation[i].HasTag("LeadIn"))
 			endIf
 			i += 1
 		endWhile
@@ -595,7 +595,7 @@ event OnPageReset(string page)
 		i = 0
 		while i < SexLab.Animation.Length
 			if SexLab.Animation[i].Slotted
-				oidAggrAnimation[i] = AddToggleOption(SexLab.Animation[i].name, SexLab.Animation[i].HasTag("Aggressive"))
+				oidAggrAnimation[i] = AddToggleOption(SexLab.Animation[i].Name, SexLab.Animation[i].HasTag("Aggressive"))
 			endIf
 			i += 1
 		endWhile
@@ -603,8 +603,8 @@ event OnPageReset(string page)
 		SetCursorFillMode(LEFT_TO_RIGHT)
 		i = 0
 		while i < SexLab.voice.Length
-			if SexLab.voice[i] != none
-				oidToggleVoice[i] = AddToggleOption(SexLab.voice[i].name, SexLab.voice[i].Enabled)
+			if SexLab.Voice[i].Slotted
+				oidToggleVoice[i] = AddToggleOption(SexLab.Voice[i].Name, SexLab.Voice[i].Enabled)
 			endIf
 			i += 1
 		endWhile
@@ -981,7 +981,7 @@ event OnOptionSelect(int option)
 		bool run = ShowMessage("$SSL_WarnRebuildVoices")
 		if run
 			SexLab._ClearVoices()
-			SexLab.Data.LoadVoices()
+			SexLab._LoadVoices()
 			ShowMessage("$SSL_RunRebuildVoices", false)
 		endIf
 
@@ -1012,40 +1012,17 @@ event OnOptionSelect(int option)
 	; Voice Settings
 	elseif option == oidPlayerVoice
 		sslBaseVoice voice
-		form[] voices
-		int gender = SexLab.PlayerRef.GetLeveledActorBase().GetSex()
 		int current = SexLab.FindVoiceByName(sPlayerVoice)
 
-		int i = 0
-		while i < SexLab.voice.Length
-			voice = SexLab.voice[i]
-			if voice != none && voice.Enabled && voice.gender == gender
-				voices = sslUtility.PushForm(voice,voices)
-			endIf
-			i += 1
-		endWhile
-
-		i = 0
-		if current != -1
-			while i < voices.Length
-				if (voices[i] as sslBaseVoice).name == SexLab.voice[current].name
-					current = i
-					i = voices.Length
-				endIf
-				i += 1
-			endWhile
-		endIf
-
 		current += 1
-		if current >= voices.Length
+		if current >= SexLab.Voice.Length
 			current = -1
 		endIf
 
 		if current == -1
 			sPlayerVoice = "$SSL_Random"
 		else
-			voice = voices[current] as sslBaseVoice
-			sPlayerVoice = voice.name
+			sPlayerVoice = SexLab.GetVoiceBySlot(current).Name  
 		endIf
 	
 		SetTextOptionValue(oidPlayerVoice, sPlayerVoice)
@@ -1063,8 +1040,8 @@ event OnOptionSelect(int option)
 		int i = 0
 		while i < 128
 			if option == oidToggleVoice[i]
-				SexLab.voice[i].Enabled = !SexLab.voice[i].Enabled
-				SetToggleOptionValue(option, SexLab.voice[i].Enabled)
+				SexLab.Voice[i].Enabled = !SexLab.Voice[i].Enabled
+				SetToggleOptionValue(option, SexLab.Voice[i].Enabled)
 				i = 128
 			elseif option == oidToggleAnimation[i]
 				SexLab.Animation[i].Enabled = !SexLab.Animation[i].Enabled

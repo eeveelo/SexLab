@@ -26,6 +26,7 @@ endProperty
 ;# Start Animation Variables #
 ;#---------------------------#
 sslAnimationRegistry property AnimationRegistry auto
+sslVoiceRegistry property VoiceRegistry auto
 sslThreadSlots property ThreadSlots auto
 sslActorSlots property ActorSlots auto
 
@@ -35,6 +36,7 @@ sslBaseAnimation[] property Animation hidden
 		return AnimationRegistry.Animations
 	endFunction
 endProperty
+
 
 ; Animation Faction
 faction property AnimatingFaction auto
@@ -46,9 +48,12 @@ faction property AnimatingFaction auto
 ; Debug Spell Actor Storage, for Development use only
 actor property DebugActor auto hidden
 
-; Voice Files
-sslBaseVoice[] property voice auto hidden
-int voiceIndex = 0
+; Voice Sets
+sslBaseVoice[] property Voice hidden
+	sslBaseVoice[] function get()
+		return VoiceRegistry.Voices
+	endFunction
+endProperty
 
 ; local vars
 bool systemenabled = false
@@ -446,90 +451,29 @@ endFunction
 ;#---------------------------#
 
 sslBaseVoice function PickVoice(actor a)
-	if a == PlayerRef && Config.sPlayerVoice != "$SSL_Random"
-		return GetVoiceByName(Config.sPlayerVoice)
-	else
-		return GetVoiceByGender(a.GetLeveledActorBase().GetSex())
-	endIf
+	return VoiceRegistry.PickVoice(a)
 endFunction
 
 sslBaseVoice function GetVoiceByGender(int g)
-	int[] voiceSelection
-	int i = 0
-	while i < voiceIndex
-		if voice[i] != none && voice[i].gender == g && voice[i].enabled
-			voiceSelection = sslUtility.PushInt(i,voiceSelection)
-		endIf
-		i += 1
-	endWhile
-
-	int found = voiceSelection.Length
-
-	if found == 0
-		return none
-	endIf
-
-	int random = utility.RandomInt(0, found - 1)
-	int vid = voiceSelection[random]
-	return voice[vid]
+	return VoiceRegistry.GetByGender(g)
 endFunction
 
 sslBaseVoice function GetVoiceByName(string findName)
-	int i = 0
-	while i < voiceIndex
-		if voice[i] != none && voice[i].name == findName
-			return voice[i]
-		endIf
-		i += 1
-	endWhile
-	return none
+	return VoiceRegistry.GetByName(findName)
 endFunction
 
 int function FindVoiceByName(string findName)
-	if voiceIndex >= 0
-		int i = 0
-		while i < voiceIndex
-			if voice[i] != none && voice[i].name == findName
-				return i
-			endIf
-			i += 1
-		endWhile
-	endIf
-	return -1
+	return VoiceRegistry.FindByName(findName)
 endFunction
 
 sslBaseVoice function GetVoiceByTag(string tag1, string tag2 = "", string tagSuppress = "", bool requireAll = true)
-	int i = 0
-	while i < voiceIndex
-		if voice[i].enabled
-			bool check1 = voice[i].HasTag(tag1)
-			bool check2 = voice[i].HasTag(tag2)
-			bool supress = voice[i].HasTag(tagSuppress)
-			if requireAll && check1 && (check2 || tag2 == "") && !(supress && tagSuppress != "")
-				return voice[i]
-			elseif !requireAll && (check1 || check2) && !(supress && tagSuppress != "")
-				return voice[i]
-			endIf
-		endIf
-		i += 1
-	endWhile
-	return none
+	return VoiceRegistry.GetByTag(tag1, tag2, tagSuppress, requireAll)
 endFunction
 
-int function RegisterVoice(sslBaseVoice vc)
-	_ReadyWait()
-	ready = false
-	int vid = FindVoiceByName(vc.name)
-	if vid == -1
-		vid = voiceIndex
-		voice[vid] = vc
-		voice[vid].LoadVoice()
-		_DebugTrace("RegisterVoice","Voice script successfully registered",vc.name)
-		voiceIndex += 1
-	endIf
-	ready = true
-	return vid
+sslBaseVoice function GetVoiceBySlot(int slot)
+	return VoiceRegistry.GetBySlot(slot)
 endFunction
+
 ;#---------------------------#
 ;#    END VOICE FUNCTIONS    #
 ;#---------------------------#
@@ -780,13 +724,13 @@ endFunction
 
 function _ClearVoices()
 	ready = false
-	int i = 0
-	while i < voiceIndex
-		voice[i].UnloadVoice()
-		i += 1
-	endWhile
-	voice = new sslBaseVoice[128]
-	voiceIndex = 0
+	VoiceRegistry._Setup()
+	ready = true
+endFunction
+
+function _LoadVoices()
+	ready = false
+	VoiceRegistry._Load()
 	ready = true
 endFunction
 
@@ -815,7 +759,7 @@ function _SetupSystem()
 
 	; Init voices
 	_ClearVoices()
-	Data.LoadVoices()
+	_LoadVoices()
 
 endFunction
 
