@@ -2,7 +2,7 @@ scriptname sslSystemConfig extends SKI_ConfigBase
 {Skyrim Sex Lab Mod Configuration Menu}
 
 int function GetVersion()
-	return 115
+	return 119
 endFunction
 
 bool function DebugMode()
@@ -575,27 +575,27 @@ event OnPageReset(string page)
 	elseIf page == "$SSL_ToggleAnimations"
 		SetCursorFillMode(LEFT_TO_RIGHT)
 		i = 0
-		while i < SexLab.animation.Length
-			if SexLab.animation[i] != none
-				oidToggleAnimation[i] = AddToggleOption(SexLab.animation[i].name, SexLab.animation[i].enabled)
+		while i < SexLab.Animation.Length
+			if SexLab.Animation[i].Slotted
+				oidToggleAnimation[i] = AddToggleOption(SexLab.Animation[i].name, SexLab.Animation[i].Enabled)
 			endIf
 			i += 1
 		endWhile
 	elseIf page == "$SSL_ForeplayAnimations"
 		SetCursorFillMode(LEFT_TO_RIGHT)
 		i = 0
-		while i < SexLab.animation.Length
-			if SexLab.animation[i] != none
-				oidForeplayAnimation[i] = AddToggleOption(SexLab.animation[i].name, SexLab.animation[i].HasTag("LeadIn"))
+		while i < SexLab.Animation.Length
+			if SexLab.Animation[i].Slotted
+				oidForeplayAnimation[i] = AddToggleOption(SexLab.Animation[i].name, SexLab.Animation[i].HasTag("LeadIn"))
 			endIf
 			i += 1
 		endWhile
 	elseIf page == "$SSL_AggressiveAnimations"
 		SetCursorFillMode(LEFT_TO_RIGHT)
 		i = 0
-		while i < SexLab.animation.Length
-			if SexLab.animation[i] != none
-				oidAggrAnimation[i] = AddToggleOption(SexLab.animation[i].name, SexLab.animation[i].HasTag("Aggressive"))
+		while i < SexLab.Animation.Length
+			if SexLab.Animation[i].Slotted
+				oidAggrAnimation[i] = AddToggleOption(SexLab.Animation[i].name, SexLab.Animation[i].HasTag("Aggressive"))
 			endIf
 			i += 1
 		endWhile
@@ -604,7 +604,7 @@ event OnPageReset(string page)
 		i = 0
 		while i < SexLab.voice.Length
 			if SexLab.voice[i] != none
-				oidToggleVoice[i] = AddToggleOption(SexLab.voice[i].name, SexLab.voice[i].enabled)
+				oidToggleVoice[i] = AddToggleOption(SexLab.voice[i].name, SexLab.voice[i].Enabled)
 			endIf
 			i += 1
 		endWhile
@@ -1019,7 +1019,7 @@ event OnOptionSelect(int option)
 		int i = 0
 		while i < SexLab.voice.Length
 			voice = SexLab.voice[i]
-			if voice != none && voice.enabled && voice.gender == gender
+			if voice != none && voice.Enabled && voice.gender == gender
 				voices = sslUtility.PushForm(voice,voices)
 			endIf
 			i += 1
@@ -1063,28 +1063,28 @@ event OnOptionSelect(int option)
 		int i = 0
 		while i < 128
 			if option == oidToggleVoice[i]
-				SexLab.voice[i].enabled = !SexLab.voice[i].enabled
-				SetToggleOptionValue(option, SexLab.voice[i].enabled)
+				SexLab.voice[i].Enabled = !SexLab.voice[i].Enabled
+				SetToggleOptionValue(option, SexLab.voice[i].Enabled)
 				i = 128
 			elseif option == oidToggleAnimation[i]
-				SexLab.animation[i].enabled = !SexLab.animation[i].enabled
-				SetToggleOptionValue(option, SexLab.animation[i].enabled)
+				SexLab.Animation[i].Enabled = !SexLab.Animation[i].Enabled
+				SetToggleOptionValue(option, SexLab.Animation[i].Enabled)
 				i = 128
 			elseif option == oidAggrAnimation[i]
-				if !SexLab.animation[i].HasTag("Aggressive")
-					SexLab.animation[i].AddTag("Aggressive")
+				if !SexLab.Animation[i].HasTag("Aggressive")
+					SexLab.Animation[i].AddTag("Aggressive")
 				else
-					SexLab.animation[i].RemoveTag("Aggressive")
+					SexLab.Animation[i].RemoveTag("Aggressive")
 				endIf
-				SetToggleOptionValue(option, SexLab.animation[i].HasTag("Aggressive"))
+				SetToggleOptionValue(option, SexLab.Animation[i].HasTag("Aggressive"))
 				i = 128
 			elseif option == oidForeplayAnimation[i]
-				if !SexLab.animation[i].HasTag("LeadIn")
-					SexLab.animation[i].AddTag("LeadIn")
+				if !SexLab.Animation[i].HasTag("LeadIn")
+					SexLab.Animation[i].AddTag("LeadIn")
 				else
-					SexLab.animation[i].RemoveTag("LeadIn")
+					SexLab.Animation[i].RemoveTag("LeadIn")
 				endIf
-				SetToggleOptionValue(option, SexLab.animation[i].HasTag("LeadIn"))
+				SetToggleOptionValue(option, SexLab.Animation[i].HasTag("LeadIn"))
 				i = 128
 			elseIf i < 33 && option == oidStripMale[i]
 				bStripMale[i] = !bStripMale[i] 

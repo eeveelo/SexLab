@@ -1,4 +1,4 @@
-scriptname sslBaseAnimation extends Scene
+scriptname sslBaseAnimation extends ReferenceAlias
 
 string property Name = "" auto hidden
 string property Registrar = "" auto hidden
@@ -6,22 +6,24 @@ bool property Enabled = true auto hidden
 bool property TCL = false auto hidden
 int property Timer = -1 auto hidden
 
+bool property Slotted hidden
+	bool function get()
+		return Registrar != "" && Name != ""
+	endFunction
+endProperty
+
 ; Gender Types
+int property Creature = -1 autoreadonly hidden
 int property Male = 0 autoreadonly hidden
 int property Female = 1 autoreadonly hidden
 
-; Animation Information
 int actors = 0
 int stages = 0
 int sfx = 0
 int content = 0
 
 ; Animation Events
-string[] actor1
-string[] actor2
-string[] actor3
-string[] actor4
-string[] actor5
+string[] animations
 
 ; Data storage
 float[] offsetData ; x, y, z, rotation
@@ -107,23 +109,11 @@ int function AddPositionStage(int position, string animation, float forward = 0.
 	endIf
 
 	_WaitLock()
-	int stage
-	if position == 0
-		actor1 = sslUtility.PushString(animation, actor1)
-		stage = actor1.Length
-	elseIf position == 1
-		actor2 = sslUtility.PushString(animation, actor2)
-		stage = actor2.Length
-	elseIf position == 2
-		actor3 = sslUtility.PushString(animation, actor3)
-		stage = actor3.Length
-	elseIf position == 3
-		actor4 = sslUtility.PushString(animation, actor4)
-		stage = actor4.Length
-	elseIf position == 4
-		actor5 = sslUtility.PushString(animation, actor5)
-		stage = actor5.Length
-	endIf
+
+	animations = sslUtility.PushString(animation, animations)
+	string[] anims = FetchPosition(position)
+	int stage = anims.Length
+
 	if stage > stages
 		stages = stage
 	endIf
@@ -165,15 +155,6 @@ endFunction
 ;/-----------------------------------------------\;
 ;|	Data Accessors                               |;
 ;\-----------------------------------------------/;
-
-int function Zero(int stage)
-	stage -= 1
-	if stage < 0
-		stage = 0
-	endIf
-	return stage
-endFunction
-
 bool function Exists(string method, int position, int stage = -99)
 	if position > actors || position < 0
 		_Log("Unknown actor position, '"+position+"' given.", method)
@@ -187,7 +168,7 @@ endFunction
 
 int function DataIndex(int slots, int position, int stage, int slot)
 	; Zeroindex the stage
-	stage = Zero(stage)
+	stage -= 1
 	; Return calculated index
 	return ( position * (stages * slots) ) + ( stage * slots ) + slot
 endFunction
@@ -201,7 +182,7 @@ bool function AccessSwitch(int position, int stage, int slot)
 endFunction
 
 int function AccessPosition(int position, int slot)
-	return positionData[(position * slot)]
+	return positionData[( (position * 2) + slot )]
 endFunction
 
 bool[] function GetSwitchSlot(int stage, int slot)
@@ -299,27 +280,21 @@ endFunction
 ;\-----------------------------------------------/;
 
 string[] function FetchPosition(int position)
-	if !Exists("FetchPosition", position)
+	if position > actors || position < 0
+		_Log("Unknown position, '"+stage+"' given", "FetchPosition")
 		return none
 	endIf
-	if position == 0
-		return actor1
-	elseif position == 1
-		return actor2
-	elseif position == 2
-		return actor3
-	elseif position == 3
-		return actor4
-	elseif position == 4
-		return actor5
-	endIf
+	string[] anims = sslUtility.StringArray(actors)
+	int stage = 1
+	while stage <= stages
+		anims[stage] = FetchPositionStage(position, stage)
+		stage += 1
+	endWhile
+	return anims
 endFunction
 
 string function FetchPositionStage(int position, int stage)
-	; Zeroindex the stage
-	stage = Zero(stage)
-	string[] events = FetchPosition(position)
-	return events[stage]
+	return animations[((position * stages) + (stage - 1))]
 endFunction
 
 string[] function FetchStage(int stage)
@@ -417,7 +392,6 @@ form[] function GetExtras(int position)
 	endIf
 endFunction
 
-
 bool function IsSexual()
 	if content == 1 || content == 2
 		return true
@@ -467,7 +441,6 @@ bool function HasTag(string tag)
 	return tags.Find(tag) >= 0
 endFunction
 
-
 ;/-----------------------------------------------\;
 ;|	System Use                                   |;
 ;\-----------------------------------------------/;
@@ -488,10 +461,11 @@ function _Log(string log, string method, string type = "NOTICE")
 	Debug.Trace("--------------------------------------------------------------------------------------------")
 endFunction
 
-function UnloadAnimation()
+function InitializeAnimation()
 	Name = ""
 	Registrar = ""
 	Enabled = true
+	waiting = false
 	content = 0
 	actors = 0
 	stages = 0
@@ -508,27 +482,14 @@ function UnloadAnimation()
 	bool[] switchDel
 	switchData = switchDel
 
-	string[] tagsDel
-	tags = tagsDel
-	string[] actor1Del
-	actor1 = actor1Del
-	string[] actor2Del
-	actor2 = actor2Del
-	string[] actor3Del
-	actor3 = actor3Del
-	string[] actor4Del
-	actor4 = actor4Del
-	string[] actor5Del
-	actor5 = actor5Del
+	string[] stringDel
+	tags = stringDel
+	animations = stringDel
 
-	form[] extras1Del
-	extras1 = extras1Del
-	form[] extras2Del
-	extras2 = extras2Del
-	form[] extras3Del
-	extras3 = extras3Del
-	form[] extras4Del
-	extras4 = extras4Del
-	form[] extras5Del
-	extras5 = extras5Del
+	form[] formDel
+	extras1 = formDel
+	extras2 = formDel
+	extras3 = formDel
+	extras4 = formDel
+	extras5 = formDel
 endFunction

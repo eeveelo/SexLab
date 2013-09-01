@@ -30,8 +30,11 @@ sslThreadSlots property ThreadSlots auto
 sslActorSlots property ActorSlots auto
 
 ; Animation Sets
-sslBaseAnimation[] property animation auto hidden
-int animIndex = 0
+sslBaseAnimation[] property Animation hidden
+	sslBaseAnimation[] function get()
+		return AnimationRegistry.Animations
+	endFunction
+endProperty
 
 ; Animation Faction
 faction property AnimatingFaction auto

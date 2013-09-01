@@ -875,6 +875,13 @@ function InitializeThread()
 	storageslots = acDel
 	victim = none
 	; Empty alias slots
+	int i = 0
+	while i < ActorSlots.Length
+		if ActorSlots[i] != none
+			ActorSlots[i].ClearAlias()
+		endIf
+		i += 1
+	endWhile
 	sslActorAlias[] aaDel
 	ActorSlots = aaDel
 	; Empty Floats

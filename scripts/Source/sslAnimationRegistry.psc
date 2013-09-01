@@ -1,21 +1,13 @@
 scriptname sslAnimationRegistry extends Quest
 
 sslBaseAnimation[] Registry
-Scene[] AnimationSlots
-bool locked
-
-int property FreeSlot hidden
-	int function get()
-		int i = 0
-		while i < Registry.Length
-			if Registry[i] == none || Registry[i].Registrar == ""
-				return i
-			endIf
-			i += 1
-		endWhile
-		return -1
+sslBaseAnimation[] property Animations hidden
+	sslBaseAnimation[] function get()
+		return Registry
 	endFunction
 endProperty
+Scene[] AnimationSlots
+bool locked
 
 ;/-----------------------------------------------\;
 ;|	Search Animations                            |;
@@ -24,7 +16,7 @@ endProperty
 sslBaseAnimation function GetByName(string findName)
 	int i = 0
 	while i < Registry.Length
-		if Registry[i] != none && Registry[i].name == findName
+		if Registry[i].Slotted && Registry[i].Name == findName
 			return Registry[i]
 		endIf
 		i += 1
@@ -36,7 +28,7 @@ sslBaseAnimation[] function GetByTag(int actors, string tag1, string tag2 = "", 
 	sslBaseAnimation[] animReturn
 	int i = 0
 	while i < Registry.Length
-		if Registry[i] != none && Registry[i].Enabled && Registry[i].ActorCount() == actors
+		if Registry[i].Slotted && Registry[i].Enabled && Registry[i].ActorCount() == actors
 			bool check1 = Registry[i].HasTag(tag1)
 			bool check2 = Registry[i].HasTag(tag2)
 			bool check3 = Registry[i].HasTag(tag3)
@@ -46,7 +38,7 @@ sslBaseAnimation[] function GetByTag(int actors, string tag1, string tag2 = "", 
 			elseif !requireAll && (check1 || check2 || check3) && !(supress && tagSuppress != "")
 				animReturn = sslUtility.PushAnimation(Registry[i], animReturn)
 			; else
-				; debug.trace("Rejecting "+Registry[i].name+" based on "+check1+check2+check3+supress)
+				; debug.trace("Rejecting "+Registry[i].Name+" based on "+check1+check2+check3+supress)
 			endIf
 		endIf
 		i += 1
@@ -60,28 +52,36 @@ sslBaseAnimation[] function GetByType(int actors, int males = -1, int females = 
 	sslBaseAnimation[] animReturn
 	int i = 0
 	while i < Registry.Length
-		if Registry[i] != none && Registry[i].enabled
+		if Registry[i].Slotted && Registry[i].Enabled
+			Debug.Trace("checking Registry["+Registry[i].Registrar+"] '"+Registry[i].Name+"'")
 			bool accepted = true
 			if actors != Registry[i].ActorCount()
+				Debug.Trace(actors+" actors needed, has "+Registry[i].ActorCount())
 				accepted = false
 			endIf
 			if accepted && males != -1 && males != Registry[i].MaleCount()
+				Debug.Trace(males+" males needed, has "+Registry[i].MaleCount())
 				accepted = false
 			endIf
 			if accepted && females != -1 && females != Registry[i].FemaleCount()
+				Debug.Trace(females+" females needed, has "+Registry[i].FemaleCount())
 				accepted = false
 			endIf
 			if accepted && stages != -1 && stages != Registry[i].StageCount()
+				Debug.Trace(stages+" stages needed, has "+Registry[i].StageCount())
 				accepted = false
 			endIf
 			if accepted && (aggressive != Registry[i].HasTag("Aggressive") && restrictAggressive)
+				Debug.Trace(aggressive+" aggr needed, has "+Registry[i].HasTag("Aggressive"))
 				accepted = false
 			endIf
 			if accepted && sexual != Registry[i].IsSexual()
+				Debug.Trace(aggressive+" sexual needed, has "+Registry[i].IsSexual())
 				accepted = false
 			endIf
 			; Still accepted? Push it's return
 			if accepted
+				Debug.Trace("Accepting "+Registry[i].Name)
 				animReturn = sslUtility.PushAnimation(Registry[i], animReturn)
 			endIf
 		endIf
@@ -96,6 +96,17 @@ sslBaseAnimation function GetBySlot(int slot)
 	return Registry[slot]
 endFunction
 
+int function GetFreeSlot()
+	int i = 0
+	while i < Registry.Length
+		if !Registry[i].Slotted
+			return i
+		endIf
+		i += 1
+	endWhile
+	return -1
+endFunction
+
 ;/-----------------------------------------------\;
 ;|	Locate Animations                            |;
 ;\-----------------------------------------------/;
@@ -103,7 +114,7 @@ endFunction
 int function FindByName(string findName)
 	int i = 0
 	while i < Registry.Length
-		if Registry[i] != none && Registry[i].name == findName
+		if Registry[i].Slotted && Registry[i].Name == findName
 			return i
 		endIf
 		i += 1
@@ -114,7 +125,7 @@ endFunction
 int function FindByRegistrar(string id)
 	int i = 0
 	while i < Registry.Length
-		if Registry[i] != none && Registry[i].Registrar == id
+		if Registry[i].Slotted && Registry[i].Registrar == id
 			return i
 		endIf
 		i += 1
@@ -130,7 +141,7 @@ int function GetCount(bool ignoreDisabled = true)
 	int count = 0
 	int i = 0
 	while i < Registry.Length
-		if Registry[i] != none && Registry[i].Name == "" && ((ignoreDisabled && Registry[i].Enabled) || !ignoreDisabled)
+		if Registry[i].Slotted && ((ignoreDisabled && Registry[i].Enabled) || !ignoreDisabled)
 			count += 1
 		endIf
 		i += 1
@@ -227,11 +238,34 @@ sslBaseAnimation property SexLabAnimationSlot071 auto
 sslBaseAnimation property SexLabAnimationSlot072 auto
 sslBaseAnimation property SexLabAnimationSlot073 auto
 sslBaseAnimation property SexLabAnimationSlot074 auto
+sslBaseAnimation property SexLabAnimationSlot075 auto
+sslBaseAnimation property SexLabAnimationSlot076 auto
+sslBaseAnimation property SexLabAnimationSlot077 auto
+sslBaseAnimation property SexLabAnimationSlot078 auto
+sslBaseAnimation property SexLabAnimationSlot079 auto
+sslBaseAnimation property SexLabAnimationSlot080 auto
+sslBaseAnimation property SexLabAnimationSlot081 auto
+sslBaseAnimation property SexLabAnimationSlot082 auto
+sslBaseAnimation property SexLabAnimationSlot083 auto
+sslBaseAnimation property SexLabAnimationSlot084 auto
+sslBaseAnimation property SexLabAnimationSlot085 auto
+sslBaseAnimation property SexLabAnimationSlot086 auto
+sslBaseAnimation property SexLabAnimationSlot087 auto
+sslBaseAnimation property SexLabAnimationSlot088 auto
+sslBaseAnimation property SexLabAnimationSlot089 auto
+sslBaseAnimation property SexLabAnimationSlot090 auto
+sslBaseAnimation property SexLabAnimationSlot091 auto
+sslBaseAnimation property SexLabAnimationSlot092 auto
+sslBaseAnimation property SexLabAnimationSlot093 auto
+sslBaseAnimation property SexLabAnimationSlot094 auto
+sslBaseAnimation property SexLabAnimationSlot095 auto
+sslBaseAnimation property SexLabAnimationSlot096 auto
+sslBaseAnimation property SexLabAnimationSlot097 auto
+sslBaseAnimation property SexLabAnimationSlot098 auto
+sslBaseAnimation property SexLabAnimationSlot099 auto
 
 function _Setup()
-	locked = true
-
-	Registry = new sslBaseAnimation[75]
+	Registry = new sslBaseAnimation[100]
 	Registry[0] = SexLabAnimationSlot000
 	Registry[1] = SexLabAnimationSlot001
 	Registry[2] = SexLabAnimationSlot002
@@ -307,25 +341,44 @@ function _Setup()
 	Registry[72] = SexLabAnimationSlot072
 	Registry[73] = SexLabAnimationSlot073
 	Registry[74] = SexLabAnimationSlot074
+	Registry[75] = SexLabAnimationSlot075
+	Registry[76] = SexLabAnimationSlot076
+	Registry[77] = SexLabAnimationSlot077
+	Registry[78] = SexLabAnimationSlot078
+	Registry[79] = SexLabAnimationSlot079
+	Registry[80] = SexLabAnimationSlot080
+	Registry[81] = SexLabAnimationSlot081
+	Registry[82] = SexLabAnimationSlot082
+	Registry[83] = SexLabAnimationSlot083
+	Registry[84] = SexLabAnimationSlot084
+	Registry[85] = SexLabAnimationSlot085
+	Registry[86] = SexLabAnimationSlot086
+	Registry[87] = SexLabAnimationSlot087
+	Registry[88] = SexLabAnimationSlot088
+	Registry[89] = SexLabAnimationSlot089
+	Registry[90] = SexLabAnimationSlot090
+	Registry[91] = SexLabAnimationSlot091
+	Registry[92] = SexLabAnimationSlot092
+	Registry[93] = SexLabAnimationSlot093
+	Registry[94] = SexLabAnimationSlot094
+	Registry[95] = SexLabAnimationSlot095
+	Registry[96] = SexLabAnimationSlot096
+	Registry[97] = SexLabAnimationSlot097
+	Registry[98] = SexLabAnimationSlot098
+	Registry[99] = SexLabAnimationSlot099
 
 	int i
 	while i < Registry.Length
-		Registry[i].UnloadAnimation()
+		Registry[i].InitializeAnimation()
 		i += 1
 	endWhile
 
-	locked = false
+	_Load()
 endFunction
 
 
 sslAnimationDefaults property Defaults auto
 function _Load()
 	Defaults.LoadAnimations()
-endFunction
-
-function _WaitLock()
-	while locked
-		Utility.Wait(0.25)
-	endWhile
-	locked = true
+	Debug.Notification("Registered SexLab '"+GetCount(false)+"' Animations")
 endFunction
