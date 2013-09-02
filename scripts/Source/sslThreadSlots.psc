@@ -25,7 +25,6 @@ sslThreadController function GetController(int tid)
 	endWhile
 endFunction
 
-
 sslThreadController function PickController()
 	int i = 0
 	while i < ThreadView.Length

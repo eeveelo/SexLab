@@ -128,9 +128,11 @@ function PlayAnimation()
 	; Play Idle
 	Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(position, stage))
 	; Open Mouth
-	ActorRef.ClearExpressionOverride()
 	if Animation.UseOpenMouth(position, stage)
 		ActorRef.SetExpressionOverride(16, 100)
+	else
+		ActorRef.SetExpressionOverride(7, 50)
+		ActorRef.ClearExpressionOverride()
 	endIf
 	; Send SOS event
 	if SexLab.sosEnabled && Animation.GetGender(position) < 1

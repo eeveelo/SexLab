@@ -25,18 +25,17 @@ endProperty
 ;#---------------------------#
 ;# Start Animation Variables #
 ;#---------------------------#
-sslAnimationRegistry property AnimationRegistry auto
-sslVoiceRegistry property VoiceRegistry auto
+sslAnimationSlots property AnimationSlots auto
+sslVoiceSlots property VoiceSlots auto
 sslThreadSlots property ThreadSlots auto
 sslActorSlots property ActorSlots auto
 
 ; Animation Sets
 sslBaseAnimation[] property Animation hidden
 	sslBaseAnimation[] function get()
-		return AnimationRegistry.Animations
+		return AnimationSlots.Animations
 	endFunction
 endProperty
-
 
 ; Animation Faction
 faction property AnimatingFaction auto
@@ -51,7 +50,7 @@ actor property DebugActor auto hidden
 ; Voice Sets
 sslBaseVoice[] property Voice hidden
 	sslBaseVoice[] function get()
-		return VoiceRegistry.Voices
+		return VoiceSlots.Voices
 	endFunction
 endProperty
 
@@ -414,32 +413,32 @@ endFunction
 ;#---------------------------#
 
 sslBaseAnimation function GetAnimationByName(string findName)
-	return AnimationRegistry.GetByName(findName)
+	return AnimationSlots.GetByName(findName)
 endFunction
 
 sslBaseAnimation[] function GetAnimationsByType(int actors, int males = -1, int females = -1, int stages = -1, bool aggressive = false, bool sexual = true)
-	return AnimationRegistry.GetByType(actors, males, females, stages, aggressive, sexual, Config.bRestrictAggressive)
+	return AnimationSlots.GetByType(actors, males, females, stages, aggressive, sexual, Config.bRestrictAggressive)
 endFunction
 
 sslBaseAnimation[] function GetAnimationsByTag(int actors, string tag1, string tag2 = "", string tag3 = "", string tagSuppress = "", bool requireAll = true)
-	return AnimationRegistry.GetByTag(actors, tag1, tag2, tag3, tagSuppress, requireAll)
+	return AnimationSlots.GetByTag(actors, tag1, tag2, tag3, tagSuppress, requireAll)
 endFunction
 
 sslBaseAnimation[] function MergeAnimationLists(sslBaseAnimation[] list1, sslBaseAnimation[] list2)
-	return AnimationRegistry.MergeLists(list1, list2)
+	return AnimationSlots.MergeLists(list1, list2)
 endFunction
 
 int function FindAnimationByName(string findName)
-	return AnimationRegistry.FindByName(findName)
+	return AnimationSlots.FindByName(findName)
 endFunction
 
 int function GetAnimationCount(bool ignoreDisabled = true)
-	return AnimationRegistry.GetCount(ignoreDisabled)
+	return AnimationSlots.GetCount(ignoreDisabled)
 endFunction
 
 int function RegisterAnimation(sslBaseAnimation anim)
 	return -1
-	;return AnimationRegistry.Register(anim)
+	;return AnimationSlots.Register(anim)
 endFunction
 
 ;#---------------------------#
@@ -451,27 +450,27 @@ endFunction
 ;#---------------------------#
 
 sslBaseVoice function PickVoice(actor a)
-	return VoiceRegistry.PickVoice(a)
+	return VoiceSlots.PickVoice(a)
 endFunction
 
 sslBaseVoice function GetVoiceByGender(int g)
-	return VoiceRegistry.GetByGender(g)
+	return VoiceSlots.GetByGender(g)
 endFunction
 
 sslBaseVoice function GetVoiceByName(string findName)
-	return VoiceRegistry.GetByName(findName)
+	return VoiceSlots.GetByName(findName)
 endFunction
 
 int function FindVoiceByName(string findName)
-	return VoiceRegistry.FindByName(findName)
+	return VoiceSlots.FindByName(findName)
 endFunction
 
 sslBaseVoice function GetVoiceByTag(string tag1, string tag2 = "", string tagSuppress = "", bool requireAll = true)
-	return VoiceRegistry.GetByTag(tag1, tag2, tagSuppress, requireAll)
+	return VoiceSlots.GetByTag(tag1, tag2, tagSuppress, requireAll)
 endFunction
 
 sslBaseVoice function GetVoiceBySlot(int slot)
-	return VoiceRegistry.GetBySlot(slot)
+	return VoiceSlots.GetBySlot(slot)
 endFunction
 
 ;#---------------------------#
@@ -711,26 +710,26 @@ endFunction
 
 function _ClearAnimations()
 	ready = false
-	AnimationRegistry._Setup()
+	AnimationSlots._Setup()
 	ready = true
 endFunction
 
 
 function _LoadAnimations()
 	ready = false
-	AnimationRegistry._Load()
+	AnimationSlots._Load()
 	ready = true
 endFunction
 
 function _ClearVoices()
 	ready = false
-	VoiceRegistry._Setup()
+	VoiceSlots._Setup()
 	ready = true
 endFunction
 
 function _LoadVoices()
 	ready = false
-	VoiceRegistry._Load()
+	VoiceSlots._Load()
 	ready = true
 endFunction
 

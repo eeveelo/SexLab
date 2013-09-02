@@ -1,6 +1,6 @@
 scriptname sslAnimationFactory extends Quest
 
-sslAnimationRegistry property Registry auto
+sslAnimationSlots property Registry auto
 sslBaseAnimation property Animation auto hidden
 int slot
 

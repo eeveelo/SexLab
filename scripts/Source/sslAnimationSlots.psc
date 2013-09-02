@@ -1,4 +1,4 @@
-scriptname sslAnimationRegistry extends Quest
+scriptname sslAnimationSlots extends Quest
 
 sslBaseAnimation[] Registry
 sslBaseAnimation[] property Animations hidden

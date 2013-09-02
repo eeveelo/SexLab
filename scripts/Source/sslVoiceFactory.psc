@@ -1,6 +1,6 @@
 scriptname sslVoiceFactory extends Quest
 
-sslVoiceRegistry property Registry auto
+sslVoiceSlots property Registry auto
 sslBaseVoice property Voice auto hidden
 int slot
 

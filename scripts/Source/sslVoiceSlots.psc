@@ -1,4 +1,4 @@
-scriptname sslVoiceRegistry extends Quest
+scriptname sslVoiceSlots extends Quest
 
 sslBaseVoice[] Registry
 sslBaseVoice[] property Voices hidden

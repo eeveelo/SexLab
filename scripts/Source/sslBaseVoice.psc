@@ -1,6 +1,6 @@
 scriptname sslBaseVoice extends ReferenceAlias
 
-sslVoiceRegistry property Registry auto
+sslVoiceSlots property Registry auto
 
 string property Name = "" auto hidden
 string property Registrar = "" auto hidden
