@@ -111,11 +111,13 @@ int function AddPositionStage(int position, string animation, float forward = 0.
 	_WaitLock()
 
 	animations = sslUtility.PushString(animation, animations)
-	string[] anims = FetchPosition(position)
-	int stage = anims.Length
 
-	if stage > stages
+	int stage
+	if position == 0
+		stage = ( stages + 1 )
 		stages = stage
+	else
+		stage = ( animations.Length - (position * stages) )
 	endIf
 
 	offsetData = sslUtility.PushFloat(forward, offsetData)
@@ -284,10 +286,10 @@ string[] function FetchPosition(int position)
 		_Log("Unknown position, '"+stage+"' given", "FetchPosition")
 		return none
 	endIf
-	string[] anims = sslUtility.StringArray(actors)
-	int stage = 1
+	string[] anims = sslUtility.StringArray(stages)
+	int stage = 0
 	while stage <= stages
-		anims[stage] = FetchPositionStage(position, stage)
+		anims[stage] = FetchPositionStage(position, (stage + 1))
 		stage += 1
 	endWhile
 	return anims
