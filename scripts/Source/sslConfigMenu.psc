@@ -681,7 +681,7 @@ state VoiceVolume
 	endEvent
 	event OnSliderAcceptST(float value)
 		ActorLib.fVoiceVolume = ( value / 100 )
-		SetSliderOptionValueST(ActorLib.fVoiceVolume, "{0}%")
+		SetSliderOptionValueST(value, "{0}%")
 	endEvent
 	event OnDefaultST()
 		ActorLib.fVoiceVolume = 0.70
