@@ -129,6 +129,8 @@ event OnPageReset(string page)
 	endIf
 
 	if page == "$SSL_AnimationSettings"
+		SetCursorFillMode(TOP_TO_BOTTOM)
+
 		AddToggleOptionST("RestrictAggressive","$SSL_RestrictAggressive", AnimLib.bRestrictAggressive)
 		AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", ActorLib.bScaleActors)
 		AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", ActorLib.bRagdollEnd)
@@ -148,13 +150,13 @@ event OnPageReset(string page)
 		AddHeaderOption("$SSL_PlayerSettings")
 		AddToggleOptionST("AutoAdvance","$SSL_AutoAdvanceStages", ThreadLib.bAutoAdvance)
 		AddToggleOptionST("DisableVictim","$SSL_DisableVictimControls", ActorLib.bDisablePlayer)
-		
+
 		AddHeaderOption("$SSL_SoundsVoices")
 		AddTextOptionST("PlayerVoice","$SSL_PCVoice", "$SSL_Random")
-		AddSliderOptionST("VoiceVolume","$SSL_VoiceVolume", ActorLib.fVoiceVolume, "{2}")
+		AddSliderOptionST("VoiceVolume","$SSL_VoiceVolume", (ActorLib.fVoiceVolume * 100), "{0}%")
 		AddSliderOptionST("MaleVoiceDelay","$SSL_MaleVoiceDelay", ActorLib.fMaleVoiceDelay, "$SSL_Seconds")
 		AddSliderOptionST("FemaleVoiceDelay","$SSL_FemaleVoiceDelay", ActorLib.fFemaleVoiceDelay, "$SSL_Seconds")
-		AddSliderOptionST("SFXVolume","$SSL_SFXVolume", ThreadLib.fSFXVolume, "{2}")
+		AddSliderOptionST("SFXVolume","$SSL_SFXVolume", (ThreadLib.fSFXVolume * 100), "{0}%")
 		AddSliderOptionST("SFXDelay","$SSL_SFXDelay", ThreadLib.fSFXDelay, "$SSL_Seconds")
 
 	elseIf page == "$SSL_PlayerHotkeys"
@@ -180,7 +182,6 @@ event OnPageReset(string page)
 		AddKeyMapOptionST("RestoreOffsets","$SSL_DeleteSavedAdjustments", ActorLib.kRestoreOffsets)
 
 	elseIf page == "$SSL_NormalTimersStripping"
-
 		SetCursorFillMode(TOP_TO_BOTTOM)
 
 		AddHeaderOption("$SSL_ConsensualStageTimers")
@@ -228,6 +229,7 @@ event OnPageReset(string page)
 
 	elseIf page == "$SSL_ForeplayTimersStripping"
 		SetCursorFillMode(TOP_TO_BOTTOM)
+
 		AddHeaderOption("$SSL_ForeplayIntroAnimationTimers")
 		oidStageTimerLeadIn[0] = AddSliderOption("$SSL_Stage1Length", ThreadLib.fStageTimerLeadIn[0], "$SSL_Seconds")
 		oidStageTimerLeadIn[1] = AddSliderOption("$SSL_Stage2Length", ThreadLib.fStageTimerLeadIn[1], "$SSL_Seconds")
@@ -273,8 +275,8 @@ event OnPageReset(string page)
 
 
 	elseIf page == "$SSL_AggressiveTimersStripping"
-
 		SetCursorFillMode(TOP_TO_BOTTOM)
+
 		AddHeaderOption("$SSL_AggressiveAnimationTimers")
 		oidStageTimerAggr[0] = AddSliderOption("$SSL_Stage1Length", ThreadLib.fStageTimerAggr[0], "$SSL_Seconds")
 		oidStageTimerAggr[1] = AddSliderOption("$SSL_Stage2Length", ThreadLib.fStageTimerAggr[1], "$SSL_Seconds")
@@ -320,6 +322,7 @@ event OnPageReset(string page)
 
 	elseIf page == "$SSL_ToggleAnimations"
 		SetCursorFillMode(LEFT_TO_RIGHT)
+
 		i = 0
 		while i < AnimSlots.Animations.Length
 			if AnimSlots.Animations[i].Registered
@@ -329,6 +332,7 @@ event OnPageReset(string page)
 		endWhile
 	elseIf page == "$SSL_ForeplayAnimations"
 		SetCursorFillMode(LEFT_TO_RIGHT)
+
 		i = 0
 		while i < AnimSlots.Animations.Length
 			if AnimSlots.Animations[i].Registered
@@ -338,6 +342,7 @@ event OnPageReset(string page)
 		endWhile
 	elseIf page == "$SSL_AggressiveAnimations"
 		SetCursorFillMode(LEFT_TO_RIGHT)
+
 		i = 0
 		while i < AnimSlots.Animations.Length
 			if AnimSlots.Animations[i].Registered
@@ -347,6 +352,7 @@ event OnPageReset(string page)
 		endWhile
 	elseIf page == "$SSL_ToggleVoices"
 		SetCursorFillMode(LEFT_TO_RIGHT)
+
 		i = 0
 		while i < VoiceSlots.Voices.Length
 			if VoiceSlots.Voices[i].Registered
@@ -356,6 +362,7 @@ event OnPageReset(string page)
 		endWhile
 	elseIf page == "$SSL_SexDiary" || page == "$SSL_SexJournal"
 		SetCursorFillMode(TOP_TO_BOTTOM)
+
 		AddHeaderOption("$SSL_SexualExperience")
 		int full = Stats.fTimeSpent as int
 		int seconds = full % 60
@@ -385,6 +392,7 @@ event OnPageReset(string page)
 
 	elseIf page == "$SSL_RebuildClean"
 		SetCursorFillMode(TOP_TO_BOTTOM)
+
 		AddHeaderOption("SexLab v"+GetStringVer()+" by Ashal@LoversLab.com")
 		AddEmptyOption()
 		AddHeaderOption("$SSL_Maintenance")
@@ -436,7 +444,6 @@ state RestrictAggressive
 		SetInfoText("$SSL_InfoRestrictAggressive")
 	endEvent
 endState
-
 state ScaleActors
 	event OnSelectST()
 		ActorLib.bScaleActors = !ActorLib.bScaleActors
@@ -450,7 +457,6 @@ state ScaleActors
 		SetInfoText("$SSL_InfoScaleActors")
 	endEvent
 endState
-
 state RagdollEnd
 	event OnSelectST()
 		ActorLib.bRagdollEnd = !ActorLib.bRagdollEnd
@@ -464,7 +470,6 @@ state RagdollEnd
 		SetInfoText("$SSL_InfoRagdollEnd")
 	endEvent
 endState
-
 state UndressAnimation
 	event OnSelectST()
 		ActorLib.bUndressAnimation = !ActorLib.bUndressAnimation
@@ -478,7 +483,6 @@ state UndressAnimation
 		SetInfoText("$SSL_InfoUndressAnimation")
 	endEvent
 endState
-
 state ReDressVictim
 	event OnSelectST()
 		ActorLib.bReDressVictim = !ActorLib.bReDressVictim
@@ -492,7 +496,6 @@ state ReDressVictim
 		SetInfoText("$SSL_InfoReDressVictim")
 	endEvent
 endState
-
 state NPCBed 
 	event OnSelectST()
 		if ThreadLib.sNPCBed == "$SSL_Never"
@@ -512,7 +515,6 @@ state NPCBed
 		SetInfoText("$SSL_InfoNPCBed")
 	endEvent
 endState
-
 state UseCum
 	event OnSelectST()
 		ActorLib.bUseCum = !ActorLib.bUseCum
@@ -526,7 +528,6 @@ state UseCum
 		SetInfoText("$SSL_InfoUseCum")
 	endEvent
 endState
-
 state AllowFemaleFemaleCum
 	event OnSelectST()
 		ActorLib.bAllowFFCum = !ActorLib.bAllowFFCum
@@ -540,27 +541,25 @@ state AllowFemaleFemaleCum
 		SetInfoText("$SSL_InfoAllowFFCum")
 	endEvent
 endState
-
 state CumEffectTimer
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(ActorLib.fCumTimer)
 		SetSliderDialogDefaultValue(120.0)
-		SetSliderDialogRange(1.0, 500.0)
+		SetSliderDialogRange(1.0, 600.0)
 		SetSliderDialogInterval(1.0)
 	endEvent
 	event OnSliderAcceptST(float value)
 		ActorLib.fCumTimer = value
-		SetSliderOptionValueST(ActorLib.fCumTimer)
+		SetSliderOptionValueST(ActorLib.fCumTimer, "$SSL_Seconds")
 	endEvent
 	event OnDefaultST()
 		ActorLib.fCumTimer = 120.0
-		SetToggleOptionValueST(ActorLib.fCumTimer)
+		SetToggleOptionValueST(ActorLib.fCumTimer, "$SSL_Seconds")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoCumTimer")
 	endEvent
 endState
-
 state StraponsFemale
 	event OnSelectST()
 		ActorLib.bUseStrapons = !ActorLib.bUseStrapons
@@ -574,7 +573,6 @@ state StraponsFemale
 		SetInfoText("$SSL_InfoUseStrapons")
 	endEvent
 endState
-
 state NudeSuitMales
 	event OnSelectST()
 		ActorLib.bUseMaleNudeSuit = !ActorLib.bUseMaleNudeSuit
@@ -588,7 +586,6 @@ state NudeSuitMales
 		SetInfoText("$SSL_InfoMaleNudeSuit")
 	endEvent
 endState
-
 state NudeSuitFemales
 	event OnSelectST()
 		ActorLib.bUseFemaleNudeSuit = !ActorLib.bUseFemaleNudeSuit
@@ -602,7 +599,6 @@ state NudeSuitFemales
 		SetInfoText("$SSL_InfoFemaleNudeSuit")
 	endEvent
 endState
-
 state ForeplayStage
 	event OnSelectST()
 		ThreadLib.bForeplayStage = !ThreadLib.bForeplayStage
@@ -616,7 +612,6 @@ state ForeplayStage
 		SetInfoText("")
 	endEvent
 endState
-
 state PlayerTCL
 	event OnSelectST()
 		ActorLib.bEnableTCL = !ActorLib.bEnableTCL
@@ -630,7 +625,6 @@ state PlayerTCL
 		SetInfoText("$SSL_InfoPlayerTCL")
 	endEvent
 endState
-
 state AutoAdvance
 	event OnSelectST()
 		ThreadLib.bAutoAdvance = !ThreadLib.bAutoAdvance
@@ -644,7 +638,6 @@ state AutoAdvance
 		SetInfoText("$SSL_InfoAutoAdvance")
 	endEvent
 endState
-
 state DisableVictim
 	event OnSelectST()
 		ActorLib.bDisablePlayer = !ActorLib.bDisablePlayer
@@ -658,7 +651,6 @@ state DisableVictim
 		SetInfoText("$SSL_InfoDisablePlayer")
 	endEvent
 endState
-
 state PlayerVoice
 	event OnSelectST()
 		int current = ( VoiceSlots.FindByName(VoiceLib.sPlayerVoice) + 1 )
@@ -668,7 +660,7 @@ state PlayerVoice
 		if current == -1
 			VoiceLib.sPlayerVoice = "$SSL_Random"
 		else
-			VoiceLib.sPlayerVoice = VoiceSlots.GetBySlot(current).Name  
+			VoiceLib.sPlayerVoice = VoiceSlots.GetBySlot(current).Name
 		endIf
 		SetTextOptionValueST(VoiceLib.sPlayerVoice)
 	endEvent
@@ -680,81 +672,77 @@ state PlayerVoice
 		SetInfoText("$SSL_InfoPlayerVoice")
 	endEvent
 endState
-
 state VoiceVolume
 	event OnSliderOpenST()
-		SetSliderDialogStartValue(ActorLib.fVoiceVolume)
-		SetSliderDialogDefaultValue(0.7)
-		SetSliderDialogRange(0.0, 1.0)
-		SetSliderDialogInterval(0.01)
+		SetSliderDialogStartValue((ActorLib.fVoiceVolume * 100))
+		SetSliderDialogDefaultValue(70)
+		SetSliderDialogRange(0, 100)
+		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
-		ActorLib.fVoiceVolume = value
-		SetSliderOptionValueST(ActorLib.fVoiceVolume)
+		ActorLib.fVoiceVolume = ( value / 100 )
+		SetSliderOptionValueST(ActorLib.fVoiceVolume, "{0}%")
 	endEvent
 	event OnDefaultST()
-		ActorLib.fVoiceVolume = 50
-		SetSliderOptionValueST(ActorLib.fVoiceVolume)
+		ActorLib.fVoiceVolume = 0.70
+		SetSliderOptionValueST(70, "{0}%")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoVoiceVolume")
 	endEvent
 endState
-
 state MaleVoiceDelay
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(ActorLib.fMaleVoiceDelay)
 		SetSliderDialogDefaultValue(7.0)
-		SetSliderDialogRange(4.0, 60.0)
+		SetSliderDialogRange(4.0, 45.0)
 		SetSliderDialogInterval(1.0)
 	endEvent
 	event OnSliderAcceptST(float value)
 		ActorLib.fMaleVoiceDelay = value
-		SetSliderOptionValueST(ActorLib.fMaleVoiceDelay)
+		SetSliderOptionValueST(ActorLib.fMaleVoiceDelay, "$SSL_Seconds")
 	endEvent
 	event OnDefaultST()
 		ActorLib.fMaleVoiceDelay = 7.0
-		SetSliderOptionValueST(ActorLib.fMaleVoiceDelay)
+		SetSliderOptionValueST(ActorLib.fMaleVoiceDelay, "$SSL_Seconds")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoMaleVoiceDelay")
 	endEvent
 endState
-
 state FemaleVoiceDelay
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(ActorLib.fFemaleVoiceDelay)
 		SetSliderDialogDefaultValue(6.0)
-		SetSliderDialogRange(4.0, 60.0)
+		SetSliderDialogRange(4.0, 45.0)
 		SetSliderDialogInterval(1.0)
 	endEvent
 	event OnSliderAcceptST(float value)
 		ActorLib.fFemaleVoiceDelay = value
-		SetSliderOptionValueST(ActorLib.fFemaleVoiceDelay)
+		SetSliderOptionValueST(ActorLib.fFemaleVoiceDelay, "$SSL_Seconds")
 	endEvent
 	event OnDefaultST()
 		ActorLib.fFemaleVoiceDelay = 6.0
-		SetSliderOptionValueST(ActorLib.fFemaleVoiceDelay)
+		SetSliderOptionValueST(ActorLib.fFemaleVoiceDelay, "$SSL_Seconds")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoFemaleVoiceDelay")
 	endEvent
 endState
-
 state SFXVolume
 	event OnSliderOpenST()
-		SetSliderDialogStartValue(ThreadLib.fSFXVolume)
-		SetSliderDialogDefaultValue(0.8)
-		SetSliderDialogRange(0.0, 1.0)
-		SetSliderDialogInterval(0.01)
+		SetSliderDialogStartValue((ThreadLib.fSFXVolume * 100))
+		SetSliderDialogDefaultValue(80)
+		SetSliderDialogRange(0, 100)
+		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
-		ThreadLib.fSFXVolume = value as int
-		SetSliderOptionValueST(ThreadLib.fSFXVolume)
+		ThreadLib.fSFXVolume = (value / 100.0)
+		SetSliderOptionValueST(value, "{0}%")
 	endEvent
 	event OnDefaultST()
-		ThreadLib.fSFXVolume = 0.8
-		SetSliderOptionValueST(ThreadLib.fSFXVolume)
+		ThreadLib.fSFXVolume = 0.80
+		SetSliderOptionValueST(80, "{0}%")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoSFXVolume")
@@ -764,16 +752,16 @@ state SFXDelay
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(ThreadLib.fSFXDelay)
 		SetSliderDialogDefaultValue(4.0)
-		SetSliderDialogRange(4.0, 60.0)
+		SetSliderDialogRange(4.0, 30.0)
 		SetSliderDialogInterval(1.0)
 	endEvent
 	event OnSliderAcceptST(float value)
 		ThreadLib.fSFXDelay = value
-		SetSliderOptionValueST(ThreadLib.fSFXDelay)
+		SetSliderOptionValueST(ThreadLib.fSFXDelay, "$SSL_Seconds")
 	endEvent
 	event OnDefaultST()
 		ThreadLib.fSFXDelay = 4.0
-		SetSliderOptionValueST(ThreadLib.fSFXDelay)
+		SetSliderOptionValueST(ThreadLib.fSFXDelay, "$SSL_Seconds")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoSFXDelay")
@@ -786,16 +774,16 @@ bool function KeyConflict(int newKeyCode, string conflictControl, string conflic
 	if (conflictControl != "")
 		string msg
 		if (conflictName != "")
-			msg = "This key is already mapped to: '" + conflictControl + "'\n(" + conflictName + ")\n\nAre you sure you want to continue?"
+			msg = "This key is already mapped to: \n'" + conflictControl + "'\n(" + conflictName + ")\n\nAre you sure you want to continue?"
 		else
-			msg = "This key is already mapped to: '" + conflictControl + "'\n\nAre you sure you want to continue?"
+			msg = "This key is already mapped to: \n'" + conflictControl + "'\n\nAre you sure you want to continue?"
 		endIf
 		continue = ShowMessage(msg, true, "$Yes", "$No")
 	endIf
 	return !continue
 endFunction
 
-State BackwardsModifier
+state BackwardsModifier
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
 			ActorLib.kBackwards = newKeyCode
@@ -810,8 +798,7 @@ State BackwardsModifier
 		SetInfoText("$SSL_InfoBackwards")
 	endEvent
 endState
-
-State AdvanceAnimation
+state AdvanceAnimation
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
 			ActorLib.kAdvanceAnimation = newKeyCode
@@ -826,8 +813,7 @@ State AdvanceAnimation
 		SetInfoText("$SSL_InfoAdvanceAnimation")
 	endEvent
 endState
-
-State ChangeAnimation
+state ChangeAnimation
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
 			ActorLib.kChangeAnimation = newKeyCode
@@ -842,8 +828,7 @@ State ChangeAnimation
 		SetInfoText("$SSL_InfoChangeAnimation")
 	endEvent
 endState
-
-State ChangePositions
+state ChangePositions
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
 			ActorLib.kChangePositions = newKeyCode
@@ -858,8 +843,7 @@ State ChangePositions
 		SetInfoText("$SSL_InfoChangePositions")
 	endEvent
 endState
-
-State MoveSceneLocation
+state MoveSceneLocation
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
 			ActorLib.kMoveScene = newKeyCode
@@ -874,8 +858,7 @@ State MoveSceneLocation
 		SetInfoText("$SSL_InfoMoveScene")
 	endEvent
 endState
-
-State RotateScene
+state RotateScene
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
 			ActorLib.kRotateScene = newKeyCode
@@ -890,8 +873,7 @@ State RotateScene
 		SetInfoText("$SSL_InfoRotateScene")
 	endEvent
 endState
-
-State AdjustStage
+state AdjustStage
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
 			ActorLib.kAdjustStage = newKeyCode
@@ -907,7 +889,7 @@ State AdjustStage
 	endEvent
 endState
 
-State AdjustChange
+state AdjustChange
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
 			ActorLib.kAdjustChange = newKeyCode
@@ -922,8 +904,7 @@ State AdjustChange
 		SetInfoText("$SSL_InfoAdjustChange")
 	endEvent
 endState
-
-State AdjustForward
+state AdjustForward
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
 			ActorLib.kAdjustForward = newKeyCode
@@ -938,8 +919,7 @@ State AdjustForward
 		SetInfoText("$SSL_InfoAdjustForward")
 	endEvent
 endState
-
-State AdjustUpward
+state AdjustUpward
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
 			ActorLib.kAdjustUpward = newKeyCode
@@ -954,8 +934,7 @@ State AdjustUpward
 		SetInfoText("$SSL_InfoAdjustUpward")
 	endEvent
 endState
-
-State AdjustSideways
+state AdjustSideways
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
 			ActorLib.kAdjustSideways = newKeyCode
@@ -970,8 +949,7 @@ State AdjustSideways
 		SetInfoText("$SSL_InfoAdjustSideways")
 	endEvent
 endState
-
-State RealignActors
+state RealignActors
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
 			ActorLib.kRealignActors = newKeyCode
@@ -986,8 +964,7 @@ State RealignActors
 		SetInfoText("$SSL_InfoRealignActors")
 	endEvent
 endState
-
-State RestoreOffsets
+state RestoreOffsets
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
 			ActorLib.kRestoreOffsets = newKeyCode
@@ -1018,14 +995,12 @@ state ToggleSystem
 		endIf
 	endEvent
 endState
-
 state StopCurrentAnimations
 	event OnSelectST()
 		ShowMessage("$SSL_StopRunningAnimations", false)
 		ThreadSlots._StopAll()
 	endEvent
 endState
-
 state RestoreDefaultSettings
 	event OnSelectST()
 		bool run = ShowMessage("$SSL_WarnRestoreDefaults")
@@ -1036,7 +1011,6 @@ state RestoreDefaultSettings
 		endIf
 	endEvent
 endState
-
 state ResetAnimationRegistry
 	event OnSelectST()
 		bool run = ShowMessage("$SSL_WarnRebuildAnimations")
@@ -1048,7 +1022,6 @@ state ResetAnimationRegistry
 		endIf
 	endEvent
 endState
-
 state ResetVoiceRegistry
 	event OnSelectST()
 		bool run = ShowMessage("$SSL_WarnRebuildVoices")
@@ -1058,7 +1031,6 @@ state ResetVoiceRegistry
 		endIf
 	endEvent
 endState
-
 state ResetPlayerSexStats
 	event OnSelectST()
 		bool run = ShowMessage("$SSL_WarnResetStats")
@@ -1068,7 +1040,6 @@ state ResetPlayerSexStats
 		endIf
 	endEvent
 endState
-
 state CleanSystem
 	event OnSelectST()
 		bool run = ShowMessage("$SSL_WarnCleanSystem")
@@ -1079,7 +1050,6 @@ state CleanSystem
 		endIf
 	endEvent
 endState
-
 state RebuildStraponList
 	event OnSelectST()
 		FindStrapons()
@@ -1093,54 +1063,137 @@ state RebuildStraponList
 	endEvent
 endState
 
+
+
+event OnOptionSliderOpen(int option)
+	if option == oidStageTimer[0]
+		SetSliderDialogStartValue(ThreadLib.fStageTimer[0])
+		SetSliderDialogDefaultValue(30.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+	elseIf option == oidStageTimer[1]
+		SetSliderDialogStartValue(ThreadLib.fStageTimer[1])
+		SetSliderDialogDefaultValue(20.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+	elseIf option == oidStageTimer[2]
+		SetSliderDialogStartValue(ThreadLib.fStageTimer[2])
+		SetSliderDialogDefaultValue(15.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+	elseIf option == oidStageTimer[3]
+		SetSliderDialogStartValue(ThreadLib.fStageTimer[3])
+		SetSliderDialogDefaultValue(15.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+	elseIf option == oidStageTimer[4]
+		SetSliderDialogStartValue(ThreadLib.fStageTimer[4])
+		SetSliderDialogDefaultValue(7.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+
+	elseIf option == oidStageTimerLeadIn[0]
+		SetSliderDialogStartValue(ThreadLib.fStageTimerLeadIn[0])
+		SetSliderDialogDefaultValue(30.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+	elseIf option == oidStageTimerLeadIn[1]
+		SetSliderDialogStartValue(ThreadLib.fStageTimerLeadIn[1])
+		SetSliderDialogDefaultValue(20.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+	elseIf option == oidStageTimerLeadIn[2]
+		SetSliderDialogStartValue(ThreadLib.fStageTimerLeadIn[2])
+		SetSliderDialogDefaultValue(15.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+	elseIf option == oidStageTimerLeadIn[3]
+		SetSliderDialogStartValue(ThreadLib.fStageTimerLeadIn[3])
+		SetSliderDialogDefaultValue(15.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+	elseIf option == oidStageTimerLeadIn[4]
+		SetSliderDialogStartValue(ThreadLib.fStageTimerLeadIn[4])
+		SetSliderDialogDefaultValue(7.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+
+	elseIf option == oidStageTimerAggr[0]
+		SetSliderDialogStartValue(ThreadLib.fStageTimerAggr[0])
+		SetSliderDialogDefaultValue(30.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+	elseIf option == oidStageTimerAggr[1]
+		SetSliderDialogStartValue(ThreadLib.fStageTimerAggr[1])
+		SetSliderDialogDefaultValue(20.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+	elseIf option == oidStageTimerAggr[2]
+		SetSliderDialogStartValue(ThreadLib.fStageTimerAggr[2])
+		SetSliderDialogDefaultValue(15.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+	elseIf option == oidStageTimerAggr[3]
+		SetSliderDialogStartValue(ThreadLib.fStageTimerAggr[3])
+		SetSliderDialogDefaultValue(15.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+	elseIf option == oidStageTimerAggr[4]
+		SetSliderDialogStartValue(ThreadLib.fStageTimerAggr[4])
+		SetSliderDialogDefaultValue(7.0)
+		SetSliderDialogRange(3.0, 300.0)
+		SetSliderDialogInterval(1.0)
+	endIf
+endEvent
+
 event OnOptionSliderAccept(int option, float value)
 	if option == oidStageTimer[0]
 		ThreadLib.fStageTimer[0] = value
-		SetSliderOptionValue(oidStageTimer[0], ThreadLib.fStageTimer[0], "$SSL_Seconds")
+		SetSliderOptionValue(oidStageTimer[0], value, "$SSL_Seconds")
 	elseIf option == oidStageTimer[1]
 		ThreadLib.fStageTimer[1] = value
-		SetSliderOptionValue(oidStageTimer[1], ThreadLib.fStageTimer[1], "$SSL_Seconds")
+		SetSliderOptionValue(oidStageTimer[1], value, "$SSL_Seconds")
 	elseIf option == oidStageTimer[2]
 		ThreadLib.fStageTimer[2] = value
-		SetSliderOptionValue(oidStageTimer[2], ThreadLib.fStageTimer[2], "$SSL_Seconds")
+		SetSliderOptionValue(oidStageTimer[2], value, "$SSL_Seconds")
 	elseIf option == oidStageTimer[3]
 		ThreadLib.fStageTimer[3] = value
-		SetSliderOptionValue(oidStageTimer[3], ThreadLib.fStageTimer[3], "$SSL_Seconds")
+		SetSliderOptionValue(oidStageTimer[3], value, "$SSL_Seconds")
 	elseIf option == oidStageTimer[4]
 		ThreadLib.fStageTimer[4] = value
-		SetSliderOptionValue(oidStageTimer[4], ThreadLib.fStageTimer[4], "$SSL_Seconds")
+		SetSliderOptionValue(oidStageTimer[4], value, "$SSL_Seconds")
 
 	elseIf option == oidStageTimerLeadIn[0]
 		ThreadLib.fStageTimerLeadIn[0] = value
-		SetSliderOptionValue(oidStageTimerLeadIn[0], ThreadLib.fStageTimerLeadIn[0], "$SSL_Seconds")
+		SetSliderOptionValue(oidStageTimerLeadIn[0], value, "$SSL_Seconds")
 	elseIf option == oidStageTimerLeadIn[1]
 		ThreadLib.fStageTimerLeadIn[1] = value
-		SetSliderOptionValue(oidStageTimerLeadIn[1], ThreadLib.fStageTimerLeadIn[1], "$SSL_Seconds")
+		SetSliderOptionValue(oidStageTimerLeadIn[1], value, "$SSL_Seconds")
 	elseIf option == oidStageTimerLeadIn[2]
 		ThreadLib.fStageTimerLeadIn[2] = value
-		SetSliderOptionValue(oidStageTimerLeadIn[2], ThreadLib.fStageTimerLeadIn[2], "$SSL_Seconds")
+		SetSliderOptionValue(oidStageTimerLeadIn[2], value, "$SSL_Seconds")
 	elseIf option == oidStageTimerLeadIn[3]
 		ThreadLib.fStageTimerLeadIn[3] = value
-		SetSliderOptionValue(oidStageTimerLeadIn[3], ThreadLib.fStageTimerLeadIn[3], "$SSL_Seconds")
+		SetSliderOptionValue(oidStageTimerLeadIn[3], value, "$SSL_Seconds")
 	elseIf option == oidStageTimerLeadIn[4]
 		ThreadLib.fStageTimerLeadIn[4] = value
-		SetSliderOptionValue(oidStageTimerLeadIn[4], ThreadLib.fStageTimerLeadIn[4], "$SSL_Seconds")
+		SetSliderOptionValue(oidStageTimerLeadIn[4], value, "$SSL_Seconds")
 
 	elseIf option == oidStageTimerAggr[0]
 		ThreadLib.fStageTimerAggr[0] = value
-		SetSliderOptionValue(oidStageTimerAggr[0], ThreadLib.fStageTimerAggr[0], "$SSL_Seconds")
+		SetSliderOptionValue(oidStageTimerAggr[0], value, "$SSL_Seconds")
 	elseIf option == oidStageTimerAggr[1]
 		ThreadLib.fStageTimerAggr[1] = value
-		SetSliderOptionValue(oidStageTimerAggr[1], ThreadLib.fStageTimerAggr[1], "$SSL_Seconds")
+		SetSliderOptionValue(oidStageTimerAggr[1], value, "$SSL_Seconds")
 	elseIf option == oidStageTimerAggr[2]
 		ThreadLib.fStageTimerAggr[2] = value
-		SetSliderOptionValue(oidStageTimerAggr[2], ThreadLib.fStageTimerAggr[2], "$SSL_Seconds")
+		SetSliderOptionValue(oidStageTimerAggr[2], value, "$SSL_Seconds")
 	elseIf option == oidStageTimerAggr[3]
 		ThreadLib.fStageTimerAggr[3] = value
-		SetSliderOptionValue(oidStageTimerAggr[3], ThreadLib.fStageTimerAggr[3], "$SSL_Seconds")
+		SetSliderOptionValue(oidStageTimerAggr[3], value, "$SSL_Seconds")
 	elseIf option == oidStageTimerAggr[4]
 		ThreadLib.fStageTimerAggr[4] = value
-		SetSliderOptionValue(oidStageTimerAggr[4], ThreadLib.fStageTimerAggr[4], "$SSL_Seconds")
+		SetSliderOptionValue(oidStageTimerAggr[4], value, "$SSL_Seconds")
 	endIf
 endEvent
 
@@ -1376,7 +1429,6 @@ function FindStrapons()
 		ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285F)
 	endIf
 endFunction
-
 
 function _SetupSystem()
 	; Init Stats
