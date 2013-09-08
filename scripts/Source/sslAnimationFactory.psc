@@ -1,6 +1,6 @@
 scriptname sslAnimationFactory extends Quest
 
-sslAnimationSlots property Registry auto
+sslAnimationSlots property Slots auto
 sslBaseAnimation property Animation auto hidden
 int slot
 
@@ -23,7 +23,6 @@ int property SexMix = 3 autoreadonly hidden
 int property Misc = 0 autoreadonly hidden
 int property Sexual = 1 autoreadonly hidden
 int property Foreplay = 2 autoreadonly hidden
-int property Creature = 3 autoreadonly hidden
 
 ;/-----------------------------------------------\;
 ;|	Registering Animations                       |;
@@ -31,21 +30,18 @@ int property Creature = 3 autoreadonly hidden
 
 ; Send callback event to start registration
 int function RegisterAnimation(string registrar)
-	int check = Registry.FindByRegistrar(registrar)
-	if check != -1
-		return check ; Duplicate
-	elseif Registry.GetFreeSlot() < 0
+	if Slots.FindByRegistrar(registrar) != -1
+		return Slots.FindByRegistrar(registrar) ; Duplicate
+	elseif !Slots.FreeSlots
 		return -1 ; No free slots
 	endIf
 	; Wait for factory to be free
-	_FactoryWait()
+	while Animation != none
+		Utility.Wait(0.10)
+	endWhile
 	; Get free animation slot
-	slot = Registry.GetFreeSlot()
-	Animation = Registry.GetBySlot(slot)
-	; Make sure it's cleared out before loading
-	Animation.InitializeAnimation()
-	; Set Registrar
-	Animation.Registrar = registrar
+	Animation = Slots.GetFree()
+	slot = Slots.Register(Animation, registrar)
 	; Send load event
 	RegisterForModEvent("RegisterAnimation", registrar)
 	SendModEvent("RegisterAnimation", registrar, 1)
@@ -56,16 +52,9 @@ endFunction
 ; Unlocks factory for next callback, MUST be called at end of callback
 function Save()
 	Debug.Trace("SexLabAnimationFactory: Registered animation slot SexLabFramework.Animation["+slot+"] to '"+Animation.Name+"' ")
-	slot = -1
 	Animation = none
+	slot = -1
 endfunction
-
-; System use only, makes factory wait for free callback closure
-function _FactoryWait()
-	while Animation != none
-		Utility.Wait(0.12)
-	endWhile
-endFunction
 
 ;/-----------------------------------------------\;
 ;|	Callback Animation Property Shortcuts        |;

@@ -1,41 +1,33 @@
 scriptname sslVoiceSlots extends Quest
 
-sslBaseVoice[] Registry
+sslVoiceDefaults property Defaults auto
+sslVoiceLibrary property Lib auto
+
+sslBaseVoice[] Slots
 sslBaseVoice[] property Voices hidden
 	sslBaseVoice[] function get()
-		return Registry
+		return Slots
 	endFunction
 endProperty
-Scene[] AnimationSlots
-bool locked
 
-topic property SexLabMoanMild auto
-topic property SexLabMoanMedium auto
-topic property SexLabMoanHot auto
+string[] registry
+int slotted
 
-VoiceType property SexLabVoiceM auto
-VoiceType property SexLabVoiceF auto
-FormList property VoicesPlayer auto
-
-actor property PlayerRef auto
-sslSystemConfig property Config auto
+bool property FreeSlots hidden
+	bool function get()
+		return slotted < 50
+	endFunction
+endProperty
 
 ;/-----------------------------------------------\;
-;|	Search Animations                            |;
+;|	Search Voices                                |;
 ;\-----------------------------------------------/;
-sslBaseVoice function PickVoice(actor a)
-	if a == PlayerRef && Config.sPlayerVoice != "$SSL_Random"
-		return GetByName(Config.sPlayerVoice)
-	else
-		return GetByGender(a.GetLeveledActorBase().GetSex())
-	endIf
-endFunction
 
-sslBaseVoice function GetByGender(int g)
+sslBaseVoice function GetRandom(int gender)
 	int[] voiceReturn
-	int i = 0
-	while i < Registry.Length
-		if Registry[i].Slotted && Registry[i].Gender == g && Registry[i].Enabled
+	int i
+	while i < slotted
+		if Slots[i].Registered && Slots[i].Gender == gender && Slots[i].Enabled
 			voiceReturn = sslUtility.PushInt(i, voiceReturn)
 		endIf
 		i += 1
@@ -43,14 +35,14 @@ sslBaseVoice function GetByGender(int g)
 	if voiceReturn.Length == 0
 		return none
 	endIf
-	return Registry[(utility.RandomInt(0, voiceReturn.Length - 1))]
+	return Slots[( voiceReturn[( utility.RandomInt(0, voiceReturn.Length - 1) )] )]
 endFunction
 
 sslBaseVoice function GetByName(string findName)
-	int i = 0
-	while i < Registry.Length
-		if Registry[i].Slotted && Registry[i].name == findName
-			return Registry[i]
+	int i
+	while i < slotted
+		if Slots[i].Registered && Slots[i].name == findName
+			return Slots[i]
 		endIf
 		i += 1
 	endWhile
@@ -58,16 +50,16 @@ sslBaseVoice function GetByName(string findName)
 endFunction
 
 sslBaseVoice function GetByTag(string tag1, string tag2 = "", string tagSuppress = "", bool requireAll = true)
-	int i = 0
-	while i < Registry.Length
-		if Registry[i].Enabled
-			bool check1 = Registry[i].HasTag(tag1)
-			bool check2 = Registry[i].HasTag(tag2)
-			bool supress = Registry[i].HasTag(tagSuppress)
+	int i
+	while i < slotted
+		if Slots[i].Enabled
+			bool check1 = Slots[i].HasTag(tag1)
+			bool check2 = Slots[i].HasTag(tag2)
+			bool supress = Slots[i].HasTag(tagSuppress)
 			if requireAll && check1 && (check2 || tag2 == "") && !(supress && tagSuppress != "")
-				return Registry[i]
+				return Slots[i]
 			elseif !requireAll && (check1 || check2) && !(supress && tagSuppress != "")
-				return Registry[i]
+				return Slots[i]
 			endIf
 		endIf
 		i += 1
@@ -76,28 +68,17 @@ sslBaseVoice function GetByTag(string tag1, string tag2 = "", string tagSuppress
 endFunction
 
 sslBaseVoice function GetBySlot(int slot)
-	return Registry[slot]
-endFunction
-
-int function GetFreeSlot()
-	int i = 0
-	while i < Registry.Length
-		if !Registry[i].Slotted
-			return i
-		endIf
-		i += 1
-	endWhile
-	return -1
+	return Slots[slot]
 endFunction
 
 ;/-----------------------------------------------\;
-;|	Locate Animations                            |;
+;|	Locate Voices                                |;
 ;\-----------------------------------------------/;
 
 int function FindByName(string findName)
-	int i = 0
-	while i < Registry.Length
-		if Registry[i].Slotted && Registry[i].Name == findName
+	int i
+	while i < slotted
+		if Slots[i].Registered && Slots[i].Name == findName
 			return i
 		endIf
 		i += 1
@@ -105,27 +86,37 @@ int function FindByName(string findName)
 	return -1
 endFunction
 
+int function FindByRegistrar(string registrar)
+	return registry.Find(registrar)
+endFunction
 
-int function FindByRegistrar(string id)
-	int i = 0
-	while i < Registry.Length
-		if Registry[i].Slotted && Registry[i].Registrar == id
-			return i
-		endIf
-		i += 1
-	endWhile
-	return -1
+int function Find(sslBaseVoice findVoice)
+	return Slots.Find(findVoice)
 endFunction
 
 ;/-----------------------------------------------\;
-;|	Manage Animations                            |;
+;|	Manage Voices                                |;
 ;\-----------------------------------------------/;
 
+sslBaseVoice function GetFree()
+	return Slots[slotted]
+endFunction
+
+int function Register(sslBaseVoice Claiming, string registrar)
+	registry = sslUtility.PushString(registrar, registry)
+	slotted = registry.Length
+	Claiming.Initialize()
+	return Slots.Find(Claiming)
+endFunction
+
 int function GetCount(bool ignoreDisabled = true)
+	if !ignoreDisabled
+		return slotted
+	endIf
 	int count = 0
 	int i = 0
-	while i < Registry.Length
-		if Registry[i].Slotted && ((ignoreDisabled && Registry[i].Enabled) || !ignoreDisabled)
+	while i < slotted
+		if Slots[i].Registered && Slots[i].Enabled
 			count += 1
 		endIf
 		i += 1
@@ -134,125 +125,122 @@ int function GetCount(bool ignoreDisabled = true)
 endFunction
 
 ;/-----------------------------------------------\;
-;|	System Animations                            |;
+;|	System Voices                                |;
 ;\-----------------------------------------------/;
 
-sslBaseVoice property SexLabVoiceSlot000 auto
-sslBaseVoice property SexLabVoiceSlot001 auto
-sslBaseVoice property SexLabVoiceSlot002 auto
-sslBaseVoice property SexLabVoiceSlot003 auto
-sslBaseVoice property SexLabVoiceSlot004 auto
-sslBaseVoice property SexLabVoiceSlot005 auto
-sslBaseVoice property SexLabVoiceSlot006 auto
-sslBaseVoice property SexLabVoiceSlot007 auto
-sslBaseVoice property SexLabVoiceSlot008 auto
-sslBaseVoice property SexLabVoiceSlot009 auto
-sslBaseVoice property SexLabVoiceSlot010 auto
-sslBaseVoice property SexLabVoiceSlot011 auto
-sslBaseVoice property SexLabVoiceSlot012 auto
-sslBaseVoice property SexLabVoiceSlot013 auto
-sslBaseVoice property SexLabVoiceSlot014 auto
-sslBaseVoice property SexLabVoiceSlot015 auto
-sslBaseVoice property SexLabVoiceSlot016 auto
-sslBaseVoice property SexLabVoiceSlot017 auto
-sslBaseVoice property SexLabVoiceSlot018 auto
-sslBaseVoice property SexLabVoiceSlot019 auto
-sslBaseVoice property SexLabVoiceSlot020 auto
-sslBaseVoice property SexLabVoiceSlot021 auto
-sslBaseVoice property SexLabVoiceSlot022 auto
-sslBaseVoice property SexLabVoiceSlot023 auto
-sslBaseVoice property SexLabVoiceSlot024 auto
-sslBaseVoice property SexLabVoiceSlot025 auto
-sslBaseVoice property SexLabVoiceSlot026 auto
-sslBaseVoice property SexLabVoiceSlot027 auto
-sslBaseVoice property SexLabVoiceSlot028 auto
-sslBaseVoice property SexLabVoiceSlot029 auto
-sslBaseVoice property SexLabVoiceSlot030 auto
-sslBaseVoice property SexLabVoiceSlot031 auto
-sslBaseVoice property SexLabVoiceSlot032 auto
-sslBaseVoice property SexLabVoiceSlot033 auto
-sslBaseVoice property SexLabVoiceSlot034 auto
-sslBaseVoice property SexLabVoiceSlot035 auto
-sslBaseVoice property SexLabVoiceSlot036 auto
-sslBaseVoice property SexLabVoiceSlot037 auto
-sslBaseVoice property SexLabVoiceSlot038 auto
-sslBaseVoice property SexLabVoiceSlot039 auto
-sslBaseVoice property SexLabVoiceSlot040 auto
-sslBaseVoice property SexLabVoiceSlot041 auto
-sslBaseVoice property SexLabVoiceSlot042 auto
-sslBaseVoice property SexLabVoiceSlot043 auto
-sslBaseVoice property SexLabVoiceSlot044 auto
-sslBaseVoice property SexLabVoiceSlot045 auto
-sslBaseVoice property SexLabVoiceSlot046 auto
-sslBaseVoice property SexLabVoiceSlot047 auto
-sslBaseVoice property SexLabVoiceSlot048 auto
-sslBaseVoice property SexLabVoiceSlot049 auto
+sslBaseVoice property VoiceSlot000 auto
+sslBaseVoice property VoiceSlot001 auto
+sslBaseVoice property VoiceSlot002 auto
+sslBaseVoice property VoiceSlot003 auto
+sslBaseVoice property VoiceSlot004 auto
+sslBaseVoice property VoiceSlot005 auto
+sslBaseVoice property VoiceSlot006 auto
+sslBaseVoice property VoiceSlot007 auto
+sslBaseVoice property VoiceSlot008 auto
+sslBaseVoice property VoiceSlot009 auto
+sslBaseVoice property VoiceSlot010 auto
+sslBaseVoice property VoiceSlot011 auto
+sslBaseVoice property VoiceSlot012 auto
+sslBaseVoice property VoiceSlot013 auto
+sslBaseVoice property VoiceSlot014 auto
+sslBaseVoice property VoiceSlot015 auto
+sslBaseVoice property VoiceSlot016 auto
+sslBaseVoice property VoiceSlot017 auto
+sslBaseVoice property VoiceSlot018 auto
+sslBaseVoice property VoiceSlot019 auto
+sslBaseVoice property VoiceSlot020 auto
+sslBaseVoice property VoiceSlot021 auto
+sslBaseVoice property VoiceSlot022 auto
+sslBaseVoice property VoiceSlot023 auto
+sslBaseVoice property VoiceSlot024 auto
+sslBaseVoice property VoiceSlot025 auto
+sslBaseVoice property VoiceSlot026 auto
+sslBaseVoice property VoiceSlot027 auto
+sslBaseVoice property VoiceSlot028 auto
+sslBaseVoice property VoiceSlot029 auto
+sslBaseVoice property VoiceSlot030 auto
+sslBaseVoice property VoiceSlot031 auto
+sslBaseVoice property VoiceSlot032 auto
+sslBaseVoice property VoiceSlot033 auto
+sslBaseVoice property VoiceSlot034 auto
+sslBaseVoice property VoiceSlot035 auto
+sslBaseVoice property VoiceSlot036 auto
+sslBaseVoice property VoiceSlot037 auto
+sslBaseVoice property VoiceSlot038 auto
+sslBaseVoice property VoiceSlot039 auto
+sslBaseVoice property VoiceSlot040 auto
+sslBaseVoice property VoiceSlot041 auto
+sslBaseVoice property VoiceSlot042 auto
+sslBaseVoice property VoiceSlot043 auto
+sslBaseVoice property VoiceSlot044 auto
+sslBaseVoice property VoiceSlot045 auto
+sslBaseVoice property VoiceSlot046 auto
+sslBaseVoice property VoiceSlot047 auto
+sslBaseVoice property VoiceSlot048 auto
+sslBaseVoice property VoiceSlot049 auto
 
 function _Setup()
-	Registry = new sslBaseVoice[50]
-	Registry[0] = SexLabVoiceSlot000
-	Registry[1] = SexLabVoiceSlot001
-	Registry[2] = SexLabVoiceSlot002
-	Registry[3] = SexLabVoiceSlot003
-	Registry[4] = SexLabVoiceSlot004
-	Registry[5] = SexLabVoiceSlot005
-	Registry[6] = SexLabVoiceSlot006
-	Registry[7] = SexLabVoiceSlot007
-	Registry[8] = SexLabVoiceSlot008
-	Registry[9] = SexLabVoiceSlot009
-	Registry[10] = SexLabVoiceSlot010
-	Registry[11] = SexLabVoiceSlot011
-	Registry[12] = SexLabVoiceSlot012
-	Registry[13] = SexLabVoiceSlot013
-	Registry[14] = SexLabVoiceSlot014
-	Registry[15] = SexLabVoiceSlot015
-	Registry[16] = SexLabVoiceSlot016
-	Registry[17] = SexLabVoiceSlot017
-	Registry[18] = SexLabVoiceSlot018
-	Registry[19] = SexLabVoiceSlot019
-	Registry[20] = SexLabVoiceSlot020
-	Registry[21] = SexLabVoiceSlot021
-	Registry[22] = SexLabVoiceSlot022
-	Registry[23] = SexLabVoiceSlot023
-	Registry[24] = SexLabVoiceSlot024
-	Registry[25] = SexLabVoiceSlot025
-	Registry[26] = SexLabVoiceSlot026
-	Registry[27] = SexLabVoiceSlot027
-	Registry[28] = SexLabVoiceSlot028
-	Registry[29] = SexLabVoiceSlot029
-	Registry[30] = SexLabVoiceSlot030
-	Registry[31] = SexLabVoiceSlot031
-	Registry[32] = SexLabVoiceSlot032
-	Registry[33] = SexLabVoiceSlot033
-	Registry[34] = SexLabVoiceSlot034
-	Registry[35] = SexLabVoiceSlot035
-	Registry[36] = SexLabVoiceSlot036
-	Registry[37] = SexLabVoiceSlot037
-	Registry[38] = SexLabVoiceSlot038
-	Registry[39] = SexLabVoiceSlot039
-	Registry[40] = SexLabVoiceSlot040
-	Registry[41] = SexLabVoiceSlot041
-	Registry[42] = SexLabVoiceSlot042
-	Registry[43] = SexLabVoiceSlot043
-	Registry[44] = SexLabVoiceSlot044
-	Registry[45] = SexLabVoiceSlot045
-	Registry[46] = SexLabVoiceSlot046
-	Registry[47] = SexLabVoiceSlot047
-	Registry[48] = SexLabVoiceSlot048
-	Registry[49] = SexLabVoiceSlot049
+	Slots = new sslBaseVoice[50]
+	Slots[0] = VoiceSlot000
+	Slots[1] = VoiceSlot001
+	Slots[2] = VoiceSlot002
+	Slots[3] = VoiceSlot003
+	Slots[4] = VoiceSlot004
+	Slots[5] = VoiceSlot005
+	Slots[6] = VoiceSlot006
+	Slots[7] = VoiceSlot007
+	Slots[8] = VoiceSlot008
+	Slots[9] = VoiceSlot009
+	Slots[10] = VoiceSlot010
+	Slots[11] = VoiceSlot011
+	Slots[12] = VoiceSlot012
+	Slots[13] = VoiceSlot013
+	Slots[14] = VoiceSlot014
+	Slots[15] = VoiceSlot015
+	Slots[16] = VoiceSlot016
+	Slots[17] = VoiceSlot017
+	Slots[18] = VoiceSlot018
+	Slots[19] = VoiceSlot019
+	Slots[20] = VoiceSlot020
+	Slots[21] = VoiceSlot021
+	Slots[22] = VoiceSlot022
+	Slots[23] = VoiceSlot023
+	Slots[24] = VoiceSlot024
+	Slots[25] = VoiceSlot025
+	Slots[26] = VoiceSlot026
+	Slots[27] = VoiceSlot027
+	Slots[28] = VoiceSlot028
+	Slots[29] = VoiceSlot029
+	Slots[30] = VoiceSlot030
+	Slots[31] = VoiceSlot031
+	Slots[32] = VoiceSlot032
+	Slots[33] = VoiceSlot033
+	Slots[34] = VoiceSlot034
+	Slots[35] = VoiceSlot035
+	Slots[36] = VoiceSlot036
+	Slots[37] = VoiceSlot037
+	Slots[38] = VoiceSlot038
+	Slots[39] = VoiceSlot039
+	Slots[40] = VoiceSlot040
+	Slots[41] = VoiceSlot041
+	Slots[42] = VoiceSlot042
+	Slots[43] = VoiceSlot043
+	Slots[44] = VoiceSlot044
+	Slots[45] = VoiceSlot045
+	Slots[46] = VoiceSlot046
+	Slots[47] = VoiceSlot047
+	Slots[48] = VoiceSlot048
+	Slots[49] = VoiceSlot049
 
 	int i
-	while i < Registry.Length
-		Registry[i].InitializeVoice()
+	while i < Slots.Length
+		Slots[i].Initialize()
 		i += 1
 	endWhile
+	
+	string[] init
+	registry = init
+	slotted = 0
 
-	_Load()
-endFunction
-
-
-sslVoiceDefaults property Defaults auto
-function _Load()
 	Defaults.LoadVoices()
-	Debug.Notification("Registered SexLab Voices: "+GetCount(false))
 endFunction

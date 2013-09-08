@@ -1,14 +1,12 @@
-scriptname sslThreadModel extends Quest
-{Animation Thread Model: Runs storage and information about a thread}
+scriptname sslThreadModel extends ReferenceAlias
+{ Animation Thread Model: Runs storage and information about a thread. Access only through functions; NEVER create a property directly to this. }
 
-; Framework
-SexLabFramework property SexLab auto
-; Thread Actor Handler
-sslActorSlots property ActorAlias auto
+sslThreadLibrary property Lib auto
 
+int _ThreadID
 int property tid hidden
 	int function get()
-		return _ThreadID()
+		return _ThreadID
 	endFunction
 endProperty
 
@@ -46,18 +44,17 @@ float timeout
 bool making
 
 sslThreadModel function Make(float timeoutIn = 5.0)
-	if locked || !SexLab.Enabled
+	if locked
 		return none
 	endIf
-	InitializeThread()
+	Initialize()
 	locked = true
 	making = true
 	timeout = timeoutIn
-	voices = new sslBaseVoice[5]
 	storageslots = new actor[5]
-	ActorSlots = new sslActorAlias[5]
+	ActorAlias = new ReferenceAlias[5]
 	GoToState("Making")
-	RegisterForSingleUpdate(0.01)
+	RegisterForSingleUpdate(0.1)
 	return self
 endFunction
 
@@ -73,7 +70,7 @@ state Making
 			if active || !locked
 				return
 			endIf
-		  Utility.wait(0.5)
+		  Utility.Wait(0.5)
 		endwhile
 		; Check if need to reset
 		if !active
@@ -106,18 +103,18 @@ sslThreadController function StartThread()
 
 	; Check for valid animations
 	if primaryAnimations.Length == 0
-		int[] gender = SexLab.GenderCount(Positions)
+		int[] gender = Lib.Actors.GenderCount(Positions)
 		; Same sex pairings
 		if (gender[1] == 2 && gender[0] == 0) || (gender[0] == 2 && gender[1] == 0)
-			sslBaseAnimation[] samesex = SexLab.GetAnimationsByType(actors, gender[0], gender[1], aggressive = IsAggressive)
-			sslBaseAnimation[] couples = SexLab.GetAnimationsByType(actors, 1, 1, aggressive = IsAggressive)
-			primaryAnimations = SexLab.MergeAnimationLists(samesex, couples)
+			sslBaseAnimation[] samesex = Lib.Animations.GetByType(actors, gender[0], gender[1], aggressive = IsAggressive)
+			sslBaseAnimation[] couples = Lib.Animations.GetByType(actors, 1, 1, aggressive = IsAggressive)
+			primaryAnimations = Lib.Animations.MergeLists(samesex, couples)
 		elseif actors < 3
 			; Grab animations like normal
-			primaryAnimations = SexLab.GetAnimationsByType(actors, gender[0], gender[1], aggressive = IsAggressive)
+			primaryAnimations = Lib.Animations.GetByType(actors, gender[0], gender[1], aggressive = IsAggressive)
 		elseif actors >= 3
 			; Get 3P + animations ignoring gender
-			primaryAnimations = SexLab.GetAnimationsByType(actors, aggressive = IsAggressive)
+			primaryAnimations = Lib.Animations.GetByType(actors, aggressive = IsAggressive)
 		endIf
 		; Check for valid animations again
 		if primaryAnimations.Length == 0
@@ -145,8 +142,8 @@ sslThreadController function StartThread()
 	endWhile
 
 	; Determine if foreplay lead in should be used
-	if leadAnimations.Length == 0 && !IsAggressive && ActorCount == 2 && SexLab.Config.bForeplayStage && !leadInDisabled
-		SetLeadAnimations(SexLab.GetAnimationsByTag(ActorCount, "LeadIn"))
+	if leadAnimations.Length == 0 && !IsAggressive && ActorCount == 2 && Lib.bForeplayStage && !leadInDisabled
+		SetLeadAnimations(Lib.Animations.GetByTag(ActorCount, "LeadIn"))
 	endIf
 
 	; Check for center
@@ -154,18 +151,18 @@ sslThreadController function StartThread()
 		ObjectReference BedRef
 		; Select a bed
 		if PlayerRef != none
-			BedRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(SexLab.Data.BedsList, PlayerRef, 500.0)
+			BedRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(Lib.BedsList, PlayerRef, 500.0)
 		else
-			BedRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(SexLab.Data.BedsList, Positions[0], 500.0)
+			BedRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(Lib.BedsList, Positions[0], 500.0)
 		endIf
 		; A bed was selected, should we use it?
 		if BedRef != none && !BedRef.IsFurnitureInUse(true)
 			int useBed = 0
-			if bed == 2 || SexLab.Config.sNPCBed == "$SSL_Always"
+			if bed == 2 || Lib.sNPCBed == "$SSL_Always"
 				useBed = 1
 			elseIf PlayerRef != none && !IsVictim(PlayerRef) 
-				useBed = SexLab.Data.mUseBed.Show()
-			elseIf SexLab.Config.sNPCBed == "$SSL_Sometimes"
+				useBed = Lib.mUseBed.Show()
+			elseIf Lib.sNPCBed == "$SSL_Sometimes"
 				useBed = utility.RandomInt(0,1)
 			endIf
 			if useBed == 1
@@ -178,7 +175,7 @@ sslThreadController function StartThread()
 	if centerObj == none 
 		i = 0
 		while i < ActorCount
-			ObjectReference marker = Game.FindRandomReferenceOfTypeFromRef(SexLab.Data.LocationMarker, Positions[i], 750.0) as ObjectReference
+			ObjectReference marker = Game.FindRandomReferenceOfTypeFromRef(Lib.LocationMarker, Positions[i], 750.0) as ObjectReference
 			if marker != none
 				CenterOnObject(marker)
 				i = ActorCount
@@ -203,10 +200,10 @@ sslThreadController function StartThread()
 
 	; Enable auto advance
 	if PlayerRef != none
-		if IsVictim(PlayerRef) && SexLab.Config.bDisablePlayer
+		if IsVictim(PlayerRef) && Lib.Actors.bDisablePlayer
 			autoAdvance = true
 		else
-			autoAdvance = SexLab.Config.bAutoAdvance
+			autoAdvance = Lib.bAutoAdvance
 		endIf
 	else
 		autoAdvance = true
@@ -254,11 +251,11 @@ float[] property Timers hidden
 		if customtimers.Length > 0
 			return customtimers
 		elseif leadIn
-			return SexLab.Config.fStageTimerLeadIn
+			return Lib.fStageTimerLeadIn
 		elseif IsAggressive
-			return SexLab.Config.fStageTimerAggr
+			return Lib.fStageTimerAggr
 		else
-			return SexLab.Config.fStageTimer
+			return Lib.fStageTimer
 		endIf
 	endFunction
 endProperty
@@ -295,14 +292,14 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 	endIf
 	
 	centerObj = centerOn
-	if SexLab.Data.BedsList.HasForm(centerObj.GetBaseObject())
+	if Lib.BedsList.HasForm(centerObj.GetBaseObject())
 		bed = 1
 		centerLoc = GetCoords(centerObj)
 		centerLoc[0] = centerLoc[0] + (35 * Math.sin(centerLoc[5]))
 		centerLoc[1] = centerLoc[1] + (35 * Math.cos(centerLoc[5]))
 		centerLoc[2] = centerLoc[2] + 35
-	elseif centerObj == SexLab.PlayerRef || centerObj.HasKeyWordString("ActorTypeNPC")
-		ObjectReference Stager = centerObj.PlaceAtMe(SexLab.Data.SexLabStager)
+	elseif centerObj == Lib.PlayerRef || centerObj.HasKeyWordString("ActorTypeNPC")
+		ObjectReference Stager = centerObj.PlaceAtMe(Lib.SexLabStager)
 		centerLoc = GetCoords(Stager)
 		Stager.Disable()
 		Stager.Delete()
@@ -372,12 +369,11 @@ endfunction
 
 actor[] property Positions auto hidden 
 actor[] storageslots
-sslActorAlias[] property ActorSlots auto hidden
+ReferenceAlias[] property ActorAlias auto hidden
 
 actor PlayerRef
 
 actor victim
-sslBaseVoice[] voices
 
 bool[] strip0
 bool[] strip1
@@ -397,7 +393,6 @@ float[] loc2
 float[] loc3
 float[] loc4
 
-
 int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice = none, bool forceSilent = false)
 	if !_MakeWait("AddActor")
 		return -1
@@ -407,17 +402,20 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 	elseif Positions.Find(position) != -1
 		_Log("Duplicate actor", "AddActor")
 		return -1
+	elseif !Lib.Actors.ValidateActor(position)
+		_Log("Invalid actor given", "AddActor")
+		return -1
 	endIf
 	waiting = true
 
 	int id = -1
-	sslActorAlias slot = ActorAlias.SlotActor(position, self as sslThreadController) as sslActorAlias
+	ReferenceAlias slot = Lib.Actors.Slots.SlotActor(position, self as sslThreadController)
 	if slot != none
 		; Push actor to positions array
 		Positions = sslUtility.PushActor(position, Positions)
 		id = ActorCount - 1
 		; Save Alias slot
-		ActorSlots[id] = slot
+		ActorAlias[id] = slot
 		; Save static storage slot
 		storageslots[id] = position
 		; Set as victim
@@ -425,14 +423,14 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 			victim = position
 		endIf
 		; Check for player
-		if position == SexLab.PlayerRef
+		if position == Lib.PlayerRef
 			PlayerRef = position
 		endIf
 		; Find voice or use given voice
 		if voice == none && !forceSilent
-			voice = SexLab.PickVoice(position)
+			voice = Lib.Voices.PickVoice(position)
 		endIf
-		slot.Voice = voice
+		(slot as sslActorAlias).SetVoice(voice)
 	else
 		_Log("Failed to slot actor '"+position.GetName()+"'", "AddActor", "FATAL")
 	endIf
@@ -448,7 +446,7 @@ function ChangeActors(actor[] changeTo)
 	; Make sure all new actors are vaild.
 	int i = 0
 	while i < changeTo.Length
-		if Positions.Find(changeTo[i]) < 0 && SexLab.ValidateActor(changeTo[i]) < 0
+		if Positions.Find(changeTo[i]) < 0 && Lib.Actors.ValidateActor(changeTo[i]) < 0
 			return 
 		endIf
 		i += 1
@@ -458,11 +456,11 @@ function ChangeActors(actor[] changeTo)
 		sslBaseAnimation[] newList
 		; Try aggressive animations first if we need them
 		if victim != none
-			newList = SexLab.GetAnimationsByType(changeTo.Length, aggressive=true)
+			newList = Lib.Animations.GetByType(changeTo.Length, aggressive=true)
 		endIf
 		; Runs if no victim or victim search didn't find any
 		if newList.Length == 0
-			newList = SexLab.GetAnimationsByType(changeTo.Length)
+			newList = Lib.Animations.GetByType(changeTo.Length)
 		endIf
 		; Still none? We have no animations for this count, bail
 		if newList.Length == 0
@@ -478,7 +476,7 @@ function ChangeActors(actor[] changeTo)
 		actor a = Positions[i]
 		ResetActor(a)
 		if !a.IsDead() && !a.IsBleedingOut()
-			SexLab.UnstripActor(a, GetEquipment(a), GetVictim())
+			Lib.Actors.UnstripActor(a, GetEquipment(a), GetVictim())
 		endIf
 		if changeTo.Find(a) < 0
 			if IsPlayerActor(a)
@@ -561,8 +559,12 @@ bool function HasMoved(actor position)
 	return false
 endFunction
 
+sslActorAlias function ActorAlias(int position)
+	return ActorAlias[position] as sslActorAlias
+endFunction
+
 sslActorAlias function GetActorAlias(actor position)
-	return ActorSlots[GetSlot(position)]
+	return ActorAlias[GetSlot(position)] as sslActorAlias
 endFunction
 
 ;/-----------------------------------------------\;
@@ -676,19 +678,19 @@ bool[] function GetStrip(actor position)
 		return strip
 	endIf
 	; Fallback to default
-	int gender = SexLab.GetGender(position)
+	int gender = Lib.Actors.GetGender(position)
 	if leadIn && gender < 1
-		strip = SexLab.Config.bStripLeadInMale
+		strip = Lib.bStripLeadInMale
 	elseif leadIn && gender > 0
-		strip = SexLab.Config.bStripLeadInFemale
+		strip = Lib.bStripLeadInFemale
 	elseif IsAggressive && position == victim
-		strip = SexLab.Config.bStripVictim
+		strip = Lib.bStripVictim
 	elseif IsAggressive && position != victim
-		strip = SexLab.Config.bStripAggressor
+		strip = Lib.bStripAggressor
 	elseif !IsAggressive && gender < 1
-		strip = SexLab.Config.bStripMale
+		strip = Lib.bStripMale
 	else
-		strip = SexLab.Config.bstripFemale
+		strip = Lib.bstripFemale
 	endIf
 	return strip
 endFunction
@@ -733,13 +735,11 @@ form[] function GetEquipment(actor position)
 endFunction
 
 function SetVoice(actor position, sslBaseVoice voice)
-	GetActorAlias(position).Voice = voice
-	; To be removed
-	voices[GetSlot(position)] = voice
+	GetActorAlias(position).SetVoice(voice)
 endFunction
 
 sslBaseVoice function GetVoice(actor position)
-	return voices[GetSlot(position)]
+	return GetActorAlias(position).GetVoice()
 endFunction
 
 bool function HasPlayer()
@@ -751,7 +751,7 @@ actor function GetPlayer()
 endFunction
 
 int function GetPlayerPosition()
-	return Positions.Find(SexLab.PlayerRef)
+	return Positions.Find(Lib.PlayerRef)
 endFunction
 
 bool function IsPlayerActor(actor position)
@@ -785,8 +785,7 @@ endFunction
 bool function _MakeWait(string method)
 	; Ready wait
 	while waiting && locked
-		debug.trace("MakeWait on "+method+"()")
-		Utility.Wait(0.1)
+		Utility.Wait(0.10)
 	endWhile
 	; Not spooled, bail.
 	if !locked
@@ -829,11 +828,11 @@ function SendThreadEvent(string eventName)
 	if hook != ""
 		string customEvent = eventName+"_"+hook
 		Debug.Trace("SexLab ThreadController["+tid+"]: Sending custom event hook '"+customEvent+"'")
-		SexLab.SendModEvent(customEvent, (tid as string), 1)
+		SendModEvent(customEvent, (tid as string), 1)
 	endIf
 	; Send Global Event
 	;Debug.Trace("SexLab ThreadController["+tid+"]: Sending event hook '"+eventName+"'")
-	SexLab.SendModEvent(eventName, (tid as string), 1)
+	SendModEvent(eventName, (tid as string), 1)
 endFunction
 
 int function PositionWrap(int value)
@@ -851,17 +850,17 @@ endFunction
 
 auto state Idle
 	event OnBeginState()
-		InitializeThread()
+		Initialize()
 		locked = false
 	endEvent
 endState
 
 function UnlockThread()
-	InitializeThread()
+	Initialize()
 	GoToState("Idle")
 endFunction
 
-function InitializeThread()
+function Initialize()
 	; Set states
 	waiting = false
 	active = false
@@ -876,14 +875,14 @@ function InitializeThread()
 	victim = none
 	; Empty alias slots
 	int i = 0
-	while i < ActorSlots.Length
-		if ActorSlots[i] != none
-			ActorSlots[i].ClearAlias()
+	while i < ActorAlias.Length
+		if ActorAlias[i] != none
+			ActorAlias(i).ClearAlias()
 		endIf
 		i += 1
 	endWhile
-	sslActorAlias[] aaDel
-	ActorSlots = aaDel
+	ReferenceAlias[] aaDel
+	ActorAlias = aaDel
 	; Empty Floats
 	float[] fDel
 	centerLoc = fDel
@@ -914,9 +913,6 @@ function InitializeThread()
 	; Empty integers
 	bed = 0
 	stage = 0
-	; Empty voice slots
-	sslBaseVoice[] voDel
-	voices = voDel
 	; Empty animations
 	sslBaseAnimation[] anDel
 	customAnimations = anDel
@@ -925,14 +921,13 @@ function InitializeThread()
 	; Clear Forms
 	centerObj = none
 	PlayerRef = none
-
 endFunction
 
 ;/-----------------------------------------------\;
 ;|	Child Functions                              |;
 ;\-----------------------------------------------/;
-int function _ThreadID()
-	return -1
+function _SetThreadID(int threadid)
+	_ThreadID = threadid
 endFunction
 sslThreadController function PrimeThread()
 	return none

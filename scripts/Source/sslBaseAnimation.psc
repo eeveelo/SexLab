@@ -1,14 +1,13 @@
 scriptname sslBaseAnimation extends ReferenceAlias
 
 string property Name = "" auto hidden
-string property Registrar = "" auto hidden
 bool property Enabled = true auto hidden
 bool property TCL = false auto hidden
 int property Timer = -1 auto hidden
 
-bool property Slotted hidden
+bool property Registered hidden
 	bool function get()
-		return Registrar != "" && Name != ""
+		return Name != ""
 	endFunction
 endProperty
 
@@ -456,16 +455,15 @@ endFunction
 
 function _Log(string log, string method, string type = "NOTICE")
 	Debug.Trace("--------------------------------------------------------------------------------------------")
-	Debug.Trace("--- SexLab BaseAnimation["+Registrar+"] ----------------------------------------------------------")
+	Debug.Trace("--- SexLab BaseAnimation["+Name+"] ----------------------------------------------------------")
 	Debug.Trace("--------------------------------------------------------------------------------------------")
 	Debug.Trace(" "+type+": "+method+"()" )
 	Debug.Trace("   "+log)
 	Debug.Trace("--------------------------------------------------------------------------------------------")
 endFunction
 
-function InitializeAnimation()
+function Initialize()
 	Name = ""
-	Registrar = ""
 	Enabled = true
 	waiting = false
 	content = 0

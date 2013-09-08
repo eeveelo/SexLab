@@ -1,13 +1,23 @@
 scriptname sslAnimationSlots extends Quest
 
-sslBaseAnimation[] Registry
+sslAnimationDefaults property Defaults auto
+sslAnimationLibrary property Lib auto
+
+sslBaseAnimation[] Slots
 sslBaseAnimation[] property Animations hidden
 	sslBaseAnimation[] function get()
-		return Registry
+		return Slots
 	endFunction
 endProperty
-Scene[] AnimationSlots
-bool locked
+
+string[] registry
+int slotted
+
+bool property FreeSlots hidden
+	bool function get()
+		return slotted < 100
+	endFunction
+endProperty
 
 ;/-----------------------------------------------\;
 ;|	Search Animations                            |;
@@ -15,9 +25,9 @@ bool locked
 
 sslBaseAnimation function GetByName(string findName)
 	int i = 0
-	while i < Registry.Length
-		if Registry[i].Slotted && Registry[i].Name == findName
-			return Registry[i]
+	while i < slotted
+		if Slots[i].Registered && Slots[i].Name == findName
+			return Slots[i]
 		endIf
 		i += 1
 	endWhile
@@ -27,18 +37,18 @@ endFunction
 sslBaseAnimation[] function GetByTag(int actors, string tag1, string tag2 = "", string tag3 = "", string tagSuppress = "", bool requireAll = true)
 	sslBaseAnimation[] animReturn
 	int i = 0
-	while i < Registry.Length
-		if Registry[i].Slotted && Registry[i].Enabled && Registry[i].ActorCount() == actors
-			bool check1 = Registry[i].HasTag(tag1)
-			bool check2 = Registry[i].HasTag(tag2)
-			bool check3 = Registry[i].HasTag(tag3)
-			bool supress = Registry[i].HasTag(tagSuppress)
+	while i < slotted
+		if Slots[i].Registered && Slots[i].Enabled && Slots[i].ActorCount() == actors
+			bool check1 = Slots[i].HasTag(tag1)
+			bool check2 = Slots[i].HasTag(tag2)
+			bool check3 = Slots[i].HasTag(tag3)
+			bool supress = Slots[i].HasTag(tagSuppress)
 			if requireAll && check1 && (check2 || tag2 == "") && (check3 || tag3 == "") && !(supress && tagSuppress != "")
-				animReturn = sslUtility.PushAnimation(Registry[i], animReturn)
+				animReturn = sslUtility.PushAnimation(Slots[i], animReturn)
 			elseif !requireAll && (check1 || check2 || check3) && !(supress && tagSuppress != "")
-				animReturn = sslUtility.PushAnimation(Registry[i], animReturn)
+				animReturn = sslUtility.PushAnimation(Slots[i], animReturn)
 			; else
-				; debug.trace("Rejecting "+Registry[i].Name+" based on "+check1+check2+check3+supress)
+				; debug.trace("Rejecting "+Slots[i].Name+" based on "+check1+check2+check3+supress)
 			endIf
 		endIf
 		i += 1
@@ -48,41 +58,33 @@ sslBaseAnimation[] function GetByTag(int actors, string tag1, string tag2 = "", 
 	return animReturn
 endFunction
 
-sslBaseAnimation[] function GetByType(int actors, int males = -1, int females = -1, int stages = -1, bool aggressive = false, bool sexual = true, bool restrictAggressive = true)
+sslBaseAnimation[] function GetByType(int actors, int males = -1, int females = -1, int stages = -1, bool aggressive = false, bool sexual = true)
 	sslBaseAnimation[] animReturn
 	int i = 0
-	while i < Registry.Length
-		if Registry[i].Slotted && Registry[i].Enabled
-			Debug.Trace("checking Registry["+Registry[i].Registrar+"] '"+Registry[i].Name+"'")
+	while i < slotted
+		if Slots[i].Registered && Slots[i].Enabled
 			bool accepted = true
-			if actors != Registry[i].ActorCount()
-				Debug.Trace(actors+" actors needed, has "+Registry[i].ActorCount())
+			if actors != Slots[i].ActorCount()
 				accepted = false
 			endIf
-			if accepted && males != -1 && males != Registry[i].MaleCount()
-				Debug.Trace(males+" males needed, has "+Registry[i].MaleCount())
+			if accepted && males != -1 && males != Slots[i].MaleCount()
 				accepted = false
 			endIf
-			if accepted && females != -1 && females != Registry[i].FemaleCount()
-				Debug.Trace(females+" females needed, has "+Registry[i].FemaleCount())
+			if accepted && females != -1 && females != Slots[i].FemaleCount()
 				accepted = false
 			endIf
-			if accepted && stages != -1 && stages != Registry[i].StageCount()
-				Debug.Trace(stages+" stages needed, has "+Registry[i].StageCount())
+			if accepted && stages != -1 && stages != Slots[i].StageCount()
 				accepted = false
 			endIf
-			if accepted && (aggressive != Registry[i].HasTag("Aggressive") && restrictAggressive)
-				Debug.Trace(aggressive+" aggr needed, has "+Registry[i].HasTag("Aggressive"))
+			if accepted && (aggressive != Slots[i].HasTag("Aggressive") && Lib.bRestrictAggressive)
 				accepted = false
 			endIf
-			if accepted && sexual != Registry[i].IsSexual()
-				Debug.Trace(aggressive+" sexual needed, has "+Registry[i].IsSexual())
+			if accepted && sexual != Slots[i].IsSexual()
 				accepted = false
 			endIf
 			; Still accepted? Push it's return
 			if accepted
-				Debug.Trace("Accepting "+Registry[i].Name)
-				animReturn = sslUtility.PushAnimation(Registry[i], animReturn)
+				animReturn = sslUtility.PushAnimation(Slots[i], animReturn)
 			endIf
 		endIf
 		i += 1
@@ -93,18 +95,7 @@ sslBaseAnimation[] function GetByType(int actors, int males = -1, int females = 
 endFunction
 
 sslBaseAnimation function GetBySlot(int slot)
-	return Registry[slot]
-endFunction
-
-int function GetFreeSlot()
-	int i = 0
-	while i < Registry.Length
-		if !Registry[i].Slotted
-			return i
-		endIf
-		i += 1
-	endWhile
-	return -1
+	return Slots[slot]
 endFunction
 
 ;/-----------------------------------------------\;
@@ -113,8 +104,8 @@ endFunction
 
 int function FindByName(string findName)
 	int i = 0
-	while i < Registry.Length
-		if Registry[i].Slotted && Registry[i].Name == findName
+	while i < slotted
+		if Slots[i].Registered && Slots[i].Name == findName
 			return i
 		endIf
 		i += 1
@@ -122,26 +113,37 @@ int function FindByName(string findName)
 	return -1
 endFunction
 
-int function FindByRegistrar(string id)
-	int i = 0
-	while i < Registry.Length
-		if Registry[i].Slotted && Registry[i].Registrar == id
-			return i
-		endIf
-		i += 1
-	endWhile
-	return -1
+int function FindByRegistrar(string registrar)
+	return registry.Find(registrar)
+endFunction
+
+int function Find(sslBaseAnimation findAnim)
+	return Slots.Find(findAnim)
 endFunction
 
 ;/-----------------------------------------------\;
 ;|	Manage Animations                            |;
 ;\-----------------------------------------------/;
 
+sslBaseAnimation function GetFree()
+	return Slots[slotted]
+endFunction
+
+int function Register(sslBaseAnimation Claiming, string registrar)
+	registry = sslUtility.PushString(registrar, registry)
+	slotted = registry.Length
+	Claiming.Initialize()
+	return Slots.Find(Claiming)
+endFunction
+
 int function GetCount(bool ignoreDisabled = true)
+	if !ignoreDisabled
+		return slotted
+	endIf
 	int count = 0
 	int i = 0
-	while i < Registry.Length
-		if Registry[i].Slotted && ((ignoreDisabled && Registry[i].Enabled) || !ignoreDisabled)
+	while i < slotted
+		if Slots[i].Registered && Slots[i].Enabled
 			count += 1
 		endIf
 		i += 1
@@ -163,222 +165,219 @@ endFunction
 ;\-----------------------------------------------/;
 
 
-sslBaseAnimation property SexLabAnimationSlot000 auto
-sslBaseAnimation property SexLabAnimationSlot001 auto
-sslBaseAnimation property SexLabAnimationSlot002 auto
-sslBaseAnimation property SexLabAnimationSlot003 auto
-sslBaseAnimation property SexLabAnimationSlot004 auto
-sslBaseAnimation property SexLabAnimationSlot005 auto
-sslBaseAnimation property SexLabAnimationSlot006 auto
-sslBaseAnimation property SexLabAnimationSlot007 auto
-sslBaseAnimation property SexLabAnimationSlot008 auto
-sslBaseAnimation property SexLabAnimationSlot009 auto
-sslBaseAnimation property SexLabAnimationSlot010 auto
-sslBaseAnimation property SexLabAnimationSlot011 auto
-sslBaseAnimation property SexLabAnimationSlot012 auto
-sslBaseAnimation property SexLabAnimationSlot013 auto
-sslBaseAnimation property SexLabAnimationSlot014 auto
-sslBaseAnimation property SexLabAnimationSlot015 auto
-sslBaseAnimation property SexLabAnimationSlot016 auto
-sslBaseAnimation property SexLabAnimationSlot017 auto
-sslBaseAnimation property SexLabAnimationSlot018 auto
-sslBaseAnimation property SexLabAnimationSlot019 auto
-sslBaseAnimation property SexLabAnimationSlot020 auto
-sslBaseAnimation property SexLabAnimationSlot021 auto
-sslBaseAnimation property SexLabAnimationSlot022 auto
-sslBaseAnimation property SexLabAnimationSlot023 auto
-sslBaseAnimation property SexLabAnimationSlot024 auto
-sslBaseAnimation property SexLabAnimationSlot025 auto
-sslBaseAnimation property SexLabAnimationSlot026 auto
-sslBaseAnimation property SexLabAnimationSlot027 auto
-sslBaseAnimation property SexLabAnimationSlot028 auto
-sslBaseAnimation property SexLabAnimationSlot029 auto
-sslBaseAnimation property SexLabAnimationSlot030 auto
-sslBaseAnimation property SexLabAnimationSlot031 auto
-sslBaseAnimation property SexLabAnimationSlot032 auto
-sslBaseAnimation property SexLabAnimationSlot033 auto
-sslBaseAnimation property SexLabAnimationSlot034 auto
-sslBaseAnimation property SexLabAnimationSlot035 auto
-sslBaseAnimation property SexLabAnimationSlot036 auto
-sslBaseAnimation property SexLabAnimationSlot037 auto
-sslBaseAnimation property SexLabAnimationSlot038 auto
-sslBaseAnimation property SexLabAnimationSlot039 auto
-sslBaseAnimation property SexLabAnimationSlot040 auto
-sslBaseAnimation property SexLabAnimationSlot041 auto
-sslBaseAnimation property SexLabAnimationSlot042 auto
-sslBaseAnimation property SexLabAnimationSlot043 auto
-sslBaseAnimation property SexLabAnimationSlot044 auto
-sslBaseAnimation property SexLabAnimationSlot045 auto
-sslBaseAnimation property SexLabAnimationSlot046 auto
-sslBaseAnimation property SexLabAnimationSlot047 auto
-sslBaseAnimation property SexLabAnimationSlot048 auto
-sslBaseAnimation property SexLabAnimationSlot049 auto
-sslBaseAnimation property SexLabAnimationSlot050 auto
-sslBaseAnimation property SexLabAnimationSlot051 auto
-sslBaseAnimation property SexLabAnimationSlot052 auto
-sslBaseAnimation property SexLabAnimationSlot053 auto
-sslBaseAnimation property SexLabAnimationSlot054 auto
-sslBaseAnimation property SexLabAnimationSlot055 auto
-sslBaseAnimation property SexLabAnimationSlot056 auto
-sslBaseAnimation property SexLabAnimationSlot057 auto
-sslBaseAnimation property SexLabAnimationSlot058 auto
-sslBaseAnimation property SexLabAnimationSlot059 auto
-sslBaseAnimation property SexLabAnimationSlot060 auto
-sslBaseAnimation property SexLabAnimationSlot061 auto
-sslBaseAnimation property SexLabAnimationSlot062 auto
-sslBaseAnimation property SexLabAnimationSlot063 auto
-sslBaseAnimation property SexLabAnimationSlot064 auto
-sslBaseAnimation property SexLabAnimationSlot065 auto
-sslBaseAnimation property SexLabAnimationSlot066 auto
-sslBaseAnimation property SexLabAnimationSlot067 auto
-sslBaseAnimation property SexLabAnimationSlot068 auto
-sslBaseAnimation property SexLabAnimationSlot069 auto
-sslBaseAnimation property SexLabAnimationSlot070 auto
-sslBaseAnimation property SexLabAnimationSlot071 auto
-sslBaseAnimation property SexLabAnimationSlot072 auto
-sslBaseAnimation property SexLabAnimationSlot073 auto
-sslBaseAnimation property SexLabAnimationSlot074 auto
-sslBaseAnimation property SexLabAnimationSlot075 auto
-sslBaseAnimation property SexLabAnimationSlot076 auto
-sslBaseAnimation property SexLabAnimationSlot077 auto
-sslBaseAnimation property SexLabAnimationSlot078 auto
-sslBaseAnimation property SexLabAnimationSlot079 auto
-sslBaseAnimation property SexLabAnimationSlot080 auto
-sslBaseAnimation property SexLabAnimationSlot081 auto
-sslBaseAnimation property SexLabAnimationSlot082 auto
-sslBaseAnimation property SexLabAnimationSlot083 auto
-sslBaseAnimation property SexLabAnimationSlot084 auto
-sslBaseAnimation property SexLabAnimationSlot085 auto
-sslBaseAnimation property SexLabAnimationSlot086 auto
-sslBaseAnimation property SexLabAnimationSlot087 auto
-sslBaseAnimation property SexLabAnimationSlot088 auto
-sslBaseAnimation property SexLabAnimationSlot089 auto
-sslBaseAnimation property SexLabAnimationSlot090 auto
-sslBaseAnimation property SexLabAnimationSlot091 auto
-sslBaseAnimation property SexLabAnimationSlot092 auto
-sslBaseAnimation property SexLabAnimationSlot093 auto
-sslBaseAnimation property SexLabAnimationSlot094 auto
-sslBaseAnimation property SexLabAnimationSlot095 auto
-sslBaseAnimation property SexLabAnimationSlot096 auto
-sslBaseAnimation property SexLabAnimationSlot097 auto
-sslBaseAnimation property SexLabAnimationSlot098 auto
-sslBaseAnimation property SexLabAnimationSlot099 auto
+sslBaseAnimation property AnimationSlot000 auto
+sslBaseAnimation property AnimationSlot001 auto
+sslBaseAnimation property AnimationSlot002 auto
+sslBaseAnimation property AnimationSlot003 auto
+sslBaseAnimation property AnimationSlot004 auto
+sslBaseAnimation property AnimationSlot005 auto
+sslBaseAnimation property AnimationSlot006 auto
+sslBaseAnimation property AnimationSlot007 auto
+sslBaseAnimation property AnimationSlot008 auto
+sslBaseAnimation property AnimationSlot009 auto
+sslBaseAnimation property AnimationSlot010 auto
+sslBaseAnimation property AnimationSlot011 auto
+sslBaseAnimation property AnimationSlot012 auto
+sslBaseAnimation property AnimationSlot013 auto
+sslBaseAnimation property AnimationSlot014 auto
+sslBaseAnimation property AnimationSlot015 auto
+sslBaseAnimation property AnimationSlot016 auto
+sslBaseAnimation property AnimationSlot017 auto
+sslBaseAnimation property AnimationSlot018 auto
+sslBaseAnimation property AnimationSlot019 auto
+sslBaseAnimation property AnimationSlot020 auto
+sslBaseAnimation property AnimationSlot021 auto
+sslBaseAnimation property AnimationSlot022 auto
+sslBaseAnimation property AnimationSlot023 auto
+sslBaseAnimation property AnimationSlot024 auto
+sslBaseAnimation property AnimationSlot025 auto
+sslBaseAnimation property AnimationSlot026 auto
+sslBaseAnimation property AnimationSlot027 auto
+sslBaseAnimation property AnimationSlot028 auto
+sslBaseAnimation property AnimationSlot029 auto
+sslBaseAnimation property AnimationSlot030 auto
+sslBaseAnimation property AnimationSlot031 auto
+sslBaseAnimation property AnimationSlot032 auto
+sslBaseAnimation property AnimationSlot033 auto
+sslBaseAnimation property AnimationSlot034 auto
+sslBaseAnimation property AnimationSlot035 auto
+sslBaseAnimation property AnimationSlot036 auto
+sslBaseAnimation property AnimationSlot037 auto
+sslBaseAnimation property AnimationSlot038 auto
+sslBaseAnimation property AnimationSlot039 auto
+sslBaseAnimation property AnimationSlot040 auto
+sslBaseAnimation property AnimationSlot041 auto
+sslBaseAnimation property AnimationSlot042 auto
+sslBaseAnimation property AnimationSlot043 auto
+sslBaseAnimation property AnimationSlot044 auto
+sslBaseAnimation property AnimationSlot045 auto
+sslBaseAnimation property AnimationSlot046 auto
+sslBaseAnimation property AnimationSlot047 auto
+sslBaseAnimation property AnimationSlot048 auto
+sslBaseAnimation property AnimationSlot049 auto
+sslBaseAnimation property AnimationSlot050 auto
+sslBaseAnimation property AnimationSlot051 auto
+sslBaseAnimation property AnimationSlot052 auto
+sslBaseAnimation property AnimationSlot053 auto
+sslBaseAnimation property AnimationSlot054 auto
+sslBaseAnimation property AnimationSlot055 auto
+sslBaseAnimation property AnimationSlot056 auto
+sslBaseAnimation property AnimationSlot057 auto
+sslBaseAnimation property AnimationSlot058 auto
+sslBaseAnimation property AnimationSlot059 auto
+sslBaseAnimation property AnimationSlot060 auto
+sslBaseAnimation property AnimationSlot061 auto
+sslBaseAnimation property AnimationSlot062 auto
+sslBaseAnimation property AnimationSlot063 auto
+sslBaseAnimation property AnimationSlot064 auto
+sslBaseAnimation property AnimationSlot065 auto
+sslBaseAnimation property AnimationSlot066 auto
+sslBaseAnimation property AnimationSlot067 auto
+sslBaseAnimation property AnimationSlot068 auto
+sslBaseAnimation property AnimationSlot069 auto
+sslBaseAnimation property AnimationSlot070 auto
+sslBaseAnimation property AnimationSlot071 auto
+sslBaseAnimation property AnimationSlot072 auto
+sslBaseAnimation property AnimationSlot073 auto
+sslBaseAnimation property AnimationSlot074 auto
+sslBaseAnimation property AnimationSlot075 auto
+sslBaseAnimation property AnimationSlot076 auto
+sslBaseAnimation property AnimationSlot077 auto
+sslBaseAnimation property AnimationSlot078 auto
+sslBaseAnimation property AnimationSlot079 auto
+sslBaseAnimation property AnimationSlot080 auto
+sslBaseAnimation property AnimationSlot081 auto
+sslBaseAnimation property AnimationSlot082 auto
+sslBaseAnimation property AnimationSlot083 auto
+sslBaseAnimation property AnimationSlot084 auto
+sslBaseAnimation property AnimationSlot085 auto
+sslBaseAnimation property AnimationSlot086 auto
+sslBaseAnimation property AnimationSlot087 auto
+sslBaseAnimation property AnimationSlot088 auto
+sslBaseAnimation property AnimationSlot089 auto
+sslBaseAnimation property AnimationSlot090 auto
+sslBaseAnimation property AnimationSlot091 auto
+sslBaseAnimation property AnimationSlot092 auto
+sslBaseAnimation property AnimationSlot093 auto
+sslBaseAnimation property AnimationSlot094 auto
+sslBaseAnimation property AnimationSlot095 auto
+sslBaseAnimation property AnimationSlot096 auto
+sslBaseAnimation property AnimationSlot097 auto
+sslBaseAnimation property AnimationSlot098 auto
+sslBaseAnimation property AnimationSlot099 auto
 
 function _Setup()
-	Registry = new sslBaseAnimation[100]
-	Registry[0] = SexLabAnimationSlot000
-	Registry[1] = SexLabAnimationSlot001
-	Registry[2] = SexLabAnimationSlot002
-	Registry[3] = SexLabAnimationSlot003
-	Registry[4] = SexLabAnimationSlot004
-	Registry[5] = SexLabAnimationSlot005
-	Registry[6] = SexLabAnimationSlot006
-	Registry[7] = SexLabAnimationSlot007
-	Registry[8] = SexLabAnimationSlot008
-	Registry[9] = SexLabAnimationSlot009
-	Registry[10] = SexLabAnimationSlot010
-	Registry[11] = SexLabAnimationSlot011
-	Registry[12] = SexLabAnimationSlot012
-	Registry[13] = SexLabAnimationSlot013
-	Registry[14] = SexLabAnimationSlot014
-	Registry[15] = SexLabAnimationSlot015
-	Registry[16] = SexLabAnimationSlot016
-	Registry[17] = SexLabAnimationSlot017
-	Registry[18] = SexLabAnimationSlot018
-	Registry[19] = SexLabAnimationSlot019
-	Registry[20] = SexLabAnimationSlot020
-	Registry[21] = SexLabAnimationSlot021
-	Registry[22] = SexLabAnimationSlot022
-	Registry[23] = SexLabAnimationSlot023
-	Registry[24] = SexLabAnimationSlot024
-	Registry[25] = SexLabAnimationSlot025
-	Registry[26] = SexLabAnimationSlot026
-	Registry[27] = SexLabAnimationSlot027
-	Registry[28] = SexLabAnimationSlot028
-	Registry[29] = SexLabAnimationSlot029
-	Registry[30] = SexLabAnimationSlot030
-	Registry[31] = SexLabAnimationSlot031
-	Registry[32] = SexLabAnimationSlot032
-	Registry[33] = SexLabAnimationSlot033
-	Registry[34] = SexLabAnimationSlot034
-	Registry[35] = SexLabAnimationSlot035
-	Registry[36] = SexLabAnimationSlot036
-	Registry[37] = SexLabAnimationSlot037
-	Registry[38] = SexLabAnimationSlot038
-	Registry[39] = SexLabAnimationSlot039
-	Registry[40] = SexLabAnimationSlot040
-	Registry[41] = SexLabAnimationSlot041
-	Registry[42] = SexLabAnimationSlot042
-	Registry[43] = SexLabAnimationSlot043
-	Registry[44] = SexLabAnimationSlot044
-	Registry[45] = SexLabAnimationSlot045
-	Registry[46] = SexLabAnimationSlot046
-	Registry[47] = SexLabAnimationSlot047
-	Registry[48] = SexLabAnimationSlot048
-	Registry[49] = SexLabAnimationSlot049
-	Registry[50] = SexLabAnimationSlot050
-	Registry[51] = SexLabAnimationSlot051
-	Registry[52] = SexLabAnimationSlot052
-	Registry[53] = SexLabAnimationSlot053
-	Registry[54] = SexLabAnimationSlot054
-	Registry[55] = SexLabAnimationSlot055
-	Registry[56] = SexLabAnimationSlot056
-	Registry[57] = SexLabAnimationSlot057
-	Registry[58] = SexLabAnimationSlot058
-	Registry[59] = SexLabAnimationSlot059
-	Registry[60] = SexLabAnimationSlot060
-	Registry[61] = SexLabAnimationSlot061
-	Registry[62] = SexLabAnimationSlot062
-	Registry[63] = SexLabAnimationSlot063
-	Registry[64] = SexLabAnimationSlot064
-	Registry[65] = SexLabAnimationSlot065
-	Registry[66] = SexLabAnimationSlot066
-	Registry[67] = SexLabAnimationSlot067
-	Registry[68] = SexLabAnimationSlot068
-	Registry[69] = SexLabAnimationSlot069
-	Registry[70] = SexLabAnimationSlot070
-	Registry[71] = SexLabAnimationSlot071
-	Registry[72] = SexLabAnimationSlot072
-	Registry[73] = SexLabAnimationSlot073
-	Registry[74] = SexLabAnimationSlot074
-	Registry[75] = SexLabAnimationSlot075
-	Registry[76] = SexLabAnimationSlot076
-	Registry[77] = SexLabAnimationSlot077
-	Registry[78] = SexLabAnimationSlot078
-	Registry[79] = SexLabAnimationSlot079
-	Registry[80] = SexLabAnimationSlot080
-	Registry[81] = SexLabAnimationSlot081
-	Registry[82] = SexLabAnimationSlot082
-	Registry[83] = SexLabAnimationSlot083
-	Registry[84] = SexLabAnimationSlot084
-	Registry[85] = SexLabAnimationSlot085
-	Registry[86] = SexLabAnimationSlot086
-	Registry[87] = SexLabAnimationSlot087
-	Registry[88] = SexLabAnimationSlot088
-	Registry[89] = SexLabAnimationSlot089
-	Registry[90] = SexLabAnimationSlot090
-	Registry[91] = SexLabAnimationSlot091
-	Registry[92] = SexLabAnimationSlot092
-	Registry[93] = SexLabAnimationSlot093
-	Registry[94] = SexLabAnimationSlot094
-	Registry[95] = SexLabAnimationSlot095
-	Registry[96] = SexLabAnimationSlot096
-	Registry[97] = SexLabAnimationSlot097
-	Registry[98] = SexLabAnimationSlot098
-	Registry[99] = SexLabAnimationSlot099
+	Slots = new sslBaseAnimation[100]
+	Slots[0] = AnimationSlot000
+	Slots[1] = AnimationSlot001
+	Slots[2] = AnimationSlot002
+	Slots[3] = AnimationSlot003
+	Slots[4] = AnimationSlot004
+	Slots[5] = AnimationSlot005
+	Slots[6] = AnimationSlot006
+	Slots[7] = AnimationSlot007
+	Slots[8] = AnimationSlot008
+	Slots[9] = AnimationSlot009
+	Slots[10] = AnimationSlot010
+	Slots[11] = AnimationSlot011
+	Slots[12] = AnimationSlot012
+	Slots[13] = AnimationSlot013
+	Slots[14] = AnimationSlot014
+	Slots[15] = AnimationSlot015
+	Slots[16] = AnimationSlot016
+	Slots[17] = AnimationSlot017
+	Slots[18] = AnimationSlot018
+	Slots[19] = AnimationSlot019
+	Slots[20] = AnimationSlot020
+	Slots[21] = AnimationSlot021
+	Slots[22] = AnimationSlot022
+	Slots[23] = AnimationSlot023
+	Slots[24] = AnimationSlot024
+	Slots[25] = AnimationSlot025
+	Slots[26] = AnimationSlot026
+	Slots[27] = AnimationSlot027
+	Slots[28] = AnimationSlot028
+	Slots[29] = AnimationSlot029
+	Slots[30] = AnimationSlot030
+	Slots[31] = AnimationSlot031
+	Slots[32] = AnimationSlot032
+	Slots[33] = AnimationSlot033
+	Slots[34] = AnimationSlot034
+	Slots[35] = AnimationSlot035
+	Slots[36] = AnimationSlot036
+	Slots[37] = AnimationSlot037
+	Slots[38] = AnimationSlot038
+	Slots[39] = AnimationSlot039
+	Slots[40] = AnimationSlot040
+	Slots[41] = AnimationSlot041
+	Slots[42] = AnimationSlot042
+	Slots[43] = AnimationSlot043
+	Slots[44] = AnimationSlot044
+	Slots[45] = AnimationSlot045
+	Slots[46] = AnimationSlot046
+	Slots[47] = AnimationSlot047
+	Slots[48] = AnimationSlot048
+	Slots[49] = AnimationSlot049
+	Slots[50] = AnimationSlot050
+	Slots[51] = AnimationSlot051
+	Slots[52] = AnimationSlot052
+	Slots[53] = AnimationSlot053
+	Slots[54] = AnimationSlot054
+	Slots[55] = AnimationSlot055
+	Slots[56] = AnimationSlot056
+	Slots[57] = AnimationSlot057
+	Slots[58] = AnimationSlot058
+	Slots[59] = AnimationSlot059
+	Slots[60] = AnimationSlot060
+	Slots[61] = AnimationSlot061
+	Slots[62] = AnimationSlot062
+	Slots[63] = AnimationSlot063
+	Slots[64] = AnimationSlot064
+	Slots[65] = AnimationSlot065
+	Slots[66] = AnimationSlot066
+	Slots[67] = AnimationSlot067
+	Slots[68] = AnimationSlot068
+	Slots[69] = AnimationSlot069
+	Slots[70] = AnimationSlot070
+	Slots[71] = AnimationSlot071
+	Slots[72] = AnimationSlot072
+	Slots[73] = AnimationSlot073
+	Slots[74] = AnimationSlot074
+	Slots[75] = AnimationSlot075
+	Slots[76] = AnimationSlot076
+	Slots[77] = AnimationSlot077
+	Slots[78] = AnimationSlot078
+	Slots[79] = AnimationSlot079
+	Slots[80] = AnimationSlot080
+	Slots[81] = AnimationSlot081
+	Slots[82] = AnimationSlot082
+	Slots[83] = AnimationSlot083
+	Slots[84] = AnimationSlot084
+	Slots[85] = AnimationSlot085
+	Slots[86] = AnimationSlot086
+	Slots[87] = AnimationSlot087
+	Slots[88] = AnimationSlot088
+	Slots[89] = AnimationSlot089
+	Slots[90] = AnimationSlot090
+	Slots[91] = AnimationSlot091
+	Slots[92] = AnimationSlot092
+	Slots[93] = AnimationSlot093
+	Slots[94] = AnimationSlot094
+	Slots[95] = AnimationSlot095
+	Slots[96] = AnimationSlot096
+	Slots[97] = AnimationSlot097
+	Slots[98] = AnimationSlot098
+	Slots[99] = AnimationSlot099
 
 	int i
-	while i < Registry.Length
-		Registry[i].InitializeAnimation()
+	while i < Slots.Length
+		Slots[i].Initialize()
 		i += 1
 	endWhile
 
-	_Load()
-endFunction
+	string[] init
+	registry = init
+	slotted = 0
 
-
-sslAnimationDefaults property Defaults auto
-function _Load()
 	Defaults.LoadAnimations()
-	Debug.Notification("Registered SexLab '"+GetCount(false)+"' Animations")
 endFunction

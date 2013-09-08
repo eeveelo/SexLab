@@ -1,9 +1,9 @@
 scriptname sslThreadController extends sslThreadModel
-{Animation Thread Controller: Runs manipulation logic of thread based on information from model}
+{ Animation Thread Controller: Runs manipulation logic of thread based on information from model. Access only through functions; NEVER create a property directly to this. }
 
 ;/-----------------------------------------------\;
 ;|	Primary Starter                              |;
-;\-----------------------------------------------/;
+;\-------------------Access only through functions; NEVER create a property directly to this.----------------------------/;
 
 bool primed
 bool scaled
@@ -21,7 +21,7 @@ endFunction
 bool function ActorsReady()
 	int i
 	while i < ActorCount
-		if ActorSlots[i].GetState() != "Ready"
+		if ActorAlias(i).GetState() != "Ready"
 			return false
 		endIf
 		i += 1
@@ -39,25 +39,22 @@ state Preparing
 			return
 		endIf
 		primed = false
-
 		; Set random starting animation
 		SetAnimation()
-
 		; Setup actors
 		SendActorEvent("StartThread")
 
 		; Wait for actors ready, or for 5 seconds to pass
 		float failsafe = Utility.GetCurrentRealTime() + 5.0
 		while !ActorsReady() && failsafe > Utility.GetCurrentRealTime()
-			Utility.Wait(0.5)
+			Utility.Wait(0.20)
 		endWhile
 
 		if IsPlayerPosition(AdjustingPosition) && ActorCount > 1
 			AdjustingPosition = PositionWrap((AdjustingPosition + 1))
 		endIf
 
-		RealignActors()
-
+		; RealignActors()
 		SendThreadEvent("AnimationStart")
 		if leadIn
 			SendThreadEvent("LeadInStart")
@@ -87,7 +84,7 @@ float timer
 state BeginLoop
 	event OnBeginState()
 		beginLoop = true
-		RegisterForSingleUpdate(0.15)
+		RegisterForSingleUpdate(0.10)
 	endEvent
 	event OnUpdate()
 		if !beginLoop
@@ -97,9 +94,11 @@ state BeginLoop
 
 		int i
 		while i < ActorCount
-			ActorSlots[i].StartAnimating()
+			ActorAlias(i).StartAnimating()
 			i += 1
 		endWhile
+
+		RealignActors()
 
 		animating = true
 		advance = true
@@ -107,7 +106,7 @@ state BeginLoop
 
 		; Set the SFX
 		int sfxInstance
-		float sfxVolume = SexLab.Config.fSFXVolume
+		float sfxVolume = Lib.fSFXVolume
 
 		started = Utility.GetCurrentRealTime()
 		while animating
@@ -126,7 +125,7 @@ endState
 state Advance
 	event OnBeginState()
 		if advance == true
-			RegisterForSingleUpdate(0.15)
+			RegisterForSingleUpdate(0.10)
 		else
 			EndAnimation(true)
 		endIf
@@ -162,8 +161,8 @@ state Advance
 			if Animation.IsSexual()
 				int i
 				while i < ActorCount
-					form[] equipment = SexLab.StripSlots(Positions[i], GetStrip(Positions[i]), false)
-					ActorSlots[i].StoreEquipment(equipment)
+					form[] equipment = Lib.Actors.StripSlots(Positions[i], GetStrip(Positions[i]), false)
+					ActorAlias(i).StoreEquipment(equipment)
 					i += 1
 				endWhile
 			endIf
@@ -200,7 +199,7 @@ state Advance
 		; Inform ActorAlias of change
 		int i
 		while i < ActorCount
-			ActorSlots[i].ThreadStage(stage)
+			ActorAlias(i).ThreadStage(stage)
 			i += 1
 		endWhile
 	endEvent
@@ -210,7 +209,7 @@ state Animating
 	event OnBeginState()
 		if animating
 			beginStage = true
-			RegisterForSingleUpdate(0.15)
+			RegisterForSingleUpdate(0.10)
 		endIf
 	endEvent
 
@@ -418,7 +417,7 @@ function AdjustChange(bool backwards = false)
 		AdjustingPosition += 1
 	endIf
 	AdjustingPosition = PositionWrap(AdjustingPosition)
-	SexLab.Data.mAdjustChange.Show((AdjustingPosition + 1))
+	Lib.mAdjustChange.Show((AdjustingPosition + 1))
 endFunction
 
 function RestoreOffsets()
@@ -444,9 +443,9 @@ function MoveScene()
 	MovingScene = true
 	Game.SetPlayerAIDriven(false)
 	;Game.EnablePlayerControls()
-	Debug.SendAnimationEvent(SexLab.PlayerRef, "IdleForceDefaultState")
+	Debug.SendAnimationEvent(Lib.PlayerRef, "IdleForceDefaultState")
 	; Lock hotkeys here for timer
-	SexLab.Data.mMoveScene.Show(6)
+	Lib.mMoveScene.Show(6)
 	float stopat = Utility.GetCurrentRealTime() + 6
 	while stopat > Utility.GetCurrentRealTime()
 		Utility.Wait(0.8)
@@ -531,11 +530,11 @@ function SetAnimation(int anim = -1)
 	animationCurrent = animations[aid]
 
 	if Animation.GetSFX() == 1 ; Squishing
-		sfxType = SexLab.Data.sfxSquishing01
+		sfxType = Lib.sfxSquishing01
 	elseIf Animation.GetSFX() == 2 ; Sucking
-		sfxType = SexLab.Data.sfxSucking01
+		sfxType = Lib.sfxSucking01
 	elseIf Animation.GetSFX() == 3 ; SexMix
-		sfxType = SexLab.Data.sfxSexMix01
+		sfxType = Lib.sfxSexMix01
 	else
 		sfxType = none
 	endIf
@@ -555,7 +554,7 @@ endFunction
 function PlayAnimation()
 	int i
 	while i < ActorCount
-		ActorSlots[i].PlayAnimation()
+		ActorAlias(i).PlayAnimation()
 		i += 1
 	endWhile
 endFunction
@@ -576,12 +575,12 @@ function EndAnimation(bool quick = false)
 
 	if !quick
 		; Apply Cum
-		if Animation.IsSexual() && SexLab.Config.bUseCum
-			int[] genders = SexLab.GenderCount(positions)
-			if genders[0] > 0 || SexLab.Config.bAllowFFCum
+		if Animation.IsSexual() && Lib.Actors.bUseCum
+			int[] genders = Lib.Actors.GenderCount(positions)
+			if genders[0] > 0 || Lib.Actors.bAllowFFCum
 				int i
 				while i < ActorCount
-					SexLab.ApplyCum(Positions[i], Animation.GetCum(i))
+					Lib.Actors.ApplyCum(Positions[i], Animation.GetCum(i))
 					i += 1
 				endWhile
 			endIf
@@ -597,9 +596,9 @@ function EndAnimation(bool quick = false)
 	UnlockThread()
 endFunction
 
-function InitializeThread()
+function Initialize()
 	; Clear model
-	parent.InitializeThread()
+	parent.Initialize()
 	; Set states
 	animating = false
 	stageBack = false
@@ -638,11 +637,10 @@ endFunction
 function SendActorEvent(string callback)
 	int i
 	while i < ActorCount
-		ActorSlots[i].ActorEvent(callback)
+		ActorAlias(i).ActorEvent(callback)
 		i += 1
 	endWhile
 endFunction
-
 
 ;/-----------------------------------------------\;
 ;|	API Functions                                |;

@@ -1,6 +1,6 @@
 scriptname sslVoiceFactory extends Quest
 
-sslVoiceSlots property Registry auto
+sslVoiceSlots property Slots auto
 sslBaseVoice property Voice auto hidden
 int slot
 
@@ -14,21 +14,19 @@ int property Female = 1 autoreadonly hidden
 
 ; Send callback event to start registration
 int function RegisterVoice(string registrar)
-	int check = Registry.FindByRegistrar(registrar)
+	int check = Slots.FindByRegistrar(registrar)
 	if check != -1
 		return check ; Duplicate
-	elseif Registry.GetFreeSlot() < 0
+	elseif !Slots.FreeSlots
 		return -1 ; No free slots
 	endIf
 	; Wait for factory to be free
-	_FactoryWait()
+	while Voice != none
+		Utility.Wait(0.10)
+	endWhile
 	; Get free animation slot
-	slot = Registry.GetFreeSlot()
-	Voice = Registry.GetBySlot(slot)
-	; Make sure it's cleared out before loading
-	Voice.InitializeVoice()
-	; Set Registrar
-	Voice.Registrar = registrar
+	Voice = Slots.GetFree()
+	slot = Slots.Register(Voice, registrar)
 	; Send load event
 	RegisterForModEvent("RegisterVoice", registrar)
 	SendModEvent("RegisterVoice", registrar, 1)
@@ -39,16 +37,9 @@ endFunction
 ; Unlocks factory for next callback, MUST be called at end of callback
 function Save()
 	Debug.Trace("SexLabVoiceFactory: Registered voice slot SexLabFramework.Voice["+slot+"] to '"+Voice.Name+"' ")
-	slot = -1
 	Voice = none
+	slot = -1
 endfunction
-
-; System use only, makes factory wait for free callback closure
-function _FactoryWait()
-	while Voice != none
-		Utility.Wait(0.12)
-	endWhile
-endFunction
 
 ;/-----------------------------------------------\;
 ;|	Callback Voice Property Shortcuts            |;

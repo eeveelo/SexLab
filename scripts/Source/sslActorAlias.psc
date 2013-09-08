@@ -1,15 +1,13 @@
 scriptname sslActorAlias extends ReferenceAlias
 
-SexLabFramework property SexLab auto
-sslSystemResources property Data auto
-sslSystemConfig property Config auto
+sslActorLibrary property Lib auto
 
 bool Active
 actor ActorRef
 sslThreadController Controller
+sslBaseVoice Voice
 
 ; Actor Information
-sslBaseVoice property Voice auto hidden
 float VoiceDelay
 float VoiceStrength
 bool IsSilent
@@ -33,19 +31,22 @@ form[] EquipmentStorage
 ;\-----------------------------------------------/;
 
 function PrepareActor()
+
+
+
 	if IsPlayer
 		Game.ForceThirdPerson()
 		;Game.DisablePlayerControls(true, true, false, false, true, false, false, true, 0)
 		;Game.SetInChargen(false, true, true)
 		Game.SetPlayerAIDriven()
 		; Enable hotkeys, if needed
-		if Config.bDisablePlayer && IsVictim
+		if Lib.bDisablePlayer && IsVictim
 			Controller.autoAdvance = true
 		else
-			SexLab._EnableHotkeys(Controller.tid)
+			Lib._HKStart(Controller)
 		endIf
 		; Toggle TCL if enabled and player present
-		if Config.bEnableTCL
+		if Lib.bEnableTCL
 			Debug.ToggleCollisions()
 		endIf
 	else
@@ -57,20 +58,20 @@ function PrepareActor()
 		ActorRef.SheatheWeapon()
 	endIf
 	; Start DoNothing package
-	ActorRef.SetFactionRank(SexLab.AnimatingFaction, 1)
+	ActorRef.SetFactionRank(Lib.AnimatingFaction, 1)
 	TryToEvaluatePackage()
 	; Sexual animations only
 	if Controller.Animation.IsSexual()
 		; Strip Actor
-		form[] equipment = SexLab.StripSlots(ActorRef, Controller.GetStrip(ActorRef), true)
+		form[] equipment = Lib.StripSlots(ActorRef, Controller.GetStrip(ActorRef), true)
 		StoreEquipment(equipment)
 		; Make Erect
-		if SexLab.sosEnabled && Controller.Animation.GetGender(Controller.GetPosition(ActorRef)) < 1
+		if Lib.SOSEnabled && Controller.Animation.GetGender(Controller.GetPosition(ActorRef)) < 1
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 		endIf
 	endIf
 	; Scale actor is enabled
-	if Controller.ActorCount > 1 && Config.bScaleActors
+	if Controller.ActorCount > 1 && Lib.bScaleActors
 		IsScaled = true
 
 		float display = ActorRef.GetScale()
@@ -93,34 +94,34 @@ function ResetActor()
 		ActorRef.SetScale(Scale)
 	endIf
 	; Remove from animation faction
-	ActorRef.RemoveFromFaction(SexLab.AnimatingFaction)
+	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
 	RemoveExtras()
 	; Reset openmouth
+	ActorRef.SetExpressionOverride(7, 50)
 	ActorRef.ClearExpressionOverride()
 	; Enable movement
 	if IsPlayer
-		if Config.bEnableTCL
+		if Lib.bEnableTCL
 			Debug.ToggleCollisions()
 		endIf
-		SexLab._DisableHotkeys()
+		Lib._HKClear()
 		;Game.ForceThirdPerson()
 		;Game.SetInChargen(false, false, false)
 		Game.SetPlayerAIDriven(false)
 		;Game.EnablePlayerControls()
-		SexLab.UpdatePlayerStats(Controller.Animation, Controller.GetTime(), Controller.Positions, Controller.GetVictim())
+		Lib.Stats.UpdatePlayerStats(Controller.Animation, Controller.GetTime(), Controller.Positions, Controller.GetVictim())
 	else
 		ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 		ActorRef.SetDontMove(false)
 		ActorRef.SetRestrained(false)
 	endIf
-	
 	; Make flaccid
-	if SexLab.sosEnabled && Controller.Animation.GetGender(Controller.GetPosition(ActorRef)) < 1
+	if Lib.SOSEnabled
 		Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
 	endIf
 	; Unstrip
 	if !ActorRef.IsDead() && !ActorRef.IsBleedingOut()
-		SexLab.UnstripActor(ActorRef, EquipmentStorage, Controller.GetVictim())
+		Lib.UnstripActor(ActorRef, EquipmentStorage, Controller.GetVictim())
 	endIf
 endFunction
 
@@ -135,7 +136,7 @@ function PlayAnimation()
 		ActorRef.ClearExpressionOverride()
 	endIf
 	; Send SOS event
-	if SexLab.sosEnabled && Animation.GetGender(position) < 1
+	if Lib.SOSEnabled && Animation.GetGender(position) < 1
 		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Animation.GetSchlong(position, stage))
 	endif
 endfunction
@@ -165,8 +166,8 @@ function EquipExtras()
 		endWhile
 	endIf
 	; Strapons are enabled for this position, and they are female in a male position
-	if Animation.GetGender(position) == 0 && Config.bUseStrapons && Animation.UseStrapon(position, stage)
-		SexLab.EquipStrapon(ActorRef)
+	if Animation.GetGender(position) == 0 && Lib.bUseStrapons && Animation.UseStrapon(position, stage)
+		Lib.EquipStrapon(ActorRef)
 	endIf
 endFunction
 
@@ -187,7 +188,7 @@ function RemoveExtras()
 		endWhile
 	endIf
 	; Strapons are enabled for this position, and they are female in a male position
-	SexLab.UnequipStrapon(ActorRef)
+	Lib.UnequipStrapon(ActorRef)
 endFunction
 
 function SetAlias(sslThreadController ThreadView)
@@ -196,14 +197,14 @@ function SetAlias(sslThreadController ThreadView)
 		TryToStopCombat()
 		ActorRef = GetReference() as actor
 		Controller = ThreadView
-		IsPlayer = ActorRef == SexLab.PlayerRef
+		IsPlayer = ActorRef == Lib.PlayerRef
 		IsVictim = ActorRef == ThreadView.GetVictim()
 	endIf
 endFunction
 
 function ClearAlias()
 	if GetReference() != none
-		Debug.Trace("SexLab: Clearing Actor Slot '"+GetName()+"'' of "+ActorRef)
+		Debug.Trace("SexLab: Clearing Actor Slot of "+ActorRef)
 		TryToClear()
 		TryToReset()
 		ActorRef.EvaluatePackage()
@@ -233,15 +234,11 @@ function ThreadAnimation(sslBaseAnimation toAnimation)
 	if !Active || ActorRef == none
 		return
 	endIf
-
 	RemoveExtras()
-
 	Animation = toAnimation
-
 	EquipExtras()
-
 	if IsPlayer
-		Debug.Notification(Animation.name)
+		Debug.Notification(Animation.Name)
 	endIf
 endFunction
 
@@ -262,17 +259,20 @@ function ThreadStage(int toStage)
 	; Update Silence
 	IsSilent = Animation.IsSilent(position, stage)
 
-	if !IsSilent
+	if IsSilent
+		; VoiceDelay is used as loop timer, must be set.
+		VoiceDelay = 4.0
+	else
 		; Update Strength
 		VoiceStrength = (stage as float) / (Animation.StageCount() as float)
 		if Animation.StageCount() == 1 && stage == 1
 			VoiceStrength = 0.50
 		endIf
 		; Base Delay
-		if SexLab.GetGender(ActorRef) < 1
-			VoiceDelay = Config.fMaleVoiceDelay
+		if Lib.GetGender(ActorRef) < 1
+			VoiceDelay = Lib.fMaleVoiceDelay
 		else
-			VoiceDelay = Config.fFemaleVoiceDelay
+			VoiceDelay = Lib.fFemaleVoiceDelay
 		endIf
 		; Stage Delay
 		if stage > 1
@@ -285,6 +285,13 @@ function ThreadStage(int toStage)
 	endIf
 endFunction
 
+function SetVoice(sslBaseVoice toVoice)
+	Voice = toVoice
+endFunction
+sslBaseVoice function GetVoice()
+	return Voice
+endFunction
+
 ;/-----------------------------------------------\;
 ;|	Animation/Voice Loop                         |;
 ;\-----------------------------------------------/;
@@ -295,8 +302,8 @@ state Ready
 	endEvent
 	function StartAnimating()
 		Active = true
-		ThreadAnimation(Controller.Animation)
 		ThreadPosition(Controller.Positions.Find(ActorRef))
+		ThreadAnimation(Controller.Animation)
 		ThreadStage(Controller.Stage)
 		GoToState("Animating")
 		RegisterForSingleUpdate(Utility.RandomFloat(0.0, 0.8))
@@ -319,7 +326,7 @@ state Animating
 				Sound.StopInstance(VoiceInstance)
 			endIf
 			VoiceInstance = Voice.Moan(ActorRef, VoiceStrength, IsVictim)
-			Sound.SetInstanceVolume(VoiceInstance, Config.fVoiceVolume)
+			Sound.SetInstanceVolume(VoiceInstance, Lib.fVoiceVolume)
 		endIf
 
 		RegisterForSingleUpdate(VoiceDelay)
@@ -344,7 +351,7 @@ endEvent
 
 event OnEndThread(string eventName, string actorSlot, float argNum, form sender)
 	ResetActor()
-	StopAnimating(!Config.bRagDollEnd)
+	StopAnimating(!Lib.bRagDollEnd)
 	ClearAlias()
 endEvent
 

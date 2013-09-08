@@ -1,15 +1,14 @@
 scriptname sslBaseVoice extends ReferenceAlias
 
-sslVoiceSlots property Registry auto
+sslVoiceLibrary property Lib auto
 
 string property Name = "" auto hidden
-string property Registrar = "" auto hidden
 bool property Enabled = true auto hidden
 int property Gender auto hidden
 
-bool property Slotted hidden
+bool property Registered hidden
 	bool function get()
-		return Registrar != "" && Name != ""
+		return Name != ""
 	endFunction
 endProperty
 
@@ -38,13 +37,13 @@ endFunction
 int function PlaySound(actor a, sound soundset, topic lipsync)
 	ActorBase base = a.GetLeveledActorBase()
 	VoiceType type = base.GetVoiceType()
-	if Registry.VoicesPlayer.HasForm(type) || type == Registry.SexLabVoiceM || type == Registry.SexLabVoiceF
+	if Lib.VoicesPlayer.HasForm(type) || type == Lib.SexLabVoiceM || type == Lib.SexLabVoiceF
 		a.Say(lipsync)
 	else
 		if base.GetSex() > 0
-			base.SetVoiceType(Registry.SexLabVoiceF)
+			base.SetVoiceType(Lib.SexLabVoiceF)
 		else
-			base.SetVoiceType(Registry.SexLabVoiceM)
+			base.SetVoiceType(Lib.SexLabVoiceM)
 		endIf
 		a.Say(lipsync)
 		base.SetVoiceType(type)
@@ -53,15 +52,15 @@ int function PlaySound(actor a, sound soundset, topic lipsync)
 endFunction
 
 int function PlayMild(actor a)
-	return PlaySound(a, Mild, Registry.SexLabMoanMild)
+	return PlaySound(a, Mild, Lib.SexLabMoanMild)
 endFunction
 
 int function PlayMedium(actor a)
-	return PlaySound(a, Medium, Registry.SexLabMoanMedium)
+	return PlaySound(a, Medium, Lib.SexLabMoanMedium)
 endFunction
 
 int function PlayHot(actor a)
-	return PlaySound(a, Hot, Registry.SexLabMoanHot)
+	return PlaySound(a, Hot, Lib.SexLabMoanHot)
 endFunction
 
 
@@ -104,14 +103,10 @@ endFunction
 ;|	Child loaders                                |;
 ;\-----------------------------------------------/;
 
-function LoadVoice()
-	return
-endFunction
-
-function InitializeVoice()
-	name = ""
-	enabled = true
-	gender = 1
+function Initialize()
+	Name = ""
+	Enabled = true
+	Gender = 0
 	string[] tagsDel
 	tags = tagsDel
 endFunction

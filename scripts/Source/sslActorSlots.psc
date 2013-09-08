@@ -1,65 +1,18 @@
 scriptname sslActorSlots extends Quest
 
-ReferenceAlias[] ActorSlot
+sslActorAlias[] ActorSlot
+sslActorLibrary property Lib auto
 
-int function ValidateActor(actor position)
-
-	if FindSlot(position) != -1
-		Debug.TraceAndBox("Failed to add actor to animation; actor appears to already be animating")
-		return -10
-	endIf
-
-	if position.HasKeyWordString("SexLabForbid")
-		Debug.TraceAndBox("Failed to add actor to animation; actor is forbidden from animating")
-		return -11
-	endIf
-
-	if !position.Is3DLoaded()
-		Debug.TraceAndBox("Failed to add actor to animation; actor is not loaded")
-		return -12
-	endIf
-
-	if position.IsDead()
-		Debug.TraceAndBox("Failed to add actor to animation; actor is dead")
-		return -13
-	endIf
-
-	if position.IsDisabled()
-		Debug.TraceAndBox("Failed to add actor to animation; actor is disabled")
-		return -14
-	endIf
-
-	Race ActorRace = position.GetLeveledActorBase().GetRace()
-	if position.IsChild() || ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(ActorRace.GetName(), "Child") != -1 || StringUtil.Find(ActorRace.GetName(), "117") != -1
-		Debug.TraceAndBox("Failed to add actor to animation; actor is child")
-		return -15
-	endIf
-
-	if position.HasKeyWordString("ActorTypeCreature") || position.HasKeyWordString("ActorTypeDwarven")
-		Debug.TraceAndBox("Failed to add actor to animation; actor is a creature or Dwemer that is currently not supported")
-		return -16
-	endIf
-
-
-	return 1
-endFunction
-
-ReferenceAlias function SlotActor(actor position, sslThreadController ThreadView)
-	
-	if ValidateActor(position) < 1
-		return none
-	endIf
-
+sslActorAlias function SlotActor(actor position, sslThreadController ThreadView)
 	int i = 0
 	while i < ActorSlot.Length
 		if ActorSlot[i].ForceRefIfEmpty(position)
 			Debug.Trace("SexLab: Slotting ActorSlot["+i+"] with "+position)
-			(ActorSlot[i] as sslActorAlias).SetAlias(ThreadView)
+			ActorSlot[i].SetAlias(ThreadView)
 			return ActorSlot[i]
 		endIf
 		i += 1
 	endWhile
-
 	return none
 endFunction
 
@@ -77,7 +30,6 @@ int function FindSlot(actor position)
 endFunction
 
 function ClearSlot(int slot)
-	debug.traceandbox("ClearSlot("+slot+")")
 	if slot >= 0 && slot < ActorSlot.Length
 		actor position = ActorSlot[slot].GetReference() as actor
 		Debug.Trace("SexLab: Clearing ActorSlot["+slot+"] of "+position)
@@ -88,106 +40,101 @@ function ClearSlot(int slot)
 endFunction
 
 function ClearActor(actor position)
-
 	int slot = FindSlot(position)
-	debug.traceandbox("ClearActor("+position+") -> "+slot)
 	if slot != -1
 		ClearSlot(slot)
 	endIf
 endFunction
 
 sslActorAlias function GetActorAlias(actor position)
-	return (ActorSlot[FindSlot(position)] as sslActorAlias)
+	return ActorSlot[FindSlot(position)]
 endFunction
 
-ReferenceAlias property ActorSlot000 auto
-ReferenceAlias property ActorSlot001 auto
-ReferenceAlias property ActorSlot002 auto
-ReferenceAlias property ActorSlot003 auto
-ReferenceAlias property ActorSlot004 auto
-ReferenceAlias property ActorSlot005 auto
-ReferenceAlias property ActorSlot006 auto
-ReferenceAlias property ActorSlot007 auto
-ReferenceAlias property ActorSlot008 auto
-ReferenceAlias property ActorSlot009 auto
+sslActorAlias property ActorSlot000 auto
+sslActorAlias property ActorSlot001 auto
+sslActorAlias property ActorSlot002 auto
+sslActorAlias property ActorSlot003 auto
+sslActorAlias property ActorSlot004 auto
+sslActorAlias property ActorSlot005 auto
+sslActorAlias property ActorSlot006 auto
+sslActorAlias property ActorSlot007 auto
+sslActorAlias property ActorSlot008 auto
+sslActorAlias property ActorSlot009 auto
 
-ReferenceAlias property ActorSlot010 auto
-ReferenceAlias property ActorSlot011 auto
-ReferenceAlias property ActorSlot012 auto
-ReferenceAlias property ActorSlot013 auto
-ReferenceAlias property ActorSlot014 auto
-ReferenceAlias property ActorSlot015 auto
-ReferenceAlias property ActorSlot016 auto
-ReferenceAlias property ActorSlot017 auto
-ReferenceAlias property ActorSlot018 auto
-ReferenceAlias property ActorSlot019 auto
+sslActorAlias property ActorSlot010 auto
+sslActorAlias property ActorSlot011 auto
+sslActorAlias property ActorSlot012 auto
+sslActorAlias property ActorSlot013 auto
+sslActorAlias property ActorSlot014 auto
+sslActorAlias property ActorSlot015 auto
+sslActorAlias property ActorSlot016 auto
+sslActorAlias property ActorSlot017 auto
+sslActorAlias property ActorSlot018 auto
+sslActorAlias property ActorSlot019 auto
 
-ReferenceAlias property ActorSlot020 auto
-ReferenceAlias property ActorSlot021 auto
-ReferenceAlias property ActorSlot022 auto
-ReferenceAlias property ActorSlot023 auto
-ReferenceAlias property ActorSlot024 auto
-ReferenceAlias property ActorSlot025 auto
-ReferenceAlias property ActorSlot026 auto
-ReferenceAlias property ActorSlot027 auto
-ReferenceAlias property ActorSlot028 auto
-ReferenceAlias property ActorSlot029 auto
+sslActorAlias property ActorSlot020 auto
+sslActorAlias property ActorSlot021 auto
+sslActorAlias property ActorSlot022 auto
+sslActorAlias property ActorSlot023 auto
+sslActorAlias property ActorSlot024 auto
+sslActorAlias property ActorSlot025 auto
+sslActorAlias property ActorSlot026 auto
+sslActorAlias property ActorSlot027 auto
+sslActorAlias property ActorSlot028 auto
+sslActorAlias property ActorSlot029 auto
 
-ReferenceAlias property ActorSlot030 auto
-ReferenceAlias property ActorSlot031 auto
-ReferenceAlias property ActorSlot032 auto
-ReferenceAlias property ActorSlot033 auto
-ReferenceAlias property ActorSlot034 auto
-ReferenceAlias property ActorSlot035 auto
-ReferenceAlias property ActorSlot036 auto
-ReferenceAlias property ActorSlot037 auto
-ReferenceAlias property ActorSlot038 auto
-ReferenceAlias property ActorSlot039 auto
+sslActorAlias property ActorSlot030 auto
+sslActorAlias property ActorSlot031 auto
+sslActorAlias property ActorSlot032 auto
+sslActorAlias property ActorSlot033 auto
+sslActorAlias property ActorSlot034 auto
+sslActorAlias property ActorSlot035 auto
+sslActorAlias property ActorSlot036 auto
+sslActorAlias property ActorSlot037 auto
+sslActorAlias property ActorSlot038 auto
+sslActorAlias property ActorSlot039 auto
 
-ReferenceAlias property ActorSlot040 auto
-ReferenceAlias property ActorSlot041 auto
-ReferenceAlias property ActorSlot042 auto
-ReferenceAlias property ActorSlot043 auto
-ReferenceAlias property ActorSlot044 auto
-ReferenceAlias property ActorSlot045 auto
-ReferenceAlias property ActorSlot046 auto
-ReferenceAlias property ActorSlot047 auto
-ReferenceAlias property ActorSlot048 auto
-ReferenceAlias property ActorSlot049 auto
+sslActorAlias property ActorSlot040 auto
+sslActorAlias property ActorSlot041 auto
+sslActorAlias property ActorSlot042 auto
+sslActorAlias property ActorSlot043 auto
+sslActorAlias property ActorSlot044 auto
+sslActorAlias property ActorSlot045 auto
+sslActorAlias property ActorSlot046 auto
+sslActorAlias property ActorSlot047 auto
+sslActorAlias property ActorSlot048 auto
+sslActorAlias property ActorSlot049 auto
 
-ReferenceAlias property ActorSlot050 auto
-ReferenceAlias property ActorSlot051 auto
-ReferenceAlias property ActorSlot052 auto
-ReferenceAlias property ActorSlot053 auto
-ReferenceAlias property ActorSlot054 auto
-ReferenceAlias property ActorSlot055 auto
-ReferenceAlias property ActorSlot056 auto
-ReferenceAlias property ActorSlot057 auto
-ReferenceAlias property ActorSlot058 auto
-ReferenceAlias property ActorSlot059 auto
+sslActorAlias property ActorSlot050 auto
+sslActorAlias property ActorSlot051 auto
+sslActorAlias property ActorSlot052 auto
+sslActorAlias property ActorSlot053 auto
+sslActorAlias property ActorSlot054 auto
+sslActorAlias property ActorSlot055 auto
+sslActorAlias property ActorSlot056 auto
+sslActorAlias property ActorSlot057 auto
+sslActorAlias property ActorSlot058 auto
+sslActorAlias property ActorSlot059 auto
 
-ReferenceAlias property ActorSlot060 auto
-ReferenceAlias property ActorSlot061 auto
-ReferenceAlias property ActorSlot062 auto
-ReferenceAlias property ActorSlot063 auto
-ReferenceAlias property ActorSlot064 auto
-ReferenceAlias property ActorSlot065 auto
-ReferenceAlias property ActorSlot066 auto
-ReferenceAlias property ActorSlot067 auto
-ReferenceAlias property ActorSlot068 auto
-ReferenceAlias property ActorSlot069 auto
+sslActorAlias property ActorSlot060 auto
+sslActorAlias property ActorSlot061 auto
+sslActorAlias property ActorSlot062 auto
+sslActorAlias property ActorSlot063 auto
+sslActorAlias property ActorSlot064 auto
+sslActorAlias property ActorSlot065 auto
+sslActorAlias property ActorSlot066 auto
+sslActorAlias property ActorSlot067 auto
+sslActorAlias property ActorSlot068 auto
+sslActorAlias property ActorSlot069 auto
 
-ReferenceAlias property ActorSlot070 auto
-ReferenceAlias property ActorSlot071 auto
-ReferenceAlias property ActorSlot072 auto
-ReferenceAlias property ActorSlot073 auto
-ReferenceAlias property ActorSlot074 auto
+sslActorAlias property ActorSlot070 auto
+sslActorAlias property ActorSlot071 auto
+sslActorAlias property ActorSlot072 auto
+sslActorAlias property ActorSlot073 auto
+sslActorAlias property ActorSlot074 auto
 
 function _Setup()
-	Stop()
-	Start()
-
-	ActorSlot = new ReferenceAlias[75]
+	ActorSlot = new sslActorAlias[75]
 	ActorSlot[0] = ActorSlot000
 	ActorSlot[1] = ActorSlot001
 	ActorSlot[2] = ActorSlot002
@@ -269,8 +216,7 @@ function _Setup()
 		ActorSlot[i].TryToClear()
 		i += 1
 	endWhile
-endFunction
 
-event OnInit()
-	_Setup()
-endEvent
+	; Reind Hotkeys
+	Lib._HKClear()
+endFunction
