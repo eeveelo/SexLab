@@ -12,7 +12,7 @@ sslThreadController function PrimeThread()
 	if GetState() != "Making"
 		return none
 	endIf
-	stage = 0
+	stage = 1
 	sfx = new float[2]
 	GotoState("Preparing")
 	return self
@@ -102,6 +102,7 @@ state BeginLoop
 
 		animating = true
 		advance = true
+		stage = 0
 		GoToState("Advance")
 
 		; Set the SFX

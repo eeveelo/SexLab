@@ -302,9 +302,10 @@ state Ready
 	endEvent
 	function StartAnimating()
 		Active = true
+		stage = Controller.Stage
 		ThreadPosition(Controller.Positions.Find(ActorRef))
 		ThreadAnimation(Controller.Animation)
-		ThreadStage(Controller.Stage)
+		ThreadStage(stage)
 		GoToState("Animating")
 		RegisterForSingleUpdate(Utility.RandomFloat(0.0, 0.8))
 	endFunction
