@@ -1,20 +1,45 @@
 scriptname sslThreadController extends sslThreadModel
 { Animation Thread Controller: Runs manipulation logic of thread based on information from model. Access only through functions; NEVER create a property directly to this. }
 
+; Animation
+int aid
+sslBaseAnimation AnimCurrent
+sslBaseAnimation property Animation hidden
+	sslBaseAnimation function get()
+		return AnimCurrent
+	endFunction
+endProperty
+
+; SFX
+Sound sfxType
+float[] sfx
+int sfxInstance
+float sfxVolume
+
+; Processing
+int stagePrev
+float started
+float timer
+float advanceAt
+
+; Hotkeys
+int AdjustingPosition
+bool MovingScene
+
+; Locks
+bool looping
+
+
 ;/-----------------------------------------------\;
 ;|	Primary Starter                              |;
-;\-------------------Access only through functions; NEVER create a property directly to this.----------------------------/;
-
-bool primed
-bool scaled
+;\-----------------------------------------------/;
 
 sslThreadController function PrimeThread()
 	if GetState() != "Making"
 		return none
 	endIf
-	stage = 1
-	sfx = new float[2]
 	GotoState("Preparing")
+	RegisterForSingleUpdate(0.12)
 	return self
 endFunction
 
@@ -30,36 +55,25 @@ bool function ActorsReady()
 endFunction
 
 state Preparing
-	event OnBeginState()
-		primed = true
-		RegisterForSingleUpdate(0.15)
-	endEvent
 	event OnUpdate()
-		if !primed
-			return
-		endIf
-		primed = false
+		Debug.TraceAndBox("ThreadView["+tid+"]: "+GetState()+" :: Preparing")
+		; Init
+		Stage = 1
+		sfx = new float[2]
+		sfxVolume = Lib.fSFXVolume
+		sfxInstance = 0
 		; Set random starting animation
 		SetAnimation()
 		; Setup actors
 		SendActorEvent("StartThread")
-
 		; Wait for actors ready, or for 5 seconds to pass
 		float failsafe = Utility.GetCurrentRealTime() + 5.0
 		while !ActorsReady() && failsafe > Utility.GetCurrentRealTime()
 			Utility.Wait(0.20)
 		endWhile
-
 		if IsPlayerPosition(AdjustingPosition) && ActorCount > 1
 			AdjustingPosition = PositionWrap((AdjustingPosition + 1))
 		endIf
-
-		; RealignActors()
-		SendThreadEvent("AnimationStart")
-		if leadIn
-			SendThreadEvent("LeadInStart")
-		endIf
-		primed = true
 		GotoState("BeginLoop")
 	endEvent
 endState
@@ -68,29 +82,14 @@ endState
 ;|	Animation Loops                              |;
 ;\-----------------------------------------------/;
 
-bool beginLoop
-bool beginStage
-bool animating
-bool stageBack
-bool advance
-bool orgasm
-float advanceTimer
-int previousStage
-
-float[] sfx
-float started
-float timer
-
 state BeginLoop
 	event OnBeginState()
-		beginLoop = true
-		RegisterForSingleUpdate(0.10)
-	endEvent
-	event OnUpdate()
-		if !beginLoop
-			return
+		Debug.TraceAndBox("ThreadView["+tid+"]: "+GetState()+" :: BeginLoop")
+
+		SendThreadEvent("AnimationStart")
+		if LeadIn
+			SendThreadEvent("LeadInStart")
 		endIf
-		beginLoop = false
 
 		int i
 		while i < ActorCount
@@ -98,68 +97,25 @@ state BeginLoop
 			i += 1
 		endWhile
 
-		RealignActors()
-
-		animating = true
-		advance = true
-		stage = 0
-		GoToState("Advance")
-
-		; Set the SFX
-		int sfxInstance
-		float sfxVolume = Lib.fSFXVolume
-
 		started = Utility.GetCurrentRealTime()
-		while animating
-			; Play SFX
-			if sfx[0] <= timer - sfx[1] && sfxType != none
-				sfxInstance = sfxType.Play(Positions[0])
-				Sound.SetInstanceVolume(sfxInstance, sfxVolume)
-				sfx[1] = timer
-			endIf
-			timer = Utility.GetCurrentRealTime() - started
-			Utility.Wait(0.4)
-		endWhile
+		MoveActors()
+		GoToStage(1)
 	endEvent
 endState
 
 state Advance
-	event OnBeginState()
-		if advance == true
-			RegisterForSingleUpdate(0.10)
-		else
-			EndAnimation(true)
-		endIf
-	endEvent
-
 	event OnUpdate()
-		if !advance
-			return
-		endIf
-		advance = false
-
-		previousStage = stage
-
-		; Next stage
-		if stageBack
-			stage -= 1
-		else
-			stage += 1
-		endIf
-		if stage < 1
-			stage = 1
-		endIf
-
-		stageBack = false
-
-		if leadIn && stage > Animation.StageCount()
-			; End leadIn animations and go into normal animations
-			stage = 1
-			leadIn = false
+		UnregisterForUpdate()
+		if !LeadIn && Stage > Animation.StageCount
+			EndAnimation()
+			return ; Stop
+		elseIf LeadIn && Stage > Animation.StageCount
+			; Swap to non lead in animations
+			Stage = 1
+			LeadIn = false
 			SetAnimation()
-			SendThreadEvent("LeadInEnd")
 			; Restrip with new strip options
-			if Animation.IsSexual()
+			if Animation.IsSexual
 				int i
 				while i < ActorCount
 					form[] equipment = Lib.Actors.StripSlots(Positions[i], GetStrip(Positions[i]), false)
@@ -167,105 +123,64 @@ state Advance
 					i += 1
 				endWhile
 			endIf
-			; Start Animations loop
 			RealignActors()
-			GoToState("Animating")
-		elseIf stage <= Animation.StageCount()
-			; Make sure stage exists first
-			if !leadIn && stage == Animation.StageCount()
-				orgasm = true
-			else
-				orgasm = false
-			endIf
-			; Start Animations loop
-			GoToState("Animating")
-		else
-			; No valid stages left
-			EndAnimation()
+			SendThreadEvent("LeadInEnd")			
 		endIf
-	endEvent
-
-	event OnEndState()
-		if !animating
-			return
-		endIf
-		; Stage Delay
-		if stage > 1
-			sfx[0] = sfx[0] - (stage * 0.2)
-		endIf
-		; min 1.0 delay
-		if sfx[0] < 1.0
-			sfx[0] = 1.0
-		endIf
-		; Inform ActorAlias of change
+		; Inform ActorAlias of stage
 		int i
 		while i < ActorCount
-			ActorAlias(i).ThreadStage(stage)
+			ActorAlias(i).ToStage(Stage)
 			i += 1
 		endWhile
+		; Start Animations loop
+		GoToState("Animating")
 	endEvent
 endState
 
 state Animating
 	event OnBeginState()
-		if animating
-			beginStage = true
-			RegisterForSingleUpdate(0.10)
-		endIf
-	endEvent
-
-	event OnUpdate()
-		if !beginStage
-			return
-		endIf
-		beginStage = false
-
-		if orgasm
+		if !LeadIn && Stage == Animation.StageCount
 			SendThreadEvent("OrgasmStart")
 		else
 			SendThreadEvent("StageStart")
 		endIf
-
-		PlayAnimation()
-
-		; Check if actor needs to be realigned for stage
-		if previousStage != 0
-			int position = 0
-			while position < ActorCount
-				float[] current = Animation.GetPositionOffsets(position, stage)
-				float[] previous = Animation.GetPositionOffsets(position, previousStage)
-				int offset = 0
-				while offset < 4
-					if current[offset] != previous[offset]
-						MoveActor(position)
-						offset = 4
-					endIf
-					offset += 1
-				endWhile
-				position += 1
-			endWhile
+		; Stage Delay
+		if stage > 1
+			sfx[0] = sfx[0] - (Stage * 0.2)
 		endIf
-
-		advanceTimer = Utility.GetCurrentRealTime() + GetStageTimer(Animation.StageCount())
-
-		advance = false
-		while !advance && animating
-			; Delay loop
-			Utility.Wait(1.0)
-			; Auto Advance
-			if autoAdvance && advanceTimer < Utility.GetCurrentRealTime()
-				advance = true
-			endIf
-		endWhile
-
-		if orgasm
+		; min 0.75 delay
+		if sfx[0] < 0.80
+			sfx[0] = 0.80
+		endIf
+		; Start animation looping
+		PlayAnimation()
+		looping = true
+		advanceAt = Utility.GetCurrentRealTime() + StageTimer()
+		RegisterForSingleUpdate(0.10)
+	endEvent
+	event OnUpdate()
+		if !looping
+			return
+		endIf
+		timer = Utility.GetCurrentRealTime() - started
+		if autoAdvance && advanceAt < Utility.GetCurrentRealTime()
+			GoToStage((Stage + 1))
+			return ; End Stage
+		endIf
+		; Play SFX
+		if sfx[0] <= timer - sfx[1] && sfxType != none
+			Sound.SetInstanceVolume(sfxType.Play(Positions[0]), sfxVolume)
+			sfx[1] = timer
+		endIf
+		; Loop
+		RegisterForSingleUpdate(0.60)
+	endEvent
+	event OnEndState()
+		if !LeadIn && Stage == Animation.StageCount
 			SendThreadEvent("OrgasmEnd")
 		else
 			SendThreadEvent("StageEnd")
 		endIf
-
-		; stage == Animation.StageCount() && Animation.StageCount() >= 2 && Animation.IsSexual() && !leadIn
-		GoToState("Advance")
 	endEvent
 endState
 
@@ -273,23 +188,16 @@ endState
 ;|	Hotkey Functions                             |;
 ;\-----------------------------------------------/;
 
-int AdjustingPosition
-bool MovingScene
-
 function AdvanceStage(bool backwards = false)
-	if !animating
-		return
+	if !backwards
+		GoToStage((Stage + 1))
+	elseIf backwards && stage > 1
+		GoToStage((Stage - 1))
 	endIf
-	if backwards && stage == 1
-		return
-	elseif backwards && stage > 1
-		stageBack = true
-	endIf
-	advance = true
 endFunction
 
 function ChangeAnimation(bool backwards = false)
-	if !animating || animations.Length == 1
+	if !looping || Animations.Length == 1
 		return ; Single animation selected, nothing to change to
 	endIf
 	if !backwards
@@ -297,10 +205,10 @@ function ChangeAnimation(bool backwards = false)
 	else
 		aid -= 1
 	endIf
-	if aid >= animations.Length
+	if aid >= Animations.Length
 		aid = 0
 	elseIf aid < 0
-		aid = animations.Length - 1
+		aid = Animations.Length - 1
 	endIf
 
 	SetAnimation(aid)
@@ -311,7 +219,7 @@ function ChangeAnimation(bool backwards = false)
 endFunction
 
 function ChangePositions(bool backwards = false)
-	if !animating || ActorCount < 2
+	if !looping || ActorCount < 2
 		return ; Solo Animation, nobody to swap with
 	endIf
 	; Set direction of swapping
@@ -336,8 +244,8 @@ function ChangePositions(bool backwards = false)
 	AdjustAlias.RemoveExtras()
 	MovedAlias.RemoveExtras()
 	; Update positions
-	AdjustAlias.ThreadPosition(GetPosition(adjusting))
-	MovedAlias.ThreadPosition(GetPosition(moved))
+	AdjustAlias.ToPosition(GetPosition(adjusting))
+	MovedAlias.ToPosition(GetPosition(moved))
 	; Equip new extras
 	AdjustAlias.EquipExtras()
 	MovedAlias.EquipExtras()
@@ -348,7 +256,7 @@ function ChangePositions(bool backwards = false)
 endFunction
 
 function AdjustForward(bool backwards = false, bool adjuststage = false)
-	if !animating
+	if !looping
 		return
 	endIf
 	float adjustment = 0.75
@@ -364,7 +272,7 @@ function AdjustForward(bool backwards = false, bool adjuststage = false)
 endFunction
 
 function AdjustSideways(bool backwards = false, bool adjuststage = false)
-	if !animating
+	if !looping
 		return
 	endIf
 	float adjustment = 0.75
@@ -380,7 +288,7 @@ function AdjustSideways(bool backwards = false, bool adjuststage = false)
 endFunction
 
 function AdjustUpward(bool backwards = false, bool adjuststage = false)
-	if !animating || IsPlayerPosition(AdjustingPosition)
+	if !looping || IsPlayerPosition(AdjustingPosition)
 		return
 	endIf
 	float adjustment = 0.75
@@ -396,7 +304,7 @@ function AdjustUpward(bool backwards = false, bool adjuststage = false)
 endFunction
 
 function RotateScene(bool backwards = false)
-	if !animating
+	if !looping
 		return
 	endIf
 	; Adjust current center's Z angle
@@ -409,7 +317,7 @@ function RotateScene(bool backwards = false)
 endFunction
 
 function AdjustChange(bool backwards = false)
-	if !animating
+	if !looping
 		return
 	endIf
 	if backwards
@@ -422,7 +330,7 @@ function AdjustChange(bool backwards = false)
 endFunction
 
 function RestoreOffsets()
-	if !animating
+	if !looping
 		return
 	endIf
 	Animation.RestoreOffsets()
@@ -430,7 +338,7 @@ function RestoreOffsets()
 endFunction
 
 function MoveScene()
-	if !animating
+	if !looping
 		return
 	endIf
 	bool advanceToggle
@@ -474,6 +382,28 @@ endFunction
 ;|	Actor Manipulation                           |;
 ;\-----------------------------------------------/;
 
+function GoToStage(int toStage)
+	looping = false
+	stagePrev = stage
+	if toStage < 0
+		toStage = 0
+	endIf
+	Stage = toStage
+	GoToState("Advance")
+	RegisterForSingleUpdate(0.10)
+endFunction
+
+; TODO: add check for animation async timer here
+float function StageTimer()
+	int last = ( Timers.Length - 1 )
+	if stage < last
+		return Timers[(stage - 1)]
+	elseif stage >= Animation.StageCount
+		return Timers[last]
+	endIf
+	return Timers[(last - 1)]
+endfunction
+
 function MoveActor(int position)
 	actor a = Positions[position]
 	float[] offsets = Animation.GetPositionOffsets(position, stage)
@@ -509,44 +439,23 @@ endFunction
 ;|	Animation Functions                           |;
 ;\-----------------------------------------------/;
 
-sslBaseAnimation animationCurrent
-sslBaseAnimation property Animation hidden
-	sslBaseAnimation function get()
-		return animationCurrent
-	endFunction
-endProperty
-
-int aid
-Sound sfxType
-bool[] silence
-
 function SetAnimation(int anim = -1)
-	if !_MakeWait("SetAnimation")
-		return
-	endIf
-	aid = anim
-	if aid < 0 ; randomize if -1
-		aid = utility.RandomInt(0, animations.Length - 1)
-	endIf
-	animationCurrent = animations[aid]
-
-	if Animation.GetSFX() == 1 ; Squishing
-		sfxType = Lib.sfxSquishing01
-	elseIf Animation.GetSFX() == 2 ; Sucking
-		sfxType = Lib.sfxSucking01
-	elseIf Animation.GetSFX() == 3 ; SexMix
-		sfxType = Lib.sfxSexMix01
+	if anim < 0 ; randomize if -1
+		aid = utility.RandomInt(0, Animations.Length - 1)
 	else
-		sfxType = none
+		aid = anim
 	endIf
-
+	; Set current animation to play
+	AnimCurrent = Animations[aid]
+	; Set SFX Marker
+	sfxType = Lib.GetSFX(Animation.SFX)
+	; Update with new animation
 	int i = 0
 	while i < ActorCount
-		;SexLab.StripActor(pos[i], victim)
 		sslActorAlias Slot = GetActorAlias(Positions[i])
-		Slot.ThreadPosition(i)
-		Slot.ThreadAnimation(Animation)
-		Slot.ThreadStage(Stage)
+		Slot.ToStage(Stage)
+		Slot.ToPosition(i)
+		Slot.ToAnimation(Animation)
 		i += 1
 	endWhile
 
@@ -564,28 +473,25 @@ endFunction
 ;|	Ending Functions                             |;
 ;\-----------------------------------------------/;
 
-bool[] ending
 
 function EndAnimation(bool quick = false)
-	if !animating
-		UnlockThread()
-		return
-	endIf
-	animating = false
+	UnregisterForUpdate()
+	looping = false
+
 	SendThreadEvent("AnimationEnd")
 
 	if !quick
 		; Apply Cum
-		if Animation.IsSexual() && Lib.Actors.bUseCum
-			int[] genders = Lib.Actors.GenderCount(positions)
-			if genders[0] > 0 || Lib.Actors.bAllowFFCum
-				int i
-				while i < ActorCount
-					Lib.Actors.ApplyCum(Positions[i], Animation.GetCum(i))
-					i += 1
-				endWhile
-			endIf
-		endIf
+		; if Animation.IsSexual && Lib.Actors.bUseCum
+		; 	int[] genders = Lib.Actors.GenderCount(positions)
+		; 	if genders[0] > 0 || Lib.Actors.bAllowFFCum
+		; 		int i
+		; 		while i < ActorCount
+		; 			Lib.Actors.ApplyCum(Positions[i], Animation.GetCum(i))
+		; 			i += 1
+		; 		endWhile
+		; 	endIf
+		; endIf
 		; Reset Actor & Clear Alias
 		SendActorEvent("EndThread")
 		Utility.Wait(2.0)
@@ -595,18 +501,14 @@ function EndAnimation(bool quick = false)
 	endIf
 
 	UnlockThread()
+	SendThreadEvent("ThreadClear")
 endFunction
 
 function Initialize()
 	; Clear model
 	parent.Initialize()
 	; Set states
-	animating = false
-	stageBack = false
-	primed = false
-	scaled = false
-	advance = false
-	orgasm = false
+	looping = false
 	; Empty Strings
 	; Empty actors
 	actor[] acDel
@@ -615,18 +517,16 @@ function Initialize()
 	sfx = fDel
 	timer = 0.0
 	started = 0.0
-	advanceTimer = 0.0
 	; Empty bools
 	bool[] bDel
-	silence = bDel
 	; Empty integers
 	int[] iDel
 	AdjustingPosition = 0
-	previousStage = 0
+	stagePrev = 0
 	aid = 0
 	; Empty voice slots
-	; Empty animations
-	animationCurrent = none
+	; Empty AnimationS
+	AnimCurrent = none
 	; Empty forms
 	sfxType = none
 endFunction

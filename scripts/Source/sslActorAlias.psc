@@ -32,8 +32,6 @@ form[] EquipmentStorage
 
 function PrepareActor()
 
-
-
 	if IsPlayer
 		Game.ForceThirdPerson()
 		;Game.DisablePlayerControls(true, true, false, false, true, false, false, true, 0)
@@ -230,7 +228,7 @@ function StoreEquipment(form[] equipment)
 	EquipmentStorage = equipment
 endFunction
 
-function ThreadAnimation(sslBaseAnimation toAnimation)
+function ToAnimation(sslBaseAnimation toAnimation)
 	if !Active || ActorRef == none
 		return
 	endIf
@@ -242,14 +240,14 @@ function ThreadAnimation(sslBaseAnimation toAnimation)
 	endIf
 endFunction
 
-function ThreadPosition(int toPosition)
+function ToPosition(int toPosition)
 	if !Active || ActorRef == none
 		return
 	endIf
 	position = toPosition
 endFunction
 
-function ThreadStage(int toStage)
+function ToStage(int toStage)
 	if !Active || ActorRef == none
 		return
 	endIf
@@ -303,9 +301,9 @@ state Ready
 	function StartAnimating()
 		Active = true
 		stage = Controller.Stage
-		ThreadPosition(Controller.Positions.Find(ActorRef))
-		ThreadAnimation(Controller.Animation)
-		ThreadStage(stage)
+		ToPosition(Controller.Positions.Find(ActorRef))
+		ToAnimation(Controller.Animation)
+		ToStage(stage)
 		GoToState("Animating")
 		RegisterForSingleUpdate(Utility.RandomFloat(0.0, 0.8))
 	endFunction

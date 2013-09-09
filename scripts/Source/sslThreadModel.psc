@@ -125,8 +125,8 @@ sslThreadController function StartThread()
 
 	i = 0
 	while i < primaryAnimations.Length
-		if actors != primaryAnimations[i].ActorCount()
-			_Log("Primary animation '"+primaryAnimations[i].name+"' requires "+primaryAnimations[i].ActorCount()+" actors, only "+actors+" present", "StartThread", "FATAL")
+		if actors != primaryAnimations[i].PositionCount
+			_Log("Primary animation '"+primaryAnimations[i].Name+"' requires "+primaryAnimations[i].PositionCount+" actors, only "+actors+" present", "StartThread", "FATAL")
 			return none
 		endIf
 		i += 1
@@ -134,8 +134,8 @@ sslThreadController function StartThread()
 
 	i = 0
 	while i < leadAnimations.Length
-		if actors != leadAnimations[i].ActorCount()
-			_Log("Lead in animation '"+leadAnimations[i].name+"' requires "+leadAnimations[i].ActorCount()+" actors, only "+actors+" present", "StartThread", "FATAL")
+		if actors != leadAnimations[i].PositionCount
+			_Log("Lead in animation '"+leadAnimations[i].Name+"' requires "+leadAnimations[i].PositionCount+" actors, only "+actors+" present", "StartThread", "FATAL")
 			return none
 		endIf
 		i += 1

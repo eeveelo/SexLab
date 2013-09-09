@@ -34,6 +34,22 @@ bool[] property bStripLeadInMale auto hidden
 bool[] property bStripVictim auto hidden
 bool[] property bStripAggressor auto hidden
 
+Sound function GetSFX(int id)
+	; Squishing
+	if id == 1
+		return sfxSquishing01
+	; Sucking
+	elseIf id == 2
+		return sfxSucking01
+	; SexMix
+	elseIf id == 3
+		return sfxSexMix01
+	; Empty
+	else
+		return none
+	endIf
+endFunction
+
 function _Defaults()
 	; Config
 	fSFXDelay = 4.0
