@@ -69,11 +69,11 @@ int function AddPositionStage(int position, string animationEvent, float forward
 endFunction
 
 function SetContent(int contentType)
-	return Animation.SetContent(contentType)
+	Animation.SetContent(contentType)
 endFunction
 
 function SetSFX(int iSFX)
-	return Animation.SetSFX(iSFX)
+	Animation.SFX = iSFX
 endFunction
 
 bool function AddTag(string tag)

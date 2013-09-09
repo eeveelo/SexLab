@@ -1,24 +1,14 @@
 scriptname sslBaseAnimation extends ReferenceAlias
 
+; Config
 string property Name = "" auto hidden
 bool property Enabled = true auto hidden
 bool property TCL = false auto hidden
 int property Timer = -1 auto hidden
-
-bool property Registered hidden
-	bool function get()
-		return Name != ""
-	endFunction
-endProperty
-
-; Gender Types
-int property Creature = -1 autoreadonly hidden
-int property Male = 0 autoreadonly hidden
-int property Female = 1 autoreadonly hidden
+int property SFX auto hidden
 
 int actors = 0
 int stages = 0
-int sfx = 0
 int content = 0
 
 ; Animation Events
@@ -41,6 +31,27 @@ form[] extras5
 
 bool waiting
 
+; Information
+bool property Registered hidden
+	bool function get()
+		return Name != ""
+	endFunction
+endProperty
+bool property IsSexual hidden
+	bool function get()
+		return content < 3
+	endFunction
+endProperty
+int property StageCount hidden
+	int function get()
+		return stages
+	endFunction
+endProperty
+int property PositionCount hidden
+	int function get()
+		return actors
+	endFunction
+endProperty
 ;/-----------------------------------------------\;
 ;|	Animation Offsets                            |;
 ;\-----------------------------------------------/;
@@ -332,10 +343,6 @@ bool function UseStrapon(int position, int stage)
 	return AccessSwitch(position, stage, 2)
 endFunction
 
-int function GetSFX()
-	return sfx
-endFunction
-
 int function ActorCount()
 	return actors
 endFunction
@@ -394,15 +401,7 @@ form[] function GetExtras(int position)
 endFunction
 
 bool function IsSexual()
-	if content == 1 || content == 2
-		return true
-	else
-		return false
-	endIf
-endFunction
-
-function SetSFX(int iSFX)
-	sfx = iSFX
+	return IsSexual
 endFunction
 
 function SetContent(int contentType)
@@ -466,10 +465,10 @@ function Initialize()
 	Name = ""
 	Enabled = true
 	waiting = false
+	Actors = 0
+	Stages = 0
+	SFX = 0
 	content = 0
-	actors = 0
-	stages = 0
-	sfx = 0
 
 	float[] floatDel
 	offsetData = floatDel
