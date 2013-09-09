@@ -58,38 +58,38 @@ sslThreadController PlayerController
 
 int function ValidateActor(actor position)
 	if Slots.FindSlot(position) != -1
-		Debug.TraceAndBox("Failed to add actor to animation; actor appears to already be animating")
+		Debug.Trace("Failed to add actor to animation; actor appears to already be animating")
 		return -10
 	endIf
 
 	if position.HasKeyWordString("SexLabForbid")
-		Debug.TraceAndBox("Failed to add actor to animation; actor is forbidden from animating")
+		Debug.Trace("Failed to add actor to animation; actor is forbidden from animating")
 		return -11
 	endIf
 
 	if !position.Is3DLoaded()
-		Debug.TraceAndBox("Failed to add actor to animation; actor is not loaded")
+		Debug.Trace("Failed to add actor to animation; actor is not loaded")
 		return -12
 	endIf
 
 	if position.IsDead()
-		Debug.TraceAndBox("Failed to add actor to animation; actor is dead")
+		Debug.Trace("Failed to add actor to animation; actor is dead")
 		return -13
 	endIf
 
 	if position.IsDisabled()
-		Debug.TraceAndBox("Failed to add actor to animation; actor is disabled")
+		Debug.Trace("Failed to add actor to animation; actor is disabled")
 		return -14
 	endIf
 
 	Race ActorRace = position.GetLeveledActorBase().GetRace()
 	if position.IsChild() || ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(ActorRace.GetName(), "Child") != -1 || StringUtil.Find(ActorRace.GetName(), "117") != -1
-		Debug.TraceAndBox("Failed to add actor to animation; actor is child")
+		Debug.Trace("Failed to add actor to animation; actor is child")
 		return -15
 	endIf
 
 	if position.HasKeyWordString("ActorTypeCreature") || position.HasKeyWordString("ActorTypeDwarven")
-		Debug.TraceAndBox("Failed to add actor to animation; actor is a creature or Dwemer that is currently not supported")
+		Debug.Trace("Failed to add actor to animation; actor is a creature or Dwemer that is currently not supported")
 		return -16
 	endIf
 	return 1
