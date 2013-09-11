@@ -145,24 +145,10 @@ function ApplyCum(actor a, int cumID)
 	endIf
 endFunction
 
-; form[] function StripActor(actor a, actor victim = none, bool animate = true, bool leadIn = false)
-; 	int gender = GetGender(a)
-; 	bool[] strip
-; 	if leadIn && gender < 1
-; 		strip = bStripLeadInMale
-; 	elseif leadIn && gender > 0
-; 		strip = bStripLeadInFemale
-; 	elseif victim != none && a == victim
-; 		strip = bStripVictim
-; 	elseif victim != none && a != victim
-; 		strip = bStripAggressor
-; 	elseif victim == none && gender < 1
-; 		strip = bStripMale
-; 	else
-; 		strip = bstripFemale
-; 	endIf
-; 	return StripSlots(a, strip, animate)
-; endFunction
+form[] function StripActor(actor a, actor victim = none, bool animate = true, bool leadIn = false)
+	bool[] strip = GetStrip(a, victim, leadIn)
+	return StripSlots(a, strip, animate)
+endFunction
 
 bool[] function GetStrip(actor a, actor victim, bool leadin)
 	bool female = GetGender(a) == 1
