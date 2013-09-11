@@ -206,8 +206,17 @@ function PlayAnimation()
 		ActorRef.ClearExpressionOverride()
 	endIf
 	; Send SOS event
-	if Lib.SOSEnabled && Animation.GetGender(position) < 1
-		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Animation.GetSchlong(position, stage))
+	if Lib.SOSEnabled && Animation.GetGender(position) == 0
+		int offset = Animation.GetSchlong(position, stage)
+		string bend
+		if offset < 0
+			bend = "SOSBendDown0"+Math.Ceiling(Math.Abs(offset) / 2)
+		elseif offset > 0
+			bend = "SOSBendUp0"+Math.Ceiling(Math.Abs(offset) / 2)
+		else
+			bend = "SOSNoBend"
+		endIf
+		Debug.SendAnimationEvent(ActorRef, bend)
 	endif
 endfunction
 
