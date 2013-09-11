@@ -4,7 +4,6 @@ scriptname sslBaseAnimation extends ReferenceAlias
 string property Name = "" auto hidden
 bool property Enabled = true auto hidden
 bool property TCL = false auto hidden
-int property Timer = -1 auto hidden
 int property SFX auto hidden
 
 int actors = 0
@@ -15,6 +14,7 @@ int content = 0
 string[] animations
 
 ; Data storage
+float[] timerData
 float[] offsetData ; x, y, z, rotation
 float[] offsetDefaults ; x, y, z, rotation
 bool[] switchData ; silence, mouth, strapon
@@ -471,6 +471,7 @@ function Initialize()
 	content = 0
 
 	float[] floatDel
+	timerData = floatDel
 	offsetData = floatDel
 	offsetDefaults = floatDel
 

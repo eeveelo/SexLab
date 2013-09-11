@@ -213,6 +213,7 @@ function _Setup()
 
 	int i = 0
 	while i < ActorSlot.Length
+		ActorSlot[i].ClearAlias()
 		ActorSlot[i].TryToClear()
 		i += 1
 	endWhile

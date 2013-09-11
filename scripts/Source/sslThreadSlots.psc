@@ -98,7 +98,8 @@ endFunction
 function _StopAll()
 	int i = 0
 	while i < ThreadView.Length
-		ThreadView[i].EndAnimation(quick = true)
+		ThreadView[i].SendActorEvent("EndThread", 1.0)
+		ThreadView[i].UnlockThread()
 		i += 1
 	endWhile
 endFunction

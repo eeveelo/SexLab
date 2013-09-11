@@ -1,32 +1,50 @@
 scriptname sslThreadModel extends ReferenceAlias
 { Animation Thread Model: Runs storage and information about a thread. Access only through functions; NEVER create a property directly to this. }
 
+; Library
 sslThreadLibrary property Lib auto
 
-int _ThreadID
-int property tid hidden
-	int function get()
-		return _ThreadID
-	endFunction
-endProperty
+; Locks
+bool waiting
+bool locked
+bool active
+bool making
 
-bool waiting = false
-bool locked = false
-bool active = false
+; Actors
+actor[] property Positions auto hidden 
+ReferenceAlias[] property ActorAlias auto hidden
 
-bool property IsLocked hidden
-	bool function get()
-		return locked
-	endFunction
-endProperty
+; Animations
+int property Stage auto hidden
+sslBaseAnimation[] customAnimations
+sslBaseAnimation[] primaryAnimations
+sslBaseAnimation[] leadAnimations
 
-string logtype = "trace"
-string property Logging hidden
-	string function get()
-		return logtype
-	endFunction
-	function set(string value)
-		logtype = value
+; Thread Instance settings
+string property Logging = "trace" auto hidden
+bool property AutoAdvance auto hidden
+bool property LeadIn auto hidden
+
+ObjectReference centerObj
+float[] centerLoc
+float[] customtimers
+bool leadInDisabled
+actor PlayerRef
+actor victim
+string hook
+int bed ; 0 allow, 1 in use, 2 force, -1 forbid
+float timeout
+
+; Thread Instance Info
+sslBaseAnimation[] property Animations hidden
+	sslBaseAnimation[] function get()
+		if customAnimations.Length > 0
+			return customAnimations
+		elseIf leadIn
+			return leadAnimations
+		else
+			return primaryAnimations
+		endIf
 	endFunction
 endProperty
 
@@ -36,12 +54,47 @@ int property ActorCount hidden
 	endFunction
 endProperty
 
+bool property IsAggressive hidden
+	bool function get()
+		return victim != none
+	endFunction
+endProperty
+
+ObjectReference property CenterRef hidden
+	ObjectReference function get()
+		return centerObj
+	endFunction
+endProperty
+
+float[] property CenterLocation hidden
+	float[] function get()
+		return centerLoc
+	endFunction
+endProperty
+
+bool property IsLocked hidden
+	bool function get()
+		return locked
+	endFunction
+endProperty
+
+float[] property Timers hidden
+	float[] function get()
+		if customtimers.Length > 0
+			return customtimers
+		elseif leadIn
+			return Lib.fStageTimerLeadIn
+		elseif IsAggressive
+			return Lib.fStageTimerAggr
+		else
+			return Lib.fStageTimer
+		endIf
+	endFunction
+endProperty
+
 ;/-----------------------------------------------\;
 ;|	Preparation Functions                        |;
 ;\-----------------------------------------------/;
-
-float timeout
-bool making
 
 sslThreadModel function Make(float timeoutIn = 5.0)
 	if locked
@@ -51,7 +104,6 @@ sslThreadModel function Make(float timeoutIn = 5.0)
 	locked = true
 	making = true
 	timeout = timeoutIn
-	storageslots = new actor[5]
 	ActorAlias = new ReferenceAlias[5]
 	GoToState("Making")
 	RegisterForSingleUpdate(0.1)
@@ -222,46 +274,6 @@ endFunction
 ;|	Setting Functions                            |;
 ;\-----------------------------------------------/;
 
-string hook
-int property stage auto hidden
-
-ObjectReference centerObj
-ObjectReference property CenterRef hidden
-	ObjectReference function get()
-		return centerObj
-	endFunction
-endProperty
-
-float[] centerLoc
-float[] property CenterLocation hidden
-	float[] function get()
-		return centerLoc
-	endFunction
-endProperty
-
-bool property IsAggressive hidden
-	bool function get()
-		return victim != none
-	endFunction
-endProperty
-
-float[] customtimers
-float[] property Timers hidden
-	float[] function get()
-		if customtimers.Length > 0
-			return customtimers
-		elseif leadIn
-			return Lib.fStageTimerLeadIn
-		elseif IsAggressive
-			return Lib.fStageTimerAggr
-		else
-			return Lib.fStageTimer
-		endIf
-	endFunction
-endProperty
-
-int bed ; 0 allow, 1 in use, 2 force, -1 forbid
-
 function SetHook(string hookName)
 	if !_MakeWait("SetHook")
 		return
@@ -292,19 +304,23 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 	endIf
 	
 	centerObj = centerOn
-	if Lib.BedsList.HasForm(centerObj.GetBaseObject())
+	if Lib.BedsList.HasForm(centerOn.GetBaseObject())
 		bed = 1
-		centerLoc = GetCoords(centerObj)
+		centerLoc = GetCoords(centerOn)
 		centerLoc[0] = centerLoc[0] + (35 * Math.sin(centerLoc[5]))
 		centerLoc[1] = centerLoc[1] + (35 * Math.cos(centerLoc[5]))
 		centerLoc[2] = centerLoc[2] + 35
-	elseif centerObj == Lib.PlayerRef || centerObj.HasKeyWordString("ActorTypeNPC")
-		ObjectReference Stager = centerObj.PlaceAtMe(Lib.SexLabStager)
-		centerLoc = GetCoords(Stager)
+	elseif centerOn == Lib.PlayerRef || centerOn.HasKeyWordString("ActorTypeNPC")
+		ObjectReference Stager = centerOn.PlaceAtMe(Lib.SexLabStager)
+		if centerOn.GetDistance(Stager) < 600
+			centerLoc = GetCoords(Stager)
+		else
+			centerLoc = GetCoords(centerOn)
+		endIf
 		Stager.Disable()
 		Stager.Delete()
 	else
-		centerLoc = GetCoords(centerObj)
+		centerLoc = GetCoords(centerOn)
 	endIf
 
 	if active && resync
@@ -314,20 +330,20 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 endFunction
 
 function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, float RotX = 0.0, float RotY = 0.0, float RotZ = 0.0, bool resync = true)
-	float[] coords = new float[6]
-	coords[0] = LocX
-	coords[1] = LocY
-	coords[2] = LocZ
-	coords[3] = RotX
-	coords[4] = RotY
-	coords[5] = RotZ
+	centerLoc = new float[6]
+	centerLoc[0] = LocX
+	centerLoc[1] = LocY
+	centerLoc[2] = LocZ
+	centerLoc[3] = RotX
+	centerLoc[4] = RotY
+	centerLoc[5] = RotZ
 	if active && resync
 		RealignActors()
 		SendThreadEvent("ActorsRelocated")
 	endIf
 endFunction
 
-function UpdateRotation(float adjust)
+function AdjustRotation(float adjust)
 	centerLoc[5] = centerLoc[5] + adjust
 	if centerLoc[5] >= 360
 		centerLoc[5] = ( centerLoc[5] - 360 )
@@ -367,32 +383,6 @@ endfunction
 ;|	Actor Functions                              |;
 ;\-----------------------------------------------/;
 
-actor[] property Positions auto hidden 
-actor[] storageslots
-ReferenceAlias[] property ActorAlias auto hidden
-
-actor PlayerRef
-
-actor victim
-
-bool[] strip0
-bool[] strip1
-bool[] strip2
-bool[] strip3
-bool[] strip4
-
-form[] equipment0
-form[] equipment1
-form[] equipment2
-form[] equipment3
-form[] equipment4
-
-float[] loc0
-float[] loc1
-float[] loc2
-float[] loc3
-float[] loc4
-
 int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice = none, bool forceSilent = false)
 	if !_MakeWait("AddActor")
 		return -1
@@ -416,8 +406,6 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 		id = ActorCount - 1
 		; Save Alias slot
 		ActorAlias[id] = slot
-		; Save static storage slot
-		storageslots[id] = position
 		; Set as victim
 		if isVictim
 			victim = position
@@ -439,156 +427,74 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 	return id
 endFunction
 
+; TODO: Remake
 function ChangeActors(actor[] changeTo)
-	if !active
-		return
-	endIf
-	; Make sure all new actors are vaild.
-	int i = 0
-	while i < changeTo.Length
-		if Positions.Find(changeTo[i]) < 0 && Lib.Actors.ValidateActor(changeTo[i]) < 0
-			return 
-		endIf
-		i += 1
-	endWhile
-	; Actor count has changed, get new default animation list
-	if changeTo.Length != ActorCount
-		sslBaseAnimation[] newList
-		; Try aggressive animations first if we need them
-		if victim != none
-			newList = Lib.Animations.GetByType(changeTo.Length, aggressive=true)
-		endIf
-		; Runs if no victim or victim search didn't find any
-		if newList.Length == 0
-			newList = Lib.Animations.GetByType(changeTo.Length)
-		endIf
-		; Still none? We have no animations for this count, bail
-		if newList.Length == 0
-			return	
-		endIf
-		; Set our new list
-		SetAnimations(newList)
-		SetAnimation()
-	endIf
-	SendThreadEvent("ActorChangeStart")
-	i = 0
-	while i < ActorCount
-		actor a = Positions[i]
-		ResetActor(a)
-		if !a.IsDead() && !a.IsBleedingOut()
-			Lib.Actors.UnstripActor(a, GetEquipment(a), GetVictim())
-		endIf
-		if changeTo.Find(a) < 0
-			if IsPlayerActor(a)
-				autoAdvance = true
-			endIf
-		endIf
-		i += 1
-	endWhile
-	Positions = changeTo
-	storageslots = changeTo
-	form[] foDel
-	equipment0 = foDel
-	equipment1 = foDel
-	equipment2 = foDel
-	equipment3 = foDel
-	equipment4 = foDel
-	i = 0
-	while i < ActorCount
-		SetupActor(Positions[i])
-		i += 1
-	endWhile
-	stage -= 1
-	AdvanceStage()
-	SendThreadEvent("ActorChangeEnd")
-endFunction
-
-function SaveLocation(actor position)
-	float[] loc = new float[3]
-	loc[0] = position.GetPositionX()
-	loc[1] = position.GetPositionY()
-	loc[2] = position.GetPositionZ()
-	int slot = GetSlot(position)
-	if slot == 0
-		loc0 = loc
-	elseIf slot == 1
-		loc1 = loc
-	elseIf slot == 2
-		loc2 = loc
-	elseIf slot == 3
-		loc3 = loc
-	elseIf slot == 4
-		loc4 = loc
-	else
-		_Log("Unknown position given, '"+position+"' ", "SaveLocation")
-	endIf
-endFunction
-
-float[] function GetLocation(actor position)
-	int slot = GetSlot(position)
-	if slot == 0
-		return loc0
-	elseIf slot == 1
-		return loc1
-	elseIf slot == 2
-		return loc2
-	elseIf slot == 3
-		return loc3
-	elseIf slot == 4
-		return loc4
-	else
-		_Log("Unknown position given, '"+position+"' ", "SaveLocation")
-		return none
-	endIf
-endFunction
-
-bool function HasMoved(actor position)
-	float[] current = new float[3]
-	current[0] = position.GetPositionX()
-	current[1] = position.GetPositionY()
-	current[2] = position.GetPositionZ()
-	float[] saved = GetLocation(position)
-
-	int i = 0
-	while i < 3
-		if ( (current[i] - saved[i]) > 2 ) || ( (current[i] - saved[i]) < -2 )
-			return true
-		endIf
-		i += 1
-	endWhile
-	return false
-endFunction
-
-sslActorAlias function ActorAlias(int position)
-	return ActorAlias[position] as sslActorAlias
-endFunction
-
-sslActorAlias function GetActorAlias(actor position)
-	return ActorAlias[GetSlot(position)] as sslActorAlias
+	; if !active
+	; 	return
+	; endIf
+	; ; Make sure all new actors are vaild.
+	; int i = 0
+	; while i < changeTo.Length
+	; 	if Positions.Find(changeTo[i]) < 0 && Lib.Actors.ValidateActor(changeTo[i]) < 0
+	; 		return 
+	; 	endIf
+	; 	i += 1
+	; endWhile
+	; ; Actor count has changed, get new default animation list
+	; if changeTo.Length != ActorCount
+	; 	sslBaseAnimation[] newList
+	; 	; Try aggressive animations first if we need them
+	; 	if victim != none
+	; 		newList = Lib.Animations.GetByType(changeTo.Length, aggressive=true)
+	; 	endIf
+	; 	; Runs if no victim or victim search didn't find any
+	; 	if newList.Length == 0
+	; 		newList = Lib.Animations.GetByType(changeTo.Length)
+	; 	endIf
+	; 	; Still none? We have no animations for this count, bail
+	; 	if newList.Length == 0
+	; 		return	
+	; 	endIf
+	; 	; Set our new list
+	; 	SetAnimations(newList)
+	; 	SetAnimation()
+	; endIf
+	; SendThreadEvent("ActorChangeStart")
+	; i = 0
+	; while i < ActorCount
+	; 	actor a = Positions[i]
+	; 	ResetActor(a)
+	; 	if !a.IsDead() && !a.IsBleedingOut()
+	; 		;Lib.Actors.UnstripActor(a, GetEquipment(a), GetVictim())
+	; 	endIf
+	; 	if changeTo.Find(a) < 0
+	; 		if IsPlayerActor(a)
+	; 			autoAdvance = true
+	; 		endIf
+	; 	endIf
+	; 	i += 1
+	; endWhile
+	; Positions = changeTo
+	; storageslots = changeTo
+	; form[] foDel
+	; equipment0 = foDel
+	; equipment1 = foDel
+	; equipment2 = foDel
+	; equipment3 = foDel
+	; equipment4 = foDel
+	; i = 0
+	; while i < ActorCount
+	; 	SetupActor(Positions[i])
+	; 	i += 1
+	; endWhile
+	; stage -= 1
+	; AdvanceStage()
+	; SendThreadEvent("ActorChangeEnd")
 endFunction
 
 ;/-----------------------------------------------\;
 ;|	Animation Functions                          |;
 ;\-----------------------------------------------/;
-
-bool property autoAdvance auto hidden
-bool property leadIn auto hidden
-bool leadInDisabled
-
-sslBaseAnimation[] customAnimations
-sslBaseAnimation[] primaryAnimations
-sslBaseAnimation[] leadAnimations
-sslBaseAnimation[] property Animations hidden
-	sslBaseAnimation[] function get()
-		if customAnimations.Length > 0
-			return customAnimations
-		elseIf leadIn
-			return leadAnimations
-		else
-			return primaryAnimations
-		endIf
-	endFunction
-endProperty
 
 function SetForcedAnimations(sslBaseAnimation[] animationList)
 	if AnimationList.Length == 0
@@ -615,20 +521,42 @@ function SetLeadAnimations(sslBaseAnimation[] animationList)
 	SetAnimation()
 endFunction
 
-function DisableLeadIn(bool disableIt = false)
+function DisableLeadIn(bool disableIt = true)
 	leadInDisabled = disableIt
-	if !disableIt
+	if disableIt
 		leadIn = false
 	endIf
 endFunction
 
+function DisableUndressAnimation(actor position, bool disableIt = true)
+	ActorAlias(position).DisableUndressAnim(disableIt)
+endFunction
+
+function DisableRagdollEnd(actor position, bool disableIt = true)
+	ActorAlias(position).DisableRagdollEnd(disableIt)
+endFunction
 
 ;/-----------------------------------------------\;
 ;|	Storage Functions                            |;
 ;\-----------------------------------------------/;
 
 int function GetSlot(actor position)
-	return storageslots.Find(position)
+	int i
+	while i < ActorAlias.Length
+		if ActorAlias[i] != none && ((ActorAlias[i].GetReference() as actor) == position)
+			return i
+		endIf
+		i += 1
+	endWhile
+	return -1
+endFunction
+
+sslActorAlias function GetAlias(int position)
+	return ActorAlias[position] as sslActorAlias
+endFunction
+
+sslActorAlias function ActorAlias(actor position)
+	return ActorAlias[GetSlot(position)] as sslActorAlias
 endFunction
 
 int function GetPosition(actor position)
@@ -642,104 +570,15 @@ function SetStrip(actor position, bool[] strip)
 		_Log("Malformed strip bool[] passed, must be 33 length bool array, "+strip.Length+" given", "SetStrip")
 		return
 	endIf
-	int slot = GetSlot(position)
-	if slot == 0
-		strip0 = strip
-	elseIf slot == 1
-		strip1 = strip
-	elseIf slot == 2
-		strip2 = strip
-	elseIf slot == 3
-		strip3 = strip
-	elseIf slot == 4
-		strip4 = strip
-	else
-		_Log("Unknown position given, '"+position+"' ", "SetStrip")
-	endIf
-endFunction
-
-bool[] function GetStrip(actor position)
-	bool[] strip
-	int slot = GetSlot(position)
-	; Check for custom
-	if slot == 0
-		strip = strip0
-	elseIf slot == 1
-		strip = strip1
-	elseIf slot == 2
-		strip = strip2
-	elseIf slot == 3
-		strip = strip3
-	elseIf slot == 4
-		strip = strip4
-	endIf
-	; Return customized strip options
-	if strip.Length == 33
-		return strip
-	endIf
-	; Fallback to default
-	int gender = Lib.Actors.GetGender(position)
-	if leadIn && gender < 1
-		strip = Lib.bStripLeadInMale
-	elseif leadIn && gender > 0
-		strip = Lib.bStripLeadInFemale
-	elseif IsAggressive && position == victim
-		strip = Lib.bStripVictim
-	elseif IsAggressive && position != victim
-		strip = Lib.bStripAggressor
-	elseif !IsAggressive && gender < 1
-		strip = Lib.bStripMale
-	else
-		strip = Lib.bstripFemale
-	endIf
-	return strip
-endFunction
-
-function StoreEquipment(actor position, form[] equipment)
-	; Check for current equipment
-	form[] current = GetEquipment(position)
-	; Merge with current storage
-	int i
-	while i < current.Length
-		equipment = sslUtility.PushForm(current[i], equipment)
-		i += 1
-	endWhile
-	; Put in storage
-	int slot = GetSlot(position)
-	if slot == 0
-		equipment0 = equipment
-	elseIf slot == 1
-		equipment1 = equipment
-	elseIf slot == 2
-		equipment2 = equipment
-	elseIf slot == 3
-		equipment3 = equipment
-	elseIf slot == 4
-		equipment4 = equipment
-	endIf
-endFunction
-
-form[] function GetEquipment(actor position)
-	int slot = GetSlot(position)
-	if slot == 0
-		return equipment0
-	elseIf slot == 1
-		return equipment1
-	elseIf slot == 2
-		return equipment2
-	elseIf slot == 3
-		return equipment3
-	elseIf slot == 4
-		return equipment4
-	endIf
+	ActorAlias(position).OverrideStrip(strip)	
 endFunction
 
 function SetVoice(actor position, sslBaseVoice voice)
-	GetActorAlias(position).SetVoice(voice)
+	ActorAlias(position).SetVoice(voice)
 endFunction
 
 sslBaseVoice function GetVoice(actor position)
-	return GetActorAlias(position).GetVoice()
+	return ActorAlias(position).GetVoice()
 endFunction
 
 bool function HasPlayer()
@@ -782,6 +621,38 @@ endFunction
 ;|	Utility Functions                            |;
 ;\-----------------------------------------------/;
 
+function SendThreadEvent(string eventName, float argNum = 0.0)
+	; Send Custom Event
+	if hook != ""
+		string customEvent = eventName+"_"+hook
+		Debug.Trace("SexLab ThreadController["+tid+"]: Sending custom event hook '"+customEvent+"'")
+		SendModEvent(customEvent, (tid as string), argNum)
+	endIf
+	; Send Global Event
+	;Debug.Trace("SexLab ThreadController["+tid+"]: Sending event hook '"+eventName+"'")
+	SendModEvent(eventName, (tid as string), argNum)
+endFunction
+
+function SendActorEvent(string eventName, float argNum = 0.0)
+	int position
+	while position < ActorCount
+		GetAlias(position).RegisterForModEvent(eventName, "On"+eventName)
+		position += 1
+	endWhile
+	SendModEvent(eventName, (position as string), argNum)
+endFunction
+
+int function ArrayWrap(int value, int max)
+	max -= 1
+	if value > max
+		return 0
+	elseif value < 0
+		return max
+	else
+		return value
+	endIf
+endFunction
+
 bool function _MakeWait(string method)
 	; Ready wait
 	while waiting && locked
@@ -796,7 +667,6 @@ bool function _MakeWait(string method)
 endFunction
 
 function _Log(string log, string method, string type = "ERROR")
-
 	int severity = 0
 	if type == "ERROR" || type == "FATAL"
 		severity = 2
@@ -804,11 +674,11 @@ function _Log(string log, string method, string type = "ERROR")
 		severity = 1
 	endIf
 
-	if logType == "notification"
+	if Logging == "notification"
 		Debug.Notification(type+": "+log)
-	elseif logType == "messagebox"
+	elseif Logging == "messagebox"
 		Debug.MessageBox(method+"() "+type+": "+log)
-	elseif logType == "trace-minimal"
+	elseif Logging == "trace-minimal"
 		Debug.Trace("SexLab "+method+"() "+type+": "+log, severity)
 	else
 		Debug.Trace("--------------------------------------------------------------------------------------------", severity)
@@ -821,27 +691,6 @@ function _Log(string log, string method, string type = "ERROR")
 	if type == "FATAL"
 		UnlockThread()
 	endIf
-endFunction
-
-function SendThreadEvent(string eventName)
-	; Send Custom Event
-	if hook != ""
-		string customEvent = eventName+"_"+hook
-		Debug.Trace("SexLab ThreadController["+tid+"]: Sending custom event hook '"+customEvent+"'")
-		SendModEvent(customEvent, (tid as string), 1)
-	endIf
-	; Send Global Event
-	;Debug.Trace("SexLab ThreadController["+tid+"]: Sending event hook '"+eventName+"'")
-	SendModEvent(eventName, (tid as string), 1)
-endFunction
-
-int function PositionWrap(int value)
-	if value < 0
-		return (ActorCount - 1)
-	elseif value >= ActorCount
-		return 0
-	endIf
-	return value
 endFunction
 
 ;/-----------------------------------------------\;
@@ -867,17 +716,16 @@ function Initialize()
 	making = false
 	; Empty Strings
 	hook = ""
-	logtype = "trace"
+	Logging = "trace"
 	; Empty actors
 	actor[] acDel
 	Positions = acDel
-	storageslots = acDel
 	victim = none
 	; Empty alias slots
 	int i = 0
 	while i < ActorAlias.Length
 		if ActorAlias[i] != none
-			ActorAlias(i).ClearAlias()
+			GetAlias(i).ClearAlias()
 		endIf
 		i += 1
 	endWhile
@@ -887,29 +735,12 @@ function Initialize()
 	float[] fDel
 	centerLoc = fDel
 	customtimers = fDel
-	loc0 = fDel
-	loc1 = fDel
-	loc2 = fDel
-	loc3 = fDel
-	loc4 = fDel
 	timeout = 0
 	; Empty bools
-	bool[] bDel
-	strip0 = bDel
-	strip1 = bDel
-	strip2 = bDel
-	strip3 = bDel
-	strip4 = bDel
 	leadIn = false
 	leadInDisabled = false
 	autoAdvance = false
 	; Empty forms
-	form[] foDel
-	equipment0 = foDel
-	equipment1 = foDel
-	equipment2 = foDel
-	equipment3 = foDel
-	equipment4 = foDel
 	; Empty integers
 	bed = 0
 	stage = 0
@@ -926,6 +757,14 @@ endFunction
 ;/-----------------------------------------------\;
 ;|	Child Functions                              |;
 ;\-----------------------------------------------/;
+
+int _ThreadID
+int property tid hidden
+	int function get()
+		return _ThreadID
+	endFunction
+endProperty
+
 function _SetThreadID(int threadid)
 	_ThreadID = threadid
 endFunction

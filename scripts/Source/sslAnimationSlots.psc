@@ -53,8 +53,8 @@ sslBaseAnimation[] function GetByTag(int actors, string tag1, string tag2 = "", 
 		endIf
 		i += 1
 	endWhile
-	Debug.Trace("SexLab Get Animations By Tag Count: "+animReturn.Length)
-	Debug.Trace("SexLab Get Animations By Tag: "+animReturn)
+	; Debug.Trace("SexLab Get Animations By Tag Count: "+animReturn.Length)
+	; Debug.Trace("SexLab Get Animations By Tag: "+animReturn)
 	return animReturn
 endFunction
 
@@ -89,8 +89,8 @@ sslBaseAnimation[] function GetByType(int actors, int males = -1, int females = 
 		endIf
 		i += 1
 	endWhile
-	Debug.Trace("SexLab Get Animations By Type Count: "+animReturn.Length)
-	Debug.Trace("SexLab Get Animations By Type: "+animReturn)
+	; Debug.Trace("SexLab Get Animations By Type Count: "+animReturn.Length)
+	; Debug.Trace("SexLab Get Animations By Type: "+animReturn)
 	return animReturn
 endFunction
 

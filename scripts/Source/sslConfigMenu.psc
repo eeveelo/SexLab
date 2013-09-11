@@ -191,13 +191,13 @@ event OnPageReset(string page)
 		AddEmptyOption()
 
 		AddHeaderOption("$SSL_FemaleStripFrom")
-		oidStripFemale[32] = AddToggleOption("$SSL_Weapons", ThreadLib.bStripFemale[32])
+		oidStripFemale[32] = AddToggleOption("$SSL_Weapons", ActorLib.bStripFemale[32])
 		i = 0
 		while i < 32
 			int slot = i + 30
 			string name = GetSlotName(slot)
 			if name != "IGNORE"
-				oidStripFemale[i] = AddToggleOption(name, ThreadLib.bStripFemale[i])
+				oidStripFemale[i] = AddToggleOption(name, ActorLib.bStripFemale[i])
 			endIf
 			if slot == 43
 				AddHeaderOption("$SSL_ExtraSlots")
@@ -213,13 +213,13 @@ event OnPageReset(string page)
 		AddEmptyOption()
 
 		AddHeaderOption("$SSL_MaleStripFrom")
-		oidStripMale[32] = AddToggleOption("$SSL_Weapons", ThreadLib.bStripMale[32])
+		oidStripMale[32] = AddToggleOption("$SSL_Weapons", ActorLib.bStripMale[32])
 		i = 0
 		while i < 32
 			int slot = i + 30
 			string name = GetSlotName(slot)
 			if name != "IGNORE"
-				oidStripMale[i] = AddToggleOption(name, ThreadLib.bStripMale[i])
+				oidStripMale[i] = AddToggleOption(name, ActorLib.bStripMale[i])
 			endIf
 			if slot == 43
 				AddHeaderOption("$SSL_ExtraSlots")
@@ -237,13 +237,13 @@ event OnPageReset(string page)
 		AddEmptyOption()
 
 		AddHeaderOption("$SSL_FemaleStripFrom")
-		oidStripVictim[32] = AddToggleOption("$SSL_Weapons", ThreadLib.bStripLeadInFemale[32])
+		oidStripVictim[32] = AddToggleOption("$SSL_Weapons", ActorLib.bStripLeadInFemale[32])
 		i = 0
 		while i < 32
 			int slot = i + 30
 			string name = GetSlotName(slot)
 			if name != "IGNORE"
-				oidStripLeadInFemale[i] = AddToggleOption(name, ThreadLib.bStripLeadInFemale[i])
+				oidStripLeadInFemale[i] = AddToggleOption(name, ActorLib.bStripLeadInFemale[i])
 			endIf
 			if slot == 43
 				AddHeaderOption("$SSL_ExtraSlots")
@@ -259,13 +259,13 @@ event OnPageReset(string page)
 		AddEmptyOption()
 
 		AddHeaderOption("$SSL_MaleStripFrom")
-		oidStripAggressor[32] = AddToggleOption("$SSL_Weapons", ThreadLib.bStripLeadInMale[32])
+		oidStripAggressor[32] = AddToggleOption("$SSL_Weapons", ActorLib.bStripLeadInMale[32])
 		i = 0
 		while i < 32
 			int slot = i + 30
 			string name = GetSlotName(slot)
 			if name != "IGNORE"
-				oidStripLeadInMale[i] = AddToggleOption(name, ThreadLib.bStripLeadInMale[i])
+				oidStripLeadInMale[i] = AddToggleOption(name, ActorLib.bStripLeadInMale[i])
 			endIf
 			if slot == 43
 				AddHeaderOption("$SSL_ExtraSlots")
@@ -284,13 +284,13 @@ event OnPageReset(string page)
 		AddEmptyOption()
 
 		AddHeaderOption("$SSL_VictimStripFrom")
-		oidStripVictim[32] = AddToggleOption("$SSL_Weapons", ThreadLib.bStripVictim[32])
+		oidStripVictim[32] = AddToggleOption("$SSL_Weapons", ActorLib.bStripVictim[32])
 		i = 0
 		while i < 32
 			int slot = i + 30
 			string name = GetSlotName(slot)
 			if name != "IGNORE"
-				oidStripVictim[i] = AddToggleOption(name, ThreadLib.bStripVictim[i])
+				oidStripVictim[i] = AddToggleOption(name, ActorLib.bStripVictim[i])
 			endIf
 			if slot == 43
 				AddHeaderOption("$SSL_ExtraSlots")
@@ -306,13 +306,13 @@ event OnPageReset(string page)
 		AddEmptyOption()
 
 		AddHeaderOption("$SSL_AggressorStripFrom")
-		oidStripAggressor[32] = AddToggleOption("$SSL_Weapons", ThreadLib.bStripAggressor[32])
+		oidStripAggressor[32] = AddToggleOption("$SSL_Weapons", ActorLib.bStripAggressor[32])
 		i = 0
 		while i < 32
 			int slot = i + 30
 			string name = GetSlotName(slot)
 			if name != "IGNORE"
-				oidStripAggressor[i] = AddToggleOption(name, ThreadLib.bStripAggressor[i])
+				oidStripAggressor[i] = AddToggleOption(name, ActorLib.bStripAggressor[i])
 			endIf
 			if slot == 43
 				AddHeaderOption("$SSL_ExtraSlots")
@@ -1225,28 +1225,28 @@ event OnOptionSelect(int option)
 			SetToggleOptionValue(option, AnimSlots.Animations[i].HasTag("LeadIn"))
 			i = 128
 		elseIf i < 33 && option == oidStripMale[i]
-			ThreadLib.bStripMale[i] = !ThreadLib.bStripMale[i] 
-			SetToggleOptionValue(option, ThreadLib.bStripMale[i])
+			ActorLib.bStripMale[i] = !ActorLib.bStripMale[i] 
+			SetToggleOptionValue(option, ActorLib.bStripMale[i])
 			i = 128
 		elseIf i < 33 && option == oidStripFemale[i]
-			ThreadLib.bStripFemale[i] = !ThreadLib.bStripFemale[i] 
-			SetToggleOptionValue(option, ThreadLib.bStripFemale[i])
+			ActorLib.bStripFemale[i] = !ActorLib.bStripFemale[i] 
+			SetToggleOptionValue(option, ActorLib.bStripFemale[i])
 			i = 128
 		elseIf i < 33 && option == oidStripLeadInMale[i]
-			ThreadLib.bStripLeadInMale[i] = !ThreadLib.bStripLeadInMale[i] 
-			SetToggleOptionValue(option, ThreadLib.bStripLeadInMale[i])
+			ActorLib.bStripLeadInMale[i] = !ActorLib.bStripLeadInMale[i] 
+			SetToggleOptionValue(option, ActorLib.bStripLeadInMale[i])
 			i = 128
 		elseIf i < 33 && option == oidStripLeadInFemale[i]
-			ThreadLib.bStripLeadInFemale[i] = !ThreadLib.bStripLeadInFemale[i] 
-			SetToggleOptionValue(option, ThreadLib.bStripLeadInFemale[i])
+			ActorLib.bStripLeadInFemale[i] = !ActorLib.bStripLeadInFemale[i] 
+			SetToggleOptionValue(option, ActorLib.bStripLeadInFemale[i])
 			i = 128
 		elseIf i < 33 && option == oidStripVictim[i]
-			ThreadLib.bStripVictim[i] = !ThreadLib.bStripVictim[i] 
-			SetToggleOptionValue(option, ThreadLib.bStripVictim[i])
+			ActorLib.bStripVictim[i] = !ActorLib.bStripVictim[i] 
+			SetToggleOptionValue(option, ActorLib.bStripVictim[i])
 			i = 128
 		elseIf i < 33 && option == oidStripAggressor[i]
-			ThreadLib.bStripAggressor[i] = !ThreadLib.bStripAggressor[i] 
-			SetToggleOptionValue(option, ThreadLib.bStripAggressor[i])
+			ActorLib.bStripAggressor[i] = !ActorLib.bStripAggressor[i] 
+			SetToggleOptionValue(option, ActorLib.bStripAggressor[i])
 			i = 128
 		elseIf i < 10 && option == oidRemoveStrapon[i]
 			form[] strapons = ActorLib.Strapons
@@ -1471,17 +1471,16 @@ function _CheckSystem()
 	endIf
 	; Check for Schlongs of Skyrim
 	ActorLib.sosEnabled = false
-	form check = Game.GetFormFromFile(0x0D64, "Schlongs of Skyrim.esp") ; Armor SkinNaked
-	if check != none
-		ActorLib.sosEnabled = true
-		Debug.Trace("SexLab Compatibility: 'Schlongs of Skyrim.esp' was found")
-	else
-		check = Game.GetFormFromFile(0x0D67, "Schlongs of Skyrim - Light.esp") ; ArmorAddon NakedTorso
-		if check != none
+	int mods = Game.GetModCount()
+	while mods
+		mods -= 1
+		string name = Game.GetModName(mods)
+		if name == "Schlongs of Skyrim.esp" || name == "Schlongs of Skyrim - Light.esp"
+			Debug.Trace("SexLab Compatibility: '"+name+"' enabled")
 			ActorLib.sosEnabled = true
-			Debug.Trace("SexLab Compatibility: 'Schlongs of Skyrim - Light.esp' was found")
+			mods = 0
 		endIf
-	endIf
+	endwhile
 	; Add debug spell
 	if DebugMode() && !PlayerRef.HasSpell(SexLabDebugSpell)
 		PlayerRef.AddSpell(SexLabDebugSpell, true)

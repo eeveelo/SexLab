@@ -2,29 +2,59 @@ scriptname sslActorAlias extends ReferenceAlias
 
 sslActorLibrary property Lib auto
 
-bool Active
 actor ActorRef
+bool Active
 sslThreadController Controller
 sslBaseVoice Voice
 
-; Actor Information
+; Voice
 float VoiceDelay
 float VoiceStrength
 bool IsSilent
-
 int VoiceInstance
 
+; Info
 bool IsPlayer
 bool IsVictim
-bool IsScaled
+bool IsFemale
 
-float Scale
-
+; Storage
 sslBaseAnimation Animation
 int position
 int stage
-
 form[] EquipmentStorage
+bool[] StripOverride
+bool disableUndress
+bool disableRagdoll
+form strapon
+float scale
+
+
+;/-----------------------------------------------\;
+;|	Alias Functions                              |;
+;\-----------------------------------------------/;
+
+function SetAlias(sslThreadController ThreadView)
+	if GetReference() != none
+		_Init()
+		TryToStopCombat()
+		ActorRef = GetReference() as actor
+		Controller = ThreadView
+		IsPlayer = ActorRef == Lib.PlayerRef
+		IsVictim = ActorRef == ThreadView.GetVictim()
+		IsFemale = Lib.GetGender(ActorRef) == 1
+	endIf
+endFunction
+
+function ClearAlias()
+	if GetReference() != none
+		Debug.Trace("SexLab: Clearing Actor Slot of "+ActorRef)
+		TryToClear()
+		TryToReset()
+		ActorRef.EvaluatePackage()
+		_Init()
+	endIf
+endFunction
 
 ;/-----------------------------------------------\;
 ;|	Preparation Functions                        |;
@@ -61,8 +91,7 @@ function PrepareActor()
 	; Sexual animations only
 	if Controller.Animation.IsSexual()
 		; Strip Actor
-		form[] equipment = Lib.StripSlots(ActorRef, Controller.GetStrip(ActorRef), true)
-		StoreEquipment(equipment)
+		Strip()
 		; Make Erect
 		if Lib.SOSEnabled && Controller.Animation.GetGender(Controller.GetPosition(ActorRef)) < 1
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
@@ -70,14 +99,12 @@ function PrepareActor()
 	endIf
 	; Scale actor is enabled
 	if Controller.ActorCount > 1 && Lib.bScaleActors
-		IsScaled = true
-
 		float display = ActorRef.GetScale()
 		ActorRef.SetScale(1.0)
 		float base = ActorRef.GetScale()
 		
-		Scale = ( display / base )
-		ActorRef.SetScale(Scale)
+		scale = ( display / base )
+		ActorRef.SetScale(scale)
 		ActorRef.SetScale(1.0 / base)
 	endIf
 	; Set into aniamtion ready state
@@ -88,8 +115,8 @@ function ResetActor()
 	UnregisterForUpdate()
 	GoToState("")
 	; Reset to starting scale
-	if IsScaled
-		ActorRef.SetScale(Scale)
+	if scale > 0.0
+		ActorRef.SetScale(scale)
 	endIf
 	; Remove from animation faction
 	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
@@ -120,31 +147,6 @@ function ResetActor()
 	; Unstrip
 	if !ActorRef.IsDead() && !ActorRef.IsBleedingOut()
 		Lib.UnstripActor(ActorRef, EquipmentStorage, Controller.GetVictim())
-	endIf
-endFunction
-
-function PlayAnimation()
-	; Play Idle
-	Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(position, stage))
-	; Open Mouth
-	if Animation.UseOpenMouth(position, stage)
-		ActorRef.SetExpressionOverride(16, 100)
-	else
-		ActorRef.SetExpressionOverride(7, 50)
-		ActorRef.ClearExpressionOverride()
-	endIf
-	; Send SOS event
-	if Lib.SOSEnabled && Animation.GetGender(position) < 1
-		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Animation.GetSchlong(position, stage))
-	endif
-endfunction
-
-function StopAnimating(bool quick = false)
-	; Reset Idle
-	if quick || Game.GetCameraState() == 3
-		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
-	else
-		ActorRef.PushActorAway(ActorRef, 1)
 	endIf
 endFunction
 
@@ -189,30 +191,102 @@ function RemoveExtras()
 	Lib.UnequipStrapon(ActorRef)
 endFunction
 
-function SetAlias(sslThreadController ThreadView)
-	if GetReference() != none
-		_Init()
-		TryToStopCombat()
-		ActorRef = GetReference() as actor
-		Controller = ThreadView
-		IsPlayer = ActorRef == Lib.PlayerRef
-		IsVictim = ActorRef == ThreadView.GetVictim()
+;/-----------------------------------------------\;
+;|	Manipulation Functions                       |;
+;\-----------------------------------------------/;
+
+function PlayAnimation()
+	; Play Idle
+	Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(position, stage))
+	; Open Mouth
+	if Animation.UseOpenMouth(position, stage)
+		ActorRef.SetExpressionOverride(16, 100)
+	else
+		ActorRef.SetExpressionOverride(7, 50)
+		ActorRef.ClearExpressionOverride()
+	endIf
+	; Send SOS event
+	if Lib.SOSEnabled && Animation.GetGender(position) < 1
+		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Animation.GetSchlong(position, stage))
+	endif
+endfunction
+
+function StopAnimating(bool quick = false)
+	if !quick && Animation.IsSexual && Lib.bUseCum
+		int[] genders = Lib.GenderCount(Controller.Positions)
+		if genders[0] > 0 || (genders[0] == 0 && genders[1] > 1 && Lib.bAllowFFCum)
+			Lib.ApplyCum(ActorRef, Animation.GetCum(position))
+		endIf
+	endIf
+	; Reset Idle
+	if quick || Game.GetCameraState() == 3 || !DoRagdollEnd()
+		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
+	else
+		ActorRef.PushActorAway(ActorRef, 1)
 	endIf
 endFunction
 
-function ClearAlias()
-	if GetReference() != none
-		Debug.Trace("SexLab: Clearing Actor Slot of "+ActorRef)
-		TryToClear()
-		TryToReset()
-		ActorRef.EvaluatePackage()
-		_Init()
+function AlignTo(float[] center)
+	float[] offsets = Animation.GetPositionOffsets(position, stage)
+	float[] loc = new float[6]
+	; Determine offsets coordinates from center
+	loc[0] = ( center[0] + ( Math.sin(center[5]) * offsets[0] + Math.cos(center[5]) * offsets[1] ) )
+	loc[1] = ( center[1] + ( Math.cos(center[5]) * offsets[0] + Math.sin(center[5]) * offsets[1] ) )
+	loc[2] = ( center[2] + offsets[2] )
+	; Determine rotation coordinates from center
+	loc[3] = center[3]
+	loc[4] = center[4]
+	loc[5] = ( center[5] + offsets[3] )
+	if loc[5] >= 360
+		loc[5] = ( loc[5] - 360 )
+	elseIf loc[5] < 0
+		loc[5] = ( loc[5] + 360 )
 	endIf
+	; Set Coords
+	ActorRef.SetPosition(loc[0], loc[1], loc[2])
+	ActorRef.SetAngle(loc[3], loc[4], loc[5])
+endFunction
+
+function Strip(bool animate = true)
+	bool[] strip
+	; Get Strip settings or override
+	if StripOverride.Length != 33
+		strip = Lib.GetStrip(ActorRef, Controller.GetVictim(), Controller.LeadIn)
+	else
+		strip = StripOverride
+	endIf
+	; No animation override, get thread/user setting
+	if animate 
+		animate = DoUndressAnim()
+	endIf
+	; Strip slots and store removed equipment
+	form[] equipment = Lib.StripSlots(ActorRef, strip, animate)
+	StoreEquipment(equipment)
 endFunction
 
 ;/-----------------------------------------------\;
 ;|	Storage Functions                            |;
 ;\-----------------------------------------------/;
+
+function DisableRagdollEnd(bool disableIt = true)
+	disableragdoll = disableIt
+endFunction
+bool function DoRagdollEnd()
+	if disableundress
+		return false
+	endif
+	return Lib.bRagDollEnd
+endFunction
+
+function DisableUndressAnim(bool disableIt = true)
+	disableundress = disableIt
+endFunction
+bool function DoUndressAnim()
+	if disableundress
+		return false
+	endif
+	return Lib.bUndressAnimation
+endFunction
 
 function StoreEquipment(form[] equipment)
 	if equipment.Length < 1
@@ -228,61 +302,60 @@ function StoreEquipment(form[] equipment)
 	EquipmentStorage = equipment
 endFunction
 
-function ToAnimation(sslBaseAnimation toAnimation)
+function SyncThread(int toPosition)
 	if !Active || ActorRef == none
 		return
 	endIf
-	RemoveExtras()
-	Animation = toAnimation
-	EquipExtras()
-	if IsPlayer
-		Debug.Notification(Animation.Name)
-	endIf
-endFunction
-
-function ToPosition(int toPosition)
-	if !Active || ActorRef == none
-		return
-	endIf
+	; Update Position
 	position = toPosition
+	; Current stage + animation
+	int toStage = Controller.Stage
+	sslBaseAnimation toAnimation = Controller.Animation
+	; Update Stage
+	if stage != toStage
+		; Set Stage
+		stage = toStage
+		; Update Silence
+		IsSilent = toAnimation.IsSilent(position, stage)
+		if IsSilent
+			; VoiceDelay is used as loop timer, must be set even if silent.
+			VoiceDelay = 4.0
+		else
+			; Update Strength
+			VoiceStrength = (stage as float) / (toAnimation.StageCount() as float)
+			if toAnimation.StageCount() == 1 && stage == 1
+				VoiceStrength = 0.50
+			endIf
+			; Base Delay
+			if Lib.GetGender(ActorRef) < 1
+				VoiceDelay = Lib.fMaleVoiceDelay
+			else
+				VoiceDelay = Lib.fFemaleVoiceDelay
+			endIf
+			; Stage Delay
+			if stage > 1
+				VoiceDelay = (VoiceDelay - (stage * 0.8)) + Utility.RandomFloat(-0.3, 0.3)
+			endIf
+			; Min 1.3 delay
+			if VoiceDelay < 1.3
+				VoiceDelay = 1.3
+			endIf
+		endIf
+	endIf
+	; Update Animation
+	if Animation != toAnimation
+		RemoveExtras()
+		Animation = toAnimation
+		EquipExtras()
+	endIf
 endFunction
 
-function ToStage(int toStage)
-	if !Active || ActorRef == none
+function OverrideStrip(bool[] setStrip)
+	if setStrip.Length != 33
 		return
 	endIf
-
-	stage = toStage
-
-	; Update Silence
-	IsSilent = Animation.IsSilent(position, stage)
-
-	if IsSilent
-		; VoiceDelay is used as loop timer, must be set.
-		VoiceDelay = 4.0
-	else
-		; Update Strength
-		VoiceStrength = (stage as float) / (Animation.StageCount() as float)
-		if Animation.StageCount() == 1 && stage == 1
-			VoiceStrength = 0.50
-		endIf
-		; Base Delay
-		if Lib.GetGender(ActorRef) < 1
-			VoiceDelay = Lib.fMaleVoiceDelay
-		else
-			VoiceDelay = Lib.fFemaleVoiceDelay
-		endIf
-		; Stage Delay
-		if stage > 1
-			VoiceDelay = (VoiceDelay - (stage * 0.8)) + Utility.RandomFloat(-0.3, 0.3)
-		endIf
-		; Min 1.3 delay
-		if VoiceDelay < 1.3
-			VoiceDelay = 1.3
-		endIf
-	endIf
+	StripOverride = setStrip
 endFunction
-
 function SetVoice(sslBaseVoice toVoice)
 	Voice = toVoice
 endFunction
@@ -300,10 +373,7 @@ state Ready
 	endEvent
 	function StartAnimating()
 		Active = true
-		stage = Controller.Stage
-		ToPosition(Controller.Positions.Find(ActorRef))
-		ToAnimation(Controller.Animation)
-		ToStage(stage)
+		SyncThread(Controller.GetPosition(ActorRef))
 		GoToState("Animating")
 		RegisterForSingleUpdate(Utility.RandomFloat(0.0, 0.8))
 	endFunction
@@ -311,10 +381,6 @@ endState
 
 state Animating
 	event OnUpdate()
-		if !Active || ActorRef == none
-			return
-		endIf
-
 		if ActorRef.IsDead() || ActorRef.IsBleedingOut() || !ActorRef.Is3DLoaded()
 			Controller.EndAnimation(true)
 			return
@@ -336,27 +402,15 @@ endState
 ;|	Actor Callbacks                              |;
 ;\-----------------------------------------------/;
 
-function ActorEvent(string callback)
-	;Debug.TraceAndBox("Sending Event "+callback+": "+ActorRef)
-	RegisterForModEvent(callback, "On"+callback)
-	SendModEvent(callback)
-	UnregisterForModEvent("On"+callback)
-endFunction
-
 event OnStartThread(string eventName, string actorSlot, float argNum, form sender)
-	;Debug.TraceAndBox("OnStartThread: "+ActorRef)
+	UnregisterForModEvent("OnStartThread")
 	PrepareActor()
 endEvent
 
-event OnEndThread(string eventName, string actorSlot, float argNum, form sender)
+event OnEndThread(string eventName, string actorSlot, float quick, form sender)
+	UnregisterForModEvent("OnEndThread")
 	ResetActor()
-	StopAnimating(!Lib.bRagDollEnd)
-	ClearAlias()
-endEvent
-
-event OnQuickEndThread(string eventName, string actorSlot, float argNum, form sender)
-	ResetActor()
-	StopAnimating(true)
+	StopAnimating((quick as bool))
 	ClearAlias()
 endEvent
 
@@ -365,18 +419,19 @@ endEvent
 ;\-----------------------------------------------/;
 
 function _Init()
+	UnregisterForAllModEvents()
 	ActorRef = none
+	Active = false
 	Controller = none
 	Voice = none
 	Animation = none
-	IsScaled = false
+	strapon = none
+	scale = 0.0
 	form[] formDel
 	EquipmentStorage = formDel
+	bool[] boolDel
+	StripOverride = boolDel
 endFunction
-
-event OnPackageStart(package newPackage)
-	Debug.Trace(GetName()+" evaluated "+GetActorRef()+"'s package to "+newPackage)
-endEvent
 
 function StartAnimating()
 	Debug.TraceAndbox("Null start: "+ActorRef)

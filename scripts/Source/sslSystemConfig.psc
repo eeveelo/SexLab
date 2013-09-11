@@ -64,32 +64,32 @@ float[] property fStageTimerAggr hidden
 endProperty
 bool[] property bStripMale hidden
 	bool[] function get()
-		return ThreadLib.bStripMale
+		return ActorLib.bStripMale
 	endFunction
 endProperty
 bool[] property bStripFemale hidden
 	bool[] function get()
-		return ThreadLib.bStripFemale
+		return ActorLib.bStripFemale
 	endFunction
 endProperty
 bool[] property bStripLeadInFemale hidden
 	bool[] function get()
-		return ThreadLib.bStripLeadInFemale
+		return ActorLib.bStripLeadInFemale
 	endFunction
 endProperty
 bool[] property bStripLeadInMale hidden
 	bool[] function get()
-		return ThreadLib.bStripLeadInMale
+		return ActorLib.bStripLeadInMale
 	endFunction
 endProperty
 bool[] property bStripVictim hidden
 	bool[] function get()
-		return ThreadLib.bStripVictim
+		return ActorLib.bStripVictim
 	endFunction
 endProperty
 bool[] property bStripAggressor hidden
 	bool[] function get()
-		return ThreadLib.bStripAggressor
+		return ActorLib.bStripAggressor
 	endFunction
 endProperty
 
