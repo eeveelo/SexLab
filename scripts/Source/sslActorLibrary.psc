@@ -6,6 +6,7 @@ sslActorSlots property Slots auto
 
 ; Data
 faction property AnimatingFaction auto
+faction property GenderFaction auto
 actor property PlayerRef auto
 weapon property DummyWeapon auto
 armor property NudeSuit auto
@@ -61,7 +62,6 @@ bool[] property bStripLeadInFemale auto hidden
 bool[] property bStripLeadInMale auto hidden
 bool[] property bStripVictim auto hidden
 bool[] property bStripAggressor auto hidden
-
 
 ; Local
 bool hkReady
@@ -318,14 +318,27 @@ function UnequipStrapon(actor a)
 	endIf
 endFunction
 
+function TreatAsMale(actor a)
+	a.AddToFaction(GenderFaction)
+	a.SetFactionRank(GenderFaction, 0)
+endFunction
+
+function TreatAsFemale(actor a)
+	a.AddToFaction(GenderFaction)
+	a.SetFactionRank(GenderFaction, 1)
+endFunction
+
+function ClearForcedGender(actor a)
+	a.RemoveFromFaction(GenderFaction)
+endFunction
+
 int function GetGender(actor a)
-	ActorBase base = a.GetLeveledActorBase()
-	if a.HasKeyWordString("SexLabTreatMale") || base.HasKeyWordString("SexLabTreatMale")
+	if a.GetFactionRank(GenderFaction) == 0 || a.HasKeywordString("SexLabTreatMale")
 		return 0
-	elseif a.HasKeyWordString("SexLabTreatFemale") || base.HasKeyWordString("SexLabTreatFemale")
+	elseif a.GetFactionRank(GenderFaction) == 1 || a.HasKeywordString("SexLabTreatFemale")
 		return 1
 	else
-		return base.GetSex()
+		return a.GetLeveledActorBase().GetSex()
 	endIf
 endFunction
 
@@ -352,8 +365,6 @@ int function FemaleCount(actor[] pos)
 	int[] gender = GenderCount(pos)
 	return gender[1]
 endFunction
-
-
 
 ;#---------------------------#
 ;#    Hotkeys For Player     #
@@ -442,6 +453,8 @@ endEvent
 ;#---------------------------#
 ;#  END Hotkeys For Player   #
 ;#---------------------------#
+
+
 armor function LoadStrapon(string esp, int id)
 	armor strapon = Game.GetFormFromFile(id, esp) as armor
 	if strapon != none

@@ -140,6 +140,17 @@ function UnequipStrapon(actor a)
 	ActorLib.UnequipStrapon(a)
 endFunction
 
+function TreatAsMale(actor a)
+	ActorLib.TreatAsMale(a)
+endFunction
+
+function TreatAsFemale(actor a)
+	ActorLib.TreatAsFemale(a)
+endFunction
+
+function ClearForcedGender(actor a)
+	ActorLib.ClearForcedGender(a)
+endFunction
 
 int function GetGender(actor a)
 	return ActorLib.GetGender(a)
