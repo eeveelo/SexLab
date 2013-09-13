@@ -107,21 +107,16 @@ int function ValidateActor(actor position)
 endFunction
 
 actor[] function SortActors(actor[] actorList, bool femaleFirst = true)
-	int actorCount = actorList.Length
-	if actorCount == 1
+	if actorList.Length < 2
 		return actorList ; Why reorder a single actor?
 	endIf
-	int priorityGender = 1
-	if !femaleFirst
-		priorityGender = 0
-	endIf
-	int orderSlot = 0
-	int i = 0
-	while i < actorCount
-		actor a = actorList[i]
-		if GetGender(a) == priorityGender && i > orderSlot
+	int orderSlot
+	int priority = (femaleFirst as int)
+	int i
+	while i < actorList.Length
+		if GetGender(actorList[i]) == priority && i > orderSlot
 			actor moved = actorList[orderSlot]
-			actorList[orderSlot] = a
+			actorList[orderSlot] = actorList[i]
 			actorList[i] = moved
 			orderSlot += 1
 		endIf
@@ -255,20 +250,16 @@ function UnstripActor(actor a, form[] stripped, actor victim = none)
 	if i < 1
 		return
 	endIf
-
 	; Remove nudesuits
-	int gender = GetGender(a)
-	if (gender < 2 && bUseMaleNudeSuit) || (gender == 1  && bUseFemaleNudeSuit)
+	if bUseMaleNudeSuit || bUseFemaleNudeSuit
 		a.UnequipItem(NudeSuit, true, true)
 		a.RemoveItem(NudeSuit, 1, true)
 	endIf
-
 	if a == victim && !bReDressVictim
 		return ; Don't requip victims
 	endIf
 	; Requip stripped
 	int hand = 1
-
 	while i
 		i -= 1
 		int type = stripped[i].GetType()
