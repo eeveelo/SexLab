@@ -7,16 +7,21 @@ sslActorSlots property Slots auto
 ; Data
 faction property AnimatingFaction auto
 actor property PlayerRef auto
-EffectShader property CumVaginalOralAnal auto
-EffectShader property CumOralAnal auto
-EffectShader property CumVaginalOral auto
-EffectShader property CumVaginalAnal auto
-EffectShader property CumVaginal auto
-EffectShader property CumOral auto
-EffectShader property CumAnal auto
 weapon property DummyWeapon auto
 armor property NudeSuit auto
 form[] property Strapons auto hidden
+
+Spell property CumVaginalOralAnalSpell auto
+Spell property CumOralAnalSpell auto
+Spell property CumVaginalOralSpell auto
+Spell property CumVaginalAnalSpell auto
+Spell property CumVaginalSpell auto
+Spell property CumOralSpell auto
+Spell property CumAnalSpell auto
+
+Keyword property kwCumOral auto
+Keyword property kwCumAnal auto
+Keyword property kwCumVaginal auto
 
 ; Config Settings
 bool property SOSEnabled auto hidden
@@ -127,21 +132,27 @@ endFunction
 
 function ApplyCum(actor a, int cumID)
 	if cumID < 1
-		return
-	elseif cumID == 1
-		CumVaginal.Play(a, fCumTimer)
-	elseif cumID == 2
-		CumOral.Play(a, fCumTimer)
-	elseif cumID == 3
-		CumAnal.Play(a, fCumTimer)
-	elseif cumID == 4
-		CumVaginalOral.Play(a, fCumTimer)
-	elseif cumID == 5
-		CumVaginalAnal.Play(a, fCumTimer)
-	elseif cumID == 6
-		CumOralAnal.Play(a, fCumTimer)
-	elseif cumID == 7
-		CumVaginalOralAnal.Play(a, fCumTimer)
+		return ; Invalid ID
+	endIf
+	; Check current locations
+	bool anal = a.HasMagicEffectWithKeyword(kwCumAnal)
+	bool oral = a.HasMagicEffectWithKeyword(kwCumOral)
+	bool vaginal = a.HasMagicEffectWithKeyword(kwCumVaginal)
+	; Apply passed id + current
+	if cumID == 1 && !anal && !oral
+		CumVaginalSpell.Cast(a, a)
+	elseif cumID == 2 && !anal && !vaginal
+		CumOralSpell.Cast(a, a)
+	elseif cumID == 3 && !oral && !vaginal
+		CumAnalSpell.Cast(a, a)
+	elseif (cumID == 4 || cumID == 1 || cumID == 2) && (vaginal || oral) && !anal
+		CumVaginalOralSpell.Cast(a, a)
+	elseif (cumID == 5 || cumID == 1 || cumID == 3) && (vaginal || anal) && !oral
+		CumVaginalAnalSpell.Cast(a, a)
+	elseif (cumID == 6 || cumID == 2 || cumID == 3) && (oral || anal) && !vaginal
+		CumOralAnalSpell.Cast(a, a)
+	else
+		CumVaginalOralAnalSpell.Cast(a, a)
 	endIf
 endFunction
 
@@ -306,7 +317,6 @@ function UnequipStrapon(actor a)
 		endWhile
 	endIf
 endFunction
-
 
 int function GetGender(actor a)
 	ActorBase base = a.GetLeveledActorBase()

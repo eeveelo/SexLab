@@ -545,8 +545,8 @@ state CumEffectTimer
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(ActorLib.fCumTimer)
 		SetSliderDialogDefaultValue(120.0)
-		SetSliderDialogRange(1.0, 600.0)
-		SetSliderDialogInterval(1.0)
+		SetSliderDialogRange(5.0, 900.0)
+		SetSliderDialogInterval(5.0)
 	endEvent
 	event OnSliderAcceptST(float value)
 		ActorLib.fCumTimer = value
