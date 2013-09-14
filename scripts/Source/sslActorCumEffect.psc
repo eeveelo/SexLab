@@ -14,6 +14,3 @@ event OnUpdate()
 	endIf
 	RegisterForSingleUpdate(5.0)
 endEvent
-event OnEffectFinish(actor target, actor caster)
-	UnregisterForUpdate()
-endEvent
