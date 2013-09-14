@@ -134,7 +134,8 @@ function ResetActor()
 		;Game.SetInChargen(false, false, false)
 		Game.SetPlayerAIDriven(false)
 		;Game.EnablePlayerControls()
-		Lib.Stats.UpdatePlayerStats(Controller.Animation, Controller.GetTime(), Controller.Positions, Controller.GetVictim())
+		int[] genders = Lib.GenderCount(Controller.Positions)
+		Lib.Stats.UpdatePlayerStats(genders[0], genders[1], Controller.Animation, Controller.GetVictim(), Controller.GetTime())
 	else
 		ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 		ActorRef.SetDontMove(false)
@@ -411,6 +412,7 @@ endState
 ;|	Actor Callbacks                              |;
 ;\-----------------------------------------------/;
 
+; TODO check mod events for eventname or callback
 event OnStartThread(string eventName, string actorSlot, float argNum, form sender)
 	UnregisterForModEvent("OnStartThread")
 	PrepareActor()

@@ -4,16 +4,16 @@ scriptname sslActorStats extends Quest
 sslActorLibrary property Lib auto
 
 ; Data
-float property fTimeSpent = 0.0 auto hidden
-float property fSexualPurity = 0.0 auto hidden
-int property iMalePartners = 0 auto hidden
-int property iFemalePartners = 0 auto hidden
-int property iMasturbationCount = 0 auto hidden
-int property iAnalCount = 0 auto hidden
-int property iVaginalCount = 0 auto hidden
-int property iOralCount = 0 auto hidden
-int property iVictimCount = 0 auto hidden
-int property iAggressorCount = 0 auto hidden
+float property fTimeSpent auto hidden
+float property fSexualPurity auto hidden
+int property iMalePartners auto hidden
+int property iFemalePartners auto hidden
+int property iMasturbationCount auto hidden
+int property iAnalCount auto hidden
+int property iVaginalCount auto hidden
+int property iOralCount auto hidden
+int property iVictimCount auto hidden
+int property iAggressorCount auto hidden
 string[] property sCustomStatName auto hidden
 string[] property sCustomStatValue auto hidden
 
@@ -22,103 +22,86 @@ string[] sStatTitles
 string[] sPureTitles
 string[] sImpureTitles
 
-function UpdatePlayerStats(sslBaseAnimation anim, float time, actor[] pos, actor victim)
-	if !anim.IsSexual()
+function UpdatePlayerStats(int males, int females, sslBaseAnimation Animation, actor victim, float time)
+	if !Animation.IsSexual()
 		return
 	endIf
 	; Update time spent
-	fTimeSpent = fTimeSpent + time
-
-	int[] genders = Lib.GenderCount(pos)
-	int males = genders[0]
-	int females = genders[1]
-
-	if Lib.GetGender(Lib.PlayerRef) > 0
-		iMalePartners = iMalePartners + males
-		iFemalePartners = iFemalePartners + (females - 1)
-	else
-		iMalePartners = iMalePartners + (males - 1)
-		iFemalePartners = iFemalePartners + females
+	fTimeSpent += time
+	; Nothing else matters for solo animations
+	if Animation.HasTag("Masturbation")
+		iMasturbationCount += 1
+		AdjustPlayerPurity(-1.0)
+		return ; Bail
 	endIf
-
-	int partners = (males + females) - 1
-	bool anal = anim.HasTag("Anal")
-	bool vaginal = anim.HasTag("Vaginal")
-	bool oral = anim.HasTag("Oral")
-	bool solo = anim.HasTag("Masturbation")
-	; Vaginal tag but no vaginas present, gay male pairing?
-	if vaginal && females == 0 && !solo
+	; Update partners
+	iMalePartners += males
+	iFemalePartners += females
+	; Don't count players gender in that
+	if Lib.GetGender(Lib.PlayerRef) == 1
+		iFemalePartners -= 1 ; Female Player
+	else
+		iMalePartners -= 1 ; Male Player
+	endIf
+	; Gather information
+	bool anal = Animation.HasTag("Anal")
+	bool vaginal = Animation.HasTag("Vaginal")
+	bool oral = Animation.HasTag("Oral")
+	bool isAggressor = victim != Lib.PlayerRef
+	bool isVictim = victim == Lib.PlayerRef
+	; Vaginal tag but no vaginas present, assume gay male pairing
+	if vaginal && females == 0
 		vaginal = false
 		anal = true
 	endIf
 	; Update type counts
-	if anal
-		iAnalCount = iAnalCount + 1
-	endIf
-	if vaginal
-		iVaginalCount = iVaginalCount + 1
-	endIf
-	if oral
-		iOralCount = iOralCount + 1
-	endIf
-	if solo
-		iMasturbationCount = iMasturbationCount + 1
-		AdjustPlayerPurity(-1.0)
-		return ; masturbation does it's own pervert/purity, don't continue
-	endIf
-	; Update perversion
-	bool dirty = anim.HasTag("Dirty")
-	bool loving = anim.HasTag("Loving")
-	if dirty
-		AdjustPlayerPurity(-2.5 * partners)
-	endIf
-	if loving
-		AdjustPlayerPurity(2.5 * partners)
-	elseIf !loving && !dirty
-		AdjustPlayerPurity(Utility.RandomFloat(-1.0, 1.0) * partners)
-	endIf
-	; Victim/Aggressor
+	iAnalCount += (anal as int)
+	iVaginalCount += (vaginal as int)
+	iOralCount += (oral as int)
 	if victim != none
-		if victim == Lib.PlayerRef
-			; Victim
-			iVictimCount = iVictimCount + 1
-			AdjustPlayerPurity(-1.2 * partners)
-		else 
-			; Aggressor
-			iAggressorCount = iAggressorCount + 1
-			AdjustPlayerPurity(-2.5 * partners)
-		endIf
+		iVictimCount += (isVictim as int)
+		iAggressorCount += (isAggressor as int)
 	endIf
+	; Update perversion/purity
+	float purity
+	if isVictim
+		purity = -1.2
+	elseif isAggressor || Animation.HasTag("Dirty")
+		purity = -2.5
+	elseif !isVictim && Animation.HasTag("Loving")
+		purity = 2.5
+	else
+		purity = Utility.RandomFloat(-0.8, 0.8)
+	endIf
+	AdjustPlayerPurity(purity * ((males + females) - 1))
 endFunction
 
 float function AdjustPlayerPurity(float amount)
-	float current = (fSexualPurity + amount)
-	fSexualPurity = current
-	return current
+	fSexualPurity += amount
+	return fSexualPurity
 endFunction
 
 int function GetPlayerPurityLevel()
-	float level = (fSexualPurity * 1)
-	if level < 0
-		; Flip float signing for impure, but return to signed for level number
-		level = (Math.Sqrt((((fSexualPurity * -1.0) + 1.0) / 2.0) * 0.2) * -1.0) 
+	; Calculate level
+	int level = Math.Sqrt(((Math.Abs(fSexualPurity) + 1.0) / 2.0) * 0.2) as int
+	; Return signed if impure
+	if fSexualPurity < 0
+		return -level
 	else
-		level = Math.Sqrt(((fSexualPurity + 1.0) / 2.0) * 0.2)
-	endIf
-	return level as int ; Return as int to floor value for level number
+		return level
+	endif
 endFunction
 
 string function GetPlayerPurityTitle()
-	int level = GetPlayerPurityLevel()
+	; Get titles
 	string[] titles
-	if level < 0
-		level = level * -1
+	if fSexualPurity < 0
 		titles = sImpureTitles
 	else
 		titles = sPureTitles
 	endIf
 	; Clamp levels to titles array
-	string title
+	int level = Math.Abs(GetPlayerPurityLevel()) as int
 	if level > 6
 		return titles[6]
 	elseif level < 0
@@ -129,24 +112,24 @@ string function GetPlayerPurityTitle()
 endFunction
 
 string function GetPlayerSexuality()
-	int males = iMalePartners
-	int females = iFemalePartners
-	int partners = 1 + (males + females)
-	int gender = Lib.GetGender(Lib.PlayerRef)
+	; Check gender
+	bool IsFemale = Lib.GetGender(Lib.PlayerRef) == 1
+	; Calculate "straightness ratio" 0 = full gay, 1 = full straight
 	float ratio
-	if gender > 0
-		ratio = ((males + 1.0) / partners as float) * 100.0
+	if IsFemale
+		ratio = ((iMalePartners + 1.0) / ((iMalePartners + iFemalePartners + 1) as float)) * 100.0
 	else
-		ratio = ((females + 1.0) / partners as float) * 100.0
+		ratio = ((iFemalePartners + 1.0) / ((iMalePartners + iFemalePartners + 1) as float)) * 100.0
 	endIf
-	if ratio <= 35 && gender > 0
-		return "$SSL_Lesbian"
-	elseIf ratio <= 35 && gender < 1
-		return "$SSL_Gay"
-	elseIf ratio > 35 && ratio < 65
-		return "$SSL_Bisexual"
-	else
+	; Return sexuality title
+	if ratio >= 65
 		return "$SSL_Heterosexual"
+	elseif ratio < 65 && ratio > 35
+		return "$SSL_Bisexual"
+	elseif IsFemale
+		return "$SSL_Lesbian"
+	else
+		return "$SSL_Gay"
 	endIf
 endFunction
 
@@ -161,13 +144,12 @@ int function GetPlayerStatLevel(string type)
 	else
 		return -1
 	endIf
-	float level = Math.Sqrt(((val + 1.0) / 2.0) * 0.65)
-	return level as int ; Return as int to floor value for level number
+	return Math.Sqrt(((val + 1.0) / 2.0) * 0.65) as int ; Return as int to floor value for level number
 endFunction
 
 string function GetPlayerStatTitle(string type)
 	int level = GetPlayerStatLevel(type)
-	; Clamp levels to titles array
+	; Clamp levels to stat titles array
 	string title
 	if level > 6
 		return sStatTitles[6]
