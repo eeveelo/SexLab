@@ -52,7 +52,6 @@ actor property PlayerRef auto
 message property mOldSkyrim auto
 message property mOldSKSE auto
 message property mNoSKSE auto
-message property mDirtyUpgrade auto
 message property mCleanSystemFinish auto
 message property mSystemDisabled auto
 message property mSystemUpdated auto
