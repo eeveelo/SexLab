@@ -10,17 +10,20 @@ string function GetStringVer()
 endFunction
 
 bool function DebugMode()
-	return true
+	return false
 endFunction
 
 event OnVersionUpdate(int version)
 	float current = (CurrentVersion as float / 1000.0)
 	float latest = (version as float / 1000.0)
-	Debug.Notification("Starting SexLab v"+GetStringVer())
+	Debug.Notification("Updating SexLab v"+GetStringVer())
 endEvent
 
 event OnConfigInit()
+	; Init System
 	_SetupSystem()
+	; Init Stats
+	Stats._Setup()
 endEvent
 
 event OnGameReload()
@@ -119,7 +122,7 @@ function SetDefaults()
 endFunction
 
 event OnPageReset(string page)
-	int i = 0
+	int i
 
 	if page == ""
 		LoadCustomContent("SexLab/logo.dds", 184, 31)
@@ -1063,8 +1066,6 @@ state RebuildStraponList
 	endEvent
 endState
 
-
-
 event OnOptionSliderOpen(int option)
 	if option == oidStageTimer[0]
 		SetSliderDialogStartValue(ThreadLib.fStageTimer[0])
@@ -1198,7 +1199,7 @@ event OnOptionSliderAccept(int option, float value)
 endEvent
 
 event OnOptionSelect(int option)
-	int i = 0
+	int i
 	while i < 128
 		if option == oidToggleVoice[i]
 			VoiceSlots.Voices[i].Enabled = !VoiceSlots.Voices[i].Enabled
@@ -1268,8 +1269,7 @@ event OnOptionSelect(int option)
 endEvent
 
 event OnOptionHighlight(int option)
-	; What are we?
-	int i = 0
+	int i
 	while i < 128
 		if option == oidToggleVoice[i]
 			SetInfoText("$SSL_EnableVoice")
@@ -1435,8 +1435,7 @@ function FindStrapons()
 endFunction
 
 function _SetupSystem()
-	; Init Stats
-	Stats._Setup()
+	Debug.TraceAndBox("SexLab is now updating/installing, please wait for ready message before using.")
 	; Init animations
 	AnimSlots._Setup()
 	; Init voices
@@ -1450,7 +1449,7 @@ function _SetupSystem()
 	; Init Defaults
 	SetDefaults()
 	; Finished
-	Debug.TraceAndBox("SexLab v"+GetStringVer()+" has finished installing")
+	Debug.TraceAndBox("SexLab has finished updating/installing and is ready for use.")
 endFunction
 
 function _CheckSystem()
@@ -1485,6 +1484,8 @@ function _CheckSystem()
 			mods = 0
 		endIf
 	endwhile
+	; Find Strapons
+	FindStrapons()
 	; Add debug spell
 	if DebugMode() && !PlayerRef.HasSpell(SexLabDebugSpell)
 		PlayerRef.AddSpell(SexLabDebugSpell, true)
