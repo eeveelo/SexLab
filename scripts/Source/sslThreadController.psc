@@ -87,10 +87,6 @@ function GoToStage(int toStage)
 	stagePrev = stage
 	if toStage < 0
 		toStage = 0
-	elseif toStage > Animation.StageCount
-		Stage = Animation.StageCount
-		EndAnimation()
-		return ; No such stage, end animation
 	endIf
 	Stage = toStage
 	; Start advancement
