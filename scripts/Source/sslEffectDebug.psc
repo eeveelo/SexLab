@@ -3,8 +3,16 @@ Scriptname sslEffectDebug extends ActiveMagicEffect
 SexLabFramework property SexLab Auto
 
 event OnEffectStart(actor target, actor caster)
+	debug.traceandbox("Pre Gender: "+SexLab.ActorLib.GetGender(caster))
+	SexLab.ActorLib.TreatAsMale(caster)
+	debug.traceandbox("Post Gender: "+SexLab.ActorLib.GetGender(caster))
+	SexLab.ActorLib.ClearForcedGender(caster)
+	debug.traceandbox("Cleared Gender: "+SexLab.ActorLib.GetGender(caster))
 
-
+	;SexLab.ActorLib.StripActor(target, none, false, false)
+	SexLab.ActorLib.StripActor(caster, none, false, false)
+	;SexLab.ActorLib.ApplyCum(target, 0)
+	SexLab.ActorLib.ApplyCum(caster, 2)
 	; SexLab.StripActor(target, none, false, false)
 	; SexLab.Data.CumOralSpell.Cast(target, caster)
 	; SexLab.Data.CumVaginalOralAnal.Play(target, SexLab.Config.fCumTimer)

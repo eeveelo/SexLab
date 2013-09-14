@@ -6,14 +6,20 @@ sslThreadLibrary property Lib auto
 ; Local
 sslThreadController[] ThreadView
 
-int property Count hidden
+int property ActiveThreads hidden
 	int function get()
-		return ThreadView.Length
+		int count
+		int i
+		while i < 15
+			count += ThreadView[i].IsLocked as int
+			i += 1
+		endWhile
+		return count
 	endFunction
 endProperty
 
 int function FindActorController(actor toFind)
-	int i = 0
+	int i
 	while i < 15
 		if ThreadView[i].HasActor(toFind)
 			return i
@@ -44,7 +50,7 @@ sslThreadController function GetController(int tid)
 endFunction
 
 sslThreadController function PickController()
-	int i = 0
+	int i
 	while i < ThreadView.Length
 		if !ThreadView[i].IsLocked
 			return ThreadView[i]
@@ -52,44 +58,22 @@ sslThreadController function PickController()
 		i += 1
 	endWhile
 	return none
-endFunction
+endFunction	
 
-sslThreadController property ThreadView000 auto
-sslThreadController property ThreadView001 auto
-sslThreadController property ThreadView002 auto
-sslThreadController property ThreadView003 auto
-sslThreadController property ThreadView004 auto
-sslThreadController property ThreadView005 auto
-sslThreadController property ThreadView006 auto
-sslThreadController property ThreadView007 auto
-sslThreadController property ThreadView008 auto
-sslThreadController property ThreadView009 auto
-sslThreadController property ThreadView010 auto
-sslThreadController property ThreadView011 auto
-sslThreadController property ThreadView012 auto
-sslThreadController property ThreadView013 auto
-sslThreadController property ThreadView014 auto
+;/-----------------------------------------------\;
+;|	Thread Slots Setup                           |;
+;\-----------------------------------------------/;
 
 function _Setup()
 	ThreadView = new sslThreadController[15]
-	ThreadView[0] = ThreadView000
-	ThreadView[1] = ThreadView001
-	ThreadView[2] = ThreadView002
-	ThreadView[3] = ThreadView003
-	ThreadView[4] = ThreadView004
-	ThreadView[5] = ThreadView005
-	ThreadView[6] = ThreadView006
-	ThreadView[7] = ThreadView007
-	ThreadView[8] = ThreadView008
-	ThreadView[9] = ThreadView009
-	ThreadView[10] = ThreadView010
-	ThreadView[11] = ThreadView011
-	ThreadView[12] = ThreadView012
-	ThreadView[13] = ThreadView013
-	ThreadView[14] = ThreadView014
 
-	int i = 0
+	int i
 	while i < 15
+		if i < 10
+			ThreadView[i] = GetAliasByName("ThreadView00"+i) as sslThreadController
+		else
+			ThreadView[i] = GetAliasByName("ThreadView0"+i) as sslThreadController
+		endIf
 		ThreadView[i]._SetThreadID(i)
 		i += 1
 	endWhile
