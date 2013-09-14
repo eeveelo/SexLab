@@ -3,7 +3,7 @@
 Skryim SexLab Framework
   By Ashal of Loverslab.com
 
-    Version 1.15b, released 2013/08/11
+    Version 1.20 beta 1, released 2013/09/14
 
 -- Description --------------------------------------------------------------
 
