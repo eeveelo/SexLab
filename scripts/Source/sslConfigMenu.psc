@@ -1406,28 +1406,32 @@ function FindStrapons()
 	ActorLib.Strapons = new form[1]
 	ActorLib.Strapons[0] = aCalypsStrapon
 
-	ActorLib.LoadStrapon("StrapOnbyaeonv1.1.esp", 0x0D65)
-	ActorLib.LoadStrapon("TG.esp", 0x0182B)
-
-	armor check = ActorLib.LoadStrapon("Futa equippable.esp", 0x0D66)
-	if check != none
-		ActorLib.LoadStrapon("Futa equippable.esp", 0x0D67)
-		ActorLib.LoadStrapon("Futa equippable.esp", 0x01D96)
-		ActorLib.LoadStrapon("Futa equippable.esp", 0x022FB)
-		ActorLib.LoadStrapon("Futa equippable.esp", 0x022FC)
-		ActorLib.LoadStrapon("Futa equippable.esp", 0x022FD)
-	endIf
-
-	check = ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x00D65)
-	if check != none
-		ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x02859)
-		ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285A)
-		ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285B)
-		ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285C)
-		ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285D)
-		ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285E)
-		ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285F)
-	endIf
+	int mods = Game.GetModCount()
+	while mods
+		mods -= 1
+		string name = Game.GetModName(mods)
+		if name == "StrapOnbyaeonv1.1.esp"
+			ActorLib.LoadStrapon("StrapOnbyaeonv1.1.esp", 0x0D65)
+		elseif name == "TG.esp"
+			ActorLib.LoadStrapon("TG.esp", 0x0182B)
+		elseif name == "Futa equippable.esp"
+			ActorLib.LoadStrapon("Futa equippable.esp", 0x0D66)
+			ActorLib.LoadStrapon("Futa equippable.esp", 0x0D67)
+			ActorLib.LoadStrapon("Futa equippable.esp", 0x01D96)
+			ActorLib.LoadStrapon("Futa equippable.esp", 0x022FB)
+			ActorLib.LoadStrapon("Futa equippable.esp", 0x022FC)
+			ActorLib.LoadStrapon("Futa equippable.esp", 0x022FD)
+		elseif name == "Skyrim_Strap_Ons.esp"
+			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x00D65)
+			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x02859)
+			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285A)
+			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285B)
+			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285C)
+			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285D)
+			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285E)
+			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285F)
+		endif
+	endWhile
 endFunction
 
 function _SetupSystem()
