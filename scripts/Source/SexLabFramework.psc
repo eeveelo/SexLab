@@ -305,7 +305,8 @@ endFunction
 ;#---------------------------#
 
 function UpdatePlayerStats(sslBaseAnimation anim, float time, actor[] pos, actor victim)
-	Stats.UpdatePlayerStats(anim, time, pos, victim)
+	int[] genders = ActorLib.GenderCount(pos)
+	Stats.UpdatePlayerStats(genders[0], genders[1], anim, victim, time)
 endFunction
 
 float function AdjustPlayerPurity(float amount)
