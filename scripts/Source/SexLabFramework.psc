@@ -62,46 +62,43 @@ actor property DebugActor auto hidden
 ;#---------------------------#
 
 sslThreadModel function NewThread(float timeout = 5.0)
-	if !Enabled
-		_DebugTrace("NewThread","","Failed to make new thread model; system is currently disabled")
+	if !systemenabled
+		_Log("NewThread", "Failed to make new thread model; system is currently disabled", "FATAL")
 		return none
 	endIf
+	; Claim an available thread
 	sslThreadController ThreadView = ThreadSlots.PickController()
 	if ThreadView != none
-		debug.trace("Making thread["+ThreadView.tid+"] "+ThreadView)
+		Debug.Trace("SexLab: Making thread["+ThreadView.tid+"] "+ThreadView)
 		return ThreadView.Make(timeout)
 	endIf
 	return none
 endFunction
 
 int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim = none, ObjectReference centerOn = none, bool allowBed = true, string hook = "")
-	if !Enabled
-		_DebugTrace("StartSex","","Failed to start animation; system is currently disabled")
+	if !systemenabled
+		_Log("StartSex", "Failed to make new thread model; system is currently disabled", "FATAL")
 		return -99
 	endIf
-	int i = 0
-	while i < sexActors.Length
-		if ActorLib.ValidateActor(sexActors[i]) != 1
-			return -1 ; Don't both locking a thread, bad actor passed
-		endIf
-		i += 1
-	endWhile
+	; Claim a thread
 	sslThreadModel Make = NewThread()
-	i = 0
+	; Add actors to thread
+	int i
 	while i < sexActors.Length
 		if Make.AddActor(sexActors[i], (victim == sexActors[i])) < 0
 			return -1 ; Actor failed to add
 		endIf
 		i += 1
 	endWhile
+	; Configure our thread with passed arguments
 	Make.SetAnimations(anims)
 	Make.CenterOnObject(centerOn)
 	if allowBed == false
 		Make.SetBedding(-1)
 	endIf
 	Make.SetHook(hook)
+	; Start the animation
 	sslThreadController Controller = Make.StartThread()
-
 	if Controller != none
 		return Controller.tid
 	endIf
@@ -120,9 +117,9 @@ function ApplyCum(actor a, int cumID)
 	ActorLib.ApplyCum(a, cumID)
 endFunction
 
-; form[] function StripActor(actor a, actor victim = none, bool animate = true, bool leadIn = false)
-; 	return ActorLib.StripActor(a, victim, animation, leadIn)
-; endFunction
+form[] function StripActor(actor a, actor victim = none, bool animate = true, bool leadIn = false)
+	return ActorLib.StripActor(a, victim, animation, leadIn)
+endFunction
 
 form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool allowNudesuit = true)
 	return ActorLib.StripSlots(a, strip, animate, allowNudesuit)
@@ -402,19 +399,13 @@ function _EnableSystem(bool EnableSexLab = true)
 	endIf
 endFunction
 
-function _SendEventHook(string eventName, int threadID, string customHook = "")
-	; Send Custom Event
-	if customHook != ""
-		string customEvent = eventName+"_"+customHook
-		_DebugTrace("_SendHookEvent","Sending custom event "+customEvent,"eventName="+eventName+", tid="+threadID)
-		SendModEvent(customEvent, threadID, 1)
-	endIf
-	; Send Global Event
-	SendModEvent(eventName, threadID, 1)
-endFunction
-
-function _DebugTrace(string functionName, string str, string args = "")
-	debug.trace("--SEXLAB NOTICE "+functionName+"("+args+") --- "+str)
+function _Log(string log, string method, string type = "NOTICE")
+	Debug.Trace("--------------------------------------------------------------------------------------------")
+	Debug.Trace("--- SexLabFramework ---")
+	Debug.Trace("--------------------------------------------------------------------------------------------")
+	Debug.Trace(" "+type+": "+method+"()" )
+	Debug.Trace("   "+log)
+	Debug.Trace("--------------------------------------------------------------------------------------------")
 endFunction
 
 function _Deprecate(string deprecated, string replacer)
