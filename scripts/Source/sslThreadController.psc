@@ -336,6 +336,10 @@ function MoveScene()
 	UnregisterForUpdate()
 	; Enable Controls
 	Game.SetPlayerAIDriven(false)
+	; Renable clipping if TCL option on
+	if Lib.Actors.bEnableTCL
+		Debug.ToggleCollisions()
+	endIf
 	Debug.SendAnimationEvent(Lib.PlayerRef, "IdleForceDefaultState")
 	; Lock hotkeys and wait 6 seconds
 	Lib.mMoveScene.Show(6)
@@ -347,6 +351,10 @@ function MoveScene()
 	Game.SetPlayerAIDriven(true)
 	; Give player time to settle incase airborne
 	Utility.Wait(1.0)
+	; Disable clipping if TCL option on
+	if Lib.Actors.bEnableTCL
+		Debug.ToggleCollisions()
+	endIf
 	; Recenter on coords to avoid stager + resync animations
 	float[] coords = GetCoords(GetPlayer())
 	CenterOnCoords(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5], true)
