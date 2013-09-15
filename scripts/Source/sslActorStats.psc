@@ -14,13 +14,117 @@ int property iVaginalCount auto hidden
 int property iOralCount auto hidden
 int property iVictimCount auto hidden
 int property iAggressorCount auto hidden
-string[] property sCustomStatName auto hidden
-string[] property sCustomStatValue auto hidden
 
 ; Titles
 string[] sStatTitles
 string[] sPureTitles
 string[] sImpureTitles
+
+; Local
+string[] StatName
+string[] StatValue
+string[] StatPrepend
+string[] StatAppend
+
+string[] property CustomStats hidden
+	string[] function get()
+		return StatName
+	endFunction
+endProperty
+
+;/-----------------------------------------------\;
+;|	Custom Stats                                 |;
+;\-----------------------------------------------/;
+
+int function FindStat(string name)
+	return StatName.Find(name)
+endFunction
+
+int function RegisterStat(string name, string value, string prepend = "", string append = "")
+	int index = FindStat(name)
+	if index == -1
+		StatName = sslUtility.PushString(name, StatName)
+		StatValue = sslUtility.PushString(value, StatValue)
+		StatPrepend = sslUtility.PushString(prepend, StatPrepend)
+		StatAppend = sslUtility.PushString(append, StatAppend)
+		return (StatName.Length - 1)
+	endIf
+	return index
+endFunction
+
+function Alter(string name, string newName = "", string value = "", string prepend = "", string append = "")
+	int index = FindStat(name)
+	if index == -1
+		return
+	endIf
+	if newName != ""
+		StatName[index] = newName
+	endIf
+	if value != ""
+		StatValue[index] = value
+	endIf
+	if prepend != ""
+		StatPrepend[index] = prepend
+	endIf
+	if append != ""
+		StatAppend[index] = append
+	endIf
+endFunction
+
+string[] function GetInfo(string name)
+	int index = FindStat(name)
+	if index == -1
+		return none
+	endIf
+	string[] info = new string[3]
+	info[0] = StatValue[index]
+	info[1] = StatPrepend[index]
+	info[2] = StatAppend[index]
+	return info
+endFunction
+
+string function GetValue(string name)
+	int index = FindStat(name)
+	if index == -1
+		return ""
+	endIf
+	return StatValue[index]
+endFunction
+
+int function GetValueInt(string name)
+	return GetValue(name) as int
+endFunction
+
+string function SetValue(string name, string value)
+	int index = FindStat(name)
+	if index == -1
+		return ""
+	endIf
+	StatValue[index] = value
+	return StatValue[index]
+endFunction
+
+int function AdjustBy(string name, int adjust)
+	int value = GetValueInt(name)
+	value += adjust
+	return SetValue(name, (value as string)) as int
+endFunction
+
+string function GetStat(string name)
+	string[] info = GetInfo(name)
+	if info == none
+		return ""
+	endIf 
+	return info[1]+info[0]+info[2]
+endFunction
+
+string function GetIndex(int index)
+	return GetStat(StatName[index])
+endFunction
+
+;/-----------------------------------------------\;
+;|	Native Player Stats                          |;
+;\-----------------------------------------------/;
 
 function UpdatePlayerStats(int males, int females, sslBaseAnimation Animation, actor victim, float time)
 	if !Animation.IsSexual()
@@ -161,6 +265,12 @@ string function GetPlayerStatTitle(string type)
 endFunction
 
 function _Setup()
+	string[] sDel
+	StatName = sDel
+	StatValue = sDel
+	StatPrepend = sDel
+	StatAppend = sDel
+
 	fTimeSpent = 0.0
 	fSexualPurity = 0.0
 	iMalePartners = 0
@@ -206,4 +316,6 @@ function _Setup()
 		sImpureTitles[5] = "$SSL_Depraved"
 		sImpureTitles[6] = "$SSL_Hypersexual"
 	endIf
+
+	SendModEvent("SexLabRegisterStats")
 endFunction

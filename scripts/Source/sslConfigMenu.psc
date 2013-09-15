@@ -391,6 +391,14 @@ event OnPageReset(string page)
 		AddTextOption("$SSL_VaginalProficiency", Stats.GetPlayerStatTitle("Vaginal"))
 		AddTextOption("$SSL_AnalProficiency", Stats.GetPlayerStatTitle("Anal"))
 		AddTextOption("$SSL_OralProficiency", Stats.GetPlayerStatTitle("Oral"))
+		AddEmptyOption()
+		; Custom stats set by other mods
+		i = 0
+		while i < Stats.CustomStats.Length
+			string stat = Stats.CustomStats[i]
+			AddTextOption(stat, Stats.GetStat(stat))
+			i += 1
+		endWhile
 
 	elseIf page == "$SSL_RebuildClean"
 		SetCursorFillMode(TOP_TO_BOTTOM)

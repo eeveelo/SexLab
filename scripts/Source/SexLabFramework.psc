@@ -304,6 +304,46 @@ endFunction
 ;#   START STAT FUNCTIONS    #
 ;#---------------------------#
 
+int function FindStat(string name)
+	return Stats.FindStat(name)
+endFunction
+
+int function RegisterStat(string name, string value, string prepend = "", string append = "")
+	return Stats.RegisterStat(name, value, prepend, append)
+endFunction
+
+function Alter(string name, string newName = "", string value = "", string prepend = "", string append = "")
+	Stats.Alter(name, newName, value, prepend, append)
+endFunction
+
+string[] function GetInfo(string name)
+	return Stats.GetInfo(name)
+endFunction
+
+string function GetValue(string name)
+	return Stats.GetValue(name)
+endFunction
+
+int function GetValueInt(string name)
+	return Stats.GetValueInt(name)
+endFunction
+
+string function SetValue(string name, string value)
+	return Stats.SetValue(name, value)
+endFunction
+
+int function AdjustBy(string name, int adjust)
+	return Stats.AdjustBy(name, adjust)
+endFunction
+
+string function GetStat(string name)
+	return Stats.GetStat(name)
+endFunction
+
+string function GetIndex(int index)
+	return Stats.GetIndex(index)
+endFunction
+
 function UpdatePlayerStats(sslBaseAnimation anim, float time, actor[] pos, actor victim)
 	int[] genders = ActorLib.GenderCount(pos)
 	Stats.UpdatePlayerStats(genders[0], genders[1], anim, victim, time)
@@ -326,11 +366,11 @@ string function GetPlayerSexuality()
 endFunction
 
 int function GetPlayerStatLevel(string type)
-	return GetPlayerStatLevel(type)
+	return Stats.GetPlayerStatLevel(type)
 endFunction
 
 string function GetPlayerStatTitle(string type)
-	return GetPlayerStatTitle(type)
+	return Stats.GetPlayerStatTitle(type)
 endFunction
 
 ;#---------------------------#
