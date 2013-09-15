@@ -147,5 +147,6 @@ function _Setup()
 	slotted = 0
 
 	Defaults.LoadVoices()
-	SendModEvent("SexLabRegisterVoices")
+
+	SendModEvent("SexLabSlotVoices")
 endFunction

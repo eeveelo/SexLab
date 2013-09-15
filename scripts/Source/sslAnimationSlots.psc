@@ -183,5 +183,6 @@ function _Setup()
 	slotted = 0
 
 	Defaults.LoadAnimations()
-	SendModEvent("SexLabRegisterAnimations")
+
+	SendModEvent("SexLabSlotAnimations")
 endFunction
