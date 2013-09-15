@@ -454,7 +454,7 @@ endFunction
 
 function _Log(string log, string method, string type = "NOTICE")
 	Debug.Trace("--------------------------------------------------------------------------------------------")
-	Debug.Trace("--- SexLab BaseAnimation["+Name+"] ----------------------------------------------------------")
+	Debug.Trace("--- SexLab BaseAnimation '"+Name+"' ---")
 	Debug.Trace("--------------------------------------------------------------------------------------------")
 	Debug.Trace(" "+type+": "+method+"()" )
 	Debug.Trace("   "+log)

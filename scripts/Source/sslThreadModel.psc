@@ -622,15 +622,15 @@ endFunction
 ;\-----------------------------------------------/;
 
 function SendThreadEvent(string eventName, float argNum = 0.0)
+	string customEvent
 	; Send Custom Event
 	if hook != ""
-		string customEvent = eventName+"_"+hook
-		Debug.Trace("SexLab ThreadController["+tid+"]: Sending custom event hook '"+customEvent+"'")
+		customEvent = eventName+"_"+hook
 		SendModEvent(customEvent, (tid as string), argNum)
 	endIf
 	; Send Global Event
-	;Debug.Trace("SexLab ThreadController["+tid+"]: Sending event hook '"+eventName+"'")
 	SendModEvent(eventName, (tid as string), argNum)
+	Debug.Trace("SexLab Thread["+_ThreadID+"] ModEvent: "+eventName+" / "+customEvent)
 endFunction
 
 function SendActorEvent(string eventName, float argNum = 0.0)
@@ -682,7 +682,7 @@ function _Log(string log, string method, string type = "ERROR")
 		Debug.Trace("SexLab "+method+"() "+type+": "+log, severity)
 	else
 		Debug.Trace("--------------------------------------------------------------------------------------------", severity)
-		Debug.Trace("--- SexLab ThreadController["+tid+"] --------------------------------------------------------------", severity)
+		Debug.Trace("--- SexLab ThreadController["+tid+"] ---", severity)
 		Debug.Trace("--------------------------------------------------------------------------------------------", severity)
 		Debug.Trace(" "+type+": "+method+"()" )
 		Debug.Trace("   "+log)
