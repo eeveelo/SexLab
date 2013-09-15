@@ -92,10 +92,6 @@ function PrepareActor()
 	if Controller.Animation.IsSexual()
 		; Strip Actor
 		Strip()
-		; Make Erect
-		if Lib.SOSEnabled && Controller.Animation.GetGender(Controller.GetPosition(ActorRef)) < 1
-			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
-		endIf
 	endIf
 	; Scale actor is enabled
 	if Controller.ActorCount > 1 && Lib.bScaleActors
@@ -141,10 +137,8 @@ function ResetActor()
 		ActorRef.SetDontMove(false)
 		ActorRef.SetRestrained(false)
 	endIf
-	; Make flaccid
-	if Lib.SOSEnabled
-		Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
-	endIf
+	; Make flaccid for SOS
+	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
 	; Unstrip
 	if !ActorRef.IsDead() && !ActorRef.IsBleedingOut()
 		Lib.UnstripActor(ActorRef, EquipmentStorage, Controller.GetVictim())
@@ -208,16 +202,18 @@ function PlayAnimation()
 	endIf
 	; Send SOS event
 	if Lib.SOSEnabled && Animation.GetGender(position) == 0
+		Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 		int offset = Animation.GetSchlong(position, stage)
 		string bend
 		if offset < 0
-			bend = "SOSBendDown0"+Math.Ceiling(Math.Abs(offset) / 2)
+			bend = "SOSBendDown0"+((Math.Abs(offset) / 2) as int)
 		elseif offset > 0
-			bend = "SOSBendUp0"+Math.Ceiling(Math.Abs(offset) / 2)
+			bend = "SOSBendUp0"+((Math.Abs(offset) / 2) as int)
 		else
 			bend = "SOSNoBend"
 		endIf
 		Debug.SendAnimationEvent(ActorRef, bend)
+		Debug.SendAnimationEvent(ActorRef, "SOSBend"+offset)
 	endif
 endfunction
 

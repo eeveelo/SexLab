@@ -416,9 +416,8 @@ endFunction
 function EndAnimation(bool quick = false)
 	SendThreadEvent("AnimationEnd")
 	SendActorEvent("EndThread", (quick as float))
-	Utility.Wait(3.0)
+	Utility.Wait(2.0)
 	UnlockThread()
-	SendThreadEvent("ThreadClear")
 endFunction
 
 function Initialize()
