@@ -410,12 +410,12 @@ endState
 
 ; TODO check mod events for eventname or callback
 event OnStartThread(string eventName, string actorSlot, float argNum, form sender)
-	UnregisterForModEvent("OnStartThread")
+	UnregisterForModEvent("StartThread")
 	PrepareActor()
 endEvent
 
 event OnEndThread(string eventName, string actorSlot, float quick, form sender)
-	UnregisterForModEvent("OnEndThread")
+	UnregisterForModEvent("EndThread")
 	ResetActor()
 	StopAnimating((quick as bool))
 	ClearAlias()
