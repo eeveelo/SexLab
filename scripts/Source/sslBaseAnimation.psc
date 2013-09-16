@@ -164,9 +164,26 @@ function AddExtra(int position, form extra)
 	endIf
 endFunction
 
+function SetStageTimer(int stage, float timer)
+	; Validate stage
+	if stage > stages || stage < 1
+		_Log("Unknown animation stage, '"+stage+"' given.", "SetStageTimer")
+		return
+	endIf
+	; Initial timer array if needed
+	if timerData.Length != stages
+		timerData = sslUtility.FloatArray(stages)
+	endIf
+	; Zeroindex the stage
+	stage -= 1
+	; Set timer
+	timerData[stage] = timer
+endFunction
+
 ;/-----------------------------------------------\;
 ;|	Data Accessors                               |;
 ;\-----------------------------------------------/;
+
 bool function Exists(string method, int position, int stage = -99)
 	if position > actors || position < 0
 		_Log("Unknown actor position, '"+position+"' given.", method)
@@ -219,6 +236,16 @@ endFunction
 
 int function GetSchlong(int position, int stage)
 	return schlongData[DataIndex(1, position, stage, 0)]
+endFunction
+
+float function GetStageTimer(int stage)
+	if stage > timerData.Length || stage < 1 || stage > stages
+		return 0.0 ; There is no valid stage timer, skip the rest
+	endIf
+	; Zero index
+	stage -= 1
+	; Return timer
+	return timerData[stage]
 endFunction
 
 ;/-----------------------------------------------\;

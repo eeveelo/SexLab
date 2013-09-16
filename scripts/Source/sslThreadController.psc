@@ -21,6 +21,7 @@ int stagePrev
 float started
 float timer
 float advanceAt
+bool timedStage
 
 ; Hotkeys
 int AdjustingPosition
@@ -94,7 +95,17 @@ function GoToStage(int toStage)
 	RegisterForSingleUpdate(0.10)
 endFunction
 
-; TODO: add check for animation async timer here
+
+function UpdateTimer(float toTimer = 0.0)
+	if toTimer > 0.0
+		advanceAt = Utility.GetCurrentRealTime() + toTimer + 0.10
+		timedStage = true
+	else
+		advanceAt = Utility.GetCurrentRealTime() + StageTimer() + 0.10
+		timedStage = false
+	endIf
+endFunction
+
 float function StageTimer()
 	int last = ( Timers.Length - 1 )
 	if stage < last
@@ -173,7 +184,7 @@ state Animating
 		; Start animation looping
 		PlayAnimation()
 		looping = true
-		advanceAt = Utility.GetCurrentRealTime() + StageTimer()
+		UpdateTimer(Animation.GetStageTimer(stage))
 		RegisterForSingleUpdate(0.10)
 	endEvent
 	event OnUpdate()
@@ -181,7 +192,7 @@ state Animating
 			return
 		endIf
 		timer = Utility.GetCurrentRealTime() - started
-		if autoAdvance && advanceAt < Utility.GetCurrentRealTime()
+		if (autoAdvance || timedStage) && advanceAt < Utility.GetCurrentRealTime()
 			GoToStage((Stage + 1))
 			return ; End Stage
 		endIf
@@ -404,6 +415,12 @@ function SetAnimation(int anim = -1)
 		GetAlias(i).SyncThread(i)
 		i += 1
 	endWhile
+	; Check for animation specific stage timer
+	float stagetimer = AnimCurrent.GetStageTimer(stage)
+	if stagetimer > 0.0
+		UpdateTimer(stagetimer)
+	endIf
+	; Notify play of animation name
 	if HasPlayer()
 		Debug.Notification(Animation.Name)
 	endIf

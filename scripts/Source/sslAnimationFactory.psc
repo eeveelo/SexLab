@@ -76,6 +76,10 @@ function SetSFX(int iSFX)
 	Animation.SFX = iSFX
 endFunction
 
+function SetStageTimer(int stage, float timer)
+	Animation.SetStageTimer(stage, timer)
+endFunction
+
 bool function AddTag(string tag)
 	return Animation.AddTag(tag)
 endFunction
