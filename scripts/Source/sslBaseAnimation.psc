@@ -56,14 +56,17 @@ endProperty
 ;|	Animation Offsets                            |;
 ;\-----------------------------------------------/;
 
-float[] function GetPositionOffsets(int position, int stage)
+float[] function GetPositionOffsets(int position, int stage, bool adjust = true)
 	if !Exists("GetPositionOffsets", position, stage)
 		return none
 	endIf
 
 	float[] off = new float[4]
-	off[0] = CalculateForward(position, stage)
-	;off[0] = AccessOffset(position, stage, 0)
+	if adjust
+		off[0] = CalculateForward(position, stage)
+	else
+		off[0] = AccessOffset(position, stage, 0)
+	endIf
 	off[1] = AccessOffset(position, stage, 1)
 	off[2] = AccessOffset(position, stage, 2)
 	off[3] = AccessOffset(position, stage, 3)

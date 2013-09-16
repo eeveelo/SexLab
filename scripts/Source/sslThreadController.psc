@@ -98,10 +98,10 @@ endFunction
 
 function UpdateTimer(float toTimer = 0.0)
 	if toTimer > 0.0
-		advanceAt = Utility.GetCurrentRealTime() + toTimer + 0.10
+		advanceAt = Utility.GetCurrentRealTime() + toTimer
 		timedStage = true
 	else
-		advanceAt = Utility.GetCurrentRealTime() + StageTimer() + 0.10
+		advanceAt = Utility.GetCurrentRealTime() + StageTimer()
 		timedStage = false
 	endIf
 endFunction
@@ -186,6 +186,19 @@ state Animating
 		looping = true
 		UpdateTimer(Animation.GetStageTimer(stage))
 		RegisterForSingleUpdate(0.10)
+		; Check if realignment is needed
+		if stagePrev != 0
+			i = 0
+			while i < ActorCount
+				float[] prev = Animation.GetPositionOffsets(i, stagePrev)
+				float[] next = Animation.GetPositionOffsets(i, stage)
+				if (prev[0] != next[0]) || (prev[1] != next[1]) || (prev[2] != next[2])
+					MoveActors()
+					return
+				endIf
+				i += 1
+			endWhile
+		endIf
 	endEvent
 	event OnUpdate()
 		if !looping
