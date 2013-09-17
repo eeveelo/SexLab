@@ -80,9 +80,19 @@ function _Setup()
 endFunction
 
 function _StopAll()
-	int i = 0
+	int i
 	while i < ThreadView.Length
-		ThreadView[i].SendActorEvent("EndThread", 1.0)
+		int slot
+		while slot < ThreadView[i].ActorAlias.Length
+			if ThreadView[i].ActorAlias[slot] != none
+				sslActorAlias clearing = ThreadView[i].ActorAlias[slot] as sslActorAlias
+				clearing.ResetActor()
+				clearing.StopAnimating(true)
+				clearing.ClearAlias()
+			endIf
+			slot += 1
+		endWhile
+		ThreadView[i].SendThreadEvent("AnimationEnd")
 		ThreadView[i].UnlockThread()
 		i += 1
 	endWhile

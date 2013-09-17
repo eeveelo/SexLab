@@ -626,6 +626,9 @@ endFunction
 ;\-----------------------------------------------/;
 
 function SendThreadEvent(string eventName, float argNum = 0.0)
+	if !active
+		return
+	endIf
 	string customEvent
 	; Send Custom Event
 	if hook != ""
@@ -638,6 +641,9 @@ function SendThreadEvent(string eventName, float argNum = 0.0)
 endFunction
 
 function SendActorEvent(string eventName, float argNum = 0.0)
+	if !active
+		return
+	endIf
 	int position
 	while position < ActorCount
 		GetAlias(position).RegisterForModEvent(eventName, "On"+eventName)
