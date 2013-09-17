@@ -29,6 +29,7 @@ endEvent
 event OnGameReload()
 	_CheckSystem()
 	parent.OnGameReload()
+	ThreadSlots._StopAll()
 endEvent
 
 ; Framework
