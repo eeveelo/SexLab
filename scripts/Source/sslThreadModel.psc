@@ -427,69 +427,73 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 	return id
 endFunction
 
-; TODO: Remake
 function ChangeActors(actor[] changeTo)
-	; if !active
-	; 	return
-	; endIf
-	; ; Make sure all new actors are vaild.
-	; int i = 0
-	; while i < changeTo.Length
-	; 	if Positions.Find(changeTo[i]) < 0 && Lib.Actors.ValidateActor(changeTo[i]) < 0
-	; 		return 
-	; 	endIf
-	; 	i += 1
-	; endWhile
-	; ; Actor count has changed, get new default animation list
-	; if changeTo.Length != ActorCount
-	; 	sslBaseAnimation[] newList
-	; 	; Try aggressive animations first if we need them
-	; 	if victim != none
-	; 		newList = Lib.Animations.GetByType(changeTo.Length, aggressive=true)
-	; 	endIf
-	; 	; Runs if no victim or victim search didn't find any
-	; 	if newList.Length == 0
-	; 		newList = Lib.Animations.GetByType(changeTo.Length)
-	; 	endIf
-	; 	; Still none? We have no animations for this count, bail
-	; 	if newList.Length == 0
-	; 		return	
-	; 	endIf
-	; 	; Set our new list
-	; 	SetAnimations(newList)
-	; 	SetAnimation()
-	; endIf
-	; SendThreadEvent("ActorChangeStart")
-	; i = 0
-	; while i < ActorCount
-	; 	actor a = Positions[i]
-	; 	ResetActor(a)
-	; 	if !a.IsDead() && !a.IsBleedingOut()
-	; 		;Lib.Actors.UnstripActor(a, GetEquipment(a), GetVictim())
-	; 	endIf
-	; 	if changeTo.Find(a) < 0
-	; 		if IsPlayerActor(a)
-	; 			autoAdvance = true
-	; 		endIf
-	; 	endIf
-	; 	i += 1
-	; endWhile
-	; Positions = changeTo
-	; storageslots = changeTo
-	; form[] foDel
-	; equipment0 = foDel
-	; equipment1 = foDel
-	; equipment2 = foDel
-	; equipment3 = foDel
-	; equipment4 = foDel
-	; i = 0
-	; while i < ActorCount
-	; 	SetupActor(Positions[i])
-	; 	i += 1
-	; endWhile
-	; stage -= 1
-	; AdvanceStage()
-	; SendThreadEvent("ActorChangeEnd")
+	if !active
+		return
+	endIf
+	int i
+	; Validate new actors
+	while i < changeTo.Length
+		if Positions.Find(changeTo[i]) == -1 && !Lib.Actors.ValidateActor(changeTo[i])
+			_Log("A new actor does not pass validation", "ChangeActors")
+			return
+		endIf
+		i += 1
+	endWhile
+	; Check if new animations are needed
+	if changeTo.Length != ActorCount
+		sslBaseAnimation[] newAnims
+		newAnims = Lib.Animations.GetByType(changeTo.Length, aggressive=IsAggressive)
+		if newAnims.Length == 0
+			_Log("No animations found for changed actor count", "ChangeActors")
+			return
+		endIf
+		SetAnimations(newAnims)
+		SetAnimation()
+	endIf
+	; Start changing
+	SendThreadEvent("ActorChangeStart")
+	; Remove actors no longer present
+	i = 0
+	while i < ActorCount
+		ActorAlias(Positions[i]).UnregisterForUpdate()
+		if changeTo.Find(Positions[i]) == -1
+			sslActorAlias clearing = ActorAlias(Positions[i])
+			clearing.ResetActor()
+			clearing.StopAnimating(true)
+			clearing.ClearAlias()
+			if IsPlayerPosition(i)
+				autoAdvance = true
+			endIf
+		endIf
+		i += 1
+	endWhile
+	; Prepare/Reset actors as needed
+	Positions = changeTo
+	ReferenceAlias[] newSlots = new ReferenceAlias[5]
+	i = 0
+	while i < changeTo.Length
+		int slot = Lib.Actors.Slots.FindActor(changeTo[i])
+		if slot != -1
+			; Existing actor, retrieve their slot
+			newSlots[i] = Lib.Actors.Slots.GetSlot(slot)
+			newSlots[i].RegisterForSingleUpdate(0.20)
+		else
+			; New actor, slot and prepare them
+			newSlots[i] = Lib.Actors.Slots.SlotActor(changeTo[i], self as sslThreadController)
+			sslActorAlias adding = newSlots[i] as sslActorAlias
+			adding.SetVoice(Lib.Voices.PickVoice(changeTo[i]))
+			adding.DisableUndressAnim(true)
+			adding.PrepareActor()
+			adding.StartAnimating()
+		endIf
+		i += 1
+	endWhile
+	; Set new actors into thread
+	ActorAlias = newSlots
+	RealignActors()
+	; End changing
+	SendThreadEvent("ActorChangeEnd")
 endFunction
 
 ;/-----------------------------------------------\;

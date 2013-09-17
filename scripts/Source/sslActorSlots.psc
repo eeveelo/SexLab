@@ -30,7 +30,7 @@ sslActorAlias function SlotActor(actor position, sslThreadController ThreadView)
 	return none
 endFunction
 
-int function FindSlot(actor position)
+int function FindActor(actor position)
 	if position != none
 		int i = 0
 		while i < ActorSlot.Length
@@ -41,6 +41,10 @@ int function FindSlot(actor position)
 		endWhile
 	endIf
 	return -1
+endFunction
+
+sslActorAlias function GetSlot(int slot)
+	return ActorSlot[slot]
 endFunction
 
 function ClearSlot(int slot)
@@ -54,14 +58,14 @@ function ClearSlot(int slot)
 endFunction
 
 function ClearActor(actor position)
-	int slot = FindSlot(position)
+	int slot = FindActor(position)
 	if slot != -1
 		ClearSlot(slot)
 	endIf
 endFunction
 
 sslActorAlias function GetActorAlias(actor position)
-	return ActorSlot[FindSlot(position)]
+	return ActorSlot[FindActor(position)]
 endFunction
 
 ;/-----------------------------------------------\;

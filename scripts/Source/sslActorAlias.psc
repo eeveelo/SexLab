@@ -408,7 +408,6 @@ endState
 ;|	Actor Callbacks                              |;
 ;\-----------------------------------------------/;
 
-; TODO check mod events for eventname or callback
 event OnStartThread(string eventName, string actorSlot, float argNum, form sender)
 	UnregisterForModEvent("StartThread")
 	PrepareActor()
