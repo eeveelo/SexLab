@@ -420,7 +420,7 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 		endIf
 		(slot as sslActorAlias).SetVoice(voice)
 	else
-		_Log("Failed to slot actor '"+position.GetName()+"'", "AddActor", "FATAL")
+		_Log("Failed to slot actor '"+position+"'", "AddActor", "FATAL")
 	endIf
 
 	waiting = false

@@ -68,7 +68,7 @@ bool hkReady
 sslThreadController PlayerController
 
 int function ValidateActor(actor position)
-	if Slots.FindActor(position) != -1
+	if position.HasKeyWordString("SexLabActive")
 		Debug.Trace("Failed to add actor to animation; actor appears to already be animating")
 		return -10
 	endIf
