@@ -3,7 +3,7 @@ scriptname sslAnimationSlots extends Quest
 sslAnimationDefaults property Defaults auto
 sslAnimationLibrary property Lib auto
 
-sslBaseAnimation[] Slots
+sslBaseAnimation[] property Slots auto hidden
 sslBaseAnimation[] property Animations hidden
 	sslBaseAnimation[] function get()
 		return Slots
@@ -11,11 +11,11 @@ sslBaseAnimation[] property Animations hidden
 endProperty
 
 string[] registry
-int slotted
+int property Slotted auto hidden
 
 bool property FreeSlots hidden
 	bool function get()
-		return slotted < 100
+		return Slotted < Slots.Length
 	endFunction
 endProperty
 
@@ -25,7 +25,7 @@ endProperty
 
 sslBaseAnimation function GetByName(string findName)
 	int i = 0
-	while i < slotted
+	while i < Slotted
 		if Slots[i].Registered && Slots[i].Name == findName
 			return Slots[i]
 		endIf
@@ -34,64 +34,47 @@ sslBaseAnimation function GetByName(string findName)
 	return none
 endFunction
 
-sslBaseAnimation[] function GetByTag(int actors, string tag1, string tag2 = "", string tag3 = "", string tagSuppress = "", bool requireAll = true)
-	sslBaseAnimation[] animReturn
-	int i = 0
-	while i < slotted
-		if Slots[i].Registered && Slots[i].Enabled && Slots[i].ActorCount() == actors
-			bool check1 = Slots[i].HasTag(tag1)
-			bool check2 = Slots[i].HasTag(tag2)
-			bool check3 = Slots[i].HasTag(tag3)
-			bool supress = Slots[i].HasTag(tagSuppress)
-			if requireAll && check1 && (check2 || tag2 == "") && (check3 || tag3 == "") && !(supress && tagSuppress != "")
-				animReturn = sslUtility.PushAnimation(Slots[i], animReturn)
-			elseif !requireAll && (check1 || check2 || check3) && !(supress && tagSuppress != "")
-				animReturn = sslUtility.PushAnimation(Slots[i], animReturn)
-			; else
-				; debug.trace("Rejecting "+Slots[i].Name+" based on "+check1+check2+check3+supress)
-			endIf
+sslBaseAnimation[] function GetByTags(int actors, string[] tags, string tagSuppress = "", bool requireAll = true)
+	if tags.Length == 0
+		_Log("No tags given.", "GetByTags", "ERROR")
+		return none
+	endIf
+	sslBaseAnimation[] output
+	int i = Slotted
+	while i
+		i -= 1
+		sslBaseAnimation anim = Slots[i]
+		if Searchable(anim) && actors == anim.ActorCount() && (tagSuppress == "" || !anim.HasTag(tagSuppress)) && anim.CheckTags(tags, requireAll)
+			output = sslUtility.PushAnimation(anim, output)
 		endIf
-		i += 1
 	endWhile
-	; Debug.Trace("SexLab Get Animations By Tag Count: "+animReturn.Length)
-	; Debug.Trace("SexLab Get Animations By Tag: "+animReturn)
-	return animReturn
+	_LogFound("GetByTags", actors+", "+tags+", "+tagSuppress+", "+requireAll, output)
+	return output
+endFunction
+
+sslBaseAnimation[] function GetByTag(int actors, string tag1, string tag2 = "", string tag3 = "", string tagSuppress = "", bool requireAll = true)
+	string[] tags = new string[3]
+	tags[0] = tag1
+	tags[1] = tag2
+	tags[2] = tag3
+	return GetByTags(actors, tags, tagSuppress, requireAll)
 endFunction
 
 sslBaseAnimation[] function GetByType(int actors, int males = -1, int females = -1, int stages = -1, bool aggressive = false, bool sexual = true)
-	sslBaseAnimation[] animReturn
-	int i = 0
-	while i < slotted
-		if Slots[i].Registered && Slots[i].Enabled
-			bool accepted = true
-			if actors != Slots[i].ActorCount()
-				accepted = false
-			endIf
-			if accepted && males != -1 && males != Slots[i].MaleCount()
-				accepted = false
-			endIf
-			if accepted && females != -1 && females != Slots[i].FemaleCount()
-				accepted = false
-			endIf
-			if accepted && stages != -1 && stages != Slots[i].StageCount()
-				accepted = false
-			endIf
-			if accepted && (aggressive != Slots[i].HasTag("Aggressive") && Lib.bRestrictAggressive)
-				accepted = false
-			endIf
-			if accepted && sexual != Slots[i].IsSexual()
-				accepted = false
-			endIf
-			; Still accepted? Push it's return
-			if accepted
-				animReturn = sslUtility.PushAnimation(Slots[i], animReturn)
+	sslBaseAnimation[] output
+	int i = Slotted
+	while i
+		i -= 1
+		if Searchable(Slots[i])
+			sslBaseAnimation anim = Slots[i]
+			if (actors == anim.ActorCount()) && (males == -1 || males == anim.MaleCount()) && (females == -1 || females == anim.FemaleCount()) \
+			&& (stages == -1 || stages == anim.StageCount()) && (aggressive == anim.HasTag("Aggressive") || !Lib.bRestrictAggressive) && (sexual == anim.IsSexual)
+				output = sslUtility.PushAnimation(anim, output)
 			endIf
 		endIf
-		i += 1
 	endWhile
-	; Debug.Trace("SexLab Get Animations By Type Count: "+animReturn.Length)
-	; Debug.Trace("SexLab Get Animations By Type: "+animReturn)
-	return animReturn
+	_LogFound("GetByType", actors+", "+males+", "+females+", "+stages+", "+aggressive+", "+sexual, output)
+	return output
 endFunction
 
 sslBaseAnimation function GetBySlot(int slot)
@@ -104,7 +87,7 @@ endFunction
 
 int function FindByName(string findName)
 	int i = 0
-	while i < slotted
+	while i < Slotted
 		if Slots[i].Registered && Slots[i].Name == findName
 			return i
 		endIf
@@ -126,24 +109,24 @@ endFunction
 ;\-----------------------------------------------/;
 
 sslBaseAnimation function GetFree()
-	return Slots[slotted]
+	return Slots[Slotted]
 endFunction
 
 int function Register(sslBaseAnimation Claiming, string registrar)
 	registry = sslUtility.PushString(registrar, registry)
-	slotted = registry.Length
+	Slotted = registry.Length
 	Claiming.Initialize()
 	return Slots.Find(Claiming)
 endFunction
 
 int function GetCount(bool ignoreDisabled = true)
 	if !ignoreDisabled
-		return slotted
+		return Slotted
 	endIf
 	int count = 0
 	int i = 0
-	while i < slotted
-		if Slots[i].Registered && Slots[i].Enabled
+	while i < Slotted
+		if Searchable(Slots[i])
 			count += 1
 		endIf
 		i += 1
@@ -160,9 +143,35 @@ sslBaseAnimation[] function MergeLists(sslBaseAnimation[] list1, sslBaseAnimatio
 	return list1
 endFunction
 
+bool function Searchable(sslBaseAnimation anim)
+	return anim.Registered && anim.Enabled
+endFunction
+
 ;/-----------------------------------------------\;
 ;|	System Animations                            |;
 ;\-----------------------------------------------/;
+
+function _Log(string log, string method, string type = "NOTICE", string arguments = "")
+	Debug.Trace("--------------------------------------------------------------------------------------------")
+	Debug.Trace("--- sslAnimationSlots: SexLab Animation Slots---")
+	Debug.Trace("--------------------------------------------------------------------------------------------")
+	Debug.Trace(" "+type+": "+method+"("+arguments+")" )
+	Debug.Trace("   "+log)
+	Debug.Trace("--------------------------------------------------------------------------------------------")
+endFunction
+
+function _LogFound(string method, string arguments, sslBaseAnimation[] results)
+	string log = "Found ["+results.Length+"] Animations: "
+	int i = results.Length
+	while i
+		i -= 1
+		log += results[i].Name
+		if i > 0
+			log += ", "
+		endIf
+	endWhile
+	_Log(log, method, "NOTICE", arguments)
+endFunction
 
 function _Setup()
 	Slots = new sslBaseAnimation[100]
@@ -178,11 +187,15 @@ function _Setup()
 		i += 1
 	endWhile
 
-	string[] init
-	registry = init
-	slotted = 0
+	Initialize()
 
 	Defaults.LoadAnimations()
 
 	SendModEvent("SexLabSlotAnimations")
+endFunction
+
+function Initialize()
+	string[] init
+	registry = init
+	Slotted = 0
 endFunction

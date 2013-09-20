@@ -29,6 +29,8 @@ form[] extras3
 form[] extras4
 form[] extras5
 
+Form[] creatures
+
 bool waiting
 
 ; Information
@@ -40,6 +42,11 @@ endProperty
 bool property IsSexual hidden
 	bool function get()
 		return content < 3
+	endFunction
+endProperty
+bool property IsCreature hidden
+	bool function get()
+		return creatures.Length > 0
 	endFunction
 endProperty
 int property StageCount hidden
@@ -468,7 +475,44 @@ bool function RemoveTag(string tag)
 endFunction
 
 bool function HasTag(string tag)
-	return tags.Find(tag) >= 0
+	return tags.Find(tag) != -1
+endFunction
+
+bool function CheckTags(string[] find, bool requireAll = true)
+	debug.trace(name + " Being checked, has " + tags)
+	debug.trace("need: "+find)
+	int i = find.Length
+	while i
+		i -= 1
+		if find[i] != ""
+			bool check = HasTag(find[i])
+			if requireAll && !check
+				debug.trace(Name+ " doesn't have "+find[i])
+				return false ; Stop if we need all and don't have it
+			elseif !requireAll && check
+				debug.trace(Name+ " has "+find[i])
+				return true ; Stop if we don't need all and have one
+			endIf
+		endIf
+	endWhile
+	debug.trace(name+" had all ")
+	; If still here than we require all and had all
+	return true
+endFunction	
+
+
+;/-----------------------------------------------\;
+;|	Creature Use                                 |;
+;\-----------------------------------------------/;
+
+bool function HasRace(Race creature)
+	return creatures.Find(creature) != -1
+endFunction
+
+function AddRace(Race creature)
+	if !HasRace(creature)
+		creatures = sslUtility.PushForm(creature, creatures)
+	endIf
 endFunction
 
 ;/-----------------------------------------------\;
@@ -522,4 +566,5 @@ function Initialize()
 	extras3 = formDel
 	extras4 = formDel
 	extras5 = formDel
+	creatures = formDel
 endFunction
