@@ -42,10 +42,10 @@ sslThreadController function PrimeThread()
 	return self
 endFunction
 
-bool function ActorsReady()
+bool function ActorWait(string waitfor)
 	int i
 	while i < ActorCount
-		if GetAlias(i).GetState() != "Ready"
+		if GetAlias(i).GetState() != waitfor
 			return false
 		endIf
 		i += 1
@@ -66,7 +66,7 @@ state Preparing
 		SendActorEvent("StartThread")
 		; Wait for actors ready, or for 5 seconds to pass
 		float failsafe = Utility.GetCurrentRealTime() + 5.0
-		while !ActorsReady() && failsafe > Utility.GetCurrentRealTime()
+		while !ActorWait("Ready") && failsafe > Utility.GetCurrentRealTime()
 			Utility.Wait(0.20)
 		endWhile
 		if IsPlayerPosition(AdjustingPosition) && ActorCount > 1
@@ -255,7 +255,7 @@ function ChangeAnimation(bool backwards = false)
 endFunction
 
 function ChangePositions(bool backwards = false)
-	if ActorCount < 2
+	if ActorCount < 2 || IsCreature
 		return ; Solo Animation, nobody to swap with
 	endIf
 	; Set direction of swapping
@@ -360,11 +360,8 @@ function MoveScene()
 	UnregisterForUpdate()
 	; Enable Controls
 	Game.SetPlayerAIDriven(false)
-	; Renable clipping if TCL option on
-	if Lib.Actors.bEnableTCL
-		Debug.ToggleCollisions()
-	endIf
 	Debug.SendAnimationEvent(Lib.PlayerRef, "IdleForceDefaultState")
+	Lib.PlayerRef.SetVehicle(none)
 	; Lock hotkeys and wait 6 seconds
 	Lib.mMoveScene.Show(6)
 	float stopat = Utility.GetCurrentRealTime() + 6
@@ -375,10 +372,6 @@ function MoveScene()
 	Game.SetPlayerAIDriven(true)
 	; Give player time to settle incase airborne
 	Utility.Wait(1.0)
-	; Disable clipping if TCL option on
-	if Lib.Actors.bEnableTCL
-		Debug.ToggleCollisions()
-	endIf
 	; Recenter on coords to avoid stager + resync animations
 	float[] coords = GetCoords(GetPlayer())
 	CenterOnCoords(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5], true)
@@ -454,7 +447,11 @@ endFunction
 function EndAnimation(bool quick = false)
 	SendThreadEvent("AnimationEnd")
 	SendActorEvent("EndThread", (quick as float))
-	Utility.Wait(2.0)
+	; Wait for actors to clear, or for 5 seconds to pass
+	float failsafe = Utility.GetCurrentRealTime() + 5.0
+	while !ActorWait("") && failsafe > Utility.GetCurrentRealTime()
+		Utility.Wait(0.20)
+	endWhile
 	UnlockThread()
 endFunction
 

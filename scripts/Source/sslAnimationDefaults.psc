@@ -660,7 +660,6 @@ function SexLabAggrBehind(string eventName, string id, float argNum, form sender
 	SetContent(Sexual)
 	SetSFX(Squishing)
 	
-	TCL = true
 	Enabled = false
 
 	int a1 = AddPosition(Female, addCum=Anal)

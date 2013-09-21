@@ -2,6 +2,7 @@ scriptname sslThreadLibrary extends Quest
 
 ; Scripts
 sslAnimationSlots property Animations auto
+sslCreatureAnimationSlots property CreatureAnimations auto
 sslVoiceLibrary property Voices auto
 sslActorLibrary property Actors auto
 
@@ -41,6 +42,37 @@ Sound function GetSFX(int id)
 	else
 		return none
 	endIf
+endFunction
+
+
+int function FindNext(actor[] Positions, sslBaseAnimation Animation, int offset, bool findCreature)
+	while offset
+		offset -= 1
+		if Animation.HasRace(Positions[offset].GetLeveledActorBase().GetRace()) == findCreature
+			return offset
+		endIf
+	endwhile
+	return -1
+endFunction
+
+
+actor[] function SortCreatures(actor[] Positions, sslBaseAnimation Animation)
+	if Positions.Length < 2 || !Animation.IsCreature
+		return Positions ; Nothing to sort
+	endIf
+	int slot
+	int i
+	while i < Positions.Length
+		; Put non creatures first
+		if !Animation.HasRace(Positions[i].GetLeveledActorBase().GetRace()) && i > slot
+			actor moved = Positions[slot]
+			Positions[slot] = Positions[i]
+			Positions[i] = moved
+			slot += 1
+		endIf
+		i += 1
+	endWhile
+	return Positions
 endFunction
 
 function _Defaults()

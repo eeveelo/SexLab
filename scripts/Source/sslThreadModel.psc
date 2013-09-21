@@ -24,6 +24,7 @@ sslBaseAnimation[] leadAnimations
 string property Logging = "trace" auto hidden
 bool property AutoAdvance auto hidden
 bool property LeadIn auto hidden
+Race property Creature auto hidden
 
 ObjectReference centerObj
 float[] centerLoc
@@ -57,6 +58,12 @@ endProperty
 bool property IsAggressive hidden
 	bool function get()
 		return victim != none
+	endFunction
+endProperty
+
+bool property IsCreature hidden
+	bool function get()
+		return Creature != none
 	endFunction
 endProperty
 
@@ -154,6 +161,17 @@ sslThreadController function StartThread()
 	endWhile
 
 	; Check for valid animations
+	if IsCreature
+		primaryAnimations = Lib.CreatureAnimations.GetByRace(actors, Creature)
+		DisableLeadIn(true)
+		; Bail if no valid creature animations
+		if primaryAnimations.Length == 0
+			_Log("Unable to find valid creature animations", "StartThread", "FATAL")
+			return none
+		endIf
+		Positions = Lib.SortCreatures(Positions, primaryAnimations[0])
+	endIf
+
 	if primaryAnimations.Length == 0
 		int[] gender = Lib.Actors.GenderCount(Positions)
 		; Same sex pairings
@@ -384,16 +402,17 @@ endfunction
 ;\-----------------------------------------------/;
 
 int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice = none, bool forceSilent = false)
-	if !_MakeWait("AddActor")
+	int validation = Lib.Actors.ValidateActor(position)
+	if validation < 1
+		_Log("Invalid actor given", "AddActor")
+		return -1
+	elseif !_MakeWait("AddActor")
 		return -1
 	elseIf ActorCount >= 5
 		_Log("No available actor positions", "AddActor")
 		return -1
 	elseif Positions.Find(position) != -1
 		_Log("Duplicate actor", "AddActor")
-		return -1
-	elseif !Lib.Actors.ValidateActor(position)
-		_Log("Invalid actor given", "AddActor")
 		return -1
 	endIf
 	waiting = true
@@ -414,11 +433,17 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 		if position == Lib.PlayerRef
 			PlayerRef = position
 		endIf
-		; Find voice or use given voice
-		if voice == none && !forceSilent
-			voice = Lib.Voices.PickVoice(position)
+		
+		; Find voice or use given voice, if not creature
+		if validation != 2
+			if voice == none && !forceSilent && validation != 2
+				voice = Lib.Voices.PickVoice(position)
+			endIf
+			(slot as sslActorAlias).SetVoice(voice)
+		else ; Set thread into creature mode if actor is creature
+			Creature = position.GetLeveledActorBase().GetRace()
+			(slot as sslActorAlias).MakeCreature(true)
 		endIf
-		(slot as sslActorAlias).SetVoice(voice)
 	else
 		_Log("Failed to slot actor '"+position+"'", "AddActor", "FATAL")
 	endIf
@@ -428,7 +453,7 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 endFunction
 
 function ChangeActors(actor[] changeTo)
-	if !active
+	if !active || IsCreature
 		return
 	endIf
 	int i
@@ -501,7 +526,7 @@ endFunction
 ;\-----------------------------------------------/;
 
 function SetForcedAnimations(sslBaseAnimation[] animationList)
-	if AnimationList.Length == 0
+	if AnimationList.Length == 0 || IsCreature
 		return
 	endIf
 	customAnimations = animationList
@@ -509,7 +534,7 @@ function SetForcedAnimations(sslBaseAnimation[] animationList)
 endFunction
 
 function SetAnimations(sslBaseAnimation[] animationList)
-	if AnimationList.Length == 0
+	if AnimationList.Length == 0 || IsCreature
 		return
 	endIf
 	primaryAnimations = animationList
@@ -517,7 +542,7 @@ function SetAnimations(sslBaseAnimation[] animationList)
 endFunction
 
 function SetLeadAnimations(sslBaseAnimation[] animationList)
-	if AnimationList.Length == 0
+	if AnimationList.Length == 0 || IsCreature
 		return
 	endIf
 	leadIn = true

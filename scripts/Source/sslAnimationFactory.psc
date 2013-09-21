@@ -92,7 +92,7 @@ endProperty
 
 bool property TCL hidden
 	function set(bool value)
-		Animation.TCL = value
+		; No longer used
 	endFunction
 endProperty
 

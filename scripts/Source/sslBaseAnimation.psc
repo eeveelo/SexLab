@@ -3,7 +3,6 @@ scriptname sslBaseAnimation extends ReferenceAlias
 ; Config
 string property Name = "" auto hidden
 bool property Enabled = true auto hidden
-bool property TCL = false auto hidden
 int property SFX auto hidden
 
 int actors = 0

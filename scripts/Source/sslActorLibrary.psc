@@ -4,6 +4,8 @@ scriptname sslActorLibrary extends Quest
 sslActorStats property Stats auto
 sslActorSlots property Slots auto
 
+sslAnimationLibrary property AnimLib auto
+
 ; Data
 faction property AnimatingFaction auto
 faction property GenderFaction auto
@@ -23,6 +25,8 @@ Spell property CumAnalSpell auto
 Keyword property kwCumOral auto
 Keyword property kwCumAnal auto
 Keyword property kwCumVaginal auto
+
+Furniture property BaseMarker auto
 
 ; Config Settings
 bool property SOSEnabled auto hidden
@@ -100,29 +104,33 @@ int function ValidateActor(actor position)
 	endIf
 
 	if position.HasKeyWordString("ActorTypeCreature") || position.HasKeyWordString("ActorTypeDwarven")
-		Debug.Trace("Failed to add actor to animation; actor is a creature or Dwemer that is currently not supported")
-		return -16
+		if AnimLib.AllowedCreature(ActorRace)
+			return 2
+		else
+			Debug.Trace("Failed to add actor to animation; actor is a creature or Dwemer that is currently not supported")
+			return -16
+		endIf
 	endIf
 	return 1
 endFunction
 
-actor[] function SortActors(actor[] actorList, bool femaleFirst = true)
-	if actorList.Length < 2
-		return actorList ; Why reorder a single actor?
+actor[] function SortActors(actor[] Positions, bool femaleFirst = true)
+	if Positions.Length < 2
+		return Positions ; Why reorder a single actor?
 	endIf
-	int orderSlot
+	int slot
 	int priority = (femaleFirst as int)
 	int i
-	while i < actorList.Length
-		if GetGender(actorList[i]) == priority && i > orderSlot
-			actor moved = actorList[orderSlot]
-			actorList[orderSlot] = actorList[i]
-			actorList[i] = moved
-			orderSlot += 1
+	while i < Positions.Length
+		if GetGender(Positions[i]) == priority && i > slot
+			actor moved = Positions[slot]
+			Positions[slot] = Positions[i]
+			Positions[i] = moved
+			slot += 1
 		endIf
 		i += 1
 	endWhile
-	return actorList
+	return Positions
 endFunction
 
 function ApplyCum(actor a, int cumID)

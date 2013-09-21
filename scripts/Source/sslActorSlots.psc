@@ -18,7 +18,7 @@ int property ActiveActors hidden
 endProperty
 
 sslActorAlias function SlotActor(actor position, sslThreadController ThreadView)
-	if Lib.ValidateActor(position) == 1
+	if Lib.ValidateActor(position) > 0
 		int i = 0
 		while i < 75
 			if ActorSlot[i].ForceRefIfEmpty(position)

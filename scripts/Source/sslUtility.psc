@@ -1,5 +1,24 @@
 scriptname sslUtility
 
+string[] function ArgString(string args, string delimiter = ",") global
+	string[] output
+	args += delimiter
+	int prev = 0
+	int next = StringUtil.Find(args, delimiter, prev)
+	while next != -1
+		string arg = StringUtil.SubString(args, prev, (next - prev))
+		if StringUtil.GetNthChar(arg, 0) == " "
+			arg = StringUtil.SubString(arg, 1)
+		endIf
+		if arg != ""
+			output = PushString(arg, output)
+		endIf
+		prev = next + 1
+		next = StringUtil.Find(args, delimiter, prev)
+	endWhile
+	return output
+endFunction
+
 float[] function PushFloat(float var, float[] array) global
 	int len = array.Length
 	if len >= 128
@@ -117,16 +136,7 @@ actor[] function PushActor(actor var, actor[] array) global
 		array[0] = var
 		return array
 	endIf
-	actor[] pushed
-	if len == 1
-		pushed = new actor[2]
-	elseIf len == 2
-		pushed = new actor[3]
-	elseIf len == 3
-		pushed = new actor[4]
-	else
-		pushed = new actor[5]
-	endIf
+	actor[] pushed = ActorArray(len+1)
 	pushed[len] = var
 	while len
 		len -=1
@@ -145,6 +155,20 @@ int function ValidateSize(int size) global
 		return 128
 	else
 		return size
+	endIf
+endFunction
+
+actor[] function ActorArray(int size) global
+	if size == 1
+		return new actor[1]
+	elseIf size == 2
+		return new actor[2]
+	elseIf size == 3
+		return new actor[3]
+	elseIf size == 4
+		return new actor[4]
+	else
+		return new actor[5]
 	endIf
 endFunction
 

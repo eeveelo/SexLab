@@ -38,6 +38,8 @@ SexLabFramework property SexLab auto
 sslAnimationSlots property AnimSlots auto
 sslAnimationLibrary property AnimLib auto
 
+sslCreatureAnimationSlots property CreatureAnimSlots auto
+
 sslVoiceSlots property VoiceSlots auto
 sslVoiceLibrary property VoiceLib auto
 
@@ -70,6 +72,7 @@ int[] oidStripVictim
 int[] oidStripAggressor
 int[] oidToggleVoice
 int[] oidToggleAnimation
+int[] oidToggleCreatureAnimation
 int[] oidAggrAnimation
 int[] oidForeplayAnimation
 int[] oidRemoveStrapon
@@ -83,10 +86,11 @@ function SetDefaults()
 	ActorLib._Defaults()
 	ThreadLib._Defaults()
 
-	oidToggleVoice = new int[128]
-	oidToggleAnimation = new int[128]
-	oidAggrAnimation = new int[128]
-	oidForeplayAnimation = new int[128]
+	oidToggleVoice = new int[50]
+	oidToggleCreatureAnimation = new int[50]
+	oidToggleAnimation = new int[100]
+	oidAggrAnimation = new int[100]
+	oidForeplayAnimation = new int[100]
 	
 	oidStripMale = new int[33]
 	oidStripFemale = new int[33]
@@ -101,7 +105,7 @@ function SetDefaults()
 
 	oidRemoveStrapon = new int[10]
 
-	Pages = new string[11]
+	Pages = new string[12]
 	Pages[0] = "$SSL_AnimationSettings"
 	Pages[1] = "$SSL_PlayerHotkeys"
 	Pages[2] = "$SSL_NormalTimersStripping"
@@ -111,12 +115,13 @@ function SetDefaults()
 	Pages[6] = "$SSL_ToggleAnimations"
 	Pages[7] = "$SSL_ForeplayAnimations"
 	Pages[8] = "$SSL_AggressiveAnimations"
+	Pages[9] = "$SSL_CreatureAnimations"
 	if Game.GetPlayer().GetActorBase().GetSex() > 0
-		Pages[9] = "$SSL_SexDiary"
+		Pages[10] = "$SSL_SexDiary"
 	else
-		Pages[9] = "$SSL_SexJournal"
+		Pages[10] = "$SSL_SexJournal"
 	endIf
-	Pages[10] = "$SSL_RebuildClean"
+	Pages[11] = "$SSL_RebuildClean"
 
 	FindStrapons()
 endFunction
@@ -147,8 +152,8 @@ event OnPageReset(string page)
 		AddToggleOptionST("NudeSuitMales","$SSL_UseNudeSuitMales", ActorLib.bUseMaleNudeSuit)
 		AddToggleOptionST("NudeSuitFemales","$SSL_UseNudeSuitFemales", ActorLib.bUseFemaleNudeSuit)
 		SetCursorPosition(1)
+		AddToggleOptionST("AllowCreatures","$SSL_AllowCreatures", AnimLib.bAllowCreatures)
 		AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", ThreadLib.bForeplayStage)
-		AddToggleOptionST("PlayerTCL","$SSL_PlayerTCL", ActorLib.bEnableTCL)
 
 		AddHeaderOption("$SSL_PlayerSettings")
 		AddToggleOptionST("AutoAdvance","$SSL_AutoAdvanceStages", ThreadLib.bAutoAdvance)
@@ -323,36 +328,6 @@ event OnPageReset(string page)
 			i += 1
 		endWhile
 
-	elseIf page == "$SSL_ToggleAnimations"
-		SetCursorFillMode(LEFT_TO_RIGHT)
-
-		i = 0
-		while i < AnimSlots.Animations.Length
-			if AnimSlots.Animations[i].Registered
-				oidToggleAnimation[i] = AddToggleOption(AnimSlots.Animations[i].Name, AnimSlots.Animations[i].Enabled)
-			endIf
-			i += 1
-		endWhile
-	elseIf page == "$SSL_ForeplayAnimations"
-		SetCursorFillMode(LEFT_TO_RIGHT)
-
-		i = 0
-		while i < AnimSlots.Animations.Length
-			if AnimSlots.Animations[i].Registered
-				oidForeplayAnimation[i] = AddToggleOption(AnimSlots.Animations[i].Name, AnimSlots.Animations[i].HasTag("LeadIn"))
-			endIf
-			i += 1
-		endWhile
-	elseIf page == "$SSL_AggressiveAnimations"
-		SetCursorFillMode(LEFT_TO_RIGHT)
-
-		i = 0
-		while i < AnimSlots.Animations.Length
-			if AnimSlots.Animations[i].Registered
-				oidAggrAnimation[i] = AddToggleOption(AnimSlots.Animations[i].Name, AnimSlots.Animations[i].HasTag("Aggressive"))
-			endIf
-			i += 1
-		endWhile
 	elseIf page == "$SSL_ToggleVoices"
 		SetCursorFillMode(LEFT_TO_RIGHT)
 
@@ -363,6 +338,50 @@ event OnPageReset(string page)
 			endIf
 			i += 1
 		endWhile
+
+	elseIf page == "$SSL_ToggleAnimations"
+		SetCursorFillMode(LEFT_TO_RIGHT)
+
+		i = 0
+		while i < AnimSlots.Slotted
+			if AnimSlots.Slots[i].Registered
+				oidToggleAnimation[i] = AddToggleOption(AnimSlots.Slots[i].Name, AnimSlots.Slots[i].Enabled)
+			endIf
+			i += 1
+		endWhile
+
+	elseIf page == "$SSL_ForeplayAnimations"
+		SetCursorFillMode(LEFT_TO_RIGHT)
+
+		i = 0
+		while i < AnimSlots.Slotted
+			if AnimSlots.Slots[i].Registered
+				oidForeplayAnimation[i] = AddToggleOption(AnimSlots.Slots[i].Name, AnimSlots.Slots[i].HasTag("LeadIn"))
+			endIf
+			i += 1
+		endWhile
+
+	elseIf page == "$SSL_AggressiveAnimations"
+		SetCursorFillMode(LEFT_TO_RIGHT)
+
+		i = 0
+		while i < AnimSlots.Slotted
+			if AnimSlots.Slots[i].Registered
+				oidAggrAnimation[i] = AddToggleOption(AnimSlots.Slots[i].Name, AnimSlots.Slots[i].HasTag("Aggressive"))
+			endIf
+			i += 1
+		endWhile
+
+	elseIf page == "$SSL_CreatureAnimations"
+		SetCursorFillMode(LEFT_TO_RIGHT)
+		i = 0
+		while i < CreatureAnimSlots.Slotted
+			if CreatureAnimSlots.Slots[i].Registered
+				oidToggleCreatureAnimation[i] = AddToggleOption(CreatureAnimSlots.Slots[i].Name, CreatureAnimSlots.Slots[i].Enabled)
+			endIf
+			i += 1
+		endWhile
+
 	elseIf page == "$SSL_SexDiary" || page == "$SSL_SexJournal"
 		SetCursorFillMode(TOP_TO_BOTTOM)
 
@@ -608,6 +627,19 @@ state NudeSuitFemales
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoFemaleNudeSuit")
+	endEvent
+endState
+state AllowCreatures
+	event OnSelectST()
+		AnimLib.bAllowCreatures = !AnimLib.bAllowCreatures
+		SetToggleOptionValueST(AnimLib.bAllowCreatures)
+	endEvent
+	event OnDefaultST()
+		AnimLib.bAllowCreatures = false
+		SetToggleOptionValueST(AnimLib.bAllowCreatures)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoAllowCreatures")
 	endEvent
 endState
 state ForeplayStage
@@ -1028,7 +1060,7 @@ state ResetAnimationRegistry
 		if run
 			ThreadSlots._StopAll()
 			AnimSlots._Setup()
-
+			CreatureAnimSlots._Setup()
 			ShowMessage("$SSL_RunRebuildAnimations", false)
 		endIf
 	endEvent
@@ -1208,134 +1240,129 @@ endEvent
 
 event OnOptionSelect(int option)
 	int i
-	while i < 128
-		if option == oidToggleVoice[i]
-			VoiceSlots.Voices[i].Enabled = !VoiceSlots.Voices[i].Enabled
-			SetToggleOptionValue(option, VoiceSlots.Voices[i].Enabled)
-			i = 128
-		elseif option == oidToggleAnimation[i]
-			AnimSlots.Animations[i].Enabled = !AnimSlots.Animations[i].Enabled
-			SetToggleOptionValue(option, AnimSlots.Animations[i].Enabled)
-			i = 128
-		elseif option == oidAggrAnimation[i]
-			if !AnimSlots.Animations[i].HasTag("Aggressive")
-				AnimSlots.Animations[i].AddTag("Aggressive")
-			else
-				AnimSlots.Animations[i].RemoveTag("Aggressive")
-			endIf
-			SetToggleOptionValue(option, AnimSlots.Animations[i].HasTag("Aggressive"))
-			i = 128
-		elseif option == oidForeplayAnimation[i]
-			if !AnimSlots.Animations[i].HasTag("LeadIn")
-				AnimSlots.Animations[i].AddTag("LeadIn")
-			else
-				AnimSlots.Animations[i].RemoveTag("LeadIn")
-			endIf
-			SetToggleOptionValue(option, AnimSlots.Animations[i].HasTag("LeadIn"))
-			i = 128
-		elseIf i < 33 && option == oidStripMale[i]
+	if CurrentPage == "$SSL_ToggleVoices"
+		i = oidToggleVoice.Find(option)
+		VoiceSlots.Voices[i].Enabled = !VoiceSlots.Voices[i].Enabled
+		SetToggleOptionValue(option, VoiceSlots.Voices[i].Enabled)
+	elseif CurrentPage == "$SSL_CreatureAnimations"
+		i = oidToggleCreatureAnimation.Find(option)
+		CreatureAnimSlots.Slots[i].Enabled = !CreatureAnimSlots.Slots[i].Enabled
+		SetToggleOptionValue(option, CreatureAnimSlots.Slots[i].Enabled)
+	elseif CurrentPage == "$SSL_ToggleAnimations"
+		i = oidToggleAnimation.Find(option)
+		AnimSlots.Slots[i].Enabled = !AnimSlots.Slots[i].Enabled
+		SetToggleOptionValue(option, AnimSlots.Slots[i].Enabled)
+	elseif CurrentPage == "$SSL_AggressiveAnimations"
+		i = oidAggrAnimation.Find(option)
+		if !AnimSlots.Slots[i].HasTag("Aggressive")
+			AnimSlots.Slots[i].AddTag("Aggressive")
+		else
+			AnimSlots.Slots[i].RemoveTag("Aggressive")
+		endIf
+		SetToggleOptionValue(option, AnimSlots.Slots[i].HasTag("Aggressive"))
+	elseif CurrentPage == "$SSL_ForeplayAnimations"
+		i = oidForeplayAnimation.Find(option)
+		if !AnimSlots.Slots[i].HasTag("LeadIn")
+			AnimSlots.Slots[i].AddTag("LeadIn")
+		else
+			AnimSlots.Slots[i].RemoveTag("LeadIn")
+		endIf
+		SetToggleOptionValue(option, AnimSlots.Slots[i].HasTag("LeadIn"))
+	elseIf CurrentPage == "$SSL_NormalTimersStripping"
+		i = oidStripMale.Find(option)
+		if i >= 0
 			ActorLib.bStripMale[i] = !ActorLib.bStripMale[i] 
 			SetToggleOptionValue(option, ActorLib.bStripMale[i])
-			i = 128
-		elseIf i < 33 && option == oidStripFemale[i]
+		else
+			i = oidStripFemale.Find(option)
 			ActorLib.bStripFemale[i] = !ActorLib.bStripFemale[i] 
 			SetToggleOptionValue(option, ActorLib.bStripFemale[i])
-			i = 128
-		elseIf i < 33 && option == oidStripLeadInMale[i]
+		endIf
+	elseIf CurrentPage == "$SSL_ForeplayTimersStripping"
+		i = oidStripLeadInMale.Find(option)
+		if i >= 0
 			ActorLib.bStripLeadInMale[i] = !ActorLib.bStripLeadInMale[i] 
 			SetToggleOptionValue(option, ActorLib.bStripLeadInMale[i])
-			i = 128
-		elseIf i < 33 && option == oidStripLeadInFemale[i]
+		else
+			i = oidStripLeadInFemale.Find(option)
 			ActorLib.bStripLeadInFemale[i] = !ActorLib.bStripLeadInFemale[i] 
 			SetToggleOptionValue(option, ActorLib.bStripLeadInFemale[i])
-			i = 128
-		elseIf i < 33 && option == oidStripVictim[i]
+		endIf
+	elseIf CurrentPage == "$SSL_AggressiveTimersStripping"
+		i = oidStripVictim.Find(option)
+		if i >= 0
 			ActorLib.bStripVictim[i] = !ActorLib.bStripVictim[i] 
 			SetToggleOptionValue(option, ActorLib.bStripVictim[i])
-			i = 128
-		elseIf i < 33 && option == oidStripAggressor[i]
+		else
+			i = oidStripAggressor.Find(option)
 			ActorLib.bStripAggressor[i] = !ActorLib.bStripAggressor[i] 
 			SetToggleOptionValue(option, ActorLib.bStripAggressor[i])
-			i = 128
-		elseIf i < 10 && option == oidRemoveStrapon[i]
-			form[] strapons = ActorLib.Strapons
-			form toRemove = strapons[i]
-			form[] newStrapons
-			int s = 0
-			while s < strapons.Length
-				if strapons[s] != toRemove
-					newStrapons = sslUtility.PushForm(strapons[s], newStrapons)
-				endIf
-				s += 1
-			endWhile
-			ActorLib.Strapons = newStrapons
-			ForcePageReset()
-			i = 128
 		endIf
-		i += 1
-	endWhile
+	elseIf CurrentPage == "$SSL_RebuildClean"
+		i = oidRemoveStrapon.Find(option)
+		form[] strapons = ActorLib.Strapons
+		form toRemove = strapons[i]
+		form[] newStrapons
+		int s = 0
+		while s < strapons.Length
+			if strapons[s] != toRemove
+				newStrapons = sslUtility.PushForm(strapons[s], newStrapons)
+			endIf
+			s += 1
+		endWhile
+		ActorLib.Strapons = newStrapons
+		ForcePageReset()
+	endIf
 endEvent
 
 event OnOptionHighlight(int option)
-	int i
-	while i < 128
-		if option == oidToggleVoice[i]
-			SetInfoText("$SSL_EnableVoice")
-			i = 128
-		elseif option == oidToggleAnimation[i]
-			SetInfoText("$SSL_EnableAnimation")
-			i = 128
-		elseif option == oidForeplayAnimation[i]
-			SetInfoText("$SSL_ToggleForeplay")
-			i = 128
-		elseif option == oidAggrAnimation[i]
-			SetInfoText("$SSL_ToggleAggressive")
-			i = 128
-		elseIf i < 33 && option == oidStripMale[i]
-			if i != 32
-				SetInfoText("$SSL_StripMale")
-			else
-				SetInfoText("$SSL_StripMaleWeapon")
-			endIf
-			i = 128
-		elseIf i < 33 && option == oidStripFemale[i]
-			if i != 32
-				SetInfoText("$SSL_StripFemale")
-			else
-				SetInfoText("$SSL_StripFemaleWeapon")
-			endIf
-			i = 128
-		elseIf i < 33 && option == oidStripLeadInFemale[i]
-			if i != 32
-				SetInfoText("$SSL_StripLeadInFemale")
-			else
-				SetInfoText("$SSL_StripLeadInFemaleWeapon")
-			endIf
-			i = 128
-		elseIf i < 33 && option == oidStripLeadInMale[i]
-			if i != 32
-				SetInfoText("$SSL_StripLeadInMale")
-			else
-				SetInfoText("$SSL_StripLeadInMaleWeapon")
-			endIf
-			i = 128
-		elseIf i < 33 && option == oidStripVictim[i]
-			if i != 32
-				SetInfoText("$SSL_StripVictim")
-			else
-				SetInfoText("$SSL_StripVictimWeapon")
-			endIf
-			i = 128
-		elseIf i < 33 && option == oidStripAggressor[i]
-			if i != 32
-				SetInfoText("$SSL_StripAggressor")
-			else
-				SetInfoText("$SSL_StripAggressorWeapon")
-			endIf
-			i = 128
+	if oidToggleVoice.Find(option) != -1
+		SetInfoText("$SSL_EnableVoice")
+	elseif oidToggleCreatureAnimation.Find(option) != -1
+		SetInfoText("$SSL_ToggleCreatureAnimation")
+	elseif oidToggleAnimation.Find(option) != -1
+		SetInfoText("$SSL_EnableAnimation")
+	elseif oidForeplayAnimation.Find(option) != -1
+		SetInfoText("$SSL_ToggleForeplay")
+	elseif oidAggrAnimation.Find(option) != -1
+		SetInfoText("$SSL_ToggleAggressive")
+	elseIf oidStripMale.Find(option) != -1
+		if oidStripMale.Find(option) != 32
+			SetInfoText("$SSL_StripMale")
+		else
+			SetInfoText("$SSL_StripMaleWeapon")
 		endIf
-		i += 1
-	endWhile
+	elseIf oidStripFemale.Find(option) != -1
+		if oidStripFemale.Find(option) != 32
+			SetInfoText("$SSL_StripFemale")
+		else
+			SetInfoText("$SSL_StripFemaleWeapon")
+		endIf
+	elseIf oidStripLeadInFemale.Find(option) != -1
+		if oidStripLeadInFemale.Find(option) != 32
+			SetInfoText("$SSL_StripLeadInFemale")
+		else
+			SetInfoText("$SSL_StripLeadInFemaleWeapon")
+		endIf
+	elseIf oidStripLeadInMale.Find(option) != -1
+		if oidStripLeadInMale.Find(option) != 32
+			SetInfoText("$SSL_StripLeadInMale")
+		else
+			SetInfoText("$SSL_StripLeadInMaleWeapon")
+		endIf
+	elseIf oidStripVictim.Find(option) != -1
+		if oidStripVictim.Find(option) != 32
+			SetInfoText("$SSL_StripVictim")
+		else
+			SetInfoText("$SSL_StripVictimWeapon")
+		endIf
+	elseIf oidStripAggressor.Find(option) != -1
+		if oidStripAggressor.Find(option) != 32
+			SetInfoText("$SSL_StripAggressor")
+		else
+			SetInfoText("$SSL_StripAggressorWeapon")
+		endIf
+	endIf
 endEvent
 
 string function GetSlotName(int slot)
@@ -1446,6 +1473,8 @@ function _SetupSystem()
 	Debug.TraceAndBox("SexLab is now updating/installing, please wait for ready message before using.")
 	; Init animations
 	AnimSlots._Setup()
+	; Init creature animations
+	CreatureAnimSlots._Setup()
 	; Init voices
 	VoiceSlots._Setup()
 	; Init Alias Slots

@@ -3,6 +3,8 @@ scriptname sslActorAlias extends ReferenceAlias
 sslActorLibrary property Lib auto
 
 actor ActorRef
+ObjectReference MarkerRef
+
 bool Active
 sslThreadController Controller
 sslBaseVoice Voice
@@ -17,6 +19,7 @@ int VoiceInstance
 bool IsPlayer
 bool IsVictim
 bool IsFemale
+bool IsCreature
 
 ; Storage
 sslBaseAnimation Animation
@@ -28,7 +31,6 @@ bool disableUndress
 bool disableRagdoll
 form strapon
 float scale
-
 
 ;/-----------------------------------------------\;
 ;|	Alias Functions                              |;
@@ -43,6 +45,7 @@ function SetAlias(sslThreadController ThreadView)
 		IsPlayer = ActorRef == Lib.PlayerRef
 		IsVictim = ActorRef == ThreadView.GetVictim()
 		IsFemale = Lib.GetGender(ActorRef) == 1
+		IsCreature = false
 	endIf
 endFunction
 
@@ -56,16 +59,22 @@ function ClearAlias()
 	endIf
 endFunction
 
+function MakeCreature(bool makeCreature = true)
+	IsCreature = makeCreature
+endFunction
+
+bool function IsCreature()
+	return IsCreature
+endFunction
+
 ;/-----------------------------------------------\;
 ;|	Preparation Functions                        |;
 ;\-----------------------------------------------/;
 
 function PrepareActor()
-
+	; Disable movement
 	if IsPlayer
 		Game.ForceThirdPerson()
-		;Game.DisablePlayerControls(true, true, false, false, true, false, false, true, 0)
-		;Game.SetInChargen(false, true, true)
 		Game.SetPlayerAIDriven()
 		; Enable hotkeys, if needed
 		if Lib.bDisablePlayer && IsVictim
@@ -73,21 +82,24 @@ function PrepareActor()
 		else
 			Lib._HKStart(Controller)
 		endIf
-		; Toggle TCL if enabled and player present
-		if Lib.bEnableTCL
-			Debug.ToggleCollisions()
-		endIf
 	else
 		ActorRef.SetRestrained()
 		ActorRef.SetDontMove()
-		ActorRef.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
-	endIf
-	if ActorRef.IsWeaponDrawn()
-		ActorRef.SheatheWeapon()
 	endIf
 	; Start DoNothing package
 	ActorRef.SetFactionRank(Lib.AnimatingFaction, 1)
 	TryToEvaluatePackage()
+	; Creature needs nothing else
+	if IsCreature
+		GoToState("Ready")
+		return
+	endIf
+	; Disable IK
+	ActorRef.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
+	; Cleanup
+	if ActorRef.IsWeaponDrawn()
+		ActorRef.SheatheWeapon()
+	endIf
 	; Sexual animations only
 	if Controller.Animation.IsSexual()
 		; Strip Actor
@@ -109,44 +121,46 @@ endFunction
 
 function ResetActor()
 	UnregisterForUpdate()
-	GoToState("")
-	; Reset to starting scale
-	if scale > 0.0
-		ActorRef.SetScale(scale)
+	; Dettach from marker
+	ActorRef.SetVehicle(none)
+	_ClearMarker()
+	; Enable movement
+	if IsPlayer
+		Lib._HKClear()
+		Game.SetPlayerAIDriven(false)
+		int[] genders = Lib.GenderCount(Controller.Positions)
+		Lib.Stats.UpdatePlayerStats(genders[0], genders[1], Controller.Animation, Controller.GetVictim(), Controller.GetTime())
+	else
+		ActorRef.SetDontMove(false)
+		ActorRef.SetRestrained(false)
 	endIf
 	; Remove from animation faction
 	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
+	; Creatures need nothing more
+	if IsCreature
+		return
+	endIf
+	; Cleanup Actors
 	RemoveExtras()
 	; Reset openmouth
 	ActorRef.SetExpressionOverride(7, 50)
 	ActorRef.ClearExpressionOverride()
-	; Enable movement
-	if IsPlayer
-		if Lib.bEnableTCL
-			Debug.ToggleCollisions()
-		endIf
-		Lib._HKClear()
-		;Game.ForceThirdPerson()
-		;Game.SetInChargen(false, false, false)
-		Game.SetPlayerAIDriven(false)
-		;Game.EnablePlayerControls()
-		int[] genders = Lib.GenderCount(Controller.Positions)
-		Lib.Stats.UpdatePlayerStats(genders[0], genders[1], Controller.Animation, Controller.GetVictim(), Controller.GetTime())
-	else
-		ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
-		ActorRef.SetDontMove(false)
-		ActorRef.SetRestrained(false)
+	; Reset to starting scale
+	if scale > 0.0
+		ActorRef.SetScale(scale)
 	endIf
+	; Renable IK
+	ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 	; Make flaccid for SOS
 	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
 	; Unstrip
-	if !ActorRef.IsDead() && !ActorRef.IsBleedingOut()
+	if !ActorRef.IsDead() && !ActorRef.IsBleedingOut() && !IsCreature
 		Lib.UnstripActor(ActorRef, EquipmentStorage, Controller.GetVictim())
 	endIf
 endFunction
 
 function EquipExtras()
-	if Animation == none
+	if Animation == none || IsCreature
 		return
 	endIf
 	
@@ -167,7 +181,7 @@ function EquipExtras()
 endFunction
 
 function RemoveExtras()
-	if Animation == none
+	if Animation == none || IsCreature
 		return
 	endIf
 
@@ -193,6 +207,9 @@ endFunction
 function PlayAnimation()
 	; Play Idle
 	Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(position, stage))
+	if IsCreature
+		return
+	endIf
 	; Open Mouth
 	if Animation.UseOpenMouth(position, stage)
 		ActorRef.SetExpressionOverride(16, 100)
@@ -225,7 +242,9 @@ function StopAnimating(bool quick = false)
 		endIf
 	endIf
 	; Reset Idle
-	if quick || Game.GetCameraState() == 3 || !DoRagdollEnd()
+	if IsCreature
+		Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
+	elseif quick || Game.GetCameraState() == 3 || !DoRagdollEnd()
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 	else
 		ActorRef.PushActorAway(ActorRef, 1)
@@ -248,12 +267,27 @@ function AlignTo(float[] center)
 	elseIf loc[5] < 0
 		loc[5] = ( loc[5] + 360 )
 	endIf
+	; Make Marker if we don't have one
+	if MarkerRef == none
+		MarkerRef = ActorRef.PlaceAtMe(Lib.BaseMarker)
+		Debug.Trace(ActorRef + " Made Marker: "+MarkerRef)
+	endIf
 	; Set Coords
-	ActorRef.SetPosition(loc[0], loc[1], loc[2])
-	ActorRef.SetAngle(loc[3], loc[4], loc[5])
+	MarkerRef.SetPosition(loc[0], loc[1], loc[2])
+	MarkerRef.SetAngle(loc[3], loc[4], loc[5])
+	SnapTo()
+endFunction
+
+function SnapTo()
+	ActorRef.SetVehicle(MarkerRef)
+	ActorRef.MoveTo(MarkerRef)
+	ActorRef.SetVehicle(MarkerRef)
 endFunction
 
 function Strip(bool animate = true)
+	if IsCreature
+		return
+	endIf
 	bool[] strip
 	; Get Strip settings or override
 	if StripOverride.Length != 33
@@ -392,15 +426,17 @@ state Animating
 			return
 		endIf
 
-		if !IsSilent
-			if VoiceInstance > 0
-				Sound.StopInstance(VoiceInstance)
-			endIf
-			VoiceInstance = Voice.Moan(ActorRef, VoiceStrength, IsVictim)
-			Sound.SetInstanceVolume(VoiceInstance, Lib.fVoiceVolume)
+		RegisterForSingleUpdate(VoiceDelay)
+
+		if IsCreature || IsSilent 
+			return
 		endIf
 
-		RegisterForSingleUpdate(VoiceDelay)
+		if VoiceInstance > 0
+			Sound.StopInstance(VoiceInstance)
+		endIf
+		VoiceInstance = Voice.Moan(ActorRef, VoiceStrength, IsVictim)
+		Sound.SetInstanceVolume(VoiceInstance, Lib.fVoiceVolume)
 	endEvent
 endState
 
@@ -437,6 +473,16 @@ function _Init()
 	EquipmentStorage = formDel
 	bool[] boolDel
 	StripOverride = boolDel
+	_ClearMarker()
+	GoToState("")
+endFunction
+
+function _ClearMarker()
+	if MarkerRef != none
+		MarkerRef.Disable()
+		MarkerRef.Delete()
+		MarkerRef = none
+	endIf
 endFunction
 
 function StartAnimating()
