@@ -1465,6 +1465,8 @@ function FindStrapons()
 			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285D)
 			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285E)
 			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285F)
+		elseif name == "SOS Equipable Schlong.esp"
+			ActorLib.LoadStrapon("SOS Equipable Schlong.esp", 0x0D62)
 		endif
 	endWhile
 endFunction
