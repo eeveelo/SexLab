@@ -6,8 +6,9 @@ sslBaseAnimation[] function GetByRace(int actors, Race creature)
 	sslBaseAnimation[] output
 	int i
 	while i < Slotted
-		if Slots[i].Registered && Slots[i].HasRace(creature) && Slots[i].Enabled
-			output = sslUtility.PushAnimation(Slots[i], output)
+		sslBaseAnimation anim = Slots[i]
+		if Searchable(anim) && anim.HasRace(creature) && actors == anim.ActorCount()
+			output = sslUtility.PushAnimation(anim, output)
 		endIf
 		i += 1
 	endWhile

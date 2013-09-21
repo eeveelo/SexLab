@@ -53,7 +53,7 @@ sslSystemConfig property Config auto
 ; Data
 actor property PlayerRef auto
 faction property AnimatingFaction auto
-actor property DebugActor auto hidden
+actor[] property DebugActor auto hidden
 
 ;#---------------------------#
 ;#                           #
@@ -388,7 +388,8 @@ endFunction
 ;#---------------------------#
 
 function _Setup()
-	DebugActor = none
+	actor[] aInit
+	DebugActor = aInit
 	systemenabled = true
 endFunction
 

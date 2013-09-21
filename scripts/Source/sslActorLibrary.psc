@@ -103,11 +103,12 @@ int function ValidateActor(actor position)
 		return -15
 	endIf
 
-	if position.HasKeyWordString("ActorTypeCreature") || position.HasKeyWordString("ActorTypeDwarven")
+	if !ActorRace.IsRaceFlagSet(0x00000001) || position.HasKeyWordString("ActorTypeAnimal") || position.HasKeyWordString("ActorTypeCreature") || position.HasKeyWordString("ActorTypeDwarven")
+		Debug.Trace("Validating race: "+ActorRace.GetName())
 		if AnimLib.AllowedCreature(ActorRace)
 			return 2
 		else
-			Debug.Trace("Failed to add actor to animation; actor is a creature or Dwemer that is currently not supported")
+			Debug.Trace("Failed to add actor to animation; actor is a creature that is currently not supported")
 			return -16
 		endIf
 	endIf

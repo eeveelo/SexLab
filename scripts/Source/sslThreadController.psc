@@ -255,7 +255,7 @@ function ChangeAnimation(bool backwards = false)
 endFunction
 
 function ChangePositions(bool backwards = false)
-	if ActorCount < 2 || IsCreature
+	if ActorCount < 2 || HasCreature
 		return ; Solo Animation, nobody to swap with
 	endIf
 	; Set direction of swapping

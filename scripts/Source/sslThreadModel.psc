@@ -24,7 +24,6 @@ sslBaseAnimation[] leadAnimations
 string property Logging = "trace" auto hidden
 bool property AutoAdvance auto hidden
 bool property LeadIn auto hidden
-Race property Creature auto hidden
 
 ObjectReference centerObj
 float[] centerLoc
@@ -35,6 +34,7 @@ actor victim
 string hook
 int bed ; 0 allow, 1 in use, 2 force, -1 forbid
 float timeout
+Race CreatureRef
 
 ; Thread Instance Info
 sslBaseAnimation[] property Animations hidden
@@ -55,15 +55,21 @@ int property ActorCount hidden
 	endFunction
 endProperty
 
-bool property IsAggressive hidden
+bool property HasCreature hidden
 	bool function get()
-		return victim != none
+		return CreatureRef != none
 	endFunction
 endProperty
 
-bool property IsCreature hidden
+Race property Creature hidden
+	Race function get()
+		return CreatureRef
+	endFunction
+endProperty
+
+bool property IsAggressive hidden
 	bool function get()
-		return Creature != none
+		return victim != none
 	endFunction
 endProperty
 
@@ -161,7 +167,7 @@ sslThreadController function StartThread()
 	endWhile
 
 	; Check for valid animations
-	if IsCreature
+	if HasCreature
 		primaryAnimations = Lib.CreatureAnimations.GetByRace(actors, Creature)
 		DisableLeadIn(true)
 		; Bail if no valid creature animations
@@ -436,13 +442,12 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 		
 		; Find voice or use given voice, if not creature
 		if validation != 2
-			if voice == none && !forceSilent && validation != 2
+			if voice == none && !forceSilent
 				voice = Lib.Voices.PickVoice(position)
 			endIf
 			(slot as sslActorAlias).SetVoice(voice)
-		else ; Set thread into creature mode if actor is creature
-			Creature = position.GetLeveledActorBase().GetRace()
-			(slot as sslActorAlias).MakeCreature(true)
+		else
+			CreatureRef = position.GetLeveledActorBase().GetRace()
 		endIf
 	else
 		_Log("Failed to slot actor '"+position+"'", "AddActor", "FATAL")
@@ -453,7 +458,7 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 endFunction
 
 function ChangeActors(actor[] changeTo)
-	if !active || IsCreature
+	if !active || HasCreature
 		return
 	endIf
 	int i
@@ -526,7 +531,7 @@ endFunction
 ;\-----------------------------------------------/;
 
 function SetForcedAnimations(sslBaseAnimation[] animationList)
-	if AnimationList.Length == 0 || IsCreature
+	if AnimationList.Length == 0 || HasCreature
 		return
 	endIf
 	customAnimations = animationList
@@ -534,7 +539,7 @@ function SetForcedAnimations(sslBaseAnimation[] animationList)
 endFunction
 
 function SetAnimations(sslBaseAnimation[] animationList)
-	if AnimationList.Length == 0 || IsCreature
+	if AnimationList.Length == 0 || HasCreature
 		return
 	endIf
 	primaryAnimations = animationList
@@ -542,7 +547,7 @@ function SetAnimations(sslBaseAnimation[] animationList)
 endFunction
 
 function SetLeadAnimations(sslBaseAnimation[] animationList)
-	if AnimationList.Length == 0 || IsCreature
+	if AnimationList.Length == 0 || HasCreature
 		return
 	endIf
 	leadIn = true

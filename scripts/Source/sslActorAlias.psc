@@ -59,10 +59,6 @@ function ClearAlias()
 	endIf
 endFunction
 
-function MakeCreature(bool makeCreature = true)
-	IsCreature = makeCreature
-endFunction
-
 bool function IsCreature()
 	return IsCreature
 endFunction
@@ -90,7 +86,8 @@ function PrepareActor()
 	ActorRef.SetFactionRank(Lib.AnimatingFaction, 1)
 	TryToEvaluatePackage()
 	; Creature needs nothing else
-	if IsCreature
+	if Controller.HasCreature && Controller.Animation.HasRace(ActorRef.GetLeveledActorBase().GetRace())
+		IsCreature = true
 		GoToState("Ready")
 		return
 	endIf
@@ -235,18 +232,17 @@ function PlayAnimation()
 endfunction
 
 function StopAnimating(bool quick = false)
-	if !quick && Animation.IsSexual && Lib.bUseCum
-		int[] genders = Lib.GenderCount(Controller.Positions)
-		if genders[0] > 0 || (genders[0] == 0 && genders[1] > 1 && Lib.bAllowFFCum)
-			Lib.ApplyCum(ActorRef, Animation.GetCum(position))
-		endIf
-	endIf
-	; Reset Idle
 	if IsCreature
+		; Reset Creature Idle
 		Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
+		Debug.SendAnimationEvent(ActorRef, "FNISDefault")
+		Debug.SendAnimationEvent(ActorRef, "IdleReturnToDefault")
+		Debug.SendAnimationEvent(ActorRef, "ForceFurnExit")
 	elseif quick || Game.GetCameraState() == 3 || !DoRagdollEnd()
+		; Reset NPC/PC Idle Quickly
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 	else
+		; Ragdoll NPC/PC
 		ActorRef.PushActorAway(ActorRef, 1)
 	endIf
 endFunction
