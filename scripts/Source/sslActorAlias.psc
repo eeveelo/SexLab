@@ -201,9 +201,7 @@ endFunction
 ;|	Manipulation Functions                       |;
 ;\-----------------------------------------------/;
 
-function PlayAnimation()
-	; Play Idle
-	Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(position, stage))
+function AnimationExtras()
 	if IsCreature
 		return
 	endIf
@@ -227,7 +225,7 @@ function PlayAnimation()
 			bend = "SOSNoBend"
 		endIf
 		Debug.SendAnimationEvent(ActorRef, bend)
-		Debug.SendAnimationEvent(ActorRef, "SOSBend"+offset)
+		; Debug.SendAnimationEvent(ActorRef, "SOSBend"+offset)
 	endif
 endfunction
 

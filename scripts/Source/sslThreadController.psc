@@ -385,12 +385,8 @@ endFunction
 ;\-----------------------------------------------/;
 
 function RealignActors()
-	int i
-	while i < ActorCount
-		GetAlias(i).AlignTo(CenterLocation)
-		GetAlias(i).PlayAnimation()
-		i += 1
-	endWhile
+	MoveActors()
+	PlayAnimation()
 endFunction
 
 function MoveActors()
@@ -433,10 +429,34 @@ function SetAnimation(int anim = -1)
 endFunction
 
 function PlayAnimation()
-	int i
-	while i < ActorCount
-		GetAlias(i).PlayAnimation()
-		i += 1
+	; Send with as little overhead as possible to improve syncing
+	string[] events = Animation.FetchStage(Stage)
+	if ActorCount == 1
+		Debug.SendAnimationEvent(Positions[0], events[0])
+	elseIf ActorCount == 2
+		Debug.SendAnimationEvent(Positions[0], events[0])
+		Debug.SendAnimationEvent(Positions[1], events[1])
+	elseIf ActorCount == 3
+		Debug.SendAnimationEvent(Positions[0], events[0])
+		Debug.SendAnimationEvent(Positions[1], events[1])
+		Debug.SendAnimationEvent(Positions[2], events[2])
+	elseIf ActorCount == 4
+		Debug.SendAnimationEvent(Positions[0], events[0])
+		Debug.SendAnimationEvent(Positions[1], events[1])
+		Debug.SendAnimationEvent(Positions[2], events[2])
+		Debug.SendAnimationEvent(Positions[3], events[3])
+	elseIf ActorCount == 5
+		Debug.SendAnimationEvent(Positions[0], events[0])
+		Debug.SendAnimationEvent(Positions[1], events[1])
+		Debug.SendAnimationEvent(Positions[2], events[2])
+		Debug.SendAnimationEvent(Positions[3], events[3])
+		Debug.SendAnimationEvent(Positions[4], events[4])
+	endIf
+	; Send extra settings, open mouth, silence, and sos
+	int i = ActorCount
+	while i
+		i -= 1
+		GetAlias(i).AnimationExtras()
 	endWhile
 endFunction
 
