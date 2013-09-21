@@ -1,0 +1,169 @@
+s Bear_Doggystyle_A1_S1 Bear_Doggystyle_A1_S1.hkx
++ Bear_Doggystyle_A1_S2 Bear_Doggystyle_A1_S2.hkx
++ Bear_Doggystyle_A1_S3 Bear_Doggystyle_A1_S3.hkx
++ Bear_Doggystyle_A1_S4 Bear_Doggystyle_A1_S4.hkx
+
+s Cat_Doggystyle_A1_S1 Cat_Doggystyle_A1_S1.hkx
++ Cat_Doggystyle_A1_S2 Cat_Doggystyle_A1_S2.hkx
++ Cat_Doggystyle_A1_S3 Cat_Doggystyle_A1_S3.hkx
++ Cat_Doggystyle_A1_S4 Cat_Doggystyle_A1_S4.hkx
+
+s Chaurus_Forward_A1_S1 Chaurus_Forward_A1_S1.hkx
++ Chaurus_Forward_A1_S2 Chaurus_Forward_A1_S2.hkx
++ Chaurus_Forward_A1_S3 Chaurus_Forward_A1_S3.hkx
++ Chaurus_Forward_A1_S4 Chaurus_Forward_A1_S4.hkx
+
+s Chaurus_Reverse_A1_S1 Chaurus_Reverse_A1_S1.hkx
++ Chaurus_Reverse_A1_S2 Chaurus_Reverse_A1_S2.hkx
++ Chaurus_Reverse_A1_S3 Chaurus_Reverse_A1_S3.hkx
++ Chaurus_Reverse_A1_S4 Chaurus_Reverse_A1_S4.hkx
+
+s Daedra_Hugging_A1_S1 Daedra_Hugging_A1_S1.hkx
++ Daedra_Hugging_A1_S2 Daedra_Hugging_A1_S2.hkx
++ Daedra_Hugging_A1_S3 Daedra_Hugging_A1_S3.hkx
++ Daedra_Hugging_A1_S4 Daedra_Hugging_A1_S4.hkx
+
+s Dragon_Penetration_A1_S1 Dragon_Penetration_A1_S1.hkx
++ Dragon_Penetration_A1_S2 Dragon_Penetration_A1_S2.hkx
++ Dragon_Penetration_A1_S3 Dragon_Penetration_A1_S3.hkx
++ Dragon_Penetration_A1_S4 Dragon_Penetration_A1_S4.hkx
+
+s Dragon_Tongue_A1_S1 Dragon_Tongue_A1_S1.hkx
++ Dragon_Tongue_A1_S2 Dragon_Tongue_A1_S2.hkx
++ Dragon_Tongue_A1_S3 Dragon_Tongue_A1_S3.hkx
++ Dragon_Tongue_A1_S4 Dragon_Tongue_A1_S4.hkx
+
+s Draugr_Doggystyle_A1_S1 Draugr_Doggystyle_A1_S1.hkx
++ Draugr_Doggystyle_A1_S2 Draugr_Doggystyle_A1_S2.hkx
++ Draugr_Doggystyle_A1_S3 Draugr_Doggystyle_A1_S3.hkx
++ Draugr_Doggystyle_A1_S4 Draugr_Doggystyle_A1_S4.hkx
+
+s Draugr_Gangbang_A1_S1 Draugr_Gangbang_A1_S1.hkx
++ Draugr_Gangbang_A1_S2 Draugr_Gangbang_A1_S2.hkx
++ Draugr_Gangbang_A1_S3 Draugr_Gangbang_A1_S3.hkx
++ Draugr_Gangbang_A1_S4 Draugr_Gangbang_A1_S4.hkx
+
+s Draugr_Holding_A1_S1 Draugr_Holding_A1_S1.hkx
++ Draugr_Holding_A1_S2 Draugr_Holding_A1_S2.hkx
++ Draugr_Holding_A1_S3 Draugr_Holding_A1_S3.hkx
++ Draugr_Holding_A1_S4 Draugr_Holding_A1_S4.hkx
+
+s Draugr_Missionary_A1_S1 Draugr_Missionary_A1_S1.hkx
++ Draugr_Missionary_A1_S2 Draugr_Missionary_A1_S2.hkx
++ Draugr_Missionary_A1_S3 Draugr_Missionary_A1_S3.hkx
++ Draugr_Missionary_A1_S4 Draugr_Missionary_A1_S4.hkx
+
+s Falmer_Doggystyle_A1_S1 Falmer_Doggystyle_A1_S1.hkx
++ Falmer_Doggystyle_A1_S2 Falmer_Doggystyle_A1_S2.hkx
++ Falmer_Doggystyle_A1_S3 Falmer_Doggystyle_A1_S3.hkx
++ Falmer_Doggystyle_A1_S4 Falmer_Doggystyle_A1_S4.hkx
+
+s Falmer_Gangbang_A1_S1 Falmer_Gangbang_A1_S1.hkx
++ Falmer_Gangbang_A1_S2 Falmer_Gangbang_A1_S2.hkx
++ Falmer_Gangbang_A1_S3 Falmer_Gangbang_A1_S3.hkx
++ Falmer_Gangbang_A1_S4 Falmer_Gangbang_A1_S4.hkx
+
+s Falmer_Holding_A1_S1 Falmer_Holding_A1_S1.hkx
++ Falmer_Holding_A1_S2 Falmer_Holding_A1_S2.hkx
++ Falmer_Holding_A1_S3 Falmer_Holding_A1_S3.hkx
++ Falmer_Holding_A1_S4 Falmer_Holding_A1_S4.hkx
+
+s Falmer_Missionary_A1_S1 Falmer_Missionary_A1_S1.hkx
++ Falmer_Missionary_A1_S2 Falmer_Missionary_A1_S2.hkx
++ Falmer_Missionary_A1_S3 Falmer_Missionary_A1_S3.hkx
++ Falmer_Missionary_A1_S4 Falmer_Missionary_A1_S4.hkx
+
+s Gargoyle_Doggystyle_A1_S1 Gargoyle_Doggystyle_A1_S1.hkx
++ Gargoyle_Doggystyle_A1_S2 Gargoyle_Doggystyle_A1_S2.hkx
++ Gargoyle_Doggystyle_A1_S3 Gargoyle_Doggystyle_A1_S3.hkx
++ Gargoyle_Doggystyle_A1_S4 Gargoyle_Doggystyle_A1_S4.hkx
+
+s Gargoyle_Holding_A1_S1 Gargoyle_Holding_A1_S1.hkx
++ Gargoyle_Holding_A1_S2 Gargoyle_Holding_A1_S2.hkx
++ Gargoyle_Holding_A1_S3 Gargoyle_Holding_A1_S3.hkx
++ Gargoyle_Holding_A1_S4 Gargoyle_Holding_A1_S4.hkx
+
+s Gargoyle_Missionary_A1_S1 Gargoyle_Missionary_A1_S1.hkx
++ Gargoyle_Missionary_A1_S2 Gargoyle_Missionary_A1_S2.hkx
++ Gargoyle_Missionary_A1_S3 Gargoyle_Missionary_A1_S3.hkx
++ Gargoyle_Missionary_A1_S4 Gargoyle_Missionary_A1_S4.hkx
+
+s Giant_Penetration_A1_S1 Giant_Penetration_A1_S1.hkx
++ Giant_Penetration_A1_S2 Giant_Penetration_A1_S2.hkx
++ Giant_Penetration_A1_S3 Giant_Penetration_A1_S3.hkx
++ Giant_Penetration_A1_S4 Giant_Penetration_A1_S4.hkx
+
+s Horse_Doggystyle_A1_S1 Horse_Doggystyle_A1_S1.hkx
++ Horse_Doggystyle_A1_S2 Horse_Doggystyle_A1_S2.hkx
++ Horse_Doggystyle_A1_S3 Horse_Doggystyle_A1_S3.hkx
++ Horse_Doggystyle_A1_S4 Horse_Doggystyle_A1_S4.hkx
+
+s Spider_Double_A1_S1 Spider_Double_A1_S1.hkx
++ Spider_Double_A1_S2 Spider_Double_A1_S2.hkx
++ Spider_Double_A1_S3 Spider_Double_A1_S3.hkx
++ Spider_Double_A1_S4 Spider_Double_A1_S4.hkx
+
+s Spider_Penetration_A1_S1 Spider_Penetration_A1_S1.hkx
++ Spider_Penetration_A1_S2 Spider_Penetration_A1_S2.hkx
++ Spider_Penetration_A1_S3 Spider_Penetration_A1_S3.hkx
++ Spider_Penetration_A1_S4 Spider_Penetration_A1_S4.hkx
+
+s BigSpider_Penetration_A1_S1 BigSpider_Penetration_A1_S1.hkx
++ BigSpider_Penetration_A1_S2 BigSpider_Penetration_A1_S2.hkx
++ BigSpider_Penetration_A1_S3 BigSpider_Penetration_A1_S3.hkx
++ BigSpider_Penetration_A1_S4 BigSpider_Penetration_A1_S4.hkx
+
+s Troll_Doggystyle_A1_S1 Troll_Doggystyle_A1_S1.hkx
++ Troll_Doggystyle_A1_S2 Troll_Doggystyle_A1_S2.hkx
++ Troll_Doggystyle_A1_S3 Troll_Doggystyle_A1_S3.hkx
++ Troll_Doggystyle_A1_S4 Troll_Doggystyle_A1_S4.hkx
+
+s Troll_Holding_A1_S1 Troll_Holding_A1_S1.hkx
++ Troll_Holding_A1_S2 Troll_Holding_A1_S2.hkx
++ Troll_Holding_A1_S3 Troll_Holding_A1_S3.hkx
++ Troll_Holding_A1_S4 Troll_Holding_A1_S4.hkx
+
+s Troll_Missionary_A1_S1 Troll_Missionary_A1_S1.hkx
++ Troll_Missionary_A1_S2 Troll_Missionary_A1_S2.hkx
++ Troll_Missionary_A1_S3 Troll_Missionary_A1_S3.hkx
++ Troll_Missionary_A1_S4 Troll_Missionary_A1_S4.hkx
+
+s VampireLord_Doggystyle_A1_S1 VampireLord_Doggystyle_A1_S1.hkx
++ VampireLord_Doggystyle_A1_S2 VampireLord_Doggystyle_A1_S2.hkx
++ VampireLord_Doggystyle_A1_S3 VampireLord_Doggystyle_A1_S3.hkx
++ VampireLord_Doggystyle_A1_S4 VampireLord_Doggystyle_A1_S4.hkx
+
+s VampireLord_Holding_A1_S1 VampireLord_Holding_A1_S1.hkx
++ VampireLord_Holding_A1_S2 VampireLord_Holding_A1_S2.hkx
++ VampireLord_Holding_A1_S3 VampireLord_Holding_A1_S3.hkx
++ VampireLord_Holding_A1_S4 VampireLord_Holding_A1_S4.hkx
+
+s VampireLord_Missionary_A1_S1 VampireLord_Missionary_A1_S1.hkx
++ VampireLord_Missionary_A1_S2 VampireLord_Missionary_A1_S2.hkx
++ VampireLord_Missionary_A1_S3 VampireLord_Missionary_A1_S3.hkx
++ VampireLord_Missionary_A1_S4 VampireLord_Missionary_A1_S4.hkx
+
+s Werewolf_Doggystyle_A1_S1 Werewolf_Doggystyle_A1_S1.hkx
++ Werewolf_Doggystyle_A1_S2 Werewolf_Doggystyle_A1_S2.hkx
++ Werewolf_Doggystyle_A1_S3 Werewolf_Doggystyle_A1_S3.hkx
++ Werewolf_Doggystyle_A1_S4 Werewolf_Doggystyle_A1_S4.hkx
+
+s Werewolf_Holding_A1_S1 Werewolf_Holding_A1_S1.hkx
++ Werewolf_Holding_A1_S2 Werewolf_Holding_A1_S2.hkx
++ Werewolf_Holding_A1_S3 Werewolf_Holding_A1_S3.hkx
++ Werewolf_Holding_A1_S4 Werewolf_Holding_A1_S4.hkx
+
+s Werewolf_Missionary_A1_S1 Werewolf_Missionary_A1_S1.hkx
++ Werewolf_Missionary_A1_S2 Werewolf_Missionary_A1_S2.hkx
++ Werewolf_Missionary_A1_S3 Werewolf_Missionary_A1_S3.hkx
++ Werewolf_Missionary_A1_S4 Werewolf_Missionary_A1_S4.hkx
+
+s Wolf_Doggystyle_A1_S1 Wolf_Doggystyle_A1_S1.hkx
++ Wolf_Doggystyle_A1_S2 Wolf_Doggystyle_A1_S2.hkx
++ Wolf_Doggystyle_A1_S3 Wolf_Doggystyle_A1_S3.hkx
++ Wolf_Doggystyle_A1_S4 Wolf_Doggystyle_A1_S4.hkx
+
+s Wolf_Missionary_A1_S1 Wolf_Missionary_A1_S1.hkx
++ Wolf_Missionary_A1_S2 Wolf_Missionary_A1_S2.hkx
++ Wolf_Missionary_A1_S3 Wolf_Missionary_A1_S3.hkx
++ Wolf_Missionary_A1_S4 Wolf_Missionary_A1_S4.hkx
