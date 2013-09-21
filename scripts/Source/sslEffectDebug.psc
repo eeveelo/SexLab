@@ -8,13 +8,12 @@ SexLabFramework property SexLab Auto
 event OnEffectStart(actor target, actor caster)
 
 
-	actor[] sorting = new actor[2]
-	sorting[0] = caster
-	sorting[1] = target
-	debug.traceandbox(sorting)
-	sslBaseAnimation[] anim = SexLab.AnimLib.CreatureSlots.GetByRace(2, SexLab.AnimLib.CreatureSlots.CreatureDefaults.HorseRace)
-	actor[] sorted = SexLab.ThreadLib.SortCreatures(sorting, anim[0])
-	debug.traceandbox(sorted)
+	sslThreadModel Model = SexLab.NewThread()
+
+	Model.AddActor(caster)
+	Model.AddActor(target)
+
+	sslThreadController Controller = Model.StartThread()
 
 	; string args = "test1, test2,test3,test4,test5"
 	; string[] argArray = sslUtility.ArgString(args)

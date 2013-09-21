@@ -478,23 +478,18 @@ bool function HasTag(string tag)
 endFunction
 
 bool function CheckTags(string[] find, bool requireAll = true)
-	debug.trace(name + " Being checked, has " + tags)
-	debug.trace("need: "+find)
 	int i = find.Length
 	while i
 		i -= 1
 		if find[i] != ""
 			bool check = HasTag(find[i])
 			if requireAll && !check
-				debug.trace(Name+ " doesn't have "+find[i])
 				return false ; Stop if we need all and don't have it
 			elseif !requireAll && check
-				debug.trace(Name+ " has "+find[i])
 				return true ; Stop if we don't need all and have one
 			endIf
 		endIf
 	endWhile
-	debug.trace(name+" had all ")
 	; If still here than we require all and had all
 	return true
 endFunction	
