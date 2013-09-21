@@ -187,18 +187,18 @@ state Animating
 		UpdateTimer(Animation.GetStageTimer(stage))
 		RegisterForSingleUpdate(0.10)
 		; Check if realignment is needed
-		if stagePrev != 0
-			i = 0
-			while i < ActorCount
-				float[] prev = Animation.GetPositionOffsets(i, stagePrev)
-				float[] next = Animation.GetPositionOffsets(i, stage)
-				if (prev[0] != next[0]) || (prev[1] != next[1]) || (prev[2] != next[2])
-					MoveActors()
-					return
-				endIf
-				i += 1
-			endWhile
-		endIf
+		; if stagePrev != 0
+		; 	i = 0
+		; 	while i < ActorCount
+		; 		float[] prev = Animation.GetPositionOffsets(i, stagePrev)
+		; 		float[] next = Animation.GetPositionOffsets(i, stage)
+		; 		if (prev[0] != next[0]) || (prev[1] != next[1]) || (prev[2] != next[2])
+		; 			MoveActors()
+		; 			return
+		; 		endIf
+		; 		i += 1
+		; 	endWhile
+		; endIf
 	endEvent
 	event OnUpdate()
 		if !looping
@@ -295,7 +295,7 @@ function AdjustForward(bool backwards = false, bool adjuststage = false)
 	else
 		Animation.UpdateAllForward(AdjustingPosition, adjustment)
 	endIf
-	ActorAlias(Positions[AdjustingPosition]).AlignTo(CenterLocation)
+	ActorAlias(Positions[AdjustingPosition]).UpdateMarker()
 endFunction
 
 function AdjustSideways(bool backwards = false, bool adjuststage = false)
@@ -308,7 +308,7 @@ function AdjustSideways(bool backwards = false, bool adjuststage = false)
 	else
 		Animation.UpdateAllSide(AdjustingPosition, adjustment)
 	endIf
-	ActorAlias(Positions[AdjustingPosition]).AlignTo(CenterLocation)
+	ActorAlias(Positions[AdjustingPosition]).UpdateMarker()
 endFunction
 
 function AdjustUpward(bool backwards = false, bool adjuststage = false)
@@ -324,7 +324,7 @@ function AdjustUpward(bool backwards = false, bool adjuststage = false)
 	else
 		Animation.UpdateAllUp(AdjustingPosition, adjustment)
 	endIf
-	ActorAlias(Positions[AdjustingPosition]).AlignTo(CenterLocation)
+	ActorAlias(Positions[AdjustingPosition]).UpdateMarker()
 endFunction
 
 function RotateScene(bool backwards = false)
@@ -362,6 +362,7 @@ function MoveScene()
 	Game.SetPlayerAIDriven(false)
 	Debug.SendAnimationEvent(Lib.PlayerRef, "IdleForceDefaultState")
 	Lib.PlayerRef.SetVehicle(none)
+	Lib.PlayerRef.SetDontMove(false)
 	; Lock hotkeys and wait 6 seconds
 	Lib.mMoveScene.Show(6)
 	float stopat = Utility.GetCurrentRealTime() + 6
@@ -385,14 +386,23 @@ endFunction
 ;\-----------------------------------------------/;
 
 function RealignActors()
-	MoveActors()
 	PlayAnimation()
+	MoveActors()
+endFunction
+
+function UpdateLocations()
+	PlayAnimation()
+	int i
+	while i < ActorCount
+		GetAlias(i).UpdateMarker()
+		i += 1
+	endWhile
 endFunction
 
 function MoveActors()
 	int i
 	while i < ActorCount
-		GetAlias(i).AlignTo(CenterLocation)
+		GetAlias(i).Snap()
 		i += 1
 	endWhile
 endFunction

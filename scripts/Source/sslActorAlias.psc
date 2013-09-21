@@ -31,6 +31,7 @@ bool disableUndress
 bool disableRagdoll
 form strapon
 float scale
+float[] loc
 
 ;/-----------------------------------------------\;
 ;|	Alias Functions                              |;
@@ -46,6 +47,8 @@ function SetAlias(sslThreadController ThreadView)
 		IsVictim = ActorRef == ThreadView.GetVictim()
 		IsFemale = Lib.GetGender(ActorRef) == 1
 		IsCreature = false
+		MarkerRef = ActorRef.PlaceAtMe(Lib.BaseMarker)
+		ActorRef.SetVehicle(MarkerRef)
 	endIf
 endFunction
 
@@ -79,8 +82,8 @@ function PrepareActor()
 			Lib._HKStart(Controller)
 		endIf
 	else
+		ActorRef.SetDontMove(true)
 		ActorRef.SetRestrained()
-		ActorRef.SetDontMove()
 	endIf
 	; Start DoNothing package
 	ActorRef.SetFactionRank(Lib.AnimatingFaction, 1)
@@ -91,8 +94,10 @@ function PrepareActor()
 		GoToState("Ready")
 		return
 	endIf
-	; Disable IK
-	ActorRef.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
+	; Disable NPC ik
+	if !IsPlayer
+		ActorRef.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
+	endIF
 	; Cleanup
 	if ActorRef.IsWeaponDrawn()
 		ActorRef.SheatheWeapon()
@@ -112,14 +117,16 @@ function PrepareActor()
 		ActorRef.SetScale(scale)
 		ActorRef.SetScale(1.0 / base)
 	endIf
+	; Make erect for SOS
+	Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 	; Set into aniamtion ready state
 	GoToState("Ready")
 endFunction
 
 function ResetActor()
 	UnregisterForUpdate()
-	; Dettach from marker
 	ActorRef.SetVehicle(none)
+	ActorRef.StopTranslation()
 	_ClearMarker()
 	; Enable movement
 	if IsPlayer
@@ -128,9 +135,11 @@ function ResetActor()
 		int[] genders = Lib.GenderCount(Controller.Positions)
 		Lib.Stats.UpdatePlayerStats(genders[0], genders[1], Controller.Animation, Controller.GetVictim(), Controller.GetTime())
 	else
-		ActorRef.SetDontMove(false)
 		ActorRef.SetRestrained(false)
+		; Renable IK
+		ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 	endIf
+	ActorRef.SetDontMove(false)
 	; Remove from animation faction
 	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
 	; Creatures need nothing more
@@ -146,8 +155,6 @@ function ResetActor()
 	if scale > 0.0
 		ActorRef.SetScale(scale)
 	endIf
-	; Renable IK
-	ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 	; Make flaccid for SOS
 	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
 	; Unstrip
@@ -230,8 +237,16 @@ function AnimationExtras()
 endfunction
 
 function StopAnimating(bool quick = false)
+	; Apply cum
+	if !quick && Animation.IsSexual && Lib.bUseCum
+		int[] genders = Lib.GenderCount(Controller.Positions)
+		if genders[0] > 0 || (genders[0] == 0 && genders[1] > 1 && Lib.bAllowFFCum)
+			Lib.ApplyCum(ActorRef, Animation.GetCum(position))
+		endIf
+	endIf
 	if IsCreature
 		; Reset Creature Idle
+		Debug.SendAnimationEvent(ActorRef, "Reset")
 		Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
 		Debug.SendAnimationEvent(ActorRef, "FNISDefault")
 		Debug.SendAnimationEvent(ActorRef, "IdleReturnToDefault")
@@ -245,36 +260,35 @@ function StopAnimating(bool quick = false)
 	endIf
 endFunction
 
-function AlignTo(float[] center)
-	float[] offsets = Animation.GetPositionOffsets(position, stage)
-	float[] loc = new float[6]
+function AlignBy(float[] offsets)
+	float[] centerLoc = Controller.CenterLocation
+	loc = new float[6]
 	; Determine offsets coordinates from center
-	loc[0] = ( center[0] + ( Math.sin(center[5]) * offsets[0] + Math.cos(center[5]) * offsets[1] ) )
-	loc[1] = ( center[1] + ( Math.cos(center[5]) * offsets[0] + Math.sin(center[5]) * offsets[1] ) )
-	loc[2] = ( center[2] + offsets[2] )
+	loc[0] = ( centerLoc[0] + ( Math.sin(centerLoc[5]) * offsets[0] + Math.cos(centerLoc[5]) * offsets[1] ) )
+	loc[1] = ( centerLoc[1] + ( Math.cos(centerLoc[5]) * offsets[0] + Math.sin(centerLoc[5]) * offsets[1] ) )
+	loc[2] = ( centerLoc[2] + offsets[2] )
 	; Determine rotation coordinates from center
-	loc[3] = center[3]
-	loc[4] = center[4]
-	loc[5] = ( center[5] + offsets[3] )
+	loc[3] = centerLoc[3]
+	loc[4] = centerLoc[4]
+	loc[5] = ( centerLoc[5] + offsets[3] )
 	if loc[5] >= 360
 		loc[5] = ( loc[5] - 360 )
 	elseIf loc[5] < 0
 		loc[5] = ( loc[5] + 360 )
 	endIf
-	; Make Marker if we don't have one
-	if MarkerRef == none
-		MarkerRef = ActorRef.PlaceAtMe(Lib.BaseMarker)
-		Debug.Trace(ActorRef + " Made Marker: "+MarkerRef)
-	endIf
-	; Set Coords
 	MarkerRef.SetPosition(loc[0], loc[1], loc[2])
 	MarkerRef.SetAngle(loc[3], loc[4], loc[5])
-	SnapTo()
+	Snap()
+endfunction
+
+function UpdateMarker()
+	AlignBy(Animation.GetPositionOffsets(position, stage))
 endFunction
 
-function SnapTo()
-	ActorRef.SetVehicle(MarkerRef)
-	ActorRef.MoveTo(MarkerRef)
+function Snap()
+	ActorRef.StopTranslation()
+	ActorRef.TranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 1500, 1.0)
+	ActorRef.SetAngle(loc[3], loc[4], loc[5])
 	ActorRef.SetVehicle(MarkerRef)
 endFunction
 
@@ -382,6 +396,8 @@ function SyncThread(int toPosition)
 		Animation = toAnimation
 		EquipExtras()
 	endIf
+	; Update marker postioning
+	UpdateMarker()
 endFunction
 
 function OverrideStrip(bool[] setStrip)
@@ -455,6 +471,7 @@ endEvent
 ;\-----------------------------------------------/;
 
 function _Init()
+	_ClearMarker()
 	UnregisterForAllModEvents()
 	ActorRef = none
 	Active = false
@@ -467,7 +484,6 @@ function _Init()
 	EquipmentStorage = formDel
 	bool[] boolDel
 	StripOverride = boolDel
-	_ClearMarker()
 	GoToState("")
 endFunction
 

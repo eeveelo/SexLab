@@ -348,7 +348,7 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 	endIf
 
 	if active && resync
-		RealignActors()
+		UpdateLocations()
 		SendThreadEvent("ActorsRelocated")
 	endIf
 endFunction
@@ -362,7 +362,7 @@ function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, fl
 	centerLoc[4] = RotY
 	centerLoc[5] = RotZ
 	if active && resync
-		RealignActors()
+		UpdateLocations()
 		SendThreadEvent("ActorsRelocated")
 	endIf
 endFunction
@@ -521,7 +521,7 @@ function ChangeActors(actor[] changeTo)
 	endWhile
 	; Set new actors into thread
 	ActorAlias = newSlots
-	RealignActors()
+	UpdateLocations()
 	; End changing
 	SendThreadEvent("ActorChangeEnd")
 endFunction
@@ -815,7 +815,7 @@ function EquipExtras(actor position)
 endFunction
 function RemoveExtras(actor position)
 endFunction
-function RealignActors()
+function UpdateLocations()
 endFunction
 function ResetActor(actor position)
 endFunction
