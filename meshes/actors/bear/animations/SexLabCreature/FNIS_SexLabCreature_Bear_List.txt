@@ -1,0 +1,4 @@
+s Bear_Doggystyle_A2_S1 Bear_Doggystyle_A2_S1.hkx
++ Bear_Doggystyle_A2_S2 Bear_Doggystyle_A2_S2.hkx
++ Bear_Doggystyle_A2_S3 Bear_Doggystyle_A2_S3.hkx
++ Bear_Doggystyle_A2_S4 Bear_Doggystyle_A2_S4.hkx

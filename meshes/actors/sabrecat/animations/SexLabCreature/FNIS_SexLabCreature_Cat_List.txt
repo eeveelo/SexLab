@@ -1,0 +1,4 @@
+s Cat_Doggystyle_A2_S1 Cat_Doggystyle_A2_S1.hkx
++ Cat_Doggystyle_A2_S2 Cat_Doggystyle_A2_S2.hkx
++ Cat_Doggystyle_A2_S3 Cat_Doggystyle_A2_S3.hkx
++ Cat_Doggystyle_A2_S4 Cat_Doggystyle_A2_S4.hkx

@@ -1,0 +1,14 @@
+s VampireLord_Doggystyle_A2_S1 VampireLord_Doggystyle_A2_S1.hkx
++ VampireLord_Doggystyle_A2_S2 VampireLord_Doggystyle_A2_S2.hkx
++ VampireLord_Doggystyle_A2_S3 VampireLord_Doggystyle_A2_S3.hkx
++ VampireLord_Doggystyle_A2_S4 VampireLord_Doggystyle_A2_S4.hkx
+
+s VampireLord_Holding_A2_S1 VampireLord_Holding_A2_S1.hkx
++ VampireLord_Holding_A2_S2 VampireLord_Holding_A2_S2.hkx
++ VampireLord_Holding_A2_S3 VampireLord_Holding_A2_S3.hkx
++ VampireLord_Holding_A2_S4 VampireLord_Holding_A2_S4.hkx
+
+s VampireLord_Missionary_A2_S1 VampireLord_Missionary_A2_S1.hkx
++ VampireLord_Missionary_A2_S2 VampireLord_Missionary_A2_S2.hkx
++ VampireLord_Missionary_A2_S3 VampireLord_Missionary_A2_S3.hkx
++ VampireLord_Missionary_A2_S4 VampireLord_Missionary_A2_S4.hkx

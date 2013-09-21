@@ -1,0 +1,14 @@
+s Gargoyle_Doggystyle_A2_S1 Gargoyle_Doggystyle_A2_S1.hkx
++ Gargoyle_Doggystyle_A2_S2 Gargoyle_Doggystyle_A2_S2.hkx
++ Gargoyle_Doggystyle_A2_S3 Gargoyle_Doggystyle_A2_S3.hkx
++ Gargoyle_Doggystyle_A2_S4 Gargoyle_Doggystyle_A2_S4.hkx
+
+s Gargoyle_Holding_A2_S1 Gargoyle_Holding_A2_S1.hkx
++ Gargoyle_Holding_A2_S2 Gargoyle_Holding_A2_S2.hkx
++ Gargoyle_Holding_A2_S3 Gargoyle_Holding_A2_S3.hkx
++ Gargoyle_Holding_A2_S4 Gargoyle_Holding_A2_S4.hkx
+
+s Gargoyle_Missionary_A2_S1 Gargoyle_Missionary_A2_S1.hkx
++ Gargoyle_Missionary_A2_S2 Gargoyle_Missionary_A2_S2.hkx
++ Gargoyle_Missionary_A2_S3 Gargoyle_Missionary_A2_S3.hkx
++ Gargoyle_Missionary_A2_S4 Gargoyle_Missionary_A2_S4.hkx

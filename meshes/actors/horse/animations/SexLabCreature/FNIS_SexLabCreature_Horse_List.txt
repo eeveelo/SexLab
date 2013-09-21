@@ -1,0 +1,4 @@
+s Horse_Doggystyle_A2_S1 Horse_Doggystyle_A2_S1.hkx
++ Horse_Doggystyle_A2_S2 Horse_Doggystyle_A2_S2.hkx
++ Horse_Doggystyle_A2_S3 Horse_Doggystyle_A2_S3.hkx
++ Horse_Doggystyle_A2_S4 Horse_Doggystyle_A2_S4.hkx

@@ -1,0 +1,19 @@
+s BigSpider_Penetration_A2_S1 BigSpider_Penetration_A2_S1.hkx
++ BigSpider_Penetration_A2_S2 BigSpider_Penetration_A2_S2.hkx
++ BigSpider_Penetration_A2_S3 BigSpider_Penetration_A2_S3.hkx
++ BigSpider_Penetration_A2_S4 BigSpider_Penetration_A2_S4.hkx
+
+s Spider_Penetration_A2_S1 Spider_Penetration_A2_S1.hkx
++ Spider_Penetration_A2_S2 Spider_Penetration_A2_S2.hkx
++ Spider_Penetration_A2_S3 Spider_Penetration_A2_S3.hkx
++ Spider_Penetration_A2_S4 Spider_Penetration_A2_S4.hkx
+
+s Spider_Double_A2_S1 Spider_Double_A2_S1.hkx
++ Spider_Double_A2_S2 Spider_Double_A2_S2.hkx
++ Spider_Double_A2_S3 Spider_Double_A2_S3.hkx
++ Spider_Double_A2_S4 Spider_Double_A2_S4.hkx
+
+s Spider_Double_A3_S1 Spider_Double_A3_S1.hkx
++ Spider_Double_A3_S2 Spider_Double_A3_S2.hkx
++ Spider_Double_A3_S3 Spider_Double_A3_S3.hkx
++ Spider_Double_A3_S4 Spider_Double_A3_S4.hkx

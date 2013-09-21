@@ -1,0 +1,4 @@
+s Giant_Penetration_A2_S1 Giant_Penetration_A2_S1.hkx
++ Giant_Penetration_A2_S2 Giant_Penetration_A2_S2.hkx
++ Giant_Penetration_A2_S3 Giant_Penetration_A2_S3.hkx
++ Giant_Penetration_A2_S4 Giant_Penetration_A2_S4.hkx

@@ -1,0 +1,9 @@
+s Chaurus_Forward_A2_S1 Chaurus_Forward_A2_S1.hkx
++ Chaurus_Forward_A2_S2 Chaurus_Forward_A2_S2.hkx
++ Chaurus_Forward_A2_S3 Chaurus_Forward_A2_S3.hkx
++ Chaurus_Forward_A2_S4 Chaurus_Forward_A2_S4.hkx
+
+s Chaurus_Reverse_A2_S1 Chaurus_Reverse_A2_S1.hkx
++ Chaurus_Reverse_A2_S2 Chaurus_Reverse_A2_S2.hkx
++ Chaurus_Reverse_A2_S3 Chaurus_Reverse_A2_S3.hkx
++ Chaurus_Reverse_A2_S4 Chaurus_Reverse_A2_S4.hkx

@@ -1,0 +1,34 @@
+s Draugr_Holding_A2_S1 Draugr_Holding_A2_S1.hkx
++ Draugr_Holding_A2_S2 Draugr_Holding_A2_S2.hkx
++ Draugr_Holding_A2_S3 Draugr_Holding_A2_S3.hkx
++ Draugr_Holding_A2_S4 Draugr_Holding_A2_S4.hkx
+
+s Draugr_Missionary_A2_S1 Draugr_Missionary_A2_S1.hkx
++ Draugr_Missionary_A2_S2 Draugr_Missionary_A2_S2.hkx
++ Draugr_Missionary_A2_S3 Draugr_Missionary_A2_S3.hkx
++ Draugr_Missionary_A2_S4 Draugr_Missionary_A2_S4.hkx
+
+s Draugr_Gangbang_A2_S1 Draugr_Gangbang_A2_S1.hkx
++ Draugr_Gangbang_A2_S2 Draugr_Gangbang_A2_S2.hkx
++ Draugr_Gangbang_A2_S3 Draugr_Gangbang_A2_S3.hkx
++ Draugr_Gangbang_A2_S4 Draugr_Gangbang_A2_S4.hkx
+
+s Draugr_Gangbang_A3_S1 Draugr_Gangbang_A3_S1.hkx
++ Draugr_Gangbang_A3_S2 Draugr_Gangbang_A3_S2.hkx
++ Draugr_Gangbang_A3_S3 Draugr_Gangbang_A3_S3.hkx
++ Draugr_Gangbang_A3_S4 Draugr_Gangbang_A3_S4.hkx
+
+s Draugr_Gangbang_A4_S1 Draugr_Gangbang_A4_S1.hkx
++ Draugr_Gangbang_A4_S2 Draugr_Gangbang_A4_S2.hkx
++ Draugr_Gangbang_A4_S3 Draugr_Gangbang_A4_S3.hkx
++ Draugr_Gangbang_A4_S4 Draugr_Gangbang_A4_S4.hkx
+
+s Draugr_Gangbang_A5_S1 Draugr_Gangbang_A5_S1.hkx
++ Draugr_Gangbang_A5_S2 Draugr_Gangbang_A5_S2.hkx
++ Draugr_Gangbang_A5_S3 Draugr_Gangbang_A5_S3.hkx
++ Draugr_Gangbang_A5_S4 Draugr_Gangbang_A5_S4.hkx
+
+s Draugr_Gangbang_A6_S1 Draugr_Gangbang_A6_S1.hkx
++ Draugr_Gangbang_A6_S2 Draugr_Gangbang_A6_S2.hkx
++ Draugr_Gangbang_A6_S3 Draugr_Gangbang_A6_S3.hkx
++ Draugr_Gangbang_A6_S4 Draugr_Gangbang_A6_S4.hkx

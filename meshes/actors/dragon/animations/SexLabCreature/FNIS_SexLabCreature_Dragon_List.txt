@@ -1,0 +1,9 @@
+s Dragon_Tongue_A2_S1 Dragon_Tongue_A2_S1.hkx
++ Dragon_Tongue_A2_S2 Dragon_Tongue_A2_S2.hkx
++ Dragon_Tongue_A2_S3 Dragon_Tongue_A2_S3.hkx
++ Dragon_Tongue_A2_S4 Dragon_Tongue_A2_S4.hkx
+
+s Dragon_Penetration_A2_S1 Dragon_Penetration_A2_S1.hkx
++ Dragon_Penetration_A2_S2 Dragon_Penetration_A2_S2.hkx
++ Dragon_Penetration_A2_S3 Dragon_Penetration_A2_S3.hkx
++ Dragon_Penetration_A2_S4 Dragon_Penetration_A2_S4.hkx
