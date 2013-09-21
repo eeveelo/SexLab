@@ -17,6 +17,7 @@ Race property HorseRace auto
 Race property FrostbiteSpiderRace auto
 Race property FrostbiteSpiderRaceGiant auto
 Race property FrostbiteSpiderRaceLarge auto
+Race property TrollRace auto
 Race property WerewolfBeastRace auto
 Race property WolfRace auto
 
@@ -82,10 +83,9 @@ function LoadAnimations()
 	RegisterAnimation("SpiderPenetration")
 	RegisterAnimation("BigSpiderPenetration")
 
-	; FNIS Won't compile troll behavior for some reason
-	; RegisterAnimation("TrollDoggystyle")
-	; RegisterAnimation("TrollHolding")
-	; RegisterAnimation("TrollMissionary")
+	RegisterAnimation("TrollDoggystyle")
+	RegisterAnimation("TrollHolding")
+	RegisterAnimation("TrollMissionary")
 
 	RegisterAnimation("WerewolfDoggystyle")
 	RegisterAnimation("WerewolfHolding")
@@ -797,7 +797,7 @@ function BigSpiderPenetration(string eventName, string id, float argNum, form se
 	Save()
 endFunction
 
-;/
+
 function TrollDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Troll) Doggystyle"
 	SetSFX(Squishing)
@@ -811,10 +811,10 @@ function TrollDoggystyle(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a1, "Troll_Doggystyle_A1_S4")
 
 	int a2 = AddPosition(Creature)
-	AddPositionStage(a2, "Troll_Doggystyle_A2_S1", 45.0, rotate=180.0)
-	AddPositionStage(a2, "Troll_Doggystyle_A2_S1", 45.0, rotate=180.0)
-	AddPositionStage(a2, "Troll_Doggystyle_A2_S1", 45.0, rotate=180.0)
-	AddPositionStage(a2, "Troll_Doggystyle_A2_S1", 45.0, rotate=180.0)
+	AddPositionStage(a2, "Troll_Doggystyle_A2_S1", 40.0, rotate=180.0)
+	AddPositionStage(a2, "Troll_Doggystyle_A2_S1", 40.0, rotate=180.0)
+	AddPositionStage(a2, "Troll_Doggystyle_A2_S1", 40.0, rotate=180.0)
+	AddPositionStage(a2, "Troll_Doggystyle_A2_S1", 40.0, rotate=180.0)
 
 	AddTag("Creature")
 	AddTag("Bestiality")
@@ -838,10 +838,10 @@ function TrollHolding(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a1, "Troll_Holding_A1_S4")
 
 	int a2 = AddPosition(Creature)
-	AddPositionStage(a2, "Troll_Holding_A2_S1", 45.0, rotate=180.0)
-	AddPositionStage(a2, "Troll_Holding_A2_S1", 45.0, rotate=180.0)
-	AddPositionStage(a2, "Troll_Holding_A2_S1", 45.0, rotate=180.0)
-	AddPositionStage(a2, "Troll_Holding_A2_S1", 45.0, rotate=180.0)
+	AddPositionStage(a2, "Troll_Holding_A2_S1", 40.0, rotate=180.0)
+	AddPositionStage(a2, "Troll_Holding_A2_S1", 40.0, rotate=180.0)
+	AddPositionStage(a2, "Troll_Holding_A2_S1", 40.0, rotate=180.0)
+	AddPositionStage(a2, "Troll_Holding_A2_S1", 40.0, rotate=180.0)
 
 	AddTag("Creature")
 	AddTag("Bestiality")
@@ -865,10 +865,10 @@ function TrollMissionary(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a1, "Troll_Missionary_A1_S4")
 
 	int a2 = AddPosition(Creature)
-	AddPositionStage(a2, "Troll_Missionary_A2_S1", 45.0, rotate=180.0)
-	AddPositionStage(a2, "Troll_Missionary_A2_S1", 45.0, rotate=180.0)
-	AddPositionStage(a2, "Troll_Missionary_A2_S1", 45.0, rotate=180.0)
-	AddPositionStage(a2, "Troll_Missionary_A2_S1", 45.0, rotate=180.0)
+	AddPositionStage(a2, "Troll_Missionary_A2_S1", 40.0, rotate=180.0)
+	AddPositionStage(a2, "Troll_Missionary_A2_S1", 40.0, rotate=180.0)
+	AddPositionStage(a2, "Troll_Missionary_A2_S1", 40.0, rotate=180.0)
+	AddPositionStage(a2, "Troll_Missionary_A2_S1", 40.0, rotate=180.0)
 
 	AddTag("Creature")
 	AddTag("Bestiality")
@@ -878,7 +878,7 @@ function TrollMissionary(string eventName, string id, float argNum, form sender)
 
 	Save()
 endFunction
-/;
+
 
 function VampireLordDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Vampire Lord) Doggystyle"
