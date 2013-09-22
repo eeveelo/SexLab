@@ -435,16 +435,16 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 		if position == Lib.PlayerRef
 			PlayerRef = position
 		endIf
-		if voice == none && !forceSilent
-			voice = Lib.Voices.PickVoice(position)
+		if !slot.IsCreature()
+			; Pick voice for non creatures
+			if voice == none && !forceSilent
+				voice = Lib.Voices.PickVoice(position)
+			endIf
+			slot.SetVoice(voice)
+		else
+			; Set controller as creature thread
+			CreatureRef = position.GetLeveledActorBase().GetRace()
 		endIf
-		(slot as sslActorAlias).SetVoice(voice)
-		; Find voice or use given voice, if not creature
-		; if validation != 2
-			
-		; else
-		; 	;CreatureRef = position.GetLeveledActorBase().GetRace()
-		; endIf
 	else
 		_Log("Failed to slot actor '"+position+"'", "AddActor", "FATAL")
 	endIf

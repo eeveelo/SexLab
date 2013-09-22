@@ -46,7 +46,7 @@ float[] loc
 ;|	Alias Functions                              |;
 ;\-----------------------------------------------/;
 
-function SetAlias(sslThreadController ThreadView)
+function SetAlias(sslThreadController ThreadView, int validation)
 	if GetReference() != none
 		_Init()
 		TryToStopCombat()
@@ -55,6 +55,7 @@ function SetAlias(sslThreadController ThreadView)
 		IsPlayer = ActorRef == Lib.PlayerRef
 		IsVictim = ActorRef == ThreadView.GetVictim()
 		IsFemale = Lib.GetGender(ActorRef) == 1
+		IsCreature = validation == 2
 	endIf
 endFunction
 
@@ -93,7 +94,6 @@ function LockActor()
 	else
 		ActorRef.SetDontMove(true)
 		ActorRef.SetRestrained()
-		IsCreature = Controller.HasCreature && Controller.Animation.HasRace(ActorRef.GetLeveledActorBase().GetRace())
 	endIf
 	; Attach Marker
 	ActorRef.SetVehicle(MarkerRef)
@@ -169,7 +169,7 @@ function ResetActor()
 	; Make flaccid for SOS
 	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
 	; Unstrip
-	if !ActorRef.IsDead() && !ActorRef.IsBleedingOut() && !IsCreature
+	if !ActorRef.IsDead() && !ActorRef.IsBleedingOut()
 		Lib.UnstripActor(ActorRef, EquipmentStorage, Controller.GetVictim())
 	endIf
 endFunction

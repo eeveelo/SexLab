@@ -299,7 +299,7 @@ endFunction
 
 function AdjustUpward(bool backwards = false, bool adjuststage = false)
 	float adjustment = SignFloat(0.75, backwards)
-	Animation.UpdateSide(AdjustingPosition, stage, adjustment, adjuststage)
+	Animation.UpdateUp(AdjustingPosition, stage, adjustment, adjuststage)
 	ActorAlias(Positions[AdjustingPosition]).AlignTo(Animation.GetPositionOffsets(AdjustingPosition, stage))
 endFunction
 
