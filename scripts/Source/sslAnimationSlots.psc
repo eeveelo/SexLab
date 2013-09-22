@@ -199,3 +199,10 @@ function Initialize()
 	registry = init
 	Slotted = 0
 endFunction
+
+
+function AddRace(Race creature)
+endFunction
+bool function HasRace(Race creature)
+	return false
+endFunction

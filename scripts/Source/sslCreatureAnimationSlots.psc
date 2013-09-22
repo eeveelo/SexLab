@@ -2,6 +2,9 @@ scriptname sslCreatureAnimationSlots extends sslAnimationSlots
 
 sslCreatureAnimationDefaults property CreatureDefaults auto
 
+Form[] ValidRaces
+
+
 sslBaseAnimation[] function GetByRace(int actors, Race creature)
 	sslBaseAnimation[] output
 	int i
@@ -25,6 +28,16 @@ bool function HasAnimation(Race creature)
 		i += 1
 	endWhile
 	return false
+endFunction
+
+function AddRace(Race creature)
+	if !HasRace(creature)
+		ValidRaces = sslUtility.PushForm(creature, ValidRaces)
+	endIf
+endFunction
+
+bool function HasRace(Race creature)
+	return ValidRaces.Find(creature) != -1
 endFunction
 
 function _Setup()

@@ -12,7 +12,7 @@ bool property bAllowCreatures auto hidden
 
 
 bool function AllowedCreature(Race creature)
-	return bAllowCreatures && CreatureSlots.HasAnimation(creature)
+	return bAllowCreatures && CreatureSlots.HasRace(creature)
 endFunction
 
 function _Defaults()

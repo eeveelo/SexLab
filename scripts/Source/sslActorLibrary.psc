@@ -103,7 +103,7 @@ int function ValidateActor(actor position)
 		return -15
 	endIf
 
-	if position.HasKeyWordString("ActorTypeAnimal") || position.HasKeyWordString("ActorTypeCreature") || position.HasKeyWordString("ActorTypeDwarven")
+	if position.HasKeyWordString("ActorTypeAnimal") || position.HasKeyWordString("ActorTypeCreature") || position.HasKeyWordString("ActorTypeDwarven") || position.HasKeyWordString("ActorTypeDaedra")
 		Debug.Trace("Validating race: "+ActorRace.GetName())
 		if AnimLib.AllowedCreature(ActorRace)
 			return 2

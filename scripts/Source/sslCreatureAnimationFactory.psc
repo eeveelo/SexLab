@@ -44,4 +44,5 @@ endfunction
 
 function AddRace(Race creatureRace)
 	Animation.AddRace(creatureRace)
+	Slots.AddRace(creatureRace)
 endFunction
