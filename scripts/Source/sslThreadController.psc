@@ -45,7 +45,7 @@ endFunction
 bool function ActorWait(string waitfor)
 	int i
 	while i < ActorCount
-		if GetAlias(i).GetState() != waitfor
+		if ActorAlias[i].GetState() != waitfor
 			return false
 		endIf
 		i += 1
@@ -124,7 +124,7 @@ state Starting
 		endIf
 		int i
 		while i < ActorCount
-			GetAlias(i).StartAnimating()
+			ActorAlias[i].StartAnimating()
 			i += 1
 		endWhile
 		started = Utility.GetCurrentRealTime()
@@ -148,7 +148,7 @@ state Advancing
 			if Animation.IsSexual
 				int i
 				while i < ActorCount
-					GetAlias(i).Strip(false)
+					ActorAlias[i].Strip(false)
 					i += 1
 				endWhile
 			endIf
@@ -178,7 +178,7 @@ state Animating
 		; Inform ActorAlias of stage
 		int i
 		while i < ActorCount
-			GetAlias(i).SyncThread(i)
+			ActorAlias[i].SyncThread(i)
 			i += 1
 		endWhile
 		; Start animation looping
@@ -392,7 +392,7 @@ function UpdateLocations()
 	PlayAnimation()
 	int i
 	while i < ActorCount
-		GetAlias(i).AlignTo(Animation.GetPositionOffsets(i, stage))
+		ActorAlias[i].AlignTo(Animation.GetPositionOffsets(i, stage))
 		i += 1
 	endWhile
 endFunction
@@ -400,7 +400,7 @@ endFunction
 function MoveActors()
 	int i
 	while i < ActorCount
-		GetAlias(i).Snap()
+		ActorAlias[i].Snap()
 		i += 1
 	endWhile
 endFunction
@@ -422,7 +422,7 @@ function SetAnimation(int anim = -1)
 	; Update with new animation
 	int i = 0
 	while i < ActorCount
-		GetAlias(i).SyncThread(i)
+		ActorAlias[i].SyncThread(i)
 		i += 1
 	endWhile
 	; Check for animation specific stage timer
@@ -460,7 +460,7 @@ function PlayAnimation()
 	int i = ActorCount
 	while i
 		i -= 1
-		GetAlias(i).AnimationExtras()
+		ActorAlias[i].AnimationExtras()
 	endWhile
 endFunction
 

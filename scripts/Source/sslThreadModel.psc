@@ -12,7 +12,7 @@ bool making
 
 ; Actors
 actor[] property Positions auto hidden 
-ReferenceAlias[] property ActorAlias auto hidden
+sslActorAlias[] property ActorAlias auto hidden
 
 ; Animations
 int property Stage auto hidden
@@ -117,7 +117,7 @@ sslThreadModel function Make(float timeoutIn = 5.0)
 	locked = true
 	making = true
 	timeout = timeoutIn
-	ActorAlias = new ReferenceAlias[5]
+	ActorAlias = new sslActorAlias[5]
 	GoToState("Making")
 	RegisterForSingleUpdate(0.1)
 	return self
@@ -408,11 +408,7 @@ endfunction
 ;\-----------------------------------------------/;
 
 int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice = none, bool forceSilent = false)
-	int validation = Lib.Actors.ValidateActor(position)
-	if validation < 1
-		_Log("Invalid actor given", "AddActor")
-		return -1
-	elseif !_MakeWait("AddActor")
+	if !_MakeWait("AddActor")
 		return -1
 	elseIf ActorCount >= 5
 		_Log("No available actor positions", "AddActor")
@@ -424,7 +420,7 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 	waiting = true
 
 	int id = -1
-	ReferenceAlias slot = Lib.Actors.Slots.SlotActor(position, self as sslThreadController)
+	sslActorAlias slot = Lib.Actors.Slots.SlotActor(position, self as sslThreadController)
 	if slot != none
 		; Push actor to positions array
 		Positions = sslUtility.PushActor(position, Positions)
@@ -439,16 +435,16 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 		if position == Lib.PlayerRef
 			PlayerRef = position
 		endIf
-		
-		; Find voice or use given voice, if not creature
-		if validation != 2
-			if voice == none && !forceSilent
-				voice = Lib.Voices.PickVoice(position)
-			endIf
-			(slot as sslActorAlias).SetVoice(voice)
-		else
-			CreatureRef = position.GetLeveledActorBase().GetRace()
+		if voice == none && !forceSilent
+			voice = Lib.Voices.PickVoice(position)
 		endIf
+		(slot as sslActorAlias).SetVoice(voice)
+		; Find voice or use given voice, if not creature
+		; if validation != 2
+			
+		; else
+		; 	;CreatureRef = position.GetLeveledActorBase().GetRace()
+		; endIf
 	else
 		_Log("Failed to slot actor '"+position+"'", "AddActor", "FATAL")
 	endIf
@@ -500,7 +496,7 @@ function ChangeActors(actor[] changeTo)
 	endWhile
 	; Prepare/Reset actors as needed
 	Positions = changeTo
-	ReferenceAlias[] newSlots = new ReferenceAlias[5]
+	sslActorAlias[] newSlots = new sslActorAlias[5]
 	i = 0
 	while i < changeTo.Length
 		int slot = Lib.Actors.Slots.FindActor(changeTo[i])
@@ -583,10 +579,6 @@ int function GetSlot(actor position)
 		i += 1
 	endWhile
 	return -1
-endFunction
-
-sslActorAlias function GetAlias(int position)
-	return ActorAlias[position] as sslActorAlias
 endFunction
 
 sslActorAlias function ActorAlias(actor position)
@@ -676,7 +668,7 @@ function SendActorEvent(string eventName, float argNum = 0.0)
 	endIf
 	int position
 	while position < ActorCount
-		GetAlias(position).RegisterForModEvent(eventName, "On"+eventName)
+		ActorAlias[position].RegisterForModEvent(eventName, "On"+eventName)
 		position += 1
 	endWhile
 	SendModEvent(eventName, (position as string), argNum)
@@ -692,6 +684,7 @@ int function ArrayWrap(int value, int max)
 		return value
 	endIf
 endFunction
+
 
 bool function _MakeWait(string method)
 	; Ready wait
@@ -765,11 +758,11 @@ function Initialize()
 	int i = 0
 	while i < ActorAlias.Length
 		if ActorAlias[i] != none
-			GetAlias(i).ClearAlias()
+			ActorAlias[i].ClearAlias()
 		endIf
 		i += 1
 	endWhile
-	ReferenceAlias[] aaDel
+	sslActorAlias[] aaDel
 	ActorAlias = aaDel
 	; Empty Floats
 	float[] fDel
