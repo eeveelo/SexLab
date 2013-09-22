@@ -294,7 +294,9 @@ function AlignTo(float[] offsets)
 endfunction
 
 function Snap()
+	ActorRef.SetVehicle(MarkerRef)
 	ActorRef.SetAngle(loc[3], loc[4], loc[5])
+	ActorRef.SetVehicle(MarkerRef)
 	ActorRef.TranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 1500, 1)
 endFunction
 
