@@ -286,54 +286,26 @@ function ChangePositions(bool backwards = false)
 endFunction
 
 function AdjustForward(bool backwards = false, bool adjuststage = false)
-	float adjustment = 0.75
-	if backwards
-		adjustment = adjustment * -1
-	endIf
-	if adjuststage
-		Animation.UpdateForward(AdjustingPosition, stage, adjustment)
-	else
-		Animation.UpdateAllForward(AdjustingPosition, adjustment)
-	endIf
+	float adjustment = SignFloat(0.75, backwards)
+	Animation.UpdateForward(AdjustingPosition, stage, adjustment, adjuststage)
 	ActorAlias(Positions[AdjustingPosition]).AlignTo(Animation.GetPositionOffsets(AdjustingPosition, stage))
 endFunction
 
 function AdjustSideways(bool backwards = false, bool adjuststage = false)
-	float adjustment = 0.75
-	if backwards
-		adjustment = adjustment * -1
-	endIf
-	if adjuststage
-		Animation.UpdateSide(AdjustingPosition, stage, adjustment)
-	else
-		Animation.UpdateAllSide(AdjustingPosition, adjustment)
-	endIf
+	float adjustment = SignFloat(0.75, backwards)
+	Animation.UpdateSide(AdjustingPosition, stage, adjustment, adjuststage)
 	ActorAlias(Positions[AdjustingPosition]).AlignTo(Animation.GetPositionOffsets(AdjustingPosition, stage))
 endFunction
 
 function AdjustUpward(bool backwards = false, bool adjuststage = false)
-	if IsPlayerPosition(AdjustingPosition)
-		return
-	endIf
-	float adjustment = 0.75
-	if backwards
-		adjustment = adjustment * -1
-	endIf
-	if adjuststage
-		Animation.UpdateUp(AdjustingPosition, stage, adjustment)
-	else
-		Animation.UpdateAllUp(AdjustingPosition, adjustment)
-	endIf
+	float adjustment = SignFloat(0.75, backwards)
+	Animation.UpdateSide(AdjustingPosition, stage, adjustment, adjuststage)
 	ActorAlias(Positions[AdjustingPosition]).AlignTo(Animation.GetPositionOffsets(AdjustingPosition, stage))
 endFunction
 
 function RotateScene(bool backwards = false)
 	; Adjust current center's Z angle
-	float adjustment = 45
-	if backwards
-		adjustment = adjustment * -1
-	endIf
-	AdjustRotation(adjustment)
+	AdjustRotation(SignFloat(45, backwards))
 	UpdateLocations()
 endFunction
 
@@ -343,6 +315,7 @@ function AdjustChange(bool backwards = false)
 	else
 		AdjustingPosition = ArrayWrap((AdjustingPosition + 1), ActorCount)
 	endIf
+	AdjustingPosition = ArrayWrap((AdjustingPosition - 1), ActorCount)
 	Lib.mAdjustChange.Show((AdjustingPosition + 1))
 endFunction
 

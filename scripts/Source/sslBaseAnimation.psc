@@ -261,61 +261,47 @@ endFunction
 ;|	Update Offsets                               |;
 ;\-----------------------------------------------/;
 
-function UpdateForward(int position, int stage, float adjust)
-	if !Exists("UpdateForward", position, stage)
-		return
-	endIf
-	int index = DataIndex(4, position, stage, 0)
-	offsetData[index] = ( offsetData[index] + adjust )
-endFunction
-
-function UpdateAllForward(int position, float adjust)
-	if !Exists("UpdateAllForward", position)
-		return
-	endIf
-	int stage = 1
-	while stage <= stages
-		UpdateForward(position, stage, adjust)
-		stage += 1
+function UpdateAllOffsets(int slot, int position, float adjust)
+	int stage = stages
+	while stage
+		UpdateOffset(slot, position, stage, adjust)
+		stage -= 1
 	endWhile
 endFunction
 
-function UpdateSide(int position, int stage, float adjust)
-	if !Exists("UpdateSide", position, stage)
-		return
-	endIf
-	int index = DataIndex(4, position, stage, 1)
-	offsetData[index] = ( offsetData[index] + adjust )
+function UpdateOffset(int slot, int position, int stage, float adjust)
+	int index = DataIndex(4, position, stage, slot)
+	offsetData[index] = offsetData[index] + adjust
 endFunction
 
-function UpdateAllSide(int position, float adjust)
-	if !Exists("UpdateAllSide", position)
-		return
+function UpdateForward(int position, int stage, float adjust, bool adjuststage = false)
+	if Exists("UpdateForward", position, stage)
+		if adjuststage
+			UpdateOffset(0, position, stage, adjust)
+		else
+			UpdateAllOffsets(0, position, adjust)
+		endIf
 	endIf
-	int stage = 1
-	while stage <= stages
-		UpdateSide(position, stage, adjust)
-		stage += 1
-	endWhile
 endFunction
 
-function UpdateUp(int position, int stage, float adjust)
-	if !Exists("UpdateUp", position, stage)
-		return
+function UpdateSide(int position, int stage, float adjust, bool adjuststage = false)
+	if Exists("UpdateSide", position, stage)
+		if adjuststage
+			UpdateOffset(1, position, stage, adjust)
+		else
+			UpdateAllOffsets(1, position, adjust)
+		endIf
 	endIf
-	int index = DataIndex(4, position, stage, 2)
-	offsetData[index] = ( offsetData[index] + adjust )
 endFunction
 
-function UpdateAllUp(int position, float adjust)
-	if !Exists("UpdateAllUp", position)
-		return
+function UpdateUp(int position, int stage, float adjust, bool adjuststage = false)
+	if Exists("UpdateUp", position, stage)
+		if adjuststage
+			UpdateOffset(2, position, stage, adjust)
+		else
+			UpdateAllOffsets(2, position, adjust)
+		endIf
 	endIf
-	int stage = 1
-	while stage <= stages
-		UpdateUp(position, stage, adjust)
-		stage += 1
-	endWhile
 endFunction
 
 function RestoreOffsets()

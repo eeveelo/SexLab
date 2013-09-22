@@ -680,11 +680,16 @@ int function ArrayWrap(int value, int max)
 		return 0
 	elseif value < 0
 		return max
-	else
-		return value
 	endIf
+	return value
 endFunction
 
+float function SignFloat(float value, bool sign)
+	if sign
+		return value * -1
+	endIf
+	return value
+endFunction
 
 bool function _MakeWait(string method)
 	; Ready wait
