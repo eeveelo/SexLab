@@ -103,7 +103,7 @@ int function ValidateActor(actor position)
 		return -15
 	endIf
 
-	if !ActorRace.IsRaceFlagSet(0x00000001) || position.HasKeyWordString("ActorTypeAnimal") || position.HasKeyWordString("ActorTypeCreature") || position.HasKeyWordString("ActorTypeDwarven")
+	if position.HasKeyWordString("ActorTypeAnimal") || position.HasKeyWordString("ActorTypeCreature") || position.HasKeyWordString("ActorTypeDwarven")
 		Debug.Trace("Validating race: "+ActorRace.GetName())
 		if AnimLib.AllowedCreature(ActorRace)
 			return 2
