@@ -19,7 +19,13 @@ Race property FrostbiteSpiderRaceGiant auto
 Race property FrostbiteSpiderRaceLarge auto
 Race property TrollRace auto
 Race property WerewolfBeastRace auto
+
 Race property WolfRace auto
+
+Race property DogRace auto
+Race property DogCompanionRace auto
+Race property MG07DogRace auto
+Race property DA03BarbasDogRace auto
 
 bool dawnguard
 Race DLC1VampireBeastRace
@@ -1046,10 +1052,14 @@ function WerewolfMissionary(string eventName, string id, float argNum, form send
 endFunction
 
 function WolfDoggystyle(string eventName, string id, float argNum, form sender)
-	Name = "(Wolf) Doggystyle"
+	Name = "(Dog) Doggystyle"
 	SetSFX(Squishing)
 
-	AddRace(WolfRace)
+	; AddRace(WolfRace)
+	AddRace(DogRace)
+	AddRace(DogCompanionRace)
+	AddRace(MG07DogRace)
+	AddRace(DA03BarbasDogRace)
 
 	int a1 = AddPosition(Female, addCum=Anal)
 	AddPositionStage(a1, "Wolf_Doggystyle_A1_S1")
@@ -1067,16 +1077,21 @@ function WolfDoggystyle(string eventName, string id, float argNum, form sender)
 	AddTag("Bestiality")
 	AddTag("Dirty")
 	AddTag("Doggystyle")
-	AddTag("Wolf")
+	AddTag("Dog")
+	AddTag("Canine")
 
 	Save()
 endFunction
 
 function WolfMissionary(string eventName, string id, float argNum, form sender)
-	Name = "(Wolf) Missionary"
+	Name = "(Dog) Missionary"
 	SetSFX(Squishing)
 
-	AddRace(WolfRace)
+	; AddRace(WolfRace)
+	AddRace(DogRace)
+	AddRace(DogCompanionRace)
+	AddRace(MG07DogRace)
+	AddRace(DA03BarbasDogRace)
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
 	AddPositionStage(a1, "Wolf_Missionary_A1_S1")
@@ -1094,7 +1109,8 @@ function WolfMissionary(string eventName, string id, float argNum, form sender)
 	AddTag("Bestiality")
 	AddTag("Dirty")
 	AddTag("Missionary")
-	AddTag("Wolf")
+	AddTag("Dog")
+	AddTag("Canine")
 
 	Save()
 endFunction
