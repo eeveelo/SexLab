@@ -86,6 +86,7 @@ function _StopAll()
 		while slot < ThreadView[i].ActorAlias.Length
 			if ThreadView[i].ActorAlias[slot] != none
 				sslActorAlias clearing = ThreadView[i].ActorAlias[slot] as sslActorAlias
+				clearing.UnlockActor()
 				clearing.ResetActor()
 				clearing.StopAnimating(true)
 				clearing.ClearAlias()
