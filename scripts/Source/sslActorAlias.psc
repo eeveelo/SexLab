@@ -2,8 +2,17 @@ scriptname sslActorAlias extends ReferenceAlias
 
 sslActorLibrary property Lib auto
 
+ObjectReference MarkerObj
+ObjectReference property MarkerRef hidden
+	ObjectReference function get()
+		if MarkerObj == none && ActorRef != none
+			MarkerObj = ActorRef.PlaceAtMe(Lib.BaseMarker)
+		endIf
+		return MarkerObj
+	endFunction
+endProperty
+
 actor ActorRef
-ObjectReference MarkerRef
 
 bool Active
 sslThreadController Controller
@@ -46,9 +55,6 @@ function SetAlias(sslThreadController ThreadView)
 		IsPlayer = ActorRef == Lib.PlayerRef
 		IsVictim = ActorRef == ThreadView.GetVictim()
 		IsFemale = Lib.GetGender(ActorRef) == 1
-		IsCreature = false
-		MarkerRef = ActorRef.PlaceAtMe(Lib.BaseMarker)
-		ActorRef.SetVehicle(MarkerRef)
 	endIf
 endFunction
 
@@ -70,29 +76,51 @@ endFunction
 ;|	Preparation Functions                        |;
 ;\-----------------------------------------------/;
 
-function PrepareActor()
+function LockActor()
+	; Start DoNothing package
+	ActorRef.SetFactionRank(Lib.AnimatingFaction, 1)
+	TryToEvaluatePackage()
 	; Disable movement
 	if IsPlayer
 		Game.ForceThirdPerson()
 		Game.SetPlayerAIDriven()
 		; Enable hotkeys, if needed
-		if Lib.bDisablePlayer && IsVictim
-			Controller.autoAdvance = true
+		if IsVictim && Lib.bDisablePlayer
+			Controller.AutoAdvance = true
 		else
 			Lib._HKStart(Controller)
 		endIf
 	else
 		ActorRef.SetDontMove(true)
 		ActorRef.SetRestrained()
+		IsCreature = Controller.HasCreature && Controller.Animation.HasRace(ActorRef.GetLeveledActorBase().GetRace())
 	endIf
-	; Start DoNothing package
-	ActorRef.SetFactionRank(Lib.AnimatingFaction, 1)
-	TryToEvaluatePackage()
-	; Creature needs nothing else
-	if Controller.HasCreature && Controller.Animation.HasRace(ActorRef.GetLeveledActorBase().GetRace())
-		IsCreature = true
+	; Attach Marker
+	ActorRef.SetVehicle(MarkerRef)
+endFunction
+
+function UnlockActor()
+	; Detach from marker
+	ClearMarker()
+	; Enable movement
+	if IsPlayer
+		Lib._HKClear()
+		Game.SetPlayerAIDriven(false)
+		int[] genders = Lib.GenderCount(Controller.Positions)
+		Lib.Stats.UpdatePlayerStats(genders[0], genders[1], Controller.Animation, Controller.GetVictim(), Controller.GetTime())
+	else
+		ActorRef.SetDontMove(false)
+		ActorRef.SetRestrained(false)
+	endIf
+	; Remove from animation faction
+	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
+	ActorRef.EvaluatePackage()
+endFunction
+
+function PrepareActor()
+	if IsCreature
 		GoToState("Ready")
-		return
+		return ; Creatures need none of this
 	endIf
 	; Disable NPC ik
 	if !IsPlayer
@@ -104,7 +132,6 @@ function PrepareActor()
 	endIf
 	; Sexual animations only
 	if Controller.Animation.IsSexual()
-		; Strip Actor
 		Strip()
 	endIf
 	; Scale actor is enabled
@@ -112,39 +139,23 @@ function PrepareActor()
 		float display = ActorRef.GetScale()
 		ActorRef.SetScale(1.0)
 		float base = ActorRef.GetScale()
-		
 		scale = ( display / base )
 		ActorRef.SetScale(scale)
 		ActorRef.SetScale(1.0 / base)
 	endIf
 	; Make erect for SOS
 	Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
-	; Set into aniamtion ready state
 	GoToState("Ready")
 endFunction
 
 function ResetActor()
 	UnregisterForUpdate()
-	ActorRef.SetVehicle(none)
-	ActorRef.StopTranslation()
-	_ClearMarker()
-	; Enable movement
-	if IsPlayer
-		Lib._HKClear()
-		Game.SetPlayerAIDriven(false)
-		int[] genders = Lib.GenderCount(Controller.Positions)
-		Lib.Stats.UpdatePlayerStats(genders[0], genders[1], Controller.Animation, Controller.GetVictim(), Controller.GetTime())
-	else
-		ActorRef.SetRestrained(false)
-		; Renable IK
-		ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
-	endIf
-	ActorRef.SetDontMove(false)
-	; Remove from animation faction
-	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
-	; Creatures need nothing more
 	if IsCreature
-		return
+		return ; Creatures need none of this
+	endIf
+	; Renable IK
+	if !IsPlayer
+		ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 	endIf
 	; Cleanup Actors
 	RemoveExtras()
@@ -257,39 +268,34 @@ function StopAnimating(bool quick = false)
 	else
 		; Ragdoll NPC/PC
 		ActorRef.PushActorAway(ActorRef, 1)
+		Utility.Wait(2.0)
 	endIf
 endFunction
 
-function AlignBy(float[] offsets)
+function AlignTo(float[] offsets)
 	float[] centerLoc = Controller.CenterLocation
 	loc = new float[6]
 	; Determine offsets coordinates from center
-	loc[0] = ( centerLoc[0] + ( Math.sin(centerLoc[5]) * offsets[0] + Math.cos(centerLoc[5]) * offsets[1] ) )
-	loc[1] = ( centerLoc[1] + ( Math.cos(centerLoc[5]) * offsets[0] + Math.sin(centerLoc[5]) * offsets[1] ) )
-	loc[2] = ( centerLoc[2] + offsets[2] )
+	loc[0] = centerLoc[0] + ( Math.sin(centerLoc[5]) * offsets[0] ) + ( Math.cos(centerLoc[5]) * offsets[1] )
+	loc[1] = centerLoc[1] + ( Math.cos(centerLoc[5]) * offsets[0] ) + ( Math.sin(centerLoc[5]) * offsets[1] )
+	loc[2] = centerLoc[2] + offsets[2]
 	; Determine rotation coordinates from center
 	loc[3] = centerLoc[3]
 	loc[4] = centerLoc[4]
-	loc[5] = ( centerLoc[5] + offsets[3] )
+	loc[5] = centerLoc[5] + offsets[3]
 	if loc[5] >= 360
-		loc[5] = ( loc[5] - 360 )
+		loc[5] = loc[5] - 360
 	elseIf loc[5] < 0
-		loc[5] = ( loc[5] + 360 )
+		loc[5] = loc[5] + 360
 	endIf
 	MarkerRef.SetPosition(loc[0], loc[1], loc[2])
 	MarkerRef.SetAngle(loc[3], loc[4], loc[5])
 	Snap()
 endfunction
 
-function UpdateMarker()
-	AlignBy(Animation.GetPositionOffsets(position, stage))
-endFunction
-
 function Snap()
-	ActorRef.StopTranslation()
-	ActorRef.TranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 1500, 1.0)
 	ActorRef.SetAngle(loc[3], loc[4], loc[5])
-	ActorRef.SetVehicle(MarkerRef)
+	ActorRef.TranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 1500, 1)
 endFunction
 
 function Strip(bool animate = true)
@@ -397,7 +403,7 @@ function SyncThread(int toPosition)
 		EquipExtras()
 	endIf
 	; Update marker postioning
-	UpdateMarker()
+	AlignTo(Animation.GetPositionOffsets(position, stage))
 endFunction
 
 function OverrideStrip(bool[] setStrip)
@@ -456,6 +462,7 @@ endState
 
 event OnStartThread(string eventName, string actorSlot, float argNum, form sender)
 	UnregisterForModEvent("StartThread")
+	LockActor()
 	PrepareActor()
 endEvent
 
@@ -463,6 +470,7 @@ event OnEndThread(string eventName, string actorSlot, float quick, form sender)
 	UnregisterForModEvent("EndThread")
 	ResetActor()
 	StopAnimating((quick as bool))
+	UnlockActor()
 	ClearAlias()
 endEvent
 
@@ -471,8 +479,8 @@ endEvent
 ;\-----------------------------------------------/;
 
 function _Init()
-	_ClearMarker()
 	UnregisterForAllModEvents()
+	ClearMarker()
 	ActorRef = none
 	Active = false
 	Controller = none
@@ -487,14 +495,18 @@ function _Init()
 	GoToState("")
 endFunction
 
-function _ClearMarker()
-	if MarkerRef != none
-		MarkerRef.Disable()
-		MarkerRef.Delete()
-		MarkerRef = none
+function ClearMarker()
+	if ActorRef != none
+		ActorRef.StopTranslation()
+		ActorRef.SetVehicle(none)
+	endIf
+	if MarkerObj != none
+		MarkerObj.Disable()
+		MarkerObj.Delete()
+		MarkerObj = none
 	endIf
 endFunction
 
 function StartAnimating()
-	Debug.TraceAndbox("Null start: "+ActorRef)
+	;Debug.TraceAndbox("Null start: "+ActorRef)
 endFunction

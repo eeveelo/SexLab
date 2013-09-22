@@ -295,7 +295,7 @@ function AdjustForward(bool backwards = false, bool adjuststage = false)
 	else
 		Animation.UpdateAllForward(AdjustingPosition, adjustment)
 	endIf
-	ActorAlias(Positions[AdjustingPosition]).UpdateMarker()
+	ActorAlias(Positions[AdjustingPosition]).AlignTo(Animation.GetPositionOffsets(AdjustingPosition, stage))
 endFunction
 
 function AdjustSideways(bool backwards = false, bool adjuststage = false)
@@ -308,7 +308,7 @@ function AdjustSideways(bool backwards = false, bool adjuststage = false)
 	else
 		Animation.UpdateAllSide(AdjustingPosition, adjustment)
 	endIf
-	ActorAlias(Positions[AdjustingPosition]).UpdateMarker()
+	ActorAlias(Positions[AdjustingPosition]).AlignTo(Animation.GetPositionOffsets(AdjustingPosition, stage))
 endFunction
 
 function AdjustUpward(bool backwards = false, bool adjuststage = false)
@@ -324,7 +324,7 @@ function AdjustUpward(bool backwards = false, bool adjuststage = false)
 	else
 		Animation.UpdateAllUp(AdjustingPosition, adjustment)
 	endIf
-	ActorAlias(Positions[AdjustingPosition]).UpdateMarker()
+	ActorAlias(Positions[AdjustingPosition]).AlignTo(Animation.GetPositionOffsets(AdjustingPosition, stage))
 endFunction
 
 function RotateScene(bool backwards = false)
@@ -333,8 +333,8 @@ function RotateScene(bool backwards = false)
 	if backwards
 		adjustment = adjustment * -1
 	endIf
-	AdjustRotation(adjustment) 
-	MoveActors()
+	AdjustRotation(adjustment)
+	UpdateLocations()
 endFunction
 
 function AdjustChange(bool backwards = false)
@@ -359,10 +359,9 @@ function MoveScene()
 	looping = false
 	UnregisterForUpdate()
 	; Enable Controls
-	Game.SetPlayerAIDriven(false)
+	sslActorAlias Slot = ActorAlias(Lib.PlayerRef)
+	Slot.UnlockActor()
 	Debug.SendAnimationEvent(Lib.PlayerRef, "IdleForceDefaultState")
-	Lib.PlayerRef.SetVehicle(none)
-	Lib.PlayerRef.SetDontMove(false)
 	; Lock hotkeys and wait 6 seconds
 	Lib.mMoveScene.Show(6)
 	float stopat = Utility.GetCurrentRealTime() + 6
@@ -370,12 +369,11 @@ function MoveScene()
 		Utility.Wait(0.8)
 	endWhile
 	; Disable Controls
-	Game.SetPlayerAIDriven(true)
+	Slot.LockActor()
 	; Give player time to settle incase airborne
 	Utility.Wait(1.0)
 	; Recenter on coords to avoid stager + resync animations
-	float[] coords = GetCoords(GetPlayer())
-	CenterOnCoords(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5], true)
+	CenterOnObject(Lib.PlayerRef, true)
 	; Return to animation loop
 	looping = true
 	RegisterForSingleUpdate(0.15)
@@ -387,14 +385,14 @@ endFunction
 
 function RealignActors()
 	PlayAnimation()
-	MoveActors()
+	UpdateLocations()
 endFunction
 
 function UpdateLocations()
 	PlayAnimation()
 	int i
 	while i < ActorCount
-		GetAlias(i).UpdateMarker()
+		GetAlias(i).AlignTo(Animation.GetPositionOffsets(i, stage))
 		i += 1
 	endWhile
 endFunction
@@ -431,10 +429,6 @@ function SetAnimation(int anim = -1)
 	float stagetimer = AnimCurrent.GetStageTimer(stage)
 	if stagetimer > 0.0
 		UpdateTimer(stagetimer)
-	endIf
-	; Notify play of animation name
-	if HasPlayer()
-		Debug.Notification(Animation.Name)
 	endIf
 endFunction
 
