@@ -16,7 +16,10 @@ endFunction
 event OnVersionUpdate(int version)
 	float current = (CurrentVersion as float / 1000.0)
 	float latest = (version as float / 1000.0)
-	Debug.Notification("Updating SexLab v"+GetStringVer())
+	if current > 0
+		Debug.Notification("Updating SexLab v"+GetStringVer())
+		_SetupSystem()
+	endIf
 endEvent
 
 event OnConfigInit()
@@ -27,8 +30,8 @@ event OnConfigInit()
 endEvent
 
 event OnGameReload()
-	_CheckSystem()
 	parent.OnGameReload()
+	_CheckSystem()
 	ThreadSlots._StopAll()
 endEvent
 
@@ -1472,7 +1475,7 @@ function FindStrapons()
 endFunction
 
 function _SetupSystem()
-	Debug.TraceAndBox("SexLab is now updating/installing, please wait for ready message before using.")
+	SexLab._EnableSystem(false)
 	; Init animations
 	AnimSlots._Setup()
 	; Init creature animations
@@ -1488,12 +1491,10 @@ function _SetupSystem()
 	; Init Defaults
 	SetDefaults()
 	; Finished
-	Debug.TraceAndBox("SexLab has finished updating/installing and is ready for use.")
+	Debug.Notification("SexLab has finished updating/installing and is ready for use.")
 endFunction
 
 function _CheckSystem()
-	; Refresh system init
-	SexLab._Setup()
 	; Check SKSE Version
 	float skseNeeded = 1.0609
 	float skseInstalled = SKSE.GetVersion() + SKSE.GetVersionMinor() * 0.01 + SKSE.GetVersionBeta() * 0.0001

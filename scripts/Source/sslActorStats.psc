@@ -14,6 +14,7 @@ int property iVaginalCount auto hidden
 int property iOralCount auto hidden
 int property iVictimCount auto hidden
 int property iAggressorCount auto hidden
+int property iCreatureCount auto hidden
 
 ; Titles
 string[] sStatTitles
@@ -281,6 +282,7 @@ function _Setup()
 	iOralCount = 0
 	iVictimCount = 0
 	iAggressorCount = 0
+	iCreatureCount = 0
 
 	sPureTitles = new string[7]
 	sPureTitles[0] = "$SSL_Neutral"
