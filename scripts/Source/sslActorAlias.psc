@@ -2,6 +2,8 @@ scriptname sslActorAlias extends ReferenceAlias
 
 sslActorLibrary property Lib auto
 
+actor property ActorRef auto hidden
+
 ObjectReference MarkerObj
 ObjectReference property MarkerRef hidden
 	ObjectReference function get()
@@ -11,8 +13,6 @@ ObjectReference property MarkerRef hidden
 		return MarkerObj
 	endFunction
 endProperty
-
-actor ActorRef
 
 bool Active
 sslThreadController Controller
@@ -46,16 +46,17 @@ float[] loc
 ;|	Alias Functions                              |;
 ;\-----------------------------------------------/;
 
-function SetAlias(sslThreadController ThreadView, int validation)
+function SetAlias(sslThreadController ThreadView)
 	if GetReference() != none
 		_Init()
 		TryToStopCombat()
-		ActorRef = GetReference() as actor
 		Controller = ThreadView
+		ActorRef = GetReference() as actor
+		int gender = Lib.GetGender(ActorRef)
+		IsFemale = gender == 1
+		IsCreature = gender == 2
 		IsPlayer = ActorRef == Lib.PlayerRef
 		IsVictim = ActorRef == ThreadView.GetVictim()
-		IsFemale = Lib.GetGender(ActorRef) == 1
-		IsCreature = validation == 2
 	endIf
 endFunction
 
@@ -63,7 +64,7 @@ function ClearAlias()
 	if GetReference() != none
 		Debug.Trace("SexLab: Clearing Actor Slot of "+ActorRef)
 		TryToClear()
-		TryToReset()
+		;TryToReset()
 		ActorRef.EvaluatePackage()
 		_Init()
 	endIf
@@ -122,10 +123,6 @@ function PrepareActor()
 		GoToState("Ready")
 		return ; Creatures need none of this
 	endIf
-	; Disable NPC ik
-	if !IsPlayer
-		ActorRef.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
-	endIF
 	; Cleanup
 	if ActorRef.IsWeaponDrawn()
 		ActorRef.SheatheWeapon()
@@ -153,12 +150,9 @@ function ResetActor()
 	if IsCreature
 		return ; Creatures need none of this
 	endIf
-	; Renable IK
-	if !IsPlayer
-		ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
-	endIf
 	; Cleanup Actors
 	RemoveExtras()
+	RemoveStrapon()
 	; Reset openmouth
 	ActorRef.SetExpressionOverride(7, 50)
 	ActorRef.ClearExpressionOverride()
@@ -178,41 +172,33 @@ function EquipExtras()
 	if Animation == none || IsCreature
 		return
 	endIf
-	
-	form[] extras = Animation.GetExtras(position)
-	if extras.Length > 0
-		int i
-		while i < extras.Length
-			if extras[i] != none
-				ActorRef.EquipItem(extras[i], false, true)
-			endIf
-			i += 1
-		endWhile
-	endIf
-	; Strapons are enabled for this position, and they are female in a male position
-	if Animation.GetGender(position) == 0 && Lib.bUseStrapons && Animation.UseStrapon(position, stage)
-		Lib.EquipStrapon(ActorRef)
-	endIf
+	; Equip Animation Extras
+	Animation.EquipExtras(position, ActorRef)
 endFunction
 
 function RemoveExtras()
 	if Animation == none || IsCreature
 		return
 	endIf
+	; Remove Animation Extras
+	Animation.RemoveExtras(position, ActorRef)
+endFunction
 
-	form[] extras = Animation.GetExtras(position)
-	if extras.Length > 0
-		int i
-		while i < extras.Length
-			if extras[i] != none
-				ActorRef.UnequipItem(extras[i], false, true)
-				ActorRef.RemoveItem(extras[i], 1, true)
-			endIf
-			i += 1
-		endWhile
+function EquipStrapon()
+	if strapon == none
+		strapon = Lib.PickStrapon()
 	endIf
-	; Strapons are enabled for this position, and they are female in a male position
-	Lib.UnequipStrapon(ActorRef)
+	if strapon != none && !ActorRef.IsEquipped(strapon)
+		ActorRef.EquipItem(strapon, false, true)
+	endIf
+endFunction
+
+function RemoveStrapon()
+	if strapon == none || (strapon != none && !ActorRef.IsEquipped(strapon))
+		return ; Nothing to remove
+	endIf
+	ActorRef.UnequipItem(strapon, false, true)
+	ActorRef.RemoveItem(strapon, 1, true)
 endFunction
 
 ;/-----------------------------------------------\;
@@ -245,15 +231,25 @@ function AnimationExtras()
 		Debug.SendAnimationEvent(ActorRef, bend)
 		; Debug.SendAnimationEvent(ActorRef, "SOSBend"+offset)
 	endif
+	; Equip Strapon if needed
+	If IsFemale
+		bool MalePosition = Animation.GetGender(position) == 0
+		bool StraponPosition = Animation.UseStrapon(position, stage)
+		if MalePosition && StraponPosition && Lib.bUseStrapons
+			EquipStrapon()
+		; Remove strapon if not needed and is equipped
+		elseIf !MalePosition || (MalePosition && !StraponPosition)
+			RemoveStrapon()
+		endIf
+	endIf
 endfunction
 
 function StopAnimating(bool quick = false)
+	; Detach from marker
+	ClearMarker()
 	; Apply cum
-	if !quick && Animation.IsSexual && Lib.bUseCum
-		int[] genders = Lib.GenderCount(Controller.Positions)
-		if genders[0] > 0 || (genders[0] == 0 && genders[1] > 1 && Lib.bAllowFFCum)
-			Lib.ApplyCum(ActorRef, Animation.GetCum(position))
-		endIf
+	if !quick && !IsCreature && Lib.bUseCum && (Lib.MaleCount(Controller.Positions) > 0 || Lib.bAllowFFCum)
+		Lib.ApplyCum(ActorRef, Animation.GetCum(position))
 	endIf
 	if IsCreature
 		; Reset Creature Idle
@@ -268,7 +264,6 @@ function StopAnimating(bool quick = false)
 	else
 		; Ragdoll NPC/PC
 		ActorRef.PushActorAway(ActorRef, 1)
-		Utility.Wait(2.0)
 	endIf
 endFunction
 
@@ -295,9 +290,11 @@ endfunction
 
 function Snap()
 	ActorRef.SetVehicle(MarkerRef)
-	ActorRef.SetAngle(loc[3], loc[4], loc[5])
-	ActorRef.SetVehicle(MarkerRef)
-	ActorRef.TranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 1500, 1)
+	if ActorRef.GetDistance(MarkerRef) > 0.70
+		ActorRef.SetAngle(loc[3], loc[4], loc[5])
+		ActorRef.SetVehicle(MarkerRef)
+		ActorRef.TranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 2500, 0)
+	endIf
 endFunction
 
 function Strip(bool animate = true)
@@ -373,7 +370,7 @@ function SyncThread(int toPosition)
 		stage = toStage
 		; Update Silence
 		IsSilent = toAnimation.IsSilent(position, stage)
-		if IsSilent
+		if IsSilent || IsCreature
 			; VoiceDelay is used as loop timer, must be set even if silent.
 			VoiceDelay = 4.0
 		else
@@ -383,7 +380,7 @@ function SyncThread(int toPosition)
 				VoiceStrength = 0.50
 			endIf
 			; Base Delay
-			if Lib.GetGender(ActorRef) < 1
+			if !IsFemale
 				VoiceDelay = Lib.fMaleVoiceDelay
 			else
 				VoiceDelay = Lib.fFemaleVoiceDelay
@@ -398,8 +395,9 @@ function SyncThread(int toPosition)
 			endIf
 		endIf
 	endIf
-	; Update Animation
+	; Update Change
 	if Animation != toAnimation
+		; Update animation
 		RemoveExtras()
 		Animation = toAnimation
 		EquipExtras()
@@ -439,7 +437,7 @@ endState
 
 state Animating
 	event OnUpdate()
-		if ActorRef.IsDead() || ActorRef.IsBleedingOut() || !ActorRef.Is3DLoaded()
+		if ActorRef.IsDead() || ActorRef.IsBleedingOut()
 			Controller.EndAnimation(true)
 			return
 		endIf
@@ -470,9 +468,12 @@ endEvent
 
 event OnEndThread(string eventName, string actorSlot, float quick, form sender)
 	UnregisterForModEvent("EndThread")
+	UnregisterForUpdate()
+	ClearMarker()
 	ResetActor()
-	StopAnimating((quick as bool))
 	UnlockActor()
+	StopAnimating((quick as bool))
+	GoToState("")
 	ClearAlias()
 endEvent
 

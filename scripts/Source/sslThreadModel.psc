@@ -12,7 +12,7 @@ bool making
 
 ; Actors
 actor[] property Positions auto hidden 
-sslActorAlias[] property ActorAlias auto hidden
+sslActorAlias[] ActorSlots
 
 ; Animations
 int property Stage auto hidden
@@ -37,6 +37,12 @@ float timeout
 Race CreatureRef
 
 ; Thread Instance Info
+sslActorAlias[] property ActorAlias hidden
+	sslActorAlias[] function get()
+		return ActorSlots
+	endFunction
+endProperty
+
 sslBaseAnimation[] property Animations hidden
 	sslBaseAnimation[] function get()
 		if customAnimations.Length > 0
@@ -117,7 +123,7 @@ sslThreadModel function Make(float timeoutIn = 5.0)
 	locked = true
 	making = true
 	timeout = timeoutIn
-	ActorAlias = new sslActorAlias[5]
+	ActorSlots = new sslActorAlias[5]
 	GoToState("Making")
 	RegisterForSingleUpdate(0.1)
 	return self
@@ -425,8 +431,8 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 		; Push actor to positions array
 		Positions = sslUtility.PushActor(position, Positions)
 		id = ActorCount - 1
-		; Save Alias slot
-		ActorAlias[id] = slot
+		; Save Actor/Alias slot
+		ActorSlots[id] = slot
 		; Set as victim
 		if isVictim
 			victim = position
@@ -516,8 +522,8 @@ function ChangeActors(actor[] changeTo)
 		i += 1
 	endWhile
 	; Set new actors into thread
-	ActorAlias = newSlots
-	UpdateLocations()
+	ActorSlots = newSlots
+	SyncActors()
 	; End changing
 	SendThreadEvent("ActorChangeEnd")
 endFunction
@@ -571,18 +577,22 @@ endFunction
 ;\-----------------------------------------------/;
 
 int function GetSlot(actor position)
-	int i
-	while i < ActorAlias.Length
-		if ActorAlias[i] != none && ((ActorAlias[i].GetReference() as actor) == position)
+	int i = ActorCount
+	while i
+		i -= 1
+		if ActorSlots[i].ActorRef == position
 			return i
 		endIf
-		i += 1
 	endWhile
 	return -1
 endFunction
 
+sslActorAlias function ActorSlot(int position)
+	return ActorAlias[GetSlot(Positions[position])]
+endFunction
+
 sslActorAlias function ActorAlias(actor position)
-	return ActorAlias[GetSlot(position)] as sslActorAlias
+	return ActorAlias[GetSlot(position)]
 endFunction
 
 int function GetPosition(actor position)
@@ -647,6 +657,14 @@ endFunction
 ;|	Utility Functions                            |;
 ;\-----------------------------------------------/;
 
+function SyncActors()
+	int i = ActorCount
+	while i
+		i -= 1
+		ActorSlot(i).SyncThread(i)
+	endWhile
+endFunction
+
 function SendThreadEvent(string eventName, float argNum = 0.0)
 	if !active
 		return
@@ -685,6 +703,13 @@ int function ArrayWrap(int value, int max)
 endFunction
 
 float function SignFloat(float value, bool sign)
+	if sign
+		return value * -1
+	endIf
+	return value
+endFunction
+
+int function SignInt(int value, bool sign)
 	if sign
 		return value * -1
 	endIf
@@ -761,14 +786,14 @@ function Initialize()
 	victim = none
 	; Empty alias slots
 	int i = 0
-	while i < ActorAlias.Length
-		if ActorAlias[i] != none
-			ActorAlias[i].ClearAlias()
+	while i < ActorSlots.Length
+		if ActorSlots[i] != none
+			ActorSlots[i].ClearAlias()
 		endIf
 		i += 1
 	endWhile
 	sslActorAlias[] aaDel
-	ActorAlias = aaDel
+	ActorSlots = aaDel
 	; Empty Floats
 	float[] fDel
 	centerLoc = fDel

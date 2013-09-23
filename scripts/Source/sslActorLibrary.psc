@@ -104,14 +104,12 @@ int function ValidateActor(actor position)
 	endIf
 
 	if position.HasKeyWordString("ActorTypeAnimal") || position.HasKeyWordString("ActorTypeCreature") || position.HasKeyWordString("ActorTypeDwarven") || position.HasKeyWordString("ActorTypeDaedra")
-		Debug.Trace("Validating race: "+ActorRace.GetName())
-		if AnimLib.AllowedCreature(ActorRace)
-			return 2
-		else
-			Debug.Trace("Failed to add actor to animation; actor is a creature that is currently not supported")
+		if !AnimLib.AllowedCreature(ActorRace)
+			Debug.Trace("Failed to add actor to animation; actor is a creature that is currently not supported ("+ActorRace.GetName()+")")
 			return -16
 		endIf
 	endIf
+
 	return 1
 endFunction
 
@@ -284,16 +282,19 @@ function UnstripActor(actor a, form[] stripped, actor victim = none)
 	endWhile
 endFunction
 
-form function EquipStrapon(actor a)
+form function PickStrapon()
 	int straponCount = Strapons.Length
 	if straponCount == 0
 		return none
 	endIf
+	return Strapons[utility.RandomInt(0, straponCount - 1)]
+endFunction
 
+form function EquipStrapon(actor a)
 	if GetGender(a) == 1
-		int sid = utility.RandomInt(0, straponCount - 1)
-		a.EquipItem(Strapons[sid], false, true)
-		return Strapons[sid]
+		form strapon = PickStrapon()
+		a.EquipItem(strapon, false, true)
+		return strapon
 	else
 		return none
 	endIf
@@ -304,7 +305,6 @@ function UnequipStrapon(actor a)
 	if straponCount == 0
 		return
 	endIf
-
 	if GetGender(a) == 1
 		int i = 0
 		while i < straponCount

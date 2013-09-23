@@ -152,7 +152,6 @@ state Advancing
 					i += 1
 				endWhile
 			endIf
-			RealignActors()
 			SendThreadEvent("LeadInEnd")			
 		endIf
 		; Start Animations loop
@@ -162,7 +161,7 @@ endState
 
 state Animating
 	event OnBeginState()
-		if !LeadIn && Stage == Animation.StageCount
+		if !LeadIn && Stage >= Animation.StageCount
 			SendThreadEvent("OrgasmStart")
 		else
 			SendThreadEvent("StageStart")
@@ -176,29 +175,12 @@ state Animating
 			sfx[0] = 0.80
 		endIf
 		; Inform ActorAlias of stage
-		int i
-		while i < ActorCount
-			ActorAlias[i].SyncThread(i)
-			i += 1
-		endWhile
+		SyncActors()
 		; Start animation looping
 		PlayAnimation()
 		looping = true
 		UpdateTimer(Animation.GetStageTimer(stage))
 		RegisterForSingleUpdate(0.10)
-		; Check if realignment is needed
-		; if stagePrev != 0
-		; 	i = 0
-		; 	while i < ActorCount
-		; 		float[] prev = Animation.GetPositionOffsets(i, stagePrev)
-		; 		float[] next = Animation.GetPositionOffsets(i, stage)
-		; 		if (prev[0] != next[0]) || (prev[1] != next[1]) || (prev[2] != next[2])
-		; 			MoveActors()
-		; 			return
-		; 		endIf
-		; 		i += 1
-		; 	endWhile
-		; endIf
 	endEvent
 	event OnUpdate()
 		if !looping
@@ -218,7 +200,7 @@ state Animating
 		RegisterForSingleUpdate(0.60)
 	endEvent
 	event OnEndState()
-		if !LeadIn && Stage == Animation.StageCount
+		if !LeadIn && Stage >= Animation.StageCount
 			SendThreadEvent("OrgasmEnd")
 		else
 			SendThreadEvent("StageEnd")
@@ -244,27 +226,19 @@ function ChangeAnimation(bool backwards = false)
 	if Animations.Length == 1
 		return ; Single animation selected, nothing to change to
 	endIf
-	if backwards
-		aid = ArrayWrap((aid - 1), Animations.Length)
-	else
-		aid = ArrayWrap((aid + 1), Animations.Length)
-	endIf
+	aid = ArrayWrap((aid + SignInt(1, backwards)), Animations.Length)
 	SetAnimation(aid)
+	SyncActors()
 	RealignActors()
 	SendThreadEvent("AnimationChange")
 endFunction
 
 function ChangePositions(bool backwards = false)
 	if ActorCount < 2 || HasCreature
-		return ; Solo Animation, nobody to swap with
+		return ; Solo/Creature Animation, nobody to swap with
 	endIf
 	; Set direction of swapping
-	int MovedTo
-	if backwards
-		MovedTo = ArrayWrap((AdjustingPosition - 1), ActorCount)
-	else
-		MovedTo = ArrayWrap((AdjustingPosition + 1), ActorCount)
-	endIf
+	int MovedTo = ArrayWrap((AdjustingPosition + SignInt(1, backwards)), ActorCount)
 	; Actors to swap
 	actor adjusting = Positions[AdjustingPosition]
 	actor moved = Positions[MovedTo]
@@ -277,9 +251,7 @@ function ChangePositions(bool backwards = false)
 	NewPositions[MovedTo] = adjusting
 	Positions = NewPositions
 	; Sync new positions
-	AdjustAlias.SyncThread(GetPosition(adjusting))
-	MovedAlias.SyncThread(GetPosition(moved))
-	; Restart animations
+	SyncActors()
 	RealignActors()
 	AdjustChange(backwards)
 	SendThreadEvent("PositionChange")
@@ -288,39 +260,34 @@ endFunction
 function AdjustForward(bool backwards = false, bool adjuststage = false)
 	float adjustment = SignFloat(0.75, backwards)
 	Animation.UpdateForward(AdjustingPosition, stage, adjustment, adjuststage)
-	ActorAlias(Positions[AdjustingPosition]).AlignTo(Animation.GetPositionOffsets(AdjustingPosition, stage))
+	ActorSlot(AdjustingPosition).AlignTo(Animation.GetPositionOffsets(AdjustingPosition, stage))
 endFunction
 
 function AdjustSideways(bool backwards = false, bool adjuststage = false)
 	float adjustment = SignFloat(0.75, backwards)
 	Animation.UpdateSide(AdjustingPosition, stage, adjustment, adjuststage)
-	ActorAlias(Positions[AdjustingPosition]).AlignTo(Animation.GetPositionOffsets(AdjustingPosition, stage))
+	ActorSlot(AdjustingPosition).AlignTo(Animation.GetPositionOffsets(AdjustingPosition, stage))
 endFunction
 
 function AdjustUpward(bool backwards = false, bool adjuststage = false)
 	float adjustment = SignFloat(0.75, backwards)
 	Animation.UpdateUp(AdjustingPosition, stage, adjustment, adjuststage)
-	ActorAlias(Positions[AdjustingPosition]).AlignTo(Animation.GetPositionOffsets(AdjustingPosition, stage))
+	ActorSlot(AdjustingPosition).AlignTo(Animation.GetPositionOffsets(AdjustingPosition, stage))
 endFunction
 
 function RotateScene(bool backwards = false)
-	; Adjust current center's Z angle
 	AdjustRotation(SignFloat(45, backwards))
 	UpdateLocations()
 endFunction
 
 function AdjustChange(bool backwards = false)
-	if backwards
-		AdjustingPosition = ArrayWrap((AdjustingPosition - 1), ActorCount)
-	else
-		AdjustingPosition = ArrayWrap((AdjustingPosition + 1), ActorCount)
-	endIf
-	AdjustingPosition = ArrayWrap((AdjustingPosition - 1), ActorCount)
+	AdjustingPosition = ArrayWrap((AdjustingPosition + SignInt(1, backwards)), ActorCount)
 	Lib.mAdjustChange.Show((AdjustingPosition + 1))
 endFunction
 
 function RestoreOffsets()
 	Animation.RestoreOffsets()
+	SyncActors()
 	RealignActors()
 endFunction
 
@@ -358,16 +325,7 @@ endFunction
 
 function RealignActors()
 	PlayAnimation()
-	UpdateLocations()
-endFunction
-
-function UpdateLocations()
-	PlayAnimation()
-	int i
-	while i < ActorCount
-		ActorAlias[i].AlignTo(Animation.GetPositionOffsets(i, stage))
-		i += 1
-	endWhile
+	MoveActors()
 endFunction
 
 function MoveActors()
@@ -376,6 +334,15 @@ function MoveActors()
 		ActorAlias[i].Snap()
 		i += 1
 	endWhile
+endFunction
+
+function UpdateLocations()
+	int i
+	while i < ActorCount
+		ActorAlias[i].AlignTo(Animation.GetPositionOffsets(i, stage))
+		i += 1
+	endWhile
+	RealignActors()
 endFunction
 
 ;/-----------------------------------------------\;
@@ -393,11 +360,7 @@ function SetAnimation(int anim = -1)
 	; Set SFX Marker
 	sfxType = Lib.GetSFX(Animation.SFX)
 	; Update with new animation
-	int i = 0
-	while i < ActorCount
-		ActorAlias[i].SyncThread(i)
-		i += 1
-	endWhile
+	SyncActors()
 	; Check for animation specific stage timer
 	float stagetimer = AnimCurrent.GetStageTimer(stage)
 	if stagetimer > 0.0

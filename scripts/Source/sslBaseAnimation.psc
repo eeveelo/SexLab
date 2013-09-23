@@ -138,12 +138,16 @@ int function AddPositionStage(int position, string animation, float forward = 0.
 	else
 		stage = ( animations.Length - (position * stages) )
 	endIf
-
+	; Set current
 	offsetData = sslUtility.PushFloat(forward, offsetData)
 	offsetData = sslUtility.PushFloat(side, offsetData)
 	offsetData = sslUtility.PushFloat(up, offsetData)
 	offsetData = sslUtility.PushFloat(rotate, offsetData)
-	offsetDefaults = offsetData
+	; Copy for defaults
+	offsetDefaults = sslUtility.PushFloat(forward, offsetDefaults)
+	offsetDefaults = sslUtility.PushFloat(side, offsetDefaults)
+	offsetDefaults = sslUtility.PushFloat(up, offsetDefaults)
+	offsetDefaults = sslUtility.PushFloat(rotate, offsetDefaults)
 	if !IsSexual()
 		strapon = false
 	endIf
@@ -305,8 +309,12 @@ function UpdateUp(int position, int stage, float adjust, bool adjuststage = fals
 endFunction
 
 function RestoreOffsets()
-	float[] defaults = offsetDefaults
-	offsetData = defaults
+	;float[] defaults = offsetDefaults
+	float[] fDel
+	offsetData = fDel
+	debug.trace(offsetData) 
+	offsetData = offsetDefaults
+	debug.trace(offsetData)
 endFunction
 
 ;/-----------------------------------------------\;
@@ -417,8 +425,35 @@ form[] function GetExtras(int position)
 	elseIf position == 4
 		return extras5
 	else
-		return none
-		debug.trace("----SLAB ERROR sslBaseAnimation GetExtras() "+name+"--- Unknown position "+position)
+		form[] null
+		return null
+	endIf
+endFunction
+
+function EquipExtras(int position, actor a)
+	form[] extras = GetExtras(position)
+	if extras.Length > 0
+		int i = extras.Length
+		while i
+			i -= 1
+			if extras[i] != none
+				a.EquipItem(extras[i], false, true)
+			endIf
+		endWhile
+	endIf
+endFunction
+
+function RemoveExtras(int position, actor a)
+	form[] extras = GetExtras(position)
+	if extras.Length > 0
+		int i = extras.Length
+		while i
+			i -= 1
+			if extras[i] != none
+				a.UnequipItem(extras[i], false, true)
+				a.RemoveItem(extras[i], 1, true)
+			endIf
+		endWhile
 	endIf
 endFunction
 
