@@ -475,8 +475,8 @@ function _Defaults()
 	fMaleVoiceDelay = 7.0
 	fFemaleVoiceDelay = 6.0
 	fVoiceVolume = 0.7
-	bEnableTCL = true 
-	bScaleActors = true
+	bEnableTCL = false
+	bScaleActors = false
 	bUseCum = true
 	bAllowFFCum = false
 	fCumTimer = 120.0

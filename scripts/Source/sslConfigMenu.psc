@@ -506,7 +506,7 @@ state UndressAnimation
 		SetToggleOptionValueST(ActorLib.bUndressAnimation)
 	endEvent
 	event OnDefaultST()
-		ActorLib.bUndressAnimation = true
+		ActorLib.bUndressAnimation = false
 		SetToggleOptionValueST(ActorLib.bUndressAnimation)
 	endEvent
 	event OnHighlightST()
@@ -661,7 +661,7 @@ state PlayerTCL
 		SetToggleOptionValueST(ActorLib.bEnableTCL)
 	endEvent
 	event OnDefaultST()
-		ActorLib.bEnableTCL = true
+		ActorLib.bEnableTCL = false
 		SetToggleOptionValueST(ActorLib.bEnableTCL)
 	endEvent
 	event OnHighlightST()
