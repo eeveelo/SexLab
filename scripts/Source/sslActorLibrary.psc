@@ -333,24 +333,24 @@ function ClearForcedGender(actor a)
 endFunction
 
 int function GetGender(actor a)
-	if a.GetFactionRank(GenderFaction) == 0 || a.HasKeywordString("SexLabTreatMale")
-		return 0
+	ActorBase Base = a.GetLeveledActorBase()
+	if AnimLib.CreatureSlots.HasRace(Base.GetRace())
+		return 2 ; Creature
+	elseif a.GetFactionRank(GenderFaction) == 0 || a.HasKeywordString("SexLabTreatMale")
+		return 0 ; Male
 	elseif a.GetFactionRank(GenderFaction) == 1 || a.HasKeywordString("SexLabTreatFemale")
-		return 1
+		return 1 ; Female
 	else
-		return a.GetLeveledActorBase().GetSex()
+		return Base.GetSex() ; Default
 	endIf
 endFunction
 
 int[] function GenderCount(actor[] pos)
-	int[] genders = new int[2]
+	int[] genders = new int[3]
 	int i = 0
 	while i < pos.Length
-		if GetGender(pos[i]) > 0
-			genders[1] = ( genders[1] + 1 )
-		else
-			genders[0] = ( genders[0] + 1 )
-		endIf
+		int g = GetGender(pos[i])
+		genders[g] = genders[g] + 1
 		i += 1
 	endWhile
 	return genders
@@ -364,6 +364,11 @@ endFunction
 int function FemaleCount(actor[] pos)
 	int[] gender = GenderCount(pos)
 	return gender[1]
+endFunction
+
+int function CreatureCount(actor[] pos)
+	int[] gender = GenderCount(pos)
+	return gender[2]
 endFunction
 
 ;#---------------------------#
