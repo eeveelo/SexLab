@@ -41,7 +41,6 @@ endfunction
 ;|	Callback Animation Property Shortcuts        |;
 ;\-----------------------------------------------/;
 
-
 function AddRace(Race creatureRace)
 	Animation.AddRace(creatureRace)
 	Slots.AddRace(creatureRace)

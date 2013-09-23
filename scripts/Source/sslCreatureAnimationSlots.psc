@@ -4,13 +4,12 @@ sslCreatureAnimationDefaults property CreatureDefaults auto
 
 Form[] ValidRaces
 
-
 sslBaseAnimation[] function GetByRace(int actors, Race creature)
 	sslBaseAnimation[] output
 	int i
 	while i < Slotted
-		sslBaseAnimation anim = Slots[i]
-		if Searchable(anim) && anim.HasRace(creature) && actors == anim.ActorCount()
+		sslBaseAnimation Anim = Slots[i]
+		if Searchable(anim) && Anim.HasRace(creature) && actors == Anim.ActorCount()
 			output = sslUtility.PushAnimation(anim, output)
 		endIf
 		i += 1
@@ -19,10 +18,11 @@ sslBaseAnimation[] function GetByRace(int actors, Race creature)
 	return output
 endFunction
 
-bool function HasAnimation(Race creature)
+bool function HasAnimation(Race creature, Race creature2 = none)
 	int i
 	while i < Slotted
-		if Slots[i].Registered && Slots[i].HasRace(creature) && Slots[i].Enabled
+		sslBaseAnimation Anim = Slots[i]
+		if Anim.Registered && Anim.HasRace(creature) && (creature2 == none || Anim.HasRace(creature2))
 			return true
 		endIf
 		i += 1
@@ -30,14 +30,14 @@ bool function HasAnimation(Race creature)
 	return false
 endFunction
 
+bool function HasRace(Race creature)
+	return ValidRaces.Length != 0 && ValidRaces.Find(creature) != -1
+endFunction
+
 function AddRace(Race creature)
 	if !HasRace(creature)
 		ValidRaces = sslUtility.PushForm(creature, ValidRaces)
 	endIf
-endFunction
-
-bool function HasRace(Race creature)
-	return ValidRaces.Find(creature) != -1
 endFunction
 
 function _Setup()
@@ -59,4 +59,10 @@ function _Setup()
 	CreatureDefaults.LoadAnimations()
 
 	SendModEvent("SexLabSlotCreatureAnimations")
+endFunction
+
+function Initialize()
+	parent.Initialize()
+	form[] fDel
+	ValidRaces = fDel
 endFunction
