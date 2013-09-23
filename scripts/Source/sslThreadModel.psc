@@ -5,10 +5,7 @@ scriptname sslThreadModel extends ReferenceAlias
 sslThreadLibrary property Lib auto
 
 ; Locks
-bool waiting
-bool locked
 bool active
-bool making
 
 ; Actors
 actor[] property Positions auto hidden 
@@ -34,7 +31,7 @@ actor victim
 string hook
 int bed ; 0 allow, 1 in use, 2 force, -1 forbid
 float timeout
-Race CreatureRef
+Race Creature
 
 ; Thread Instance Info
 sslActorAlias[] property ActorAlias hidden
@@ -63,13 +60,13 @@ endProperty
 
 bool property HasCreature hidden
 	bool function get()
-		return CreatureRef != none
+		return Creature != none
 	endFunction
 endProperty
 
-Race property Creature hidden
+Race property CreatureRef hidden
 	Race function get()
-		return CreatureRef
+		return Creature
 	endFunction
 endProperty
 
@@ -91,12 +88,6 @@ float[] property CenterLocation hidden
 	endFunction
 endProperty
 
-bool property IsLocked hidden
-	bool function get()
-		return locked
-	endFunction
-endProperty
-
 float[] property Timers hidden
 	float[] function get()
 		if customtimers.Length > 0
@@ -111,192 +102,190 @@ float[] property Timers hidden
 	endFunction
 endProperty
 
+bool property IsLocked hidden
+	bool function get()
+		return GetState() != "Unlocked"
+	endFunction
+endProperty
+
 ;/-----------------------------------------------\;
 ;|	Preparation Functions                        |;
 ;\-----------------------------------------------/;
 
 sslThreadModel function Make(float timeoutIn = 5.0)
-	if locked
+	if GetState() != "Unlocked"
 		return none
 	endIf
 	Initialize()
-	locked = true
-	making = true
 	timeout = timeoutIn
 	ActorSlots = new sslActorAlias[5]
 	GoToState("Making")
-	RegisterForSingleUpdate(0.1)
+	RegisterForSingleUpdate(timeoutIn)
 	return self
 endFunction
 
 state Making
 	event OnUpdate()
-		if !making
-			return
-		endIf
-		making = false
-		; Make timer
-		float expire = Utility.GetCurrentRealTime() + timeout
-		while expire > Utility.GetCurrentRealTime()
-			if active || !locked
-				return
-			endIf
-		  Utility.Wait(0.5)
-		endwhile
-		; Check if need to reset
 		if !active
-			_Log("ThreadController["+tid+"] has timed out; resetting model for selection pool", "Make", "NOTICE")
-			GoToState("Idle")
-			return
+			_Log("Thread has timed out of the making process; resetting model for selection pool", "Make", "FATAL")
 		endIf
 	endEvent
-endState
 
-sslThreadController function StartThread()
-	if !_MakeWait("StartThread")
-		return none
-	elseif ActorCount == 0
-		_Log("No valid actors available for animation", "StartThread", "FATAL")
-		return none
-	endIf
-
-	int actors = ActorCount
-
-	int i = 0
-	; Check for duplicate actors
-	while i < actors
-		if Positions.Find(Positions[i]) != Positions.RFind(Positions[i])
-			_Log("Duplicate actor found in list", "StartThread", "FATAL")
+	sslThreadController function StartThread()
+		if !Locked("StartThread")
+			return none
+		elseif ActorCount == 0
+			_Log("No valid actors available for animation", "StartThread", "FATAL")
 			return none
 		endIf
-		i += 1
-	endWhile
 
-	; Check for valid animations
-	if HasCreature
-		primaryAnimations = Lib.CreatureAnimations.GetByRace(actors, Creature)
-		DisableLeadIn(true)
-		; Bail if no valid creature animations
-		if primaryAnimations.Length == 0
-			_Log("Unable to find valid creature animations", "StartThread", "FATAL")
-			return none
-		endIf
-		Positions = Lib.SortCreatures(Positions, primaryAnimations[0])
-	endIf
+		int i
+		int actors = ActorCount
 
-	if primaryAnimations.Length == 0
-		int[] gender = Lib.Actors.GenderCount(Positions)
-		; Same sex pairings
-		if (gender[1] == 2 && gender[0] == 0) || (gender[0] == 2 && gender[1] == 0)
-			sslBaseAnimation[] samesex = Lib.Animations.GetByType(actors, gender[0], gender[1], aggressive = IsAggressive)
-			sslBaseAnimation[] couples = Lib.Animations.GetByType(actors, 1, 1, aggressive = IsAggressive)
-			primaryAnimations = Lib.Animations.MergeLists(samesex, couples)
-		elseif actors < 3
-			; Grab animations like normal
-			primaryAnimations = Lib.Animations.GetByType(actors, gender[0], gender[1], aggressive = IsAggressive)
-		elseif actors >= 3
-			; Get 3P + animations ignoring gender
-			primaryAnimations = Lib.Animations.GetByType(actors, aggressive = IsAggressive)
-		endIf
-		; Check for valid animations again
-		if primaryAnimations.Length == 0
-			_Log("Unable to find valid animations", "StartThread", "FATAL")
-			return none
-		endIf
-	endIf
-
-	i = 0
-	while i < primaryAnimations.Length
-		if actors != primaryAnimations[i].PositionCount
-			_Log("Primary animation '"+primaryAnimations[i].Name+"' requires "+primaryAnimations[i].PositionCount+" actors, only "+actors+" present", "StartThread", "FATAL")
-			return none
-		endIf
-		i += 1
-	endWhile
-
-	i = 0
-	while i < leadAnimations.Length
-		if actors != leadAnimations[i].PositionCount
-			_Log("Lead in animation '"+leadAnimations[i].Name+"' requires "+leadAnimations[i].PositionCount+" actors, only "+actors+" present", "StartThread", "FATAL")
-			return none
-		endIf
-		i += 1
-	endWhile
-
-	; Determine if foreplay lead in should be used
-	if leadAnimations.Length == 0 && !IsAggressive && ActorCount == 2 && Lib.bForeplayStage && !leadInDisabled
-		SetLeadAnimations(Lib.Animations.GetByTag(ActorCount, "LeadIn"))
-	endIf
-
-	; Check for center
-	if centerObj == none && bed != -1
-		ObjectReference BedRef
-		; Select a bed
-		if PlayerRef != none
-			BedRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(Lib.BedsList, PlayerRef, 500.0)
-		else
-			BedRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(Lib.BedsList, Positions[0], 500.0)
-		endIf
-		; A bed was selected, should we use it?
-		if BedRef != none && !BedRef.IsFurnitureInUse(true)
-			int useBed = 0
-			if bed == 2 || Lib.sNPCBed == "$SSL_Always"
-				useBed = 1
-			elseIf PlayerRef != none && !IsVictim(PlayerRef) 
-				useBed = Lib.mUseBed.Show()
-			elseIf Lib.sNPCBed == "$SSL_Sometimes"
-				useBed = utility.RandomInt(0,1)
-			endIf
-			if useBed == 1
-				CenterOnObject(BedRef)
-			endIf
-		endIf
-	endIf
-
-	; Find a marker near one of our actors and center there
-	if centerObj == none 
-		i = 0
-		while i < ActorCount
-			ObjectReference marker = Game.FindRandomReferenceOfTypeFromRef(Lib.LocationMarker, Positions[i], 750.0) as ObjectReference
-			if marker != none
-				CenterOnObject(marker)
-				i = ActorCount
+		; Check for duplicate actors
+		while i < actors
+			if Positions.Find(Positions[i]) != Positions.RFind(Positions[i])
+				_Log("Duplicate actor found in list", "StartThread", "FATAL")
+				return none
 			endIf
 			i += 1
 		endWhile
-	endIf
 
-	; Still no center, fallback to something
-	if centerObj == none || centerLoc == none
-		; Fallback to victim
-		if victim != none
-			CenterOnObject(victim)
-		; Fallback to player
-		elseif PlayerRef != none
-			CenterOnObject(GetPlayer())
-		; Fallback to first position actor
-		else
+		; Check for valid animations
+		if HasCreature
+			primaryAnimations = Lib.CreatureAnimations.GetByRace(actors, Creature)
+			DisableLeadIn(true)
+			; Bail if no valid creature animations
+			if primaryAnimations.Length == 0
+				_Log("Unable to find valid creature animations", "StartThread", "FATAL")
+				return none
+			endIf
+			Positions = Lib.SortCreatures(Positions, primaryAnimations[0])
 			CenterOnObject(Positions[0])
 		endIf
-	endIf
 
-	; Enable auto advance
-	if PlayerRef != none
-		if IsVictim(PlayerRef) && Lib.Actors.bDisablePlayer
-			autoAdvance = true
-		else
-			autoAdvance = Lib.bAutoAdvance
+		if primaryAnimations.Length == 0
+			int[] gender = Lib.Actors.GenderCount(Positions)
+			; Same sex pairings
+			if (gender[1] == 2 && gender[0] == 0) || (gender[0] == 2 && gender[1] == 0)
+				sslBaseAnimation[] samesex = Lib.Animations.GetByType(actors, gender[0], gender[1], aggressive = IsAggressive)
+				sslBaseAnimation[] couples = Lib.Animations.GetByType(actors, 1, 1, aggressive = IsAggressive)
+				primaryAnimations = Lib.Animations.MergeLists(samesex, couples)
+			elseif actors < 3
+				; Grab animations like normal
+				primaryAnimations = Lib.Animations.GetByType(actors, gender[0], gender[1], aggressive = IsAggressive)
+			elseif actors >= 3
+				; Get 3P + animations ignoring gender
+				primaryAnimations = Lib.Animations.GetByType(actors, aggressive = IsAggressive)
+			endIf
+			; Check for valid animations again
+			if primaryAnimations.Length == 0
+				_Log("Unable to find valid animations", "StartThread", "FATAL")
+				return none
+			endIf
 		endIf
-	else
-		autoAdvance = true
-	endIf
 
-	; Start the controller
-	sslThreadController controller = PrimeThread()
-	if controller != none	
-		active = true
-		return controller
-	endIf
+		; Determine if foreplay lead in should be used
+		if Lib.bForeplayStage && !leadInDisabled && leadAnimations.Length == 0 && !HasCreature && !IsAggressive && actors == 2
+			SetLeadAnimations(Lib.Animations.GetByTag(2, "LeadIn"))
+		endIf
+
+		; Validate Primary animations
+		i = 0
+		while i < primaryAnimations.Length
+			if actors != primaryAnimations[i].PositionCount
+				_Log("Primary animation '"+primaryAnimations[i].Name+"' requires "+primaryAnimations[i].PositionCount+" actors, only "+actors+" present", "StartThread", "FATAL")
+				return none
+			endIf
+			i += 1
+		endWhile
+
+		; Validate Leadin Animations
+		i = 0
+		while i < leadAnimations.Length
+			if actors != leadAnimations[i].PositionCount
+				_Log("Lead in animation '"+leadAnimations[i].Name+"' requires "+leadAnimations[i].PositionCount+" actors, only "+actors+" present", "StartThread", "FATAL")
+				return none
+			endIf
+			i += 1
+		endWhile
+
+		; Check for center
+		if centerObj == none && bed != -1
+			ObjectReference BedRef
+			; Select a bed
+			if PlayerRef != none
+				BedRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(Lib.BedsList, PlayerRef, 600.0)
+			else
+				BedRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(Lib.BedsList, Positions[0], 600.0)
+			endIf
+			; A bed was selected, should we use it?
+			if BedRef != none && !BedRef.IsFurnitureInUse(true)
+				int useBed = 0
+				if bed == 2 || Lib.sNPCBed == "$SSL_Always"
+					useBed = 1
+				elseIf PlayerRef != none && !IsVictim(PlayerRef) 
+					useBed = Lib.mUseBed.Show()
+				elseIf Lib.sNPCBed == "$SSL_Sometimes"
+					useBed = utility.RandomInt(0, 1)
+				endIf
+				if useBed == 1
+					CenterOnObject(BedRef)
+				endIf
+			endIf
+		endIf
+
+		; Find a marker near one of our actors and center there
+		if centerObj == none 
+			i = 0
+			while i < actors
+				ObjectReference marker = Game.FindRandomReferenceOfTypeFromRef(Lib.LocationMarker, Positions[i], 750.0) as ObjectReference
+				if marker != none
+					CenterOnObject(marker)
+					i = actors
+				endIf
+				i += 1
+			endWhile
+		endIf
+
+		; Still no center, fallback to something
+		if centerObj == none || centerLoc == none
+			; Fallback to victim
+			if victim != none
+				CenterOnObject(victim)
+			; Fallback to player
+			elseif PlayerRef != none
+				CenterOnObject(GetPlayer())
+			; Fallback to first position actor
+			else
+				CenterOnObject(Positions[0])
+			endIf
+		endIf
+
+		; Enable auto advance
+		if PlayerRef != none
+			if IsVictim(PlayerRef) && Lib.Actors.bDisablePlayer
+				AutoAdvance = true
+			else
+				AutoAdvance = Lib.bAutoAdvance
+			endIf
+		else
+			AutoAdvance = true
+		endIf
+
+		; Start the controller
+		sslThreadController Controller = PrimeThread()
+		if Controller != none
+			active = true
+			return Controller
+		endIf
+		return none
+	endFunction
+endState
+
+
+sslThreadController function StartThread()
+	Debug.Trace("Cannot start thread while not in a Making state")
 	return none
 endFunction
 
@@ -305,7 +294,7 @@ endFunction
 ;\-----------------------------------------------/;
 
 function SetHook(string hookName)
-	if !_MakeWait("SetHook")
+	if !Locked("SetHook")
 		return
 	endIf
 	hook = hookName
@@ -327,9 +316,7 @@ float[] function GetCoords(ObjectReference Object)
 endFunction
 
 function CenterOnObject(ObjectReference centerOn, bool resync = true)
-	if !_MakeWait("CenterOnObject")
-		return none
-	elseIf centerOn == none
+	if !Locked("CenterOnObject") || centerOn == none
 		return none
 	endIf
 	
@@ -354,12 +341,15 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 	endIf
 
 	if active && resync
-		UpdateLocations()
+		SyncActors()
 		SendThreadEvent("ActorsRelocated")
 	endIf
 endFunction
 
 function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, float RotX = 0.0, float RotY = 0.0, float RotZ = 0.0, bool resync = true)
+	if !Locked("CenterOnCoords")
+		return none
+	endIf
 	centerLoc = new float[6]
 	centerLoc[0] = LocX
 	centerLoc[1] = LocY
@@ -368,12 +358,15 @@ function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, fl
 	centerLoc[4] = RotY
 	centerLoc[5] = RotZ
 	if active && resync
-		UpdateLocations()
+		SyncActors()
 		SendThreadEvent("ActorsRelocated")
 	endIf
 endFunction
 
 function AdjustRotation(float adjust)
+	if !Locked("AdjustRotation")
+		return none
+	endIf
 	centerLoc[5] = centerLoc[5] + adjust
 	if centerLoc[5] >= 360
 		centerLoc[5] = ( centerLoc[5] - 360 )
@@ -383,14 +376,14 @@ function AdjustRotation(float adjust)
 endFunction
 
 function SetBedding(int set = 0)
-	if !_MakeWait("SetBedding")
+	if !Locked("SetBedding")
 		return
 	endIf
 	bed = set
 endFunction
 
 function SetTimers(float[] timers)
-	if !_MakeWait("SetTimers")
+	if !Locked("SetTimers")
 		return
 	elseif timers.Length < 1
 		_Log("Empty timers given.", "SetTimers")
@@ -414,7 +407,7 @@ endfunction
 ;\-----------------------------------------------/;
 
 int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice = none, bool forceSilent = false)
-	if !_MakeWait("AddActor")
+	if !Locked("AddActor")
 		return -1
 	elseIf ActorCount >= 5
 		_Log("No available actor positions", "AddActor")
@@ -423,39 +416,40 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 		_Log("Duplicate actor", "AddActor")
 		return -1
 	endIf
-	waiting = true
 
 	int id = -1
 	sslActorAlias slot = Lib.Actors.Slots.SlotActor(position, self as sslThreadController)
-	if slot != none
-		; Push actor to positions array
-		Positions = sslUtility.PushActor(position, Positions)
-		id = ActorCount - 1
-		; Save Actor/Alias slot
-		ActorSlots[id] = slot
-		; Set as victim
-		if isVictim
-			victim = position
+	if slot == none
+		_Log("Failed to slot actor '"+position+"'", "AddActor", "FATAL")
+		return -1
+	elseif slot.IsCreature()
+		Race PosCreature = position.GetLeveledActorBase().GetRace()
+		if Creature != none && !Lib.Actors.AnimLib.AllowedCreatureCombination(PosCreature, Creature)
+			_Log("Invalid creature race combination '"+Creature.GetName()+"' & '"+PosCreature.GetName()+"'", "AddActor", "FATAL")
+			return -1
 		endIf
+		Creature = PosCreature
+	else
 		; Check for player
 		if position == Lib.PlayerRef
 			PlayerRef = position
 		endIf
-		if !slot.IsCreature()
-			; Pick voice for non creatures
-			if voice == none && !forceSilent
-				voice = Lib.Voices.PickVoice(position)
-			endIf
-			slot.SetVoice(voice)
-		else
-			; Set controller as creature thread
-			CreatureRef = position.GetLeveledActorBase().GetRace()
+		; Pick voice for non creatures
+		if voice == none && !forceSilent
+			voice = Lib.Voices.PickVoice(position)
 		endIf
-	else
-		_Log("Failed to slot actor '"+position+"'", "AddActor", "FATAL")
+		slot.SetVoice(voice)
+	endIf
+	; Push actor to positions array
+	Positions = sslUtility.PushActor(position, Positions)
+	id = ActorCount - 1
+	; Save Actor/Alias slot
+	ActorSlots[id] = slot
+	; Set as victim
+	if isVictim
+		victim = position
 	endIf
 
-	waiting = false
 	return id
 endFunction
 
@@ -495,7 +489,7 @@ function ChangeActors(actor[] changeTo)
 			clearing.StopAnimating(true)
 			clearing.ClearAlias()
 			if IsPlayerPosition(i)
-				autoAdvance = true
+				AutoAdvance = true
 			endIf
 		endIf
 		i += 1
@@ -600,7 +594,7 @@ int function GetPosition(actor position)
 endFunction
 
 function SetStrip(actor position, bool[] strip)
-	if !_MakeWait("SetActor")
+	if !Locked("SetActor")
 		return
 	elseif strip.Length != 33
 		_Log("Malformed strip bool[] passed, must be 33 length bool array, "+strip.Length+" given", "SetStrip")
@@ -716,14 +710,9 @@ int function SignInt(int value, bool sign)
 	return value
 endFunction
 
-bool function _MakeWait(string method)
-	; Ready wait
-	while waiting && locked
-		Utility.Wait(0.10)
-	endWhile
-	; Not spooled, bail.
-	if !locked
-		_Log("Unsafe attempt to modify unlocked thread "+self, method, "FATAL")
+bool function Locked(string method)
+	if GetState() == "Unlocked"
+		_Log("Unsafe attempt to modify unlocked thread["+tid+"]", method, "FATAL")
 		return false
 	endIf
 	return true
@@ -760,23 +749,14 @@ endFunction
 ;|	Ending Functions                             |;
 ;\-----------------------------------------------/;
 
-auto state Idle
-	event OnBeginState()
-		Initialize()
-		locked = false
-	endEvent
-endState
-
 function UnlockThread()
 	Initialize()
-	GoToState("Idle")
+	GotoState("Unlocked")
 endFunction
 
 function Initialize()
 	; Set states
-	waiting = false
 	active = false
-	making = false
 	; Empty Strings
 	hook = ""
 	Logging = "trace"
@@ -802,7 +782,7 @@ function Initialize()
 	; Empty bools
 	leadIn = false
 	leadInDisabled = false
-	autoAdvance = false
+	AutoAdvance = false
 	; Empty forms
 	; Empty integers
 	bed = 0
@@ -815,6 +795,7 @@ function Initialize()
 	; Clear Forms
 	centerObj = none
 	PlayerRef = none
+	creature = none
 endFunction
 
 ;/-----------------------------------------------\;
@@ -830,7 +811,11 @@ endProperty
 
 function _SetThreadID(int threadid)
 	_ThreadID = threadid
+	UnlockThread()
 endFunction
+auto state Unlocked
+endState
+
 sslThreadController function PrimeThread()
 	return none
 endFunction

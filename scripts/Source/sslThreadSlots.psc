@@ -93,7 +93,6 @@ function _StopAll()
 			endIf
 			slot += 1
 		endWhile
-		ThreadView[i].SendThreadEvent("AnimationEnd")
 		ThreadView[i].UnlockThread()
 		i += 1
 	endWhile

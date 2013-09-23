@@ -10,9 +10,12 @@ sslCreatureAnimationSlots property CreatureSlots auto
 bool property bRestrictAggressive auto hidden
 bool property bAllowCreatures auto hidden
 
-
 bool function AllowedCreature(Race creature)
 	return bAllowCreatures && CreatureSlots.HasRace(creature)
+endFunction
+
+bool function AllowedCreatureCombination(Race creature, Race creature2)
+	return bAllowCreatures && CreatureSlots.HasAnimation(creature, creature2)
 endFunction
 
 function _Defaults()

@@ -416,8 +416,6 @@ function EndAnimation(bool quick = false)
 endFunction
 
 function Initialize()
-	; Clear model
-	parent.Initialize()
 	; Set states
 	looping = false
 	; Empty Strings
@@ -440,6 +438,8 @@ function Initialize()
 	AnimCurrent = none
 	; Empty forms
 	sfxType = none
+	; Clear model
+	parent.Initialize()
 endFunction
 
 ;/-----------------------------------------------\;

@@ -521,8 +521,7 @@ endFunction
 ;\-----------------------------------------------/;
 
 bool function HasRace(Race creature)
-	bool output = creatures.Find(creature) != -1
-	return output
+	return creatures.Length != 0 && creatures.Find(creature) != -1
 endFunction
 
 function AddRace(Race creature)

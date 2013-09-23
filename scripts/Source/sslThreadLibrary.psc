@@ -28,15 +28,6 @@ float[] property fStageTimer auto hidden
 float[] property fStageTimerLeadIn auto hidden
 float[] property fStageTimerAggr auto hidden
 
-
-bool function ValidateAnimations(actor[] positions, sslBaseAnimation[] Animations)
-
-
-
-return true
-endFunction
-
-
 Sound function GetSFX(int id)
 	; Squishing
 	if id == 1
