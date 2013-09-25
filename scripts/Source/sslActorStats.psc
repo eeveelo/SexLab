@@ -8,13 +8,13 @@ float property fTimeSpent auto hidden
 float property fSexualPurity auto hidden
 int property iMalePartners auto hidden
 int property iFemalePartners auto hidden
+int property iCreaturePartners auto hidden
 int property iMasturbationCount auto hidden
 int property iAnalCount auto hidden
 int property iVaginalCount auto hidden
 int property iOralCount auto hidden
 int property iVictimCount auto hidden
 int property iAggressorCount auto hidden
-int property iCreatureCount auto hidden
 
 ; Titles
 string[] sStatTitles
@@ -34,12 +34,8 @@ string[] property CustomStats hidden
 endProperty
 
 ;/-----------------------------------------------\;
-;|	Custom Stats                                 |;
+;|	Manipulate Custom Stats                      |;
 ;\-----------------------------------------------/;
-
-int function FindStat(string name)
-	return StatName.Find(name)
-endFunction
 
 int function RegisterStat(string name, string value, string prepend = "", string append = "")
 	int index = FindStat(name)
@@ -72,6 +68,61 @@ function Alter(string name, string newName = "", string value = "", string prepe
 	endIf
 endFunction
 
+string function SetStat(string name, string value)
+	int index = FindStat(name)
+	if index == -1
+		return ""
+	endIf
+	StatValue[index] = value
+	return StatValue[index]
+endFunction
+
+int function AdjustBy(string name, int adjust)
+	int value = GetStatInt(name)
+	value += adjust
+	return SetStat(name, (value as string)) as int
+endFunction
+
+;/-----------------------------------------------\;
+;|	Stat Custom Stat Lookup                      |;
+;\-----------------------------------------------/;
+
+string function GetStat(string name)
+	int index = FindStat(name)
+	if index == -1
+		return ""
+	endIf
+	return StatValue[index]
+endFunction
+
+float function GetStatFloat(string name)
+	return GetStat(name) as float
+endFunction
+
+int function GetStatInt(string name)
+	return GetStat(name) as int
+endFunction
+
+int function GetStatLevel(string name, float curve = 0.65)
+	return CalcLevel(GetStatInt(name), curve)
+endFunction
+
+string function GetStatTitle(string name, float curve = 0.65)
+	return sStatTitles[Clamp(CalcLevel(GetStatInt(name), curve), 6)]
+endFunction
+
+string function GetStatFull(string name)
+	string[] info = GetInfo(name)
+	if info == none
+		return ""
+	endIf 
+	return info[1]+info[0]+info[2]
+endFunction
+
+int function FindStat(string name)
+	return StatName.Find(name)
+endFunction
+
 string[] function GetInfo(string name)
 	int index = FindStat(name)
 	if index == -1
@@ -84,50 +135,32 @@ string[] function GetInfo(string name)
 	return info
 endFunction
 
-string function GetValue(string name)
-	int index = FindStat(name)
-	if index == -1
-		return ""
+;/-----------------------------------------------\;
+;|	Calculate/Parse Stats                        |;
+;\-----------------------------------------------/;
+
+int function CalcSexuality(bool IsFemale, int males, int females)
+	; Calculate "sexuality ratio" 0 = full homosexual, 100 = full heterosexual
+	if IsFemale
+		return (((males + 1.0) / ((males + females + 1) as float)) * 100.0) as int
+	else
+		return (((females + 1.0) / ((males + females + 1) as float)) * 100.0) as int
 	endIf
-	return StatValue[index]
 endFunction
 
-int function GetValueInt(string name)
-	return GetValue(name) as int
+int function CalcLevel(float total, float curve = 0.65)
+	return Math.Sqrt(((Math.Abs(total) + 1.0) / 2.0) * Math.Abs(curve)) as int
 endFunction
 
-string function SetValue(string name, string value)
-	int index = FindStat(name)
-	if index == -1
-		return ""
-	endIf
-	StatValue[index] = value
-	return StatValue[index]
-endFunction
-
-int function AdjustBy(string name, int adjust)
-	int value = GetValueInt(name)
-	value += adjust
-	return SetValue(name, (value as string)) as int
-endFunction
-
-string function GetStat(string name)
-	string[] info = GetInfo(name)
-	if info == none
-		return ""
-	endIf 
-	return info[1]+info[0]+info[2]
-endFunction
-
-string function GetIndex(int index)
-	return GetStat(StatName[index])
+string function ParseTime(int time)
+	return ((time / 3600) as int)+":"+(((time / 60) % 60) as int)+":"+(time % 60 as int)
 endFunction
 
 ;/-----------------------------------------------\;
 ;|	Native Player Stats                          |;
 ;\-----------------------------------------------/;
 
-function UpdatePlayerStats(int males, int females, sslBaseAnimation Animation, actor victim, float time)
+function UpdatePlayerStats(int males, int females, int creatures, sslBaseAnimation Animation, actor victim, float time)
 	if !Animation.IsSexual()
 		return
 	endIf
@@ -136,12 +169,13 @@ function UpdatePlayerStats(int males, int females, sslBaseAnimation Animation, a
 	; Nothing else matters for solo animations
 	if Animation.HasTag("Masturbation")
 		iMasturbationCount += 1
-		AdjustPlayerPurity(-1.0)
+		AdjustPurity(-1.0)
 		return ; Bail
 	endIf
 	; Update partners
 	iMalePartners += males
 	iFemalePartners += females
+	iCreaturePartners += creatures
 	; Don't count players gender in that
 	if Lib.GetGender(Lib.PlayerRef) == 1
 		iFemalePartners -= 1 ; Female Player
@@ -178,54 +212,39 @@ function UpdatePlayerStats(int males, int females, sslBaseAnimation Animation, a
 	else
 		purity = Utility.RandomFloat(-0.8, 0.8)
 	endIf
-	AdjustPlayerPurity(purity * ((males + females) - 1))
+	; Adjuster-ma-jigger.
+	; Adjust base purity by present male/females + subtract purity for each creature present
+	AdjustPurity(purity * ((males + females) - 1) + (creatures * -0.8))
 endFunction
 
-float function AdjustPlayerPurity(float amount)
+float function AdjustPurity(float amount)
 	fSexualPurity += amount
 	return fSexualPurity
 endFunction
 
-int function GetPlayerPurityLevel()
-	; Calculate level
-	int level = Math.Sqrt(((Math.Abs(fSexualPurity) + 1.0) / 2.0) * 0.2) as int
-	; Return signed if impure
-	if fSexualPurity < 0
-		return -level
-	else
-		return level
-	endif
+int function GetPurityLevel()
+	return CalcLevel(fSexualPurity, 0.2)
 endFunction
 
-string function GetPlayerPurityTitle()
-	; Get titles
-	string[] titles
+bool function IsPure()
+	return fSexualPurity >= 0
+endFunction
+
+bool function IsImpure()
+	return fSexualPurity < 0
+endFunction
+
+string function GetPurityTitle()
 	if fSexualPurity < 0
-		titles = sImpureTitles
+		return sImpureTitles[Clamp(GetPurityLevel(), 6)]
 	else
-		titles = sPureTitles
-	endIf
-	; Clamp levels to titles array
-	int level = Math.Abs(GetPlayerPurityLevel()) as int
-	if level > 6
-		return titles[6]
-	elseif level < 0
-		return titles[0]
-	else
-		return titles[level]
+		return sPureTitles[Clamp(GetPurityLevel(), 6)]
 	endIf
 endFunction
 
-string function GetPlayerSexuality()
-	; Check gender
+string function GetSexualityTitle()
 	bool IsFemale = Lib.GetGender(Lib.PlayerRef) == 1
-	; Calculate "straightness ratio" 0 = full gay, 1 = full straight
-	float ratio
-	if IsFemale
-		ratio = ((iMalePartners + 1.0) / ((iMalePartners + iFemalePartners + 1) as float)) * 100.0
-	else
-		ratio = ((iFemalePartners + 1.0) / ((iMalePartners + iFemalePartners + 1) as float)) * 100.0
-	endIf
+	int ratio = CalcSexuality(IsFemale, iMalePartners, iFemalePartners)
 	; Return sexuality title
 	if ratio >= 65
 		return "$SSL_Heterosexual"
@@ -238,31 +257,28 @@ string function GetPlayerSexuality()
 	endIf
 endFunction
 
-int function GetPlayerStatLevel(string type)
-	float val
+int function GetPlayerProficencyLevel(string type)
 	if type == "Vaginal"
-		val = iVaginalCount as float
+		return CalcLevel(iVaginalCount, 0.65)
 	elseIf type == "Anal"
-		val = iAnalCount as float
+		return CalcLevel(iAnalCount, 0.65)
 	elseIf type == "Oral"
-		val = iOralCount as float
-	else
-		return -1
+		return CalcLevel(iOralCount, 0.65)
 	endIf
-	return Math.Sqrt(((val + 1.0) / 2.0) * 0.65) as int ; Return as int to floor value for level number
+	return -1
 endFunction
 
-string function GetPlayerStatTitle(string type)
-	int level = GetPlayerStatLevel(type)
-	; Clamp levels to stat titles array
-	string title
-	if level > 6
-		return sStatTitles[6]
-	elseif level < 0
-		return sStatTitles[0]
-	else
-		return sStatTitles[level]
-	endIf
+string function GetPlayerProficencyTitle(string type)
+	return sStatTitles[Clamp(GetPlayerProficencyLevel(type), 6)]
+endFunction
+
+int function Clamp(int value, int max)
+	if value > max
+		return max
+	elseif value < 0
+		return 0
+	endif
+	return value
 endFunction
 
 function _Setup()
@@ -276,13 +292,13 @@ function _Setup()
 	fSexualPurity = 0.0
 	iMalePartners = 0
 	iFemalePartners = 0
+	iCreaturePartners = 0
 	iMasturbationCount = 0
 	iAnalCount = 0
 	iVaginalCount = 0
 	iOralCount = 0
 	iVictimCount = 0
 	iAggressorCount = 0
-	iCreatureCount = 0
 
 	sPureTitles = new string[7]
 	sPureTitles[0] = "$SSL_Neutral"

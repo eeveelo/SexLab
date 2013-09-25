@@ -317,57 +317,66 @@ string[] function GetInfo(string name)
 	return Stats.GetInfo(name)
 endFunction
 
-string function GetValue(string name)
-	return Stats.GetValue(name)
+string function GetStat(string name)
+	return Stats.GetStat(name)
 endFunction
 
-int function GetValueInt(string name)
-	return Stats.GetValueInt(name)
+int function GetStatInt(string name)
+	return Stats.GetStatInt(name)
 endFunction
 
-string function SetValue(string name, string value)
-	return Stats.SetValue(name, value)
+float function GetStatFloat(string name)
+	return Stats.GetStatFloat(name)
+endFunction
+
+string function SetStat(string name, string value)
+	return Stats.SetStat(name, value)
 endFunction
 
 int function AdjustBy(string name, int adjust)
 	return Stats.AdjustBy(name, adjust)
 endFunction
 
-string function GetStat(string name)
-	return Stats.GetStat(name)
+
+int function CalcSexuality(bool IsFemale, int males, int females)
+	return Stats.CalcSexuality(IsFemale, males, females)
 endFunction
 
-string function GetIndex(int index)
-	return Stats.GetIndex(index)
+int function CalcLevel(float total, float curve = 0.65)
+	return Stats.CalcLevel(total, curve)
+endFunction
+
+string function ParseTime(int time)
+	return Stats.ParseTime(time)
 endFunction
 
 function UpdatePlayerStats(sslBaseAnimation anim, float time, actor[] pos, actor victim)
 	int[] genders = ActorLib.GenderCount(pos)
-	Stats.UpdatePlayerStats(genders[0], genders[1], anim, victim, time)
+	Stats.UpdatePlayerStats(genders[0], genders[1], genders[2], anim, victim, time)
 endFunction
 
 float function AdjustPlayerPurity(float amount)
-	return Stats.AdjustPlayerPurity(amount)
+	return Stats.AdjustPurity(amount)
 endFunction
 
 int function GetPlayerPurityLevel()
-	return Stats.GetPlayerPurityLevel()
+	return Stats.GetPurityLevel()
 endFunction
 
 string function GetPlayerPurityTitle()
-	return Stats.GetPlayerPurityTitle()
+	return Stats.GetPurityTitle()
 endFunction
 
 string function GetPlayerSexuality()
-	return Stats.GetPlayerSexuality()
+	return Stats.GetSexualityTitle()
 endFunction
 
 int function GetPlayerStatLevel(string type)
-	return Stats.GetPlayerStatLevel(type)
+	return Stats.GetPlayerProficencyLevel(type)
 endFunction
 
-string function GetPlayerStatTitle(string type)
-	return Stats.GetPlayerStatTitle(type)
+string function GetStatProficiency(string type)
+	return Stats.GetPlayerProficencyTitle(type)
 endFunction
 
 ;#---------------------------#

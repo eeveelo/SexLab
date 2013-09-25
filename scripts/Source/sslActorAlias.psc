@@ -108,7 +108,7 @@ function UnlockActor()
 		Lib._HKClear()
 		Game.SetPlayerAIDriven(false)
 		int[] genders = Lib.GenderCount(Controller.Positions)
-		Lib.Stats.UpdatePlayerStats(genders[0], genders[1], Controller.Animation, Controller.GetVictim(), Controller.GetTime())
+		Lib.Stats.UpdatePlayerStats(genders[0], genders[1], genders[2], Controller.Animation, Controller.GetVictim(), Controller.GetTime())
 	else
 		ActorRef.SetDontMove(false)
 		ActorRef.SetRestrained(false)

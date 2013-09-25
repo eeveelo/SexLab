@@ -389,13 +389,10 @@ event OnPageReset(string page)
 		SetCursorFillMode(TOP_TO_BOTTOM)
 
 		AddHeaderOption("$SSL_SexualExperience")
-		int full = Stats.fTimeSpent as int
-		int seconds = full % 60
-		int minutes = Math.Floor((full / 60) % 60)
-		int hours = Math.Floor(full / 3600)
-		AddTextOption("$SSL_TimeSpentHavingSex", hours+":"+minutes+":"+seconds)
+		AddTextOption("$SSL_TimeSpentHavingSex", Stats.ParseTime(Stats.fTimeSpent as int))
 		AddTextOption("$SSL_MaleSexualPartners", Stats.iMalePartners)
 		AddTextOption("$SSL_FemaleSexualPartners", Stats.iFemalePartners)
+		AddTextOption("$SSL_CreatureSexualPartners", Stats.iCreaturePartners)
 		AddTextOption("$SSL_TimesMasturbated", Stats.iMasturbationCount)
 		AddTextOption("$SSL_VaginalExperience", Stats.iVaginalCount)
 		AddTextOption("$SSL_AnalExperience", Stats.iAnalCount)
@@ -405,21 +402,21 @@ event OnPageReset(string page)
 
 		SetCursorPosition(1)
 		AddHeaderOption("$SSL_SexualStats")
-		AddTextOption("$SSL_Sexuality", Stats.GetPlayerSexuality())
-		if Stats.GetPlayerPurityLevel() < 0
-			AddTextOption("$SSL_SexualPerversion", Stats.GetPlayerPurityTitle())
+		AddTextOption("$SSL_Sexuality", Stats.GetSexualityTitle())
+		if Stats.GetPurityLevel() < 0
+			AddTextOption("$SSL_SexualPerversion", Stats.GetPurityTitle())
 		else
-			AddTextOption("$SSL_SexualPurity", Stats.GetPlayerPurityTitle())
+			AddTextOption("$SSL_SexualPurity", Stats.GetPurityTitle())
 		endIf
-		AddTextOption("$SSL_VaginalProficiency", Stats.GetPlayerStatTitle("Vaginal"))
-		AddTextOption("$SSL_AnalProficiency", Stats.GetPlayerStatTitle("Anal"))
-		AddTextOption("$SSL_OralProficiency", Stats.GetPlayerStatTitle("Oral"))
+		AddTextOption("$SSL_VaginalProficiency", Stats.GetPlayerProficencyTitle("Vaginal"))
+		AddTextOption("$SSL_AnalProficiency", Stats.GetPlayerProficencyTitle("Anal"))
+		AddTextOption("$SSL_OralProficiency", Stats.GetPlayerProficencyTitle("Oral"))
 		AddEmptyOption()
 		; Custom stats set by other mods
 		i = 0
 		while i < Stats.CustomStats.Length
 			string stat = Stats.CustomStats[i]
-			AddTextOption(stat, Stats.GetStat(stat))
+			AddTextOption(stat, Stats.GetStatFull(stat))
 			i += 1
 		endWhile
 
@@ -1049,8 +1046,7 @@ state StopCurrentAnimations
 endState
 state RestoreDefaultSettings
 	event OnSelectST()
-		bool run = ShowMessage("$SSL_WarnRestoreDefaults")
-		if run
+		if ShowMessage("$SSL_WarnRestoreDefaults")
 			SetDefaults()			
 			ShowMessage("$SSL_RunRestoreDefaults", false)
 			ForcePageReset()
@@ -1059,8 +1055,7 @@ state RestoreDefaultSettings
 endState
 state ResetAnimationRegistry
 	event OnSelectST()
-		bool run = ShowMessage("$SSL_WarnRebuildAnimations")
-		if run
+		if ShowMessage("$SSL_WarnRebuildAnimations")
 			ThreadSlots._StopAll()
 			AnimSlots._Setup()
 			CreatureAnimSlots._Setup()
@@ -1070,8 +1065,7 @@ state ResetAnimationRegistry
 endState
 state ResetVoiceRegistry
 	event OnSelectST()
-		bool run = ShowMessage("$SSL_WarnRebuildVoices")
-		if run
+		if ShowMessage("$SSL_WarnRebuildVoices")
 			VoiceSlots._Setup()
 			ShowMessage("$SSL_RunRebuildVoices", false)
 		endIf
@@ -1079,8 +1073,7 @@ state ResetVoiceRegistry
 endState
 state ResetPlayerSexStats
 	event OnSelectST()
-		bool run = ShowMessage("$SSL_WarnResetStats")
-		if run
+		if ShowMessage("$SSL_WarnResetStats")
 			Stats._Setup()
 			ShowMessage("$SSL_RunResetStats", false)
 		endIf
@@ -1088,8 +1081,7 @@ state ResetPlayerSexStats
 endState
 state CleanSystem
 	event OnSelectST()
-		bool run = ShowMessage("$SSL_WarnCleanSystem")
-		if run
+		if ShowMessage("$SSL_WarnCleanSystem")
 			ShowMessage("$SSL_RunCleanSystem", false)
 			_SetupSystem()
 			mCleanSystemFinish.Show()
@@ -1099,8 +1091,7 @@ endState
 state RebuildStraponList
 	event OnSelectST()
 		FindStrapons()
-		int found = ActorLib.Strapons.Length
-		if found > 0
+		if ActorLib.Strapons.Length > 0
 			ShowMessage("$SSL_FoundStrapon", false)
 		else
 			ShowMessage("$SSL_NoStrapons", false)
@@ -1524,8 +1515,6 @@ function _CheckSystem()
 			mods = 0
 		endIf
 	endwhile
-	; Find Strapons
-	FindStrapons()
 	; Add debug spell
 	if DebugMode() && !PlayerRef.HasSpell(SexLabDebugSpell)
 		PlayerRef.AddSpell(SexLabDebugSpell, true)
