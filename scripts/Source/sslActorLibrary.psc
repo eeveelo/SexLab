@@ -9,6 +9,7 @@ sslAnimationLibrary property AnimLib auto
 ; Data
 faction property AnimatingFaction auto
 faction property GenderFaction auto
+faction property ForbiddenFaction auto
 actor property PlayerRef auto
 weapon property DummyWeapon auto
 armor property NudeSuit auto
@@ -77,7 +78,7 @@ int function ValidateActor(actor position)
 		return -10
 	endIf
 
-	if position.HasKeyWordString("SexLabForbid")
+	if position.HasKeyWordString("SexLabForbid") && !position.IsInFaction(ForbiddenFaction)
 		Debug.Trace("Failed to add actor to animation; actor is forbidden from animating")
 		return -11
 	endIf
@@ -98,7 +99,7 @@ int function ValidateActor(actor position)
 	endIf
 
 	Race ActorRace = position.GetLeveledActorBase().GetRace()
-	if position.IsChild() || ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(ActorRace.GetName(), "Child") != -1 || StringUtil.Find(ActorRace.GetName(), "117") != -1
+	if ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(ActorRace.GetName(), "Child") != -1 || StringUtil.Find(ActorRace.GetName(), "117") != -1
 		Debug.Trace("Failed to add actor to animation; actor is child")
 		return -15
 	endIf
@@ -316,6 +317,14 @@ function UnequipStrapon(actor a)
 			i += 1
 		endWhile
 	endIf
+endFunction
+
+function ForbidActor(actor a)
+	a.AddToFaction(ForbiddenFaction)
+endFunction
+
+function AllowActor(actor a)
+	a.RemoveFromFaction(ForbiddenFaction)
 endFunction
 
 function TreatAsMale(actor a)

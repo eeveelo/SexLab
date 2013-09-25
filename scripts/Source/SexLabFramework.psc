@@ -105,6 +105,11 @@ int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim 
 	return -1
 endFunction
 
+
+;#------------------------------#
+;#  ACTOR FUNCTIONS             #
+;#------------------------------#
+
 int function ValidateActor(actor a)
 	return ActorLib.ValidateActor(a)
 endFunction
@@ -137,6 +142,14 @@ function UnequipStrapon(actor a)
 	ActorLib.UnequipStrapon(a)
 endFunction
 
+function ForbidActor(actor a)
+	ActorLib.ForbidActor(a)
+endFunction
+
+function AllowActor(actor a)
+	ActorLib.AllowActor(a)
+endFunction
+
 function TreatAsMale(actor a)
 	ActorLib.TreatAsMale(a)
 endFunction
@@ -164,6 +177,14 @@ endFunction
 int function FemaleCount(actor[] pos)
 	return ActorLib.FemaleCount(pos)
 endFunction
+int function CreatureCount(actor[] pos)
+	return ActorLib.CreatureCount(pos)
+endFunction
+
+;#------------------------------#
+;#     END ACTOR FUNCTIONS      #
+;#------------------------------#
+
 
 ;#------------------------------#
 ;#  BEGIN CONTROLLER FUNCTIONS  #
