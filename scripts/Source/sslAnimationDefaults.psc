@@ -32,6 +32,9 @@ function LoadAnimations()
 	RegisterAnimation("SexLabSideways")
 	RegisterAnimation("SexLabStanding")
 	RegisterAnimation("SexLabTribadism")
+	RegisterAnimation("ZynRoughStanding")
+	RegisterAnimation("ZynLesbian")
+	RegisterAnimation("Zyntest")
 	RegisterAnimation("APAnal")
 	RegisterAnimation("APBedMissionary")
 	RegisterAnimation("APBlowjob")
@@ -660,7 +663,6 @@ function SexLabAggrBehind(string eventName, string id, float argNum, form sender
 	SetContent(Sexual)
 	SetSFX(Squishing)
 	
-	Enabled = false
 
 	int a1 = AddPosition(Female, addCum=Anal)
 	AddPositionStage(a1, "AggrBehind_A1_S1", 0)
@@ -1478,5 +1480,67 @@ function APSkullFuck(string eventName, string id, float argNum, form sender)
 	AddTag("Blowjob")
 	AddTag("Oral")
 	
+	Save()
+endFunction
+
+
+
+function ZynRoughStanding(string eventName, string id, float argNum, form sender)
+	Name = "Zyn Rough Standing"
+	
+	SetContent(Sexual)
+	SetSFX(Sucking)
+
+	int a1 = AddPosition(Female, addCum=VaginalOral)
+	AddPositionStage(a1, "Zyn_RoughStanding_A1_S1", 0)
+	AddPositionStage(a1, "Zyn_RoughStanding_A1_S2", silent = true, openMouth = true)
+	AddPositionStage(a1, "Zyn_RoughStanding_A1_S3", 0)
+	AddPositionStage(a1, "Zyn_RoughStanding_A1_S4", 0)
+
+	int a2 = AddPosition(Male) ; -102
+	AddPositionStage(a2, "Zyn_RoughStanding_A2_S1", -107, sos = 9)
+	AddPositionStage(a2, "Zyn_RoughStanding_A2_S2", -107, sos = 9)
+	AddPositionStage(a2, "Zyn_RoughStanding_A2_S3", -107, sos = 9)
+	AddPositionStage(a2, "Zyn_RoughStanding_A2_S4", -107, sos = 9)
+
+	AddTag("Zyn")
+	AddTag("Sex")
+	AddTag("MF")
+	AddTag("Rough")
+	AddTag("Standing")
+	AddTag("Aggressive")
+	AddTag("Oral")
+	AddTag("Vaginal")
+
+	Save()
+endFunction
+
+function ZynLesbian(string eventName, string id, float argNum, form sender)
+	Name = "Zyn Lesbian"
+	
+	SetContent(Sexual)
+	SetSFX(Squishing)
+
+	int a1 = AddPosition(Female, addCum=Vaginal)
+	AddPositionStage(a1, "Zyn_Lesbian_A1_S1", 0, silent = true)
+	AddPositionStage(a1, "Zyn_Lesbian_A1_S2", 0)
+	AddPositionStage(a1, "Zyn_Lesbian_A1_S3", 0)
+	AddPositionStage(a1, "Zyn_Lesbian_A1_S4", 0)
+
+	int a2 = AddPosition(Female)
+	AddPositionStage(a2, "Zyn_Lesbian_A2_S1", -81, silent = true)
+	AddPositionStage(a2, "Zyn_Lesbian_A2_S2", -81, silent = true, openMouth = true)
+	AddPositionStage(a2, "Zyn_Lesbian_A2_S3", -81)
+	AddPositionStage(a2, "Zyn_Lesbian_A2_S4", -81)
+
+	AddTag("Zyn")
+	AddTag("Sex")
+	AddTag("FF")
+	AddTag("Lesbian")
+	AddTag("Dirty")
+	AddTag("Vaginal")
+	AddTag("Oral")
+	AddTag("Kissing")
+
 	Save()
 endFunction

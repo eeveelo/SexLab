@@ -278,6 +278,19 @@ s Arrok_DevilsThreeway_A3_S1 Arrok_DevilsThreeway_A3_S1.hkx
 + Arrok_DevilsThreeway_A3_S3 Arrok_DevilsThreeway_A3_S3.hkx
 + Arrok_DevilsThreeway_A3_S4 Arrok_DevilsThreeway_A3_S4.hkx
 
+s Arrok_Tricycle_A1_S1 Arrok_Tricycle_A1_S1.hkx
++ Arrok_Tricycle_A1_S2 Arrok_Tricycle_A1_S2.hkx
++ Arrok_Tricycle_A1_S3 Arrok_Tricycle_A1_S3.hkx
++ Arrok_Tricycle_A1_S4 Arrok_Tricycle_A1_S4.hkx
+s Arrok_Tricycle_A2_S1 Arrok_Tricycle_A2_S1.hkx
++ Arrok_Tricycle_A2_S2 Arrok_Tricycle_A2_S2.hkx
++ Arrok_Tricycle_A2_S3 Arrok_Tricycle_A2_S3.hkx
++ Arrok_Tricycle_A2_S4 Arrok_Tricycle_A2_S4.hkx
+s Arrok_Tricycle_A3_S1 Arrok_Tricycle_A3_S1.hkx
++ Arrok_Tricycle_A3_S2 Arrok_Tricycle_A3_S2.hkx
++ Arrok_Tricycle_A3_S3 Arrok_Tricycle_A3_S3.hkx
++ Arrok_Tricycle_A3_S4 Arrok_Tricycle_A3_S4.hkx
+
 
 '
 ' Animated Prostitution Animations
@@ -445,15 +458,23 @@ s AP_Scene16_A1_S1 AP_Scene16_A1_S1.hkx
 + AP_Scene16_A1_S5 AP_Scene16_A1_S5.hkx
 b AP_Scene16_A2_S1 AP_Scene16_A2_S1.hkx
 
-s Arrok_Tricycle_A1_S1 Arrok_Tricycle_A1_S1.hkx
-+ Arrok_Tricycle_A1_S2 Arrok_Tricycle_A1_S2.hkx
-+ Arrok_Tricycle_A1_S3 Arrok_Tricycle_A1_S3.hkx
-+ Arrok_Tricycle_A1_S4 Arrok_Tricycle_A1_S4.hkx
-s Arrok_Tricycle_A2_S1 Arrok_Tricycle_A2_S1.hkx
-+ Arrok_Tricycle_A2_S2 Arrok_Tricycle_A2_S2.hkx
-+ Arrok_Tricycle_A2_S3 Arrok_Tricycle_A2_S3.hkx
-+ Arrok_Tricycle_A2_S4 Arrok_Tricycle_A2_S4.hkx
-s Arrok_Tricycle_A3_S1 Arrok_Tricycle_A3_S1.hkx
-+ Arrok_Tricycle_A3_S2 Arrok_Tricycle_A3_S2.hkx
-+ Arrok_Tricycle_A3_S3 Arrok_Tricycle_A3_S3.hkx
-+ Arrok_Tricycle_A3_S4 Arrok_Tricycle_A3_S4.hkx
+'
+' Zynisch Animations
+'
+s Zyn_Lesbian_A1_S1 Zyn_Lesbian_A1_S1.hkx
++ Zyn_Lesbian_A1_S2 Zyn_Lesbian_A1_S2.hkx
++ Zyn_Lesbian_A1_S3 Zyn_Lesbian_A1_S3.hkx
++ Zyn_Lesbian_A1_S4 Zyn_Lesbian_A1_S4.hkx
+s Zyn_Lesbian_A2_S1 Zyn_Lesbian_A2_S1.hkx
++ Zyn_Lesbian_A2_S2 Zyn_Lesbian_A2_S2.hkx
++ Zyn_Lesbian_A2_S3 Zyn_Lesbian_A2_S3.hkx
++ Zyn_Lesbian_A2_S4 Zyn_Lesbian_A2_S4.hkx
+
+s -a Zyn_RoughStanding_A1_S1 Zyn_RoughStanding_A1_S1.hkx
++ Zyn_RoughStanding_A1_S2 Zyn_RoughStanding_A1_S2.hkx
++ Zyn_RoughStanding_A1_S3 Zyn_RoughStanding_A1_S3.hkx
++ Zyn_RoughStanding_A1_S4 Zyn_RoughStanding_A1_S4.hkx
+s -a Zyn_RoughStanding_A2_S1 Zyn_RoughStanding_A2_S1.hkx
++ Zyn_RoughStanding_A2_S2 Zyn_RoughStanding_A2_S2.hkx
++ Zyn_RoughStanding_A2_S3 Zyn_RoughStanding_A2_S3.hkx
++ Zyn_RoughStanding_A2_S4 Zyn_RoughStanding_A2_S4.hkx
