@@ -129,8 +129,7 @@ endFunction
 ;\-----------------------------------------------/;
 
 function _Setup()
-	Slots = new sslBaseVoice[50]
-
+	Initialize()
 	int i
 	while i < 50
 		if i < 10
@@ -141,12 +140,14 @@ function _Setup()
 		Slots[i].Initialize()
 		i += 1
 	endWhile
-	
+	Defaults.LoadVoices()
+	SendModEvent("SexLabSlotVoices")
+	Debug.Notification("$SSL_NotifyVoiceInstall")
+endFunction
+
+function Initialize()
+	Slots = new sslBaseVoice[50]
 	string[] init
 	registry = init
-	slotted = 0
-
-	Defaults.LoadVoices()
-
-	SendModEvent("SexLabSlotVoices")
+	Slotted = 0
 endFunction
