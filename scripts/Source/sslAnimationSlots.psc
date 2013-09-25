@@ -174,7 +174,7 @@ function _LogFound(string method, string arguments, sslBaseAnimation[] results)
 endFunction
 
 function _Setup()
-	Initialize()
+	Slots = new sslBaseAnimation[100]
 	int i
 	while i < 100
 		if i < 10
@@ -184,14 +184,14 @@ function _Setup()
 		endIf
 		Slots[i].Initialize()
 		i += 1
-	endWhile	
+	endWhile
+	Initialize()
 	Defaults.LoadAnimations()
 	SendModEvent("SexLabSlotAnimations")
 	Debug.Notification("$SSL_NotifyAnimationInstall")
 endFunction
 
 function Initialize()
-	Slots = new sslBaseAnimation[100]
 	string[] init
 	registry = init
 	Slotted = 0

@@ -41,7 +41,7 @@ function AddRace(Race creature)
 endFunction
 
 function _Setup()
-	Initialize()
+	Slots = new sslBaseAnimation[50]
 	int i
 	while i < 50
 		if i < 10
@@ -52,6 +52,7 @@ function _Setup()
 		Slots[i].Initialize()
 		i += 1
 	endWhile
+	Initialize()
 	CreatureDefaults.LoadAnimations()
 	SendModEvent("SexLabSlotCreatureAnimations")
 	Debug.Notification("$SSL_NotifyCreatureAnimationInstall")
