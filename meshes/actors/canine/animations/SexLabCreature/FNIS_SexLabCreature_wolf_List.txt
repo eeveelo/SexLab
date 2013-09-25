@@ -1,9 +1,9 @@
-s Wolf_Doggystyle_A2_S1 Wolf_Doggystyle_A2_S1.hkx
-+ Wolf_Doggystyle_A2_S2 Wolf_Doggystyle_A2_S2.hkx
-+ Wolf_Doggystyle_A2_S3 Wolf_Doggystyle_A2_S3.hkx
-+ Wolf_Doggystyle_A2_S4 Wolf_Doggystyle_A2_S4.hkx
+s Wolf_Doggystyle_A2_S1 Canine_Doggystyle_A2_S1.hkx
++ Wolf_Doggystyle_A2_S2 Canine_Doggystyle_A2_S2.hkx
++ Wolf_Doggystyle_A2_S3 Canine_Doggystyle_A2_S3.hkx
++ Wolf_Doggystyle_A2_S4 Canine_Doggystyle_A2_S4.hkx
 
-s Wolf_Missionary_A2_S1 Wolf_Missionary_A2_S1.hkx
-+ Wolf_Missionary_A2_S2 Wolf_Missionary_A2_S2.hkx
-+ Wolf_Missionary_A2_S3 Wolf_Missionary_A2_S3.hkx
-+ Wolf_Missionary_A2_S4 Wolf_Missionary_A2_S4.hkx
+s Wolf_Missionary_A2_S1 Canine_Missionary_A2_S1.hkx
++ Wolf_Missionary_A2_S2 Canine_Missionary_A2_S2.hkx
++ Wolf_Missionary_A2_S3 Canine_Missionary_A2_S3.hkx
++ Wolf_Missionary_A2_S4 Canine_Missionary_A2_S4.hkx

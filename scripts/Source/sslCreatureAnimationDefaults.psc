@@ -120,8 +120,9 @@ endFunction
 
 function BearDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Bear) Doggystyle"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(BearBlackRace)
 	AddRace(BearBrownRace)
 	AddRace(BearSnowRace)
@@ -149,8 +150,9 @@ endFunction
 
 function ChaurusForward(string eventName, string id, float argNum, form sender)
 	Name = "(Chaurus) Forward"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(ChaurusRace)
 	AddRace(ChaurusReaperRace)
 
@@ -177,8 +179,9 @@ endFunction
 
 function ChaurusReverse(string eventName, string id, float argNum, form sender)
 	Name = "(Chaurus) Reverse"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(ChaurusRace)
 	AddRace(ChaurusReaperRace)
 
@@ -205,8 +208,9 @@ endFunction
 
 function DaedraHugging(string eventName, string id, float argNum, form sender)
 	Name = "(Daedra) Hugging"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(DLC2SeekerRace)
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
@@ -233,25 +237,25 @@ endFunction
 
 function CanineDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Dog) Doggystyle"
+
 	SetSFX(Squishing)
 
-	; AddRace(WolfRace)
 	AddRace(DogRace)
 	AddRace(DogCompanionRace)
 	AddRace(MG07DogRace)
 	AddRace(DA03BarbasDogRace)
 
 	int a1 = AddPosition(Female, addCum=Anal)
-	AddPositionStage(a1, "Wolf_Doggystyle_A1_S1")
-	AddPositionStage(a1, "Wolf_Doggystyle_A1_S2")
-	AddPositionStage(a1, "Wolf_Doggystyle_A1_S3")
-	AddPositionStage(a1, "Wolf_Doggystyle_A1_S4")
+	AddPositionStage(a1, "Canine_Doggystyle_A1_S1")
+	AddPositionStage(a1, "Canine_Doggystyle_A1_S2")
+	AddPositionStage(a1, "Canine_Doggystyle_A1_S3")
+	AddPositionStage(a1, "Canine_Doggystyle_A1_S4")
 
 	int a2 = AddPosition(Creature)
-	AddPositionStage(a2, "Wolf_Doggystyle_A2_S1", 45.0, rotate=180.0)
-	AddPositionStage(a2, "Wolf_Doggystyle_A2_S2", 45.0, rotate=180.0)
-	AddPositionStage(a2, "Wolf_Doggystyle_A2_S3", 45.0, rotate=180.0)
-	AddPositionStage(a2, "Wolf_Doggystyle_A2_S4", 45.0, rotate=180.0)
+	AddPositionStage(a2, "Dog_Doggystyle_A2_S1", 45.0, rotate=180.0)
+	AddPositionStage(a2, "Dog_Doggystyle_A2_S2", 45.0, rotate=180.0)
+	AddPositionStage(a2, "Dog_Doggystyle_A2_S3", 45.0, rotate=180.0)
+	AddPositionStage(a2, "Dog_Doggystyle_A2_S4", 45.0, rotate=180.0)
 
 	AddTag("Creature")
 	AddTag("Bestiality")
@@ -265,25 +269,25 @@ endFunction
 
 function CanineMissionary(string eventName, string id, float argNum, form sender)
 	Name = "(Dog) Missionary"
+	
 	SetSFX(Squishing)
-
-	; AddRace(WolfRace)
+	
 	AddRace(DogRace)
 	AddRace(DogCompanionRace)
 	AddRace(MG07DogRace)
 	AddRace(DA03BarbasDogRace)
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
-	AddPositionStage(a1, "Wolf_Missionary_A1_S1")
-	AddPositionStage(a1, "Wolf_Missionary_A1_S2")
-	AddPositionStage(a1, "Wolf_Missionary_A1_S3")
-	AddPositionStage(a1, "Wolf_Missionary_A1_S4")
+	AddPositionStage(a1, "Canine_Missionary_A1_S1")
+	AddPositionStage(a1, "Canine_Missionary_A1_S2")
+	AddPositionStage(a1, "Canine_Missionary_A1_S3")
+	AddPositionStage(a1, "Canine_Missionary_A1_S4")
 
 	int a2 = AddPosition(Creature)
-	AddPositionStage(a2, "Wolf_Missionary_A2_S1", 45.0, rotate=180.0)
-	AddPositionStage(a2, "Wolf_Missionary_A2_S2", 45.0, rotate=180.0)
-	AddPositionStage(a2, "Wolf_Missionary_A2_S3", 45.0, rotate=180.0)
-	AddPositionStage(a2, "Wolf_Missionary_A2_S4", 45.0, rotate=180.0)
+	AddPositionStage(a2, "Dog_Missionary_A2_S1", 45.0, rotate=180.0)
+	AddPositionStage(a2, "Dog_Missionary_A2_S2", 45.0, rotate=180.0)
+	AddPositionStage(a2, "Dog_Missionary_A2_S3", 45.0, rotate=180.0)
+	AddPositionStage(a2, "Dog_Missionary_A2_S4", 45.0, rotate=180.0)
 
 	AddTag("Creature")
 	AddTag("Bestiality")
@@ -298,8 +302,9 @@ endFunction
 
 function DragonPenetration(string eventName, string id, float argNum, form sender)
 	Name = "(Dragon) Penetration"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(DragonRace)
 	AddRace(UndeadDragonRace)
 
@@ -326,8 +331,9 @@ endFunction
 
 function DragonTongue(string eventName, string id, float argNum, form sender)
 	Name = "(Dragon) Tongue"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(DragonRace)
 	AddRace(UndeadDragonRace)
 
@@ -354,8 +360,9 @@ endFunction
 
 function DraugrDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Draugr) Doggystyle"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
 
@@ -382,8 +389,9 @@ endFunction
 
 function DraugrGangbang(string eventName, string id, float argNum, form sender)
 	Name = "(Draugr) Gangbang"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
 
@@ -428,8 +436,9 @@ endFunction
 
 function DraugrHolding(string eventName, string id, float argNum, form sender)
 	Name = "(Draugr) Holding"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
 
@@ -456,8 +465,9 @@ endFunction
 
 function DraugrMissionary(string eventName, string id, float argNum, form sender)
 	Name = "(Draugr) Missionary"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
 
@@ -484,8 +494,9 @@ endFunction
 
 function FalmerDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Falmer) Doggystyle"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(FalmerRace)
 
 	int a1 = AddPosition(Female, addCum=Anal)
@@ -511,8 +522,9 @@ endFunction
 
 function FalmerGangbang(string eventName, string id, float argNum, form sender)
 	Name = "(Falmer) Gangbang"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(FalmerRace)
 
 	int a1 = AddPosition(Female, addCum=Anal)
@@ -556,8 +568,9 @@ endFunction
 
 function FalmerHolding(string eventName, string id, float argNum, form sender)
 	Name = "(Falmer) Holding"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(FalmerRace)
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
@@ -585,8 +598,9 @@ endFunction
 
 function FalmerMissionary(string eventName, string id, float argNum, form sender)
 	Name = "(Falmer) Missionary"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(FalmerRace)
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
@@ -614,8 +628,9 @@ endFunction
 
 function GargoyleDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Gargoyle) Doggystyle"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(DLC1GargoyleRace)
 	AddRace(DLC1GargoyleVariantBossRace)
 	AddRace(DLC1GargoyleVariantGreenRace)
@@ -643,8 +658,9 @@ endFunction
 
 function GargoyleHolding(string eventName, string id, float argNum, form sender)
 	Name = "(Gargoyle) Holding"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(DLC1GargoyleRace)
 	AddRace(DLC1GargoyleVariantBossRace)
 	AddRace(DLC1GargoyleVariantGreenRace)
@@ -672,8 +688,9 @@ endFunction
 
 function GargoyleMissionary(string eventName, string id, float argNum, form sender)
 	Name = "(Gargoyle) Missionary"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(DLC1GargoyleRace)
 	AddRace(DLC1GargoyleVariantBossRace)
 	AddRace(DLC1GargoyleVariantGreenRace)
@@ -701,8 +718,9 @@ endFunction
 
 function GiantPenetration(string eventName, string id, float argNum, form sender)
 	Name = "(Giant) Penetration"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(GiantRace)
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
@@ -729,8 +747,9 @@ endFunction
 
 function HorseDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Horse) Doggystyle"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(HorseRace)
 
 	int a1 = AddPosition(Female, addCum=Anal)
@@ -756,8 +775,9 @@ endFunction
 
 function CatDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Sabre Cat) Doggystyle"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(SabreCatRace)
 	AddRace(SabreCatSnowyRace)
 
@@ -784,8 +804,9 @@ endFunction
 
 function SpiderDouble(string eventName, string id, float argNum, form sender)
 	Name = "(Spider) Double"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(FrostbiteSpiderRace)
 
 	int a1 = AddPosition(Female, addCum=VaginalOralAnal)
@@ -817,8 +838,9 @@ endFunction
 
 function SpiderPenetration(string eventName, string id, float argNum, form sender)
 	Name = "(Spider) Penetration"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(FrostbiteSpiderRace)
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
@@ -844,8 +866,9 @@ endFunction
 
 function BigSpiderPenetration(string eventName, string id, float argNum, form sender)
 	Name = "(Large Spider) Penetration"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(FrostbiteSpiderRaceLarge)
 	AddRace(FrostbiteSpiderRaceGiant)
 
@@ -874,8 +897,9 @@ endFunction
 
 function TrollDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Troll) Doggystyle"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(TrollRace)
 
 	int a1 = AddPosition(Female, addCum=Anal)
@@ -901,8 +925,9 @@ endFunction
 
 function TrollHolding(string eventName, string id, float argNum, form sender)
 	Name = "(Troll) Holding"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(TrollRace)
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
@@ -928,8 +953,9 @@ endFunction
 
 function TrollMissionary(string eventName, string id, float argNum, form sender)
 	Name = "(Troll) Missionary"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(TrollRace)
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
@@ -956,8 +982,9 @@ endFunction
 
 function VampireLordDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Vampire Lord) Doggystyle"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(DLC1VampireBeastRace)
 
 	int a1 = AddPosition(Female, addCum=Anal)
@@ -983,8 +1010,9 @@ endFunction
 
 function VampireLordHolding(string eventName, string id, float argNum, form sender)
 	Name = "(Vampire Lord) Holding"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(DLC1VampireBeastRace)
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
@@ -1010,8 +1038,9 @@ endFunction
 
 function VampireLordMissionary(string eventName, string id, float argNum, form sender)
 	Name = "(Vampire Lord) Missionary"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(DLC1VampireBeastRace)
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
@@ -1037,8 +1066,9 @@ endFunction
 
 function WerewolfDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Werewolf) Doggystyle"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(WerewolfBeastRace)
 
 	int a1 = AddPosition(Female, addCum=Anal)
@@ -1065,8 +1095,9 @@ endFunction
 
 function WerewolfHolding(string eventName, string id, float argNum, form sender)
 	Name = "(Werewolf) Holding"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(WerewolfBeastRace)
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
@@ -1093,8 +1124,9 @@ endFunction
 
 function WerewolfMissionary(string eventName, string id, float argNum, form sender)
 	Name = "(Werewolf) Missionary"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(WerewolfBeastRace)
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
@@ -1121,19 +1153,16 @@ endFunction
 
 function WolfDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Wolf) Doggystyle"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(WolfRace)
-	; AddRace(DogRace)
-	; AddRace(DogCompanionRace)
-	; AddRace(MG07DogRace)
-	; AddRace(DA03BarbasDogRace)
 
 	int a1 = AddPosition(Female, addCum=Anal)
-	AddPositionStage(a1, "Wolf_Doggystyle_A1_S1")
-	AddPositionStage(a1, "Wolf_Doggystyle_A1_S2")
-	AddPositionStage(a1, "Wolf_Doggystyle_A1_S3")
-	AddPositionStage(a1, "Wolf_Doggystyle_A1_S4")
+	AddPositionStage(a1, "Canine_Doggystyle_A1_S1")
+	AddPositionStage(a1, "Canine_Doggystyle_A1_S2")
+	AddPositionStage(a1, "Canine_Doggystyle_A1_S3")
+	AddPositionStage(a1, "Canine_Doggystyle_A1_S4")
 
 	int a2 = AddPosition(Creature)
 	AddPositionStage(a2, "Wolf_Doggystyle_A2_S1", 45.0, rotate=180.0)
@@ -1152,19 +1181,16 @@ endFunction
 
 function WolfMissionary(string eventName, string id, float argNum, form sender)
 	Name = "(Wolf) Missionary"
+	
 	SetSFX(Squishing)
-
+	
 	AddRace(WolfRace)
-	; AddRace(DogRace)
-	; AddRace(DogCompanionRace)
-	; AddRace(MG07DogRace)
-	; AddRace(DA03BarbasDogRace)
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
-	AddPositionStage(a1, "Wolf_Missionary_A1_S1")
-	AddPositionStage(a1, "Wolf_Missionary_A1_S2")
-	AddPositionStage(a1, "Wolf_Missionary_A1_S3")
-	AddPositionStage(a1, "Wolf_Missionary_A1_S4")
+	AddPositionStage(a1, "Canine_Missionary_A1_S1")
+	AddPositionStage(a1, "Canine_Missionary_A1_S2")
+	AddPositionStage(a1, "Canine_Missionary_A1_S3")
+	AddPositionStage(a1, "Canine_Missionary_A1_S4")
 
 	int a2 = AddPosition(Creature)
 	AddPositionStage(a2, "Wolf_Missionary_A2_S1", 45.0, rotate=180.0)
