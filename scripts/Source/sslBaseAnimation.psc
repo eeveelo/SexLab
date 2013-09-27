@@ -309,12 +309,9 @@ function UpdateUp(int position, int stage, float adjust, bool adjuststage = fals
 endFunction
 
 function RestoreOffsets()
-	;float[] defaults = offsetDefaults
-	float[] fDel
-	offsetData = fDel
-	debug.trace(offsetData) 
-	offsetData = offsetDefaults
-	debug.trace(offsetData)
+	float[] defaults = offsetDefaults
+	offsetData = defaults
+	offsetDefaults = defaults
 endFunction
 
 ;/-----------------------------------------------\;
