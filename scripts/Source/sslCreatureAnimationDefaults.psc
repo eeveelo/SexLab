@@ -21,7 +21,6 @@ Race property TrollRace auto
 Race property WerewolfBeastRace auto
 
 Race property WolfRace auto
-
 Race property DogRace auto
 Race property DogCompanionRace auto
 Race property MG07DogRace auto
@@ -73,14 +72,16 @@ function LoadAnimations()
 	RegisterAnimation("DragonTongue")
 
 	RegisterAnimation("DraugrDoggystyle")
-	RegisterAnimation("DraugrGangbang")
 	RegisterAnimation("DraugrHolding")
 	RegisterAnimation("DraugrMissionary")
+	RegisterAnimation("DraugrGangbang3P")
+	RegisterAnimation("DraugrGangbang4P")
 
 	RegisterAnimation("FalmerDoggystyle")
-	RegisterAnimation("FalmerGangbang")
 	RegisterAnimation("FalmerHolding")
 	RegisterAnimation("FalmerMissionary")
+	RegisterAnimation("FalmerGangbang3P")
+	RegisterAnimation("FalmerGangbang4P")
 
 	RegisterAnimation("GiantPenetration")
 
@@ -122,7 +123,6 @@ function BearDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Bear) Doggystyle"
 	
 	SetSFX(Squishing)
-	
 	AddRace(BearBlackRace)
 	AddRace(BearBrownRace)
 	AddRace(BearSnowRace)
@@ -152,7 +152,6 @@ function ChaurusForward(string eventName, string id, float argNum, form sender)
 	Name = "(Chaurus) Forward"
 	
 	SetSFX(Squishing)
-	
 	AddRace(ChaurusRace)
 	AddRace(ChaurusReaperRace)
 
@@ -181,7 +180,6 @@ function ChaurusReverse(string eventName, string id, float argNum, form sender)
 	Name = "(Chaurus) Reverse"
 	
 	SetSFX(Squishing)
-	
 	AddRace(ChaurusRace)
 	AddRace(ChaurusReaperRace)
 
@@ -210,7 +208,6 @@ function DaedraHugging(string eventName, string id, float argNum, form sender)
 	Name = "(Daedra) Hugging"
 	
 	SetSFX(Squishing)
-	
 	AddRace(DLC2SeekerRace)
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
@@ -271,7 +268,6 @@ function CanineMissionary(string eventName, string id, float argNum, form sender
 	Name = "(Dog) Missionary"
 	
 	SetSFX(Squishing)
-	
 	AddRace(DogRace)
 	AddRace(DogCompanionRace)
 	AddRace(MG07DogRace)
@@ -304,7 +300,6 @@ function DragonPenetration(string eventName, string id, float argNum, form sende
 	Name = "(Dragon) Penetration"
 	
 	SetSFX(Squishing)
-	
 	AddRace(DragonRace)
 	AddRace(UndeadDragonRace)
 
@@ -333,7 +328,6 @@ function DragonTongue(string eventName, string id, float argNum, form sender)
 	Name = "(Dragon) Tongue"
 	
 	SetSFX(Squishing)
-	
 	AddRace(DragonRace)
 	AddRace(UndeadDragonRace)
 
@@ -362,7 +356,6 @@ function DraugrDoggystyle(string eventName, string id, float argNum, form sender
 	Name = "(Draugr) Doggystyle"
 	
 	SetSFX(Squishing)
-	
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
 
@@ -387,11 +380,10 @@ function DraugrDoggystyle(string eventName, string id, float argNum, form sender
 	Save()
 endFunction
 
-function DraugrGangbang(string eventName, string id, float argNum, form sender)
-	Name = "(Draugr) Gangbang"
+function DraugrGangbang3P(string eventName, string id, float argNum, form sender)
+	Name = "(Draugr) Gangbang 3P"
 	
 	SetSFX(Squishing)
-	
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
 
@@ -402,28 +394,56 @@ function DraugrGangbang(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a1, "Draugr_Gangbang_A1_S4")
 
 	int a2 = AddPosition(Creature)
-	AddPositionStage(a2, "Draugr_Gangbang_A2_S1", 35.0, rotate=180.0)
-	AddPositionStage(a2, "Draugr_Gangbang_A2_S2", 35.0, rotate=180.0)
-	AddPositionStage(a2, "Draugr_Gangbang_A2_S3", 35.0, rotate=180.0)
-	AddPositionStage(a2, "Draugr_Gangbang_A2_S4", 35.0, rotate=180.0)
+	AddPositionStage(a2, "Draugr_Gangbang_A2_S1", 30.0, rotate=180.0)
+	AddPositionStage(a2, "Draugr_Gangbang_A2_S2", 30.0, rotate=180.0)
+	AddPositionStage(a2, "Draugr_Gangbang_A2_S3", 30.0, rotate=180.0)
+	AddPositionStage(a2, "Draugr_Gangbang_A2_S4", 30.0, rotate=180.0)
 
 	int a3 = AddPosition(Creature)
-	AddPositionStage(a3, "Draugr_Gangbang_A3_S1", 70.0, rotate=180.0)
-	AddPositionStage(a3, "Draugr_Gangbang_A3_S2", 70.0, rotate=180.0)
-	AddPositionStage(a3, "Draugr_Gangbang_A3_S3", 70.0, rotate=180.0)
-	AddPositionStage(a3, "Draugr_Gangbang_A3_S4", 70.0, rotate=180.0)
+	AddPositionStage(a3, "Draugr_Gangbang_A3_S1", 31.0, rotate=180.0)
+	AddPositionStage(a3, "Draugr_Gangbang_A3_S2", 31.0, rotate=180.0)
+	AddPositionStage(a3, "Draugr_Gangbang_A3_S3", 31.0, rotate=180.0)
+	AddPositionStage(a3, "Draugr_Gangbang_A3_S4", 31.0, rotate=180.0)
 
-	; int a4 = AddPosition(Creature)
-	; AddPositionStage(a4, "Draugr_Gangbang_A4_S1", 55.0, rotate=180.0)
-	; AddPositionStage(a4, "Draugr_Gangbang_A4_S2", 55.0, rotate=180.0)
-	; AddPositionStage(a4, "Draugr_Gangbang_A4_S3", 55.0, rotate=180.0)
-	; AddPositionStage(a4, "Draugr_Gangbang_A4_S4", 55.0, rotate=180.0)
+	AddTag("Creature")
+	AddTag("Bestiality")
+	AddTag("Dirty")
+	AddTag("Gangbang")
+	AddTag("Draugr")
 
-	; int a5 = AddPosition(Creature)
-	; AddPositionStage(a5, "Draugr_Gangbang_A5_S1", 65.0, rotate=180.0)
-	; AddPositionStage(a5, "Draugr_Gangbang_A5_S2", 65.0, rotate=180.0)
-	; AddPositionStage(a5, "Draugr_Gangbang_A5_S3", 65.0, rotate=180.0)
-	; AddPositionStage(a5, "Draugr_Gangbang_A5_S4", 65.0, rotate=180.0)
+	Save()
+endFunction
+
+function DraugrGangbang4P(string eventName, string id, float argNum, form sender)
+	Name = "(Draugr) Gangbang 4P"
+	
+	SetSFX(Squishing)
+	AddRace(DraugrRace)
+	AddRace(DraugrMagicRace)
+
+	int a1 = AddPosition(Female, addCum=VaginalOralAnal)
+	AddPositionStage(a1, "Draugr_Gangbang_A1_S1")
+	AddPositionStage(a1, "Draugr_Gangbang_A1_S2")
+	AddPositionStage(a1, "Draugr_Gangbang_A1_S3")
+	AddPositionStage(a1, "Draugr_Gangbang_A1_S4")
+
+	int a2 = AddPosition(Creature)
+	AddPositionStage(a2, "Draugr_Gangbang_A2_S1", 30.0, rotate=180.0)
+	AddPositionStage(a2, "Draugr_Gangbang_A2_S2", 30.0, rotate=180.0)
+	AddPositionStage(a2, "Draugr_Gangbang_A2_S3", 30.0, rotate=180.0)
+	AddPositionStage(a2, "Draugr_Gangbang_A2_S4", 30.0, rotate=180.0)
+
+	int a3 = AddPosition(Creature)
+	AddPositionStage(a3, "Draugr_Gangbang_A3_S1", 31.0, rotate=180.0)
+	AddPositionStage(a3, "Draugr_Gangbang_A3_S2", 31.0, rotate=180.0)
+	AddPositionStage(a3, "Draugr_Gangbang_A3_S3", 31.0, rotate=180.0)
+	AddPositionStage(a3, "Draugr_Gangbang_A3_S4", 31.0, rotate=180.0)
+
+	int a4 = AddPosition(Creature)
+	AddPositionStage(a4, "Draugr_Gangbang_A4_S1", 32.0, rotate=180.0)
+	AddPositionStage(a4, "Draugr_Gangbang_A4_S2", 32.0, rotate=180.0)
+	AddPositionStage(a4, "Draugr_Gangbang_A4_S3", 32.0, rotate=180.0)
+	AddPositionStage(a4, "Draugr_Gangbang_A4_S4", 32.0, rotate=180.0)
 
 	AddTag("Creature")
 	AddTag("Bestiality")
@@ -438,7 +458,6 @@ function DraugrHolding(string eventName, string id, float argNum, form sender)
 	Name = "(Draugr) Holding"
 	
 	SetSFX(Squishing)
-	
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
 
@@ -467,7 +486,6 @@ function DraugrMissionary(string eventName, string id, float argNum, form sender
 	Name = "(Draugr) Missionary"
 	
 	SetSFX(Squishing)
-	
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
 
@@ -496,7 +514,6 @@ function FalmerDoggystyle(string eventName, string id, float argNum, form sender
 	Name = "(Falmer) Doggystyle"
 	
 	SetSFX(Squishing)
-	
 	AddRace(FalmerRace)
 
 	int a1 = AddPosition(Female, addCum=Anal)
@@ -520,42 +537,70 @@ function FalmerDoggystyle(string eventName, string id, float argNum, form sender
 	Save()
 endFunction
 
-function FalmerGangbang(string eventName, string id, float argNum, form sender)
-	Name = "(Falmer) Gangbang"
+function FalmerGangbang3P(string eventName, string id, float argNum, form sender)
+	Name = "(Falmer) Gangbang 3P"
 	
 	SetSFX(Squishing)
-	
 	AddRace(FalmerRace)
 
-	int a1 = AddPosition(Female, addCum=Anal)
+	int a1 = AddPosition(Female, addCum=VaginalOralAnal)
 	AddPositionStage(a1, "Falmer_Gangbang_A1_S1")
 	AddPositionStage(a1, "Falmer_Gangbang_A1_S2")
 	AddPositionStage(a1, "Falmer_Gangbang_A1_S3")
 	AddPositionStage(a1, "Falmer_Gangbang_A1_S4")
 
 	int a2 = AddPosition(Creature)
-	AddPositionStage(a2, "Falmer_Gangbang_A2_S1", 35.0, rotate=180.0)
-	AddPositionStage(a2, "Falmer_Gangbang_A2_S2", 35.0, rotate=180.0)
-	AddPositionStage(a2, "Falmer_Gangbang_A2_S3", 35.0, rotate=180.0)
-	AddPositionStage(a2, "Falmer_Gangbang_A2_S4", 35.0, rotate=180.0)
+	AddPositionStage(a2, "Falmer_Gangbang_A2_S1", 30.0, rotate=180.0)
+	AddPositionStage(a2, "Falmer_Gangbang_A2_S2", 30.0, rotate=180.0)
+	AddPositionStage(a2, "Falmer_Gangbang_A2_S3", 30.0, rotate=180.0)
+	AddPositionStage(a2, "Falmer_Gangbang_A2_S4", 30.0, rotate=180.0)
 
 	int a3 = AddPosition(Creature)
-	AddPositionStage(a3, "Falmer_Gangbang_A3_S1", -35.0)
-	AddPositionStage(a3, "Falmer_Gangbang_A3_S2", -35.0)
-	AddPositionStage(a3, "Falmer_Gangbang_A3_S3", -35.0)
-	AddPositionStage(a3, "Falmer_Gangbang_A3_S4", -35.0)
+	AddPositionStage(a3, "Falmer_Gangbang_A3_S1", 31.0, rotate=180.0)
+	AddPositionStage(a3, "Falmer_Gangbang_A3_S2", 31.0, rotate=180.0)
+	AddPositionStage(a3, "Falmer_Gangbang_A3_S3", 31.0, rotate=180.0)
+	AddPositionStage(a3, "Falmer_Gangbang_A3_S4", 31.0, rotate=180.0)
 
-	; int a4 = AddPosition(Creature)
-	; AddPositionStage(a4, "Falmer_Gangbang_A4_S1", 35.0, rotate=180.0)
-	; AddPositionStage(a4, "Falmer_Gangbang_A4_S2", 35.0, rotate=180.0)
-	; AddPositionStage(a4, "Falmer_Gangbang_A4_S3", 35.0, rotate=180.0)
-	; AddPositionStage(a4, "Falmer_Gangbang_A4_S4", 35.0, rotate=180.0)
+	AddTag("Creature")
+	AddTag("Bestiality")
+	AddTag("Dirty")
+	AddTag("Gangbang")
+	AddTag("Falmer")
 
-	; int a5 = AddPosition(Creature)
-	; AddPositionStage(a5, "Falmer_Gangbang_A5_S1", 35.0, rotate=180.0)
-	; AddPositionStage(a5, "Falmer_Gangbang_A5_S2", 35.0, rotate=180.0)
-	; AddPositionStage(a5, "Falmer_Gangbang_A5_S3", 35.0, rotate=180.0)
-	; AddPositionStage(a5, "Falmer_Gangbang_A5_S4", 35.0, rotate=180.0)
+	Save()
+endFunction
+
+
+
+function FalmerGangbang4P(string eventName, string id, float argNum, form sender)
+	Name = "(Falmer) Gangbang 4P"
+	
+	SetSFX(Squishing)
+	AddRace(FalmerRace)
+
+	int a1 = AddPosition(Female, addCum=VaginalOralAnal)
+	AddPositionStage(a1, "Falmer_Gangbang_A1_S1")
+	AddPositionStage(a1, "Falmer_Gangbang_A1_S2")
+	AddPositionStage(a1, "Falmer_Gangbang_A1_S3")
+	AddPositionStage(a1, "Falmer_Gangbang_A1_S4")
+
+	int a2 = AddPosition(Creature)
+	AddPositionStage(a2, "Falmer_Gangbang_A2_S1", 30.0, rotate=180.0)
+	AddPositionStage(a2, "Falmer_Gangbang_A2_S2", 30.0, rotate=180.0)
+	AddPositionStage(a2, "Falmer_Gangbang_A2_S3", 30.0, rotate=180.0)
+	AddPositionStage(a2, "Falmer_Gangbang_A2_S4", 30.0, rotate=180.0)
+
+	int a3 = AddPosition(Creature)
+	AddPositionStage(a3, "Falmer_Gangbang_A3_S1", 31.0, rotate=180.0)
+	AddPositionStage(a3, "Falmer_Gangbang_A3_S2", 31.0, rotate=180.0)
+	AddPositionStage(a3, "Falmer_Gangbang_A3_S3", 31.0, rotate=180.0)
+	AddPositionStage(a3, "Falmer_Gangbang_A3_S4", 31.0, rotate=180.0)
+
+	int a4 = AddPosition(Creature)
+	AddPositionStage(a4, "Falmer_Gangbang_A4_S1", 32.0, rotate=180.0)
+	AddPositionStage(a4, "Falmer_Gangbang_A4_S2", 32.0, rotate=180.0)
+	AddPositionStage(a4, "Falmer_Gangbang_A4_S3", 32.0, rotate=180.0)
+	AddPositionStage(a4, "Falmer_Gangbang_A4_S4", 32.0, rotate=180.0)
 
 	AddTag("Creature")
 	AddTag("Bestiality")
@@ -570,7 +615,6 @@ function FalmerHolding(string eventName, string id, float argNum, form sender)
 	Name = "(Falmer) Holding"
 	
 	SetSFX(Squishing)
-	
 	AddRace(FalmerRace)
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
@@ -600,7 +644,6 @@ function FalmerMissionary(string eventName, string id, float argNum, form sender
 	Name = "(Falmer) Missionary"
 	
 	SetSFX(Squishing)
-	
 	AddRace(FalmerRace)
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
@@ -630,7 +673,6 @@ function GargoyleDoggystyle(string eventName, string id, float argNum, form send
 	Name = "(Gargoyle) Doggystyle"
 	
 	SetSFX(Squishing)
-	
 	AddRace(DLC1GargoyleRace)
 	AddRace(DLC1GargoyleVariantBossRace)
 	AddRace(DLC1GargoyleVariantGreenRace)
@@ -660,7 +702,6 @@ function GargoyleHolding(string eventName, string id, float argNum, form sender)
 	Name = "(Gargoyle) Holding"
 	
 	SetSFX(Squishing)
-	
 	AddRace(DLC1GargoyleRace)
 	AddRace(DLC1GargoyleVariantBossRace)
 	AddRace(DLC1GargoyleVariantGreenRace)
@@ -690,7 +731,6 @@ function GargoyleMissionary(string eventName, string id, float argNum, form send
 	Name = "(Gargoyle) Missionary"
 	
 	SetSFX(Squishing)
-	
 	AddRace(DLC1GargoyleRace)
 	AddRace(DLC1GargoyleVariantBossRace)
 	AddRace(DLC1GargoyleVariantGreenRace)
@@ -720,7 +760,6 @@ function GiantPenetration(string eventName, string id, float argNum, form sender
 	Name = "(Giant) Penetration"
 	
 	SetSFX(Squishing)
-	
 	AddRace(GiantRace)
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
@@ -749,7 +788,6 @@ function HorseDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Horse) Doggystyle"
 	
 	SetSFX(Squishing)
-	
 	AddRace(HorseRace)
 
 	int a1 = AddPosition(Female, addCum=Anal)
@@ -777,7 +815,6 @@ function CatDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Sabre Cat) Doggystyle"
 	
 	SetSFX(Squishing)
-	
 	AddRace(SabreCatRace)
 	AddRace(SabreCatSnowyRace)
 
@@ -806,7 +843,6 @@ function SpiderDouble(string eventName, string id, float argNum, form sender)
 	Name = "(Spider) Double"
 	
 	SetSFX(Squishing)
-	
 	AddRace(FrostbiteSpiderRace)
 
 	int a1 = AddPosition(Female, addCum=VaginalOralAnal)
@@ -840,7 +876,6 @@ function SpiderPenetration(string eventName, string id, float argNum, form sende
 	Name = "(Spider) Penetration"
 	
 	SetSFX(Squishing)
-	
 	AddRace(FrostbiteSpiderRace)
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
@@ -868,7 +903,6 @@ function BigSpiderPenetration(string eventName, string id, float argNum, form se
 	Name = "(Large Spider) Penetration"
 	
 	SetSFX(Squishing)
-	
 	AddRace(FrostbiteSpiderRaceLarge)
 	AddRace(FrostbiteSpiderRaceGiant)
 
@@ -899,7 +933,6 @@ function TrollDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Troll) Doggystyle"
 	
 	SetSFX(Squishing)
-	
 	AddRace(TrollRace)
 
 	int a1 = AddPosition(Female, addCum=Anal)
@@ -927,7 +960,6 @@ function TrollHolding(string eventName, string id, float argNum, form sender)
 	Name = "(Troll) Holding"
 	
 	SetSFX(Squishing)
-	
 	AddRace(TrollRace)
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
@@ -955,7 +987,6 @@ function TrollMissionary(string eventName, string id, float argNum, form sender)
 	Name = "(Troll) Missionary"
 	
 	SetSFX(Squishing)
-	
 	AddRace(TrollRace)
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
@@ -984,7 +1015,6 @@ function VampireLordDoggystyle(string eventName, string id, float argNum, form s
 	Name = "(Vampire Lord) Doggystyle"
 	
 	SetSFX(Squishing)
-	
 	AddRace(DLC1VampireBeastRace)
 
 	int a1 = AddPosition(Female, addCum=Anal)
@@ -1012,7 +1042,6 @@ function VampireLordHolding(string eventName, string id, float argNum, form send
 	Name = "(Vampire Lord) Holding"
 	
 	SetSFX(Squishing)
-	
 	AddRace(DLC1VampireBeastRace)
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
@@ -1040,7 +1069,6 @@ function VampireLordMissionary(string eventName, string id, float argNum, form s
 	Name = "(Vampire Lord) Missionary"
 	
 	SetSFX(Squishing)
-	
 	AddRace(DLC1VampireBeastRace)
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
@@ -1068,7 +1096,6 @@ function WerewolfDoggystyle(string eventName, string id, float argNum, form send
 	Name = "(Werewolf) Doggystyle"
 	
 	SetSFX(Squishing)
-	
 	AddRace(WerewolfBeastRace)
 
 	int a1 = AddPosition(Female, addCum=Anal)
@@ -1097,7 +1124,6 @@ function WerewolfHolding(string eventName, string id, float argNum, form sender)
 	Name = "(Werewolf) Holding"
 	
 	SetSFX(Squishing)
-	
 	AddRace(WerewolfBeastRace)
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
@@ -1126,7 +1152,6 @@ function WerewolfMissionary(string eventName, string id, float argNum, form send
 	Name = "(Werewolf) Missionary"
 	
 	SetSFX(Squishing)
-	
 	AddRace(WerewolfBeastRace)
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
@@ -1155,7 +1180,6 @@ function WolfDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Wolf) Doggystyle"
 	
 	SetSFX(Squishing)
-	
 	AddRace(WolfRace)
 
 	int a1 = AddPosition(Female, addCum=Anal)
@@ -1183,7 +1207,6 @@ function WolfMissionary(string eventName, string id, float argNum, form sender)
 	Name = "(Wolf) Missionary"
 	
 	SetSFX(Squishing)
-	
 	AddRace(WolfRace)
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
