@@ -248,7 +248,7 @@ function StopAnimating(bool quick = false)
 	; Detach from marker
 	ClearMarker()
 	; Apply cum
-	if !quick && !IsCreature && Lib.bUseCum && (Lib.MaleCount(Controller.Positions) > 0 || Lib.bAllowFFCum)
+	if !quick && !IsCreature && Lib.bUseCum && (Controller.HasCreature || Lib.MaleCount(Controller.Positions) > 0 || Lib.bAllowFFCum)
 		Lib.ApplyCum(ActorRef, Animation.GetCum(position))
 	endIf
 	if IsCreature
