@@ -301,6 +301,7 @@ function MoveScene()
 	; Enable Controls
 	sslActorAlias Slot = ActorAlias(Lib.PlayerRef)
 	Slot.UnlockActor()
+	Debug.SendAnimationEvent(Lib.PlayerRef, "JumpLandEnd")
 	Debug.SendAnimationEvent(Lib.PlayerRef, "IdleForceDefaultState")
 	; Lock hotkeys and wait 6 seconds
 	Lib.mMoveScene.Show(6)
