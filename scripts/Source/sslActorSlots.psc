@@ -18,7 +18,7 @@ int property ActiveActors hidden
 endProperty
 
 sslActorAlias function SlotActor(actor position, sslThreadController ThreadView)
-	if Lib.ValidateActor(position) < 1
+	if FindActor(position) != -1 || Lib.ValidateActor(position) < 1
 		return none
 	endIf
 	int i
