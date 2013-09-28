@@ -3,7 +3,7 @@
 Skryim SexLab Framework
   By Ashal of Loverslab.com
 
-    Version 1.20 beta 1, released 2013/09/14
+    Version 1.20, released 2013/09/27
 
 -- Description --------------------------------------------------------------
 
@@ -30,6 +30,7 @@ Skryim SexLab Framework
      Mithos
      Blac945
      TDA
+     Zynsch
 
     Audio:
      Lovers with PK
