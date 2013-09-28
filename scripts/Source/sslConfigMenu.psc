@@ -2,7 +2,7 @@ scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
 int function GetVersion()
-	return 1190
+	return 1200
 endFunction
 
 string function GetStringVer()
@@ -1056,18 +1056,20 @@ endState
 state ResetAnimationRegistry
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnRebuildAnimations")
+			Utility.Wait(0.10)
 			ThreadSlots._StopAll()
 			AnimSlots._Setup()
 			CreatureAnimSlots._Setup()
-			ShowMessage("$SSL_RunRebuildAnimations", false)
+			Debug.TraceAndbox("$SSL_RunRebuildAnimations")
 		endIf
 	endEvent
 endState
 state ResetVoiceRegistry
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnRebuildVoices")
+			Utility.Wait(0.10)
 			VoiceSlots._Setup()
-			ShowMessage("$SSL_RunRebuildVoices", false)
+			Debug.TraceAndbox("$SSL_RunRebuildVoices")
 		endIf
 	endEvent
 endState
@@ -1075,14 +1077,15 @@ state ResetPlayerSexStats
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnResetStats")
 			Stats._Setup()
-			ShowMessage("$SSL_RunResetStats", false)
+			Debug.TraceAndbox("$SSL_RunResetStats")
 		endIf
 	endEvent
 endState
 state CleanSystem
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnCleanSystem")
-			ShowMessage("$SSL_RunCleanSystem", false)
+			ShowMessage("$SSL_RunCleanSystem")
+			Utility.WAit(0.10)
 			_SetupSystem()
 			mCleanSystemFinish.Show()
 		endIf
