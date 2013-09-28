@@ -385,7 +385,7 @@ endFunction
 function DraugrGangbang3P(string eventName, string id, float argNum, form sender)
 	Name = "(Draugr) Gangbang 3P"
 	
-	SetSFX(Squishing)
+	SetSFX(SexMix)
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
 
@@ -420,7 +420,7 @@ endFunction
 function DraugrGangbang4P(string eventName, string id, float argNum, form sender)
 	Name = "(Draugr) Gangbang 4P"
 	
-	SetSFX(Squishing)
+	SetSFX(SexMix)
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
 
@@ -461,7 +461,7 @@ endFunction
 function DraugrGangbang5P(string eventName, string id, float argNum, form sender)
 	Name = "(Draugr) Gangbang 5P"
 	
-	SetSFX(Squishing)
+	SetSFX(SexMix)
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
 
@@ -591,7 +591,7 @@ endFunction
 function FalmerGangbang3P(string eventName, string id, float argNum, form sender)
 	Name = "(Falmer) Gangbang 3P"
 	
-	SetSFX(Squishing)
+	SetSFX(SexMix)
 	AddRace(FalmerRace)
 
 	int a1 = AddPosition(Female, addCum=VaginalOralAnal)
@@ -625,7 +625,7 @@ endFunction
 function FalmerGangbang4P(string eventName, string id, float argNum, form sender)
 	Name = "(Falmer) Gangbang 4P"
 	
-	SetSFX(Squishing)
+	SetSFX(SexMix)
 	AddRace(FalmerRace)
 
 	int a1 = AddPosition(Female, addCum=VaginalOralAnal)
@@ -665,7 +665,7 @@ endFunction
 function FalmerGangbang5P(string eventName, string id, float argNum, form sender)
 	Name = "(Falmer) Gangbang 5P"
 	
-	SetSFX(Squishing)
+	SetSFX(SexMix)
 	AddRace(FalmerRace)
 
 	int a1 = AddPosition(Female, addCum=VaginalOralAnal)
