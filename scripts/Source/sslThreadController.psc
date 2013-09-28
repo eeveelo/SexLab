@@ -301,8 +301,7 @@ function MoveScene()
 	; Enable Controls
 	sslActorAlias Slot = ActorAlias(Lib.PlayerRef)
 	Slot.UnlockActor()
-	Debug.SendAnimationEvent(Lib.PlayerRef, "JumpLandEnd")
-	Debug.SendAnimationEvent(Lib.PlayerRef, "IdleForceDefaultState")
+	Slot.StopAnimating(true)
 	; Lock hotkeys and wait 6 seconds
 	Lib.mMoveScene.Show(6)
 	float stopat = Utility.GetCurrentRealTime() + 6
@@ -315,6 +314,7 @@ function MoveScene()
 	Utility.Wait(1.0)
 	; Recenter on coords to avoid stager + resync animations
 	CenterOnObject(Lib.PlayerRef, true)
+	RealignActors()
 	; Return to animation loop
 	looping = true
 	RegisterForSingleUpdate(0.15)
