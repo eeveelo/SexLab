@@ -404,8 +404,9 @@ function _HKClear()
 endFunction
 
 event OnKeyDown(int keyCode)
-	if PlayerController != none && hkReady
+	if PlayerController != none && hkReady && !UI.IsMenuOpen("Console") && !UI.IsMenuOpen("Main Menu") && !UI.IsMenuOpen("Loading Menu") && !UI.IsMenuOpen("MessageBoxMenu")
 		hkReady = false
+		Utility.Wait(0.001)
 
 		bool backwards
 		if kBackwards == 42 || kBackwards == 54
