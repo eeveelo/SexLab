@@ -64,9 +64,8 @@ function ClearAlias()
 	if GetReference() != none
 		Debug.Trace("SexLab: Clearing Actor Slot of "+ActorRef)
 		TryToClear()
-		;TryToReset()
+		TryToReset()
 		ActorRef.EvaluatePackage()
-		_Init()
 	endIf
 endFunction
 
@@ -101,8 +100,6 @@ function LockActor()
 endFunction
 
 function UnlockActor()
-	; Detach from marker
-	ClearMarker()
 	; Enable movement
 	if IsPlayer
 		Lib._HKClear()
@@ -115,7 +112,7 @@ function UnlockActor()
 	endIf
 	; Remove from animation faction
 	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
-	ActorRef.EvaluatePackage()
+	TryToEvaluatePackage()
 endFunction
 
 function PrepareActor()
@@ -129,7 +126,7 @@ function PrepareActor()
 	endIf
 	; Sexual animations only
 	if Controller.Animation.IsSexual()
-		Strip()
+		Strip(DoUndressAnim())
 	endIf
 	; Scale actor is enabled
 	if Controller.ActorCount > 1 && Lib.bScaleActors
@@ -154,7 +151,7 @@ function ResetActor()
 	RemoveExtras()
 	RemoveStrapon()
 	; Reset openmouth
-	ActorRef.SetExpressionOverride(7, 50)
+	;ActorRef.SetExpressionOverride(7, 50)
 	ActorRef.ClearExpressionOverride()
 	; Reset to starting scale
 	if scale > 0.0
@@ -163,7 +160,7 @@ function ResetActor()
 	; Make flaccid for SOS
 	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
 	; Unstrip
-	if !ActorRef.IsDead() && !ActorRef.IsBleedingOut()
+	if !ActorRef.IsDead()
 		Lib.UnstripActor(ActorRef, EquipmentStorage, Controller.GetVictim())
 	endIf
 endFunction
@@ -247,10 +244,7 @@ endfunction
 function StopAnimating(bool quick = false)
 	; Detach from marker
 	ClearMarker()
-	; Apply cum
-	if !quick && !IsCreature && Lib.bUseCum && (Controller.HasCreature || Lib.MaleCount(Controller.Positions) > 0 || Lib.bAllowFFCum)
-		Lib.ApplyCum(ActorRef, Animation.GetCum(position))
-	endIf
+	; Reset Idle
 	if IsCreature
 		; Reset Creature Idle
 		Debug.SendAnimationEvent(ActorRef, "Reset")
@@ -308,10 +302,6 @@ function Strip(bool animate = true)
 		strip = Lib.GetStrip(ActorRef, Controller.GetVictim(), Controller.LeadIn)
 	else
 		strip = StripOverride
-	endIf
-	; No animation override, get thread/user setting
-	if animate 
-		animate = DoUndressAnim()
 	endIf
 	; Strip slots and store removed equipment
 	form[] equipment = Lib.StripSlots(ActorRef, strip, animate)
@@ -373,7 +363,7 @@ function SyncThread(int toPosition)
 		IsSilent = toAnimation.IsSilent(position, stage)
 		if IsSilent || IsCreature
 			; VoiceDelay is used as loop timer, must be set even if silent.
-			VoiceDelay = 4.0
+			VoiceDelay = 2.5
 		else
 			; Update Strength
 			VoiceStrength = (stage as float) / (toAnimation.StageCount() as float)
@@ -467,14 +457,20 @@ event OnStartThread(string eventName, string actorSlot, float argNum, form sende
 	PrepareActor()
 endEvent
 
-event OnEndThread(string eventName, string actorSlot, float quick, form sender)
+event OnEndThread(string eventName, string actorSlot, float argNum, form sender)
 	UnregisterForModEvent("EndThread")
 	UnregisterForUpdate()
-	ClearMarker()
+	bool quick = (argNum as bool)
+	; Reset actor
+	StopAnimating(quick)
 	ResetActor()
 	UnlockActor()
-	StopAnimating((quick as bool))
-	GoToState("")
+	; Apply cum
+	int cum = Animation.GetCum(position)
+	if !quick && cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Lib.MaleCount(Controller.Positions) > 0)
+		Lib.ApplyCum(ActorRef, cum)
+	endIf
+	; Free up alias slot
 	ClearAlias()
 endEvent
 

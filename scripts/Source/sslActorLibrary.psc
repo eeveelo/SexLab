@@ -183,11 +183,12 @@ endFunction
 
 form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool allowNudesuit = true)
 
-	if strip.Length != 33
+	int gender = GetGender(a)
+
+	if strip.Length != 33 || gender == 2
 		return none
 	endIf
 
-	int gender = GetGender(a)
 	form[] items
 	int mask
 	armor item
@@ -199,8 +200,6 @@ form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool all
 		else
 			Debug.SendAnimationEvent(a, "Arrok_MaleUndress")
 		endIf
-	else
-		animate = false
 	endIf
 	
 	; Use Strip settings
@@ -212,9 +211,7 @@ form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool all
 			if item != none && !item.HasKeyWordString("SexLabNoStrip")
 				a.UnequipItem(item, false, true)
 				items = sslUtility.PushForm(item, items)
-				if animate
-					utility.wait(0.35)
-				endIf
+				Utility.Wait(0.25)
 			endIf 
 		elseif strip[i] && i == 32			
 			eWeap = a.GetEquippedWeapon(true)
@@ -229,11 +226,13 @@ form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool all
 					a.UnequipItem(eWeap, false, true)
 				endIf
 				items = sslUtility.PushForm(eWeap, items)
+				Utility.Wait(0.25)
 			endIf
 			eWeap = a.GetEquippedWeapon(false)
 			if eWeap != none && !eWeap.HasKeyWordString("SexLabNoStrip")
 				a.UnequipItem(eWeap, false, true)
 				items = sslUtility.PushForm(eWeap, items)
+				Utility.Wait(0.25)
 			endIf
 		endIf
 		i += 1
@@ -244,10 +243,6 @@ form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool all
 		if (gender < 1 && bUseMaleNudeSuit) || (gender == 1  && bUseFemaleNudeSuit)
 			a.EquipItem(NudeSuit, false, true)
 		endIf
-	endIf
-
-	if animate
-		Debug.SendAnimationEvent(a, "IdleForceDefaultState")
 	endIf
 
 	return items
@@ -280,6 +275,7 @@ function UnstripActor(actor a, form[] stripped, actor victim = none)
 		if type == 41 || type == 31 || type == 22 || type == 82
 			hand = 0
 		endIf
+		Utility.Wait(0.25)
 	endWhile
 endFunction
 
