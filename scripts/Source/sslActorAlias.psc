@@ -254,7 +254,6 @@ function StopAnimating(bool quick = false)
 		Debug.SendAnimationEvent(ActorRef, "ForceFurnExit")
 	elseif quick || Game.GetCameraState() == 3 || !DoRagdollEnd()
 		; Reset NPC/PC Idle Quickly
-		Debug.SendAnimationEvent(ActorRef, "JumpLandEnd")
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 	else
 		; Ragdoll NPC/PC
