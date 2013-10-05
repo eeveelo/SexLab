@@ -150,6 +150,10 @@ function AllowActor(actor a)
 	ActorLib.AllowActor(a)
 endFunction
 
+bool function IsForbidden(actor a)
+	return ActorLib.IsForbidden(a)
+endFunction
+
 function TreatAsMale(actor a)
 	ActorLib.TreatAsMale(a)
 endFunction

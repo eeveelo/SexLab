@@ -36,11 +36,33 @@ int position
 int stage
 form[] EquipmentStorage
 bool[] StripOverride
-bool disableUndress
-bool disableRagdoll
 form strapon
 float scale
 float[] loc
+
+; Switches
+bool disableRagdoll
+bool property DoRagdoll hidden
+	bool function get()
+		if disableRagdoll
+			return false
+		endIf
+		return Lib.bRagDollEnd
+	endFunction
+endProperty
+
+bool disableundress
+bool property DoUndress hidden
+	bool function get()
+		if disableundress
+			return false
+		endIf
+		return Lib.bUndressAnimation
+	endFunction
+	function set(bool value)
+		disableundress = !value
+	endFunction
+endProperty
 
 ;/-----------------------------------------------\;
 ;|	Alias Functions                              |;
@@ -48,7 +70,7 @@ float[] loc
 
 function SetAlias(sslThreadController ThreadView)
 	if GetReference() != none
-		_Init()
+		Initialize()
 		TryToStopCombat()
 		Controller = ThreadView
 		ActorRef = GetReference() as actor
@@ -62,10 +84,11 @@ endFunction
 
 function ClearAlias()
 	if GetReference() != none
-		Debug.Trace("SexLab: Clearing Actor Slot of "+ActorRef)
 		TryToClear()
 		TryToReset()
+		Debug.Trace("SexLab: Clearing Actor Slot of "+ActorRef.GetLeveledActorBase().GetName())
 		ActorRef.EvaluatePackage()
+		Initialize()
 	endIf
 endFunction
 
@@ -79,8 +102,9 @@ endFunction
 
 function LockActor()
 	; Start DoNothing package
+	ActorRef.AddToFaction(Lib.AnimatingFaction)
 	ActorRef.SetFactionRank(Lib.AnimatingFaction, 1)
-	TryToEvaluatePackage()
+	ActorRef.EvaluatePackage()
 	; Disable movement
 	if IsPlayer
 		Game.ForceThirdPerson()
@@ -92,8 +116,9 @@ function LockActor()
 			Lib._HKStart(Controller)
 		endIf
 	else
+		ActorRef.SetRestrained(true)
 		ActorRef.SetDontMove(true)
-		ActorRef.SetRestrained()
+		ActorRef.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
 	endIf
 	; Attach Marker
 	ActorRef.SetVehicle(MarkerRef)
@@ -107,12 +132,15 @@ function UnlockActor()
 		int[] genders = Lib.GenderCount(Controller.Positions)
 		Lib.Stats.UpdatePlayerStats(genders[0], genders[1], genders[2], Controller.Animation, Controller.GetVictim(), Controller.GetTime())
 	else
-		ActorRef.SetDontMove(false)
 		ActorRef.SetRestrained(false)
+		ActorRef.SetDontMove(false)
+		ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 	endIf
 	; Remove from animation faction
 	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
-	TryToEvaluatePackage()
+	ActorRef.EvaluatePackage()
+	; Detach Marker
+	ActorRef.SetVehicle(none)
 endFunction
 
 function PrepareActor()
@@ -126,7 +154,7 @@ function PrepareActor()
 	endIf
 	; Sexual animations only
 	if Controller.Animation.IsSexual()
-		Strip(DoUndressAnim())
+		Strip(DoUndress)
 	endIf
 	; Scale actor is enabled
 	if Controller.ActorCount > 1 && Lib.bScaleActors
@@ -243,7 +271,8 @@ endfunction
 
 function StopAnimating(bool quick = false)
 	; Detach from marker
-	ClearMarker()
+	ActorRef.StopTranslation()
+	ActorRef.SetVehicle(none)
 	; Reset Idle
 	if IsCreature
 		; Reset Creature Idle
@@ -252,12 +281,15 @@ function StopAnimating(bool quick = false)
 		Debug.SendAnimationEvent(ActorRef, "FNISDefault")
 		Debug.SendAnimationEvent(ActorRef, "IdleReturnToDefault")
 		Debug.SendAnimationEvent(ActorRef, "ForceFurnExit")
-	elseif quick || Game.GetCameraState() == 3 || !DoRagdollEnd()
-		; Reset NPC/PC Idle Quickly
-		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
+		ActorRef.PushActorAway(ActorRef, 0.1)
 	else
-		; Ragdoll NPC/PC
-		ActorRef.PushActorAway(ActorRef, 1)
+		; Reset NPC/PC Idle Quickly
+		Debug.SendAnimationEvent(ActorRef, "JumpLand")
+		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
+		; Ragdoll NPC/PC if enabled and not in TFC
+		if !quick && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
+			ActorRef.PushActorAway(ActorRef, 0.1)
+		endIf
 	endIf
 endFunction
 
@@ -268,7 +300,6 @@ function AlignTo(float[] offsets)
 	loc[0] = centerLoc[0] + ( Math.sin(centerLoc[5]) * offsets[0] ) + ( Math.cos(centerLoc[5]) * offsets[1] )
 	loc[1] = centerLoc[1] + ( Math.cos(centerLoc[5]) * offsets[0] ) + ( Math.sin(centerLoc[5]) * offsets[1] )
 	loc[2] = centerLoc[2] + offsets[2]
-	; Determine rotation coordinates from center
 	loc[3] = centerLoc[3]
 	loc[4] = centerLoc[4]
 	loc[5] = centerLoc[5] + offsets[3]
@@ -279,16 +310,17 @@ function AlignTo(float[] offsets)
 	endIf
 	MarkerRef.SetPosition(loc[0], loc[1], loc[2])
 	MarkerRef.SetAngle(loc[3], loc[4], loc[5])
+	ActorRef.SetVehicle(MarkerRef)
 	Snap()
 endfunction
 
-function Snap()
-	ActorRef.SetVehicle(MarkerRef)
-	if ActorRef.GetDistance(MarkerRef) > 0.70
-		ActorRef.SetAngle(loc[3], loc[4], loc[5])
+function Snap(float tolerance = 0.70)
+	if ActorRef.GetDistance(MarkerRef) > tolerance
+		ActorRef.MoveTo(MarkerRef)
 		ActorRef.SetVehicle(MarkerRef)
-		ActorRef.TranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 2500, 0)
-	endIf
+		ActorRef.StopTranslation()
+		ActorRef.TranslateTo((loc[0] + 0.1), (loc[1] + 0.1), loc[2], loc[3], loc[4], loc[5], 0.1, 0.1)
+	endIf	
 endFunction
 
 function Strip(bool animate = true)
@@ -314,21 +346,9 @@ endFunction
 function DisableRagdollEnd(bool disableIt = true)
 	disableragdoll = disableIt
 endFunction
-bool function DoRagdollEnd()
-	if disableundress
-		return false
-	endif
-	return Lib.bRagDollEnd
-endFunction
 
 function DisableUndressAnim(bool disableIt = true)
 	disableundress = disableIt
-endFunction
-bool function DoUndressAnim()
-	if disableundress
-		return false
-	endif
-	return Lib.bUndressAnimation
 endFunction
 
 function StoreEquipment(form[] equipment)
@@ -345,12 +365,12 @@ function StoreEquipment(form[] equipment)
 	EquipmentStorage = equipment
 endFunction
 
-function SyncThread(int toPosition)
-	if !Active || ActorRef == none
+function SyncThread()
+	if !Active || Controller == none || ActorRef == none
 		return
 	endIf
 	; Update Position
-	position = toPosition
+	position = Controller.GetPosition(ActorRef)
 	; Current stage + animation
 	int toStage = Controller.Stage
 	sslBaseAnimation toAnimation = Controller.Animation
@@ -419,7 +439,7 @@ state Ready
 	endEvent
 	function StartAnimating()
 		Active = true
-		SyncThread(Controller.GetPosition(ActorRef))
+		SyncThread()
 		GoToState("Animating")
 		RegisterForSingleUpdate(Utility.RandomFloat(0.0, 0.8))
 	endFunction
@@ -427,17 +447,14 @@ endState
 
 state Animating
 	event OnUpdate()
-		if ActorRef.IsDead() || ActorRef.IsBleedingOut()
+		if ActorRef.IsDead() || ActorRef.IsDisabled()
 			Controller.EndAnimation(true)
 			return
 		endIf
-
 		RegisterForSingleUpdate(VoiceDelay)
-
 		if IsCreature || IsSilent 
 			return
 		endIf
-
 		if VoiceInstance > 0
 			Sound.StopInstance(VoiceInstance)
 		endIf
@@ -471,15 +488,30 @@ event OnEndThread(string eventName, string actorSlot, float argNum, form sender)
 	endIf
 	; Free up alias slot
 	ClearAlias()
+	Utility.Wait(0.5)
+	Initialize()
 endEvent
 
 ;/-----------------------------------------------\;
 ;|	Misc Functions                               |;
 ;\-----------------------------------------------/;
 
-function _Init()
+function Initialize()
+	; Clear events
+	UnregisterForUpdate()
 	UnregisterForAllModEvents()
-	ClearMarker()
+	GoToState("")
+	; Clear marker snapping
+	if ActorRef != none
+		ActorRef.StopTranslation()
+		ActorRef.SetVehicle(none)
+	endIf
+	if MarkerObj != none
+		MarkerObj.Disable()
+		MarkerObj.Delete()
+	endIf
+	; Clear storage
+	MarkerObj = none
 	ActorRef = none
 	Active = false
 	Controller = none
@@ -491,21 +523,12 @@ function _Init()
 	EquipmentStorage = formDel
 	bool[] boolDel
 	StripOverride = boolDel
-	GoToState("")
-endFunction
-
-function ClearMarker()
-	if ActorRef != none
-		ActorRef.StopTranslation()
-		ActorRef.SetVehicle(none)
-	endIf
-	if MarkerObj != none
-		MarkerObj.Disable()
-		MarkerObj.Delete()
-		MarkerObj = none
-	endIf
 endFunction
 
 function StartAnimating()
 	;Debug.TraceAndbox("Null start: "+ActorRef)
 endFunction
+
+event OnTranslationComplete()
+	Debug.Notification("Move compltete")
+endEvent

@@ -249,7 +249,7 @@ state Making
 		endIf
 
 		; Still no center, fallback to something
-		if centerObj == none || centerLoc == none
+		if centerLoc.Length == 0
 			; Fallback to victim
 			if victim != none
 				CenterOnObject(victim)
@@ -327,15 +327,15 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 		centerLoc[0] = centerLoc[0] + (35 * Math.sin(centerLoc[5]))
 		centerLoc[1] = centerLoc[1] + (35 * Math.cos(centerLoc[5]))
 		centerLoc[2] = centerLoc[2] + 35
-	; elseif centerOn == Lib.PlayerRef || centerOn.HasKeyWordString("ActorTypeNPC")
-	; 	ObjectReference Stager = centerOn.PlaceAtMe(Lib.SexLabStager)
-	; 	if centerOn.GetDistance(Stager) < 600
-	; 		centerLoc = GetCoords(Stager)
-	; 	else
-	; 		centerLoc = GetCoords(centerOn)
-	; 	endIf
-	; 	Stager.Disable()
-	; 	Stager.Delete()
+	elseif centerOn == Lib.PlayerRef || centerOn.HasKeyWordString("ActorTypeNPC")
+		ObjectReference Stager = centerOn.PlaceAtMe(Lib.SexLabStager)
+		if centerOn.GetDistance(Stager) < 600
+			centerLoc = GetCoords(Stager)
+		else
+			centerLoc = GetCoords(centerOn)
+		endIf
+		Stager.Disable()
+		Stager.Delete()
 	else
 		centerLoc = GetCoords(centerOn)
 	endIf
@@ -655,7 +655,7 @@ function SyncActors()
 	int i = ActorCount
 	while i
 		i -= 1
-		ActorSlot(i).SyncThread(i)
+		ActorAlias[i].SyncThread()
 	endWhile
 endFunction
 

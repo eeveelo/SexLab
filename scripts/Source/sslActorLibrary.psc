@@ -72,47 +72,52 @@ bool[] property bStripAggressor auto hidden
 bool hkReady
 sslThreadController PlayerController
 
-int function ValidateActor(actor position)
-	if position.HasKeyWordString("SexLabActive")
-		Debug.Trace("Failed to add actor to animation; actor appears to already be animating")
+int function ValidateActor(actor a)
+
+	String ActorName = a.GetLeveledActorBase().GetName()
+
+	if a.HasKeywordString("SexLabActive")
+		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They appear to already be animating")
 		return -10
 	endIf
 
-	if position.HasKeyWordString("SexLabForbid") && !position.IsInFaction(ForbiddenFaction)
-		Debug.Trace("Failed to add actor to animation; actor is forbidden from animating")
+	if a.HasKeywordString("SexLabForbid") || a.IsInFaction(ForbiddenFaction)
+		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are forbidden from animating")
 		return -11
 	endIf
 
-	if !position.Is3DLoaded()
-		Debug.Trace("Failed to add actor to animation; actor is not loaded")
+	if !a.Is3DLoaded()
+		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are not loaded")
 		return -12
 	endIf
 
-	if position.IsDead()
-		Debug.Trace("Failed to add actor to animation; actor is dead")
+	if a.IsDead()
+		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: He's dead Jim.")
 		return -13
 	endIf
 
-	if position.IsDisabled()
-		Debug.Trace("Failed to add actor to animation; actor is disabled")
+	if a.IsDisabled()
+		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are disabled")
 		return -14
 	endIf
 
-	Race ActorRace = position.GetLeveledActorBase().GetRace()
-	if ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(ActorRace.GetName(), "Child") != -1 || StringUtil.Find(ActorRace.GetName(), "117") != -1
-		Debug.Trace("Failed to add actor to animation; actor is child")
+	Race ActorRace = a.GetLeveledActorBase().GetRace()
+	String RaceName = ActorRace.GetName()
+
+	if ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Child") != -1 || StringUtil.Find(RaceName, "117") != -1
+		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are a child")
 		return -15
 	endIf
 
-	if position.HasKeyWordString("ActorTypeAnimal") || position.HasKeyWordString("ActorTypeCreature") || position.HasKeyWordString("ActorTypeDwarven") || position.HasKeyWordString("ActorTypeDaedra")
-		if !AnimLib.AllowedCreature(ActorRace)
-			Debug.Trace("Failed to add actor to animation; actor is a creature that is currently not supported ("+ActorRace.GetName()+")")
-			return -16
-		endIf
+	if a != PlayerRef && !a.HasKeywordString("ActorTypeNPC") && !AnimLib.AllowedCreature(ActorRace)
+		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are a creature that is currently not supported ("+RaceName+")")
+		return -16
 	endIf
 
 	return 1
 endFunction
+
+
 
 actor[] function SortActors(actor[] Positions, bool femaleFirst = true)
 	if Positions.Length < 2
@@ -323,6 +328,10 @@ function AllowActor(actor a)
 	a.RemoveFromFaction(ForbiddenFaction)
 endFunction
 
+bool function IsForbidden(actor a)
+	return a.HasKeyWordString("SexLabForbid") || !a.IsInFaction(ForbiddenFaction)
+endFunction
+
 function TreatAsMale(actor a)
 	a.AddToFaction(GenderFaction)
 	a.SetFactionRank(GenderFaction, 0)
@@ -445,7 +454,7 @@ event OnKeyDown(int keyCode)
 		; Change Adjusted Actor
 		elseIf keyCode == kAdjustChange
 			PlayerController.AdjustChange(backwards)
-		; Reposition Actors
+		; RePosition Actors
 		elseIf keyCode == kRealignActors
 			PlayerController.RealignActors()
 		; Restore animation offsets

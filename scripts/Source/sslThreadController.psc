@@ -69,7 +69,7 @@ state Preparing
 		while !ActorWait("Ready") && failsafe > Utility.GetCurrentRealTime()
 			Utility.Wait(0.20)
 		endWhile
-		if IsPlayerPosition(AdjustingPosition) && ActorCount > 1
+		if IsPlayerPosition(AdjustingPosition) && ActorCount > 1 && !HasCreature
 			AdjustingPosition = ArrayWrap((AdjustingPosition + 1), ActorCount)
 		endIf
 		GotoState("Starting")
@@ -128,7 +128,6 @@ state Starting
 			i += 1
 		endWhile
 		started = Utility.GetCurrentRealTime()
-		MoveActors()
 		GoToStage(1)
 	endEvent
 endState
@@ -174,10 +173,8 @@ state Animating
 		if sfx[0] < 0.80
 			sfx[0] = 0.80
 		endIf
-		; Inform ActorAlias of stage
-		SyncActors()
 		; Start animation looping
-		PlayAnimation()
+		RealignActors()
 		looping = true
 		UpdateTimer(Animation.GetStageTimer(stage))
 		RegisterForSingleUpdate(0.10)
@@ -187,7 +184,7 @@ state Animating
 			return
 		endIf
 		timer = Utility.GetCurrentRealTime() - started
-		if (autoAdvance || timedStage) && advanceAt < Utility.GetCurrentRealTime()
+		if (AutoAdvance || timedStage) && advanceAt < Utility.GetCurrentRealTime()
 			GoToStage((Stage + 1))
 			return ; End Stage
 		endIf
@@ -200,7 +197,7 @@ state Animating
 		RegisterForSingleUpdate(0.60)
 	endEvent
 	event OnEndState()
-		if !LeadIn && Stage >= Animation.StageCount
+		if !LeadIn && Stage > Animation.StageCount
 			SendThreadEvent("OrgasmEnd")
 		else
 			SendThreadEvent("StageEnd")
@@ -228,7 +225,6 @@ function ChangeAnimation(bool backwards = false)
 	endIf
 	aid = ArrayWrap((aid + SignInt(1, backwards)), Animations.Length)
 	SetAnimation(aid)
-	SyncActors()
 	RealignActors()
 	SendThreadEvent("AnimationChange")
 endFunction
@@ -287,7 +283,6 @@ endFunction
 
 function RestoreOffsets()
 	Animation.RestoreOffsets()
-	SyncActors()
 	RealignActors()
 endFunction
 
@@ -325,14 +320,15 @@ endFunction
 ;\-----------------------------------------------/;
 
 function RealignActors()
+	SyncActors()
 	PlayAnimation()
-	MoveActors()
+	UpdateLocations()
 endFunction
 
 function MoveActors()
 	int i
 	while i < ActorCount
-		ActorAlias[i].Snap()
+		ActorAlias[i].Snap(1.25)
 		i += 1
 	endWhile
 endFunction
@@ -343,7 +339,6 @@ function UpdateLocations()
 		ActorAlias[i].AlignTo(Animation.GetPositionOffsets(i, stage))
 		i += 1
 	endWhile
-	RealignActors()
 endFunction
 
 ;/-----------------------------------------------\;
@@ -360,8 +355,6 @@ function SetAnimation(int anim = -1)
 	AnimCurrent = Animations[aid]
 	; Set SFX Marker
 	sfxType = Lib.GetSFX(Animation.SFX)
-	; Update with new animation
-	SyncActors()
 	; Check for animation specific stage timer
 	float stagetimer = AnimCurrent.GetStageTimer(stage)
 	if stagetimer > 0.0
