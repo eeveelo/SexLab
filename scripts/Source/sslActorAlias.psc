@@ -210,10 +210,11 @@ function RemoveExtras()
 endFunction
 
 function EquipStrapon()
-	if strapon == none
-		strapon = Lib.PickStrapon()
+	if strapon == none && !Lib.HasStrapon(ActorRef)
+		strapon = Lib.PickStrapon(ActorRef)
 	endIf
 	if strapon != none && !ActorRef.IsEquipped(strapon)
+		ActorRef.AddItem(strapon, 1, true)
 		ActorRef.EquipItem(strapon, false, true)
 	endIf
 endFunction

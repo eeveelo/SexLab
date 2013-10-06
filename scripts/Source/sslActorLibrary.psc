@@ -284,22 +284,41 @@ function UnstripActor(actor a, form[] stripped, actor victim = none)
 	endWhile
 endFunction
 
-form function PickStrapon()
-	int straponCount = Strapons.Length
-	if straponCount == 0
-		return none
+
+form function WornStrapon(actor a)
+	int i = Strapons.Length
+	while i
+		i -= 1
+		if a.IsEquipped(Strapons[i])
+			return Strapons[i]
+		endIf
+	endWhile
+	return none
+endFunction
+
+bool function HasStrapon(actor a)
+	return WornStrapon(a) != none
+endFunction
+
+form function PickStrapon(actor a)
+	int i = Strapons.Length
+	form strapon = WornStrapon(a)
+	if strapon != none
+		return strapon
 	endIf
-	return Strapons[utility.RandomInt(0, straponCount - 1)]
+	return Strapons[Utility.RandomInt(0, Strapons.Length - 1)]
 endFunction
 
 form function EquipStrapon(actor a)
 	if GetGender(a) == 1
-		form strapon = PickStrapon()
-		a.EquipItem(strapon, false, true)
+		form strapon = PickStrapon(a)
+		if strapon != none
+			a.AddItem(strapon, 1, true)
+			a.EquipItem(strapon, false, true)
+		endIf
 		return strapon
-	else
-		return none
 	endIf
+	return none
 endFunction
 
 function UnequipStrapon(actor a)
