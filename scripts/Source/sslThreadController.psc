@@ -3,10 +3,9 @@ scriptname sslThreadController extends sslThreadModel
 
 ; Animation
 int aid
-sslBaseAnimation AnimCurrent
 sslBaseAnimation property Animation hidden
 	sslBaseAnimation function get()
-		return AnimCurrent
+		return Animations[aid]
 	endFunction
 endProperty
 
@@ -350,12 +349,10 @@ function SetAnimation(int anim = -1)
 	else
 		aid = anim
 	endIf
-	; Set current animation to play
-	AnimCurrent = Animations[aid]
 	; Set SFX Marker
 	sfxType = Lib.GetSFX(Animation.SFX)
 	; Check for animation specific stage timer
-	float stagetimer = AnimCurrent.GetStageTimer(stage)
+	float stagetimer = Animation.GetStageTimer(stage)
 	if stagetimer > 0.0
 		UpdateTimer(stagetimer)
 	endIf
@@ -428,9 +425,6 @@ function Initialize()
 	AdjustingPosition = 0
 	stagePrev = 0
 	aid = 0
-	; Empty voice slots
-	; Empty AnimationS
-	AnimCurrent = none
 	; Empty forms
 	sfxType = none
 	; Clear model
