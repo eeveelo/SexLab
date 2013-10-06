@@ -121,7 +121,7 @@ function SetDefaults()
 	Pages[7] = "$SSL_ForeplayAnimations"
 	Pages[8] = "$SSL_AggressiveAnimations"
 	Pages[9] = "$SSL_CreatureAnimations"
-	if Game.GetPlayer().GetActorBase().GetSex() > 0
+	if PlayerRef.GetLeveledActorBase().GetSex() > 0
 		Pages[10] = "$SSL_SexDiary"
 	else
 		Pages[10] = "$SSL_SexJournal"

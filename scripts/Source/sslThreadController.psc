@@ -253,21 +253,24 @@ function ChangePositions(bool backwards = false)
 endFunction
 
 function AdjustForward(bool backwards = false, bool adjuststage = false)
-	float adjustment = SignFloat(0.75, backwards)
-	Animation.UpdateForward(AdjustingPosition, stage, adjustment, adjuststage)
-	ActorSlot(AdjustingPosition).AlignTo(Animation.GetPositionOffsets(AdjustingPosition, stage))
+	float[] offsets = Animation.UpdateForward(AdjustingPosition, stage, SignFloat(0.75, backwards), adjuststage)
+	sslActorAlias Slot = ActorSlot(AdjustingPosition)
+	Slot.AlignTo(offsets)
+	Slot.Snap(0.0)
 endFunction
 
 function AdjustSideways(bool backwards = false, bool adjuststage = false)
-	float adjustment = SignFloat(0.75, backwards)
-	Animation.UpdateSide(AdjustingPosition, stage, adjustment, adjuststage)
-	ActorSlot(AdjustingPosition).AlignTo(Animation.GetPositionOffsets(AdjustingPosition, stage))
+	float[] offsets = Animation.UpdateSide(AdjustingPosition, stage, SignFloat(0.75, backwards), adjuststage)
+	sslActorAlias Slot = ActorSlot(AdjustingPosition)
+	Slot.AlignTo(offsets)
+	Slot.Snap(0.0)
 endFunction
 
 function AdjustUpward(bool backwards = false, bool adjuststage = false)
-	float adjustment = SignFloat(0.75, backwards)
-	Animation.UpdateUp(AdjustingPosition, stage, adjustment, adjuststage)
-	ActorSlot(AdjustingPosition).AlignTo(Animation.GetPositionOffsets(AdjustingPosition, stage))
+	float[] offsets = Animation.UpdateUp(AdjustingPosition, stage, SignFloat(0.75, backwards), adjuststage)
+	sslActorAlias Slot = ActorSlot(AdjustingPosition)
+	Slot.AlignTo(offsets)
+	Slot.Snap(0.0)
 endFunction
 
 function RotateScene(bool backwards = false)
@@ -283,6 +286,7 @@ endFunction
 function RestoreOffsets()
 	Animation.RestoreOffsets()
 	RealignActors()
+	MoveActors()
 endFunction
 
 function MoveScene()
@@ -321,12 +325,13 @@ endFunction
 function RealignActors()
 	SyncActors()
 	PlayAnimation()
+	MoveActors()
 endFunction
 
 function MoveActors()
 	int i
 	while i < ActorCount
-		ActorAlias[i].Snap(0.1)
+		ActorAlias[i].Snap(0.0)
 		i += 1
 	endWhile
 endFunction
@@ -334,9 +339,10 @@ endFunction
 function UpdateLocations()
 	int i
 	while i < ActorCount
-		ActorAlias[i].AlignTo(Animation.GetPositionOffsets(i, stage))
+		ActorSlot(i).AlignTo(Animation.GetPositionOffsets(i, stage))
 		i += 1
 	endWhile
+	MoveActors()
 endFunction
 
 ;/-----------------------------------------------\;

@@ -62,13 +62,13 @@ endProperty
 ;|	Animation Offsets                            |;
 ;\-----------------------------------------------/;
 
-float[] function GetPositionOffsets(int position, int stage, bool adjust = true)
+float[] function GetPositionOffsets(int position, int stage)
 	if !Exists("GetPositionOffsets", position, stage)
 		return none
 	endIf
 
 	float[] off = new float[4]
-	if adjust
+	if creatures.Length == 0
 		off[0] = CalculateForward(position, stage)
 	else
 		off[0] = AccessOffset(position, stage, 0)
@@ -278,7 +278,7 @@ function UpdateOffset(int slot, int position, int stage, float adjust)
 	offsetData[index] = offsetData[index] + adjust
 endFunction
 
-function UpdateForward(int position, int stage, float adjust, bool adjuststage = false)
+float[] function UpdateForward(int position, int stage, float adjust, bool adjuststage = false)
 	if Exists("UpdateForward", position, stage)
 		if adjuststage
 			UpdateOffset(0, position, stage, adjust)
@@ -286,9 +286,10 @@ function UpdateForward(int position, int stage, float adjust, bool adjuststage =
 			UpdateAllOffsets(0, position, adjust)
 		endIf
 	endIf
+	return GetPositionOffsets(position, stage)
 endFunction
 
-function UpdateSide(int position, int stage, float adjust, bool adjuststage = false)
+float[] function UpdateSide(int position, int stage, float adjust, bool adjuststage = false)
 	if Exists("UpdateSide", position, stage)
 		if adjuststage
 			UpdateOffset(1, position, stage, adjust)
@@ -296,9 +297,10 @@ function UpdateSide(int position, int stage, float adjust, bool adjuststage = fa
 			UpdateAllOffsets(1, position, adjust)
 		endIf
 	endIf
+	return GetPositionOffsets(position, stage)
 endFunction
 
-function UpdateUp(int position, int stage, float adjust, bool adjuststage = false)
+float[] function UpdateUp(int position, int stage, float adjust, bool adjuststage = false)
 	if Exists("UpdateUp", position, stage)
 		if adjuststage
 			UpdateOffset(2, position, stage, adjust)
@@ -306,6 +308,7 @@ function UpdateUp(int position, int stage, float adjust, bool adjuststage = fals
 			UpdateAllOffsets(2, position, adjust)
 		endIf
 	endIf
+	return GetPositionOffsets(position, stage)
 endFunction
 
 function RestoreOffsets()

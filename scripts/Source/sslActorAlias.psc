@@ -314,7 +314,7 @@ function AlignTo(float[] offsets)
 	MarkerRef.SetPosition(loc[0], loc[1], loc[2])
 	MarkerRef.SetAngle(loc[3], loc[4], loc[5])
 	ActorRef.SetVehicle(MarkerRef)
-	Snap(0.60)
+	Snap(0.70)
 endfunction
 
 function Snap(float tolerance)
@@ -326,7 +326,7 @@ function Snap(float tolerance)
 		ActorRef.SetVehicle(MarkerRef)
 	endIf
 	ActorRef.StopTranslation()
-	ActorRef.TranslateTo((loc[0] + 1.0), (loc[1] + 1.0), loc[2], loc[3], loc[4], (loc[5] + 1.0), 0.001, 0.001)
+	ActorRef.TranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], (loc[5] + 1.0), 0.001, 0.001)
 endFunction
 
 event OnTranslationComplete()
