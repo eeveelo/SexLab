@@ -140,7 +140,8 @@ function UnlockActor()
 	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
 	ActorRef.EvaluatePackage()
 	; Detach positioning marker
-	DetachMarker()
+	ActorRef.SetVehicle(none)
+	ActorRef.StopTranslation()
 endFunction
 
 function PrepareActor()
@@ -272,23 +273,24 @@ endfunction
 
 function StopAnimating(bool quick = false)
 	; Detach positioning marker
-	DetachMarker()
+	ActorRef.SetVehicle(none)
+	ActorRef.StopTranslation()
 	; Reset Idle
 	if IsCreature
 		; Reset Creature Idle
-		; Debug.SendAnimationEvent(ActorRef, "Reset")
-		; Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
-		; Debug.SendAnimationEvent(ActorRef, "FNISDefault")
-		; Debug.SendAnimationEvent(ActorRef, "IdleReturnToDefault")
-		; Debug.SendAnimationEvent(ActorRef, "ForceFurnExit")
-		ActorRef.PushActorAway(ActorRef, 0.1)
+		Debug.SendAnimationEvent(ActorRef, "Reset")
+		Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
+		Debug.SendAnimationEvent(ActorRef, "FNISDefault")
+		Debug.SendAnimationEvent(ActorRef, "IdleReturnToDefault")
+		Debug.SendAnimationEvent(ActorRef, "ForceFurnExit")
+		ActorRef.PushActorAway(ActorRef, 1.0)
 	else
 		; Reset NPC/PC Idle Quickly
 		Debug.SendAnimationEvent(ActorRef, "JumpLand")
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 		; Ragdoll NPC/PC if enabled and not in TFC
 		if !quick && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
-			ActorRef.PushActorAway(ActorRef, 0.1)
+			ActorRef.PushActorAway(ActorRef, 0.01)
 		endIf
 	endIf
 endFunction
@@ -314,20 +316,17 @@ function AlignTo(float[] offsets)
 	Snap(0.60)
 endfunction
 
-function Snap(float tolerance = 0.0)
-	if tolerance == 0.0 || ActorRef.GetDistance(MarkerRef) > tolerance
-		ActorRef.StopTranslation()
-		ActorRef.SetPosition(loc[0], loc[1], loc[2])
-		ActorRef.SetAngle(loc[3], loc[4], loc[5])
+function Snap(float tolerance)
+	if tolerance == 0.0 || ActorRef.GetDistance(MarkerRef) >= tolerance
+		ActorRef.MoveTo(MarkerRef)
 		ActorRef.SetVehicle(MarkerRef)
-		ActorRef.TranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], (loc[5] + 1.0), 0.001, 0.001)
-		debug.trace(ActorRef.GetLeveledActorBase().GetName()+" Snapping")
 	endIf
+	ActorRef.StopTranslation()
+	ActorRef.TranslateTo((loc[0] + 1.0), (loc[1] + 1.0), loc[2], loc[3], loc[4], (loc[5] + 1.0), 0.001, 0.001)
 endFunction
 
 event OnTranslationComplete()
-	Debug.traceandbox(ActorRef.GetLeveledActorBase().GetName()+" TRANSLATION COMPLETE: RESNAP")
-	Snap()
+	Snap(0.1)
 endEvent
 
 function Strip(bool animate = true)
@@ -503,12 +502,6 @@ endEvent
 ;|	Misc Functions                               |;
 ;\-----------------------------------------------/;
 
-function DetachMarker()
-	if ActorRef != none
-		ActorRef.SetVehicle(none)
-		ActorRef.StopTranslation()
-	endIf
-endFunction
 
 function Initialize()
 	; Clear events
@@ -516,7 +509,10 @@ function Initialize()
 	UnregisterForAllModEvents()
 	GoToState("")
 	; Clear marker snapping
-	DetachMarker()
+	if ActorRef != none
+		ActorRef.SetVehicle(none)
+		ActorRef.StopTranslation()
+	endIf
 	if MarkerObj != none
 		MarkerObj.Disable()
 		MarkerObj.Delete()
@@ -535,6 +531,7 @@ function Initialize()
 	bool[] boolDel
 	StripOverride = boolDel
 endFunction
+
 
 function StartAnimating()
 	;Debug.TraceAndbox("Null start: "+ActorRef)
