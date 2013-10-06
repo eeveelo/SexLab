@@ -328,7 +328,7 @@ endFunction
 function MoveActors()
 	int i
 	while i < ActorCount
-		ActorAlias[i].Snap(1.25)
+		ActorAlias[i].Snap()
 		i += 1
 	endWhile
 endFunction

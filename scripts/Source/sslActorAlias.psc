@@ -120,7 +120,7 @@ function LockActor()
 		ActorRef.SetDontMove(true)
 		ActorRef.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
 	endIf
-	; Attach Marker
+	; Attach positioning marker
 	ActorRef.SetVehicle(MarkerRef)
 endFunction
 
@@ -139,8 +139,8 @@ function UnlockActor()
 	; Remove from animation faction
 	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
 	ActorRef.EvaluatePackage()
-	; Detach Marker
-	ActorRef.SetVehicle(none)
+	; Detach positioning marker
+	DetachMarker()
 endFunction
 
 function PrepareActor()
@@ -270,17 +270,16 @@ function AnimationExtras()
 endfunction
 
 function StopAnimating(bool quick = false)
-	; Detach from marker
-	ActorRef.StopTranslation()
-	ActorRef.SetVehicle(none)
+	; Detach positioning marker
+	DetachMarker()
 	; Reset Idle
 	if IsCreature
 		; Reset Creature Idle
-		Debug.SendAnimationEvent(ActorRef, "Reset")
-		Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
-		Debug.SendAnimationEvent(ActorRef, "FNISDefault")
-		Debug.SendAnimationEvent(ActorRef, "IdleReturnToDefault")
-		Debug.SendAnimationEvent(ActorRef, "ForceFurnExit")
+		; Debug.SendAnimationEvent(ActorRef, "Reset")
+		; Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
+		; Debug.SendAnimationEvent(ActorRef, "FNISDefault")
+		; Debug.SendAnimationEvent(ActorRef, "IdleReturnToDefault")
+		; Debug.SendAnimationEvent(ActorRef, "ForceFurnExit")
 		ActorRef.PushActorAway(ActorRef, 0.1)
 	else
 		; Reset NPC/PC Idle Quickly
@@ -311,17 +310,24 @@ function AlignTo(float[] offsets)
 	MarkerRef.SetPosition(loc[0], loc[1], loc[2])
 	MarkerRef.SetAngle(loc[3], loc[4], loc[5])
 	ActorRef.SetVehicle(MarkerRef)
-	Snap()
+	Snap(0.60)
 endfunction
 
-function Snap(float tolerance = 0.70)
-	if ActorRef.GetDistance(MarkerRef) > tolerance
-		ActorRef.MoveTo(MarkerRef)
-		ActorRef.SetVehicle(MarkerRef)
+function Snap(float tolerance = 0.0)
+	if tolerance == 0.0 || ActorRef.GetDistance(MarkerRef) > tolerance
 		ActorRef.StopTranslation()
-		ActorRef.TranslateTo((loc[0] + 0.1), (loc[1] + 0.1), loc[2], loc[3], loc[4], loc[5], 0.1, 0.1)
-	endIf	
+		ActorRef.SetPosition(loc[0], loc[1], loc[2])
+		ActorRef.SetAngle(loc[3], loc[4], loc[5])
+		ActorRef.SetVehicle(MarkerRef)
+		ActorRef.TranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], (loc[5] + 1.0), 0.001, 0.001)
+		debug.trace(ActorRef.GetLeveledActorBase().GetName()+" Snapping")
+	endIf
 endFunction
+
+event OnTranslationComplete()
+	Debug.traceandbox(ActorRef.GetLeveledActorBase().GetName()+" TRANSLATION COMPLETE: RESNAP")
+	Snap()
+endEvent
 
 function Strip(bool animate = true)
 	if IsCreature
@@ -496,16 +502,20 @@ endEvent
 ;|	Misc Functions                               |;
 ;\-----------------------------------------------/;
 
+function DetachMarker()
+	if ActorRef != none
+		ActorRef.SetVehicle(none)
+		ActorRef.StopTranslation()
+	endIf
+endFunction
+
 function Initialize()
 	; Clear events
 	UnregisterForUpdate()
 	UnregisterForAllModEvents()
 	GoToState("")
 	; Clear marker snapping
-	if ActorRef != none
-		ActorRef.StopTranslation()
-		ActorRef.SetVehicle(none)
-	endIf
+	DetachMarker()
 	if MarkerObj != none
 		MarkerObj.Disable()
 		MarkerObj.Delete()
@@ -529,6 +539,3 @@ function StartAnimating()
 	;Debug.TraceAndbox("Null start: "+ActorRef)
 endFunction
 
-event OnTranslationComplete()
-	Debug.Notification("Move compltete")
-endEvent
