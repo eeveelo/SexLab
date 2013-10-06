@@ -163,7 +163,7 @@ event OnPageReset(string page)
 		AddToggleOptionST("DisableVictim","$SSL_DisableVictimControls", ActorLib.bDisablePlayer)
 
 		AddHeaderOption("$SSL_SoundsVoices")
-		AddTextOptionST("PlayerVoice","$SSL_PCVoice", "$SSL_Random")
+		AddTextOptionST("PlayerVoice","$SSL_PCVoice", VoiceLib.sPlayerVoice)
 		AddSliderOptionST("VoiceVolume","$SSL_VoiceVolume", (ActorLib.fVoiceVolume * 100), "{0}%")
 		AddSliderOptionST("MaleVoiceDelay","$SSL_MaleVoiceDelay", ActorLib.fMaleVoiceDelay, "$SSL_Seconds")
 		AddSliderOptionST("FemaleVoiceDelay","$SSL_FemaleVoiceDelay", ActorLib.fFemaleVoiceDelay, "$SSL_Seconds")

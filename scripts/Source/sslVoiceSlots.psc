@@ -147,7 +147,6 @@ function _Setup()
 endFunction
 
 function Initialize()
-	
 	string[] init
 	registry = init
 	Slotted = 0
