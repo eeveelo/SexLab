@@ -2,7 +2,7 @@ scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
 int function GetVersion()
-	return 1200
+	return 12099
 endFunction
 
 string function GetStringVer()
@@ -16,8 +16,10 @@ endFunction
 event OnVersionUpdate(int version)
 	float current = (CurrentVersion as float / 1000.0)
 	float latest = (version as float / 1000.0)
-	if current > 0
-		Debug.Notification("Updating SexLab v"+GetStringVer())
+	if current < latest
+		Debug.Notification("Updating to SexLab v"+GetStringVer())
+	endIf
+	if current > 0 && current < 1.20
 		_SetupSystem()
 	endIf
 endEvent
