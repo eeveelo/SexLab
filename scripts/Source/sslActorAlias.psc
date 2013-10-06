@@ -273,8 +273,7 @@ function AnimationExtras()
 endfunction
 
 function StopAnimating(bool quick = false)
-	; Detach positioning marker
-	ActorRef.SetVehicle(none)
+	; Stop any snapping going on beforehand
 	ActorRef.StopTranslation()
 	; Reset Idle
 	if IsCreature
@@ -292,8 +291,13 @@ function StopAnimating(bool quick = false)
 		; Ragdoll NPC/PC if enabled and not in TFC
 		if !quick && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
 			ActorRef.PushActorAway(ActorRef, 0.01)
+			if IsPlayer
+				Utility.Wait(3.0) ; Don't unlock player to quickly while ragdolling.
+			endIf
 		endIf
 	endIf
+	; Detach positioning marker
+	ActorRef.SetVehicle(none)
 endFunction
 
 function AlignTo(float[] offsets)
@@ -325,12 +329,12 @@ function Snap(float tolerance)
 		ActorRef.SetAngle(loc[3], loc[4], loc[5])
 		ActorRef.SetVehicle(MarkerRef)
 	endIf
-	ActorRef.StopTranslation()
+	;ActorRef.StopTranslation()
 	ActorRef.TranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], (loc[5] + 1.0), 0.001, 0.001)
 endFunction
 
 event OnTranslationComplete()
-	Snap(0.1)
+	Snap(0.0)
 endEvent
 
 function Strip(bool animate = true)
