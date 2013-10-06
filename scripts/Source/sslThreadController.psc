@@ -64,8 +64,8 @@ state Preparing
 		SetAnimation()
 		; Setup actors
 		SendActorEvent("StartThread")
-		; Wait for actors ready, or for 5 seconds to pass
-		float failsafe = Utility.GetCurrentRealTime() + 5.0
+		; Wait for actors ready, or for 7 seconds to pass
+		float failsafe = Utility.GetCurrentRealTime() + 7.0
 		while !ActorWait("Ready") && failsafe > Utility.GetCurrentRealTime()
 			Utility.Wait(0.20)
 		endWhile
