@@ -31,7 +31,6 @@ bool IsFemale
 bool IsCreature
 
 ; Storage
-sslBaseAnimation Animation
 int position
 int stage
 form[] EquipmentStorage
@@ -63,6 +62,10 @@ bool property DoUndress hidden
 		disableundress = !value
 	endFunction
 endProperty
+
+; Syncing
+sslBaseAnimation Animation
+
 
 ;/-----------------------------------------------\;
 ;|	Alias Functions                              |;
@@ -236,6 +239,7 @@ function AnimationExtras()
 	if IsCreature
 		return
 	endIf
+	Animation = Controller.Animation
 	; Open Mouth
 	if Animation.UseOpenMouth(position, stage)
 		ActorRef.SetExpressionOverride(16, 100)
@@ -318,7 +322,9 @@ endfunction
 
 function Snap(float tolerance)
 	if tolerance == 0.0 || ActorRef.GetDistance(MarkerRef) >= tolerance
-		ActorRef.MoveTo(MarkerRef)
+		ActorRef.SetPosition(loc[0], loc[1], loc[2])
+		ActorRef.SetVehicle(MarkerRef)
+		ActorRef.SetAngle(loc[3], loc[4], loc[5])
 		ActorRef.SetVehicle(MarkerRef)
 	endIf
 	ActorRef.StopTranslation()
@@ -375,24 +381,29 @@ function SyncThread()
 	if !Active || Controller == none || ActorRef == none
 		return
 	endIf
-	; Update Position
-	position = Controller.GetPosition(ActorRef)
-	; Current stage + animation
+	; Sync from thread
+	int toPosition = Controller.GetPosition(ActorRef)
 	int toStage = Controller.Stage
 	sslBaseAnimation toAnimation = Controller.Animation
-	; Update Stage
-	if stage != toStage
-		; Set Stage
+	; Update if needed
+	if toPosition != position || toStage != stage || toAnimation != Animation
+		; Update thread info
+		position = toPosition
 		stage = toStage
+		Animation = toAnimation
+		; Animation related stuffs
+		AnimationExtras()
+		; Update marker postioning
+		AlignTo(Animation.GetPositionOffsets(position, stage))
 		; Update Silence
-		IsSilent = toAnimation.IsSilent(position, stage)
+		IsSilent = Animation.IsSilent(position, stage)
 		if IsSilent || IsCreature
 			; VoiceDelay is used as loop timer, must be set even if silent.
 			VoiceDelay = 2.5
 		else
 			; Update Strength
-			VoiceStrength = (stage as float) / (toAnimation.StageCount() as float)
-			if toAnimation.StageCount() == 1 && stage == 1
+			VoiceStrength = (stage as float) / (Animation.StageCount() as float)
+			if Animation.StageCount() == 1 && stage == 1
 				VoiceStrength = 0.50
 			endIf
 			; Base Delay
@@ -411,15 +422,6 @@ function SyncThread()
 			endIf
 		endIf
 	endIf
-	; Update Change
-	if Animation != toAnimation
-		; Update animation
-		RemoveExtras()
-		Animation = toAnimation
-		EquipExtras()
-	endIf
-	; Update marker postioning
-	AlignTo(Animation.GetPositionOffsets(position, stage))
 endFunction
 
 function OverrideStrip(bool[] setStrip)

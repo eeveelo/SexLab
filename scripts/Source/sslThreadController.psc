@@ -174,8 +174,9 @@ state Animating
 			sfx[0] = 0.80
 		endIf
 		; Start animation looping
-		RealignActors()
 		looping = true
+		SyncActors()
+		PlayAnimation()
 		UpdateTimer(Animation.GetStageTimer(stage))
 		RegisterForSingleUpdate(0.10)
 	endEvent
@@ -247,7 +248,6 @@ function ChangePositions(bool backwards = false)
 	NewPositions[MovedTo] = adjusting
 	Positions = NewPositions
 	; Sync new positions
-	SyncActors()
 	RealignActors()
 	AdjustChange(backwards)
 	SendThreadEvent("PositionChange")
@@ -321,14 +321,13 @@ endFunction
 
 function RealignActors()
 	SyncActors()
-	MoveActors()
 	PlayAnimation()
 endFunction
 
 function MoveActors()
 	int i
 	while i < ActorCount
-		ActorAlias[i].Snap(0.0)
+		ActorAlias[i].Snap(0.1)
 		i += 1
 	endWhile
 endFunction
@@ -363,6 +362,12 @@ function SetAnimation(int anim = -1)
 endFunction
 
 function PlayAnimation()
+	; Send extra settings, open mouth, silence, and sos
+	int i = ActorCount
+	while i
+		i -= 1
+		ActorAlias[i].AnimationExtras()
+	endWhile
 	; Send with as little overhead as possible to improve syncing
 	string[] events = Animation.FetchStage(Stage)
 	if ActorCount == 1
@@ -386,12 +391,8 @@ function PlayAnimation()
 		Debug.SendAnimationEvent(Positions[3], events[3])
 		Debug.SendAnimationEvent(Positions[4], events[4])
 	endIf
-	; Send extra settings, open mouth, silence, and sos
-	int i = ActorCount
-	while i
-		i -= 1
-		ActorAlias[i].AnimationExtras()
-	endWhile
+	; Reposition actors
+	UpdateLocations()
 endFunction
 
 ;/-----------------------------------------------\;

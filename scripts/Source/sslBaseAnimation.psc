@@ -434,6 +434,7 @@ function EquipExtras(int position, actor a)
 		while i
 			i -= 1
 			if extras[i] != none
+				a.AddItem(extras[i], 1, true)
 				a.EquipItem(extras[i], false, true)
 			endIf
 		endWhile
