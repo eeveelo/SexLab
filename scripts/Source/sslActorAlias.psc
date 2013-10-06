@@ -16,6 +16,7 @@ endProperty
 
 bool Active
 sslThreadController Controller
+sslBaseAnimation Animation
 sslBaseVoice Voice
 
 ; Voice
@@ -62,10 +63,6 @@ bool property DoUndress hidden
 		disableundress = !value
 	endFunction
 endProperty
-
-; Syncing
-sslBaseAnimation Animation
-
 
 ;/-----------------------------------------------\;
 ;|	Alias Functions                              |;
@@ -322,6 +319,7 @@ endfunction
 
 function Snap(float tolerance)
 	if tolerance == 0.0 || ActorRef.GetDistance(MarkerRef) >= tolerance
+		ActorRef.SetVehicle(MarkerRef)
 		ActorRef.SetPosition(loc[0], loc[1], loc[2])
 		ActorRef.SetVehicle(MarkerRef)
 		ActorRef.SetAngle(loc[3], loc[4], loc[5])
