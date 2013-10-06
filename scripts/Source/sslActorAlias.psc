@@ -211,11 +211,13 @@ function RemoveExtras()
 endFunction
 
 function EquipStrapon()
-	if strapon == none && !Lib.HasStrapon(ActorRef)
+	if strapon == none && Lib.HasStrapon(ActorRef)
+		return
+	elseIf strapon == none
 		strapon = Lib.PickStrapon(ActorRef)
 	endIf
 	if strapon != none && !ActorRef.IsEquipped(strapon)
-		ActorRef.AddItem(strapon, 1, true)
+		;ActorRef.AddItem(strapon, 1, true)
 		ActorRef.EquipItem(strapon, false, true)
 	endIf
 endFunction
@@ -291,9 +293,6 @@ function StopAnimating(bool quick = false)
 		; Ragdoll NPC/PC if enabled and not in TFC
 		if !quick && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
 			ActorRef.PushActorAway(ActorRef, 0.01)
-			if IsPlayer
-				Utility.Wait(3.0) ; Don't unlock player to quickly while ragdolling.
-			endIf
 		endIf
 	endIf
 	; Detach positioning marker
@@ -323,17 +322,17 @@ endfunction
 
 function Snap(float tolerance)
 	if tolerance == 0.0 || ActorRef.GetDistance(MarkerRef) >= tolerance
-		ActorRef.SetVehicle(MarkerRef)
 		ActorRef.SetPosition(loc[0], loc[1], loc[2])
 		ActorRef.SetVehicle(MarkerRef)
 		ActorRef.SetAngle(loc[3], loc[4], loc[5])
 		ActorRef.SetVehicle(MarkerRef)
-	endIf
-	;ActorRef.StopTranslation()
-	ActorRef.TranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], (loc[5] + 1.0), 0.001, 0.001)
+		;ActorRef.StopTranslation()
+		ActorRef.TranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], (loc[5] + 1.0), 1000, 0.01)
+	endIf	
 endFunction
 
 event OnTranslationComplete()
+	Debug.TraceAndBox("Translation Complete, Snapping "+ActorRef.GetLeveledActorBase().GetName())
 	Snap(0.0)
 endEvent
 
