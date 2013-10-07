@@ -168,7 +168,7 @@ state Animating
 		if stage > 1
 			sfx[0] = sfx[0] - (Stage * 0.2)
 		endIf
-		; min 0.75 delay
+		; min 0.80 delay
 		if sfx[0] < 0.80
 			sfx[0] = 0.80
 		endIf
@@ -253,21 +253,21 @@ function ChangePositions(bool backwards = false)
 endFunction
 
 function AdjustForward(bool backwards = false, bool adjuststage = false)
-	float[] offsets = Animation.UpdateForward(AdjustingPosition, stage, SignFloat(0.75, backwards), adjuststage)
+	float[] offsets = Animation.UpdateForward(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage)
 	sslActorAlias Slot = ActorSlot(AdjustingPosition)
 	Slot.AlignTo(offsets)
 	Slot.Snap(0.0)
 endFunction
 
 function AdjustSideways(bool backwards = false, bool adjuststage = false)
-	float[] offsets = Animation.UpdateSide(AdjustingPosition, stage, SignFloat(0.75, backwards), adjuststage)
+	float[] offsets = Animation.UpdateSide(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage)
 	sslActorAlias Slot = ActorSlot(AdjustingPosition)
 	Slot.AlignTo(offsets)
 	Slot.Snap(0.0)
 endFunction
 
 function AdjustUpward(bool backwards = false, bool adjuststage = false)
-	float[] offsets = Animation.UpdateUp(AdjustingPosition, stage, SignFloat(0.75, backwards), adjuststage)
+	float[] offsets = Animation.UpdateUp(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage)
 	sslActorAlias Slot = ActorSlot(AdjustingPosition)
 	Slot.AlignTo(offsets)
 	Slot.Snap(0.0)
