@@ -22,12 +22,6 @@ int[] schlongData ; bend
 
 string[] tags
 
-form[] extras1
-form[] extras2
-form[] extras3
-form[] extras4
-form[] extras5
-
 Form[] creatures
 
 bool waiting
@@ -157,24 +151,6 @@ int function AddPositionStage(int position, string animation, float forward = 0.
 	schlongData = sslUtility.PushInt(sos, schlongData)
 	waiting = false
 	return stage
-endFunction
-
-function AddExtra(int position, form extra)
-	if !Exists("AddExtra", position)
-		return
-	endIf
-
-	if position == 0
-		extras1 = sslUtility.PushForm(extra, extras1)
-	elseIf position == 1
-		extras2 = sslUtility.PushForm(extra, extras2)
-	elseIf position == 2
-		extras3 = sslUtility.PushForm(extra, extras3)
-	elseIf position == 3
-		extras4 = sslUtility.PushForm(extra, extras4)
-	elseIf position == 4
-		extras5 = sslUtility.PushForm(extra, extras5)
-	endIf
 endFunction
 
 function SetStageTimer(int stage, float timer)
@@ -413,51 +389,6 @@ int function GetCum(int position)
 	return AccessPosition(position, 1)
 endFunction
 
-form[] function GetExtras(int position)
-	if position == 0
-		return extras1
-	elseIf position == 1
-		return extras2
-	elseIf position == 2
-		return extras3
-	elseIf position == 3
-		return extras1
-	elseIf position == 4
-		return extras5
-	else
-		form[] null
-		return null
-	endIf
-endFunction
-
-function EquipExtras(int position, actor a)
-	form[] extras = GetExtras(position)
-	if extras.Length > 0
-		int i = extras.Length
-		while i
-			i -= 1
-			if extras[i] != none
-				a.AddItem(extras[i], 1, true)
-				a.EquipItem(extras[i], false, true)
-			endIf
-		endWhile
-	endIf
-endFunction
-
-function RemoveExtras(int position, actor a)
-	form[] extras = GetExtras(position)
-	if extras.Length > 0
-		int i = extras.Length
-		while i
-			i -= 1
-			if extras[i] != none
-				a.UnequipItem(extras[i], false, true)
-				a.RemoveItem(extras[i], 1, true)
-			endIf
-		endWhile
-	endIf
-endFunction
-
 bool function IsSexual()
 	return IsSexual
 endFunction
@@ -577,10 +508,5 @@ function Initialize()
 	animations = stringDel
 
 	form[] formDel
-	extras1 = formDel
-	extras2 = formDel
-	extras3 = formDel
-	extras4 = formDel
-	extras5 = formDel
 	creatures = formDel
 endFunction

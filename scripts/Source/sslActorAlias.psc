@@ -177,7 +177,6 @@ function ResetActor()
 		return ; Creatures need none of this
 	endIf
 	; Cleanup Actors
-	RemoveExtras()
 	RemoveStrapon()
 	; Reset openmouth
 	;ActorRef.SetExpressionOverride(7, 50)
@@ -192,22 +191,6 @@ function ResetActor()
 	if !ActorRef.IsDead()
 		Lib.UnstripActor(ActorRef, EquipmentStorage, Controller.GetVictim())
 	endIf
-endFunction
-
-function EquipExtras()
-	if Animation == none || IsCreature
-		return
-	endIf
-	; Equip Animation Extras
-	Animation.EquipExtras(position, ActorRef)
-endFunction
-
-function RemoveExtras()
-	if Animation == none || IsCreature
-		return
-	endIf
-	; Remove Animation Extras
-	Animation.RemoveExtras(position, ActorRef)
 endFunction
 
 function EquipStrapon()
