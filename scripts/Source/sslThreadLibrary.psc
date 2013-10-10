@@ -8,12 +8,13 @@ sslActorLibrary property Actors auto
 
 ; Data
 actor property PlayerRef auto
-FormList property BedsList auto
+
 sound property sfxSquishing01 auto
 sound property sfxSucking01 auto
 sound property sfxSexMix01 auto
 Static property LocationMarker auto
 ActorBase property SexLabStager auto
+FormList property BedsList auto
 message property mAdjustChange auto
 message property mUseBed auto
 message property mMoveScene auto
@@ -44,7 +45,6 @@ Sound function GetSFX(int id)
 	endIf
 endFunction
 
-
 int function FindNext(actor[] Positions, sslBaseAnimation Animation, int offset, bool findCreature)
 	while offset
 		offset -= 1
@@ -54,7 +54,6 @@ int function FindNext(actor[] Positions, sslBaseAnimation Animation, int offset,
 	endwhile
 	return -1
 endFunction
-
 
 actor[] function SortCreatures(actor[] Positions, sslBaseAnimation Animation)
 	if Positions.Length < 2 || !Animation.IsCreature

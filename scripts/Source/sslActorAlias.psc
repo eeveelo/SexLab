@@ -140,8 +140,8 @@ function UnlockActor()
 	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
 	ActorRef.EvaluatePackage()
 	; Detach positioning marker
-	ActorRef.SetVehicle(none)
 	ActorRef.StopTranslation()
+	ActorRef.SetVehicle(none)
 endFunction
 
 function PrepareActor()
@@ -474,7 +474,6 @@ endEvent
 ;|	Misc Functions                               |;
 ;\-----------------------------------------------/;
 
-
 function Initialize()
 	; Clear events
 	UnregisterForUpdate()
@@ -482,8 +481,8 @@ function Initialize()
 	GoToState("")
 	; Clear marker snapping
 	if ActorRef != none
-		ActorRef.SetVehicle(none)
 		ActorRef.StopTranslation()
+		ActorRef.SetVehicle(none)
 	endIf
 	if MarkerObj != none
 		MarkerObj.Disable()

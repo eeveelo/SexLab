@@ -18,7 +18,7 @@ sslBaseAnimation[] primaryAnimations
 sslBaseAnimation[] leadAnimations
 
 ; Thread Instance settings
-string property Logging = "trace" auto hidden
+string property Logging auto hidden
 bool property AutoAdvance auto hidden
 bool property LeadIn auto hidden
 
@@ -237,14 +237,14 @@ state Making
 
 		; Find a marker near one of our actors and center there
 		if centerObj == none 
-			i = 0
+			i = actors
 			while i < actors
+				i -= 1
 				ObjectReference marker = Game.FindRandomReferenceOfTypeFromRef(Lib.LocationMarker, Positions[i], 750.0) as ObjectReference
 				if marker != none
 					CenterOnObject(marker)
-					i = actors
+					i = 0
 				endIf
-				i += 1
 			endWhile
 		endIf
 
@@ -255,7 +255,7 @@ state Making
 				CenterOnObject(victim)
 			; Fallback to player
 			elseif PlayerRef != none
-				CenterOnObject(GetPlayer())
+				CenterOnObject(PlayerRef)
 			; Fallback to first position actor
 			else
 				CenterOnObject(Positions[0])
@@ -485,8 +485,9 @@ function ChangeActors(actor[] changeTo)
 		ActorAlias(Positions[i]).UnregisterForUpdate()
 		if changeTo.Find(Positions[i]) == -1
 			sslActorAlias clearing = ActorAlias(Positions[i])
-			clearing.ResetActor()
 			clearing.StopAnimating(true)
+			clearing.UnlockActor()
+			clearing.ResetActor()
 			clearing.ClearAlias()
 			if IsPlayerPosition(i)
 				AutoAdvance = true
@@ -510,6 +511,7 @@ function ChangeActors(actor[] changeTo)
 			sslActorAlias adding = newSlots[i] as sslActorAlias
 			adding.SetVoice(Lib.Voices.PickVoice(changeTo[i]))
 			adding.DisableUndressAnim(true)
+			adding.LockActor()
 			adding.PrepareActor()
 			adding.StartAnimating()
 		endIf
@@ -733,9 +735,7 @@ function _Log(string log, string method, string type = "ERROR")
 	elseif Logging == "trace-minimal"
 		Debug.Trace("SexLab "+method+"() "+type+": "+log, severity)
 	else
-		Debug.Trace("--------------------------------------------------------------------------------------------", severity)
-		Debug.Trace("--- SexLab ThreadController["+tid+"] ---", severity)
-		Debug.Trace("--------------------------------------------------------------------------------------------", severity)
+		Debug.Trace("--- SexLab ThreadController["+tid+"] ------------------------------------------------------", severity)
 		Debug.Trace(" "+type+": "+method+"()" )
 		Debug.Trace("   "+log)
 		Debug.Trace("--------------------------------------------------------------------------------------------", severity)
@@ -767,7 +767,7 @@ function Initialize()
 	; Empty alias slots
 	int i = 0
 	while i < ActorSlots.Length
-		if ActorSlots[i] != none
+		if ActorSlots[i] != none && ActorSlots[i].GetState() != ""
 			ActorSlots[i].ClearAlias()
 		endIf
 		i += 1
