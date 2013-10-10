@@ -141,7 +141,7 @@ function UnlockActor()
 	ActorRef.EvaluatePackage()
 	; Detach positioning marker
 	ActorRef.SetVehicle(none)
-	ActorRef.StopTranslation()
+	;ActorRef.StopTranslation()
 endFunction
 
 function PrepareActor()
@@ -275,8 +275,9 @@ function AnimationExtras()
 endfunction
 
 function StopAnimating(bool quick = false)
-	; Stop any snapping going on beforehand
-	ActorRef.StopTranslation()
+	; Detach positioning marker
+	;ActorRef.StopTranslation()
+	ActorRef.SetVehicle(none)
 	; Reset Idle
 	if IsCreature
 		; Reset Creature Idle
@@ -295,8 +296,6 @@ function StopAnimating(bool quick = false)
 			ActorRef.PushActorAway(ActorRef, 0.01)
 		endIf
 	endIf
-	; Detach positioning marker
-	ActorRef.SetVehicle(none)
 endFunction
 
 function AlignTo(float[] offsets)
@@ -322,18 +321,14 @@ endfunction
 
 function Snap(float tolerance)
 	if tolerance == 0.0 || ActorRef.GetDistance(MarkerRef) >= tolerance
-		ActorRef.SetPosition(loc[0], loc[1], loc[2])
-		ActorRef.SetVehicle(MarkerRef)
 		ActorRef.SetAngle(loc[3], loc[4], loc[5])
 		ActorRef.SetVehicle(MarkerRef)
-		;ActorRef.StopTranslation()
-		ActorRef.TranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], (loc[5] + 1.0), 1000, 0.01)
-	endIf	
+		ActorRef.TranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], (loc[5] + 1.0), 5000, 0.01)
+	endIf
 endFunction
 
 event OnTranslationComplete()
-	Debug.TraceAndBox("Translation Complete, Snapping "+ActorRef.GetLeveledActorBase().GetName())
-	Snap(0.0)
+	Snap(0.2)
 endEvent
 
 function Strip(bool animate = true)
@@ -514,7 +509,7 @@ function Initialize()
 	; Clear marker snapping
 	if ActorRef != none
 		ActorRef.SetVehicle(none)
-		ActorRef.StopTranslation()
+		;ActorRef.StopTranslation()
 	endIf
 	if MarkerObj != none
 		MarkerObj.Disable()

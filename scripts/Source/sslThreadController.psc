@@ -325,13 +325,13 @@ endFunction
 function RealignActors()
 	SyncActors()
 	PlayAnimation()
-	MoveActors()
+	; MoveActors()
 endFunction
 
 function MoveActors()
 	int i
 	while i < ActorCount
-		ActorAlias[i].Snap(0.0)
+		ActorAlias[i].Snap(0.00)
 		i += 1
 	endWhile
 endFunction
