@@ -13,16 +13,14 @@ int content = 0
 string[] animations
 
 ; Data storage
+string[] tags
+form[] creatures
 float[] timerData
 float[] offsetData ; x, y, z, rotation
 float[] offsetDefaults ; x, y, z, rotation
 bool[] switchData ; silence, mouth, strapon
 int[] positionData ; gender, cum
 int[] schlongData ; bend
-
-string[] tags
-
-Form[] creatures
 
 bool waiting
 
@@ -108,8 +106,10 @@ int function AddPosition(int gender = 0, int addCum = -1)
 		return -1
 	endIf
 	_WaitLock()
-	positionData = sslUtility.PushInt(gender, positionData)
-	positionData = sslUtility.PushInt(addCum, positionData)
+	int[] position = new int[2]
+	position[0] = gender
+	position[1] = addCum
+	positionData = sslUtility.MergeIntArray(position, positionData)
 	int aid = actors
 	actors += 1
 	waiting = false
@@ -123,32 +123,36 @@ int function AddPositionStage(int position, string animation, float forward = 0.
 
 	_WaitLock()
 
+	; Add animation event
 	animations = sslUtility.PushString(animation, animations)
-
+	; Figure out what stage this is
 	int stage
 	if position == 0
-		stage = ( stages + 1 )
+		stage = stages + 1
 		stages = stage
 	else
 		stage = ( animations.Length - (position * stages) )
 	endIf
-	; Set current
-	offsetData = sslUtility.PushFloat(forward, offsetData)
-	offsetData = sslUtility.PushFloat(side, offsetData)
-	offsetData = sslUtility.PushFloat(up, offsetData)
-	offsetData = sslUtility.PushFloat(rotate, offsetData)
-	; Copy for defaults
-	offsetDefaults = sslUtility.PushFloat(forward, offsetDefaults)
-	offsetDefaults = sslUtility.PushFloat(side, offsetDefaults)
-	offsetDefaults = sslUtility.PushFloat(up, offsetDefaults)
-	offsetDefaults = sslUtility.PushFloat(rotate, offsetDefaults)
-	if !IsSexual()
-		strapon = false
-	endIf
-	switchData = sslUtility.PushBool(silent, switchData)
-	switchData = sslUtility.PushBool(openMouth, switchData)
-	switchData = sslUtility.PushBool(strapon, switchData)
+
+	; Set offsets
+	float[] offset = new float[4]
+	offset[0] = forward
+	offset[1] = side
+	offset[2] = up
+	offset[3] = rotate
+	offsetData = sslUtility.MergeFloatArray(offset, offsetData)
+	offsetDefaults = sslUtility.MergeFloatArray(offset, offsetDefaults)
+
+	; Set switch information
+	bool[] switch = new bool[3]
+	switch[0] = silent
+	switch[1] = openMouth
+	switch[2] = strapon && MalePosition(position)
+	switchData = sslUtility.MergeBoolArray(switch, switchData)
+
+	; Set Schlongs of Skyrim bend
 	schlongData = sslUtility.PushInt(sos, schlongData)
+
 	waiting = false
 	return stage
 endFunction
@@ -185,10 +189,7 @@ bool function Exists(string method, int position, int stage = -99)
 endFunction
 
 int function DataIndex(int slots, int position, int stage, int slot)
-	; Zeroindex the stage
-	stage -= 1
-	; Return calculated index
-	return ( position * (stages * slots) ) + ( stage * slots ) + slot
+	return ( position * (stages * slots) ) + ( (stage - 1) * slots ) + slot
 endFunction
 
 float function AccessOffset(int position, int stage, int slot)
@@ -359,6 +360,18 @@ endFunction
 
 int function GetGender(int position)
 	return AccessPosition(position, 0)
+endFunction
+
+bool function MalePosition(int position)
+	return AccessPosition(position, 0) == 0
+endFunction
+
+bool function FemalePosition(int position)
+	return AccessPosition(position, 0) == 1
+endFunction
+
+bool function CreaturePosition(int position)
+	return AccessPosition(position, 0) == 2
 endFunction
 
 int function FemaleCount()
