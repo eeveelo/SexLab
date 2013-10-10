@@ -19,94 +19,206 @@ string[] function ArgString(string args, string delimiter = ",") global
 	return output
 endFunction
 
+float[] function IncreaseFloat(int by, float[] array) global
+	int len = array.Length
+	if by < 1 || (len+by > 128)
+		return array
+	elseIf len == 0
+		return FloatArray(by)
+	endIf
+	float[] output = FloatArray(len+by)
+	while len
+		len -= 1
+		output[len] = array[len]
+	endWhile
+	return output
+endFunction
+
 float[] function PushFloat(float var, float[] array) global
 	int len = array.Length
 	if len >= 128
 		return array
-	elseIf len == 0
-		array = new float[1]
-		array[0] = var
+	endIf
+	float[] output = IncreaseFloat(1, array)
+	output[len] = var
+	return output
+endFunction
+
+float[] function MergeFloatArray(float[] push, float[] array) global
+	int pushing = push.Length
+	if pushing+array.Length > 128 || pushing == 0
 		return array
 	endIf
-	float[] pushed = FloatArray(len+1)
-	pushed[len] = var
-	while len
-		len -=1
-		pushed[len] = array[len]
+	float[] output = IncreaseFloat(pushing, array)
+	int len = output.Length
+	while pushing
+		len -= 1
+		pushing -= 1
+		output[len] = push[pushing] 
 	endWhile
-	return pushed
+	return output
+endFunction
+
+int[] function IncreaseInt(int by, int[] array) global
+	int len = array.Length
+	if by < 1 || (len+by > 128)
+		return array
+	elseIf len == 0
+		return IntArray(by)
+	endIf
+	int[] output = IntArray(len+by)
+	while len
+		len -= 1
+		output[len] = array[len]
+	endWhile
+	return output
 endFunction
 
 int[] function PushInt(int var, int[] array) global
 	int len = array.Length
 	if len >= 128
 		return array
-	elseIf len == 0
-		array = new int[1]
-		array[0] = var
+	endIf
+	int[] output = IncreaseInt(1, array)
+	output[len] = var
+	return output
+endFunction
+
+int[] function MergeIntArray(int[] push, int[] array) global
+	int pushing = push.Length
+	if pushing+array.Length > 128 || pushing == 0
 		return array
 	endIf
-	int[] pushed = IntArray(len+1)
-	pushed[len] = var
-	while len
-		len -=1
-		pushed[len] = array[len]
+	int[] output = IncreaseInt(pushing, array)
+	int len = output.Length
+	while pushing
+		len -= 1
+		pushing -= 1
+		output[len] = push[pushing] 
 	endWhile
-	return pushed
+	return output
+endFunction
+
+
+bool[] function IncreaseBool(int by, bool[] array) global
+	int len = array.Length
+	if by < 1 || (len+by > 128)
+		return array
+	elseIf len == 0
+		return BoolArray(by)
+	endIf
+	bool[] output = BoolArray(len+by)
+	while len
+		len -= 1
+		output[len] = array[len]
+	endWhile
+	return output
 endFunction
 
 bool[] function PushBool(bool var, bool[] array) global
 	int len = array.Length
 	if len >= 128
 		return array
-	elseIf len == 0
-		array = new bool[1]
-		array[0] = var
+	endIf
+	bool[] output = IncreaseBool(1, array)
+	output[len] = var
+	return output
+endFunction
+
+bool[] function MergeBoolArray(bool[] push, bool[] array) global
+	int pushing = push.Length
+	if pushing+array.Length > 128 || pushing == 0
 		return array
 	endIf
-	bool[] pushed = BoolArray(len+1)
-	pushed[len] = var
-	while len
-		len -=1
-		pushed[len] = array[len]
+	bool[] output = IncreaseBool(pushing, array)
+	int len = output.Length
+	while pushing
+		len -= 1
+		pushing -= 1
+		output[len] = push[pushing] 
 	endWhile
-	return pushed
+	return output
+endFunction
+
+
+string[] function IncreaseString(int by, string[] array) global
+	int len = array.Length
+	if by < 1 || (len+by > 128)
+		return array
+	elseIf len == 0
+		return StringArray(by)
+	endIf
+	string[] output = StringArray(len+by)
+	while len
+		len -= 1
+		output[len] = array[len]
+	endWhile
+	return output
 endFunction
 
 string[] function PushString(string var, string[] array) global
 	int len = array.Length
 	if len >= 128
 		return array
-	elseIf len == 0
-		array = new string[1]
-		array[0] = var
+	endIf
+	string[] output = IncreaseString(1, array)
+	output[len] = var
+	return output
+endFunction
+
+string[] function MergeStringArray(string[] push, string[] array) global
+	int pushing = push.Length
+	if pushing+array.Length > 128 || pushing == 0
 		return array
 	endIf
-	string[] pushed = StringArray(len+1)
-	pushed[len] = var
-	while len
-		len -=1
-		pushed[len] = array[len]
+	string[] output = IncreaseString(pushing, array)
+	int len = output.Length
+	while pushing
+		len -= 1
+		pushing -= 1
+		output[len] = push[pushing] 
 	endWhile
-	return pushed
+	return output
+endFunction
+
+form[] function IncreaseForm(int by, form[] array) global
+	int len = array.Length
+	if by < 1 || (len+by > 128)
+		return array
+	elseIf len == 0
+		return FormArray(by)
+	endIf
+	form[] output = FormArray(len+by)
+	while len
+		len -= 1
+		output[len] = array[len]
+	endWhile
+	return output
 endFunction
 
 form[] function PushForm(form var, form[] array) global
 	int len = array.Length
 	if len >= 128
 		return array
-	elseIf len == 0
-		array = new form[1]
-		array[0] = var
+	endIf
+	form[] output = IncreaseForm(1, array)
+	output[len] = var
+	return output
+endFunction
+
+form[] function MergeFormArray(form[] push, form[] array) global
+	int pushing = push.Length
+	if pushing+array.Length > 128 || pushing == 0
 		return array
 	endIf
-	form[] pushed = FormArray(len+1)
-	pushed[len] = var
-	while len
-		len -=1
-		pushed[len] = array[len]
+	form[] output = IncreaseForm(pushing, array)
+	int len = output.Length
+	while pushing
+		len -= 1
+		pushing -= 1
+		output[len] = push[pushing] 
 	endWhile
-	return pushed
+	return output
 endFunction
 
 sslBaseAnimation[] function PushAnimation(sslBaseAnimation var, sslBaseAnimation[] array) global
