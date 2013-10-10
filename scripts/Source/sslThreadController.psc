@@ -365,12 +365,6 @@ function SetAnimation(int anim = -1)
 endFunction
 
 function PlayAnimation()
-	; Send extra settings, open mouth, silence, and sos
-	int i = ActorCount
-	while i
-		i -= 1
-		ActorAlias[i].AnimationExtras()
-	endWhile
 	; Send with as little overhead as possible to improve syncing
 	string[] events = Animation.FetchStage(Stage)
 	if ActorCount == 1

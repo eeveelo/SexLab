@@ -284,7 +284,6 @@ function UnstripActor(actor a, form[] stripped, actor victim = none)
 	endWhile
 endFunction
 
-
 form function WornStrapon(actor a)
 	int i = Strapons.Length
 	while i

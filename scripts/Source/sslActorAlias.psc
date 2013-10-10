@@ -141,7 +141,7 @@ function UnlockActor()
 	ActorRef.EvaluatePackage()
 	; Detach positioning marker
 	ActorRef.SetVehicle(none)
-	;ActorRef.StopTranslation()
+	ActorRef.StopTranslation()
 endFunction
 
 function PrepareActor()
@@ -216,46 +216,6 @@ endFunction
 ;/-----------------------------------------------\;
 ;|	Manipulation Functions                       |;
 ;\-----------------------------------------------/;
-
-function AnimationExtras()
-	if IsCreature
-		return
-	endIf
-	Animation = Controller.Animation
-	; Open Mouth
-	if Animation.UseOpenMouth(position, stage)
-		ActorRef.SetExpressionOverride(16, 100)
-	else
-		ActorRef.SetExpressionOverride(7, 50)
-		ActorRef.ClearExpressionOverride()
-	endIf
-	; Send SOS event
-	if Lib.SOSEnabled && Animation.GetGender(position) == 0
-		Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
-		int offset = Animation.GetSchlong(position, stage)
-		string bend
-		if offset < 0
-			bend = "SOSBendDown0"+((Math.Abs(offset) / 2) as int)
-		elseif offset > 0
-			bend = "SOSBendUp0"+((Math.Abs(offset) / 2) as int)
-		else
-			bend = "SOSNoBend"
-		endIf
-		Debug.SendAnimationEvent(ActorRef, bend)
-		; Debug.SendAnimationEvent(ActorRef, "SOSBend"+offset)
-	endif
-	; Equip Strapon if needed
-	If IsFemale
-		bool MalePosition = Animation.GetGender(position) == 0
-		bool StraponPosition = Animation.UseStrapon(position, stage)
-		if MalePosition && StraponPosition && Lib.bUseStrapons
-			EquipStrapon()
-		; Remove strapon if not needed and is equipped
-		elseIf !MalePosition || (MalePosition && !StraponPosition)
-			RemoveStrapon()
-		endIf
-	endIf
-endfunction
 
 function StopAnimating(bool quick = false)
 	; Detach positioning marker
@@ -364,16 +324,14 @@ function SyncThread()
 	int toPosition = Controller.GetPosition(ActorRef)
 	int toStage = Controller.Stage
 	sslBaseAnimation toAnimation = Controller.Animation
+	; Update marker postioning
+	AlignTo(toAnimation.GetPositionOffsets(toPosition, toStage))
 	; Update if needed
 	if toPosition != position || toStage != stage || toAnimation != Animation
 		; Update thread info
 		position = toPosition
 		stage = toStage
 		Animation = toAnimation
-		; Animation related stuffs
-		AnimationExtras()
-		; Update marker postioning
-		AlignTo(Animation.GetPositionOffsets(position, stage))
 		; Update Silence
 		IsSilent = Animation.IsSilent(position, stage)
 		if IsSilent || IsCreature
@@ -398,6 +356,38 @@ function SyncThread()
 			; Min 1.3 delay
 			if VoiceDelay < 1.3
 				VoiceDelay = 1.3
+			endIf
+		endIf
+		; Animation related stuffs
+		if !IsCreature
+			; Open Mouth
+			if Animation.UseOpenMouth(position, stage)
+				ActorRef.SetExpressionOverride(16, 100)
+			else
+				ActorRef.SetExpressionOverride(7, 50)
+				ActorRef.ClearExpressionOverride()
+			endIf
+			; Send SOS event
+			if Lib.SOSEnabled && Animation.GetGender(position) == 0
+				Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
+				int offset = Animation.GetSchlong(position, stage)
+				string bend
+				if offset < 0
+					bend = "SOSBendDown0"+((Math.Abs(offset) / 2) as int)
+				elseif offset > 0
+					bend = "SOSBendUp0"+((Math.Abs(offset) / 2) as int)
+				else
+					bend = "SOSNoBend"
+				endIf
+				Debug.SendAnimationEvent(ActorRef, bend)
+				; Debug.SendAnimationEvent(ActorRef, "SOSBend"+offset)
+			endif
+			; Equip Strapon if needed
+			if IsFemale && Lib.bUseStrapons && Animation.UseStrapon(position, stage)
+				EquipStrapon()
+			; Remove strapon if there is one
+			elseIf strapon != none
+				RemoveStrapon()
 			endIf
 		endIf
 	endIf
@@ -492,7 +482,7 @@ function Initialize()
 	; Clear marker snapping
 	if ActorRef != none
 		ActorRef.SetVehicle(none)
-		;ActorRef.StopTranslation()
+		ActorRef.StopTranslation()
 	endIf
 	if MarkerObj != none
 		MarkerObj.Disable()
@@ -507,6 +497,8 @@ function Initialize()
 	Animation = none
 	strapon = none
 	scale = 0.0
+	position = 0
+	stage = 0
 	form[] formDel
 	EquipmentStorage = formDel
 	bool[] boolDel
