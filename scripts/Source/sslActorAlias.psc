@@ -179,7 +179,7 @@ function ResetActor()
 	; Cleanup Actors
 	RemoveStrapon()
 	; Reset openmouth
-	;ActorRef.SetExpressionOverride(7, 50)
+	ActorRef.SetExpressionOverride(7, 50)
 	ActorRef.ClearExpressionOverride()
 	; Reset to starting scale
 	if scale > 0.0
@@ -219,7 +219,7 @@ endFunction
 
 function StopAnimating(bool quick = false)
 	; Detach positioning marker
-	;ActorRef.StopTranslation()
+	ActorRef.StopTranslation()
 	ActorRef.SetVehicle(none)
 	; Reset Idle
 	if IsCreature
@@ -236,7 +236,8 @@ function StopAnimating(bool quick = false)
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 		; Ragdoll NPC/PC if enabled and not in TFC
 		if !quick && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
-			ActorRef.PushActorAway(ActorRef, 0.01)
+			ActorRef.MoveTo(ActorRef, 0.0, 0.0, 4.0)
+			ActorRef.PushActorAway(ActorRef, 0.1)
 		endIf
 	endIf
 endFunction
