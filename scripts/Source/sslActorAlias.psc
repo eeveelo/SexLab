@@ -182,7 +182,7 @@ function ResetActor()
 	ActorRef.SetExpressionOverride(7, 50)
 	ActorRef.ClearExpressionOverride()
 	; Reset to starting scale
-	if scale > 0.0
+	if Controller.ActorCount > 1 && Lib.bScaleActors && scale > 0.0
 		ActorRef.SetScale(scale)
 	endIf
 	; Make flaccid for SOS
