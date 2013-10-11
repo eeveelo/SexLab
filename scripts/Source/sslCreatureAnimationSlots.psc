@@ -2,7 +2,12 @@ scriptname sslCreatureAnimationSlots extends sslAnimationSlots
 
 sslCreatureAnimationDefaults property CreatureDefaults auto
 
-Form[] ValidRaces
+form[] ValidRaces
+form[] property CreatureRaces hidden
+	form[] function get()
+		return ValidRaces
+	endFunction
+endProperty
 
 sslBaseAnimation[] function GetByRace(int actors, Race creature)
 	sslBaseAnimation[] output

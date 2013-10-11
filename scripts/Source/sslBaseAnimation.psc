@@ -50,6 +50,12 @@ int property PositionCount hidden
 		return actors
 	endFunction
 endProperty
+form[] property CreatureRaces hidden
+	form[] function get()
+		return creatures
+	endFunction
+endProperty
+
 ;/-----------------------------------------------\;
 ;|	Animation Offsets                            |;
 ;\-----------------------------------------------/;
