@@ -16,12 +16,12 @@ endFunction
 event OnVersionUpdate(int version)
 	float current = (CurrentVersion as float / 10000.0)
 	float latest = (version as float / 10000.0)
-
+	; Notify update
 	if current < latest
 		Debug.Notification("Updating to SexLab v"+GetStringVer())
 	endIf
-
-	if current > 0
+	; Resetup system
+	if current > 0 && current < 1.21
 		_SetupSystem()
 	endIf
 endEvent
