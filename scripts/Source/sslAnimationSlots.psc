@@ -23,6 +23,29 @@ endProperty
 ;|	Search Animations                            |;
 ;\-----------------------------------------------/;
 
+sslBaseAnimation[] function PickByActors(actor[] Positions, int limit = 64, bool aggressive = false)
+	int actors = Positions.Length
+	int[] genders = Lib.ActorLib.GenderCount(Positions)
+	sslBaseAnimation[] Matches = GetByType(Positions.Length, genders[0], genders[1], -1, aggressive)
+	if Matches.Length <= limit
+		return Matches
+	endIf
+
+int count = Matches.Length - 1
+	sslBaseAnimation[] Picked = sslUtility.AnimationArray(limit)
+
+	while limit
+		int rand = Utility.RandomInt(0, count)
+		if Picked.Find(Matches[rand]) == -1
+			limit -= 1
+			Picked[limit] = Matches[rand]
+		endIf
+		debug.trace(Picked)
+	endWhile
+
+	return Picked
+endFunction
+
 sslBaseAnimation function GetByName(string findName)
 	int i = 0
 	while i < Slotted

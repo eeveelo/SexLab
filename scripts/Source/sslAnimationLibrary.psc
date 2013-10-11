@@ -3,6 +3,7 @@ scriptname sslAnimationLibrary extends Quest
 ; Scripts
 sslAnimationSlots property Slots auto
 sslCreatureAnimationSlots property CreatureSlots auto
+sslActorLibrary property ActorLib auto
 
 ; Data
 
