@@ -518,7 +518,7 @@ function _Defaults()
 	bRagdollEnd = false
 	bUseMaleNudeSuit = false
 	bUseFemaleNudeSuit = false
-	bUndressAnimation = true
+	bUndressAnimation = false
 
 	; Hotkeys
 	kBackwards = 54 ; Right Shift 
