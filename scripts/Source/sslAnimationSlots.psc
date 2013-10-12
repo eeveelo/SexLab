@@ -175,12 +175,9 @@ endFunction
 ;\-----------------------------------------------/;
 
 function _Log(string log, string method, string type = "NOTICE", string arguments = "")
-	Debug.Trace("--------------------------------------------------------------------------------------------")
-	Debug.Trace("--- sslAnimationSlots: SexLab Animation Slots---")
-	Debug.Trace("--------------------------------------------------------------------------------------------")
+	Debug.Trace("--- sslAnimationSlots: SexLab Animation Slots ------------------------------")
 	Debug.Trace(" "+type+": "+method+"("+arguments+")" )
 	Debug.Trace("   "+log)
-	Debug.Trace("--------------------------------------------------------------------------------------------")
 endFunction
 
 function _LogFound(string method, string arguments, sslBaseAnimation[] results)
