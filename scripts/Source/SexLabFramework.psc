@@ -238,6 +238,10 @@ sslBaseAnimation[] function MergeAnimationLists(sslBaseAnimation[] list1, sslBas
 	return AnimSlots.MergeLists(list1, list2)
 endFunction
 
+sslBaseAnimation[] function PickAnimationsByActors(actor[] Positions, int limit = 64, bool aggressive = false)
+	return AnimSlots.PickByActors(Positions, limit, aggressive)
+endFunction
+
 int function FindAnimationByName(string findName)
 	return AnimSlots.FindByName(findName)
 endFunction
