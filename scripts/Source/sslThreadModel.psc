@@ -765,9 +765,9 @@ function Initialize()
 	Positions = acDel
 	victim = none
 	; Empty alias slots
-	int i = 0
+	int i
 	while i < ActorSlots.Length
-		if ActorSlots[i] != none && ActorSlots[i].GetState() != ""
+		if ActorSlots[i] != none
 			ActorSlots[i].ClearAlias()
 		endIf
 		i += 1
