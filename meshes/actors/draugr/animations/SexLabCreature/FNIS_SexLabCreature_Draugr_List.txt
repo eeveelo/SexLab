@@ -8,6 +8,11 @@ s Draugr_Missionary_A2_S1 Draugr_Missionary_A2_S1.hkx
 + Draugr_Missionary_A2_S3 Draugr_Missionary_A2_S3.hkx
 + Draugr_Missionary_A2_S4 Draugr_Missionary_A2_S4.hkx
 
+s Draugr_Doggystyle_A2_S1 Draugr_Doggystyle_A2_S1.hkx
++ Draugr_Doggystyle_A2_S2 Draugr_Doggystyle_A2_S2.hkx
++ Draugr_Doggystyle_A2_S3 Draugr_Doggystyle_A2_S3.hkx
++ Draugr_Doggystyle_A2_S4 Draugr_Doggystyle_A2_S4.hkx
+
 s Draugr_Gangbang_A2_S1 Draugr_Gangbang_A2_S1.hkx
 + Draugr_Gangbang_A2_S2 Draugr_Gangbang_A2_S2.hkx
 + Draugr_Gangbang_A2_S3 Draugr_Gangbang_A2_S3.hkx
