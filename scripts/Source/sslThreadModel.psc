@@ -602,7 +602,7 @@ function SetStrip(actor position, bool[] strip)
 		_Log("Malformed strip bool[] passed, must be 33 length bool array, "+strip.Length+" given", "SetStrip")
 		return
 	endIf
-	ActorAlias(position).OverrideStrip(strip)	
+	ActorAlias(position).OverrideStrip(strip)
 endFunction
 
 function SetVoice(actor position, sslBaseVoice voice)
