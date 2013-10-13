@@ -324,9 +324,9 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 	if Lib.BedsList.HasForm(centerOn.GetBaseObject())
 		bed = 1
 		centerLoc = GetCoords(centerOn)
-		centerLoc[0] = centerLoc[0] + (35 * Math.sin(centerLoc[5]))
-		centerLoc[1] = centerLoc[1] + (35 * Math.cos(centerLoc[5]))
-		centerLoc[2] = centerLoc[2] + 35
+		centerLoc[0] = centerLoc[0] + (33 * Math.sin(centerLoc[5]))
+		centerLoc[1] = centerLoc[1] + (33 * Math.cos(centerLoc[5]))
+		centerLoc[2] = centerLoc[2] + 36
 	elseif centerOn == Lib.PlayerRef || centerOn.HasKeyWordString("ActorTypeNPC")
 		ObjectReference Stager = centerOn.PlaceAtMe(Lib.SexLabStager)
 		if centerOn.GetDistance(Stager) < 600
@@ -751,7 +751,6 @@ endFunction
 
 function UnlockThread()
 	Initialize()
-	GotoState("Unlocked")
 endFunction
 
 function Initialize()
@@ -796,6 +795,7 @@ function Initialize()
 	centerObj = none
 	PlayerRef = none
 	creature = none
+	GotoState("Unlocked")
 endFunction
 
 ;/-----------------------------------------------\;

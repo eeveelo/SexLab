@@ -397,6 +397,8 @@ endFunction
 ;\-----------------------------------------------/;
 
 function EndAnimation(bool quick = false)
+	UnregisterForUpdate()
+	GoToState("")
 	SendThreadEvent("AnimationEnd")
 	SendActorEvent("EndThread", (quick as float))
 	; Wait for actors to clear, or for 5 seconds to pass
@@ -404,7 +406,7 @@ function EndAnimation(bool quick = false)
 	while !ActorWait("") && failsafe > Utility.GetCurrentRealTime()
 		Utility.Wait(0.20)
 	endWhile
-	UnlockThread()
+	Initialize()
 endFunction
 
 function Initialize()
