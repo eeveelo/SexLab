@@ -218,10 +218,6 @@ endFunction
 ;\-----------------------------------------------/;
 
 function StopAnimating(bool quick = false)
-	; Detach positioning marker
-	; ActorRef.StopTranslation()
-	; ActorRef.SetVehicle(none)
-
 	; Reset Idle
 	if IsCreature
 		; Reset Creature Idle
@@ -265,10 +261,11 @@ endfunction
 
 function Snap(float tolerance)
 	if tolerance == 0.0 || ActorRef.GetDistance(MarkerRef) >= tolerance
-		ActorRef.SetAngle(loc[3], loc[4], loc[5])
+		ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 100, 10000, 0)
 		ActorRef.SetVehicle(MarkerRef)
-		ActorRef.TranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 3000, 0)
+		Utility.Wait(0.1)
 	endIf
+	ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5]+0.1, 100, 3000, 0.001)
 endFunction
 
 event OnTranslationComplete()
@@ -430,7 +427,7 @@ state Animating
 			return
 		endIf
 		RegisterForSingleUpdate(VoiceDelay)
-		if IsCreature || IsSilent 
+		if IsCreature || IsSilent || Voice == none
 			return
 		endIf
 		if VoiceInstance > 0
