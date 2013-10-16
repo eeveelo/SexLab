@@ -42,12 +42,12 @@ sslThreadController function PrimeThread()
 endFunction
 
 bool function ActorWait(string waitfor)
-	int i
-	while i < ActorCount
+	int i = ActorCount
+	while i
+		i -= 1
 		if ActorAlias[i].GetState() != waitfor
 			return false
 		endIf
-		i += 1
 	endWhile
 	return true
 endFunction
@@ -84,7 +84,7 @@ function GoToStage(int toStage)
 	looping = false
 	UnregisterForUpdate()
 	; Set upcoming stage
-	stagePrev = stage
+	stagePrev = Stage
 	if toStage < 0
 		toStage = 0
 	endIf
@@ -121,10 +121,10 @@ state Starting
 		if LeadIn
 			SendThreadEvent("LeadInStart")
 		endIf
-		int i
-		while i < ActorCount
+		int i = ActorCount
+		while i
+			i -= 1
 			ActorAlias[i].StartAnimating()
-			i += 1
 		endWhile
 		started = Utility.GetCurrentRealTime()
 		GoToStage(1)
@@ -150,7 +150,7 @@ state Advancing
 					i += 1
 				endWhile
 			endIf
-			SendThreadEvent("LeadInEnd")			
+			SendThreadEvent("LeadInEnd")
 		endIf
 		; Start Animations loop
 		GoToState("Animating")
@@ -329,18 +329,18 @@ function RealignActors()
 endFunction
 
 function MoveActors()
-	int i
-	while i < ActorCount
-		ActorAlias[i].Snap(0.00)
-		i += 1
+	int i = ActorCount
+	while i
+		i -= 1
+		ActorAlias[i].Snap(0.0)
 	endWhile
 endFunction
 
 function UpdateLocations()
-	int i
-	while i < ActorCount
+	int i = ActorCount
+	while i
+		i -= 1
 		ActorSlot(i).AlignTo(Animation.GetPositionOffsets(i, stage))
-		i += 1
 	endWhile
 	MoveActors()
 endFunction
@@ -351,7 +351,7 @@ endFunction
 
 function SetAnimation(int anim = -1)
 	if anim < 0 ; randomize if -1
-		aid = utility.RandomInt(0, Animations.Length - 1)
+		aid = Utility.RandomInt(0, Animations.Length - 1)
 	else
 		aid = anim
 	endIf

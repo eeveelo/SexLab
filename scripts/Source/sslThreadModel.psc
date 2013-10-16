@@ -8,7 +8,7 @@ sslThreadLibrary property Lib auto
 bool active
 
 ; Actors
-actor[] property Positions auto hidden 
+actor[] property Positions auto hidden
 sslActorAlias[] ActorSlots
 
 ; Animations
@@ -191,24 +191,26 @@ state Making
 		endIf
 
 		; Validate Primary animations
-		i = 0
-		while i < primaryAnimations.Length
+		i = primaryAnimations.Length
+		while i
+			i -= 1
 			if actors != primaryAnimations[i].PositionCount
 				_Log("Primary animation '"+primaryAnimations[i].Name+"' requires "+primaryAnimations[i].PositionCount+" actors, only "+actors+" present", "StartThread", "FATAL")
 				return none
 			endIf
-			i += 1
 		endWhile
 
 		; Validate Leadin Animations
-		i = 0
-		while i < leadAnimations.Length
-			if actors != leadAnimations[i].PositionCount
-				_Log("Lead in animation '"+leadAnimations[i].Name+"' requires "+leadAnimations[i].PositionCount+" actors, only "+actors+" present", "StartThread", "FATAL")
-				return none
-			endIf
-			i += 1
-		endWhile
+		if !leadInDisabled && !HasCreature && leadAnimations.Length > 0
+			i = leadAnimations.Length
+			while i
+				i -= 1
+				if actors != leadAnimations[i].PositionCount
+					_Log("Lead in animation '"+leadAnimations[i].Name+"' requires "+leadAnimations[i].PositionCount+" actors, only "+actors+" present", "StartThread", "FATAL")
+					return none
+				endIf
+			endWhile
+		endIf
 
 		; Check for center
 		if centerObj == none && bed != -1
@@ -224,7 +226,7 @@ state Making
 				int useBed = 0
 				if bed == 2 || Lib.sNPCBed == "$SSL_Always"
 					useBed = 1
-				elseIf PlayerRef != none && !IsVictim(PlayerRef) 
+				elseIf PlayerRef != none && !IsVictim(PlayerRef)
 					useBed = Lib.mUseBed.Show()
 				elseIf Lib.sNPCBed == "$SSL_Sometimes"
 					useBed = utility.RandomInt(0, 1)
@@ -236,9 +238,9 @@ state Making
 		endIf
 
 		; Find a marker near one of our actors and center there
-		if centerObj == none 
+		if centerObj == none
 			i = actors
-			while i < actors
+			while i
 				i -= 1
 				ObjectReference marker = Game.FindRandomReferenceOfTypeFromRef(Lib.LocationMarker, Positions[i], 750.0) as ObjectReference
 				if marker != none
@@ -319,7 +321,7 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 	if !Locked("CenterOnObject") || centerOn == none
 		return none
 	endIf
-	
+
 	centerObj = centerOn
 	if Lib.BedsList.HasForm(centerOn.GetBaseObject())
 		bed = 1
@@ -680,12 +682,12 @@ function SendActorEvent(string eventName, float argNum = 0.0)
 	if !active
 		return
 	endIf
-	int position
-	while position < ActorCount
-		ActorAlias[position].RegisterForModEvent(eventName, "On"+eventName)
-		position += 1
+	int i = ActorCount
+	while i
+		i -= 1
+		ActorAlias[i].RegisterForModEvent(eventName, "On"+eventName)
 	endWhile
-	SendModEvent(eventName, (position as string), argNum)
+	SendModEvent(eventName, (tid as string), argNum)
 endFunction
 
 int function ArrayWrap(int value, int max)
@@ -764,12 +766,12 @@ function Initialize()
 	Positions = acDel
 	victim = none
 	; Empty alias slots
-	int i
-	while i < ActorSlots.Length
+	int i = ActorSlots.Length
+	while i
+		i -= 1
 		if ActorSlots[i] != none
 			ActorSlots[i].ClearAlias()
 		endIf
-		i += 1
 	endWhile
 	sslActorAlias[] aaDel
 	ActorSlots = aaDel
