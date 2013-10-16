@@ -39,7 +39,7 @@ function DLCLoad()
 	dawnguard = false
 	dragonborn = false
 	int mods = Game.GetModCount()
-	int i 
+	int i
 	while i < mods
 		string modname = Game.GetModName(i)
 		if !dawnguard && modname == "Dawnguard.esm"
@@ -123,7 +123,7 @@ endFunction
 
 function BearDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Bear) Doggystyle"
-	
+
 	SetSFX(Squishing)
 	AddRace(BearBlackRace)
 	AddRace(BearBrownRace)
@@ -152,7 +152,7 @@ endFunction
 
 function ChaurusForward(string eventName, string id, float argNum, form sender)
 	Name = "(Chaurus) Forward"
-	
+
 	SetSFX(Squishing)
 	AddRace(ChaurusRace)
 	AddRace(ChaurusReaperRace)
@@ -180,7 +180,7 @@ endFunction
 
 function ChaurusReverse(string eventName, string id, float argNum, form sender)
 	Name = "(Chaurus) Reverse"
-	
+
 	SetSFX(Squishing)
 	AddRace(ChaurusRace)
 	AddRace(ChaurusReaperRace)
@@ -208,7 +208,7 @@ endFunction
 
 function DaedraHugging(string eventName, string id, float argNum, form sender)
 	Name = "(Daedra) Hugging"
-	
+
 	SetSFX(Squishing)
 	AddRace(DLC2SeekerRace)
 
@@ -268,7 +268,7 @@ endFunction
 
 function CanineMissionary(string eventName, string id, float argNum, form sender)
 	Name = "(Dog) Missionary"
-	
+
 	SetSFX(Squishing)
 	AddRace(DogRace)
 	AddRace(DogCompanionRace)
@@ -300,7 +300,7 @@ endFunction
 
 function DragonPenetration(string eventName, string id, float argNum, form sender)
 	Name = "(Dragon) Penetration"
-	
+
 	SetSFX(Squishing)
 	AddRace(DragonRace)
 	AddRace(UndeadDragonRace)
@@ -312,10 +312,10 @@ function DragonPenetration(string eventName, string id, float argNum, form sende
 	AddPositionStage(a1, "Dragon_Penetration_A1_S4")
 
 	int a2 = AddPosition(Creature)
-	AddPositionStage(a2, "Dragon_Penetration_A2_S1", 35.0)
-	AddPositionStage(a2, "Dragon_Penetration_A2_S2", 35.0)
-	AddPositionStage(a2, "Dragon_Penetration_A2_S3", 35.0)
-	AddPositionStage(a2, "Dragon_Penetration_A2_S4", 35.0)
+	AddPositionStage(a2, "Dragon_Penetration_A2_S1", 35.0, rotate=180.0)
+	AddPositionStage(a2, "Dragon_Penetration_A2_S2", 35.0, rotate=180.0)
+	AddPositionStage(a2, "Dragon_Penetration_A2_S3", 35.0, rotate=180.0)
+	AddPositionStage(a2, "Dragon_Penetration_A2_S4", 35.0, rotate=180.0)
 
 	AddTag("Creature")
 	AddTag("Bestiality")
@@ -328,7 +328,7 @@ endFunction
 
 function DragonTongue(string eventName, string id, float argNum, form sender)
 	Name = "(Dragon) Tongue"
-	
+
 	SetSFX(Squishing)
 	AddRace(DragonRace)
 	AddRace(UndeadDragonRace)
@@ -356,7 +356,7 @@ endFunction
 
 function DraugrDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Draugr) Doggystyle"
-	
+
 	SetSFX(Squishing)
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
@@ -384,7 +384,7 @@ endFunction
 
 function DraugrGangbang3P(string eventName, string id, float argNum, form sender)
 	Name = "(Draugr) Gangbang 3P"
-	
+
 	SetSFX(SexMix)
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
@@ -419,7 +419,7 @@ endFunction
 
 function DraugrGangbang4P(string eventName, string id, float argNum, form sender)
 	Name = "(Draugr) Gangbang 4P"
-	
+
 	SetSFX(SexMix)
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
@@ -460,7 +460,7 @@ endFunction
 
 function DraugrGangbang5P(string eventName, string id, float argNum, form sender)
 	Name = "(Draugr) Gangbang 5P"
-	
+
 	SetSFX(SexMix)
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
@@ -507,7 +507,7 @@ endFunction
 
 function DraugrHolding(string eventName, string id, float argNum, form sender)
 	Name = "(Draugr) Holding"
-	
+
 	SetSFX(Squishing)
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
@@ -535,7 +535,7 @@ endFunction
 
 function DraugrMissionary(string eventName, string id, float argNum, form sender)
 	Name = "(Draugr) Missionary"
-	
+
 	SetSFX(Squishing)
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
@@ -563,7 +563,7 @@ endFunction
 
 function FalmerDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Falmer) Doggystyle"
-	
+
 	SetSFX(Squishing)
 	AddRace(FalmerRace)
 
@@ -590,7 +590,7 @@ endFunction
 
 function FalmerGangbang3P(string eventName, string id, float argNum, form sender)
 	Name = "(Falmer) Gangbang 3P"
-	
+
 	SetSFX(SexMix)
 	AddRace(FalmerRace)
 
@@ -624,7 +624,7 @@ endFunction
 
 function FalmerGangbang4P(string eventName, string id, float argNum, form sender)
 	Name = "(Falmer) Gangbang 4P"
-	
+
 	SetSFX(SexMix)
 	AddRace(FalmerRace)
 
@@ -664,7 +664,7 @@ endFunction
 
 function FalmerGangbang5P(string eventName, string id, float argNum, form sender)
 	Name = "(Falmer) Gangbang 5P"
-	
+
 	SetSFX(SexMix)
 	AddRace(FalmerRace)
 
@@ -710,7 +710,7 @@ endFunction
 
 function FalmerHolding(string eventName, string id, float argNum, form sender)
 	Name = "(Falmer) Holding"
-	
+
 	SetSFX(Squishing)
 	AddRace(FalmerRace)
 
@@ -739,7 +739,7 @@ endFunction
 
 function FalmerMissionary(string eventName, string id, float argNum, form sender)
 	Name = "(Falmer) Missionary"
-	
+
 	SetSFX(Squishing)
 	AddRace(FalmerRace)
 
@@ -768,7 +768,7 @@ endFunction
 
 function GargoyleDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Gargoyle) Doggystyle"
-	
+
 	SetSFX(Squishing)
 	AddRace(DLC1GargoyleRace)
 	AddRace(DLC1GargoyleVariantBossRace)
@@ -797,7 +797,7 @@ endFunction
 
 function GargoyleHolding(string eventName, string id, float argNum, form sender)
 	Name = "(Gargoyle) Holding"
-	
+
 	SetSFX(Squishing)
 	AddRace(DLC1GargoyleRace)
 	AddRace(DLC1GargoyleVariantBossRace)
@@ -826,7 +826,7 @@ endFunction
 
 function GargoyleMissionary(string eventName, string id, float argNum, form sender)
 	Name = "(Gargoyle) Missionary"
-	
+
 	SetSFX(Squishing)
 	AddRace(DLC1GargoyleRace)
 	AddRace(DLC1GargoyleVariantBossRace)
@@ -855,7 +855,7 @@ endFunction
 
 function GiantPenetration(string eventName, string id, float argNum, form sender)
 	Name = "(Giant) Penetration"
-	
+
 	SetSFX(Squishing)
 	AddRace(GiantRace)
 
@@ -883,7 +883,7 @@ endFunction
 
 function HorseDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Horse) Doggystyle"
-	
+
 	SetSFX(Squishing)
 	AddRace(HorseRace)
 
@@ -910,7 +910,7 @@ endFunction
 
 function CatDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Sabre Cat) Doggystyle"
-	
+
 	SetSFX(Squishing)
 	AddRace(SabreCatRace)
 	AddRace(SabreCatSnowyRace)
@@ -938,7 +938,7 @@ endFunction
 
 function SpiderDouble(string eventName, string id, float argNum, form sender)
 	Name = "(Spider) Double"
-	
+
 	SetSFX(Squishing)
 	AddRace(FrostbiteSpiderRace)
 
@@ -971,7 +971,7 @@ endFunction
 
 function SpiderPenetration(string eventName, string id, float argNum, form sender)
 	Name = "(Spider) Penetration"
-	
+
 	SetSFX(Squishing)
 	AddRace(FrostbiteSpiderRace)
 
@@ -998,7 +998,7 @@ endFunction
 
 function BigSpiderPenetration(string eventName, string id, float argNum, form sender)
 	Name = "(Large Spider) Penetration"
-	
+
 	SetSFX(Squishing)
 	AddRace(FrostbiteSpiderRaceLarge)
 	AddRace(FrostbiteSpiderRaceGiant)
@@ -1028,7 +1028,7 @@ endFunction
 
 function TrollDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Troll) Doggystyle"
-	
+
 	SetSFX(Squishing)
 	AddRace(TrollRace)
 
@@ -1055,7 +1055,7 @@ endFunction
 
 function TrollHolding(string eventName, string id, float argNum, form sender)
 	Name = "(Troll) Holding"
-	
+
 	SetSFX(Squishing)
 	AddRace(TrollRace)
 
@@ -1082,7 +1082,7 @@ endFunction
 
 function TrollMissionary(string eventName, string id, float argNum, form sender)
 	Name = "(Troll) Missionary"
-	
+
 	SetSFX(Squishing)
 	AddRace(TrollRace)
 
@@ -1110,7 +1110,7 @@ endFunction
 
 function VampireLordDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Vampire Lord) Doggystyle"
-	
+
 	SetSFX(Squishing)
 	AddRace(DLC1VampireBeastRace)
 
@@ -1137,7 +1137,7 @@ endFunction
 
 function VampireLordHolding(string eventName, string id, float argNum, form sender)
 	Name = "(Vampire Lord) Holding"
-	
+
 	SetSFX(Squishing)
 	AddRace(DLC1VampireBeastRace)
 
@@ -1164,7 +1164,7 @@ endFunction
 
 function VampireLordMissionary(string eventName, string id, float argNum, form sender)
 	Name = "(Vampire Lord) Missionary"
-	
+
 	SetSFX(Squishing)
 	AddRace(DLC1VampireBeastRace)
 
@@ -1191,7 +1191,7 @@ endFunction
 
 function WerewolfDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Werewolf) Doggystyle"
-	
+
 	SetSFX(Squishing)
 	AddRace(WerewolfBeastRace)
 
@@ -1219,7 +1219,7 @@ endFunction
 
 function WerewolfHolding(string eventName, string id, float argNum, form sender)
 	Name = "(Werewolf) Holding"
-	
+
 	SetSFX(Squishing)
 	AddRace(WerewolfBeastRace)
 
@@ -1247,7 +1247,7 @@ endFunction
 
 function WerewolfMissionary(string eventName, string id, float argNum, form sender)
 	Name = "(Werewolf) Missionary"
-	
+
 	SetSFX(Squishing)
 	AddRace(WerewolfBeastRace)
 
@@ -1276,8 +1276,6 @@ endFunction
 function WolfDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Wolf) Doggystyle"
 
-	Enabled = false
-	
 	SetSFX(Squishing)
 	AddRace(WolfRace)
 
@@ -1305,8 +1303,6 @@ endFunction
 function WolfMissionary(string eventName, string id, float argNum, form sender)
 	Name = "(Wolf) Missionary"
 
-	Enabled = false
-	
 	SetSFX(Squishing)
 	AddRace(WolfRace)
 
