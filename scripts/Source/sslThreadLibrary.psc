@@ -79,7 +79,7 @@ function _Defaults()
 	fSFXDelay = 4.0
 	fSFXVolume = 0.8
 	bAutoAdvance = true
-	bForeplayStage = true
+	bForeplayStage = false
 	sNPCBed = "$SSL_Never"
 
 	; Timers
