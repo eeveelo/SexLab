@@ -98,7 +98,7 @@ function SetDefaults()
 	oidToggleAnimation = new int[100]
 	oidAggrAnimation = new int[100]
 	oidForeplayAnimation = new int[100]
-	
+
 	oidStripMale = new int[33]
 	oidStripFemale = new int[33]
 	oidStripLeadInFemale = new int[33]
@@ -530,7 +530,7 @@ state ReDressVictim
 		SetInfoText("$SSL_InfoReDressVictim")
 	endEvent
 endState
-state NPCBed 
+state NPCBed
 	event OnSelectST()
 		if ThreadLib.sNPCBed == "$SSL_Never"
 			ThreadLib.sNPCBed = "$SSL_Sometimes"
@@ -1051,7 +1051,7 @@ endState
 state RestoreDefaultSettings
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnRestoreDefaults")
-			SetDefaults()			
+			SetDefaults()
 			ShowMessage("$SSL_RunRestoreDefaults", false)
 			ForcePageReset()
 		endIf
@@ -1064,7 +1064,7 @@ state ResetAnimationRegistry
 			ThreadSlots._StopAll()
 			AnimSlots._Setup()
 			CreatureAnimSlots._Setup()
-			Debug.TraceAndbox("$SSL_RunRebuildAnimations")
+			ShowMessage("$SSL_RunRebuildAnimations", false)
 		endIf
 	endEvent
 endState
@@ -1073,7 +1073,7 @@ state ResetVoiceRegistry
 		if ShowMessage("$SSL_WarnRebuildVoices")
 			Utility.Wait(0.10)
 			VoiceSlots._Setup()
-			Debug.TraceAndbox("$SSL_RunRebuildVoices")
+			ShowMessage("$SSL_RunRebuildVoices", false)
 		endIf
 	endEvent
 endState
@@ -1081,15 +1081,15 @@ state ResetPlayerSexStats
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnResetStats")
 			Stats._Setup()
-			Debug.TraceAndbox("$SSL_RunResetStats")
+			ShowMessage("$SSL_RunResetStats", false)
 		endIf
 	endEvent
 endState
 state CleanSystem
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnCleanSystem")
-			ShowMessage("$SSL_RunCleanSystem")
-			Utility.WAit(0.10)
+			ShowMessage("$SSL_RunCleanSystem", false)
+			Utility.Wait(0.10)
 			_SetupSystem()
 			mCleanSystemFinish.Show()
 		endIf
@@ -1272,31 +1272,31 @@ event OnOptionSelect(int option)
 	elseIf CurrentPage == "$SSL_NormalTimersStripping"
 		i = oidStripMale.Find(option)
 		if i >= 0
-			ActorLib.bStripMale[i] = !ActorLib.bStripMale[i] 
+			ActorLib.bStripMale[i] = !ActorLib.bStripMale[i]
 			SetToggleOptionValue(option, ActorLib.bStripMale[i])
 		else
 			i = oidStripFemale.Find(option)
-			ActorLib.bStripFemale[i] = !ActorLib.bStripFemale[i] 
+			ActorLib.bStripFemale[i] = !ActorLib.bStripFemale[i]
 			SetToggleOptionValue(option, ActorLib.bStripFemale[i])
 		endIf
 	elseIf CurrentPage == "$SSL_ForeplayTimersStripping"
 		i = oidStripLeadInMale.Find(option)
 		if i >= 0
-			ActorLib.bStripLeadInMale[i] = !ActorLib.bStripLeadInMale[i] 
+			ActorLib.bStripLeadInMale[i] = !ActorLib.bStripLeadInMale[i]
 			SetToggleOptionValue(option, ActorLib.bStripLeadInMale[i])
 		else
 			i = oidStripLeadInFemale.Find(option)
-			ActorLib.bStripLeadInFemale[i] = !ActorLib.bStripLeadInFemale[i] 
+			ActorLib.bStripLeadInFemale[i] = !ActorLib.bStripLeadInFemale[i]
 			SetToggleOptionValue(option, ActorLib.bStripLeadInFemale[i])
 		endIf
 	elseIf CurrentPage == "$SSL_AggressiveTimersStripping"
 		i = oidStripVictim.Find(option)
 		if i >= 0
-			ActorLib.bStripVictim[i] = !ActorLib.bStripVictim[i] 
+			ActorLib.bStripVictim[i] = !ActorLib.bStripVictim[i]
 			SetToggleOptionValue(option, ActorLib.bStripVictim[i])
 		else
 			i = oidStripAggressor.Find(option)
-			ActorLib.bStripAggressor[i] = !ActorLib.bStripAggressor[i] 
+			ActorLib.bStripAggressor[i] = !ActorLib.bStripAggressor[i]
 			SetToggleOptionValue(option, ActorLib.bStripAggressor[i])
 		endIf
 	elseIf CurrentPage == "$SSL_RebuildClean"

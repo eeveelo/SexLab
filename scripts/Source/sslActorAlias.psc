@@ -261,9 +261,9 @@ endfunction
 
 function Snap(float tolerance)
 	if tolerance == 0.0 || ActorRef.GetDistance(MarkerRef) >= tolerance
-		ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 100, 10000, 0)
+		ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 100, 50000, 0)
 		ActorRef.SetVehicle(MarkerRef)
-		Utility.Wait(0.1)
+		Utility.Wait(0.5)
 	endIf
 	ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5]+0.1, 100, 3000, 0.001)
 endFunction
@@ -442,13 +442,13 @@ endState
 ;|	Actor Callbacks                              |;
 ;\-----------------------------------------------/;
 
-event OnStartThread(string eventName, string actorSlot, float argNum, form sender)
+event OnStartThread(string eventName, string argString, float argNum, form sender)
 	UnregisterForModEvent("StartThread")
 	LockActor()
 	PrepareActor()
 endEvent
 
-event OnEndThread(string eventName, string actorSlot, float argNum, form sender)
+event OnEndThread(string eventName, string argString, float argNum, form sender)
 	UnregisterForModEvent("EndThread")
 	UnregisterForUpdate()
 	bool quick = (argNum as bool)
