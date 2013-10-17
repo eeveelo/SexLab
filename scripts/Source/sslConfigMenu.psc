@@ -1064,7 +1064,7 @@ state ResetAnimationRegistry
 			ThreadSlots._StopAll()
 			AnimSlots._Setup()
 			CreatureAnimSlots._Setup()
-			ShowMessage("$SSL_RunRebuildAnimations", false)
+			Debug.Notification("$SSL_RunRebuildAnimations")
 		endIf
 	endEvent
 endState
@@ -1073,7 +1073,7 @@ state ResetVoiceRegistry
 		if ShowMessage("$SSL_WarnRebuildVoices")
 			Utility.Wait(0.10)
 			VoiceSlots._Setup()
-			ShowMessage("$SSL_RunRebuildVoices", false)
+			Debug.Notification("$SSL_RunRebuildVoices")
 		endIf
 	endEvent
 endState
@@ -1081,7 +1081,7 @@ state ResetPlayerSexStats
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnResetStats")
 			Stats._Setup()
-			ShowMessage("$SSL_RunResetStats", false)
+			Debug.Notification("$SSL_RunResetStats")
 		endIf
 	endEvent
 endState
