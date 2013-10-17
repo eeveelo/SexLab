@@ -3,11 +3,11 @@
 Skryim SexLab Framework
   By Ashal of Loverslab.com
 
-    Version 1.22, released 2013/10/12
+    Version 1.23, released 2013/10/16
 
 -- Description --------------------------------------------------------------
 
-    Skyrim SexLab, is intended to serve as a unifying resource for 
+    Skyrim SexLab, is intended to serve as a unifying resource for
     modders to pull animations from to aid them in development of adult
     themed mods, without having to going through the complex scripting
     work it takes by themselves. A modder is provided with a wealth of tools
