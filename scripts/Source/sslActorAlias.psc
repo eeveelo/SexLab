@@ -263,7 +263,7 @@ function Snap(float tolerance)
 	if tolerance == 0.0 || ActorRef.GetDistance(MarkerRef) >= tolerance
 		ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 100, 50000, 0)
 		ActorRef.SetVehicle(MarkerRef)
-		Utility.Wait(0.5)
+		Utility.Wait(0.1)
 	endIf
 	ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5]+0.1, 100, 3000, 0.001)
 endFunction
