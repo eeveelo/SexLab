@@ -76,6 +76,12 @@ bool property IsAggressive hidden
 	endFunction
 endProperty
 
+bool property IsUsingBed hidden
+	bool function get()
+		return bed == 1
+	endFunction
+endProperty
+
 ObjectReference property CenterRef hidden
 	ObjectReference function get()
 		return centerObj
@@ -326,12 +332,12 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 	if Lib.BedsList.HasForm(centerOn.GetBaseObject())
 		bed = 1
 		centerLoc = GetCoords(centerOn)
-		centerLoc[0] = centerLoc[0] + (33 * Math.sin(centerLoc[5]))
-		centerLoc[1] = centerLoc[1] + (33 * Math.cos(centerLoc[5]))
-		centerLoc[2] = centerLoc[2] + 36
+		centerLoc[0] = centerLoc[0] + (32.0 * Math.sin(centerLoc[5]))
+		centerLoc[1] = centerLoc[1] + (32.0 * Math.cos(centerLoc[5]))
+		centerLoc[2] = centerLoc[2] + 37.0
 	elseif centerOn == Lib.PlayerRef || centerOn.HasKeyWordString("ActorTypeNPC")
 		ObjectReference Stager = centerOn.PlaceAtMe(Lib.SexLabStager)
-		if centerOn.GetDistance(Stager) < 600
+		if centerOn.GetDistance(Stager) < 600.0
 			centerLoc = GetCoords(Stager)
 		else
 			centerLoc = GetCoords(centerOn)
@@ -367,13 +373,13 @@ endFunction
 
 function AdjustRotation(float adjust)
 	if !Locked("AdjustRotation")
-		return none
+		return
 	endIf
 	centerLoc[5] = centerLoc[5] + adjust
-	if centerLoc[5] >= 360
-		centerLoc[5] = ( centerLoc[5] - 360 )
-	elseIf centerLoc[5] < 0
-		centerLoc[5] = ( centerLoc[5] + 360 )
+	if centerLoc[5] >= 360.0
+		centerLoc[5] = centerLoc[5] - 360.0
+	elseIf centerLoc[5] < 0.0
+		centerLoc[5] = centerLoc[5] + 360.0
 	endIf
 endFunction
 
