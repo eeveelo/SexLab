@@ -1494,7 +1494,7 @@ endFunction
 
 function _CheckSystem()
 	; Check SKSE Version
-	float skseNeeded = 1.0609
+	float skseNeeded = 1.0616
 	float skseInstalled = SKSE.GetVersion() + SKSE.GetVersionMinor() * 0.01 + SKSE.GetVersionBeta() * 0.0001
 	if skseInstalled == 0
 		mNoSKSE.Show()
@@ -1504,7 +1504,7 @@ function _CheckSystem()
 		SexLab._EnableSystem(false)
 	endIf
 	; Check Skyrim Version
-	float skyrimNeeded = 1.8
+	float skyrimNeeded = 1.9
 	float skyrimMajor = StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float
 	if skyrimMajor < skyrimNeeded
 		mOldSkyrim.Show(skyrimMajor, skyrimNeeded)
