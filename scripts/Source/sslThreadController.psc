@@ -256,21 +256,21 @@ function AdjustForward(bool backwards = false, bool adjuststage = false)
 	float[] offsets = Animation.UpdateForward(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage)
 	sslActorAlias Slot = ActorSlot(AdjustingPosition)
 	Slot.AlignTo(offsets)
-	Slot.Snap(0.0)
+	Slot.Snap()
 endFunction
 
 function AdjustSideways(bool backwards = false, bool adjuststage = false)
 	float[] offsets = Animation.UpdateSide(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage)
 	sslActorAlias Slot = ActorSlot(AdjustingPosition)
 	Slot.AlignTo(offsets)
-	Slot.Snap(0.0)
+	Slot.Snap()
 endFunction
 
 function AdjustUpward(bool backwards = false, bool adjuststage = false)
 	float[] offsets = Animation.UpdateUp(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage)
 	sslActorAlias Slot = ActorSlot(AdjustingPosition)
 	Slot.AlignTo(offsets)
-	Slot.Snap(0.0)
+	Slot.Snap()
 endFunction
 
 function RotateScene(bool backwards = false)
@@ -332,7 +332,7 @@ function MoveActors()
 	int i = ActorCount
 	while i
 		i -= 1
-		ActorAlias[i].Snap(0.0)
+		ActorAlias[i].Snap()
 	endWhile
 endFunction
 

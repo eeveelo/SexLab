@@ -1,4 +1,4 @@
-Scriptname sslEffectDebug extends ActiveMagicEffect  
+Scriptname sslEffectDebug extends ActiveMagicEffect
 
 SexLabFramework property SexLab Auto
 
@@ -14,7 +14,7 @@ event OnEffectStart(actor target, actor caster)
 	if Positions.Find(target) == -1
 		Positions = sslUtility.PushActor(target, Positions)
 		SexLab.DebugActor = Positions
-		Debug.Notification(Positions.Length)	
+		Debug.Notification(Positions.Length)
 	endIf
 
 	if Positions.Length != count

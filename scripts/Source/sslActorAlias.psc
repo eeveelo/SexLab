@@ -248,28 +248,31 @@ function AlignTo(float[] offsets)
 	loc[3] = centerLoc[3]
 	loc[4] = centerLoc[4]
 	loc[5] = centerLoc[5] + offsets[3]
-	if loc[5] >= 360
-		loc[5] = loc[5] - 360
-	elseIf loc[5] < 0
-		loc[5] = loc[5] + 360
+	if loc[5] >= 360.0
+		loc[5] = loc[5] - 360.0
+	elseIf loc[5] < 0.0
+		loc[5] = loc[5] + 360.0
 	endIf
 	MarkerRef.SetPosition(loc[0], loc[1], loc[2])
 	MarkerRef.SetAngle(loc[3], loc[4], loc[5])
 	ActorRef.SetVehicle(MarkerRef)
-	Snap(0.70)
+	Snap()
 endfunction
 
-function Snap(float tolerance)
-	if tolerance == 0.0 || ActorRef.GetDistance(MarkerRef) >= tolerance
-		ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 100, 50000, 0)
+function Snap()
+	if ActorRef == none || MarkerObj == none
+		return
+	elseIf ActorRef.GetDistance(MarkerRef) >= 0.5 || Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ()) > 1.0
+		ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 100.0, 50000, 0)
 		ActorRef.SetVehicle(MarkerRef)
-		Utility.Wait(0.1)
+		Utility.Wait(0.2)
 	endIf
-	ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5]+0.1, 100, 3000, 0.001)
+	ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5]+0.1, 100.0, 10000, 0.001)
 endFunction
 
 event OnTranslationComplete()
-	Snap(0.2)
+	Utility.Wait(0.5)
+	Snap()
 endEvent
 
 function Strip(bool animate = true)
