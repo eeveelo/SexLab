@@ -262,16 +262,25 @@ endfunction
 function Snap()
 	if ActorRef == none || MarkerObj == none
 		return
-	elseIf ActorRef.GetDistance(MarkerRef) >= 0.5 || Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ()) > 1.0
-		ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 100.0, 50000, 0)
-		ActorRef.SetVehicle(MarkerRef)
-		Utility.Wait(0.2)
 	endIf
-	ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5]+0.1, 100.0, 10000, 0.001)
+
+	; Quickly move into place if actor isn't positioned right
+	if ActorRef.GetDistance(MarkerRef) > 0.5
+		ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 1.0, 50000, 0)
+		ActorRef.SetVehicle(MarkerRef)
+		Utility.Wait(0.1)
+	endIf
+	; Force angle if translation didn't rotate them properly
+	if Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ()) > 0.5
+		ActorRef.SetAngle(loc[3], loc[4], loc[5])
+		ActorRef.SetVehicle(MarkerRef)
+	endIf
+	; Begin very slowly rotating a small amount to hold position
+	ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5]+0.1, 1.0, 10000, 0.0001)
 endFunction
 
 event OnTranslationComplete()
-	Utility.Wait(0.5)
+	Utility.Wait(0.25)
 	Snap()
 endEvent
 
@@ -509,4 +518,3 @@ endFunction
 function StartAnimating()
 	;Debug.TraceAndbox("Null start: "+ActorRef)
 endFunction
-
