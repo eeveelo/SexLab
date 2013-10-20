@@ -165,7 +165,7 @@ state Animating
 			SendThreadEvent("StageStart")
 		endIf
 		; Stage Delay
-		if stage > 1
+		if Stage > 1
 			sfx[0] = sfx[0] - (Stage * 0.2)
 		endIf
 		; min 0.80 delay
@@ -275,7 +275,7 @@ endFunction
 
 function RotateScene(bool backwards = false)
 	AdjustRotation(SignFloat(45, backwards))
-	UpdateLocations()
+	SyncActors()
 endFunction
 
 function AdjustChange(bool backwards = false)
@@ -300,6 +300,7 @@ function MoveScene()
 	sslActorAlias Slot = ActorAlias(Lib.PlayerRef)
 	Slot.UnlockActor()
 	Slot.StopAnimating(true)
+	Lib.PlayerRef.StopTranslation()
 	; Lock hotkeys and wait 6 seconds
 	Lib.mMoveScene.Show(6)
 	float stopat = Utility.GetCurrentRealTime() + 6
@@ -325,7 +326,7 @@ endFunction
 function RealignActors()
 	SyncActors()
 	PlayAnimation()
-	; MoveActors()
+	MoveActors()
 endFunction
 
 function MoveActors()
@@ -334,15 +335,6 @@ function MoveActors()
 		i -= 1
 		ActorAlias[i].Snap()
 	endWhile
-endFunction
-
-function UpdateLocations()
-	int i = ActorCount
-	while i
-		i -= 1
-		ActorSlot(i).AlignTo(Animation.GetPositionOffsets(i, stage))
-	endWhile
-	MoveActors()
 endFunction
 
 ;/-----------------------------------------------\;
@@ -388,8 +380,6 @@ function PlayAnimation()
 		Debug.SendAnimationEvent(Positions[3], events[3])
 		Debug.SendAnimationEvent(Positions[4], events[4])
 	endIf
-	; Reposition actors
-	UpdateLocations()
 endFunction
 
 ;/-----------------------------------------------\;
