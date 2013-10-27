@@ -105,10 +105,14 @@ function LockActor()
 	ActorRef.AddToFaction(Lib.AnimatingFaction)
 	ActorRef.SetFactionRank(Lib.AnimatingFaction, 1)
 	ActorRef.EvaluatePackage()
+	; Attach positioning marker
+	ActorRef.SetVehicle(MarkerRef)
 	; Disable movement
 	if IsPlayer
+		Game.DisablePlayerControls(false, false, false, false, false, false, true, false, 0)
 		Game.ForceThirdPerson()
 		Game.SetPlayerAIDriven()
+		; Game.SetInChargen(true, true, true)
 		; Enable hotkeys, if needed
 		if IsVictim && Lib.bDisablePlayer
 			Controller.AutoAdvance = true
@@ -120,15 +124,21 @@ function LockActor()
 		ActorRef.SetDontMove(true)
 		; ActorRef.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
 	endIf
-	; Attach positioning marker
-	ActorRef.SetVehicle(MarkerRef)
 endFunction
 
 function UnlockActor()
+	; Remove from animation faction
+	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
+	ActorRef.EvaluatePackage()
+	; Detach positioning marker
+	ActorRef.StopTranslation()
+	ActorRef.SetVehicle(none)
 	; Enable movement
 	if IsPlayer
 		Lib._HKClear()
+		Game.EnablePlayerControls(false, false, false, false, false, false, true, false, 0)
 		Game.SetPlayerAIDriven(false)
+		; Game.SetInChargen(false, false, false)
 		int[] genders = Lib.GenderCount(Controller.Positions)
 		Lib.Stats.UpdatePlayerStats(genders[0], genders[1], genders[2], Controller.Animation, Controller.GetVictim(), Controller.GetTime())
 	else
@@ -136,12 +146,6 @@ function UnlockActor()
 		ActorRef.SetDontMove(false)
 		; ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 	endIf
-	; Remove from animation faction
-	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
-	ActorRef.EvaluatePackage()
-	; Detach positioning marker
-	ActorRef.StopTranslation()
-	ActorRef.SetVehicle(none)
 endFunction
 
 function PrepareActor()
@@ -233,7 +237,7 @@ function StopAnimating(bool quick = false)
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 		; Ragdoll NPC/PC if enabled and not in TFC
 		if !quick && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
-			ActorRef.PushActorAway(ActorRef, 0.01)
+			ActorRef.PushActorAway(ActorRef, 1.0)
 		endIf
 	endIf
 endFunction
