@@ -223,21 +223,19 @@ state Making
 			ObjectReference BedRef
 			; Select a bed
 			if PlayerRef != none
-				BedRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(Lib.BedsList, PlayerRef, 600.0)
+				BedRef = Lib.FindBed(PlayerRef, 750.0)
 			else
-				BedRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(Lib.BedsList, Positions[0], 600.0)
+				BedRef = Lib.FindBed(Positions[0], 1000.0)
 			endIf
 			; A bed was selected, should we use it?
-			if BedRef != none && !BedRef.IsFurnitureInUse(true)
-				int useBed = 0
-				if bed == 2 || Lib.sNPCBed == "$SSL_Always"
-					useBed = 1
-				elseIf PlayerRef != none && !IsVictim(PlayerRef)
-					useBed = Lib.mUseBed.Show()
+			if BedRef != none
+				bool use = bed == 2 || Lib.sNPCBed == "$SSL_Always"
+				if PlayerRef != none && !IsVictim(PlayerRef)
+					use = Lib.mUseBed.Show() as bool
 				elseIf Lib.sNPCBed == "$SSL_Sometimes"
-					useBed = utility.RandomInt(0, 1)
+					use = Utility.RandomInt(0, 1) as bool
 				endIf
-				if useBed == 1
+				if use
 					CenterOnObject(BedRef)
 				endIf
 			endIf
