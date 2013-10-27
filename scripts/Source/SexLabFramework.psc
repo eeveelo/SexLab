@@ -25,6 +25,9 @@ sslAnimationLibrary property AnimLib auto
 sslVoiceSlots property VoiceSlots auto
 sslVoiceLibrary property VoiceLib auto
 
+sslExpressionSlots property ExpressionSlots auto
+sslExpressionLibrary property ExpressionLib auto
+
 sslThreadSlots property ThreadSlots auto
 sslThreadLibrary property ThreadLib auto
 

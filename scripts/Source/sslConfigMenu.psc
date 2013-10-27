@@ -50,6 +50,9 @@ sslCreatureAnimationSlots property CreatureAnimSlots auto
 sslVoiceSlots property VoiceSlots auto
 sslVoiceLibrary property VoiceLib auto
 
+sslExpressionSlots property ExpressionSlots auto
+sslExpressionLibrary property ExpressionLib auto
+
 sslThreadSlots property ThreadSlots auto
 sslThreadLibrary property ThreadLib auto
 
@@ -90,6 +93,7 @@ armor property aCalypsStrapon auto
 function SetDefaults()
 	AnimLib._Defaults()
 	VoiceLib._Defaults()
+	ExpressionLib._Defaults()
 	ActorLib._Defaults()
 	ThreadLib._Defaults()
 
@@ -1480,6 +1484,8 @@ function _SetupSystem()
 	CreatureAnimSlots._Setup()
 	; Init voices
 	VoiceSlots._Setup()
+	; Init expressions
+	ExpressionSlots._Setup()
 	; Init Alias Slots
 	ActorSlots._Setup()
 	; Init Thread Controllers
