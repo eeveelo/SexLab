@@ -1,10 +1,14 @@
 Scriptname sslEffectDebug extends ActiveMagicEffect
 
 SexLabFramework property SexLab Auto
+import SexLabUtil
 
 event OnEffectStart(actor target, actor caster)
-	actor[] Positions = SexLab.FindAvailablePartners(SexLab.MakeActorArray(caster, target), 3)
-	SexLab.StartSex(Positions, SexLab.PickAnimationsByActors(Positions), centerOn = SexLab.FindBed(caster))
+
+	SexLabFramework ssl = GetAPI()
+	actor[] Positions = ssl.FindAvailablePartners(ssl.MakeActorArray(caster, target), 3)
+	int tid = StartSex(Positions, ssl.PickAnimationsByActors(Positions), centerOn = ssl.FindBed(caster))
+	debug.traceandbox(tid)
 	; int count = 1
 
 	; actor[] Positions = SexLab.DebugActor

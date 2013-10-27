@@ -289,7 +289,6 @@ state Making
 	endFunction
 endState
 
-
 sslThreadController function StartThread()
 	Debug.Trace("Cannot start thread while not in a Making state")
 	return none
