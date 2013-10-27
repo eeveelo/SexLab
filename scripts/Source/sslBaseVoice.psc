@@ -69,14 +69,11 @@ endFunction
 ;\-----------------------------------------------/;
 
 bool function AddTag(string tag)
-	bool check = HasTag(tag)
-	if check
+	if HasTag(tag)
 		return false
-	else
-		int tagCount = tags.Length
-		tags = sslUtility.PushString(tag,tags)
-		return true
 	endIf
+	tags = sslUtility.PushString(tag,tags)
+	return true
 endFunction
 
 bool function RemoveTag(string tag)
@@ -87,7 +84,7 @@ bool function RemoveTag(string tag)
 	int i = 0
 	while i < tags.Length
 		if tags[i] != tag
-			newTags = sslUtility.PushString(tags[i],newTags)
+			newTags = sslUtility.PushString(tags[i], newTags)
 		endIf
 		i += 1
 	endWhile
@@ -96,11 +93,11 @@ bool function RemoveTag(string tag)
 endFunction
 
 bool function HasTag(string tag)
-		return tags.Find(tag) >= 0
+	return tags.Find(tag) != -1
 endFunction
 
 ;/-----------------------------------------------\;
-;|	Child loaders                                |;
+;|	System Use                                   |;
 ;\-----------------------------------------------/;
 
 function Initialize()

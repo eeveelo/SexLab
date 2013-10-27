@@ -424,7 +424,6 @@ bool function AddTag(string tag)
 	if HasTag(tag)
 		return false
 	endIf
-	int tagCount = tags.Length
 	tags = sslUtility.PushString(tag,tags)
 	return true
 endFunction
@@ -464,7 +463,7 @@ bool function CheckTags(string[] find, bool requireAll = true)
 	endWhile
 	; If still here than we require all and had all
 	return true
-endFunction	
+endFunction
 
 
 ;/-----------------------------------------------\;
