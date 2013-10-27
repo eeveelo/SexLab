@@ -35,7 +35,7 @@ bool property bDisablePlayer auto hidden
 float property fMaleVoiceDelay auto hidden
 float property fFemaleVoiceDelay auto hidden
 float property fVoiceVolume auto hidden
-bool property bEnableTCL auto hidden 
+bool property bEnableTCL auto hidden
 bool property bScaleActors auto hidden
 bool property bUseCum auto hidden
 bool property bAllowFFCum auto hidden
@@ -47,7 +47,7 @@ bool property bUseMaleNudeSuit auto hidden
 bool property bUseFemaleNudeSuit auto hidden
 bool property bUndressAnimation auto hidden
 
-int property kBackwards auto hidden ; Right Shift 
+int property kBackwards auto hidden ; Right Shift
 int property kAdjustStage auto hidden; Right Ctrl
 int property kAdvanceAnimation auto hidden ; Space
 int property kChangeAnimation auto hidden ; O
@@ -117,7 +117,114 @@ int function ValidateActor(actor a)
 	return 1
 endFunction
 
+bool function IsValidActor(actor a)
+	return ValidateActor(a) == 1
+endFunction
 
+actor[] function MakeActorArray(actor a1 = none, actor a2 = none, actor a3 = none, actor a4 = none, actor a5 = none)
+	actor[] output
+	if a1 != none
+		output = sslUtility.PushActor(a1, output)
+	endIf
+	if a2 != none
+		output = sslUtility.PushActor(a2, output)
+	endIf
+	if a3 != none
+		output = sslUtility.PushActor(a3, output)
+	endIf
+	if a4 != none
+		output = sslUtility.PushActor(a4, output)
+	endIf
+	if a5 != none
+		output = sslUtility.PushActor(a5, output)
+	endIf
+	return output
+endFunction
+
+
+actor function FindAvailableActor(ObjectReference centerRef, float radius = 5000.0, int findGender = -1, actor ignore1 = none, actor ignore2 = none, actor ignore3 = none, actor ignore4 = none)
+	if centerRef == none || findGender > 2 || findGender < -1 || radius < 0
+		return none ; Invalid args
+	endIf
+	; Create supression list
+	form[] supress = sslUtility.FormArray(5)
+	supress[0] = centerRef
+	supress[1] = ignore1
+	supress[2] = ignore2
+	supress[3] = ignore3
+	supress[4] = ignore4
+	; Attempt 20 times before giving up.
+	int attempt = 20
+	while attempt
+		attempt -= 1
+		; Get random actor
+		actor foundRef = Game.FindRandomActorFromRef(centerRef, radius)
+		; Validate actor
+		int gender
+		bool valid = foundRef != none && supress.Find(foundRef) == -1
+		if valid
+			; Get their gender if we need it
+			gender = GetGender(foundRef)
+			; Supress from future validation attempts
+			supress = sslUtility.PushForm(foundRef, supress)
+		endIf
+		valid = valid && (findGender != 2 && gender != 2) ; Supress creatures
+		valid = valid && (findGender == -1 || findGender == gender) ; Validate gender
+		valid = valid && IsValidActor(foundRef) ; Actor Validate
+		if valid
+			return foundRef ; Actor passed validation, end loop/function
+		endIf
+	endWhile
+	; No actor found in attempts
+	return none
+endFunction
+
+actor[] function FindAvailablePartners(actor[] Positions, int total, int males = -1, int females = -1, float radius = 10000.0)
+	int needed = (total - Positions.Length)
+	if needed <= 0 || Positions.Length < 1
+		return Positions ; Nothing to do
+	endIf
+	; Get needed gender counts based on current counts
+	int[] genders = GenderCount(Positions)
+	males -= genders[0]
+	females -= genders[1]
+	; Loop through until filled or we give up
+	int attempts = 30
+	while needed && attempts
+		; Determine needed gender
+		int findGender = -1
+		if males > 0 && females < 1
+			findGender = 0
+		elseif females > 0 && males < 1
+			findGender = 1
+		endIf
+		; Locate actor
+		int have = Positions.Length
+		actor FoundRef
+		if have == 2
+			FoundRef = FindAvailableActor(Positions[0], radius, findGender, Positions[1])
+		elseif have == 3
+			FoundRef = FindAvailableActor(Positions[0], radius, findGender, Positions[1], Positions[2])
+		elseif have == 4
+			FoundRef = FindAvailableActor(Positions[0], radius, findGender, Positions[1], Positions[2], Positions[3])
+		else
+			FoundRef = FindAvailableActor(Positions[0], radius, findGender)
+		endIf
+		; Validate/Add them
+		if FoundRef != none && Positions.Find(FoundRef) == -1
+			; Add actor
+			Positions = sslUtility.PushActor(FoundRef, Positions)
+			; Update search counts
+			int gender = GetGender(FoundRef)
+			males -= (gender == 0) as int
+			females -= (gender == 1) as int
+			needed -= 1
+		endIf
+		attempts -= 1
+	endWhile
+	; Output whatever we have at this point
+	return Positions
+endFunction
 
 actor[] function SortActors(actor[] Positions, bool femaleFirst = true)
 	if Positions.Length < 2
@@ -190,7 +297,7 @@ form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool all
 
 	int gender = GetGender(a)
 
-	if strip.Length != 33 || gender == 2
+	if strip.Length != 33 || gender == 3
 		return none
 	endIf
 
@@ -200,13 +307,13 @@ form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool all
 	weapon eWeap
 
 	if bUndressAnimation && animate
-		if gender > 0 
+		if gender > 0
 			Debug.SendAnimationEvent(a, "Arrok_FemaleUndress")
 		else
 			Debug.SendAnimationEvent(a, "Arrok_MaleUndress")
 		endIf
 	endIf
-	
+
 	; Use Strip settings
 	int i = 0
 	while i < 33
@@ -217,8 +324,8 @@ form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool all
 				a.UnequipItem(item, false, true)
 				items = sslUtility.PushForm(item, items)
 				Utility.Wait(0.25)
-			endIf 
-		elseif strip[i] && i == 32			
+			endIf
+		elseif strip[i] && i == 32
 			eWeap = a.GetEquippedWeapon(true)
 			if eWeap != none && !eWeap.HasKeyWordString("SexLabNoStrip")
 				int type = a.GetEquippedItemType(1)
@@ -450,7 +557,7 @@ event OnKeyDown(int keyCode)
 		else
 			adjustingstage = input.IsKeyPressed(kBackwards)
 		endIf
-		
+
 		; Advance Stage
 		if keyCode == kAdvanceAnimation
 			PlayerController.AdvanceStage(backwards)
@@ -521,7 +628,7 @@ function _Defaults()
 	bUndressAnimation = false
 
 	; Hotkeys
-	kBackwards = 54 ; Right Shift 
+	kBackwards = 54 ; Right Shift
 	kAdjustStage = 157; Right Ctrl
 	kAdvanceAnimation = 57 ; Space
 	kChangeAnimation =  24 ; O
