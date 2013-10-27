@@ -118,7 +118,7 @@ function LockActor()
 	else
 		ActorRef.SetRestrained(true)
 		ActorRef.SetDontMove(true)
-		ActorRef.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
+		; ActorRef.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
 	endIf
 	; Attach positioning marker
 	ActorRef.SetVehicle(MarkerRef)
@@ -134,7 +134,7 @@ function UnlockActor()
 	else
 		ActorRef.SetRestrained(false)
 		ActorRef.SetDontMove(false)
-		ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
+		; ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 	endIf
 	; Remove from animation faction
 	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
