@@ -55,6 +55,35 @@ int function FindNext(actor[] Positions, sslBaseAnimation Animation, int offset,
 	return -1
 endFunction
 
+
+ObjectReference function FindBed(ObjectReference centerRef, float radius = 1000.0, bool ignoreUsed = true, ObjectReference ignore1 = none, ObjectReference ignore2 = none)
+	if centerRef == none || radius < 0
+		return none ; Invalid args
+	endIf
+	; Create supression list
+	form[] supress = sslUtility.FormArray(2)
+	supress[0] = ignore1
+	supress[1] = ignore2
+	; Attempt 15 times before giving up
+	int attempts = 15
+	while attempts
+		attempts -= 1
+		; Find nearby
+		ObjectReference BedRef = Game.FindRandomReferenceOfAnyTypeInListFromRef(BedsList, centerRef, radius)
+		if BedRef != none && supress.Find(BedRef) == -1
+			if ignoreUsed && BedRef.IsFurnitureInUse(true)
+				; Bed is in use, add to supression list
+				supress = sslUtility.PushForm(BedRef, supress)
+			else
+				; Bed is free, end loop/function
+				return BedRef
+			endIf
+		endIf
+	endWhile
+	; No beds found in attempts
+	return none
+endFunction
+
 actor[] function SortCreatures(actor[] Positions, sslBaseAnimation Animation)
 	if Positions.Length < 2 || !Animation.IsCreature
 		return Positions ; Nothing to sort
