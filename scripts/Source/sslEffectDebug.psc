@@ -2,40 +2,38 @@ Scriptname sslEffectDebug extends ActiveMagicEffect
 
 SexLabFramework property SexLab Auto
 
-
-
-
 event OnEffectStart(actor target, actor caster)
+	actor[] Positions = SexLab.FindAvailablePartners(SexLab.MakeActorArray(caster, target), 3)
+	SexLab.StartSex(Positions, SexLab.PickAnimationsByActors(Positions), centerOn = SexLab.FindBed(caster))
+	; int count = 1
 
-	int count = 1
+	; actor[] Positions = SexLab.DebugActor
 
-	actor[] Positions = SexLab.DebugActor
+	; if Positions.Find(target) == -1
+	; 	Positions = sslUtility.PushActor(target, Positions)
+	; 	SexLab.DebugActor = Positions
+	; 	Debug.Notification(Positions.Length)
+	; endIf
 
-	if Positions.Find(target) == -1
-		Positions = sslUtility.PushActor(target, Positions)
-		SexLab.DebugActor = Positions
-		Debug.Notification(Positions.Length)
-	endIf
+	; if Positions.Length != count
+	; 	return
+	; endIf
 
-	if Positions.Length != count
-		return
-	endIf
+	; Debug.Notification("SexLab debug scene starting")
+	; Utility.Wait(3.0)
 
-	Debug.Notification("SexLab debug scene starting")
-	Utility.Wait(3.0)
+	; sslThreadModel Model = SexLab.NewThread()
 
-	sslThreadModel Model = SexLab.NewThread()
+	; Model.AddActor(caster)
 
-	Model.AddActor(caster)
+	; int i
+	; while i < count
+	; 	Model.AddActor(Positions[i])
+	; 	i += 1
+	; endWhile
 
-	int i
-	while i < count
-		Model.AddActor(Positions[i])
-		i += 1
-	endWhile
+	; sslThreadController Controller = Model.StartThread()
 
-	sslThreadController Controller = Model.StartThread()
-
-	actor[] aDel
-	SexLab.DebugActor = aDel
+	; actor[] aDel
+	; SexLab.DebugActor = aDel
 endEvent

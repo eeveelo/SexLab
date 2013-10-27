@@ -114,6 +114,22 @@ int function ValidateActor(actor a)
 	return ActorLib.ValidateActor(a)
 endFunction
 
+bool function IsValidActor(actor a)
+	return ActorLib.IsValidActor(a)
+endFunction
+
+actor[] function MakeActorArray(actor a1 = none, actor a2 = none, actor a3 = none, actor a4 = none, actor a5 = none)
+	return ActorLib.MakeActorArray(a1, a2, a3, a4, a5)
+endFunction
+
+actor function FindAvailableActor(ObjectReference centerRef, float radius = 5000.0, int findGender = -1, actor ignore1 = none, actor ignore2 = none, actor ignore3 = none, actor ignore4 = none)
+	return ActorLib.FindAvailableActor(centerRef, radius, findGender, ignore1, ignore2, ignore3, ignore4)
+endFunction
+
+actor[] function FindAvailablePartners(actor[] Positions, int total, int males = -1, int females = -1, float radius = 10000.0)
+	return ActorLib.FindAvailablePartners(Positions, total, males, females, radius)
+endFunction
+
 actor[] function SortActors(actor[] actorList, bool femaleFirst = true)
 	return ActorLib.SortActors(actorList, femaleFirst)
 endFunction
@@ -193,6 +209,10 @@ endFunction
 ;#------------------------------#
 ;#  BEGIN CONTROLLER FUNCTIONS  #
 ;#------------------------------#
+
+ObjectReference function FindBed(ObjectReference centerRef, float radius = 1000.0, bool ignoreUsed = true, ObjectReference ignore1 = none, ObjectReference ignore2 = none)
+	return ThreadLib.FindBed(centerRef, radius, ignoreUsed, ignore1, ignore2)
+endFunction
 
 int function FindActorController(actor toFind)
 	return ThreadSlots.FindActorController(toFind)
