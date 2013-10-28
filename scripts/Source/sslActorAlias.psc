@@ -16,12 +16,12 @@ endProperty
 
 bool Active
 sslThreadController Controller
+sslBaseExpression Expression
 sslBaseAnimation Animation
 sslBaseVoice Voice
 
 ; Voice
 float VoiceDelay
-float VoiceStrength
 bool IsSilent
 int VoiceInstance
 
@@ -32,6 +32,7 @@ bool IsFemale
 bool IsCreature
 
 ; Storage
+int strength
 int position
 int stage
 form[] EquipmentStorage
@@ -183,8 +184,8 @@ function ResetActor()
 	; Cleanup Actors
 	RemoveStrapon()
 	; Reset openmouth
-	ActorRef.SetExpressionOverride(7, 50)
 	ActorRef.ClearExpressionOverride()
+	MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
 	; Reset to starting scale
 	if Controller.ActorCount > 1 && Lib.bScaleActors && scale > 0.0
 		ActorRef.SetScale(scale)
@@ -346,17 +347,22 @@ function SyncThread()
 		position = toPosition
 		stage = toStage
 		Animation = toAnimation
+		; Update Strength for voice & expression
+		strength = ((stage as float) / (Animation.StageCount() as float) * 100) as int
+		if Controller.LeadIn
+			strength = ((strength as float) * 0.65) as int
+		endIf
+		if stage == 1 && Animation.StageCount() == 1
+			strength = 50
+		endIf
+		Debug.Trace("ActorRef: "+strength+" stage: "+stage+"/"+Animation.StageCount())
+
 		; Update Silence
 		IsSilent = Animation.IsSilent(position, stage)
 		if IsSilent || IsCreature
 			; VoiceDelay is used as loop timer, must be set even if silent.
 			VoiceDelay = 2.5
 		else
-			; Update Strength
-			VoiceStrength = (stage as float) / (Animation.StageCount() as float)
-			if Animation.StageCount() == 1 && stage == 1
-				VoiceStrength = 0.50
-			endIf
 			; Base Delay
 			if !IsFemale
 				VoiceDelay = Lib.fMaleVoiceDelay
@@ -374,13 +380,8 @@ function SyncThread()
 		endIf
 		; Animation related stuffs
 		if !IsCreature
-			; Open Mouth
-			if Animation.UseOpenMouth(position, stage)
-				ActorRef.SetExpressionOverride(16, 100)
-			else
-				ActorRef.SetExpressionOverride(7, 50)
-				ActorRef.ClearExpressionOverride()
-			endIf
+			; Send expression
+			Expression.ApplyTo(ActorRef, strength, Animation.UseOpenMouth(position, stage))
 			; Send SOS event
 			if Lib.SOSEnabled && Animation.GetGender(position) == 0
 				Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
@@ -413,11 +414,19 @@ function OverrideStrip(bool[] setStrip)
 	endIf
 	StripOverride = setStrip
 endFunction
+
 function SetVoice(sslBaseVoice toVoice)
 	Voice = toVoice
 endFunction
 sslBaseVoice function GetVoice()
 	return Voice
+endFunction
+
+function SetExpression(sslBaseExpression toExpression)
+	Expression = toExpression
+endFunction
+sslBaseExpression function GetExpression()
+	return Expression
 endFunction
 
 ;/-----------------------------------------------\;
@@ -449,7 +458,7 @@ state Animating
 		if VoiceInstance > 0
 			Sound.StopInstance(VoiceInstance)
 		endIf
-		VoiceInstance = Voice.Moan(ActorRef, VoiceStrength, IsVictim)
+		VoiceInstance = Voice.Moan(ActorRef, strength, IsVictim)
 		Sound.SetInstanceVolume(VoiceInstance, Lib.fVoiceVolume)
 	endEvent
 endState
@@ -508,6 +517,7 @@ function Initialize()
 	Controller = none
 	Voice = none
 	Animation = none
+	Expression = none
 	strapon = none
 	scale = 0.0
 	position = 0

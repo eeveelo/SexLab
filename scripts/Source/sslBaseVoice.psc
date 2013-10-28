@@ -22,12 +22,22 @@ string[] tags
 ;|	API Functions                                |;
 ;\-----------------------------------------------/;
 
-int function Moan(actor a, float strength = 0.3, bool victim = false)
-	int seed = ((1.0 - strength) * 100.0) as int
-	int randomizer = Utility.RandomInt(0, seed)
-	if randomizer <= 10 && !victim
+int function Moan(actor a, int strength = 30, bool victim = false)
+	; Victim always uses medium
+	if victim
+		return PlayMedium(a)
+	endIf
+	; Return extremes from clamped values
+	if strength > 100
 		return PlayHot(a)
-	elseif randomizer <= 20 || victim
+	elseIf strength < 1
+		return PlayMild(a)
+	endIf
+	; Randomize slightly
+	strength = Utility.RandomInt(0, (100 - strength))
+	if strength <= 15
+		return PlayHot(a)
+	elseif strength <= 18
 		return PlayMedium(a)
 	else
 		return PlayMild(a)
@@ -37,16 +47,20 @@ endFunction
 int function PlaySound(actor a, sound soundset, topic lipsync)
 	ActorBase base = a.GetLeveledActorBase()
 	VoiceType type = base.GetVoiceType()
+	; debug.trace(type)
 	if Lib.VoicesPlayer.HasForm(type) || type == Lib.SexLabVoiceM || type == Lib.SexLabVoiceF
 		a.Say(lipsync)
+		; debug.trace(base.GetName()+" playing "+lipsync+" from playervoice: "+type)
 	else
 		if base.GetSex() > 0
 			base.SetVoiceType(Lib.SexLabVoiceF)
 		else
 			base.SetVoiceType(Lib.SexLabVoiceM)
 		endIf
+		; debug.trace(base.GetName()+" playing "+lipsync+" from SEXLABVOICE: "+type+" -> "+base.GetVoiceType())
 		a.Say(lipsync)
 		base.SetVoiceType(type)
+		; debug.trace(base.GetName()+" returned to "+base.GetVoiceType())
 	endIf
 	return soundset.Play(a)
 endFunction
