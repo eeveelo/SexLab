@@ -1532,4 +1532,6 @@ function _CheckSystem()
 	if DebugMode() && !PlayerRef.HasSpell(SexLabDebugSpell)
 		PlayerRef.AddSpell(SexLabDebugSpell, true)
 	endIf
+	; DEBUG TESTING Init expressions
+	ExpressionSlots._Setup()
 endFunction

@@ -28,35 +28,34 @@ int[] female5
 ;|	API Functions                                |;
 ;\-----------------------------------------------/;
 
-function ApplyTo(actor ActorRef, int phase)
+function ApplyTo(actor ActorRef, int strength = 50, bool openmouth = false)
 	if ActorRef == none
 		return ; Nobody to express with!
 	endIf
-	; Clamp phase to 1-5
-	if phase < 1
-		phase = 1
-	elseIf phase > 5
-		phase = 5
-	endIf
-	; Get phase presets
-	int[] presets = GetPhase(ActorRef.GetLeveledActorBase().GetSex(), phase)
+	; Clear existing mfg from actor
+	Lib.ClearMFG(ActorRef)
+	; Get phase presets, [n + 0] = mode, [n + 1] = id, [n + 2] = value
+	bool female = ActorRef.GetLeveledActorBase().GetSex() == 1
+	int[] presets = GetPhase(CalcPhase(strength, female), female)
 	; Apply phase presets to actor
-	int i = presets.Length / 3
+	int i = presets.Length
 	while i
-		i -= 1
-		int[] mfg = GetPreset(presets, i)
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, mfg[0], mfg[1], mfg[2])
+		i -= 3
+		if presets[i] == 2 && !openmouth
+			ActorRef.SetExpressionOverride(presets[(i + 1)], presets[(i + 2)])
+		else
+			MfgConsoleFunc.SetPhonemeModifier(ActorRef, presets[i], presets[(i + 1)], presets[(i + 2)])
+		endIf
 	endWhile
-endFunction
-
-function ClearFrom(actor ActorRef)
-	; Clears current mfg phoneme/modifier/expression from actor
-	MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
-	ActorRef.ClearExpressionOverride()
+	; Apply open mouth
+	if openmouth
+		ActorRef.ClearExpressionOverride()
+		ActorRef.SetExpressionOverride(16, 100)
+	endIf
 endFunction
 
 int[] function GetPreset(int[] presets, int n)
-	int slot = presets.Length * 3
+	int slot = ( n * 3 )
 	int[] output = new int[3]
 	output[0] = presets[slot]
 	output[1] = presets[slot + 1]
@@ -64,31 +63,9 @@ int[] function GetPreset(int[] presets, int n)
 	return output
 endFunction
 
-function AddPreset(int phase, int gender, int mode, int id, int value)
-	int[] presets = sslUtility.IncreaseInt(3, GetPhase(gender, phase))
-	int index = (presets.Length - 3)
-	presets[index] = mode
-	presets[index + 1] = id
-	presets[index + 2] = value
-	SetPhase(gender, phase, presets)
-endFunction
-
-int[] function GetPhase(int phase, int gender)
-	; Male presets
-	if gender == 0
-		if phase == 1
-			return male1
-		elseIf phase == 2
-			return male2
-		elseIf phase == 3
-			return male3
-		elseIf phase == 4
-			return male4
-		else
-			return male5
-		endIf
+int[] function GetPhase(int phase, bool female)
 	; Female presets
-	else
+	if female
 		if phase == 1
 			return female1
 		elseIf phase == 2
@@ -100,25 +77,30 @@ int[] function GetPhase(int phase, int gender)
 		else
 			return female5
 		endIf
+	; Male presets
+	else
+		if phase == 1
+			return male1
+		elseIf phase == 2
+			return male2
+		elseIf phase == 3
+			return male3
+		elseIf phase == 4
+			return male4
+		else
+			return male5
+		endIf
 	endIf
 endFunction
 
-function SetPhase(int gender, int phase, int[] presets)
-	; Male presets
-	if gender == 0
-		if phase == 1
-			male1 = presets
-		elseIf phase == 2
-			male2 = presets
-		elseIf phase == 3
-			male3 = presets
-		elseIf phase == 4
-			male4 = presets
-		else
-			male5 = presets
-		endIf
+
+;/-----------------------------------------------\;
+;|	Editing Functions                            |;
+;\-----------------------------------------------/;
+
+function SetPhase(int phase, bool female, int[] presets)
 	; Female presets
-	else
+	if female
 		if phase == 1
 			female1 = presets
 		elseIf phase == 2
@@ -127,10 +109,35 @@ function SetPhase(int gender, int phase, int[] presets)
 			female3 = presets
 		elseIf phase == 4
 			female4 = presets
-		else
+		elseIf phase == 5
 			female5 = presets
 		endIf
+	; Male presets
+	else
+		if phase == 1
+			male1 = presets
+		elseIf phase == 2
+			male2 = presets
+		elseIf phase == 3
+			male3 = presets
+		elseIf phase == 4
+			male4 = presets
+		elseIf phase == 5
+			male5 = presets
+		endIf
 	endIf
+endFunction
+
+function AddPreset(int phase, bool female, int mode, int id, int value)
+	if phase < 1 || phase > 5
+		return ; Invalid phase
+	endIf
+	int[] presets = sslUtility.IncreaseInt(3, GetPhase(phase, female))
+	int index = (presets.Length - 3)
+	presets[index] = mode
+	presets[index + 1] = id
+	presets[index + 2] = value
+	SetPhase(phase, female, presets)
 endFunction
 
 ;/-----------------------------------------------\;
@@ -168,6 +175,23 @@ endFunction
 ;/-----------------------------------------------\;
 ;|	System Use                                   |;
 ;\-----------------------------------------------/;
+
+int function CalcPhase(int strength, bool female)
+	; Count number of phases gender has
+	int count = 1
+	count += ((female && female2.Length != 0) || (!female && male2.Length != 0)) as int
+	count += ((female && female3.Length != 0) || (!female && male3.Length != 0)) as int
+	count += ((female && female4.Length != 0) || (!female && male4.Length != 0)) as int
+	count += ((female && female5.Length != 0) || (!female && male5.Length != 0)) as int
+	; Return clamped phase
+	if strength > 100
+		return count
+	elseif strength < 1
+		return 1
+	endIf
+	; Return calculated phase
+	return Math.Floor(((strength as float) / 100.0) * count)
+endFunction
 
 function Initialize()
 	Name = ""

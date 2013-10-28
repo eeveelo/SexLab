@@ -444,6 +444,8 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 			voice = Lib.Voices.PickVoice(position)
 		endIf
 		slot.SetVoice(voice)
+		; Pick expression for actor
+		slot.SetExpression(Lib.Expressions.PickExpression(position))
 	endIf
 	; Push actor to positions array
 	Positions = sslUtility.PushActor(position, Positions)
@@ -616,6 +618,14 @@ endFunction
 
 sslBaseVoice function GetVoice(actor position)
 	return ActorAlias(position).GetVoice()
+endFunction
+
+function SetExpression(actor position, sslBaseExpression expression)
+	ActorAlias(position).SetExpression(expression)
+endFunction
+
+sslBaseExpression function GetExpression(actor position)
+	return ActorAlias(position).GetExpression()
 endFunction
 
 bool function HasPlayer()

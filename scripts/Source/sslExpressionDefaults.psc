@@ -51,7 +51,7 @@ function Pleasure(string eventName, string id, float argNum, form sender)
 	AddPreset(4, Female, Phoneme, 12, 30)
 
 	; // Female Phase 5
-	AddPreset(5, Female, Expression, 12, 100)
+	AddPreset(5, Female, Expression, 12, 60)
 	AddPreset(5, Female, Modifier, 0, 15)
 	AddPreset(5, Female, Modifier, 1, 15)
 	AddPreset(5, Female, Modifier, 2, 25)
@@ -106,7 +106,7 @@ function Pleasure(string eventName, string id, float argNum, form sender)
 	AddPreset(4, Male, Phoneme, 12, 30)
 
 	; // Male Phase 5
-	AddPreset(5, Male, Expression, 12, 100)
+	AddPreset(5, Male, Expression, 12, 60)
 	AddPreset(5, Male, Modifier, 0, 15)
 	AddPreset(5, Male, Modifier, 1, 15)
 	AddPreset(5, Male, Modifier, 2, 25)

@@ -5,8 +5,8 @@ sslBaseExpression property Registering auto hidden
 int slot
 
 ; Gender Types
-int property Male = 0 autoreadonly hidden
-int property Female = 1 autoreadonly hidden
+bool property Male = false autoreadonly hidden
+bool property Female = true autoreadonly hidden
 ; MFG Types
 int property Phoneme = 0 autoreadonly hidden
 int property Modifier = 1 autoreadonly hidden
@@ -53,8 +53,8 @@ bool function AddTag(string tag)
 	return Registering.AddTag(tag)
 endFunction
 
-function AddPreset(int phase, int gender, int mode, int id, int value)
-	Registering.AddPreset(phase, gender, mode, id, value)
+function AddPreset(int phase, bool isFemale, int mode, int id, int value)
+	Registering.AddPreset(phase, isFemale, mode, id, value)
 endFunction
 
 string property Name hidden
