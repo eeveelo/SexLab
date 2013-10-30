@@ -268,15 +268,21 @@ function Snap()
 	if ActorRef == none || MarkerObj == none
 		return
 	endIf
-
 	; Quickly move into place if actor isn't positioned right
 	if ActorRef.GetDistance(MarkerRef) > 0.5
 		ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 1.0, 50000, 0)
 		ActorRef.SetVehicle(MarkerRef)
 		Utility.Wait(0.1)
 	endIf
+	; Force position if translation didn't move them properly
+	if ActorRef.GetDistance(MarkerRef) > 1.0
+		ActorRef.StopTranslation()
+		ActorRef.SetPosition(loc[0], loc[1], loc[2])
+		ActorRef.SetVehicle(MarkerRef)
+	endIf
 	; Force angle if translation didn't rotate them properly
 	if Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ()) > 0.5
+		ActorRef.StopTranslation()
 		ActorRef.SetAngle(loc[3], loc[4], loc[5])
 		ActorRef.SetVehicle(MarkerRef)
 	endIf
@@ -350,12 +356,11 @@ function SyncThread()
 		; Update Strength for voice & expression
 		strength = ((stage as float) / (Animation.StageCount() as float) * 100) as int
 		if Controller.LeadIn
-			strength = ((strength as float) * 0.65) as int
+			strength = ((strength as float) * 0.70) as int
 		endIf
 		if stage == 1 && Animation.StageCount() == 1
-			strength = 50
+			strength = 70
 		endIf
-		Debug.Trace("ActorRef: "+strength+" stage: "+stage+"/"+Animation.StageCount())
 
 		; Update Silence
 		IsSilent = Animation.IsSilent(position, stage)
