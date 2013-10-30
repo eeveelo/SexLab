@@ -123,7 +123,7 @@ function LockActor()
 	else
 		ActorRef.SetRestrained(true)
 		ActorRef.SetDontMove(true)
-		; ActorRef.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
+		ActorRef.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
 	endIf
 endFunction
 
@@ -145,7 +145,7 @@ function UnlockActor()
 	else
 		ActorRef.SetRestrained(false)
 		ActorRef.SetDontMove(false)
-		; ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
+		ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 	endIf
 endFunction
 
