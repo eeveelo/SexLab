@@ -147,14 +147,14 @@ actor function FindAvailableActor(ObjectReference centerRef, float radius = 5000
 		return none ; Invalid args
 	endIf
 	; Create supression list
-	form[] supress = sslUtility.FormArray(5)
+	form[] supress = new form[5]
 	supress[0] = centerRef
 	supress[1] = ignore1
 	supress[2] = ignore2
 	supress[3] = ignore3
 	supress[4] = ignore4
-	; Attempt 20 times before giving up.
-	int attempt = 20
+	; Attempt 30 times before giving up.
+	int attempt = 30
 	while attempt
 		attempt -= 1
 		; Get random actor
