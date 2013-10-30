@@ -18,6 +18,7 @@ Race property FrostbiteSpiderRace auto
 Race property FrostbiteSpiderRaceGiant auto
 Race property FrostbiteSpiderRaceLarge auto
 Race property TrollRace auto
+Race property TrollFrostRace auto
 Race property WerewolfBeastRace auto
 
 Race property WolfRace auto
@@ -27,6 +28,12 @@ Race property MG07DogRace auto
 Race property DA03BarbasDogRace auto
 
 bool dawnguard
+Race DLC1HuskyArmoredCompanionRace
+Race DLC1DeathHoundCompanionRace
+Race DLC1DeathHoundRace
+Race SkeletonArmorRace
+Race DLC1SoulCairnKeeperRace
+Race DLC1SoulCairnSkeletonArmorRace
 Race DLC1VampireBeastRace
 Race DLC1GargoyleRace
 Race DLC1GargoyleVariantBossRace
@@ -34,6 +41,7 @@ Race DLC1GargoyleVariantGreenRace
 
 bool dragonborn
 Race DLC2SeekerRace
+Race DLC2AshSpawnRace
 
 function DLCLoad()
 	dawnguard = false
@@ -44,13 +52,26 @@ function DLCLoad()
 		string modname = Game.GetModName(i)
 		if !dawnguard && modname == "Dawnguard.esm"
 			dawnguard = true
+			; Dogs
+			DLC1HuskyArmoredCompanionRace = Game.GetFormFromFile(0x3D01, "Dawnguard.esm") as Race
+			DLC1DeathHoundCompanionRace = Game.GetFormFromFile(0x3D02, "Dawnguard.esm") as Race
+			DLC1DeathHoundRace = Game.GetFormFromFile(0xC5F0, "Dawnguard.esm") as Race
+			; Draugr
+			SkeletonArmorRace = Game.GetFormFromFile(0x23E2, "Dawnguard.esm") as Race
+			DLC1SoulCairnKeeperRace = Game.GetFormFromFile(0x7AF3, "Dawnguard.esm") as Race
+			DLC1SoulCairnSkeletonArmorRace = Game.GetFormFromFile(0x894D, "Dawnguard.esm") as Race
+			; Vampire Lord
 			DLC1VampireBeastRace = Game.GetFormFromFile(0x283A, "Dawnguard.esm") as Race
+			; Gargoyle
 			DLC1GargoyleRace = Game.GetFormFromFile(0xA2C6, "Dawnguard.esm") as Race
 			DLC1GargoyleVariantBossRace = Game.GetFormFromFile(0x10D00, "Dawnguard.esm") as Race
 			DLC1GargoyleVariantGreenRace = Game.GetFormFromFile(0x19D86, "Dawnguard.esm") as Race
 		elseif !dragonborn && modname == "Dragonborn.esm"
 			dragonborn = true
+			; Seeker
 			DLC2SeekerRace = Game.GetFormFromFile(0x1DCB9, "Dragonborn.esm") as Race
+			; Draugr
+			DLC2AshSpawnRace  = Game.GetFormFromFile(0x1B637, "Dragonborn.esm") as Race
 		elseif dawnguard && dragonborn
 			return
 		endIf
@@ -243,6 +264,11 @@ function CanineDoggystyle(string eventName, string id, float argNum, form sender
 	AddRace(DogCompanionRace)
 	AddRace(MG07DogRace)
 	AddRace(DA03BarbasDogRace)
+	if dawnguard
+		AddRace(DLC1HuskyArmoredCompanionRace)
+		AddRace(DLC1DeathHoundCompanionRace)
+		AddRace(DLC1DeathHoundRace)
+	endIf
 
 	int a1 = AddPosition(Female, addCum=Anal)
 	AddPositionStage(a1, "Canine_Doggystyle_A1_S1")
@@ -274,6 +300,11 @@ function CanineMissionary(string eventName, string id, float argNum, form sender
 	AddRace(DogCompanionRace)
 	AddRace(MG07DogRace)
 	AddRace(DA03BarbasDogRace)
+	if dawnguard
+		AddRace(DLC1HuskyArmoredCompanionRace)
+		AddRace(DLC1DeathHoundCompanionRace)
+		AddRace(DLC1DeathHoundRace)
+	endIf
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
 	AddPositionStage(a1, "Canine_Missionary_A1_S1")
@@ -360,6 +391,14 @@ function DraugrDoggystyle(string eventName, string id, float argNum, form sender
 	SetSFX(Squishing)
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
+	if dawnguard
+		AddRace(SkeletonArmorRace)
+		AddRace(DLC1SoulCairnKeeperRace)
+		AddRace(DLC1SoulCairnSkeletonArmorRace)
+	endIf
+	if dragonborn
+		AddRace(DLC2AshSpawnRace)
+	endIf
 
 	int a1 = AddPosition(Female, addCum=Anal)
 	AddPositionStage(a1, "Draugr_Doggystyle_A1_S1")
@@ -388,6 +427,14 @@ function DraugrGangbang3P(string eventName, string id, float argNum, form sender
 	SetSFX(SexMix)
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
+	if dawnguard
+		AddRace(SkeletonArmorRace)
+		AddRace(DLC1SoulCairnKeeperRace)
+		AddRace(DLC1SoulCairnSkeletonArmorRace)
+	endIf
+	if dragonborn
+		AddRace(DLC2AshSpawnRace)
+	endIf
 
 	int a1 = AddPosition(Female, addCum=VaginalOralAnal)
 	AddPositionStage(a1, "Draugr_Gangbang_A1_S1", silent = true, openMouth = true)
@@ -423,6 +470,14 @@ function DraugrGangbang4P(string eventName, string id, float argNum, form sender
 	SetSFX(SexMix)
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
+	if dawnguard
+		AddRace(SkeletonArmorRace)
+		AddRace(DLC1SoulCairnKeeperRace)
+		AddRace(DLC1SoulCairnSkeletonArmorRace)
+	endIf
+	if dragonborn
+		AddRace(DLC2AshSpawnRace)
+	endIf
 
 	int a1 = AddPosition(Female, addCum=VaginalOralAnal)
 	AddPositionStage(a1, "Draugr_Gangbang_A1_S1", silent = true, openMouth = true)
@@ -464,6 +519,14 @@ function DraugrGangbang5P(string eventName, string id, float argNum, form sender
 	SetSFX(SexMix)
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
+	if dawnguard
+		AddRace(SkeletonArmorRace)
+		AddRace(DLC1SoulCairnKeeperRace)
+		AddRace(DLC1SoulCairnSkeletonArmorRace)
+	endIf
+	if dragonborn
+		AddRace(DLC2AshSpawnRace)
+	endIf
 
 	int a1 = AddPosition(Female, addCum=VaginalOralAnal)
 	AddPositionStage(a1, "Draugr_Gangbang_A1_S1", silent = true, openMouth = true)
@@ -511,6 +574,14 @@ function DraugrHolding(string eventName, string id, float argNum, form sender)
 	SetSFX(Squishing)
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
+	if dawnguard
+		AddRace(SkeletonArmorRace)
+		AddRace(DLC1SoulCairnKeeperRace)
+		AddRace(DLC1SoulCairnSkeletonArmorRace)
+	endIf
+	if dragonborn
+		AddRace(DLC2AshSpawnRace)
+	endIf
 
 	int a1 = AddPosition(Female, addCum=Anal)
 	AddPositionStage(a1, "Draugr_Holding_A1_S1")
@@ -539,6 +610,14 @@ function DraugrMissionary(string eventName, string id, float argNum, form sender
 	SetSFX(Squishing)
 	AddRace(DraugrRace)
 	AddRace(DraugrMagicRace)
+	if dawnguard
+		AddRace(SkeletonArmorRace)
+		AddRace(DLC1SoulCairnKeeperRace)
+		AddRace(DLC1SoulCairnSkeletonArmorRace)
+	endIf
+	if dragonborn
+		AddRace(DLC2AshSpawnRace)
+	endIf
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
 	AddPositionStage(a1, "Draugr_Missionary_A1_S1")
@@ -1031,6 +1110,7 @@ function TrollDoggystyle(string eventName, string id, float argNum, form sender)
 
 	SetSFX(Squishing)
 	AddRace(TrollRace)
+	AddRace(TrollFrostRace)
 
 	int a1 = AddPosition(Female, addCum=Anal)
 	AddPositionStage(a1, "Troll_Doggystyle_A1_S1")
@@ -1058,6 +1138,7 @@ function TrollHolding(string eventName, string id, float argNum, form sender)
 
 	SetSFX(Squishing)
 	AddRace(TrollRace)
+	AddRace(TrollFrostRace)
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
 	AddPositionStage(a1, "Troll_Holding_A1_S1")
@@ -1085,6 +1166,7 @@ function TrollMissionary(string eventName, string id, float argNum, form sender)
 
 	SetSFX(Squishing)
 	AddRace(TrollRace)
+	AddRace(TrollFrostRace)
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
 	AddPositionStage(a1, "Troll_Missionary_A1_S1")
