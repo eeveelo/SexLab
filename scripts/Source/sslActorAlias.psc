@@ -113,6 +113,7 @@ function LockActor()
 		Game.DisablePlayerControls(false, false, false, false, false, false, true, false, 0)
 		Game.ForceThirdPerson()
 		Game.SetPlayerAIDriven()
+		; Debug.SetFootIK(false)
 		; Game.SetInChargen(true, true, true)
 		; Enable hotkeys, if needed
 		if IsVictim && Lib.bDisablePlayer
@@ -123,7 +124,7 @@ function LockActor()
 	else
 		ActorRef.SetRestrained(true)
 		ActorRef.SetDontMove(true)
-		ActorRef.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
+		; ActorRef.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
 	endIf
 endFunction
 
@@ -140,12 +141,13 @@ function UnlockActor()
 		Game.EnablePlayerControls(false, false, false, false, false, false, true, false, 0)
 		Game.SetPlayerAIDriven(false)
 		; Game.SetInChargen(false, false, false)
+		; Debug.SetFootIK(true)
 		int[] genders = Lib.GenderCount(Controller.Positions)
 		Lib.Stats.UpdatePlayerStats(genders[0], genders[1], genders[2], Controller.Animation, Controller.GetVictim(), Controller.GetTime())
 	else
 		ActorRef.SetRestrained(false)
 		ActorRef.SetDontMove(false)
-		ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
+		; ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 	endIf
 endFunction
 
