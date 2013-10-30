@@ -113,8 +113,8 @@ function LockActor()
 		Game.DisablePlayerControls(false, false, false, false, false, false, true, false, 0)
 		Game.ForceThirdPerson()
 		Game.SetPlayerAIDriven()
-		; Debug.SetFootIK(false)
 		; Game.SetInChargen(true, true, true)
+		; Debug.SetFootIK(false)
 		; Enable hotkeys, if needed
 		if IsVictim && Lib.bDisablePlayer
 			Controller.AutoAdvance = true
@@ -170,7 +170,6 @@ function PrepareActor()
 		ActorRef.SetScale(1.0)
 		float base = ActorRef.GetScale()
 		scale = ( display / base )
-		ActorRef.SetScale(scale)
 		ActorRef.SetScale(1.0 / base)
 	endIf
 	; Make erect for SOS
