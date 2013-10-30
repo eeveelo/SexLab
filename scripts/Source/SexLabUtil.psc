@@ -32,3 +32,31 @@ sslThreadModel function NewThread(float timeout = 5.0) global
 	endIf
 	return SexLab.NewThread(timeout)
 endFunction
+
+function Log(string msg, string source, string type = "NOTICE", string display = "trace", bool minimal = false) global
+	int severity = 0
+	if type == "ERROR" || type == "FATAL"
+		severity = 2
+	elseif type == "NOTICE" || type == "DEBUG"
+		severity = 1
+	endIf
+	if StringUtil.Find(display, "trace") != -1
+		if minimal
+			Debug.Trace("-- SexLab "+type+"-- "+source+": "+msg, severity)
+		else
+			Debug.Trace("--- SexLab "+source+" --------------------------------", severity)
+			Debug.Trace(" "+type+":", severity)
+			Debug.Trace("   "+msg, severity)
+			Debug.Trace("-----------------------------------------------------------", severity)
+		endIf
+	endIf
+	if StringUtil.Find(display, "box") != -1
+		Debug.MessageBox(type+" "+source+": "+msg)
+	endIf
+	if StringUtil.Find(display, "notif") != -1
+		Debug.Notification(type+": "+msg)
+	endIf
+	if StringUtil.Find(display, "stack") != -1
+		Debug.TraceStack("-- SexLab "+type+"-- "+source+": "+msg, severity)
+	endIf
+endFunction
