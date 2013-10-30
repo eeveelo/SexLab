@@ -76,9 +76,13 @@ int function ValidateActor(actor a)
 
 	String ActorName = a.GetLeveledActorBase().GetName()
 
-	if a.HasKeywordString("SexLabActive")
-		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They appear to already be animating")
-		return -10
+	if a.IsInFaction(AnimatingFaction)
+		if Slots.FindActor(a) == -1
+			a.RemoveFromFaction(AnimatingFaction)
+		else
+			Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They appear to already be animating")
+			return -10
+		endIf
 	endIf
 
 	if a.HasKeywordString("SexLabForbid") || a.IsInFaction(ForbiddenFaction)
@@ -101,12 +105,18 @@ int function ValidateActor(actor a)
 		return -14
 	endIf
 
+	if a.IsFlying()
+		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are flying.")
+		return -15
+	endIf
+
 	Race ActorRace = a.GetLeveledActorBase().GetRace()
 	String RaceName = ActorRace.GetName()
 
-	if ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Child") != -1 || StringUtil.Find(RaceName, "117") != -1
-		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are a child")
-		return -15
+	if ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Child") != -1 || StringUtil.Find(RaceName, "117") != -1 || StringUtil.Find(RaceName, "Monli") != -1 || StringUtil.Find(RaceName, "Elin") != -1
+		ForbidActor(a)
+		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are forbidden from animating")
+		return -11
 	endIf
 
 	if a != PlayerRef && !a.HasKeywordString("ActorTypeNPC") && !AnimLib.AllowedCreature(ActorRace)
@@ -140,7 +150,6 @@ actor[] function MakeActorArray(actor a1 = none, actor a2 = none, actor a3 = non
 	endIf
 	return output
 endFunction
-
 
 actor function FindAvailableActor(ObjectReference centerRef, float radius = 5000.0, int findGender = -1, actor ignore1 = none, actor ignore2 = none, actor ignore3 = none, actor ignore4 = none)
 	if centerRef == none || findGender > 2 || findGender < -1 || radius < 0
