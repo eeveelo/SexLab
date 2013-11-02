@@ -303,70 +303,66 @@ bool[] function GetStrip(actor a, actor victim, bool leadin)
 endFunction
 
 form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool allowNudesuit = true)
-
-	int gender = GetGender(a)
-
-	if strip.Length != 33 || gender == 3
+	if strip.Length != 33
 		return none
 	endIf
-
-	form[] items
-	int mask
-	armor item
-	weapon eWeap
-
-	if bUndressAnimation && animate
-		if gender > 0
+	; Determine gender and animation switch
+	int gender = a.GetLeveledActorBase().GetSex()
+	if animate
+		if gender == 0
 			Debug.SendAnimationEvent(a, "Arrok_FemaleUndress")
 		else
 			Debug.SendAnimationEvent(a, "Arrok_MaleUndress")
 		endIf
 	endIf
-
-	; Use Strip settings
-	int i = 0
-	while i < 33
-		if strip[i] && i != 32
-			mask = armor.GetMaskForSlot(i + 30)
-			item = a.GetWornForm(mask) as armor
+	; Item storage
+	form[] items = new form[34]
+	; Strip weapon
+	if strip[32]
+		Weapon eWeap = a.GetEquippedWeapon(true)
+		if eWeap != none && !eWeap.HasKeyWordString("SexLabNoStrip")
+			int type = a.GetEquippedItemType(1)
+			if type == 5 || type == 6 || type == 7
+				a.AddItem(DummyWeapon, 1, true)
+				a.EquipItem(DummyWeapon, false, true)
+				a.UnEquipItem(DummyWeapon, false, true)
+				a.RemoveItem(DummyWeapon, 1, true)
+			else
+				a.UnequipItem(eWeap, false, true)
+			endIf
+			items[32] = eWeap
+		endIf
+		eWeap = a.GetEquippedWeapon(false)
+		if eWeap != none && !eWeap.HasKeyWordString("SexLabNoStrip")
+			a.UnequipItem(eWeap, false, true)
+			items[33] = eWeap
+			if animate
+				Utility.Wait(0.20)
+			endIf
+		endIf
+	endIf
+	; Strip armors
+	int i
+	while i < 32
+		if strip[i]
+			form item = a.GetWornForm(Armor.GetMaskForSlot(i + 30))
 			if item != none && !item.HasKeyWordString("SexLabNoStrip")
 				a.UnequipItem(item, false, true)
-				items = sslUtility.PushForm(item, items)
-				Utility.Wait(0.25)
-			endIf
-		elseif strip[i] && i == 32
-			eWeap = a.GetEquippedWeapon(true)
-			if eWeap != none && !eWeap.HasKeyWordString("SexLabNoStrip")
-				int type = a.GetEquippedItemType(1)
-				if type == 5 || type == 6 || type == 7
-					a.AddItem(DummyWeapon, abSilent = true)
-					a.EquipItem(DummyWeapon, abSilent = true)
-					a.UnEquipItem(DummyWeapon, abSilent = true)
-					a.RemoveItem(DummyWeapon, abSilent = true)
-				else
-					a.UnequipItem(eWeap, false, true)
+				items[i] = item
+				if animate
+					Utility.Wait(0.20)
 				endIf
-				items = sslUtility.PushForm(eWeap, items)
-				Utility.Wait(0.25)
-			endIf
-			eWeap = a.GetEquippedWeapon(false)
-			if eWeap != none && !eWeap.HasKeyWordString("SexLabNoStrip")
-				a.UnequipItem(eWeap, false, true)
-				items = sslUtility.PushForm(eWeap, items)
-				Utility.Wait(0.25)
 			endIf
 		endIf
 		i += 1
 	endWhile
-
 	; Apply Nudesuit
 	if strip[2] && allowNudesuit
-		if (gender < 1 && bUseMaleNudeSuit) || (gender == 1  && bUseFemaleNudeSuit)
+		if (gender == 0 && bUseMaleNudeSuit) || (gender == 1  && bUseFemaleNudeSuit)
 			a.EquipItem(NudeSuit, false, true)
 		endIf
 	endIf
-
-	return items
+	return sslUtility.ClearNone(items)
 endFunction
 
 function UnstripActor(actor a, form[] stripped, actor victim = none)
@@ -386,15 +382,17 @@ function UnstripActor(actor a, form[] stripped, actor victim = none)
 	int hand = 1
 	while i
 		i -= 1
-		int type = stripped[i].GetType()
-		if type == 22 || type == 82
-			a.EquipSpell(stripped[i] as spell, hand)
-		else
-			a.EquipItem(stripped[i], false, true)
-		endIf
-		; Move to other hand if weapon, light, spell, or leveledspell
-		if type == 41 || type == 31 || type == 22 || type == 82
-			hand = 0
+		if stripped[i] != none
+			int type = stripped[i].GetType()
+			if type == 22 || type == 82
+				a.EquipSpell(stripped[i] as spell, hand)
+			else
+				a.EquipItem(stripped[i], false, true)
+			endIf
+			; Move to other hand if weapon, light, spell, or leveledspell
+			if type == 41 || type == 31 || type == 22 || type == 82
+				hand = 0
+			endIf
 		endIf
 		Utility.Wait(0.25)
 	endWhile
