@@ -54,6 +54,10 @@ function ApplyTo(actor ActorRef, int strength = 50, bool openmouth = false)
 	endIf
 endFunction
 
+function ClearMFG(actor ActorRef)
+	Lib.ClearMFG(ActorRef)
+endFunction
+
 int[] function GetPreset(int[] presets, int n)
 	int slot = ( n * 3 )
 	int[] output = new int[3]
@@ -170,6 +174,15 @@ endFunction
 
 bool function HasTag(string tag)
 	return tags.Find(tag) != -1
+endFunction
+
+bool function ToggleTag(string tag)
+	if HasTag(tag)
+		RemoveTag(tag)
+	else
+		AddTag(tag)
+	endIf
+	return HasTag(tag)
 endFunction
 
 ;/-----------------------------------------------\;

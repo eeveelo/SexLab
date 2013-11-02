@@ -110,6 +110,15 @@ bool function HasTag(string tag)
 	return tags.Find(tag) != -1
 endFunction
 
+bool function ToggleTag(string tag)
+	if HasTag(tag)
+		RemoveTag(tag)
+	else
+		AddTag(tag)
+	endIf
+	return HasTag(tag)
+endFunction
+
 ;/-----------------------------------------------\;
 ;|	System Use                                   |;
 ;\-----------------------------------------------/;
