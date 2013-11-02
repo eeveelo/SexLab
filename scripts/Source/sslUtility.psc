@@ -54,7 +54,7 @@ float[] function MergeFloatArray(float[] push, float[] array) global
 	while pushing
 		len -= 1
 		pushing -= 1
-		output[len] = push[pushing] 
+		output[len] = push[pushing]
 	endWhile
 	return output
 endFunction
@@ -94,7 +94,7 @@ int[] function MergeIntArray(int[] push, int[] array) global
 	while pushing
 		len -= 1
 		pushing -= 1
-		output[len] = push[pushing] 
+		output[len] = push[pushing]
 	endWhile
 	return output
 endFunction
@@ -135,7 +135,7 @@ bool[] function MergeBoolArray(bool[] push, bool[] array) global
 	while pushing
 		len -= 1
 		pushing -= 1
-		output[len] = push[pushing] 
+		output[len] = push[pushing]
 	endWhile
 	return output
 endFunction
@@ -176,7 +176,7 @@ string[] function MergeStringArray(string[] push, string[] array) global
 	while pushing
 		len -= 1
 		pushing -= 1
-		output[len] = push[pushing] 
+		output[len] = push[pushing]
 	endWhile
 	return output
 endFunction
@@ -216,7 +216,35 @@ form[] function MergeFormArray(form[] push, form[] array) global
 	while pushing
 		len -= 1
 		pushing -= 1
-		output[len] = push[pushing] 
+		output[len] = push[pushing]
+	endWhile
+	return output
+endFunction
+
+form[] function ClearNone(form[] array) global
+	int filled
+	int i = array.Length
+	while i
+		i -= 1
+		if array[i] != none
+			filled += 1
+		endIf
+	endWhile
+	if filled < 1
+		form[] empty
+		return empty
+	elseif filled == array.Length
+		return array
+	endIf
+	form[] output = FormArray(filled)
+	filled -= 1
+	i = array.Length
+	while i
+		i -= 1
+		if array[i] != none
+			output[filled] = array[i]
+			filled -= 1
+		endIf
 	endWhile
 	return output
 endFunction
