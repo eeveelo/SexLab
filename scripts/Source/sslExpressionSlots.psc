@@ -3,7 +3,7 @@ scriptname sslExpressionSlots extends Quest
 sslExpressionDefaults property Defaults auto
 sslExpressionLibrary property Lib auto
 
-sslBaseExpression[] property Slots auto hidden
+sslBaseExpression[] Slots
 sslBaseExpression[] property Expression hidden
 	sslBaseExpression[] function get()
 		return Slots
@@ -22,6 +22,33 @@ endProperty
 ;/-----------------------------------------------\;
 ;|	Search Expression                            |;
 ;\-----------------------------------------------/;
+
+sslBaseExpression function RandomByTag(string tag)
+	int count
+	; Get tagged count
+	int i = slotted
+	while i
+		i -= 1
+		count += Slots[i].HasTag(tag) as int
+	endWhile
+	if count == 0
+		return none ; No valid slots found
+	endIf
+	; Determine random
+	int random = Utility.RandomInt(1, count)
+	; Get random
+	i = slotted
+	while i
+		i -= 1
+		if Slots[i].HasTag(tag)
+			if random == count
+				return Slots[i]
+			endIf
+			count -= 1
+		endIf
+	endWhile
+	return none
+endFunction
 
 sslBaseExpression function GetByName(string findName)
 	int i

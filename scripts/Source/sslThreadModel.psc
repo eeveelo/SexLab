@@ -144,16 +144,16 @@ state Making
 			_Log("No valid actors available for animation", "StartThread", "FATAL")
 			return none
 		endIf
-
-		int i
 		int actors = ActorCount
-
-		; Check for duplicate actors
+		int i
 		while i < actors
+			; Check for duplicate actors
 			if Positions.Find(Positions[i]) != Positions.RFind(Positions[i])
 				_Log("Duplicate actor found in list", "StartThread", "FATAL")
 				return none
 			endIf
+			; Pick expression for actor
+			ActorAlias[i].SetExpression(Lib.Expressions.PickExpression(Positions[i], Victim))
 			i += 1
 		endWhile
 
@@ -444,8 +444,6 @@ int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice 
 			voice = Lib.Voices.PickVoice(position)
 		endIf
 		slot.SetVoice(voice)
-		; Pick expression for actor
-		slot.SetExpression(Lib.Expressions.PickExpression(position))
 	endIf
 	; Push actor to positions array
 	Positions = sslUtility.PushActor(position, Positions)

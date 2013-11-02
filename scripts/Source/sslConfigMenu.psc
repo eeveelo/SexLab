@@ -407,8 +407,8 @@ event OnPageReset(string page)
 		AddHeaderOption("")
 		i = 0
 		while i < ExpressionSlots.Slotted
-			if ExpressionSlots.Slots[i].Registered
-				oidToggleExpressionNormal[i] = AddToggleOption(ExpressionSlots.Slots[i].Name, ExpressionSlots.Slots[i].HasTag("Normal"))
+			if ExpressionSlots.Expression[i].Registered
+				oidToggleExpressionNormal[i] = AddToggleOption(ExpressionSlots.Expression[i].Name, ExpressionSlots.Expression[i].HasTag("Normal"))
 			endIf
 			i += 1
 		endWhile
@@ -416,8 +416,8 @@ event OnPageReset(string page)
 		AddHeaderOption("")
 		i = 0
 		while i < ExpressionSlots.Slotted
-			if ExpressionSlots.Slots[i].Registered
-				oidToggleExpressionVictim[i] = AddToggleOption(ExpressionSlots.Slots[i].Name, ExpressionSlots.Slots[i].HasTag("Victim"))
+			if ExpressionSlots.Expression[i].Registered
+				oidToggleExpressionVictim[i] = AddToggleOption(ExpressionSlots.Expression[i].Name, ExpressionSlots.Expression[i].HasTag("Victim"))
 			endIf
 			i += 1
 		endWhile
@@ -425,8 +425,8 @@ event OnPageReset(string page)
 		AddHeaderOption("")
 		i = 0
 		while i < ExpressionSlots.Slotted
-			if ExpressionSlots.Slots[i].Registered
-				oidToggleExpressionAggressor[i] = AddToggleOption(ExpressionSlots.Slots[i].Name, ExpressionSlots.Slots[i].HasTag("Aggressor"))
+			if ExpressionSlots.Expression[i].Registered
+				oidToggleExpressionAggressor[i] = AddToggleOption(ExpressionSlots.Expression[i].Name, ExpressionSlots.Expression[i].HasTag("Aggressor"))
 			endIf
 			i += 1
 		endWhile
@@ -1334,17 +1334,17 @@ event OnOptionSelect(int option)
 	elseif CurrentPage == "$SSL_ExpressionSelection"
 		i = oidToggleExpressionNormal.Find(option)
 		if i != -1
-			SetToggleOptionValue(option, ExpressionSlots.Slots[i].ToggleTag("Normal"))
+			SetToggleOptionValue(option, ExpressionSlots.Expression[i].ToggleTag("Normal"))
 			return
 		endIf
 		i = oidToggleExpressionVictim.Find(option)
 		if i != -1
-			SetToggleOptionValue(option, ExpressionSlots.Slots[i].ToggleTag("Victim"))
+			SetToggleOptionValue(option, ExpressionSlots.Expression[i].ToggleTag("Victim"))
 			return
 		endIf
 		i = oidToggleExpressionAggressor.Find(option)
 		if i != -1
-			SetToggleOptionValue(option, ExpressionSlots.Slots[i].ToggleTag("Aggressor"))
+			SetToggleOptionValue(option, ExpressionSlots.Expression[i].ToggleTag("Aggressor"))
 			return
 		endIf
 	elseIf CurrentPage == "$SSL_RebuildClean"

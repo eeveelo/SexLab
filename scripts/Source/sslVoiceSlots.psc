@@ -3,7 +3,7 @@ scriptname sslVoiceSlots extends Quest
 sslVoiceDefaults property Defaults auto
 sslVoiceLibrary property Lib auto
 
-sslBaseVoice[] property Slots auto hidden
+sslBaseVoice[] Slots
 sslBaseVoice[] property Voices hidden
 	sslBaseVoice[] function get()
 		return Slots

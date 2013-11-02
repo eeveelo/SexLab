@@ -22,8 +22,16 @@ function ClearMFG(actor ActorRef)
 	MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
 endFunction
 
-sslBaseExpression function PickExpression(actor a)
-	return Slots.GetByName("Pleasure")
+sslBaseExpression function PickExpression(actor ActorRef, actor VictimRef = none)
+	if VictimRef != none && ActorRef == VictimRef
+		; Return random victim
+		return Slots.RandomByTag("Victim")
+	elseif VictimRef != none && ActorRef != VictimRef
+		; Return random aggressor
+		return Slots.RandomByTag("Aggressor")
+	endIf
+	; Return random consensual
+	return Slots.RandomByTag("Consensual")
 endFunction
 
 function _Defaults()
