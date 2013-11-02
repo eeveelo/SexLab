@@ -3,7 +3,7 @@ scriptname sslExpressionSlots extends Quest
 sslExpressionDefaults property Defaults auto
 sslExpressionLibrary property Lib auto
 
-sslBaseExpression[] Slots
+sslBaseExpression[] property Slots auto hidden
 sslBaseExpression[] property Expression hidden
 	sslBaseExpression[] function get()
 		return Slots
@@ -11,11 +11,11 @@ sslBaseExpression[] property Expression hidden
 endProperty
 
 string[] registry
-int slotted
+int property Slotted auto hidden
 
 bool property FreeSlots hidden
 	bool function get()
-		return slotted < 50
+		return slotted < 40
 	endFunction
 endProperty
 
@@ -101,9 +101,9 @@ endFunction
 ;\-----------------------------------------------/;
 
 function _Setup()
-	Slots = new sslBaseExpression[50]
+	Slots = new sslBaseExpression[40]
 	int i
-	while i < 50
+	while i < 40
 		if i < 10
 			Slots[i] = GetAliasByName("ExpressionSlot00"+i) as sslBaseExpression
 		else

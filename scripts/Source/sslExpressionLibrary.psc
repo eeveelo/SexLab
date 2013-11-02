@@ -26,8 +26,8 @@ sslBaseExpression function PickExpression(actor a)
 	return Slots.GetByName("Pleasure")
 endFunction
 
-
-
 function _Defaults()
+
+
 
 endFunction
