@@ -83,6 +83,9 @@ int[] oidStripAggressor
 int[] oidToggleVoice
 int[] oidToggleAnimation
 int[] oidToggleCreatureAnimation
+int[] oidToggleExpressionNormal
+int[] oidToggleExpressionVictim
+int[] oidToggleExpressionAggressor
 int[] oidAggrAnimation
 int[] oidForeplayAnimation
 int[] oidRemoveStrapon
@@ -102,6 +105,9 @@ function SetDefaults()
 	oidToggleAnimation = new int[100]
 	oidAggrAnimation = new int[100]
 	oidForeplayAnimation = new int[100]
+	oidToggleExpressionNormal = new int[40]
+	oidToggleExpressionVictim = new int[40]
+	oidToggleExpressionAggressor = new int[40]
 
 	oidStripMale = new int[33]
 	oidStripFemale = new int[33]
@@ -116,7 +122,7 @@ function SetDefaults()
 
 	oidRemoveStrapon = new int[10]
 
-	Pages = new string[12]
+	Pages = new string[13]
 	Pages[0] = "$SSL_AnimationSettings"
 	Pages[1] = "$SSL_PlayerHotkeys"
 	Pages[2] = "$SSL_NormalTimersStripping"
@@ -127,12 +133,13 @@ function SetDefaults()
 	Pages[7] = "$SSL_ForeplayAnimations"
 	Pages[8] = "$SSL_AggressiveAnimations"
 	Pages[9] = "$SSL_CreatureAnimations"
+	Pages[10] = "$SSL_ExpressionSelection"
 	if PlayerRef.GetLeveledActorBase().GetSex() > 0
-		Pages[10] = "$SSL_SexDiary"
+		Pages[11] = "$SSL_SexDiary"
 	else
-		Pages[10] = "$SSL_SexJournal"
+		Pages[11] = "$SSL_SexJournal"
 	endIf
-	Pages[11] = "$SSL_RebuildClean"
+	Pages[12] = "$SSL_RebuildClean"
 
 	FindStrapons()
 endFunction
@@ -343,7 +350,7 @@ event OnPageReset(string page)
 		SetCursorFillMode(LEFT_TO_RIGHT)
 
 		i = 0
-		while i < VoiceSlots.Voices.Length
+		while i < VoiceSlots.Slotted
 			if VoiceSlots.Voices[i].Registered
 				oidToggleVoice[i] = AddToggleOption(VoiceSlots.Voices[i].Name, VoiceSlots.Voices[i].Enabled)
 			endIf
@@ -389,6 +396,37 @@ event OnPageReset(string page)
 		while i < CreatureAnimSlots.Slotted
 			if CreatureAnimSlots.Slots[i].Registered
 				oidToggleCreatureAnimation[i] = AddToggleOption(CreatureAnimSlots.Slots[i].Name, CreatureAnimSlots.Slots[i].Enabled)
+			endIf
+			i += 1
+		endWhile
+
+	elseIf page == "$SSL_ExpressionSelection"
+		SetCursorFillMode(LEFT_TO_RIGHT)
+
+		AddHeaderOption("$SSL_ExpressionsNormal")
+		AddHeaderOption("")
+		i = 0
+		while i < ExpressionSlots.Slotted
+			if ExpressionSlots.Slots[i].Registered
+				oidToggleExpressionNormal[i] = AddToggleOption(ExpressionSlots.Slots[i].Name, ExpressionSlots.Slots[i].HasTag("Normal"))
+			endIf
+			i += 1
+		endWhile
+		AddHeaderOption("$SSL_ExpressionsVictim")
+		AddHeaderOption("")
+		i = 0
+		while i < ExpressionSlots.Slotted
+			if ExpressionSlots.Slots[i].Registered
+				oidToggleExpressionVictim[i] = AddToggleOption(ExpressionSlots.Slots[i].Name, ExpressionSlots.Slots[i].HasTag("Victim"))
+			endIf
+			i += 1
+		endWhile
+		AddHeaderOption("$SSL_ExpressionsAggressor")
+		AddHeaderOption("")
+		i = 0
+		while i < ExpressionSlots.Slotted
+			if ExpressionSlots.Slots[i].Registered
+				oidToggleExpressionAggressor[i] = AddToggleOption(ExpressionSlots.Slots[i].Name, ExpressionSlots.Slots[i].HasTag("Aggressor"))
 			endIf
 			i += 1
 		endWhile
@@ -1259,20 +1297,10 @@ event OnOptionSelect(int option)
 		SetToggleOptionValue(option, AnimSlots.Slots[i].Enabled)
 	elseif CurrentPage == "$SSL_AggressiveAnimations"
 		i = oidAggrAnimation.Find(option)
-		if !AnimSlots.Slots[i].HasTag("Aggressive")
-			AnimSlots.Slots[i].AddTag("Aggressive")
-		else
-			AnimSlots.Slots[i].RemoveTag("Aggressive")
-		endIf
-		SetToggleOptionValue(option, AnimSlots.Slots[i].HasTag("Aggressive"))
+		SetToggleOptionValue(option, AnimSlots.Slots[i].ToggleTag("Aggressive"))
 	elseif CurrentPage == "$SSL_ForeplayAnimations"
 		i = oidForeplayAnimation.Find(option)
-		if !AnimSlots.Slots[i].HasTag("LeadIn")
-			AnimSlots.Slots[i].AddTag("LeadIn")
-		else
-			AnimSlots.Slots[i].RemoveTag("LeadIn")
-		endIf
-		SetToggleOptionValue(option, AnimSlots.Slots[i].HasTag("LeadIn"))
+		SetToggleOptionValue(option, AnimSlots.Slots[i].ToggleTag("LeadIn"))
 	elseIf CurrentPage == "$SSL_NormalTimersStripping"
 		i = oidStripMale.Find(option)
 		if i >= 0
@@ -1303,6 +1331,22 @@ event OnOptionSelect(int option)
 			ActorLib.bStripAggressor[i] = !ActorLib.bStripAggressor[i]
 			SetToggleOptionValue(option, ActorLib.bStripAggressor[i])
 		endIf
+	elseif CurrentPage == "$SSL_ExpressionSelection"
+		i = oidToggleExpressionNormal.Find(option)
+		if i != -1
+			SetToggleOptionValue(option, ExpressionSlots.Slots[i].ToggleTag("Normal"))
+			return
+		endIf
+		i = oidToggleExpressionVictim.Find(option)
+		if i != -1
+			SetToggleOptionValue(option, ExpressionSlots.Slots[i].ToggleTag("Victim"))
+			return
+		endIf
+		i = oidToggleExpressionAggressor.Find(option)
+		if i != -1
+			SetToggleOptionValue(option, ExpressionSlots.Slots[i].ToggleTag("Aggressor"))
+			return
+		endIf
 	elseIf CurrentPage == "$SSL_RebuildClean"
 		i = oidRemoveStrapon.Find(option)
 		form[] strapons = ActorLib.Strapons
@@ -1323,6 +1367,12 @@ endEvent
 event OnOptionHighlight(int option)
 	if oidToggleVoice.Find(option) != -1
 		SetInfoText("$SSL_EnableVoice")
+	elseif oidToggleExpressionNormal.Find(option) != -1
+		SetInfoText("$SSL_ToggleExpressionNormal")
+	elseif oidToggleExpressionVictim.Find(option) != -1
+		SetInfoText("$SSL_ToggleExpressionVictim")
+	elseif oidToggleExpressionAggressor.Find(option) != -1
+		SetInfoText("$SSL_ToggleExpressionAggressor")
 	elseif oidToggleCreatureAnimation.Find(option) != -1
 		SetInfoText("$SSL_ToggleCreatureAnimation")
 	elseif oidToggleAnimation.Find(option) != -1
