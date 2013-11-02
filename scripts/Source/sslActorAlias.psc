@@ -114,7 +114,6 @@ function LockActor()
 		Game.ForceThirdPerson()
 		Game.SetPlayerAIDriven()
 		; Game.SetInChargen(true, true, true)
-		; Debug.SetFootIK(false)
 		; Enable hotkeys, if needed
 		if IsVictim && Lib.bDisablePlayer
 			Controller.AutoAdvance = true
@@ -129,26 +128,23 @@ function LockActor()
 endFunction
 
 function UnlockActor()
-	; Remove from animation faction
-	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
-	ActorRef.EvaluatePackage()
-	; Detach positioning marker
-	ActorRef.StopTranslation()
-	ActorRef.SetVehicle(none)
 	; Enable movement
 	if IsPlayer
 		Lib._HKClear()
 		Game.EnablePlayerControls(false, false, false, false, false, false, true, false, 0)
 		Game.SetPlayerAIDriven(false)
 		; Game.SetInChargen(false, false, false)
-		; Debug.SetFootIK(true)
-		int[] genders = Lib.GenderCount(Controller.Positions)
-		Lib.Stats.UpdatePlayerStats(genders[0], genders[1], genders[2], Controller.Animation, Controller.GetVictim(), Controller.GetTime())
 	else
 		ActorRef.SetRestrained(false)
 		ActorRef.SetDontMove(false)
 		; ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 	endIf
+	; Remove from animation faction
+	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
+	ActorRef.EvaluatePackage()
+	; Detach positioning marker
+	ActorRef.StopTranslation()
+	ActorRef.SetVehicle(none)
 endFunction
 
 function PrepareActor()
@@ -362,7 +358,6 @@ function SyncThread()
 		if stage == 1 && Animation.StageCount() == 1
 			strength = 70
 		endIf
-
 		; Update Silence
 		IsSilent = Animation.IsSilent(position, stage)
 		if IsSilent || IsCreature
@@ -482,11 +477,16 @@ endEvent
 event OnEndThread(string eventName, string argString, float argNum, form sender)
 	UnregisterForModEvent("EndThread")
 	UnregisterForUpdate()
-	bool quick = (argNum as bool)
+	; Update diary/journal stats for player
+	if IsPlayer
+		int[] genders = Lib.GenderCount(Controller.Positions)
+		Lib.Stats.UpdatePlayerStats(genders[0], genders[1], genders[2], Animation, Controller.GetVictim(), Controller.GetTime())
+	endIf
 	; Reset actor
+	bool quick = (argNum as bool)
+	UnlockActor()
 	StopAnimating(quick)
 	ResetActor()
-	UnlockActor()
 	; Apply cum
 	int cum = Animation.GetCum(position)
 	if !quick && cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Lib.MaleCount(Controller.Positions) > 0)
