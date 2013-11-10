@@ -298,8 +298,23 @@ bool[] function GetStrip(actor a, actor victim, bool leadin)
  	elseif victim == none && !female
  		return bStripMale
  	else
- 		return bstripFemale
+ 		return bStripFemale
  	endIf
+endFunction
+
+bool function IsStrippable(form item)
+	if item == none
+		return false
+	endIf
+	int i = item.GetNumKeywords()
+	while i
+		i -= 1
+		string kw = item.GetNthKeyword(i).GetString()
+		if StringUtil.Find(kw, "NoStrip") != -1 || StringUtil.Find(kw, "Bound") != -1
+			return false
+		endIf
+	endWhile
+	return true
 endFunction
 
 form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool allowNudesuit = true)
@@ -320,7 +335,7 @@ form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool all
 	; Strip weapon
 	if strip[32]
 		Weapon eWeap = a.GetEquippedWeapon(true)
-		if eWeap != none && !eWeap.HasKeyWordString("SexLabNoStrip")
+		if IsStrippable(eWeap)
 			int type = a.GetEquippedItemType(1)
 			if type == 5 || type == 6 || type == 7
 				a.AddItem(DummyWeapon, 1, true)
@@ -333,7 +348,7 @@ form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool all
 			items[32] = eWeap
 		endIf
 		eWeap = a.GetEquippedWeapon(false)
-		if eWeap != none && !eWeap.HasKeyWordString("SexLabNoStrip")
+		if IsStrippable(eWeap)
 			a.UnequipItem(eWeap, false, true)
 			items[33] = eWeap
 			if animate
@@ -346,7 +361,7 @@ form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool all
 	while i < 32
 		if strip[i]
 			form item = a.GetWornForm(Armor.GetMaskForSlot(i + 30))
-			if item != none && !item.HasKeyWordString("SexLabNoStrip")
+			if IsStrippable(item)
 				a.UnequipItem(item, false, true)
 				items[i] = item
 				if animate
