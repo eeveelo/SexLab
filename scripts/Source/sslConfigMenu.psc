@@ -1583,5 +1583,5 @@ function _CheckSystem()
 		PlayerRef.AddSpell(SexLabDebugSpell, true)
 	endIf
 	; DEBUG TESTING Init expressions
-	ExpressionSlots._Setup()
+	;ExpressionSlots._Setup()
 endFunction
