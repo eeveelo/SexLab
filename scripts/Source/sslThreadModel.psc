@@ -30,7 +30,6 @@ actor PlayerRef
 actor victim
 string hook
 int bed ; 0 allow, 1 in use, 2 force, -1 forbid
-float timeout
 Race Creature
 
 ; Thread Instance Info
@@ -123,18 +122,15 @@ endProperty
 ;/-----------------------------------------------\;
 ;|	Preparation Functions                        |;
 ;\-----------------------------------------------/;
-
-sslThreadModel function Make(float timeoutIn = 5.0)
-	if GetState() != "Unlocked"
-		return none
-	endIf
-	Initialize()
-	timeout = timeoutIn
-	ActorSlots = new sslActorAlias[5]
-	GoToState("Making")
-	RegisterForSingleUpdate(timeoutIn)
-	return self
-endFunction
+state Unlocked
+	sslThreadModel function Make(float timeoutIn = 5.0)
+		Initialize()
+		ActorSlots = new sslActorAlias[5]
+		GoToState("Making")
+		RegisterForSingleUpdate((timeoutIn + 5.0))
+		return self
+	endFunction
+endState
 
 state Making
 	event OnUpdate()
@@ -143,10 +139,52 @@ state Making
 		endIf
 	endEvent
 
+	int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice = none, bool forceSilent = false)
+		if Positions.Find(position) != -1
+			_Log("Duplicate actor", "AddActor")
+			return -1
+		elseif ActorCount >= 5
+			_Log("No available actor positions", "AddActor")
+			return -1
+		endIf
+		; Slot and parse
+		int id = -1
+		sslActorAlias slot = Lib.Actors.Slots.SlotActor(position, self as sslThreadController)
+		if slot == none
+			_Log("Failed to slot actor '"+position+"'", "AddActor", "FATAL")
+			return -1
+		elseif slot.IsCreature()
+			Race PosCreature = position.GetLeveledActorBase().GetRace()
+			if Creature != none && !Lib.Actors.AnimLib.AllowedCreatureCombination(PosCreature, Creature)
+				_Log("Invalid creature race combination '"+Creature.GetName()+"' & '"+PosCreature.GetName()+"'", "AddActor", "FATAL")
+				return -1
+			endIf
+			Creature = PosCreature
+		else
+			; Check for player
+			if position == Lib.PlayerRef
+				PlayerRef = position
+			endIf
+			; Pick voice for non creatures
+			if voice == none && !forceSilent
+				voice = Lib.Voices.PickVoice(position)
+			endIf
+			slot.SetVoice(voice)
+		endIf
+		; Push actor to positions array
+		Positions = sslUtility.PushActor(position, Positions)
+		id = ActorCount - 1
+		; Save Actor/Alias slot
+		ActorSlots[id] = slot
+		; Set as victim
+		if isVictim
+			victim = position
+		endIf
+		return id
+	endFunction
+
 	sslThreadController function StartThread()
-		if !Locked("StartThread")
-			return none
-		elseif ActorCount == 0
+		if ActorCount == 0
 			_Log("No valid actors available for animation", "StartThread", "FATAL")
 			return none
 		endIf
@@ -249,14 +287,14 @@ state Making
 
 		; Find a marker near one of our actors and center there
 		if centerObj == none
-			i = actors
-			while i
-				i -= 1
+			i = 0
+			while i < actors
 				ObjectReference marker = Game.FindRandomReferenceOfTypeFromRef(Lib.LocationMarker, Positions[i], 750.0) as ObjectReference
 				if marker != none
 					CenterOnObject(marker)
-					i = 0
+					i = 5
 				endIf
+				i += 1
 			endWhile
 		endIf
 
@@ -294,11 +332,6 @@ state Making
 		return none
 	endFunction
 endState
-
-sslThreadController function StartThread()
-	Debug.Trace("Cannot start thread while not in a Making state")
-	return none
-endFunction
 
 ;/-----------------------------------------------\;
 ;|	Setting Functions                            |;
@@ -416,53 +449,6 @@ endfunction
 ;/-----------------------------------------------\;
 ;|	Actor Functions                              |;
 ;\-----------------------------------------------/;
-
-int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice = none, bool forceSilent = false)
-	if !Locked("AddActor")
-		return -1
-	elseIf ActorCount >= 5
-		_Log("No available actor positions", "AddActor")
-		return -1
-	elseif Positions.Find(position) != -1
-		_Log("Duplicate actor", "AddActor")
-		return -1
-	endIf
-
-	int id = -1
-	sslActorAlias slot = Lib.Actors.Slots.SlotActor(position, self as sslThreadController)
-	if slot == none
-		_Log("Failed to slot actor '"+position+"'", "AddActor", "FATAL")
-		return -1
-	elseif slot.IsCreature()
-		Race PosCreature = position.GetLeveledActorBase().GetRace()
-		if Creature != none && !Lib.Actors.AnimLib.AllowedCreatureCombination(PosCreature, Creature)
-			_Log("Invalid creature race combination '"+Creature.GetName()+"' & '"+PosCreature.GetName()+"'", "AddActor", "FATAL")
-			return -1
-		endIf
-		Creature = PosCreature
-	else
-		; Check for player
-		if position == Lib.PlayerRef
-			PlayerRef = position
-		endIf
-		; Pick voice for non creatures
-		if voice == none && !forceSilent
-			voice = Lib.Voices.PickVoice(position)
-		endIf
-		slot.SetVoice(voice)
-	endIf
-	; Push actor to positions array
-	Positions = sslUtility.PushActor(position, Positions)
-	id = ActorCount - 1
-	; Save Actor/Alias slot
-	ActorSlots[id] = slot
-	; Set as victim
-	if isVictim
-		victim = position
-	endIf
-
-	return id
-endFunction
 
 function ChangeActors(actor[] changeTo)
 	if !active || HasCreature
@@ -796,7 +782,6 @@ function Initialize()
 	float[] fDel
 	centerLoc = fDel
 	customtimers = fDel
-	timeout = 0
 	; Empty bools
 	leadIn = false
 	leadInDisabled = false
@@ -815,6 +800,25 @@ function Initialize()
 	PlayerRef = none
 	creature = none
 	GotoState("Unlocked")
+endFunction
+
+;/-----------------------------------------------\;
+;| State Permissible Functions                   |;
+;\-----------------------------------------------/;
+
+sslThreadModel function Make(float timeoutIn = 5.0)
+	_Log("Cannot enter make on a locked thread", "Make")
+	return none
+endFunction
+
+int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice = none, bool forceSilent = false)
+	_Log("Cannot add an actor to a locked thread", "AddActor")
+	return -1
+endFunction
+
+sslThreadController function StartThread()
+	_Log("Cannot start thread while not in a Making state", "StartThread")
+	return none
 endFunction
 
 ;/-----------------------------------------------\;
