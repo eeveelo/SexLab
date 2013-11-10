@@ -32,14 +32,13 @@ bool looping
 ;|	Primary Starter                              |;
 ;\-----------------------------------------------/;
 
-sslThreadController function PrimeThread()
-	if GetState() != "Making"
-		return none
-	endIf
-	GotoState("Preparing")
-	RegisterForSingleUpdate(0.12)
-	return self
-endFunction
+state Making
+	sslThreadController function PrimeThread()
+		GotoState("Preparing")
+		RegisterForSingleUpdate(0.05)
+		return self
+	endFunction
+endState
 
 bool function ActorWait(string waitfor)
 	int i = ActorCount
@@ -448,6 +447,10 @@ function Initialize()
 	sfxType = none
 	; Clear model
 	parent.Initialize()
+endFunction
+
+sslThreadController function PrimeThread()
+	return none
 endFunction
 
 ;/-----------------------------------------------\;
