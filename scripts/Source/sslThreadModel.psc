@@ -58,6 +58,12 @@ int property ActorCount hidden
 	endFunction
 endProperty
 
+bool property HasPlayer hidden
+	bool function get()
+		return PlayerRef != none
+	endFunction
+endProperty
+
 bool property HasCreature hidden
 	bool function get()
 		return Creature != none
