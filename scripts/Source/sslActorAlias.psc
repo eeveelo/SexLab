@@ -396,6 +396,9 @@ function SyncThread()
 					bend = "SOSNoBend"
 				endIf
 				Debug.SendAnimationEvent(ActorRef, bend)
+				string name = ActorRef.GetLeveledActorBase().GetName()
+				;Debug.Notification(name+" Offset["+offset+"]: "+bend)
+				;Debug.Trace(name+" Offset: SOSBend"+offset+ ": Sent -> "+bend)
 				; Debug.SendAnimationEvent(ActorRef, "SOSBend"+offset)
 			endif
 			; Equip Strapon if needed
@@ -459,8 +462,10 @@ state Animating
 		if VoiceInstance > 0
 			Sound.StopInstance(VoiceInstance)
 		endIf
+		Expression.ClearMFG(ActorRef)
 		VoiceInstance = Voice.Moan(ActorRef, strength, IsVictim)
 		Sound.SetInstanceVolume(VoiceInstance, Lib.fVoiceVolume)
+		Expression.ApplyTo(ActorRef, strength)
 	endEvent
 endState
 
