@@ -62,21 +62,22 @@ ObjectReference function FindBed(ObjectReference centerRef, float radius = 1000.
 		return none ; Invalid args
 	endIf
 	; Create supression list
-	form[] supress = sslUtility.FormArray(2)
-	supress[0] = ignore1
-	supress[1] = ignore2
-	; Attempt 15 times before giving up
-	int attempts = 15
+	form[] supress = new Form[12]
+	supress[11] = ignore1
+	supress[10] = ignore2
+	; Attempt 10 times before giving up
+	int attempts = 10
 	while attempts
 		attempts -= 1
 		; Find nearby
 		ObjectReference BedRef = Game.FindRandomReferenceOfAnyTypeInListFromRef(BedsList, centerRef, radius)
-		if BedRef != none && supress.Find(BedRef) == -1
-			if ignoreUsed && BedRef.IsFurnitureInUse(true)
-				; Bed is in use, add to supression list
-				supress = sslUtility.PushForm(BedRef, supress)
-			else
-				; Bed is free, end loop/function
+		if BedRef == none
+			return none ; If none, than none in radius, give up now.
+		elseIf supress.Find(BedRef) == -1
+			; Add to supression list
+			supress[attempts] = BedRef
+			; Check if free
+			if !ignoreUsed || (ignoreUsed && !BedRef.IsFurnitureInUse(true))
 				return BedRef
 			endIf
 		endIf
