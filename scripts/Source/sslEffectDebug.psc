@@ -3,11 +3,31 @@ Scriptname sslEffectDebug extends ActiveMagicEffect
 SexLabFramework property SexLab Auto
 import SexLabUtil
 
+
+
+
 event OnEffectStart(actor target, actor caster)
 
+	int n = 0
 
-	sslBaseExpression Expression = SexLab.ExpressionLib.PickExpression(target, caster)
-	debug.traceandbox(Expression.Name)
+	; sslBaseAnimation[] Anim = new sslBaseAnimation[1]
+	; Anim[0] = SexLab.Animation[n]
+
+	sslThreadModel Model = SexLab.NewThread()
+
+	Model.AddActor(caster)
+	Model.AddActor(target)
+	; Model.SetAnimations(Anim)
+	Model.DisableLeadIn(true)
+	sslThreadController Thread = Model.StartThread()
+	debug.traceandbox("Starting: "+Thread.Animation.Name)
+
+	; Thread.SetForcedAnimations(Anim)
+	; Thread.SyncActors()
+
+
+
+
 
 	; Debug.Notification("Phase 1")
 	; Expression.ApplyTo(target, 20)

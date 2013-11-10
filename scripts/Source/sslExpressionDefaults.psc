@@ -5,6 +5,7 @@ function LoadExpressions()
 	RegisterExpression("Shy")
 	RegisterExpression("Afraid")
 	RegisterExpression("Pained")
+	RegisterExpression("Angry")
 endFunction
 
 function Pleasure(string eventName, string id, float argNum, form sender)
@@ -351,6 +352,55 @@ function Pained(string eventName, string id, float argNum, form sender)
 	AddPreset(4, Male, Modifier, 11, 90)
 	AddPreset(4, Male, Phoneme, 0, 30)
 	AddPreset(4, Male, Phoneme, 2, 30)
+
+	Save()
+endFunction
+
+
+function Angry(string eventName, string id, float argNum, form sender)
+	Name = "Angry"
+
+
+	AddTag("Mad")
+	AddTag("Angry")
+	AddTag("Upset")
+
+	AddTag("Aggressor")
+	AddTag("Victim")
+
+	; Female
+	AddPreset(1, Female, Expression, 0, 40)
+	AddPreset(1, Female, Modifier, 12, 30)
+	AddPreset(1, Female, Modifier, 13, 30)
+	AddPreset(1, Female, Phoneme, 4, 40)
+
+	AddPreset(2, Female, Expression, 0, 55)
+	AddPreset(2, Female, Modifier, 12, 50)
+	AddPreset(2, Female, Modifier, 13, 50)
+	AddPreset(2, Female, Phoneme, 4, 40)
+
+	AddPreset(3, Female, Expression, 0, 100)
+	AddPreset(3, Female, Modifier, 12, 65)
+	AddPreset(3, Female, Modifier, 13, 65)
+	AddPreset(3, Female, Phoneme, 4, 50)
+	AddPreset(3, Female, Phoneme, 3, 40)
+
+	; Male
+	AddPreset(1, Male, Expression, 0, 40)
+	AddPreset(1, Male, Modifier, 12, 30)
+	AddPreset(1, Male, Modifier, 13, 30)
+	AddPreset(1, Male, Phoneme, 4, 40)
+
+	AddPreset(2, Male, Expression, 0, 55)
+	AddPreset(2, Male, Modifier, 12, 50)
+	AddPreset(2, Male, Modifier, 13, 50)
+	AddPreset(2, Male, Phoneme, 4, 40)
+
+	AddPreset(3, Male, Expression, 0, 100)
+	AddPreset(3, Male, Modifier, 12, 65)
+	AddPreset(3, Male, Modifier, 13, 65)
+	AddPreset(3, Male, Phoneme, 4, 50)
+	AddPreset(3, Male, Phoneme, 3, 40)
 
 	Save()
 endFunction
