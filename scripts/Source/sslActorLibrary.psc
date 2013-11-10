@@ -500,13 +500,16 @@ function ClearForcedGender(actor a)
 endFunction
 
 int function GetGender(actor a)
+	if a.IsInFaction(GenderFaction)
+		if a.GetFactionRank(GenderFaction) == 0 ; || a.HasKeywordString("SexLabTreatMale")
+			return 0 ; Male
+		elseif a.GetFactionRank(GenderFaction) == 1 ; || a.HasKeywordString("SexLabTreatFemale")
+			return 1 ; Female
+		endIf
+	endIf
 	ActorBase Base = a.GetLeveledActorBase()
 	if AnimLib.CreatureSlots.HasRace(Base.GetRace())
 		return 2 ; Creature
-	elseif a.GetFactionRank(GenderFaction) == 0 || a.HasKeywordString("SexLabTreatMale")
-		return 0 ; Male
-	elseif a.GetFactionRank(GenderFaction) == 1 || a.HasKeywordString("SexLabTreatFemale")
-		return 1 ; Female
 	else
 		return Base.GetSex() ; Default
 	endIf
