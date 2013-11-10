@@ -145,6 +145,10 @@ form[] function StripActor(actor a, actor victim = none, bool animate = true, bo
 	return ActorLib.StripActor(a, victim, animate, leadIn)
 endFunction
 
+bool function IsStrippable(form item)
+	return ActorLib.IsStrippable(item)
+endFunction
+
 form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool allowNudesuit = true)
 	return ActorLib.StripSlots(a, strip, animate, allowNudesuit)
 endFunction
@@ -389,7 +393,6 @@ int function AdjustBy(string name, int adjust)
 	return Stats.AdjustBy(name, adjust)
 endFunction
 
-
 int function CalcSexuality(bool IsFemale, int males, int females)
 	return Stats.CalcSexuality(IsFemale, males, females)
 endFunction
@@ -400,6 +403,18 @@ endFunction
 
 string function ParseTime(int time)
 	return Stats.ParseTime(time)
+endFunction
+
+int function SexWithPlayerCount(actor a)
+	return Stats.SexWithPlayerCount(a)
+endFunction
+
+bool function HasHadPlayerSex(actor a)
+	return Stats.HasHadPlayerSex(a)
+endFunction
+
+function SexWithPlayer(actor a)
+	Stats.SexWithPlayer(a)
 endFunction
 
 function UpdatePlayerStats(sslBaseAnimation anim, float time, actor[] pos, actor victim)
