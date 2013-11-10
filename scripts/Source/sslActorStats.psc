@@ -4,6 +4,8 @@ scriptname sslActorStats extends Quest
 sslActorLibrary property Lib auto
 
 ; Data
+faction property PlayerSexPartners auto
+
 float property fTimeSpent auto hidden
 float property fSexualPurity auto hidden
 int property iMalePartners auto hidden
@@ -115,7 +117,7 @@ string function GetStatFull(string name)
 	string[] info = GetInfo(name)
 	if info == none
 		return ""
-	endIf 
+	endIf
 	return info[1]+info[0]+info[2]
 endFunction
 
@@ -159,6 +161,22 @@ endFunction
 ;/-----------------------------------------------\;
 ;|	Native Player Stats                          |;
 ;\-----------------------------------------------/;
+
+int function SexWithPlayerCount(actor a)
+	return a.GetFactionRank(PlayerSexPartners)
+endFunction
+
+bool function HasHadPlayerSex(actor a)
+	return a.IsInFaction(PlayerSexPartners)
+endFunction
+
+function SexWithPlayer(actor a)
+	if a.IsInFaction(PlayerSexPartners)
+		a.ModFactionRank(PlayerSexPartners, 1)
+	else
+		a.SetFactionRank(PlayerSexPartners, 1)
+	endIf
+endFunction
 
 function UpdatePlayerStats(int males, int females, int creatures, sslBaseAnimation Animation, actor victim, float time)
 	if !Animation.IsSexual()
