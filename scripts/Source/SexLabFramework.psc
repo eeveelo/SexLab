@@ -405,16 +405,16 @@ string function ParseTime(int time)
 	return Stats.ParseTime(time)
 endFunction
 
-int function SexWithPlayerCount(actor a)
-	return Stats.SexWithPlayerCount(a)
+int function PlayerSexCount(actor a)
+	return Stats.PlayerSexCount(a)
 endFunction
 
-bool function HasHadPlayerSex(actor a)
-	return Stats.HasHadPlayerSex(a)
+bool function HadPlayerSex(actor a)
+	return Stats.HadPlayerSex(a)
 endFunction
 
-function SexWithPlayer(actor a)
-	Stats.SexWithPlayer(a)
+function AddPlayerSex(actor a)
+	Stats.AddPlayerSex(a)
 endFunction
 
 function UpdatePlayerStats(sslBaseAnimation anim, float time, actor[] pos, actor victim)

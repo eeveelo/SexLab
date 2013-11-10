@@ -487,7 +487,7 @@ event OnEndThread(string eventName, string argString, float argNum, form sender)
 		int[] genders = Lib.GenderCount(Controller.Positions)
 		Lib.Stats.UpdatePlayerStats(genders[0], genders[1], genders[2], Animation, Controller.GetVictim(), Controller.GetTime())
 	elseIf Controller.HasPlayer
-		Lib.Stats.SexWithPlayer(ActorRef)
+		Lib.Stats.AddPlayerSex(ActorRef)
 	endIf
 	; Reset actor
 	bool quick = (argNum as bool)

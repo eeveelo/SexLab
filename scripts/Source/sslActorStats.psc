@@ -162,15 +162,15 @@ endFunction
 ;|	Native Player Stats                          |;
 ;\-----------------------------------------------/;
 
-int function SexWithPlayerCount(actor a)
+int function PlayerSexCount(actor a)
 	return a.GetFactionRank(PlayerSexPartners)
 endFunction
 
-bool function HasHadPlayerSex(actor a)
+bool function HadPlayerSex(actor a)
 	return a.IsInFaction(PlayerSexPartners)
 endFunction
 
-function SexWithPlayer(actor a)
+function AddPlayerSex(actor a)
 	if a.IsInFaction(PlayerSexPartners)
 		a.ModFactionRank(PlayerSexPartners, 1)
 	else
