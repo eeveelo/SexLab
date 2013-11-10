@@ -142,7 +142,7 @@ function ApplyCum(actor a, int cumID)
 endFunction
 
 form[] function StripActor(actor a, actor victim = none, bool animate = true, bool leadIn = false)
-	return ActorLib.StripActor(a, victim, animation, leadIn)
+	return ActorLib.StripActor(a, victim, animate, leadIn)
 endFunction
 
 form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool allowNudesuit = true)
