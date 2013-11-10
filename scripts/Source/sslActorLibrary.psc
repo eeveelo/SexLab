@@ -27,6 +27,10 @@ Keyword property kwCumOral auto
 Keyword property kwCumAnal auto
 Keyword property kwCumVaginal auto
 
+FormList property ValidActorList auto
+FormList property NoStripList auto
+FormList property StripList auto
+
 Furniture property BaseMarker auto
 
 ; Config Settings
@@ -73,9 +77,10 @@ bool hkReady
 sslThreadController PlayerController
 
 int function ValidateActor(actor a)
-
+	if ValidActorList.Find(a) != -1
+		return 1
+	endIf
 	String ActorName = a.GetLeveledActorBase().GetName()
-
 	if a.IsInFaction(AnimatingFaction)
 		if Slots.FindActor(a) == -1
 			a.RemoveFromFaction(AnimatingFaction)
@@ -84,46 +89,38 @@ int function ValidateActor(actor a)
 			return -10
 		endIf
 	endIf
-
 	if a.HasKeywordString("SexLabForbid") || a.IsInFaction(ForbiddenFaction)
 		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are forbidden from animating")
 		return -11
 	endIf
-
 	if !a.Is3DLoaded()
 		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are not loaded")
 		return -12
 	endIf
-
 	if a.IsDead()
 		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: He's dead Jim.")
 		return -13
 	endIf
-
 	if a.IsDisabled()
 		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are disabled")
 		return -14
 	endIf
-
 	if a.IsFlying()
 		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are flying.")
 		return -15
 	endIf
-
 	Race ActorRace = a.GetLeveledActorBase().GetRace()
 	String RaceName = ActorRace.GetName()
-
 	if ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Child") != -1 || StringUtil.Find(RaceName, "117") != -1 || StringUtil.Find(RaceName, "Monli") != -1 || StringUtil.Find(RaceName, "Elin") != -1
 		ForbidActor(a)
 		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are forbidden from animating")
 		return -11
 	endIf
-
 	if a != PlayerRef && !a.HasKeywordString("ActorTypeNPC") && !AnimLib.AllowedCreature(ActorRace)
 		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are a creature that is currently not supported ("+RaceName+")")
 		return -16
 	endIf
-
+	ValidActorList.AddForm(a)
 	return 1
 endFunction
 
@@ -306,14 +303,23 @@ bool function IsStrippable(form item)
 	if item == none
 		return false
 	endIf
+	; Check previous validations
+	if StripList.Find(item) != -1
+		return true
+	elseIf NoStripList.Find(item) != -1
+		return false
+	endIf
+	; Check keywords
 	int i = item.GetNumKeywords()
 	while i
 		i -= 1
 		string kw = item.GetNthKeyword(i).GetString()
 		if StringUtil.Find(kw, "NoStrip") != -1 || StringUtil.Find(kw, "Bound") != -1
+			NoStripList.AddForm(item)
 			return false
 		endIf
 	endWhile
+	StripList.AddForm(item)
 	return true
 endFunction
 
