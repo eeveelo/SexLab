@@ -389,6 +389,33 @@ endFunction
 function EndAnimation(bool quick = false)
 	UnregisterForUpdate()
 	GoToState("")
+
+	; TEMP DEBUG INFO
+	; Animation.Enabled = false
+	Debug.Trace("########################################")
+	Debug.Trace("####  "+Animation.Name)
+	Debug.Trace("########################################")
+	int i
+	while i < ActorCount
+		Debug.Trace("###### POSITION: "+ i + " IsFemale: "+Animation.GetGender(i) == 1)
+		int stages = 1
+		while stages <= Animation.StageCount()
+			float[] offsets = Animation.GetPositionOffsets(i, stages)
+			string curStage = "Stage ["+stages+"/"+Animation.StageCount()+"]"
+			Debug.Trace(curStage+" "+Animation.FetchPositionStage(i, stages))
+			Debug.Trace(curStage+" Calculated Forward: "+Animation.CalculateForward(i, stages))
+			Debug.Trace(curStage+" Raw Forward: "+offsets[0])
+			Debug.Trace(curStage+" Side: "+offsets[1])
+			Debug.Trace(curStage+" Up: "+offsets[2])
+			Debug.Trace(curStage+" Rotate: "+offsets[3])
+			Debug.Trace(curStage+" Mouth: "+Animation.UseOpenMouth(i, stages))
+			Debug.Trace(curStage+" SOS: "+Animation.GetSchlong(i, stages))
+			stages += 1
+		endWhile
+		i += 1
+	endWhile
+
+
 	SendThreadEvent("AnimationEnd")
 	SendActorEvent("EndThread", (quick as float))
 	; Wait for actors to clear, or for 5 seconds to pass
