@@ -7,20 +7,41 @@ import SexLabUtil
 
 
 event OnEffectStart(actor target, actor caster)
+	Debug.Trace("SexLab Debug Start")
+	Debug.Trace(SexLab.Stats.PlayerSexCount(target) +" -> "+ SexLab.Stats.HadPlayerSex(target))
 
-	int n = 0
+	Utility.WaitMenuMode(0.5)
+	Float started = Utility.GetCurrentRealTime()
+	Float total = Utility.GetCurrentRealTime()
+
+	sslThreadModel Model = SexLab.NewThread()
+	Debug.Trace("NewThread: "+(Utility.GetCurrentRealTime() - started))
+	started = Utility.GetCurrentRealTime()
+
+	Model.AddActor(caster)
+	Debug.Trace("AddActor[0]: "+(Utility.GetCurrentRealTime() - started))
+	started = Utility.GetCurrentRealTime()
+
+	Model.AddActor(target)
+	Debug.Trace("AddActor[1]: "+(Utility.GetCurrentRealTime() - started))
+	started = Utility.GetCurrentRealTime()
+
+	sslThreadController Thread = Model.StartThread()
+	Debug.Trace("StartThread: "+(Utility.GetCurrentRealTime() - started))
+	Debug.Trace("Total Time: "+(Utility.GetCurrentRealTime() - total))
+
+
+	;int n = 0
 
 	; sslBaseAnimation[] Anim = new sslBaseAnimation[1]
 	; Anim[0] = SexLab.Animation[n]
 
-	sslThreadModel Model = SexLab.NewThread()
 
-	Model.AddActor(caster)
-	Model.AddActor(target)
-	; Model.SetAnimations(Anim)
-	Model.DisableLeadIn(true)
-	sslThreadController Thread = Model.StartThread()
-	debug.traceandbox("Starting: "+Thread.Animation.Name)
+
+	; ; Model.SetAnimations(Anim)
+	; Model.DisableLeadIn(true)
+	; sslThreadController Thread = Model.StartThread()
+	; debug.traceandbox("Starting: "+Thread.Animation.Name)
 
 	; Thread.SetForcedAnimations(Anim)
 	; Thread.SyncActors()
