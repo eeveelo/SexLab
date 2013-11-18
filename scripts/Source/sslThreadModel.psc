@@ -21,6 +21,7 @@ sslBaseAnimation[] leadAnimations
 string property Logging auto hidden
 bool property AutoAdvance auto hidden
 bool property LeadIn auto hidden
+bool property FastEnd auto hidden
 
 ObjectReference centerObj
 float[] centerLoc
@@ -482,9 +483,7 @@ function ChangeActors(actor[] changeTo)
 		ActorAlias(Positions[i]).UnregisterForUpdate()
 		if changeTo.Find(Positions[i]) == -1
 			sslActorAlias clearing = ActorAlias(Positions[i])
-			clearing.StopAnimating(true)
-			clearing.UnlockActor()
-			clearing.ResetActor()
+			clearing.GoToState("Reset")
 			clearing.ClearAlias()
 			if IsPlayerPosition(i)
 				AutoAdvance = true
@@ -508,8 +507,14 @@ function ChangeActors(actor[] changeTo)
 			sslActorAlias adding = newSlots[i] as sslActorAlias
 			adding.SetVoice(Lib.Voices.PickVoice(changeTo[i]))
 			adding.DisableUndressAnim(true)
-			adding.LockActor()
-			adding.PrepareActor()
+			; Start preparing actor
+			adding.GotoState("Prepare")
+			; Wait for ready state
+			float failsafe = Utility.GetCurrentRealTime() + 10.0
+			while adding.GetState() != "Ready" && failsafe > Utility.GetCurrentRealTime()
+				Utility.Wait(0.1)
+			endWhile
+			; Begin animation state
 			adding.StartAnimating()
 		endIf
 		i += 1
@@ -786,6 +791,7 @@ function Initialize()
 	leadIn = false
 	leadInDisabled = false
 	AutoAdvance = false
+	FastEnd = false
 	; Empty forms
 	; Empty integers
 	bed = 0

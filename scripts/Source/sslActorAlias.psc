@@ -38,8 +38,8 @@ int stage
 form[] EquipmentStorage
 bool[] StripOverride
 form strapon
-float scale
-float evenScale
+float ActorScale
+float AnimScale
 float[] loc
 
 ; Switches
@@ -75,6 +75,7 @@ function SetAlias(sslThreadController ThreadView)
 		Initialize()
 		TryToStopCombat()
 		Controller = ThreadView
+		; Init actor information
 		ActorRef = GetReference() as actor
 		int gender = Lib.GetGender(ActorRef)
 		IsFemale = gender == 1
@@ -85,19 +86,27 @@ function SetAlias(sslThreadController ThreadView)
 		float display = ActorRef.GetScale()
 		ActorRef.SetScale(1.0)
 		float base = ActorRef.GetScale()
-		scale = ( display / base )
-		evenScale = (1.0 / base)
+		; Starting scale
+		ActorScale = ( display / base )
+		; Reset back to starting scale
+		ActorRef.SetScale(ActorScale)
+		; Pick animation scale
+		if Controller.ActorCount > 1 && Lib.bScaleActors
+			AnimScale = (1.0 / base)
+		else
+			AnimScale = ActorScale
+		endIf
 	endIf
 endFunction
 
 function ClearAlias()
+	TryToClear()
+	TryToReset()
 	if GetReference() != none
-		TryToClear()
-		TryToReset()
-		Debug.Trace("SexLab: Clearing Actor Slot of "+ActorRef.GetLeveledActorBase().GetName())
 		ActorRef.EvaluatePackage()
-		Initialize()
+		Debug.Trace("SexLab: Clearing Actor Slot of "+ActorRef.GetLeveledActorBase().GetName())
 	endIf
+	Initialize()
 endFunction
 
 bool function IsCreature()
@@ -152,43 +161,13 @@ function UnlockActor()
 	ActorRef.SetVehicle(none)
 endFunction
 
-function PrepareActor()
-	if IsCreature
-		GoToState("Ready")
-		return ; Creatures need none of this
-	endIf
-	; Cleanup
-	if ActorRef.IsWeaponDrawn()
-		ActorRef.SheatheWeapon()
-	endIf
-	; Sexual animations only
-	if Controller.Animation.IsSexual()
-		Strip(DoUndress)
-	endIf
-	; Make erect for SOS
-	Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
-	GoToState("Ready")
-endFunction
+; function PrepareActor()
+; 	; Removed in favor of "Prepare" state events
+; endFunction
 
-function ResetActor()
-	UnregisterForUpdate()
-	if IsCreature
-		return ; Creatures need none of this
-	endIf
-	; Cleanup Actors
-	RemoveStrapon()
-	; Reset openmouth
-	ActorRef.ClearExpressionOverride()
-	MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
-	; Reset to starting scale
-	ActorRef.SetScale(scale)
-	; Make flaccid for SOS
-	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
-	; Unstrip
-	if !ActorRef.IsDead()
-		Lib.UnstripActor(ActorRef, EquipmentStorage, Controller.GetVictim())
-	endIf
-endFunction
+; function ResetActor()
+; 	; Removed in favor of "Reset" state events
+; endFunction
 
 function EquipStrapon()
 	if strapon == none && Lib.HasStrapon(ActorRef)
@@ -237,11 +216,7 @@ endFunction
 
 function AttachMarker()
 	ActorRef.SetVehicle(MarkerRef)
-	if Controller.ActorCount > 1 && Lib.bScaleActors
-		ActorRef.SetScale(evenScale)
-	else
-		ActorRef.SetScale(scale)
-	endIf
+	ActorRef.SetScale(AnimScale)
 endFunction
 
 function AlignTo(float[] offsets)
@@ -440,6 +415,31 @@ endFunction
 ;/-----------------------------------------------\;
 ;|	Animation/Voice Loop                         |;
 ;\-----------------------------------------------/;
+state Prepare
+	event OnBeginState()
+		RegisterForSingleUpdate(0.1)
+	endEvent
+	event OnUpdate()
+		; Lock movement
+		LockActor()
+		; Creatures need none of this
+		if IsCreature
+			GoToState("Ready")
+			return
+		endIf
+		; Cleanup
+		if ActorRef.IsWeaponDrawn()
+			ActorRef.SheatheWeapon()
+		endIf
+		; Sexual animations only
+		if Controller.Animation.IsSexual()
+			Strip(DoUndress)
+		endIf
+		; Make erect for SOS
+		Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
+		GoToState("Ready")
+	endEvent
+endState
 
 state Ready
 	event OnBeginState()
@@ -473,41 +473,48 @@ state Animating
 	endEvent
 endState
 
-;/-----------------------------------------------\;
-;|	Actor Callbacks                              |;
-;\-----------------------------------------------/;
-
-event OnStartThread(string eventName, string argString, float argNum, form sender)
-	UnregisterForModEvent("StartThread")
-	LockActor()
-	PrepareActor()
-endEvent
-
-event OnEndThread(string eventName, string argString, float argNum, form sender)
-	UnregisterForModEvent("EndThread")
-	UnregisterForUpdate()
-	; Update diary/journal stats for player
-	if IsPlayer
-		int[] genders = Lib.GenderCount(Controller.Positions)
-		Lib.Stats.UpdatePlayerStats(genders[0], genders[1], genders[2], Animation, Controller.GetVictim(), Controller.GetTime())
-	elseIf Controller.HasPlayer
-		Lib.Stats.AddPlayerSex(ActorRef)
-	endIf
-	; Reset actor
-	bool quick = (argNum as bool)
-	UnlockActor()
-	StopAnimating(quick)
-	ResetActor()
-	; Apply cum
-	int cum = Animation.GetCum(position)
-	if !quick && cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Lib.MaleCount(Controller.Positions) > 0)
-		Lib.ApplyCum(ActorRef, cum)
-	endIf
-	; Free up alias slot
-	ClearAlias()
-	Utility.Wait(0.5)
-	Initialize()
-endEvent
+state Reset
+	event OnBeginState()
+		RegisterForSingleUpdate(0.1)
+	endEvent
+	event OnUpdate()
+		UnregisterForUpdate()
+		; Update diary/journal stats for player
+		if IsPlayer
+			int[] genders = Lib.GenderCount(Controller.Positions)
+			Lib.Stats.UpdatePlayerStats(genders[0], genders[1], genders[2], Animation, Controller.GetVictim(), Controller.GetTime())
+		elseIf Controller.HasPlayer
+			Lib.Stats.AddPlayerSex(ActorRef)
+		endIf
+		; Apply cum
+		int cum = Animation.GetCum(position)
+		if !Controller.FastEnd && cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Lib.MaleCount(Controller.Positions) > 0)
+			Lib.ApplyCum(ActorRef, cum)
+		endIf
+		; Reset to starting scale
+		ActorRef.SetScale(ActorScale)
+		; Make flaccid for SOS
+		Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
+		; Reset the actor
+		StopAnimating(Controller.FastEnd)
+		if !IsCreature
+			; Cleanup extras
+			RemoveStrapon()
+			; Reset openmouth/mfg
+			ActorRef.ClearExpressionOverride()
+			MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
+		endIf
+		; Unstrip
+		if !ActorRef.IsDead()
+			Lib.UnstripActor(ActorRef, EquipmentStorage, Controller.GetVictim())
+		endIf
+		; Unlock their movement
+		UnlockActor()
+		; Free up alias slot
+		ClearAlias()
+		GoToState("")
+	endEvent
+endState
 
 ;/-----------------------------------------------\;
 ;|	Misc Functions                               |;
@@ -517,7 +524,6 @@ function Initialize()
 	; Clear events
 	UnregisterForUpdate()
 	UnregisterForAllModEvents()
-	GoToState("")
 	; Clear marker snapping
 	if ActorRef != none
 		ActorRef.StopTranslation()
@@ -536,13 +542,16 @@ function Initialize()
 	Animation = none
 	Expression = none
 	strapon = none
-	scale = 0.0
+	ActorScale = 0.0
+	AnimScale = 0.0
 	position = 0
 	stage = 0
 	form[] formDel
 	EquipmentStorage = formDel
 	bool[] boolDel
 	StripOverride = boolDel
+	; Reset state
+	GoToState("")
 endFunction
 
 

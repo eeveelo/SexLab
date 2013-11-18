@@ -51,6 +51,20 @@ bool function ActorWait(string waitfor)
 	return true
 endFunction
 
+function ActorAction(string stateAction, string stateFinish)
+	; Start actor action state
+	int i = ActorCount
+	while i
+		i -= 1
+		ActorAlias[i].GoToState(stateAction)
+	endWhile
+	; Wait for actors ready, or for 10 seconds to pass
+	float failsafe = Utility.GetCurrentRealTime() + 10.0
+	while !ActorWait(stateFinish) && failsafe > Utility.GetCurrentRealTime()
+		Utility.Wait(0.10)
+	endWhile
+endFunction
+
 state Preparing
 	event OnUpdate()
 		; Init
@@ -60,17 +74,27 @@ state Preparing
 		sfxInstance = 0
 		; Set random starting animation
 		SetAnimation()
-		; Setup actors
-		SendActorEvent("StartThread")
-		; Wait for actors ready, or for 10 seconds to pass
-		float failsafe = Utility.GetCurrentRealTime() + 10.0
-		while !ActorWait("Ready") && failsafe > Utility.GetCurrentRealTime()
-			Utility.Wait(0.20)
-		endWhile
+		; Set initial positioning actor
 		if IsPlayerPosition(AdjustingPosition) && ActorCount > 1 && !HasCreature
 			AdjustingPosition = ArrayWrap((AdjustingPosition + 1), ActorCount)
 		endIf
-		GotoState("Starting")
+		; Setup actors
+		ActorAction("Prepare", "Ready")
+		; Everything ready, send starting event
+		SendThreadEvent("AnimationStart")
+		if LeadIn
+			SendThreadEvent("LeadInStart")
+		endIf
+		; Start animation loops
+		int i = ActorCount
+		while i
+			i -= 1
+			ActorAlias[i].StartAnimating()
+		endWhile
+		; Record start time
+		started = Utility.GetCurrentRealTime()
+		; Begin first stage
+		GoToStage(1)
 	endEvent
 endState
 
@@ -93,7 +117,6 @@ function GoToStage(int toStage)
 	RegisterForSingleUpdate(0.10)
 endFunction
 
-
 function UpdateTimer(float toTimer = 0.0)
 	if toTimer > 0.0
 		advanceAt = Utility.GetCurrentRealTime() + toTimer
@@ -113,22 +136,6 @@ float function StageTimer()
 	endIf
 	return Timers[(last - 1)]
 endfunction
-
-state Starting
-	event OnBeginState()
-		SendThreadEvent("AnimationStart")
-		if LeadIn
-			SendThreadEvent("LeadInStart")
-		endIf
-		int i = ActorCount
-		while i
-			i -= 1
-			ActorAlias[i].StartAnimating()
-		endWhile
-		started = Utility.GetCurrentRealTime()
-		GoToStage(1)
-	endEvent
-endState
 
 state Advancing
 	event OnUpdate()
@@ -389,11 +396,6 @@ function EndAnimation(bool quick = false)
 	UnregisterForUpdate()
 	GoToState("")
 
-	; Immediately stop hotkeys to prevent further stage advancing
-	if HasPlayer
-		Lib.Actors._HKClear()
-	endIf
-
 	; TEMP DEBUG INFO
 	; Animation.Enabled = false
 	; Debug.Trace("########################################")
@@ -419,13 +421,17 @@ function EndAnimation(bool quick = false)
 	; 	i += 1
 	; endWhile
 
+	; Set fast flag to skip slow ending functions
+	FastEnd = quick
+	; Immediately stop hotkeys to prevent further stage advancing
+	if HasPlayer
+		Lib.Actors._HKClear()
+	endIf
+	; Send end event
 	SendThreadEvent("AnimationEnd")
-	SendActorEvent("EndThread", (quick as float))
-	; Wait for actors to clear, or for 5 seconds to pass
-	float failsafe = Utility.GetCurrentRealTime() + 5.0
-	while !ActorWait("") && failsafe > Utility.GetCurrentRealTime()
-		Utility.Wait(0.20)
-	endWhile
+	; Reset actors & wait for clear state
+	ActorAction("Reset", "")
+	; Clear & Reset animation thread
 	Initialize()
 endFunction
 
