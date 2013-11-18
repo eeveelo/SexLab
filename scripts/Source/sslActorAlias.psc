@@ -39,6 +39,7 @@ form[] EquipmentStorage
 bool[] StripOverride
 form strapon
 float scale
+float evenScale
 float[] loc
 
 ; Switches
@@ -80,6 +81,12 @@ function SetAlias(sslThreadController ThreadView)
 		IsCreature = gender == 2
 		IsPlayer = ActorRef == Lib.PlayerRef
 		IsVictim = ActorRef == ThreadView.GetVictim()
+		; Calculate scales
+		float display = ActorRef.GetScale()
+		ActorRef.SetScale(1.0)
+		float base = ActorRef.GetScale()
+		scale = ( display / base )
+		evenScale = (1.0 / base)
 	endIf
 endFunction
 
@@ -106,8 +113,6 @@ function LockActor()
 	ActorRef.AddToFaction(Lib.AnimatingFaction)
 	ActorRef.SetFactionRank(Lib.AnimatingFaction, 1)
 	ActorRef.EvaluatePackage()
-	; Attach positioning marker
-	ActorRef.SetVehicle(MarkerRef)
 	; Disable movement
 	if IsPlayer
 		Game.DisablePlayerControls(false, false, false, false, false, false, true, false, 0)
@@ -160,14 +165,6 @@ function PrepareActor()
 	if Controller.Animation.IsSexual()
 		Strip(DoUndress)
 	endIf
-	; Scale actor is enabled
-	if Controller.ActorCount > 1 && Lib.bScaleActors
-		float display = ActorRef.GetScale()
-		ActorRef.SetScale(1.0)
-		float base = ActorRef.GetScale()
-		scale = ( display / base )
-		ActorRef.SetScale(1.0 / base)
-	endIf
 	; Make erect for SOS
 	Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 	GoToState("Ready")
@@ -184,9 +181,7 @@ function ResetActor()
 	ActorRef.ClearExpressionOverride()
 	MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
 	; Reset to starting scale
-	if Controller.ActorCount > 1 && Lib.bScaleActors && scale > 0.0
-		ActorRef.SetScale(scale)
-	endIf
+	ActorRef.SetScale(scale)
 	; Make flaccid for SOS
 	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
 	; Unstrip
@@ -240,6 +235,15 @@ function StopAnimating(bool quick = false)
 	endIf
 endFunction
 
+function AttachMarker()
+	ActorRef.SetVehicle(MarkerRef)
+	if Controller.ActorCount > 1 && Lib.bScaleActors
+		ActorRef.SetScale(evenScale)
+	else
+		ActorRef.SetScale(scale)
+	endIf
+endFunction
+
 function AlignTo(float[] offsets)
 	float[] centerLoc = Controller.CenterLocation
 	loc = new float[6]
@@ -257,7 +261,7 @@ function AlignTo(float[] offsets)
 	endIf
 	MarkerRef.SetPosition(loc[0], loc[1], loc[2])
 	MarkerRef.SetAngle(loc[3], loc[4], loc[5])
-	ActorRef.SetVehicle(MarkerRef)
+	AttachMarker()
 	Snap()
 endfunction
 
@@ -268,20 +272,20 @@ function Snap()
 	; Quickly move into place if actor isn't positioned right
 	if ActorRef.GetDistance(MarkerRef) > 0.5
 		ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 1.0, 50000, 0)
-		ActorRef.SetVehicle(MarkerRef)
+		AttachMarker()
 		Utility.Wait(0.1)
 	endIf
 	; Force position if translation didn't move them properly
 	if ActorRef.GetDistance(MarkerRef) > 1.0
 		ActorRef.StopTranslation()
 		ActorRef.SetPosition(loc[0], loc[1], loc[2])
-		ActorRef.SetVehicle(MarkerRef)
+		AttachMarker()
 	endIf
 	; Force angle if translation didn't rotate them properly
-	if Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ()) > 0.5
+	if Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ()) > 0.5; || Math.Abs(ActorRef.GetAngleX() - MarkerRef.GetAngleX()) > 0.5
 		ActorRef.StopTranslation()
 		ActorRef.SetAngle(loc[3], loc[4], loc[5])
-		ActorRef.SetVehicle(MarkerRef)
+		AttachMarker()
 	endIf
 	; Begin very slowly rotating a small amount to hold position
 	ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5]+0.1, 1.0, 10000, 0.0001)
