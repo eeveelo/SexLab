@@ -62,8 +62,8 @@ state Preparing
 		SetAnimation()
 		; Setup actors
 		SendActorEvent("StartThread")
-		; Wait for actors ready, or for 7 seconds to pass
-		float failsafe = Utility.GetCurrentRealTime() + 7.0
+		; Wait for actors ready, or for 10 seconds to pass
+		float failsafe = Utility.GetCurrentRealTime() + 10.0
 		while !ActorWait("Ready") && failsafe > Utility.GetCurrentRealTime()
 			Utility.Wait(0.20)
 		endWhile
@@ -389,31 +389,35 @@ function EndAnimation(bool quick = false)
 	UnregisterForUpdate()
 	GoToState("")
 
+	; Immediately stop hotkeys to prevent further stage advancing
+	if HasPlayer
+		Lib.Actors._HKClear()
+	endIf
+
 	; TEMP DEBUG INFO
 	; Animation.Enabled = false
-	Debug.Trace("########################################")
-	Debug.Trace("####  "+Animation.Name)
-	Debug.Trace("########################################")
-	int i
-	while i < ActorCount
-		Debug.Trace("###### POSITION: "+ i + " IsFemale: "+Animation.GetGender(i) == 1)
-		int stages = 1
-		while stages <= Animation.StageCount()
-			float[] offsets = Animation.GetPositionOffsets(i, stages)
-			string curStage = "Stage ["+stages+"/"+Animation.StageCount()+"]"
-			Debug.Trace(curStage+" "+Animation.FetchPositionStage(i, stages))
-			Debug.Trace(curStage+" Calculated Forward: "+Animation.CalculateForward(i, stages))
-			Debug.Trace(curStage+" Raw Forward: "+offsets[0])
-			Debug.Trace(curStage+" Side: "+offsets[1])
-			Debug.Trace(curStage+" Up: "+offsets[2])
-			Debug.Trace(curStage+" Rotate: "+offsets[3])
-			Debug.Trace(curStage+" Mouth: "+Animation.UseOpenMouth(i, stages))
-			Debug.Trace(curStage+" SOS: "+Animation.GetSchlong(i, stages))
-			stages += 1
-		endWhile
-		i += 1
-	endWhile
-
+	; Debug.Trace("########################################")
+	; Debug.Trace("####  "+Animation.Name)
+	; Debug.Trace("########################################")
+	; int i
+	; while i < ActorCount
+	; 	Debug.Trace("###### POSITION: "+ i + " IsFemale: "+Animation.GetGender(i) == 1)
+	; 	int stages = 1
+	; 	while stages <= Animation.StageCount()
+	; 		float[] offsets = Animation.GetPositionOffsets(i, stages)
+	; 		string curStage = "Stage ["+stages+"/"+Animation.StageCount()+"]"
+	; 		Debug.Trace(curStage+" "+Animation.FetchPositionStage(i, stages))
+	; 		Debug.Trace(curStage+" Calculated Forward: "+Animation.CalculateForward(i, stages))
+	; 		Debug.Trace(curStage+" Raw Forward: "+offsets[0])
+	; 		Debug.Trace(curStage+" Side: "+offsets[1])
+	; 		Debug.Trace(curStage+" Up: "+offsets[2])
+	; 		Debug.Trace(curStage+" Rotate: "+offsets[3])
+	; 		Debug.Trace(curStage+" Mouth: "+Animation.UseOpenMouth(i, stages))
+	; 		Debug.Trace(curStage+" SOS: "+Animation.GetSchlong(i, stages))
+	; 		stages += 1
+	; 	endWhile
+	; 	i += 1
+	; endWhile
 
 	SendThreadEvent("AnimationEnd")
 	SendActorEvent("EndThread", (quick as float))
