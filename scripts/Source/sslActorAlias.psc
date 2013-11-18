@@ -81,7 +81,6 @@ function SetAlias(sslThreadController ThreadView)
 		IsFemale = gender == 1
 		IsCreature = gender == 2
 		IsPlayer = ActorRef == Lib.PlayerRef
-		IsVictim = ActorRef == ThreadView.GetVictim()
 		; Calculate scales
 		float display = ActorRef.GetScale()
 		ActorRef.SetScale(1.0)
@@ -187,6 +186,10 @@ function RemoveStrapon()
 	endIf
 	ActorRef.UnequipItem(strapon, false, true)
 	ActorRef.RemoveItem(strapon, 1, true)
+endFunction
+
+function MakeVictim(bool victimize = true)
+	IsVictim = victimize
 endFunction
 
 ;/-----------------------------------------------\;
@@ -398,9 +401,17 @@ function OverrideStrip(bool[] setStrip)
 	StripOverride = setStrip
 endFunction
 
-function SetVoice(sslBaseVoice toVoice)
+function SetVoice(sslBaseVoice toVoice, bool forceSilent = false)
+	if IsCreature
+		return
+	endIf
 	Voice = toVoice
+	if toVoice == none
+		Voice = Lib.VoiceLib.PickVoice(ActorRef)
+	endIf
+	IsSilent = forceSilent || IsSilent
 endFunction
+
 sslBaseVoice function GetVoice()
 	return Voice
 endFunction
@@ -408,6 +419,7 @@ endFunction
 function SetExpression(sslBaseExpression toExpression)
 	Expression = toExpression
 endFunction
+
 sslBaseExpression function GetExpression()
 	return Expression
 endFunction

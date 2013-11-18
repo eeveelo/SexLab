@@ -56,7 +56,6 @@ int function FindNext(actor[] Positions, sslBaseAnimation Animation, int offset,
 	return -1
 endFunction
 
-
 ObjectReference function FindBed(ObjectReference centerRef, float radius = 1000.0, bool ignoreUsed = true, ObjectReference ignore1 = none, ObjectReference ignore2 = none)
 	if centerRef == none || radius < 0
 		return none ; Invalid args

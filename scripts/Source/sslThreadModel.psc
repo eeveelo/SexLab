@@ -150,11 +150,11 @@ state Making
 		endIf
 		; Slot and parse
 		int id = -1
-		sslActorAlias slot = Lib.Actors.Slots.SlotActor(position, self as sslThreadController)
-		if slot == none
+		sslActorAlias Slot = Lib.Actors.Slots.SlotActor(position, self as sslThreadController)
+		if Slot == none
 			_Log("Failed to slot actor '"+position+"'", "AddActor", "FATAL")
 			return -1
-		elseif slot.IsCreature()
+		elseif Slot.IsCreature()
 			Race PosCreature = position.GetLeveledActorBase().GetRace()
 			if Creature != none && !Lib.Actors.AnimLib.AllowedCreatureCombination(PosCreature, Creature)
 				_Log("Invalid creature race combination '"+Creature.GetName()+"' & '"+PosCreature.GetName()+"'", "AddActor", "FATAL")
@@ -162,25 +162,23 @@ state Making
 			endIf
 			Creature = PosCreature
 		else
-			; Check for player
+			; Set voice
+			Slot.SetVoice(voice, forceSilent)
+			; Set Player actor
 			if position == Lib.PlayerRef
 				PlayerRef = position
 			endIf
-			; Pick voice for non creatures
-			if voice == none && !forceSilent
-				voice = Lib.Voices.PickVoice(position)
-			endIf
-			slot.SetVoice(voice)
+		endIf
+		; Set as victim
+		if isVictim
+			Slot.MakeVictim(true)
+			victim = position
 		endIf
 		; Push actor to positions array
 		Positions = sslUtility.PushActor(position, Positions)
 		id = ActorCount - 1
 		; Save Actor/Alias slot
-		ActorSlots[id] = slot
-		; Set as victim
-		if isVictim
-			victim = position
-		endIf
+		ActorSlots[id] = Slot
 		return id
 	endFunction
 
@@ -372,15 +370,15 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 		centerLoc[0] = centerLoc[0] + (32.0 * Math.sin(centerLoc[5]))
 		centerLoc[1] = centerLoc[1] + (32.0 * Math.cos(centerLoc[5]))
 		centerLoc[2] = centerLoc[2] + 37.0
-	elseif centerOn == Lib.PlayerRef || centerOn.HasKeyWordString("ActorTypeNPC")
-		ObjectReference Stager = centerOn.PlaceAtMe(Lib.SexLabStager)
-		if centerOn.GetDistance(Stager) < 600.0
-			centerLoc = GetCoords(Stager)
-		else
-			centerLoc = GetCoords(centerOn)
-		endIf
-		Stager.Disable()
-		Stager.Delete()
+	; elseif centerOn == Lib.PlayerRef || centerOn.HasKeyWordString("ActorTypeNPC")
+	; 	ObjectReference Stager = centerOn.PlaceAtMe(Lib.SexLabStager)
+	; 	if centerOn.GetDistance(Stager) < 600.0
+	; 		centerLoc = GetCoords(Stager)
+	; 	else
+	; 		centerLoc = GetCoords(centerOn)
+	; 	endIf
+	; 	Stager.Disable()
+	; 	Stager.Delete()
 	else
 		centerLoc = GetCoords(centerOn)
 	endIf
@@ -636,7 +634,7 @@ int function GetPlayerPosition()
 endFunction
 
 bool function IsPlayerActor(actor position)
-	return position == PlayerRef
+	return position == Lib.PlayerRef
 endFunction
 
 bool function IsPlayerPosition(int position)

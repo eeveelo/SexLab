@@ -5,6 +5,8 @@ sslActorStats property Stats auto
 sslActorSlots property Slots auto
 
 sslAnimationLibrary property AnimLib auto
+sslVoiceLibrary property VoiceLib auto
+sslExpressionLibrary property ExpressionLib auto
 
 ; Data
 faction property AnimatingFaction auto
