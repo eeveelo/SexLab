@@ -116,19 +116,19 @@ bool function IsCreature()
 	return IsCreature
 endFunction
 
-function SetCloned(actor clone)
+function SetCloned(actor CloneRef)
 	StopAnimating(true)
 	UnlockActor()
 
 	Clear()
-	ForceRefTo(clone)
+	ForceRefTo(CloneRef)
 	OrigRef = ActorRef
 
 	actor[] Positions = Controller.Positions
-	Positions[Positions.Find(ActorRef)] = clone
+	Positions[Positions.Find(ActorRef)] = CloneRef
 	Controller.Positions = Positions
 
-	ActorRef = clone
+	ActorRef = CloneRef
 	IsPlayer = false
 	IsCloned = true
 	LockActor()
@@ -326,7 +326,7 @@ function Snap()
 endFunction
 
 event OnTranslationComplete()
-	debug.trace(ActorRef+ " Translation Complete")
+	; debug.trace(ActorRef+ " Translation Complete")
 	Utility.Wait(0.25)
 	Snap()
 endEvent
@@ -572,9 +572,10 @@ state Reset
 	endEvent
 	event OnUpdate()
 		UnregisterForUpdate()
-		; Unclone 1st person actor
-		if IsCloned
+		; Reset camera to default state
+		if IsPlayer
 			Lib.ControlLib.ControlCamera.GoToState("")
+			Lib.ControlLib.EnableFreeCamera(false)
 		endIf
 		; Update diary/journal stats for player
 		if IsPlayer
