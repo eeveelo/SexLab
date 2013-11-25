@@ -8,6 +8,10 @@ ReferenceAlias property CloneAlias auto
 Actor property PlayerRef auto
 Race property CameraRace auto
 
+ImageSpaceModifier property FadeToBlack auto
+ImageSpaceModifier property FadeToBlackBack auto
+ImageSpaceModifier property FadeToBlackHold auto
+
 Armor property CameraHead auto
 VoiceType property SexLabVoiceM auto
 VoiceType property SexLabVoiceF auto
@@ -20,53 +24,37 @@ float NifScale
 float Scale
 ObjectReference MarkerRef
 
-
-
 event OnTranslationAlmostComplete()
 endEvent
 
 state FirstPerson
 	event OnTranslationAlmostComplete()
-		MarkerRef.MoveToNode(CloneRef, "NPCEyeBone")
-		; Game.ForceThirdPerson()
-		; PlayerRef.SetAngle(MarkerRef.GetAngleX(), MarkerRef.GetAngleY(), MarkerRef.GetAngleZ())
-		; PlayerRef.SetVehicle(CloneRef)
-		; Game.ForceFirstPerson()
-		Debug.Trace("Marker: "+MarkerRef.GetAngleX()+", "+MarkerRef.GetAngleY()+", "+MarkerRef.GetAngleZ())
-		Debug.Trace("Player: "+Playerref.GetAngleX()+", "+Playerref.GetAngleY()+", "+Playerref.GetAngleZ())
-		; float Z = MarkerRef.GetAngleZ()
-		; PlayerRef.SplineTranslateTo(MarkerRef.X + (Math.sin(Z) * -5.0), MarkerRef.Y + (Math.cos(Z) * -5.0), MarkerRef.Z + 1.0, 0, 0, 0, 1, 500, 0)
 		PlayerRef.SplineTranslateToRefNode(CloneRef, "NPCEyeBone", 1, 300, 0)
 	endEvent
 	event OnBeginState()
 		Debug.ToggleCollisions()
 		Debug.Notification("Entering First Person")
-		; Clear out existing clone
+		FadeToBlackHold.ApplyCrossFade(0.5)
+
+		; Get existing clone or make new one
 		if CloneAlias.GetReference() != none
-			CloneRef = CloneAlias.GetReference() as Actor
+			actor tmp = CloneAlias.GetReference() as Actor
 			CloneAlias.Clear()
+			tmp.Disable()
+			tmp.Delete()
 		endIf
-		if Cloneref != none
-			CloneRef.Disable()
-			CloneRef.Delete()
-			CloneRef = none
-		endIf
-
-		; Place clone
 		CloneRef = PlayerRef.PlaceAtMe(PlayerRef.GetLeveledActorBase(), 1) as Actor
-		CloneRef.MoveTo(PlayerRef)
 		Utility.Wait(0.1)
-
-		; Fill clone alias
+		CloneRef.MoveTo(PlayerRef)
 		CloneAlias.ForceRefTo(CloneRef)
 
-		; Give an empty voice type
-		ActorBase CloneBase = CloneRef.GetLeveledActorBase()
-		if CloneBase.GetSex() == 1
-			CloneBase.SetVoiceType(SexLabVoiceF)
-		else
-			CloneBase.SetVoiceType(SexLabVoiceM)
-		endIf
+		; ; Give an empty voice type
+		; ActorBase CloneBase = CloneRef.GetLeveledActorBase()
+		; if CloneBase.GetSex() == 1
+		; 	CloneBase.SetVoiceType(SexLabVoiceF)
+		; else
+		; 	CloneBase.SetVoiceType(SexLabVoiceM)
+		; endIf
 
 		PlayerRef.SetMotionType(PlayerRef.Motion_Keyframed)
 
@@ -84,68 +72,47 @@ state FirstPerson
 
 		CloneRef.SetHeadTracking(false)
 		CloneRef.EvaluatePackage()
-		; CloneRef.QueueNiNodeUpdate()
+		NetImmerse.SetNodeScale(CloneRef, "NPCEyeBone", 0.01, false)
+		NetImmerse.SetNodeScale(CloneRef, "NPC Head [Head]", 0.01, false)
+		CloneRef.QueueNiNodeUpdate()
 
 		; CloneRef.SetVehicle(PlayerRef)
 		PlayerAlias = ActorSlots.GetActorAlias(PlayerRef)
-		if PlayerAlias != none
-			PlayerAlias.SetCloned(CloneRef)
-		endIf
+		PlayerAlias.SetCloned(CloneRef)
 
-		; PlayerRace = PlayerRef.GetRace()
-		;PlayerRef.SetRace(CameraRace)
-		; CloneRef.SetRace(PlayerRace)
-
-		PlayerRef.SetVehicle(CloneRef)
-		PlayerRef.SetGhost(true)
-
-		NifScale = NetImmerse.GetNodeScale(PlayerRef, "NPC Root [Root]", true)
-		debug.trace("Before: "+NifScale+"/"+PlayerRef.GetScale())
-		NetImmerse.SetNodeScale(PlayerRef, "NPC Root [Root]", 0.01, true)
-		debug.trace("After:"+NifScale+"/"+PlayerRef.GetScale())
-
+		; Shrink player down
+		NifScale = NetImmerse.GetNodeScale(PlayerRef, "NPC", true)
+		NetImmerse.SetNodeScale(PlayerRef, "NPC", 0.001, true)
+		NetImmerse.SetNodeScale(PlayerRef, "NPCEyeBone", 0.01, true)
+		NetImmerse.SetNodeScale(PlayerRef, "Camera1st [Cam1]", 0.01, true)
+		NetImmerse.SetNodeScale(PlayerRef, "NPC Head [Head]", 0.01, true)
 		; Lib.PlayerRef.SetScale(0.01)
 		PlayerRef.QueueNiNodeUpdate()
+		PlayerRef.SetGhost(true)
+		PlayerRef.SetVehicle(CloneRef)
+		; Force into first person camera and hide body
 		Game.ForceFirstPerson()
 		Game.DisablePlayerControls(false, false, true, false, false, false, true, false, 0)
 		Game.ShowFirstPersonGeometry(false)
-		PlayerRef.ForceAddRagdollToWorld()
 
-		if MarkerRef == none && CloneRef != none
-			MarkerRef = CloneRef.PlaceAtMe(Lib.BaseMarker)
-		endIf
-		; MarkerRef.MoveToNode(CloneRef, "NPCEyeBone")
-		; float Z = MarkerRef.GetAngleZ()
-		; PlayerRef.SplineTranslateTo(MarkerRef.X + (Math.sin(Z) * -5.0), MarkerRef.Y + (Math.cos(Z) * -5.0), MarkerRef.Z + 1.0, 0, 0, 0, 1, 50000, 0)
+		; Poistion and loop
 		PlayerRef.SplineTranslateToRefNode(CloneRef, "NPCEyeBone", 1, 50000, 0)
-		Utility.Wait(0.1)
-		RegisterForSingleUpdate(0.1)
+		RegisterForSingleUpdate(2.5)
 
+		; Return to view
+		ImageSpaceModifier.RemoveCrossFade()
 	endEvent
 
 	event OnUpdate()
-		; if Math.Abs(PlayerRef.GetAngleZ() - CloneRef.GetAngleZ()) > 100
-		; 	PlayerRef.SetAngle(CloneRef.GetAngleX(), CloneRef.GetAngleY(), CloneRef.GetAngleZ())
-		; 	PlayerRef.SetVehicle(CloneRef)
-		; 	PlayerRef.SetScale(0.15)
-		; endIfw
+		; Renforce translation loop every so often
 		PlayerRef.SplineTranslateToRefNode(CloneRef, "NPCEyeBone", 1, 1000, 0)
-		; MarkerRef.MoveToNode(CloneRef, "NPCEyeBone")
-		; float Z = MarkerRef.GetAngleZ()
-		; PlayerRef.SplineTranslateTo(MarkerRef.X + (Math.sin(Z) * -5.0), MarkerRef.Y + (Math.cos(Z) * -5.0), MarkerRef.Z + 1.0, 0, 0, 0, 1, 1000, 0)
-		RegisterForSingleUpdate(1.0)
+		RegisterForSingleUpdate(2.5)
 	endEvent
 
 	event OnEndState()
 		UnregisterForUpdate()
 		Debug.ToggleCollisions()
-
-		if PlayerAlias != none
-			PlayerAlias.RemoveClone()
-		endIf
-
-		NetImmerse.SetNodeScale(PlayerRef, "NPC Root [Root]", NifScale, true)
-		debug.trace("Finish:"+NifScale+"/"+PlayerRef.GetScale())
+		FadeToBlackHold.ApplyCrossFade(0.5)
 
 		PlayerRef.SetVehicle(none)
 		PlayerRef.SetGhost(false)
@@ -154,32 +121,46 @@ state FirstPerson
 
 		Game.ShowFirstPersonGeometry(true)
 		Game.ForceThirdPerson()
+		; Reset player scale
+		NetImmerse.SetNodeScale(PlayerRef, "NPC", NifScale, true)
+		NetImmerse.SetNodeScale(PlayerRef, "NPCEyeBone", 1.0, true)
+		NetImmerse.SetNodeScale(PlayerRef, "Camera1st [Cam1]", 1.0, true)
+		NetImmerse.SetNodeScale(PlayerRef, "NPC Head [Head]", 1.0, true)
+		PlayerRef.QueueNiNodeUpdate()
+		PlayerAlias.RemoveClone()
 
+
+		CloneAlias.Clear()
 		CloneRef.Disable()
 		CloneRef.Delete()
 		CloneRef = none
+
+		ImageSpaceModifier.RemoveCrossFade()
 	endEvent
 endState
 
 state FreeCamera
 	event OnBeginState()
 		if Game.GetCameraState() != 3
+			Game.ForceThirdPerson()
 			ToggleFreeCamera()
 		endIf
 	endEvent
 	event OnEndState()
 		if Game.GetCameraState() == 3
 			ToggleFreeCamera()
+			Game.ForceThirdPerson()
 		endIf
 	endEvent
 endState
 
-
 bool function ToggleFreeCamera()
+	FadeToBlackHold.ApplyCrossFade(0.5)
 	TFC = true
 	RegisterForMenu("Console")
 	Input.Tapkey(Input.GetMappedKey("Console", 0))
 	Utility.Wait(0.01)
+	ImageSpaceModifier.RemoveCrossFade()
 	; Return current TFC state
 	return Game.GetCameraState() == 3
 endFunction

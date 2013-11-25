@@ -2,7 +2,7 @@ scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
 int function GetVersion()
-	return 12500
+	return 12900
 endFunction
 
 string function GetStringVer()
@@ -1586,7 +1586,6 @@ function _CheckSystem()
 	endIf
 	; DEBUG TESTING Init expressions
 	;ExpressionSlots._Setup()
-	; DEBUG Globally enable 1st person cam switch
+	; DEBUG reset controls
 	ControlLib._Defaults()
-	ControlLib.RegisterForKey(ControlLib.kToggleCamera)
 endFunction

@@ -23,7 +23,8 @@ int property kRealignActors auto hidden ; [
 int property kMoveScene auto hidden ; ]
 int property kRestoreOffsets auto hidden ; -
 int property kRotateScene auto hidden ; U
-int property kToggleCamera auto hidden ; NUM 1
+int property kToggle1stCamera auto hidden ; NUM 1
+int property kToggleFreeCamera auto hidden ; NUM 1
 
 ; Local
 bool hkReady
@@ -37,6 +38,9 @@ function EnableFreeCamera(bool enableIt = true)
 		ControlCamera.GoToState("FreeCamera")
 	elseIf !enableIt && InFreeCamera()
 		ControlCamera.GoToState("")
+		if InFreeCamera()
+			ControlCamera.ToggleFreeCamera()
+		endIf
 	endIf
 endFunction
 
@@ -60,7 +64,8 @@ function _HKStart(sslThreadController Controller)
 	RegisterForKey(kRestoreOffsets)
 	RegisterForKey(kMoveScene)
 	RegisterForKey(kRotateScene)
-	RegisterForKey(kToggleCamera)
+	RegisterForKey(kToggle1stCamera)
+	RegisterForKey(kToggleFreeCamera)
 	PlayerController = Controller
 	hkReady = true
 endFunction
@@ -69,24 +74,9 @@ function _HKClear()
 	UnregisterForAllKeys()
 	PlayerController = none
 	hkReady = true
-	; DEBUG: Keep enabled
-	RegisterForKey(kToggleCamera)
 endFunction
 
 event OnKeyDown(int keyCode)
-	debug.trace("HotkeyLib: "+keyCode)
-	if keyCode == kToggleCamera
-		string current = ControlCamera.GetState()
-		if current == ""
-			ControlCamera.GoToState("FirstPerson")
-		;elseIf current == "FirstPerson"
-		;	ControlCamera.GoToState("FreeCamera")
-		else
-			ControlCamera.GoToState("")
-		endIf
-	endIf
-
-
 	if PlayerController != none && hkReady && !UI.IsMenuOpen("Console") && !UI.IsMenuOpen("Main Menu") && !UI.IsMenuOpen("Loading Menu") && !UI.IsMenuOpen("MessageBoxMenu")
 		hkReady = false
 		Utility.Wait(0.001)
@@ -140,6 +130,20 @@ event OnKeyDown(int keyCode)
 		; Rotate Scene
 		elseIf keyCode == kRotateScene
 			PlayerController.RotateScene(backwards)
+		; Toggle First Person
+		elseIf keyCode == kToggle1stCamera
+			if ControlCamera.GetState() != "FirstPerson"
+				ControlCamera.GoToState("FirstPerson")
+			else
+				ControlCamera.GoToState("")
+			endIf
+		; Toggle TFC
+		elseIf keyCode == kToggleFreeCamera
+			if ControlCamera.GetState() != "FreeCamera"
+				ControlCamera.GoToState("FreeCamera")
+			else
+				ControlCamera.GoToState("")
+			endIf
 		endIf
 		hkReady = true
 	endIf
@@ -162,5 +166,6 @@ function _Defaults()
 	kMoveScene = 27 ; ]
 	kRestoreOffsets = 12 ; -
 	kRotateScene = 22 ; U
-	kToggleCamera = 79 ; NUM 1
+	kToggle1stCamera = 79 ; NUM 1
+	kToggleFreeCamera = 81 ; NUM 3
 endFunction
