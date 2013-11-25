@@ -6,6 +6,7 @@ sslAnimationLibrary property AnimLib auto
 sslVoiceLibrary property VoiceLib auto
 sslThreadLibrary property ThreadLib auto
 sslActorLibrary property ActorLib auto
+sslControlLibrary property ControlLib auto
 
 ; Animation Library
 bool property bRestrictAggressive hidden
@@ -17,7 +18,7 @@ endProperty
 ; Voice Library
 string property sPlayerVoice hidden
 	string function get()
-		return VoiceLib.sPlayerVoice 
+		return VoiceLib.sPlayerVoice
 	endFunction
 endProperty
 
@@ -99,7 +100,7 @@ bool property bDisablePlayer hidden
 		return ActorLib.bDisablePlayer
 	endFunction
 endProperty
-bool property bEnableTCL hidden 
+bool property bEnableTCL hidden
 	bool function get()
 		return ActorLib.bEnableTCL
 	endFunction
@@ -171,66 +172,66 @@ float property fCumTimer hidden
 endProperty
 int property kBackwards hidden
 	int function get()
-		return ActorLib.kBackwards
+		return ControlLib.kBackwards
 	endFunction
 endProperty
 int property kAdjustStage hidden
 	int function get()
-		return ActorLib.kAdjustStage
+		return ControlLib.kAdjustStage
 	endFunction
 endProperty
 int property kAdvanceAnimation hidden
 	int function get()
-		return ActorLib.kAdvanceAnimation
+		return ControlLib.kAdvanceAnimation
 	endFunction
 endProperty
 int property kChangeAnimation hidden
 	int function get()
-		return ActorLib.kChangeAnimation
+		return ControlLib.kChangeAnimation
 	endFunction
 endProperty
 int property kChangePositions hidden
 	int function get()
-		return ActorLib.kChangePositions
+		return ControlLib.kChangePositions
 	endFunction
 endProperty
 int property kAdjustChange hidden
 	int function get()
-		return ActorLib.kAdjustChange
+		return ControlLib.kAdjustChange
 	endFunction
 endProperty
 int property kAdjustForward hidden
 	int function get()
-		return ActorLib.kAdjustForward
+		return ControlLib.kAdjustForward
 	endFunction
 endProperty
 int property kAdjustSideways hidden
 	int function get()
-		return ActorLib.kAdjustSideways
+		return ControlLib.kAdjustSideways
 	endFunction
 endProperty
 int property kAdjustUpward hidden
 	int function get()
-		return ActorLib.kAdjustUpward
+		return ControlLib.kAdjustUpward
 	endFunction
 endProperty
 int property kRealignActors hidden
 	int function get()
-		return ActorLib.kRealignActors
+		return ControlLib.kRealignActors
 	endFunction
 endProperty
 int property kMoveScene hidden
 	int function get()
-		return ActorLib.kMoveScene
+		return ControlLib.kMoveScene
 	endFunction
 endProperty
 int property kRestoreOffsets hidden
 	int function get()
-		return ActorLib.kRestoreOffsets
+		return ControlLib.kRestoreOffsets
 	endFunction
 endProperty
 int property kRotateScene hidden
 	int function get()
-		return ActorLib.kRotateScene
+		return ControlLib.kRotateScene
 	endFunction
 endProperty

@@ -6,6 +6,7 @@ sslCreatureAnimationSlots property CreatureAnimations auto
 sslVoiceLibrary property Voices auto
 sslActorLibrary property Actors auto
 sslExpressionLibrary property Expressions auto
+sslControlLibrary property ControlLib auto
 
 ; Data
 actor property PlayerRef auto

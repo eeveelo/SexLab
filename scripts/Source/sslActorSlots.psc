@@ -91,5 +91,5 @@ function _Setup()
 	endWhile
 
 	; Reind Hotkeys
-	Lib._HKClear()
+	Lib.ControlLib._HKClear()
 endFunction

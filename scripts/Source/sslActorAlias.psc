@@ -42,6 +42,10 @@ float ActorScale
 float AnimScale
 float[] loc
 
+; actor PlayerClone
+bool IsCloned
+actor OrigRef
+
 ; Switches
 bool disableRagdoll
 bool property DoRagdoll hidden
@@ -112,6 +116,45 @@ bool function IsCreature()
 	return IsCreature
 endFunction
 
+function SetCloned(actor clone)
+	StopAnimating(true)
+	UnlockActor()
+
+	Clear()
+	ForceRefTo(clone)
+	OrigRef = ActorRef
+
+	actor[] Positions = Controller.Positions
+	Positions[Positions.Find(ActorRef)] = clone
+	Controller.Positions = Positions
+
+	ActorRef = clone
+	IsPlayer = false
+	IsCloned = true
+	LockActor()
+	Controller.RealignActors()
+	Lib.ControlLib._HKStart(Controller)
+	; debug.traceandbox(ActorRef+" After: "+Controller.Positions)
+endFunction
+
+function RemoveClone()
+	actor[] Positions = Controller.Positions
+	Positions[Positions.Find(ActorRef)] = OrigRef
+	Controller.Positions = Positions
+
+	ActorRef = OrigRef
+	IsPlayer = true
+	IsCloned = false
+
+	Clear()
+	ForceRefTo(OrigRef)
+	OrigRef = none
+
+	LockActor()
+	Controller.RealignActors()
+	Lib.ControlLib._HKStart(Controller)
+endFunction
+
 ;/-----------------------------------------------\;
 ;|	Preparation Functions                        |;
 ;\-----------------------------------------------/;
@@ -131,7 +174,7 @@ function LockActor()
 		if IsVictim && Lib.bDisablePlayer
 			Controller.AutoAdvance = true
 		else
-			Lib._HKStart(Controller)
+			Lib.ControlLib._HKStart(Controller)
 		endIf
 	else
 		ActorRef.SetRestrained(true)
@@ -143,7 +186,7 @@ endFunction
 function UnlockActor()
 	; Enable movement
 	if IsPlayer
-		Lib._HKClear()
+		Lib.ControlLib._HKClear()
 		Game.EnablePlayerControls(false, false, false, false, false, false, true, false, 0)
 		Game.SetPlayerAIDriven(false)
 		; Game.SetInChargen(false, false, false)
@@ -218,11 +261,16 @@ function StopAnimating(bool quick = false)
 endFunction
 
 function AttachMarker()
+	if IsCloned
+		OrigRef.SetVehicle(ActorRef)
+		; NetImmerse.SetNodeScale(Lib.PlayerRef, "skeleton.nif", 0.01, true)
+		; Lib.PlayerRef.SetScale(0.01)
+	endIf
 	ActorRef.SetVehicle(MarkerRef)
 	ActorRef.SetScale(AnimScale)
 endFunction
 
-function AlignTo(float[] offsets)
+function AlignTo(float[] offsets, bool forceTo = false)
 	float[] centerLoc = Controller.CenterLocation
 	loc = new float[6]
 	; Determine offsets coordinates from center
@@ -237,9 +285,17 @@ function AlignTo(float[] offsets)
 	elseIf loc[5] < 0.0
 		loc[5] = loc[5] + 360.0
 	endIf
+	; Set Marker Position
 	MarkerRef.SetPosition(loc[0], loc[1], loc[2])
 	MarkerRef.SetAngle(loc[3], loc[4], loc[5])
 	AttachMarker()
+	; Force actor location
+	if forceTo
+		ActorRef.SetPosition(loc[0], loc[1], loc[2])
+		ActorRef.SetAngle(loc[3], loc[4], loc[5])
+		AttachMarker()
+	endIf
+	; Soft snap actor location
 	Snap()
 endfunction
 
@@ -270,6 +326,7 @@ function Snap()
 endFunction
 
 event OnTranslationComplete()
+	debug.trace(ActorRef+ " Translation Complete")
 	Utility.Wait(0.25)
 	Snap()
 endEvent
@@ -356,9 +413,9 @@ function SyncThread()
 			if stage > 1
 				VoiceDelay = (VoiceDelay - (stage * 0.8)) + Utility.RandomFloat(-0.3, 0.3)
 			endIf
-			; Min 1.3 delay
-			if VoiceDelay < 1.3
-				VoiceDelay = 1.3
+			; Min 1.2 delay
+			if VoiceDelay < 1.2
+				VoiceDelay = 1.2
 			endIf
 		endIf
 		; Animation related stuffs
@@ -461,7 +518,7 @@ state Ready
 		Active = true
 		SyncThread()
 		GoToState("Animating")
-		RegisterForSingleUpdate(Utility.RandomFloat(0.0, 0.8))
+		RegisterForSingleUpdate(Utility.RandomFloat(0.1, 0.8))
 	endFunction
 endState
 
@@ -471,17 +528,41 @@ state Animating
 			Controller.EndAnimation(true)
 			return
 		endIf
+		if Expression != none
+			Expression.ClearMFG(ActorRef)
+		endIf
+		if Voice != none
+			if VoiceInstance > 0
+				Sound.StopInstance(VoiceInstance)
+			endIf
+			VoiceInstance = Voice.Moan(ActorRef, strength, IsVictim)
+			Sound.SetInstanceVolume(VoiceInstance, Lib.fVoiceVolume)
+		endIf
+		if Expression != none
+			Expression.ApplyTo(ActorRef, strength)
+		endIf
 		RegisterForSingleUpdate(VoiceDelay)
-		if IsCreature || IsSilent || Voice == none
-			return
+	endEvent
+endState
+
+state Orgasm
+	event OnBeginState()
+		if IsPlayer
+			Lib.UnregisterForKey(Lib.ControlLib.kAdvanceAnimation)
 		endIf
-		if VoiceInstance > 0
-			Sound.StopInstance(VoiceInstance)
+		RegisterForSingleUpdate(0.1)
+	endEvent
+	event OnUpdate()
+		; Apply cum
+		int cum = Animation.GetCum(position)
+		if cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Lib.MaleCount(Controller.Positions) > 0)
+			Lib.ApplyCum(ActorRef, cum)
 		endIf
-		Expression.ClearMFG(ActorRef)
-		VoiceInstance = Voice.Moan(ActorRef, strength, IsVictim)
-		Sound.SetInstanceVolume(VoiceInstance, Lib.fVoiceVolume)
-		Expression.ApplyTo(ActorRef, strength)
+		; Voice
+		strength = 100
+		VoiceDelay = 1.0
+		GoToState("Animating")
+		RegisterForSingleUpdate(0.1)
 	endEvent
 endState
 
@@ -491,6 +572,10 @@ state Reset
 	endEvent
 	event OnUpdate()
 		UnregisterForUpdate()
+		; Unclone 1st person actor
+		if IsCloned
+			Lib.ControlLib.ControlCamera.GoToState("")
+		endIf
 		; Update diary/journal stats for player
 		if IsPlayer
 			int[] genders = Lib.GenderCount(Controller.Positions)
@@ -498,13 +583,13 @@ state Reset
 		elseIf Controller.HasPlayer
 			Lib.Stats.AddPlayerSex(ActorRef)
 		endIf
-		; Apply cum
+		; Reset to starting scale
+		ActorRef.SetScale(ActorScale)
+		; Reapply cum
 		int cum = Animation.GetCum(position)
 		if !Controller.FastEnd && cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Lib.MaleCount(Controller.Positions) > 0)
 			Lib.ApplyCum(ActorRef, cum)
 		endIf
-		; Reset to starting scale
-		ActorRef.SetScale(ActorScale)
 		; Make flaccid for SOS
 		Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
 		; Reset the actor
@@ -549,6 +634,8 @@ function Initialize()
 	MarkerObj = none
 	ActorRef = none
 	Active = false
+	IsCloned = false
+	OrigRef = none
 	Controller = none
 	Voice = none
 	Animation = none

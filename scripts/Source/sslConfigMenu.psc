@@ -2,7 +2,7 @@ scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
 int function GetVersion()
-	return 12400
+	return 12500
 endFunction
 
 string function GetStringVer()
@@ -21,7 +21,7 @@ event OnVersionUpdate(int version)
 		Debug.Notification("Updating to SexLab v"+GetStringVer())
 	endIf
 	; Resetup system
-	if current > 0 && current < 1.23
+	if current > 0 && current < 1.25
 		_SetupSystem()
 	endIf
 endEvent
@@ -59,6 +59,8 @@ sslThreadLibrary property ThreadLib auto
 sslActorSlots property ActorSlots auto
 sslActorLibrary property ActorLib auto
 sslActorStats property Stats auto
+
+sslControlLibrary property ControlLib auto
 
 ; Data
 actor property PlayerRef auto
@@ -189,23 +191,23 @@ event OnPageReset(string page)
 		SetCursorFillMode(TOP_TO_BOTTOM)
 
 		AddHeaderOption("$SSL_SceneManipulation")
-		AddKeyMapOptionST("BackwardsModifier", "$SSL_ReverseDirectionModifier", ActorLib.kBackwards)
-		AddKeyMapOptionST("AdvanceAnimation", "$SSL_AdvanceAnimationStage", ActorLib.kAdvanceAnimation)
-		AddKeyMapOptionST("ChangeAnimation", "$SSL_ChangeAnimationSet", ActorLib.kChangeAnimation)
-		AddKeyMapOptionST("ChangePositions", "$SSL_SwapActorPositions", ActorLib.kChangePositions)
-		AddKeyMapOptionST("MoveSceneLocation", "$SSL_MoveSceneLocation", ActorLib.kMoveScene)
-		AddKeyMapOptionST("RotateScene", "$SSL_RotateScene", ActorLib.kRotateScene)
+		AddKeyMapOptionST("BackwardsModifier", "$SSL_ReverseDirectionModifier", ControlLib.kBackwards)
+		AddKeyMapOptionST("AdvanceAnimation", "$SSL_AdvanceAnimationStage", ControlLib.kAdvanceAnimation)
+		AddKeyMapOptionST("ChangeAnimation", "$SSL_ChangeAnimationSet", ControlLib.kChangeAnimation)
+		AddKeyMapOptionST("ChangePositions", "$SSL_SwapActorPositions", ControlLib.kChangePositions)
+		AddKeyMapOptionST("MoveSceneLocation", "$SSL_MoveSceneLocation", ControlLib.kMoveScene)
+		AddKeyMapOptionST("RotateScene", "$SSL_RotateScene", ControlLib.kRotateScene)
 
 		SetCursorPosition(1)
 
 		AddHeaderOption("$SSL_AlignmentAdjustments")
-		AddKeyMapOptionST("AdjustStage","$SSL_AdjustStage", ActorLib.kAdjustStage)
-		AddKeyMapOptionST("AdjustChange","$SSL_ChangeActorBeingMoved", ActorLib.kAdjustChange)
-		AddKeyMapOptionST("AdjustForward","$SSL_MoveActorForwardBackward", ActorLib.kAdjustForward)
-		AddKeyMapOptionST("AdjustUpward","$SSL_AdjustPositionUpwardDownward", ActorLib.kAdjustUpward)
-		AddKeyMapOptionST("AdjustSideways","$SSL_MoveActorLeftRight", ActorLib.kAdjustSideways)
-		AddKeyMapOptionST("RealignActors","$SSL_RealignActors", ActorLib.kRealignActors)
-		AddKeyMapOptionST("RestoreOffsets","$SSL_DeleteSavedAdjustments", ActorLib.kRestoreOffsets)
+		AddKeyMapOptionST("AdjustStage","$SSL_AdjustStage", ControlLib.kAdjustStage)
+		AddKeyMapOptionST("AdjustChange","$SSL_ChangeActorBeingMoved", ControlLib.kAdjustChange)
+		AddKeyMapOptionST("AdjustForward","$SSL_MoveActorForwardBackward", ControlLib.kAdjustForward)
+		AddKeyMapOptionST("AdjustUpward","$SSL_AdjustPositionUpwardDownward", ControlLib.kAdjustUpward)
+		AddKeyMapOptionST("AdjustSideways","$SSL_MoveActorLeftRight", ControlLib.kAdjustSideways)
+		AddKeyMapOptionST("RealignActors","$SSL_RealignActors", ControlLib.kRealignActors)
+		AddKeyMapOptionST("RestoreOffsets","$SSL_DeleteSavedAdjustments", ControlLib.kRestoreOffsets)
 
 	elseIf page == "$SSL_NormalTimersStripping"
 		SetCursorFillMode(TOP_TO_BOTTOM)
@@ -875,13 +877,13 @@ endFunction
 state BackwardsModifier
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			ActorLib.kBackwards = newKeyCode
-			SetKeyMapOptionValueST(ActorLib.kBackwards)
+			ControlLib.kBackwards = newKeyCode
+			SetKeyMapOptionValueST(ControlLib.kBackwards)
 		endIf
 	endEvent
 	event OnDefaultST()
-		ActorLib.kBackwards = 54
-		SetKeyMapOptionValueST(ActorLib.kBackwards)
+		ControlLib.kBackwards = 54
+		SetKeyMapOptionValueST(ControlLib.kBackwards)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoBackwards")
@@ -890,13 +892,13 @@ endState
 state AdvanceAnimation
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			ActorLib.kAdvanceAnimation = newKeyCode
-			SetKeyMapOptionValueST(ActorLib.kAdvanceAnimation)
+			ControlLib.kAdvanceAnimation = newKeyCode
+			SetKeyMapOptionValueST(ControlLib.kAdvanceAnimation)
 		endIf
 	endEvent
 	event OnDefaultST()
-		ActorLib.kAdvanceAnimation = 57
-		SetKeyMapOptionValueST(ActorLib.kAdvanceAnimation)
+		ControlLib.kAdvanceAnimation = 57
+		SetKeyMapOptionValueST(ControlLib.kAdvanceAnimation)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAdvanceAnimation")
@@ -905,13 +907,13 @@ endState
 state ChangeAnimation
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			ActorLib.kChangeAnimation = newKeyCode
-			SetKeyMapOptionValueST(ActorLib.kChangeAnimation)
+			ControlLib.kChangeAnimation = newKeyCode
+			SetKeyMapOptionValueST(ControlLib.kChangeAnimation)
 		endIf
 	endEvent
 	event OnDefaultST()
-		ActorLib.kChangeAnimation = 24
-		SetKeyMapOptionValueST(ActorLib.kChangeAnimation)
+		ControlLib.kChangeAnimation = 24
+		SetKeyMapOptionValueST(ControlLib.kChangeAnimation)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoChangeAnimation")
@@ -920,13 +922,13 @@ endState
 state ChangePositions
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			ActorLib.kChangePositions = newKeyCode
-			SetKeyMapOptionValueST(ActorLib.kChangePositions)
+			ControlLib.kChangePositions = newKeyCode
+			SetKeyMapOptionValueST(ControlLib.kChangePositions)
 		endIf
 	endEvent
 	event OnDefaultST()
-		ActorLib.kChangePositions = 13
-		SetKeyMapOptionValueST(ActorLib.kChangePositions)
+		ControlLib.kChangePositions = 13
+		SetKeyMapOptionValueST(ControlLib.kChangePositions)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoChangePositions")
@@ -935,13 +937,13 @@ endState
 state MoveSceneLocation
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			ActorLib.kMoveScene = newKeyCode
-			SetKeyMapOptionValueST(ActorLib.kMoveScene)
+			ControlLib.kMoveScene = newKeyCode
+			SetKeyMapOptionValueST(ControlLib.kMoveScene)
 		endIf
 	endEvent
 	event OnDefaultST()
-		ActorLib.kMoveScene = 27
-		SetKeyMapOptionValueST(ActorLib.kMoveScene)
+		ControlLib.kMoveScene = 27
+		SetKeyMapOptionValueST(ControlLib.kMoveScene)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoMoveScene")
@@ -950,13 +952,13 @@ endState
 state RotateScene
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			ActorLib.kRotateScene = newKeyCode
-			SetKeyMapOptionValueST(ActorLib.kRotateScene)
+			ControlLib.kRotateScene = newKeyCode
+			SetKeyMapOptionValueST(ControlLib.kRotateScene)
 		endIf
 	endEvent
 	event OnDefaultST()
-		ActorLib.kRotateScene = 22
-		SetKeyMapOptionValueST(ActorLib.kRotateScene)
+		ControlLib.kRotateScene = 22
+		SetKeyMapOptionValueST(ControlLib.kRotateScene)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoRotateScene")
@@ -965,13 +967,13 @@ endState
 state AdjustStage
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			ActorLib.kAdjustStage = newKeyCode
-			SetKeyMapOptionValueST(ActorLib.kAdjustStage)
+			ControlLib.kAdjustStage = newKeyCode
+			SetKeyMapOptionValueST(ControlLib.kAdjustStage)
 		endIf
 	endEvent
 	event OnDefaultST()
-		ActorLib.kAdjustStage = 157
-		SetKeyMapOptionValueST(ActorLib.kAdjustStage)
+		ControlLib.kAdjustStage = 157
+		SetKeyMapOptionValueST(ControlLib.kAdjustStage)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAdjustStage")
@@ -981,13 +983,13 @@ endState
 state AdjustChange
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			ActorLib.kAdjustChange = newKeyCode
-			SetKeyMapOptionValueST(ActorLib.kAdjustChange)
+			ControlLib.kAdjustChange = newKeyCode
+			SetKeyMapOptionValueST(ControlLib.kAdjustChange)
 		endIf
 	endEvent
 	event OnDefaultST()
-		ActorLib.kAdjustChange = 37
-		SetKeyMapOptionValueST(ActorLib.kAdjustChange)
+		ControlLib.kAdjustChange = 37
+		SetKeyMapOptionValueST(ControlLib.kAdjustChange)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAdjustChange")
@@ -996,13 +998,13 @@ endState
 state AdjustForward
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			ActorLib.kAdjustForward = newKeyCode
-			SetKeyMapOptionValueST(ActorLib.kAdjustForward)
+			ControlLib.kAdjustForward = newKeyCode
+			SetKeyMapOptionValueST(ControlLib.kAdjustForward)
 		endIf
 	endEvent
 	event OnDefaultST()
-		ActorLib.kAdjustForward = 38
-		SetKeyMapOptionValueST(ActorLib.kAdjustForward)
+		ControlLib.kAdjustForward = 38
+		SetKeyMapOptionValueST(ControlLib.kAdjustForward)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAdjustForward")
@@ -1011,13 +1013,13 @@ endState
 state AdjustUpward
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			ActorLib.kAdjustUpward = newKeyCode
-			SetKeyMapOptionValueST(ActorLib.kAdjustUpward)
+			ControlLib.kAdjustUpward = newKeyCode
+			SetKeyMapOptionValueST(ControlLib.kAdjustUpward)
 		endIf
 	endEvent
 	event OnDefaultST()
-		ActorLib.kAdjustUpward = 39
-		SetKeyMapOptionValueST(ActorLib.kAdjustUpward)
+		ControlLib.kAdjustUpward = 39
+		SetKeyMapOptionValueST(ControlLib.kAdjustUpward)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAdjustUpward")
@@ -1026,13 +1028,13 @@ endState
 state AdjustSideways
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			ActorLib.kAdjustSideways = newKeyCode
-			SetKeyMapOptionValueST(ActorLib.kAdjustSideways)
+			ControlLib.kAdjustSideways = newKeyCode
+			SetKeyMapOptionValueST(ControlLib.kAdjustSideways)
 		endIf
 	endEvent
 	event OnDefaultST()
-		ActorLib.kAdjustSideways = 40
-		SetKeyMapOptionValueST(ActorLib.kAdjustSideways)
+		ControlLib.kAdjustSideways = 40
+		SetKeyMapOptionValueST(ControlLib.kAdjustSideways)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAdjustSideways")
@@ -1041,13 +1043,13 @@ endState
 state RealignActors
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			ActorLib.kRealignActors = newKeyCode
-			SetKeyMapOptionValueST(ActorLib.kRealignActors)
+			ControlLib.kRealignActors = newKeyCode
+			SetKeyMapOptionValueST(ControlLib.kRealignActors)
 		endIf
 	endEvent
 	event OnDefaultST()
-		ActorLib.kRealignActors = 26
-		SetKeyMapOptionValueST(ActorLib.kRealignActors)
+		ControlLib.kRealignActors = 26
+		SetKeyMapOptionValueST(ControlLib.kRealignActors)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoRealignActors")
@@ -1056,13 +1058,13 @@ endState
 state RestoreOffsets
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			ActorLib.kRestoreOffsets = newKeyCode
-			SetKeyMapOptionValueST(ActorLib.kRestoreOffsets)
+			ControlLib.kRestoreOffsets = newKeyCode
+			SetKeyMapOptionValueST(ControlLib.kRestoreOffsets)
 		endIf
 	endEvent
 	event OnDefaultST()
-		ActorLib.kRestoreOffsets = 12
-		SetKeyMapOptionValueST(ActorLib.kRestoreOffsets)
+		ControlLib.kRestoreOffsets = 12
+		SetKeyMapOptionValueST(ControlLib.kRestoreOffsets)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoRestoreOffsets")
@@ -1584,4 +1586,7 @@ function _CheckSystem()
 	endIf
 	; DEBUG TESTING Init expressions
 	;ExpressionSlots._Setup()
+	; DEBUG Globally enable 1st person cam switch
+	ControlLib._Defaults()
+	ControlLib.RegisterForKey(ControlLib.kToggleCamera)
 endFunction

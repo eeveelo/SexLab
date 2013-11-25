@@ -7,6 +7,7 @@ sslActorSlots property Slots auto
 sslAnimationLibrary property AnimLib auto
 sslVoiceLibrary property VoiceLib auto
 sslExpressionLibrary property ExpressionLib auto
+sslControlLibrary property ControlLib auto
 
 ; Data
 faction property AnimatingFaction auto
@@ -52,20 +53,6 @@ bool property bRagdollEnd auto hidden
 bool property bUseMaleNudeSuit auto hidden
 bool property bUseFemaleNudeSuit auto hidden
 bool property bUndressAnimation auto hidden
-
-int property kBackwards auto hidden ; Right Shift
-int property kAdjustStage auto hidden; Right Ctrl
-int property kAdvanceAnimation auto hidden ; Space
-int property kChangeAnimation auto hidden ; O
-int property kChangePositions auto hidden ; =
-int property kAdjustChange auto hidden ; K
-int property kAdjustForward auto hidden ; L
-int property kAdjustSideways auto hidden ; '
-int property kAdjustUpward auto hidden ; ;
-int property kRealignActors auto hidden ; [
-int property kMoveScene auto hidden ; ]
-int property kRestoreOffsets auto hidden ; -
-int property kRotateScene auto hidden ; U
 
 bool[] property bStripMale auto hidden
 bool[] property bStripFemale auto hidden
@@ -543,96 +530,6 @@ int function CreatureCount(actor[] pos)
 	return gender[2]
 endFunction
 
-;#---------------------------#
-;#    Hotkeys For Player     #
-;#---------------------------#
-function _HKStart(sslThreadController Controller)
-	RegisterForKey(kBackwards)
-	RegisterForKey(kAdjustStage)
-	RegisterForKey(kAdvanceAnimation)
-	RegisterForKey(kChangeAnimation)
-	RegisterForKey(kChangePositions)
-	RegisterForKey(kAdjustChange)
-	RegisterForKey(kAdjustForward)
-	RegisterForKey(kAdjustSideways)
-	RegisterForKey(kAdjustUpward)
-	RegisterForKey(kRealignActors)
-	RegisterForKey(kRestoreOffsets)
-	RegisterForKey(kMoveScene)
-	RegisterForKey(kRotateScene)
-	PlayerController = Controller
-	hkReady = true
-endFunction
-
-function _HKClear()
-	UnregisterForAllKeys()
-	PlayerController = none
-	hkReady = true
-endFunction
-
-event OnKeyDown(int keyCode)
-	if PlayerController != none && hkReady && !UI.IsMenuOpen("Console") && !UI.IsMenuOpen("Main Menu") && !UI.IsMenuOpen("Loading Menu") && !UI.IsMenuOpen("MessageBoxMenu")
-		hkReady = false
-		Utility.Wait(0.001)
-
-		bool backwards
-		if kBackwards == 42 || kBackwards == 54
-			; Check both shift keys
-			backwards = ( input.IsKeyPressed(42) || input.IsKeyPressed(54) )
-		else
-			backwards = input.IsKeyPressed(kBackwards)
-		endIf
-
-		bool adjustingstage
-		if kAdjustStage == 157 || kAdjustStage == 29
-			; Check both ctrl keys
-			adjustingstage = ( input.IsKeyPressed(157) || input.IsKeyPressed(29) )
-		else
-			adjustingstage = input.IsKeyPressed(kBackwards)
-		endIf
-
-		; Advance Stage
-		if keyCode == kAdvanceAnimation
-			PlayerController.AdvanceStage(backwards)
-		; Change Animation
-		elseIf keyCode == kChangeAnimation
-			PlayerController.ChangeAnimation(backwards)
-		; Change Positions
-		elseIf keyCode == kChangePositions
-			PlayerController.ChangePositions(backwards)
-		; Forward / Backward adjustments
-		elseIf keyCode == kAdjustForward
-			PlayerController.AdjustForward(backwards, adjustingstage)
-		; Left / Right adjustments
-		elseIf keyCode == kAdjustSideways
-			PlayerController.AdjustSideways(backwards, adjustingstage)
-		; Up / Down adjustments
-		elseIf keyCode == kAdjustUpward
-			PlayerController.AdjustUpward(backwards, adjustingstage)
-		; Change Adjusted Actor
-		elseIf keyCode == kAdjustChange
-			PlayerController.AdjustChange(backwards)
-		; RePosition Actors
-		elseIf keyCode == kRealignActors
-			PlayerController.RealignActors()
-		; Restore animation offsets
-		elseIf keyCode == kRestoreOffsets
-			PlayerController.RestoreOffsets()
-		; Move Scene
-		elseIf keyCode == kMoveScene
-			PlayerController.MoveScene()
-		; Rotate Scene
-		elseIf keyCode == kRotateScene
-			PlayerController.RotateScene(backwards)
-		endIf
-		hkReady = true
-	endIf
-endEvent
-;#---------------------------#
-;#  END Hotkeys For Player   #
-;#---------------------------#
-
-
 armor function LoadStrapon(string esp, int id)
 	armor strapon = Game.GetFormFromFile(id, esp) as armor
 	if strapon != none
@@ -659,21 +556,6 @@ function _Defaults()
 	bUseMaleNudeSuit = false
 	bUseFemaleNudeSuit = false
 	bUndressAnimation = false
-
-	; Hotkeys
-	kBackwards = 54 ; Right Shift
-	kAdjustStage = 157; Right Ctrl
-	kAdvanceAnimation = 57 ; Space
-	kChangeAnimation =  24 ; O
-	kChangePositions = 13 ; =
-	kAdjustChange = 37 ; K
-	kAdjustForward = 38 ; L
-	kAdjustSideways = 40 ; '
-	kAdjustUpward = 39 ; ;
-	kRealignActors = 26 ; [
-	kMoveScene = 27 ; ]
-	kRestoreOffsets = 12 ; -
-	kRotateScene = 22 ; U
 
 	; Strip
 	bStripMale = new bool[33]

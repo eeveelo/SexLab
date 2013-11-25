@@ -370,15 +370,6 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 		centerLoc[0] = centerLoc[0] + (32.0 * Math.sin(centerLoc[5]))
 		centerLoc[1] = centerLoc[1] + (32.0 * Math.cos(centerLoc[5]))
 		centerLoc[2] = centerLoc[2] + 37.0
-	; elseif centerOn == Lib.PlayerRef || centerOn.HasKeyWordString("ActorTypeNPC")
-	; 	ObjectReference Stager = centerOn.PlaceAtMe(Lib.SexLabStager)
-	; 	if centerOn.GetDistance(Stager) < 600.0
-	; 		centerLoc = GetCoords(Stager)
-	; 	else
-	; 		centerLoc = GetCoords(centerOn)
-	; 	endIf
-	; 	Stager.Disable()
-	; 	Stager.Delete()
 	else
 		centerLoc = GetCoords(centerOn)
 	endIf

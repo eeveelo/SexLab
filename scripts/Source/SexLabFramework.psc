@@ -36,6 +36,8 @@ sslActorLibrary property ActorLib auto
 
 sslActorStats property Stats auto
 
+sslControlLibrary property ControlLib auto
+
 ; Animation Sets
 sslBaseAnimation[] property Animation hidden
 	sslBaseAnimation[] function get()

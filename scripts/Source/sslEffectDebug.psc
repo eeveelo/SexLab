@@ -1,209 +1,100 @@
 Scriptname sslEffectDebug extends ActiveMagicEffect
 
 SexLabFramework property SexLab Auto
-import SexLabUtil
+
+actor Camera
+actor PlayerRef
 
 
+function PositionCamera()
+	float[] eyes = new float[6]
+	eyes[0] = NetImmerse.GetNodePositionX(PlayerRef, "NPCEyeBone", false)
+	eyes[1] = NetImmerse.GetNodePositionY(PlayerRef, "NPCEyeBone", false)
+	eyes[2] = NetImmerse.GetNodePositionZ(PlayerRef, "NPCEyeBone", false)
+	; Camera.MoveToNode(PlayerRef, "NPCEyeBone")
+	; Camera.TranslateTo(eyes[0],eyes[1],eyes[2],Camera.GetAngleX(), Camera.GetAngleY(), Camera.GetAngleZ(), 10000, 0.01)
+	Debug.SendAnimationEvent(Camera, "IdleForceDefaultState")
+	Game.SetCameraTarget(Camera)
+	Game.ForceThirdPerson()
+	debug.setgodmode(true)
+	Camera.MoveToNode(PlayerRef, "NPCEyeBone")
+	Camera.SetVehicle(PlayerRef)
+	Game.ForceFirstPerson()
 
+	; Debug.SendAnimationEvent(Camera, "IdleForceDefaultState")
+	; Game.SetCameraTarget(Camera)
+	; Game.ForceThirdPerson()
+	; debug.setgodmode(true)
+	; Camera.SplineTranslateToRefNode(PlayerRef, "NPCEyeBone", 100, 10000, 0.0001)
+	; Camera.SetVehicle(PlayerRef)
+	; Game.ForceFirstPerson()
+
+
+	; Game.SetCameraTarget(Camera)
+	; Game.ForceThirdPerson()
+	; Camera.SplineTranslateToRefNode(PlayerRef, "NPCEyeBone", 100, 10000, 0)
+	; Game.ForceFirstPerson()
+	; ; Camera.SetVehicle(PlayerRef)
+	; Utility.Wait(0.1)
+	; Game.SetCameraTarget(Camera)
+	; Game.ForceThirdPerson()
+	; Game.ForceFirstPerson()
+endFunction
+
+event OnUpdate()
+	Debug.Trace("SSL: Positioning camera")
+	PositionCamera()
+endEvent
 
 event OnEffectStart(actor target, actor caster)
-	Debug.Trace("SexLab Debug Start")
-	Debug.Trace(SexLab.Stats.PlayerSexCount(target) +" -> "+ SexLab.Stats.HadPlayerSex(target))
+	Utility.SetIniFloat("fOverShoulderPosZ:Camera", 0)
+	Utility.SetIniFloat("fOverShoulderPosX:Camera", 0)
+	Utility.SetIniFloat("fOverShoulderPosY:Camera", 0)
+	Utility.SetIniFloat("fOverShoulderCombatPosZ:Camera", 0)
+	Utility.SetIniFloat("fOverShoulderCombatPosX:Camera", 0)
+	Utility.SetIniFloat("fOverShoulderCombatPosY:Camera", 0)
+	Utility.SetIniFloat("fActorFadeOutLimit:Camera", 0)
+	Game.UpdateThirdPerson()
+	; ; debug.togglecollisions()
+	; PlayerRef = caster
+	; Camera = PlayerRef.PlaceAtMe(SexLab.ActorLib.CameraActor, 1) as actor
+	; ; Game.SetPlayerAIDriven(true)
+	; ; Game.ForceFirstPerson()
+	; Game.DisablePlayerControls(false, true, false, false, false, false, false, false, 0)
+	; Camera.SetPlayerControls(true)
+	; PlayerRef.SetPlayerControls(false)
+	; Camera.EnableAI(true)
+	; Debug.SendAnimationEvent(Camera, "IdleForceDefaultState")
+	; ; Camera.SetScale(0.15)
+	; Camera.SetGhost(true)
+	; Game.SetCameraTarget(Camera)
 
-	Utility.WaitMenuMode(0.5)
-	Float started = Utility.GetCurrentRealTime()
-	Float total = Utility.GetCurrentRealTime()
+	; PositionCamera()
 
-	sslThreadModel Model = SexLab.NewThread()
-	Debug.Trace("NewThread: "+(Utility.GetCurrentRealTime() - started))
-	started = Utility.GetCurrentRealTime()
+	; ; Game.SetCameraTarget(Camera)
 
-	Model.AddActor(caster)
-	Debug.Trace("AddActor[0]: "+(Utility.GetCurrentRealTime() - started))
-	started = Utility.GetCurrentRealTime()
+	; ; Game.SetCameraTarget(none)
+	; ; Camera.SetVehicle(PlayerRef)
 
-	Model.AddActor(target)
-	Debug.Trace("AddActor[1]: "+(Utility.GetCurrentRealTime() - started))
-	started = Utility.GetCurrentRealTime()
+	; ; Game.ForceThirdPerson()
+	; ;debug.messagebox(Camera + " Controlled")
+	; Utility.Wait(6.0)
 
-	sslThreadController Thread = Model.StartThread()
-	Debug.Trace("StartThread: "+(Utility.GetCurrentRealTime() - started))
-	Debug.Trace("Total Time: "+(Utility.GetCurrentRealTime() - total))
-
-
-	;int n = 0
-
-	; sslBaseAnimation[] Anim = new sslBaseAnimation[1]
-	; Anim[0] = SexLab.Animation[n]
-
-
-
-	; ; Model.SetAnimations(Anim)
-	; Model.DisableLeadIn(true)
-	; sslThreadController Thread = Model.StartThread()
-	; debug.traceandbox("Starting: "+Thread.Animation.Name)
-
-	; Thread.SetForcedAnimations(Anim)
-	; Thread.SyncActors()
-
-
-
-
-
-	; Debug.Notification("Phase 1")
-	; Expression.ApplyTo(target, 20)
-	; Expression.ApplyTo(caster, 20)
+	; PositionCamera()
+	; Utility.Wait(5.0)
+	; Debug.SendAnimationEvent(PlayerRef, "Missionary_A1_S3")
+	; Utility.Wait(1.0)
+	; PositionCamera()
 	; Utility.Wait(10.0)
-	; Debug.Notification("Phase 2")
-	; Expression.ApplyTo(target, 66)
-	; Expression.ApplyTo(caster, 66)
-	; Utility.Wait(10.0)
-	; Debug.Notification("Phase 3")
-	; Expression.ApplyTo(target, 100)
-	; Expression.ApplyTo(caster, 100)
-	; Utility.Wait(10.0)
-	; Debug.MessageBox("Cleared")
-	; Expression.ClearMFG(target)
-	; Expression.ClearMFG(caster)
-	; sslBaseVoice tvoice = SexLab.PickVoice(target)
-	; sslBaseVoice cvoice = SexLab.PickVoice(caster)
 
-	; Utility.Wait(4.0)
-	; debug.trace("1: no expression, mild")
-	; debug.notification("1: no expression, mild")
-	; tvoice.PlayMild(target)
-	; cvoice.PlayMild(caster)
-	; Utility.Wait(2.0)
-	; tvoice.PlayMild(target)
-	; cvoice.PlayMild(caster)
-	; Utility.Wait(2.0)
-	; tvoice.PlayMild(target)
-	; cvoice.PlayMild(caster)
-	; Utility.Wait(2.0)
-	; tvoice.PlayMild(target)
-	; cvoice.PlayMild(caster)
-
-	; debug.notification("1: end")
-
-	; Utility.Wait(4.0)
-	; debug.trace("2: no expression, medium")
-	; debug.notification("2: no expression, medium")
-	; tvoice.PlayMedium(target)
-	; cvoice.PlayMedium(caster)
-	; Utility.Wait(2.0)
-	; tvoice.PlayMedium(target)
-	; cvoice.PlayMedium(caster)
-	; Utility.Wait(2.0)
-	; tvoice.PlayMedium(target)
-	; cvoice.PlayMedium(caster)
-	; Utility.Wait(2.0)
-	; tvoice.PlayMedium(target)
-	; cvoice.PlayMedium(caster)
-	; debug.notification("2: end")
-
-
-	; Utility.Wait(4.0)
-	; debug.trace("3: no expression, Hot")
-	; debug.notification("3: no expression, Hot")
-	; tvoice.PlayHot(target)
-	; cvoice.PlayHot(caster)
-	; Utility.Wait(2.0)
-	; tvoice.PlayHot(target)
-	; cvoice.PlayHot(caster)
-	; Utility.Wait(2.0)
-	; tvoice.PlayHot(target)
-	; cvoice.PlayHot(caster)
-	; Utility.Wait(2.0)
-	; tvoice.PlayHot(target)
-	; cvoice.PlayHot(caster)
-	; debug.notification("3: end")
-
-
-	; Utility.Wait(4.0)
-	; debug.trace("1: WITH expression, mild")
-	; debug.notification("1: WITH expression, mild")
-	; Expression.ApplyTo(target, 20)
-	; Expression.ApplyTo(caster, 20)
-	; tvoice.PlayMild(target)
-	; cvoice.PlayMild(caster)
-	; Utility.Wait(2.0)
-	; tvoice.PlayMild(target)
-	; cvoice.PlayMild(caster)
-	; Utility.Wait(2.0)
-	; tvoice.PlayMild(target)
-	; cvoice.PlayMild(caster)
-	; Utility.Wait(2.0)
-	; tvoice.PlayMild(target)
-	; cvoice.PlayMild(caster)
-	; debug.notification("1: end")
-	; Utility.Wait(4.0)
-	; debug.trace("2: WITH expression, medium")
-	; debug.notification("2: WITH expression, medium")
-	; Expression.ApplyTo(target, 60)
-	; Expression.ApplyTo(caster, 60)
-	; tvoice.PlayMedium(target)
-	; cvoice.PlayMedium(caster)
-	; Utility.Wait(2.0)
-	; tvoice.PlayMedium(target)
-	; cvoice.PlayMedium(caster)
-	; Utility.Wait(2.0)
-	; tvoice.PlayMedium(target)
-	; cvoice.PlayMedium(caster)
-	; Utility.Wait(2.0)
-	; tvoice.PlayMedium(target)
-	; cvoice.PlayMedium(caster)
-	; debug.notification("2: end")
-	; Utility.Wait(4.0)
-	; debug.trace("3: WITH expression, Hot")
-	; debug.notification("3: WITH expression, Hot")
-	; Expression.ApplyTo(target, 100)
-	; Expression.ApplyTo(caster, 100)
-	; tvoice.PlayHot(target)
-	; cvoice.PlayHot(caster)
-	; Utility.Wait(2.0)
-	; tvoice.PlayHot(target)
-	; cvoice.PlayHot(caster)
-	; Utility.Wait(2.0)
-	; tvoice.PlayHot(target)
-	; cvoice.PlayHot(caster)
-	; Utility.Wait(2.0)
-	; tvoice.PlayHot(target)
-	; cvoice.PlayHot(caster)
-	; debug.notification("3: end")
-
-	; SexLab.ExpressionLib.ClearMFG(target)
-	; SexLab.ExpressionLib.ClearMFG(caster)
-
-	; debug.traceandbox("Finish")
-	; int count = 1
-
-	; actor[] Positions = SexLab.DebugActor
-
-	; if Positions.Find(target) == -1
-	; 	Positions = sslUtility.PushActor(target, Positions)
-	; 	SexLab.DebugActor = Positions
-	; 	Debug.Notification(Positions.Length)
-	; endIf
-
-	; if Positions.Length != count
-	; 	return
-	; endIf
-
-	; Debug.Notification("SexLab debug scene starting")
-	; Utility.Wait(3.0)
-
-	; sslThreadModel Model = SexLab.NewThread()
-
-	; Model.AddActor(caster)
-
-	; int i
-	; while i < count
-	; 	Model.AddActor(Positions[i])
-	; 	i += 1
-	; endWhile
-
-	; sslThreadController Controller = Model.StartThread()
-
-	; actor[] aDel
-	; SexLab.DebugActor = aDel
+	; Game.SetCameraTarget(PlayerRef)
+	; Game.SetPlayerAIDriven(false)
+	; PlayerRef.SetPlayerControls(true)
+	; Camera.SetPlayerControls(false)
+	; Camera.SetScale(1.0)
+	; Camera.SetVehicle(none)
+	; ; Camera.Disable()
+	; ; Camera.Delete()
+	; ; Debug.ToggleCollisions()
+	; Debug.MessageBox("End!")
 endEvent

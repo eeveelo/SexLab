@@ -158,6 +158,14 @@ state Advancing
 			endIf
 			SendThreadEvent("LeadInEnd")
 		endIf
+		; Stage Delay
+		if Stage > 1
+			sfx[0] = sfx[0] - (Stage * 0.2)
+		endIf
+		; min 0.80 delay
+		if sfx[0] < 0.80
+			sfx[0] = 0.80
+		endIf
 		; Start Animations loop
 		GoToState("Animating")
 	endEvent
@@ -167,16 +175,15 @@ state Animating
 	event OnBeginState()
 		if !LeadIn && Stage >= Animation.StageCount
 			SendThreadEvent("OrgasmStart")
+			; Perform actor orgasm stuff
+			if Animation.IsSexual()
+				ActorAction("Orgasm", "Animating")
+				PlayAnimation()
+				Sound.SetInstanceVolume(sfxType.Play(Positions[0]), sfxVolume)
+				sfx[0] = 0.60
+			endIf
 		else
 			SendThreadEvent("StageStart")
-		endIf
-		; Stage Delay
-		if Stage > 1
-			sfx[0] = sfx[0] - (Stage * 0.2)
-		endIf
-		; min 0.80 delay
-		if sfx[0] < 0.80
-			sfx[0] = 0.80
 		endIf
 		; Start animation looping
 		looping = true
@@ -216,7 +223,7 @@ endState
 ;\-----------------------------------------------/;
 
 function AdvanceStage(bool backwards = false)
-	if !looping
+	if GetState() != "Animating"
 		return ; Don't advance while not looping
 	elseif !backwards
 		GoToStage((Stage + 1))
@@ -261,22 +268,19 @@ endFunction
 function AdjustForward(bool backwards = false, bool adjuststage = false)
 	float[] offsets = Animation.UpdateForward(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage)
 	sslActorAlias Slot = ActorSlot(AdjustingPosition)
-	Slot.AlignTo(offsets)
-	Slot.Snap()
+	Slot.AlignTo(offsets, true)
 endFunction
 
 function AdjustSideways(bool backwards = false, bool adjuststage = false)
 	float[] offsets = Animation.UpdateSide(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage)
 	sslActorAlias Slot = ActorSlot(AdjustingPosition)
-	Slot.AlignTo(offsets)
-	Slot.Snap()
+	Slot.AlignTo(offsets, true)
 endFunction
 
 function AdjustUpward(bool backwards = false, bool adjuststage = false)
 	float[] offsets = Animation.UpdateUp(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage)
 	sslActorAlias Slot = ActorSlot(AdjustingPosition)
-	Slot.AlignTo(offsets)
-	Slot.Snap()
+	Slot.AlignTo(offsets, true)
 endFunction
 
 function RotateScene(bool backwards = false)
@@ -292,7 +296,6 @@ endFunction
 function RestoreOffsets()
 	Animation.RestoreOffsets()
 	RealignActors()
-	MoveActors()
 endFunction
 
 function MoveScene()
@@ -309,7 +312,7 @@ function MoveScene()
 	Lib.PlayerRef.StopTranslation()
 	; Lock hotkeys and wait 6 seconds
 	Lib.mMoveScene.Show(6)
-	float stopat = Utility.GetCurrentRealTime() + 6
+	float stopat = Utility.GetCurrentRealTime() + 6.0
 	while stopat > Utility.GetCurrentRealTime()
 		Utility.Wait(0.8)
 	endWhile
@@ -425,7 +428,7 @@ function EndAnimation(bool quick = false)
 	FastEnd = quick
 	; Immediately stop hotkeys to prevent further stage advancing
 	if HasPlayer
-		Lib.Actors._HKClear()
+		Lib.ControlLib._HKClear()
 	endIf
 	; Send end event
 	SendThreadEvent("AnimationEnd")

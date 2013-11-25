@@ -58,7 +58,7 @@ sslThreadController function PickController()
 		i += 1
 	endWhile
 	return none
-endFunction	
+endFunction
 
 ;/-----------------------------------------------\;
 ;|	Thread Slots Setup                           |;
@@ -86,9 +86,7 @@ function _StopAll()
 		while slot < ThreadView[i].ActorAlias.Length
 			if ThreadView[i].ActorAlias[slot] != none
 				sslActorAlias clearing = ThreadView[i].ActorAlias[slot] as sslActorAlias
-				clearing.StopAnimating(true)
-				clearing.UnlockActor()
-				clearing.ResetActor()
+				clearing.GoToState("Reset")
 				clearing.ClearAlias()
 			endIf
 			slot += 1
