@@ -337,7 +337,8 @@ state Making
 
 		; Start the controller
 		sslThreadController Controller = PrimeThread()
-		Active = PrimeThread() != none
+		Active = Controller != none
+		debug.traceandbox(Controller+" -> "+Active)
 		started = Utility.GetCurrentRealTime()
 		return Controller
 	endFunction

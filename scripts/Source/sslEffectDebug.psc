@@ -47,14 +47,49 @@ event OnUpdate()
 endEvent
 
 event OnEffectStart(actor target, actor caster)
-	Utility.SetIniFloat("fOverShoulderPosZ:Camera", 0)
-	Utility.SetIniFloat("fOverShoulderPosX:Camera", 0)
-	Utility.SetIniFloat("fOverShoulderPosY:Camera", 0)
-	Utility.SetIniFloat("fOverShoulderCombatPosZ:Camera", 0)
-	Utility.SetIniFloat("fOverShoulderCombatPosX:Camera", 0)
-	Utility.SetIniFloat("fOverShoulderCombatPosY:Camera", 0)
-	Utility.SetIniFloat("fActorFadeOutLimit:Camera", 0)
 	Game.UpdateThirdPerson()
+
+	float[] scales = new float[8]
+
+	scales[0] = NetImmerse.GetNodeScale(target, "skeleton.nif", false)
+	scales[1] = NetImmerse.GetNodeScale(target, "NPC", false)
+	scales[2] = NetImmerse.GetNodeScale(target, "NPC Root [Root]", false)
+	scales[3] = NetImmerse.GetNodeScale(target, "NPC COM [COM ]", false)
+	scales[4] = NetImmerse.GetNodeScale(caster, "skeleton.nif", false)
+	scales[5] = NetImmerse.GetNodeScale(caster, "NPC", false)
+	scales[6] = NetImmerse.GetNodeScale(caster, "NPC Root [Root]", false)
+	scales[7] = NetImmerse.GetNodeScale(caster, "NPC COM [COM ]", false)
+
+	NetImmerse.SetNodeScale(target, "skeleton.nif", 1.0, false)
+	NetImmerse.SetNodeScale(target, "NPC", 1.0, false)
+	NetImmerse.SetNodeScale(target, "NPC Root [Root]", 1.0, false)
+	NetImmerse.SetNodeScale(target, "NPC COM [COM ]", 1.0, false)
+	NetImmerse.SetNodeScale(caster, "skeleton.nif", 1.0, false)
+	NetImmerse.SetNodeScale(caster, "NPC", 1.0, false)
+	NetImmerse.SetNodeScale(caster, "NPC Root [Root]", 1.0, false)
+	NetImmerse.SetNodeScale(caster, "NPC COM [COM ]", 1.0, false)
+
+	debug.traceandbox(scales)
+	utility.wait(5.0)
+
+	caster.setvehicle(target)
+
+	utility.wait(5.0)
+
+	NetImmerse.SetNodeScale(target, "skeleton.nif", scales[0], false)
+	NetImmerse.SetNodeScale(target, "NPC", scales[1], false)
+	NetImmerse.SetNodeScale(target, "NPC Root [Root]", scales[2], false)
+	NetImmerse.SetNodeScale(target, "NPC COM [COM ]", scales[3], false)
+	NetImmerse.SetNodeScale(caster, "skeleton.nif", scales[4], false)
+	NetImmerse.SetNodeScale(caster, "NPC", scales[5], false)
+	NetImmerse.SetNodeScale(caster, "NPC Root [Root]", scales[6], false)
+	NetImmerse.SetNodeScale(caster, "NPC COM [COM ]", scales[7], false)
+
+
+
+	debug.traceandbox("done")
+	caster.setvehicle(none)
+
 	; ; debug.togglecollisions()
 	; PlayerRef = caster
 	; Camera = PlayerRef.PlaceAtMe(SexLab.ActorLib.CameraActor, 1) as actor

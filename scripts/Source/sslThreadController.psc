@@ -174,12 +174,10 @@ state Animating
 		if !LeadIn && Stage >= Animation.StageCount
 			SendThreadEvent("OrgasmStart")
 			; Perform actor orgasm stuff
-			if Animation.IsSexual()
-				ActorAction("Orgasm", "Animating")
-				PlayAnimation()
-				Sound.SetInstanceVolume(sfxType.Play(Positions[0]), sfxVolume)
-				sfx[0] = 0.60
-			endIf
+			ActorAction("Orgasm", "Animating")
+			PlayAnimation()
+			Sound.SetInstanceVolume(sfxType.Play(Positions[0]), sfxVolume)
+			sfx[0] = 0.60
 		else
 			SendThreadEvent("StageStart")
 		endIf
@@ -424,9 +422,13 @@ function EndAnimation(bool quick = false)
 
 	; Set fast flag to skip slow ending functions
 	FastEnd = quick
-	; Immediately stop hotkeys to prevent further stage advancing
+	Stage = Animation.StageCount
 	if HasPlayer
+		; Immediately stop hotkeys to prevent further stage advancing
 		Lib.ControlLib._HKClear()
+		; Force camera to default state for ending
+		Lib.ControlLib.ControlCamera.GoToState("")
+		Lib.ControlLib.EnableFreeCamera(false)
 	endIf
 	; Send end event
 	SendThreadEvent("AnimationEnd")
@@ -469,7 +471,7 @@ endFunction
 
 function CenterOnObject(ObjectReference centerOn, bool resync = true)
 	parent.CenterOnObject(centerOn, resync)
-	if resync
+	if resync && GetState() == "Animating"
 		RealignActors()
 		SendThreadEvent("ActorsRelocated")
 	endIf
@@ -477,7 +479,7 @@ endFunction
 
 function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, float RotX = 0.0, float RotY = 0.0, float RotZ = 0.0, bool resync = true)
 	parent.CenterOnCoords(LocX, LocY, LocZ, RotX, RotY, RotZ, resync)
-	if resync
+	if resync && GetState() == "Animating"
 		RealignActors()
 		SendThreadEvent("ActorsRelocated")
 	endIf

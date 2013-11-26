@@ -56,7 +56,7 @@ state FirstPerson
 		; 	CloneBase.SetVoiceType(SexLabVoiceM)
 		; endIf
 
-		PlayerRef.SetMotionType(PlayerRef.Motion_Keyframed)
+		; PlayerRef.SetMotionType(PlayerRef.Motion_Keyframed)
 
 		; Make clone match player
 		CloneRef.RemoveAllItems()
@@ -114,6 +114,7 @@ state FirstPerson
 		Debug.ToggleCollisions()
 		FadeToBlackHold.ApplyCrossFade(0.5)
 
+		PlayerRef.StopTranslation()
 		PlayerRef.SetVehicle(none)
 		PlayerRef.SetGhost(false)
 

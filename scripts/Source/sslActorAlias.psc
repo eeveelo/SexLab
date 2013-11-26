@@ -14,7 +14,6 @@ ObjectReference property MarkerRef hidden
 	endFunction
 endProperty
 
-bool Active
 sslThreadController Controller
 sslBaseExpression Expression
 sslBaseAnimation Animation
@@ -41,10 +40,7 @@ form strapon
 float ActorScale
 float AnimScale
 float[] loc
-
-; actor PlayerClone
-bool IsCloned
-actor OrigRef
+actor ClonedRef
 
 ; Switches
 bool disableRagdoll
@@ -117,42 +113,41 @@ bool function IsCreature()
 endFunction
 
 function SetCloned(actor CloneRef)
-	StopAnimating(true)
-	UnlockActor()
-
-	Clear()
-	ForceRefTo(CloneRef)
-	OrigRef = ActorRef
-
-	actor[] Positions = Controller.Positions
-	Positions[Positions.Find(ActorRef)] = CloneRef
-	Controller.Positions = Positions
-
-	ActorRef = CloneRef
-	IsPlayer = false
-	IsCloned = true
-	LockActor()
-	Controller.RealignActors()
-	Lib.ControlLib._HKStart(Controller)
-	; debug.traceandbox(ActorRef+" After: "+Controller.Positions)
+	if ClonedRef == none && CloneRef != none
+		StopAnimating(true)
+		UnlockActor()
+		Clear()
+		ForceRefTo(CloneRef)
+		ClonedRef = ActorRef
+		actor[] Positions = Controller.Positions
+		Positions[Positions.Find(ActorRef)] = CloneRef
+		Controller.Positions = Positions
+		ActorRef = CloneRef
+		IsPlayer = false
+		LockActor()
+		if GetState() == "Animating"
+			Controller.RealignActors()
+		endIf
+		Lib.ControlLib._HKStart(Controller)
+	endIf
 endFunction
 
 function RemoveClone()
-	actor[] Positions = Controller.Positions
-	Positions[Positions.Find(ActorRef)] = OrigRef
-	Controller.Positions = Positions
-
-	ActorRef = OrigRef
-	IsPlayer = true
-	IsCloned = false
-
-	Clear()
-	ForceRefTo(OrigRef)
-	OrigRef = none
-
-	LockActor()
-	Controller.RealignActors()
-	Lib.ControlLib._HKStart(Controller)
+	if ClonedRef != none
+		actor[] Positions = Controller.Positions
+		Positions[Positions.Find(ActorRef)] = ClonedRef
+		Controller.Positions = Positions
+		ActorRef = ClonedRef
+		IsPlayer = true
+		Clear()
+		ForceRefTo(ActorRef)
+		ClonedRef = none
+		LockActor()
+		Snap()
+		if GetState() == "Animating"
+			Controller.RealignActors()
+		endIf
+	endIf
 endFunction
 
 ;/-----------------------------------------------\;
@@ -203,13 +198,6 @@ function UnlockActor()
 	ActorRef.SetVehicle(none)
 endFunction
 
-; function PrepareActor()
-; 	; Removed in favor of "Prepare" state events
-; endFunction
-
-; function ResetActor()
-; 	; Removed in favor of "Reset" state events
-; endFunction
 
 function EquipStrapon()
 	if strapon == none && Lib.HasStrapon(ActorRef)
@@ -261,13 +249,11 @@ function StopAnimating(bool quick = false)
 endFunction
 
 function AttachMarker()
-	if IsCloned
-		OrigRef.SetVehicle(ActorRef)
-		; NetImmerse.SetNodeScale(Lib.PlayerRef, "skeleton.nif", 0.01, true)
-		; Lib.PlayerRef.SetScale(0.01)
-	endIf
 	ActorRef.SetVehicle(MarkerRef)
 	ActorRef.SetScale(AnimScale)
+	if ClonedRef != none
+		ClonedRef.SetVehicle(ActorRef)
+	endIf
 endFunction
 
 function AlignTo(float[] offsets, bool forceTo = false)
@@ -374,7 +360,7 @@ function StoreEquipment(form[] equipment)
 endFunction
 
 function SyncThread()
-	if !Active || Controller == none || ActorRef == none
+	if Controller == none || ActorRef == none
 		return
 	endIf
 	; Sync from thread
@@ -492,20 +478,18 @@ state Prepare
 		; Lock movement
 		LockActor()
 		; Creatures need none of this
-		if IsCreature
-			GoToState("Ready")
-			return
+		if !IsCreature
+			; Cleanup
+			if ActorRef.IsWeaponDrawn()
+				ActorRef.SheatheWeapon()
+			endIf
+			; Sexual animations only
+			if Controller.Animation.IsSexual()
+				Strip(DoUndress)
+			endIf
+			; Make erect for SOS
+			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 		endIf
-		; Cleanup
-		if ActorRef.IsWeaponDrawn()
-			ActorRef.SheatheWeapon()
-		endIf
-		; Sexual animations only
-		if Controller.Animation.IsSexual()
-			Strip(DoUndress)
-		endIf
-		; Make erect for SOS
-		Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 		GoToState("Ready")
 	endEvent
 endState
@@ -515,10 +499,11 @@ state Ready
 		UnregisterForUpdate()
 	endEvent
 	function StartAnimating()
-		Active = true
-		SyncThread()
-		GoToState("Animating")
-		RegisterForSingleUpdate(Utility.RandomFloat(0.1, 0.8))
+		if ActorRef != none && Controller != none
+			SyncThread()
+			GoToState("Animating")
+			RegisterForSingleUpdate(Utility.RandomFloat(0.1, 0.8))
+		endIf
 	endFunction
 endState
 
@@ -572,16 +557,13 @@ state Reset
 	endEvent
 	event OnUpdate()
 		UnregisterForUpdate()
-		; Reset camera to default state
 		if IsPlayer
-			Lib.ControlLib.ControlCamera.GoToState("")
-			Lib.ControlLib.EnableFreeCamera(false)
-		endIf
-		; Update diary/journal stats for player
-		if IsPlayer
+			RemoveClone()
+			; Update diary/journal stats for player
 			int[] genders = Lib.GenderCount(Controller.Positions)
 			Lib.Stats.UpdatePlayerStats(genders[0], genders[1], genders[2], Animation, Controller.GetVictim(), Controller.GetTime())
 		elseIf Controller.HasPlayer
+			; Increase player sex for NPC
 			Lib.Stats.AddPlayerSex(ActorRef)
 		endIf
 		; Reset to starting scale
@@ -634,9 +616,7 @@ function Initialize()
 	; Clear storage
 	MarkerObj = none
 	ActorRef = none
-	Active = false
-	IsCloned = false
-	OrigRef = none
+	ClonedRef = none
 	Controller = none
 	Voice = none
 	Animation = none
@@ -654,7 +634,6 @@ function Initialize()
 	GoToState("")
 endFunction
 
-
 function StartAnimating()
-	;Debug.TraceAndbox("Null start: "+ActorRef)
+	Debug.TraceAndBox("Null StartAnimating(): "+ActorRef)
 endFunction
