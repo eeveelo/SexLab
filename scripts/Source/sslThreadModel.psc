@@ -5,7 +5,7 @@ scriptname sslThreadModel extends ReferenceAlias
 sslThreadLibrary property Lib auto
 
 ; Locks
-bool active
+bool Active
 
 ; Actors
 actor[] property Positions auto hidden
@@ -135,7 +135,7 @@ endState
 
 state Making
 	event OnUpdate()
-		if !active
+		if !Active
 			_Log("Thread has timed out of the making process; resetting model for selection pool", "Make", "FATAL")
 		endIf
 	endEvent
@@ -324,7 +324,7 @@ state Making
 
 		; Start the controller
 		sslThreadController Controller = PrimeThread()
-		active = PrimeThread() != none
+		Active = PrimeThread() != none
 		return Controller
 	endFunction
 endState
@@ -356,21 +356,14 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 	if centerOn == none
 		return none
 	endIf
-
 	centerObj = centerOn
+	centerLoc = GetCoords(centerOn)
 	if Lib.BedsList.HasForm(centerOn.GetBaseObject())
 		bed = 1
 		centerLoc = GetCoords(centerOn)
-		centerLoc[0] = centerLoc[0] + (32.0 * Math.sin(centerLoc[5]))
-		centerLoc[1] = centerLoc[1] + (32.0 * Math.cos(centerLoc[5]))
+		centerLoc[0] = centerLoc[0] + (33.0 * Math.sin(centerLoc[5]))
+		centerLoc[1] = centerLoc[1] + (33.0 * Math.cos(centerLoc[5]))
 		centerLoc[2] = centerLoc[2] + 37.0
-	else
-		centerLoc = GetCoords(centerOn)
-	endIf
-
-	if active && resync
-		SyncActors()
-		SendThreadEvent("ActorsRelocated")
 	endIf
 endFunction
 
@@ -382,10 +375,6 @@ function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, fl
 	centerLoc[3] = RotX
 	centerLoc[4] = RotY
 	centerLoc[5] = RotZ
-	if active && resync
-		SyncActors()
-		SendThreadEvent("ActorsRelocated")
-	endIf
 endFunction
 
 function AdjustRotation(float adjust)
@@ -424,7 +413,7 @@ endfunction
 ;\-----------------------------------------------/;
 
 function ChangeActors(actor[] changeTo)
-	if !active || HasCreature
+	if !Active || HasCreature
 		return
 	endIf
 	int i
@@ -642,7 +631,7 @@ function SyncActors()
 endFunction
 
 function SendThreadEvent(string eventName, float argNum = 0.0)
-	if !active
+	if !Active
 		return
 	endIf
 	string customEvent
@@ -657,7 +646,7 @@ function SendThreadEvent(string eventName, float argNum = 0.0)
 endFunction
 
 function SendActorEvent(string eventName, float argNum = 0.0)
-	if !active
+	if !Active
 		return
 	endIf
 	int i = ActorCount
@@ -735,7 +724,7 @@ endFunction
 
 function Initialize()
 	; Set states
-	active = false
+	Active = false
 	; Empty Strings
 	hook = ""
 	Logging = "trace"

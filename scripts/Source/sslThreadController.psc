@@ -467,6 +467,26 @@ sslThreadController function PrimeThread()
 endFunction
 
 ;/-----------------------------------------------\;
+;|	Scene Manipulation                           |;
+;\-----------------------------------------------/;
+
+function CenterOnObject(ObjectReference centerOn, bool resync = true)
+	parent.CenterOnObject(centerOn, resync)
+	if resync
+		RealignActors()
+		SendThreadEvent("ActorsRelocated")
+	endIf
+endFunction
+
+function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, float RotX = 0.0, float RotY = 0.0, float RotZ = 0.0, bool resync = true)
+	parent.CenterOnCoords(LocX, LocY, LocZ, RotX, RotY, RotZ, resync)
+	if resync
+		RealignActors()
+		SendThreadEvent("ActorsRelocated")
+	endIf
+endFunction
+
+;/-----------------------------------------------\;
 ;|	API Functions                                |;
 ;\-----------------------------------------------/;
 
