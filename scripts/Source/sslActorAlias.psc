@@ -673,5 +673,5 @@ function Initialize()
 endFunction
 
 function StartAnimating()
-	Debug.TraceAndBox("Null StartAnimating(): "+BaseRef.GetName())
+	Debug.TraceAndBox("Null StartAnimating(): "+ActorName)
 endFunction

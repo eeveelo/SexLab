@@ -72,8 +72,8 @@ state FirstPerson
 
 		CloneRef.SetHeadTracking(false)
 		CloneRef.EvaluatePackage()
-		NetImmerse.SetNodeScale(CloneRef, "NPCEyeBone", 0.01, false)
-		NetImmerse.SetNodeScale(CloneRef, "NPC Head [Head]", 0.01, false)
+		NetImmerse.SetNodeScale(CloneRef, "NPCEyeBone", 0.5, false)
+		NetImmerse.SetNodeScale(CloneRef, "NPC Head [Head]", 0.5, false)
 		CloneRef.QueueNiNodeUpdate()
 
 		; CloneRef.SetVehicle(PlayerRef)
@@ -82,10 +82,12 @@ state FirstPerson
 
 		; Shrink player down
 		NifScale = NetImmerse.GetNodeScale(PlayerRef, "NPC", true)
-		NetImmerse.SetNodeScale(PlayerRef, "NPC", 0.001, true)
+		NetImmerse.SetNodeScale(PlayerRef, "NPC", 0.05, true)
 		NetImmerse.SetNodeScale(PlayerRef, "NPCEyeBone", 0.01, true)
 		NetImmerse.SetNodeScale(PlayerRef, "Camera1st [Cam1]", 0.01, true)
 		NetImmerse.SetNodeScale(PlayerRef, "NPC Head [Head]", 0.01, true)
+		NetImmerse.SetNodeScale(PlayerRef, "Camera Control", 0.01, true)
+		NetImmerse.SetNodeScale(PlayerRef, "NPC LookNode [Look]", 0.01, true)
 		; Lib.PlayerRef.SetScale(0.01)
 		PlayerRef.QueueNiNodeUpdate()
 		PlayerRef.SetGhost(true)
@@ -127,6 +129,8 @@ state FirstPerson
 		NetImmerse.SetNodeScale(PlayerRef, "NPCEyeBone", 1.0, true)
 		NetImmerse.SetNodeScale(PlayerRef, "Camera1st [Cam1]", 1.0, true)
 		NetImmerse.SetNodeScale(PlayerRef, "NPC Head [Head]", 1.0, true)
+		NetImmerse.SetNodeScale(PlayerRef, "Camera Control", 1.0, true)
+		NetImmerse.SetNodeScale(PlayerRef, "NPC LookNode [Look]", 1.0, true)
 		PlayerRef.QueueNiNodeUpdate()
 		PlayerAlias.RemoveClone()
 
