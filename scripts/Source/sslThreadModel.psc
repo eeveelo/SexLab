@@ -324,11 +324,8 @@ state Making
 
 		; Start the controller
 		sslThreadController Controller = PrimeThread()
-		if Controller != none
-			active = true
-			return Controller
-		endIf
-		return none
+		active = PrimeThread() != none
+		return Controller
 	endFunction
 endState
 
@@ -337,9 +334,6 @@ endState
 ;\-----------------------------------------------/;
 
 function SetHook(string hookName)
-	if !Locked("SetHook")
-		return
-	endIf
 	hook = hookName
 endFunction
 
@@ -359,7 +353,7 @@ float[] function GetCoords(ObjectReference Object)
 endFunction
 
 function CenterOnObject(ObjectReference centerOn, bool resync = true)
-	if !Locked("CenterOnObject") || centerOn == none
+	if centerOn == none
 		return none
 	endIf
 
@@ -381,9 +375,6 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 endFunction
 
 function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, float RotX = 0.0, float RotY = 0.0, float RotZ = 0.0, bool resync = true)
-	if !Locked("CenterOnCoords")
-		return none
-	endIf
 	centerLoc = new float[6]
 	centerLoc[0] = LocX
 	centerLoc[1] = LocY
@@ -398,9 +389,6 @@ function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, fl
 endFunction
 
 function AdjustRotation(float adjust)
-	if !Locked("AdjustRotation")
-		return
-	endIf
 	centerLoc[5] = centerLoc[5] + adjust
 	if centerLoc[5] >= 360.0
 		centerLoc[5] = centerLoc[5] - 360.0
@@ -410,16 +398,11 @@ function AdjustRotation(float adjust)
 endFunction
 
 function SetBedding(int set = 0)
-	if !Locked("SetBedding")
-		return
-	endIf
 	bed = set
 endFunction
 
 function SetTimers(float[] timers)
-	if !Locked("SetTimers")
-		return
-	elseif timers.Length < 1
+	if timers.Length < 1
 		_Log("Empty timers given.", "SetTimers")
 		return
 	endIf
@@ -587,9 +570,7 @@ int function GetPosition(actor position)
 endFunction
 
 function SetStrip(actor position, bool[] strip)
-	if !Locked("SetActor")
-		return
-	elseif strip.Length != 33
+	if strip.Length != 33
 		_Log("Malformed strip bool[] passed, must be 33 length bool array, "+strip.Length+" given", "SetStrip")
 		return
 	endIf
@@ -711,13 +692,13 @@ int function SignInt(int value, bool sign)
 	return value
 endFunction
 
-bool function Locked(string method)
-	if GetState() == "Unlocked"
-		_Log("Unsafe attempt to modify unlocked thread["+tid+"]", method, "FATAL")
-		return false
-	endIf
-	return true
-endFunction
+; bool function Locked(string method)
+; 	if GetState() == "Unlocked"
+; 		_Log("Unsafe attempt to modify unlocked thread["+tid+"]", method, "FATAL")
+; 		return false
+; 	endIf
+; 	return true
+; endFunction
 
 function _Log(string log, string method, string type = "ERROR")
 	int severity = 0
