@@ -17,7 +17,6 @@ float sfxVolume
 
 ; Processing
 int stagePrev
-float started
 float timer
 float advanceAt
 bool timedStage
@@ -91,8 +90,6 @@ state Preparing
 			i -= 1
 			ActorAlias[i].StartAnimating()
 		endWhile
-		; Record start time
-		started = Utility.GetCurrentRealTime()
 		; Begin first stage
 		GoToStage(1)
 	endEvent
@@ -196,15 +193,15 @@ state Animating
 		if !looping
 			return
 		endIf
-		timer = Utility.GetCurrentRealTime() - started
-		if (AutoAdvance || timedStage) && advanceAt < Utility.GetCurrentRealTime()
+		float time = Utility.GetCurrentRealTime()
+		if (AutoAdvance || timedStage) && advanceAt < time
 			GoToStage((Stage + 1))
 			return ; End Stage
 		endIf
 		; Play SFX
-		if sfx[0] <= timer - sfx[1] && sfxType != none
+		if sfx[0] <= (time - sfx[1]) && sfxType != none
 			Sound.SetInstanceVolume(sfxType.Play(Positions[0]), sfxVolume)
-			sfx[1] = timer
+			sfx[1] = time
 		endIf
 		; Loop
 		RegisterForSingleUpdate(0.60)
@@ -448,7 +445,6 @@ function Initialize()
 	float[] fDel
 	sfx = fDel
 	timer = 0.0
-	started = 0.0
 	; Empty bools
 	bool[] bDel
 	; Empty integers
@@ -485,11 +481,3 @@ function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, fl
 		SendThreadEvent("ActorsRelocated")
 	endIf
 endFunction
-
-;/-----------------------------------------------\;
-;|	API Functions                                |;
-;\-----------------------------------------------/;
-
-float function GetTime()
-	return timer
-endfunction

@@ -32,6 +32,7 @@ actor victim
 string hook
 int bed ; 0 allow, 1 in use, 2 force, -1 forbid
 Race Creature
+float started
 
 ; Thread Instance Info
 sslActorAlias[] property ActorAlias hidden
@@ -117,6 +118,18 @@ endProperty
 bool property IsLocked hidden
 	bool function get()
 		return GetState() != "Unlocked"
+	endFunction
+endProperty
+
+float property StartedAt hidden
+	float function get()
+		return started
+	endFunction
+endProperty
+
+float property TotalTime hidden
+	float function get()
+		return Utility.GetCurrentRealTime() - started
 	endFunction
 endProperty
 
@@ -325,6 +338,7 @@ state Making
 		; Start the controller
 		sslThreadController Controller = PrimeThread()
 		Active = PrimeThread() != none
+		started = Utility.GetCurrentRealTime()
 		return Controller
 	endFunction
 endState
@@ -618,6 +632,10 @@ actor function GetVictim()
 	return victim
 endFunction
 
+float function GetTime()
+	return started
+endfunction
+
 ;/-----------------------------------------------\;
 ;|	Utility Functions                            |;
 ;\-----------------------------------------------/;
@@ -746,6 +764,7 @@ function Initialize()
 	float[] fDel
 	centerLoc = fDel
 	customtimers = fDel
+	started = 0.0
 	; Empty bools
 	leadIn = false
 	leadInDisabled = false
