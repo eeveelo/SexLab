@@ -91,28 +91,15 @@ state Preparing
 			ActorAlias[i].StartAnimating()
 		endWhile
 		; Begin first stage
-		GoToStage(1)
+		Stage = 1
+		GoToState("Advancing")
+		RegisterForSingleUpdate(0.10)
 	endEvent
 endState
 
 ;/-----------------------------------------------\;
 ;|	Animation Loops/Functions                    |;
 ;\-----------------------------------------------/;
-
-function GoToStage(int toStage)
-	; Stop looping
-	looping = false
-	UnregisterForUpdate()
-	; Set upcoming stage
-	stagePrev = Stage
-	if toStage < 0
-		toStage = 0
-	endIf
-	Stage = toStage
-	; Start advancement
-	GoToState("Advancing")
-	RegisterForSingleUpdate(0.10)
-endFunction
 
 function UpdateTimer(float toTimer = 0.0)
 	if toTimer > 0.0
@@ -169,6 +156,20 @@ state Advancing
 endState
 
 state Animating
+	function GoToStage(int toStage)
+		; Stop looping
+		looping = false
+		UnregisterForUpdate()
+		; Set upcoming stage
+		stagePrev = Stage
+		if toStage < 0
+			toStage = 0
+		endIf
+		Stage = toStage
+		; Start advancement
+		GoToState("Advancing")
+		RegisterForSingleUpdate(0.10)
+	endFunction
 	event OnBeginState()
 		if !LeadIn && Stage >= Animation.StageCount
 			SendThreadEvent("OrgasmStart")

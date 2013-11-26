@@ -840,3 +840,5 @@ function AdvanceStage(bool backwards = false)
 endFunction
 function SetAnimation(int aid = -1)
 endFunction
+function GoToStage(int toStage)
+endFunction
