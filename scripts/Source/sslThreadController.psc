@@ -443,6 +443,9 @@ function EndAnimation(bool quick = false)
 endFunction
 
 function Initialize()
+	UnregisterForUpdate()
+	; Clear model
+	parent.Initialize()
 	; Set states
 	looping = false
 	; Empty Strings
@@ -461,8 +464,7 @@ function Initialize()
 	aid = 0
 	; Empty forms
 	sfxType = none
-	; Clear model
-	parent.Initialize()
+	GoToState("Unlocked")
 endFunction
 
 sslThreadController function PrimeThread()

@@ -776,6 +776,21 @@ function UnlockThread()
 endFunction
 
 function Initialize()
+	UnregisterForUpdate()
+	; Empty alias slots
+	FastEnd = true
+	int i = ActorSlots.Length
+	while i
+		i -= 1
+		if ActorSlots[i] != none
+			ActorSlots[i].StopAnimating(true)
+			ActorSlots[i].UnlockActor()
+			ActorSlots[i].GoToState("")
+			ActorSlots[i].GoToState("Reset")
+		endIf
+	endWhile
+	sslActorAlias[] aaDel
+	ActorSlots = aaDel
 	; Set states
 	Active = false
 	; Empty Strings
@@ -785,16 +800,6 @@ function Initialize()
 	actor[] acDel
 	Positions = acDel
 	victim = none
-	; Empty alias slots
-	int i = ActorSlots.Length
-	while i
-		i -= 1
-		if ActorSlots[i] != none
-			ActorSlots[i].ClearAlias()
-		endIf
-	endWhile
-	sslActorAlias[] aaDel
-	ActorSlots = aaDel
 	; Empty Floats
 	float[] fDel
 	centerLoc = fDel
