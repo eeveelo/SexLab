@@ -142,16 +142,16 @@ actor function FindAvailableActor(ObjectReference centerRef, float radius = 5000
 		return none ; Invalid args
 	endIf
 	; Create supression list
-	form[] supress = new form[5]
-	supress[0] = centerRef
-	supress[1] = ignore1
-	supress[2] = ignore2
-	supress[3] = ignore3
-	supress[4] = ignore4
+	form[] supress = new form[35]
+	supress[34] = centerRef
+	supress[33] = ignore1
+	supress[32] = ignore2
+	supress[31] = ignore3
+	supress[30] = ignore4
 	; Attempt 30 times before giving up.
-	int attempt = 30
-	while attempt
-		attempt -= 1
+	int attempts = 30
+	while attempts
+		attempts -= 1
 		; Get random actor
 		actor foundRef = Game.FindRandomActorFromRef(centerRef, radius)
 		; Validate actor
@@ -161,7 +161,7 @@ actor function FindAvailableActor(ObjectReference centerRef, float radius = 5000
 			; Get their gender if we need it
 			gender = GetGender(foundRef)
 			; Supress from future validation attempts
-			supress = sslUtility.PushForm(foundRef, supress)
+			supress[attempts] = foundRef
 		endIf
 		valid = valid && (findGender != 2 && gender != 2) ; Supress creatures
 		valid = valid && (findGender == -1 || findGender == gender) ; Validate gender
