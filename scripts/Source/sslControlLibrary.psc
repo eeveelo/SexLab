@@ -30,27 +30,56 @@ int property kToggleFreeCamera auto hidden ; NUM 1
 bool hkReady
 sslThreadController PlayerController
 
-function ToggleFirstPerson()
+; Dynamic properties
+bool property InFirstPerson hidden
+	bool function get()
+		return ControlCamera.GetState() == "FirstPerson"
+	endFunction
+endProperty
+
+bool property InFreeCamera hidden
+	bool function get()
+		return Game.GetCameraState() == 3
+	endFunction
+endProperty
+
+; Functions
+function ResetCamera()
+	if InFreeCamera
+		ControlCamera.ToggleFreeCamera()
+	endIf
+	ControlCamera.GoToState("")
+endFunction
+
+function EnableFirstPerson(bool enableIt = true)
+	if enableIt && !InFirstPerson
+		ControlCamera.GoToState("FirstPerson")
+	elseIf !enableIt && InFirstPerson
+		ControlCamera.GoToState("")
+	endIf
+endFunction
+
+bool function ToggleFirstPerson()
+	return ControlCamera.ToggleFirstPerson()
 endFunction
 
 function EnableFreeCamera(bool enableIt = true)
-	if enableIt && !InFreeCamera()
+	if enableIt && !InFreeCamera
 		ControlCamera.GoToState("FreeCamera")
-	elseIf !enableIt && InFreeCamera()
+	elseIf !enableIt && InFreeCamera
 		ControlCamera.GoToState("")
-		if InFreeCamera()
+		if InFreeCamera
 			ControlCamera.ToggleFreeCamera()
 		endIf
 	endIf
 endFunction
 
-bool function InFreeCamera()
-	return Game.GetCameraState() == 3
+bool function ToggleFreeCamera()
+	return ControlCamera.ToggleFreeCamera()
 endFunction
 
 function _HKStart(sslThreadController Controller)
 	; CameraControl = GetAliasByName("CameraControl") as sslHotkeyCamera
-
 	RegisterForKey(kBackwards)
 	RegisterForKey(kAdjustStage)
 	RegisterForKey(kAdvanceAnimation)
@@ -77,7 +106,7 @@ function _HKClear()
 endFunction
 
 event OnKeyDown(int keyCode)
-	if PlayerController != none && hkReady && !UI.IsMenuOpen("Console") && !UI.IsMenuOpen("Main Menu") && !UI.IsMenuOpen("Loading Menu") && !UI.IsMenuOpen("MessageBoxMenu")
+	if PlayerController != none && hkReady && PlayerController.GetState() == "Animating" && !UI.IsMenuOpen("Console") && !UI.IsMenuOpen("Main Menu") && !UI.IsMenuOpen("Loading Menu") && !UI.IsMenuOpen("MessageBoxMenu")
 		hkReady = false
 		Utility.Wait(0.001)
 
@@ -132,18 +161,10 @@ event OnKeyDown(int keyCode)
 			PlayerController.RotateScene(backwards)
 		; Toggle First Person
 		elseIf keyCode == kToggle1stCamera
-			if ControlCamera.GetState() != "FirstPerson"
-				ControlCamera.GoToState("FirstPerson")
-			else
-				ControlCamera.GoToState("")
-			endIf
+			EnableFirstPerson(!InFirstPerson)
 		; Toggle TFC
 		elseIf keyCode == kToggleFreeCamera
-			if ControlCamera.GetState() != "FreeCamera"
-				ControlCamera.GoToState("FreeCamera")
-			else
-				ControlCamera.GoToState("")
-			endIf
+			EnableFreeCamera(!InFreeCamera)
 		endIf
 		hkReady = true
 	endIf
