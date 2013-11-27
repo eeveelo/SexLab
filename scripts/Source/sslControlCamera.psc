@@ -74,22 +74,24 @@ state FirstPerson
 		CloneRef.EvaluatePackage()
 		NetImmerse.SetNodeScale(CloneRef, "NPCEyeBone", 0.5, false)
 		NetImmerse.SetNodeScale(CloneRef, "NPC Head [Head]", 0.5, false)
-		CloneRef.QueueNiNodeUpdate()
+		; CloneRef.QueueNiNodeUpdate()
 
 		; CloneRef.SetVehicle(PlayerRef)
-		PlayerAlias = ActorSlots.GetActorAlias(PlayerRef)
-		PlayerAlias.SetCloned(CloneRef)
 
 		; Shrink player down
 		NifScale = NetImmerse.GetNodeScale(PlayerRef, "NPC", true)
 		NetImmerse.SetNodeScale(PlayerRef, "NPC", 0.05, true)
-		NetImmerse.SetNodeScale(PlayerRef, "NPCEyeBone", 0.01, true)
-		NetImmerse.SetNodeScale(PlayerRef, "Camera1st [Cam1]", 0.01, true)
+		; NetImmerse.SetNodeScale(PlayerRef, "NPCEyeBone", 0.01, true)
+		; NetImmerse.SetNodeScale(PlayerRef, "Camera1st [Cam1]", 0.01, true)
 		NetImmerse.SetNodeScale(PlayerRef, "NPC Head [Head]", 0.01, true)
-		NetImmerse.SetNodeScale(PlayerRef, "Camera Control", 0.01, true)
+		; NetImmerse.SetNodeScale(PlayerRef, "Camera Control", 0.01, true)
 		NetImmerse.SetNodeScale(PlayerRef, "NPC LookNode [Look]", 0.01, true)
 		; Lib.PlayerRef.SetScale(0.01)
-		PlayerRef.QueueNiNodeUpdate()
+		; PlayerRef.QueueNiNodeUpdate()
+
+		PlayerAlias = ActorSlots.GetActorAlias(PlayerRef)
+		PlayerAlias.SetCloned(CloneRef)
+
 		PlayerRef.SetGhost(true)
 		PlayerRef.SetVehicle(CloneRef)
 		; Force into first person camera and hide body
@@ -113,27 +115,22 @@ state FirstPerson
 
 	event OnEndState()
 		UnregisterForUpdate()
-		Debug.ToggleCollisions()
 		FadeToBlackHold.ApplyCrossFade(0.5)
 
-		PlayerRef.StopTranslation()
-		PlayerRef.SetVehicle(none)
+		; PlayerRef.SetVehicle(none)
 		PlayerRef.SetGhost(false)
+		; Game.EnablePlayerControls(false, false, true, false, false, false, true, false, 0)
 
-		Game.EnablePlayerControls(false, false, true, false, false, false, true, false, 0)
-
-		Game.ShowFirstPersonGeometry(true)
-		Game.ForceThirdPerson()
 		; Reset player scale
 		NetImmerse.SetNodeScale(PlayerRef, "NPC", NifScale, true)
-		NetImmerse.SetNodeScale(PlayerRef, "NPCEyeBone", 1.0, true)
-		NetImmerse.SetNodeScale(PlayerRef, "Camera1st [Cam1]", 1.0, true)
+		; NetImmerse.SetNodeScale(PlayerRef, "NPCEyeBone", 1.0, true)
+		; NetImmerse.SetNodeScale(PlayerRef, "Camera1st [Cam1]", 1.0, true)
 		NetImmerse.SetNodeScale(PlayerRef, "NPC Head [Head]", 1.0, true)
-		NetImmerse.SetNodeScale(PlayerRef, "Camera Control", 1.0, true)
+		; NetImmerse.SetNodeScale(PlayerRef, "Camera Control", 1.0, true)
 		NetImmerse.SetNodeScale(PlayerRef, "NPC LookNode [Look]", 1.0, true)
-		PlayerRef.QueueNiNodeUpdate()
+		; PlayerRef.QueueNiNodeUpdate()
+		Game.ShowFirstPersonGeometry(true)
 		PlayerAlias.RemoveClone()
-
 
 		CloneAlias.Clear()
 		CloneRef.Disable()
@@ -141,6 +138,8 @@ state FirstPerson
 		CloneRef = none
 
 		ImageSpaceModifier.RemoveCrossFade()
+		Debug.ToggleCollisions()
+		Game.ForceThirdPerson()
 	endEvent
 endState
 
@@ -154,10 +153,19 @@ state FreeCamera
 	event OnEndState()
 		if Game.GetCameraState() == 3
 			ToggleFreeCamera()
-			Game.ForceThirdPerson()
+			; Game.ForceThirdPerson()
 		endIf
 	endEvent
 endState
+
+bool function ToggleFirstPerson()
+	if GetState() == "FirstPerson"
+		GoToState("")
+	else
+		GoToState("FirstPerson")
+	endIf
+	return GetState() == "FirstPerson"
+endFunction
 
 bool function ToggleFreeCamera()
 	FadeToBlackHold.ApplyCrossFade(0.5)
@@ -166,8 +174,13 @@ bool function ToggleFreeCamera()
 	Input.Tapkey(Input.GetMappedKey("Console", 0))
 	Utility.Wait(0.01)
 	ImageSpaceModifier.RemoveCrossFade()
+	bool current = Game.GetCameraState() == 3
+	; Clear free camera state if needed
+	if !current && GetState() == "FreeCamera"
+		GotoState("")
+	endIf
 	; Return current TFC state
-	return Game.GetCameraState() == 3
+	return current
 endFunction
 
 event OnMenuOpen(string menu)
@@ -175,13 +188,13 @@ event OnMenuOpen(string menu)
 		UnregisterForMenu("Console")
 		TFC = false
 		Input.TapKey(20) ; T
-		Utility.WaitMenuMode(0.05)
+		Utility.WaitMenuMode(0.10)
 		Input.TapKey(33) ; F
-		Utility.WaitMenuMode(0.05)
+		Utility.WaitMenuMode(0.10)
 		Input.TapKey(46) ; C
-		Utility.WaitMenuMode(0.05)
+		Utility.WaitMenuMode(0.10)
 		Input.TapKey(28) ; Enter
-		Utility.WaitMenuMode(0.05)
+		Utility.WaitMenuMode(0.10)
 		; Close console
 		Input.TapKey(Input.GetMappedKey("Console", 0))
 	endIf
