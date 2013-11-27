@@ -26,6 +26,7 @@ bool property FastEnd auto hidden
 ObjectReference centerObj
 float[] centerLoc
 float[] customtimers
+int[] gendercounts
 bool leadInDisabled
 actor PlayerRef
 actor victim
@@ -121,6 +122,12 @@ bool property IsLocked hidden
 	endFunction
 endProperty
 
+actor property VictimRef hidden
+	actor function get()
+		return victim
+	endFunction
+endProperty
+
 float property StartedAt hidden
 	float function get()
 		return started
@@ -130,6 +137,30 @@ endProperty
 float property TotalTime hidden
 	float function get()
 		return Utility.GetCurrentRealTime() - started
+	endFunction
+endProperty
+
+int[] property Genders hidden
+	int[] function get()
+		return gendercounts
+	endFunction
+endProperty
+
+int property Males hidden
+	int function get()
+		return gendercounts[0]
+	endFunction
+endProperty
+
+int property Females hidden
+	int function get()
+		return gendercounts[1]
+	endFunction
+endProperty
+
+int property Creatures hidden
+	int function get()
+		return gendercounts[2]
 	endFunction
 endProperty
 
@@ -213,6 +244,9 @@ state Making
 			i += 1
 		endWhile
 
+		; Remember present genders
+		gendercounts = Lib.Actors.GenderCount(Positions)
+
 		; Check for valid animations
 		if HasCreature
 			primaryAnimations = Lib.CreatureAnimations.GetByRace(actors, Creature)
@@ -227,15 +261,14 @@ state Making
 		endIf
 
 		if primaryAnimations.Length == 0
-			int[] gender = Lib.Actors.GenderCount(Positions)
 			; Same sex pairings
-			if (gender[1] == 2 && gender[0] == 0) || (gender[0] == 2 && gender[1] == 0)
-				sslBaseAnimation[] samesex = Lib.Animations.GetByType(actors, gender[0], gender[1], aggressive = IsAggressive)
+			if (Females == 2 && Males == 0) || (Males == 2 && Females == 0)
+				sslBaseAnimation[] samesex = Lib.Animations.GetByType(actors, Males, Females, aggressive = IsAggressive)
 				sslBaseAnimation[] couples = Lib.Animations.GetByType(actors, 1, 1, aggressive = IsAggressive)
 				primaryAnimations = Lib.Animations.MergeLists(samesex, couples)
 			elseif actors < 3
 				; Grab animations like normal
-				primaryAnimations = Lib.Animations.GetByType(actors, gender[0], gender[1], aggressive = IsAggressive)
+				primaryAnimations = Lib.Animations.GetByType(actors, Males, Females, aggressive = IsAggressive)
 			elseif actors >= 3
 				; Get 3P + animations ignoring gender
 				primaryAnimations = Lib.Animations.GetByType(actors, aggressive = IsAggressive)
@@ -494,6 +527,8 @@ function ChangeActors(actor[] changeTo)
 		endIf
 		i += 1
 	endWhile
+	; Remember new genders
+	gendercounts = Lib.Actors.GenderCount(Positions)
 	; Set new actors into thread
 	ActorSlots = newSlots
 	SyncActors()
@@ -772,6 +807,8 @@ function Initialize()
 	FastEnd = false
 	; Empty forms
 	; Empty integers
+	int[] iDel
+	gendercounts = iDel
 	bed = 0
 	stage = 0
 	; Empty animations
