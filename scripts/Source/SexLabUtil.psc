@@ -1,4 +1,4 @@
-scriptname SexLabUtil
+scriptname SexLabUtil hidden
 
 bool function SexLabIsActive() global
 	bool active

@@ -1,4 +1,4 @@
-scriptname sslUtility
+scriptname sslUtility hidden
 
 string[] function ArgString(string args, string delimiter = ",") global
 	string[] output
