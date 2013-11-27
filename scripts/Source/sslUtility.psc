@@ -115,6 +115,7 @@ bool[] function IncreaseBool(int by, bool[] array) global
 	return output
 endFunction
 
+
 bool[] function PushBool(bool var, bool[] array) global
 	int len = array.Length
 	if len >= 128
@@ -138,6 +139,16 @@ bool[] function MergeBoolArray(bool[] push, bool[] array) global
 		output[len] = push[pushing]
 	endWhile
 	return output
+endFunction
+
+int function CountTrue(bool[] array) global
+	int pos = array.Find(true)
+	int count
+	while pos != -1
+	  count += 1
+	  pos = array.Find(true, (pos + 1))
+	endWhile
+	return count
 endFunction
 
 
@@ -221,15 +232,19 @@ form[] function MergeFormArray(form[] push, form[] array) global
 	return output
 endFunction
 
-form[] function ClearNone(form[] array) global
-	int filled
-	int i = array.Length
-	while i
-		i -= 1
-		if array[i] != none
-			filled += 1
-		endIf
+
+int function CountNone(form[] array) global
+	int pos = array.Find(none)
+	int count
+	while pos != -1
+	  count += 1
+	  pos = array.Find(none, (pos + 1))
 	endWhile
+	return count
+endFunction
+
+form[] function ClearNone(form[] array) global
+	int filled = (array.Length - CountNone(array))
 	if filled < 1
 		form[] empty
 		return empty
@@ -238,7 +253,7 @@ form[] function ClearNone(form[] array) global
 	endIf
 	form[] output = FormArray(filled)
 	filled -= 1
-	i = array.Length
+	int i = array.Length
 	while i
 		i -= 1
 		if array[i] != none

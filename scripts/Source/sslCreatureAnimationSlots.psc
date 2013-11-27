@@ -10,27 +10,24 @@ form[] property CreatureRaces hidden
 endProperty
 
 sslBaseAnimation[] function GetByRace(int actors, Race creature)
-	sslBaseAnimation[] output
-	int i
-	while i < Slotted
-		sslBaseAnimation Anim = Slots[i]
-		if Searchable(anim) && Anim.HasRace(creature) && actors == Anim.ActorCount()
-			output = sslUtility.PushAnimation(anim, output)
-		endIf
-		i += 1
+	bool[] valid = sslUtility.BoolArray(Slotted)
+	int i = Slotted
+	while i
+		i -= 1
+		valid[i] = Searchable(Slots[i]) && Slots[i].HasRace(creature) && actors == Slots[i].ActorCount()
 	endWhile
+	sslBaseAnimation[] output = GetList(valid)
 	_LogFound("GetByRace", actors+", "+creature.GetName(), output)
 	return output
 endFunction
 
 bool function HasAnimation(Race creature, Race creature2 = none)
-	int i
-	while i < Slotted
-		sslBaseAnimation Anim = Slots[i]
-		if Anim.Registered && Anim.HasRace(creature) && (creature2 == none || Anim.HasRace(creature2))
+	int i = Slotted
+	while i
+		i -= 1
+		if Searchable(Slots[i]) && Slots[i].HasRace(creature) && (creature2 == none || Slots[i].HasRace(creature2))
 			return true
 		endIf
-		i += 1
 	endWhile
 	return false
 endFunction

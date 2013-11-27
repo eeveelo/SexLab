@@ -24,14 +24,13 @@ endProperty
 ;\-----------------------------------------------/;
 
 sslBaseAnimation[] function PickByActors(actor[] Positions, int limit = 64, bool aggressive = false)
-	int actors = Positions.Length
 	int[] genders = Lib.ActorLib.GenderCount(Positions)
 	sslBaseAnimation[] Matches = GetByType(Positions.Length, genders[0], genders[1], -1, aggressive)
 	if Matches.Length <= limit
 		return Matches
 	endIf
 
-int count = Matches.Length - 1
+	int count = Matches.Length - 1
 	sslBaseAnimation[] Picked = sslUtility.AnimationArray(limit)
 
 	while limit
@@ -62,15 +61,13 @@ sslBaseAnimation[] function GetByTags(int actors, string[] tags, string tagSuppr
 		_Log("No tags given.", "GetByTags", "ERROR")
 		return none
 	endIf
-	sslBaseAnimation[] output
+	bool[] valid = sslUtility.BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
-		sslBaseAnimation anim = Slots[i]
-		if Searchable(anim) && actors == anim.ActorCount() && (tagSuppress == "" || !anim.HasTag(tagSuppress)) && anim.CheckTags(tags, requireAll)
-			output = sslUtility.PushAnimation(anim, output)
-		endIf
+		valid[i] = Searchable(Slots[i]) && actors == Slots[i].ActorCount() && (tagSuppress == "" || !Slots[i].HasTag(tagSuppress)) && Slots[i].CheckTags(tags, requireAll)
 	endWhile
+	sslBaseAnimation[] output = GetList(valid)
 	_LogFound("GetByTags", actors+", "+tags+", "+tagSuppress+", "+requireAll, output)
 	return output
 endFunction
@@ -84,24 +81,32 @@ sslBaseAnimation[] function GetByTag(int actors, string tag1, string tag2 = "", 
 endFunction
 
 sslBaseAnimation[] function GetByType(int actors, int males = -1, int females = -1, int stages = -1, bool aggressive = false, bool sexual = true)
-	sslBaseAnimation[] output
+	bool[] valid = sslUtility.BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
-		if Searchable(Slots[i])
-			sslBaseAnimation anim = Slots[i]
-			if (actors == anim.ActorCount()) && (males == -1 || males == anim.MaleCount()) && (females == -1 || females == anim.FemaleCount()) \
-			&& (stages == -1 || stages == anim.StageCount()) && (aggressive == anim.HasTag("Aggressive") || !Lib.bRestrictAggressive) && (sexual == anim.IsSexual)
-				output = sslUtility.PushAnimation(anim, output)
-			endIf
-		endIf
+		valid[i] = Searchable(Slots[i]) && actors == Slots[i].ActorCount() && (males == -1 || males == Slots[i].MaleCount()) && (females == -1 || females == Slots[i].FemaleCount()) \
+		&& (stages == -1 || stages == Slots[i].StageCount()) && (aggressive == Slots[i].HasTag("Aggressive") || !Lib.bRestrictAggressive) && (sexual == Slots[i].IsSexual)
 	endWhile
+	sslBaseAnimation[] output = GetList(valid)
 	_LogFound("GetByType", actors+", "+males+", "+females+", "+stages+", "+aggressive+", "+sexual, output)
 	return output
 endFunction
 
 sslBaseAnimation function GetBySlot(int slot)
 	return Slots[slot]
+endFunction
+
+sslBaseAnimation[] function GetList(bool[] valid)
+	int count = sslUtility.CountTrue(valid)
+	sslBaseAnimation[] output = sslUtility.AnimationArray(count)
+	int pos = valid.Find(true)
+	while pos != -1
+		count -= 1
+		output[count] = Slots[pos]
+		pos = valid.Find(true, (pos + 1))
+	endWhile
+	return output
 endFunction
 
 ;/-----------------------------------------------\;
@@ -171,7 +176,7 @@ bool function Searchable(sslBaseAnimation anim)
 endFunction
 
 ;/-----------------------------------------------\;
-;|	System Animations                            |;
+;|	System Functions                             |;
 ;\-----------------------------------------------/;
 
 function _Log(string log, string method, string type = "NOTICE", string arguments = "")
@@ -181,16 +186,16 @@ function _Log(string log, string method, string type = "NOTICE", string argument
 endFunction
 
 function _LogFound(string method, string arguments, sslBaseAnimation[] results)
-	string log = "Found ["+results.Length+"] Animations: "
+	string found = "Found ["+results.Length+"] Animations: "
 	int i = results.Length
 	while i
 		i -= 1
-		log += results[i].Name
-		if i > 0
-			log += ", "
-		endIf
+		found += results[i].Name+", "
 	endWhile
-	_Log(log, method, "NOTICE", arguments)
+	Debug.Trace("--- SexLab Animation Search ------------------------------")
+	Debug.Trace(" "+method+"("+arguments+")")
+	Debug.Trace("   "+found)
+	Debug.Trace("----------------------------------------------------------")
 endFunction
 
 function _Setup()
