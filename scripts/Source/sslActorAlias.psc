@@ -159,41 +159,29 @@ endFunction
 ;\-----------------------------------------------/;
 
 function LockActor()
-	Debug.Trace(ActorName+" DEBUG, LockActor() - START")
+	; Make unhittable
+	ActorRef.SetGhost(true)
 	; Start DoNothing package
 	ActorRef.AddToFaction(Lib.AnimatingFaction)
-	Debug.Trace(ActorName+" DEBUG, LockActor() - 1")
 	ActorRef.SetFactionRank(Lib.AnimatingFaction, 1)
-	Debug.Trace(ActorName+" DEBUG, LockActor() - 2")
 	ActorRef.EvaluatePackage()
-	Debug.Trace(ActorName+" DEBUG, LockActor() - 3")
 	; Disable movement
 	if IsPlayer
-		Debug.Trace(ActorName+" DEBUG, LockActor() - 4 - Player 1")
 		Game.DisablePlayerControls(false, false, false, false, false, false, true, false, 0)
-		Debug.Trace(ActorName+" DEBUG, LockActor() - 4 - Player 2")
 		Game.ForceThirdPerson()
-		Debug.Trace(ActorName+" DEBUG, LockActor() - 4 - Player 3")
 		Game.SetPlayerAIDriven()
-		Debug.Trace(ActorName+" DEBUG, LockActor() - 4 - Player 4")
 		; Game.SetInChargen(true, true, true)
 		; Enable hotkeys, if needed
 		if IsVictim && Lib.bDisablePlayer
-			Debug.Trace(ActorName+" DEBUG, LockActor() - 4 - Player 5")
 			Controller.AutoAdvance = true
 		else
-			Debug.Trace(ActorName+" DEBUG, LockActor() - 4 - Player 6")
 			Lib.ControlLib._HKStart(Controller)
 		endIf
 	else
-		Debug.Trace(ActorName+" DEBUG, LockActor() - 4 - NPC 1")
 		ActorRef.SetRestrained(true)
-		Debug.Trace(ActorName+" DEBUG, LockActor() - 4 - NPC 2")
 		ActorRef.SetDontMove(true)
-		Debug.Trace(ActorName+" DEBUG, LockActor() - 4 - NPC 3")
 		; ActorRef.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
 	endIf
-	Debug.Trace(ActorName+" DEBUG, LockActor() - END")
 endFunction
 
 function UnlockActor()
@@ -214,6 +202,8 @@ function UnlockActor()
 	; Detach positioning marker
 	ActorRef.StopTranslation()
 	ActorRef.SetVehicle(none)
+	; Make hittable
+	ActorRef.SetGhost(false)
 endFunction
 
 
@@ -330,7 +320,6 @@ function Snap()
 endFunction
 
 event OnTranslationComplete()
-	; debug.trace(ActorRef+ " Translation Complete")
 	Utility.Wait(0.25)
 	Snap()
 endEvent
@@ -364,17 +353,24 @@ function DisableUndressAnim(bool disableIt = true)
 endFunction
 
 function StoreEquipment(form[] equipment)
-	if equipment.Length < 1
+	; Nothing to add
+	if equipment.Length == 0
 		return
+	; Nothing to add on to
+	elseIf EquipmentStorage.Length == 0
+		EquipmentStorage = equipment
+	; Add onto existing storage
+	else
+		EquipmentStorage = sslUtility.MergeFormArray(equipment, EquipmentStorage)
 	endIf
-	; Addon existing storage
-	int i
-	while i < EquipmentStorage.Length
-		equipment = sslUtility.PushForm(EquipmentStorage[i], equipment)
-		i += 1
-	endWhile
-	; Save new storage
-	EquipmentStorage = equipment
+
+	; int i
+	; while i < EquipmentStorage.Length
+	; 	equipment = sslUtility.PushForm(EquipmentStorage[i], equipment)
+	; 	i += 1
+	; endWhile
+	; ; Save new storage
+	; EquipmentStorage = equipment
 endFunction
 
 function SyncThread()
@@ -490,63 +486,43 @@ endFunction
 ;\-----------------------------------------------/;
 state Prepare
 	event OnBeginState()
-		Debug.Trace(ActorName+" DEBUG, Prepare OnBeginState()")
 		RegisterForSingleUpdate(0.1)
 	endEvent
 	event OnUpdate()
-		Debug.Trace(ActorName+" DEBUG, Prepare OnUpdate() - START")
-		Debug.Trace(ActorName+" DEBUG, Prepare OnUpdate() - 1")
 		; Lock movement
 		LockActor()
-		Debug.Trace(ActorName+" DEBUG, Prepare OnUpdate() - 2")
 		; Creatures need none of this
 		if !IsCreature
-			Debug.Trace(ActorName+" DEBUG, Prepare OnUpdate() - 3")
 			; Cleanup
 			if ActorRef.IsWeaponDrawn()
 				ActorRef.SheatheWeapon()
-				Debug.Trace(ActorName+" DEBUG, Prepare OnUpdate() - 4")
 			endIf
-			Debug.Trace(ActorName+" DEBUG, Prepare OnUpdate() - 5")
 			; Sexual animations only
 			if Controller.Animation.IsSexual()
-				Debug.Trace(ActorName+" DEBUG, Prepare OnUpdate() - 6")
 				Strip(DoUndress)
-				Debug.Trace(ActorName+" DEBUG, Prepare OnUpdate() - 7")
 			endIf
-			Debug.Trace(ActorName+" DEBUG, Prepare OnUpdate() - 8")
 			; Make erect for SOS
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 		endIf
-		Debug.Trace(ActorName+" DEBUG, Prepare OnUpdate() - 9")
 		GoToState("Ready")
-		Debug.Trace(ActorName+" DEBUG, Prepare OnUpdate() - END")
 	endEvent
 endState
 
 state Ready
 	event OnBeginState()
-		Debug.Trace(ActorName+" DEBUG, Ready OnBeginState()")
 		UnregisterForUpdate()
 	endEvent
 	function StartAnimating()
-		Debug.Trace(ActorName+" DEBUG, Ready StartAnimating() - START")
-		Debug.Trace(ActorName+" DEBUG, Ready StartAnimating() - 1")
 		if ActorRef != none && Controller != none
-			Debug.Trace(ActorName+" DEBUG, Ready StartAnimating() - 2")
 			SyncThread()
-			Debug.Trace(ActorName+" DEBUG, Ready StartAnimating() - 3")
 			GoToState("Animating")
-			Debug.Trace(ActorName+" DEBUG, Ready StartAnimating() - 4")
 			RegisterForSingleUpdate(Utility.RandomFloat(0.1, 0.8))
 		endIf
-		Debug.Trace(ActorName+" DEBUG, Ready StartAnimating() - END")
 	endFunction
 endState
 
 state Animating
 	event OnUpdate()
-		Debug.Trace(ActorName+" DEBUG, Animating OnUpdate()")
 		if ActorRef.IsDead() || ActorRef.IsDisabled()
 			Controller.EndAnimation(true)
 			return
@@ -578,7 +554,7 @@ state Orgasm
 	event OnUpdate()
 		; Apply cum
 		int cum = Animation.GetCum(position)
-		if cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Lib.MaleCount(Controller.Positions) > 0)
+		if cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Controller.Males > 0)
 			Lib.ApplyCum(ActorRef, cum)
 		endIf
 		; Voice
@@ -595,11 +571,12 @@ state Reset
 	endEvent
 	event OnUpdate()
 		UnregisterForUpdate()
+		; Make sure we clear out 1st person clone
+		RemoveClone()
 		if IsPlayer
-			RemoveClone()
+			Lib.ControlLib.ResetCamera()
 			; Update diary/journal stats for player
-			int[] genders = Lib.GenderCount(Controller.Positions)
-			Lib.Stats.UpdatePlayerStats(genders[0], genders[1], genders[2], Animation, Controller.GetVictim(), Controller.GetTime())
+			Lib.Stats.UpdatePlayerStats(Controller.Males, Controller.Females, Controller.Creatures, Animation, Controller.VictimRef, Controller.TotalTime)
 		elseIf Controller.HasPlayer
 			; Increase player sex for NPC
 			Lib.Stats.AddPlayerSex(ActorRef)
@@ -608,7 +585,7 @@ state Reset
 		ActorRef.SetScale(ActorScale)
 		; Reapply cum
 		int cum = Animation.GetCum(position)
-		if !Controller.FastEnd && cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Lib.MaleCount(Controller.Positions) > 0)
+		if !Controller.FastEnd && cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Controller.Males > 0)
 			Lib.ApplyCum(ActorRef, cum)
 		endIf
 		; Make flaccid for SOS

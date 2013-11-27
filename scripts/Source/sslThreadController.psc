@@ -128,6 +128,8 @@ state Advancing
 			EndAnimation()
 			return ; No stage to advance to, end animation
 		elseIf LeadIn && Stage > Animation.StageCount
+			; Disable free camera now to help prevent CTD
+			DisableFreeCamera()
 			; Swap to non lead in animations
 			Stage = 1
 			LeadIn = false
@@ -172,6 +174,9 @@ state Animating
 	endFunction
 	event OnBeginState()
 		if !LeadIn && Stage >= Animation.StageCount
+			; Disable free camera now to help prevent CTD
+			DisableFreeCamera()
+			; Send orgasm stage specific event
 			SendThreadEvent("OrgasmStart")
 			; Perform actor orgasm stuff
 			ActorAction("Orgasm", "Animating")
@@ -424,11 +429,10 @@ function EndAnimation(bool quick = false)
 	FastEnd = quick
 	Stage = Animation.StageCount
 	if HasPlayer
-		; Immediately stop hotkeys to prevent further stage advancing
-		Lib.ControlLib._HKClear()
 		; Force camera to default state for ending
-		Lib.ControlLib.ControlCamera.GoToState("")
-		Lib.ControlLib.EnableFreeCamera(false)
+		Lib.ControlLib.ResetCamera()
+		; Stop hotkeys to prevent further stage advancing
+		Lib.ControlLib._HKClear()
 	endIf
 	; Send end event
 	SendThreadEvent("AnimationEnd")
@@ -468,6 +472,12 @@ endFunction
 ;/-----------------------------------------------\;
 ;|	Scene Manipulation                           |;
 ;\-----------------------------------------------/;
+
+function DisableFreeCamera()
+	if HasPlayer && Game.GetCameraState() == 3
+		Lib.ControlLib.ToggleFreeCamera()
+	endIf
+endFunction
 
 function CenterOnObject(ObjectReference centerOn, bool resync = true)
 	parent.CenterOnObject(centerOn, resync)
