@@ -168,12 +168,12 @@ bool function ToggleFirstPerson()
 endFunction
 
 bool function ToggleFreeCamera()
-	FadeToBlackHold.ApplyCrossFade(0.5)
+	; FadeToBlackHold.ApplyCrossFade(0.5)
 	TFC = true
 	RegisterForMenu("Console")
 	Input.Tapkey(Input.GetMappedKey("Console", 0))
-	Utility.Wait(0.01)
-	ImageSpaceModifier.RemoveCrossFade()
+	Utility.Wait(0.10)
+	; ImageSpaceModifier.RemoveCrossFade()
 	bool current = Game.GetCameraState() == 3
 	; Clear free camera state if needed
 	if !current && GetState() == "FreeCamera"
@@ -187,6 +187,8 @@ event OnMenuOpen(string menu)
 	if menu == "Console" && TFC == true
 		UnregisterForMenu("Console")
 		TFC = false
+		Input.TapKey(28) ; Enter
+		Utility.WaitMenuMode(0.10)
 		Input.TapKey(20) ; T
 		Utility.WaitMenuMode(0.10)
 		Input.TapKey(33) ; F
