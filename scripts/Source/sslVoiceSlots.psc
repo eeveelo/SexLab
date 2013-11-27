@@ -130,15 +130,11 @@ endFunction
 
 function _Setup()
 	Slots = new sslBaseVoice[50]
-	int i
-	while i < 50
-		if i < 10
-			Slots[i] = GetAliasByName("VoiceSlot00"+i) as sslBaseVoice
-		else
-			Slots[i] = GetAliasByName("VoiceSlot0"+i) as sslBaseVoice
-		endIf
+	int i = 50
+	while i
+		i -= 1
+		Slots[i] = GetNthAlias(i) as sslBaseVoice
 		Slots[i].Initialize()
-		i += 1
 	endWhile
 	Initialize()
 	Defaults.LoadVoices()

@@ -195,15 +195,11 @@ endFunction
 
 function _Setup()
 	Slots = new sslBaseAnimation[100]
-	int i
-	while i < 100
-		if i < 10
-			Slots[i] = GetAliasByName("AnimationSlot00"+i) as sslBaseAnimation
-		else
-			Slots[i] = GetAliasByName("AnimationSlot0"+i) as sslBaseAnimation
-		endIf
+	int i = 100
+	while i
+		i -= 1
+		Slots[i] = GetNthAlias(i) as sslBaseAnimation
 		Slots[i].Initialize()
-		i += 1
 	endWhile
 	Initialize()
 	Defaults.LoadAnimations()

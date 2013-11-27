@@ -129,15 +129,11 @@ endFunction
 
 function _Setup()
 	Slots = new sslBaseExpression[40]
-	int i
-	while i < 40
-		if i < 10
-			Slots[i] = GetAliasByName("ExpressionSlot00"+i) as sslBaseExpression
-		else
-			Slots[i] = GetAliasByName("ExpressionSlot0"+i) as sslBaseExpression
-		endIf
+	int i = 40
+	while i
+		i -= 1
+		Slots[i] = GetNthAlias(i) as sslBaseExpression
 		Slots[i].Initialize()
-		i += 1
 	endWhile
 	Initialize()
 	Defaults.LoadExpressions()

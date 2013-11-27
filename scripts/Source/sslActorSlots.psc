@@ -77,19 +77,13 @@ endFunction
 
 function _Setup()
 	ActorSlot = new sslActorAlias[75]
-
-	int i
-	while i < 75
-		if i < 10
-			ActorSlot[i] = GetAliasByName("ActorSlot00"+i) as sslActorAlias
-		else
-			ActorSlot[i] = GetAliasByName("ActorSlot0"+i) as sslActorAlias
-		endIf
+	int i = 75
+	while i
+		i -= 1
+		ActorSlot[i] = GetNthAlias(i) as sslActorAlias
 		ActorSlot[i].ClearAlias()
 		ActorSlot[i].TryToClear()
-		i += 1
 	endWhile
-
-	; Reind Hotkeys
+	; Rebind Hotkeys
 	Lib.ControlLib._HKClear()
 endFunction

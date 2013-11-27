@@ -65,33 +65,32 @@ endFunction
 ;\-----------------------------------------------/;
 
 function _Setup()
+	_StopAll()
 	ThreadView = new sslThreadController[15]
-
-	int i
-	while i < 15
-		if i < 10
-			ThreadView[i] = GetAliasByName("ThreadView00"+i) as sslThreadController
-		else
-			ThreadView[i] = GetAliasByName("ThreadView0"+i) as sslThreadController
-		endIf
+	int i = 15
+	while i
+		i -= 1
+		ThreadView[i] = GetNthAlias(i) as sslThreadController
 		ThreadView[i]._SetThreadID(i)
-		i += 1
+		ThreadView[i].Initialize()
 	endWhile
 endFunction
 
 function _StopAll()
-	int i
-	while i < ThreadView.Length
-		int slot
-		while slot < ThreadView[i].ActorAlias.Length
-			if ThreadView[i].ActorAlias[slot] != none
-				sslActorAlias clearing = ThreadView[i].ActorAlias[slot] as sslActorAlias
+	int i = ThreadView.Length
+	while i
+		i -= 1
+		if ThreadView[i].GetState() != "Unlocked"
+			ThreadView[i].FastEnd = true
+			int n = ThreadView[i].ActorAlias.Length
+			while n
+				n -= 1
+				sslActorAlias clearing = ThreadView[i].ActorAlias[n]
+				clearing.StopAnimating(true)
+				clearing.GoToState("")
 				clearing.GoToState("Reset")
-				clearing.ClearAlias()
-			endIf
-			slot += 1
-		endWhile
+			endWhile
+		endIf
 		ThreadView[i].Initialize()
-		i += 1
 	endWhile
 endFunction
