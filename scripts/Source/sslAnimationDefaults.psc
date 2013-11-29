@@ -287,6 +287,7 @@ function ArrokMaleMasturbation(string eventName, string id, float argNum, form s
 	AddTag("M")
 	AddTag("Masturbation")
 	AddTag("Standing")
+	AddTag("Dirty")
 
 	Save()
 endFunction
@@ -963,6 +964,28 @@ function SexLabTribadism(string eventName, string id, float argNum, form sender)
 	Save()
 endFunction
 
+function BleaghFemaleSolo(string eventName, string id, float argNum, form sender)
+	Name = "Bleagh Female Masturbation"
+
+	SetContent(Sexual)
+	SetSFX(Squishing)
+
+	int a1 = AddPosition(Female)
+	AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S1", 0)
+	AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S2", 0)
+	AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S3", 0)
+	AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S4", 0)
+	AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S5", 0)
+
+	AddTag("Sex")
+	AddTag("Solo")
+	AddTag("F")
+	AddTag("Masturbation")
+	AddTag("Dirty")
+
+	Save()
+endFunction
+
 function APAnal(string eventName, string id, float argNum, form sender)
 	Name = "AP Anal"
 
@@ -1138,7 +1161,7 @@ function APFemaleSolo(string eventName, string id, float argNum, form sender)
 	AddTag("Solo")
 	AddTag("F")
 	AddTag("Masturbation")
-	AddTag("Standing")
+	AddTag("Dirty")
 
 	Save()
 endFunction

@@ -478,3 +478,12 @@ s -a Zyn_RoughStanding_A2_S1 Zyn_RoughStanding_A2_S1.hkx
 + Zyn_RoughStanding_A2_S2 Zyn_RoughStanding_A2_S2.hkx
 + Zyn_RoughStanding_A2_S3 Zyn_RoughStanding_A2_S3.hkx
 + Zyn_RoughStanding_A2_S4 Zyn_RoughStanding_A2_S4.hkx
+
+'
+' Bleagh Animation
+'
+s Bleagh_FemaleSolo_A1_S1 Bleagh_FemaleSolo_A1_S1.hkx
++ Bleagh_FemaleSolo_A1_S2 Bleagh_FemaleSolo_A1_S2.hkx
++ Bleagh_FemaleSolo_A1_S3 Bleagh_FemaleSolo_A1_S3.hkx
++ Bleagh_FemaleSolo_A1_S4 Bleagh_FemaleSolo_A1_S4.hkx
++ Bleagh_FemaleSolo_A1_S5 Bleagh_FemaleSolo_A1_S5.hkx
