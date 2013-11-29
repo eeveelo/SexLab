@@ -79,7 +79,6 @@ bool function ToggleFreeCamera()
 endFunction
 
 function _HKStart(sslThreadController Controller)
-	; CameraControl = GetAliasByName("CameraControl") as sslHotkeyCamera
 	RegisterForKey(kBackwards)
 	RegisterForKey(kAdjustStage)
 	RegisterForKey(kAdvanceAnimation)
@@ -171,8 +170,9 @@ event OnKeyDown(int keyCode)
 endEvent
 
 function _Defaults()
-	; CameraControl = GetAliasByName("CameraControl") as sslHotkeyCamera
-	; debug.traceandbox("CameraControl: "+CameraControl)
+	_HKClear()
+	hkReady = true
+
 	; Config Hotkeys
 	kBackwards = 54 ; Right Shift
 	kAdjustStage = 157; Right Ctrl
@@ -189,4 +189,5 @@ function _Defaults()
 	kRotateScene = 22 ; U
 	kToggle1stCamera = 79 ; NUM 1
 	kToggleFreeCamera = 81 ; NUM 3
+
 endFunction

@@ -363,14 +363,6 @@ function StoreEquipment(form[] equipment)
 	else
 		EquipmentStorage = sslUtility.MergeFormArray(equipment, EquipmentStorage)
 	endIf
-
-	; int i
-	; while i < EquipmentStorage.Length
-	; 	equipment = sslUtility.PushForm(EquipmentStorage[i], equipment)
-	; 	i += 1
-	; endWhile
-	; ; Save new storage
-	; EquipmentStorage = equipment
 endFunction
 
 function SyncThread()
@@ -527,18 +519,16 @@ state Animating
 			Controller.EndAnimation(true)
 			return
 		endIf
-		if Expression != none
-			Expression.ClearMFG(ActorRef)
-		endIf
-		if Voice != none
-			if VoiceInstance > 0
+		if Voice != none && !IsSilent
+			ActorRef.ClearExpressionOverride()
+			if VoiceInstance
 				Sound.StopInstance(VoiceInstance)
 			endIf
 			VoiceInstance = Voice.Moan(ActorRef, strength, IsVictim)
 			Sound.SetInstanceVolume(VoiceInstance, Lib.fVoiceVolume)
-		endIf
-		if Expression != none
-			Expression.ApplyTo(ActorRef, strength)
+			if Expression != none
+				Expression.ApplyTo(ActorRef, strength)
+			endIf
 		endIf
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent
@@ -556,6 +546,10 @@ state Orgasm
 		int cum = Animation.GetCum(position)
 		if cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Controller.Males > 0)
 			Lib.ApplyCum(ActorRef, cum)
+		endIf
+		; Shake camera if player and not in free camera
+		if (IsPlayer || ClonedRef) && Game.GetCameraState() != 3
+			Game.ShakeCamera(none, 0.75, 1.0)
 		endIf
 		; Voice
 		strength = 100
