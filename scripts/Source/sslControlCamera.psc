@@ -4,17 +4,12 @@ scriptname sslControlCamera extends ReferenceAlias
 sslControlLibrary property Lib auto
 sslActorSlots property ActorSlots auto
 
-ReferenceAlias property CloneAlias auto
 Actor property PlayerRef auto
-Race property CameraRace auto
-
-ImageSpaceModifier property FadeToBlack auto
-ImageSpaceModifier property FadeToBlackBack auto
+ReferenceAlias property CloneAlias auto
+Armor property CameraHead auto
+Furniture property CameraMarker auto
 ImageSpaceModifier property FadeToBlackHold auto
 
-Armor property CameraHead auto
-VoiceType property SexLabVoiceM auto
-VoiceType property SexLabVoiceF auto
 
 sslActorAlias PlayerAlias
 Race PlayerRace
@@ -29,12 +24,21 @@ endEvent
 
 state FirstPerson
 	event OnTranslationAlmostComplete()
+		; PlayerRef.SplineTranslateToRefNode(CloneRef, "NPCEyeBone", 1, 300, 0)
+
+		; debug.trace("translation complete"+PlayerRef+" - "+MarkerRef+" - "+CloneRef)
+		; MarkerRef.MoveToNode(CloneRef, "NPCEyeBone")
+		; PlayerRef.Activate(MarkerRef)
+		; PlayerRef.SetVehicle(MarkerRef)
+		; PlayerRef.SetVehicle(CloneRef)
+		; PlayerRef.SetScale(0.0001)
+		; Utility.Wait(0.5)
 		PlayerRef.SplineTranslateToRefNode(CloneRef, "NPCEyeBone", 1, 300, 0)
 	endEvent
 	event OnBeginState()
 		Debug.ToggleCollisions()
 		Debug.Notification("Entering First Person")
-		FadeToBlackHold.ApplyCrossFade(0.5)
+		; FadeToBlackHold.ApplyCrossFade(0.5)
 
 		; Get existing clone or make new one
 		if CloneAlias.GetReference() != none
@@ -72,11 +76,14 @@ state FirstPerson
 
 		CloneRef.SetHeadTracking(false)
 		CloneRef.EvaluatePackage()
+		PlayerAlias = ActorSlots.GetActorAlias(PlayerRef)
+		PlayerAlias.SetCloned(CloneRef)
+
 		NetImmerse.SetNodeScale(CloneRef, "NPCEyeBone", 0.5, false)
 		NetImmerse.SetNodeScale(CloneRef, "NPC Head [Head]", 0.5, false)
-		; CloneRef.QueueNiNodeUpdate()
+		CloneRef.QueueNiNodeUpdate()
 
-		; CloneRef.SetVehicle(PlayerRef)
+		CloneRef.SetVehicle(PlayerRef)
 
 		; Shrink player down
 		NifScale = NetImmerse.GetNodeScale(PlayerRef, "NPC", true)
@@ -87,24 +94,28 @@ state FirstPerson
 		; NetImmerse.SetNodeScale(PlayerRef, "Camera Control", 0.01, true)
 		NetImmerse.SetNodeScale(PlayerRef, "NPC LookNode [Look]", 0.01, true)
 		; Lib.PlayerRef.SetScale(0.01)
-		; PlayerRef.QueueNiNodeUpdate()
+		PlayerRef.QueueNiNodeUpdate()
 
-		PlayerAlias = ActorSlots.GetActorAlias(PlayerRef)
-		PlayerAlias.SetCloned(CloneRef)
 
-		PlayerRef.SetGhost(true)
-		PlayerRef.SetVehicle(CloneRef)
+		; MarkerRef = PlayerRef.PlaceAtMe(Game.GetForm(0x0B9C04), 1)
+		Utility.Wait(0.5)
+		; MarkerRef.SetScale(0.0001)
+		; MarkerRef.MoveToNode(CloneRef, "NPCEyeBone")
+		; PlayerRef.Activate(MarkerRef)
+		; PlayerRef.SetVehicle(MarkerRef)
+		; PlayerRef.SetVehicle(CloneRef)
+
 		; Force into first person camera and hide body
-		Game.ForceFirstPerson()
 		Game.DisablePlayerControls(false, false, true, false, false, false, true, false, 0)
 		Game.ShowFirstPersonGeometry(false)
+		Game.ForceFirstPerson()
+		PlayerRef.SetGhost(true)
 
 		; Poistion and loop
 		PlayerRef.SplineTranslateToRefNode(CloneRef, "NPCEyeBone", 1, 50000, 0)
 		RegisterForSingleUpdate(2.5)
-
 		; Return to view
-		ImageSpaceModifier.RemoveCrossFade()
+		; ImageSpaceModifier.RemoveCrossFade()
 	endEvent
 
 	event OnUpdate()
@@ -117,9 +128,10 @@ state FirstPerson
 		UnregisterForUpdate()
 		FadeToBlackHold.ApplyCrossFade(0.5)
 
-		; PlayerRef.SetVehicle(none)
+		PlayerRef.StopTranslation()
+		PlayerRef.SetVehicle(none)
 		PlayerRef.SetGhost(false)
-		; Game.EnablePlayerControls(false, false, true, false, false, false, true, false, 0)
+		Game.EnablePlayerControls(false, false, true, false, false, false, true, false, 0)
 
 		; Reset player scale
 		NetImmerse.SetNodeScale(PlayerRef, "NPC", NifScale, true)
