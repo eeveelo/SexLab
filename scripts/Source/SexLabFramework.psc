@@ -110,6 +110,10 @@ int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim 
 	return -1
 endFunction
 
+sslThreadController function QuickStart(actor a1, actor a2 = none, actor a3 = none, actor a4 = none, actor a5 = none, actor victim = none, string hook = "")
+	sslBaseAnimation[] anim
+	return ThreadSlots.GetController(StartSex(ActorLib.MakeActorArray(a1, a2, a3, a4, a5), anim, victim, none, true, hook))
+endFunction
 
 ;#------------------------------#
 ;#  ACTOR FUNCTIONS             #
