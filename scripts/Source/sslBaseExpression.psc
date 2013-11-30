@@ -28,23 +28,22 @@ int[] female5
 ;|	API Functions                                |;
 ;\-----------------------------------------------/;
 
-function ApplyTo(actor ActorRef, int strength = 50, bool openmouth = false)
+function ApplyTo(actor ActorRef, int strength = 50, bool isFemale, bool openmouth = false)
 	if ActorRef == none
 		return ; Nobody to express with!
 	endIf
 	; Clear existing mfg from actor
 	Lib.ClearMFG(ActorRef)
 	; Get phase presets, [n + 0] = mode, [n + 1] = id, [n + 2] = value
-	bool female = ActorRef.GetLeveledActorBase().GetSex() == 1
-	int[] presets = GetPhase(CalcPhase(strength, female), female)
+	int[] presets = GetPhase(CalcPhase(strength, isFemale), isFemale)
 	; Apply phase presets to actor
 	int i = presets.Length
 	while i
 		i -= 3
-		if presets[i] == 2 && !openmouth
-			ActorRef.SetExpressionOverride(presets[(i + 1)], presets[(i + 2)])
-		else
+		if presets[i] != 2 && presets[i] != 0
 			MfgConsoleFunc.SetPhonemeModifier(ActorRef, presets[i], presets[(i + 1)], presets[(i + 2)])
+		elseIf !openmouth
+			ActorRef.SetExpressionOverride(presets[(i + 1)], presets[(i + 2)])
 		endIf
 	endWhile
 	; Apply open mouth
@@ -55,7 +54,13 @@ function ApplyTo(actor ActorRef, int strength = 50, bool openmouth = false)
 endFunction
 
 function ClearMFG(actor ActorRef)
-	Lib.ClearMFG(ActorRef)
+	ActorRef.ClearExpressionOverride()
+	MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
+endFunction
+
+function ClearPhoneme(actor ActorRef)
+	int[] phonemes = new int[32]
+
 endFunction
 
 int[] function GetPreset(int[] presets, int n)
