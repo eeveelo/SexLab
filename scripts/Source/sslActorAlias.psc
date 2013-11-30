@@ -29,6 +29,7 @@ bool IsPlayer
 bool IsVictim
 bool IsFemale
 bool IsCreature
+bool IsMouthOpen
 
 ; Storage
 int strength
@@ -43,6 +44,14 @@ float[] loc
 actor ClonedRef
 ActorBase BaseRef
 string ActorName
+int[] ExpressionPreset
+
+; Stats
+float Purity
+bool IsPure
+int Vaginal
+int Anal
+int Oral
 
 ; Switches
 bool disableRagdoll
@@ -85,6 +94,7 @@ function SetAlias(sslThreadController ThreadView)
 		IsFemale = gender == 1
 		IsCreature = gender == 2
 		IsPlayer = ActorRef == Lib.PlayerRef
+		IsVictim = ActorRef == Controller.VictimRef
 		; Calculate scales
 		float display = ActorRef.GetScale()
 		ActorRef.SetScale(1.0)
@@ -412,8 +422,12 @@ function SyncThread()
 		endIf
 		; Animation related stuffs
 		if !IsCreature
+			Debug.Trace(ActorName+ " Enjoyment: "+GetEnjoyment())
 			; Send expression
-			Expression.ApplyTo(ActorRef, strength, Animation.UseOpenMouth(position, stage))
+			IsMouthOpen = Animation.UseOpenMouth(position, stage)
+			Expression.ApplyTo(ActorRef, strength, BaseRef.GetSex() == 1, IsMouthOpen)
+			; ExpressionPreset = Lib.ExpressionLib.PresetMixin(Lib.ExpressionLib.GetBasePreset(IsFemale), GetEnjoyment(), IsFemale, IsVictim)
+			; Lib.ExpressionLib.ApplyPreset(ExpressionPreset, ActorRef, IsMouthOpen)
 			; Send SOS event
 			if Lib.SOSEnabled && Animation.GetGender(position) == 0
 				Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
@@ -428,8 +442,8 @@ function SyncThread()
 				endIf
 				Debug.SendAnimationEvent(ActorRef, bend)
 				string name = ActorRef.GetLeveledActorBase().GetName()
-				;Debug.Notification(name+" Offset["+offset+"]: "+bend)
-				;Debug.Trace(name+" Offset: SOSBend"+offset+ ": Sent -> "+bend)
+				; Debug.Notification(name+" Offset["+offset+"]: "+bend)
+				; Debug.Trace(name+" Offset: SOSBend"+offset+ ": Sent -> "+bend)
 				; Debug.SendAnimationEvent(ActorRef, "SOSBend"+offset)
 			endif
 			; Equip Strapon if needed
@@ -493,6 +507,20 @@ state Prepare
 			if Controller.Animation.IsSexual()
 				Strip(DoUndress)
 			endIf
+			; Get Stats
+			if Controller.HasPlayer
+				Purity = Lib.Stats.GetPurityLevel()
+				IsPure = Lib.Stats.IsPure()
+				Vaginal = Lib.Stats.GetPlayerProficencyLevel("Vaginal")
+				Anal = Lib.Stats.GetPlayerProficencyLevel("Anal")
+				Oral = Lib.Stats.GetPlayerProficencyLevel("Oral")
+			else
+				Purity = Utility.RandomFloat(-350, 350)
+				IsPure = Purity >= 0
+				Vaginal = Lib.Stats.CalcLevel(Utility.RandomFloat(0, 80), 0.65)
+				Anal = Lib.Stats.CalcLevel(Utility.RandomFloat(0, 80), 0.65)
+				Oral = Lib.Stats.CalcLevel(Utility.RandomFloat(0, 80), 0.65)
+			endIf
 			; Make erect for SOS
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 		endIf
@@ -520,15 +548,17 @@ state Animating
 			return
 		endIf
 		if Voice != none && !IsSilent
-			ActorRef.ClearExpressionOverride()
+			; ActorRef.ClearExpressionOverride()
+			; Lib.ExpressionLib.ClearMFG(ActorRef)
 			if VoiceInstance
 				Sound.StopInstance(VoiceInstance)
 			endIf
 			VoiceInstance = Voice.Moan(ActorRef, strength, IsVictim)
 			Sound.SetInstanceVolume(VoiceInstance, Lib.fVoiceVolume)
-			if Expression != none
-				Expression.ApplyTo(ActorRef, strength)
-			endIf
+			; Lib.ExpressionLib.ApplyPreset(ExpressionPreset, ActorRef, IsMouthOpen)
+			; if Expression != none
+			; 	Expression.ApplyTo(ActorRef, strength)
+			; endIf
 		endIf
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent
@@ -549,7 +579,7 @@ state Orgasm
 		endIf
 		; Shake camera if player and not in free camera
 		if (IsPlayer || ClonedRef) && Game.GetCameraState() != 3
-			Game.ShakeCamera(none, 0.75, 1.0)
+			Game.ShakeCamera(none, 0.75, 1.5)
 		endIf
 		; Voice
 		strength = 100
@@ -608,6 +638,67 @@ endState
 ;/-----------------------------------------------\;
 ;|	Misc Functions                               |;
 ;\-----------------------------------------------/;
+
+int function GetEnjoyment()
+	int BaseWeight = 5
+	int ProficencyWeight
+	int PurityWeight
+	if Animation.HasTag("Vaginal")
+		ProficencyWeight += Vaginal
+	endIf
+	if Animation.HasTag("Anal")
+		ProficencyWeight += Anal
+		if IsFemale
+			BaseWeight -= 1
+		else
+			BaseWeight += 2
+		endIf
+		if IsPure
+			PurityWeight -= 2
+		else
+			PurityWeight += 1
+		endIf
+	endIf
+	if Animation.HasTag("Oral")
+		ProficencyWeight += Oral
+		if IsFemale
+			BaseWeight -= 1
+		endIf
+		if Purity > 0
+			PurityWeight -= 1
+		else
+			PurityWeight += 1
+		endIf
+	endIf
+	if Animation.HasTag("Dirty")
+		if IsPure
+			PurityWeight -= 1 + (((Purity + 1) / 2.0) as int)
+		else
+			PurityWeight += 1 + (((Purity + 1) / 2.0) as int)
+		endIf
+	endIf
+
+	; Clamp values
+	BaseWeight = ClampInt(BaseWeight, 0, 7)
+	ProficencyWeight = ClampInt(ProficencyWeight, 0, 12)
+	PurityWeight = ClampInt(PurityWeight, -6, 7)
+
+	int Enjoyment = ClampInt((BaseWeight + PurityWeight + ProficencyWeight) * Stage, 0, 100)
+	if IsVictim
+		Enjoyment = Enjoyment / 2
+	endIf
+	debug.trace(ActorName+" Stage: "+Stage+" BaseWeight: "+ BaseWeight +" ProficencyWeight: "+ProficencyWeight+" PurityWeight: "+PurityWeight+" ENJOYMENT: "+Enjoyment)
+	return Enjoyment
+endFunction
+
+int function ClampInt(int value, int min, int max)
+	if value > max
+		return max
+	elseIf value < min
+		return min
+	endIf
+	return value
+endFunction
 
 function Initialize()
 	; Clear events
