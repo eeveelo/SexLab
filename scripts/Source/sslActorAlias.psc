@@ -47,11 +47,13 @@ string ActorName
 int[] ExpressionPreset
 
 ; Stats
-float Purity
 bool IsPure
+int Purity
 int Vaginal
 int Anal
 int Oral
+
+int property Enjoyment auto hidden
 
 ; Switches
 bool disableRagdoll
@@ -422,6 +424,7 @@ function SyncThread()
 		endIf
 		; Animation related stuffs
 		if !IsCreature
+			; DEBUG TEMP
 			Debug.Trace(ActorName+ " Enjoyment: "+GetEnjoyment())
 			; Send expression
 			IsMouthOpen = Animation.UseOpenMouth(position, stage)
@@ -507,19 +510,24 @@ state Prepare
 			if Controller.Animation.IsSexual()
 				Strip(DoUndress)
 			endIf
-			; Get Stats
-			if Controller.HasPlayer
-				Purity = Lib.Stats.GetPurityLevel()
+			; Get purity
+			if IsPlayer
+				Purity = Lib.Stats.GetPlayerPurityLevel()
 				IsPure = Lib.Stats.IsPure()
+			else
+				Purity = Lib.Stats.GetActorPurityLevel(ActorRef)
+				IsPure = Lib.Stats.IsActorPure(ActorRef)
+			endIf
+			; Get skill levels
+			if Controller.HasPlayer
 				Vaginal = Lib.Stats.GetPlayerProficencyLevel("Vaginal")
 				Anal = Lib.Stats.GetPlayerProficencyLevel("Anal")
 				Oral = Lib.Stats.GetPlayerProficencyLevel("Oral")
 			else
-				Purity = Utility.RandomFloat(-350, 350)
-				IsPure = Purity >= 0
-				Vaginal = Lib.Stats.CalcLevel(Utility.RandomFloat(0, 80), 0.65)
-				Anal = Lib.Stats.CalcLevel(Utility.RandomFloat(0, 80), 0.65)
-				Oral = Lib.Stats.CalcLevel(Utility.RandomFloat(0, 80), 0.65)
+				int prof = Lib.Stats.GetActorProficencyLevel(ActorRef)
+				Vaginal = prof
+				Anal = prof
+				Oral = prof
 			endIf
 			; Make erect for SOS
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
@@ -640,62 +648,78 @@ endState
 ;\-----------------------------------------------/;
 
 int function GetEnjoyment()
-	int BaseWeight = 5
+	; Init weights
+	int BaseWeight
 	int ProficencyWeight
 	int PurityWeight
+	int ActorCount = Controller.ActorCount
+	; Appropiate bonus = 1.multiplier -- leaving addition intact
+	; Inappropiate bonus = 0 -- canceling out the addition
+	int FemaleBonus = (IsFemale as int)
+	int MaleBonus = ((!IsFemale) as int)
+	int PureBonus = (IsPure as int)
+	int ImpureBonus = ((!IsPure) as int)
+	; Scaling purity modifier
+	int PurityMod = 1 + (Purity / 2)
+	; Adjust bonuses based on type, gender, and purity
 	if Animation.HasTag("Vaginal")
 		ProficencyWeight += Vaginal
+		BaseWeight   += FemaleBonus  * 2
+		BaseWeight   += MaleBonus    * 3
 	endIf
 	if Animation.HasTag("Anal")
 		ProficencyWeight += Anal
-		if IsFemale
-			BaseWeight -= 1
-		else
-			BaseWeight += 2
-		endIf
-		if IsPure
-			PurityWeight -= 2
-		else
-			PurityWeight += 1
-		endIf
+		BaseWeight   += FemaleBonus  * -1
+		BaseWeight   += MaleBonus    * 3
+		PurityWeight += PureBonus    * -PurityMod
+		PurityWeight += ImpureBonus  * PurityMod
 	endIf
 	if Animation.HasTag("Oral")
 		ProficencyWeight += Oral
-		if IsFemale
-			BaseWeight -= 1
-		endIf
-		if Purity > 0
-			PurityWeight -= 1
-		else
-			PurityWeight += 1
-		endIf
+		BaseWeight   += FemaleBonus  * -1
+		BaseWeight   += MaleBonus    * 3
+		PurityWeight += PureBonus    * -PurityMod
+		PurityWeight += ImpureBonus  * PurityMod
 	endIf
 	if Animation.HasTag("Dirty")
-		if IsPure
-			PurityWeight -= 1 + (((Purity + 1) / 2.0) as int)
-		else
-			PurityWeight += 1 + (((Purity + 1) / 2.0) as int)
-		endIf
+		PurityWeight += PureBonus    * (-PurityMod - 1)
+		PurityWeight += ImpureBonus  * PurityMod
 	endIf
+	if Animation.HasTag("Aggressive")
+		PurityWeight += PureBonus    * (-PurityMod - 3)
+	endIf
+	if Animation.HasTag("Loving")
+		PurityWeight += PureBonus    * (PurityMod + 1)
+	endIf
+	if Animation.IsCreature
+		PurityWeight += PureBonus    * (-PurityMod - 6)
+	endIf
+	if ActorCount > 2
+		PurityWeight += PureBonus    * ((-PurityMod - 3) * (ActorCount - 2))
+		PurityWeight += ImpureBonus  * ((PurityMod + 2) * (ActorCount - 2))
+	endIf
+	if ActorCount == 1
+		ProficencyWeight += Purity
+		PurityWeight += ImpureBonus  * (PurityMod + (ActorRef.GetActorValue("Confidence") as int))
+	endIf
+	; Ramp up with stage and time spent, maxout time bonus at 2.5 minutes (8 seconds * 19 intervals = 152 seconds == ~2.5 minutes)
+	BaseWeight += (4 * Stage) + Clamp(((Controller.TotalTime / 8.0) as int), 19)
 
-	; Clamp values
-	BaseWeight = ClampInt(BaseWeight, 0, 7)
-	ProficencyWeight = ClampInt(ProficencyWeight, 0, 12)
-	PurityWeight = ClampInt(PurityWeight, -6, 7)
-
-	int Enjoyment = ClampInt((BaseWeight + PurityWeight + ProficencyWeight) * Stage, 0, 100)
+	; Calculate root enjoyment of the animation, give multipler by progress through the animation stages (1/5 stage = 1.20 multiplier)
+	Enjoyment = (((BaseWeight + PurityWeight + (ProficencyWeight * 3)) as float) * ((Stage as float / Animation.StageCount as float) + 1.0)) as int
+	; Cap victim at 50 after halving
 	if IsVictim
-		Enjoyment = Enjoyment / 2
+		Enjoyment = Clamp((Enjoyment / 2), 50)
 	endIf
-	debug.trace(ActorName+" Stage: "+Stage+" BaseWeight: "+ BaseWeight +" ProficencyWeight: "+ProficencyWeight+" PurityWeight: "+PurityWeight+" ENJOYMENT: "+Enjoyment)
+	; Return raw enjoyment for modder use, if 100+ expression will clamp value
 	return Enjoyment
 endFunction
 
-int function ClampInt(int value, int min, int max)
-	if value > max
+int function Clamp(int value, int max = 100)
+	if value < 0
+		return 0
+	elseIf value >= max
 		return max
-	elseIf value < min
-		return min
 	endIf
 	return value
 endFunction
