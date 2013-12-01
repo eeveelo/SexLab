@@ -1,23 +1,8 @@
 scriptname sslUtility hidden
 
-string[] function ArgString(string args, string delimiter = ",") global
-	string[] output
-	args += delimiter
-	int prev = 0
-	int next = StringUtil.Find(args, delimiter, prev)
-	while next != -1
-		string arg = StringUtil.SubString(args, prev, (next - prev))
-		if StringUtil.GetNthChar(arg, 0) == " "
-			arg = StringUtil.SubString(arg, 1)
-		endIf
-		if arg != ""
-			output = PushString(arg, output)
-		endIf
-		prev = next + 1
-		next = StringUtil.Find(args, delimiter, prev)
-	endWhile
-	return output
-endFunction
+;/-----------------------------------------------\;
+;|	Float Utility Functions                      |;
+;\-----------------------------------------------/;
 
 float[] function IncreaseFloat(int by, float[] array) global
 	int len = array.Length
@@ -59,6 +44,26 @@ float[] function MergeFloatArray(float[] push, float[] array) global
 	return output
 endFunction
 
+float function ClampFloat(float value, float min, float max) global
+	if value >= max
+		return max
+	elseIf value <= min
+		return min
+	endIf
+	return value
+endFunction
+
+float function SignFloat(bool sign, float value) global
+	if sign
+		return value * -1
+	endIf
+	return value
+endFunction
+
+;/-----------------------------------------------\;
+;|	Integer Utility Functions                    |;
+;\-----------------------------------------------/;
+
 int[] function IncreaseInt(int by, int[] array) global
 	int len = array.Length
 	if by < 1 || (len+by > 128)
@@ -99,6 +104,25 @@ int[] function MergeIntArray(int[] push, int[] array) global
 	return output
 endFunction
 
+int function ClampInt(int value, int min, int max) global
+	if value >= max
+		return max
+	elseIf value <= min
+		return min
+	endIf
+	return value
+endFunction
+
+int function SignInt(bool sign, int value) global
+	if sign
+		return value * -1
+	endIf
+	return value
+endFunction
+
+;/-----------------------------------------------\;
+;|	Bool Utility Functions                       |;
+;\-----------------------------------------------/;
 
 bool[] function IncreaseBool(int by, bool[] array) global
 	int len = array.Length
@@ -144,13 +168,36 @@ endFunction
 int function CountTrue(bool[] array) global
 	int pos = array.Find(true)
 	int count
-	while pos != -1
+	while pos != -1 && pos < array.Length
 	  count += 1
 	  pos = array.Find(true, (pos + 1))
 	endWhile
 	return count
 endFunction
 
+
+;/-----------------------------------------------\;
+;|	String Utility Functions                     |;
+;\-----------------------------------------------/;
+
+string[] function ArgString(string args, string delimiter = ",") global
+	string[] output
+	args += delimiter
+	int prev = 0
+	int next = StringUtil.Find(args, delimiter, prev)
+	while next != -1
+		string arg = StringUtil.SubString(args, prev, (next - prev))
+		if StringUtil.GetNthChar(arg, 0) == " "
+			arg = StringUtil.SubString(arg, 1)
+		endIf
+		if arg != ""
+			output = PushString(arg, output)
+		endIf
+		prev = next + 1
+		next = StringUtil.Find(args, delimiter, prev)
+	endWhile
+	return output
+endFunction
 
 string[] function IncreaseString(int by, string[] array) global
 	int len = array.Length
@@ -192,6 +239,10 @@ string[] function MergeStringArray(string[] push, string[] array) global
 	return output
 endFunction
 
+;/-----------------------------------------------\;
+;|	Form Utility Functions                       |;
+;\-----------------------------------------------/;
+
 form[] function IncreaseForm(int by, form[] array) global
 	int len = array.Length
 	if by < 1 || (len+by > 128)
@@ -232,11 +283,10 @@ form[] function MergeFormArray(form[] push, form[] array) global
 	return output
 endFunction
 
-
 int function CountNone(form[] array) global
 	int pos = array.Find(none)
 	int count
-	while pos != -1
+	while pos != -1 && pos < array.Length
 	  count += 1
 	  pos = array.Find(none, (pos + 1))
 	endWhile
@@ -263,6 +313,10 @@ form[] function ClearNone(form[] array) global
 	endWhile
 	return output
 endFunction
+
+;/-----------------------------------------------\;
+;|	Other Utility Functions                      |;
+;\-----------------------------------------------/;
 
 sslBaseAnimation[] function PushAnimation(sslBaseAnimation var, sslBaseAnimation[] array) global
 	int len = array.Length
@@ -303,6 +357,7 @@ endFunction
 ;##############################################
 ;#  Below Array Functions Originally by Cmod  #
 ;##############################################
+
 int function ValidateSize(int size) global
 	if size < 1
 		return 1

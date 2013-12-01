@@ -172,7 +172,7 @@ state Unlocked
 		Initialize()
 		ActorSlots = new sslActorAlias[5]
 		GoToState("Making")
-		RegisterForSingleUpdate((timeoutIn + 5.0))
+		RegisterForSingleUpdate((timeoutIn + 10.0))
 		return self
 	endFunction
 endState
@@ -782,7 +782,7 @@ function Initialize()
 	int i = ActorSlots.Length
 	while i
 		i -= 1
-		if ActorSlots[i] != none
+		if ActorSlots[i] != none && ActorSlots[i].GetReference() != none
 			ActorSlots[i].StopAnimating(true)
 			ActorSlots[i].UnlockActor()
 			ActorSlots[i].GoToState("")
