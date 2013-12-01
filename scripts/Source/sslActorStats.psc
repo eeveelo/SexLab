@@ -240,7 +240,7 @@ float function AdjustPurity(float amount)
 	return fSexualPurity
 endFunction
 
-int function GetPurityLevel()
+int function GetPlayerPurityLevel()
 	return CalcLevel(fSexualPurity, 0.2)
 endFunction
 
@@ -252,11 +252,11 @@ bool function IsImpure()
 	return fSexualPurity < 0
 endFunction
 
-string function GetPurityTitle()
+string function GetPlayerPurityTitle()
 	if fSexualPurity < 0
-		return sImpureTitles[Clamp(GetPurityLevel(), 6)]
+		return sImpureTitles[Clamp(GetPlayerPurityLevel(), 6)]
 	else
-		return sPureTitles[Clamp(GetPurityLevel(), 6)]
+		return sPureTitles[Clamp(GetPlayerPurityLevel(), 6)]
 	endIf
 endFunction
 
@@ -288,6 +288,63 @@ endFunction
 
 string function GetPlayerProficencyTitle(string type)
 	return sStatTitles[Clamp(GetPlayerProficencyLevel(type), 6)]
+endFunction
+
+int function GetActorProficencyLevel(actor ActorRef)
+	int xp = (ActorRef.GetLevel() * 2) + ((((ActorRef.GetActorValue("Speechcraft")*ActorRef.GetActorValue("Confidence")) + 1) / 2.0) as int)
+	return CalcLevel(xp, 0.65)
+endFunction
+
+float function GetActorPurityStat(actor ActorRef)
+	; Get relevant-ish AI data
+	int Aggression = ActorRef.GetActorValue("Aggression") as int
+	int Morality = ActorRef.GetActorValue("Morality") as int
+	int Assistance = ActorRef.GetActorValue("Assistance") as int
+	; Init base purity based on level and how aggressive they are
+	float purity = ((ActorRef.GetLevel() / 2 ) * 9)
+	float seed = ((((Aggression+1) as float) / 5.0) * 0.40)
+	; Actor doesn't care about crime, make more impure
+	if Morality == 0
+		seed += 0.10
+	; Actor refuses crime
+	elseIf Morality == 3
+		seed += 0.07
+	endIf
+	; Actor is a morale pacifist, make more pure
+	if Aggression == 0 && Morality != 0
+		seed += 0.06
+	; Non aggessive, add small bit
+	elseIf Aggression == 0
+		seed += 0.02
+	; Aggressive only towards enemies
+	elseIf Aggression == 1
+		seed += 0.01
+	endIf
+	; 0 = Actor won't help anybody, make more impure
+	; 2 = Actor helps friends+allies, make more pure
+	if Assistance != 1
+		seed += 0.05
+	endIf
+	; Actor is immorale but helps friends+allies, make more pure
+	if Assistance == 2 && Morality == 0
+		seed -= 0.04
+	endIf
+	; Generate largish purity with seed and base purity
+	purity += ((purity * seed) * 1.75) * 1.5
+	; Sign purity to make impure, based on "bad" traits
+	return sslUtility.SignFloat((Morality == 0 || Aggression >= 2 || (Assistance == 0 && Morality == 3)), purity)
+endFunction
+
+int function GetActorPurityLevel(actor ActorRef)
+	return CalcLevel(GetActorPurityStat(ActorRef), 0.2)
+endFunction
+
+bool function IsActorPure(actor ActorRef)
+	return GetActorPurityStat(ActorRef) >= 0
+endFunction
+
+bool function IsActorImpure(actor ActorRef)
+	return GetActorPurityStat(ActorRef) < 0
 endFunction
 
 int function Clamp(int value, int max)

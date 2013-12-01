@@ -433,11 +433,11 @@ float function AdjustPlayerPurity(float amount)
 endFunction
 
 int function GetPlayerPurityLevel()
-	return Stats.GetPurityLevel()
+	return Stats.GetPlayerPurityLevel()
 endFunction
 
 string function GetPlayerPurityTitle()
-	return Stats.GetPurityTitle()
+	return Stats.GetPlayerPurityTitle()
 endFunction
 
 string function GetPlayerSexuality()
@@ -450,6 +450,26 @@ endFunction
 
 string function GetStatProficiency(string type)
 	return Stats.GetPlayerProficencyTitle(type)
+endFunction
+
+int function GetActorProficencyLevel(actor ActorRef)
+	return Stats.GetActorProficencyLevel(ActorRef)
+endFunction
+
+float function GetActorPurityStat(actor ActorRef)
+	return Stats.GetActorPurityStat(ActorRef)
+endFunction
+
+int function GetActorPurityLevel(actor ActorRef)
+	return Stats.GetActorPurityLevel(ActorRef)
+endFunction
+
+bool function IsActorPure(actor ActorRef)
+	return Stats.GetActorPurityStat(ActorRef)
+endFunction
+
+bool function IsActorImpure(actor ActorRef)
+	return Stats.IsActorImpure(ActorRef)
 endFunction
 
 ;#---------------------------#
