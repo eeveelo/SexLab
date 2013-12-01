@@ -451,10 +451,10 @@ event OnPageReset(string page)
 		SetCursorPosition(1)
 		AddHeaderOption("$SSL_SexualStats")
 		AddTextOption("$SSL_Sexuality", Stats.GetSexualityTitle())
-		if Stats.GetPurityLevel() < 0
-			AddTextOption("$SSL_SexualPerversion", Stats.GetPurityTitle())
+		if Stats.GetPlayerPurityLevel() < 0
+			AddTextOption("$SSL_SexualPerversion", Stats.GetPlayerPurityTitle())
 		else
-			AddTextOption("$SSL_SexualPurity", Stats.GetPurityTitle())
+			AddTextOption("$SSL_SexualPurity", Stats.GetPlayerPurityTitle())
 		endIf
 		AddTextOption("$SSL_VaginalProficiency", Stats.GetPlayerProficencyTitle("Vaginal"))
 		AddTextOption("$SSL_AnalProficiency", Stats.GetPlayerProficencyTitle("Anal"))

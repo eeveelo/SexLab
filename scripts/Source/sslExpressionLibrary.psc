@@ -126,6 +126,4 @@ function _Defaults()
 	BasePresetFemale = AddBasePreset(Female, Phoneme, 4, 35)
 	BasePresetFemale = AddBasePreset(Female, Phoneme, 10, 20)
 	BasePresetFemale = AddBasePreset(Female, Phoneme, 12, 30)
-
-	debug.notification("BasePresetMale: "+BasePresetMale.Length)
 endFunction
