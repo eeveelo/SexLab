@@ -1,6 +1,9 @@
 scriptname sslVoiceDefaults extends sslVoiceFactory
 
 function LoadVoices()
+	RegisterVoice("MaleVanilla")
+	RegisterVoice("FemaleVanilla")
+
 	RegisterVoice("FemaleClassic")
 	RegisterVoice("FemaleBreathy")
 	RegisterVoice("FemaleYoung")
@@ -14,6 +17,32 @@ function LoadVoices()
 	RegisterVoice("MaleRough")
 	RegisterVoice("MaleAverage")
 endFunction
+
+
+function MaleVanilla(string eventName, string id, float argNum, form sender)
+	Name = "Vanilla (Male)"
+	Gender = Male
+	Mild = none
+	Medium = none
+	Hot = none
+	AddTag("Male")
+	AddTag("Vanilla")
+	AddTag("Normal")
+	Save()
+endFunction
+
+function FemaleVanilla(string eventName, string id, float argNum, form sender)
+	Name = "Vanilla (Female)"
+	Gender = Female
+	Mild = none
+	Medium = none
+	Hot = none
+	AddTag("Female")
+	AddTag("Vanilla")
+	AddTag("Normal")
+	Save()
+endFunction
+
 
 Sound property SexLabvFemale01MildM auto
 Sound property SexLabvFemale01MediumM auto

@@ -16,6 +16,8 @@ Sound property Mild auto hidden
 Sound property Hot auto hidden
 Sound property Medium auto hidden
 
+
+
 string[] tags
 
 ;/-----------------------------------------------\;
@@ -66,14 +68,29 @@ int function PlaySound(actor a, sound soundset, topic lipsync)
 endFunction
 
 int function PlayMild(actor a)
+	if Mild == none
+		int r = Utility.RandomInt(0, (Lib.VanillaMild.Length - 1))
+		a.Say(Lib.VanillaMild[r])
+		return 0
+	endIf
 	return PlaySound(a, Mild, Lib.SexLabMoanMild)
 endFunction
 
 int function PlayMedium(actor a)
+	if Medium == none
+		int r = Utility.RandomInt(0, (Lib.VanillaMedium.Length - 1))
+		a.Say(Lib.VanillaMedium[r])
+		return 0
+	endIf
 	return PlaySound(a, Medium, Lib.SexLabMoanMedium)
 endFunction
 
 int function PlayHot(actor a)
+	if Hot == none
+		int r = Utility.RandomInt(0, (Lib.VanillaHot.Length - 1))
+		a.Say(Lib.VanillaHot[r])
+		return 0
+	endIf
 	return PlaySound(a, Hot, Lib.SexLabMoanHot)
 endFunction
 

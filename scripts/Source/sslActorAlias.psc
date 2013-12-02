@@ -425,7 +425,7 @@ function SyncThread()
 		; Animation related stuffs
 		if !IsCreature
 			; DEBUG TEMP
-			Debug.Trace(ActorName+ " Enjoyment: "+GetEnjoyment())
+			Debug.Trace(" SEXLABDEBUG --- "+ActorName+ " Enjoyment: "+GetEnjoyment()+" Pain: "+GetPain())
 			; Send expression
 			IsMouthOpen = Animation.UseOpenMouth(position, stage)
 			Expression.ApplyTo(ActorRef, strength, BaseRef.GetSex() == 1, IsMouthOpen)
