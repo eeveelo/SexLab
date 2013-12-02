@@ -245,9 +245,6 @@ state Making
 			i += 1
 		endWhile
 
-		; Remember present genders
-		gendercounts = Lib.Actors.GenderCount(Positions)
-
 		; Check for valid animations
 		if HasCreature
 			primaryAnimations = Lib.CreatureAnimations.GetByRace(actors, Creature)
@@ -260,6 +257,9 @@ state Making
 			Positions = Lib.SortCreatures(Positions, primaryAnimations[0])
 			CenterOnObject(Positions[0])
 		endIf
+
+		; Remember present genders
+		gendercounts = Lib.Actors.GenderCount(Positions)
 
 		if primaryAnimations.Length == 0
 			; Same sex pairings

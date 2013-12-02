@@ -266,6 +266,16 @@ function ApplyCum(actor a, int cumID)
 	endIf
 endFunction
 
+function ClearCum(actor a)
+	a.DispelSpell(CumVaginalSpell)
+	a.DispelSpell(CumOralSpell)
+	a.DispelSpell(CumAnalSpell)
+	a.DispelSpell(CumVaginalOralSpell)
+	a.DispelSpell(CumVaginalAnalSpell)
+	a.DispelSpell(CumOralAnalSpell)
+	a.DispelSpell(CumVaginalOralAnalSpell)
+endFunction
+
 form[] function StripActor(actor a, actor victim = none, bool animate = true, bool leadIn = false)
 	bool[] strip = GetStrip(a, victim, leadIn)
 	return StripSlots(a, strip, animate)

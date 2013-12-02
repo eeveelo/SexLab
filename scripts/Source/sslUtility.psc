@@ -169,8 +169,13 @@ int function CountTrue(bool[] array) global
 	int pos = array.Find(true)
 	int count
 	while pos != -1 && pos < array.Length
-	  count += 1
-	  pos = array.Find(true, (pos + 1))
+		count += 1
+		pos += 1
+		if pos < array.Length
+			pos = array.Find(true, pos)
+		else
+			pos = -1
+		endIf
 	endWhile
 	return count
 endFunction
@@ -286,9 +291,14 @@ endFunction
 int function CountNone(form[] array) global
 	int pos = array.Find(none)
 	int count
-	while pos != -1 && pos < array.Length
-	  count += 1
-	  pos = array.Find(none, (pos + 1))
+	while pos != -1
+		count += 1
+		pos += 1
+		if pos < array.Length
+			pos = array.Find(none, pos)
+		else
+			pos = -1
+		endIf
 	endWhile
 	return count
 endFunction

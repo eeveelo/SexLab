@@ -151,6 +151,10 @@ function ApplyCum(actor a, int cumID)
 	ActorLib.ApplyCum(a, cumID)
 endFunction
 
+function ClearCum(actor a)
+	ActorLib.ClearCum(a)
+endFunction
+
 form[] function StripActor(actor a, actor victim = none, bool animate = true, bool leadIn = false)
 	return ActorLib.StripActor(a, victim, animate, leadIn)
 endFunction
