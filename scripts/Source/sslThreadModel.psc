@@ -24,6 +24,7 @@ bool property LeadIn auto hidden
 bool property FastEnd auto hidden
 
 ObjectReference centerObj
+string[] tags
 float[] centerLoc
 float[] customtimers
 int[] gendercounts
@@ -768,6 +769,65 @@ function _Log(string log, string method, string type = "ERROR")
 endFunction
 
 ;/-----------------------------------------------\;
+;|	Tagging Functions                            |;
+;\-----------------------------------------------/;
+
+bool function AddTag(string tag)
+	if HasTag(tag)
+		return false
+	endIf
+	tag = sslUtility.PushString(tag, tags)
+	return true
+endFunction
+
+bool function RemoveTag(string tag)
+	if !HasTag(tag)
+		return false
+	endIf
+	string[] newTags
+	int i = 0
+	while i < tags.Length
+		if tags[i] != tag
+			newTags = sslUtility.PushString(tags[i], newTags)
+		endIf
+		i += 1
+	endWhile
+	tags = newTags
+	return true
+endFunction
+
+bool function HasTag(string tag)
+	return tags.Find(tag) != -1
+endFunction
+
+bool function ToggleTag(string tag)
+	if HasTag(tag)
+		RemoveTag(tag)
+	else
+		AddTag(tag)
+	endIf
+	return HasTag(tag)
+endFunction
+
+bool function CheckTags(string[] find, bool requireAll = true)
+	int i = find.Length
+	while i
+		i -= 1
+		if find[i] != ""
+			bool check = HasTag(find[i])
+			if requireAll && !check
+				return false ; Stop if we need all and don't have it
+			elseif !requireAll && check
+				return true ; Stop if we don't need all and have one
+			endIf
+		endIf
+	endWhile
+	; If still here than we require all and had all
+	return true
+endFunction
+
+
+;/-----------------------------------------------\;
 ;|	Ending Functions                             |;
 ;\-----------------------------------------------/;
 
@@ -796,6 +856,8 @@ function Initialize()
 	; Empty Strings
 	hook = ""
 	Logging = "trace"
+	string[] sDel
+	tags = sDel
 	; Empty actors
 	actor[] acDel
 	Positions = acDel
