@@ -704,7 +704,6 @@ int function GetEnjoyment()
 	endIf
 	; Ramp up with stage and time spent, maxout time bonus at 2.5 minutes (8 seconds * 19 intervals = 152 seconds == ~2.5 minutes)
 	BaseWeight += (4 * Stage) + Clamp(((Controller.TotalTime / 8.0) as int), 19)
-
 	; Calculate root enjoyment of the animation, give multipler by progress through the animation stages (1/5 stage = 1.20 multiplier)
 	Enjoyment = (((BaseWeight + PurityWeight + (ProficencyWeight * 3)) as float) * ((Stage as float / Animation.StageCount as float) + 1.0)) as int
 	; Cap victim at 50 after halving
@@ -713,6 +712,13 @@ int function GetEnjoyment()
 	endIf
 	; Return raw enjoyment for modder use, if 100+ expression will clamp value
 	return Enjoyment
+endFunction
+
+int function GetPain()
+	if IsVictim
+		return 100 - Clamp(Enjoyment)
+	endIf
+	return 50 - Clamp((Enjoyment / 2), 50)
 endFunction
 
 int function Clamp(int value, int max = 100)
