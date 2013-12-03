@@ -5,7 +5,7 @@ float timer
 
 event OnEffectStart(actor target, actor caster)
 	timer = Lib.fCumTimer
-	RegisterForSingleUpdate(5.0)
+	RegisterForSingleUpdate(1.0)
 endEvent
 event OnUpdate()
 	if GetTargetActor().IsSwimming() || GetTimeElapsed() > timer
