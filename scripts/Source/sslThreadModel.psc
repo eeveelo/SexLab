@@ -3,6 +3,7 @@ scriptname sslThreadModel extends ReferenceAlias
 
 ; Library
 sslThreadLibrary property Lib auto
+sslActorSlots property Slots auto
 
 ; Locks
 bool Active
@@ -764,7 +765,7 @@ function _Log(string log, string method, string type = "ERROR")
 		Debug.Trace("--------------------------------------------------------------------------------------------", severity)
 	endIf
 	if type == "FATAL"
-		UnlockThread()
+		GoToState("Unlocked")
 	endIf
 endFunction
 
@@ -831,13 +832,7 @@ endFunction
 ;|	Ending Functions                             |;
 ;\-----------------------------------------------/;
 
-function UnlockThread()
-	Initialize()
-endFunction
-
-function Initialize()
-	UnregisterForUpdate()
-	; Empty alias slots
+function ClearActors()
 	FastEnd = true
 	int i = ActorSlots.Length
 	while i
@@ -849,8 +844,13 @@ function Initialize()
 			ActorSlots[i].GoToState("Reset")
 		endIf
 	endWhile
-	sslActorAlias[] aaDel
-	ActorSlots = aaDel
+	FastEnd = false
+endFunction
+
+function Initialize()
+	UnregisterForUpdate()
+	; Empty alias slots
+	ClearActors()
 	; Set states
 	Active = false
 	; Empty Strings
@@ -871,7 +871,6 @@ function Initialize()
 	leadIn = false
 	leadInDisabled = false
 	AutoAdvance = false
-	FastEnd = false
 	; Empty forms
 	; Empty integers
 	int[] iDel
@@ -922,7 +921,9 @@ endProperty
 
 function _SetThreadID(int threadid)
 	_ThreadID = threadid
-	UnlockThread()
+	ActorSlots = Lib.Actors.Slots.GetActorSlots(threadid)
+	ClearActors()
+	GoToState("Unlocked")
 endFunction
 auto state Unlocked
 endState

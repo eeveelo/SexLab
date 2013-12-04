@@ -33,6 +33,17 @@ sslActorAlias function SlotActor(actor position, sslThreadController ThreadView)
 	return none
 endFunction
 
+sslActorAlias[] function GetActorSlots(int tid)
+	tid *= 5
+	sslActorAlias[] ActorSlots = new sslActorAlias[5]
+	ActorSlots[0] = GetNthAlias(tid) as sslActorAlias
+	ActorSlots[1] = GetNthAlias(tid + 1) as sslActorAlias
+	ActorSlots[2] = GetNthAlias(tid + 2) as sslActorAlias
+	ActorSlots[3] = GetNthAlias(tid + 3) as sslActorAlias
+	ActorSlots[4] = GetNthAlias(tid + 4) as sslActorAlias
+	return ActorSlots
+endFunction
+
 int function FindActor(actor position)
 	if position != none
 		int i = 0
