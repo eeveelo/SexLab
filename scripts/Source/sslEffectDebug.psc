@@ -11,5 +11,7 @@ event OnEffectStart(actor target, actor caster)
 	; debug.traceandbox(orgasmfx)
 	; utility.wait(3.0)
 	; Sound.SetInstanceVolume(orgasmfx.play(target), 1.0)
-
+	SexLabUtil.ToggleFlyCam()
+	Utility.Wait(10.0)
+	SexLabUtil.ToggleFlyCam()
 endEvent

@@ -1,5 +1,13 @@
 scriptname SexLabUtil hidden
 
+function ToggleFreeCamera(bool stopTime = false) global native
+function EnableFreeCamera(bool enabling = true) global
+	bool InFreeCamera = Game.GetCameraState() == 3
+	if (enabling && !InFreeCamera) || (!enabling && InFreeCamera)
+		ToggleFreeCamera()
+	endIf
+endFunction
+
 bool function SexLabIsActive() global
 	bool active
 	int i

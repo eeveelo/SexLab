@@ -45,16 +45,22 @@ endProperty
 
 ; Functions
 function ResetCamera()
-	if InFreeCamera
-		ControlCamera.ToggleFreeCamera()
-	endIf
+	SexLabUtil.EnableFreeCamera(false)
 	ControlCamera.GoToState("")
 endFunction
 
-function EnableFirstPerson(bool enableIt = true)
-	if enableIt && !InFirstPerson
+function EnableFirstPerson(bool enabling = true)
+	if enabling && !InFirstPerson
 		ControlCamera.GoToState("FirstPerson")
-	elseIf !enableIt && InFirstPerson
+	elseIf !enabling && InFirstPerson
+		ControlCamera.GoToState("")
+	endIf
+endFunction
+
+function EnableFreeCamera(bool enabling = true)
+	if enabling && !InFreeCamera
+		ControlCamera.GoToState("FreeCamera")
+	elseIf !enabling && InFreeCamera
 		ControlCamera.GoToState("")
 	endIf
 endFunction
@@ -63,19 +69,9 @@ bool function ToggleFirstPerson()
 	return ControlCamera.ToggleFirstPerson()
 endFunction
 
-function EnableFreeCamera(bool enableIt = true)
-	if enableIt && !InFreeCamera
-		ControlCamera.GoToState("FreeCamera")
-	elseIf !enableIt && InFreeCamera
-		ControlCamera.GoToState("")
-		if InFreeCamera
-			ControlCamera.ToggleFreeCamera()
-		endIf
-	endIf
-endFunction
-
 bool function ToggleFreeCamera()
-	return ControlCamera.ToggleFreeCamera()
+	SexLabUtil.ToggleFreeCamera()
+	return InFreeCamera
 endFunction
 
 function _HKStart(sslThreadController Controller)
@@ -189,5 +185,4 @@ function _Defaults()
 	kRotateScene = 22 ; U
 	kToggle1stCamera = 79 ; NUM 1
 	kToggleFreeCamera = 81 ; NUM 3
-
 endFunction

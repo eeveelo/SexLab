@@ -155,21 +155,6 @@ state FirstPerson
 	endEvent
 endState
 
-state FreeCamera
-	event OnBeginState()
-		if Game.GetCameraState() != 3
-			Game.ForceThirdPerson()
-			ToggleFreeCamera()
-		endIf
-	endEvent
-	event OnEndState()
-		if Game.GetCameraState() == 3
-			ToggleFreeCamera()
-			; Game.ForceThirdPerson()
-		endIf
-	endEvent
-endState
-
 bool function ToggleFirstPerson()
 	if GetState() == "FirstPerson"
 		GoToState("")
@@ -179,37 +164,11 @@ bool function ToggleFirstPerson()
 	return GetState() == "FirstPerson"
 endFunction
 
-bool function ToggleFreeCamera()
-	; FadeToBlackHold.ApplyCrossFade(0.5)
-	TFC = true
-	RegisterForMenu("Console")
-	Input.Tapkey(Input.GetMappedKey("Console", 0))
-	Utility.Wait(0.10)
-	; ImageSpaceModifier.RemoveCrossFade()
-	bool current = Game.GetCameraState() == 3
-	; Clear free camera state if needed
-	if !current && GetState() == "FreeCamera"
-		GotoState("")
-	endIf
-	; Return current TFC state
-	return current
-endFunction
-
-event OnMenuOpen(string menu)
-	if menu == "Console" && TFC == true
-		UnregisterForMenu("Console")
-		TFC = false
-		Input.TapKey(28) ; Enter
-		Utility.WaitMenuMode(0.10)
-		Input.TapKey(20) ; T
-		Utility.WaitMenuMode(0.10)
-		Input.TapKey(33) ; F
-		Utility.WaitMenuMode(0.10)
-		Input.TapKey(46) ; C
-		Utility.WaitMenuMode(0.10)
-		Input.TapKey(28) ; Enter
-		Utility.WaitMenuMode(0.10)
-		; Close console
-		Input.TapKey(Input.GetMappedKey("Console", 0))
-	endIf
-endEvent
+state FreeCamera
+	event OnBeginState()
+		SexLabUtil.EnableFreeCamera(true)
+	endEvent
+	event OnEndState()
+		SexLabUtil.EnableFreeCamera(false)
+	endEvent
+endState
