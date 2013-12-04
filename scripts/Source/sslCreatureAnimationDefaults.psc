@@ -120,6 +120,7 @@ function LoadAnimations()
 	RegisterAnimation("TrollHolding")
 	RegisterAnimation("TrollMissionary")
 
+	RegisterAnimation("WerewolfAggrDoggystyle")
 	RegisterAnimation("WerewolfDoggystyle")
 	RegisterAnimation("WerewolfHolding")
 	RegisterAnimation("WerewolfMissionary")
@@ -162,6 +163,7 @@ function BearDoggystyle(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a2, "Bear_Doggystyle_A2_S3", 45.0, rotate=180.0)
 	AddPositionStage(a2, "Bear_Doggystyle_A2_S4", 45.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -190,6 +192,7 @@ function ChaurusForward(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a2, "Chaurus_Forward_A2_S3", 40.0, rotate=180.0)
 	AddPositionStage(a2, "Chaurus_Forward_A2_S4", 40.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -218,6 +221,7 @@ function ChaurusReverse(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a2, "Chaurus_Reverse_A2_S3", 40.0, rotate=180.0)
 	AddPositionStage(a2, "Chaurus_Reverse_A2_S4", 40.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -245,6 +249,7 @@ function DaedraHugging(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a2, "Daedra_Hugging_A2_S3", 40.0, rotate=180.0)
 	AddPositionStage(a2, "Daedra_Hugging_A2_S4", 40.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -282,6 +287,7 @@ function CanineDoggystyle(string eventName, string id, float argNum, form sender
 	AddPositionStage(a2, "Dog_Doggystyle_A2_S3", 45.0, rotate=180.0)
 	AddPositionStage(a2, "Dog_Doggystyle_A2_S4", 45.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -318,6 +324,7 @@ function CanineMissionary(string eventName, string id, float argNum, form sender
 	AddPositionStage(a2, "Dog_Missionary_A2_S3", 45.0, rotate=180.0)
 	AddPositionStage(a2, "Dog_Missionary_A2_S4", 45.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -348,6 +355,7 @@ function DragonPenetration(string eventName, string id, float argNum, form sende
 	AddPositionStage(a2, "Dragon_Penetration_A2_S3", 35.0, rotate=180.0)
 	AddPositionStage(a2, "Dragon_Penetration_A2_S4", 35.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -376,6 +384,7 @@ function DragonTongue(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a2, "Dragon_Tongue_A2_S3", 32.0)
 	AddPositionStage(a2, "Dragon_Tongue_A2_S4", 32.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -412,6 +421,7 @@ function DraugrDoggystyle(string eventName, string id, float argNum, form sender
 	AddPositionStage(a2, "Draugr_Doggystyle_A2_S3", 35.0, rotate=180.0)
 	AddPositionStage(a2, "Draugr_Doggystyle_A2_S4", 35.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -454,10 +464,10 @@ function DraugrGangbang3P(string eventName, string id, float argNum, form sender
 	AddPositionStage(a3, "Draugr_Gangbang_A3_S3", 31.0, rotate=180.0)
 	AddPositionStage(a3, "Draugr_Gangbang_A3_S4", 31.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
-	AddTag("MMF")
 	AddTag("Gangbang")
 	AddTag("Draugr")
 
@@ -503,10 +513,10 @@ function DraugrGangbang4P(string eventName, string id, float argNum, form sender
 	AddPositionStage(a4, "Draugr_Gangbang_A4_S3", 32.0, rotate=180.0)
 	AddPositionStage(a4, "Draugr_Gangbang_A4_S4", 32.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
-	AddTag("MMMF")
 	AddTag("Gangbang")
 	AddTag("Draugr")
 
@@ -558,10 +568,10 @@ function DraugrGangbang5P(string eventName, string id, float argNum, form sender
 	AddPositionStage(a4, "Draugr_Gangbang_A5_S3", 33.0, rotate=180.0)
 	AddPositionStage(a4, "Draugr_Gangbang_A5_S4", 33.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
-	AddTag("MMMMF")
 	AddTag("Gangbang")
 	AddTag("Draugr")
 
@@ -595,6 +605,7 @@ function DraugrHolding(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a2, "Draugr_Holding_A2_S3", 35.0, rotate=180.0)
 	AddPositionStage(a2, "Draugr_Holding_A2_S4", 35.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -631,6 +642,7 @@ function DraugrMissionary(string eventName, string id, float argNum, form sender
 	AddPositionStage(a2, "Draugr_Missionary_A2_S3", 35.0, rotate=180.0)
 	AddPositionStage(a2, "Draugr_Missionary_A2_S4", 35.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -658,6 +670,7 @@ function FalmerDoggystyle(string eventName, string id, float argNum, form sender
 	AddPositionStage(a2, "Falmer_Doggystyle_A2_S3", 35.0, rotate=180.0)
 	AddPositionStage(a2, "Falmer_Doggystyle_A2_S4", 35.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -691,10 +704,10 @@ function FalmerGangbang3P(string eventName, string id, float argNum, form sender
 	AddPositionStage(a3, "Falmer_Gangbang_A3_S3", 31.0, rotate=180.0)
 	AddPositionStage(a3, "Falmer_Gangbang_A3_S4", 31.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
-	AddTag("MMF")
 	AddTag("Gangbang")
 	AddTag("Falmer")
 
@@ -731,10 +744,10 @@ function FalmerGangbang4P(string eventName, string id, float argNum, form sender
 	AddPositionStage(a4, "Falmer_Gangbang_A4_S3", 32.0, rotate=180.0)
 	AddPositionStage(a4, "Falmer_Gangbang_A4_S4", 32.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
-	AddTag("MMMF")
 	AddTag("Gangbang")
 	AddTag("Falmer")
 
@@ -777,10 +790,10 @@ function FalmerGangbang5P(string eventName, string id, float argNum, form sender
 	AddPositionStage(a4, "Falmer_Gangbang_A5_S3", 33.0, rotate=180.0)
 	AddPositionStage(a4, "Falmer_Gangbang_A5_S4", 33.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
-	AddTag("MMMMF")
 	AddTag("Gangbang")
 	AddTag("Falmer")
 
@@ -805,6 +818,7 @@ function FalmerHolding(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a2, "Falmer_Holding_A2_S3", 35.0, rotate=180.0)
 	AddPositionStage(a2, "Falmer_Holding_A2_S4", 35.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -834,6 +848,7 @@ function FalmerMissionary(string eventName, string id, float argNum, form sender
 	AddPositionStage(a2, "Falmer_Missionary_A2_S3", 35.0, rotate=180.0)
 	AddPositionStage(a2, "Falmer_Missionary_A2_S4", 35.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -865,6 +880,7 @@ function GargoyleDoggystyle(string eventName, string id, float argNum, form send
 	AddPositionStage(a2, "Gargoyle_Doggystyle_A2_S3", 40.0, rotate=180.0)
 	AddPositionStage(a2, "Gargoyle_Doggystyle_A2_S4", 40.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -894,6 +910,7 @@ function GargoyleHolding(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a2, "Gargoyle_Holding_A2_S3", 40.0, rotate=180.0)
 	AddPositionStage(a2, "Gargoyle_Holding_A2_S4", 40.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -923,6 +940,7 @@ function GargoyleMissionary(string eventName, string id, float argNum, form send
 	AddPositionStage(a2, "Gargoyle_Missionary_A2_S3", 40.0, rotate=180.0)
 	AddPositionStage(a2, "Gargoyle_Missionary_A2_S4", 40.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -950,6 +968,7 @@ function GiantPenetration(string eventName, string id, float argNum, form sender
 	AddPositionStage(a2, "Giant_Penetration_A2_S3", 35.0, rotate=180.0)
 	AddPositionStage(a2, "Giant_Penetration_A2_S4", 35.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -978,6 +997,7 @@ function HorseDoggystyle(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a2, "Horse_Doggystyle_A2_S3", 45.0, rotate=180.0)
 	AddPositionStage(a2, "Horse_Doggystyle_A2_S4", 45.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -1006,6 +1026,7 @@ function CatDoggystyle(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a2, "Cat_Doggystyle_A2_S3", 45.0, rotate=180.0)
 	AddPositionStage(a2, "Cat_Doggystyle_A2_S4", 45.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -1039,6 +1060,7 @@ function SpiderDouble(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a3, "Spider_Double_A3_S3", 70.0, rotate=180.0)
 	AddPositionStage(a3, "Spider_Double_A3_S4", 70.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -1066,6 +1088,7 @@ function SpiderPenetration(string eventName, string id, float argNum, form sende
 	AddPositionStage(a2, "Spider_Penetration_A2_S3", 35.0, rotate=180.0)
 	AddPositionStage(a2, "Spider_Penetration_A2_S4", 35.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -1094,6 +1117,7 @@ function BigSpiderPenetration(string eventName, string id, float argNum, form se
 	AddPositionStage(a2, "BigSpider_Penetration_A2_S3", 35.0, rotate=180.0)
 	AddPositionStage(a2, "BigSpider_Penetration_A2_S4", 35.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -1124,6 +1148,7 @@ function TrollDoggystyle(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a2, "Troll_Doggystyle_A2_S3", 40.0, rotate=180.0)
 	AddPositionStage(a2, "Troll_Doggystyle_A2_S4", 40.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -1152,6 +1177,7 @@ function TrollHolding(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a2, "Troll_Holding_A2_S3", 40.0, rotate=180.0)
 	AddPositionStage(a2, "Troll_Holding_A2_S4", 40.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -1180,6 +1206,7 @@ function TrollMissionary(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a2, "Troll_Missionary_A2_S3", 40.0, rotate=180.0)
 	AddPositionStage(a2, "Troll_Missionary_A2_S4", 40.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -1208,6 +1235,7 @@ function VampireLordDoggystyle(string eventName, string id, float argNum, form s
 	AddPositionStage(a2, "VampireLord_Doggystyle_A2_S3", 40.0, rotate=180.0)
 	AddPositionStage(a2, "VampireLord_Doggystyle_A2_S4", 40.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -1235,6 +1263,7 @@ function VampireLordHolding(string eventName, string id, float argNum, form send
 	AddPositionStage(a2, "VampireLord_Holding_A2_S3", 40.0, rotate=180.0)
 	AddPositionStage(a2, "VampireLord_Holding_A2_S4", 40.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -1262,11 +1291,41 @@ function VampireLordMissionary(string eventName, string id, float argNum, form s
 	AddPositionStage(a2, "VampireLord_Missionary_A2_S3", 40.0, rotate=180.0)
 	AddPositionStage(a2, "VampireLord_Missionary_A2_S4", 40.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
 	AddTag("Missionary")
 	AddTag("Vampire Lord")
+
+	Save()
+endFunction
+
+function WerewolfAggrDoggystyle(string eventName, string id, float argNum, form sender)
+	Name = "(Werewolf) Rough Doggystyle"
+
+	SetSFX(Squishing)
+	AddRace(WerewolfBeastRace)
+
+	int a1 = AddPosition(Female, addCum=Anal)
+	AddPositionStage(a1, "Werewolf_AggrDoggystyle_A1_S1")
+	AddPositionStage(a1, "Werewolf_AggrDoggystyle_A1_S2")
+	AddPositionStage(a1, "Werewolf_AggrDoggystyle_A1_S3")
+	AddPositionStage(a1, "Werewolf_AggrDoggystyle_A1_S4")
+
+	int a2 = AddPosition(Creature)
+	AddPositionStage(a2, "Werewolf_AggrDoggystyle_A2_S1")
+	AddPositionStage(a2, "Werewolf_AggrDoggystyle_A2_S2")
+	AddPositionStage(a2, "Werewolf_AggrDoggystyle_A2_S3")
+	AddPositionStage(a2, "Werewolf_AggrDoggystyle_A2_S4")
+
+	AddTag("Panicforever")
+	AddTag("Creature")
+	AddTag("Bestiality")
+	AddTag("Dirty")
+	AddTag("Doggystyle")
+	AddTag("Rough")
+	AddTag("Werewolf")
 
 	Save()
 endFunction
@@ -1289,6 +1348,7 @@ function WerewolfDoggystyle(string eventName, string id, float argNum, form send
 	AddPositionStage(a2, "Werewolf_Doggystyle_A2_S3", 40.0, rotate=180.0)
 	AddPositionStage(a2, "Werewolf_Doggystyle_A2_S4", 40.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -1317,6 +1377,7 @@ function WerewolfHolding(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a2, "Werewolf_Holding_A2_S3", 40.0, rotate=180.0)
 	AddPositionStage(a2, "Werewolf_Holding_A2_S4", 40.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -1345,6 +1406,7 @@ function WerewolfMissionary(string eventName, string id, float argNum, form send
 	AddPositionStage(a2, "Werewolf_Missionary_A2_S3", 40.0, rotate=180.0)
 	AddPositionStage(a2, "Werewolf_Missionary_A2_S4", 40.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -1373,6 +1435,7 @@ function WolfDoggystyle(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a2, "Wolf_Doggystyle_A2_S3", 45.0, rotate=180.0)
 	AddPositionStage(a2, "Wolf_Doggystyle_A2_S4", 45.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -1400,6 +1463,7 @@ function WolfMissionary(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a2, "Wolf_Missionary_A2_S3", 45.0, rotate=180.0)
 	AddPositionStage(a2, "Wolf_Missionary_A2_S4", 45.0, rotate=180.0)
 
+	AddTag("Gone")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")

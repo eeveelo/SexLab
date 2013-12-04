@@ -158,6 +158,11 @@ s Werewolf_Missionary_A1_S1 Werewolf_Missionary_A1_S1.hkx
 + Werewolf_Missionary_A1_S3 Werewolf_Missionary_A1_S3.hkx
 + Werewolf_Missionary_A1_S4 Werewolf_Missionary_A1_S4.hkx
 
+s Werewolf_AggrDoggystyle_A1_S1 Werewolf_AggrDoggystyle_A1_S1.hkx
++ Werewolf_AggrDoggystyle_A1_S2 Werewolf_AggrDoggystyle_A1_S2.hkx
++ Werewolf_AggrDoggystyle_A1_S3 Werewolf_AggrDoggystyle_A1_S3.hkx
++ Werewolf_AggrDoggystyle_A1_S4 Werewolf_AggrDoggystyle_A1_S4.hkx
+
 s Canine_Doggystyle_A1_S1 Canine_Doggystyle_A1_S1.hkx
 + Canine_Doggystyle_A1_S2 Canine_Doggystyle_A1_S2.hkx
 + Canine_Doggystyle_A1_S3 Canine_Doggystyle_A1_S3.hkx
