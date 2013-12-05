@@ -19,17 +19,34 @@ Topic[] property VanillaHot auto hidden
 
 ; Config
 string property sPlayerVoice auto hidden
+bool property bNPCSaveVoice auto hidden
 
 sslBaseVoice function PickVoice(actor a)
+	; Get player selected voice
 	if a == PlayerRef && sPlayerVoice != "$SSL_Random"
 		return Slots.GetByName(sPlayerVoice)
-	else
-		return Slots.GetRandom(a.GetLeveledActorBase().GetSex())
+	; Get saved voice by faction rank as slot index
+	elseIf a != PlayerRef && a.IsInFaction(RememberVoice)
+		int vid = a.GetFactionRank(RememberVoice)
+		; Return if it is a valid rank index
+		if vid > -1 && vid < Slots.Slotted
+			return Slots.GetBySlot(vid)
+		endIf
 	endIf
+	; Pick random voice by gender
+	sslBaseVoice Voice = Slots.GetRandom(a.GetLeveledActorBase().GetSex())
+	; Save picked voice if option is enabled
+	if bNPCSaveVoice && a != PlayerRef
+		a.AddToFaction(RememberVoice)
+		a.SetFactionRank(RememberVoice, Slots.Find(Voice))
+	endIf
+	return Voice
 endFunction
 
 function _Defaults()
 	sPlayerVoice = "$SSL_Random"
+	bNPCSaveVoice = true
+
 	; VanillaMild = new Topic[3]
 	; VanillaMild[0] = Game.GetForm(0x3C570) as Topic ; ExitBowZoomBreath
 	; VanillaMild[1] = Game.GetForm(0x1701C) as Topic ; EnterSprintBreath
