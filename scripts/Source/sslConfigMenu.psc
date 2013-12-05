@@ -2,11 +2,11 @@ scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
 int function GetVersion()
-	return 12900
+	return 12901
 endFunction
 
 string function GetStringVer()
-	return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)
+	return StringUtil.Substring((((GetVersion() - 1)  as float / 10000.0) as string), 0, 4)+"b"
 endFunction
 
 bool function DebugMode()
@@ -21,7 +21,7 @@ event OnVersionUpdate(int version)
 		Debug.Notification("Updating to SexLab v"+GetStringVer())
 	endIf
 	; Resetup system
-	if current > 0 && current < 1.25
+	if current > 0 && current < 2.0
 		_SetupSystem()
 	endIf
 endEvent
@@ -71,6 +71,9 @@ message property mCleanSystemFinish auto
 message property mSystemDisabled auto
 message property mSystemUpdated auto
 spell property SexLabDebugSpell auto
+; Default strapon
+armor property aCalypsStrapon auto
+
 
 ; OIDs
 int[] oidStageTimer
@@ -91,9 +94,6 @@ int[] oidToggleExpressionAggressor
 int[] oidAggrAnimation
 int[] oidForeplayAnimation
 int[] oidRemoveStrapon
-
-; Default strapon
-armor property aCalypsStrapon auto
 
 function SetDefaults()
 	AnimLib._Defaults()
@@ -126,11 +126,11 @@ function SetDefaults()
 
 	Pages = new string[13]
 	Pages[0] = "$SSL_AnimationSettings"
-	Pages[1] = "$SSL_PlayerHotkeys"
-	Pages[2] = "$SSL_NormalTimersStripping"
-	Pages[3] = "$SSL_ForeplayTimersStripping"
-	Pages[4] = "$SSL_AggressiveTimersStripping"
-	Pages[5] = "$SSL_ToggleVoices"
+	Pages[1] = "$SSL_SoundSettings"
+	Pages[2] = "$SSL_PlayerHotkeys"
+	Pages[3] = "$SSL_NormalTimersStripping"
+	Pages[4] = "$SSL_ForeplayTimersStripping"
+	Pages[5] = "$SSL_AggressiveTimersStripping"
 	Pages[6] = "$SSL_ToggleAnimations"
 	Pages[7] = "$SSL_ForeplayAnimations"
 	Pages[8] = "$SSL_AggressiveAnimations"
@@ -159,33 +159,56 @@ event OnPageReset(string page)
 	if page == "$SSL_AnimationSettings"
 		SetCursorFillMode(TOP_TO_BOTTOM)
 
-		AddToggleOptionST("RestrictAggressive","$SSL_RestrictAggressive", AnimLib.bRestrictAggressive)
-		AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", ActorLib.bScaleActors)
-		AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", ActorLib.bRagdollEnd)
-		AddToggleOptionST("UndressAnimation","$SSL_UndressAnimation", ActorLib.bUndressAnimation)
-		AddToggleOptionST("ReDressVictim","$SSL_VictimsRedress", ActorLib.bReDressVictim)
-		AddTextOptionST("NPCBed","$SSL_NPCsUseBeds", ThreadLib.sNPCBed)
-		AddToggleOptionST("UseCum","$SSL_ApplyCumEffects", ActorLib.bUseCum)
-		AddToggleOptionST("AllowFemaleFemaleCum","$SSL_AllowFemaleFemaleCum", ActorLib.bAllowFFCum)
-		AddSliderOptionST("CumEffectTimer","$SSL_CumEffectTimer", ActorLib.fCumTimer, "$SSL_Seconds")
-		AddToggleOptionST("StraponsFemale","$SSL_FemalesUseStrapons", ActorLib.bUseStrapons)
-		AddToggleOptionST("NudeSuitMales","$SSL_UseNudeSuitMales", ActorLib.bUseMaleNudeSuit)
-		AddToggleOptionST("NudeSuitFemales","$SSL_UseNudeSuitFemales", ActorLib.bUseFemaleNudeSuit)
-		SetCursorPosition(1)
-		AddToggleOptionST("AllowCreatures","$SSL_AllowCreatures", AnimLib.bAllowCreatures)
-		AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", ThreadLib.bForeplayStage)
-
 		AddHeaderOption("$SSL_PlayerSettings")
 		AddToggleOptionST("AutoAdvance","$SSL_AutoAdvanceStages", ThreadLib.bAutoAdvance)
 		AddToggleOptionST("DisableVictim","$SSL_DisableVictimControls", ActorLib.bDisablePlayer)
+		AddToggleOptionST("AutomaticTFC","$SSL_AutomaticTFC", ControlLib.bAutoTFC)
+		AddSliderOptionST("AutomaticSUCSM","$SSL_AutomaticSUCSM", ControlLib.fAutoSUCSM, "{0}")
 
-		AddHeaderOption("$SSL_SoundsVoices")
+		AddHeaderOption("$SSL_ExtraEffects")
+		AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", ActorLib.bScaleActors)
+		AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", ActorLib.bRagdollEnd)
+		AddToggleOptionST("ReDressVictim","$SSL_VictimsRedress", ActorLib.bReDressVictim)
+		AddToggleOptionST("UseCum","$SSL_ApplyCumEffects", ActorLib.bUseCum)
+		AddToggleOptionST("AllowFemaleFemaleCum","$SSL_AllowFemaleFemaleCum", ActorLib.bAllowFFCum)
+		AddSliderOptionST("CumEffectTimer","$SSL_CumEffectTimer", ActorLib.fCumTimer, "$SSL_Seconds")
+
+		SetCursorPosition(1)
+		AddHeaderOption("$SSL_AnimationHandling")
+		AddToggleOptionST("AllowCreatures","$SSL_AllowCreatures", AnimLib.bAllowCreatures)
+		AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", ThreadLib.bForeplayStage)
+		AddToggleOptionST("RestrictAggressive","$SSL_RestrictAggressive", AnimLib.bRestrictAggressive)
+		AddToggleOptionST("UndressAnimation","$SSL_UndressAnimation", ActorLib.bUndressAnimation)
+		AddToggleOptionST("StraponsFemale","$SSL_FemalesUseStrapons", ActorLib.bUseStrapons)
+		AddToggleOptionST("NudeSuitMales","$SSL_UseNudeSuitMales", ActorLib.bUseMaleNudeSuit)
+		AddToggleOptionST("NudeSuitFemales","$SSL_UseNudeSuitFemales", ActorLib.bUseFemaleNudeSuit)
+		AddTextOptionST("NPCBed","$SSL_NPCsUseBeds", ThreadLib.sNPCBed)
+
+	elseIf page == "$SSL_SoundSettings"
+		SetCursorFillMode(LEFT_TO_RIGHT)
+
+		; Voices & SFX
 		AddTextOptionST("PlayerVoice","$SSL_PCVoice", VoiceLib.sPlayerVoice)
-		AddSliderOptionST("VoiceVolume","$SSL_VoiceVolume", (ActorLib.fVoiceVolume * 100), "{0}%")
-		AddSliderOptionST("MaleVoiceDelay","$SSL_MaleVoiceDelay", ActorLib.fMaleVoiceDelay, "$SSL_Seconds")
-		AddSliderOptionST("FemaleVoiceDelay","$SSL_FemaleVoiceDelay", ActorLib.fFemaleVoiceDelay, "$SSL_Seconds")
+		AddToggleOptionST("NPCSaveVoice","$SSL_NPCSaveVoice", VoiceLib.bNPCSaveVoice)
 		AddSliderOptionST("SFXVolume","$SSL_SFXVolume", (ThreadLib.fSFXVolume * 100), "{0}%")
+		AddSliderOptionST("VoiceVolume","$SSL_VoiceVolume", (ActorLib.fVoiceVolume * 100), "{0}%")
 		AddSliderOptionST("SFXDelay","$SSL_SFXDelay", ThreadLib.fSFXDelay, "$SSL_Seconds")
+		AddSliderOptionST("MaleVoiceDelay","$SSL_MaleVoiceDelay", ActorLib.fMaleVoiceDelay, "$SSL_Seconds")
+		AddEmptyOption()
+		AddSliderOptionST("FemaleVoiceDelay","$SSL_FemaleVoiceDelay", ActorLib.fFemaleVoiceDelay, "$SSL_Seconds")
+
+
+		; Toggle Voices
+		AddHeaderOption("$SSL_ToggleVoices")
+		AddHeaderOption("")
+
+		i = 0
+		while i < VoiceSlots.Slotted
+			if VoiceSlots.Voices[i].Registered
+				oidToggleVoice[i] = AddToggleOption(VoiceSlots.Voices[i].Name, VoiceSlots.Voices[i].Enabled)
+			endIf
+			i += 1
+		endWhile
 
 	elseIf page == "$SSL_PlayerHotkeys"
 		SetCursorFillMode(TOP_TO_BOTTOM)
@@ -197,6 +220,8 @@ event OnPageReset(string page)
 		AddKeyMapOptionST("ChangePositions", "$SSL_SwapActorPositions", ControlLib.kChangePositions)
 		AddKeyMapOptionST("MoveSceneLocation", "$SSL_MoveSceneLocation", ControlLib.kMoveScene)
 		AddKeyMapOptionST("RotateScene", "$SSL_RotateScene", ControlLib.kRotateScene)
+		AddKeyMapOptionST("Toggle1stCamera", "$SSL_Toggle1stPerson", ControlLib.kToggle1stCamera)
+		AddKeyMapOptionST("ToggleFreeCamera", "$SSL_ToggleFreeCamera", ControlLib.kToggleFreeCamera)
 
 		SetCursorPosition(1)
 
@@ -348,17 +373,6 @@ event OnPageReset(string page)
 			i += 1
 		endWhile
 
-	elseIf page == "$SSL_ToggleVoices"
-		SetCursorFillMode(LEFT_TO_RIGHT)
-
-		i = 0
-		while i < VoiceSlots.Slotted
-			if VoiceSlots.Voices[i].Registered
-				oidToggleVoice[i] = AddToggleOption(VoiceSlots.Voices[i].Name, VoiceSlots.Voices[i].Enabled)
-			endIf
-			i += 1
-		endWhile
-
 	elseIf page == "$SSL_ToggleAnimations"
 		SetCursorFillMode(LEFT_TO_RIGHT)
 
@@ -414,6 +428,11 @@ event OnPageReset(string page)
 			endIf
 			i += 1
 		endWhile
+
+		if ExpressionSlots.Slotted % 2 != 0
+			AddEmptyOption()
+		endIf
+
 		AddHeaderOption("$SSL_ExpressionsVictim")
 		AddHeaderOption("")
 		i = 0
@@ -423,6 +442,11 @@ event OnPageReset(string page)
 			endIf
 			i += 1
 		endWhile
+
+		if ExpressionSlots.Slotted % 2 != 0
+			AddEmptyOption()
+		endIf
+
 		AddHeaderOption("$SSL_ExpressionsAggressor")
 		AddHeaderOption("")
 		i = 0
@@ -742,6 +766,38 @@ state DisableVictim
 		SetInfoText("$SSL_InfoDisablePlayer")
 	endEvent
 endState
+state AutomaticTFC
+	event OnSelectST()
+		ControlLib.bAutoTFC = !ControlLib.bAutoTFC
+		SetToggleOptionValueST(ControlLib.bAutoTFC)
+	endEvent
+	event OnDefaultST()
+		ControlLib.bAutoTFC = false
+		SetToggleOptionValueST(ControlLib.bAutoTFC)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoAutomaticTFC")
+	endEvent
+endState
+state AutomaticSUCSM
+	event OnSliderOpenST()
+		SetSliderDialogStartValue(ControlLib.fAutoSUCSM)
+		SetSliderDialogDefaultValue(3.0)
+		SetSliderDialogRange(1.0, 20)
+		SetSliderDialogInterval(1.0)
+	endEvent
+	event OnSliderAcceptST(float value)
+		ControlLib.fAutoSUCSM = value
+		SetSliderOptionValueST(ControlLib.fAutoSUCSM, "{0}")
+	endEvent
+	event OnDefaultST()
+		ControlLib.fAutoSUCSM = 5.0
+		SetToggleOptionValueST(ControlLib.fAutoSUCSM, "{0}")
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoAutomaticSUCSM")
+	endEvent
+endState
 state PlayerVoice
 	event OnSelectST()
 		int current = ( VoiceSlots.FindByName(VoiceLib.sPlayerVoice) + 1 )
@@ -763,6 +819,19 @@ state PlayerVoice
 		SetInfoText("$SSL_InfoPlayerVoice")
 	endEvent
 endState
+state NPCSaveVoice
+	event OnSelectST()
+		VoiceLib.bNPCSaveVoice = !VoiceLib.bNPCSaveVoice
+		SetToggleOptionValueST(VoiceLib.bNPCSaveVoice)
+	endEvent
+	event OnDefaultST()
+		VoiceLib.bNPCSaveVoice = true
+		SetToggleOptionValueST(VoiceLib.bNPCSaveVoice)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoNPCSaveVoice")
+	endEvent
+endState
 state VoiceVolume
 	event OnSliderOpenST()
 		SetSliderDialogStartValue((ActorLib.fVoiceVolume * 100))
@@ -775,7 +844,7 @@ state VoiceVolume
 		SetSliderOptionValueST(value, "{0}%")
 	endEvent
 	event OnDefaultST()
-		ActorLib.fVoiceVolume = 0.70
+		ActorLib.fVoiceVolume = 1.0
 		SetSliderOptionValueST(70, "{0}%")
 	endEvent
 	event OnHighlightST()
@@ -832,7 +901,7 @@ state SFXVolume
 		SetSliderOptionValueST(value, "{0}%")
 	endEvent
 	event OnDefaultST()
-		ThreadLib.fSFXVolume = 0.80
+		ThreadLib.fSFXVolume = 1.0
 		SetSliderOptionValueST(80, "{0}%")
 	endEvent
 	event OnHighlightST()
@@ -962,6 +1031,36 @@ state RotateScene
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoRotateScene")
+	endEvent
+endState
+state Toggle1stCamera
+	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
+		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+			ControlLib.kToggle1stCamera = newKeyCode
+			SetKeyMapOptionValueST(ControlLib.kToggle1stCamera)
+		endIf
+	endEvent
+	event OnDefaultST()
+		ControlLib.kToggle1stCamera = 79
+		SetKeyMapOptionValueST(ControlLib.kToggle1stCamera)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoToggle1stPerson")
+	endEvent
+endState
+state ToggleFreeCamera
+	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
+		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+			ControlLib.kToggleFreeCamera = newKeyCode
+			SetKeyMapOptionValueST(ControlLib.kToggleFreeCamera)
+		endIf
+	endEvent
+	event OnDefaultST()
+		ControlLib.kToggleFreeCamera = 81
+		SetKeyMapOptionValueST(ControlLib.kToggleFreeCamera)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoToggleFreeCamera")
 	endEvent
 endState
 state AdjustStage
@@ -1547,7 +1646,7 @@ function _SetupSystem()
 	; Init Defaults
 	SetDefaults()
 	; Finished
-	Debug.Notification("SexLab has finished updating/installing and is ready for use.")
+	Debug.Notification("$SSL_SexLabUpdated")
 endFunction
 
 function _CheckSystem()

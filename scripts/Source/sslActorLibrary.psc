@@ -554,7 +554,7 @@ function _Defaults()
 	bDisablePlayer = false
 	fMaleVoiceDelay = 7.0
 	fFemaleVoiceDelay = 6.0
-	fVoiceVolume = 0.7
+	fVoiceVolume = 1.0
 	bEnableTCL = false
 	bScaleActors = false
 	bUseCum = true

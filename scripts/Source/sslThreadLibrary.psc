@@ -113,7 +113,7 @@ endFunction
 function _Defaults()
 	; Config
 	fSFXDelay = 4.0
-	fSFXVolume = 0.8
+	fSFXVolume = 1.0
 	bAutoAdvance = true
 	bForeplayStage = false
 	sNPCBed = "$SSL_Never"
