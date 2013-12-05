@@ -26,6 +26,8 @@ int property kRotateScene auto hidden ; U
 int property kToggle1stCamera auto hidden ; NUM 1
 int property kToggleFreeCamera auto hidden ; NUM 1
 
+bool property bAutoTFC auto hidden
+float property fAutoSUCSM auto hidden
 ; Local
 bool hkReady
 sslThreadController PlayerController
@@ -96,12 +98,19 @@ endFunction
 
 function _HKClear()
 	UnregisterForAllKeys()
+	RegisterForKey(kToggleFreeCamera)
 	PlayerController = none
 	hkReady = true
 endFunction
 
 event OnKeyDown(int keyCode)
-	if PlayerController != none && hkReady && PlayerController.GetState() == "Animating" && !UI.IsMenuOpen("Console") && !UI.IsMenuOpen("Main Menu") && !UI.IsMenuOpen("Loading Menu") && !UI.IsMenuOpen("MessageBoxMenu")
+	; Check for open menus
+	bool OpenMenu = UI.IsMenuOpen("Console") || UI.IsMenuOpen("Main Menu") || UI.IsMenuOpen("Loading Menu") || UI.IsMenuOpen("MessageBoxMenu")
+	; TFC toggle is always available
+	if keyCode == kToggleFreeCamera && hkReady && !OpenMenu
+		EnableFreeCamera(!InFreeCamera)
+	; Player animation restricted hotkeys
+	elseIf PlayerController != none && hkReady && !OpenMenu && PlayerController.GetState() == "Animating"
 		hkReady = false
 		Utility.Wait(0.001)
 
@@ -157,9 +166,6 @@ event OnKeyDown(int keyCode)
 		; Toggle First Person
 		elseIf keyCode == kToggle1stCamera
 			EnableFirstPerson(!InFirstPerson)
-		; Toggle TFC
-		elseIf keyCode == kToggleFreeCamera
-			EnableFreeCamera(!InFreeCamera)
 		endIf
 		hkReady = true
 	endIf
@@ -185,4 +191,9 @@ function _Defaults()
 	kRotateScene = 22 ; U
 	kToggle1stCamera = 79 ; NUM 1
 	kToggleFreeCamera = 81 ; NUM 3
+	RegisterForKey(kToggleFreeCamera)
+
+	; Config other
+	bAutoTFC = false
+	fAutoSUCSM = 5.0
 endFunction

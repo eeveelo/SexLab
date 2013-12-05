@@ -129,7 +129,9 @@ state Advancing
 			return ; No stage to advance to, end animation
 		elseIf LeadIn && Stage > Animation.StageCount
 			; Disable free camera now to help prevent CTD
-			Lib.ControlLib.EnableFreeCamera(false)
+			if HasPlayer
+				Lib.ControlLib.EnableFreeCamera(false)
+			endIf
 			; Swap to non lead in animations
 			Stage = 1
 			LeadIn = false
@@ -174,8 +176,6 @@ state Animating
 	endFunction
 	event OnBeginState()
 		if !LeadIn && Stage >= Animation.StageCount
-			; Disable free camera now to help prevent CTD
-			Lib.ControlLib.ResetCamera()
 			; Send orgasm stage specific event
 			SendThreadEvent("OrgasmStart")
 			; Perform actor orgasm stuff

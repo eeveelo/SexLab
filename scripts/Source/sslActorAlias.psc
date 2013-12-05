@@ -193,6 +193,7 @@ endFunction
 function UnlockActor()
 	; Enable movement
 	if IsPlayer
+		Lib.ControlLib.ResetCamera()
 		Lib.ControlLib._HKClear()
 		Game.EnablePlayerControls(false, false, false, false, false, false, true, false, 0)
 		Game.SetPlayerAIDriven(false)
@@ -511,6 +512,7 @@ state Prepare
 		; Creatures need none of this
 		if !IsCreature
 			; Cleanup
+			TryToStopCombat()
 			if ActorRef.IsWeaponDrawn()
 				ActorRef.SheatheWeapon()
 			endIf
@@ -536,6 +538,10 @@ state Prepare
 				Vaginal = prof
 				Anal = prof
 				Oral = prof
+			endIf
+			; Auto TFC
+			if IsPlayer && Lib.ControlLib.bAutoTFC
+				Lib.ControlLib.EnableFreeCamera(true)
 			endIf
 			; Make erect for SOS
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
@@ -588,6 +594,10 @@ state Orgasm
 		RegisterForSingleUpdate(0.1)
 	endEvent
 	event OnUpdate()
+		; Disable TFC
+		if IsPlayer || ClonedRef != none
+			Lib.ControlLib.EnableFreeCamera(false)
+		endIf
 		; Apply cum
 		int cum = Animation.GetCum(position)
 		if cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Controller.Males > 0)
