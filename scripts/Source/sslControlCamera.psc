@@ -167,6 +167,7 @@ endFunction
 state FreeCamera
 	event OnBeginState()
 		SexLabUtil.EnableFreeCamera(true)
+		SexLabUtil.SetFreeCameraSpeed(3.0)
 	endEvent
 	event OnEndState()
 		SexLabUtil.EnableFreeCamera(false)
