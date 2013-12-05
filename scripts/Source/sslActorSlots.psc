@@ -17,22 +17,6 @@ int property ActiveActors hidden
 	endFunction
 endProperty
 
-sslActorAlias function SlotActor(actor position, sslThreadController ThreadView)
-	if FindActor(position) != -1 || Lib.ValidateActor(position) < 1
-		return none
-	endIf
-	int i
-	while i < 75
-		if ActorSlot[i].ForceRefIfEmpty(position)
-			Debug.Trace("SexLab: Slotting ActorSlot["+i+"] with "+position)
-			ActorSlot[i].SetAlias(ThreadView)
-			return ActorSlot[i]
-		endIf
-		i += 1
-	endWhile
-	return none
-endFunction
-
 sslActorAlias[] function GetActorSlots(int tid)
 	tid *= 5
 	sslActorAlias[] ActorSlots = new sslActorAlias[5]

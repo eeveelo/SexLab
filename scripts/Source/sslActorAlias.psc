@@ -55,6 +55,12 @@ int Oral
 
 int property Enjoyment auto hidden
 
+race property ActorRace hidden
+	race function get()
+		return BaseRef.GetRace()
+	endFunction
+endProperty
+
 ; Switches
 bool disableRagdoll
 bool property DoRagdoll hidden
@@ -83,35 +89,23 @@ endProperty
 ;|	Alias Functions                              |;
 ;\-----------------------------------------------/;
 
-function SetAlias(sslThreadController ThreadView)
-	if GetReference() != none
-		Initialize()
-		TryToStopCombat()
-		Controller = ThreadView
-		; Init actor information
-		ActorRef = GetReference() as actor
-		BaseRef = ActorRef.GetLeveledActorBase()
-		ActorName = BaseRef.GetName()
-		int gender = Lib.GetGender(ActorRef)
-		IsFemale = gender == 1
-		IsCreature = gender == 2
-		IsPlayer = ActorRef == Lib.PlayerRef
-		IsVictim = ActorRef == Controller.VictimRef
-		; Calculate scales
-		float display = ActorRef.GetScale()
-		ActorRef.SetScale(1.0)
-		float base = ActorRef.GetScale()
-		; Starting scale
-		ActorScale = ( display / base )
-		; Reset back to starting scale
-		ActorRef.SetScale(ActorScale)
-		; Pick animation scale
-		if Controller.ActorCount > 1 && Lib.bScaleActors
-			AnimScale = (1.0 / base)
-		else
-			AnimScale = ActorScale
-		endIf
+bool function SetAlias(actor prospect, sslThreadController ThreadView)
+	if prospect == none || GetReference() != prospect || Lib.ValidateActor(prospect) != 1
+		return false ; Failed to set prospective actor into alias
 	endIf
+	Initialize()
+	Controller = ThreadView
+	; Init actor information
+	ActorRef = GetReference() as actor
+	BaseRef = ActorRef.GetLeveledActorBase()
+	ActorName = BaseRef.GetName()
+	int gender = Lib.GetGender(ActorRef)
+	IsFemale = gender == 1
+	IsCreature = gender == 2
+	IsPlayer = ActorRef == Lib.PlayerRef
+	IsVictim = ActorRef == Controller.VictimRef
+	Debug.Trace("-- SexLab ActorAlias -- Thread["+Controller.tid+"] Slotting '"+ActorName+"' into alias -- "+self)
+	return true
 endFunction
 
 function ClearAlias()
@@ -119,7 +113,7 @@ function ClearAlias()
 	TryToReset()
 	if GetReference() != none
 		ActorRef.EvaluatePackage()
-		Debug.Trace("SexLab: Clearing Actor Slot of "+ActorName)
+		Debug.Trace("-- SexLab ActorAlias -- Clearing '"+ActorName+"' from alias -- "+self)
 	endIf
 	Initialize()
 endFunction
@@ -498,6 +492,20 @@ state Prepare
 		RegisterForSingleUpdate(0.1)
 	endEvent
 	event OnUpdate()
+		; Calculate scales
+		float display = ActorRef.GetScale()
+		ActorRef.SetScale(1.0)
+		float base = ActorRef.GetScale()
+		; Starting scale
+		ActorScale = ( display / base )
+		; Reset back to starting scale
+		ActorRef.SetScale(ActorScale)
+		; Pick animation scale
+		if Controller.ActorCount > 1 && Lib.bScaleActors
+			AnimScale = (1.0 / base)
+		else
+			AnimScale = ActorScale
+		endIf
 		; Lock movement
 		LockActor()
 		; Creatures need none of this
@@ -718,7 +726,7 @@ int function GetPain()
 	if IsVictim
 		return 100 - Clamp(Enjoyment)
 	endIf
-	return 50 - Clamp((Enjoyment / 2), 50)
+	return 50 - Clamp((Enjoyment / 3), 50)
 endFunction
 
 int function Clamp(int value, int max = 100)

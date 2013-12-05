@@ -1,6 +1,7 @@
 scriptname sslThreadLibrary extends Quest
 
 ; Scripts
+sslThreadSlots property Slots auto
 sslAnimationSlots property Animations auto
 sslCreatureAnimationSlots property CreatureAnimations auto
 sslVoiceLibrary property Voices auto
@@ -45,6 +46,10 @@ Sound function GetSFX(int id)
 	else
 		return none
 	endIf
+endFunction
+
+bool function IsActorFree(actor position)
+	return Slots.FindActorController(position) == -1
 endFunction
 
 int function FindNext(actor[] Positions, sslBaseAnimation Animation, int offset, bool findCreature)

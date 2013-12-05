@@ -3,7 +3,6 @@ scriptname sslThreadModel extends ReferenceAlias
 
 ; Library
 sslThreadLibrary property Lib auto
-sslActorSlots property Slots auto
 
 ; Locks
 bool Active
@@ -172,12 +171,24 @@ endProperty
 state Unlocked
 	sslThreadModel function Make(float timeoutIn = 5.0)
 		Initialize()
-		ActorSlots = new sslActorAlias[5]
 		GoToState("Making")
 		RegisterForSingleUpdate((timeoutIn + 10.0))
 		return self
 	endFunction
 endState
+
+sslActorAlias function SlotActor(actor position)
+	int i
+	; Fill first available slot
+	while i < 5 && !ActorSlots[i].ForceRefIfEmpty(position)
+		i += 1
+	endWhile
+	; Return used alias
+	if i < 5 && (ActorSlots[i].GetReference() as actor) == position
+		return ActorSlots[i]
+	endIf
+	return none
+endFunction
 
 state Making
 	event OnUpdate()
@@ -187,30 +198,35 @@ state Making
 	endEvent
 
 	int function AddActor(actor position, bool isVictim = false, sslBaseVoice voice = none, bool forceSilent = false)
-		if Positions.Find(position) != -1
-			_Log("Duplicate actor", "AddActor")
+		; Validate actor being added
+		if ActorCount >= 5
+			_Log("Failed to add actor' "+position.GetLeveledActorBase().GetName()+"' -- thread has reached actor limit", "AddActor", "FATAL")
 			return -1
-		elseif ActorCount >= 5
-			_Log("No available actor positions", "AddActor")
+		elseIf Lib.Slots.FindActorController(position) != -1
+			_Log("Failed to add actor' "+position.GetLeveledActorBase().GetName()+"' -- already slotted by a thread", "AddActor", "FATAL")
+			return -1
+		elseIf Lib.Actors.ValidateActor(position) != 1
+			_Log("Failed to add actor' "+position.GetLeveledActorBase().GetName()+"' -- failed validation check", "AddActor", "FATAL")
 			return -1
 		endIf
-		; Slot and parse
-		int id = -1
-		sslActorAlias Slot = Lib.Actors.Slots.SlotActor(position, self as sslThreadController)
-		if Slot == none
-			_Log("Failed to slot actor '"+position+"'", "AddActor", "FATAL")
+		; Attempt to claim a slot
+		sslActorAlias Slot = SlotActor(position)
+		if Slot == none || !Slot.SetAlias(position, self as sslThreadController)
+			_Log("Failed to add actor' "+position.GetLeveledActorBase().GetName()+"' -- they were unable to fill an actor slot", "AddActor", "FATAL")
 			return -1
-		elseif Slot.IsCreature()
-			Race PosCreature = position.GetLeveledActorBase().GetRace()
-			if Creature != none && !Lib.Actors.AnimLib.AllowedCreatureCombination(PosCreature, Creature)
-				_Log("Invalid creature race combination '"+Creature.GetName()+"' & '"+PosCreature.GetName()+"'", "AddActor", "FATAL")
+		endIf
+		Positions = sslUtility.PushActor(position, Positions)
+		; Check creature race combination
+		if Slot.IsCreature()
+			if Creature != none && !Lib.Actors.AnimLib.AllowedCreatureCombination(Slot.ActorRace, Creature)
+				Slot.ClearAlias()
+				_Log("Invalid creature race combination '"+Creature.GetName()+"' & '"+Slot.ActorRace.GetName()+"'", "AddActor", "FATAL")
 				return -1
 			endIf
-			Creature = PosCreature
+			Creature = Slot.ActorRace
+		; Non-Creature prep
 		else
-			; Set voice
 			Slot.SetVoice(voice, forceSilent)
-			; Set Player actor
 			if position == Lib.PlayerRef
 				PlayerRef = position
 			endIf
@@ -220,12 +236,8 @@ state Making
 			Slot.MakeVictim(true)
 			victim = position
 		endIf
-		; Push actor to positions array
-		Positions = sslUtility.PushActor(position, Positions)
-		id = ActorCount - 1
-		; Save Actor/Alias slot
-		ActorSlots[id] = Slot
-		return id
+		; Return position index
+		return Positions.Find(position)
 	endFunction
 
 	sslThreadController function StartThread()
@@ -461,6 +473,9 @@ endfunction
 ;|	Actor Functions                              |;
 ;\-----------------------------------------------/;
 
+;
+; TODO: Probably needs to be redone again due to ActorSlot changes
+;
 function ChangeActors(actor[] changeTo)
 	if !Active || HasCreature
 		return
@@ -506,14 +521,14 @@ function ChangeActors(actor[] changeTo)
 	sslActorAlias[] newSlots = new sslActorAlias[5]
 	i = 0
 	while i < changeTo.Length
-		int slot = Lib.Actors.Slots.FindActor(changeTo[i])
+		int slot = GetSlot(changeTo[i])
 		if slot != -1
 			; Existing actor, retrieve their slot
-			newSlots[i] = Lib.Actors.Slots.GetSlot(slot)
+			newSlots[i] = ActorSlots[i]
 			newSlots[i].RegisterForSingleUpdate(0.20)
 		else
 			; New actor, slot and prepare them
-			newSlots[i] = Lib.Actors.Slots.SlotActor(changeTo[i], self as sslThreadController)
+			newSlots[i] = SlotActor(changeTo[i])
 			sslActorAlias adding = newSlots[i] as sslActorAlias
 			adding.SetVoice(Lib.Voices.PickVoice(changeTo[i]))
 			adding.DisableUndressAnim(true)
@@ -587,12 +602,12 @@ endFunction
 ;\-----------------------------------------------/;
 
 int function GetSlot(actor position)
-	int i = ActorCount
-	while i
-		i -= 1
+	int i
+	while i < 5
 		if ActorSlots[i].ActorRef == position
 			return i
 		endIf
+		i += 1
 	endWhile
 	return -1
 endFunction

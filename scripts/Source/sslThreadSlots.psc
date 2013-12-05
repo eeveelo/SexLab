@@ -67,12 +67,12 @@ endFunction
 function _Setup()
 	_StopAll()
 	ThreadView = new sslThreadController[15]
-	int i = 15
-	while i
-		i -= 1
+	int i
+	while i < 15
 		ThreadView[i] = GetNthAlias(i) as sslThreadController
 		ThreadView[i]._SetThreadID(i)
 		ThreadView[i].Initialize()
+		i += 1
 	endWhile
 endFunction
 

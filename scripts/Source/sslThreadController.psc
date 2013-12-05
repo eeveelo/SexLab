@@ -34,7 +34,7 @@ bool looping
 state Making
 	sslThreadController function PrimeThread()
 		GotoState("Preparing")
-		RegisterForSingleUpdate(0.05)
+		RegisterForSingleUpdate(0.10)
 		return self
 	endFunction
 endState
@@ -57,8 +57,8 @@ function ActorAction(string stateAction, string stateFinish)
 		i -= 1
 		ActorAlias[i].GoToState(stateAction)
 	endWhile
-	; Wait for actors ready, or for 10 seconds to pass
-	float failsafe = Utility.GetCurrentRealTime() + 10.0
+	; Wait for actors ready, or for 15 seconds to pass
+	float failsafe = Utility.GetCurrentRealTime() + 15.0
 	while !ActorWait(stateFinish) && failsafe > Utility.GetCurrentRealTime()
 		Utility.Wait(0.10)
 	endWhile
@@ -129,7 +129,7 @@ state Advancing
 			return ; No stage to advance to, end animation
 		elseIf LeadIn && Stage > Animation.StageCount
 			; Disable free camera now to help prevent CTD
-			DisableFreeCamera()
+			Lib.ControlLib.EnableFreeCamera(false)
 			; Swap to non lead in animations
 			Stage = 1
 			LeadIn = false
@@ -175,7 +175,7 @@ state Animating
 	event OnBeginState()
 		if !LeadIn && Stage >= Animation.StageCount
 			; Disable free camera now to help prevent CTD
-			DisableFreeCamera()
+			Lib.ControlLib.ResetCamera()
 			; Send orgasm stage specific event
 			SendThreadEvent("OrgasmStart")
 			; Perform actor orgasm stuff
@@ -352,11 +352,11 @@ endFunction
 ;\-----------------------------------------------/;
 
 function SetAnimation(int anim = -1)
-	if anim < 0 ; randomize if -1
-		aid = Utility.RandomInt(0, Animations.Length - 1)
-	else
-		aid = anim
+	; Randomize if -1
+	if anim < 0
+		anim = Utility.RandomInt(0, Animations.Length - 1)
 	endIf
+	aid = anim
 	; Set SFX Marker
 	sfxType = Lib.GetSFX(Animation.SFX)
 	; Check for animation specific stage timer
@@ -474,12 +474,6 @@ endFunction
 ;/-----------------------------------------------\;
 ;|	Scene Manipulation                           |;
 ;\-----------------------------------------------/;
-
-function DisableFreeCamera()
-	if HasPlayer && Game.GetCameraState() == 3
-		Lib.ControlLib.ToggleFreeCamera()
-	endIf
-endFunction
 
 function CenterOnObject(ObjectReference centerOn, bool resync = true)
 	parent.CenterOnObject(centerOn, resync)
