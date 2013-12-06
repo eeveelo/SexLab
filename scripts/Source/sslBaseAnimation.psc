@@ -395,7 +395,7 @@ bool function FemalePosition(int position)
 endFunction
 
 bool function CreaturePosition(int position)
-	return AccessPosition(position, 0) == -1
+	return AccessPosition(position, 0) == 2
 endFunction
 
 int function FemaleCount()

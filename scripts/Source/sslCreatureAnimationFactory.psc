@@ -3,7 +3,7 @@ scriptname sslCreatureAnimationFactory extends sslAnimationFactory
 int slot
 
 ; Gender Types
-int property Creature = -1 autoreadonly hidden
+int property Creature = 2 autoreadonly hidden
 
 ;/-----------------------------------------------\;
 ;|	Registering Animations                       |;
