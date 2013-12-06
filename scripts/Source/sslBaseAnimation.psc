@@ -11,10 +11,11 @@ int content = 0
 
 ; Animation Events
 string[] animations
+int[] genders
 
 ; Data storage
 string[] tags
-form[] creatures
+form[] races
 float[] timerData
 float[] offsetData ; x, y, z, rotation
 float[] offsetDefaults ; x, y, z, rotation
@@ -37,7 +38,7 @@ bool property IsSexual hidden
 endProperty
 bool property IsCreature hidden
 	bool function get()
-		return creatures.Length > 0
+		return races.Length > 0
 	endFunction
 endProperty
 int property StageCount hidden
@@ -50,9 +51,24 @@ int property PositionCount hidden
 		return actors
 	endFunction
 endProperty
+int property Males hidden
+	int function get()
+		return genders[0]
+	endFunction
+endProperty
+int property Females hidden
+	int function get()
+		return genders[1]
+	endFunction
+endProperty
+int property Creatures hidden
+	int function get()
+		return genders[2]
+	endFunction
+endProperty
 form[] property CreatureRaces hidden
 	form[] function get()
-		return creatures
+		return races
 	endFunction
 endProperty
 
@@ -66,7 +82,7 @@ float[] function GetPositionOffsets(int position, int stage)
 	endIf
 
 	float[] off = new float[4]
-	if creatures.Length == 0
+	if IsCreature
 		off[0] = CalculateForward(position, stage)
 	else
 		off[0] = AccessOffset(position, stage, 0)
@@ -112,6 +128,9 @@ int function AddPosition(int gender = 0, int addCum = -1)
 		return -1
 	endIf
 	_WaitLock()
+	RemoveTag(GetGendersTag())
+	genders[gender] = (genders[gender] + 1)
+	AddTag(GetGendersTag())
 	int[] position = new int[2]
 	position[0] = gender
 	position[1] = addCum
@@ -126,7 +145,6 @@ int function AddPositionStage(int position, string animation, float forward = 0.
 	if !Exists("AddPositionStage", position)
 		return -1
 	endIf
-
 	_WaitLock()
 
 	; Add animation event
@@ -420,6 +438,26 @@ endFunction
 ;|	Animation Tags                               |;
 ;\-----------------------------------------------/;
 
+string function GetGendersTag()
+	string tag
+	int i = Females
+	while i
+		i -= 1
+		tag += "F"
+	endWhile
+	i = Males
+	while i
+		i -= 1
+		tag += "M"
+	endWhile
+	i = Creatures
+	while i
+		i -= 1
+		tag += "C"
+	endWhile
+	return tag
+endFunction
+
 bool function AddTag(string tag)
 	if HasTag(tag)
 		return false
@@ -445,7 +483,7 @@ bool function RemoveTag(string tag)
 endFunction
 
 bool function HasTag(string tag)
-	return tags.Find(tag) != -1
+	return tag != "" && tags.Find(tag) != -1
 endFunction
 
 bool function ToggleTag(string tag)
@@ -480,12 +518,12 @@ endFunction
 ;\-----------------------------------------------/;
 
 bool function HasRace(Race creature)
-	return creatures.Length != 0 && creatures.Find(creature) != -1
+	return races.Length != 0 && races.Find(creature) != -1
 endFunction
 
 function AddRace(Race creature)
 	if !HasRace(creature)
-		creatures = sslUtility.PushForm(creature, creatures)
+		races = sslUtility.PushForm(creature, races)
 	endIf
 endFunction
 
@@ -526,6 +564,7 @@ function Initialize()
 	int[] intDel
 	schlongData = intDel
 	positionData = intDel
+	genders = new int[3]
 
 	bool[] switchDel
 	switchData = switchDel
@@ -535,5 +574,5 @@ function Initialize()
 	animations = stringDel
 
 	form[] formDel
-	creatures = formDel
+	races = formDel
 endFunction
