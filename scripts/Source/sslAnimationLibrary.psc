@@ -11,6 +11,25 @@ sslActorLibrary property ActorLib auto
 bool property bRestrictAggressive auto hidden
 bool property bAllowCreatures auto hidden
 
+
+string function MakeGenderTag(actor[] Positions)
+	string tag
+	int[] genders = ActorLib.GenderCount(Positions)
+	while genders[1]
+		genders[1] = (genders[1] - 1)
+		tag += "F"
+	endWhile
+		while genders[0]
+		genders[0] = (genders[0] - 1)
+		tag += "M"
+	endWhile
+	while genders[2]
+		genders[2] = (genders[2] - 1)
+		tag += "C"
+	endWhile
+	return tag
+endFunction
+
 bool function AllowedCreature(Race creature)
 	return bAllowCreatures && CreatureSlots.HasRace(creature)
 endFunction

@@ -291,6 +291,10 @@ int function GetAnimationCount(bool ignoreDisabled = true)
 	return AnimSlots.GetCount(ignoreDisabled)
 endFunction
 
+string function MakeAnimationGenderTag(actor[] Positions)
+	AnimLib.MakeGenderTag(Positions)
+endFunction
+
 int function RegisterAnimation(sslBaseAnimation anim)
 	return -1
 endFunction
