@@ -65,7 +65,7 @@ sslBaseAnimation[] function GetByTags(int actors, string[] tags, string tagSuppr
 	int i = Slotted
 	while i
 		i -= 1
-		valid[i] = Searchable(Slots[i]) && actors == Slots[i].ActorCount() && (tagSuppress == "" || !Slots[i].HasTag(tagSuppress)) && Slots[i].CheckTags(tags, requireAll)
+		valid[i] = Searchable(Slots[i]) && actors == Slots[i].PositionCount && (tagSuppress == "" || !Slots[i].HasTag(tagSuppress)) && Slots[i].CheckTags(tags, requireAll)
 	endWhile
 	sslBaseAnimation[] output = GetList(valid)
 	_LogFound("GetByTags", actors+", "+tags+", "+tagSuppress+", "+requireAll, output)
@@ -85,8 +85,8 @@ sslBaseAnimation[] function GetByType(int actors, int males = -1, int females = 
 	int i = Slotted
 	while i
 		i -= 1
-		valid[i] = Searchable(Slots[i]) && actors == Slots[i].ActorCount() && (males == -1 || males == Slots[i].MaleCount()) && (females == -1 || females == Slots[i].FemaleCount()) \
-		&& (stages == -1 || stages == Slots[i].StageCount()) && (aggressive == Slots[i].HasTag("Aggressive") || !Lib.bRestrictAggressive) && (sexual == Slots[i].IsSexual)
+		valid[i] = Searchable(Slots[i]) && actors == Slots[i].PositionCount && (males == -1 || males == Slots[i].Males) && (females == -1 || females == Slots[i].Females) \
+		&& (stages == -1 || stages == Slots[i].StageCount) && (aggressive == Slots[i].HasTag("Aggressive") || !Lib.bRestrictAggressive) && (sexual == Slots[i].IsSexual)
 	endWhile
 	sslBaseAnimation[] output = GetList(valid)
 	_LogFound("GetByType", actors+", "+males+", "+females+", "+stages+", "+aggressive+", "+sexual, output)
