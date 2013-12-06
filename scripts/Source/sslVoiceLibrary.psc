@@ -5,7 +5,7 @@ sslVoiceSlots property Slots auto
 
 ; Data
 actor property PlayerRef auto
-faction property RememberVoice auto
+faction property SavedVoices auto
 topic property SexLabMoanMild auto
 topic property SexLabMoanMedium auto
 topic property SexLabMoanHot auto
@@ -26,8 +26,8 @@ sslBaseVoice function PickVoice(actor a)
 	if a == PlayerRef && sPlayerVoice != "$SSL_Random"
 		return Slots.GetByName(sPlayerVoice)
 	; Get saved voice by faction rank as slot index
-	elseIf a != PlayerRef && a.IsInFaction(RememberVoice)
-		int vid = a.GetFactionRank(RememberVoice)
+	elseIf a != PlayerRef && a.IsInFaction(SavedVoices)
+		int vid = a.GetFactionRank(SavedVoices)
 		; Return if it is a valid rank index
 		if vid > -1 && vid < Slots.Slotted
 			return Slots.GetBySlot(vid)
@@ -37,8 +37,8 @@ sslBaseVoice function PickVoice(actor a)
 	sslBaseVoice Voice = Slots.GetRandom(a.GetLeveledActorBase().GetSex())
 	; Save picked voice if option is enabled
 	if bNPCSaveVoice && a != PlayerRef
-		a.AddToFaction(RememberVoice)
-		a.SetFactionRank(RememberVoice, Slots.Find(Voice))
+		a.AddToFaction(SavedVoices)
+		a.SetFactionRank(SavedVoices, Slots.Find(Voice))
 	endIf
 	return Voice
 endFunction
