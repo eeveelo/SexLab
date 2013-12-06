@@ -169,10 +169,10 @@ endProperty
 ;|	Preparation Functions                        |;
 ;\-----------------------------------------------/;
 state Unlocked
-	sslThreadModel function Make(float timeoutIn = 5.0)
+	sslThreadModel function Make(float timeoutIn = 30.0)
 		Initialize()
 		GoToState("Making")
-		RegisterForSingleUpdate((timeoutIn + 10.0))
+		RegisterForSingleUpdate(timeoutIn)
 		return self
 	endFunction
 endState
@@ -908,7 +908,7 @@ endFunction
 ;| State Permissible Functions                   |;
 ;\-----------------------------------------------/;
 
-sslThreadModel function Make(float timeoutIn = 5.0)
+sslThreadModel function Make(float timeoutIn = 30.0)
 	_Log("Cannot enter make on a locked thread", "Make")
 	return none
 endFunction

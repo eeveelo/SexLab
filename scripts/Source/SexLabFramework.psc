@@ -75,7 +75,7 @@ sslThreadModel function NewThread(float timeout = 5.0)
 	sslThreadController ThreadView = ThreadSlots.PickController()
 	if ThreadView != none
 		Debug.Trace("SexLab: Making thread["+ThreadView.tid+"] "+ThreadView)
-		return ThreadView.Make(timeout)
+		return ThreadView.Make((timeout + 25.0))
 	endIf
 	return none
 endFunction
