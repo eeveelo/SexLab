@@ -245,6 +245,9 @@ state Making
 			_Log("No valid actors available for animation", "StartThread", "FATAL")
 			return none
 		endIf
+
+		Active = true
+
 		int actors = ActorCount
 		int i
 		while i < actors
@@ -280,11 +283,11 @@ state Making
 				sslBaseAnimation[] samesex = Lib.Animations.GetByType(actors, Males, Females, aggressive = IsAggressive)
 				sslBaseAnimation[] couples = Lib.Animations.GetByType(actors, 1, 1, aggressive = IsAggressive)
 				primaryAnimations = Lib.Animations.MergeLists(samesex, couples)
+			; Grab animations like normal
 			elseif actors < 3
-				; Grab animations like normal
 				primaryAnimations = Lib.Animations.GetByType(actors, Males, Females, aggressive = IsAggressive)
+			; Get 3P + animations ignoring gender
 			elseif actors >= 3
-				; Get 3P + animations ignoring gender
 				primaryAnimations = Lib.Animations.GetByType(actors, aggressive = IsAggressive)
 			endIf
 			; Check for valid animations again
@@ -310,7 +313,7 @@ state Making
 		endWhile
 
 		; Validate Leadin Animations
-		if !leadInDisabled && !HasCreature && leadAnimations.Length > 0
+		if !leadInDisabled && leadAnimations.Length > 0
 			i = leadAnimations.Length
 			while i
 				i -= 1
@@ -327,7 +330,7 @@ state Making
 			; Select a bed
 			if PlayerRef != none
 				BedRef = Lib.FindBed(PlayerRef, 750.0)
-			else
+			elseIf PlayerRef == none && Lib.sNPCBed != "$SSL_Never"
 				BedRef = Lib.FindBed(Positions[0], 1000.0)
 			endIf
 			; A bed was selected, should we use it?
