@@ -356,7 +356,7 @@ int function HookStage(string argString)
 endFunction
 
 actor function HookVictim(string argString)
-	return ThreadSlots.GetController(argString as int).GetVictim()
+	return ThreadSlots.GetController(argString as int).VictimRef
 endFunction
 
 actor[] function HookActors(string argString)
@@ -364,7 +364,7 @@ actor[] function HookActors(string argString)
 endFunction
 
 float function HookTime(string argString)
-	return ThreadSlots.GetController(argString as int).GetTime()
+	return ThreadSlots.GetController(argString as int).TotalTime
 endFunction
 
 ;#---------------------------#
