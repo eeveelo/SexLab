@@ -306,7 +306,7 @@ state Making
 		i = primaryAnimations.Length
 		while i
 			i -= 1
-			if actors != primaryAnimations[i].PositionCount
+			if !primaryAnimations[i].Registered || actors != primaryAnimations[i].PositionCount
 				_Log("Primary animation '"+primaryAnimations[i].Name+"' requires "+primaryAnimations[i].PositionCount+" actors, only "+actors+" present", "StartThread", "FATAL")
 				return none
 			endIf
@@ -317,7 +317,7 @@ state Making
 			i = leadAnimations.Length
 			while i
 				i -= 1
-				if actors != leadAnimations[i].PositionCount
+				if !leadAnimations[i].Registered || actors != leadAnimations[i].PositionCount
 					_Log("Lead in animation '"+leadAnimations[i].Name+"' requires "+leadAnimations[i].PositionCount+" actors, only "+actors+" present", "StartThread", "FATAL")
 					return none
 				endIf
@@ -387,8 +387,11 @@ state Making
 
 		; Start the controller
 		sslThreadController Controller = PrimeThread()
-		Active = Controller != none
 		started = Utility.GetCurrentRealTime()
+		if Controller == none
+			_Log("Failed to start, controller is null", "StartThread", "FATAL")
+			return none
+		endIf
 		return Controller
 	endFunction
 endState
