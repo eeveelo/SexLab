@@ -45,6 +45,13 @@ sslBaseAnimation[] property Animation hidden
 	endFunction
 endProperty
 
+; Creature animations
+sslBaseAnimation[] property CreatureAnimation hidden
+	sslBaseAnimation[] function get()
+		return AnimLib.CreatureSlots.Slots
+	endFunction
+endProperty
+
 ; Voice Sets
 sslBaseVoice[] property Voice hidden
 	sslBaseVoice[] function get()
@@ -289,6 +296,14 @@ endFunction
 
 int function GetAnimationCount(bool ignoreDisabled = true)
 	return AnimSlots.GetCount(ignoreDisabled)
+endFunction
+
+bool function AllowedCreature(Race creature)
+	return AnimLib.AllowedCreature(creature)
+endFunction
+
+bool function AllowedCreatureCombination(Race creature, Race creature2)
+	return AnimLib.AllowedCreatureCombination(creature, creature2)
 endFunction
 
 string function MakeAnimationGenderTag(actor[] Positions)
