@@ -586,9 +586,6 @@ endState
 
 state Orgasm
 	event OnBeginState()
-		if IsPlayer
-			Lib.UnregisterForKey(Lib.ControlLib.kAdvanceAnimation)
-		endIf
 		RegisterForSingleUpdate(0.1)
 	endEvent
 	event OnUpdate()

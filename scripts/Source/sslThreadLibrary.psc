@@ -15,6 +15,7 @@ actor property PlayerRef auto
 sound property sfxSquishing01 auto
 sound property sfxSucking01 auto
 sound property sfxSexMix01 auto
+sound property OrgasmEffect auto
 Static property LocationMarker auto
 ActorBase property SexLabStager auto
 FormList property BedsList auto

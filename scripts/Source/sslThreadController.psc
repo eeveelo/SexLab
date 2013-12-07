@@ -181,7 +181,11 @@ state Animating
 			; Perform actor orgasm stuff
 			ActorAction("Orgasm", "Animating")
 			PlayAnimation()
-			Sound.SetInstanceVolume(sfxType.Play(Positions[0]), sfxVolume)
+			Lib.OrgasmEffect.PlayAndWait(Positions[0])
+			if sfxType != none
+				Sound.SetInstanceVolume(sfxType.Play(Positions[0]), sfxVolume)
+			endIf
+			Sound.SetInstanceVolume(Lib.OrgasmEffect.Play(Positions[0]), sfxVolume)
 			sfx[0] = 0.60
 		else
 			SendThreadEvent("StageStart")
