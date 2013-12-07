@@ -99,6 +99,10 @@ endFunction
 
 sslBaseAnimation[] function GetList(bool[] valid)
 	int count = sslUtility.CountTrue(valid)
+	if count < 1
+		sslBaseAnimation[] empty
+		return empty
+	endIf
 	sslBaseAnimation[] output = sslUtility.AnimationArray(count)
 	int pos = valid.Find(true)
 	while pos != -1 && pos < valid.Length
