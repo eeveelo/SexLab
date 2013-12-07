@@ -244,25 +244,49 @@ function ApplyCum(actor a, int cumID)
 	if cumID < 1
 		return ; Invalid ID
 	endIf
-	; Check current locations
-	bool anal = a.HasMagicEffectWithKeyword(kwCumAnal)
-	bool oral = a.HasMagicEffectWithKeyword(kwCumOral)
-	bool vaginal = a.HasMagicEffectWithKeyword(kwCumVaginal)
-	; Apply passed id + current
-	if cumID == 1 && !anal && !oral
+	; Apply passed id
+	if cumID == 1
+		AddCum(a, true, false, false)
+	elseif cumID == 2
+		AddCum(a, false, true, false)
+	elseif cumID == 3
+		AddCum(a, false, false, true)
+	elseif cumID == 4
+		AddCum(a, true, true, false)
+	elseif cumID == 5
+		AddCum(a, true, false, true)
+	elseif cumID == 6
+		AddCum(a, false, true, true)
+	else
+		AddCum(a, true, true, true)
+	endIf
+endFunction
+
+function AddCum(actor a, bool vaginal = true, bool oral = true, bool anal = true)
+	vaginal = vaginal || a.HasMagicEffectWithKeyword(kwCumVaginal)
+	oral = oral || a.HasMagicEffectWithKeyword(kwCumOral)
+	anal = anal || a.HasMagicEffectWithKeyword(kwCumAnal)
+	bool ToggleGhost = a.IsGhost()
+	if ToggleGhost
+		a.SetGhost(false)
+	endIf
+	if vaginal && !oral && !anal
 		CumVaginalSpell.Cast(a, a)
-	elseif cumID == 2 && !anal && !vaginal
+	elseIf oral && !vaginal && !anal
 		CumOralSpell.Cast(a, a)
-	elseif cumID == 3 && !oral && !vaginal
+	elseIf anal && !vaginal && !oral
 		CumAnalSpell.Cast(a, a)
-	elseif (cumID == 4 || cumID == 1 || cumID == 2) && (vaginal || oral) && !anal
+	elseIf vaginal && oral && !anal
 		CumVaginalOralSpell.Cast(a, a)
-	elseif (cumID == 5 || cumID == 1 || cumID == 3) && (vaginal || anal) && !oral
+	elseIf vaginal && anal && !oral
 		CumVaginalAnalSpell.Cast(a, a)
-	elseif (cumID == 6 || cumID == 2 || cumID == 3) && (oral || anal) && !vaginal
+	elseIf oral && anal && !vaginal
 		CumOralAnalSpell.Cast(a, a)
 	else
 		CumVaginalOralAnalSpell.Cast(a, a)
+	endIf
+	if ToggleGhost
+		a.SetGhost(true)
 	endIf
 endFunction
 
@@ -481,7 +505,7 @@ function AllowActor(actor a)
 endFunction
 
 bool function IsForbidden(actor a)
-	return a.HasKeyWordString("SexLabForbid") || !a.IsInFaction(ForbiddenFaction)
+	return a.IsInFaction(ForbiddenFaction) || a.HasKeyWordString("SexLabForbid")
 endFunction
 
 function TreatAsMale(actor a)
