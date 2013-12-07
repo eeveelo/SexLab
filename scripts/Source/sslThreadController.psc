@@ -364,6 +364,10 @@ function SetAnimation(int anim = -1)
 	if stagetimer > 0.0
 		UpdateTimer(stagetimer)
 	endIf
+	; Print name of animation to console
+	if HasPlayer
+		SexLabUtil.PrintConsole("Playing Animation: " + Animation.Name)
+	endIf
 endFunction
 
 function PlayAnimation()
@@ -448,9 +452,6 @@ function Initialize()
 	parent.Initialize()
 	; Set states
 	looping = false
-	; Empty Strings
-	; Empty actors
-	actor[] acDel
 	; Empty Floats
 	float[] fDel
 	sfx = fDel
