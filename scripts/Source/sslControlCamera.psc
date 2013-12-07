@@ -17,6 +17,7 @@ Actor CloneRef
 bool TFC
 float NifScale
 float Scale
+float[] distance
 ObjectReference MarkerRef
 
 event OnTranslationAlmostComplete()
@@ -48,19 +49,14 @@ state FirstPerson
 			tmp.Delete()
 		endIf
 		CloneRef = PlayerRef.PlaceAtMe(PlayerRef.GetLeveledActorBase(), 1) as Actor
-		Utility.Wait(0.1)
+		Utility.Wait(0.5)
+		CloneRef.Enable()
 		CloneRef.MoveTo(PlayerRef)
 		CloneAlias.ForceRefTo(CloneRef)
-
-		; ; Give an empty voice type
-		; ActorBase CloneBase = CloneRef.GetLeveledActorBase()
-		; if CloneBase.GetSex() == 1
-		; 	CloneBase.SetVoiceType(SexLabVoiceF)
-		; else
-		; 	CloneBase.SetVoiceType(SexLabVoiceM)
-		; endIf
-
-		; PlayerRef.SetMotionType(PlayerRef.Motion_Keyframed)
+		CloneAlias.TryToEnable()
+		while !CloneRef.Is3DLoaded()
+			Utility.Wait(0.5)
+		endWhile
 
 		; Make clone match player
 		CloneRef.RemoveAllItems()
@@ -76,23 +72,19 @@ state FirstPerson
 
 		CloneRef.SetHeadTracking(false)
 		CloneRef.EvaluatePackage()
-		PlayerAlias = ActorSlots.GetActorAlias(PlayerRef)
+		PlayerAlias = Lib.ThreadLib.Slots.GetPlayerController().ActorAlias(PlayerRef)
+		; debug.traceandbox(PlayerAlias)
 		PlayerAlias.SetCloned(CloneRef)
 
-		NetImmerse.SetNodeScale(CloneRef, "NPCEyeBone", 0.5, false)
 		NetImmerse.SetNodeScale(CloneRef, "NPC Head [Head]", 0.5, false)
 		CloneRef.QueueNiNodeUpdate()
-
 		CloneRef.SetVehicle(PlayerRef)
 
 		; Shrink player down
 		NifScale = NetImmerse.GetNodeScale(PlayerRef, "NPC", true)
 		NetImmerse.SetNodeScale(PlayerRef, "NPC", 0.05, true)
-		; NetImmerse.SetNodeScale(PlayerRef, "NPCEyeBone", 0.01, true)
-		; NetImmerse.SetNodeScale(PlayerRef, "Camera1st [Cam1]", 0.01, true)
-		NetImmerse.SetNodeScale(PlayerRef, "NPC Head [Head]", 0.01, true)
-		; NetImmerse.SetNodeScale(PlayerRef, "Camera Control", 0.01, true)
-		NetImmerse.SetNodeScale(PlayerRef, "NPC LookNode [Look]", 0.01, true)
+		; NetImmerse.SetNodeScale(PlayerRef, "NPC Head [Head]", 0.01, true)
+		; NetImmerse.SetNodeScale(PlayerRef, "NPC LookNode [Look]", 0.01, true)
 		; Lib.PlayerRef.SetScale(0.01)
 		PlayerRef.QueueNiNodeUpdate()
 
@@ -104,6 +96,12 @@ state FirstPerson
 		; PlayerRef.Activate(MarkerRef)
 		; PlayerRef.SetVehicle(MarkerRef)
 		; PlayerRef.SetVehicle(CloneRef)
+
+		distance = new float[2]
+		distance[0] = Utility.GetINIFloat("fNearDistance:Display")
+		distance[1] = Utility.GetINIFloat("fNear1stPersonDistance:Display")
+		Utility.SetINIFloat("fNearDistance:Display", 0.1)
+		Utility.SetINIFloat("fNear1stPersonDistance:Display", 0.0)
 
 		; Force into first person camera and hide body
 		Game.DisablePlayerControls(false, false, true, false, false, false, true, false, 0)
@@ -135,12 +133,9 @@ state FirstPerson
 
 		; Reset player scale
 		NetImmerse.SetNodeScale(PlayerRef, "NPC", NifScale, true)
-		; NetImmerse.SetNodeScale(PlayerRef, "NPCEyeBone", 1.0, true)
-		; NetImmerse.SetNodeScale(PlayerRef, "Camera1st [Cam1]", 1.0, true)
-		NetImmerse.SetNodeScale(PlayerRef, "NPC Head [Head]", 1.0, true)
-		; NetImmerse.SetNodeScale(PlayerRef, "Camera Control", 1.0, true)
-		NetImmerse.SetNodeScale(PlayerRef, "NPC LookNode [Look]", 1.0, true)
-		; PlayerRef.QueueNiNodeUpdate()
+		; NetImmerse.SetNodeScale(PlayerRef, "NPC Head [Head]", 1.0, true)
+		; NetImmerse.SetNodeScale(PlayerRef, "NPC LookNode [Look]", 1.0, true)
+		PlayerRef.QueueNiNodeUpdate()
 		Game.ShowFirstPersonGeometry(true)
 		PlayerAlias.RemoveClone()
 
@@ -149,6 +144,8 @@ state FirstPerson
 		CloneRef.Delete()
 		CloneRef = none
 
+		Utility.SetINIFloat("fNearDistance:Display", distance[0])
+		Utility.SetINIFloat("fNear1stPersonDistance:Display", distance[1])
 		ImageSpaceModifier.RemoveCrossFade()
 		Debug.ToggleCollisions()
 		Game.ForceThirdPerson()

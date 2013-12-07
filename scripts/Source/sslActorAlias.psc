@@ -124,20 +124,19 @@ endFunction
 
 function SetCloned(actor CloneRef)
 	if ClonedRef == none && CloneRef != none
+		UnregisterForUpdate()
 		StopAnimating(true)
-		UnlockActor()
 		Clear()
 		ForceRefTo(CloneRef)
 		ClonedRef = ActorRef
 		actor[] Positions = Controller.Positions
-		Positions[Positions.Find(ActorRef)] = CloneRef
+		int pid = Positions.Find(ActorRef)
+		Positions[pid] = CloneRef
 		Controller.Positions = Positions
 		ActorRef = CloneRef
 		IsPlayer = false
 		LockActor()
-		if GetState() == "Animating"
-			Controller.RealignActors()
-		endIf
+		Controller.RealignActors()
 		Lib.ControlLib._HKStart(Controller)
 	endIf
 endFunction
@@ -145,7 +144,8 @@ endFunction
 function RemoveClone()
 	if ClonedRef != none
 		actor[] Positions = Controller.Positions
-		Positions[Positions.Find(ActorRef)] = ClonedRef
+		int pid = Positions.Find(ActorRef)
+		Positions[pid] = ClonedRef
 		Controller.Positions = Positions
 		ActorRef = ClonedRef
 		IsPlayer = true
@@ -419,8 +419,6 @@ function SyncThread()
 		endIf
 		; Animation related stuffs
 		if !IsCreature
-			; DEBUG TEMP
-			Debug.Trace(" SEXLABDEBUG --- "+ActorName+ " Enjoyment: "+GetEnjoyment()+" Pain: "+GetPain())
 			; Send expression
 			IsMouthOpen = Animation.UseOpenMouth(position, stage)
 			Expression.ApplyTo(ActorRef, strength, BaseRef.GetSex() == 1, IsMouthOpen)
