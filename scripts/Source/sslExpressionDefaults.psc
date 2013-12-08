@@ -326,7 +326,6 @@ endFunction
 function Angry(string eventName, string id, float argNum, form sender)
 	Name = "Angry"
 
-
 	AddTag("Mad")
 	AddTag("Angry")
 	AddTag("Upset")

@@ -16,8 +16,6 @@ Sound property Mild auto hidden
 Sound property Hot auto hidden
 Sound property Medium auto hidden
 
-
-
 string[] tags
 
 ;/-----------------------------------------------\;

@@ -59,8 +59,11 @@ function ClearMFG(actor ActorRef)
 endFunction
 
 function ClearPhoneme(actor ActorRef)
-	int[] phonemes = new int[32]
-
+	int i
+	while i <= 15
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, i, 0)
+		i += 1
+	endWhile
 endFunction
 
 int[] function GetPreset(int[] presets, int n)

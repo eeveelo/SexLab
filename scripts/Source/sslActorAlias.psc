@@ -45,6 +45,7 @@ actor ClonedRef
 ActorBase BaseRef
 string ActorName
 int[] ExpressionPreset
+bool toggle
 
 ; Stats
 bool IsPure
@@ -419,9 +420,11 @@ function SyncThread()
 		endIf
 		; Animation related stuffs
 		if !IsCreature
+			; Calculate current enjoyment level
+			GetEnjoyment()
 			; Send expression
 			IsMouthOpen = Animation.UseOpenMouth(position, stage)
-			Expression.ApplyTo(ActorRef, strength, BaseRef.GetSex() == 1, IsMouthOpen)
+			Expression.ApplyTo(ActorRef, Enjoyment, BaseRef.GetSex() == 1, IsMouthOpen)
 			; ExpressionPreset = Lib.ExpressionLib.PresetMixin(Lib.ExpressionLib.GetBasePreset(IsFemale), GetEnjoyment(), IsFemale, IsVictim)
 			; Lib.ExpressionLib.ApplyPreset(ExpressionPreset, ActorRef, IsMouthOpen)
 			; Send SOS event
@@ -568,17 +571,21 @@ state Animating
 			return
 		endIf
 		if Voice != none && !IsSilent
-			; ActorRef.ClearExpressionOverride()
-			; Lib.ExpressionLib.ClearMFG(ActorRef)
+			if Expression != none
+				Expression.ClearPhoneme(ActorRef)
+			endIf
 			if VoiceInstance
 				Sound.StopInstance(VoiceInstance)
 			endIf
-			VoiceInstance = Voice.Moan(ActorRef, strength, IsVictim)
+			VoiceInstance = Voice.Moan(ActorRef, Strength, IsVictim)
 			Sound.SetInstanceVolume(VoiceInstance, Lib.fVoiceVolume)
-			; Lib.ExpressionLib.ApplyPreset(ExpressionPreset, ActorRef, IsMouthOpen)
-			; if Expression != none
-			; 	Expression.ApplyTo(ActorRef, strength)
-			; endIf
+		endIf
+		toggle = !toggle
+		if toggle
+			GetEnjoyment()
+			if Expression != none
+				Expression.ApplyTo(ActorRef, Enjoyment, IsFemale, IsMouthOpen)
+			endIf
 		endIf
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent
@@ -778,5 +785,5 @@ function Initialize()
 endFunction
 
 function StartAnimating()
-	Debug.TraceAndBox("Null StartAnimating(): "+ActorName)
+	Debug.Trace("Null StartAnimating(): "+ActorName)
 endFunction
