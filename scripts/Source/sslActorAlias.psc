@@ -166,8 +166,6 @@ endFunction
 ;\-----------------------------------------------/;
 
 function LockActor()
-	; Make unhittable
-	ActorRef.SetGhost(true)
 	; Start DoNothing package
 	ActorRef.AddToFaction(Lib.AnimatingFaction)
 	ActorRef.SetFactionRank(Lib.AnimatingFaction, 1)
@@ -210,8 +208,6 @@ function UnlockActor()
 	; Detach positioning marker
 	ActorRef.StopTranslation()
 	ActorRef.SetVehicle(none)
-	; Make hittable
-	ActorRef.SetGhost(false)
 endFunction
 
 
