@@ -10,7 +10,7 @@ int property ActiveActors hidden
 		int count
 		int i
 		while i < 75
-			count += (ActorSlot[i].GetReference() == none) as int
+			count += (ActorSlot[i].GetReference() != none) as int
 			i += 1
 		endWhile
 		return count
@@ -47,19 +47,12 @@ endFunction
 
 function ClearSlot(int slot)
 	if slot >= 0 && slot < 75
-		actor position = ActorSlot[slot].GetReference() as actor
-		Debug.Trace("SexLab: Clearing ActorSlot["+slot+"] of "+position)
-		ActorSlot[slot].TryToClear()
-		ActorSlot[slot].TryToReset()
-		position.EvaluatePackage()
+		ActorSlot[slot].ClearAlias()
 	endIf
 endFunction
 
 function ClearActor(actor position)
-	int slot = FindActor(position)
-	if slot != -1
-		ClearSlot(slot)
-	endIf
+	ClearSlot(FindActor(position))
 endFunction
 
 sslActorAlias function GetActorAlias(actor position)
