@@ -8,6 +8,7 @@ sslAnimationLibrary property AnimLib auto
 sslVoiceLibrary property VoiceLib auto
 sslExpressionLibrary property ExpressionLib auto
 sslControlLibrary property ControlLib auto
+sslThreadSlots property ThreadSlots auto
 
 ; Data
 faction property AnimatingFaction auto
@@ -64,58 +65,6 @@ bool[] property bStripAggressor auto hidden
 ; Local
 bool hkReady
 sslThreadController PlayerController
-
-int function ValidateActor(actor a)
-	if ValidActorList.Find(a) != -1
-		return 1
-	endIf
-	String ActorName = a.GetLeveledActorBase().GetName()
-	if a.IsInFaction(AnimatingFaction)
-		if Slots.FindActor(a) == -1
-			a.RemoveFromFaction(AnimatingFaction)
-		else
-			Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They appear to already be animating")
-			return -10
-		endIf
-	endIf
-	if a.IsInFaction(ForbiddenFaction) || a.HasKeywordString("SexLabForbid")
-		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are forbidden from animating")
-		return -11
-	endIf
-	if !a.Is3DLoaded()
-		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are not loaded")
-		return -12
-	endIf
-	if a.IsDead()
-		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: He's dead Jim.")
-		return -13
-	endIf
-	if a.IsDisabled()
-		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are disabled")
-		return -14
-	endIf
-	if a.IsFlying()
-		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are flying.")
-		return -15
-	endIf
-	Race ActorRace = a.GetLeveledActorBase().GetRace()
-	String RaceName = ActorRace.GetName()
-	if ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Child") != -1 || StringUtil.Find(RaceName, "117") != -1 || StringUtil.Find(RaceName, "Monli") != -1 || StringUtil.Find(RaceName, "Elin") != -1 || StringUtil.Find(RaceName, "Enfant") != -1
-		ForbidActor(a)
-		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are forbidden from animating")
-		return -11
-	endIf
-	if a != PlayerRef && !a.HasKeywordString("ActorTypeNPC") && !AnimLib.AllowedCreature(ActorRace)
-		Debug.Trace("--- SexLab --- Failed to validate ("+ActorName+") :: They are a creature that is currently not supported ("+RaceName+")")
-		return -16
-	endIf
-	ValidActorList.AddForm(a)
-	return 1
-endFunction
-
-bool function IsValidActor(actor a)
-	return ValidateActor(a) == 1
-endFunction
 
 actor[] function MakeActorArray(actor a1 = none, actor a2 = none, actor a3 = none, actor a4 = none, actor a5 = none)
 	actor[] output
@@ -496,6 +445,57 @@ function UnequipStrapon(actor a)
 	endIf
 endFunction
 
+int function ValidateActor(actor a)
+	if a.IsInFaction(AnimatingFaction)
+		if ThreadSlots.FindActorController(a) == -1
+			a.RemoveFromFaction(AnimatingFaction)
+		else
+			Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They appear to already be animating")
+			return -10
+		endIf
+	endIf
+	if ValidActorList.Find(a) != -1
+		return 1
+	endIf
+	if a.IsInFaction(ForbiddenFaction) || a.HasKeywordString("SexLabForbid")
+		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They are forbidden from animating")
+		return -11
+	endIf
+	if !a.Is3DLoaded()
+		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They are not loaded")
+		return -12
+	endIf
+	if a.IsDead()
+		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: He's dead Jim.")
+		return -13
+	endIf
+	if a.IsDisabled()
+		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They are disabled")
+		return -14
+	endIf
+	if a.IsFlying()
+		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They are flying.")
+		return -15
+	endIf
+	Race ActorRace = a.GetLeveledActorBase().GetRace()
+	String RaceName = ActorRace.GetName()
+	if ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Child") != -1 || StringUtil.Find(RaceName, "117") != -1 || StringUtil.Find(RaceName, "Monli") != -1 || StringUtil.Find(RaceName, "Elin") != -1 || StringUtil.Find(RaceName, "Enfant") != -1
+		ForbidActor(a)
+		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They are forbidden from animating")
+		return -11
+	endIf
+	if a != PlayerRef && !a.HasKeywordString("ActorTypeNPC") && !AnimLib.AllowedCreature(ActorRace)
+		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They are a creature that is currently not supported ("+RaceName+")")
+		return -16
+	endIf
+	ValidActorList.AddForm(a)
+	return 1
+endFunction
+
+bool function IsValidActor(actor a)
+	return ValidateActor(a) == 1
+endFunction
+
 function ForbidActor(actor a)
 	a.AddToFaction(ForbiddenFaction)
 endFunction
@@ -669,4 +669,9 @@ function _Defaults()
 	bStripAggressor[16] = true
 	bStripAggressor[24] = true
 	bStripAggressor[26] = true
+
+	; Clear cache
+	NoStripList.Revert()
+	StripList.Revert()
+	ValidActorList.Revert()
 endFunction
