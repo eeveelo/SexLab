@@ -39,7 +39,7 @@ state FirstPerson
 	event OnBeginState()
 		Debug.ToggleCollisions()
 		Debug.Notification("Entering First Person")
-		; FadeToBlackHold.ApplyCrossFade(0.5)
+		FadeToBlackHold.ApplyCrossFade(0.5)
 
 		; Get existing clone or make new one
 		if CloneAlias.GetReference() != none
@@ -55,7 +55,7 @@ state FirstPerson
 		CloneAlias.ForceRefTo(CloneRef)
 		CloneAlias.TryToEnable()
 		while !CloneRef.Is3DLoaded()
-			Utility.Wait(0.5)
+			Utility.Wait(0.1)
 		endWhile
 
 		; Make clone match player
@@ -83,25 +83,13 @@ state FirstPerson
 		; Shrink player down
 		NifScale = NetImmerse.GetNodeScale(PlayerRef, "NPC", true)
 		NetImmerse.SetNodeScale(PlayerRef, "NPC", 0.05, true)
-		; NetImmerse.SetNodeScale(PlayerRef, "NPC Head [Head]", 0.01, true)
-		; NetImmerse.SetNodeScale(PlayerRef, "NPC LookNode [Look]", 0.01, true)
-		; Lib.PlayerRef.SetScale(0.01)
 		PlayerRef.QueueNiNodeUpdate()
-
-
-		; MarkerRef = PlayerRef.PlaceAtMe(Game.GetForm(0x0B9C04), 1)
-		Utility.Wait(0.5)
-		; MarkerRef.SetScale(0.0001)
-		; MarkerRef.MoveToNode(CloneRef, "NPCEyeBone")
-		; PlayerRef.Activate(MarkerRef)
-		; PlayerRef.SetVehicle(MarkerRef)
-		; PlayerRef.SetVehicle(CloneRef)
 
 		distance = new float[2]
 		distance[0] = Utility.GetINIFloat("fNearDistance:Display")
 		distance[1] = Utility.GetINIFloat("fNear1stPersonDistance:Display")
-		Utility.SetINIFloat("fNearDistance:Display", 0.1)
-		Utility.SetINIFloat("fNear1stPersonDistance:Display", 0.0)
+		Utility.SetINIFloat("fNearDistance:Display", 4.0)
+		Utility.SetINIFloat("fNear1stPersonDistance:Display", 4.0)
 
 		; Force into first person camera and hide body
 		Game.DisablePlayerControls(false, false, true, false, false, false, true, false, 0)
@@ -109,15 +97,41 @@ state FirstPerson
 		Game.ForceFirstPerson()
 		PlayerRef.SetGhost(true)
 
+
+		if MarkerRef != none
+			MarkerRef.Disable()
+			MarkerRef.Delete()
+			MarkerRef = none
+		endIf
+
+		MarkerRef = PlayerRef.PlaceAtMe(CameraMarker, 1)
+		MarkerRef.MoveTo(PlayerRef)
+		MarkerRef.Enable()
+		while !MarkerRef.Is3DLoaded()
+			Utility.Wait(0.1)
+		endWhile
+		MarkerRef.SetScale(0.01)
+		MarkerRef.Enable()
+		MarkerRef.MoveToNode(CloneRef, "NPCEyeBone")
+		PlayerRef.Activate(MarkerRef)
+		PlayerRef.SetVehicle(MarkerRef)
+		MarkerRef.Disable()
+
 		; Poistion and loop
 		PlayerRef.SplineTranslateToRefNode(CloneRef, "NPCEyeBone", 1, 50000, 0)
 		RegisterForSingleUpdate(2.5)
 		; Return to view
-		; ImageSpaceModifier.RemoveCrossFade()
+		ImageSpaceModifier.RemoveCrossFade()
 	endEvent
 
 	event OnUpdate()
 		; Renforce translation loop every so often
+		MarkerRef.Enable()
+		MarkerRef.MoveToNode(CloneRef, "NPCEyeBone")
+		PlayerRef.Activate(MarkerRef)
+		PlayerRef.SetVehicle(MarkerRef)
+		MarkerRef.Disable()
+		PlayerRef.SetVehicle(CloneRef)
 		PlayerRef.SplineTranslateToRefNode(CloneRef, "NPCEyeBone", 1, 1000, 0)
 		RegisterForSingleUpdate(2.5)
 	endEvent
@@ -133,11 +147,12 @@ state FirstPerson
 
 		; Reset player scale
 		NetImmerse.SetNodeScale(PlayerRef, "NPC", NifScale, true)
-		; NetImmerse.SetNodeScale(PlayerRef, "NPC Head [Head]", 1.0, true)
-		; NetImmerse.SetNodeScale(PlayerRef, "NPC LookNode [Look]", 1.0, true)
 		PlayerRef.QueueNiNodeUpdate()
 		Game.ShowFirstPersonGeometry(true)
 		PlayerAlias.RemoveClone()
+
+		MarkerRef.Disable()
+		MarkerRef.Delete()
 
 		CloneAlias.Clear()
 		CloneRef.Disable()
