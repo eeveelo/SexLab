@@ -730,7 +730,8 @@ int function GetEnjoyment()
 	if IsVictim
 		Enjoyment = Clamp((Enjoyment / 2), 50)
 	endIf
-	; Return raw enjoyment for modder use, if 100+ expression will clamp value
+	; Return enjoyment, clamped to max value of 100
+	Enjoyment = Clamp(Enjoyment)
 	return Enjoyment
 endFunction
 
