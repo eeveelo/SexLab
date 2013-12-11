@@ -159,6 +159,92 @@ string function ParseTime(int time)
 endFunction
 
 ;/-----------------------------------------------\;
+;|	Native NPC Stats                             |;
+;\-----------------------------------------------/;
+
+int function GetSkill(actor ActorRef, string skill)
+	if !HasInt(ActorRef, skill)
+		SetInt(ActorRef, skill, (Utility.RandomInt(ActorRef.GetLevel(), (ActorRef.GetLevel() * 2)) + ((((ActorRef.GetActorValue("Speechcraft")*ActorRef.GetActorValue("Confidence")) + 1) / 2.0) as int)))
+	endIf
+	return GetInt(ActorRef, skill)
+endFunction
+
+int function GetSkillLevel(actor ActorRef, string skill)
+	return CalcLevel(GetSkill(ActorRef, skill), 0.65)
+endFunction
+
+string function GetSkillTitle(actor ActorRef, string skill)
+	return sStatTitles[Clamp(GetSkillLevel(ActorRef, skill), 6)]
+endFunction
+
+float function GetActorPurity(actor ActorRef)
+	; Seed purity stat if empty
+	if !HasFloat(ActorRef, "Purity")
+		Debug.TraceAndBox(ActorRef+ " Seeding!")
+		; Get relevant-ish AI data
+		int Aggression = ActorRef.GetActorValue("Aggression") as int
+		int Morality = ActorRef.GetActorValue("Morality") as int
+		int Assistance = ActorRef.GetActorValue("Assistance") as int
+		; Init base purity based on level and how aggressive they are
+		float purity = ((ActorRef.GetLevel() / 2 ) * 9)
+		float seed = ((((Aggression+1) as float) / 5.0) * 0.40)
+		; Actor doesn't care about crime, make more impure
+		if Morality == 0
+			seed += 0.10
+		; Actor refuses crime
+		elseIf Morality == 3
+			seed += 0.07
+		endIf
+		; Actor is a morale pacifist, make more pure
+		if Aggression == 0 && Morality != 0
+			seed += 0.06
+		; Non aggessive, add small bit
+		elseIf Aggression == 0
+			seed += 0.02
+		; Aggressive only towards enemies
+		elseIf Aggression == 1
+			seed += 0.01
+		endIf
+		; 0 = Actor won't help anybody, make more impure
+		; 2 = Actor helps friends+allies, make more pure
+		if Assistance != 1
+			seed += 0.05
+		endIf
+		; Actor is immorale but helps friends+allies, make more pure
+		if Assistance == 2 && Morality == 0
+			seed -= 0.04
+		endIf
+		; Generate largish purity with seed and base purity
+		purity += ((purity * seed) * 1.75) * 1.5
+		; Save & Sign purity to make impure, based on "bad" traits
+		SetFloat(ActorRef, "Purity", sslUtility.SignFloat((Morality == 0 || Aggression >= 2 || (Assistance == 0 && Morality == 3)), purity))
+	endIf
+	; Return saved stat
+	return GetFloat(ActorRef, "Purity")
+endFunction
+
+int function GetActorPurityLevel(actor ActorRef)
+	return CalcLevel(GetActorPurity(ActorRef), 0.2)
+endFunction
+
+bool function IsActorPure(actor ActorRef)
+	return GetActorPurity(ActorRef) >= 0
+endFunction
+
+bool function IsActorImpure(actor ActorRef)
+	return GetActorPurity(ActorRef) < 0
+endFunction
+
+int function Clamp(int value, int max)
+	if value > max
+		return max
+	elseif value < 0
+		return 0
+	endif
+	return value
+endFunction
+
+;/-----------------------------------------------\;
 ;|	Native Player Stats                          |;
 ;\-----------------------------------------------/;
 
@@ -275,85 +361,19 @@ string function GetSexualityTitle()
 	endIf
 endFunction
 
-int function GetPlayerProficencyLevel(string type)
-	if type == "Vaginal"
+int function GetPlayerSkillLevel(string skill)
+	if skill == "Vaginal"
 		return CalcLevel(iVaginalCount, 0.65)
-	elseIf type == "Anal"
+	elseIf skill == "Anal"
 		return CalcLevel(iAnalCount, 0.65)
-	elseIf type == "Oral"
+	elseIf skill == "Oral"
 		return CalcLevel(iOralCount, 0.65)
 	endIf
 	return -1
 endFunction
 
-string function GetPlayerProficencyTitle(string type)
-	return sStatTitles[Clamp(GetPlayerProficencyLevel(type), 6)]
-endFunction
-
-int function GetActorProficencyLevel(actor ActorRef)
-	int xp = (ActorRef.GetLevel() * 2) + ((((ActorRef.GetActorValue("Speechcraft")*ActorRef.GetActorValue("Confidence")) + 1) / 2.0) as int)
-	return CalcLevel(xp, 0.65)
-endFunction
-
-float function GetActorPurityStat(actor ActorRef)
-	; Get relevant-ish AI data
-	int Aggression = ActorRef.GetActorValue("Aggression") as int
-	int Morality = ActorRef.GetActorValue("Morality") as int
-	int Assistance = ActorRef.GetActorValue("Assistance") as int
-	; Init base purity based on level and how aggressive they are
-	float purity = ((ActorRef.GetLevel() / 2 ) * 9)
-	float seed = ((((Aggression+1) as float) / 5.0) * 0.40)
-	; Actor doesn't care about crime, make more impure
-	if Morality == 0
-		seed += 0.10
-	; Actor refuses crime
-	elseIf Morality == 3
-		seed += 0.07
-	endIf
-	; Actor is a morale pacifist, make more pure
-	if Aggression == 0 && Morality != 0
-		seed += 0.06
-	; Non aggessive, add small bit
-	elseIf Aggression == 0
-		seed += 0.02
-	; Aggressive only towards enemies
-	elseIf Aggression == 1
-		seed += 0.01
-	endIf
-	; 0 = Actor won't help anybody, make more impure
-	; 2 = Actor helps friends+allies, make more pure
-	if Assistance != 1
-		seed += 0.05
-	endIf
-	; Actor is immorale but helps friends+allies, make more pure
-	if Assistance == 2 && Morality == 0
-		seed -= 0.04
-	endIf
-	; Generate largish purity with seed and base purity
-	purity += ((purity * seed) * 1.75) * 1.5
-	; Sign purity to make impure, based on "bad" traits
-	return sslUtility.SignFloat((Morality == 0 || Aggression >= 2 || (Assistance == 0 && Morality == 3)), purity)
-endFunction
-
-int function GetActorPurityLevel(actor ActorRef)
-	return CalcLevel(GetActorPurityStat(ActorRef), 0.2)
-endFunction
-
-bool function IsActorPure(actor ActorRef)
-	return GetActorPurityStat(ActorRef) >= 0
-endFunction
-
-bool function IsActorImpure(actor ActorRef)
-	return GetActorPurityStat(ActorRef) < 0
-endFunction
-
-int function Clamp(int value, int max)
-	if value > max
-		return max
-	elseif value < 0
-		return 0
-	endif
-	return value
+string function GetPlayerSkillTitle(string skill)
+	return sStatTitles[Clamp(GetPlayerSkillLevel(skill), 6)]
 endFunction
 
 function _Setup()
@@ -413,6 +433,32 @@ function _Setup()
 	SendModEvent("SexLabRegisterStats")
 endFunction
 
-function Get(actor ActorRef, string stat)
-	return StorageUtil.GetIntValue(ActorRef, "sslStats-"+stat)
+bool function HasInt(actor ActorRef, string stat)
+	return StorageUtil.HasIntValue(ActorRef, "sslActorStats."+stat)
+endFunction
+bool function HasFloat(actor ActorRef, string stat)
+	return StorageUtil.HasFloatValue(ActorRef, "sslActorStats."+stat)
+endFunction
+bool function HasString(actor ActorRef, string stat)
+	return StorageUtil.HasStringValue(ActorRef, "sslActorStats."+stat)
+endFunction
+
+int function GetInt(actor ActorRef, string stat)
+	return StorageUtil.GetIntValue(ActorRef, "sslActorStats."+stat)
+endFunction
+float function GetFloat(actor ActorRef, string stat)
+	return StorageUtil.GetFloatValue(ActorRef, "sslActorStats."+stat)
+endFunction
+string function GetString(actor ActorRef, string stat)
+	return StorageUtil.GetStringValue(ActorRef, "sslActorStats."+stat)
+endFunction
+
+function SetInt(actor ActorRef, string stat, int value)
+	StorageUtil.SetIntValue(ActorRef, "sslActorStats."+stat, value)
+endFunction
+function SetFloat(actor ActorRef, string stat, float value)
+	StorageUtil.SetFloatValue(ActorRef, "sslActorStats."+stat, value)
+endFunction
+function SetString(actor ActorRef, string stat, string value)
+	StorageUtil.SetStringValue(ActorRef, "sslActorStats."+stat, value)
 endFunction

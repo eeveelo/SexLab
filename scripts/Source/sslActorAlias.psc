@@ -527,14 +527,13 @@ state Prepare
 			endIf
 			; Get skill levels
 			if Controller.HasPlayer
-				Vaginal = Lib.Stats.GetPlayerProficencyLevel("Vaginal")
-				Anal = Lib.Stats.GetPlayerProficencyLevel("Anal")
-				Oral = Lib.Stats.GetPlayerProficencyLevel("Oral")
+				Vaginal = Lib.Stats.GetPlayerSkillLevel("Vaginal")
+				Anal = Lib.Stats.GetPlayerSkillLevel("Anal")
+				Oral = Lib.Stats.GetPlayerSkillLevel("Oral")
 			else
-				int prof = Lib.Stats.GetActorProficencyLevel(ActorRef)
-				Vaginal = prof
-				Anal = prof
-				Oral = prof
+				Vaginal = Lib.Stats.GetSkillLevel(ActorRef, "Vaginal")
+				Anal = Lib.Stats.GetSkillLevel(ActorRef, "Anal")
+				Oral = Lib.Stats.GetSkillLevel(ActorRef, "Oral")
 			endIf
 			; Auto TFC
 			if IsPlayer && Lib.ControlLib.bAutoTFC

@@ -326,6 +326,18 @@ sslBaseVoice function PickVoice(actor a)
 	return VoiceLib.PickVoice(a)
 endFunction
 
+function SaveVoice(actor a, sslBaseVoice saving)
+	VoiceLib.SaveVoice(a, saving)
+endFunction
+
+function ForgetVoice(actor a)
+	VoiceLib.ForgetVoice(a)
+endFunction
+
+sslBaseVoice function GetVoice(actor a)
+	return VoiceLib.GetVoice(a)
+endFunction
+
 sslBaseVoice function GetVoiceByGender(int g)
 	return VoiceSlots.GetRandom(g)
 endFunction
@@ -471,20 +483,24 @@ string function GetPlayerSexuality()
 	return Stats.GetSexualityTitle()
 endFunction
 
-int function GetPlayerStatLevel(string type)
-	return Stats.GetPlayerProficencyLevel(type)
+int function GetPlayerSkillLevel(string skill)
+	return Stats.GetPlayerSkillLevel(skill)
 endFunction
 
-string function GetStatProficiency(string type)
-	return Stats.GetPlayerProficencyTitle(type)
+string function GetPlayerSkillTitle(string skill)
+	return Stats.GetPlayerSkillTitle(skill)
 endFunction
 
-int function GetActorProficencyLevel(actor ActorRef)
-	return Stats.GetActorProficencyLevel(ActorRef)
+string function GetSkillTitle(actor ActorRef, string skill)
+	return Stats.GetSkillTitle(ActorRef, skill)
 endFunction
 
-float function GetActorPurityStat(actor ActorRef)
-	return Stats.GetActorPurityStat(ActorRef)
+int function GetSkillLevel(actor ActorRef, string skill)
+	return Stats.GetSkillLevel(ActorRef, skill)
+endFunction
+
+float function GetActorPurity(actor ActorRef)
+	return Stats.GetActorPurity(ActorRef)
 endFunction
 
 int function GetActorPurityLevel(actor ActorRef)
@@ -492,7 +508,7 @@ int function GetActorPurityLevel(actor ActorRef)
 endFunction
 
 bool function IsActorPure(actor ActorRef)
-	return Stats.GetActorPurityStat(ActorRef)
+	return Stats.GetActorPurity(ActorRef)
 endFunction
 
 bool function IsActorImpure(actor ActorRef)
