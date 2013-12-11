@@ -31,26 +31,20 @@ sslBaseVoice function GetRandom(int gender)
 		i -= 1
 		valid[i] = Slots[i].Registered && Slots[i].Enabled && Slots[i].Gender == gender
 	endWhile
-	; Pick random index within range
-	int pos = valid.Find(true, Utility.RandomInt())
-
-
-	; if count < 1
-	; 	return none ; No valid voices found
-	; endIf
-	; sslBaseAnimation[] output = sslUtility.AnimationArray(count)
-	; int pos = valid.Find(true)
-	; while pos != -1 && pos < valid.Length
-	; 	count -= 1
-	; 	output[count] = Slots[pos]
-	; 	pos = valid.Find(true, (pos + 1))
-	; endWhile
-	; return output
-
-	; if voiceReturn.Length == 0
-	; 	return none
-	; endIf
-	; return Slots[( voiceReturn[( utility.RandomInt(0, voiceReturn.Length - 1) )] )]
+	; No valid voices found
+	if valid.Find(true) == -1
+		return none
+	endIf
+	; Pick random index within range of valid
+	int rand = Utility.RandomInt(valid.Find(true), valid.RFind(true))
+	int pos = valid.Find(true, rand)
+	if pos == -1
+		pos = valid.RFind(true, rand)
+	endIf
+	if pos != -1
+		return Slots[pos]
+	endIf
+	return none
 endFunction
 
 sslBaseVoice function GetByName(string findName)
