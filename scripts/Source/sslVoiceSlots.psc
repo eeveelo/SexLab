@@ -35,22 +35,22 @@ sslBaseVoice function GetRandom(int gender)
 	int pos = valid.Find(true, Utility.RandomInt())
 
 
-	if count < 1
-		return none ; No valid voices found
-	endIf
-	sslBaseAnimation[] output = sslUtility.AnimationArray(count)
-	int pos = valid.Find(true)
-	while pos != -1 && pos < valid.Length
-		count -= 1
-		output[count] = Slots[pos]
-		pos = valid.Find(true, (pos + 1))
-	endWhile
-	return output
+	; if count < 1
+	; 	return none ; No valid voices found
+	; endIf
+	; sslBaseAnimation[] output = sslUtility.AnimationArray(count)
+	; int pos = valid.Find(true)
+	; while pos != -1 && pos < valid.Length
+	; 	count -= 1
+	; 	output[count] = Slots[pos]
+	; 	pos = valid.Find(true, (pos + 1))
+	; endWhile
+	; return output
 
-	if voiceReturn.Length == 0
-		return none
-	endIf
-	return Slots[( voiceReturn[( utility.RandomInt(0, voiceReturn.Length - 1) )] )]
+	; if voiceReturn.Length == 0
+	; 	return none
+	; endIf
+	; return Slots[( voiceReturn[( utility.RandomInt(0, voiceReturn.Length - 1) )] )]
 endFunction
 
 sslBaseVoice function GetByName(string findName)

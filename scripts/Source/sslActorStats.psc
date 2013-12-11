@@ -412,3 +412,7 @@ function _Setup()
 
 	SendModEvent("SexLabRegisterStats")
 endFunction
+
+function Get(actor ActorRef, string stat)
+	return StorageUtil.GetIntValue(ActorRef, "sslStats-"+stat)
+endFunction
