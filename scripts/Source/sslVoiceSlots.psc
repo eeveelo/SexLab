@@ -24,14 +24,29 @@ endProperty
 ;\-----------------------------------------------/;
 
 sslBaseVoice function GetRandom(int gender)
-	int[] voiceReturn
-	int i
-	while i < slotted
-		if Slots[i].Registered && Slots[i].Gender == gender && Slots[i].Enabled
-			voiceReturn = sslUtility.PushInt(i, voiceReturn)
-		endIf
-		i += 1
+	; Select valid voices by gender
+	bool[] valid = sslUtility.BoolArray(Slotted)
+	int i = Slotted
+	while i
+		i -= 1
+		valid[i] = Slots[i].Registered && Slots[i].Enabled && Slots[i].Gender == gender
 	endWhile
+	; Pick random index within range
+	int pos = valid.Find(true, Utility.RandomInt())
+
+
+	if count < 1
+		return none ; No valid voices found
+	endIf
+	sslBaseAnimation[] output = sslUtility.AnimationArray(count)
+	int pos = valid.Find(true)
+	while pos != -1 && pos < valid.Length
+		count -= 1
+		output[count] = Slots[pos]
+		pos = valid.Find(true, (pos + 1))
+	endWhile
+	return output
+
 	if voiceReturn.Length == 0
 		return none
 	endIf

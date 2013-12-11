@@ -22,6 +22,31 @@ string property sPlayerVoice auto hidden
 bool property bNPCSaveVoice auto hidden
 
 sslBaseVoice function PickVoice(actor a)
+	; Get saved voice
+	sslBaseVoice Voice = GetVoice(a)
+	; Pick random voice by gender if nothing saved
+	if Voice == none
+		Voice = Slots.GetRandom(a.GetLeveledActorBase().GetSex())
+		; Save picked voice if option is enabled
+		if bNPCSaveVoice
+			SaveVoice(a, Voice)
+		endIf
+	endIf
+	return Voice
+endFunction
+
+function SaveVoice(actor a, sslBaseVoice Voice)
+	if a != PlayerRef
+		a.AddToFaction(SavedVoices)
+		a.SetFactionRank(SavedVoices, Slots.Find(Voice))
+	endIf
+endFunction
+
+function ForgetVoice(actor a)
+	a.RemoveFromFaction(SavedVoices)
+endFunction
+
+sslBaseVoice function GetVoice(actor a)
 	; Get player selected voice
 	if a == PlayerRef && sPlayerVoice != "$SSL_Random"
 		return Slots.GetByName(sPlayerVoice)
@@ -33,14 +58,7 @@ sslBaseVoice function PickVoice(actor a)
 			return Slots.GetBySlot(vid)
 		endIf
 	endIf
-	; Pick random voice by gender
-	sslBaseVoice Voice = Slots.GetRandom(a.GetLeveledActorBase().GetSex())
-	; Save picked voice if option is enabled
-	if bNPCSaveVoice && a != PlayerRef
-		a.AddToFaction(SavedVoices)
-		a.SetFactionRank(SavedVoices, Slots.Find(Voice))
-	endIf
-	return Voice
+	return none
 endFunction
 
 function _Defaults()
