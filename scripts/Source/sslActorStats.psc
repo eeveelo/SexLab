@@ -162,12 +162,6 @@ endFunction
 ;|	Native NPC Stats                             |;
 ;\-----------------------------------------------/;
 
-function AdjustSkill(actor ActorRef, string skill, int amount)
-	if amount != 0 && ActorRef != none && skill != ""
-		SetInt(ActorRef, skill, (GetSkill(ActorRef, skill) + amount))
-	endIf
-endFunction
-
 int function GetSkill(actor ActorRef, string skill)
 	; Native Player skills
 	if ActorRef == Lib.PlayerRef
@@ -177,13 +171,36 @@ int function GetSkill(actor ActorRef, string skill)
 			return iAnalCount
 		elseIf skill == "Oral"
 			return iOralCount
+		elseIf skill == "Males"
+			return iMalePartners
+		elseIf skill == "Females"
+			return iFemalePartners
 		endIf
 	endIf
 	; Seed for NPC native skills
-	if (skill == "Vaginal" || skill == "Anal" || skill == "Oral") && ActorRef != Lib.PlayerRef && !HasInt(ActorRef, skill)
-		SetInt(ActorRef, skill, (Utility.RandomInt(ActorRef.GetLevel(), (ActorRef.GetLevel() * 2)) + ((((ActorRef.GetActorValue("Speechcraft")*ActorRef.GetActorValue("Confidence")) + 1) / 2.0) as int)))
+	if ActorRef != Lib.PlayerRef && !HasInt(ActorRef, skill)
+		if skill == "Vaginal" || skill == "Anal" || skill == "Oral"
+			SetInt(ActorRef, skill, (Utility.RandomInt(ActorRef.GetLevel(), (ActorRef.GetLevel() * 2)) + ((((ActorRef.GetActorValue("Speechcraft")*ActorRef.GetActorValue("Confidence")) + 1) / 2.3) as int)))
+		elseIf skill == "Males" || skill == "Females"
+			bool IsFemale = Lib.GetGender(ActorRef) == 1
+			int amount = Utility.RandomInt(0, ActorRef.GetLevel())
+			; Same sex
+			if (IsFemale && skill == "Females") || (!IsFemale && skill == "Males")
+				amount += ((Math.Abs(ActorRef.GetLowestRelationshipRank() as float) + 1) as int)*(((ActorRef.GetActorValue("Energy") + 1) / 3) as int)
+			else
+				amount *= 2
+				amount += ((Math.Abs(ActorRef.GetLowestRelationshipRank() as float) + 1) as int)*(((ActorRef.GetActorValue("Energy") + ActorRef.GetActorValue("Assistance")) / 3) as int) + (ActorRef.GetActorValue("Assistance") as int)
+			endIf
+			SetInt(ActorRef, skill, amount)
+		endIf
 	endIf
 	return GetInt(ActorRef, skill)
+endFunction
+
+function AdjustSkill(actor ActorRef, string skill, int amount)
+	if amount != 0 && ActorRef != none && skill != ""
+		SetInt(ActorRef, skill, (GetSkill(ActorRef, skill) + amount))
+	endIf
 endFunction
 
 int function GetSkillLevel(actor ActorRef, string skill)
@@ -191,14 +208,7 @@ int function GetSkillLevel(actor ActorRef, string skill)
 endFunction
 
 string function GetSkillTitle(actor ActorRef, string skill)
-	return sStatTitles[Clamp(CalcLevel(GetSkill(ActorRef, skill), 0.65), 6)]
-endFunction
-
-function AdjustPurity(actor ActorRef, float amount)
-	if ActorRef == Lib.PlayerRef
-		fSexualPurity += amount
-	endIf
-	SetFloat(ActorRef, "Purity", (GetFloat(ActorRef, "Purity") + amount))
+	return sStatTitles[Clamp(GetSkillLevel(ActorRef, skill), 6)]
 endFunction
 
 float function GetPurity(actor ActorRef)
@@ -250,8 +260,24 @@ float function GetPurity(actor ActorRef)
 	return GetFloat(ActorRef, "Purity")
 endFunction
 
+function AdjustPurity(actor ActorRef, float amount)
+	if ActorRef == Lib.PlayerRef
+		fSexualPurity += amount
+	else
+		SetFloat(ActorRef, "Purity", (GetFloat(ActorRef, "Purity") + amount))
+	endIf
+endFunction
+
 int function GetPurityLevel(actor ActorRef)
 	return CalcLevel(GetPurity(ActorRef), 0.2)
+endFunction
+
+string function GetPurityTitle(actor ActorRef)
+	if IsImpure(ActorRef)
+		return sImpureTitles[Clamp(GetPurityLevel(ActorRef), 6)]
+	else
+		return sPureTitles[Clamp(GetPurityLevel(ActorRef), 6)]
+	endIf
 endFunction
 
 bool function IsPure(actor ActorRef)
@@ -262,13 +288,36 @@ bool function IsImpure(actor ActorRef)
 	return GetPurity(ActorRef) < 0
 endFunction
 
-int function Clamp(int value, int max)
-	if value > max
-		return max
-	elseif value < 0
-		return 0
-	endif
-	return value
+int function GetSexuality(actor ActorRef)
+	return CalcSexuality((Lib.GetGender(ActorRef) == 1), GetSkill(ActorRef, "Males"), GetSkill(ActorRef, "Females"))
+endFunction
+
+string function GetSexualityTitle(actor ActorRef)
+	bool IsFemale = Lib.GetGender(ActorRef) == 1
+	int ratio = CalcSexuality(IsFemale, GetSkill(ActorRef, "Males"), GetSkill(ActorRef, "Females"))
+	; Return sexuality title
+	if ratio >= 65
+		return "$SSL_Heterosexual"
+	elseif ratio < 65 && ratio > 35
+		return "$SSL_Bisexual"
+	elseif IsFemale
+		return "$SSL_Lesbian"
+	else
+		return "$SSL_Gay"
+	endIf
+endFunction
+
+bool function IsStraight(actor ActorRef)
+	return GetSexuality(ActorRef) >= 65
+endFunction
+
+bool function IsBisexual(actor ActorRef)
+	int ratio = GetSexuality(ActorRef)
+	return ratio < 65 && ratio > 35
+endFunction
+
+bool function IsGay(actor ActorRef)
+	return GetSexuality(ActorRef) <= 35
 endFunction
 
 ;/-----------------------------------------------\;
@@ -291,24 +340,37 @@ function AddPlayerSex(actor a)
 	endIf
 endFunction
 
+int function GetPlayerSkillLevel(string skill)
+	return GetSkillLevel(Lib.PlayerRef, skill)
+endFunction
+
+string function GetPlayerSkillTitle(string skill)
+	return sStatTitles[Clamp(GetPlayerSkillLevel(skill), 6)]
+endFunction
+
+int function GetPlayerPurityLevel()
+	return CalcLevel(fSexualPurity, 0.2)
+endFunction
+
+string function GetPlayerPurityTitle()
+	if fSexualPurity < 0
+		return sImpureTitles[Clamp(GetPlayerPurityLevel(), 6)]
+	else
+		return sPureTitles[Clamp(GetPlayerPurityLevel(), 6)]
+	endIf
+endFunction
+
+string function GetPlayerSexualityTitle()
+	return GetSexualityTitle(Lib.PlayerRef)
+endFunction
+
+;/-----------------------------------------------\;
+;|	System Functions                             |;
+;\-----------------------------------------------/;
+
 function UpdateNativeStats(actor ActorRef, int males, int females, int creatures, sslBaseAnimation Animation, actor victim, float time)
 	if !Animation.IsSexual()
 		return
-	endIf
-	bool IsPlayer = ActorRef == Lib.PlayerRef
-	; Player only stats
-	if IsPlayer
-		; Update time spent
-		fTimeSpent += time
-		; Update player partners
-		iMalePartners += males
-		iFemalePartners += females
-		iCreaturePartners += creatures
-		if Lib.GetGender(ActorRef) == 1
-			iFemalePartners -= 1 ; Female Player
-		else
-			iMalePartners -= 1 ; Male Player
-		endIf
 	endIf
 	; Gather information
 	bool anal = Animation.HasTag("Anal")
@@ -321,19 +383,38 @@ function UpdateNativeStats(actor ActorRef, int males, int females, int creatures
 		vaginal = false
 		anal = true
 	endIf
-	; Update type counts
-	if IsPlayer
+	; Player tracked skills
+	if ActorRef == Lib.PlayerRef
 		iAnalCount += (anal as int)
 		iVaginalCount += (vaginal as int)
 		iOralCount += (oral as int)
 		iVictimCount += (isVictim as int)
 		iAggressorCount += (isAggressor as int)
+		; Update time spent
+		fTimeSpent += time
+		; Update player partners
+		iMalePartners += males
+		iFemalePartners += females
+		iCreaturePartners += creatures
+		if Lib.GetGender(ActorRef) == 1
+			iFemalePartners -= 1 ; Female Player
+		else
+			iMalePartners -= 1 ; Male Player
+		endIf
+	; NPC tracked skills
 	else
 		AdjustSkill(ActorRef, "Anal", (anal as int))
 		AdjustSkill(ActorRef, "Vaginal", (vaginal as int))
 		AdjustSkill(ActorRef, "Oral", (oral as int))
 		AdjustSkill(ActorRef, "Victim", (isVictim as int))
 		AdjustSkill(ActorRef, "Aggressor", (isAggressor as int))
+		if Lib.GetGender(ActorRef) == 1
+			AdjustSkill(ActorRef, "Females", (females - 1))
+			AdjustSkill(ActorRef, "Males", males)
+		else
+			AdjustSkill(ActorRef, "Females", females)
+			AdjustSkill(ActorRef, "Males", (males - 1))
+		endIf
 	endIf
 	; Update perversion/purity
 	float purity
@@ -352,46 +433,13 @@ function UpdateNativeStats(actor ActorRef, int males, int females, int creatures
 	AdjustPurity(ActorRef, purity)
 endFunction
 
-int function GetPlayerPurityLevel()
-	return CalcLevel(fSexualPurity, 0.2)
-endFunction
-
-string function GetPlayerPurityTitle()
-	if fSexualPurity < 0
-		return sImpureTitles[Clamp(GetPlayerPurityLevel(), 6)]
-	else
-		return sPureTitles[Clamp(GetPlayerPurityLevel(), 6)]
-	endIf
-endFunction
-
-string function GetSexualityTitle()
-	bool IsFemale = Lib.GetGender(Lib.PlayerRef) == 1
-	int ratio = CalcSexuality(IsFemale, iMalePartners, iFemalePartners)
-	; Return sexuality title
-	if ratio >= 65
-		return "$SSL_Heterosexual"
-	elseif ratio < 65 && ratio > 35
-		return "$SSL_Bisexual"
-	elseif IsFemale
-		return "$SSL_Lesbian"
-	else
-		return "$SSL_Gay"
-	endIf
-endFunction
-
-int function GetPlayerSkillLevel(string skill)
-	if skill == "Vaginal"
-		return CalcLevel(iVaginalCount, 0.65)
-	elseIf skill == "Anal"
-		return CalcLevel(iAnalCount, 0.65)
-	elseIf skill == "Oral"
-		return CalcLevel(iOralCount, 0.65)
-	endIf
-	return -1
-endFunction
-
-string function GetPlayerSkillTitle(string skill)
-	return sStatTitles[Clamp(GetPlayerSkillLevel(skill), 6)]
+int function Clamp(int value, int max)
+	if value > max
+		return max
+	elseif value < 0
+		return 0
+	endif
+	return value
 endFunction
 
 function _Setup()

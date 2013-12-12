@@ -480,8 +480,8 @@ string function GetPlayerPurityTitle()
 	return Stats.GetPlayerPurityTitle()
 endFunction
 
-string function GetPlayerSexuality()
-	return Stats.GetSexualityTitle()
+string function GetPlayerSexualityTitle()
+	return Stats.GetSexualityTitle(PlayerRef)
 endFunction
 
 int function GetPlayerSkillLevel(string skill)
@@ -492,8 +492,20 @@ string function GetPlayerSkillTitle(string skill)
 	return Stats.GetPlayerSkillTitle(skill)
 endFunction
 
+int function GetSexuality(actor ActorRef)
+	return Stats.GetSexuality(ActorRef)
+endFunction
+
+string function GetSexualityTitle(actor ActorRef)
+	return Stats.GetSexualityTitle(ActorRef)
+endFunction
+
 string function GetSkillTitle(actor ActorRef, string skill)
 	return Stats.GetSkillTitle(ActorRef, skill)
+endFunction
+
+int function GetSkill(actor ActorRef, string skill)
+	return Stats.GetSkill(ActorRef, skill)
 endFunction
 
 int function GetSkillLevel(actor ActorRef, string skill)
@@ -508,12 +520,28 @@ int function GetPurityLevel(actor ActorRef)
 	return Stats.GetPurityLevel(ActorRef)
 endFunction
 
+string function GetPurityTitle(actor ActorRef)
+	return Stats.GetPurityTitle(ActorRef)
+endFunction
+
 bool function IsPure(actor ActorRef)
 	return Stats.IsPure(ActorRef)
 endFunction
 
 bool function IsImpure(actor ActorRef)
 	return Stats.IsImpure(ActorRef)
+endFunction
+
+bool function IsStraight(actor ActorRef)
+	return IsStraight(ActorRef)
+endFunction
+
+bool function IsBisexual(actor ActorRef)
+	return IsBisexual(ActorRef)
+endFunction
+
+bool function IsGay(actor ActorRef)
+	return IsGay(ActorRef)
 endFunction
 
 ;#---------------------------#

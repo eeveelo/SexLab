@@ -471,7 +471,7 @@ event OnPageReset(string page)
 
 		SetCursorPosition(1)
 		AddHeaderOption("$SSL_SexualStats")
-		AddTextOption("$SSL_Sexuality", Stats.GetSexualityTitle())
+		AddTextOption("$SSL_Sexuality", Stats.GetPlayerSexualityTitle())
 		if Stats.GetPlayerPurityLevel() < 0
 			AddTextOption("$SSL_SexualPerversion", Stats.GetPlayerPurityTitle())
 		else
