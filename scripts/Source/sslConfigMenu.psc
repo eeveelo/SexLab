@@ -477,9 +477,9 @@ event OnPageReset(string page)
 		else
 			AddTextOption("$SSL_SexualPurity", Stats.GetPlayerPurityTitle())
 		endIf
-		AddTextOption("$SSL_VaginalProficiency", Stats.GetPlayerProficencyTitle("Vaginal"))
-		AddTextOption("$SSL_AnalProficiency", Stats.GetPlayerProficencyTitle("Anal"))
-		AddTextOption("$SSL_OralProficiency", Stats.GetPlayerProficencyTitle("Oral"))
+		AddTextOption("$SSL_VaginalProficiency", Stats.GetPlayerSkillTitle("Vaginal"))
+		AddTextOption("$SSL_AnalProficiency", Stats.GetPlayerSkillTitle("Anal"))
+		AddTextOption("$SSL_OralProficiency", Stats.GetPlayerSkillTitle("Oral"))
 		AddEmptyOption()
 		; Custom stats set by other mods
 		i = 0
@@ -511,7 +511,7 @@ event OnPageReset(string page)
 		AddEmptyOption()
 
 		SetCursorPosition(1)
-		AddHeaderOption("$SSL_TranslatorCredit")
+		AddHeaderOption("")
 		AddEmptyOption()
 		AddHeaderOption("$SSL_AvailableStrapons")
 		AddTextOptionST("RebuildStraponList","$SSL_RebuildStraponList", "$SSL_ClickHere")
@@ -721,7 +721,7 @@ state ForeplayStage
 		SetToggleOptionValueST(ThreadLib.bForeplayStage)
 	endEvent
 	event OnHighlightST()
-		SetInfoText("")
+		SetInfoText("$SSL_InfoForeplayStage")
 	endEvent
 endState
 state PlayerTCL

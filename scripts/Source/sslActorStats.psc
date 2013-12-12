@@ -180,7 +180,6 @@ endFunction
 float function GetActorPurity(actor ActorRef)
 	; Seed purity stat if empty
 	if !HasFloat(ActorRef, "Purity")
-		Debug.TraceAndBox(ActorRef+ " Seeding!")
 		; Get relevant-ish AI data
 		int Aggression = ActorRef.GetActorValue("Aggression") as int
 		int Morality = ActorRef.GetActorValue("Morality") as int
