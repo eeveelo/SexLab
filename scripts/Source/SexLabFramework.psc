@@ -462,13 +462,14 @@ function AddPlayerSex(actor a)
 	Stats.AddPlayerSex(a)
 endFunction
 
-function UpdatePlayerStats(sslBaseAnimation anim, float time, actor[] pos, actor victim)
-	int[] genders = ActorLib.GenderCount(pos)
-	Stats.UpdatePlayerStats(genders[0], genders[1], genders[2], anim, victim, time)
+float function AdjustPurity(actor ActorRef, float amount)
+	Stats.AdjustPurity(ActorRef, amount)
+	return Stats.GetPurity(ActorRef)
 endFunction
 
 float function AdjustPlayerPurity(float amount)
-	return Stats.AdjustPurity(amount)
+	Stats.AdjustPurity(PlayerRef, amount)
+	return Stats.GetPurity(PlayerRef)
 endFunction
 
 int function GetPlayerPurityLevel()
@@ -499,20 +500,20 @@ int function GetSkillLevel(actor ActorRef, string skill)
 	return Stats.GetSkillLevel(ActorRef, skill)
 endFunction
 
-float function GetActorPurity(actor ActorRef)
-	return Stats.GetActorPurity(ActorRef)
+float function GetPurity(actor ActorRef)
+	return Stats.GetPurity(ActorRef)
 endFunction
 
-int function GetActorPurityLevel(actor ActorRef)
-	return Stats.GetActorPurityLevel(ActorRef)
+int function GetPurityLevel(actor ActorRef)
+	return Stats.GetPurityLevel(ActorRef)
 endFunction
 
-bool function IsActorPure(actor ActorRef)
-	return Stats.GetActorPurity(ActorRef)
+bool function IsPure(actor ActorRef)
+	return Stats.IsPure(ActorRef)
 endFunction
 
-bool function IsActorImpure(actor ActorRef)
-	return Stats.IsActorImpure(ActorRef)
+bool function IsImpure(actor ActorRef)
+	return Stats.IsImpure(ActorRef)
 endFunction
 
 ;#---------------------------#

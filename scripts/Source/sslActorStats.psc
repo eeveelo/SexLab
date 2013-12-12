@@ -162,8 +162,25 @@ endFunction
 ;|	Native NPC Stats                             |;
 ;\-----------------------------------------------/;
 
+function AdjustSkill(actor ActorRef, string skill, int amount)
+	if amount != 0 && ActorRef != none && skill != ""
+		SetInt(ActorRef, skill, (GetSkill(ActorRef, skill) + amount))
+	endIf
+endFunction
+
 int function GetSkill(actor ActorRef, string skill)
-	if !HasInt(ActorRef, skill)
+	; Native Player skills
+	if ActorRef == Lib.PlayerRef
+		if skill == "Vaginal"
+			return iVaginalCount
+		elseIf skill == "Anal"
+			return iAnalCount
+		elseIf skill == "Oral"
+			return iOralCount
+		endIf
+	endIf
+	; Seed for NPC native skills
+	if (skill == "Vaginal" || skill == "Anal" || skill == "Oral") && ActorRef != Lib.PlayerRef && !HasInt(ActorRef, skill)
 		SetInt(ActorRef, skill, (Utility.RandomInt(ActorRef.GetLevel(), (ActorRef.GetLevel() * 2)) + ((((ActorRef.GetActorValue("Speechcraft")*ActorRef.GetActorValue("Confidence")) + 1) / 2.0) as int)))
 	endIf
 	return GetInt(ActorRef, skill)
@@ -174,11 +191,22 @@ int function GetSkillLevel(actor ActorRef, string skill)
 endFunction
 
 string function GetSkillTitle(actor ActorRef, string skill)
-	return sStatTitles[Clamp(GetSkillLevel(ActorRef, skill), 6)]
+	return sStatTitles[Clamp(CalcLevel(GetSkill(ActorRef, skill), 0.65), 6)]
 endFunction
 
-float function GetActorPurity(actor ActorRef)
-	; Seed purity stat if empty
+function AdjustPurity(actor ActorRef, float amount)
+	if ActorRef == Lib.PlayerRef
+		fSexualPurity += amount
+	endIf
+	SetFloat(ActorRef, "Purity", (GetFloat(ActorRef, "Purity") + amount))
+endFunction
+
+float function GetPurity(actor ActorRef)
+	; Get Player purity
+	if ActorRef == Lib.PlayerRef
+		return fSexualPurity
+	endIf
+	; Seed NPC purity stat if empty
 	if !HasFloat(ActorRef, "Purity")
 		; Get relevant-ish AI data
 		int Aggression = ActorRef.GetActorValue("Aggression") as int
@@ -222,16 +250,16 @@ float function GetActorPurity(actor ActorRef)
 	return GetFloat(ActorRef, "Purity")
 endFunction
 
-int function GetActorPurityLevel(actor ActorRef)
-	return CalcLevel(GetActorPurity(ActorRef), 0.2)
+int function GetPurityLevel(actor ActorRef)
+	return CalcLevel(GetPurity(ActorRef), 0.2)
 endFunction
 
-bool function IsActorPure(actor ActorRef)
-	return GetActorPurity(ActorRef) >= 0
+bool function IsPure(actor ActorRef)
+	return GetPurity(ActorRef) >= 0
 endFunction
 
-bool function IsActorImpure(actor ActorRef)
-	return GetActorPurity(ActorRef) < 0
+bool function IsImpure(actor ActorRef)
+	return GetPurity(ActorRef) < 0
 endFunction
 
 int function Clamp(int value, int max)
@@ -263,46 +291,49 @@ function AddPlayerSex(actor a)
 	endIf
 endFunction
 
-function UpdatePlayerStats(int males, int females, int creatures, sslBaseAnimation Animation, actor victim, float time)
+function UpdateNativeStats(actor ActorRef, int males, int females, int creatures, sslBaseAnimation Animation, actor victim, float time)
 	if !Animation.IsSexual()
 		return
 	endIf
-	; Update time spent
-	fTimeSpent += time
-	; Nothing else matters for solo animations
-	if Animation.HasTag("Masturbation")
-		iMasturbationCount += 1
-		AdjustPurity(-1.0)
-		return ; Bail
-	endIf
-	; Update partners
-	iMalePartners += males
-	iFemalePartners += females
-	iCreaturePartners += creatures
-	; Don't count players gender in that
-	if Lib.GetGender(Lib.PlayerRef) == 1
-		iFemalePartners -= 1 ; Female Player
-	else
-		iMalePartners -= 1 ; Male Player
+	bool IsPlayer = ActorRef == Lib.PlayerRef
+	; Player only stats
+	if IsPlayer
+		; Update time spent
+		fTimeSpent += time
+		; Update player partners
+		iMalePartners += males
+		iFemalePartners += females
+		iCreaturePartners += creatures
+		if Lib.GetGender(ActorRef) == 1
+			iFemalePartners -= 1 ; Female Player
+		else
+			iMalePartners -= 1 ; Male Player
+		endIf
 	endIf
 	; Gather information
 	bool anal = Animation.HasTag("Anal")
 	bool vaginal = Animation.HasTag("Vaginal")
 	bool oral = Animation.HasTag("Oral")
-	bool isAggressor = victim != Lib.PlayerRef
-	bool isVictim = victim == Lib.PlayerRef
+	bool isAggressor = victim != none && victim != ActorRef
+	bool isVictim = victim != none && victim == ActorRef
 	; Vaginal tag but no vaginas present, assume gay male pairing
 	if vaginal && females == 0
 		vaginal = false
 		anal = true
 	endIf
 	; Update type counts
-	iAnalCount += (anal as int)
-	iVaginalCount += (vaginal as int)
-	iOralCount += (oral as int)
-	if victim != none
+	if IsPlayer
+		iAnalCount += (anal as int)
+		iVaginalCount += (vaginal as int)
+		iOralCount += (oral as int)
 		iVictimCount += (isVictim as int)
 		iAggressorCount += (isAggressor as int)
+	else
+		AdjustSkill(ActorRef, "Anal", (anal as int))
+		AdjustSkill(ActorRef, "Vaginal", (vaginal as int))
+		AdjustSkill(ActorRef, "Oral", (oral as int))
+		AdjustSkill(ActorRef, "Victim", (isVictim as int))
+		AdjustSkill(ActorRef, "Aggressor", (isAggressor as int))
 	endIf
 	; Update perversion/purity
 	float purity
@@ -315,26 +346,14 @@ function UpdatePlayerStats(int males, int females, int creatures, sslBaseAnimati
 	else
 		purity = Utility.RandomFloat(-0.8, 0.8)
 	endIf
+	purity *= ((males + females) - 1) + (creatures * -0.8)
 	; Adjuster-ma-jigger.
 	; Adjust base purity by present male/females + subtract purity for each creature present
-	AdjustPurity(purity * ((males + females) - 1) + (creatures * -0.8))
-endFunction
-
-float function AdjustPurity(float amount)
-	fSexualPurity += amount
-	return fSexualPurity
+	AdjustPurity(ActorRef, purity)
 endFunction
 
 int function GetPlayerPurityLevel()
 	return CalcLevel(fSexualPurity, 0.2)
-endFunction
-
-bool function IsPure()
-	return fSexualPurity >= 0
-endFunction
-
-bool function IsImpure()
-	return fSexualPurity < 0
 endFunction
 
 string function GetPlayerPurityTitle()

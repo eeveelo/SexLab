@@ -475,13 +475,8 @@ state Prepare
 				Strip(DoUndress)
 			endIf
 			; Get purity
-			if IsPlayer
-				Purity = Lib.Stats.GetPlayerPurityLevel()
-				IsPure = Lib.Stats.IsPure()
-			else
-				Purity = Lib.Stats.GetActorPurityLevel(ActorRef)
-				IsPure = Lib.Stats.IsActorPure(ActorRef)
-			endIf
+			Purity = Lib.Stats.GetPurityLevel(ActorRef)
+			IsPure = Lib.Stats.IsPure(ActorRef)
 			; Get skill levels
 			if Controller.HasPlayer
 				Vaginal = Lib.Stats.GetPlayerSkillLevel("Vaginal")
@@ -567,15 +562,15 @@ state Reset
 	endEvent
 	event OnUpdate()
 		UnregisterForUpdate()
+		; Disable free camera, if in it
 		if IsPlayer
-			; Disable free camera, if in it
 			SexLabUtil.EnableFreeCamera(false)
-			; Update diary/journal stats for player
-			Lib.Stats.UpdatePlayerStats(Controller.Males, Controller.Females, Controller.Creatures, Animation, Controller.VictimRef, Controller.TotalTime)
+		; Increase player sex for NPC
 		elseIf Controller.HasPlayer
-			; Increase player sex for NPC
 			Lib.Stats.AddPlayerSex(ActorRef)
 		endIf
+		; Update diary/journal stats for player + native stats for NPCs
+		Lib.Stats.UpdateNativeStats(ActorRef, Controller.Males, Controller.Females, Controller.Creatures, Animation, Controller.VictimRef, Controller.TotalTime)
 		; Reset to starting scale
 		ActorRef.SetScale(ActorScale)
 		; Reapply cum
