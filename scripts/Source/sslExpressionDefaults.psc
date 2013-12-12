@@ -2,7 +2,9 @@ scriptname sslExpressionDefaults extends sslExpressionFactory
 
 function LoadExpressions()
 	RegisterExpression("Pleasure")
+	RegisterExpression("Happy")
 	RegisterExpression("Shy")
+	RegisterExpression("Sad")
 	RegisterExpression("Afraid")
 	RegisterExpression("Pained")
 	RegisterExpression("Angry")
@@ -322,7 +324,6 @@ function Pained(string eventName, string id, float argNum, form sender)
 	Save()
 endFunction
 
-
 function Angry(string eventName, string id, float argNum, form sender)
 	Name = "Angry"
 
@@ -366,6 +367,100 @@ function Angry(string eventName, string id, float argNum, form sender)
 	AddPreset(3, Male, Modifier, 13, 65)
 	AddPreset(3, Male, Phoneme, 4, 50)
 	AddPreset(3, Male, Phoneme, 3, 40)
+
+	Save()
+endFunction
+
+function Happy(string eventName, string id, float argNum, form sender)
+	Name = "Happy"
+
+	AddTag("Happy")
+	AddTag("Normal")
+
+	AddTag("Consensual")
+
+	; Female
+	AddPreset(1, Female, Expression, 2, 50)
+	AddPreset(1, Female, Modifier, 12, 50)
+	AddPreset(1, Female, Modifier, 13, 50)
+	AddPreset(1, Female, Phoneme, 5, 50)
+
+	AddPreset(2, Female, Expression, 2, 70)
+	AddPreset(2, Female, Modifier, 12, 70)
+	AddPreset(2, Female, Modifier, 13, 70)
+	AddPreset(2, Female, Phoneme, 5, 50)
+	AddPreset(2, Female, Phoneme, 8, 50)
+
+	AddPreset(3, Female, Expression, 2, 80)
+	AddPreset(3, Female, Modifier, 12, 80)
+	AddPreset(3, Female, Modifier, 13, 80)
+	AddPreset(3, Female, Phoneme, 5, 50)
+	AddPreset(3, Female, Phoneme, 11, 60)
+
+	; Male
+	AddPreset(1, Male, Expression, 2, 50)
+	AddPreset(1, Male, Modifier, 12, 50)
+	AddPreset(1, Male, Modifier, 13, 50)
+	AddPreset(1, Male, Phoneme, 5, 50)
+
+	AddPreset(2, Male, Expression, 2, 70)
+	AddPreset(2, Male, Modifier, 12, 70)
+	AddPreset(2, Male, Modifier, 13, 70)
+	AddPreset(2, Male, Phoneme, 5, 50)
+	AddPreset(2, Male, Phoneme, 8, 50)
+
+	AddPreset(3, Male, Expression, 2, 80)
+	AddPreset(3, Male, Modifier, 12, 80)
+	AddPreset(3, Male, Modifier, 13, 80)
+	AddPreset(3, Male, Phoneme, 5, 50)
+	AddPreset(3, Male, Phoneme, 11, 60)
+
+	Save()
+endFunction
+
+function Sad(string eventName, string id, float argNum, form sender)
+	Name = "Sad"
+
+	AddTag("Sad")
+	AddTag("Normal")
+
+	AddTag("Victim")
+
+	; Female
+	AddPreset(1, Female, Expression, 2, 50)
+	AddPreset(1, Female, Modifier, 12, 50)
+	AddPreset(1, Female, Modifier, 13, 50)
+	AddPreset(1, Female, Phoneme, 5, 50)
+
+	AddPreset(2, Female, Expression, 2, 70)
+	AddPreset(2, Female, Modifier, 12, 70)
+	AddPreset(2, Female, Modifier, 13, 70)
+	AddPreset(2, Female, Phoneme, 5, 50)
+	AddPreset(2, Female, Phoneme, 8, 50)
+
+	AddPreset(3, Female, Expression, 2, 80)
+	AddPreset(3, Female, Modifier, 12, 80)
+	AddPreset(3, Female, Modifier, 13, 80)
+	AddPreset(3, Female, Phoneme, 5, 50)
+	AddPreset(3, Female, Phoneme, 11, 60)
+
+	; Male
+	AddPreset(1, Male, Expression, 2, 50)
+	AddPreset(1, Male, Modifier, 12, 50)
+	AddPreset(1, Male, Modifier, 13, 50)
+	AddPreset(1, Male, Phoneme, 5, 50)
+
+	AddPreset(2, Male, Expression, 2, 70)
+	AddPreset(2, Male, Modifier, 12, 70)
+	AddPreset(2, Male, Modifier, 13, 70)
+	AddPreset(2, Male, Phoneme, 5, 50)
+	AddPreset(2, Male, Phoneme, 8, 50)
+
+	AddPreset(3, Male, Expression, 2, 80)
+	AddPreset(3, Male, Modifier, 12, 80)
+	AddPreset(3, Male, Modifier, 13, 80)
+	AddPreset(3, Male, Phoneme, 5, 50)
+	AddPreset(3, Male, Phoneme, 11, 60)
 
 	Save()
 endFunction
