@@ -71,9 +71,7 @@ message property mCleanSystemFinish auto
 message property mSystemDisabled auto
 message property mSystemUpdated auto
 spell property SexLabDebugSpell auto
-; Default strapon
 armor property aCalypsStrapon auto
-
 
 ; OIDs
 int[] oidStageTimer
@@ -220,7 +218,6 @@ event OnPageReset(string page)
 		AddKeyMapOptionST("ChangePositions", "$SSL_SwapActorPositions", ControlLib.kChangePositions)
 		AddKeyMapOptionST("MoveSceneLocation", "$SSL_MoveSceneLocation", ControlLib.kMoveScene)
 		AddKeyMapOptionST("RotateScene", "$SSL_RotateScene", ControlLib.kRotateScene)
-		AddKeyMapOptionST("Toggle1stCamera", "$SSL_Toggle1stPerson", ControlLib.kToggle1stCamera)
 		AddKeyMapOptionST("ToggleFreeCamera", "$SSL_ToggleFreeCamera", ControlLib.kToggleFreeCamera)
 
 		SetCursorPosition(1)
@@ -1031,21 +1028,6 @@ state RotateScene
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoRotateScene")
-	endEvent
-endState
-state Toggle1stCamera
-	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			ControlLib.kToggle1stCamera = newKeyCode
-			SetKeyMapOptionValueST(ControlLib.kToggle1stCamera)
-		endIf
-	endEvent
-	event OnDefaultST()
-		ControlLib.kToggle1stCamera = 79
-		SetKeyMapOptionValueST(ControlLib.kToggle1stCamera)
-	endEvent
-	event OnHighlightST()
-		SetInfoText("$SSL_InfoToggle1stPerson")
 	endEvent
 endState
 state ToggleFreeCamera

@@ -129,8 +129,9 @@ state Advancing
 			return ; No stage to advance to, end animation
 		elseIf LeadIn && Stage > Animation.StageCount
 			; Disable free camera now to help prevent CTD
-			if HasPlayer
-				Lib.ControlLib.EnableFreeCamera(false)
+			bool ToggleFreeCamera = HasPlayer && Game.GetCameraState() == 3
+			if ToggleFreeCamera
+				SexLabUtil.EnableFreeCamera(false)
 			endIf
 			; Swap to non lead in animations
 			Stage = 1
@@ -145,6 +146,10 @@ state Advancing
 				endWhile
 			endIf
 			SendThreadEvent("LeadInEnd")
+			; Renable free camera
+			if ToggleFreeCamera
+				SexLabUtil.EnableFreeCamera(true)
+			endIf
 		endIf
 		; Stage Delay
 		if Stage > 1
@@ -437,8 +442,6 @@ function EndAnimation(bool quick = false)
 	FastEnd = quick
 	Stage = Animation.StageCount
 	if HasPlayer
-		; Force camera to default state for ending
-		Lib.ControlLib.ResetCamera()
 		; Stop hotkeys to prevent further stage advancing
 		Lib.ControlLib._HKClear()
 	endIf

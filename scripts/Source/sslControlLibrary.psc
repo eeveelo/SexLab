@@ -6,8 +6,6 @@ sslThreadLibrary property ThreadLib auto
 
 ; Data
 Actor property PlayerRef auto
-Furniture property BaseMarker auto
-sslControlCamera property ControlCamera auto
 
 ; Settings
 int property kBackwards auto hidden ; Right Shift
@@ -23,22 +21,16 @@ int property kRealignActors auto hidden ; [
 int property kMoveScene auto hidden ; ]
 int property kRestoreOffsets auto hidden ; -
 int property kRotateScene auto hidden ; U
-int property kToggle1stCamera auto hidden ; NUM 1
-int property kToggleFreeCamera auto hidden ; NUM 1
+int property kToggleFreeCamera auto hidden ; NUM 3
 
 bool property bAutoTFC auto hidden
 float property fAutoSUCSM auto hidden
+
 ; Local
 bool hkReady
 sslThreadController PlayerController
 
 ; Dynamic properties
-bool property InFirstPerson hidden
-	bool function get()
-		return ControlCamera.GetState() == "FirstPerson"
-	endFunction
-endProperty
-
 bool property InFreeCamera hidden
 	bool function get()
 		return Game.GetCameraState() == 3
@@ -46,69 +38,48 @@ bool property InFreeCamera hidden
 endProperty
 
 ; Functions
-function ResetCamera()
-	SexLabUtil.EnableFreeCamera(false)
-	ControlCamera.GoToState("")
-endFunction
-
-function EnableFirstPerson(bool enabling = true)
-	if enabling && !InFirstPerson
-		ControlCamera.GoToState("FirstPerson")
-	elseIf !enabling && InFirstPerson
-		ControlCamera.GoToState("")
-	endIf
-endFunction
-
-function EnableFreeCamera(bool enabling = true)
-	if enabling && !InFreeCamera
-		ControlCamera.GoToState("FreeCamera")
-	elseIf !enabling && InFreeCamera
-		ControlCamera.GoToState("")
-	endIf
-endFunction
-
-bool function ToggleFirstPerson()
-	return ControlCamera.ToggleFirstPerson()
-endFunction
-
-bool function ToggleFreeCamera()
-	SexLabUtil.ToggleFreeCamera()
-	return InFreeCamera
-endFunction
-
 function _HKStart(sslThreadController Controller)
-	RegisterForKey(kBackwards)
-	RegisterForKey(kAdjustStage)
-	RegisterForKey(kAdvanceAnimation)
-	RegisterForKey(kChangeAnimation)
-	RegisterForKey(kChangePositions)
-	RegisterForKey(kAdjustChange)
-	RegisterForKey(kAdjustForward)
-	RegisterForKey(kAdjustSideways)
-	RegisterForKey(kAdjustUpward)
-	RegisterForKey(kRealignActors)
-	RegisterForKey(kRestoreOffsets)
-	RegisterForKey(kMoveScene)
-	RegisterForKey(kRotateScene)
-	RegisterForKey(kToggle1stCamera)
-	RegisterForKey(kToggleFreeCamera)
-	PlayerController = Controller
-	hkReady = true
+	if Controller != none
+		; Register hotkeys
+		RegisterForKey(kBackwards)
+		RegisterForKey(kAdjustStage)
+		RegisterForKey(kAdvanceAnimation)
+		RegisterForKey(kChangeAnimation)
+		RegisterForKey(kChangePositions)
+		RegisterForKey(kAdjustChange)
+		RegisterForKey(kAdjustForward)
+		RegisterForKey(kAdjustSideways)
+		RegisterForKey(kAdjustUpward)
+		RegisterForKey(kRealignActors)
+		RegisterForKey(kRestoreOffsets)
+		RegisterForKey(kMoveScene)
+		RegisterForKey(kRotateScene)
+		RegisterForKey(kToggleFreeCamera)
+		; Auto TFC
+		SexLabUtil.EnableFreeCamera(bAutoTFC, fAutoSUCSM)
+		; Ready
+		PlayerController = Controller
+		hkReady = true
+	endIf
 endFunction
 
 function _HKClear()
+	; Leave TFC
+	SexLabUtil.EnableFreeCamera(false)
+	; Clear hotkeys
 	UnregisterForAllKeys()
-	RegisterForKey(kToggleFreeCamera)
 	PlayerController = none
 	hkReady = true
+	; Keep TFC key enabled
+	RegisterForKey(kToggleFreeCamera)
 endFunction
 
 event OnKeyDown(int keyCode)
 	; Check for open menus
-	bool OpenMenu = UI.IsMenuOpen("Console") || UI.IsMenuOpen("Main Menu") || UI.IsMenuOpen("Loading Menu") || UI.IsMenuOpen("MessageBoxMenu")
+	bool OpenMenu = Utility.IsInMenuMode() || UI.IsMenuOpen("Console") || UI.IsMenuOpen("Loading Menu")
 	; TFC toggle is always available
 	if keyCode == kToggleFreeCamera && hkReady && !OpenMenu
-		EnableFreeCamera(!InFreeCamera)
+		SexLabUtil.EnableFreeCamera(!InFreeCamera, fAutoSUCSM)
 	; Player animation restricted hotkeys
 	elseIf PlayerController != none && hkReady && !OpenMenu && PlayerController.GetState() == "Animating"
 		hkReady = false
@@ -163,18 +134,12 @@ event OnKeyDown(int keyCode)
 		; Rotate Scene
 		elseIf keyCode == kRotateScene
 			PlayerController.RotateScene(backwards)
-		; Toggle First Person
-		elseIf keyCode == kToggle1stCamera
-			EnableFirstPerson(!InFirstPerson)
 		endIf
 		hkReady = true
 	endIf
 endEvent
 
 function _Defaults()
-	_HKClear()
-	hkReady = true
-
 	; Config Hotkeys
 	kBackwards = 54 ; Right Shift
 	kAdjustStage = 157; Right Ctrl
@@ -189,11 +154,12 @@ function _Defaults()
 	kMoveScene = 27 ; ]
 	kRestoreOffsets = 12 ; -
 	kRotateScene = 22 ; U
-	kToggle1stCamera = 79 ; NUM 1
 	kToggleFreeCamera = 81 ; NUM 3
-	RegisterForKey(kToggleFreeCamera)
 
 	; Config other
+	hkReady = true
+	_HKClear()
+
 	bAutoTFC = false
 	fAutoSUCSM = 5.0
 endFunction

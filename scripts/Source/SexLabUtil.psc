@@ -80,9 +80,12 @@ endFunction
 function SetFreeCameraSpeed(float speed) global native
 function ToggleFreeCamera(bool stopTime = false) global native
 
-function EnableFreeCamera(bool enabling = true) global
+function EnableFreeCamera(bool enabling = true, float sucsm = 5.0) global
 	bool InFreeCamera = Game.GetCameraState() == 3
-	if (enabling && !InFreeCamera) || (!enabling && InFreeCamera)
+	if enabling && !InFreeCamera
+		SetFreeCameraSpeed(sucsm)
+		ToggleFreeCamera()
+	elseIf !enabling && InFreeCamera
 		ToggleFreeCamera()
 	endIf
 endFunction

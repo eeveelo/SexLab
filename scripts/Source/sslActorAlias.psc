@@ -41,7 +41,6 @@ form strapon
 float ActorScale
 float AnimScale
 float[] loc
-actor ClonedRef
 ActorBase BaseRef
 string ActorName
 int[] ExpressionPreset
@@ -123,44 +122,6 @@ bool function IsCreature()
 	return IsCreature
 endFunction
 
-function SetCloned(actor CloneRef)
-	if ClonedRef == none && CloneRef != none
-		UnregisterForUpdate()
-		StopAnimating(true)
-		Clear()
-		ForceRefTo(CloneRef)
-		ClonedRef = ActorRef
-		actor[] Positions = Controller.Positions
-		int pid = Positions.Find(ActorRef)
-		Positions[pid] = CloneRef
-		Controller.Positions = Positions
-		ActorRef = CloneRef
-		IsPlayer = false
-		LockActor()
-		Controller.RealignActors()
-		Lib.ControlLib._HKStart(Controller)
-	endIf
-endFunction
-
-function RemoveClone()
-	if ClonedRef != none
-		actor[] Positions = Controller.Positions
-		int pid = Positions.Find(ActorRef)
-		Positions[pid] = ClonedRef
-		Controller.Positions = Positions
-		ActorRef = ClonedRef
-		IsPlayer = true
-		Clear()
-		ForceRefTo(ActorRef)
-		ClonedRef = none
-		LockActor()
-		Snap()
-		if GetState() == "Animating"
-			Controller.RealignActors()
-		endIf
-	endIf
-endFunction
-
 ;/-----------------------------------------------\;
 ;|	Preparation Functions                        |;
 ;\-----------------------------------------------/;
@@ -192,7 +153,6 @@ endFunction
 function UnlockActor()
 	; Enable movement
 	if IsPlayer
-		Lib.ControlLib.ResetCamera()
 		Lib.ControlLib._HKClear()
 		Game.EnablePlayerControls(false, false, false, false, false, false, true, false, 0)
 		Game.SetPlayerAIDriven(false)
@@ -263,9 +223,6 @@ endFunction
 function AttachMarker()
 	ActorRef.SetVehicle(MarkerRef)
 	ActorRef.SetScale(AnimScale)
-	if ClonedRef != none
-		ClonedRef.SetVehicle(ActorRef)
-	endIf
 endFunction
 
 function AlignTo(float[] offsets, bool forceTo = false)
@@ -535,10 +492,6 @@ state Prepare
 				Anal = Lib.Stats.GetSkillLevel(ActorRef, "Anal")
 				Oral = Lib.Stats.GetSkillLevel(ActorRef, "Oral")
 			endIf
-			; Auto TFC
-			if IsPlayer && Lib.ControlLib.bAutoTFC
-				Lib.ControlLib.EnableFreeCamera(true)
-			endIf
 			; Make erect for SOS
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 		endIf
@@ -591,17 +544,13 @@ state Orgasm
 		RegisterForSingleUpdate(0.1)
 	endEvent
 	event OnUpdate()
-		; Disable TFC
-		if IsPlayer || ClonedRef != none
-			Lib.ControlLib.EnableFreeCamera(false)
-		endIf
 		; Apply cum
 		int cum = Animation.GetCum(position)
 		if cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Controller.Males > 0)
 			Lib.ApplyCum(ActorRef, cum)
 		endIf
 		; Shake camera if player and not in free camera
-		if (IsPlayer || ClonedRef) && Game.GetCameraState() != 3
+		if IsPlayer && Game.GetCameraState() != 3
 			Game.ShakeCamera(none, 0.75, 1.5)
 		endIf
 		; Voice
@@ -618,10 +567,9 @@ state Reset
 	endEvent
 	event OnUpdate()
 		UnregisterForUpdate()
-		; Make sure we clear out 1st person clone
-		RemoveClone()
 		if IsPlayer
-			Lib.ControlLib.ResetCamera()
+			; Disable free camera, if in it
+			SexLabUtil.EnableFreeCamera(false)
 			; Update diary/journal stats for player
 			Lib.Stats.UpdatePlayerStats(Controller.Males, Controller.Females, Controller.Creatures, Animation, Controller.VictimRef, Controller.TotalTime)
 		elseIf Controller.HasPlayer
@@ -762,7 +710,6 @@ function Initialize()
 	; Clear storage
 	MarkerObj = none
 	ActorRef = none
-	ClonedRef = none
 	Controller = none
 	Voice = none
 	Animation = none
