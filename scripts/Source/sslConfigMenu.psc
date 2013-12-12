@@ -2,11 +2,11 @@ scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
 int function GetVersion()
-	return 12903
+	return 12904
 endFunction
 
 string function GetStringVer()
-	return StringUtil.Substring((((GetVersion() - 1)  as float / 10000.0) as string), 0, 4)+"c"
+	return StringUtil.Substring((((GetVersion() - 1)  as float / 10000.0) as string), 0, 4)+"d"
 endFunction
 
 bool function DebugMode()

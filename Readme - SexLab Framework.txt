@@ -3,7 +3,7 @@
 Skryim SexLab Framework
   By Ashal of Loverslab.com
 
-    Version 1.24, released 2013/10/19
+    Version 1.29d, released 2013/12/12
 
 -- Description --------------------------------------------------------------
 
@@ -19,7 +19,7 @@ Skryim SexLab Framework
 
 -- Modders Resource ---------------------------------------------------------
 
-    API Guide: http://git.loverslab.com/sexlab/wikis/home
+    API Guide: http://git.loverslab.com/sexlab/framework/wikis/home
 
 -- Credits ------------------------------------------------------------------
 
@@ -31,6 +31,8 @@ Skryim SexLab Framework
      Blac945
      TDA
      Zynsch
+     Bleagh
+     PanicForever
 
     Audio:
      Lovers with PK
@@ -41,6 +43,10 @@ Skryim SexLab Framework
      oli3d - Bukkake Shaders - http://www.loverslab.com/topic/12678-bukkake
      4uDIK1 - Male Nudesuit - http://skyrim.nexusmods.com/mods/6667
      Dimon99 - Female Nudesuit - http://skyrim.nexusmods.com/mods/6709
+
+    SKSE Plugins:
+     h38fh2mf
+     kapaer
 
     Scripting:
      Ashal
