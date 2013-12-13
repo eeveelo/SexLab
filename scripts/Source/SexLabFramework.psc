@@ -484,6 +484,9 @@ string function GetPlayerSexualityTitle()
 	return Stats.GetSexualityTitle(PlayerRef)
 endFunction
 
+int function GetPlayerStatLevel(string type)
+	return Stats.GetPlayerSkillLevel(type)
+endFunction
 int function GetPlayerSkillLevel(string skill)
 	return Stats.GetPlayerSkillLevel(skill)
 endFunction
