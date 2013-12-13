@@ -282,6 +282,10 @@ sslBaseAnimation[] function GetAnimationsByTag(int actors, string tag1, string t
 	return AnimSlots.GetByTag(actors, tag1, tag2, tag3, tagSuppress, requireAll)
 endFunction
 
+sslBaseAnimation[] function GetAnimationsByTags(int actors, string tags, string tagsSuppressed = "", bool requireAll = true)
+	return AnimSlots.GetByTags(actors, tags, tagsSuppressed, requireAll)
+endFunction
+
 sslBaseAnimation[] function MergeAnimationLists(sslBaseAnimation[] list1, sslBaseAnimation[] list2)
 	return AnimSlots.MergeLists(list1, list2)
 endFunction

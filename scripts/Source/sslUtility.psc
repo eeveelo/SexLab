@@ -187,6 +187,9 @@ endFunction
 
 string[] function ArgString(string args, string delimiter = ",") global
 	string[] output
+	if args == "" || args == " "
+		return output ; Empty arg string, return empty array
+	endIf
 	args += delimiter
 	int prev = 0
 	int next = StringUtil.Find(args, delimiter, prev)

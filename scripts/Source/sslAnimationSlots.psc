@@ -56,27 +56,32 @@ sslBaseAnimation function GetByName(string findName)
 	return none
 endFunction
 
-sslBaseAnimation[] function GetByTags(int actors, string[] tags, string tagSuppress = "", bool requireAll = true)
-	if tags.Length == 0
+sslBaseAnimation[] function GetByTags(int actors, string tags, string tagsSuppressed = "", bool requireAll = true)
+	string[] finding = sslUtility.ArgString(tags)
+	if finding.Length == 0
 		_Log("No tags given.", "GetByTags", "ERROR")
 		return none
 	endIf
+	string[] suppressed = sslUtility.ArgString(tagsSuppressed)
 	bool[] valid = sslUtility.BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
-		valid[i] = Searchable(Slots[i]) && actors == Slots[i].PositionCount && (tagSuppress == "" || !Slots[i].HasTag(tagSuppress)) && Slots[i].CheckTags(tags, requireAll)
+		valid[i] = Searchable(Slots[i]) && actors == Slots[i].PositionCount && (tagsSuppressed == "" || Slots[i].CheckTags(suppressed, false, true)) && Slots[i].CheckTags(finding, requireAll)
 	endWhile
 	sslBaseAnimation[] output = GetList(valid)
-	_LogFound("GetByTags", actors+", "+tags+", "+tagSuppress+", "+requireAll, output)
+	_LogFound("GetByTags", actors+", "+finding+", "+suppressed+", "+requireAll, output)
 	return output
 endFunction
 
 sslBaseAnimation[] function GetByTag(int actors, string tag1, string tag2 = "", string tag3 = "", string tagSuppress = "", bool requireAll = true)
-	string[] tags = new string[3]
-	tags[0] = tag1
-	tags[1] = tag2
-	tags[2] = tag3
+	string tags = tag1
+	if tag2 != ""
+		tags += ","+tag2
+	endIf
+	if tag3 != ""
+		tags += ","+tag3
+	endIf
 	return GetByTags(actors, tags, tagSuppress, requireAll)
 endFunction
 

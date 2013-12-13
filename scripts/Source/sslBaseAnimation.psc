@@ -495,16 +495,18 @@ bool function ToggleTag(string tag)
 	return HasTag(tag)
 endFunction
 
-bool function CheckTags(string[] find, bool requireAll = true)
+bool function CheckTags(string[] find, bool requireAll = true, bool suppress = false)
 	int i = find.Length
 	while i
 		i -= 1
 		if find[i] != ""
 			bool check = HasTag(find[i])
-			if requireAll && !check
+			if requireAll && !check && !suppress
 				return false ; Stop if we need all and don't have it
-			elseif !requireAll && check
+			elseif !requireAll && check && !suppress
 				return true ; Stop if we don't need all and have one
+			elseif check && suppress
+				return false
 			endIf
 		endIf
 	endWhile
