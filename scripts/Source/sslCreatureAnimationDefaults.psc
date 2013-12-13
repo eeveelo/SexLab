@@ -84,6 +84,7 @@ function LoadAnimations()
 	RegisterAnimation("BearDoggystyle")
 
 	RegisterAnimation("CanineDoggystyle")
+	RegisterAnimation("CanineDoggystyle2")
 	RegisterAnimation("CanineMissionary")
 
 	RegisterAnimation("ChaurusForward")
@@ -126,6 +127,7 @@ function LoadAnimations()
 	RegisterAnimation("WerewolfMissionary")
 
 	RegisterAnimation("WolfDoggystyle")
+	RegisterAnimation("WolfDoggystyle2")
 	RegisterAnimation("WolfMissionary")
 
 	if dawnguard
@@ -288,6 +290,46 @@ function CanineDoggystyle(string eventName, string id, float argNum, form sender
 	AddPositionStage(a2, "Dog_Doggystyle_A2_S4", 45.0, rotate=180.0)
 
 	AddTag("Gone")
+	AddTag("Creature")
+	AddTag("Bestiality")
+	AddTag("Dirty")
+	AddTag("Doggystyle")
+	AddTag("Canine")
+	AddTag("Dog")
+
+	Save()
+endFunction
+
+function CanineDoggystyle2(string eventName, string id, float argNum, form sender)
+	Name = "(Dog) Doggystyle 2"
+
+	SetSFX(Squishing)
+
+	AddRace(DogRace)
+	AddRace(DogCompanionRace)
+	AddRace(MG07DogRace)
+	AddRace(DA03BarbasDogRace)
+	if dawnguard
+		AddRace(DLC1HuskyArmoredCompanionRace)
+		AddRace(DLC1DeathHoundCompanionRace)
+		AddRace(DLC1DeathHoundRace)
+	endIf
+
+	int a1 = AddPosition(Female, addCum=Anal)
+	AddPositionStage(a1, "Canine_Doggystyle2_A1_S1")
+	AddPositionStage(a1, "Canine_Doggystyle2_A1_S2")
+	AddPositionStage(a1, "Canine_Doggystyle2_A1_S3")
+	AddPositionStage(a1, "Canine_Doggystyle2_A1_S4")
+	AddPositionStage(a1, "Canine_Doggystyle2_A1_S5")
+
+	int a2 = AddPosition(Creature)
+	AddPositionStage(a2, "Dog_Doggystyle2_A2_S1")
+	AddPositionStage(a2, "Dog_Doggystyle2_A2_S2")
+	AddPositionStage(a2, "Dog_Doggystyle2_A2_S3")
+	AddPositionStage(a2, "Dog_Doggystyle2_A2_S4")
+	AddPositionStage(a2, "Dog_Doggystyle2_A2_S5")
+
+	AddTag("Panicforever")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")
@@ -1436,6 +1478,36 @@ function WolfDoggystyle(string eventName, string id, float argNum, form sender)
 	AddPositionStage(a2, "Wolf_Doggystyle_A2_S4", 45.0, rotate=180.0)
 
 	AddTag("Gone")
+	AddTag("Creature")
+	AddTag("Bestiality")
+	AddTag("Dirty")
+	AddTag("Doggystyle")
+	AddTag("Wolf")
+
+	Save()
+endFunction
+
+function WolfDoggystyle2(string eventName, string id, float argNum, form sender)
+	Name = "(Wolf) Doggystyle 2"
+
+	SetSFX(Squishing)
+	AddRace(WolfRace)
+
+	int a1 = AddPosition(Female, addCum=Anal)
+	AddPositionStage(a1, "Canine_Doggystyle2_A1_S1")
+	AddPositionStage(a1, "Canine_Doggystyle2_A1_S2")
+	AddPositionStage(a1, "Canine_Doggystyle2_A1_S3")
+	AddPositionStage(a1, "Canine_Doggystyle2_A1_S4")
+	AddPositionStage(a1, "Canine_Doggystyle2_A1_S5")
+
+	int a2 = AddPosition(Creature)
+	AddPositionStage(a2, "Wolf_Doggystyle2_A2_S1")
+	AddPositionStage(a2, "Wolf_Doggystyle2_A2_S2")
+	AddPositionStage(a2, "Wolf_Doggystyle2_A2_S3")
+	AddPositionStage(a2, "Wolf_Doggystyle2_A2_S4")
+	AddPositionStage(a2, "Wolf_Doggystyle2_A2_S5")
+
+	AddTag("Panicforever")
 	AddTag("Creature")
 	AddTag("Bestiality")
 	AddTag("Dirty")

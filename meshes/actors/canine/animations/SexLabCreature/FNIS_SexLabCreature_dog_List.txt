@@ -7,3 +7,9 @@ s Dog_Missionary_A2_S1 Canine_Missionary_A2_S1.hkx
 + Dog_Missionary_A2_S2 Canine_Missionary_A2_S2.hkx
 + Dog_Missionary_A2_S3 Canine_Missionary_A2_S3.hkx
 + Dog_Missionary_A2_S4 Canine_Missionary_A2_S4.hkx
+
+s Dog_Doggystyle2_A2_S1 Dog_Doggystyle2_A2_S1.hkx
++ Dog_Doggystyle2_A2_S2 Dog_Doggystyle2_A2_S2.hkx
++ Dog_Doggystyle2_A2_S3 Dog_Doggystyle2_A2_S3.hkx
++ Dog_Doggystyle2_A2_S4 Dog_Doggystyle2_A2_S4.hkx
++ Dog_Doggystyle2_A2_S5 Dog_Doggystyle2_A2_S5.hkx
