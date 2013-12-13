@@ -92,6 +92,7 @@ function ArrokBlowjob(string eventName, string id, float argNum, form sender)
 	AddTag("Dirty")
 	AddTag("Blowjob")
 	AddTag("LeadIn")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -120,6 +121,7 @@ function ArrokBoobjob(string eventName, string id, float argNum, form sender)
 	AddTag("Boobjob")
 	AddTag("Breast")
 	AddTag("LeadIn")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -152,6 +154,7 @@ function ArrokCowgirl(string eventName, string id, float argNum, form sender)
 	AddTag("Dirty")
 	AddTag("Cowgirl")
 	AddTag("Vaginal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -217,6 +220,7 @@ function ArrokDoggyStyle(string eventName, string id, float argNum, form sender)
 	AddTag("Sex")
 	AddTag("Doggy Style")
 	AddTag("Anal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -245,6 +249,7 @@ function ArrokForeplay(string eventName, string id, float argNum, form sender)
 	AddTag("Loving")
 	AddTag("Cuddling")
 	AddTag("LeadIn")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -275,6 +280,7 @@ function ArrokLegUp(string eventName, string id, float argNum, form sender)
 	AddTag("Laying")
 	AddTag("Aggressive")
 	AddTag("Vaginal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -292,7 +298,6 @@ function ArrokMaleMasturbation(string eventName, string id, float argNum, form s
 
 	AddTag("Sex")
 	AddTag("Solo")
-	AddTag("M")
 	AddTag("Masturbation")
 	AddTag("Standing")
 	AddTag("Dirty")
@@ -324,6 +329,7 @@ function ArrokMissionary(string eventName, string id, float argNum, form sender)
 	AddTag("Missionary")
 	AddTag("Laying")
 	AddTag("Vaginal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -355,6 +361,7 @@ function ArrokOral(string eventName, string id, float argNum, form sender)
 	AddTag("Cunnilingus")
 	AddTag("Blowjob")
 	AddTag("69")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -385,6 +392,7 @@ function ArrokReverseCowgirl(string eventName, string id, float argNum, form sen
 	AddTag("Dirty")
 	AddTag("Cowgirl")
 	AddTag("Anal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -414,6 +422,7 @@ function ArrokSideways(string eventName, string id, float argNum, form sender)
 	AddTag("Sideways")
 	AddTag("Dirty")
 	AddTag("Vaginal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -442,6 +451,7 @@ function ArrokStanding(string eventName, string id, float argNum, form sender)
 	AddTag("Standing")
 	AddTag("Dirty")
 	AddTag("Vaginal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -470,6 +480,7 @@ function ArrokStandingForeplay(string eventName, string id, float argNum, form s
 	AddTag("Loving")
 	AddTag("Kissing")
 	AddTag("LeadIn")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -509,6 +520,7 @@ function ArrokTricycle(string eventName, string id, float argNum, form sender)
 	AddTag("Orgy")
 	AddTag("Vaginal")
 	AddTag("Dirty")
+	AddTag("MFF")
 
 	Save()
 endFunction
@@ -537,6 +549,7 @@ function ArrokHugFuck(string eventName, string id, float argNum, form sender)
 	AddTag("Hugging")
 	AddTag("Loving")
 	AddTag("Vaginal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -562,7 +575,6 @@ function ArrokLesbian(string eventName, string id, float argNum, form sender)
 	AddTag("Arrok")
 	AddTag("BBP")
 	AddTag("Sex")
-	AddTag("FF")
 	AddTag("Lesbian")
 	AddTag("Oral")
 	AddTag("Vaginal")
@@ -594,6 +606,7 @@ function ArrokSittingForeplay(string eventName, string id, float argNum, form se
 	AddTag("Loving")
 	AddTag("Foreplay")
 	AddTag("LeadIn")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -621,6 +634,7 @@ function ArrokAnal(string eventName, string id, float argNum, form sender)
 	AddTag("Anal")
 	AddTag("Sex")
 	AddTag("Dirty")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -650,6 +664,7 @@ function ArrokRape(string eventName, string id, float argNum, form sender)
 	AddTag("Aggressive")
 	AddTag("Dirty")
 	AddTag("Behind")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -678,6 +693,7 @@ function SexLabAggrBehind(string eventName, string id, float argNum, form sender
 	AddTag("Behind")
 	AddTag("Anal")
 	AddTag("Aggressive")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -706,6 +722,7 @@ function SexLabAggrDoggyStyle(string eventName, string id, float argNum, form se
 	AddTag("Behind")
 	AddTag("Anal")
 	AddTag("Aggressive")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -734,6 +751,7 @@ function SexLabAggrMissonary(string eventName, string id, float argNum, form sen
 	AddTag("Laying")
 	AddTag("Vaginal")
 	AddTag("Aggressive")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -760,6 +778,7 @@ function SexLabBoobjob(string eventName, string id, float argNum, form sender)
 	AddTag("Boobjob")
 	AddTag("Dirty")
 	AddTag("Breast")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -786,6 +805,7 @@ function SexLabDoggyStyle(string eventName, string id, float argNum, form sender
 	AddTag("Sex")
 	AddTag("Doggy Style")
 	AddTag("Vaginal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -813,6 +833,7 @@ function SexLabHuggingSex(string eventName, string id, float argNum, form sender
 	AddTag("Hugging")
 	AddTag("Loving")
 	AddTag("Vaginal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -840,6 +861,7 @@ function SexLabMissonary(string eventName, string id, float argNum, form sender)
 	AddTag("Missionary")
 	AddTag("Laying")
 	AddTag("Vaginal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -867,6 +889,7 @@ function SexLabReverseCowgirl(string eventName, string id, float argNum, form se
 	AddTag("Dirty")
 	AddTag("Cowgirl")
 	AddTag("Anal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -894,6 +917,7 @@ function SexLabSideways(string eventName, string id, float argNum, form sender)
 	AddTag("Standing")
 	AddTag("Sideways")
 	AddTag("Vaginal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -921,6 +945,7 @@ function SexLabStanding(string eventName, string id, float argNum, form sender)
 	AddTag("Standing")
 	AddTag("Dirty")
 	AddTag("Vaginal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -943,7 +968,6 @@ function SexLabTribadism(string eventName, string id, float argNum, form sender)
 
 	AddTag("Default")
 	AddTag("Sex")
-	AddTag("FF")
 	AddTag("Lesbian")
 	AddTag("Tribadism")
 	AddTag("Vaginal")
@@ -966,7 +990,6 @@ function BleaghFemaleSolo(string eventName, string id, float argNum, form sender
 
 	AddTag("Sex")
 	AddTag("Solo")
-	AddTag("F")
 	AddTag("Masturbation")
 	AddTag("Dirty")
 
@@ -998,6 +1021,7 @@ function APAnal(string eventName, string id, float argNum, form sender)
 	AddTag("Straight")
 	AddTag("Aggressive")
 	AddTag("Anal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -1029,6 +1053,7 @@ function APBedMissionary(string eventName, string id, float argNum, form sender)
 	AddTag("Straight")
 	AddTag("Missionary")
 	AddTag("Vaginal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -1060,6 +1085,7 @@ function APBlowjob(string eventName, string id, float argNum, form sender)
 	AddTag("Oral")
 	AddTag("Blowjob")
 	AddTag("LeadIn")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -1089,6 +1115,7 @@ function APBoobjob(string eventName, string id, float argNum, form sender)
 	AddTag("Dirty")
 	AddTag("Boobjob")
 	AddTag("Breast")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -1121,6 +1148,7 @@ function APCowgirl(string eventName, string id, float argNum, form sender)
 	AddTag("Cowgirl")
 	AddTag("Dirty")
 	AddTag("Vaginal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -1141,7 +1169,6 @@ function APFemaleSolo(string eventName, string id, float argNum, form sender)
 
 	AddTag("Sex")
 	AddTag("Solo")
-	AddTag("F")
 	AddTag("Masturbation")
 	AddTag("Dirty")
 
@@ -1175,6 +1202,7 @@ function APFisting(string eventName, string id, float argNum, form sender)
 	AddTag("Fisting")
 	AddTag("Rough")
 	AddTag("Dirty")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -1203,6 +1231,7 @@ function APHandjob(string eventName, string id, float argNum, form sender)
 	AddTag("Straight")
 	AddTag("Dirty")
 	AddTag("Handjob")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -1234,6 +1263,7 @@ function APKneelBlowjob(string eventName, string id, float argNum, form sender)
 	AddTag("Oral")
 	AddTag("Blowjob")
 	AddTag("LeadIn")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -1263,6 +1293,7 @@ function APLegUp(string eventName, string id, float argNum, form sender)
 	AddTag("Laying")
 	AddTag("Aggressive")
 	AddTag("Vaginal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -1292,6 +1323,7 @@ function APShoulder(string eventName, string id, float argNum, form sender)
 	AddTag("Straight")
 	AddTag("Standing")
 	AddTag("Vaginal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -1323,6 +1355,7 @@ function APStandBlowjob(string eventName, string id, float argNum, form sender)
 	AddTag("Oral")
 	AddTag("Blowjob")
 	AddTag("LeadIn")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -1352,6 +1385,7 @@ function APStanding(string eventName, string id, float argNum, form sender)
 	AddTag("Straight")
 	AddTag("Standing")
 	AddTag("Vaginal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -1382,6 +1416,7 @@ function APDoggyStyle(string eventName, string id, float argNum, form sender)
 	AddTag("DoggyStyle")
 	AddTag("Knees")
 	AddTag("Anal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -1412,6 +1447,7 @@ function APHoldLegUp(string eventName, string id, float argNum, form sender)
 	AddTag("Aggressive")
 	AddTag("Straight")
 	AddTag("Anal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -1442,6 +1478,7 @@ function APFaceDown(string eventName, string id, float argNum, form sender)
 	AddTag("Aggressive")
 	AddTag("Straight")
 	AddTag("Anal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -1472,6 +1509,7 @@ function APSkullFuck(string eventName, string id, float argNum, form sender)
 	AddTag("Aggressive")
 	AddTag("Blowjob")
 	AddTag("Oral")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -1503,6 +1541,7 @@ function ZynRoughStanding(string eventName, string id, float argNum, form sender
 	AddTag("Aggressive")
 	AddTag("Oral")
 	AddTag("Vaginal")
+	AddTag("MF")
 
 	Save()
 endFunction
@@ -1527,7 +1566,6 @@ function ZynLesbian(string eventName, string id, float argNum, form sender)
 
 	AddTag("Zyn")
 	AddTag("Sex")
-	AddTag("FF")
 	AddTag("Lesbian")
 	AddTag("Dirty")
 	AddTag("Vaginal")
