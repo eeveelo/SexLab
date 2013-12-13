@@ -299,10 +299,12 @@ form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool all
 	if strip.Length != 33
 		return none
 	endIf
+	; TFC prevents clothing from updating, leave it
+	bool toggled = ControlLib.TempToggleFreeCamera(a == PlayerRef, "StripSlots")
 	; Determine gender and animation switch
 	int gender = a.GetLeveledActorBase().GetSex()
 	if animate
-		if gender == 0
+		if gender == 1
 			Debug.SendAnimationEvent(a, "Arrok_FemaleUndress")
 		else
 			Debug.SendAnimationEvent(a, "Arrok_MaleUndress")
@@ -355,6 +357,8 @@ form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool all
 			a.EquipItem(NudeSuit, false, true)
 		endIf
 	endIf
+	; Toggle free camera back on
+	ControlLib.TempToggleFreeCamera(toggled, "StripSlots")
 	return sslUtility.ClearNone(items)
 endFunction
 
@@ -363,6 +367,8 @@ function UnstripActor(actor a, form[] stripped, actor victim = none)
 	if i < 1
 		return
 	endIf
+	; TFC prevents clothing from updating, leave it
+	bool toggled = ControlLib.TempToggleFreeCamera(a == PlayerRef, "UnstripSlots")
 	; Remove nudesuits
 	if bUseMaleNudeSuit || bUseFemaleNudeSuit
 		a.UnequipItem(NudeSuit, true, true)
@@ -389,6 +395,8 @@ function UnstripActor(actor a, form[] stripped, actor victim = none)
 		endIf
 		Utility.Wait(0.25)
 	endWhile
+	; Toggle free camera back on
+	ControlLib.TempToggleFreeCamera(toggled, "UnstripSlots")
 endFunction
 
 form function WornStrapon(actor a)

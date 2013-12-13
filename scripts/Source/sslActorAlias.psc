@@ -179,7 +179,9 @@ function EquipStrapon()
 	endIf
 	if strapon != none && !ActorRef.IsEquipped(strapon)
 		;ActorRef.AddItem(strapon, 1, true)
+		bool toggled = Lib.ControlLib.TempToggleFreeCamera(Controller.HasPlayer, "EquipStrapon")
 		ActorRef.EquipItem(strapon, false, true)
+		Lib.ControlLib.TempToggleFreeCamera(toggled, "EquipStrapon")
 	endIf
 endFunction
 
@@ -187,8 +189,10 @@ function RemoveStrapon()
 	if strapon == none || (strapon != none && !ActorRef.IsEquipped(strapon))
 		return ; Nothing to remove
 	endIf
+	bool toggled = Lib.ControlLib.TempToggleFreeCamera(Controller.HasPlayer, "RemoveStrapon")
 	ActorRef.UnequipItem(strapon, false, true)
 	ActorRef.RemoveItem(strapon, 1, true)
+	Lib.ControlLib.TempToggleFreeCamera(toggled, "RemoveStrapon")
 endFunction
 
 function MakeVictim(bool victimize = true)
@@ -490,6 +494,10 @@ state Prepare
 			; Make erect for SOS
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 		endIf
+		; Auto TFC
+		if IsPlayer && Lib.ControlLib.bAutoTFC
+			Lib.ControlLib.EnableFreeCamera(true)
+		endIf
 		GoToState("Ready")
 	endEvent
 endState
@@ -539,6 +547,10 @@ state Orgasm
 		RegisterForSingleUpdate(0.1)
 	endEvent
 	event OnUpdate()
+		; Disable Free camera, if in it
+		if IsPlayer
+			Lib.ControlLib.EnableFreeCamera(false)
+		endIf
 		; Apply cum
 		int cum = Animation.GetCum(position)
 		if cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Controller.Males > 0)
@@ -564,7 +576,7 @@ state Reset
 		UnregisterForUpdate()
 		; Disable free camera, if in it
 		if IsPlayer
-			SexLabUtil.EnableFreeCamera(false)
+			Lib.ControlLib.EnableFreeCamera(false)
 		; Increase player sex for NPC
 		elseIf Controller.HasPlayer
 			Lib.Stats.AddPlayerSex(ActorRef)

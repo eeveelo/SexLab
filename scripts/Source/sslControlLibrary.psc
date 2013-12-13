@@ -27,8 +27,10 @@ bool property bAutoTFC auto hidden
 float property fAutoSUCSM auto hidden
 
 ; Local
+string toggled
 bool hkReady
 sslThreadController PlayerController
+
 
 ; Dynamic properties
 bool property InFreeCamera hidden
@@ -38,6 +40,23 @@ bool property InFreeCamera hidden
 endProperty
 
 ; Functions
+bool function TempToggleFreeCamera(bool condition, string toggledBy)
+	if condition && toggled == "" && InFreeCamera
+		SexLabUtil.EnableFreeCamera(false)
+		toggled = toggledBy
+		return true
+	elseIf condition && toggled == toggledBy && !InFreeCamera
+		SexLabUtil.EnableFreeCamera(true, fAutoSUCSM)
+		toggled = ""
+		return false
+	endIf
+	return false
+endFunction
+
+function EnableFreeCamera(bool enabling = true)
+	SexLabUtil.EnableFreeCamera(enabling, fAutoSUCSM)
+endFunction
+
 function _HKStart(sslThreadController Controller)
 	if Controller != none
 		; Register hotkeys
@@ -55,8 +74,6 @@ function _HKStart(sslThreadController Controller)
 		RegisterForKey(kMoveScene)
 		RegisterForKey(kRotateScene)
 		RegisterForKey(kToggleFreeCamera)
-		; Auto TFC
-		SexLabUtil.EnableFreeCamera(bAutoTFC, fAutoSUCSM)
 		; Ready
 		PlayerController = Controller
 		hkReady = true
@@ -155,11 +172,11 @@ function _Defaults()
 	kRestoreOffsets = 12 ; -
 	kRotateScene = 22 ; U
 	kToggleFreeCamera = 81 ; NUM 3
-
-	; Config other
-	hkReady = true
-	_HKClear()
-
+	; MCM TFC settings
 	bAutoTFC = false
 	fAutoSUCSM = 5.0
+	; Config other
+	toggled = ""
+	hkReady = true
+	_HKClear()
 endFunction

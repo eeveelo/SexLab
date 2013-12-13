@@ -129,10 +129,7 @@ state Advancing
 			return ; No stage to advance to, end animation
 		elseIf LeadIn && Stage > Animation.StageCount
 			; Disable free camera now to help prevent CTD
-			bool ToggleFreeCamera = HasPlayer && Game.GetCameraState() == 3
-			if ToggleFreeCamera
-				SexLabUtil.EnableFreeCamera(false)
-			endIf
+			bool toggled = Lib.ControlLib.TempToggleFreeCamera(HasPlayer, "LeadInEnd")
 			; Swap to non lead in animations
 			Stage = 1
 			LeadIn = false
@@ -147,9 +144,7 @@ state Advancing
 			endIf
 			SendThreadEvent("LeadInEnd")
 			; Renable free camera
-			if ToggleFreeCamera
-				SexLabUtil.EnableFreeCamera(true)
-			endIf
+			Lib.ControlLib.TempToggleFreeCamera(toggled, "LeadInEnd")
 		endIf
 		; Stage Delay
 		if Stage > 1
@@ -190,6 +185,7 @@ state Animating
 			if sfxType != none
 				Sound.SetInstanceVolume(sfxType.Play(Positions[0]), sfxVolume)
 			endIf
+			Lib.OrgasmEffect.PlayAndWait(Positions[0])
 			Sound.SetInstanceVolume(Lib.OrgasmEffect.Play(Positions[0]), sfxVolume)
 			sfx[0] = 0.60
 		else
