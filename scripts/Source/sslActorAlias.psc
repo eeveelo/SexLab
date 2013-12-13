@@ -388,19 +388,19 @@ function SyncThread()
 			if Lib.SOSEnabled && Animation.GetGender(position) == 0
 				Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 				int offset = Animation.GetSchlong(position, stage)
-				string bend
-				if offset < 0
-					bend = "SOSBendDown0"+((Math.Abs(offset) / 2) as int)
-				elseif offset > 0
-					bend = "SOSBendUp0"+((Math.Abs(offset) / 2) as int)
-				else
-					bend = "SOSNoBend"
-				endIf
-				Debug.SendAnimationEvent(ActorRef, bend)
-				string name = ActorRef.GetLeveledActorBase().GetName()
+				Debug.SendAnimationEvent(ActorRef, "SOSBend"+offset)
+				; string bend
+				; if offset < 0
+				; 	bend = "SOSBendDown0"+((Math.Abs(offset) / 2) as int)
+				; elseif offset > 0
+				; 	bend = "SOSBendUp0"+((Math.Abs(offset) / 2) as int)
+				; else
+				; 	bend = "SOSNoBend"
+				; endIf
+				; Debug.SendAnimationEvent(ActorRef, bend)
+				; string name = ActorRef.GetLeveledActorBase().GetName()
 				; Debug.Notification(name+" Offset["+offset+"]: "+bend)
 				; Debug.Trace(name+" Offset: SOSBend"+offset+ ": Sent -> "+bend)
-				; Debug.SendAnimationEvent(ActorRef, "SOSBend"+offset)
 			endif
 			; Equip Strapon if needed
 			if IsFemale && Lib.bUseStrapons && Animation.UseStrapon(position, stage)
