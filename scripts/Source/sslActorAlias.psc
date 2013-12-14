@@ -607,6 +607,10 @@ state Reset
 		endIf
 		; Unlock their movement
 		UnlockActor()
+		; Clear expression
+		if Expression != none
+			Expression.ClearMFG(ActorRef)
+		endIf
 		; Free up alias slot
 		ClearAlias()
 		GoToState("")
