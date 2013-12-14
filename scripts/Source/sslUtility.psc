@@ -198,7 +198,7 @@ string[] function ArgString(string args, string delimiter = ",") global
 		if StringUtil.GetNthChar(arg, 0) == " "
 			arg = StringUtil.SubString(arg, 1)
 		endIf
-		if arg != ""
+		if arg != "" && arg != delimiter
 			output = PushString(arg, output)
 		endIf
 		prev = next + 1

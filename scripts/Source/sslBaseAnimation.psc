@@ -82,11 +82,12 @@ float[] function GetPositionOffsets(int position, int stage)
 	endIf
 
 	float[] off = new float[4]
-	if IsCreature
-		off[0] = CalculateForward(position, stage)
-	else
-		off[0] = AccessOffset(position, stage, 0)
-	endIf
+	; if IsCreature
+	; 	off[0] = CalculateForward(position, stage)
+	; else
+	; 	off[0] = AccessOffset(position, stage, 0)
+	; endIf
+	off[0] = CalculateForward(position, stage)
 	off[1] = AccessOffset(position, stage, 1)
 	off[2] = AccessOffset(position, stage, 2)
 	off[3] = AccessOffset(position, stage, 3)

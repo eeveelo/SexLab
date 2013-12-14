@@ -168,6 +168,7 @@ endProperty
 ;/-----------------------------------------------\;
 ;|	Preparation Functions                        |;
 ;\-----------------------------------------------/;
+
 state Unlocked
 	sslThreadModel function Make(float timeoutIn = 30.0)
 		Initialize()
@@ -248,6 +249,7 @@ state Making
 
 		Active = true
 
+		string suppress
 		int actors = ActorCount
 		int i
 		while i < actors
@@ -277,53 +279,6 @@ state Making
 		; Remember present genders
 		gendercounts = Lib.Actors.GenderCount(Positions)
 
-		if primaryAnimations.Length == 0
-			; Same sex pairings
-			if (Females == 2 && Males == 0) || (Males == 2 && Females == 0)
-				sslBaseAnimation[] samesex = Lib.Animations.GetByType(actors, Males, Females, aggressive = IsAggressive)
-				sslBaseAnimation[] couples = Lib.Animations.GetByType(actors, 1, 1, aggressive = IsAggressive)
-				primaryAnimations = Lib.Animations.MergeLists(samesex, couples)
-			; Grab animations like normal
-			elseif actors < 3
-				primaryAnimations = Lib.Animations.GetByType(actors, Males, Females, aggressive = IsAggressive)
-			; Get 3P + animations ignoring gender
-			elseif actors >= 3
-				primaryAnimations = Lib.Animations.GetByType(actors, aggressive = IsAggressive)
-			endIf
-			; Check for valid animations again
-			if primaryAnimations.Length == 0
-				_Log("Unable to find valid animations", "StartThread", "FATAL")
-				return none
-			endIf
-		endIf
-
-		; Determine if foreplay lead in should be used
-		if Lib.bForeplayStage && !leadInDisabled && leadAnimations.Length == 0 && !HasCreature && !IsAggressive && actors == 2
-			SetLeadAnimations(Lib.Animations.GetByTag(2, "LeadIn"))
-		endIf
-
-		; Validate Primary animations
-		i = primaryAnimations.Length
-		while i
-			i -= 1
-			if !primaryAnimations[i].Registered || actors != primaryAnimations[i].PositionCount
-				_Log("Primary animation '"+primaryAnimations[i].Name+"' requires "+primaryAnimations[i].PositionCount+" actors, only "+actors+" present", "StartThread", "FATAL")
-				return none
-			endIf
-		endWhile
-
-		; Validate Leadin Animations
-		if !leadInDisabled && leadAnimations.Length > 0
-			i = leadAnimations.Length
-			while i
-				i -= 1
-				if !leadAnimations[i].Registered || actors != leadAnimations[i].PositionCount
-					_Log("Lead in animation '"+leadAnimations[i].Name+"' requires "+leadAnimations[i].PositionCount+" actors, only "+actors+" present", "StartThread", "FATAL")
-					return none
-				endIf
-			endWhile
-		endIf
-
 		; Check for center
 		if centerObj == none && bed != -1
 			ObjectReference BedRef
@@ -342,7 +297,10 @@ state Making
 					use = Utility.RandomInt(0, 1) as bool
 				endIf
 				if use
+					; Center on found bed
 					CenterOnObject(BedRef)
+					; Suppress standing animations with bed
+					suppress += "Standing,"
 				endIf
 			endIf
 		endIf
@@ -372,6 +330,56 @@ state Making
 			else
 				CenterOnObject(Positions[0])
 			endIf
+		endIf
+
+		; Suppress aggressive tag
+		if !IsAggressive
+			suppress += "Aggressive,"
+		endIf
+
+		if primaryAnimations.Length == 0
+			; Same sex pairings
+			if (Females == 2 && Males == 0) || (Males == 2 && Females == 0)
+				primaryAnimations = Lib.Animations.MergeLists(Lib.Animations.GetByTags(actors, Lib.Animations.Lib.MakeGenderTag(Positions), suppress), Lib.Animations.GetByTags(actors, "FM", suppress))
+			; Grab animations like normal
+			elseif actors < 3
+				primaryAnimations = Lib.Animations.GetByTags(actors, Lib.Animations.Lib.MakeGenderTag(Positions), suppress)
+			; Get 3P + animations ignoring gender
+			elseif actors >= 3
+				primaryAnimations = Lib.Animations.GetByType(actors, aggressive = IsAggressive)
+			endIf
+			; Check for valid animations again
+			if primaryAnimations.Length == 0
+				_Log("Unable to find valid animations", "StartThread", "FATAL")
+				return none
+			endIf
+		endIf
+
+		; Determine if foreplay lead in should be used
+		if Lib.bForeplayStage && !leadInDisabled && leadAnimations.Length == 0 && !HasCreature && !IsAggressive && actors == 2
+			SetLeadAnimations(Lib.Animations.GetByTags(2, "LeadIn", suppress))
+		endIf
+
+		; Validate Primary animations
+		i = primaryAnimations.Length
+		while i
+			i -= 1
+			if !primaryAnimations[i].Registered || actors != primaryAnimations[i].PositionCount
+				_Log("Primary animation '"+primaryAnimations[i].Name+"' requires "+primaryAnimations[i].PositionCount+" actors, only "+actors+" present", "StartThread", "FATAL")
+				return none
+			endIf
+		endWhile
+
+		; Validate Leadin Animations
+		if !leadInDisabled && leadAnimations.Length > 0
+			i = leadAnimations.Length
+			while i
+				i -= 1
+				if !leadAnimations[i].Registered || actors != leadAnimations[i].PositionCount
+					_Log("Lead in animation '"+leadAnimations[i].Name+"' requires "+leadAnimations[i].PositionCount+" actors, only "+actors+" present", "StartThread", "FATAL")
+					return none
+				endIf
+			endWhile
 		endIf
 
 		; Enable auto advance
