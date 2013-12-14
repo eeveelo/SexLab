@@ -111,7 +111,7 @@ endFunction
 function ClearAlias()
 	TryToClear()
 	TryToReset()
-	if GetReference() != none
+	if ActorRef != none
 		ActorRef.EvaluatePackage()
 		Debug.Trace("-- SexLab ActorAlias -- Clearing '"+ActorName+"' from alias -- "+self)
 	endIf
@@ -494,10 +494,6 @@ state Prepare
 			; Make erect for SOS
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 		endIf
-		; Auto TFC
-		if IsPlayer && Lib.ControlLib.bAutoTFC
-			Lib.ControlLib.EnableFreeCamera(true)
-		endIf
 		GoToState("Ready")
 	endEvent
 endState
@@ -511,6 +507,10 @@ state Ready
 			SyncThread()
 			GoToState("Animating")
 			RegisterForSingleUpdate(Utility.RandomFloat(0.1, 0.8))
+			; Auto TFC
+			if IsPlayer && Lib.ControlLib.bAutoTFC
+				Lib.ControlLib.EnableFreeCamera(true)
+			endIf
 		endIf
 	endFunction
 endState
