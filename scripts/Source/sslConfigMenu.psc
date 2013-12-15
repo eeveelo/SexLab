@@ -1366,7 +1366,7 @@ endEvent
 
 event OnOptionSelect(int option)
 	int i
-	if CurrentPage == "$SSL_ToggleVoices"
+	if CurrentPage == "$SSL_SoundSettings"
 		i = oidToggleVoice.Find(option)
 		VoiceSlots.Voices[i].Enabled = !VoiceSlots.Voices[i].Enabled
 		SetToggleOptionValue(option, VoiceSlots.Voices[i].Enabled)
