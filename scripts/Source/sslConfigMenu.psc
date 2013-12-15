@@ -99,6 +99,7 @@ function SetDefaults()
 	ExpressionLib._Defaults()
 	ActorLib._Defaults()
 	ThreadLib._Defaults()
+	ControlLib._Defaults()
 
 	oidToggleVoice = new int[50]
 	oidToggleCreatureAnimation = new int[50]
@@ -780,7 +781,7 @@ state AutomaticSUCSM
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(ControlLib.fAutoSUCSM)
 		SetSliderDialogDefaultValue(3.0)
-		SetSliderDialogRange(1.0, 20)
+		SetSliderDialogRange(1.0, 20.0)
 		SetSliderDialogInterval(1.0)
 	endEvent
 	event OnSliderAcceptST(float value)
