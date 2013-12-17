@@ -30,7 +30,14 @@ int[] female5
 
 function ApplyTo(actor ActorRef, int strength = 50, bool isFemale, bool openmouth = false)
 	if ActorRef == none
-		return ; Nobody to express with!
+		return ; Nobody to express and doesn't update in free camera!
+	elseIf Game.GetCameraState() == 3
+		; Apply open mouth and nothing else
+		if openmouth
+			ActorRef.ClearExpressionOverride()
+			ActorRef.SetExpressionOverride(16, 100)
+		endIf
+		return ; MFG doesn't update in free camera, so don't bother with anything else
 	endIf
 	; Clear existing mfg from actor
 	Lib.ClearMFG(ActorRef)

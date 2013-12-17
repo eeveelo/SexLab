@@ -68,7 +68,7 @@ function Log(string msg, string source, string type = "NOTICE", string display =
 		Debug.TraceStack("-- SexLab "+type+"-- "+source+": "+msg, severity)
 	endIf
 	if StringUtil.Find(display, "console") != -1
-		PrintConsole(type+" SexLab "+source+": "+msg)
+		MiscUtil.PrintConsole(type+" SexLab "+source+": "+msg)
 	endIf
 endFunction
 
@@ -77,21 +77,12 @@ endFunction
 ;#        by h38fh2mf           #
 ;#------------------------------#
 
-function SetFreeCameraSpeed(float speed) global native
-function ToggleFreeCamera(bool stopTime = false) global native
-
 function EnableFreeCamera(bool enabling = true, float sucsm = 5.0) global
 	bool InFreeCamera = Game.GetCameraState() == 3
 	if enabling && !InFreeCamera
-		SetFreeCameraSpeed(sucsm)
-		ToggleFreeCamera()
+		MiscUtil.SetFreeCameraSpeed(sucsm)
+		MiscUtil.ToggleFreeCamera()
 	elseIf !enabling && InFreeCamera
-		ToggleFreeCamera()
+		MiscUtil.ToggleFreeCamera()
 	endIf
 endFunction
-
-; Get node rotation
-float function GetNodeRotation(ObjectReference obj, string nodeName, bool firstPerson, int rotationIndex) global native
-
-; Print text to console.
-function PrintConsole(string text) global native

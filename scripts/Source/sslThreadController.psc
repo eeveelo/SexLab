@@ -371,7 +371,7 @@ function SetAnimation(int anim = -1)
 	endIf
 	; Print name of animation to console
 	if HasPlayer
-		SexLabUtil.PrintConsole("Playing Animation: " + Animation.Name)
+		MiscUtil.PrintConsole("Playing Animation: " + Animation.Name)
 	endIf
 endFunction
 
