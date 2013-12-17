@@ -371,6 +371,42 @@ endFunction
 ;#---------------------------#
 
 ;#---------------------------#
+;# BEGIN EXPRESSION FUNCTION #
+;#---------------------------#
+
+function ClearMFG(actor ActorRef)
+	ExpressionLib.ClearMFG(ActorRef)
+endFunction
+
+function ClearPhoneme(actor ActorRef)
+	ExpressionLib.ClearPhoneme(ActorRef)
+endFunction
+
+sslBaseExpression function PickExpression(actor ActorRef, actor VictimRef = none)
+	return ExpressionLib.PickExpression(ActorRef, VictimRef)
+endFunction
+
+sslBaseExpression function RandomExpressionByTag(string tag)
+	return ExpressionSlots.RandomByTag(tag)
+endFunction
+
+sslBaseExpression  function GetExpressionByName(string findName)
+	return ExpressionSlots.GetByName(findName)
+endFunction
+
+int function FindExpressionByName(string findName)
+	return ExpressionSlots.FindByName(findName)
+endFunction
+
+sslBaseExpression function GetExpressionBySlot(int slot)
+	return ExpressionSlots.GetBySlot(slot)
+endFunction
+
+;#---------------------------#
+;#  END EXPRESSION FUNCTIONS #
+;#---------------------------#
+
+;#---------------------------#
 ;#    START HOOK FUNCTIONS   #
 ;#---------------------------#
 

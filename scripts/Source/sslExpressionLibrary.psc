@@ -56,6 +56,14 @@ function ClearMFG(actor ActorRef)
 	MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
 endFunction
 
+function ClearPhoneme(actor ActorRef)
+	int i
+	while i <= 15
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, i, 0)
+		i += 1
+	endWhile
+endFunction
+
 sslBaseExpression function PickExpression(actor ActorRef, actor VictimRef = none)
 	if VictimRef != none && ActorRef == VictimRef
 		; Return random victim
@@ -68,62 +76,7 @@ sslBaseExpression function PickExpression(actor ActorRef, actor VictimRef = none
 	return Slots.RandomByTag("Consensual")
 endFunction
 
-int[] function PresetMixin(int[] basepreset, int enjoyment, bool female, bool victim = false)
-	float amount = (enjoyment as float / 100.0)
-	debug.trace("base: "+basepreset+ " enjoyment: "+ enjoyment +" amount: "+amount)
-
-	int i = basepreset.Length
-	while i
-		i -= 1
-		debug.trace("was "+basepreset[i])
-		basepreset[i] = (amount * basepreset[i] as float) as int
-		debug.trace("altering to "+basepreset[i])
-		i -= 2
-	endWhile
-	return basepreset
-endFunction
-
-int[] function GetBasePreset(bool gender)
-	if gender == Male
-		return BasePresetMale
-	endIf
-	return BasePresetFemale
-endFunction
-
-int[] function AddBasePreset(bool gender, int mode, int id, int value)
-	int[] presets = sslUtility.IncreaseInt(3, GetBasePreset(gender))
-	int index = (presets.Length - 3)
-	presets[index] = mode
-	presets[index + 1] = id
-	presets[index + 2] = value
-	return presets
-endFunction
 
 function _Defaults()
-	int[] iDel
-	BasePresetMale = iDel
-	BasePresetFemale = iDel
 
-	BasePresetMale = AddBasePreset(Male, Expression, 13, 40)
-	BasePresetMale = AddBasePreset(Male, Modifier, 6, 80)
-	BasePresetMale = AddBasePreset(Male, Modifier, 7, 80)
-	BasePresetMale = AddBasePreset(Male, Modifier, 12, 30)
-	BasePresetMale = AddBasePreset(Male, Modifier, 13, 30)
-	BasePresetMale = AddBasePreset(Male, Phoneme, 0, 30)
-	BasePresetMale = AddBasePreset(Male, Phoneme, 5, 20)
-	BasePresetMale = AddBasePreset(Male, Phoneme, 2, 50)
-	BasePresetMale = AddBasePreset(Male, Phoneme, 13, 20)
-
-	BasePresetFemale = AddBasePreset(Female, Expression, 10, 100)
-	BasePresetFemale = AddBasePreset(Female, Modifier, 0, 10)
-	BasePresetFemale = AddBasePreset(Female, Modifier, 1, 10)
-	BasePresetFemale = AddBasePreset(Female, Modifier, 2, 25)
-	BasePresetFemale = AddBasePreset(Female, Modifier, 3, 25)
-	BasePresetFemale = AddBasePreset(Female, Modifier, 6, 100)
-	BasePresetFemale = AddBasePreset(Female, Modifier, 7, 100)
-	BasePresetFemale = AddBasePreset(Female, Modifier, 12, 30)
-	BasePresetFemale = AddBasePreset(Female, Modifier, 13, 30)
-	BasePresetFemale = AddBasePreset(Female, Phoneme, 4, 35)
-	BasePresetFemale = AddBasePreset(Female, Phoneme, 10, 20)
-	BasePresetFemale = AddBasePreset(Female, Phoneme, 12, 30)
 endFunction
