@@ -385,26 +385,12 @@ function SyncThread()
 			GetEnjoyment()
 			; Send expression
 			IsMouthOpen = Animation.UseOpenMouth(position, stage)
-			Expression.ApplyTo(ActorRef, Enjoyment, BaseRef.GetSex() == 1, IsMouthOpen)
-			; ExpressionPreset = Lib.ExpressionLib.PresetMixin(Lib.ExpressionLib.GetBasePreset(IsFemale), GetEnjoyment(), IsFemale, IsVictim)
-			; Lib.ExpressionLib.ApplyPreset(ExpressionPreset, ActorRef, IsMouthOpen)
+			DoExpression()
 			; Send SOS event
 			if Lib.SOSEnabled && Animation.GetGender(position) == 0
 				Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 				int offset = Animation.GetSchlong(position, stage)
 				Debug.SendAnimationEvent(ActorRef, "SOSBend"+offset)
-				; string bend
-				; if offset < 0
-				; 	bend = "SOSBendDown0"+((Math.Abs(offset) / 2) as int)
-				; elseif offset > 0
-				; 	bend = "SOSBendUp0"+((Math.Abs(offset) / 2) as int)
-				; else
-				; 	bend = "SOSNoBend"
-				; endIf
-				; Debug.SendAnimationEvent(ActorRef, bend)
-				; string name = ActorRef.GetLeveledActorBase().GetName()
-				; Debug.Notification(name+" Offset["+offset+"]: "+bend)
-				; Debug.Trace(name+" Offset: SOSBend"+offset+ ": Sent -> "+bend)
 			endif
 			; Equip Strapon if needed
 			if IsFemale && Lib.bUseStrapons && Animation.UseStrapon(position, stage)
@@ -538,9 +524,7 @@ state Animating
 		toggle = !toggle
 		if toggle
 			GetEnjoyment()
-			if Expression != none
-				Expression.ApplyTo(ActorRef, Enjoyment, IsFemale, IsMouthOpen)
-			endIf
+			DoExpression()
 		endIf
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent
@@ -620,6 +604,16 @@ endState
 ;/-----------------------------------------------\;
 ;|	Misc Functions                               |;
 ;\-----------------------------------------------/;
+
+function DoExpression()
+	if Expression == none || IsCreature
+		; Nothing
+	elseIf IsVictim
+		Expression.ApplyTo(ActorRef, GetPain(), IsFemale, IsMouthOpen)
+	else
+		Expression.ApplyTo(ActorRef, Enjoyment, IsFemale, IsMouthOpen)
+	endIf
+endFunction
 
 int function GetEnjoyment()
 	; Init weights

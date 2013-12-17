@@ -24,29 +24,25 @@ endProperty
 ;\-----------------------------------------------/;
 
 sslBaseExpression function RandomByTag(string tag)
-	int count
-	; Get tagged count
-	int i = slotted
+	bool[] valid = sslUtility.BoolArray(Slotted)
+	int i = Slotted
 	while i
 		i -= 1
-		count += Slots[i].HasTag(tag) as int
+		valid[i] = Slots[i].Registered && Slots[i].HasTag(tag)
 	endWhile
-	if count == 0
-		return none ; No valid slots found
+	; No valid voices found
+	if valid.Find(true) == -1
+		return none
 	endIf
-	; Determine random
-	int random = Utility.RandomInt(1, count)
-	; Get random
-	i = slotted
-	while i
-		i -= 1
-		if Slots[i].HasTag(tag)
-			if random == count
-				return Slots[i]
-			endIf
-			count -= 1
-		endIf
-	endWhile
+	; Pick random index within range of valid
+	int rand = Utility.RandomInt(valid.Find(true), valid.RFind(true))
+	int pos = valid.Find(true, rand)
+	if pos == -1
+		pos = valid.RFind(true, rand)
+	endIf
+	if pos != -1
+		return Slots[pos]
+	endIf
 	return none
 endFunction
 
