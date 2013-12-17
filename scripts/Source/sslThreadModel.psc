@@ -663,7 +663,11 @@ sslBaseExpression function GetExpression(actor position)
 endFunction
 
 int function GetEnjoyment(actor position)
-	ActorAlias(position).Enjoyment
+	ActorAlias(position).GetEnjoyment()
+endFunction
+
+int function GetPain(actor position)
+	ActorAlias(position).GetPain()
 endFunction
 
 bool function HasPlayer()

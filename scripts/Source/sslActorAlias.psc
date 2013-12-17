@@ -168,6 +168,10 @@ function UnlockActor()
 	; Detach positioning marker
 	ActorRef.StopTranslation()
 	ActorRef.SetVehicle(none)
+	; Clear expression
+	if Expression != none
+		Expression.ClearMFG(ActorRef)
+	endIf
 endFunction
 
 
@@ -607,10 +611,6 @@ state Reset
 		endIf
 		; Unlock their movement
 		UnlockActor()
-		; Clear expression
-		if Expression != none
-			Expression.ClearMFG(ActorRef)
-		endIf
 		; Free up alias slot
 		ClearAlias()
 		GoToState("")
