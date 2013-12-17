@@ -3,7 +3,7 @@ scriptname StorageUtil Hidden
 ;/
 	MOD AUTHORS, READ!
 
-	This script contains functions for saving and loading any amount of int, float and string values
+	This script contains functions for saving and loading any amount of int, float, form and string values
 	by name on a form or globally. These values can be accessed and changed from any mod which allows
 	mods to become compatible with each other without adding any requirements to the other mod or its version
 	other than this plugin.
@@ -16,10 +16,6 @@ scriptname StorageUtil Hidden
 	Saving MCM config values here would allow other mods to change your mod settings which may
 	be useful. It should also allow you to change MCM config script without worrying about versioning
 	since there are no new variables in the script itself.
-
-	To save forms use this as example:
-	StorageUtil.SetIntValue(akTarget, "Friend", akCaster.GetFormID())
-	Actor friend = Game.GetForm(StorageUtil.GetIntValue(akTarget, "Friend")) as Actor
 
 	Functions that start with File in the name will save values to a separate file, so that you can
 	access the same values from all savegames. This may be useful for configuration settings.
@@ -45,17 +41,17 @@ scriptname StorageUtil Hidden
 
 	You can also use this storage to make your mod functions available to other mods, for example if
 	your mod has a function that sets an Actor to be invisible you could add a script that checks:
-	int i = StorageUtil.IntListCount(none, "MakeInvisible")
+	int i = StorageUtil.FormListCount(none, "MakeInvisible")
 	while(i > 0)
 		i--
-		Actor make = Game.GetForm(StorageUtil.IntListGet(none, "MakeInvisible", i)) as Actor
+		Actor make = StorageUtil.FormListGet(none, "MakeInvisible", i) as Actor
 		if(make)
 			MyScriptFunction(make)
 		endif
-		StorageUtil.IntListRemoveAt(none, "MakeInvisible", i)
+		StorageUtil.FormListRemoveAt(none, "MakeInvisible", i)
 	endwhile
 	And the other mod could write:
-	StorageUtil.IntListAdd(none, "MakeInvisible", myActor.GetFormID())
+	StorageUtil.FormListAdd(none, "MakeInvisible", myActor)
 	to make someone invisible using your mod. But if your mod isn't present then nothing happens.
 	This is just an example, I'm sure you can find better ways to implement compatibility, it would
 	help to include a documentation for other modders if you do.
@@ -99,6 +95,15 @@ float function SetFloatValue(Form obj, string key, float value) global native
 /;
 string function SetStringValue(Form obj, string key, string value) global native
 
+;/ Set form value globally or on any form by name and return
+   previous value.
+
+   obj: form to save on. Set none to save globally.
+   key: name of value.
+   value: value itself.
+/;
+Form function SetFormValue(Form obj, string key, Form value) global native
+
 
 ;/ Remove a previously set int value on an form or globally and
    return if successful. This will return false if value didn't exist.
@@ -126,6 +131,14 @@ bool function UnsetFloatValue(Form obj, string key) global native
 /;
 bool function UnsetStringValue(Form obj, string key) global native
 
+;/ Remove a previously set form value on an form or globally and
+   return if successful. This will return false if value didn't exist.
+
+   obj: form to remove from. Set none to remove global value.
+   key: name of value.
+/;
+bool function UnsetFormValue(Form obj, string key) global native
+
 
 ;/ Check if value has been set on form or globally.
 
@@ -149,6 +162,13 @@ bool function HasFloatValue(Form obj, string key) global native
    key: name of value.
 /;
 bool function HasStringValue(Form obj, string key) global native
+
+;/ Check if value has been set on form or globally.
+
+   obj: form to check on. Set none to check global value.
+   key: name of value.
+/;
+bool function HasFormValue(Form obj, string key) global native
 
 
 ;/ Get previously saved int value on form or globally.
@@ -176,6 +196,14 @@ float function GetFloatValue(Form obj, string key, float missing = 0.0) global n
    [optional] missing: if value has not been set, return this value instead.
 /;
 string function GetStringValue(Form obj, string key, string missing = "") global native
+
+;/ Get previously saved form value on form or globally.
+
+   obj: form to get from. Set none to get global value.
+   key: name of value.
+   [optional] missing: if value has not been set, return this value instead.
+/;
+Form function GetFormValue(Form obj, string key, Form missing = none) global native
 
 
 ;/ Add an int to a list on form or globally and return
@@ -422,6 +450,88 @@ string function StringListSet(Form obj, string key, int index, string value) glo
    value: value to search.
 /;
 int function StringListFind(Form obj, string key, string value) global native
+
+
+;/ Add a form to a list on form or globally and return
+   the value's new index. Index can be -1 if we were unable to add
+   the value.
+
+   obj: form to add to. Set none to add global value.
+   key: name of value.
+   value: value to add.
+   [optional] allowDuplicate: allow adding value to list if this value
+                              already exists in the list.
+/;
+int function FormListAdd(Form obj, string key, Form value, bool allowDuplicate = true) global native
+
+
+;/ Remove a previously added form value from a list on form
+   or globally and return how many instances of this value were removed.
+
+   obj: form to remove from. Set none to remove global value.
+   key: name of value.
+   value: value to remove.
+   [optional] allowInstances: remove all instances of this value in a list.
+/;
+int function FormListRemove(Form obj, string key, Form value, bool allInstances = false) global native
+
+
+;/ Clear a list of values (unset) on an form or globally and
+   return the previous size of list.
+
+   obj: form to clear on. Set none to clear global list.
+   key: name of list.
+/;
+int function FormListClear(Form obj, string key) global native
+
+
+;/ Remove a value from list by index on form or globally and
+   return if we were successful in doing so.
+
+   obj: form to remove from. Set none to remove global value.
+   key: name of list.
+   index: index of value in the list.
+/;
+bool function FormListRemoveAt(Form obj, string key, int index) global native
+
+
+;/ Get size of a list on form or globally.
+
+   obj: form to check on. Set none to check global list.
+   key: name of list.
+/;
+int function FormListCount(Form obj, string key) global native
+
+
+;/ Get a value from list by index on form or globally.
+   This will return 0 as value if there was a problem.
+
+   obj: form to get value on. Set none to get global list value.
+   key: name of list.
+   index: index of value in the list.
+/;
+Form function FormListGet(Form obj, string key, int index) global native
+
+
+;/ Set a value in list by index on form or globally.
+   This will return the previous value or 0 if there was a problem.
+
+   obj: form to set value on. Set none to set global list value.
+   key: name of list.
+   index: index of value in the list.
+   value: value to set to.
+/;
+Form function FormListSet(Form obj, string key, int index, Form value) global native
+
+
+;/ Find a value in list on form or globally and return its
+   index or -1 if value was not found.
+
+   obj: form to find value on. Set none to find global list value.
+   key: name of list.
+   value: value to search.
+/;
+int function FormListFind(Form obj, string key, Form value) global native
 
 
 
@@ -775,6 +885,10 @@ int function debug_GetStringKeysCount(Form obj) global native
 
 ;/ Get the amount of variables saved on an form or globally.
 /;
+int function debug_GetFormKeysCount(Form obj) global native
+
+;/ Get the amount of variables saved on an form or globally.
+/;
 int function debug_GetIntListKeysCount(Form obj) global native
 
 ;/ Get the amount of variables saved on an form or globally.
@@ -784,6 +898,10 @@ int function debug_GetFloatListKeysCount(Form obj) global native
 ;/ Get the amount of variables saved on an form or globally.
 /;
 int function debug_GetStringListKeysCount(Form obj) global native
+
+;/ Get the amount of variables saved on an form or globally.
+/;
+int function debug_GetFormListKeysCount(Form obj) global native
 
 ;/ Return the name of Nth variable that is saved on this form
    or globally.
@@ -803,6 +921,11 @@ string function debug_GetStringKey(Form obj, int index) global native
 ;/ Return the name of Nth variable that is saved on this form
    or globally.
 /;
+string function debug_GetFormKey(Form obj, int index) global native
+
+;/ Return the name of Nth variable that is saved on this form
+   or globally.
+/;
 string function debug_GetIntListKey(Form obj, int index) global native
 
 ;/ Return the name of Nth variable that is saved on this form
@@ -814,6 +937,11 @@ string function debug_GetFloatListKey(Form obj, int index) global native
    or globally.
 /;
 string function debug_GetStringListKey(Form obj, int index) global native
+
+;/ Return the name of Nth variable that is saved on this form
+   or globally.
+/;
+string function debug_GetFormListKey(Form obj, int index) global native
 
 ;/ Return the count of objects that we have saved variables on.
 /;
@@ -829,6 +957,10 @@ int function debug_GetStringObjectCount() global native
 
 ;/ Return the count of objects that we have saved variables on.
 /;
+int function debug_GetFormObjectCount() global native
+
+;/ Return the count of objects that we have saved variables on.
+/;
 int function debug_GetIntListObjectCount() global native
 
 ;/ Return the count of objects that we have saved variables on.
@@ -838,6 +970,10 @@ int function debug_GetFloatListObjectCount() global native
 ;/ Return the count of objects that we have saved variables on.
 /;
 int function debug_GetStringListObjectCount() global native
+
+;/ Return the count of objects that we have saved variables on.
+/;
+int function debug_GetFormListObjectCount() global native
 
 ;/ Get the Nth object that we have saved variables on.
 /;
@@ -853,6 +989,10 @@ Form function debug_GetStringObject(int index) global native
 
 ;/ Get the Nth object that we have saved variables on.
 /;
+Form function debug_GetFormObject(int index) global native
+
+;/ Get the Nth object that we have saved variables on.
+/;
 Form function debug_GetIntListObject(int index) global native
 
 ;/ Get the Nth object that we have saved variables on.
@@ -862,6 +1002,10 @@ Form function debug_GetFloatListObject(int index) global native
 ;/ Get the Nth object that we have saved variables on.
 /;
 Form function debug_GetStringListObject(int index) global native
+
+;/ Get the Nth object that we have saved variables on.
+/;
+Form function debug_GetFormListObject(int index) global native
 
 ;/ Get the amount of variables saved.
 /;
