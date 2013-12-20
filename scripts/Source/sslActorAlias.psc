@@ -128,7 +128,6 @@ endFunction
 
 function LockActor()
 	; Start DoNothing package
-	ActorRef.AddToFaction(Lib.AnimatingFaction)
 	ActorRef.SetFactionRank(Lib.AnimatingFaction, 1)
 	ActorRef.EvaluatePackage()
 	; Disable movement
@@ -218,7 +217,6 @@ function StopAnimating(bool quick = false)
 		ActorRef.PushActorAway(ActorRef, 1.0)
 	else
 		; Reset NPC/PC Idle Quickly
-		Debug.SendAnimationEvent(ActorRef, "JumpLand")
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 		; Ragdoll NPC/PC if enabled and not in TFC
 		if !quick && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
