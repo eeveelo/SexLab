@@ -2,12 +2,7 @@ scriptname sslCreatureAnimationSlots extends sslAnimationSlots
 
 sslCreatureAnimationDefaults property CreatureDefaults auto
 
-form[] ValidRaces
-form[] property CreatureRaces hidden
-	form[] function get()
-		return ValidRaces
-	endFunction
-endProperty
+FormList property CreatureTypes auto
 
 sslBaseAnimation[] function GetByRace(int actors, Race creature)
 	bool[] valid = sslUtility.BoolArray(Slotted)
@@ -22,23 +17,25 @@ sslBaseAnimation[] function GetByRace(int actors, Race creature)
 endFunction
 
 bool function HasAnimation(Race creature, Race creature2 = none)
-	int i = Slotted
-	while i
-		i -= 1
-		if Searchable(Slots[i]) && Slots[i].HasRace(creature) && (creature2 == none || Slots[i].HasRace(creature2))
-			return true
-		endIf
-	endWhile
+	if CreatureTypes.HasForm(creature)
+		int i = Slotted
+		while i
+			i -= 1
+			if Searchable(Slots[i]) && Slots[i].HasRace(creature) && (creature2 == none || Slots[i].HasRace(creature2))
+				return true
+			endIf
+		endWhile
+	endIf
 	return false
 endFunction
 
 bool function HasRace(Race creature)
-	return ValidRaces.Length != 0 && ValidRaces.Find(creature) != -1
+	return CreatureTypes.HasForm(creature)
 endFunction
 
 function AddRace(Race creature)
-	if !HasRace(creature)
-		ValidRaces = sslUtility.PushForm(creature, ValidRaces)
+	if !CreatureTypes.HasForm(creature)
+		CreatureTypes.AddForm(creature)
 	endIf
 endFunction
 
@@ -58,6 +55,5 @@ endFunction
 
 function Initialize()
 	parent.Initialize()
-	form[] fDel
-	ValidRaces = fDel
+	CreatureTypes.Revert()
 endFunction

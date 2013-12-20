@@ -524,7 +524,7 @@ int function GetGender(actor a)
 		endIf
 	endIf
 	ActorBase Base = a.GetLeveledActorBase()
-	if AnimLib.CreatureSlots.HasRace(Base.GetRace())
+	if a != PlayerRef && AnimLib.CreatureSlots.HasRace(Base.GetRace())
 		return 2 ; Creature
 	else
 		return Base.GetSex() ; Default

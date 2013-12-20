@@ -31,7 +31,7 @@ string function MakeGenderTag(actor[] Positions)
 endFunction
 
 bool function AllowedCreature(Race creature)
-	return bAllowCreatures && CreatureSlots.HasRace(creature)
+	return bAllowCreatures && CreatureSlots.HasAnimation(creature)
 endFunction
 
 bool function AllowedCreatureCombination(Race creature, Race creature2)
