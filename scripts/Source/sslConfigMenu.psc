@@ -2,7 +2,7 @@ scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
 int function GetVersion()
-	return 13000
+	return 13001
 endFunction
 
 string function GetStringVer()
