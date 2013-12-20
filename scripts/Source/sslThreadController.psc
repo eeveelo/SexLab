@@ -408,6 +408,8 @@ endFunction
 function EndAnimation(bool quick = false)
 	UnregisterForUpdate()
 	GoToState("")
+	; Send end event
+	SendThreadEvent("AnimationEnd")
 
 	; TEMP DEBUG INFO
 	; Animation.Enabled = false
@@ -441,10 +443,12 @@ function EndAnimation(bool quick = false)
 		; Stop hotkeys to prevent further stage advancing
 		Lib.ControlLib._HKClear()
 	endIf
-	; Send end event
-	SendThreadEvent("AnimationEnd")
 	; Reset actors & wait for clear state
 	ActorAction("Reset", "")
+	; Give AnimationEnd hooks some small room to breath
+	if !FastEnd
+		Utility.Wait(5.0)
+	endIf
 	; Clear & Reset animation thread
 	Initialize()
 endFunction

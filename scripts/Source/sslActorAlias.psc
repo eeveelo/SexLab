@@ -556,7 +556,7 @@ endState
 
 state Reset
 	event OnBeginState()
-		RegisterForSingleUpdate(0.1)
+		RegisterForSingleUpdate(0.5)
 	endEvent
 	event OnUpdate()
 		UnregisterForUpdate()
