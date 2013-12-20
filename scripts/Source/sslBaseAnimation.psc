@@ -18,12 +18,14 @@ string[] tags
 form[] races
 float[] timerData
 float[] offsetData ; x, y, z, rotation
-float[] offsetDefaults ; x, y, z, rotation
 bool[] switchData ; silence, mouth, strapon
 int[] positionData ; gender, cum
 int[] schlongData ; bend
 
 bool waiting
+
+; Storage key
+Quest Storage
 
 ; Information
 bool property Registered hidden
@@ -166,7 +168,6 @@ int function AddPositionStage(int position, string animation, float forward = 0.
 	offset[2] = up
 	offset[3] = rotate
 	offsetData = sslUtility.MergeFloatArray(offset, offsetData)
-	offsetDefaults = sslUtility.MergeFloatArray(offset, offsetDefaults)
 
 	; Set switch information
 	bool[] switch = new bool[3]
@@ -202,6 +203,10 @@ endFunction
 ;|	Data Accessors                               |;
 ;\-----------------------------------------------/;
 
+string function KeyStr(int i1, int i2)
+	return Name+"["+i1+"-"+i2+"]"
+endFunction
+
 bool function Exists(string method, int position, int stage = -99)
 	if position > actors || position < 0
 		_Log("Unknown actor position, '"+position+"' given.", method)
@@ -218,7 +223,15 @@ int function DataIndex(int slots, int position, int stage, int slot)
 endFunction
 
 float function AccessOffset(int position, int stage, int slot)
-	return offsetData[DataIndex(4, position, stage, slot)]
+	return offsetData[DataIndex(4, position, stage, slot)] + StorageUtil.FloatListGet(Storage, KeyStr(position, stage), slot)
+endFunction
+
+float function GetAdjustment(int position, int stage, int slot)
+	string KeyStr = KeyStr(position, stage)
+	if StorageUtil.FloatListCount(Storage, KeyStr) == 0
+		return 0.0
+	endIf
+	return StorageUtil.FloatListGet(Storage, KeyStr, slot)
 endFunction
 
 bool function AccessSwitch(int position, int stage, int slot)
@@ -276,8 +289,11 @@ function UpdateAllOffsets(int slot, int position, float adjust)
 endFunction
 
 function UpdateOffset(int slot, int position, int stage, float adjust)
-	int index = DataIndex(4, position, stage, slot)
-	offsetData[index] = offsetData[index] + adjust
+	string KeyStr = KeyStr(position, stage)
+	while StorageUtil.FloatListCount(Storage, KeyStr) < 4
+		StorageUtil.FloatListAdd(Storage, KeyStr, 0.0)
+	endWhile
+	StorageUtil.FloatListSet(Storage, KeyStr, slot, (StorageUtil.FloatListGet(Storage, KeyStr, slot) + adjust))
 endFunction
 
 float[] function UpdateForward(int position, int stage, float adjust, bool adjuststage = false)
@@ -314,9 +330,15 @@ float[] function UpdateUp(int position, int stage, float adjust, bool adjuststag
 endFunction
 
 function RestoreOffsets()
-	float[] defaults = offsetDefaults
-	offsetData = defaults
-	offsetDefaults = defaults
+	int position
+	while position < actors
+		int stage = stages
+		while stage
+			StorageUtil.FloatListClear(Storage, KeyStr(position, stage))
+			stage -= 1
+		endWhile
+		position += 1
+	endWhile
 endFunction
 
 ;/-----------------------------------------------\;
@@ -559,23 +581,27 @@ function Initialize()
 	SFX = 0
 	content = 0
 
-	float[] floatDel
-	timerData = floatDel
-	offsetData = floatDel
-	offsetDefaults = floatDel
+	float[] floatDel1
+	timerData = floatDel1
+	float[] floatDel2
+	offsetData = floatDel2
 
-	int[] intDel
-	schlongData = intDel
-	positionData = intDel
 	genders = new int[3]
+	int[] intDel1
+	schlongData = intDel1
+	int[] intDel2
+	positionData = intDel2
 
 	bool[] switchDel
 	switchData = switchDel
 
-	string[] stringDel
-	tags = stringDel
-	animations = stringDel
+	string[] stringDel1
+	tags = stringDel1
+	string[] stringDel2
+	animations = stringDel2
 
 	form[] formDel
 	races = formDel
+
+	Storage = GetOwningQuest()
 endFunction
