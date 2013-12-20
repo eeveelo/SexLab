@@ -19,13 +19,15 @@ int property ActiveThreads hidden
 endProperty
 
 int function FindActorController(actor toFind)
-	int i
-	while i < 15
-		if ThreadView[i].HasActor(toFind)
-			return i
-		endIf
-		i += 1
-	endWhile
+	if toFind != none
+		int i
+		while i < 15
+			if ThreadView[i].HasActor(toFind)
+				return i
+			endIf
+			i += 1
+		endWhile
+	endIf
 	return -1
 endFunction
 
@@ -51,7 +53,7 @@ endFunction
 
 sslThreadController function PickController()
 	int i
-	while i < ThreadView.Length
+	while i < 15
 		if !ThreadView[i].IsLocked
 			return ThreadView[i]
 		endIf

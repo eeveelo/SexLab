@@ -190,25 +190,11 @@ actor[] function SortActors(actor[] Positions, bool femaleFirst = true)
 endFunction
 
 function ApplyCum(actor a, int cumID)
-	if cumID < 1
+	if cumID < 1 || cumID > 7
 		return ; Invalid ID
 	endIf
 	; Apply passed id
-	if cumID == 1
-		AddCum(a, true, false, false)
-	elseif cumID == 2
-		AddCum(a, false, true, false)
-	elseif cumID == 3
-		AddCum(a, false, false, true)
-	elseif cumID == 4
-		AddCum(a, true, true, false)
-	elseif cumID == 5
-		AddCum(a, true, false, true)
-	elseif cumID == 6
-		AddCum(a, false, true, true)
-	else
-		AddCum(a, true, true, true)
-	endIf
+	AddCum(a, (cumID == 1 || cumID == 4 || cumID == 5 || cumID == 7), (cumID == 2 || cumID == 4 || cumID == 6 || cumID == 7), (cumID == 3 || cumID == 5 || cumID == 6 || cumID == 7))
 endFunction
 
 function AddCum(actor a, bool vaginal = true, bool oral = true, bool anal = true)
@@ -453,14 +439,14 @@ function UnequipStrapon(actor a)
 	endIf
 endFunction
 
+bool function IsActorActive(actor a)
+	return ThreadSlots.FindActorController(a) != -1
+endFunction
+
 int function ValidateActor(actor a)
-	if a.IsInFaction(AnimatingFaction)
-		if ThreadSlots.FindActorController(a) == -1
-			a.RemoveFromFaction(AnimatingFaction)
-		else
-			Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They appear to already be animating")
-			return -10
-		endIf
+	if IsActorActive(a)
+		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They appear to already be animating")
+		return -10
 	endIf
 	if ValidActorList.Find(a) != -1
 		return 1
@@ -488,7 +474,6 @@ int function ValidateActor(actor a)
 	Race ActorRace = a.GetLeveledActorBase().GetRace()
 	String RaceName = ActorRace.GetName()
 	if ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Child") != -1 || StringUtil.Find(RaceName, "117") != -1 || StringUtil.Find(RaceName, "Monli") != -1 || StringUtil.Find(RaceName, "Elin") != -1 || StringUtil.Find(RaceName, "Enfant") != -1
-		ForbidActor(a)
 		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They are forbidden from animating")
 		return -11
 	endIf

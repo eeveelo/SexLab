@@ -138,6 +138,10 @@ bool function IsValidActor(actor a)
 	return ActorLib.IsValidActor(a)
 endFunction
 
+bool function IsActorActive(actor a)
+	return ActorLib.IsActorActive(a)
+endFunction
+
 actor[] function MakeActorArray(actor a1 = none, actor a2 = none, actor a3 = none, actor a4 = none, actor a5 = none)
 	return ActorLib.MakeActorArray(a1, a2, a3, a4, a5)
 endFunction

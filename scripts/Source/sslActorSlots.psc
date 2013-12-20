@@ -29,14 +29,9 @@ sslActorAlias[] function GetActorSlots(int tid)
 endFunction
 
 int function FindActor(actor position)
-	if position != none
-		int i = 0
-		while i < 75
-			if (ActorSlot[i].GetReference() as actor) == position
-				return i
-			endIf
-			i += 1
-		endWhile
+	sslThreadController Thread = Lib.ThreadSlots.GetActorController(position)
+	if Thread != none
+		return ActorSlot.Find(Thread.ActorAlias(position))
 	endIf
 	return -1
 endFunction
