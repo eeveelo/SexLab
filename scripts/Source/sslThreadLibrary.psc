@@ -8,6 +8,7 @@ sslVoiceLibrary property Voices auto
 sslActorLibrary property Actors auto
 sslExpressionLibrary property Expressions auto
 sslControlLibrary property ControlLib auto
+sslAnimationLibrary property AnimLib auto
 
 ; Data
 actor property PlayerRef auto

@@ -263,7 +263,7 @@ state Making
 			i += 1
 		endWhile
 
-		; Check for valid animations
+		; Check for valid creature animations
 		if HasCreature
 			primaryAnimations = Lib.CreatureAnimations.GetByRace(actors, Creature)
 			DisableLeadIn(true)
@@ -290,7 +290,7 @@ state Making
 			endIf
 			; A bed was selected, should we use it?
 			if BedRef != none
-				bool use = bed == 2 || Lib.sNPCBed == "$SSL_Always"
+				bool use = (bed == 2 || Lib.sNPCBed == "$SSL_Always")
 				if PlayerRef != none && !IsVictim(PlayerRef)
 					use = Lib.mUseBed.Show() as bool
 				elseIf Lib.sNPCBed == "$SSL_Sometimes"
@@ -299,8 +299,6 @@ state Making
 				if use
 					; Center on found bed
 					CenterOnObject(BedRef)
-					; Suppress standing animations with bed
-					suppress += "Standing,"
 				endIf
 			endIf
 		endIf
@@ -332,22 +330,9 @@ state Making
 			endIf
 		endIf
 
-		; Suppress aggressive tag
-		if !IsAggressive
-			suppress += "Aggressive,"
-		endIf
-
 		if primaryAnimations.Length == 0
-			; Same sex pairings
-			if (Females == 2 && Males == 0) || (Males == 2 && Females == 0)
-				primaryAnimations = Lib.Animations.MergeLists(Lib.Animations.GetByTags(actors, Lib.Animations.Lib.MakeGenderTag(Positions), suppress), Lib.Animations.GetByTags(actors, "FM", suppress))
-			; Grab animations like normal
-			elseif actors < 3
-				primaryAnimations = Lib.Animations.GetByTags(actors, Lib.Animations.Lib.MakeGenderTag(Positions), suppress)
-			; Get 3P + animations ignoring gender
-			elseif actors >= 3
-				primaryAnimations = Lib.Animations.GetByType(actors, aggressive = IsAggressive)
-			endIf
+			; Get default animation selection
+			primaryAnimations = Lib.Animations.GetByDefault(Males, Females, IsAggressive, IsUsingBed)
 			; Check for valid animations again
 			if primaryAnimations.Length == 0
 				_Log("Unable to find valid animations", "StartThread", "FATAL")
@@ -356,7 +341,7 @@ state Making
 		endIf
 
 		; Determine if foreplay lead in should be used
-		if Lib.bForeplayStage && !leadInDisabled && leadAnimations.Length == 0 && !HasCreature && !IsAggressive && actors == 2
+		if !HasCreature && !IsAggressive && actors == 2 && Lib.bForeplayStage && !leadInDisabled && leadAnimations.Length == 0
 			SetLeadAnimations(Lib.Animations.GetByTags(2, "LeadIn", suppress))
 		endIf
 

@@ -45,6 +45,37 @@ sslBaseAnimation[] function PickByActors(actor[] Positions, int limit = 64, bool
 	return Picked
 endFunction
 
+sslBaseAnimation[] function GetByDefault(int Males, int Females, bool IsAggressive = false, bool UsingBed = false)
+	if Males == 0 && Females == 0
+		return none ; No actors passed or creatures present
+	endIf
+	; Info
+	int Actors = (Males + Females)
+	bool SameSex = (Females == 2 && Males == 0) || (Males == 2 && Females == 0)
+	; Search
+	bool[] valid = sslUtility.BoolArray(Slotted)
+	int i = Slotted
+	while i
+		i -= 1
+		; Check for appropiate enabled aniamtion
+		valid[i] = Searchable(Slots[i]) && Actors == Slots[i].PositionCount
+		; Suppress or ignore aggressive animation tags
+		valid[i] = valid[i] && (IsAggressive == Slots[i].HasTag("Aggressive") || !Lib.bRestrictAggressive)
+		; Suppress standing animations if on a bed
+		valid[i] = valid[i] && (!UsingBed || (usingbed && !Slots[i].HasTag("Standing")))
+		; Get SameSex + Non-SameSex
+		if SameSex
+			valid[i] = valid[i] && (Slots[i].HasTag("FM") || (Males == Slots[i].Males && Females == Slots[i].Females))
+		; Ignore genders for 3P+
+		elseIf Actors < 3
+			valid[i] = valid[i] && Males == Slots[i].Males && Females == Slots[i].Females
+		endIf
+	endWhile
+	sslBaseAnimation[] output = GetList(valid)
+	_LogFound("GetByDefault", Males+", "+Females+", "+IsAggressive+", "+UsingBed, output)
+	return output
+endFunction
+
 sslBaseAnimation function GetByName(string findName)
 	int i = 0
 	while i < Slotted
