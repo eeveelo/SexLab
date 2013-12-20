@@ -37,6 +37,7 @@ event OnGameReload()
 	parent.OnGameReload()
 	_CheckSystem()
 	ThreadSlots._StopAll()
+	ActorLib.ValidActorList.RemoveAddedForm(PlayerRef)
 endEvent
 
 ; Framework
@@ -1662,8 +1663,4 @@ function _CheckSystem()
 			mods = 0
 		endIf
 	endwhile
-	; Add debug spell
-	if DebugMode() && !PlayerRef.HasSpell(SexLabDebugSpell)
-		PlayerRef.AddSpell(SexLabDebugSpell, true)
-	endIf
 endFunction

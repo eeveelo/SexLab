@@ -174,7 +174,6 @@ function UnlockActor()
 	endIf
 endFunction
 
-
 function EquipStrapon()
 	if strapon == none && Lib.HasStrapon(ActorRef)
 		return
@@ -436,6 +435,7 @@ endFunction
 ;/-----------------------------------------------\;
 ;|	Animation/Voice Loop                         |;
 ;\-----------------------------------------------/;
+
 state Prepare
 	event OnBeginState()
 		RegisterForSingleUpdate(0.1)
