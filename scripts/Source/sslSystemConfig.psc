@@ -7,6 +7,18 @@ sslVoiceLibrary property VoiceLib auto
 sslThreadLibrary property ThreadLib auto
 sslActorLibrary property ActorLib auto
 sslControlLibrary property ControlLib auto
+sslExpressionLibrary property ExpressionLib auto
+
+; Object Registeries
+sslAnimationSlots property AnimSlots auto
+sslCreatureAnimationSlots property CreatureAnimSlots auto
+sslVoiceSlots property VoiceSlots auto
+sslThreadSlots property ThreadSlots auto
+sslActorSlots property ActorSlots auto
+sslExpressionSlots property ExpressionSlots auto
+
+; Misc
+sslActorStats property ActorStats auto
 
 ; Animation Library
 bool property bRestrictAggressive hidden
