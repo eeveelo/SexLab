@@ -3,6 +3,7 @@ scriptname sslExpressionDefaults extends sslExpressionFactory
 function LoadExpressions()
 	RegisterExpression("Pleasure")
 	RegisterExpression("Happy")
+	RegisterExpression("Joy")
 	RegisterExpression("Shy")
 	RegisterExpression("Sad")
 	RegisterExpression("Afraid")
@@ -19,12 +20,11 @@ function Pleasure(string eventName, string id, float argNum, form sender)
 
 	AddTag("Consensual")
 
-	; // Female Phase 1
+	; Female
 	AddPreset(1, Female, Expression, 2, 30)
 	AddPreset(1, Female, Phoneme, 5, 30)
 	AddPreset(1, Female, Phoneme, 6, 10)
 
-	; // Female Phase 2
 	AddPreset(2, Female, Expression, 10, 50)
 	AddPreset(2, Female, Modifier, 4, 30)
 	AddPreset(2, Female, Modifier, 5, 30)
@@ -33,7 +33,6 @@ function Pleasure(string eventName, string id, float argNum, form sender)
 	AddPreset(2, Female, Phoneme, 0, 20)
 	AddPreset(2, Female, Phoneme, 3, 30)
 
-	; // Female Phase 3
 	AddPreset(3, Female, Expression, 10, 70)
 	AddPreset(3, Female, Modifier, 2, 50)
 	AddPreset(3, Female, Modifier, 3, 50)
@@ -44,7 +43,6 @@ function Pleasure(string eventName, string id, float argNum, form sender)
 	AddPreset(3, Female, Phoneme, 12, 30)
 	AddPreset(3, Female, Phoneme, 13, 10)
 
-	; // Female Phase 4
 	AddPreset(4, Female, Expression, 10, 100)
 	AddPreset(4, Female, Modifier, 0, 10)
 	AddPreset(4, Female, Modifier, 1, 10)
@@ -58,7 +56,6 @@ function Pleasure(string eventName, string id, float argNum, form sender)
 	AddPreset(4, Female, Phoneme, 10, 20)
 	AddPreset(4, Female, Phoneme, 12, 30)
 
-	; // Female Phase 5
 	AddPreset(5, Female, Expression, 12, 60)
 	AddPreset(5, Female, Modifier, 0, 15)
 	AddPreset(5, Female, Modifier, 1, 15)
@@ -74,20 +71,18 @@ function Pleasure(string eventName, string id, float argNum, form sender)
 	AddPreset(5, Female, Phoneme, 12, 80)
 	AddPreset(5, Female, Phoneme, 15, 20)
 
-	; // Male Phase 1
+	; Male
 	AddPreset(1, Male, Expression, 13, 40)
-	AddPreset(2, Male, Modifier, 6, 20)
-	AddPreset(2, Male, Modifier, 7, 20)
+	AddPreset(1, Male, Modifier, 6, 20)
+	AddPreset(1, Male, Modifier, 7, 20)
 	AddPreset(1, Male, Phoneme, 5, 20)
 
-	; // Male Phase 2
 	AddPreset(2, Male, Expression, 8, 40)
 	AddPreset(2, Male, Modifier, 12, 40)
 	AddPreset(2, Male, Modifier, 13, 40)
 	AddPreset(2, Male, Phoneme, 2, 50)
 	AddPreset(2, Male, Phoneme, 13, 20)
 
-	; // Male Phase 3
 	AddPreset(3, Male, Expression, 13, 80)
 	AddPreset(3, Male, Modifier, 6, 80)
 	AddPreset(3, Male, Modifier, 7, 80)
@@ -461,6 +456,96 @@ function Sad(string eventName, string id, float argNum, form sender)
 	AddPreset(3, Male, Modifier, 13, 80)
 	AddPreset(3, Male, Phoneme, 5, 50)
 	AddPreset(3, Male, Phoneme, 11, 60)
+
+	Save()
+endFunction
+
+function Joy(string eventName, string id, float argNum, form sender)
+	Name = "Joy"
+
+	AddTag("Happy")
+	AddTag("Normal")
+	AddTag("Joy")
+	AddTag("Pleasure")
+
+	AddTag("Consensual")
+
+	; Female
+	AddPreset(1, Female, Expression, 10, 45)
+	AddPreset(1, Female, Phoneme, 0, 30)
+	AddPreset(1, Female, Phoneme, 7, 60)
+	AddPreset(1, Female, Phoneme, 12, 60)
+	AddPreset(1, Female, Modifier, 0, 30)
+	AddPreset(1, Female, Modifier, 1, 30)
+	AddPreset(1, Female, Modifier, 4, 100)
+	AddPreset(1, Female, Modifier, 5, 100)
+	AddPreset(1, Female, Modifier, 12, 70)
+	AddPreset(1, Female, Modifier, 13, 70)
+
+	AddPreset(2, Female, Expression, 10, 60)
+	AddPreset(2, Female, Phoneme, 7, 100)
+	AddPreset(2, Female, Phoneme, 15, 50)
+	AddPreset(2, Female, Modifier, 0, 30)
+	AddPreset(2, Female, Modifier, 1, 30)
+	AddPreset(2, Female, Modifier, 4, 100)
+	AddPreset(2, Female, Modifier, 5, 100)
+	AddPreset(2, Female, Modifier, 12, 70)
+	AddPreset(2, Female, Modifier, 13, 70)
+
+	AddPreset(3, Female, Expression, 10, 60)
+	AddPreset(3, Female, Phoneme, 7, 100)
+	AddPreset(3, Female, Phoneme, 15, 50)
+	AddPreset(3, Female, Modifier, 0, 30)
+	AddPreset(3, Female, Modifier, 1, 30)
+	AddPreset(3, Female, Modifier, 4, 100)
+	AddPreset(3, Female, Modifier, 5, 100)
+	AddPreset(3, Female, Modifier, 12, 70)
+	AddPreset(3, Female, Modifier, 13, 70)
+
+	AddPreset(4, Female, Expression, 10, 45)
+	AddPreset(4, Female, Phoneme, 0, 10)
+	AddPreset(4, Female, Phoneme, 6, 50)
+	AddPreset(4, Female, Phoneme, 7, 50)
+	AddPreset(4, Female, Modifier, 0, 30)
+	AddPreset(4, Female, Modifier, 1, 30)
+	AddPreset(4, Female, Modifier, 2, 70)
+	AddPreset(4, Female, Modifier, 3, 70)
+	AddPreset(4, Female, Modifier, 4, 100)
+	AddPreset(4, Female, Modifier, 5, 100)
+	AddPreset(4, Female, Modifier, 12, 70)
+	AddPreset(4, Female, Modifier, 13, 70)
+
+	AddPreset(5, Female, Expression, 10, 60)
+	AddPreset(5, Female, Phoneme, 0, 60)
+	AddPreset(5, Female, Phoneme, 6, 50)
+	AddPreset(5, Female, Phoneme, 7, 50)
+	AddPreset(5, Female, Modifier, 0, 30)
+	AddPreset(5, Female, Modifier, 1, 30)
+	AddPreset(5, Female, Modifier, 2, 70)
+	AddPreset(5, Female, Modifier, 3, 70)
+	AddPreset(5, Female, Modifier, 4, 100)
+	AddPreset(5, Female, Modifier, 5, 100)
+	AddPreset(5, Female, Modifier, 12, 70)
+	AddPreset(5, Female, Modifier, 13, 70)
+
+	; Male (copy of pleasure)
+	AddPreset(1, Male, Expression, 13, 40)
+	AddPreset(1, Male, Modifier, 6, 20)
+	AddPreset(1, Male, Modifier, 7, 20)
+	AddPreset(1, Male, Phoneme, 5, 20)
+
+	AddPreset(2, Male, Expression, 8, 40)
+	AddPreset(2, Male, Modifier, 12, 40)
+	AddPreset(2, Male, Modifier, 13, 40)
+	AddPreset(2, Male, Phoneme, 2, 50)
+	AddPreset(2, Male, Phoneme, 13, 20)
+
+	AddPreset(3, Male, Expression, 13, 80)
+	AddPreset(3, Male, Modifier, 6, 80)
+	AddPreset(3, Male, Modifier, 7, 80)
+	AddPreset(3, Male, Modifier, 12, 30)
+	AddPreset(3, Male, Modifier, 13, 30)
+	AddPreset(3, Male, Phoneme, 0, 30)
 
 	Save()
 endFunction
