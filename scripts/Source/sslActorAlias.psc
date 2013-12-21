@@ -169,7 +169,7 @@ function UnlockActor()
 	ActorRef.SetVehicle(none)
 	; Clear expression
 	if Expression != none
-		Expression.ClearMFG(ActorRef)
+		sslExpressionLibrary.ClearMFG(ActorRef)
 	endIf
 endFunction
 
@@ -511,7 +511,7 @@ state Animating
 		endIf
 		if Voice != none && !IsSilent
 			if Expression != none
-				Expression.ClearPhoneme(ActorRef)
+				sslExpressionLibrary.ClearPhoneme(ActorRef)
 			endIf
 			if VoiceInstance
 				Sound.StopInstance(VoiceInstance)
@@ -584,8 +584,7 @@ state Reset
 			; Cleanup extras
 			RemoveStrapon()
 			; Reset openmouth/mfg
-			ActorRef.ClearExpressionOverride()
-			MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
+			sslExpressionLibrary.ClearMFG(ActorRef)
 		endIf
 		; Unstrip
 		if !ActorRef.IsDead()

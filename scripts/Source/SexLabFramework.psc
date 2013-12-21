@@ -379,11 +379,19 @@ endFunction
 ;#---------------------------#
 
 function ClearMFG(actor ActorRef)
-	ExpressionLib.ClearMFG(ActorRef)
+	sslExpressionLibrary.ClearMFG(ActorRef)
 endFunction
 
 function ClearPhoneme(actor ActorRef)
-	ExpressionLib.ClearPhoneme(ActorRef)
+	sslExpressionLibrary.ClearPhoneme(ActorRef)
+endFunction
+
+function OpenMouth(actor ActorRef)
+	sslExpressionLibrary.OpenMouth(ActorRef)
+endFunction
+
+bool function IsMouthOpen(actor ActorRef)
+	return sslExpressionLibrary.IsMouthOpen(ActorRef)
 endFunction
 
 sslBaseExpression function PickExpression(actor ActorRef, actor VictimRef = none)

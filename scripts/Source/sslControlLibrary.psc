@@ -31,7 +31,6 @@ string toggled
 bool hkReady
 sslThreadController PlayerController
 
-
 ; Dynamic properties
 bool property InFreeCamera hidden
 	bool function get()

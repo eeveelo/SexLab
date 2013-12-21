@@ -1,6 +1,8 @@
 scriptname sslBaseExpression extends ReferenceAlias
 
 sslExpressionLibrary property Lib auto
+import sslExpressionLibrary
+import MfgConsoleFunc
 
 string property Name = "" auto hidden
 
@@ -34,13 +36,12 @@ function ApplyTo(actor ActorRef, int strength = 50, bool isFemale, bool openmout
 	elseIf Game.GetCameraState() == 3
 		; Apply open mouth and nothing else
 		if openmouth
-			ActorRef.ClearExpressionOverride()
-			ActorRef.SetExpressionOverride(16, 100)
+			OpenMouth(ActorRef)
 		endIf
 		return ; MFG doesn't update in free camera, so don't bother with anything else
 	endIf
 	; Clear existing mfg from actor
-	Lib.ClearMFG(ActorRef)
+	ClearMFG(ActorRef)
 	; Get phase presets, [n + 0] = mode, [n + 1] = id, [n + 2] = value
 	int[] presets = GetPhase(CalcPhase(strength, isFemale), isFemale)
 	; Apply phase presets to actor
@@ -55,22 +56,8 @@ function ApplyTo(actor ActorRef, int strength = 50, bool isFemale, bool openmout
 	endWhile
 	; Apply open mouth
 	if openmouth
-		ActorRef.ClearExpressionOverride()
-		ActorRef.SetExpressionOverride(16, 100)
+		OpenMouth(ActorRef)
 	endIf
-endFunction
-
-function ClearMFG(actor ActorRef)
-	ActorRef.ClearExpressionOverride()
-	MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
-endFunction
-
-function ClearPhoneme(actor ActorRef)
-	int i
-	while i <= 15
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, i, 0)
-		i += 1
-	endWhile
 endFunction
 
 int[] function GetPreset(int[] presets, int n)

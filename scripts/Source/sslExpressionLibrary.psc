@@ -2,6 +2,7 @@ scriptname sslExpressionLibrary extends Quest
 
 ; Scripts
 sslExpressionSlots property Slots auto
+import MfgConsoleFunc
 
 ; Data
 actor property PlayerRef auto
@@ -23,7 +24,7 @@ function MFG(actor ActorRef, int mode, int id, int value)
 	if mode == 2
 		ActorRef.SetExpressionOverride(id, value)
 	else
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, mode, id, value)
+		SetPhonemeModifier(ActorRef, mode, id, value)
 	endIf
 endFunction
 
@@ -33,7 +34,7 @@ function ApplyPreset(int[] presets, actor ActorRef, bool openmouth = false)
 	endIf
 	; Clear existing mfg from actor
 	; ActorRef.ClearExpressionOverride()
-	MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
+	ResetPhonemeModifier(ActorRef)
 	; Apply preset, [n + 0] = mode, [n + 1] = id, [n + 2] = value
 	int i = presets.Length
 	while i
@@ -41,25 +42,35 @@ function ApplyPreset(int[] presets, actor ActorRef, bool openmouth = false)
 		if presets[i] == 2 && !openmouth
 			ActorRef.SetExpressionOverride(presets[(i + 1)], presets[(i + 2)])
 		else
-			MfgConsoleFunc.SetPhonemeModifier(ActorRef, presets[i], presets[(i + 1)], presets[(i + 2)])
+			SetPhonemeModifier(ActorRef, presets[i], presets[(i + 1)], presets[(i + 2)])
 		endIf
 	endWhile
 	; Apply open mouth
 	if openmouth
+		OpenMouth(ActorRef)
+	endIf
+endFunction
+
+function OpenMouth(actor ActorRef) global
+	if !IsMouthOpen(ActorRef)
 		ActorRef.ClearExpressionOverride()
 		ActorRef.SetExpressionOverride(16, 100)
 	endIf
 endFunction
 
-function ClearMFG(actor ActorRef)
-	ActorRef.ClearExpressionOverride()
-	MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
+bool function IsMouthOpen(actor ActorRef) global
+	return GetExpressionID(ActorRef) == 16 && GetExpressionValue(ActorRef) == 100
 endFunction
 
-function ClearPhoneme(actor ActorRef)
+function ClearMFG(actor ActorRef) global
+	ActorRef.ClearExpressionOverride()
+	ResetPhonemeModifier(ActorRef)
+endFunction
+
+function ClearPhoneme(actor ActorRef) global
 	int i
 	while i <= 15
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, i, 0)
+		SetPhonemeModifier(ActorRef, 0, i, 0)
 		i += 1
 	endWhile
 endFunction
