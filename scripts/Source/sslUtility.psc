@@ -335,7 +335,7 @@ endFunction
 
 sslBaseAnimation[] function PushAnimation(sslBaseAnimation var, sslBaseAnimation[] array) global
 	int len = array.Length
-	if len >= 64
+	if len >= 100
 		return array
 	elseIf len == 0
 		array = new sslBaseAnimation[1]
@@ -524,8 +524,80 @@ sslBaseAnimation[] function AnimationArray(int size) global
 		return new sslBaseAnimation[62]
 	elseIf size == 63
 		return new sslBaseAnimation[63]
-	else
+	elseIf size == 64
 		return new sslBaseAnimation[64]
+	elseIf size == 65
+		return new sslBaseAnimation[65]
+	elseIf size == 66
+		return new sslBaseAnimation[66]
+	elseIf size == 67
+		return new sslBaseAnimation[67]
+	elseIf size == 68
+		return new sslBaseAnimation[68]
+	elseIf size == 69
+		return new sslBaseAnimation[69]
+	elseIf size == 70
+		return new sslBaseAnimation[70]
+	elseIf size == 71
+		return new sslBaseAnimation[71]
+	elseIf size == 72
+		return new sslBaseAnimation[72]
+	elseIf size == 73
+		return new sslBaseAnimation[73]
+	elseIf size == 74
+		return new sslBaseAnimation[74]
+	elseIf size == 75
+		return new sslBaseAnimation[75]
+	elseIf size == 76
+		return new sslBaseAnimation[76]
+	elseIf size == 77
+		return new sslBaseAnimation[77]
+	elseIf size == 78
+		return new sslBaseAnimation[78]
+	elseIf size == 79
+		return new sslBaseAnimation[79]
+	elseIf size == 80
+		return new sslBaseAnimation[80]
+	elseIf size == 81
+		return new sslBaseAnimation[81]
+	elseIf size == 82
+		return new sslBaseAnimation[82]
+	elseIf size == 83
+		return new sslBaseAnimation[83]
+	elseIf size == 84
+		return new sslBaseAnimation[84]
+	elseIf size == 85
+		return new sslBaseAnimation[85]
+	elseIf size == 86
+		return new sslBaseAnimation[86]
+	elseIf size == 87
+		return new sslBaseAnimation[87]
+	elseIf size == 88
+		return new sslBaseAnimation[88]
+	elseIf size == 89
+		return new sslBaseAnimation[89]
+	elseIf size == 90
+		return new sslBaseAnimation[90]
+	elseIf size == 91
+		return new sslBaseAnimation[91]
+	elseIf size == 92
+		return new sslBaseAnimation[92]
+	elseIf size == 93
+		return new sslBaseAnimation[93]
+	elseIf size == 94
+		return new sslBaseAnimation[94]
+	elseIf size == 95
+		return new sslBaseAnimation[95]
+	elseIf size == 96
+		return new sslBaseAnimation[96]
+	elseIf size == 97
+		return new sslBaseAnimation[97]
+	elseIf size == 98
+		return new sslBaseAnimation[98]
+	elseIf size == 99
+		return new sslBaseAnimation[99]
+	else
+		return new sslBaseAnimation[100]
 	endIf
 endFunction
 
