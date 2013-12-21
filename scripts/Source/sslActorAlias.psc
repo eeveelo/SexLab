@@ -378,14 +378,9 @@ function SyncThread()
 		endIf
 		; Animation related stuffs
 		if !IsCreature
-			; Calculate current enjoyment level
-			GetEnjoyment()
-			; Send expression
-			IsMouthOpen = Animation.UseOpenMouth(position, stage)
-			DoExpression()
 			; Send SOS event
 			if Lib.SOSEnabled && Animation.GetGender(position) == 0
-				Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
+				; Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 				int offset = Animation.GetSchlong(position, stage)
 				Debug.SendAnimationEvent(ActorRef, "SOSBend"+offset)
 			endif
@@ -398,6 +393,8 @@ function SyncThread()
 			endIf
 		endIf
 	endIf
+	; Update expression/enjoyment
+	DoExpression()
 endFunction
 
 function OverrideStrip(bool[] setStrip)
@@ -519,11 +516,6 @@ state Animating
 			VoiceInstance = Voice.Moan(ActorRef, Strength, IsVictim)
 			Sound.SetInstanceVolume(VoiceInstance, Lib.fVoiceVolume)
 		endIf
-		toggle = !toggle
-		if toggle
-			GetEnjoyment()
-			DoExpression()
-		endIf
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent
 endState
@@ -556,10 +548,12 @@ endState
 
 state Reset
 	event OnBeginState()
-		RegisterForSingleUpdate(0.5)
+		RegisterForSingleUpdate(0.1)
 	endEvent
 	event OnUpdate()
 		UnregisterForUpdate()
+		; Clear OpenMouth
+		ActorRef.ClearExpressionOverride()
 		; Disable free camera, if in it
 		if IsPlayer
 			Lib.ControlLib.EnableFreeCamera(false)
@@ -578,20 +572,23 @@ state Reset
 		endIf
 		; Make flaccid for SOS
 		Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
+		RemoveStrapon()
 		; Reset the actor
 		StopAnimating(Controller.FastEnd)
-		if !IsCreature
-			; Cleanup extras
-			RemoveStrapon()
-			; Reset openmouth/mfg
-			sslExpressionLibrary.ClearMFG(ActorRef)
-		endIf
 		; Unstrip
 		if !ActorRef.IsDead()
 			Lib.UnstripActor(ActorRef, EquipmentStorage, Controller.GetVictim())
 		endIf
 		; Unlock their movement
 		UnlockActor()
+		; Clear expression
+		if Expression != none
+			sslExpressionLibrary.ClearMFG(ActorRef)
+		endIF
+		; Give AnimationEnd hooks some small room to breath
+		if !Controller.FastEnd
+			Utility.Wait(5.0)
+		endIf
 		; Free up alias slot
 		ClearAlias()
 		GoToState("")
@@ -606,9 +603,11 @@ function DoExpression()
 	if Expression == none || IsCreature
 		; Nothing
 	elseIf IsVictim
+		IsMouthOpen = Animation.UseOpenMouth(position, stage)
 		Expression.ApplyTo(ActorRef, GetPain(), IsFemale, IsMouthOpen)
 	else
-		Expression.ApplyTo(ActorRef, Enjoyment, IsFemale, IsMouthOpen)
+		IsMouthOpen = Animation.UseOpenMouth(position, stage)
+		Expression.ApplyTo(ActorRef, GetEnjoyment(), IsFemale, IsMouthOpen)
 	endIf
 endFunction
 

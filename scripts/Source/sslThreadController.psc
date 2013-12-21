@@ -408,9 +408,6 @@ endFunction
 function EndAnimation(bool quick = false)
 	UnregisterForUpdate()
 	GoToState("")
-	; Send end event
-	SendThreadEvent("AnimationEnd")
-
 	; TEMP DEBUG INFO
 	; Animation.Enabled = false
 	; Debug.Trace("########################################")
@@ -439,8 +436,10 @@ function EndAnimation(bool quick = false)
 	; Set fast flag to skip slow ending functions
 	FastEnd = quick
 	Stage = Animation.StageCount
+	; Send end event
+	SendThreadEvent("AnimationEnd")
+	; Stop hotkeys to prevent further stage advancing
 	if HasPlayer
-		; Stop hotkeys to prevent further stage advancing
 		Lib.ControlLib._HKClear()
 	endIf
 	; Reset actors & wait for clear state

@@ -864,6 +864,8 @@ function ClearActors()
 			ActorSlots[i].UnlockActor()
 			ActorSlots[i].GoToState("")
 			ActorSlots[i].GoToState("Reset")
+		else
+			ActorSlots[i].ClearAlias()
 		endIf
 	endWhile
 	FastEnd = false
