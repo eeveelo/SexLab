@@ -3,7 +3,10 @@ Scriptname sslEffectDebug extends ActiveMagicEffect
 SexLabFramework property SexLab Auto
 
 event OnEffectStart(actor TargetRef, actor CasterRef)
-
+	sslThreadController Thread = SexLab.QuickStart(TargetRef)
+	WaitFor(10.0)
+	Debug.Notification("Adding Player")
+	Thread.ChangeActors(SexLab.MakeActorArray(TargetRef, CasterRef))
 endEvent
 
 event OnEffectFinish(Actor TargetRef, Actor CasterRef)

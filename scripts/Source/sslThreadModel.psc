@@ -472,9 +472,6 @@ endfunction
 ;|	Actor Functions                              |;
 ;\-----------------------------------------------/;
 
-;
-; TODO: Probably needs to be redone again due to ActorSlot changes
-;
 function ChangeActors(actor[] changeTo)
 	if !Active || HasCreature
 		return
@@ -501,53 +498,62 @@ function ChangeActors(actor[] changeTo)
 	endIf
 	; Start changing
 	SendThreadEvent("ActorChangeStart")
+	; Toggle FastEnd to quickly clear out removed actors
+	bool togglefast = FastEnd
+	FastEnd = true
 	; Remove actors no longer present
-	i = 0
-	while i < ActorCount
-		ActorAlias(Positions[i]).UnregisterForUpdate()
+	i = ActorCount
+	while i
+		i -= 1
+		sslActorAlias CheckAlias = ActorAlias(Positions[i])
+		CheckAlias.GoToState("Ready")
 		if changeTo.Find(Positions[i]) == -1
-			sslActorAlias clearing = ActorAlias(Positions[i])
-			clearing.GoToState("Reset")
-			clearing.ClearAlias()
 			if IsPlayerPosition(i)
 				AutoAdvance = true
 			endIf
-		endIf
-		i += 1
-	endWhile
-	; Prepare/Reset actors as needed
-	Positions = changeTo
-	sslActorAlias[] newSlots = new sslActorAlias[5]
-	i = 0
-	while i < changeTo.Length
-		int slot = GetSlot(changeTo[i])
-		if slot != -1
-			; Existing actor, retrieve their slot
-			newSlots[i] = ActorSlots[i]
-			newSlots[i].RegisterForSingleUpdate(0.20)
-		else
-			; New actor, slot and prepare them
-			newSlots[i] = SlotActor(changeTo[i])
-			sslActorAlias adding = newSlots[i] as sslActorAlias
-			adding.SetVoice(Lib.Voices.PickVoice(changeTo[i]))
-			adding.DisableUndressAnim(true)
-			; Start preparing actor
-			adding.GotoState("Prepare")
-			; Wait for ready state
-			float failsafe = Utility.GetCurrentRealTime() + 10.0
-			while adding.GetState() != "Ready" && failsafe > Utility.GetCurrentRealTime()
+			CheckAlias.GoToState("Reset")
+			while CheckAlias.GetState() != ""
 				Utility.Wait(0.1)
 			endWhile
-			; Begin animation state
-			adding.StartAnimating()
+			CheckAlias.ClearAlias()
 		endIf
-		i += 1
+	endWhile
+	; Return FastEnd to it's original bool
+	FastEnd = togglefast
+	; Update positions
+	Positions = changeTo
+	; Prepare/Reset actors as needed
+	i = changeTo.Length
+	while i
+		i -= 1
+		; New actor, slot and prepare them
+		if GetSlot(changeTo[i]) == -1
+			actor AddRef = changeTo[i]
+			sslActorAlias Slot = SlotActor(AddRef)
+			if Slot == none || !Slot.SetAlias(AddRef, self as sslThreadController)
+				_Log("Failed to add actor' "+AddRef.GetLeveledActorBase().GetName()+"' -- they were unable to fill an actor slot", "ChangeActors", "FATAL")
+				return
+			endIf
+			Slot.SetVoice(Lib.Voices.PickVoice(AddRef))
+			Slot.DisableUndressAnim(true)
+			; Start preparing actor
+			Slot.GotoState("Prepare")
+			; Wait for ready state
+			float failsafe = Utility.GetCurrentRealTime() + 20.0
+			while Slot.GetState() != "Ready" && failsafe > Utility.GetCurrentRealTime()
+				Utility.Wait(0.1)
+			endWhile
+		endIf
 	endWhile
 	; Remember new genders
 	gendercounts = Lib.Actors.GenderCount(Positions)
-	; Set new actors into thread
-	ActorSlots = newSlots
-	SyncActors()
+	; Start animating new actors
+	i = ActorCount
+	while i
+		i -= 1
+		ActorAlias(Positions[i]).StartAnimating()
+	endWhile
+	(self as sslThreadController).RealignActors()
 	; End changing
 	SendThreadEvent("ActorChangeEnd")
 endFunction

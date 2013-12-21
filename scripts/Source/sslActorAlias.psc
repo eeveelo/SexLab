@@ -90,7 +90,7 @@ endProperty
 ;\-----------------------------------------------/;
 
 bool function SetAlias(actor prospect, sslThreadController ThreadView)
-	if prospect == none || GetReference() != prospect || Lib.ValidateActor(prospect) != 1
+	if prospect == none || GetReference() != prospect || (Lib.ValidateActor(prospect) != 1 && ThreadView.GetState() == "Making")
 		return false ; Failed to set prospective actor into alias
 	endIf
 	Initialize()
@@ -486,6 +486,11 @@ endState
 state Ready
 	event OnBeginState()
 		UnregisterForUpdate()
+		; Make sure we should be here first
+		if Controller == none || ActorRef == none || GetReference() == none || GetReference() != ActorRef
+			GoToState("")
+			ClearAlias()
+		endIf
 	endEvent
 	function StartAnimating()
 		if ActorRef != none && Controller != none
