@@ -3,7 +3,7 @@
 Skryim SexLab Framework
   By Ashal of Loverslab.com
 
-    Version 1.30, released 2013/12/15
+    Version 1.31, released 2013/12/20
 
 -- Description --------------------------------------------------------------
 
@@ -20,6 +20,7 @@ Skryim SexLab Framework
 -- Modders Resource ---------------------------------------------------------
 
     API Guide: http://git.loverslab.com/sexlab/framework/wikis/home
+    What's New: http://git.loverslab.com/sexlab/framework/wikis/whatsnew
 
 -- Credits ------------------------------------------------------------------
 
