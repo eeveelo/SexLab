@@ -166,12 +166,13 @@ bool[] function MergeBoolArray(bool[] push, bool[] array) global
 endFunction
 
 int function CountTrue(bool[] array) global
+	int len = array.Length
 	int pos = array.Find(true)
 	int count
-	while pos != -1 && pos < array.Length
+	while pos != -1 && pos < len
 		count += 1
 		pos += 1
-		if pos < array.Length
+		if pos < len
 			pos = array.Find(true, pos)
 		else
 			pos = -1
@@ -292,12 +293,13 @@ form[] function MergeFormArray(form[] push, form[] array) global
 endFunction
 
 int function CountNone(form[] array) global
+	int len = array.Length
 	int pos = array.Find(none)
 	int count
 	while pos != -1
 		count += 1
 		pos += 1
-		if pos < array.Length
+		if pos < len
 			pos = array.Find(none, pos)
 		else
 			pos = -1

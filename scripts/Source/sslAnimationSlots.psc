@@ -140,11 +140,17 @@ sslBaseAnimation[] function GetList(bool[] valid)
 		return empty
 	endIf
 	sslBaseAnimation[] output = sslUtility.AnimationArray(count)
+	int len = valid.Length
 	int pos = valid.Find(true)
-	while pos != -1 && pos < valid.Length
+	while pos != -1
 		count -= 1
 		output[count] = Slots[pos]
-		pos = valid.Find(true, (pos + 1))
+		pos += 1
+		if pos < len
+			pos = valid.Find(true, pos)
+		else
+			pos = -1
+		endIf
 	endWhile
 	return output
 endFunction
