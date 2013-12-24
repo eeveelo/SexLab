@@ -327,14 +327,22 @@ bool function IsGay(actor ActorRef)
 	return GetSexuality(ActorRef) <= 35
 endFunction
 
-function HadSex(actor a, bool WithPlayer = false)
+int function SexCount(actor a)
+	return GetInt(a, "SexCount")
+endFunction
+
+bool function HadSex(actor a)
+	return SexCount(a) > 0
+endFunction
+
+function AddSex(actor a, bool WithPlayer = false)
+	SetInt(a, "SexCount", (SexCount(a) + 1))
 	SetFloat(a, "LastSex.GameTime", Utility.GetCurrentGameTime())
 	SetFloat(a, "LastSex.RealTime", Utility.GetCurrentRealTime())
 	if WithPlayer && a != Lib.PlayerRef
 		HadPlayerSex(a)
 	endIf
 endFunction
-
 
 ; Last sex - Game time - float days
 float function LastSexGameTime(actor a)

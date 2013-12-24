@@ -599,6 +599,14 @@ bool function IsGay(actor ActorRef)
 	return IsGay(ActorRef)
 endFunction
 
+int function SexCount(actor a)
+	return Stats.SexCount(a)
+endFunction
+
+bool function HadSex(actor a)
+	return Stats.HadSex(a)
+endFunction
+
 ; Last sex - Game time - float days
 float function LastSexGameTime(actor a)
 	return Stats.LastSexGameTime(a)

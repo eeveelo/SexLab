@@ -563,7 +563,7 @@ state Reset
 			Lib.ControlLib.EnableFreeCamera(false)
 		endIf
 		; Record sex time and player count
-		Lib.Stats.HadSex(ActorRef, Controller.HasPlayer)
+		Lib.Stats.AddSex(ActorRef, Controller.HasPlayer)
 		; Clear OpenMouth
 		ActorRef.ClearExpressionOverride()
 		; Clear expression
