@@ -561,10 +561,9 @@ state Reset
 		; Disable free camera, if in it
 		if IsPlayer
 			Lib.ControlLib.EnableFreeCamera(false)
-		; Increase player sex for NPC
-		elseIf Controller.HasPlayer
-			Lib.Stats.AddPlayerSex(ActorRef)
 		endIf
+		; Record sex time and player count
+		Lib.Stats.HadSex(ActorRef, Controller.HasPlayer)
 		; Clear OpenMouth
 		ActorRef.ClearExpressionOverride()
 		; Clear expression

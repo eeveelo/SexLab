@@ -3,10 +3,8 @@ Scriptname sslEffectDebug extends ActiveMagicEffect
 SexLabFramework property SexLab Auto
 
 event OnEffectStart(actor TargetRef, actor CasterRef)
-	sslThreadController Thread = SexLab.QuickStart(TargetRef)
-	WaitFor(10.0)
-	Debug.Notification("Adding Player")
-	Thread.ChangeActors(SexLab.MakeActorArray(TargetRef, CasterRef))
+	Debug.TraceAndBox(TargetRef.GetLeveledActorBase().GetName()+" LastSex \n GameTime: "+SexLab.MinutesSinceLastSex(TargetRef) + " -- "+SexLab.LastSexTimerString(TargetRef)  +" \n RealTime: "+SexLab.SecondsSinceLastSexRealTime(TargetRef) + " -- "+SexLab.LastSexTimerStringRealTime(TargetRef) )
+	Debug.TraceAndBox(CasterRef.GetLeveledActorBase().GetName()+" LastSex \n GameTime: "+SexLab.MinutesSinceLastSex(CasterRef) + " -- "+SexLab.LastSexTimerString(CasterRef)  +" \n RealTime: "+SexLab.SecondsSinceLastSexRealTime(CasterRef) + " -- "+SexLab.LastSexTimerStringRealTime(CasterRef) )
 endEvent
 
 event OnEffectFinish(Actor TargetRef, Actor CasterRef)

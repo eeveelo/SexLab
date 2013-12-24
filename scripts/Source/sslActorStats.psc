@@ -154,8 +154,15 @@ int function CalcLevel(float total, float curve = 0.65)
 	return Math.Sqrt(((Math.Abs(total) + 1.0) / 2.0) * Math.Abs(curve)) as int
 endFunction
 
+string function ZeroFill(string num)
+	if StringUtil.GetLength(num) == 1
+		return "0"+num
+	endIf
+	return num
+endFunction
+
 string function ParseTime(int time)
-	return ((time / 3600) as int)+":"+(((time / 60) % 60) as int)+":"+(time % 60 as int)
+	return ZeroFill(((time / 3600) as int))+":"+ZeroFill((((time / 60) % 60) as int))+":"+ZeroFill((time % 60 as int))
 endFunction
 
 ;/-----------------------------------------------\;
@@ -318,6 +325,68 @@ endFunction
 
 bool function IsGay(actor ActorRef)
 	return GetSexuality(ActorRef) <= 35
+endFunction
+
+function HadSex(actor a, bool WithPlayer = false)
+	SetFloat(a, "LastSex.GameTime", Utility.GetCurrentGameTime())
+	SetFloat(a, "LastSex.RealTime", Utility.GetCurrentRealTime())
+	if WithPlayer && a != Lib.PlayerRef
+		HadPlayerSex(a)
+	endIf
+endFunction
+
+
+; Last sex - Game time - float days
+float function LastSexGameTime(actor a)
+	return GetFloat(a, "LastSex.GameTime")
+endFunction
+
+float function DaysSinceLastSex(actor a)
+	return Utility.GetCurrentGameTime() - LastSexGameTime(a)
+endFunction
+
+float function HoursSinceLastSex(actor a)
+	return DaysSinceLastSex(a) * 24.0
+endFunction
+
+float function MinutesSinceLastSex(actor a)
+	return DaysSinceLastSex(a) * 1440.0
+endFunction
+
+float function SecondsSinceLastSex(actor a)
+	return DaysSinceLastSex(a) * 86400.0
+endFunction
+
+string function LastSexTimerString(actor a)
+	return ParseTime(SecondsSinceLastSex(a) as int)
+endFunction
+
+; Last sex - Real Time - float seconds
+float function LastSexRealTime(actor a)
+	if !HasFloat(a, "LastSex.RealTime")
+		return 0.0001 ; Prevent division by zero
+	endIf
+	return GetFloat(a, "LastSex.RealTime")
+endFunction
+
+float function SecondsSinceLastSexRealTime(actor a)
+	return Utility.GetCurrentRealTime() - LastSexRealTime(a)
+endFunction
+
+float function MinutesSinceLastSexRealTime(actor a)
+	return SecondsSinceLastSexRealTime(a) / 60.0
+endFunction
+
+float function HoursSinceLastSexRealTime(actor a)
+	return SecondsSinceLastSexRealTime(a) / 3600.0
+endFunction
+
+float function DaysSinceLastSexRealTime(actor a)
+	return SecondsSinceLastSexRealTime(a) / 86400.0
+endFunction
+
+string function LastSexTimerStringRealTime(actor a)
+	return ParseTime(SecondsSinceLastSexRealTime(a) as int)
 endFunction
 
 ;/-----------------------------------------------\;

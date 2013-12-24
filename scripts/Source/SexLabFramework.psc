@@ -599,6 +599,57 @@ bool function IsGay(actor ActorRef)
 	return IsGay(ActorRef)
 endFunction
 
+; Last sex - Game time - float days
+float function LastSexGameTime(actor a)
+	return Stats.LastSexGameTime(a)
+endFunction
+
+float function DaysSinceLastSex(actor a)
+	return Stats.DaysSinceLastSex(a)
+endFunction
+
+float function HoursSinceLastSex(actor a)
+	return Stats.HoursSinceLastSex(a)
+endFunction
+
+float function MinutesSinceLastSex(actor a)
+	return Stats.MinutesSinceLastSex(a)
+endFunction
+
+float function SecondsSinceLastSex(actor a)
+	return Stats.SecondsSinceLastSex(a)
+endFunction
+
+string function LastSexTimerString(actor a)
+	return Stats.LastSexTimerString(a)
+endFunction
+
+; Last sex - Real Time - float seconds
+float function LastSexRealTime(actor a)
+	return Stats.LastSexRealTime(a)
+endFunction
+
+float function SecondsSinceLastSexRealTime(actor a)
+	return Stats.SecondsSinceLastSexRealTime(a)
+endFunction
+
+float function MinutesSinceLastSexRealTime(actor a)
+	return Stats.MinutesSinceLastSexRealTime(a)
+endFunction
+
+float function HoursSinceLastSexRealTime(actor a)
+	return Stats.HoursSinceLastSexRealTime(a)
+endFunction
+
+float function DaysSinceLastSexRealTime(actor a)
+	return Stats.DaysSinceLastSexRealTime(a)
+endFunction
+
+string function LastSexTimerStringRealTime(actor a)
+	return Stats.LastSexTimerStringRealTime(a)
+endFunction
+
+
 ;#---------------------------#
 ;#    END STAT FUNCTIONS     #
 ;#---------------------------#
