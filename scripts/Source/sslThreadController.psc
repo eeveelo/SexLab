@@ -160,6 +160,31 @@ state Advancing
 endState
 
 state Animating
+	function PlayAnimation()
+		; Send with as little overhead as possible to improve syncing
+		string[] events = Animation.FetchStage(Stage)
+		if ActorCount == 1
+			Debug.SendAnimationEvent(Positions[0], events[0])
+		elseIf ActorCount == 2
+			Debug.SendAnimationEvent(Positions[0], events[0])
+			Debug.SendAnimationEvent(Positions[1], events[1])
+		elseIf ActorCount == 3
+			Debug.SendAnimationEvent(Positions[0], events[0])
+			Debug.SendAnimationEvent(Positions[1], events[1])
+			Debug.SendAnimationEvent(Positions[2], events[2])
+		elseIf ActorCount == 4
+			Debug.SendAnimationEvent(Positions[0], events[0])
+			Debug.SendAnimationEvent(Positions[1], events[1])
+			Debug.SendAnimationEvent(Positions[2], events[2])
+			Debug.SendAnimationEvent(Positions[3], events[3])
+		elseIf ActorCount == 5
+			Debug.SendAnimationEvent(Positions[0], events[0])
+			Debug.SendAnimationEvent(Positions[1], events[1])
+			Debug.SendAnimationEvent(Positions[2], events[2])
+			Debug.SendAnimationEvent(Positions[3], events[3])
+			Debug.SendAnimationEvent(Positions[4], events[4])
+		endIf
+	endFunction
 	function GoToStage(int toStage)
 		; Stop looping
 		looping = false
@@ -380,29 +405,6 @@ function SetAnimation(int anim = -1)
 endFunction
 
 function PlayAnimation()
-	; Send with as little overhead as possible to improve syncing
-	string[] events = Animation.FetchStage(Stage)
-	if ActorCount == 1
-		Debug.SendAnimationEvent(Positions[0], events[0])
-	elseIf ActorCount == 2
-		Debug.SendAnimationEvent(Positions[0], events[0])
-		Debug.SendAnimationEvent(Positions[1], events[1])
-	elseIf ActorCount == 3
-		Debug.SendAnimationEvent(Positions[0], events[0])
-		Debug.SendAnimationEvent(Positions[1], events[1])
-		Debug.SendAnimationEvent(Positions[2], events[2])
-	elseIf ActorCount == 4
-		Debug.SendAnimationEvent(Positions[0], events[0])
-		Debug.SendAnimationEvent(Positions[1], events[1])
-		Debug.SendAnimationEvent(Positions[2], events[2])
-		Debug.SendAnimationEvent(Positions[3], events[3])
-	elseIf ActorCount == 5
-		Debug.SendAnimationEvent(Positions[0], events[0])
-		Debug.SendAnimationEvent(Positions[1], events[1])
-		Debug.SendAnimationEvent(Positions[2], events[2])
-		Debug.SendAnimationEvent(Positions[3], events[3])
-		Debug.SendAnimationEvent(Positions[4], events[4])
-	endIf
 endFunction
 
 ;/-----------------------------------------------\;
