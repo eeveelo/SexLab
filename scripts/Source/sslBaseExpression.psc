@@ -30,7 +30,7 @@ int[] female5
 ;|	API Functions                                |;
 ;\-----------------------------------------------/;
 
-function ApplyTo(actor ActorRef, int strength = 50, bool isFemale, bool openmouth = false)
+function ApplyTo(actor ActorRef, int strength = 50, bool isFemale = true, bool openmouth = false)
 	if ActorRef == none
 		return ; Nobody to express and doesn't update in free camera!
 	elseIf Game.GetCameraState() == 3
@@ -58,6 +58,10 @@ function ApplyTo(actor ActorRef, int strength = 50, bool isFemale, bool openmout
 	if openmouth
 		OpenMouth(ActorRef)
 	endIf
+endFunction
+
+int[] function PickPreset(int strength, bool isFemale)
+	return GetPhase(CalcPhase(strength, isFemale), isFemale)
 endFunction
 
 int[] function GetPreset(int[] presets, int n)

@@ -20,7 +20,7 @@ int[] BasePresetMale
 int[] BasePresetFemale
 
 
-function MFG(actor ActorRef, int mode, int id, int value)
+function MFG(actor ActorRef, int mode, int id, int value) global
 	if mode == 2
 		ActorRef.SetExpressionOverride(id, value)
 	else
@@ -28,7 +28,7 @@ function MFG(actor ActorRef, int mode, int id, int value)
 	endIf
 endFunction
 
-function ApplyPreset(int[] presets, actor ActorRef, bool openmouth = false)
+function ApplyPreset(int[] presets, actor ActorRef, bool openmouth = false) global
 	if ActorRef == none
 		return ; Nobody to express with!
 	endIf
@@ -52,10 +52,7 @@ function ApplyPreset(int[] presets, actor ActorRef, bool openmouth = false)
 endFunction
 
 function OpenMouth(actor ActorRef) global
-	if !IsMouthOpen(ActorRef)
-		ActorRef.ClearExpressionOverride()
-		ActorRef.SetExpressionOverride(16, 100)
-	endIf
+	ActorRef.SetExpressionOverride(16, 100)
 endFunction
 
 bool function IsMouthOpen(actor ActorRef) global

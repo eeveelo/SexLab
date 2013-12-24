@@ -29,7 +29,6 @@ bool IsPlayer
 bool IsVictim
 bool IsFemale
 bool IsCreature
-bool IsMouthOpen
 
 ; Storage
 int strength
@@ -347,7 +346,7 @@ function SyncThread()
 		position = toPosition
 		stage = toStage
 		Animation = toAnimation
-		; Update Strength for voice & expression
+		; Update Strength for voice
 		strength = ((stage as float) / (Animation.StageCount() as float) * 100) as int
 		if Controller.LeadIn
 			strength = ((strength as float) * 0.70) as int
@@ -379,10 +378,9 @@ function SyncThread()
 		; Animation related stuffs
 		if !IsCreature
 			; Send SOS event
-			if Lib.SOSEnabled && Animation.GetGender(position) == 0
+			if Animation.GetGender(position) == 0
 				; Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
-				int offset = Animation.GetSchlong(position, stage)
-				Debug.SendAnimationEvent(ActorRef, "SOSBend"+offset)
+				Debug.SendAnimationEvent(ActorRef, "SOSBend"+Animation.GetSchlong(position, stage))
 			endif
 			; Equip Strapon if needed
 			if IsFemale && Lib.bUseStrapons && Animation.UseStrapon(position, stage)
@@ -393,7 +391,7 @@ function SyncThread()
 			endIf
 		endIf
 	endIf
-	; Update expression/enjoyment
+	; Update expression/enjoyment/openmouth
 	DoExpression()
 endFunction
 
@@ -560,8 +558,6 @@ state Reset
 	endEvent
 	event OnUpdate()
 		UnregisterForUpdate()
-		; Clear OpenMouth
-		ActorRef.ClearExpressionOverride()
 		; Disable free camera, if in it
 		if IsPlayer
 			Lib.ControlLib.EnableFreeCamera(false)
@@ -569,6 +565,12 @@ state Reset
 		elseIf Controller.HasPlayer
 			Lib.Stats.AddPlayerSex(ActorRef)
 		endIf
+		; Clear OpenMouth
+		ActorRef.ClearExpressionOverride()
+		; Clear expression
+		if Expression != none
+			sslExpressionLibrary.ClearMFG(ActorRef)
+		endIF
 		; Update diary/journal stats for player + native stats for NPCs
 		Lib.Stats.UpdateNativeStats(ActorRef, Controller.Males, Controller.Females, Controller.Creatures, Animation, Controller.VictimRef, Controller.TotalTime)
 		; Reset to starting scale
@@ -589,10 +591,6 @@ state Reset
 		endIf
 		; Unlock their movement
 		UnlockActor()
-		; Clear expression
-		if Expression != none
-			sslExpressionLibrary.ClearMFG(ActorRef)
-		endIF
 		; Give AnimationEnd hooks some small room to breath
 		if !Controller.FastEnd
 			Utility.Wait(5.0)
@@ -608,15 +606,39 @@ endState
 ;\-----------------------------------------------/;
 
 function DoExpression()
-	if Expression == none || IsCreature
-		; Nothing
-	elseIf IsVictim
-		IsMouthOpen = Animation.UseOpenMouth(position, stage)
-		Expression.ApplyTo(ActorRef, GetPain(), IsFemale, IsMouthOpen)
-	else
-		IsMouthOpen = Animation.UseOpenMouth(position, stage)
-		Expression.ApplyTo(ActorRef, GetEnjoyment(), IsFemale, IsMouthOpen)
+	if IsCreature
+		return
 	endIf
+	; Check if open mouth should override phoneme/expression
+	bool openmouth = Animation.UseOpenMouth(Position, Stage)
+	; Pick preset from expression and skip if empty in free camera
+	if Expression != none && Game.GetCameraState() != 3
+		int expStrength
+		if IsVictim
+			expStrength = GetPain()
+		else
+			expStrength = GetEnjoyment()
+		endIf
+		; Clear existing Phoneme and Modifiers
+		MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
+		ActorRef.ClearExpressionOverride()
+		; Apply presets to actor, skip if empty
+		int[] presets = Expression.PickPreset(expStrength, IsFemale)
+		int i = presets.Length
+		while i
+			i -= 3
+			if presets[i] == 1 || (presets[i] == 0 && !openmouth)
+				MfgConsoleFunc.SetPhonemeModifier(ActorRef, presets[i], presets[(i + 1)], presets[(i + 2)])
+			elseIf !openmouth
+				ActorRef.SetExpressionOverride(presets[(i + 1)], presets[(i + 2)])
+			endIf
+		endWhile
+	endIf
+	; Perform mouth opening
+	if openmouth
+		ActorRef.SetExpressionOverride(16, 100)
+	endIf
+
 endFunction
 
 int function GetEnjoyment()
