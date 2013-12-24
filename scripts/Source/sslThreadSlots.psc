@@ -87,10 +87,7 @@ function _StopAll()
 			int n = ThreadView[i].ActorAlias.Length
 			while n
 				n -= 1
-				sslActorAlias clearing = ThreadView[i].ActorAlias[n]
-				clearing.StopAnimating(true)
-				clearing.GoToState("")
-				clearing.GoToState("Reset")
+				ThreadView[i].ActorAlias[n].GoToState("Reset")
 			endWhile
 		endIf
 		ThreadView[i].Initialize()

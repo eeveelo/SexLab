@@ -488,7 +488,6 @@ state Ready
 		UnregisterForUpdate()
 		; Make sure we should be here first
 		if Controller == none || ActorRef == none || GetReference() == none || GetReference() != ActorRef
-			GoToState("")
 			ClearAlias()
 		endIf
 	endEvent
@@ -553,7 +552,11 @@ endState
 
 state Reset
 	event OnBeginState()
-		RegisterForSingleUpdate(0.1)
+		if ActorRef != none
+			RegisterForSingleUpdate(0.1)
+		else
+			ClearAlias()
+		endIf
 	endEvent
 	event OnUpdate()
 		UnregisterForUpdate()

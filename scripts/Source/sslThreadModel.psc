@@ -169,15 +169,6 @@ endProperty
 ;|	Preparation Functions                        |;
 ;\-----------------------------------------------/;
 
-state Unlocked
-	sslThreadModel function Make(float timeoutIn = 30.0)
-		Initialize()
-		GoToState("Making")
-		RegisterForSingleUpdate(timeoutIn)
-		return self
-	endFunction
-endState
-
 sslActorAlias function SlotActor(actor position)
 	int i
 	; Fill first available slot
@@ -192,8 +183,12 @@ sslActorAlias function SlotActor(actor position)
 endFunction
 
 state Making
+	event OnBeginState()
+		SendThreadEvent("ThreadOpened")
+	endEvent
 	event OnUpdate()
 		if !Active
+			SendThreadEvent("ThreadExpired")
 			_Log("Thread has timed out of the making process; resetting model for selection pool", "Make", "FATAL")
 		endIf
 	endEvent
@@ -229,6 +224,7 @@ state Making
 		else
 			Slot.SetVoice(voice, forceSilent)
 			if position == Lib.PlayerRef
+				SendThreadEvent("PlayerAdded")
 				PlayerRef = position
 			endIf
 		endIf
@@ -714,30 +710,19 @@ function SyncActors()
 endFunction
 
 function SendThreadEvent(string eventName, float argNum = 0.0)
-	if !Active
-		return
-	endIf
-	string customEvent
+	string threadid = (tid as string)
 	; Send Custom Event
 	if hook != ""
-		customEvent = eventName+"_"+hook
-		SendModEvent(customEvent, (tid as string), argNum)
+		SendModEvent(eventName+"_"+hook, threadid, argNum)
 	endIf
 	; Send Global Event
-	SendModEvent(eventName, (tid as string), argNum)
-	Debug.Trace("SexLab Thread["+_ThreadID+"] ModEvent: "+eventName+" / "+customEvent)
-endFunction
-
-function SendActorEvent(string eventName, float argNum = 0.0)
-	if !Active
-		return
+	SendModEvent(eventName, threadid, argNum)
+	; Send Player Global Event
+	if HasPlayer
+		SendModEvent("Player"+eventName, threadid, argNum)
 	endIf
-	int i = ActorCount
-	while i
-		i -= 1
-		ActorAlias[i].RegisterForModEvent(eventName, "On"+eventName)
-	endWhile
-	SendModEvent(eventName, (tid as string), argNum)
+	Debug.Trace("SexLab Thread["+_ThreadID+"] ModEvent: "+eventName)
+	MiscUtil.PrintConsole("Thread["+_ThreadID+"] ModEvent: "+eventName)
 endFunction
 
 int function ArrayWrap(int value, int max)
@@ -793,6 +778,7 @@ function _Log(string log, string method, string type = "ERROR")
 		Debug.Trace("--------------------------------------------------------------------------------------------", severity)
 	endIf
 	if type == "FATAL"
+		Initialize()
 		GoToState("Unlocked")
 	endIf
 endFunction
@@ -865,10 +851,9 @@ function ClearActors()
 	int i = ActorSlots.Length
 	while i
 		i -= 1
-		if ActorSlots[i] != none && ActorSlots[i].GetReference() != none
+		if ActorSlots[i] != none && ActorSlots[i].ActorRef != none
 			ActorSlots[i].StopAnimating(true)
 			ActorSlots[i].UnlockActor()
-			ActorSlots[i].GoToState("")
 			ActorSlots[i].GoToState("Reset")
 		else
 			ActorSlots[i].ClearAlias()
@@ -879,6 +864,7 @@ endFunction
 
 function Initialize()
 	UnregisterForUpdate()
+	SendThreadEvent("ThreadClosed")
 	; Empty alias slots
 	ClearActors()
 	; Set states
@@ -893,9 +879,10 @@ function Initialize()
 	Positions = acDel
 	victim = none
 	; Empty Floats
-	float[] fDel
-	centerLoc = fDel
-	customtimers = fDel
+	float[] fDel1
+	centerLoc = fDel1
+	float[] fDel2
+	customtimers = fDel2
 	started = 0.0
 	; Empty bools
 	leadIn = false
@@ -908,10 +895,12 @@ function Initialize()
 	bed = 0
 	stage = 0
 	; Empty animations
-	sslBaseAnimation[] anDel
-	customAnimations = anDel
-	primaryAnimations = anDel
-	leadAnimations = anDel
+	sslBaseAnimation[] anDel1
+	customAnimations = anDel1
+	sslBaseAnimation[] anDel2
+	primaryAnimations = anDel2
+	sslBaseAnimation[] anDel3
+	leadAnimations = anDel3
 	; Clear Forms
 	centerObj = none
 	PlayerRef = none
@@ -938,6 +927,17 @@ sslThreadController function StartThread()
 	return none
 endFunction
 
+auto state Unlocked
+	function SendThreadEvent(string eventName, float argNum = 0.0)
+	endFunction
+	sslThreadModel function Make(float timeoutIn = 30.0)
+		Initialize()
+		GoToState("Making")
+		RegisterForSingleUpdate(timeoutIn)
+		return self
+	endFunction
+endState
+
 ;/-----------------------------------------------\;
 ;|	Child Functions                              |;
 ;\-----------------------------------------------/;
@@ -955,8 +955,6 @@ function _SetThreadID(int threadid)
 	ClearActors()
 	GoToState("Unlocked")
 endFunction
-auto state Unlocked
-endState
 
 sslThreadController function PrimeThread()
 	return none

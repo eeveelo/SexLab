@@ -407,7 +407,7 @@ endFunction
 
 function EndAnimation(bool quick = false)
 	UnregisterForUpdate()
-	GoToState("")
+	GoToState("Ending")
 	; TEMP DEBUG INFO
 	; Animation.Enabled = false
 	; Debug.Trace("########################################")
@@ -436,17 +436,17 @@ function EndAnimation(bool quick = false)
 	; Set fast flag to skip slow ending functions
 	FastEnd = quick
 	Stage = Animation.StageCount
-	; Send end event
-	SendThreadEvent("AnimationEnd")
 	; Stop hotkeys to prevent further stage advancing
 	if HasPlayer
 		Lib.ControlLib._HKClear()
 	endIf
 	; Reset actors & wait for clear state
 	ActorAction("Reset", "")
+	; Send end event
+	SendThreadEvent("AnimationEnd")
 	; Give AnimationEnd hooks some small room to breath
 	if !FastEnd
-		Utility.Wait(5.0)
+		Utility.Wait(3.0)
 	endIf
 	; Clear & Reset animation thread
 	Initialize()
@@ -454,24 +454,20 @@ endFunction
 
 function Initialize()
 	UnregisterForUpdate()
-	; Clear model
-	parent.Initialize()
 	; Set states
 	looping = false
 	; Empty Floats
 	float[] fDel
 	sfx = fDel
 	timer = 0.0
-	; Empty bools
-	bool[] bDel
 	; Empty integers
-	int[] iDel
 	AdjustingPosition = 0
 	stagePrev = 0
 	aid = 0
 	; Empty forms
 	sfxType = none
-	GoToState("Unlocked")
+	; Clear model
+	parent.Initialize()
 endFunction
 
 sslThreadController function PrimeThread()
