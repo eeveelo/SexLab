@@ -462,6 +462,7 @@ event OnPageReset(string page)
 
 		AddHeaderOption("$SSL_SexualExperience")
 		AddTextOption("$SSL_TimeSpentHavingSex", Stats.ParseTime(Stats.fTimeSpent as int))
+		AddTextOption("$SSL_TimeSinceLastSex", Stats.LastSexTimerString(PlayerRef))
 		AddTextOption("$SSL_MaleSexualPartners", Stats.iMalePartners)
 		AddTextOption("$SSL_FemaleSexualPartners", Stats.iFemalePartners)
 		AddTextOption("$SSL_CreatureSexualPartners", Stats.iCreaturePartners)
