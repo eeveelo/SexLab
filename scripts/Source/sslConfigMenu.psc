@@ -2,7 +2,7 @@ scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
 int function GetVersion()
-	return 13100
+	return 13101
 endFunction
 
 string function GetStringVer()
@@ -167,15 +167,16 @@ event OnPageReset(string page)
 
 		AddHeaderOption("$SSL_ExtraEffects")
 		AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", ActorLib.bScaleActors)
-		AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", ActorLib.bRagdollEnd)
 		AddToggleOptionST("ReDressVictim","$SSL_VictimsRedress", ActorLib.bReDressVictim)
 		AddToggleOptionST("UseCum","$SSL_ApplyCumEffects", ActorLib.bUseCum)
 		AddToggleOptionST("AllowFemaleFemaleCum","$SSL_AllowFemaleFemaleCum", ActorLib.bAllowFFCum)
 		AddSliderOptionST("CumEffectTimer","$SSL_CumEffectTimer", ActorLib.fCumTimer, "$SSL_Seconds")
+		AddToggleOptionST("OrgasmEffects","$SSL_OrgasmEffects", ThreadLib.bOrgasmEffects)
 
 		SetCursorPosition(1)
 		AddHeaderOption("$SSL_AnimationHandling")
 		AddToggleOptionST("AllowCreatures","$SSL_AllowCreatures", AnimLib.bAllowCreatures)
+		AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", ActorLib.bRagdollEnd)
 		AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", ThreadLib.bForeplayStage)
 		AddToggleOptionST("RestrictAggressive","$SSL_RestrictAggressive", AnimLib.bRestrictAggressive)
 		AddToggleOptionST("UndressAnimation","$SSL_UndressAnimation", ActorLib.bUndressAnimation)
@@ -614,6 +615,19 @@ state NPCBed
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoNPCBed")
+	endEvent
+endState
+state OrgasmEffects
+	event OnSelectST()
+		ThreadLib.bOrgasmEffects = !ThreadLib.bOrgasmEffects
+		SetToggleOptionValueST(ThreadLib.bOrgasmEffects)
+	endEvent
+	event OnDefaultST()
+		ThreadLib.bOrgasmEffects = true
+		SetToggleOptionValueST(ThreadLib.bOrgasmEffects)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoOrgasmEffects")
 	endEvent
 endState
 state UseCum

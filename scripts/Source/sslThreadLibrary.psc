@@ -29,6 +29,7 @@ float property fSFXDelay auto hidden
 float property fSFXVolume auto hidden
 bool property bAutoAdvance auto hidden
 bool property bForeplayStage auto hidden
+bool property bOrgasmEffects auto hidden
 string property sNPCBed auto hidden
 float[] property fStageTimer auto hidden
 float[] property fStageTimerLeadIn auto hidden
@@ -118,6 +119,7 @@ function _Defaults()
 	fSFXVolume = 1.0
 	bAutoAdvance = true
 	bForeplayStage = false
+	bOrgasmEffects = false
 	sNPCBed = "$SSL_Never"
 
 	; Timers

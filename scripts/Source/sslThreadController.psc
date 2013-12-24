@@ -178,16 +178,20 @@ state Animating
 		if !LeadIn && Stage >= Animation.StageCount
 			; Send orgasm stage specific event
 			SendThreadEvent("OrgasmStart")
-			; Perform actor orgasm stuff
-			ActorAction("Orgasm", "Animating")
-			PlayAnimation()
-			Lib.OrgasmEffect.PlayAndWait(Positions[0])
-			if sfxType != none
-				Sound.SetInstanceVolume(sfxType.Play(Positions[0]), sfxVolume)
+			; Play optional orgasm effects
+			if Lib.bOrgasmEffects
+				; Perform actor orgasm stuff
+				ActorAction("Orgasm", "Animating")
+				PlayAnimation()
+				; Play Orgasm SFX
+				Lib.OrgasmEffect.PlayAndWait(Positions[0])
+				if sfxType != none
+					Sound.SetInstanceVolume(sfxType.Play(Positions[0]), sfxVolume)
+				endIf
+				Lib.OrgasmEffect.PlayAndWait(Positions[0])
+				Sound.SetInstanceVolume(Lib.OrgasmEffect.Play(Positions[0]), sfxVolume)
+				sfx[0] = 0.60
 			endIf
-			Lib.OrgasmEffect.PlayAndWait(Positions[0])
-			Sound.SetInstanceVolume(Lib.OrgasmEffect.Play(Positions[0]), sfxVolume)
-			sfx[0] = 0.60
 		else
 			SendThreadEvent("StageStart")
 		endIf
