@@ -2,11 +2,12 @@ scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
 int function GetVersion()
-	return 13101
+	return 13102
 endFunction
 
 string function GetStringVer()
-	return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)
+	return "1.32 DEV"
+	; return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)
 endFunction
 
 bool function DebugMode()
@@ -22,6 +23,11 @@ event OnVersionUpdate(int version)
 		; Resetup system
 		if CurrentVersion > 0
 			_SetupSystem()
+		endIf
+		; v1.32:
+		; Convert current player stats to StorageUtil
+		if CurrentVersion > 0 && CurrentVersion < 13200
+			Stats._Update()
 		endIf
 	endIf
 endEvent
@@ -461,17 +467,17 @@ event OnPageReset(string page)
 		SetCursorFillMode(TOP_TO_BOTTOM)
 
 		AddHeaderOption("$SSL_SexualExperience")
-		AddTextOption("$SSL_TimeSpentHavingSex", Stats.ParseTime(Stats.fTimeSpent as int))
+		AddTextOption("$SSL_TimeSpentHavingSex", Stats.ParseTime(Stats.GetFloat(PlayerRef, "TimeSpent") as int))
 		AddTextOption("$SSL_TimeSinceLastSex", Stats.LastSexTimerString(PlayerRef))
-		AddTextOption("$SSL_MaleSexualPartners", Stats.iMalePartners)
-		AddTextOption("$SSL_FemaleSexualPartners", Stats.iFemalePartners)
-		AddTextOption("$SSL_CreatureSexualPartners", Stats.iCreaturePartners)
-		AddTextOption("$SSL_TimesMasturbated", Stats.iMasturbationCount)
-		AddTextOption("$SSL_VaginalExperience", Stats.iVaginalCount)
-		AddTextOption("$SSL_AnalExperience", Stats.iAnalCount)
-		AddTextOption("$SSL_OralExperience", Stats.iOralCount)
-		AddTextOption("$SSL_TimesVictim", Stats.iVictimCount)
-		AddTextOption("$SSL_TimesAggressive", Stats.iAggressorCount)
+		AddTextOption("$SSL_MaleSexualPartners", Stats.GetInt(PlayerRef, "Males"))
+		AddTextOption("$SSL_FemaleSexualPartners", Stats.GetInt(PlayerRef, "Females"))
+		AddTextOption("$SSL_CreatureSexualPartners", Stats.GetInt(PlayerRef, "Creatures"))
+		AddTextOption("$SSL_TimesMasturbated", Stats.GetInt(PlayerRef, "Masturbation"))
+		AddTextOption("$SSL_VaginalExperience", Stats.GetInt(PlayerRef, "Vaginal"))
+		AddTextOption("$SSL_AnalExperience", Stats.GetInt(PlayerRef, "Anal"))
+		AddTextOption("$SSL_OralExperience", Stats.GetInt(PlayerRef, "Oral"))
+		AddTextOption("$SSL_TimesVictim", Stats.GetInt(PlayerRef, "Victim"))
+		AddTextOption("$SSL_TimesAggressive", Stats.GetInt(PlayerRef, "Aggressor"))
 
 		SetCursorPosition(1)
 		AddHeaderOption("$SSL_SexualStats")
@@ -487,9 +493,9 @@ event OnPageReset(string page)
 		AddEmptyOption()
 		; Custom stats set by other mods
 		i = 0
-		while i < Stats.CustomStats.Length
-			string stat = Stats.CustomStats[i]
-			AddTextOption(stat, Stats.GetStatFull(stat))
+		while i < StorageUtil.StringListCount(none, "sslActorStats.CustomStats")
+			string stat = StorageUtil.StringListGet(none, "sslActorStats.CustomStats", i)
+			AddTextOption(stat, Stats.GetStatFull(PlayerRef, stat))
 			i += 1
 		endWhile
 

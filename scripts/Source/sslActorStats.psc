@@ -4,6 +4,7 @@ scriptname sslActorStats extends Quest
 sslActorLibrary property Lib auto
 
 ; Data
+actor property PlayerRef auto
 faction property PlayerSexPartners auto
 
 float property fTimeSpent auto hidden
@@ -28,6 +29,7 @@ string[] StatName
 string[] StatValue
 string[] StatPrepend
 string[] StatAppend
+bool updated
 
 string[] property CustomStats hidden
 	string[] function get()
@@ -39,103 +41,115 @@ endProperty
 ;|	Manipulate Custom Stats                      |;
 ;\-----------------------------------------------/;
 
-int function RegisterStat(string name, string value, string prepend = "", string append = "")
-	int index = FindStat(name)
-	if index == -1
-		StatName = sslUtility.PushString(name, StatName)
-		StatValue = sslUtility.PushString(value, StatValue)
-		StatPrepend = sslUtility.PushString(prepend, StatPrepend)
-		StatAppend = sslUtility.PushString(append, StatAppend)
-		return (StatName.Length - 1)
+int function RegisterStat(string stat, string value, string prepend = "", string append = "")
+	if StorageUtil.StringListFind(none, "sslActorStats.CustomStats", stat) == -1
+		StorageUtil.StringListAdd(none, "sslActorStats.CustomStats", stat, false)
+		SetString(none, "Custom."+stat, prepend+"#!{"+value+"}#!"+append)
+		SetString(PlayerRef, "Custom."+stat, value)
+		return 1
 	endIf
-	return index
+	return -1
 endFunction
 
 function Alter(string name, string newName = "", string value = "", string prepend = "", string append = "")
-	int index = FindStat(name)
-	if index == -1
-		return
-	endIf
-	if newName != ""
-		StatName[index] = newName
-	endIf
-	if value != ""
-		StatValue[index] = value
-	endIf
-	if prepend != ""
-		StatPrepend[index] = prepend
-	endIf
-	if append != ""
-		StatAppend[index] = append
-	endIf
+	; int index = FindStat(name)
+	; if index == -1
+	; 	return
+	; endIf
+	; if newName != ""
+	; 	StatName[index] = newName
+	; endIf
+	; if value != ""
+	; 	StatValue[index] = value
+	; endIf
+	; if prepend != ""
+	; 	StatPrepend[index] = prepend
+	; endIf
+	; if append != ""
+	; 	StatAppend[index] = append
+	; endIf
 endFunction
 
-string function SetStat(string name, string value)
-	int index = FindStat(name)
-	if index == -1
+string function SetStat(actor ActorRef, string stat, string value)
+	if !HasStat(none, stat)
 		return ""
 	endIf
-	StatValue[index] = value
-	return StatValue[index]
+	SetString(ActorRef, "Custom."+stat, value)
+	return GetStat(ActorRef, "Custom."+stat)
 endFunction
 
-int function AdjustBy(string name, int adjust)
-	int value = GetStatInt(name)
+int function AdjustBy(actor ActorRef, string stat, int adjust)
+	int value = GetStatInt(ActorRef, stat)
 	value += adjust
-	return SetStat(name, (value as string)) as int
+	SetStat(ActorRef, stat, (value as string))
+	return value
 endFunction
 
 ;/-----------------------------------------------\;
 ;|	Stat Custom Stat Lookup                      |;
 ;\-----------------------------------------------/;
 
-string function GetStat(string name)
-	int index = FindStat(name)
-	if index == -1
-		return ""
+string function GetStat(actor ActorRef, string stat)
+	if !HasString(ActorRef, "Custom."+stat)
+		string default = GetStatDefault(stat)
+		SetString(ActorRef, "Custom."+stat, default)
+		return default
 	endIf
-	return StatValue[index]
+	return GetString(ActorRef, "Custom."+stat)
 endFunction
 
-float function GetStatFloat(string name)
-	return GetStat(name) as float
+float function GetStatFloat(actor ActorRef, string stat)
+	return GetStat(ActorRef, "Custom."+stat) as float
 endFunction
 
-int function GetStatInt(string name)
-	return GetStat(name) as int
+int function GetStatInt(actor ActorRef, string stat)
+	return GetStat(ActorRef, "Custom."+stat) as int
 endFunction
 
-int function GetStatLevel(string name, float curve = 0.65)
-	return CalcLevel(GetStatInt(name), curve)
+int function GetStatLevel(actor ActorRef, string stat, float curve = 0.65)
+	return CalcLevel(GetStatInt(ActorRef, stat), curve)
 endFunction
 
-string function GetStatTitle(string name, float curve = 0.65)
-	return sStatTitles[Clamp(CalcLevel(GetStatInt(name), curve), 6)]
+string function GetStatTitle(actor ActorRef, string stat, float curve = 0.65)
+	return sStatTitles[Clamp(CalcLevel(GetStatInt(ActorRef, stat), curve), 6)]
 endFunction
 
-string function GetStatFull(string name)
-	string[] info = GetInfo(name)
-	if info == none
-		return ""
-	endIf
-	return info[1]+info[0]+info[2]
+bool function IsValue(string value)
+	return StringUtil.GetNthChar(value, 0) == "{" && StringUtil.GetNthChar(value, (StringUtil.GetLength(value) - 1)) == "}"
 endFunction
 
-int function FindStat(string name)
-	return StatName.Find(name)
+string function GetStatDefault(string stat)
+	string[] full = sslUtility.ArgString(GetStat(none, stat), "#!")
+	int i = full.Length
+	while i
+		i -= 1
+		if IsValue(full[i])
+			return full[i]
+		endIf
+	endWhile
+	return ""
 endFunction
 
-string[] function GetInfo(string name)
-	int index = FindStat(name)
-	if index == -1
-		return none
-	endIf
-	string[] info = new string[3]
-	info[0] = StatValue[index]
-	info[1] = StatPrepend[index]
-	info[2] = StatAppend[index]
-	return info
+string function GetStatFull(actor ActorRef, string stat)
+	string[] full = sslUtility.ArgString(GetStat(none, stat), "#!")
+	debug.traceandbox(full)
+	string output = ""
+	int i
+	while i < full.Length
+		if IsValue(full[i])
+			output += GetStat(ActorRef, stat)
+		else
+			output += full[i]
+		endIf
+		i += 1
+	endWhile
+	return output
 endFunction
+
+bool function HasStat(actor ActorRef, string stat)
+	return HasString(ActorRef, "Custom."+stat)
+endFunction
+
 
 ;/-----------------------------------------------\;
 ;|	Calculate/Parse Stats                        |;
@@ -170,22 +184,8 @@ endFunction
 ;\-----------------------------------------------/;
 
 int function GetSkill(actor ActorRef, string skill)
-	; Native Player skills
-	if ActorRef == Lib.PlayerRef
-		if skill == "Vaginal"
-			return iVaginalCount
-		elseIf skill == "Anal"
-			return iAnalCount
-		elseIf skill == "Oral"
-			return iOralCount
-		elseIf skill == "Males"
-			return iMalePartners
-		elseIf skill == "Females"
-			return iFemalePartners
-		endIf
-	endIf
 	; Seed for NPC native skills
-	if ActorRef != Lib.PlayerRef && !HasInt(ActorRef, skill)
+	if ActorRef != PlayerRef && !HasInt(ActorRef, skill)
 		if skill == "Vaginal" || skill == "Anal" || skill == "Oral"
 			SetInt(ActorRef, skill, (Utility.RandomInt(ActorRef.GetLevel(), (ActorRef.GetLevel() * 2)) + ((((ActorRef.GetActorValue("Speechcraft")*ActorRef.GetActorValue("Confidence")) + 1) / 2.3) as int)))
 		elseIf skill == "Males" || skill == "Females"
@@ -219,10 +219,6 @@ string function GetSkillTitle(actor ActorRef, string skill)
 endFunction
 
 float function GetPurity(actor ActorRef)
-	; Get Player purity
-	if ActorRef == Lib.PlayerRef
-		return fSexualPurity
-	endIf
 	; Seed NPC purity stat if empty
 	if !HasFloat(ActorRef, "Purity")
 		; Get relevant-ish AI data
@@ -265,14 +261,6 @@ float function GetPurity(actor ActorRef)
 	endIf
 	; Return saved stat
 	return GetFloat(ActorRef, "Purity")
-endFunction
-
-function AdjustPurity(actor ActorRef, float amount)
-	if ActorRef == Lib.PlayerRef
-		fSexualPurity += amount
-	else
-		SetFloat(ActorRef, "Purity", (GetFloat(ActorRef, "Purity") + amount))
-	endIf
 endFunction
 
 int function GetPurityLevel(actor ActorRef)
@@ -335,12 +323,13 @@ bool function HadSex(actor a)
 	return SexCount(a) > 0
 endFunction
 
-function AddSex(actor a, bool WithPlayer = false)
-	SetInt(a, "SexCount", (SexCount(a) + 1))
+function AddSex(actor a, float TimeSpent = 0.0, bool WithPlayer = false)
+	AdjustInt(a, "SexCount", 1)
+	AdjustFloat(a, "TimeSpent", TimeSpent)
 	SetFloat(a, "LastSex.GameTime", Utility.GetCurrentGameTime())
 	SetFloat(a, "LastSex.RealTime", Utility.GetCurrentRealTime())
-	if WithPlayer && a != Lib.PlayerRef
-		HadPlayerSex(a)
+	if WithPlayer && a != PlayerRef
+		AddPlayerSex(a)
 	endIf
 endFunction
 
@@ -418,35 +407,35 @@ function AddPlayerSex(actor a)
 endFunction
 
 int function GetPlayerSkillLevel(string skill)
-	return GetSkillLevel(Lib.PlayerRef, skill)
+	return GetSkillLevel(PlayerRef, skill)
 endFunction
 
 string function GetPlayerSkillTitle(string skill)
-	return sStatTitles[Clamp(GetPlayerSkillLevel(skill), 6)]
+	return sStatTitles[Clamp(GetSkillLevel(PlayerRef, skill), 6)]
 endFunction
 
 int function GetPlayerPurityLevel()
-	return CalcLevel(fSexualPurity, 0.2)
+	return GetPurityLevel(PlayerRef)
 endFunction
 
 string function GetPlayerPurityTitle()
 	if fSexualPurity < 0
-		return sImpureTitles[Clamp(GetPlayerPurityLevel(), 6)]
+		return sImpureTitles[Clamp(GetPurityLevel(PlayerRef), 6)]
 	else
-		return sPureTitles[Clamp(GetPlayerPurityLevel(), 6)]
+		return sPureTitles[Clamp(GetPurityLevel(PlayerRef), 6)]
 	endIf
 endFunction
 
 string function GetPlayerSexualityTitle()
-	return GetSexualityTitle(Lib.PlayerRef)
+	return GetSexualityTitle(PlayerRef)
 endFunction
 
 ;/-----------------------------------------------\;
 ;|	System Functions                             |;
 ;\-----------------------------------------------/;
 
-function UpdateNativeStats(actor ActorRef, int males, int females, int creatures, sslBaseAnimation Animation, actor victim, float time)
-	if !Animation.IsSexual()
+function UpdateNativeStats(actor ActorRef, int males, int females, int creatures, sslBaseAnimation Animation, actor victim, float time, bool WithPlayer)
+	if ActorRef == none || !Animation.IsSexual() || (males + females + creatures) == 0
 		return
 	endIf
 	; Gather information
@@ -460,38 +449,24 @@ function UpdateNativeStats(actor ActorRef, int males, int females, int creatures
 		vaginal = false
 		anal = true
 	endIf
-	; Player tracked skills
-	if ActorRef == Lib.PlayerRef
-		iAnalCount += (anal as int)
-		iVaginalCount += (vaginal as int)
-		iOralCount += (oral as int)
-		iVictimCount += (isVictim as int)
-		iAggressorCount += (isAggressor as int)
-		; Update time spent
-		fTimeSpent += time
-		; Update player partners
-		iMalePartners += males
-		iFemalePartners += females
-		iCreaturePartners += creatures
-		if Lib.GetGender(ActorRef) == 1
-			iFemalePartners -= 1 ; Female Player
-		else
-			iMalePartners -= 1 ; Male Player
-		endIf
-	; NPC tracked skills
+	; Record sex act
+	AddSex(ActorRef, time, WithPlayer)
+	; Adjust tracked stats/skills
+	AdjustSkill(ActorRef, "Anal", (anal as int))
+	AdjustSkill(ActorRef, "Vaginal", (vaginal as int))
+	AdjustSkill(ActorRef, "Oral", (oral as int))
+	AdjustSkill(ActorRef, "Victim", (isVictim as int))
+	AdjustSkill(ActorRef, "Aggressor", (isAggressor as int))
+	if Animation.ActorCount() == 1
+		AdjustSkill(ActorRef, "Masturbation", 1)
+	elseIf Lib.GetGender(ActorRef) == 1
+		AdjustSkill(ActorRef, "Females", (females - 1))
+		AdjustSkill(ActorRef, "Males", males)
+		AdjustSkill(ActorRef, "Creatures", Creatures)
 	else
-		AdjustSkill(ActorRef, "Anal", (anal as int))
-		AdjustSkill(ActorRef, "Vaginal", (vaginal as int))
-		AdjustSkill(ActorRef, "Oral", (oral as int))
-		AdjustSkill(ActorRef, "Victim", (isVictim as int))
-		AdjustSkill(ActorRef, "Aggressor", (isAggressor as int))
-		if Lib.GetGender(ActorRef) == 1
-			AdjustSkill(ActorRef, "Females", (females - 1))
-			AdjustSkill(ActorRef, "Males", males)
-		else
-			AdjustSkill(ActorRef, "Females", females)
-			AdjustSkill(ActorRef, "Males", (males - 1))
-		endIf
+		AdjustSkill(ActorRef, "Females", females)
+		AdjustSkill(ActorRef, "Males", (males - 1))
+		AdjustSkill(ActorRef, "Creatures", Creatures)
 	endIf
 	; Update perversion/purity
 	float purity
@@ -507,7 +482,7 @@ function UpdateNativeStats(actor ActorRef, int males, int females, int creatures
 	purity *= ((males + females) - 1) + (creatures * -0.8)
 	; Adjuster-ma-jigger.
 	; Adjust base purity by present male/females + subtract purity for each creature present
-	AdjustPurity(ActorRef, purity)
+	AdjustFloat(ActorRef, "Purity", purity)
 endFunction
 
 int function Clamp(int value, int max)
@@ -561,7 +536,7 @@ function _Setup()
 	sStatTitles[5] = "$SSL_Master"
 	sStatTitles[6] = "$SSL_GrandMaster"
 
-	if Lib.PlayerRef.GetLeveledActorBase().GetSex() > 0
+	if PlayerRef.GetLeveledActorBase().GetSex() > 0
 		sPureTitles[2] = "$SSL_PrimProper"
 		sPureTitles[5] = "$SSL_Ladylike"
 		sImpureTitles[5] = "$SSL_Debaucherous"
@@ -574,6 +549,33 @@ function _Setup()
 	endIf
 
 	SendModEvent("SexLabRegisterStats")
+endFunction
+
+function _Update()
+	if updated
+		return
+	endIf
+	updated = true
+	SetFloat(PlayerRef, "TimeSpent", fTimeSpent)
+	SetFloat(PlayerRef, "Purity", fSexualPurity)
+	SetInt(PlayerRef, "Males", iMalePartners)
+	SetInt(PlayerRef, "Females", iFemalePartners)
+	SetInt(PlayerRef, "Creatures", iCreaturePartners)
+	SetInt(PlayerRef, "Masturbation", iMasturbationCount)
+	SetInt(PlayerRef, "Anal", iAnalCount)
+	SetInt(PlayerRef, "Vaginal", iVaginalCount)
+	SetInt(PlayerRef, "Oral", iOralCount)
+	SetInt(PlayerRef, "Victim", iVictimCount)
+	SetInt(PlayerRef, "Aggressor", iAggressorCount)
+
+	int i = StatName.Length
+	while i
+		i -= 1
+		RegisterStat(StatName[i], StatValue[i], StatPrepend[i], StatAppend[i])
+	endWhile
+
+	_Setup()
+	Debug.Notification("SexLab - Player Stats Updated" + PlayerRef)
 endFunction
 
 bool function HasInt(actor ActorRef, string stat)
@@ -605,3 +607,11 @@ endFunction
 function SetString(actor ActorRef, string stat, string value)
 	StorageUtil.SetStringValue(ActorRef, "sslActorStats."+stat, value)
 endFunction
+
+function AdjustInt(actor ActorRef, string stat, int amount)
+	StorageUtil.SetIntValue(ActorRef, "sslActorStats."+stat, (StorageUtil.GetIntValue(ActorRef, "sslActorStats."+stat) + amount))
+endFunction
+function AdjustFloat(actor ActorRef, string stat, float amount)
+	StorageUtil.SetFloatValue(ActorRef, "sslActorStats."+stat, (StorageUtil.GetFloatValue(ActorRef, "sslActorStats."+stat) + amount))
+endFunction
+

@@ -455,7 +455,10 @@ endFunction
 ;#---------------------------#
 
 int function FindStat(string name)
-	return Stats.FindStat(name)
+	return -1 ; Removed in 1.32
+endFunction
+string[] function GetInfo(string name)
+	return none ; Removed in 1.32
 endFunction
 
 int function RegisterStat(string name, string value, string prepend = "", string append = "")
@@ -466,28 +469,24 @@ function Alter(string name, string newName = "", string value = "", string prepe
 	Stats.Alter(name, newName, value, prepend, append)
 endFunction
 
-string[] function GetInfo(string name)
-	return Stats.GetInfo(name)
-endFunction
-
 string function GetStat(string name)
-	return Stats.GetStat(name)
+	return Stats.GetStat(PlayerRef, name)
 endFunction
 
 int function GetStatInt(string name)
-	return Stats.GetStatInt(name)
+	return Stats.GetStatInt(PlayerRef, name)
 endFunction
 
 float function GetStatFloat(string name)
-	return Stats.GetStatFloat(name)
+	return Stats.GetStatFloat(PlayerRef, name)
 endFunction
 
 string function SetStat(string name, string value)
-	return Stats.SetStat(name, value)
+	return Stats.SetStat(PlayerRef, name, value)
 endFunction
 
 int function AdjustBy(string name, int adjust)
-	return Stats.AdjustBy(name, adjust)
+	return Stats.AdjustBy(PlayerRef, name, adjust)
 endFunction
 
 int function CalcSexuality(bool IsFemale, int males, int females)
@@ -515,12 +514,12 @@ function AddPlayerSex(actor a)
 endFunction
 
 float function AdjustPurity(actor ActorRef, float amount)
-	Stats.AdjustPurity(ActorRef, amount)
+	Stats.AdjustFloat(ActorRef, "Purity", amount)
 	return Stats.GetPurity(ActorRef)
 endFunction
 
 float function AdjustPlayerPurity(float amount)
-	Stats.AdjustPurity(PlayerRef, amount)
+	Stats.AdjustFloat(PlayerRef, "Purity", amount)
 	return Stats.GetPurity(PlayerRef)
 endFunction
 

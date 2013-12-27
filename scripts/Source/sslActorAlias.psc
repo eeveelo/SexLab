@@ -562,8 +562,6 @@ state Reset
 		if IsPlayer
 			Lib.ControlLib.EnableFreeCamera(false)
 		endIf
-		; Record sex time and player count
-		Lib.Stats.AddSex(ActorRef, Controller.HasPlayer)
 		; Clear OpenMouth
 		ActorRef.ClearExpressionOverride()
 		; Clear expression
@@ -571,7 +569,7 @@ state Reset
 			sslExpressionLibrary.ClearMFG(ActorRef)
 		endIF
 		; Update diary/journal stats for player + native stats for NPCs
-		Lib.Stats.UpdateNativeStats(ActorRef, Controller.Males, Controller.Females, Controller.Creatures, Animation, Controller.VictimRef, Controller.TotalTime)
+		Lib.Stats.UpdateNativeStats(ActorRef, Controller.Males, Controller.Females, Controller.Creatures, Animation, Controller.VictimRef, Controller.TotalTime, Controller.HasPlayer)
 		; Reset to starting scale
 		ActorRef.SetScale(ActorScale)
 		; Reapply cum
