@@ -39,3 +39,6 @@ string function ReadFromFile(string fileName) global native
 
 ; Write string to file.
 bool function WriteToFile(string fileName, string text, bool append = true, bool timestamp = false) global native
+
+; Get race's editor ID.
+string function GetRaceEditorID(Race raceForm) global native
