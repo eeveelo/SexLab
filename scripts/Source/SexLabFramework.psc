@@ -454,19 +454,32 @@ endFunction
 ;#   START STAT FUNCTIONS    #
 ;#---------------------------#
 
-int function FindStat(string name)
-	return -1 ; Removed in 1.32
-endFunction
-string[] function GetInfo(string name)
-	return none ; Removed in 1.32
-endFunction
-
 int function RegisterStat(string name, string value, string prepend = "", string append = "")
 	return Stats.RegisterStat(name, value, prepend, append)
 endFunction
 
 function Alter(string name, string newName = "", string value = "", string prepend = "", string append = "")
 	Stats.Alter(name, newName, value, prepend, append)
+endFunction
+
+string function GetActorStat(actor ActorRef, string name)
+	return Stats.GetStat(ActorRef, name)
+endFunction
+
+int function GetActorStatInt(actor ActorRef, string name)
+	return Stats.GetStatInt(ActorRef, name)
+endFunction
+
+float function GetActorStatFloat(actor ActorRef, string name)
+	return Stats.GetStatFloat(ActorRef, name)
+endFunction
+
+string function SetActorStat(actor ActorRef, string name, string value)
+	return Stats.SetStat(ActorRef, name, value)
+endFunction
+
+int function ActorAdjustBy(actor ActorRef, string name, int adjust)
+	return Stats.AdjustBy(ActorRef, name, adjust)
 endFunction
 
 string function GetStat(string name)
@@ -656,6 +669,12 @@ string function LastSexTimerStringRealTime(actor a)
 	return Stats.LastSexTimerStringRealTime(a)
 endFunction
 
+int function FindStat(string name)
+	return -1 ; Removed in 1.32
+endFunction
+string[] function GetInfo(string name)
+	return none ; Removed in 1.32
+endFunction
 
 ;#---------------------------#
 ;#    END STAT FUNCTIONS     #

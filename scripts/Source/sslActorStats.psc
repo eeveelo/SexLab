@@ -44,7 +44,14 @@ endProperty
 int function RegisterStat(string stat, string value, string prepend = "", string append = "")
 	if StorageUtil.StringListFind(none, "sslActorStats.CustomStats", stat) == -1
 		StorageUtil.StringListAdd(none, "sslActorStats.CustomStats", stat, false)
-		SetString(none, "Custom."+stat, prepend+"#!{"+value+"}#!"+append)
+		string statstr = "{"+stat+"}"
+		if prepend != ""
+			statstr = prepend+"#!"+statstr
+		endIf
+		if append != ""
+			statstr = statstr+"#!"+append
+		endIf
+		SetString(none, "Custom."+stat, statstr)
 		SetString(PlayerRef, "Custom."+stat, value)
 		return 1
 	endIf
@@ -132,7 +139,6 @@ endFunction
 
 string function GetStatFull(actor ActorRef, string stat)
 	string[] full = sslUtility.ArgString(GetStat(none, stat), "#!")
-	debug.traceandbox(full)
 	string output = ""
 	int i
 	while i < full.Length

@@ -192,6 +192,7 @@ string[] function ArgString(string args, string delimiter = ",") global
 		return output ; Empty arg string, return empty array
 	endIf
 	args += delimiter
+	int delLen = StringUtil.GetLength(delimiter)
 	int prev = 0
 	int next = StringUtil.Find(args, delimiter, prev)
 	while next != -1
@@ -202,7 +203,7 @@ string[] function ArgString(string args, string delimiter = ",") global
 		if arg != "" && arg != delimiter
 			output = PushString(arg, output)
 		endIf
-		prev = next + 1
+		prev = next + delLen
 		next = StringUtil.Find(args, delimiter, prev)
 	endWhile
 	return output
