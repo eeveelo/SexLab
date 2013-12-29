@@ -209,6 +209,10 @@ endFunction
 ;\-----------------------------------------------/;
 
 function StopAnimating(bool quick = false)
+	if IsPlayer
+		; Disable free camera, if in it
+		Lib.ControlLib.EnableFreeCamera(false)
+	endIf
 	if IsCreature
 		; Reset creature idle
 		Debug.SendAnimationEvent(ActorRef, "Reset")
@@ -218,10 +222,6 @@ function StopAnimating(bool quick = false)
 		Debug.SendAnimationEvent(ActorRef, "ForceFurnExit")
 		ActorRef.PushActorAway(ActorRef, 1.0)
 	else
-		; Disable free camera, if in it
-		if IsPlayer
-			Lib.ControlLib.EnableFreeCamera(false)
-		endIf
 		; Reset NPC/PC Idle Quickly
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 		; Ragdoll NPC/PC if enabled and not in TFC
