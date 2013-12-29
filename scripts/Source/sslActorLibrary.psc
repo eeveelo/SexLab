@@ -163,19 +163,32 @@ actor[] function SortActors(actor[] Positions, bool femaleFirst = true)
 	if Positions.Length < 2
 		return Positions ; Why reorder a single actor?
 	endIf
-	int slot
-	int priority = (femaleFirst as int)
+	int len = Positions.Length
+	int Female = femaleFirst as int
+	actor[] Sorted = sslUtility.ActorArray(len)
 	int i
-	while i < Positions.Length
-		if GetGender(Positions[i]) == priority && i > slot
-			actor moved = Positions[slot]
-			Positions[slot] = Positions[i]
-			Positions[i] = moved
-			slot += 1
+	while i < len
+		; Fill actor into sorted array
+		actor ActorRef = Positions[i]
+		Sorted[i] = ActorRef
+		; Check if actor is proper gender
+		if GetGender(ActorRef) != Female
+			int n = (i + 1)
+			while n < len
+				actor NextRef = Positions[n]
+				; Swap for actor who has correct gender
+				if GetGender(NextRef) == Female
+					Sorted[i] = NextRef
+					Positions[i] = NextRef
+					Positions[n] = ActorRef
+					n = len
+				endIf
+				n += 1
+			endWhile
 		endIf
 		i += 1
 	endWhile
-	return Positions
+	return Sorted
 endFunction
 
 function ApplyCum(actor a, int cumID)

@@ -4,16 +4,51 @@ SexLabFramework property SexLab Auto
 import SexLabUtil
 
 event OnEffectStart(actor TargetRef, actor CasterRef)
-	sslBaseAnimation Anim = SexLab.GetAnimationByName("Rough Missionary")
-	Log("Current: "+Anim.AccessOffset(0, 2, 0), Anim.Name, "", "trace,box,console")
-	Anim.UpdateOffset(0, 2, 0, 30)
-	Log("Adjusted: "+Anim.AccessOffset(0, 2, 0), Anim.Name, "", "trace,box,console")
+	actor[] Found = SexLab.FindAvailablePartners(SexLab.MakeActorArray(CasterRef), Utility.RandomInt(2,5))
+	Debug.TraceAndBox("MALE\nUnsorted Actors: "+Genders(Found)+"\n  Sorted Actors: "+Genders(SexLab.SortActors(Found, false)))
+
+	actor[] Found2 = SexLab.FindAvailablePartners(SexLab.MakeActorArray(CasterRef), Utility.RandomInt(2,5))
+	Debug.TraceAndBox("FEMALE\nUnsorted Actors: "+Genders(Found2)+"\n  Sorted Actors: "+Genders(SexLab.SortActors(Found2, true)))
+
+	Dispel()
 endEvent
 
 event OnEffectFinish(Actor TargetRef, Actor CasterRef)
 endEvent
 
 
+bool function DupeCheck(actor[] Positions)
+	int i
+	while i < Positions.Length
+		if Positions[i] == none
+			Debug.TraceAndBox("Empty element found: "+i)
+			return false
+		elseIf Positions.Find(Positions[i]) != Positions.RFind(Positions[i])
+			Debug.TraceAndBox("Duplicate found: "+Positions.Find(Positions[i]) + " - " + Positions.RFind(Positions[i]))
+			return false
+		endIf
+		i += 1
+	endWhile
+	return true
+endFunction
+
+string function Genders(actor[] Positions)
+	DupeCheck(Positions)
+	string output
+	int i
+	while i < Positions.Length
+		int Gender = SexLab.GetGender(Positions[i])
+		if Gender == 0
+			output +=  "Male, "
+		elseIf Gender == 1
+			output += "Female, "
+		else
+			output += "Misc, "
+		endIf
+		i += 1
+	endWhile
+	return output
+endFunction
 
 ;/-----------------------------------------------\;
 ;|	Debug Utility Functions                      |;
@@ -54,11 +89,4 @@ function UnlockActor(actor ActorRef)
 	; Detach positioning marker
 	ActorRef.StopTranslation()
 	ActorRef.SetVehicle(none)
-endFunction
-
-function Wait(float seconds)
-	float timer = Utility.GetCurrentRealTime() + seconds
-	while Utility.GetCurrentRealTime() < timer
-		Utility.Wait(0.5)
-	endWhile
 endFunction
