@@ -41,6 +41,13 @@ sslThreadController function QuickStart(actor a1, actor a2 = none, actor a3 = no
 	return SexLab.QuickStart(a1, a2, a3, a4, a5, victim, hook)
 endFunction
 
+function Wait(float seconds) global
+	float timer = Utility.GetCurrentRealTime() + seconds
+	while Utility.GetCurrentRealTime() < timer
+		Utility.Wait(0.4)
+	endWhile
+endFunction
+
 function Log(string msg, string source, string type = "NOTICE", string display = "trace", bool minimal = false) global
 	int severity = 0
 	if type == "ERROR" || type == "FATAL"
