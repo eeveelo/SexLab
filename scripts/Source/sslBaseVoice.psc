@@ -145,3 +145,12 @@ function Initialize()
 	string[] tagsDel
 	tags = tagsDel
 endFunction
+function _Export()
+	string exportkey ="SexLabConfig.Voices["+Name+"]."
+	StorageUtil.FileSetIntValue(exportkey+"Enabled", Enabled as int)
+endFunction
+function _Import()
+	string exportkey ="SexLabConfig.Voices["+Name+"]."
+	Enabled = StorageUtil.FileGetIntValue(exportkey+"Enabled", Enabled as int) as bool
+	StorageUtil.FileUnsetIntValue(exportkey+"Enabled")
+endFunction

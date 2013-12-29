@@ -43,9 +43,29 @@ endFunction
 function _Export()
 	_ExportBool("bRestrictAggressive", bRestrictAggressive)
 	_ExportBool("bAllowCreatures", bAllowCreatures)
+	int i = Animations.Slotted
+	while i
+		i -= 1
+		Animations.Slots[i]._Export()
+	endWhile
+	i = CreatureAnimations.Slotted
+	while i
+		i -= 1
+		CreatureAnimations.Slots[i]._Export()
+	endWhile
 endFunction
 function _Import()
 	_Defaults()
 	bRestrictAggressive = _ImportBool("bRestrictAggressive", bRestrictAggressive)
 	bAllowCreatures = _ImportBool("bAllowCreatures", bAllowCreatures)
+	int i = Animations.Slotted
+	while i
+		i -= 1
+		Animations.Slots[i]._Import()
+	endWhile
+	i = CreatureAnimations.Slotted
+	while i
+		i -= 1
+		CreatureAnimations.Slots[i]._Import()
+	endWhile
 endFunction

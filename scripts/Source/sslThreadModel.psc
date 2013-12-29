@@ -722,7 +722,7 @@ function SendThreadEvent(string eventName, float argNum = 0.0)
 		SendModEvent("Player"+eventName, threadid, argNum)
 	endIf
 	Debug.Trace("SexLab Thread["+_ThreadID+"] ModEvent: "+eventName)
-	MiscUtil.PrintConsole("Thread["+_ThreadID+"] ModEvent: "+eventName)
+	; MiscUtil.PrintConsole("Thread["+_ThreadID+"] ModEvent: "+eventName)
 endFunction
 
 int function ArrayWrap(int value, int max)

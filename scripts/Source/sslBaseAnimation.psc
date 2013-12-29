@@ -223,15 +223,7 @@ int function DataIndex(int slots, int position, int stage, int slot)
 endFunction
 
 float function AccessOffset(int position, int stage, int slot)
-	return offsetData[DataIndex(4, position, stage, slot)] + StorageUtil.FloatListGet(Storage, KeyStr(position, stage), slot)
-endFunction
-
-float function GetAdjustment(int position, int stage, int slot)
-	string KeyStr = KeyStr(position, stage)
-	if StorageUtil.FloatListCount(Storage, KeyStr) == 0
-		return 0.0
-	endIf
-	return StorageUtil.FloatListGet(Storage, KeyStr, slot)
+	return offsetData[DataIndex(4, position, stage, slot)] + GetAdjustment(position, stage, slot)
 endFunction
 
 bool function AccessSwitch(int position, int stage, int slot)
@@ -280,28 +272,38 @@ endFunction
 ;|	Update Offsets                               |;
 ;\-----------------------------------------------/;
 
-function UpdateAllOffsets(int slot, int position, float adjust)
-	int stage = stages
-	while stage
-		UpdateOffset(slot, position, stage, adjust)
-		stage -= 1
-	endWhile
+function SetAdjustment(int position, int stage, int slot, float to)
+	if StorageUtil.FloatListCount(Storage, Name) < 1
+		int len = offsetData.Length
+		while StorageUtil.FloatListCount(Storage, Name) < len
+			StorageUtil.FloatListAdd(Storage, Name, 0.0)
+		endWhile
+	endIf
+	StorageUtil.FloatListSet(Storage, Name, DataIndex(4, position, stage, slot), to)
 endFunction
 
-function UpdateOffset(int slot, int position, int stage, float adjust)
-	string KeyStr = KeyStr(position, stage)
-	while StorageUtil.FloatListCount(Storage, KeyStr) < 4
-		StorageUtil.FloatListAdd(Storage, KeyStr, 0.0)
+float function GetAdjustment(int position, int stage, int slot)
+	return StorageUtil.FloatListGet(Storage, Name, DataIndex(4, position, stage, slot))
+endFunction
+
+function UpdateOffset(int position, int stage, int slot, float adjust)
+	SetAdjustment(position, stage, slot, (GetAdjustment(position, stage, slot) + adjust))
+endFunction
+
+function UpdateAllOffsets(int position, int slot, float adjust)
+	int stage = stages
+	while stage
+		UpdateOffset(position, stage, slot, adjust)
+		stage -= 1
 	endWhile
-	StorageUtil.FloatListSet(Storage, KeyStr, slot, (StorageUtil.FloatListGet(Storage, KeyStr, slot) + adjust))
 endFunction
 
 float[] function UpdateForward(int position, int stage, float adjust, bool adjuststage = false)
 	if Exists("UpdateForward", position, stage)
 		if adjuststage
-			UpdateOffset(0, position, stage, adjust)
+			UpdateOffset(position, stage, 0, adjust)
 		else
-			UpdateAllOffsets(0, position, adjust)
+			UpdateAllOffsets(position, 0, adjust)
 		endIf
 	endIf
 	return GetPositionOffsets(position, stage)
@@ -310,9 +312,9 @@ endFunction
 float[] function UpdateSide(int position, int stage, float adjust, bool adjuststage = false)
 	if Exists("UpdateSide", position, stage)
 		if adjuststage
-			UpdateOffset(1, position, stage, adjust)
+			UpdateOffset(position, stage, 1, adjust)
 		else
-			UpdateAllOffsets(1, position, adjust)
+			UpdateAllOffsets(position, 1, adjust)
 		endIf
 	endIf
 	return GetPositionOffsets(position, stage)
@@ -321,24 +323,16 @@ endFunction
 float[] function UpdateUp(int position, int stage, float adjust, bool adjuststage = false)
 	if Exists("UpdateUp", position, stage)
 		if adjuststage
-			UpdateOffset(2, position, stage, adjust)
+			UpdateOffset(position, stage, 2, adjust)
 		else
-			UpdateAllOffsets(2, position, adjust)
+			UpdateAllOffsets(position, 2, adjust)
 		endIf
 	endIf
 	return GetPositionOffsets(position, stage)
 endFunction
 
 function RestoreOffsets()
-	int position
-	while position < actors
-		int stage = stages
-		while stage
-			StorageUtil.FloatListClear(Storage, KeyStr(position, stage))
-			stage -= 1
-		endWhile
-		position += 1
-	endWhile
+	StorageUtil.FloatListClear(Storage, Name)
 endFunction
 
 ;/-----------------------------------------------\;
@@ -611,18 +605,13 @@ function _Export()
 	StorageUtil.FileSetIntValue(exportkey+"Enabled", Enabled as int)
 	StorageUtil.FileSetIntValue(exportkey+"Aggressive", HasTag("Aggressive") as int)
 	StorageUtil.FileSetIntValue(exportkey+"LeadIn", HasTag("LeadIn") as int)
-	StorageUtil.FileFloatListClear(exportkey+"Offsets")
-	int position
-	while position < actors
-		int stage = 1
-		while stage <= stages
-			StorageUtil.FileFloatListAdd(exportkey+"Offsets", StorageUtil.FloatListGet(Storage, KeyStr(position, stage), 0))
-			StorageUtil.FileFloatListAdd(exportkey+"Offsets", StorageUtil.FloatListGet(Storage, KeyStr(position, stage), 1))
-			StorageUtil.FileFloatListAdd(exportkey+"Offsets", StorageUtil.FloatListGet(Storage, KeyStr(position, stage), 2))
-			StorageUtil.FileFloatListAdd(exportkey+"Offsets", StorageUtil.FloatListGet(Storage, KeyStr(position, stage), 3))
-			stage += 1
-		endWhile
-		position += 1
+
+	StorageUtil.FileFloatListClear(exportkey+"Adjustments")
+	int i
+	int len = StorageUtil.FloatListCount(Storage, Name)
+	while i < len
+		StorageUtil.FileFloatListAdd(exportkey+"Adjustments", StorageUtil.FloatListGet(Storage, Name, i))
+		i += 1
 	endWhile
 endFunction
 
@@ -639,31 +628,17 @@ function _Import()
 	else
 		RemoveTag("LeadIn")
 	endIf
+
+	StorageUtil.FloatListClear(Storage, Name)
 	int i
-	int position
-	while position < actors
-		int stage = 1
-		while stage <= stages
-			float importing = StorageUtil.FileFloatListGet(exportkey+"Offsets", (i))
-			if importing != 0.0
-				StorageUtil.FloatListSet(Storage, KeyStr(position, stage), 0, importing)
-			endIf
-			importing = StorageUtil.FileFloatListGet(exportkey+"Offsets", (i + 1))
-			if importing != 0.0
-				StorageUtil.FloatListSet(Storage, KeyStr(position, stage), 1, importing)
-			endIf
-			importing = StorageUtil.FileFloatListGet(exportkey+"Offsets", (i + 2))
-			if importing != 0.0
-				StorageUtil.FloatListSet(Storage, KeyStr(position, stage), 2, importing)
-			endIf
-			importing = StorageUtil.FileFloatListGet(exportkey+"Offsets", (i + 3))
-			if importing != 0.0
-				StorageUtil.FloatListSet(Storage, KeyStr(position, stage), 3, importing)
-			endIf
-			stage += 1
-			i += 4
-		endWhile
-		position += 1
+	int len = StorageUtil.FileFloatListCount(exportkey+"Adjustments")
+	while i < len
+		StorageUtil.FloatListAdd(Storage, Name, StorageUtil.FileFloatListGet(exportkey+"Adjustments", i))
+		i += 1
 	endWhile
 
+	StorageUtil.FileUnsetIntValue(exportkey+"Enabled")
+	StorageUtil.FileUnsetIntValue(exportkey+"Aggressive")
+	StorageUtil.FileUnsetIntValue(exportkey+"LeadIn")
+	StorageUtil.FileFloatListClear(exportkey+"Adjustments")
 endFunction

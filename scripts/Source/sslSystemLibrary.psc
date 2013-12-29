@@ -1,5 +1,7 @@
 scriptname sslSystemLibrary extends Quest
 
+actor property PlayerRef auto
+
 ; Libraries
 sslAnimationLibrary property AnimLib auto
 sslVoiceLibrary property VoiceLib auto
@@ -18,9 +20,6 @@ sslExpressionSlots property Expressions auto
 
 ; Misc
 sslActorStats property ActorStats auto
-
-actor property PlayerRef auto
-
 
 function _ExportFloat(string name, float value)
 	StorageUtil.FileSetFloatValue("SexLabConfig."+name, value)
@@ -63,7 +62,6 @@ string function _ImportString(string name, string value)
 	endIf
 	return value
 endFunction
-
 
 function _ExportFloatList(string name, float[] values, int len)
 	StorageUtil.FileFloatListClear("SexLabConfig."+name)

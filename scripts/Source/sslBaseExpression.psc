@@ -228,3 +228,30 @@ function Initialize()
 	female4 = intDel
 	female5 = intDel
 endFunction
+function _Export()
+	string exportkey ="SexLabConfig.Expressions["+Name+"]."
+	StorageUtil.FileSetIntValue(exportkey+"Consensual", HasTag("Consensual") as int)
+	StorageUtil.FileSetIntValue(exportkey+"Victim", HasTag("Victim") as int)
+	StorageUtil.FileSetIntValue(exportkey+"Aggressor", HasTag("Aggressor") as int)
+endFunction
+function _Import()
+	string exportkey ="SexLabConfig.Expressions["+Name+"]."
+	if StorageUtil.FileGetIntValue(exportkey+"Consensual", HasTag("Consensual") as int) == 1
+		AddTag("Consensual")
+	else
+		RemoveTag("Consensual")
+	endIf
+	if StorageUtil.FileGetIntValue(exportkey+"Victim", HasTag("Victim") as int) == 1
+		AddTag("Victim")
+	else
+		RemoveTag("Victim")
+	endIf
+	if StorageUtil.FileGetIntValue(exportkey+"Aggressor", HasTag("Aggressor") as int) == 1
+		AddTag("Aggressor")
+	else
+		RemoveTag("Aggressor")
+	endIf
+	StorageUtil.FileUnsetIntValue(exportkey+"Consensual")
+	StorageUtil.FileUnsetIntValue(exportkey+"Victim")
+	StorageUtil.FileUnsetIntValue(exportkey+"Aggressor")
+endFunction

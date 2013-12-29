@@ -83,7 +83,20 @@ sslBaseExpression function PickExpression(actor ActorRef, actor VictimRef = none
 	return Slots.RandomByTag("Consensual")
 endFunction
 
-
 function _Defaults()
-
+endFunction
+function _Export()
+	int i = Expressions.Slotted
+	while i
+		i -= 1
+		Expressions.Expression[i]._Export()
+	endWhile
+endFunction
+function _Import()
+	_Defaults()
+	int i = Expressions.Slotted
+	while i
+		i -= 1
+		Expressions.Expression[i]._Import()
+	endWhile
 endFunction

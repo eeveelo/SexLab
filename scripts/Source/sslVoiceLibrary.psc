@@ -67,9 +67,19 @@ endFunction
 function _Export()
 	_ExportString("sPlayerVoice", sPlayerVoice)
 	_ExportBool("bNPCSaveVoice", bNPCSaveVoice)
+	int i = Voices.Slotted
+	while i
+		i -= 1
+		Voices.Voices[i]._Export()
+	endWhile
 endFunction
 function _Import()
 	_Defaults()
 	sPlayerVoice = _ImportString("sPlayerVoice", sPlayerVoice)
 	bNPCSaveVoice = _ImportBool("bNPCSaveVoice", bNPCSaveVoice)
+	int i = Voices.Slotted
+	while i
+		i -= 1
+		Voices.Voices[i]._Import()
+	endWhile
 endFunction
