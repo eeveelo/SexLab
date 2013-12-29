@@ -356,8 +356,9 @@ function MoveScene()
 	; Give player time to settle incase airborne
 	Utility.Wait(1.0)
 	; Recenter on coords to avoid stager + resync animations
-	CenterOnObject(Lib.PlayerRef, true)
-	RealignActors()
+	if !LocateBed(true, 400.0)
+		CenterOnObject(Lib.PlayerRef, true)
+	endIf
 	; Return to animation loop
 	looping = true
 	RegisterForSingleUpdate(0.15)

@@ -24,6 +24,7 @@ bool property LeadIn auto hidden
 bool property FastEnd auto hidden
 
 ObjectReference centerObj
+ObjectReference bedObj
 string[] tags
 float[] centerLoc
 float[] customtimers
@@ -32,7 +33,7 @@ bool leadInDisabled
 actor PlayerRef
 actor victim
 string hook
-int bed ; 0 allow, 1 in use, 2 force, -1 forbid
+int bedding ; 0 allow, 1 force, -1 forbid
 Race Creature
 float started
 
@@ -87,7 +88,13 @@ endProperty
 
 bool property IsUsingBed hidden
 	bool function get()
-		return bed == 1
+		return BedObj != none
+	endFunction
+endProperty
+
+ObjectReference property BedRef hidden
+	ObjectReference function get()
+		return BedObj
 	endFunction
 endProperty
 
@@ -245,7 +252,6 @@ state Making
 
 		Active = true
 
-		string suppress
 		int actors = ActorCount
 		int i
 		while i < actors
@@ -275,27 +281,12 @@ state Making
 		; Remember present genders
 		gendercounts = Lib.ActorLib.GenderCount(Positions)
 
-		; Check for center
-		if centerObj == none && bed != -1
-			ObjectReference BedRef
-			; Select a bed
+		; Search for nearby bed
+		if centerObj == none && bedding != -1
 			if PlayerRef != none
-				BedRef = Lib.FindBed(PlayerRef, 750.0)
-			elseIf PlayerRef == none && Lib.sNPCBed != "$SSL_Never"
-				BedRef = Lib.FindBed(Positions[0], 1000.0)
-			endIf
-			; A bed was selected, should we use it?
-			if BedRef != none
-				bool use = (bed == 2 || Lib.sNPCBed == "$SSL_Always")
-				if PlayerRef != none && !IsVictim(PlayerRef)
-					use = Lib.mUseBed.Show() as bool
-				elseIf Lib.sNPCBed == "$SSL_Sometimes"
-					use = Utility.RandomInt(0, 1) as bool
-				endIf
-				if use
-					; Center on found bed
-					CenterOnObject(BedRef)
-				endIf
+				LocateBed(true, 750.0)
+			else
+				LocateBed(false, 1000.0)
 			endIf
 		endIf
 
@@ -303,7 +294,7 @@ state Making
 		if centerObj == none
 			i = 0
 			while i < actors
-				ObjectReference marker = Game.FindRandomReferenceOfTypeFromRef(Lib.LocationMarker, Positions[i], 750.0) as ObjectReference
+				ObjectReference marker = Game.FindClosestReferenceOfTypeFromRef(Lib.LocationMarker, Positions[i], 750.0)
 				if marker != none
 					CenterOnObject(marker)
 					i = 5
@@ -313,7 +304,7 @@ state Making
 		endIf
 
 		; Still no center, fallback to something
-		if centerLoc.Length == 0
+		if centerObj == none
 			; Fallback to victim
 			if victim != none
 				CenterOnObject(victim)
@@ -338,7 +329,11 @@ state Making
 
 		; Determine if foreplay lead in should be used
 		if !HasCreature && !IsAggressive && actors == 2 && Lib.bForeplayStage && !leadInDisabled && leadAnimations.Length == 0
-			SetLeadAnimations(Lib.Animations.GetByTags(2, "LeadIn", suppress))
+			if IsUsingBed
+				SetLeadAnimations(Lib.Animations.GetByTags(2, "LeadIn", "Standing"))
+			else
+				SetLeadAnimations(Lib.Animations.GetByTags(2, "LeadIn"))
+			endIf
 		endIf
 
 		; Validate Primary animations
@@ -415,7 +410,7 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 	centerObj = centerOn
 	centerLoc = GetCoords(centerOn)
 	if Lib.BedsList.HasForm(centerOn.GetBaseObject())
-		bed = 1
+		bedObj = centerOn
 		centerLoc = GetCoords(centerOn)
 		centerLoc[0] = centerLoc[0] + (33.0 * Math.sin(centerLoc[5]))
 		centerLoc[1] = centerLoc[1] + (33.0 * Math.cos(centerLoc[5]))
@@ -443,7 +438,7 @@ function AdjustRotation(float adjust)
 endFunction
 
 function SetBedding(int set = 0)
-	bed = set
+	bedding = set
 endFunction
 
 function SetTimers(float[] timers)
@@ -463,6 +458,29 @@ float function GetStageTimer(int maxstage)
 	endIf
 	return Timers[(last - 1)]
 endfunction
+
+ bool function LocateBed(bool askPlayer = true, float radius = 750.0)
+	if bedding != -1
+		ObjectReference FoundBed
+		; Select a bed
+		if PlayerRef != none
+			FoundBed = Lib.FindBed(PlayerRef, radius)
+			; A bed was selected, should we use it?
+			if FoundBed != none && (bedding == 1 || askPlayer == false || (Lib.mUseBed.Show() as bool))
+				CenterOnObject(FoundBed)
+				return true
+			endIf
+		elseIf Lib.sNPCBed == "$SSL_Always" || (Lib.sNPCBed == "$SSL_Sometimes" && (Utility.RandomInt(0, 1) as bool)) || bedding == 1
+			FoundBed = Lib.FindBed(Positions[0], radius)
+			; A bed was selected, use it
+			if FoundBed != none
+				CenterOnObject(FoundBed)
+				return true
+			endIf
+		endIf
+	endIf
+	return false
+endFunction
 
 ;/-----------------------------------------------\;
 ;|	Actor Functions                              |;
@@ -711,17 +729,20 @@ endFunction
 
 function SendThreadEvent(string eventName, float argNum = 0.0)
 	string threadid = (tid as string)
+	string events = eventName+" / "
 	; Send Custom Event
 	if hook != ""
 		SendModEvent(eventName+"_"+hook, threadid, argNum)
+		events += eventName+"_"+hook
 	endIf
 	; Send Global Event
 	SendModEvent(eventName, threadid, argNum)
 	; Send Player Global Event
 	if HasPlayer
 		SendModEvent("Player"+eventName, threadid, argNum)
+		events += "Player"+eventName
 	endIf
-	Debug.Trace("SexLab Thread["+_ThreadID+"] ModEvent: "+eventName)
+	Debug.Trace("SexLab Thread["+_ThreadID+"] ModEvent: "+events)
 	; MiscUtil.PrintConsole("Thread["+_ThreadID+"] ModEvent: "+eventName)
 endFunction
 
@@ -841,7 +862,6 @@ bool function CheckTags(string[] find, bool requireAll = true)
 	return true
 endFunction
 
-
 ;/-----------------------------------------------\;
 ;|	Ending Functions                             |;
 ;\-----------------------------------------------/;
@@ -864,7 +884,9 @@ endFunction
 
 function Initialize()
 	UnregisterForUpdate()
-	SendThreadEvent("ThreadClosed")
+	if GetState() != "Unlocked"
+		SendThreadEvent("ThreadClosed")
+	endIf
 	; Empty alias slots
 	ClearActors()
 	; Set states
@@ -892,7 +914,7 @@ function Initialize()
 	; Empty integers
 	int[] iDel
 	gendercounts = iDel
-	bed = 0
+	bedding = 0
 	stage = 0
 	; Empty animations
 	sslBaseAnimation[] anDel1
@@ -903,6 +925,7 @@ function Initialize()
 	leadAnimations = anDel3
 	; Clear Forms
 	centerObj = none
+	bedObj = none
 	PlayerRef = none
 	creature = none
 	GotoState("Unlocked")
