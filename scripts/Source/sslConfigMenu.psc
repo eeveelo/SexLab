@@ -6,7 +6,7 @@ int function GetVersion()
 endFunction
 
 string function GetStringVer()
-	return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)
+	return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)+"b"
 endFunction
 
 bool function DebugMode()
