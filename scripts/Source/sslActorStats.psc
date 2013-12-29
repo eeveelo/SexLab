@@ -507,17 +507,17 @@ function _Setup()
 	StatPrepend = sDel
 	StatAppend = sDel
 
-	fTimeSpent = 0.0
-	fSexualPurity = 0.0
-	iMalePartners = 0
-	iFemalePartners = 0
-	iCreaturePartners = 0
-	iMasturbationCount = 0
-	iAnalCount = 0
-	iVaginalCount = 0
-	iOralCount = 0
-	iVictimCount = 0
-	iAggressorCount = 0
+	SetFloat(PlayerRef, "TimeSpent", 0.0)
+	SetFloat(PlayerRef, "Purity", 0.0)
+	SetInt(PlayerRef, "Males", 0)
+	SetInt(PlayerRef, "Females", 0)
+	SetInt(PlayerRef, "Creatures", 0)
+	SetInt(PlayerRef, "Masturbation", 0)
+	SetInt(PlayerRef, "Anal", 0)
+	SetInt(PlayerRef, "Vaginal", 0)
+	SetInt(PlayerRef, "Oral", 0)
+	SetInt(PlayerRef, "Victim", 0)
+	SetInt(PlayerRef, "Aggressor", 0)
 
 	sPureTitles = new string[7]
 	sPureTitles[0] = "$SSL_Neutral"
