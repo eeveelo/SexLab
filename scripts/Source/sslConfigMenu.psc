@@ -510,19 +510,19 @@ event OnPageReset(string page)
 		else
 			AddTextOptionST("ToggleSystem","$SSL_DisabledSystem", "$SSL_DoEnable")
 		endIf
-		AddTextOptionST("StopCurrentAnimations","$SSL_StopCurrentAnimations", "$SSL_ClickHere")
 		AddTextOptionST("RestoreDefaultSettings","$SSL_RestoreDefaultSettings", "$SSL_ClickHere")
+		AddTextOptionST("StopCurrentAnimations","$SSL_StopCurrentAnimations", "$SSL_ClickHere")
 		AddTextOptionST("ResetAnimationRegistry","$SSL_ResetAnimationRegistry", "$SSL_ClickHere")
 		AddTextOptionST("ResetVoiceRegistry","$SSL_ResetVoiceRegistry", "$SSL_ClickHere")
 		AddTextOptionST("ResetPlayerSexStats","$SSL_ResetPlayerSexStats", "$SSL_ClickHere")
-		AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
-		AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
-
+		AddEmptyOption()
 		AddHeaderOption("$SSL_UpgradeUninstallReinstall")
 		AddTextOptionST("CleanSystem","$SSL_CleanSystem", "$SSL_ClickHere")
 
 		SetCursorPosition(1)
 		AddHeaderOption("")
+		AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
+		AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
 		AddHeaderOption("$SSL_AvailableStrapons")
 		AddTextOptionST("RebuildStraponList","$SSL_RebuildStraponList", "$SSL_ClickHere")
 		i = 0
