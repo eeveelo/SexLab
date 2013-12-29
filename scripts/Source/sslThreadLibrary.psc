@@ -43,19 +43,20 @@ bool function IsActorFree(actor position)
 	return Threads.FindActorController(position) == -1
 endFunction
 
-int function FindNext(actor[] Positions, sslBaseAnimation Animation, int offset, bool findCreature)
-	while offset
-		offset -= 1
-		if Animation.HasRace(Positions[offset].GetLeveledActorBase().GetRace()) == findCreature
-			return offset
-		endIf
-	endwhile
-	return -1
+bool function CheckBed(ObjectReference BedRef, bool ignoreUsed = true, bool ignoreOwned = true)
+	return BedRef != none && BedRef.IsEnabled() && BedRef.Is3DLoaded() && (!ignoreUsed || (ignoreUsed && !BedRef.IsFurnitureInUse(true)))
 endFunction
 
 ObjectReference function FindBed(ObjectReference centerRef, float radius = 1000.0, bool ignoreUsed = true, ObjectReference ignore1 = none, ObjectReference ignore2 = none)
 	if centerRef == none || radius < 0
 		return none ; Invalid args
+	endIf
+	; Check nearest bed first
+	ObjectReference NearBed = Game.FindClosestReferenceOfAnyTypeInListFromRef(BedsList, centerRef, radius)
+	if CheckBed(NearBed, ignoreUsed) && NearBed != ignore1 && NearBed != ignore2
+		return NearBed ; Nearby valid bed found
+	elseIf NearBed == none
+		return none ; No nearby valid bed found at all, give up.
 	endIf
 	; Create supression list
 	form[] supress = new Form[12]
@@ -73,13 +74,23 @@ ObjectReference function FindBed(ObjectReference centerRef, float radius = 1000.
 			; Add to supression list
 			supress[attempts] = BedRef
 			; Check if free
-			if !ignoreUsed || (ignoreUsed && !BedRef.IsFurnitureInUse(true))
+			if CheckBed(BedRef, ignoreUsed)
 				return BedRef
 			endIf
 		endIf
 	endWhile
 	; No beds found in attempts
 	return none
+endFunction
+
+int function FindNext(actor[] Positions, sslBaseAnimation Animation, int offset, bool findCreature)
+	while offset
+		offset -= 1
+		if Animation.HasRace(Positions[offset].GetLeveledActorBase().GetRace()) == findCreature
+			return offset
+		endIf
+	endwhile
+	return -1
 endFunction
 
 actor[] function SortCreatures(actor[] Positions, sslBaseAnimation Animation)
