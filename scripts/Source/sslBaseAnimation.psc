@@ -605,3 +605,65 @@ function Initialize()
 
 	Storage = GetOwningQuest()
 endFunction
+
+function _Export()
+	string exportkey ="SexLabConfig.Animation["+Name+"]."
+	StorageUtil.FileSetIntValue(exportkey+"Enabled", Enabled as int)
+	StorageUtil.FileSetIntValue(exportkey+"Aggressive", HasTag("Aggressive") as int)
+	StorageUtil.FileSetIntValue(exportkey+"LeadIn", HasTag("LeadIn") as int)
+	StorageUtil.FileFloatListClear(exportkey+"Offsets")
+	int position
+	while position < actors
+		int stage = 1
+		while stage <= stages
+			StorageUtil.FileFloatListAdd(exportkey+"Offsets", StorageUtil.FloatListGet(Storage, KeyStr(position, stage), 0))
+			StorageUtil.FileFloatListAdd(exportkey+"Offsets", StorageUtil.FloatListGet(Storage, KeyStr(position, stage), 1))
+			StorageUtil.FileFloatListAdd(exportkey+"Offsets", StorageUtil.FloatListGet(Storage, KeyStr(position, stage), 2))
+			StorageUtil.FileFloatListAdd(exportkey+"Offsets", StorageUtil.FloatListGet(Storage, KeyStr(position, stage), 3))
+			stage += 1
+		endWhile
+		position += 1
+	endWhile
+endFunction
+
+function _Import()
+	string exportkey ="SexLabConfig.Animation["+Name+"]."
+	Enabled = StorageUtil.FileGetIntValue(exportkey+"Enabled", Enabled as int) as bool
+	if StorageUtil.FileGetIntValue(exportkey+"Aggressive", HasTag("Aggressive") as int) == 1
+		AddTag("Aggressive")
+	else
+		RemoveTag("Aggressive")
+	endIf
+	if StorageUtil.FileGetIntValue(exportkey+"LeadIn", HasTag("LeadIn") as int) == 1
+		AddTag("LeadIn")
+	else
+		RemoveTag("LeadIn")
+	endIf
+	int i
+	int position
+	while position < actors
+		int stage = 1
+		while stage <= stages
+			float importing = StorageUtil.FileFloatListGet(exportkey+"Offsets", (i))
+			if importing != 0.0
+				StorageUtil.FloatListSet(Storage, KeyStr(position, stage), 0, importing)
+			endIf
+			importing = StorageUtil.FileFloatListGet(exportkey+"Offsets", (i + 1))
+			if importing != 0.0
+				StorageUtil.FloatListSet(Storage, KeyStr(position, stage), 1, importing)
+			endIf
+			importing = StorageUtil.FileFloatListGet(exportkey+"Offsets", (i + 2))
+			if importing != 0.0
+				StorageUtil.FloatListSet(Storage, KeyStr(position, stage), 2, importing)
+			endIf
+			importing = StorageUtil.FileFloatListGet(exportkey+"Offsets", (i + 3))
+			if importing != 0.0
+				StorageUtil.FloatListSet(Storage, KeyStr(position, stage), 3, importing)
+			endIf
+			stage += 1
+			i += 4
+		endWhile
+		position += 1
+	endWhile
+
+endFunction

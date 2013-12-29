@@ -78,6 +78,7 @@ message property mCleanSystemFinish auto
 message property mSystemDisabled auto
 message property mSystemUpdated auto
 spell property SexLabDebugSpell auto
+spell property SexLabDebugSelfSpell auto
 armor property aCalypsStrapon auto
 
 ; OIDs
@@ -503,7 +504,6 @@ event OnPageReset(string page)
 		SetCursorFillMode(TOP_TO_BOTTOM)
 
 		AddHeaderOption("SexLab v"+GetStringVer()+" by Ashal@LoversLab.com")
-		AddEmptyOption()
 		AddHeaderOption("$SSL_Maintenance")
 		if SexLab.Enabled
 			AddTextOptionST("ToggleSystem","$SSL_EnabledSystem", "$SSL_DoDisable")
@@ -515,14 +515,14 @@ event OnPageReset(string page)
 		AddTextOptionST("ResetAnimationRegistry","$SSL_ResetAnimationRegistry", "$SSL_ClickHere")
 		AddTextOptionST("ResetVoiceRegistry","$SSL_ResetVoiceRegistry", "$SSL_ClickHere")
 		AddTextOptionST("ResetPlayerSexStats","$SSL_ResetPlayerSexStats", "$SSL_ClickHere")
-		AddEmptyOption()
+		AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
+		AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
+
 		AddHeaderOption("$SSL_UpgradeUninstallReinstall")
 		AddTextOptionST("CleanSystem","$SSL_CleanSystem", "$SSL_ClickHere")
-		AddEmptyOption()
 
 		SetCursorPosition(1)
 		AddHeaderOption("")
-		AddEmptyOption()
 		AddHeaderOption("$SSL_AvailableStrapons")
 		AddTextOptionST("RebuildStraponList","$SSL_RebuildStraponList", "$SSL_ClickHere")
 		i = 0
@@ -1233,6 +1233,40 @@ state ResetPlayerSexStats
 		endIf
 	endEvent
 endState
+state ExportSettings
+	event OnSelectST()
+		if ShowMessage("$SSL_WarnExportSettings")
+			ActorLib._Export()
+			ThreadLib._Export()
+			AnimLib._Export()
+			VoiceLib._Export()
+			ControlLib._Export()
+			StorageUtil.FileSetIntValue("SexLabConfig.Exported", 1)
+			ShowMessage("$SSL_RunExportSettings", false)
+		endIf
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoExportSettings")
+	endEvent
+endState
+state ImportSettings
+	event OnSelectST()
+		if StorageUtil.FileGetIntValue("SexLabConfig.Exported") != 1
+			ShowMessage("$SSL_WarnImportSettingsEmpty", false)
+		elseif ShowMessage("$SSL_WarnImportSettings")
+			ActorLib._Import()
+			ThreadLib._Import()
+			AnimLib._Import()
+			VoiceLib._Import()
+			ControlLib._Import()
+			StorageUtil.FileUnsetIntValue("SexLabConfig.Exported")
+			ShowMessage("$SSL_RunImportSettings", false)
+		endIf
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoImportSettings")
+	endEvent
+endState
 state CleanSystem
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnCleanSystem")
@@ -1684,4 +1718,12 @@ function _CheckSystem()
 			mods = 0
 		endIf
 	endwhile
+endFunction
+
+function _Save(string Name)
+
+endFunction
+
+function _Export()
+
 endFunction

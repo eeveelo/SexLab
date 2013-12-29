@@ -48,7 +48,7 @@ endProperty
 ; Creature animations
 sslBaseAnimation[] property CreatureAnimation hidden
 	sslBaseAnimation[] function get()
-		return AnimLib.CreatureSlots.Slots
+		return AnimLib.CreatureAnimations.Slots
 	endFunction
 endProperty
 

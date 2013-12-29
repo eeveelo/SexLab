@@ -198,10 +198,10 @@ state Making
 		if ActorCount >= 5
 			_Log("Failed to add actor' "+position.GetLeveledActorBase().GetName()+"' -- thread has reached actor limit", "AddActor", "FATAL")
 			return -1
-		elseIf Lib.Slots.FindActorController(position) != -1
+		elseIf Lib.Threads.FindActorController(position) != -1
 			_Log("Failed to add actor' "+position.GetLeveledActorBase().GetName()+"' -- already slotted by a thread", "AddActor", "FATAL")
 			return -1
-		elseIf Lib.Actors.ValidateActor(position) != 1
+		elseIf Lib.ActorLib.ValidateActor(position) != 1
 			_Log("Failed to add actor' "+position.GetLeveledActorBase().GetName()+"' -- failed validation check", "AddActor", "FATAL")
 			return -1
 		endIf
@@ -214,7 +214,7 @@ state Making
 		Positions = sslUtility.PushActor(position, Positions)
 		; Check creature race combination
 		if Slot.IsCreature()
-			if Creature != none && !Lib.Actors.AnimLib.AllowedCreatureCombination(Slot.ActorRace, Creature)
+			if Creature != none && !Lib.AnimLib.AllowedCreatureCombination(Slot.ActorRace, Creature)
 				Slot.ClearAlias()
 				_Log("Invalid creature race combination '"+Creature.GetName()+"' & '"+Slot.ActorRace.GetName()+"'", "AddActor", "FATAL")
 				return -1
@@ -255,7 +255,7 @@ state Making
 				return none
 			endIf
 			; Pick expression for actor
-			ActorAlias[i].SetExpression(Lib.Expressions.PickExpression(Positions[i], Victim))
+			ActorAlias[i].SetExpression(Lib.ExpressionLib.PickExpression(Positions[i], Victim))
 			i += 1
 		endWhile
 
@@ -273,7 +273,7 @@ state Making
 		endIf
 
 		; Remember present genders
-		gendercounts = Lib.Actors.GenderCount(Positions)
+		gendercounts = Lib.ActorLib.GenderCount(Positions)
 
 		; Check for center
 		if centerObj == none && bed != -1
@@ -365,7 +365,7 @@ state Making
 
 		; Enable auto advance
 		if PlayerRef != none
-			if IsVictim(PlayerRef) && Lib.Actors.bDisablePlayer
+			if IsVictim(PlayerRef) && Lib.ActorLib.bDisablePlayer
 				AutoAdvance = true
 			else
 				AutoAdvance = Lib.bAutoAdvance
@@ -475,7 +475,7 @@ function ChangeActors(actor[] changeTo)
 	int i
 	; Validate new actors
 	while i < changeTo.Length
-		if Positions.Find(changeTo[i]) == -1 && !Lib.Actors.ValidateActor(changeTo[i])
+		if Positions.Find(changeTo[i]) == -1 && !Lib.ActorLib.ValidateActor(changeTo[i])
 			_Log("A new actor does not pass validation", "ChangeActors")
 			return
 		endIf
@@ -530,7 +530,7 @@ function ChangeActors(actor[] changeTo)
 				_Log("Failed to add actor' "+AddRef.GetLeveledActorBase().GetName()+"' -- they were unable to fill an actor slot", "ChangeActors", "FATAL")
 				return
 			endIf
-			Slot.SetVoice(Lib.Voices.PickVoice(AddRef))
+			Slot.SetVoice(Lib.VoiceLib.PickVoice(AddRef))
 			Slot.DisableUndressAnim(true)
 			; Start preparing actor
 			Slot.GotoState("Prepare")
@@ -542,7 +542,7 @@ function ChangeActors(actor[] changeTo)
 		endIf
 	endWhile
 	; Remember new genders
-	gendercounts = Lib.Actors.GenderCount(Positions)
+	gendercounts = Lib.ActorLib.GenderCount(Positions)
 	; Start animating new actors
 	i = ActorCount
 	while i
@@ -951,7 +951,7 @@ endProperty
 
 function _SetThreadID(int threadid)
 	_ThreadID = threadid
-	ActorSlots = Lib.Actors.Slots.GetActorSlots(threadid)
+	ActorSlots = Lib.Actors.GetActorSlots(threadid)
 	ClearActors()
 	GoToState("Unlocked")
 endFunction

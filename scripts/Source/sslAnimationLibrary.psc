@@ -1,9 +1,7 @@
-scriptname sslAnimationLibrary extends Quest
+scriptname sslAnimationLibrary extends sslSystemLibrary
 
 ; Scripts
 sslAnimationSlots property Slots auto
-sslCreatureAnimationSlots property CreatureSlots auto
-sslActorLibrary property ActorLib auto
 
 ; Data
 
@@ -31,14 +29,23 @@ string function MakeGenderTag(actor[] Positions)
 endFunction
 
 bool function AllowedCreature(Race creature)
-	return bAllowCreatures && CreatureSlots.HasAnimation(creature)
+	return bAllowCreatures && CreatureAnimations.HasAnimation(creature)
 endFunction
 
 bool function AllowedCreatureCombination(Race creature, Race creature2)
-	return bAllowCreatures && CreatureSlots.HasAnimation(creature, creature2)
+	return bAllowCreatures && CreatureAnimations.HasAnimation(creature, creature2)
 endFunction
 
 function _Defaults()
 	bRestrictAggressive = true
 	bAllowCreatures = false
+endFunction
+function _Export()
+	_ExportBool("bRestrictAggressive", bRestrictAggressive)
+	_ExportBool("bAllowCreatures", bAllowCreatures)
+endFunction
+function _Import()
+	_Defaults()
+	bRestrictAggressive = _ImportBool("bRestrictAggressive", bRestrictAggressive)
+	bAllowCreatures = _ImportBool("bAllowCreatures", bAllowCreatures)
 endFunction

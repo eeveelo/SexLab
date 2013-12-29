@@ -1,18 +1,6 @@
-scriptname sslThreadLibrary extends Quest
-
-; Scripts
-sslThreadSlots property Slots auto
-sslAnimationSlots property Animations auto
-sslCreatureAnimationSlots property CreatureAnimations auto
-sslVoiceLibrary property Voices auto
-sslActorLibrary property Actors auto
-sslExpressionLibrary property Expressions auto
-sslControlLibrary property ControlLib auto
-sslAnimationLibrary property AnimLib auto
+scriptname sslThreadLibrary extends sslSystemLibrary
 
 ; Data
-actor property PlayerRef auto
-
 sound property sfxSquishing01 auto
 sound property sfxSucking01 auto
 sound property sfxSexMix01 auto
@@ -52,7 +40,7 @@ Sound function GetSFX(int id)
 endFunction
 
 bool function IsActorFree(actor position)
-	return Slots.FindActorController(position) == -1
+	return Threads.FindActorController(position) == -1
 endFunction
 
 int function FindNext(actor[] Positions, sslBaseAnimation Animation, int offset, bool findCreature)
@@ -121,7 +109,6 @@ function _Defaults()
 	bForeplayStage = false
 	bOrgasmEffects = false
 	sNPCBed = "$SSL_Never"
-
 	; Timers
 	fStageTimer = new float[5]
 	fStageTimer[0] = 30.0
@@ -143,4 +130,28 @@ function _Defaults()
 	fStageTimerAggr[2] = 10.0
 	fStageTimerAggr[3] = 10.0
 	fStageTimerAggr[4] = 3.0
+endFunction
+function _Export()
+	_ExportFloat("fSFXDelay", fSFXDelay)
+	_ExportFloat("fSFXVolume", fSFXVolume)
+	_ExportBool("bAutoAdvance", bAutoAdvance)
+	_ExportBool("bForeplayStage", bForeplayStage)
+	_ExportBool("bOrgasmEffects", bOrgasmEffects)
+	_ExportString("sNPCBed", sNPCBed)
+	; Timers
+	_ExportFloatList("fStageTimer", fStageTimer, 5)
+	_ExportFloatList("fStageTimerLeadIn", fStageTimerLeadIn, 5)
+	_ExportFloatList("fStageTimerAggr", fStageTimerAggr, 5)
+endFunction
+function _Import()
+	_Defaults()
+	fSFXDelay = _ImportFloat("fSFXDelay", fSFXDelay)
+	fSFXVolume = _ImportFloat("fSFXVolume", fSFXVolume)
+	bAutoAdvance = _ImportBool("bAutoAdvance", bAutoAdvance)
+	bForeplayStage = _ImportBool("bForeplayStage", bForeplayStage)
+	bOrgasmEffects = _ImportBool("bOrgasmEffects", bOrgasmEffects)
+	sNPCBed = _ImportString("sNPCBed", sNPCBed)
+	fStageTimer = _ImportFloatList("fStageTimer", fStageTimer, 5)
+	fStageTimerLeadIn = _ImportFloatList("fStageTimerLeadIn", fStageTimerLeadIn, 5)
+	fStageTimerAggr = _ImportFloatList("fStageTimerAggr", fStageTimerAggr, 5)
 endFunction

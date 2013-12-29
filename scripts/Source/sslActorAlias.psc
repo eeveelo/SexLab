@@ -462,17 +462,17 @@ state Prepare
 				Strip(DoUndress)
 			endIf
 			; Get purity
-			Purity = Lib.Stats.GetPurityLevel(ActorRef)
-			IsPure = Lib.Stats.IsPure(ActorRef)
+			Purity = Lib.ActorStats.GetPurityLevel(ActorRef)
+			IsPure = Lib.ActorStats.IsPure(ActorRef)
 			; Get skill levels
 			if Controller.HasPlayer
-				Vaginal = Lib.Stats.GetPlayerSkillLevel("Vaginal")
-				Anal = Lib.Stats.GetPlayerSkillLevel("Anal")
-				Oral = Lib.Stats.GetPlayerSkillLevel("Oral")
+				Vaginal = Lib.ActorStats.GetPlayerSkillLevel("Vaginal")
+				Anal = Lib.ActorStats.GetPlayerSkillLevel("Anal")
+				Oral = Lib.ActorStats.GetPlayerSkillLevel("Oral")
 			else
-				Vaginal = Lib.Stats.GetSkillLevel(ActorRef, "Vaginal")
-				Anal = Lib.Stats.GetSkillLevel(ActorRef, "Anal")
-				Oral = Lib.Stats.GetSkillLevel(ActorRef, "Oral")
+				Vaginal = Lib.ActorStats.GetSkillLevel(ActorRef, "Vaginal")
+				Anal = Lib.ActorStats.GetSkillLevel(ActorRef, "Anal")
+				Oral = Lib.ActorStats.GetSkillLevel(ActorRef, "Oral")
 			endIf
 			; Make erect for SOS
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
@@ -569,7 +569,7 @@ state Reset
 			sslExpressionLibrary.ClearMFG(ActorRef)
 		endIF
 		; Update diary/journal stats for player + native stats for NPCs
-		Lib.Stats.UpdateNativeStats(ActorRef, Controller.Males, Controller.Females, Controller.Creatures, Animation, Controller.VictimRef, Controller.TotalTime, Controller.HasPlayer)
+		Lib.ActorStats.UpdateNativeStats(ActorRef, Controller.Males, Controller.Females, Controller.Creatures, Animation, Controller.VictimRef, Controller.TotalTime, Controller.HasPlayer)
 		; Reset to starting scale
 		ActorRef.SetScale(ActorScale)
 		; Reapply cum

@@ -1,11 +1,10 @@
-scriptname sslExpressionLibrary extends Quest
+scriptname sslExpressionLibrary extends sslSystemLibrary
 
 ; Scripts
 sslExpressionSlots property Slots auto
 import MfgConsoleFunc
 
 ; Data
-actor property PlayerRef auto
 
 ; Gender Types
 bool property Male = false autoreadonly hidden

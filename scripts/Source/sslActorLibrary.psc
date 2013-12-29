@@ -1,20 +1,9 @@
-scriptname sslActorLibrary extends Quest
-
-; Scripts
-sslActorStats property Stats auto
-sslActorSlots property Slots auto
-
-sslAnimationLibrary property AnimLib auto
-sslVoiceLibrary property VoiceLib auto
-sslExpressionLibrary property ExpressionLib auto
-sslControlLibrary property ControlLib auto
-sslThreadSlots property ThreadSlots auto
+scriptname sslActorLibrary extends sslSystemLibrary
 
 ; Data
 faction property AnimatingFaction auto
 faction property GenderFaction auto
 faction property ForbiddenFaction auto
-actor property PlayerRef auto
 weapon property DummyWeapon auto
 armor property NudeSuit auto
 form[] property Strapons auto hidden
@@ -440,7 +429,7 @@ function UnequipStrapon(actor a)
 endFunction
 
 bool function IsActorActive(actor a)
-	return ThreadSlots.FindActorController(a) != -1
+	return Threads.FindActorController(a) != -1
 endFunction
 
 int function ValidateActor(actor a)
@@ -472,13 +461,13 @@ int function ValidateActor(actor a)
 		return -15
 	endIf
 	Race ActorRace = a.GetLeveledActorBase().GetRace()
-	String RaceName = ActorRace.GetName()
+	String RaceName = ActorRace.GetName()+MiscUtil.GetRaceEditorID(ActorRace)
 	if ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Child") != -1 || StringUtil.Find(RaceName, "117") != -1 || StringUtil.Find(RaceName, "Monli") != -1 || StringUtil.Find(RaceName, "Elin") != -1 || StringUtil.Find(RaceName, "Enfant") != -1
 		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They are forbidden from animating")
 		return -11
 	endIf
 	if a != PlayerRef && !a.HasKeywordString("ActorTypeNPC") && !AnimLib.AllowedCreature(ActorRace)
-		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They are a creature that is currently not supported ("+RaceName+")")
+		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They are a creature that is currently not supported ("+ActorRace.GetName()+")")
 		return -16
 	endIf
 	ValidActorList.AddForm(a)
@@ -524,7 +513,7 @@ int function GetGender(actor a)
 		endIf
 	endIf
 	ActorBase Base = a.GetLeveledActorBase()
-	if a != PlayerRef && AnimLib.CreatureSlots.HasRace(Base.GetRace())
+	if a != PlayerRef && CreatureAnimations.HasRace(Base.GetRace())
 		return 2 ; Creature
 	else
 		return Base.GetSex() ; Default
@@ -567,7 +556,6 @@ endFunction
 
 function _Defaults()
 	; Config
-	SOSEnabled = false
 	bDisablePlayer = false
 	fMaleVoiceDelay = 7.0
 	fFemaleVoiceDelay = 6.0
@@ -667,4 +655,52 @@ function _Defaults()
 	NoStripList.Revert()
 	StripList.Revert()
 	ValidActorList.Revert()
+endFunction
+
+function _Export()
+	_ExportFloat("fMaleVoiceDelay", fMaleVoiceDelay)
+	_ExportFloat("fFemaleVoiceDelay", fFemaleVoiceDelay)
+	_ExportFloat("fVoiceVolume", fVoiceVolume)
+	_ExportFloat("fCumTimer", fCumTimer)
+	_ExportBool("bDisablePlayer", bDisablePlayer)
+	_ExportBool("bEnableTCL", bEnableTCL)
+	_ExportBool("bScaleActors", bScaleActors)
+	_ExportBool("bUseCum", bUseCum)
+	_ExportBool("bAllowFFCum", bAllowFFCum)
+	_ExportBool("bUseStrapons", bUseStrapons)
+	_ExportBool("bReDressVictim", bReDressVictim)
+	_ExportBool("bRagdollEnd", bRagdollEnd)
+	_ExportBool("bUseMaleNudeSuit", bUseMaleNudeSuit)
+	_ExportBool("bUseFemaleNudeSuit", bUseFemaleNudeSuit)
+	_ExportBool("bUndressAnimation", bUndressAnimation)
+	_ExportBoolList("bStripMale", bStripMale, 33)
+	_ExportBoolList("bStripFemale", bStripFemale, 33)
+	_ExportBoolList("bStripLeadInMale", bStripLeadInMale, 33)
+	_ExportBoolList("bStripLeadInFemale", bStripLeadInFemale, 33)
+	_ExportBoolList("bStripVictim", bStripVictim, 33)
+	_ExportBoolList("bStripAggressor", bStripAggressor, 33)
+endFunction
+function _Import()
+	_Defaults()
+	fMaleVoiceDelay = _ImportFloat("fMaleVoiceDelay", fMaleVoiceDelay)
+	fFemaleVoiceDelay = _ImportFloat("fFemaleVoiceDelay", fFemaleVoiceDelay)
+	fVoiceVolume = _ImportFloat("fVoiceVolume", fVoiceVolume)
+	fCumTimer = _ImportFloat("fCumTimer", fCumTimer)
+	bDisablePlayer = _ImportBool("bDisablePlayer", bDisablePlayer)
+	bEnableTCL = _ImportBool("bEnableTCL", bEnableTCL)
+	bScaleActors = _ImportBool("bScaleActors", bScaleActors)
+	bUseCum = _ImportBool("bUseCum", bUseCum)
+	bAllowFFCum = _ImportBool("bAllowFFCum", bAllowFFCum)
+	bUseStrapons = _ImportBool("bUseStrapons", bUseStrapons)
+	bReDressVictim = _ImportBool("bReDressVictim", bReDressVictim)
+	bRagdollEnd = _ImportBool("bRagdollEnd", bRagdollEnd)
+	bUseMaleNudeSuit = _ImportBool("bUseMaleNudeSuit", bUseMaleNudeSuit)
+	bUseFemaleNudeSuit = _ImportBool("bUseFemaleNudeSuit", bUseFemaleNudeSuit)
+	bUndressAnimation = _ImportBool("bUndressAnimation", bUndressAnimation)
+	bStripMale = _ImportBoolList("bStripMale", bStripMale, 33)
+	bStripFemale = _ImportBoolList("bStripFemale", bStripFemale, 33)
+	bStripLeadInMale = _ImportBoolList("bStripLeadInMale", bStripLeadInMale, 33)
+	bStripLeadInFemale = _ImportBoolList("bStripLeadInFemale", bStripLeadInFemale, 33)
+	bStripVictim = _ImportBoolList("bStripVictim", bStripVictim, 33)
+	bStripAggressor = _ImportBoolList("bStripAggressor", bStripAggressor, 33)
 endFunction

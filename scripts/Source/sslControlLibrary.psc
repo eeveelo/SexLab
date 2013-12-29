@@ -1,11 +1,6 @@
-scriptname sslControlLibrary extends Quest
-
-; Scripts
-sslActorLibrary property ActorLib auto
-sslThreadLibrary property ThreadLib auto
+scriptname sslControlLibrary extends sslSystemLibrary
 
 ; Data
-Actor property PlayerRef auto
 
 ; Settings
 int property kBackwards auto hidden ; Right Shift
@@ -178,4 +173,41 @@ function _Defaults()
 	toggled = ""
 	hkReady = true
 	_HKClear()
+endFunction
+function _Export()
+	_ExportInt("kBackwards", kBackwards)
+	_ExportInt("kAdjustStage", kAdjustStage)
+	_ExportInt("kAdvanceAnimation", kAdvanceAnimation)
+	_ExportInt("kChangeAnimation", kChangeAnimation)
+	_ExportInt("kChangePositions", kChangePositions)
+	_ExportInt("kAdjustChange", kAdjustChange)
+	_ExportInt("kAdjustForward", kAdjustForward)
+	_ExportInt("kAdjustSideways", kAdjustSideways)
+	_ExportInt("kAdjustUpward", kAdjustUpward)
+	_ExportInt("kRealignActors", kRealignActors)
+	_ExportInt("kMoveScene", kMoveScene)
+	_ExportInt("kRestoreOffsets", kRestoreOffsets)
+	_ExportInt("kRotateScene", kRotateScene)
+	_ExportInt("kToggleFreeCamera", kToggleFreeCamera)
+	_ExportBool("bAutoTFC", bAutoTFC)
+	_ExportFloat("fAutoSUCSM", fAutoSUCSM)
+endFunction
+function _Import()
+	_Defaults()
+	kBackwards = _ImportInt("kBackwards", kBackwards)
+	kAdjustStage = _ImportInt("kAdjustStage", kAdjustStage)
+	kAdvanceAnimation = _ImportInt("kAdvanceAnimation", kAdvanceAnimation)
+	kChangeAnimation = _ImportInt("kChangeAnimation", kChangeAnimation)
+	kChangePositions = _ImportInt("kChangePositions", kChangePositions)
+	kAdjustChange = _ImportInt("kAdjustChange", kAdjustChange)
+	kAdjustForward = _ImportInt("kAdjustForward", kAdjustForward)
+	kAdjustSideways = _ImportInt("kAdjustSideways", kAdjustSideways)
+	kAdjustUpward = _ImportInt("kAdjustUpward", kAdjustUpward)
+	kRealignActors = _ImportInt("kRealignActors", kRealignActors)
+	kMoveScene = _ImportInt("kMoveScene", kMoveScene)
+	kRestoreOffsets = _ImportInt("kRestoreOffsets", kRestoreOffsets)
+	kRotateScene = _ImportInt("kRotateScene", kRotateScene)
+	kToggleFreeCamera = _ImportInt("kToggleFreeCamera", kToggleFreeCamera)
+	bAutoTFC = _ImportBool("bAutoTFC", bAutoTFC)
+	fAutoSUCSM = _ImportFloat("fAutoSUCSM", fAutoSUCSM)
 endFunction

@@ -1,10 +1,9 @@
-scriptname sslVoiceLibrary extends Quest
+scriptname sslVoiceLibrary extends sslSystemLibrary
 
 ; Scripts
 sslVoiceSlots property Slots auto
 
 ; Data
-actor property PlayerRef auto
 faction property SavedVoices auto
 topic property SexLabMoanMild auto
 topic property SexLabMoanMedium auto
@@ -64,17 +63,13 @@ endFunction
 function _Defaults()
 	sPlayerVoice = "$SSL_Random"
 	bNPCSaveVoice = true
-
-	; VanillaMild = new Topic[3]
-	; VanillaMild[0] = Game.GetForm(0x3C570) as Topic ; ExitBowZoomBreath
-	; VanillaMild[1] = Game.GetForm(0x1701C) as Topic ; EnterSprintBreath
-	; VanillaMild[2] = Game.GetForm(0x6CB49) as Topic ; CombatGrunt
-
-	; VanillaMedium = new Topic[2]
-	; VanillaMedium[1] = Game.GetForm(0x6CB49) as Topic ; CombatGrunt
-	; VanillaMedium[2] = Game.GetForm(0x3C571) as Topic ; EnterBowZoomBreath
-
-	; VanillaHot = new Topic[2]
-	; VanillaHot[2] = Game.GetForm(0x5DD77) as Topic ; OutOfBreath
-	; VanillaHot[2] = Game.GetForm(0x10EEA4) as Topic ; LeaveWaterBreath
+endFunction
+function _Export()
+	_ExportString("sPlayerVoice", sPlayerVoice)
+	_ExportBool("bNPCSaveVoice", bNPCSaveVoice)
+endFunction
+function _Import()
+	_Defaults()
+	sPlayerVoice = _ImportString("sPlayerVoice", sPlayerVoice)
+	bNPCSaveVoice = _ImportBool("bNPCSaveVoice", bNPCSaveVoice)
 endFunction
