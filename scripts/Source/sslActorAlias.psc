@@ -103,6 +103,20 @@ bool function SetAlias(actor prospect, sslThreadController ThreadView)
 	IsCreature = gender == 2
 	IsPlayer = ActorRef == Lib.PlayerRef
 	IsVictim = ActorRef == Controller.VictimRef
+	; Calculate scales
+	float display = ActorRef.GetScale()
+	ActorRef.SetScale(1.0)
+	float base = ActorRef.GetScale()
+	; Starting scale
+	ActorScale = ( display / base )
+	; Reset back to starting scale
+	ActorRef.SetScale(ActorScale)
+	; Pick animation scale
+	if Controller.ActorCount > 1 && Lib.bScaleActors
+		AnimScale = (1.0 / base)
+	else
+		AnimScale = ActorScale
+	endIf
 	Debug.Trace("-- SexLab ActorAlias -- Thread["+Controller.tid+"] Slotting '"+ActorName+"' into alias -- "+self)
 	return true
 endFunction
@@ -126,6 +140,9 @@ endFunction
 ;\-----------------------------------------------/;
 
 function LockActor()
+	if ActorRef == none
+		return
+	endIf
 	; Start DoNothing package
 	ActorRef.SetFactionRank(Lib.AnimatingFaction, 1)
 	ActorRef.EvaluatePackage()
@@ -149,6 +166,9 @@ function LockActor()
 endFunction
 
 function UnlockActor()
+	if ActorRef == none
+		return
+	endIf
 	; Disable free camera, if in it
 	if IsPlayer
 		Lib.ControlLib.EnableFreeCamera(false)
@@ -376,20 +396,6 @@ state Prepare
 		RegisterForSingleUpdate(0.1)
 	endEvent
 	event OnUpdate()
-		; Calculate scales
-		float display = ActorRef.GetScale()
-		ActorRef.SetScale(1.0)
-		float base = ActorRef.GetScale()
-		; Starting scale
-		ActorScale = ( display / base )
-		; Reset back to starting scale
-		ActorRef.SetScale(ActorScale)
-		; Pick animation scale
-		if Controller.ActorCount > 1 && Lib.bScaleActors
-			AnimScale = (1.0 / base)
-		else
-			AnimScale = ActorScale
-		endIf
 		; Lock movement
 		LockActor()
 		; Creatures need none of this
@@ -532,9 +538,16 @@ endState
 
 state Reset
 	event OnBeginState()
-		if ActorRef != none
+		; Reset to starting scale
+		if ActorScale != 0.0
+			ActorRef.SetScale(ActorScale)
+		endIf
+		; Reset actor and alias
+		if ActorRef != none && Controller != none && Animation != none
 			RegisterForSingleUpdate(0.1)
 		else
+			StopAnimating(true)
+			UnlockActor()
 			ClearAlias()
 		endIf
 	endEvent
@@ -552,8 +565,6 @@ state Reset
 		endIF
 		; Update diary/journal stats for player + native stats for NPCs
 		Lib.ActorStats.UpdateNativeStats(ActorRef, Controller.Males, Controller.Females, Controller.Creatures, Animation, Controller.VictimRef, Controller.TotalTime, Controller.HasPlayer)
-		; Reset to starting scale
-		ActorRef.SetScale(ActorScale)
 		; Reapply cum
 		int cum = Animation.GetCum(position)
 		if !Controller.FastEnd && cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Controller.Males > 0)
