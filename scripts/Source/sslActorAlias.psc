@@ -131,9 +131,9 @@ function LockActor()
 	ActorRef.EvaluatePackage()
 	; Disable movement
 	if IsPlayer
-		Game.DisablePlayerControls(false, false, false, false, false, false, true, false, 0)
 		Game.ForceThirdPerson()
 		Game.SetPlayerAIDriven()
+		Game.DisablePlayerControls(false, false, false, false, false, false, true, false, 0)
 		; Game.SetInChargen(true, true, true)
 		; Enable hotkeys, if needed
 		if IsVictim && Lib.bDisablePlayer
@@ -149,11 +149,15 @@ function LockActor()
 endFunction
 
 function UnlockActor()
+	; Disable free camera, if in it
+	if IsPlayer
+		Lib.ControlLib.EnableFreeCamera(false)
+	endIf
 	; Enable movement
 	if IsPlayer
 		Lib.ControlLib._HKClear()
-		Game.EnablePlayerControls(false, false, false, false, false, false, true, false, 0)
 		Game.SetPlayerAIDriven(false)
+		Game.EnablePlayerControls(false, false, false, false, false, false, true, false, 0)
 		; Game.SetInChargen(false, false, false)
 	else
 		ActorRef.SetRestrained(false)
@@ -205,9 +209,8 @@ endFunction
 ;\-----------------------------------------------/;
 
 function StopAnimating(bool quick = false)
-	; Reset Idle
 	if IsCreature
-		; Reset Creature Idle
+		; Reset creature idle
 		Debug.SendAnimationEvent(ActorRef, "Reset")
 		Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
 		Debug.SendAnimationEvent(ActorRef, "FNISDefault")
@@ -215,79 +218,19 @@ function StopAnimating(bool quick = false)
 		Debug.SendAnimationEvent(ActorRef, "ForceFurnExit")
 		ActorRef.PushActorAway(ActorRef, 1.0)
 	else
+		; Disable free camera, if in it
+		if IsPlayer
+			Lib.ControlLib.EnableFreeCamera(false)
+		endIf
 		; Reset NPC/PC Idle Quickly
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 		; Ragdoll NPC/PC if enabled and not in TFC
 		if !quick && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
+			ActorRef.StopTranslation()
 			ActorRef.PushActorAway(ActorRef, 1.0)
 		endIf
 	endIf
 endFunction
-
-function AttachMarker()
-	ActorRef.SetVehicle(MarkerRef)
-	ActorRef.SetScale(AnimScale)
-endFunction
-
-function AlignTo(float[] offsets, bool forceTo = false)
-	float[] centerLoc = Controller.CenterLocation
-	loc = new float[6]
-	; Determine offsets coordinates from center
-	loc[0] = centerLoc[0] + ( Math.sin(centerLoc[5]) * offsets[0] ) + ( Math.cos(centerLoc[5]) * offsets[1] )
-	loc[1] = centerLoc[1] + ( Math.cos(centerLoc[5]) * offsets[0] ) + ( Math.sin(centerLoc[5]) * offsets[1] )
-	loc[2] = centerLoc[2] + offsets[2]
-	loc[3] = centerLoc[3]
-	loc[4] = centerLoc[4]
-	loc[5] = centerLoc[5] + offsets[3]
-	if loc[5] >= 360.0
-		loc[5] = loc[5] - 360.0
-	elseIf loc[5] < 0.0
-		loc[5] = loc[5] + 360.0
-	endIf
-	; Set Marker Position
-	MarkerRef.SetPosition(loc[0], loc[1], loc[2])
-	MarkerRef.SetAngle(loc[3], loc[4], loc[5])
-	AttachMarker()
-	; Force actor location
-	if forceTo
-		ActorRef.SetPosition(loc[0], loc[1], loc[2])
-		ActorRef.SetAngle(loc[3], loc[4], loc[5])
-		AttachMarker()
-	endIf
-	; Soft snap actor location
-	Snap()
-endfunction
-
-function Snap()
-	if ActorRef == none || MarkerObj == none
-		return
-	endIf
-	; Quickly move into place if actor isn't positioned right
-	if ActorRef.GetDistance(MarkerRef) > 0.5
-		ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 1.0, 50000, 0)
-		AttachMarker()
-		Utility.Wait(0.1)
-	endIf
-	; Force position if translation didn't move them properly
-	if ActorRef.GetDistance(MarkerRef) > 1.0
-		ActorRef.StopTranslation()
-		ActorRef.SetPosition(loc[0], loc[1], loc[2])
-		AttachMarker()
-	endIf
-	; Force angle if translation didn't rotate them properly
-	if Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ()) > 0.5; || Math.Abs(ActorRef.GetAngleX() - MarkerRef.GetAngleX()) > 0.5
-		ActorRef.StopTranslation()
-		ActorRef.SetAngle(loc[3], loc[4], loc[5])
-		AttachMarker()
-	endIf
-	; Begin very slowly rotating a small amount to hold position
-	ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5]+0.1, 1.0, 10000, 0.0001)
-endFunction
-
-event OnTranslationComplete()
-	Utility.Wait(0.25)
-	Snap()
-endEvent
 
 function Strip(bool animate = true)
 	if IsCreature
@@ -301,8 +244,7 @@ function Strip(bool animate = true)
 		strip = StripOverride
 	endIf
 	; Strip slots and store removed equipment
-	form[] equipment = Lib.StripSlots(ActorRef, strip, animate)
-	StoreEquipment(equipment)
+	StoreEquipment(Lib.StripSlots(ActorRef, strip, animate))
 endFunction
 
 ;/-----------------------------------------------\;
@@ -491,18 +433,20 @@ state Ready
 	endEvent
 	function StartAnimating()
 		if ActorRef != none && Controller != none
-			SyncThread()
 			GoToState("Animating")
-			RegisterForSingleUpdate(Utility.RandomFloat(0.1, 0.8))
+			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
+			SyncThread()
 			; Auto TFC
 			if IsPlayer && Lib.ControlLib.bAutoTFC
 				Lib.ControlLib.EnableFreeCamera(true)
 			endIf
+			RegisterForSingleUpdate(Utility.RandomFloat(0.1, 0.8))
 		endIf
 	endFunction
 endState
 
 state Animating
+	; Primary loop
 	event OnUpdate()
 		if ActorRef.IsDead() || ActorRef.IsDisabled()
 			Controller.EndAnimation(true)
@@ -520,31 +464,69 @@ state Animating
 		endIf
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent
-endState
 
-state Orgasm
-	event OnBeginState()
-		RegisterForSingleUpdate(0.1)
-	endEvent
-	event OnUpdate()
-		; Disable Free camera, if in it
-		if IsPlayer
-			Lib.ControlLib.EnableFreeCamera(false)
+	; Animating functions
+	function AttachMarker()
+		ActorRef.SetVehicle(MarkerRef)
+		ActorRef.SetScale(AnimScale)
+	endFunction
+	function AlignTo(float[] offsets, bool forceTo = false)
+		float[] centerLoc = Controller.CenterLocation
+		loc = new float[6]
+		; Determine offsets coordinates from center
+		loc[0] = centerLoc[0] + ( Math.sin(centerLoc[5]) * offsets[0] ) + ( Math.cos(centerLoc[5]) * offsets[1] )
+		loc[1] = centerLoc[1] + ( Math.cos(centerLoc[5]) * offsets[0] ) + ( Math.sin(centerLoc[5]) * offsets[1] )
+		loc[2] = centerLoc[2] + offsets[2]
+		loc[3] = centerLoc[3]
+		loc[4] = centerLoc[4]
+		loc[5] = centerLoc[5] + offsets[3]
+		if loc[5] >= 360.0
+			loc[5] = loc[5] - 360.0
+		elseIf loc[5] < 0.0
+			loc[5] = loc[5] + 360.0
 		endIf
-		; Apply cum
-		int cum = Animation.GetCum(position)
-		if cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Controller.Males > 0)
-			Lib.ApplyCum(ActorRef, cum)
+		; Set Marker Position
+		MarkerRef.SetPosition(loc[0], loc[1], loc[2])
+		MarkerRef.SetAngle(loc[3], loc[4], loc[5])
+		AttachMarker()
+		; Force actor location
+		if forceTo
+			ActorRef.SetPosition(loc[0], loc[1], loc[2])
+			ActorRef.SetAngle(loc[3], loc[4], loc[5])
+			AttachMarker()
 		endIf
-		; Shake camera if player and not in free camera
-		if IsPlayer && Game.GetCameraState() != 3
-			Game.ShakeCamera(none, 0.75, 1.5)
+		; Soft snap actor location
+		Snap()
+	endfunction
+
+	function Snap()
+		if ActorRef == none || MarkerObj == none
+			return
 		endIf
-		; Voice
-		strength = 100
-		VoiceDelay = 1.0
-		GoToState("Animating")
-		RegisterForSingleUpdate(0.1)
+		; Quickly move into place if actor isn't positioned right
+		if ActorRef.GetDistance(MarkerRef) > 0.5
+			ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 1.0, 50000, 0)
+			AttachMarker()
+			return ; OnTranslationComplete() will take over when in place
+		endIf
+		; Force position if translation didn't move them properly
+		if ActorRef.GetDistance(MarkerRef) > 1.0
+			ActorRef.StopTranslation()
+			ActorRef.SetPosition(loc[0], loc[1], loc[2])
+			AttachMarker()
+		endIf
+		; Force angle if translation didn't rotate them properly
+		if Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ()) > 0.5; || Math.Abs(ActorRef.GetAngleX() - MarkerRef.GetAngleX()) > 0.5
+			ActorRef.StopTranslation()
+			ActorRef.SetAngle(loc[3], loc[4], loc[5])
+			AttachMarker()
+		endIf
+		; Begin very slowly rotating a small amount to hold position
+		ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5]+0.1, 1.0, 10000, 0.0001)
+	endFunction
+
+	event OnTranslationComplete()
+		Snap()
 	endEvent
 endState
 
@@ -590,7 +572,7 @@ state Reset
 		UnlockActor()
 		; Give AnimationEnd hooks some small room to breath
 		if !Controller.FastEnd
-			Utility.Wait(5.0)
+			Utility.Wait(2.0)
 		endIf
 		; Free up alias slot
 		ClearAlias()
@@ -601,6 +583,23 @@ endState
 ;/-----------------------------------------------\;
 ;|	Misc Functions                               |;
 ;\-----------------------------------------------/;
+
+function OrgasmEffect()
+	if Game.GetCameraState() != 3
+		; Apply cum
+		int cum = Animation.GetCum(position)
+		if cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Controller.Males > 0)
+			Lib.ApplyCum(ActorRef, cum)
+		endIf
+		; Shake camera if player and not in free camera
+		if IsPlayer
+			Game.ShakeCamera(none, 0.75, 1.5)
+		endIf
+	endIf
+	; Voice
+	strength = 100
+	VoiceDelay = 1.0
+endFunction
 
 function DoExpression()
 	if IsCreature
@@ -756,5 +755,17 @@ function Initialize()
 endFunction
 
 function StartAnimating()
-	Debug.Trace("Null StartAnimating(): "+ActorName)
+	Debug.TraceStack("SexLab -- ERROR: ActorAlias -- "+ActorName+" -- StratAnimating() called from wrong state, you probably have really bad script lag from a heavily modded game, a slow computer, or something is horribly wrong.")
 endFunction
+function AttachMarker()
+	Debug.TraceStack("SexLab -- ERROR: ActorAlias -- "+ActorName+" -- AttachMarker() called from wrong state, you are either rushing through the animation or something is wrong. This can usually be ignored.")
+endFunction
+function AlignTo(float[] offsets, bool forceTo = false)
+	Debug.TraceStack("SexLab -- ERROR: ActorAlias -- "+ActorName+" -- AlignTo() called from wrong state, you are either rushing through the animation or something is wrong. This can usually be ignored.")
+endfunction
+function Snap()
+	Debug.TraceStack("SexLab -- ERROR: ActorAlias -- "+ActorName+" -- Snap() called from wrong state, you are either rushing through the animation or something is wrong. This can usually be ignored.")
+endFunction
+event OnTranslationComplete()
+	Debug.TraceStack("SexLab -- ERROR: ActorAlias -- "+ActorName+" -- OnTranslationComplete() triggered from wrong state, you have another mod translating the actor or are rushing through the animation, or something is wrong. This can usually be ignored.")
+endEvent

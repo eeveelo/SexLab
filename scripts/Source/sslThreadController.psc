@@ -206,8 +206,12 @@ state Animating
 			; Play optional orgasm effects
 			if Lib.bOrgasmEffects
 				; Perform actor orgasm stuff
-				ActorAction("Orgasm", "Animating")
 				PlayAnimation()
+				int i = ActorCount
+				while i
+					i -= 1
+					ActorAlias[i].OrgasmEffect()
+				endWhile
 				; Play Orgasm SFX
 				Lib.OrgasmEffect.PlayAndWait(Positions[0])
 				if sfxType != none
@@ -453,7 +457,7 @@ function EndAnimation(bool quick = false)
 	SendThreadEvent("AnimationEnd")
 	; Give AnimationEnd hooks some small room to breath
 	if !FastEnd
-		Utility.Wait(3.0)
+		Utility.Wait(2.0)
 	endIf
 	; Clear & Reset animation thread
 	Initialize()

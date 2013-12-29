@@ -729,18 +729,18 @@ endFunction
 
 function SendThreadEvent(string eventName, float argNum = 0.0)
 	string threadid = (tid as string)
-	string events = eventName+" / "
+	string events = eventName+" /"
 	; Send Custom Event
 	if hook != ""
 		SendModEvent(eventName+"_"+hook, threadid, argNum)
-		events += eventName+"_"+hook
+		events += "/ "+eventName+"_"+hook+" /"
 	endIf
 	; Send Global Event
 	SendModEvent(eventName, threadid, argNum)
 	; Send Player Global Event
 	if HasPlayer
 		SendModEvent("Player"+eventName, threadid, argNum)
-		events += "Player"+eventName
+		events += "/ Player"+eventName
 	endIf
 	Debug.Trace("SexLab Thread["+_ThreadID+"] ModEvent: "+events)
 	; MiscUtil.PrintConsole("Thread["+_ThreadID+"] ModEvent: "+eventName)
@@ -872,8 +872,8 @@ function ClearActors()
 	while i
 		i -= 1
 		if ActorSlots[i] != none && ActorSlots[i].ActorRef != none
-			ActorSlots[i].StopAnimating(true)
 			ActorSlots[i].UnlockActor()
+			ActorSlots[i].StopAnimating(true)
 			ActorSlots[i].GoToState("Reset")
 		else
 			ActorSlots[i].ClearAlias()
