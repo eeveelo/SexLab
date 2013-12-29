@@ -457,7 +457,7 @@ function EndAnimation(bool quick = false)
 	SendThreadEvent("AnimationEnd")
 	; Give AnimationEnd hooks some small room to breath
 	if !FastEnd
-		Utility.Wait(2.0)
+		SexLabUtil.Wait(2.0)
 	endIf
 	; Clear & Reset animation thread
 	Initialize()

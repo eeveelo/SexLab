@@ -572,11 +572,10 @@ state Reset
 		UnlockActor()
 		; Give AnimationEnd hooks some small room to breath
 		if !Controller.FastEnd
-			Utility.Wait(2.0)
+			SexLAbUtil.Wait(1.0)
 		endIf
 		; Free up alias slot
 		ClearAlias()
-		GoToState("")
 	endEvent
 endState
 
