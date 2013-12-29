@@ -273,12 +273,17 @@ endFunction
 ;\-----------------------------------------------/;
 
 function SetAdjustment(int position, int stage, int slot, float to)
-	if StorageUtil.FloatListCount(Storage, Name) < 1
+	Debug.Trace("Storage: "+Storage+" Calc Len: "+((stages * actors) * 4)+ " Actual Len: "+offsetData.Length)
+	if StorageUtil.FloatListCount(Storage, Name) < ((stages * actors) * 4)
 		int len = offsetData.Length
-		while StorageUtil.FloatListCount(Storage, Name) < len
+		int i = StorageUtil.FloatListCount(Storage, Name)
+		while i < len
 			StorageUtil.FloatListAdd(Storage, Name, 0.0)
+			i += 1
 		endWhile
+		debug.trace("Init Length: "+StorageUtil.FloatListCount(Storage, Name))
 	endIf
+	MiscUtil.PrintConsole("Updating index: "+DataIndex(4, position, stage, slot)+"/"+StorageUtil.FloatListCount(Storage, Name))
 	StorageUtil.FloatListSet(Storage, Name, DataIndex(4, position, stage, slot), to)
 endFunction
 
@@ -599,7 +604,6 @@ function Initialize()
 
 	Storage = GetOwningQuest()
 endFunction
-
 function _Export()
 	string exportkey ="SexLabConfig.Animation["+Name+"]."
 	StorageUtil.FileSetIntValue(exportkey+"Enabled", Enabled as int)
@@ -614,7 +618,6 @@ function _Export()
 		i += 1
 	endWhile
 endFunction
-
 function _Import()
 	string exportkey ="SexLabConfig.Animation["+Name+"]."
 	Enabled = StorageUtil.FileGetIntValue(exportkey+"Enabled", Enabled as int) as bool
@@ -641,4 +644,35 @@ function _Import()
 	StorageUtil.FileUnsetIntValue(exportkey+"Aggressive")
 	StorageUtil.FileUnsetIntValue(exportkey+"LeadIn")
 	StorageUtil.FileFloatListClear(exportkey+"Adjustments")
+endFunction
+function _Upgrade()
+	int position
+	while position < actors
+		int stage
+		while stage < stages
+			string KeyStr = Name+"["+position+"-"+(stage + 1)+"]"
+			string log = KeyStr+" -- Length: ["+StorageUtil.FloatListCount(Storage, KeyStr)+"] Offests: ["+StorageUtil.FloatListGet(Storage, KeyStr, 0)+"],["+StorageUtil.FloatListGet(Storage, KeyStr, 1)+"],["+StorageUtil.FloatListGet(Storage, KeyStr, 2)+"],["+StorageUtil.FloatListGet(Storage, KeyStr, 3)+"]"
+			Debug.Trace(log)
+			MiscUtil.PrintConsole(log)
+			if StorageUtil.FloatListCount(Storage, KeyStr) > 0
+				SetAdjustment(position, stage, 0, StorageUtil.FloatListGet(Storage, KeyStr, 0))
+				SetAdjustment(position, stage, 1, StorageUtil.FloatListGet(Storage, KeyStr, 1))
+				SetAdjustment(position, stage, 2, StorageUtil.FloatListGet(Storage, KeyStr, 2))
+				SetAdjustment(position, stage, 3, StorageUtil.FloatListGet(Storage, KeyStr, 3))
+			endIf
+			StorageUtil.FloatListClear(Storage, KeyStr)
+			stage += 1
+		endWhile
+		position += 1
+	endWhile
+endFunction
+function OLDUpdateOffset(int slot, int position, int stage, float adjust)
+	string KeyStr = KeyStr(position, stage)
+	while StorageUtil.FloatListCount(Storage, KeyStr) < 4
+		StorageUtil.FloatListAdd(Storage, KeyStr, 0.0)
+	endWhile
+	StorageUtil.FloatListSet(Storage, KeyStr, slot, (StorageUtil.FloatListGet(Storage, KeyStr, slot) + adjust))
+endFunction
+float function OLDAccessOffset(int position, int stage, int slot)
+	return offsetData[DataIndex(4, position, stage, slot)] + StorageUtil.FloatListGet(Storage, KeyStr(position, stage), slot)
 endFunction

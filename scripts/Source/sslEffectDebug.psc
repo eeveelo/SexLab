@@ -4,11 +4,20 @@ SexLabFramework property SexLab Auto
 import SexLabUtil
 
 event OnEffectStart(actor TargetRef, actor CasterRef)
-	actor[] Found = SexLab.FindAvailablePartners(SexLab.MakeActorArray(CasterRef), Utility.RandomInt(2,5))
-	Debug.TraceAndBox("MALE\nUnsorted Actors: "+Genders(Found)+"\n  Sorted Actors: "+Genders(SexLab.SortActors(Found, false)))
+	sslBaseAnimation Anim = SexLab.GetAnimationByName("Arrok Cowgirl")
+	Quest Storage = Anim.GetOwningQuest()
+	int slot = 1
+	int position = 1
+	int stage = 2
 
-	actor[] Found2 = SexLab.FindAvailablePartners(SexLab.MakeActorArray(CasterRef), Utility.RandomInt(2,5))
-	Debug.TraceAndBox("FEMALE\nUnsorted Actors: "+Genders(Found2)+"\n  Sorted Actors: "+Genders(SexLab.SortActors(Found2, true)))
+	string KeyStr = Anim.Name+"["+position+"-"+stage+"]"
+	Anim.OLDUpdateOffset(slot, position, stage, 20)
+	Anim.SetAdjustment(position, stage, slot, 133)
+	Log("Old Offset: "+StorageUtil.FloatListGet(Storage, KeyStr, slot)+" New Offset: "+Anim.GetAdjustment(position, stage, slot), Anim.Name, "[1]", "trace,console")
+	Anim._Upgrade()
+	Log("Old Offset: "+StorageUtil.FloatListGet(Storage, KeyStr, slot)+" New Offset: "+Anim.GetAdjustment(position, stage, slot), Anim.Name, "[2]", "trace,console")
+	Anim.SetAdjustment(position, stage, slot, 50)
+	Log("Old Offset: "+StorageUtil.FloatListGet(Storage, KeyStr, slot)+" New Offset: "+Anim.GetAdjustment(position, stage, slot), Anim.Name, "[3]", "trace,console")
 
 	Dispel()
 endEvent
