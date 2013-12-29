@@ -2,12 +2,11 @@ scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
 int function GetVersion()
-	return 13102
+	return 13200
 endFunction
 
 string function GetStringVer()
-	return "1.32 DEV"
-	; return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)
+	return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)
 endFunction
 
 bool function DebugMode()
@@ -20,14 +19,19 @@ event OnVersionUpdate(int version)
 	; Notify update
 	if CurrentVersion < GetVersion()
 		Debug.Notification("Updating to SexLab v"+GetStringVer())
-		; Resetup system
-		if CurrentVersion > 0
-			_SetupSystem()
-		endIf
 		; v1.32:
 		; Convert current player stats to StorageUtil
 		if CurrentVersion > 0 && CurrentVersion < 13200
 			Stats._Update()
+		endIf
+		; Resetup system
+		if CurrentVersion > 12000
+			_ExportSettings()
+			debug.notification("Settings Exported")
+			_SetupSystem()
+			_ImportSettings()
+		else
+			_SetupSystem()
 		endIf
 	endIf
 endEvent
@@ -1236,12 +1240,7 @@ endState
 state ExportSettings
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnExportSettings")
-			ActorLib._Export()
-			ControlLib._Export()
-			ThreadLib._Export()
-			VoiceLib._Export()
-			ExpressionLib._Export()
-			AnimLib._Export()
+			_ExportSettings()
 			StorageUtil.FileSetIntValue("SexLabConfig.Exported", 1)
 			ShowMessage("$SSL_RunExportSettings", false)
 		endIf
@@ -1255,12 +1254,7 @@ state ImportSettings
 		if StorageUtil.FileGetIntValue("SexLabConfig.Exported") != 1
 			ShowMessage("$SSL_WarnImportSettingsEmpty", false)
 		elseif ShowMessage("$SSL_WarnImportSettings")
-			ActorLib._Import()
-			ControlLib._Import()
-			ThreadLib._Import()
-			VoiceLib._Import()
-			ExpressionLib._Import()
-			AnimLib._Import()
+			_ImportSettings()
 			StorageUtil.FileUnsetIntValue("SexLabConfig.Exported")
 			ShowMessage("$SSL_RunImportSettings", false)
 		endIf
@@ -1722,10 +1716,20 @@ function _CheckSystem()
 	endwhile
 endFunction
 
-function _Save(string Name)
-
+function _ExportSettings()
+	ActorLib._Export()
+	ControlLib._Export()
+	ThreadLib._Export()
+	VoiceLib._Export()
+	ExpressionLib._Export()
+	AnimLib._Export()
 endFunction
 
-function _Export()
-
+function _ImportSettings()
+	ActorLib._Import()
+	ControlLib._Import()
+	ThreadLib._Import()
+	VoiceLib._Import()
+	ExpressionLib._Import()
+	AnimLib._Import()
 endFunction
