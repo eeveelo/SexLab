@@ -27,7 +27,6 @@ event OnVersionUpdate(int version)
 		; Resetup system
 		if CurrentVersion > 12000
 			_ExportSettings()
-			debug.notification("Settings Exported")
 			_SetupSystem()
 			_ImportSettings()
 		else

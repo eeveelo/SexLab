@@ -103,20 +103,6 @@ bool function SetAlias(actor prospect, sslThreadController ThreadView)
 	IsCreature = gender == 2
 	IsPlayer = ActorRef == Lib.PlayerRef
 	IsVictim = ActorRef == Controller.VictimRef
-	; Calculate scales
-	float display = ActorRef.GetScale()
-	ActorRef.SetScale(1.0)
-	float base = ActorRef.GetScale()
-	; Starting scale
-	ActorScale = ( display / base )
-	; Reset back to starting scale
-	ActorRef.SetScale(ActorScale)
-	; Pick animation scale
-	if Controller.ActorCount > 1 && Lib.bScaleActors
-		AnimScale = (1.0 / base)
-	else
-		AnimScale = ActorScale
-	endIf
 	Debug.Trace("-- SexLab ActorAlias -- Thread["+Controller.tid+"] Slotting '"+ActorName+"' into alias -- "+self)
 	return true
 endFunction
@@ -398,6 +384,20 @@ state Prepare
 	event OnUpdate()
 		; Lock movement
 		LockActor()
+		; Calculate scales
+		float display = ActorRef.GetScale()
+		ActorRef.SetScale(1.0)
+		float base = ActorRef.GetScale()
+		; Starting scale
+		ActorScale = ( display / base )
+		; Reset back to starting scale
+		ActorRef.SetScale(ActorScale)
+		; Pick animation scale
+		if Controller.ActorCount > 1 && Lib.bScaleActors
+			AnimScale = (1.0 / base)
+		else
+			AnimScale = ActorScale
+		endIf
 		; Creatures need none of this
 		if !IsCreature
 			; Cleanup
@@ -441,11 +441,11 @@ state Ready
 		if ActorRef != none && Controller != none
 			GoToState("Animating")
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
-			SyncThread()
 			; Auto TFC
 			if IsPlayer && Lib.ControlLib.bAutoTFC
 				Lib.ControlLib.EnableFreeCamera(true)
 			endIf
+			SyncThread()
 			RegisterForSingleUpdate(Utility.RandomFloat(0.1, 0.8))
 		endIf
 	endFunction
@@ -532,6 +532,7 @@ state Animating
 	endFunction
 
 	event OnTranslationComplete()
+		Utility.Wait(0.2)
 		Snap()
 	endEvent
 endState
@@ -539,16 +540,18 @@ endState
 state Reset
 	event OnBeginState()
 		; Reset to starting scale
-		if ActorScale != 0.0
+		if ActorRef != none && ActorScale != 0.0
 			ActorRef.SetScale(ActorScale)
 		endIf
 		; Reset actor and alias
-		if ActorRef != none && Controller != none && Animation != none
-			RegisterForSingleUpdate(0.1)
-		else
+		if ActorRef == none
+			ClearAlias()
+		elseIf ActorRef != none && (Controller == none || Animation == none)
 			StopAnimating(true)
 			UnlockActor()
 			ClearAlias()
+		else
+			RegisterForSingleUpdate(0.1)
 		endIf
 	endEvent
 	event OnUpdate()
@@ -557,33 +560,36 @@ state Reset
 		if IsPlayer
 			Lib.ControlLib.EnableFreeCamera(false)
 		endIf
-		; Clear OpenMouth
-		ActorRef.ClearExpressionOverride()
-		; Clear expression
-		if Expression != none
-			sslExpressionLibrary.ClearMFG(ActorRef)
-		endIF
-		; Update diary/journal stats for player + native stats for NPCs
-		Lib.ActorStats.UpdateNativeStats(ActorRef, Controller.Males, Controller.Females, Controller.Creatures, Animation, Controller.VictimRef, Controller.TotalTime, Controller.HasPlayer)
 		; Reapply cum
 		int cum = Animation.GetCum(position)
 		if !Controller.FastEnd && cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Controller.Males > 0)
 			Lib.ApplyCum(ActorRef, cum)
 		endIf
-		; Make flaccid for SOS
-		Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
-		RemoveStrapon()
 		; Reset the actor
 		StopAnimating(Controller.FastEnd)
-		; Unstrip
-		if !ActorRef.IsDead()
-			Lib.UnstripActor(ActorRef, EquipmentStorage, Controller.GetVictim())
+		; Non-Creature only
+		if !IsCreature
+			; Clear OpenMouth
+			ActorRef.ClearExpressionOverride()
+			; Clear expression
+			if Expression != none
+				sslExpressionLibrary.ClearMFG(ActorRef)
+			endIf
+			; Update diary/journal stats for player + native stats for NPCs
+			Lib.ActorStats.UpdateNativeStats(ActorRef, Controller.Males, Controller.Females, Controller.Creatures, Animation, Controller.VictimRef, Controller.TotalTime, Controller.HasPlayer)
+			; Make flaccid for SOS
+			Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
+			RemoveStrapon()
+			; Unstrip
+			if !ActorRef.IsDead()
+				Lib.UnstripActor(ActorRef, EquipmentStorage, Controller.GetVictim())
+			endIf
 		endIf
 		; Unlock their movement
 		UnlockActor()
 		; Give AnimationEnd hooks some small room to breath
 		if !Controller.FastEnd
-			SexLAbUtil.Wait(1.0)
+			SexLabUtil.Wait(1.0)
 		endIf
 		; Free up alias slot
 		ClearAlias()
@@ -635,7 +641,7 @@ function DoExpression()
 			i -= 3
 			if presets[i] == 1 || (presets[i] == 0 && !openmouth)
 				MfgConsoleFunc.SetPhonemeModifier(ActorRef, presets[i], presets[(i + 1)], presets[(i + 2)])
-			elseIf !openmouth
+			elseIf presets[i] == 2 && !openmouth
 				ActorRef.SetExpressionOverride(presets[(i + 1)], presets[(i + 2)])
 			endIf
 		endWhile
@@ -644,10 +650,12 @@ function DoExpression()
 	if openmouth
 		ActorRef.SetExpressionOverride(16, 100)
 	endIf
-
 endFunction
 
 int function GetEnjoyment()
+	if IsCreature
+		return ((Stage as float / Animation.StageCount as float) * 100.0) as int
+	endIf
 	; Init weights
 	int BaseWeight
 	int ProficencyWeight
