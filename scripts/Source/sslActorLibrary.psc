@@ -320,7 +320,7 @@ form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool all
 			a.UnequipItem(eWeap, false, true)
 			items[33] = eWeap
 			if animate
-				Utility.Wait(0.20)
+				Utility.Wait(0.15)
 			endIf
 		endIf
 	endIf
@@ -333,7 +333,7 @@ form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool all
 				a.UnequipItem(item, false, true)
 				items[i] = item
 				if animate
-					Utility.Wait(0.20)
+					Utility.Wait(0.15)
 				endIf
 			endIf
 		endIf

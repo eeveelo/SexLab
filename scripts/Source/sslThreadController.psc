@@ -57,8 +57,8 @@ function ActorAction(string stateAction, string stateFinish)
 		i -= 1
 		ActorAlias[i].GoToState(stateAction)
 	endWhile
-	; Wait for actors ready, or for 15 seconds to pass
-	float failsafe = Utility.GetCurrentRealTime() + 15.0
+	; Wait for actors ready, or for 25 seconds to pass
+	float failsafe = Utility.GetCurrentRealTime() + 25.0
 	while !ActorWait(stateFinish) && failsafe > Utility.GetCurrentRealTime()
 		Utility.Wait(0.10)
 	endWhile
