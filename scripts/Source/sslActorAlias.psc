@@ -110,10 +110,7 @@ endFunction
 function ClearAlias()
 	TryToClear()
 	TryToReset()
-	if ActorRef != none
-		ActorRef.EvaluatePackage()
-		Debug.Trace("-- SexLab ActorAlias -- Clearing '"+ActorName+"' from alias -- "+self)
-	endIf
+	UnlockActor()
 	Initialize()
 endFunction
 
@@ -177,8 +174,11 @@ function UnlockActor()
 	ActorRef.StopTranslation()
 	ActorRef.SetVehicle(none)
 	; Clear expression
-	if Expression != none
-		sslExpressionLibrary.ClearMFG(ActorRef)
+	if !IsCreature
+		ActorRef.ClearExpressionOverride()
+		if Expression != none
+			sslExpressionLibrary.ClearMFG(ActorRef)
+		endIf
 	endIf
 endFunction
 
@@ -632,8 +632,8 @@ function DoExpression()
 			expStrength = GetEnjoyment()
 		endIf
 		; Clear existing Phoneme and Modifiers
+		; ActorRef.ClearExpressionOverride()
 		MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
-		ActorRef.ClearExpressionOverride()
 		; Apply presets to actor, skip if empty
 		int[] presets = Expression.PickPreset(expStrength, IsFemale)
 		int i = presets.Length
