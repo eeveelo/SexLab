@@ -501,12 +501,6 @@ int function Clamp(int value, int max)
 endFunction
 
 function _Setup()
-	string[] sDel
-	StatName = sDel
-	StatValue = sDel
-	StatPrepend = sDel
-	StatAppend = sDel
-
 	SetFloat(PlayerRef, "TimeSpent", 0.0)
 	SetFloat(PlayerRef, "Purity", 0.0)
 	SetInt(PlayerRef, "Males", 0)
@@ -557,11 +551,9 @@ function _Setup()
 	SendModEvent("SexLabRegisterStats")
 endFunction
 
-function _Update()
-	if updated
-		return
-	endIf
-	updated = true
+function _Upgrade()
+	PlayerRef = Lib.PlayerRef
+	; Native Stats
 	SetFloat(PlayerRef, "TimeSpent", fTimeSpent)
 	SetFloat(PlayerRef, "Purity", fSexualPurity)
 	SetInt(PlayerRef, "Males", iMalePartners)
@@ -573,15 +565,13 @@ function _Update()
 	SetInt(PlayerRef, "Oral", iOralCount)
 	SetInt(PlayerRef, "Victim", iVictimCount)
 	SetInt(PlayerRef, "Aggressor", iAggressorCount)
-
+	; Custom Stats
+	StorageUtil.StringListClear(none, "sslActorStats.CustomStats")
 	int i = StatName.Length
 	while i
 		i -= 1
 		RegisterStat(StatName[i], StatValue[i], StatPrepend[i], StatAppend[i])
 	endWhile
-
-	_Setup()
-	Debug.Notification("SexLab - Player Stats Updated" + PlayerRef)
 endFunction
 
 bool function HasInt(actor ActorRef, string stat)
