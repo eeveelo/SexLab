@@ -2,11 +2,11 @@ scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
 int function GetVersion()
-	return 13200
+	return 13300
 endFunction
 
 string function GetStringVer()
-	return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)+"b"
+	return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)
 endFunction
 
 bool function DebugMode()
@@ -19,10 +19,10 @@ event OnVersionUpdate(int version)
 	; Notify update
 	if CurrentVersion < GetVersion()
 		Debug.Notification("Updating to SexLab v"+GetStringVer())
-		; v1.32:
+		; v1.33:
 		; Convert current player stats to StorageUtil
-		if CurrentVersion > 0 && CurrentVersion < 13200
-			Stats._Update()
+		if CurrentVersion > 0 && CurrentVersion < 13300
+			Stats._Upgrade()
 		endIf
 		; Resetup system
 		if CurrentVersion > 12000
@@ -496,11 +496,11 @@ event OnPageReset(string page)
 		AddTextOption("$SSL_OralProficiency", Stats.GetPlayerSkillTitle("Oral"))
 		AddEmptyOption()
 		; Custom stats set by other mods
-		i = 0
-		while i < StorageUtil.StringListCount(none, "sslActorStats.CustomStats")
+		i = StorageUtil.StringListCount(none, "sslActorStats.CustomStats")
+		while i
+			i -= 1
 			string stat = StorageUtil.StringListGet(none, "sslActorStats.CustomStats", i)
 			AddTextOption(stat, Stats.GetStatFull(PlayerRef, stat))
-			i += 1
 		endWhile
 
 	elseIf page == "$SSL_RebuildClean"
@@ -523,9 +523,11 @@ event OnPageReset(string page)
 		AddTextOptionST("CleanSystem","$SSL_CleanSystem", "$SSL_ClickHere")
 
 		SetCursorPosition(1)
+		AddEmptyOption()
 		AddHeaderOption("")
 		AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
 		AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
+		AddEmptyOption()
 		AddHeaderOption("$SSL_AvailableStrapons")
 		AddTextOptionST("RebuildStraponList","$SSL_RebuildStraponList", "$SSL_ClickHere")
 		i = 0
@@ -540,7 +542,6 @@ event OnPageReset(string page)
 			i += 1
 		endWhile
 	endIf
-
 endEvent
 
 state RestrictAggressive
