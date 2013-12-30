@@ -2,9 +2,10 @@ Scriptname sslEffectDebug extends ActiveMagicEffect
 
 SexLabFramework property SexLab Auto
 import SexLabUtil
+import MiscUtil
+import ActorUtil
 
 event OnEffectStart(actor TargetRef, actor CasterRef)
-
 	Dispel()
 endEvent
 
@@ -17,7 +18,7 @@ endEvent
 
 function LockActor(actor ActorRef)
 	; Start DoNothing package
-	ActorUtil.AddPackageOverride(ActorRef, (Game.GetFormFromFile(0x0E50E, "SexLab.esm") as Package), 100)
+	AddPackageOverride(ActorRef, (Game.GetFormFromFile(0x0E50E, "SexLab.esm") as Package), 100)
 	ActorRef.SetFactionRank(SexLab.AnimatingFaction, 1)
 	ActorRef.EvaluatePackage()
 	; Disable movement
@@ -44,7 +45,7 @@ function UnlockActor(actor ActorRef)
 		; ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 	endIf
 	; Remove from animation faction
-	ActorUtil.RemovePackageOverride(ActorRef, (Game.GetFormFromFile(0x0E50E, "SexLab.esm") as Package))
+	RemovePackageOverride(ActorRef, (Game.GetFormFromFile(0x0E50E, "SexLab.esm") as Package))
 	ActorRef.RemoveFromFaction(SexLab.AnimatingFaction)
 	ActorRef.EvaluatePackage()
 	; Detach positioning marker
