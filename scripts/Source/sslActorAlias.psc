@@ -173,8 +173,13 @@ function UnlockActor()
 	; Detach positioning marker
 	ActorRef.StopTranslation()
 	ActorRef.SetVehicle(none)
-	; Clear expression
 	if !IsCreature
+		; Cleanup
+		TryToStopCombat()
+		if ActorRef.IsWeaponDrawn()
+			ActorRef.SheatheWeapon()
+		endIf
+		; Clear expression
 		ActorRef.ClearExpressionOverride()
 		if Expression != none
 			sslExpressionLibrary.ClearMFG(ActorRef)
