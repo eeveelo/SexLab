@@ -637,14 +637,14 @@ function DoExpression()
 			expStrength = GetEnjoyment()
 		endIf
 		; Clear existing Phoneme and Modifiers
-		; ActorRef.ClearExpressionOverride()
+		ActorRef.ClearExpressionOverride()
 		MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
 		; Apply presets to actor, skip if empty
 		int[] presets = Expression.PickPreset(expStrength, IsFemale)
 		int i = presets.Length
 		while i
 			i -= 3
-			if presets[i] == 1 || (presets[i] == 0 && !openmouth)
+			if presets[i] == 1 || presets[i] == 0
 				MfgConsoleFunc.SetPhonemeModifier(ActorRef, presets[i], presets[(i + 1)], presets[(i + 2)])
 			elseIf presets[i] == 2 && !openmouth
 				ActorRef.SetExpressionOverride(presets[(i + 1)], presets[(i + 2)])
@@ -654,6 +654,7 @@ function DoExpression()
 	; Perform mouth opening
 	if openmouth
 		ActorRef.SetExpressionOverride(16, 100)
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 100)
 	endIf
 endFunction
 
