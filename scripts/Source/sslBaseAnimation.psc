@@ -281,7 +281,6 @@ function SetAdjustment(int position, int stage, int slot, float to)
 			i += 1
 		endWhile
 	endIf
-	MiscUtil.PrintConsole("Updating index: "+DataIndex(4, position, stage, slot)+"/"+StorageUtil.FloatListCount(Storage, Name))
 	StorageUtil.FloatListSet(Storage, Name, DataIndex(4, position, stage, slot), to)
 endFunction
 
