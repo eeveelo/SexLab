@@ -461,6 +461,10 @@ int function RegisterStat(string name, string value, string prepend = "", string
 	return Stats.RegisterStat(name, value, prepend, append)
 endFunction
 
+int function FindStat(string name)
+	return Stats.FindStat(name)
+endFunction
+
 function Alter(string name, string newName = "", string value = "", string prepend = "", string append = "")
 	Stats.Alter(name, newName, value, prepend, append)
 endFunction
@@ -483,6 +487,14 @@ endFunction
 
 int function ActorAdjustBy(actor ActorRef, string name, int adjust)
 	return Stats.AdjustBy(ActorRef, name, adjust)
+endFunction
+
+string function GetActorStatFull(actor ActorRef, string name)
+	return Stats.GetStatFull(ActorRef, name)
+endFunction
+
+string function GetStatFull(string name)
+	return Stats.GetStatFull(PlayerRef, name)
 endFunction
 
 string function GetStat(string name)
@@ -672,9 +684,6 @@ string function LastSexTimerStringRealTime(actor a)
 	return Stats.LastSexTimerStringRealTime(a)
 endFunction
 
-int function FindStat(string name)
-	return -1 ; Removed in 1.32
-endFunction
 string[] function GetInfo(string name)
 	return none ; Removed in 1.32
 endFunction

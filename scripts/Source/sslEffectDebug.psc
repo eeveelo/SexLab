@@ -6,6 +6,7 @@ import MiscUtil
 import ActorUtil
 
 event OnEffectStart(actor TargetRef, actor CasterRef)
+
 	Dispel()
 endEvent
 

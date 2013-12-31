@@ -2,7 +2,7 @@ scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
 int function GetVersion()
-	return 13300
+	return 13400
 endFunction
 
 string function GetStringVer()
@@ -19,18 +19,17 @@ event OnVersionUpdate(int version)
 	; Notify update
 	if CurrentVersion < GetVersion()
 		Debug.Notification("Updating to SexLab v"+GetStringVer())
-		; v1.33:
-		; Convert current player stats to StorageUtil
-		if CurrentVersion > 0 && CurrentVersion < 13300
-			Stats._Upgrade()
-		endIf
-		; Resetup system
-		if CurrentVersion > 12000
+		if CurrentVersion > 12000 && CurrentVersion < 13200
 			_ExportSettings()
 			_SetupSystem()
+
+			; v1.33 - Convert current player stats to StorageUtil
+			Stats._Upgrade132()
+			Stats._Upgrade134()
+
 			_ImportSettings()
-		else
-			_SetupSystem()
+		elseIf CurrentVersion >= 13300
+			Stats._Upgrade134()
 		endIf
 	endIf
 endEvent
@@ -496,11 +495,11 @@ event OnPageReset(string page)
 		AddTextOption("$SSL_OralProficiency", Stats.GetPlayerSkillTitle("Oral"))
 		AddEmptyOption()
 		; Custom stats set by other mods
-		i = StorageUtil.StringListCount(none, "sslActorStats.CustomStats")
+		string[] CustomStats = Stats.CustomStats
+		i = CustomStats.Length
 		while i
 			i -= 1
-			string stat = StorageUtil.StringListGet(none, "sslActorStats.CustomStats", i)
-			AddTextOption(stat, Stats.GetStatFull(PlayerRef, stat))
+			AddTextOption(CustomStats[i], Stats.GetStatFull(PlayerRef, CustomStats[i]))
 		endWhile
 
 	elseIf page == "$SSL_RebuildClean"

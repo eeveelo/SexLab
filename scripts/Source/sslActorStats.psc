@@ -41,51 +41,58 @@ endProperty
 ;|	Manipulate Custom Stats                      |;
 ;\-----------------------------------------------/;
 
+int function FindStat(string stat)
+	return StatName.Find(stat)
+endFunction
+
 int function RegisterStat(string stat, string value, string prepend = "", string append = "")
-	if StorageUtil.StringListFind(none, "sslActorStats.CustomStats", stat) == -1
-		StorageUtil.StringListAdd(none, "sslActorStats.CustomStats", stat, false)
-		string statstr = "{"+stat+"}"
-		if prepend != ""
-			statstr = prepend+"#!"+statstr
-		endIf
-		if append != ""
-			statstr = statstr+"#!"+append
-		endIf
-		SetString(none, "Custom."+stat, statstr)
-		SetString(PlayerRef, "Custom."+stat, value)
-		return 1
+	if FindStat(stat) == -1
+		StatName = sslUtility.PushString(stat, StatName)
+		StatValue = sslUtility.PushString(value, StatValue)
+		StatPrepend = sslUtility.PushString(prepend, StatPrepend)
+		StatAppend = sslUtility.PushString(append, StatAppend)
+		SetStat(PlayerRef, stat, value)
 	endIf
-	return -1
+	return FindStat(stat)
 endFunction
 
 function Alter(string name, string newName = "", string value = "", string prepend = "", string append = "")
-	; int index = FindStat(name)
-	; if index == -1
-	; 	return
-	; endIf
-	; if newName != ""
-	; 	StatName[index] = newName
-	; endIf
-	; if value != ""
-	; 	StatValue[index] = value
-	; endIf
-	; if prepend != ""
-	; 	StatPrepend[index] = prepend
-	; endIf
-	; if append != ""
-	; 	StatAppend[index] = append
-	; endIf
+	int i = FindStat(name)
+	if i == -1
+		return
+	endIf
+	if newName != ""
+		StatName[i] = newName
+	endIf
+	if value != ""
+		StatValue[i] =  value
+	endIf
+	if prepend != ""
+		StatPrepend[i] =  prepend
+	endIf
+	if append != ""
+		StatAppend[i] =  append
+	endIf
 endFunction
 
-string function SetStat(actor ActorRef, string stat, string value)
-	if !HasStat(none, stat)
-		return ""
+bool function ClearStat(actor ActorRef, string stat)
+	if HasStat(ActorRef, stat)
+		ClearString(ActorRef, "Custom."+stat)
+		return true
 	endIf
-	SetString(ActorRef, "Custom."+stat, value)
-	return GetStat(ActorRef, "Custom."+stat)
+	return false
+endFunction
+
+function SetStat(actor ActorRef, string stat, string value)
+	if FindStat(stat) != -1
+		SetStr(ActorRef, "Custom."+stat, value)
+	endIf
 endFunction
 
 int function AdjustBy(actor ActorRef, string stat, int adjust)
+	if FindStat(stat) == -1
+		return 0
+	endIf
 	int value = GetStatInt(ActorRef, stat)
 	value += adjust
 	SetStat(ActorRef, stat, (value as string))
@@ -96,21 +103,27 @@ endFunction
 ;|	Stat Custom Stat Lookup                      |;
 ;\-----------------------------------------------/;
 
+bool function HasStat(actor ActorRef, string stat)
+	return HasStr(ActorRef, "Custom."+stat)
+endFunction
+
 string function GetStat(actor ActorRef, string stat)
-	if !HasString(ActorRef, "Custom."+stat)
-		string default = GetStatDefault(stat)
-		SetString(ActorRef, "Custom."+stat, default)
-		return default
+	if !HasStat(ActorRef, stat)
+		return GetStatDefault(stat)
 	endIf
-	return GetString(ActorRef, "Custom."+stat)
+	return GetStr(ActorRef, "Custom."+stat)
+endFunction
+
+string function GetStatString(actor ActorRef, string stat)
+	return GetStat(ActorRef, stat)
 endFunction
 
 float function GetStatFloat(actor ActorRef, string stat)
-	return GetStat(ActorRef, "Custom."+stat) as float
+	return GetStat(ActorRef, stat) as float
 endFunction
 
 int function GetStatInt(actor ActorRef, string stat)
-	return GetStat(ActorRef, "Custom."+stat) as int
+	return GetStat(ActorRef, stat) as int
 endFunction
 
 int function GetStatLevel(actor ActorRef, string stat, float curve = 0.65)
@@ -121,41 +134,37 @@ string function GetStatTitle(actor ActorRef, string stat, float curve = 0.65)
 	return sStatTitles[Clamp(CalcLevel(GetStatInt(ActorRef, stat), curve), 6)]
 endFunction
 
-bool function IsValue(string value)
-	return StringUtil.GetNthChar(value, 0) == "{" && StringUtil.GetNthChar(value, (StringUtil.GetLength(value) - 1)) == "}"
+string function GetStatDefault(string stat)
+	int i = FindStat(stat)
+	if i != -1 && i < StatValue.Length
+		return StatValue[i]
+	endIf
+	return ""
 endFunction
 
-string function GetStatDefault(string stat)
-	string[] full = sslUtility.ArgString(GetStat(none, stat), "#!")
-	int i = full.Length
-	while i
-		i -= 1
-		if IsValue(full[i])
-			return full[i]
-		endIf
-	endWhile
+string function GetStatPrepend(string stat)
+	int i = FindStat(stat)
+	if i != -1 && i < StatPrepend.Length
+		return StatPrepend[i]
+	endIf
+	return ""
+endFunction
+
+string function GetStatAppend(string stat)
+	int i = FindStat(stat)
+	if i != -1 && i < StatAppend.Length
+		return StatAppend[i]
+	endIf
 	return ""
 endFunction
 
 string function GetStatFull(actor ActorRef, string stat)
-	string[] full = sslUtility.ArgString(GetStat(none, stat), "#!")
-	string output = ""
-	int i
-	while i < full.Length
-		if IsValue(full[i])
-			output += GetStat(ActorRef, stat)
-		else
-			output += full[i]
-		endIf
-		i += 1
-	endWhile
-	return output
+	int i = FindStat(stat)
+	if i != -1 && i < StatName.Length
+		return StatPrepend[i] + GetStat(ActorRef, stat) + StatAppend[i]
+	endIf
+	return ""
 endFunction
-
-bool function HasStat(actor ActorRef, string stat)
-	return HasString(ActorRef, "Custom."+stat)
-endFunction
-
 
 ;/-----------------------------------------------\;
 ;|	Calculate/Parse Stats                        |;
@@ -500,7 +509,7 @@ int function Clamp(int value, int max)
 	return value
 endFunction
 
-function _Setup()
+function _ClearStats()
 	SetFloat(PlayerRef, "TimeSpent", 0.0)
 	SetFloat(PlayerRef, "Purity", 0.0)
 	SetInt(PlayerRef, "Males", 0)
@@ -513,6 +522,19 @@ function _Setup()
 	SetInt(PlayerRef, "Victim", 0)
 	SetInt(PlayerRef, "Aggressor", 0)
 
+	string[] StrDel1
+	StatName = StrDel1
+	string[] StrDel2
+	StatValue = StrDel2
+	string[] StrDel3
+	StatPrepend = StrDel3
+	string[] StrDel4
+	StatAppend = StrDel4
+
+	SendModEvent("SexLabRegisterStats")
+endFunction
+
+function _Setup()
 	sPureTitles = new string[7]
 	sPureTitles[0] = "$SSL_Neutral"
 	sPureTitles[1] = "$SSL_Unsullied"
@@ -547,11 +569,9 @@ function _Setup()
 		sImpureTitles[5] = "$SSL_Depraved"
 		sImpureTitles[6] = "$SSL_Hypersexual"
 	endIf
-
-	SendModEvent("SexLabRegisterStats")
 endFunction
 
-function _Upgrade()
+function _Upgrade132()
 	PlayerRef = Lib.PlayerRef
 	; Native Stats
 	SetFloat(PlayerRef, "TimeSpent", fTimeSpent)
@@ -567,11 +587,24 @@ function _Upgrade()
 	SetInt(PlayerRef, "Aggressor", iAggressorCount)
 	; Custom Stats
 	StorageUtil.StringListClear(none, "sslActorStats.CustomStats")
-	int i = StatName.Length
+endFunction
+
+function _Upgrade134()
+	; v1.34 - Clean out unneeded stat storage
+	int i = StorageUtil.StringListCount(none, "sslActorStats.CustomStats")
 	while i
 		i -= 1
-		RegisterStat(StatName[i], StatValue[i], StatPrepend[i], StatAppend[i])
+		StorageUtil.UnsetStringValue(PlayerRef, "sslActorStats.Custom."+StorageUtil.StringListGet(none, "sslActorStats.CustomStats", i))
 	endWhile
+	StorageUtil.StringListClear(none, "sslActorStats.CustomStats")
+	string[] StrDel1
+	StatName = StrDel1
+	string[] StrDel2
+	StatValue = StrDel2
+	string[] StrDel3
+	StatPrepend = StrDel3
+	string[] StrDel4
+	StatAppend = StrDel4
 endFunction
 
 bool function HasInt(actor ActorRef, string stat)
@@ -580,7 +613,7 @@ endFunction
 bool function HasFloat(actor ActorRef, string stat)
 	return StorageUtil.HasFloatValue(ActorRef, "sslActorStats."+stat)
 endFunction
-bool function HasString(actor ActorRef, string stat)
+bool function HasStr(actor ActorRef, string stat)
 	return StorageUtil.HasStringValue(ActorRef, "sslActorStats."+stat)
 endFunction
 
@@ -590,8 +623,18 @@ endFunction
 float function GetFloat(actor ActorRef, string stat)
 	return StorageUtil.GetFloatValue(ActorRef, "sslActorStats."+stat)
 endFunction
-string function GetString(actor ActorRef, string stat)
+string function GetStr(actor ActorRef, string stat)
 	return StorageUtil.GetStringValue(ActorRef, "sslActorStats."+stat)
+endFunction
+
+function ClearInt(actor ActorRef, int stat)
+	StorageUtil.UnsetIntValue(ActorRef, "sslActorStats."+stat)
+endFunction
+function ClearFloat(actor ActorRef, float stat)
+	StorageUtil.UnsetFloatValue(ActorRef, "sslActorStats."+stat)
+endFunction
+function ClearString(actor ActorRef, string stat)
+	StorageUtil.UnsetStringValue(ActorRef, "sslActorStats."+stat)
 endFunction
 
 function SetInt(actor ActorRef, string stat, int value)
@@ -600,7 +643,7 @@ endFunction
 function SetFloat(actor ActorRef, string stat, float value)
 	StorageUtil.SetFloatValue(ActorRef, "sslActorStats."+stat, value)
 endFunction
-function SetString(actor ActorRef, string stat, string value)
+function SetStr(actor ActorRef, string stat, string value)
 	StorageUtil.SetStringValue(ActorRef, "sslActorStats."+stat, value)
 endFunction
 
