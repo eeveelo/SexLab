@@ -263,9 +263,9 @@ bool function IsStrippable(form item)
 		return false
 	endIf
 	; Check previous validations
-	if StripList.Find(item) != -1
+	if StripList.HasForm(item)
 		return true
-	elseIf NoStripList.Find(item) != -1
+	elseIf NoStripList.HasForm(item)
 		return false
 	endIf
 	; Check keywords
@@ -449,7 +449,7 @@ int function ValidateActor(actor a)
 		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They appear to already be animating")
 		return -10
 	endIf
-	if ValidActorList.Find(a) != -1
+	if ValidActorList.HasForm(a)
 		return 1
 	endIf
 	if a.IsInFaction(ForbiddenFaction) || a.HasKeywordString("SexLabForbid")
