@@ -146,9 +146,9 @@ state Advancing
 					i += 1
 				endWhile
 			endIf
-			SendThreadEvent("LeadInEnd")
 			; Renable free camera
 			Lib.ControlLib.TempToggleFreeCamera(toggled, "LeadInEnd")
+			SendThreadEvent("LeadInEnd")
 		endIf
 		; Stage Delay
 		if Stage > 1
@@ -164,45 +164,11 @@ state Advancing
 endState
 
 state Animating
-	function PlayAnimation()
-		; Send with as little overhead as possible to improve syncing
-		string[] events = Animation.FetchStage(Stage)
-		if ActorCount == 1
-			Debug.SendAnimationEvent(Positions[0], events[0])
-		elseIf ActorCount == 2
-			Debug.SendAnimationEvent(Positions[0], events[0])
-			Debug.SendAnimationEvent(Positions[1], events[1])
-		elseIf ActorCount == 3
-			Debug.SendAnimationEvent(Positions[0], events[0])
-			Debug.SendAnimationEvent(Positions[1], events[1])
-			Debug.SendAnimationEvent(Positions[2], events[2])
-		elseIf ActorCount == 4
-			Debug.SendAnimationEvent(Positions[0], events[0])
-			Debug.SendAnimationEvent(Positions[1], events[1])
-			Debug.SendAnimationEvent(Positions[2], events[2])
-			Debug.SendAnimationEvent(Positions[3], events[3])
-		elseIf ActorCount == 5
-			Debug.SendAnimationEvent(Positions[0], events[0])
-			Debug.SendAnimationEvent(Positions[1], events[1])
-			Debug.SendAnimationEvent(Positions[2], events[2])
-			Debug.SendAnimationEvent(Positions[3], events[3])
-			Debug.SendAnimationEvent(Positions[4], events[4])
-		endIf
-	endFunction
-	function GoToStage(int toStage)
-		; Stop looping
-		looping = false
-		UnregisterForUpdate()
-		; Set upcoming stage
-		stagePrev = Stage
-		if toStage < 0
-			toStage = 0
-		endIf
-		Stage = toStage
-		; Start advancement
-		GoToState("Advancing")
-		RegisterForSingleUpdate(0.10)
-	endFunction
+
+	;/-----------------------------------------------\;
+	;|	Primary Animation Loop                       |;
+	;\-----------------------------------------------/;
+
 	event OnBeginState()
 		if !LeadIn && Stage >= Animation.StageCount
 			; Send orgasm stage specific event
@@ -235,6 +201,7 @@ state Animating
 		UpdateTimer(Animation.GetStageTimer(stage))
 		RegisterForSingleUpdate(0.10)
 	endEvent
+
 	event OnUpdate()
 		if !looping
 			return
@@ -252,6 +219,7 @@ state Animating
 		; Loop
 		RegisterForSingleUpdate(0.60)
 	endEvent
+
 	event OnEndState()
 		if !LeadIn && Stage > Animation.StageCount
 			; Disable free camera, if in it
@@ -263,133 +231,171 @@ state Animating
 			SendThreadEvent("StageEnd")
 		endIf
 	endEvent
+
+	;/-----------------------------------------------\;
+	;|	Hotkey Functions                             |;
+	;\-----------------------------------------------/;
+
+	function AdvanceStage(bool backwards = false)
+		if !backwards
+			GoToStage((Stage + 1))
+		elseIf backwards && Stage > 1
+			GoToStage((Stage - 1))
+		endIf
+	endFunction
+
+	function ChangeAnimation(bool backwards = false)
+		if Animations.Length == 1
+			return ; Single animation selected, nothing to change to
+		endIf
+		SetAnimation(ArrayWrap((aid + SignInt(1, backwards)), Animations.Length))
+		RealignActors()
+		SendThreadEvent("AnimationChange")
+	endFunction
+
+	function ChangePositions(bool backwards = false)
+		if ActorCount < 2 || HasCreature
+			return ; Solo/Creature Animation, nobody to swap with
+		endIf
+		; Set direction of swapping
+		int MovedTo = ArrayWrap((AdjustingPosition + SignInt(1, backwards)), ActorCount)
+		; Actors to swap
+		actor adjusting = Positions[AdjustingPosition]
+		actor moved = Positions[MovedTo]
+		; Actor slots
+		sslActorAlias AdjustAlias = ActorAlias(adjusting)
+		sslActorAlias MovedAlias = ActorAlias(moved)
+		; Shuffle
+		actor[] NewPositions = Positions
+		NewPositions[AdjustingPosition] = moved
+		NewPositions[MovedTo] = adjusting
+		Positions = NewPositions
+		; Sync new positions
+		RealignActors()
+		AdjustChange(backwards)
+		SendThreadEvent("PositionChange")
+	endFunction
+
+	function AdjustForward(bool backwards = false, bool adjuststage = false)
+		float[] offsets = Animation.UpdateForward(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage)
+		sslActorAlias Slot = ActorSlot(AdjustingPosition)
+		Slot.AlignTo(offsets, true)
+	endFunction
+
+	function AdjustSideways(bool backwards = false, bool adjuststage = false)
+		float[] offsets = Animation.UpdateSide(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage)
+		sslActorAlias Slot = ActorSlot(AdjustingPosition)
+		Slot.AlignTo(offsets, true)
+	endFunction
+
+	function AdjustUpward(bool backwards = false, bool adjuststage = false)
+		float[] offsets = Animation.UpdateUp(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage)
+		sslActorAlias Slot = ActorSlot(AdjustingPosition)
+		Slot.AlignTo(offsets, true)
+	endFunction
+
+	function RotateScene(bool backwards = false)
+		AdjustRotation(SignFloat(45, backwards))
+		SyncActors()
+	endFunction
+
+	function AdjustChange(bool backwards = false)
+		AdjustingPosition = ArrayWrap((AdjustingPosition + SignInt(1, backwards)), ActorCount)
+		Lib.mAdjustChange.Show((AdjustingPosition + 1))
+	endFunction
+
+	function RestoreOffsets()
+		Animation.RestoreOffsets()
+		RealignActors()
+	endFunction
+
+	function MoveScene()
+		if !looping
+			return ; Don't attempt when not looping
+		endIf
+		; Stop animation loop
+		looping = false
+		UnregisterForUpdate()
+		; Enable Controls
+		sslActorAlias Slot = ActorAlias(Lib.PlayerRef)
+		Slot.UnlockActor()
+		Slot.StopAnimating(true)
+		Lib.PlayerRef.StopTranslation()
+		; Lock hotkeys and wait 6 seconds
+		Lib.mMoveScene.Show(6)
+		SexLabUtil.Wait(6.0)
+		; Disable Controls
+		Slot.LockActor()
+		; Give player time to settle incase airborne
+		Utility.Wait(1.0)
+		; Recenter on coords to avoid stager + resync animations
+		if !LocateBed(true, 400.0)
+			CenterOnObject(Lib.PlayerRef, true)
+		endIf
+		; Return to animation loop
+		looping = true
+		RegisterForSingleUpdate(0.15)
+	endFunction
+
+	;/-----------------------------------------------\;
+	;|	Actor Manipulation                           |;
+	;\-----------------------------------------------/;
+	function PlayAnimation()
+		; Send with as little overhead as possible to improve syncing
+		string[] events = Animation.FetchStage(Stage)
+		if ActorCount == 1
+			Debug.SendAnimationEvent(Positions[0], events[0])
+		elseIf ActorCount == 2
+			Debug.SendAnimationEvent(Positions[0], events[0])
+			Debug.SendAnimationEvent(Positions[1], events[1])
+		elseIf ActorCount == 3
+			Debug.SendAnimationEvent(Positions[0], events[0])
+			Debug.SendAnimationEvent(Positions[1], events[1])
+			Debug.SendAnimationEvent(Positions[2], events[2])
+		elseIf ActorCount == 4
+			Debug.SendAnimationEvent(Positions[0], events[0])
+			Debug.SendAnimationEvent(Positions[1], events[1])
+			Debug.SendAnimationEvent(Positions[2], events[2])
+			Debug.SendAnimationEvent(Positions[3], events[3])
+		elseIf ActorCount == 5
+			Debug.SendAnimationEvent(Positions[0], events[0])
+			Debug.SendAnimationEvent(Positions[1], events[1])
+			Debug.SendAnimationEvent(Positions[2], events[2])
+			Debug.SendAnimationEvent(Positions[3], events[3])
+			Debug.SendAnimationEvent(Positions[4], events[4])
+		endIf
+	endFunction
+
+	function GoToStage(int toStage)
+		; Stop looping
+		looping = false
+		UnregisterForUpdate()
+		; Set upcoming stage
+		stagePrev = Stage
+		if toStage < 0
+			toStage = 0
+		endIf
+		Stage = toStage
+		; Start advancement
+		GoToState("Advancing")
+		RegisterForSingleUpdate(0.10)
+	endFunction
+
+	function RealignActors()
+		SyncActors()
+		PlayAnimation()
+		MoveActors()
+	endFunction
+
+	function MoveActors()
+		int i = ActorCount
+		while i
+			i -= 1
+			ActorAlias[i].Snap()
+		endWhile
+	endFunction
+
 endState
-
-;/-----------------------------------------------\;
-;|	Hotkey Functions                             |;
-;\-----------------------------------------------/;
-
-function AdvanceStage(bool backwards = false)
-	if GetState() != "Animating"
-		return ; Don't advance while not looping
-	elseif !backwards
-		GoToStage((Stage + 1))
-	elseIf backwards && Stage > 1
-		GoToStage((Stage - 1))
-	endIf
-endFunction
-
-function ChangeAnimation(bool backwards = false)
-	if Animations.Length == 1
-		return ; Single animation selected, nothing to change to
-	endIf
-	aid = ArrayWrap((aid + SignInt(1, backwards)), Animations.Length)
-	SetAnimation(aid)
-	RealignActors()
-	SendThreadEvent("AnimationChange")
-endFunction
-
-function ChangePositions(bool backwards = false)
-	if ActorCount < 2 || HasCreature
-		return ; Solo/Creature Animation, nobody to swap with
-	endIf
-	; Set direction of swapping
-	int MovedTo = ArrayWrap((AdjustingPosition + SignInt(1, backwards)), ActorCount)
-	; Actors to swap
-	actor adjusting = Positions[AdjustingPosition]
-	actor moved = Positions[MovedTo]
-	; Actor slots
-	sslActorAlias AdjustAlias = ActorAlias(adjusting)
-	sslActorAlias MovedAlias = ActorAlias(moved)
-	; Shuffle
-	actor[] NewPositions = Positions
-	NewPositions[AdjustingPosition] = moved
-	NewPositions[MovedTo] = adjusting
-	Positions = NewPositions
-	; Sync new positions
-	RealignActors()
-	AdjustChange(backwards)
-	SendThreadEvent("PositionChange")
-endFunction
-
-function AdjustForward(bool backwards = false, bool adjuststage = false)
-	float[] offsets = Animation.UpdateForward(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage)
-	sslActorAlias Slot = ActorSlot(AdjustingPosition)
-	Slot.AlignTo(offsets, true)
-endFunction
-
-function AdjustSideways(bool backwards = false, bool adjuststage = false)
-	float[] offsets = Animation.UpdateSide(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage)
-	sslActorAlias Slot = ActorSlot(AdjustingPosition)
-	Slot.AlignTo(offsets, true)
-endFunction
-
-function AdjustUpward(bool backwards = false, bool adjuststage = false)
-	float[] offsets = Animation.UpdateUp(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage)
-	sslActorAlias Slot = ActorSlot(AdjustingPosition)
-	Slot.AlignTo(offsets, true)
-endFunction
-
-function RotateScene(bool backwards = false)
-	AdjustRotation(SignFloat(45, backwards))
-	SyncActors()
-endFunction
-
-function AdjustChange(bool backwards = false)
-	AdjustingPosition = ArrayWrap((AdjustingPosition + SignInt(1, backwards)), ActorCount)
-	Lib.mAdjustChange.Show((AdjustingPosition + 1))
-endFunction
-
-function RestoreOffsets()
-	Animation.RestoreOffsets()
-	RealignActors()
-endFunction
-
-function MoveScene()
-	if !looping
-		return ; Don't attempt when not looping
-	endIf
-	; Stop animation loop
-	looping = false
-	UnregisterForUpdate()
-	; Enable Controls
-	sslActorAlias Slot = ActorAlias(Lib.PlayerRef)
-	Slot.UnlockActor()
-	Slot.StopAnimating(true)
-	Lib.PlayerRef.StopTranslation()
-	; Lock hotkeys and wait 6 seconds
-	Lib.mMoveScene.Show(6)
-	SexLabUtil.Wait(6.0)
-	; Disable Controls
-	Slot.LockActor()
-	; Give player time to settle incase airborne
-	Utility.Wait(1.0)
-	; Recenter on coords to avoid stager + resync animations
-	if !LocateBed(true, 400.0)
-		CenterOnObject(Lib.PlayerRef, true)
-	endIf
-	; Return to animation loop
-	looping = true
-	RegisterForSingleUpdate(0.15)
-endFunction
-
-;/-----------------------------------------------\;
-;|	Actor Manipulation                           |;
-;\-----------------------------------------------/;
-
-function RealignActors()
-	SyncActors()
-	PlayAnimation()
-	MoveActors()
-endFunction
-
-function MoveActors()
-	int i = ActorCount
-	while i
-		i -= 1
-		ActorAlias[i].Snap()
-	endWhile
-endFunction
 
 ;/-----------------------------------------------\;
 ;|	Animation Functions                           |;
@@ -412,9 +418,6 @@ function SetAnimation(int anim = -1)
 	if HasPlayer
 		MiscUtil.PrintConsole("Playing Animation: " + Animation.Name)
 	endIf
-endFunction
-
-function PlayAnimation()
 endFunction
 
 ;/-----------------------------------------------\;
@@ -461,10 +464,6 @@ function Initialize()
 	parent.Initialize()
 endFunction
 
-sslThreadController function PrimeThread()
-	return none
-endFunction
-
 ;/-----------------------------------------------\;
 ;|	Scene Manipulation                           |;
 ;\-----------------------------------------------/;
@@ -483,4 +482,40 @@ function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, fl
 		RealignActors()
 		SendThreadEvent("ActorsRelocated")
 	endIf
+endFunction
+
+;/-----------------------------------------------\;
+;|	Empty state dependent functions              |;
+;\-----------------------------------------------/;
+
+; State Making
+sslThreadController function PrimeThread()
+	return none
+endFunction
+; State Animating
+function PlayAnimation()
+endFunction
+function AdvanceStage(bool backwards = false)
+endFunction
+function ChangeAnimation(bool backwards = false)
+endFunction
+function ChangePositions(bool backwards = false)
+endFunction
+function AdjustForward(bool backwards = false, bool adjuststage = false)
+endFunction
+function AdjustSideways(bool backwards = false, bool adjuststage = false)
+endFunction
+function AdjustUpward(bool backwards = false, bool adjuststage = false)
+endFunction
+function RotateScene(bool backwards = false)
+endFunction
+function AdjustChange(bool backwards = false)
+endFunction
+function RestoreOffsets()
+endFunction
+function MoveScene()
+endFunction
+function RealignActors()
+endFunction
+function MoveActors()
 endFunction
