@@ -52,8 +52,7 @@ bool[] property bStripVictim auto hidden
 bool[] property bStripAggressor auto hidden
 
 ; Local
-bool hkReady
-sslThreadController PlayerController
+
 
 actor[] function MakeActorArray(actor a1 = none, actor a2 = none, actor a3 = none, actor a4 = none, actor a5 = none)
 	actor[] output

@@ -1664,16 +1664,23 @@ endFunction
 function _SetupSystem()
 	SexLab._EnableSystem(false)
 	; Init animations
+	AnimLib._Setup()
 	AnimSlots._Setup()
 	; Init creature animations
 	CreatureAnimSlots._Setup()
 	; Init voices
+	VoiceLib._Setup()
 	VoiceSlots._Setup()
 	; Init expressions
+	ExpressionLib._Setup()
 	ExpressionSlots._Setup()
 	; Init Alias Slots
+	ActorLib._Setup()
 	ActorSlots._Setup()
+	; Init control Library
+	ControlLib._Setup()
 	; Init Thread Controllers
+	ThreadLib._Setup()
 	ThreadSlots._Setup()
 	; Init Sexlab
 	SexLab._Setup()

@@ -21,6 +21,48 @@ sslExpressionSlots property Expressions auto
 ; Misc
 sslActorStats property ActorStats auto
 
+function _Setup()
+	PlayerRef = Game.GetPlayer()
+
+	; Fetch quests and cast to appropiate quests to ensure properties aren't stuck as none or wrong value
+	Quest AnimationQuest = Quest.GetQuest("SexLabQuestAnimationSlots")
+	if AnimationQuest != none
+		AnimLib = AnimationQuest as sslAnimationLibrary
+		Animations = AnimationQuest as sslAnimationSlots
+	endIf
+	Quest CreatureQuest = Quest.GetQuest("SexLabQuestCreatureAnimationSlots")
+	if CreatureQuest != none
+		CreatureAnimations = CreatureQuest as sslCreatureAnimationSlots
+	endIf
+	Quest VoiceQuest = Quest.GetQuest("SexLabQuestVoiceSlots")
+	if VoiceQuest != none
+		VoiceLib = VoiceQuest as sslVoiceLibrary
+		Voices = VoiceQuest as sslVoiceSlots
+	endIf
+	Quest ThreadQuest = Quest.GetQuest("SexLabQuestThreadSlots")
+	if ThreadQuest != none
+		ThreadLib = ThreadQuest as sslThreadLibrary
+		Threads = ThreadQuest as sslThreadSlots
+	endIf
+	Quest ActorQuest = Quest.GetQuest("SexLabQuestActorSlots")
+	if ActorQuest != none
+		ActorLib = ActorQuest as sslActorLibrary
+		Actors = ActorQuest as sslActorSlots
+		ActorStats = ActorQuest as sslActorStats
+	endIf
+	Quest ExpressionQuest = Quest.GetQuest("SexLabQuestExpressionSlots")
+	if ExpressionQuest != none
+		ExpressionLib = ExpressionQuest as sslExpressionLibrary
+		Expressions = ExpressionQuest as sslExpressionSlots
+	endIf
+	Quest ControlQuest = Quest.GetQuest("SexLabQuestControl")
+	if ControlQuest != none
+		ControlLib = ControlQuest as sslControlLibrary
+	endIf
+	Debug.Trace("SexLab --- "+self+" --- "+PlayerRef+" --- \nsslSystemLibrary _Setup() Quests --- \nAnimationQuest: "+AnimationQuest+" --- CreatureQuest: "+CreatureQuest+" --- VoiceQuest: "+VoiceQuest+" --- ThreadQuest: "+ThreadQuest+" --- ActorQuest: "+ActorQuest+" --- ExpressionQuest: "+ExpressionQuest+" --- ControlQuest: "+ControlQuest)
+	Debug.Trace("SexLab --- "+self+" --- "+PlayerRef+" --- \nsslSystemLibrary _Setup() Libraries --- \nAnimLib: "+AnimLib+" --- VoiceLib: "+VoiceLib+" --- ThreadLib: "+ThreadLib+" --- ActorLib: "+ActorLib+" --- ControlLib: "+ControlLib+" --- ExpressionLib: "+ExpressionLib+" --- Animations: "+Animations+" --- CreatureAnimations: "+CreatureAnimations+" --- Voices: "+Voices+" --- Threads: "+Threads+" --- Actors: "+Actors+" --- Expressions: "+Expressions+" --- ActorStats: "+ActorStats)
+endFunction
+
 function _ExportFloat(string name, float value)
 	StorageUtil.FileSetFloatValue("SexLabConfig."+name, value)
 endFunction
