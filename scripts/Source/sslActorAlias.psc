@@ -323,7 +323,7 @@ function SyncThread()
 			if stage > 1
 				VoiceDelay = (VoiceDelay - (stage * 0.8)) + Utility.RandomFloat(-0.3, 0.3)
 			endIf
-			; Min 1.2 delay
+			; Min 1.2 Ddelay
 			if VoiceDelay < 1.2
 				VoiceDelay = 1.2
 			endIf
@@ -445,12 +445,8 @@ state Ready
 	function StartAnimating()
 		if ActorRef != none && Controller != none
 			GoToState("Animating")
-			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
-			; Auto TFC
-			if IsPlayer && Lib.ControlLib.bAutoTFC
-				Lib.ControlLib.EnableFreeCamera(true)
-			endIf
 			SyncThread()
+			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 			RegisterForSingleUpdate(Utility.RandomFloat(0.1, 0.8))
 		endIf
 	endFunction
@@ -561,17 +557,13 @@ state Reset
 	endEvent
 	event OnUpdate()
 		UnregisterForUpdate()
-		; Disable free camera, if in it
-		if IsPlayer
-			Lib.ControlLib.EnableFreeCamera(false)
-		endIf
+		; Reset the actor
+		StopAnimating(Controller.FastEnd)
 		; Reapply cum
 		int cum = Animation.GetCum(position)
 		if !Controller.FastEnd && cum > 0 && Lib.bUseCum && (Lib.bAllowFFCum || Controller.HasCreature || Controller.Males > 0)
 			Lib.ApplyCum(ActorRef, cum)
 		endIf
-		; Reset the actor
-		StopAnimating(Controller.FastEnd)
 		; Non-Creature only
 		if !IsCreature
 			; Clear OpenMouth

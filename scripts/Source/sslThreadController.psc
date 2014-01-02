@@ -94,6 +94,10 @@ state Preparing
 		Stage = 1
 		GoToState("Advancing")
 		RegisterForSingleUpdate(0.10)
+		; Auto TFC
+		if HasPlayer && Lib.ControlLib.bAutoTFC
+			Lib.ControlLib.EnableFreeCamera(true)
+		endIf
 	endEvent
 endState
 
@@ -250,6 +254,10 @@ state Animating
 	endEvent
 	event OnEndState()
 		if !LeadIn && Stage > Animation.StageCount
+			; Disable free camera, if in it
+			if HasPlayer
+				Lib.ControlLib.EnableFreeCamera(false)
+			endIf
 			SendThreadEvent("OrgasmEnd")
 		else
 			SendThreadEvent("StageEnd")
@@ -351,10 +359,7 @@ function MoveScene()
 	Lib.PlayerRef.StopTranslation()
 	; Lock hotkeys and wait 6 seconds
 	Lib.mMoveScene.Show(6)
-	float stopat = Utility.GetCurrentRealTime() + 6.0
-	while stopat > Utility.GetCurrentRealTime()
-		Utility.Wait(0.8)
-	endWhile
+	SexLabUtil.Wait(6.0)
 	; Disable Controls
 	Slot.LockActor()
 	; Give player time to settle incase airborne
