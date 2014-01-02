@@ -859,6 +859,10 @@ int function FileStringListFind(string key, string value) global native
 /;
 
 
+;/ Save all values in file without saving the game.
+/;
+function debug_SaveFile() global native
+
 ;/ Delete all values on an form or globally.
 /;
 function debug_DeleteValues(Form obj) global native
