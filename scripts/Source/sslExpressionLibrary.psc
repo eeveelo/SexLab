@@ -51,11 +51,17 @@ function ApplyPreset(int[] presets, actor ActorRef, bool openmouth = false) glob
 endFunction
 
 function OpenMouth(actor ActorRef) global
+	MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 100)
 	ActorRef.SetExpressionOverride(16, 100)
 endFunction
 
+function CloseMouth(actor ActorRef) global
+	MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 0)
+	ActorRef.ClearExpressionOverride()
+endFunction
+
 bool function IsMouthOpen(actor ActorRef) global
-	return GetExpressionID(ActorRef) == 16 && GetExpressionValue(ActorRef) == 100
+	return (GetExpressionID(ActorRef) == 16 && GetExpressionValue(ActorRef) == 100) || (MfgConsoleFunc.GetPhonemeModifier(ActorRef, 0, 1) == 100)
 endFunction
 
 function ClearMFG(actor ActorRef) global

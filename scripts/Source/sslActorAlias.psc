@@ -567,7 +567,7 @@ state Reset
 		; Non-Creature only
 		if !IsCreature
 			; Clear OpenMouth
-			ActorRef.ClearExpressionOverride()
+			sslExpressionLibrary.CloseMouth(ActorRef)
 			; Clear expression
 			if Expression != none
 				sslExpressionLibrary.ClearMFG(ActorRef)
@@ -645,8 +645,7 @@ function DoExpression()
 	endIf
 	; Perform mouth opening
 	if openmouth
-		ActorRef.SetExpressionOverride(16, 100)
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 100)
+		sslExpressionLibrary.OpenMouth(ActorRef)
 	endIf
 endFunction
 
@@ -774,13 +773,13 @@ function StartAnimating()
 	Debug.TraceStack("SexLab -- ERROR: ActorAlias -- "+ActorName+" -- StratAnimating() called from wrong state, you probably have really bad script lag from a heavily modded game, a slow computer, or something is horribly wrong.")
 endFunction
 function AttachMarker()
-	Debug.TraceStack("SexLab -- ERROR: ActorAlias -- "+ActorName+" -- AttachMarker() called from wrong state, you are either rushing through the animation or something is wrong. This can usually be ignored.")
+	Debug.TraceStack("SexLab -- ERROR: ActorAlias -- "+ActorName+" -- AttachMarker() called from wrong state, you are either rushing through the animation or something is wrong. This can usually be ignored if seen after animation has recently ended.")
 endFunction
 function AlignTo(float[] offsets, bool forceTo = false)
-	Debug.TraceStack("SexLab -- ERROR: ActorAlias -- "+ActorName+" -- AlignTo() called from wrong state, you are either rushing through the animation or something is wrong. This can usually be ignored.")
+	Debug.TraceStack("SexLab -- ERROR: ActorAlias -- "+ActorName+" -- AlignTo() called from wrong state, you are either rushing through the animation or something is wrong. This can usually be ignored if seen after animation has recently ended.")
 endfunction
 function Snap()
-	Debug.TraceStack("SexLab -- ERROR: ActorAlias -- "+ActorName+" -- Snap() called from wrong state, you are either rushing through the animation or something is wrong. This can usually be ignored.")
+	Debug.TraceStack("SexLab -- ERROR: ActorAlias -- "+ActorName+" -- Snap() called from wrong state, you are either rushing through the animation or something is wrong. This can usually be ignored if seen after animation has recently ended.")
 endFunction
 event OnTranslationComplete()
 	Debug.TraceStack("SexLab -- ERROR: ActorAlias -- "+ActorName+" -- OnTranslationComplete() triggered from wrong state, you have another mod translating the actor or are rushing through the animation, or something is wrong. This can usually be ignored.")
