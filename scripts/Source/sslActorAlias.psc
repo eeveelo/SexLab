@@ -283,7 +283,7 @@ function StoreEquipment(form[] equipment)
 	endIf
 endFunction
 
-function SyncThread()
+function SyncThread(bool force = false)
 	if Controller == none || ActorRef == none
 		return
 	endIf
@@ -292,9 +292,9 @@ function SyncThread()
 	int toStage = Controller.Stage
 	sslBaseAnimation toAnimation = Controller.Animation
 	; Update marker postioning
-	AlignTo(toAnimation.GetPositionOffsets(toPosition, toStage))
+	AlignTo(toAnimation.GetPositionOffsets(toPosition, toStage), force)
 	; Update if needed
-	if toPosition != position || toStage != stage || toAnimation != Animation
+	if force || toPosition != position || toStage != stage || toAnimation != Animation
 		; Update thread info
 		position = toPosition
 		stage = toStage
@@ -445,7 +445,7 @@ state Ready
 	function StartAnimating()
 		if ActorRef != none && Controller != none
 			GoToState("Animating")
-			SyncThread()
+			SyncThread(true)
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 			RegisterForSingleUpdate(Utility.RandomFloat(0.1, 0.8))
 		endIf

@@ -224,6 +224,7 @@ state Animating
 		if !LeadIn && Stage > Animation.StageCount
 			; Disable free camera, if in it
 			if HasPlayer
+				; TODO: Investigate if waiting some time after disable fixes CTD issue
 				Lib.ControlLib.EnableFreeCamera(false)
 			endIf
 			SendThreadEvent("OrgasmEnd")
