@@ -36,11 +36,11 @@ endProperty
 ; Functions
 bool function TempToggleFreeCamera(bool condition, string toggledBy)
 	if condition && toggled == "" && InFreeCamera
-		SexLabUtil.EnableFreeCamera(false)
+		MiscUtil.ToggleFreeCamera()
 		toggled = toggledBy
 		return true
 	elseIf condition && toggled == toggledBy && !InFreeCamera
-		SexLabUtil.EnableFreeCamera(true, fAutoSUCSM)
+		MiscUtil.ToggleFreeCamera()
 		toggled = ""
 		return false
 	endIf
@@ -75,12 +75,15 @@ function _HKStart(sslThreadController Controller)
 endFunction
 
 function _HKClear()
-	; Leave TFC
-	SexLabUtil.EnableFreeCamera(false)
 	; Clear hotkeys
 	UnregisterForAllKeys()
 	PlayerController = none
 	hkReady = true
+	; Leave TFC
+	if InFreeCamera
+		MiscUtil.ToggleFreeCamera()
+		SexLabUtil.Wait(2.0)
+	endIf
 	; Keep TFC key enabled
 	RegisterForKey(kToggleFreeCamera)
 endFunction

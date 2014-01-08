@@ -153,8 +153,8 @@ function UnlockActor()
 		return
 	endIf
 	; Disable free camera, if in it
-	if IsPlayer
-		Lib.ControlLib.EnableFreeCamera(false)
+	if IsPlayer && Game.GetCameraState() == 3
+		MiscUtil.ToggleFreeCamera()
 	endIf
 	; Enable movement
 	if IsPlayer
@@ -220,9 +220,9 @@ endFunction
 ;\-----------------------------------------------/;
 
 function StopAnimating(bool quick = false)
-	if IsPlayer
-		; Disable free camera, if in it
-		Lib.ControlLib.EnableFreeCamera(false)
+	; Disable free camera, if in it
+	if IsPlayer && Game.GetCameraState() == 3
+		MiscUtil.ToggleFreeCamera()
 	endIf
 	if IsCreature
 		; Reset creature idle
@@ -533,7 +533,7 @@ state Animating
 	endFunction
 
 	event OnTranslationComplete()
-		Utility.Wait(0.2)
+		Utility.Wait(0.3)
 		Snap()
 	endEvent
 endState

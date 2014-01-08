@@ -719,11 +719,11 @@ endfunction
 ;|	Utility Functions                            |;
 ;\-----------------------------------------------/;
 
-function SyncActors()
+function SyncActors(bool force = false)
 	int i = ActorCount
 	while i
 		i -= 1
-		ActorAlias[i].SyncThread()
+		ActorAlias[i].SyncThread(force)
 	endWhile
 endFunction
 

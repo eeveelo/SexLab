@@ -222,11 +222,6 @@ state Animating
 
 	event OnEndState()
 		if !LeadIn && Stage > Animation.StageCount
-			; Disable free camera, if in it
-			if HasPlayer
-				; TODO: Investigate if waiting some time after disable fixes CTD issue
-				Lib.ControlLib.EnableFreeCamera(false)
-			endIf
 			SendThreadEvent("OrgasmEnd")
 		else
 			SendThreadEvent("StageEnd")
@@ -297,7 +292,7 @@ state Animating
 
 	function RotateScene(bool backwards = false)
 		AdjustRotation(SignFloat(45, backwards))
-		SyncActors()
+		SyncActors(true)
 	endFunction
 
 	function AdjustChange(bool backwards = false)
@@ -383,7 +378,7 @@ state Animating
 	endFunction
 
 	function RealignActors()
-		SyncActors()
+		SyncActors(true)
 		PlayAnimation()
 		MoveActors()
 	endFunction
@@ -431,7 +426,7 @@ function EndAnimation(bool quick = false)
 	; Set fast flag to skip slow ending functions
 	FastEnd = quick
 	Stage = Animation.StageCount
-	; Stop hotkeys to prevent further stage advancing
+	; Stop hotkeys to prevent further stage advancing + Leave TFC
 	if HasPlayer
 		Lib.ControlLib._HKClear()
 	endIf
