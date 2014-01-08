@@ -234,7 +234,7 @@ function ChaurusReverse(string eventName, string id, float argNum, form sender)
 endFunction
 
 function DaedraHugging(string eventName, string id, float argNum, form sender)
-	Name = "(Daedra) Hugging"
+	Name = "(Seeker) Hugging"
 
 	SetSFX(Squishing)
 	AddRace(DLC2SeekerRace)
@@ -258,6 +258,7 @@ function DaedraHugging(string eventName, string id, float argNum, form sender)
 	AddTag("Holding")
 	AddTag("Hugging")
 	AddTag("Daedra")
+	AddTag("Seeking")
 
 	Save()
 endFunction
