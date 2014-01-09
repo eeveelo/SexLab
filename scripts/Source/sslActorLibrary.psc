@@ -26,6 +26,8 @@ FormList property StripList auto
 
 Furniture property BaseMarker auto
 
+Package property DoNothing auto
+
 ; Config Settings
 bool property SOSEnabled auto hidden
 bool property bDisablePlayer auto hidden

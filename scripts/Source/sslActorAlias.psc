@@ -128,6 +128,7 @@ function LockActor()
 	endIf
 	; Start DoNothing package
 	ActorRef.SetFactionRank(Lib.AnimatingFaction, 1)
+	ActorUtil.AddPackageOverride(ActorRef, Lib.DoNothing, 100, 1)
 	ActorRef.EvaluatePackage()
 	; Disable movement
 	if IsPlayer
@@ -169,6 +170,7 @@ function UnlockActor()
 	endIf
 	; Remove from animation faction
 	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
+	ActorUtil.RemovePackageOverride(ActorRef, Lib.DoNothing)
 	ActorRef.EvaluatePackage()
 	; Detach positioning marker
 	ActorRef.StopTranslation()

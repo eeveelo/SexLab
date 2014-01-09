@@ -70,6 +70,8 @@ function _Setup()
 		ActorSlot[i].ClearAlias()
 		ActorSlot[i].TryToClear()
 	endWhile
+	; Make sure package overrides are clear
+	ActorUtil.RemoveAllPackageOverride(Lib.DoNothing)
 	; Rebind Hotkeys
 	Lib.ControlLib._HKClear()
 endFunction
