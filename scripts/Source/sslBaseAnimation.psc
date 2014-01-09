@@ -11,21 +11,22 @@ int content = 0
 
 ; Animation Events
 string[] animations
+float[] timers
 int[] genders
 
-; Data storage
-string[] tags
-form[] races
-float[] timerData
-float[] offsetData ; x, y, z, rotation
-bool[] switchData ; silence, mouth, strapon
-int[] positionData ; gender, cum
-int[] schlongData ; bend
-
-bool waiting
+string[] tags ; Deprecated
 
 ; Storage key
 Quest Storage
+; Storage legend
+; int Key("Positions") = gender, cum
+; int Key("Info") = silent (bool), openmouth (bool), strapon (bool), schlong offset (int)
+; form Key("Creatures") = Valid races for creature animation
+; float Key("Offsets") = forward, side, up, rotate
+; string Key("Tags") = tags applied to animation
+; float Name = forward, side, up, rotate
+
+bool waiting
 
 ; Information
 bool property Registered hidden
@@ -40,7 +41,7 @@ bool property IsSexual hidden
 endProperty
 bool property IsCreature hidden
 	bool function get()
-		return races.Length > 0
+		return StorageUtil.FormListCount(Storage, Key("Creatures")) != 0
 	endFunction
 endProperty
 int property StageCount hidden
@@ -70,6 +71,12 @@ int property Creatures hidden
 endProperty
 form[] property CreatureRaces hidden
 	form[] function get()
+		int i = StorageUtil.FormListCount(Storage, Key("Creatures"))
+		form[] races = sslUtility.FormArray(i)
+		while i
+			i -= 1
+			races[i] = StorageUtil.FormListGet(Storage, Key("Creatures"), i)
+		endWhile
 		return races
 	endFunction
 endProperty
@@ -84,11 +91,6 @@ float[] function GetPositionOffsets(int position, int stage)
 	endIf
 
 	float[] off = new float[4]
-	; if IsCreature
-	; 	off[0] = CalculateForward(position, stage)
-	; else
-	; 	off[0] = AccessOffset(position, stage, 0)
-	; endIf
 	off[0] = CalculateForward(position, stage)
 	off[1] = AccessOffset(position, stage, 1)
 	off[2] = AccessOffset(position, stage, 2)
@@ -131,13 +133,14 @@ int function AddPosition(int gender = 0, int addCum = -1)
 		return -1
 	endIf
 	_WaitLock()
+	; Update F/M/C gender tag
 	RemoveTag(GetGendersTag())
 	genders[gender] = (genders[gender] + 1)
 	AddTag(GetGendersTag())
-	int[] position = new int[2]
-	position[0] = gender
-	position[1] = addCum
-	positionData = sslUtility.MergeIntArray(position, positionData)
+	; Save position data
+	StorageUtil.IntListAdd(Storage, Key("Positions"), gender)
+	StorageUtil.IntListAdd(Storage, Key("Positions"), addCum)
+	; Update actor count
 	int aid = actors
 	actors += 1
 	waiting = false
@@ -149,7 +152,6 @@ int function AddPositionStage(int position, string animation, float forward = 0.
 		return -1
 	endIf
 	_WaitLock()
-
 	; Add animation event
 	animations = sslUtility.PushString(animation, animations)
 	; Figure out what stage this is
@@ -160,25 +162,16 @@ int function AddPositionStage(int position, string animation, float forward = 0.
 	else
 		stage = ( animations.Length - (position * stages) )
 	endIf
-
 	; Set offsets
-	float[] offset = new float[4]
-	offset[0] = forward
-	offset[1] = side
-	offset[2] = up
-	offset[3] = rotate
-	offsetData = sslUtility.MergeFloatArray(offset, offsetData)
-
+	StorageUtil.FloatListAdd(Storage, Key("Offsets"), forward)
+	StorageUtil.FloatListAdd(Storage, Key("Offsets"), side)
+	StorageUtil.FloatListAdd(Storage, Key("Offsets"), up)
+	StorageUtil.FloatListAdd(Storage, Key("Offsets"), rotate)
 	; Set switch information
-	bool[] switch = new bool[3]
-	switch[0] = silent
-	switch[1] = openMouth
-	switch[2] = strapon && MalePosition(position)
-	switchData = sslUtility.MergeBoolArray(switch, switchData)
-
-	; Set Schlongs of Skyrim bend
-	schlongData = sslUtility.PushInt(sos, schlongData)
-
+	StorageUtil.IntListAdd(Storage, Key("Info"), (silent as int))
+	StorageUtil.IntListAdd(Storage, Key("Info"), (openMouth as int))
+	StorageUtil.IntListAdd(Storage, Key("Info"), ((strapon && MalePosition(position)) as int))
+	StorageUtil.IntListAdd(Storage, Key("Info"), sos)
 	waiting = false
 	return stage
 endFunction
@@ -189,23 +182,17 @@ function SetStageTimer(int stage, float timer)
 		_Log("Unknown animation stage, '"+stage+"' given.", "SetStageTimer")
 		return
 	endIf
-	; Initial timer array if needed
-	if timerData.Length != stages
-		timerData = sslUtility.FloatArray(stages)
+	; Initialize timer array if needed
+	if timers.Length != stages
+		timers = sslUtility.FloatArray(stages)
 	endIf
-	; Zeroindex the stage
-	stage -= 1
 	; Set timer
-	timerData[stage] = timer
+	timers[(stage - 1)] = timer
 endFunction
 
 ;/-----------------------------------------------\;
 ;|	Data Accessors                               |;
 ;\-----------------------------------------------/;
-
-string function KeyStr(int i1, int i2)
-	return Name+"["+i1+"-"+i2+"]"
-endFunction
 
 bool function Exists(string method, int position, int stage = -99)
 	if position > actors || position < 0
@@ -223,49 +210,27 @@ int function DataIndex(int slots, int position, int stage, int slot)
 endFunction
 
 float function AccessOffset(int position, int stage, int slot)
-	return offsetData[DataIndex(4, position, stage, slot)] + GetAdjustment(position, stage, slot)
+	int i = DataIndex(4, position, stage, slot)
+	return StorageUtil.FloatListGet(Storage, Key("Offsets"), i) + StorageUtil.FloatListGet(Storage, Name, i)
 endFunction
 
 bool function AccessSwitch(int position, int stage, int slot)
-	return switchData[DataIndex(3, position, stage, slot)]
+	return StorageUtil.IntListGet(Storage, Key("Info"), DataIndex(4, position, stage, slot)) as bool
 endFunction
 
 int function AccessPosition(int position, int slot)
-	return positionData[( (position * 2) + slot )]
-endFunction
-
-bool[] function GetSwitchSlot(int stage, int slot)
-	bool[] switch = sslUtility.BoolArray(actors)
-	int i = 0
-	while i < actors
-		switch[i] = AccessSwitch(i, stage, slot)
-		i += 1
-	endWhile
-	return switch
-endFunction
-
-int[] function GetSchlongSlot(int stage)
-	int[] schlongs = sslUtility.IntArray(actors)
-	int i = 0
-	while i < actors
-		schlongs[i] = GetSchlong(i, stage)
-		i += 1
-	endWhile
-	return schlongs
+	return StorageUtil.IntListGet(Storage, Key("Positions"), ((position * 2) + slot))
 endFunction
 
 int function GetSchlong(int position, int stage)
-	return schlongData[DataIndex(1, position, stage, 0)]
+	return StorageUtil.IntListGet(Storage, Key("Info"), DataIndex(4, position, stage, 3))
 endFunction
 
 float function GetStageTimer(int stage)
-	if stage > timerData.Length || stage < 1 || stage > stages
+	if stage > timers.Length || stage < 1 || stage > stages
 		return 0.0 ; There is no valid stage timer, skip the rest
 	endIf
-	; Zero index
-	stage -= 1
-	; Return timer
-	return timerData[stage]
+	return timers[(stage - 1)]
 endFunction
 
 ;/-----------------------------------------------\;
@@ -273,14 +238,14 @@ endFunction
 ;\-----------------------------------------------/;
 
 function SetAdjustment(int position, int stage, int slot, float to)
-	if StorageUtil.FloatListCount(Storage, Name) < ((stages * actors) * 4)
-		int len = offsetData.Length
-		int i = StorageUtil.FloatListCount(Storage, Name)
-		while i < len
+	; Init adjustments
+	if StorageUtil.FloatListCount(Storage, Name) < 1
+		int i = StorageUtil.FloatListCount(Storage, Key("Offsets"))
+		while i > StorageUtil.FloatListCount(Storage, Name)
 			StorageUtil.FloatListAdd(Storage, Name, 0.0)
-			i += 1
 		endWhile
 	endIf
+	; Set adjustment at index
 	StorageUtil.FloatListSet(Storage, Name, DataIndex(4, position, stage, slot), to)
 endFunction
 
@@ -377,10 +342,6 @@ endFunction
 ;|	Animation Info                               |;
 ;\-----------------------------------------------/;
 
-bool[] function GetSilence(int stage)
-	return GetSwitchSlot(stage, 0)
-endFunction
-
 bool function IsSilent(int position, int stage)
 	return AccessSwitch(position, stage, 0)
 endFunction
@@ -458,30 +419,18 @@ endFunction
 ;\-----------------------------------------------/;
 
 string function GetGendersTag()
-	string tag
-	int i = Females
-	while i
-		i -= 1
-		tag += "F"
-	endWhile
-	i = Males
-	while i
-		i -= 1
-		tag += "M"
-	endWhile
-	i = Creatures
-	while i
-		i -= 1
-		tag += "C"
-	endWhile
-	return tag
+	return sslAnimationLibrary.GetGenderTag(Females, Males, Creatures)
+endFunction
+
+bool function HasTag(string tag)
+	return tag != "" && StorageUtil.StringListFind(Storage, Key("Tags"), tag) != -1
 endFunction
 
 bool function AddTag(string tag)
 	if HasTag(tag)
 		return false
 	endIf
-	tags = sslUtility.PushString(tag,tags)
+	StorageUtil.StringListAdd(Storage, Key("Tags"), tags)
 	return true
 endFunction
 
@@ -489,20 +438,8 @@ bool function RemoveTag(string tag)
 	if !HasTag(tag)
 		return false
 	endIf
-	string[] newTags
-	int i = 0
-	while i < tags.Length
-		if tags[i] != tag
-			newTags = sslUtility.PushString(tags[i], newTags)
-		endIf
-		i += 1
-	endWhile
-	tags = newTags
+	StorageUtil.StringListRemove(Storage, Key("Tags"), tag)
 	return true
-endFunction
-
-bool function HasTag(string tag)
-	return tag != "" && tags.Find(tag) != -1
 endFunction
 
 bool function ToggleTag(string tag)
@@ -539,18 +476,20 @@ endFunction
 ;\-----------------------------------------------/;
 
 bool function HasRace(Race creature)
-	return races.Length != 0 && races.Find(creature) != -1
+	return StorageUtil.FormListFind(Storage, Key("Creatures"), creature) != -1
 endFunction
 
 function AddRace(Race creature)
-	if !HasRace(creature)
-		races = sslUtility.PushForm(creature, races)
-	endIf
+	StorageUtil.FormListAdd(Storage, Key("Creatures"), creature, false)
 endFunction
 
 ;/-----------------------------------------------\;
 ;|	System Use                                   |;
 ;\-----------------------------------------------/;
+
+string function Key(string type = "")
+	return Name+"."+type
+endFunction
 
 function _WaitLock()
 	while waiting
@@ -569,6 +508,14 @@ function _Log(string log, string method, string type = "NOTICE")
 endFunction
 
 function Initialize()
+	Storage = GetOwningQuest()
+
+	StorageUtil.FloatListClear(Storage, Key("Offsets"))
+	StorageUtil.IntListClear(Storage, Key("Positions"))
+	StorageUtil.IntListClear(Storage, Key("Info"))
+	StorageUtil.StringListClear(Storage, Key("Tags"))
+	StorageUtil.FormListClear(Storage, Key("Creatures"))
+
 	Name = ""
 	Enabled = true
 	waiting = false
@@ -577,29 +524,11 @@ function Initialize()
 	SFX = 0
 	content = 0
 
-	float[] floatDel1
-	timerData = floatDel1
-	float[] floatDel2
-	offsetData = floatDel2
-
 	genders = new int[3]
-	int[] intDel1
-	schlongData = intDel1
-	int[] intDel2
-	positionData = intDel2
-
-	bool[] switchDel
-	switchData = switchDel
-
+	float[] floatDel1
+	timers = floatDel1
 	string[] stringDel1
-	tags = stringDel1
-	string[] stringDel2
-	animations = stringDel2
-
-	form[] formDel
-	races = formDel
-
-	Storage = GetOwningQuest()
+	animations = stringDel1
 endFunction
 function _Export()
 	string exportkey ="SexLabConfig.Animation["+Name+"]."
@@ -642,3 +571,19 @@ function _Import()
 	StorageUtil.FileUnsetIntValue(exportkey+"LeadIn")
 	StorageUtil.FileFloatListClear(exportkey+"Adjustments")
 endFunction
+; function _Update140()
+; 	int old = StorageUtil.FloatListCount(Storage, Name)
+; 	if old < 1
+; 		return ; Already updated
+; 	endIf
+; 	; Clear adjustments list, just in case, should already be empty
+; 	StorageUtil.FloatListClear(Storage, Name)
+; 	; Set adjustments list from old list
+; 	int i
+; 	while i < old
+; 		StorageUtil.FloatListAdd(Storage, Name, StorageUtil.FloatListGet(Storage, Name, i))
+; 		i += 1
+; 	endWhile
+; 	; Clear old list
+; 	StorageUtil.FloatListClear(Storage, Name)
+; endFunction

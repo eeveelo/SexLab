@@ -92,7 +92,6 @@ int function PlayHot(actor a)
 	return PlaySound(a, Hot, Lib.SexLabMoanHot)
 endFunction
 
-
 ;/-----------------------------------------------\;
 ;|	Tag Functions                                |;
 ;\-----------------------------------------------/;

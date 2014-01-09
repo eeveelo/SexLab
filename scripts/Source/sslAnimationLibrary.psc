@@ -9,7 +9,6 @@ sslAnimationSlots property Slots auto
 bool property bRestrictAggressive auto hidden
 bool property bAllowCreatures auto hidden
 
-
 string function MakeGenderTag(actor[] Positions)
 	string tag
 	int[] genders = ActorLib.GenderCount(Positions)
@@ -23,6 +22,23 @@ string function MakeGenderTag(actor[] Positions)
 	endWhile
 	while genders[2]
 		genders[2] = (genders[2] - 1)
+		tag += "C"
+	endWhile
+	return tag
+endFunction
+
+string function GetGenderTag(int females = 0, int males = 0, int creatures = 0) global
+	string tag
+	while females
+		females -= 1
+		tag += "F"
+	endWhile
+	while males
+		males -= 1
+		tag += "M"
+	endWhile
+	while creatures
+		creatures -= 1
 		tag += "C"
 	endWhile
 	return tag
