@@ -2,8 +2,6 @@ scriptname sslCreatureAnimationSlots extends sslAnimationSlots
 
 sslCreatureAnimationDefaults property CreatureDefaults auto
 
-FormList property CreatureTypes auto
-
 sslBaseAnimation[] function GetByRace(int actors, Race creature)
 	bool[] valid = sslUtility.BoolArray(Slotted)
 	int i = Slotted
@@ -17,7 +15,7 @@ sslBaseAnimation[] function GetByRace(int actors, Race creature)
 endFunction
 
 bool function HasAnimation(Race creature, Race creature2 = none)
-	if CreatureTypes.HasForm(creature)
+	if HasRace(creature)
 		int i = Slotted
 		while i
 			i -= 1
@@ -30,13 +28,11 @@ bool function HasAnimation(Race creature, Race creature2 = none)
 endFunction
 
 bool function HasRace(Race creature)
-	return CreatureTypes.HasForm(creature)
+	return StorageUtil.FormListFind(self, "CreatureTypes", creature) != -1
 endFunction
 
 function AddRace(Race creature)
-	if !CreatureTypes.HasForm(creature)
-		CreatureTypes.AddForm(creature)
-	endIf
+	StorageUtil.FormListAdd(self, "CreatureTypes", creature, false)
 endFunction
 
 function _Setup()
@@ -55,5 +51,5 @@ endFunction
 
 function Initialize()
 	parent.Initialize()
-	CreatureTypes.Revert()
+	StorageUtil.FormListClear(self, "CreatureTypes")
 endFunction

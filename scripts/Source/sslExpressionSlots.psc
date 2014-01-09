@@ -10,9 +10,7 @@ sslBaseExpression[] property Expression hidden
 	endFunction
 endProperty
 
-string[] registry
 int property Slotted auto hidden
-
 bool property FreeSlots hidden
 	bool function get()
 		return slotted < 40
@@ -93,7 +91,7 @@ int function FindByName(string findName)
 endFunction
 
 int function FindByRegistrar(string registrar)
-	return registry.Find(registrar)
+	return StorageUtil.StringListFind(self, "Registry", registrar)
 endFunction
 
 int function Find(sslBaseExpression findExpression)
@@ -109,14 +107,14 @@ sslBaseExpression function GetFree()
 endFunction
 
 int function Register(sslBaseExpression Claiming, string registrar)
-	registry = sslUtility.PushString(registrar, registry)
-	slotted = registry.Length
+	StorageUtil.StringListAdd(self, "Registry", registrar, false)
+	Slotted = StorageUtil.StringListCount(self, "Registry")
 	Claiming.Initialize()
 	return Slots.Find(Claiming)
 endFunction
 
 int function GetCount()
-	return registry.Length
+	return StorageUtil.StringListCount(self, "Registry")
 endFunction
 
 ;/-----------------------------------------------\;
@@ -138,7 +136,6 @@ function _Setup()
 endFunction
 
 function Initialize()
-	string[] init
-	registry = init
 	Slotted = 0
+	StorageUtil.StringListClear(self, "Registry")
 endFunction
