@@ -14,8 +14,6 @@ string[] animations
 float[] timers
 int[] genders
 
-string[] tags ; Deprecated
-
 ; Storage key
 Quest Storage
 ; Storage legend
@@ -430,7 +428,7 @@ bool function AddTag(string tag)
 	if HasTag(tag)
 		return false
 	endIf
-	StorageUtil.StringListAdd(Storage, Key("Tags"), tags)
+	StorageUtil.StringListAdd(Storage, Key("Tags"), tag, false)
 	return true
 endFunction
 
@@ -438,17 +436,12 @@ bool function RemoveTag(string tag)
 	if !HasTag(tag)
 		return false
 	endIf
-	StorageUtil.StringListRemove(Storage, Key("Tags"), tag)
+	StorageUtil.StringListRemove(Storage, Key("Tags"), tag, true)
 	return true
 endFunction
 
 bool function ToggleTag(string tag)
-	if HasTag(tag)
-		RemoveTag(tag)
-	else
-		AddTag(tag)
-	endIf
-	return HasTag(tag)
+	return (RemoveTag(tag) || AddTag(tag)) && HasTag(tag)
 endFunction
 
 bool function CheckTags(string[] find, bool requireAll = true, bool suppress = false)
@@ -571,19 +564,35 @@ function _Import()
 	StorageUtil.FileUnsetIntValue(exportkey+"LeadIn")
 	StorageUtil.FileFloatListClear(exportkey+"Adjustments")
 endFunction
-; function _Update140()
-; 	int old = StorageUtil.FloatListCount(Storage, Name)
-; 	if old < 1
-; 		return ; Already updated
-; 	endIf
-; 	; Clear adjustments list, just in case, should already be empty
-; 	StorageUtil.FloatListClear(Storage, Name)
-; 	; Set adjustments list from old list
-; 	int i
-; 	while i < old
-; 		StorageUtil.FloatListAdd(Storage, Name, StorageUtil.FloatListGet(Storage, Name, i))
-; 		i += 1
-; 	endWhile
-; 	; Clear old list
-; 	StorageUtil.FloatListClear(Storage, Name)
-; endFunction
+
+string[] tags
+string[] function _DeprecatedTags()
+	return tags
+endFunction
+
+function PrintTags()
+	int i = StorageUtil.StringListCount(Storage, Key("Tags"))
+	string[] output = sslUtility.StringArray(i)
+	while i
+		i -= 1
+		output[i] = StorageUtil.StringListGet(Storage, Key("Tags"), i)
+	endWhile
+	Debug.Trace(Name+" Tags["+StorageUtil.StringListCount(Storage, Key("Tags"))+"]: "+output)
+endFunction
+
+function _Update140()
+	; int old = StorageUtil.FloatListCount(Storage, Name)
+	; if old < 1
+	; 	return ; Already updated
+	; endIf
+	; ; Clear adjustments list, just in case, should already be empty
+	; StorageUtil.FloatListClear(Storage, Name)
+	; ; Set adjustments list from old list
+	; int i
+	; while i < old
+	; 	StorageUtil.FloatListAdd(Storage, Name, StorageUtil.FloatListGet(Storage, Name, i))
+	; 	i += 1
+	; endWhile
+	; ; Clear old list
+	; StorageUtil.FloatListClear(Storage, Name)
+endFunction

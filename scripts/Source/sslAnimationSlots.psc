@@ -256,6 +256,21 @@ function _Setup()
 	Debug.Notification("$SSL_NotifyAnimationInstall")
 endFunction
 
+function _Upgrade140()
+	int i = Slotted
+	while i
+		i -= 1
+		sslBaseAnimation Anim = Slots[i]
+		; Update tags
+		string[] tags = Anim._DeprecatedTags()
+		int n = tags.Length
+		while n
+			n -= 1
+			Anim.AddTag(tags[n])
+		endWhile
+	endWhile
+endFunction
+
 function Initialize()
 	Slotted = 0
 	StorageUtil.StringListClear(self, "Registry")

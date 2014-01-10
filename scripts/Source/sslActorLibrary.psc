@@ -443,7 +443,7 @@ function UnequipStrapon(actor a)
 endFunction
 
 bool function IsActorActive(actor a)
-	return Threads.FindActorController(a) != -1
+	return StorageUtil.FormListFind(self, "Registry", a) != -1
 endFunction
 
 int function ValidateActor(actor a)

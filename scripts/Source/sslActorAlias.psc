@@ -90,11 +90,15 @@ endProperty
 
 bool function SetAlias(actor prospect, sslThreadController ThreadView)
 	if prospect == none || GetReference() != prospect || (Lib.ValidateActor(prospect) != 1 && ThreadView.GetState() == "Making")
+		ClearAlias()
 		return false ; Failed to set prospective actor into alias
 	endIf
 	Initialize()
+	; Register actor as active
+	StorageUtil.FormListAdd(Lib, "Registry", prospect, false)
+	; Init actor alias information
+	Debug.Trace("-- SexLab ActorAlias -- Thread["+Controller.tid+"] Slotting '"+ActorName+"' into alias -- "+self)
 	Controller = ThreadView
-	; Init actor information
 	ActorRef = GetReference() as actor
 	BaseRef = ActorRef.GetLeveledActorBase()
 	ActorName = BaseRef.GetName()
@@ -103,13 +107,13 @@ bool function SetAlias(actor prospect, sslThreadController ThreadView)
 	IsCreature = gender == 2
 	IsPlayer = ActorRef == Lib.PlayerRef
 	IsVictim = ActorRef == Controller.VictimRef
-	Debug.Trace("-- SexLab ActorAlias -- Thread["+Controller.tid+"] Slotting '"+ActorName+"' into alias -- "+self)
 	return true
 endFunction
 
 function ClearAlias()
 	TryToClear()
 	TryToReset()
+	StorageUtil.FormListRemove(Lib, "Registry", ActorRef, true)
 	UnlockActor()
 	Initialize()
 endFunction

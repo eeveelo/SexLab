@@ -5,7 +5,16 @@ import SexLabUtil
 import MiscUtil
 import ActorUtil
 
+string function Key(string type)
+	return "Missionary."+type
+endFunction
+
 event OnEffectStart(actor TargetRef, actor CasterRef)
+	StorageUtil.FormListAdd(SexLab.ActorLib, "Registry", TargetRef, false)
+	Debug.TraceAndBox("[1] Tags: "+StorageUtil.FormListCount(SexLab.ActorLib, "Registry")+" HasActor: "+StorageUtil.FormListFind(SexLab.ActorLib, "Registry", TargetRef))
+	Wait(5.0)
+	StorageUtil.FormListRemove(SexLab.ActorLib, "Registry", TargetRef, true)
+	Debug.TraceAndBox("[2] Tags: "+StorageUtil.FormListCount(SexLab.ActorLib, "Registry")+" HasActor: "+StorageUtil.FormListFind(SexLab.ActorLib, "Registry", TargetRef))
 
 	Dispel()
 endEvent

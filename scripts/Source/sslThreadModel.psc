@@ -205,9 +205,6 @@ state Making
 		if ActorCount >= 5
 			_Log("Failed to add actor' "+position.GetLeveledActorBase().GetName()+"' -- thread has reached actor limit", "AddActor", "FATAL")
 			return -1
-		elseIf Lib.Threads.FindActorController(position) != -1
-			_Log("Failed to add actor' "+position.GetLeveledActorBase().GetName()+"' -- already slotted by a thread", "AddActor", "FATAL")
-			return -1
 		elseIf Lib.ActorLib.ValidateActor(position) != 1
 			_Log("Failed to add actor' "+position.GetLeveledActorBase().GetName()+"' -- failed validation check", "AddActor", "FATAL")
 			return -1
