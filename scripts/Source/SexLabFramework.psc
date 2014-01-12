@@ -206,15 +206,15 @@ bool function IsForbidden(actor a)
 endFunction
 
 function TreatAsMale(actor a)
-	ActorLib.TreatAsMale(a)
+	sslActorLibrary.TreatAsMale(a)
 endFunction
 
 function TreatAsFemale(actor a)
-	ActorLib.TreatAsFemale(a)
+	sslActorLibrary.TreatAsFemale(a)
 endFunction
 
 function ClearForcedGender(actor a)
-	ActorLib.ClearForcedGender(a)
+	sslActorLibrary.ClearForcedGender(a)
 endFunction
 
 int function GetGender(actor a)

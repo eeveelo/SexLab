@@ -522,34 +522,27 @@ endFunction
 ;|	Gender Functions                             |;
 ;\-----------------------------------------------/;
 
-function TreatAsMale(actor a)
-	a.AddToFaction(GenderFaction)
-	a.SetFactionRank(GenderFaction, 0)
+function TreatAsMale(actor a) global
+	StorageUtil.SetIntValue(a, "SexLab.ForcedGender", 0)
 endFunction
 
-function TreatAsFemale(actor a)
-	a.AddToFaction(GenderFaction)
-	a.SetFactionRank(GenderFaction, 1)
+function TreatAsFemale(actor a) global
+	StorageUtil.SetIntValue(a, "SexLab.ForcedGender", 1)
 endFunction
 
-function ClearForcedGender(actor a)
-	a.RemoveFromFaction(GenderFaction)
+function ClearForcedGender(actor a) global
+	StorageUtil.UnsetIntValue(a, "SexLab.ForcedGender")
 endFunction
 
 int function GetGender(actor a)
-	if a.IsInFaction(GenderFaction)
-		if a.GetFactionRank(GenderFaction) == 0 ; || a.HasKeywordString("SexLabTreatMale")
-			return 0 ; Male
-		elseif a.GetFactionRank(GenderFaction) == 1 ; || a.HasKeywordString("SexLabTreatFemale")
-			return 1 ; Female
-		endIf
+	if StorageUtil.HasIntValue(a, "SexLab.ForcedGender")
+		return StorageUtil.GetIntValue(a, "SexLab.ForcedGender")
 	endIf
 	ActorBase Base = a.GetLeveledActorBase()
-	if CreatureAnimations.HasRace(Base.GetRace())
+	if StorageUtil.GetIntValue(Base.GetRace(), "SexLab.HasRace") == 1
 		return 2 ; Creature
-	else
-		return Base.GetSex() ; Default
 	endIf
+	return Base.GetSex() ; Default
 endFunction
 
 int[] function GenderCount(actor[] pos)

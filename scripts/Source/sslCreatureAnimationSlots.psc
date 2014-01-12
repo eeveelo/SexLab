@@ -28,10 +28,11 @@ bool function HasAnimation(Race creature, Race creature2 = none)
 endFunction
 
 bool function HasRace(Race creature)
-	return StorageUtil.FormListFind(self, "CreatureTypes", creature) != -1
+	return StorageUtil.GetIntValue(creature, "SexLab.HasRace") == 1
 endFunction
 
 function AddRace(Race creature)
+	StorageUtil.SetIntValue(creature, "SexLab.HasRace", 1)
 	StorageUtil.FormListAdd(self, "CreatureTypes", creature, false)
 endFunction
 
