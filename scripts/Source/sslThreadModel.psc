@@ -801,15 +801,23 @@ function _Log(string log, string method, string type = "ERROR")
 	endIf
 endFunction
 
+string function Key(string type = "")
+	return _ThreadID+"."+type
+endFunction
+
 ;/-----------------------------------------------\;
 ;|	Tagging Functions                            |;
 ;\-----------------------------------------------/;
+
+bool function HasTag(string tag)
+	return tag != "" && StorageUtil.StringListFind(Lib, Key("Tags"), tag) != -1
+endFunction
 
 bool function AddTag(string tag)
 	if HasTag(tag)
 		return false
 	endIf
-	tag = sslUtility.PushString(tag, tags)
+	StorageUtil.StringListAdd(Lib, Key("Tags"), tag, false)
 	return true
 endFunction
 
@@ -817,29 +825,12 @@ bool function RemoveTag(string tag)
 	if !HasTag(tag)
 		return false
 	endIf
-	string[] newTags
-	int i = 0
-	while i < tags.Length
-		if tags[i] != tag
-			newTags = sslUtility.PushString(tags[i], newTags)
-		endIf
-		i += 1
-	endWhile
-	tags = newTags
+	StorageUtil.StringListRemove(Lib, Key("Tags"), tag, true)
 	return true
 endFunction
 
-bool function HasTag(string tag)
-	return tags.Find(tag) != -1
-endFunction
-
 bool function ToggleTag(string tag)
-	if HasTag(tag)
-		RemoveTag(tag)
-	else
-		AddTag(tag)
-	endIf
-	return HasTag(tag)
+	return (RemoveTag(tag) || AddTag(tag)) && HasTag(tag)
 endFunction
 
 bool function CheckTags(string[] find, bool requireAll = true)
@@ -888,11 +879,11 @@ function Initialize()
 	ClearActors()
 	; Set states
 	Active = false
+	; Clear tags
+	StorageUtil.StringListClear(Lib, Key("Tags"))
 	; Empty Strings
 	hook = ""
 	Logging = "trace"
-	string[] sDel
-	tags = sDel
 	; Empty actors
 	actor[] acDel
 	Positions = acDel

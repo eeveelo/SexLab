@@ -256,6 +256,18 @@ function _Setup()
 	Debug.Notification("$SSL_NotifyAnimationInstall")
 endFunction
 
+function Initialize()
+	Slotted = 0
+	StorageUtil.StringListClear(self, "Registry")
+endFunction
+
+function AddRace(Race creature)
+endFunction
+bool function HasRace(Race creature)
+	return false
+endFunction
+
+; DEPRECATED: to be removed in 1.5
 function _Upgrade140()
 	int i = Slotted
 	while i
@@ -269,15 +281,4 @@ function _Upgrade140()
 			Anim.AddTag(tags[n])
 		endWhile
 	endWhile
-endFunction
-
-function Initialize()
-	Slotted = 0
-	StorageUtil.StringListClear(self, "Registry")
-endFunction
-
-function AddRace(Race creature)
-endFunction
-bool function HasRace(Race creature)
-	return false
 endFunction

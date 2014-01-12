@@ -12,7 +12,10 @@ bool property Registered hidden
 	endFunction
 endProperty
 
-string[] tags
+; Storage key
+Quest Storage
+; Storage legend
+; string Key("Tags") = tags applied to animation
 
 int[] male1
 int[] male2
@@ -154,11 +157,15 @@ endFunction
 ;|	Tag Functions                                |;
 ;\-----------------------------------------------/;
 
+bool function HasTag(string tag)
+	return tag != "" && StorageUtil.StringListFind(Storage, Key("Tags"), tag) != -1
+endFunction
+
 bool function AddTag(string tag)
 	if HasTag(tag)
 		return false
 	endIf
-	tags = sslUtility.PushString(tag,tags)
+	StorageUtil.StringListAdd(Storage, Key("Tags"), tag, false)
 	return true
 endFunction
 
@@ -166,34 +173,21 @@ bool function RemoveTag(string tag)
 	if !HasTag(tag)
 		return false
 	endIf
-	string[] newTags
-	int i = 0
-	while i < tags.Length
-		if tags[i] != tag
-			newTags = sslUtility.PushString(tags[i], newTags)
-		endIf
-		i += 1
-	endWhile
-	tags = newTags
+	StorageUtil.StringListRemove(Storage, Key("Tags"), tag, true)
 	return true
 endFunction
 
-bool function HasTag(string tag)
-	return tags.Find(tag) != -1
-endFunction
-
 bool function ToggleTag(string tag)
-	if HasTag(tag)
-		RemoveTag(tag)
-	else
-		AddTag(tag)
-	endIf
-	return HasTag(tag)
+	return (RemoveTag(tag) || AddTag(tag)) && HasTag(tag)
 endFunction
 
 ;/-----------------------------------------------\;
 ;|	System Use                                   |;
 ;\-----------------------------------------------/;
+
+string function Key(string type = "")
+	return Name+"."+type
+endFunction
 
 int function CalcPhase(int strength, bool female)
 	; Count number of phases gender has
@@ -213,9 +207,10 @@ int function CalcPhase(int strength, bool female)
 endFunction
 
 function Initialize()
+	Storage = GetOwningQuest()
+	StorageUtil.StringListClear(Storage, Key("Tags"))
+
 	Name = ""
-	string[] tagsDel
-	tags = tagsDel
 	int[] intDel
 	male1 = intDel
 	male2 = intDel
@@ -254,4 +249,10 @@ function _Import()
 	StorageUtil.FileUnsetIntValue(exportkey+"Consensual")
 	StorageUtil.FileUnsetIntValue(exportkey+"Victim")
 	StorageUtil.FileUnsetIntValue(exportkey+"Aggressor")
+endFunction
+
+; DEPRECATED: to be removed in 1.5
+string[] tags
+string[] function _DeprecatedTags()
+	return tags
 endFunction

@@ -565,34 +565,8 @@ function _Import()
 	StorageUtil.FileFloatListClear(exportkey+"Adjustments")
 endFunction
 
+; DEPRECATED: to be removed in 1.5
 string[] tags
 string[] function _DeprecatedTags()
 	return tags
-endFunction
-
-function PrintTags()
-	int i = StorageUtil.StringListCount(Storage, Key("Tags"))
-	string[] output = sslUtility.StringArray(i)
-	while i
-		i -= 1
-		output[i] = StorageUtil.StringListGet(Storage, Key("Tags"), i)
-	endWhile
-	Debug.Trace(Name+" Tags["+StorageUtil.StringListCount(Storage, Key("Tags"))+"]: "+output)
-endFunction
-
-function _Update140()
-	; int old = StorageUtil.FloatListCount(Storage, Name)
-	; if old < 1
-	; 	return ; Already updated
-	; endIf
-	; ; Clear adjustments list, just in case, should already be empty
-	; StorageUtil.FloatListClear(Storage, Name)
-	; ; Set adjustments list from old list
-	; int i
-	; while i < old
-	; 	StorageUtil.FloatListAdd(Storage, Name, StorageUtil.FloatListGet(Storage, Name, i))
-	; 	i += 1
-	; endWhile
-	; ; Clear old list
-	; StorageUtil.FloatListClear(Storage, Name)
 endFunction
