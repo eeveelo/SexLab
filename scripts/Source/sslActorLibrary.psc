@@ -56,6 +56,10 @@ bool[] property bStripAggressor auto hidden
 ; Local
 
 
+;/-----------------------------------------------\;
+;|	Actor Handling/Effect Functions              |;
+;\-----------------------------------------------/;
+
 actor[] function MakeActorArray(actor a1 = none, actor a2 = none, actor a3 = none, actor a4 = none, actor a5 = none)
 	actor[] output
 	if a1 != none
@@ -92,21 +96,24 @@ actor function FindAvailableActor(ObjectReference centerRef, float radius = 5000
 	while attempts
 		attempts -= 1
 		; Get random actor
-		actor foundRef = Game.FindRandomActorFromRef(centerRef, radius)
+		actor FoundRef = Game.FindRandomActorFromRef(centerRef, radius)
+		if FoundRef == none
+			return none ; None means no actor in radius, give up now
+		endIf
 		; Validate actor
 		int gender
-		bool valid = foundRef != none && supress.Find(foundRef) == -1
+		bool valid = supress.Find(FoundRef) == -1
 		if valid
 			; Get their gender if we need it
-			gender = GetGender(foundRef)
+			gender = GetGender(FoundRef)
 			; Supress from future validation attempts
-			supress[attempts] = foundRef
+			supress[attempts] = FoundRef
 		endIf
 		valid = valid && (findGender != 2 && gender != 2) ; Supress creatures
 		valid = valid && (findGender == -1 || findGender == gender) ; Validate gender
-		valid = valid && IsValidActor(foundRef) ; Actor Validate
+		valid = valid && IsValidActor(FoundRef) ; Actor Validate
 		if valid
-			return foundRef ; Actor passed validation, end loop/function
+			return FoundRef ; Actor passed validation, end loop/function
 		endIf
 	endWhile
 	; No actor found in attempts
@@ -145,7 +152,9 @@ actor[] function FindAvailablePartners(actor[] Positions, int total, int males =
 			FoundRef = FindAvailableActor(Positions[0], radius, findGender)
 		endIf
 		; Validate/Add them
-		if FoundRef != none && Positions.Find(FoundRef) == -1
+		if FoundRef == none
+			return Positions ; None means no actor in radius, give up now
+		elseIf Positions.Find(FoundRef) == -1
 			; Add actor
 			Positions = sslUtility.PushActor(FoundRef, Positions)
 			; Update search counts
@@ -193,9 +202,6 @@ actor[] function SortActors(actor[] Positions, bool femaleFirst = true)
 endFunction
 
 function ApplyCum(actor a, int cumID)
-	if cumID < 1 || cumID > 7
-		return ; Invalid ID
-	endIf
 	; Apply passed id
 	AddCum(a, (cumID == 1 || cumID == 4 || cumID == 5 || cumID == 7), (cumID == 2 || cumID == 4 || cumID == 6 || cumID == 7), (cumID == 3 || cumID == 5 || cumID == 6 || cumID == 7))
 endFunction
@@ -237,6 +243,10 @@ function ClearCum(actor a)
 	a.DispelSpell(CumOralAnalSpell)
 	a.DispelSpell(CumVaginalOralAnalSpell)
 endFunction
+
+;/-----------------------------------------------\;
+;|	Equipment Functions                          |;
+;\-----------------------------------------------/;
 
 form[] function StripActor(actor a, actor victim = none, bool animate = true, bool leadIn = false)
 	bool[] strip = GetStrip(a, victim, leadIn)
@@ -442,6 +452,10 @@ function UnequipStrapon(actor a)
 	endIf
 endFunction
 
+;/-----------------------------------------------\;
+;|	Validation Functions                         |;
+;\-----------------------------------------------/;
+
 bool function IsActorActive(actor a)
 	return StorageUtil.FormListFind(self, "Registry", a) != -1
 endFunction
@@ -504,6 +518,10 @@ bool function IsForbidden(actor a)
 	return a.IsInFaction(ForbiddenFaction) || a.HasKeyWordString("SexLabForbid")
 endFunction
 
+;/-----------------------------------------------\;
+;|	Gender Functions                             |;
+;\-----------------------------------------------/;
+
 function TreatAsMale(actor a)
 	a.AddToFaction(GenderFaction)
 	a.SetFactionRank(GenderFaction, 0)
@@ -559,6 +577,10 @@ int function CreatureCount(actor[] pos)
 	int[] gender = GenderCount(pos)
 	return gender[2]
 endFunction
+
+;/-----------------------------------------------\;
+;|	System Use Only                              |;
+;\-----------------------------------------------/;
 
 armor function LoadStrapon(string esp, int id)
 	armor strapon = Game.GetFormFromFile(id, esp) as armor
