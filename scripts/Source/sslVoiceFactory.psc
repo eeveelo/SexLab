@@ -22,7 +22,7 @@ int function RegisterVoice(string registrar)
 	endIf
 	; Wait for factory to be free
 	while Voice != none
-		Utility.Wait(0.10)
+		Utility.WaitMenuMode(0.10)
 	endWhile
 	; Get free animation slot
 	Voice = Slots.GetFree()

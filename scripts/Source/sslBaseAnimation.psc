@@ -504,7 +504,7 @@ endFunction
 
 function _WaitLock()
 	while waiting
-		Utility.Wait(0.1)
+		Utility.WaitMenuMode(0.10)
 	endWhile
 	waiting = true
 endFunction

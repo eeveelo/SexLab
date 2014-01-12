@@ -37,7 +37,7 @@ int function RegisterAnimation(string registrar)
 	endIf
 	; Wait for factory to be free
 	while Animation != none
-		Utility.Wait(0.10)
+		Utility.WaitMenuMode(0.10)
 	endWhile
 	; Get free animation slot
 	Animation = Slots.GetFree()

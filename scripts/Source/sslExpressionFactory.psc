@@ -26,7 +26,7 @@ int function RegisterExpression(string registrar)
 	endIf
 	; Wait for factory to be free
 	while Registering != none
-		Utility.Wait(0.10)
+		Utility.WaitMenuMode(0.10)
 	endWhile
 	; Get free animation slot
 	Registering = Slots.GetFree()
