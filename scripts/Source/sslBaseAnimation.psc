@@ -87,38 +87,54 @@ float[] function GetPositionOffsets(int position, int stage)
 	if !Exists("GetPositionOffsets", position, stage)
 		return none
 	endIf
-
 	float[] off = new float[4]
-	off[0] = CalculateForward(position, stage)
+	off[0] = GetForward(position, stage)
 	off[1] = AccessOffset(position, stage, 1)
 	off[2] = AccessOffset(position, stage, 2)
 	off[3] = AccessOffset(position, stage, 3)
 	return off
 endFunction
 
-float function CalculateForward(int position, int stage)
-	; raw offset
-	float offset = AccessOffset(position, stage, 0)
+float function GetForward(int position, int stage)
 	; Just return single actors raw forward offset
 	if actors == 1
-		return offset
+		return AccessOffset(position, stage, 0)
 	endIf
-	; Find highest/lowest offset denomination
-	float adjust
-	int i = 0
-	while i < actors
-		float pos = AccessOffset(i, stage, 0)
-		if pos > adjust || -pos > adjust
-			adjust = pos
+	; Check for stored forward calculation
+	return StorageUtil.FloatListGet(Storage, Key("Forwards"), DataIndex(1, position, stage, 0))
+endFunction
+
+float function CacheForwards(int stage, int returnPosition = 0)
+	; Get forward offsets of all positions + find highest/lowest position
+	float adjuster
+	float[] forwards = new float[5]
+	int i = actors
+	while i
+		i -= 1
+		forwards[i] = AccessOffset(i, stage, 0)
+		if Math.Abs(forwards[i]) > Math.Abs(adjuster)
+			adjuster = forwards[i]
 		endIf
-		i += 1
 	endWhile
-	; Return offset adjusted by half of highest denomination
-	if adjust < 0
-		return ( offset + ( adjust * -0.5 ) )
-	else
-		return ( offset - ( adjust * 0.5 ) )
-	endIf
+	; Get signed half of highest/lowest offset
+	adjuster *= -0.5
+	; Cache forward offset adjusted by half of highest denomination
+	i = actors
+	while i
+		i -= 1
+		forwards[i] = (forwards[i] + adjuster)
+		StorageUtil.FloatListSet(Storage, Key("Forwards"), DataIndex(1, i, stage, 0), forwards[i])
+	endWhile
+	; Return position forward
+	return forwards[i]
+endFunction
+
+function CacheAllForwards()
+	int stage = stages
+	while stage
+		CacheForwards(stage)
+		stage -= 1
+	endWhile
 endFunction
 
 ;/-----------------------------------------------\;
@@ -165,6 +181,8 @@ int function AddPositionStage(int position, string animation, float forward = 0.
 	StorageUtil.FloatListAdd(Storage, Key("Offsets"), side)
 	StorageUtil.FloatListAdd(Storage, Key("Offsets"), up)
 	StorageUtil.FloatListAdd(Storage, Key("Offsets"), rotate)
+	; Init forward cache
+	StorageUtil.FloatListAdd(Storage, Key("Forwards"), 0.0)
 	; Set switch information
 	StorageUtil.IntListAdd(Storage, Key("Info"), (silent as int))
 	StorageUtil.IntListAdd(Storage, Key("Info"), (openMouth as int))
@@ -504,6 +522,7 @@ function Initialize()
 	Storage = GetOwningQuest()
 
 	StorageUtil.FloatListClear(Storage, Key("Offsets"))
+	StorageUtil.FloatListClear(Storage, Key("Forwards"))
 	StorageUtil.IntListClear(Storage, Key("Positions"))
 	StorageUtil.IntListClear(Storage, Key("Info"))
 	StorageUtil.StringListClear(Storage, Key("Tags"))
