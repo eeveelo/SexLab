@@ -139,3 +139,19 @@ function Initialize()
 	Slotted = 0
 	StorageUtil.StringListClear(self, "Registry")
 endFunction
+
+; DEPRECATED: to be removed in 1.5
+function _Upgrade140()
+	int i = Slotted
+	while i
+		i -= 1
+		sslBaseExpression Exp = Slots[i]
+		; Update tags
+		string[] tags = Exp._DeprecatedTags()
+		int n = tags.Length
+		while n
+			n -= 1
+			Exp.AddTag(tags[n])
+		endWhile
+	endWhile
+endFunction

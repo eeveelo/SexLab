@@ -22,6 +22,7 @@ event OnVersionUpdate(int version)
 		if CurrentVersion < 13600
 			AnimLib.Animations._Upgrade140()
 			AnimLib.CreatureAnimations._Upgrade140()
+			ExpressionLib.Expressions._Upgrade140()
 		endIf
 		; Export from v1.20+
 		if CurrentVersion > 12000
