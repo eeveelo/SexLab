@@ -10,12 +10,11 @@ string function Key(string type)
 endFunction
 
 event OnEffectStart(actor TargetRef, actor CasterRef)
-	StorageUtil.FormListAdd(SexLab.ActorLib, "Registry", TargetRef, false)
-	Debug.TraceAndBox("[1] Tags: "+StorageUtil.FormListCount(SexLab.ActorLib, "Registry")+" HasActor: "+StorageUtil.FormListFind(SexLab.ActorLib, "Registry", TargetRef))
-	Wait(5.0)
-	StorageUtil.FormListRemove(SexLab.ActorLib, "Registry", TargetRef, true)
-	Debug.TraceAndBox("[2] Tags: "+StorageUtil.FormListCount(SexLab.ActorLib, "Registry")+" HasActor: "+StorageUtil.FormListFind(SexLab.ActorLib, "Registry", TargetRef))
-
+	sslBaseExpression Expression = SexLab.PickExpression(TargetRef, none)
+	Expression.ApplyTo(TargetRef, 65, true, false)
+	Wait(10.0)
+	Sexlab.ClearMFG(TargetRef)
+	Debug.TraceAndBox("Cleared")
 	Dispel()
 endEvent
 

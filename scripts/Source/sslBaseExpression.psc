@@ -1,3 +1,4 @@
+
 scriptname sslBaseExpression extends ReferenceAlias
 
 sslExpressionLibrary property Lib auto
@@ -36,44 +37,30 @@ int[] female5
 function ApplyTo(actor ActorRef, int strength = 50, bool isFemale = true, bool openmouth = false)
 	if ActorRef == none
 		return ; Nobody to express and doesn't update in free camera!
-	elseIf Game.GetCameraState() == 3
-		; Apply open mouth and nothing else
-		if openmouth
-			OpenMouth(ActorRef)
-		endIf
-		return ; MFG doesn't update in free camera, so don't bother with anything else
 	endIf
-	; Clear existing mfg from actor
-	ClearMFG(ActorRef)
-	; Get phase presets, [n + 0] = mode, [n + 1] = id, [n + 2] = value
-	int[] presets = GetPhase(CalcPhase(strength, isFemale), isFemale)
-	; Apply phase presets to actor
-	int i = presets.Length
-	while i
-		i -= 3
-		if presets[i] != 2 && presets[i] != 0
-			MfgConsoleFunc.SetPhonemeModifier(ActorRef, presets[i], presets[(i + 1)], presets[(i + 2)])
-		elseIf !openmouth
-			ActorRef.SetExpressionOverride(presets[(i + 1)], presets[(i + 2)])
-		endIf
+	int[] preset = PickPreset(strength, isFemale)
+	int i
+	while i < 16
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 1, i, preset[i])
+		i += 1
 	endWhile
+	int p
+	while i < 31
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, preset[i])
+		p += 1
+		i += 1
+	endWhile
+	debug.traceandbox(Name+ " Expression: "+preset[31]+" - "+preset[32])
 	; Apply open mouth
 	if openmouth
 		OpenMouth(ActorRef)
+	else
+		ActorRef.SetExpressionOverride(preset[31], preset[32])
 	endIf
 endFunction
 
 int[] function PickPreset(int strength, bool isFemale)
 	return GetPhase(CalcPhase(strength, isFemale), isFemale)
-endFunction
-
-int[] function GetPreset(int[] presets, int n)
-	int slot = ( n * 3 )
-	int[] output = new int[3]
-	output[0] = presets[slot]
-	output[1] = presets[slot + 1]
-	output[2] = presets[slot + 2]
-	return output
 endFunction
 
 int[] function GetPhase(int phase, bool female)
@@ -87,8 +74,10 @@ int[] function GetPhase(int phase, bool female)
 			return female3
 		elseIf phase == 4
 			return female4
-		else
+		elseIf phase == 5
 			return female5
+		else
+			return female1
 		endIf
 	; Male presets
 	else
@@ -100,18 +89,30 @@ int[] function GetPhase(int phase, bool female)
 			return male3
 		elseIf phase == 4
 			return male4
-		else
+		elseIf phase == 5
 			return male5
+		else
+			return male1
 		endIf
 	endIf
 endFunction
-
 
 ;/-----------------------------------------------\;
 ;|	Editing Functions                            |;
 ;\-----------------------------------------------/;
 
-function SetPhase(int phase, bool female, int[] presets)
+function SetIndex(int phase, bool female, int index, int value)
+	if phase < 1 || phase > 5
+		return ; Invalid phase
+	endIf
+	; Get phase preset
+	int[] presets = GetPhase(phase, female)
+	; Init if empty
+	if presets.Length != 33
+		presets = new int[33]
+	endIf
+	; Set the given index
+	presets[index] = value
 	; Female presets
 	if female
 		if phase == 1
@@ -141,16 +142,17 @@ function SetPhase(int phase, bool female, int[] presets)
 	endIf
 endFunction
 
-function AddPreset(int phase, bool female, int mode, int id, int value)
-	if phase < 1 || phase > 5
-		return ; Invalid phase
-	endIf
-	int[] presets = sslUtility.IncreaseInt(3, GetPhase(phase, female))
-	int index = (presets.Length - 3)
-	presets[index] = mode
-	presets[index + 1] = id
-	presets[index + 2] = value
-	SetPhase(phase, female, presets)
+function AddModifier(int phase, bool female, int id, int value)
+	SetIndex(phase, female, id, value)
+endFunction
+
+function AddPhoneme(int phase, bool female, int id, int value)
+	SetIndex(phase, female, (id + 15), value)
+endFunction
+
+function AddExpression(int phase, bool female, int id, int value)
+	SetIndex(phase, female, 31, id)
+	SetIndex(phase, female, 32, value)
 endFunction
 
 ;/-----------------------------------------------\;
@@ -185,6 +187,13 @@ endFunction
 ;|	System Use                                   |;
 ;\-----------------------------------------------/;
 
+function InitList(string sKey, int phase, int slots)
+	phase *= slots
+	while phase > StorageUtil.IntListCount(Storage, sKey)
+		StorageUtil.IntListAdd(Storage, sKey, 0)
+	endWhile
+endFunction
+
 string function Key(string type = "")
 	return Name+"."+type
 endFunction
@@ -196,6 +205,7 @@ int function CalcPhase(int strength, bool female)
 	count += ((female && female3.Length != 0) || (!female && male3.Length != 0)) as int
 	count += ((female && female4.Length != 0) || (!female && male4.Length != 0)) as int
 	count += ((female && female5.Length != 0) || (!female && male5.Length != 0)) as int
+	debug.traceandbox(Name+"\n Strength = "+strength+"\n Count: "+count+"\n Phase: "+Math.Floor(((strength as float) / 100.0) * count))
 	; Return clamped phase
 	if strength > 100
 		return count
@@ -203,7 +213,11 @@ int function CalcPhase(int strength, bool female)
 		return 1
 	endIf
 	; Return calculated phase
-	return Math.Floor(((strength as float) / 100.0) * count)
+	int phase =  Math.Floor((((strength as float) / 100.0) + 0.50) * count)
+	if phase > count
+		return count
+	endIf
+	return phase
 endFunction
 
 function Initialize()
@@ -211,18 +225,29 @@ function Initialize()
 	StorageUtil.StringListClear(Storage, Key("Tags"))
 
 	Name = ""
-	int[] intDel
-	male1 = intDel
-	male2 = intDel
-	male3 = intDel
-	male4 = intDel
-	male5 = intDel
-	female1 = intDel
-	female2 = intDel
-	female3 = intDel
-	female4 = intDel
-	female5 = intDel
+	int[] intDel1
+	male1 = intDel1
+	int[] intDel2
+	male2 = intDel2
+	int[] intDel3
+	male3 = intDel3
+	int[] intDel4
+	male4 = intDel4
+	int[] intDel5
+	male5 = intDel5
+
+	int[] intDel6
+	female1 = intDel6
+	int[] intDel7
+	female2 = intDel7
+	int[] intDel8
+	female3 = intDel8
+	int[] intDel9
+	female4 = intDel9
+	int[] intDel10
+	female5 = intDel10
 endFunction
+
 function _Export()
 	string exportkey ="SexLabConfig.Expressions["+Name+"]."
 	StorageUtil.FileSetIntValue(exportkey+"Consensual", HasTag("Consensual") as int)

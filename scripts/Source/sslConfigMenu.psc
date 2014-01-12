@@ -54,6 +54,8 @@ event OnGameReload()
 	_CheckSystem()
 	ThreadSlots._StopAll()
 	ActorLib.ValidActorList.RemoveAddedForm(PlayerRef)
+	; Debug
+	ExpressionSlots._Setup()
 endEvent
 
 ; Framework

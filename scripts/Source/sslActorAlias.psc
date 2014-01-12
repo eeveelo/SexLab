@@ -624,34 +624,15 @@ function DoExpression()
 	if IsCreature
 		return
 	endIf
-	; Check if open mouth should override phoneme/expression
-	bool openmouth = Animation.UseOpenMouth(Position, Stage)
 	; Pick preset from expression and skip if empty in free camera
-	if Expression != none && Game.GetCameraState() != 3
+	if Expression != none
 		int expStrength
 		if IsVictim
 			expStrength = GetPain()
 		else
 			expStrength = GetEnjoyment()
 		endIf
-		; Clear existing Phoneme and Modifiers
-		ActorRef.ClearExpressionOverride()
-		MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
-		; Apply presets to actor, skip if empty
-		int[] presets = Expression.PickPreset(expStrength, IsFemale)
-		int i = presets.Length
-		while i
-			i -= 3
-			if presets[i] == 1 || presets[i] == 0
-				MfgConsoleFunc.SetPhonemeModifier(ActorRef, presets[i], presets[(i + 1)], presets[(i + 2)])
-			elseIf presets[i] == 2 && !openmouth
-				ActorRef.SetExpressionOverride(presets[(i + 1)], presets[(i + 2)])
-			endIf
-		endWhile
-	endIf
-	; Perform mouth opening
-	if openmouth
-		sslExpressionLibrary.OpenMouth(ActorRef)
+		Expression.ApplyTo(ActorRef, expStrength, IsFemale, Animation.UseOpenMouth(Position, Stage))
 	endIf
 endFunction
 

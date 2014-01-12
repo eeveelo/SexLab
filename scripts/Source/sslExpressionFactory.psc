@@ -54,7 +54,25 @@ bool function AddTag(string tag)
 endFunction
 
 function AddPreset(int phase, bool isFemale, int mode, int id, int value)
-	Registering.AddPreset(phase, isFemale, mode, id, value)
+	if mode == Expression
+		AddExpression(phase, isFemale, id, value)
+	elseif mode == Modifier
+		AddModifier(phase, isFemale, id, value)
+	elseif mode == Phoneme
+		AddPhoneme(phase, isFemale, id, value)
+	endIf
+endFunction
+
+function AddExpression(int phase, bool isFemale, int id, int value)
+	Registering.AddExpression(phase, isFemale, id, value)
+endFunction
+
+function AddModifier(int phase, bool isFemale, int id, int value)
+	Registering.AddModifier(phase, isFemale, id, value)
+endFunction
+
+function AddPhoneme(int phase, bool isFemale, int id, int value)
+	Registering.AddPhoneme(phase, isFemale, id, value)
 endFunction
 
 string property Name hidden
