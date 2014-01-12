@@ -1,7 +1,12 @@
 scriptname ActorUtil Hidden
 
 ;/
-	Packages.
+	Override packages of actors.
+
+	These overrides persist through save games. If you override package on same actor
+	more than once then the package with highest priority will run, if multiple
+	overrides have same priority then last added package will run. Priority ranges
+	from 0 to 100 with 100 being highest priority.
 /;
 
 ; This will add a package to actor that will override its normal behavior. Using this function overrides all packages added from any other location.

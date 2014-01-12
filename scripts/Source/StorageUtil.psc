@@ -536,6 +536,55 @@ int function FormListFind(Form obj, string key, Form value) global native
 
 
 
+;/
+	Export / import specific data to and from file.
+/;
+
+;/ Import data from a separate JSON formated file.
+
+   fileName: what file to import data from. This file is located in "Data/SKSE/Plugins/StorageUtilData/x.txt" where x is fileName.
+   restrictKey: only import data with this name, for example "myValue" would only import variables with this name.
+   restrictType: mask of which data to import. Set -1 to import all types of data.
+		1 - int
+		2 - float
+		4 - string
+		8 - form
+		16 - intlist
+		32 - floatlist
+		64 - stringlist
+		128 - formlist
+	restrictForm: only import data saved on this form.
+	restrictGlobal: only import globally saved data. restrictForm is ignored if this is set to true.
+	keyContains: normally values will be imported if restrictKey is empty or equals the name of saved value. If this is true
+	             then saved value must contain restrictKey instead of equal. example "myvalue_a", "myvalue_b", "myvalue_c" will
+				 all be imported if keyContains is true and restrictKey is "myvalue_"
+/;
+bool function ImportFile(string fileName, string restrictKey = "", int restrictType = -1, Form restrictForm = none, bool restrictGlobal = false, bool keyContains = false) global native
+
+
+;/ Export data to a separate JSON formated file.
+
+   fileName: what file to export data to. This file is located in "Data/SKSE/Plugins/StorageUtilData/x.txt" where x is fileName.
+   restrictKey: only export data with this name, for example "myValue" would only export variables with this name.
+   restrictType: mask of which data to export. Set -1 to export all types of data.
+		1 - int
+		2 - float
+		4 - string
+		8 - form
+		16 - intlist
+		32 - floatlist
+		64 - stringlist
+		128 - formlist
+	restrictForm: only export data saved on this form.
+	restrictGlobal: only export globally saved data. restrictForm is ignored if this is set to true.
+	keyContains: normally values will be exported if restrictKey is empty or equals the name of saved value. If this is true
+	             then saved value must contain restrictKey instead of equal. example "myvalue_a", "myvalue_b", "myvalue_c" will
+				 all be exported if keyContains is true and restrictKey is "myvalue_"
+	append: if this is false then the file is cleared before exporting. If true then we only modify or add data.
+/;
+bool function ExportFile(string fileName, string restrictKey = "", int restrictType = -1, Form restrictForm = none, bool restrictGlobal = false, bool keyContains = false, bool append = true) global native
+
+
 
 
 ;/
