@@ -51,6 +51,10 @@ function EnableFreeCamera(bool enabling = true)
 	SexLabUtil.EnableFreeCamera(enabling, fAutoSUCSM)
 endFunction
 
+;/-----------------------------------------------\;
+;|	System Use Only                              |;
+;\-----------------------------------------------/;
+
 function _HKStart(sslThreadController Controller)
 	if Controller != none
 		; Register hotkeys

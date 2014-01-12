@@ -51,7 +51,6 @@ endEvent
 
 event OnGameReload()
 	parent.OnGameReload()
-	_CheckSystem()
 	ThreadSlots._StopAll()
 	ActorLib.ValidActorList.RemoveAddedForm(PlayerRef)
 	; Debug
@@ -1672,6 +1671,7 @@ function FindStrapons()
 endFunction
 
 function _SetupSystem()
+	_CheckSystem()
 	SexLab._EnableSystem(false)
 	; Init animations
 	AnimLib._Setup()

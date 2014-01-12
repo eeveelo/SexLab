@@ -18,7 +18,6 @@ int property Expression = 2 autoreadonly hidden
 int[] BasePresetMale
 int[] BasePresetFemale
 
-
 function MFG(actor ActorRef, int mode, int id, int value) global
 	if mode == 2
 		ActorRef.SetExpressionOverride(id, value)
@@ -88,6 +87,10 @@ sslBaseExpression function PickExpression(actor ActorRef, actor VictimRef = none
 	; Return random consensual
 	return Slots.RandomByTag("Consensual")
 endFunction
+
+;/-----------------------------------------------\;
+;|	System Use Only                              |;
+;\-----------------------------------------------/;
 
 function _Defaults()
 endFunction

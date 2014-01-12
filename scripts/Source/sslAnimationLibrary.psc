@@ -52,6 +52,10 @@ bool function AllowedCreatureCombination(Race creature, Race creature2)
 	return bAllowCreatures && CreatureAnimations.HasAnimation(creature, creature2)
 endFunction
 
+;/-----------------------------------------------\;
+;|	System Use Only                              |;
+;\-----------------------------------------------/;
+
 function _Defaults()
 	bRestrictAggressive = true
 	bAllowCreatures = false

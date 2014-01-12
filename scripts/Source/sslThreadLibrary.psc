@@ -112,6 +112,10 @@ actor[] function SortCreatures(actor[] Positions, sslBaseAnimation Animation)
 	return Positions
 endFunction
 
+;/-----------------------------------------------\;
+;|	System Use Only                              |;
+;\-----------------------------------------------/;
+
 function _Defaults()
 	; Config
 	fSFXDelay = 4.0

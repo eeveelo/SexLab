@@ -60,6 +60,10 @@ sslBaseVoice function GetVoice(actor a)
 	return none
 endFunction
 
+;/-----------------------------------------------\;
+;|	System Use Only                              |;
+;\-----------------------------------------------/;
+
 function _Defaults()
 	sPlayerVoice = "$SSL_Random"
 	bNPCSaveVoice = true
