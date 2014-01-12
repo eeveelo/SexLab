@@ -50,7 +50,6 @@ function ApplyTo(actor ActorRef, int strength = 50, bool isFemale = true, bool o
 		p += 1
 		i += 1
 	endWhile
-	debug.traceandbox(Name+ " Expression: "+preset[31]+" - "+preset[32])
 	; Apply open mouth
 	if openmouth
 		OpenMouth(ActorRef)
@@ -205,7 +204,6 @@ int function CalcPhase(int strength, bool female)
 	count += ((female && female3.Length != 0) || (!female && male3.Length != 0)) as int
 	count += ((female && female4.Length != 0) || (!female && male4.Length != 0)) as int
 	count += ((female && female5.Length != 0) || (!female && male5.Length != 0)) as int
-	debug.traceandbox(Name+"\n Strength = "+strength+"\n Count: "+count+"\n Phase: "+Math.Floor(((strength as float) / 100.0) * count))
 	; Return clamped phase
 	if strength > 100
 		return count
