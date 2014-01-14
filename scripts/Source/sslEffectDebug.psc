@@ -10,11 +10,31 @@ string function Key(string type)
 endFunction
 
 event OnEffectStart(actor TargetRef, actor CasterRef)
-	sslBaseExpression Expression = SexLab.PickExpression(TargetRef, none)
-	Expression.ApplyTo(TargetRef, 65, true, false)
-	Wait(10.0)
-	Sexlab.ClearMFG(TargetRef)
-	Debug.TraceAndBox("Cleared")
+	sslActorLibrary Lib = SexLab.ActorLib
+
+	Lib.StripActorStorage(TargetRef, Lib.GetStrip(TargetRef, none, false), true)
+	Wait(6.0)
+	Lib.UnstripActorStorage(TargetRef)
+	Debug.TraceAndBox("Normal Done")
+
+	Lib.StripActorStorage(TargetRef, Lib.GetStrip(TargetRef, none, true), true)
+	Wait(6.0)
+	Lib.UnstripActorStorage(TargetRef)
+	Debug.TraceAndBox("LeadIn Done")
+
+	Lib.StripActorStorage(TargetRef, Lib.GetStrip(TargetRef, none, true), true)
+	Wait(4.0)
+	Lib.StripActorStorage(TargetRef, Lib.GetStrip(TargetRef, none, false), false)
+	Wait(5.0)
+	Lib.UnstripActorStorage(TargetRef)
+	Debug.TraceAndBox("LeadIn->Normal Done")
+
+	Lib.StripActorStorage(TargetRef, Lib.GetStrip(TargetRef, TargetRef, false), false)
+	Wait(6.0)
+	Lib.UnstripActorStorage(TargetRef)
+	Debug.TraceAndBox("Victim Done")
+
+
 	Dispel()
 endEvent
 

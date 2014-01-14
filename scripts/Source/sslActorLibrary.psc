@@ -248,9 +248,18 @@ endFunction
 ;|	Equipment Functions                          |;
 ;\-----------------------------------------------/;
 
+function StripAnimation(actor a)
+	; Determine gender and animation switch
+	int gender = a.GetLeveledActorBase().GetSex()
+	if gender == 1
+		Debug.SendAnimationEvent(a, "Arrok_FemaleUndress")
+	else
+		Debug.SendAnimationEvent(a, "Arrok_MaleUndress")
+	endIf
+endFunction
+
 form[] function StripActor(actor a, actor victim = none, bool animate = true, bool leadIn = false)
-	bool[] strip = GetStrip(a, victim, leadIn)
-	return StripSlots(a, strip, animate)
+	return StripSlots(a, GetStrip(a, victim, leadIn), animate)
 endFunction
 
 bool[] function GetStrip(actor a, actor victim, bool leadin)
@@ -271,13 +280,10 @@ bool[] function GetStrip(actor a, actor victim, bool leadin)
 endFunction
 
 bool function IsStrippable(form item)
-	if item == none
-		return false
-	endIf
 	; Check previous validations
-	if StripList.HasForm(item)
+	if item != none && StorageUtil.FormListFind(none, "SexLab.StripList", item) != -1
 		return true
-	elseIf NoStripList.HasForm(item)
+	elseIf item == none || StorageUtil.FormListFind(none, "SexLab.NoStripList", item) != -1
 		return false
 	endIf
 	; Check keywords
@@ -286,12 +292,44 @@ bool function IsStrippable(form item)
 		i -= 1
 		string kw = item.GetNthKeyword(i).GetString()
 		if StringUtil.Find(kw, "NoStrip") != -1 || StringUtil.Find(kw, "Bound") != -1
-			NoStripList.AddForm(item)
+			StorageUtil.FormListAdd(none, "SexLab.NoStripList", item, true)
 			return false
 		endIf
 	endWhile
-	StripList.AddForm(item)
+	StorageUtil.FormListAdd(none, "SexLab.StripList", item, true) != -1
 	return true
+endFunction
+
+form function StripSlot(actor a, int slotmask, bool store = false)
+	form item = a.GetWornForm(slotmask)
+	if item != none && IsStrippable(item)
+		a.UnequipItem(item, false, true)
+		if store
+			StorageUtil.FormListAdd(a, "SexLab.StrippedItems", item)
+		endIf
+		return item
+	endIf
+	return none
+endFunction
+
+form function StripWeapon(actor a, bool rightHand = true, bool store = false)
+	Weapon item = a.GetEquippedWeapon(rightHand)
+	if item != none && IsStrippable(item)
+		int type = a.GetEquippedItemType((rightHand as int))
+		if type == 5 || type == 6 || type == 7
+			a.AddItem(DummyWeapon, 1, true)
+			a.EquipItem(DummyWeapon, false, true)
+			a.UnEquipItem(DummyWeapon, false, true)
+			a.RemoveItem(DummyWeapon, 1, true)
+		else
+			a.UnequipItem(item, false, true)
+		endIf
+		if store
+			StorageUtil.FormListAdd(a, "SexLab.StrippedItems", item)
+		endIf
+		return item
+	endIf
+	return none
 endFunction
 
 form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool allowNudesuit = true)
@@ -300,59 +338,36 @@ form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool all
 	endIf
 	; TFC prevents clothing from updating, leave it
 	bool toggled = ControlLib.TempToggleFreeCamera(a == PlayerRef, "StripSlots")
-	; Determine gender and animation switch
-	int gender = a.GetLeveledActorBase().GetSex()
+	; Start stripping animation
 	if animate
-		if gender == 1
-			Debug.SendAnimationEvent(a, "Arrok_FemaleUndress")
-		else
-			Debug.SendAnimationEvent(a, "Arrok_MaleUndress")
-		endIf
+		StripAnimation(a)
 	endIf
 	; Item storage
 	form[] items = new form[34]
 	; Strip weapon
 	if strip[32]
-		Weapon eWeap = a.GetEquippedWeapon(true)
-		if IsStrippable(eWeap)
-			int type = a.GetEquippedItemType(1)
-			if type == 5 || type == 6 || type == 7
-				a.AddItem(DummyWeapon, 1, true)
-				a.EquipItem(DummyWeapon, false, true)
-				a.UnEquipItem(DummyWeapon, false, true)
-				a.RemoveItem(DummyWeapon, 1, true)
-			else
-				a.UnequipItem(eWeap, false, true)
-			endIf
-			items[32] = eWeap
-		endIf
-		eWeap = a.GetEquippedWeapon(false)
-		if IsStrippable(eWeap)
-			a.UnequipItem(eWeap, false, true)
-			items[33] = eWeap
-			if animate
-				Utility.Wait(0.15)
-			endIf
+		items[32] = StripWeapon(a, true)
+		items[33] = StripWeapon(a, false)
+		if animate && (items[32] != none || items[32] != none)
+			Utility.Wait(0.15)
 		endIf
 	endIf
 	; Strip armors
 	int i
 	while i < 32
 		if strip[i]
-			form item = a.GetWornForm(Armor.GetMaskForSlot(i + 30))
-			if IsStrippable(item)
-				a.UnequipItem(item, false, true)
-				items[i] = item
-				if animate
-					Utility.Wait(0.15)
-				endIf
+			items[i] = StripSlot(a, Armor.GetMaskForSlot(i + 30))
+			if animate && items[i] != none
+				Utility.Wait(0.15)
 			endIf
 		endIf
 		i += 1
 	endWhile
 	; Apply Nudesuit
 	if strip[2] && allowNudesuit
+		int gender = a.GetLeveledActorBase().GetSex()
 		if (gender == 0 && bUseMaleNudeSuit) || (gender == 1  && bUseFemaleNudeSuit)
+			a.AddItem(NudeSuit, 1, true)
 			a.EquipItem(NudeSuit, false, true)
 		endIf
 	endIf
@@ -388,14 +403,79 @@ function UnstripActor(actor a, form[] stripped, actor victim = none)
 				a.EquipItem(stripped[i], false, true)
 			endIf
 			; Move to other hand if weapon, light, spell, or leveledspell
-			if type == 41 || type == 31 || type == 22 || type == 82
-				hand = 0
-			endIf
+			hand -= ((hand == 1 && (type == 41 || type == 31 || type == 22 || type == 82)) as int)
 		endIf
 		Utility.Wait(0.25)
 	endWhile
 	; Toggle free camera back on
 	ControlLib.TempToggleFreeCamera(toggled, "UnstripSlots")
+endFunction
+
+function StripActorStorage(actor a, bool[] strip, bool animate = false, bool allowNudesuit = true)
+	if strip.Length != 33
+		return none
+	endIf
+	; TFC prevents clothing from updating, leave it
+	bool toggled = ControlLib.TempToggleFreeCamera(a == PlayerRef, "StripSlots")
+	; Start stripping animation
+	if animate
+		StripAnimation(a)
+	endIf
+	; Strip weapon
+	if strip[32]
+		StripWeapon(a, true, true)
+		StripWeapon(a, false, true)
+	endIf
+	; Strip armors
+	int i
+	while i < 32
+		if strip[i] && StripSlot(a, Armor.GetMaskForSlot(i + 30), true) != none && animate
+			Utility.Wait(0.15)
+		endIf
+		i += 1
+	endWhile
+	; Apply Nudesuit
+	if strip[2] && allowNudesuit && (bUseMaleNudeSuit || bUseFemaleNudeSuit)
+		int gender = a.GetLeveledActorBase().GetSex()
+		if (gender == 0 && bUseMaleNudeSuit) || (gender == 1  && bUseFemaleNudeSuit)
+			a.AddItem(NudeSuit, 1, true)
+			a.EquipItem(NudeSuit, false, true)
+		endIf
+	endIf
+endFunction
+
+function UnstripActorStorage(actor a, bool IsVictim = false)
+	; TFC prevents clothing from updating, leave it
+	bool toggled = ControlLib.TempToggleFreeCamera(a == PlayerRef, "UnstripSlots")
+	; Remove nudesuits
+	if bUseMaleNudeSuit || bUseFemaleNudeSuit
+		a.UnequipItem(NudeSuit, true, true)
+		a.RemoveItem(NudeSuit, 1, true)
+	endIf
+	; Skip victim redressing
+	if IsVictim && !bReDressVictim
+		StorageUtil.FormListClear(a, "SexLab.StrippedItems")
+		return ; Don't requip victims
+	endIf
+	; Equip items in storage
+	int hand = 1
+	int i = StorageUtil.FormListCount(a, "SexLab.StrippedItems")
+	while i
+		i -= 1
+		form item = StorageUtil.FormListGet(a, "SexLab.StrippedItems", i)
+		int type = item.GetType()
+		if type == 22 || type == 82
+			a.EquipSpell(item as Spell, hand)
+		else
+			a.EquipItem(item, false, true)
+		endIf
+		; Move to other hand if weapon, light, spell, or leveledspell
+		hand -= ((hand == 1 && (type == 41 || type == 31 || type == 22 || type == 82)) as int)
+	endWhile
+	; Toggle free camera back on
+	ControlLib.TempToggleFreeCamera(toggled, "UnstripSlots")
+	; Clear stripped storage
+	StorageUtil.FormListClear(a, "SexLab.StrippedItems")
 endFunction
 
 form function WornStrapon(actor a)
@@ -684,6 +764,8 @@ function _Defaults()
 	NoStripList.Revert()
 	StripList.Revert()
 	ValidActorList.Revert()
+	StorageUtil.FormListClear(none, "SexLab.NoStripList")
+	StorageUtil.FormListClear(none, "SexLab.StripList")
 endFunction
 
 function _Export()
