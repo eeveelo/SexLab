@@ -34,7 +34,6 @@ bool IsCreature
 int strength
 int position
 int stage
-form[] EquipmentStorage
 bool[] StripOverride
 form strapon
 float ActorScale
@@ -260,15 +259,12 @@ function Strip(bool animate = true)
 	if IsCreature
 		return
 	endIf
-	bool[] strip
 	; Get Strip settings or override
 	if StripOverride.Length != 33
-		strip = Lib.GetStrip(ActorRef, Controller.GetVictim(), Controller.LeadIn)
+		Lib.StripActorStorage(ActorRef, Lib.GetStrip(ActorRef, Controller.GetVictim(), Controller.LeadIn), animate)
 	else
-		strip = StripOverride
+		Lib.StripActorStorage(ActorRef, StripOverride, animate)
 	endIf
-	; Strip slots and store removed equipment
-	StoreEquipment(Lib.StripSlots(ActorRef, strip, animate))
 endFunction
 
 ;/-----------------------------------------------\;
@@ -281,19 +277,6 @@ endFunction
 
 function DisableUndressAnim(bool disableIt = true)
 	disableundress = disableIt
-endFunction
-
-function StoreEquipment(form[] equipment)
-	; Nothing to add
-	if equipment.Length == 0
-		return
-	; Nothing to add on to
-	elseIf EquipmentStorage.Length == 0
-		EquipmentStorage = equipment
-	; Add onto existing storage
-	else
-		EquipmentStorage = sslUtility.MergeFormArray(equipment, EquipmentStorage)
-	endIf
 endFunction
 
 function SyncThread(bool force = false)
@@ -535,7 +518,7 @@ state Animating
 			return
 		endIf
 		; Quickly move into place if actor isn't positioned right
-		if ActorRef.GetDistance(MarkerRef) > 0.5
+		if ActorRef.GetDistance(MarkerRef) > 0.8
 			ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 1.0, 50000, 0)
 			AttachMarker()
 			return ; OnTranslationComplete() will take over when in place
@@ -603,7 +586,7 @@ state Reset
 			RemoveStrapon()
 			; Unstrip
 			if !ActorRef.IsDead()
-				Lib.UnstripActor(ActorRef, EquipmentStorage, Controller.GetVictim())
+				Lib.UnstripActorStorage(ActorRef, IsVictim)
 			endIf
 		endIf
 		; Unlock their movement
@@ -765,8 +748,6 @@ function Initialize()
 	AnimScale = 0.0
 	position = 0
 	stage = 0
-	form[] formDel
-	EquipmentStorage = formDel
 	bool[] boolDel
 	StripOverride = boolDel
 	; Reset state
