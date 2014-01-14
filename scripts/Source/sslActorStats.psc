@@ -484,17 +484,25 @@ function UpdateNativeStats(actor ActorRef, int males, int females, int creatures
 		AdjustSkill(ActorRef, "Creatures", Creatures)
 	endIf
 	; Update perversion/purity
-	float purity
+	bool isDirty = Animation.HasTag("Dirty")
+	bool isLoving = Animation.HasTag("Loving")
+	; Get base purity weight
+	float purity = Utility.RandomFloat(0.0, 0.8)
 	if isVictim
-		purity = -1.2
-	elseif isAggressor || Animation.HasTag("Dirty")
-		purity = -2.5
-	elseif !isVictim && Animation.HasTag("Loving")
-		purity = 2.5
-	else
-		purity = Utility.RandomFloat(-0.8, 0.8)
+		purity += 1.0
+	elseif isAggressor
+		purity += 2.5
+	elseIf isDirty || IsLoving
+		purity += 2.0
 	endIf
-	purity *= ((males + females) - 1) + (creatures * -0.8)
+	; Scale up with each additional actor beyond 2
+	if (males + females + creatures) > 2
+		purity += (purity * ((males + females + creatures) - 1))
+	endIf
+	; Make signed if impure, or 1 in 4 chance otherwise
+	if victim != none || creatures != 0 || isDirty || (!isLoving && Utility.RandomInt(1, 4) == 1)
+		purity = -purity
+	endIf
 	; Adjuster-ma-jigger.
 	; Adjust base purity by present male/females + subtract purity for each creature present
 	AdjustFloat(ActorRef, "Purity", purity)
