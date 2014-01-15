@@ -3,7 +3,8 @@ scriptname sslBaseAnimation extends ReferenceAlias
 ; Config
 string property Name = "" auto hidden
 bool property Enabled = true auto hidden
-int property SFX auto hidden
+; int property SFX auto hidden
+Sound property SoundFX auto hidden
 
 int actors = 0
 int stages = 0
@@ -533,7 +534,7 @@ function Initialize()
 	waiting = false
 	Actors = 0
 	Stages = 0
-	SFX = 0
+	; SFX = 0
 	content = 0
 
 	genders = new int[3]

@@ -76,7 +76,17 @@ function SetContent(int contentType)
 endFunction
 
 function SetSFX(int iSFX)
-	Animation.SFX = iSFX
+	if iSFX == Squishing
+		Animation.SoundFX = Slots.Lib.ThreadLib.sfxSquishing01
+	elseIf iSFX == Sucking
+		Animation.SoundFX = Slots.Lib.ThreadLib.sfxSucking01
+	elseIf iSFX == SexMix
+		Animation.SoundFX = Slots.Lib.ThreadLib.sfxSexMix01
+	endIf
+endFunction
+
+function SetSound(Sound SoundFX)
+	Animation.SoundFX = SoundFX
 endFunction
 
 function SetStageTimer(int stage, float timer)

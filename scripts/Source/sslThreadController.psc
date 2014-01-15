@@ -10,10 +10,7 @@ sslBaseAnimation property Animation hidden
 endProperty
 
 ; SFX
-Sound sfxType
 float[] sfx
-int sfxInstance
-float sfxVolume
 
 ; Processing
 int stagePrev
@@ -66,19 +63,16 @@ endFunction
 
 state Preparing
 	event OnUpdate()
+		; Setup actors
+		ActorAction("Prepare", "Ready")
 		; Init
-		Stage = 1
 		sfx = new float[2]
-		sfxVolume = Lib.fSFXVolume
-		sfxInstance = 0
 		; Set random starting animation
 		SetAnimation()
 		; Set initial positioning actor
 		if IsPlayerPosition(AdjustingPosition) && ActorCount > 1 && !HasCreature
 			AdjustingPosition = ArrayWrap((AdjustingPosition + 1), ActorCount)
 		endIf
-		; Setup actors
-		ActorAction("Prepare", "Ready")
 		; Everything ready, send starting event
 		SendThreadEvent("AnimationStart")
 		if LeadIn
@@ -184,11 +178,11 @@ state Animating
 				endWhile
 				; Play Orgasm SFX
 				Lib.OrgasmEffect.PlayAndWait(Positions[0])
-				if sfxType != none
-					Sound.SetInstanceVolume(sfxType.Play(Positions[0]), sfxVolume)
+				if Animation.SoundFX != none
+					Sound.SetInstanceVolume(Animation.SoundFX.Play(Positions[0]), Lib.fSFXVolume)
 				endIf
 				Lib.OrgasmEffect.PlayAndWait(Positions[0])
-				Sound.SetInstanceVolume(Lib.OrgasmEffect.Play(Positions[0]), sfxVolume)
+				Sound.SetInstanceVolume(Lib.OrgasmEffect.Play(Positions[0]), Lib.fSFXVolume)
 				sfx[0] = 0.60
 			endIf
 		else
@@ -212,8 +206,8 @@ state Animating
 			return ; End Stage
 		endIf
 		; Play SFX
-		if sfx[0] <= (time - sfx[1]) && sfxType != none
-			Sound.SetInstanceVolume(sfxType.Play(Positions[0]), sfxVolume)
+		if sfx[0] <= (time - sfx[1]) && Animation.SoundFX != none
+			Sound.SetInstanceVolume(Animation.SoundFX.Play(Positions[0]), Lib.fSFXVolume)
 			sfx[1] = time
 		endIf
 		; Loop
@@ -403,8 +397,6 @@ function SetAnimation(int anim = -1)
 		anim = Utility.RandomInt(0, Animations.Length - 1)
 	endIf
 	aid = anim
-	; Set SFX Marker
-	sfxType = Lib.GetSFX(Animation.SFX)
 	; Check for animation specific stage timer
 	float stagetimer = Animation.GetStageTimer(stage)
 	if stagetimer > 0.0
@@ -447,15 +439,11 @@ function Initialize()
 	; Set states
 	looping = false
 	; Empty Floats
-	float[] fDel
-	sfx = fDel
 	timer = 0.0
 	; Empty integers
 	AdjustingPosition = 0
 	stagePrev = 0
 	aid = 0
-	; Empty forms
-	sfxType = none
 	; Clear model
 	parent.Initialize()
 endFunction
