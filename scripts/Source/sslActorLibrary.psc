@@ -602,21 +602,21 @@ endFunction
 ;|	Gender Functions                             |;
 ;\-----------------------------------------------/;
 
-function TreatAsMale(actor a) global
-	StorageUtil.SetIntValue(a, "SexLab.ForcedGender", 0)
+function TreatAsMale(actor a)
+	a.SetFactionRank(GenderFaction, 0)
 endFunction
 
-function TreatAsFemale(actor a) global
-	StorageUtil.SetIntValue(a, "SexLab.ForcedGender", 1)
+function TreatAsFemale(actor a)
+	a.SetFactionRank(GenderFaction, 1)
 endFunction
 
-function ClearForcedGender(actor a) global
-	StorageUtil.UnsetIntValue(a, "SexLab.ForcedGender")
+function ClearForcedGender(actor a)
+	a.RemoveFromFaction(GenderFaction)
 endFunction
 
 int function GetGender(actor a)
-	if StorageUtil.HasIntValue(a, "SexLab.ForcedGender")
-		return StorageUtil.GetIntValue(a, "SexLab.ForcedGender")
+	if a.IsInFaction(GenderFaction)
+		return a.GetFactionRank(GenderFaction)
 	endIf
 	ActorBase Base = a.GetLeveledActorBase()
 	if StorageUtil.GetIntValue(Base.GetRace(), "SexLab.HasRace") == 1
