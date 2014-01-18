@@ -112,7 +112,7 @@ endProperty
 
 float[] property Timers hidden
 	float[] function get()
-		if customtimers.Length > 0
+		if customtimers.Length != 0
 			return customtimers
 		elseif leadIn
 			return Lib.fStageTimerLeadIn
@@ -438,12 +438,12 @@ function SetBedding(int set = 0)
 	bedding = set
 endFunction
 
-function SetTimers(float[] timers)
-	if timers.Length < 1
+function SetTimers(float[] settingTimers)
+	if settingTimers.Length < 1
 		_Log("Empty timers given.", "SetTimers")
 		return
 	endIf
-	customtimers = timers
+	customtimers = settingTimers
 endFunction
 
 float function GetStageTimer(int maxstage)
@@ -550,20 +550,17 @@ function ChangeActors(actor[] changeTo)
 			; Start preparing actor
 			Slot.GotoState("Prepare")
 			; Wait for ready state
-			float failsafe = Utility.GetCurrentRealTime() + 20.0
-			while Slot.GetState() != "Ready" && failsafe > Utility.GetCurrentRealTime()
-				Utility.Wait(0.1)
+			float failsafe = 25.0
+			while Slot.GetState() != "Ready" && failsafe > 0.0
+				Utility.Wait(0.10)
+				failsafe -= 0.10
 			endWhile
 		endIf
 	endWhile
 	; Remember new genders
 	gendercounts = Lib.ActorLib.GenderCount(Positions)
 	; Start animating new actors
-	i = ActorCount
-	while i
-		i -= 1
-		ActorAlias(Positions[i]).StartAnimating()
-	endWhile
+	SyncActors(true)
 	(self as sslThreadController).RealignActors()
 	; End changing
 	SendThreadEvent("ActorChangeEnd")
@@ -766,14 +763,6 @@ int function SignInt(int value, bool sign)
 	endIf
 	return value
 endFunction
-
-; bool function Locked(string method)
-; 	if GetState() == "Unlocked"
-; 		_Log("Unsafe attempt to modify unlocked thread["+tid+"]", method, "FATAL")
-; 		return false
-; 	endIf
-; 	return true
-; endFunction
 
 function _Log(string log, string method, string type = "ERROR")
 	int severity = 0

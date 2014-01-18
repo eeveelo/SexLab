@@ -95,7 +95,7 @@ endProperty
 ;\-----------------------------------------------/;
 
 bool function SetAlias(actor prospect, sslThreadController ThreadView)
-	if prospect == none || GetReference() != prospect || (Lib.ValidateActor(prospect) != 1 && ThreadView.GetState() == "Making")
+	if prospect == none || GetReference() != prospect
 		ClearAlias()
 		return false ; Failed to set prospective actor into alias
 	endIf
@@ -103,7 +103,6 @@ bool function SetAlias(actor prospect, sslThreadController ThreadView)
 	; Register actor as active
 	StorageUtil.FormListAdd(Lib, "Registry", prospect, false)
 	; Init actor alias information
-	Debug.Trace("-- SexLab ActorAlias -- Thread["+Controller.tid+"] Slotting '"+ActorName+"' into alias -- "+self)
 	Controller = ThreadView
 	ActorRef = GetReference() as actor
 	BaseRef = ActorRef.GetLeveledActorBase()
@@ -113,6 +112,7 @@ bool function SetAlias(actor prospect, sslThreadController ThreadView)
 	IsCreature = gender == 2
 	IsPlayer = ActorRef == Lib.PlayerRef
 	IsVictim = ActorRef == Controller.VictimRef
+	Debug.Trace("-- SexLab ActorAlias -- Thread["+Controller.tid+"] Slotted '"+ActorName+"' into alias -- "+self)
 	return true
 endFunction
 
@@ -279,75 +279,6 @@ function DisableUndressAnim(bool disableIt = true)
 	disableundress = disableIt
 endFunction
 
-function SyncThread(bool force = false)
-	if Controller == none || ActorRef == none
-		return
-	endIf
-	; Sync from thread
-	int toPosition = Controller.GetPosition(ActorRef)
-	int toStage = Controller.Stage
-	sslBaseAnimation toAnimation = Controller.Animation
-	; Update base enjoyment when animation changes
-	if !IsCreature && Animation != toAnimation
-		UpdateBaseEnjoyment()
-	endIf
-	; Update marker postioning
-	AlignTo(toAnimation.GetPositionOffsets(toPosition, toStage), force)
-	; Update if needed
-	if force || toPosition != position || toStage != stage || toAnimation != Animation
-		; Update thread info
-		position = toPosition
-		stage = toStage
-		Animation = toAnimation
-		; Update Strength for voice
-		strength = ((stage as float) / (Animation.StageCount() as float) * 100) as int
-		if Controller.LeadIn
-			strength = ((strength as float) * 0.70) as int
-		endIf
-		if stage == 1 && Animation.StageCount() == 1
-			strength = 70
-		endIf
-		; Update Silence
-		IsSilent = Animation.IsSilent(position, stage)
-		if IsSilent || IsCreature
-			; VoiceDelay is used as loop timer, must be set even if silent.
-			VoiceDelay = 2.5
-		else
-			; Base Delay
-			if !IsFemale
-				VoiceDelay = Lib.fMaleVoiceDelay
-			else
-				VoiceDelay = Lib.fFemaleVoiceDelay
-			endIf
-			; Stage Delay
-			if stage > 1
-				VoiceDelay = (VoiceDelay - (stage * 0.8)) + Utility.RandomFloat(-0.3, 0.3)
-			endIf
-			; Min 1.2 Ddelay
-			if VoiceDelay < 1.2
-				VoiceDelay = 1.2
-			endIf
-		endIf
-		; Animation related stuffs
-		if !IsCreature
-			; Send SOS event
-			if Animation.GetGender(position) == 0
-				; Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
-				Debug.SendAnimationEvent(ActorRef, "SOSBend"+Animation.GetSchlong(position, stage))
-			endif
-			; Equip Strapon if needed
-			if IsFemale && Lib.bUseStrapons && Animation.UseStrapon(position, stage)
-				EquipStrapon()
-			; Remove strapon if there is one
-			elseIf strapon != none
-				RemoveStrapon()
-			endIf
-		endIf
-	endIf
-	; Update expression/enjoyment/openmouth
-	DoExpression()
-endFunction
-
 function OverrideStrip(bool[] setStrip)
 	if setStrip.Length != 33
 		return
@@ -444,17 +375,15 @@ endState
 state Ready
 	event OnBeginState()
 		UnregisterForUpdate()
-		; Make sure we should be here first
 		if Controller == none || ActorRef == none || GetReference() == none || GetReference() != ActorRef
-			ClearAlias()
+			ClearAlias() ; We shouldn't be here
 		endIf
 	endEvent
-	function StartAnimating()
+	function SyncThread(bool force = false)
 		if ActorRef != none && Controller != none
 			GoToState("Animating")
-			SyncThread(true)
-			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
-			RegisterForSingleUpdate(Utility.RandomFloat(0.1, 0.8))
+			SyncThread(force)
+			RegisterForSingleUpdate(Utility.RandomFloat(0.5, 1.8))
 		endIf
 	endFunction
 endState
@@ -480,10 +409,80 @@ state Animating
 	endEvent
 
 	; Animating functions
+	function SyncThread(bool force = false)
+		if Controller == none || ActorRef == none
+			return
+		endIf
+		; Sync from thread
+		int toPosition = Controller.GetPosition(ActorRef)
+		int toStage = Controller.Stage
+		sslBaseAnimation toAnimation = Controller.Animation
+		; Update marker postioning
+		AlignTo(toAnimation.GetPositionOffsets(toPosition, toStage), force)
+		; Update if needed
+		if force || toPosition != position || toStage != stage || toAnimation != Animation
+			; Update thread info
+			position = toPosition
+			stage = toStage
+			Animation = toAnimation
+			; Update Strength for voice
+			strength = ((stage as float) / (Animation.StageCount() as float) * 100) as int
+			if Controller.LeadIn
+				strength = ((strength as float) * 0.70) as int
+			endIf
+			if stage == 1 && Animation.StageCount() == 1
+				strength = 70
+			endIf
+			; Update Silence
+			IsSilent = Animation.IsSilent(position, stage)
+			if IsSilent || IsCreature
+				; VoiceDelay is used as loop timer, must be set even if silent.
+				VoiceDelay = 2.5
+			else
+				; Base Delay
+				if !IsFemale
+					VoiceDelay = Lib.fMaleVoiceDelay
+				else
+					VoiceDelay = Lib.fFemaleVoiceDelay
+				endIf
+				; Stage Delay
+				if stage > 1
+					VoiceDelay = (VoiceDelay - (stage * 0.8)) + Utility.RandomFloat(-0.3, 0.3)
+				endIf
+				; Min 1.2 Ddelay
+				if VoiceDelay < 1.2
+					VoiceDelay = 1.2
+				endIf
+			endIf
+			; Animation related stuffs
+			if !IsCreature
+				; Send SOS event
+				if Animation.GetGender(position) == 0
+					; Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
+					Debug.SendAnimationEvent(ActorRef, "SOSBend"+Animation.GetSchlong(position, stage))
+				endif
+				; Equip Strapon if needed
+				if IsFemale && Lib.bUseStrapons && Animation.UseStrapon(position, stage)
+					EquipStrapon()
+				; Remove strapon if there is one
+				elseIf strapon != none
+					RemoveStrapon()
+				endIf
+			endIf
+		endIf
+		; Update base enjoyment when animation changes
+		if !IsCreature && Animation != toAnimation
+			UpdateBaseEnjoyment()
+		endIf
+		; Update expression/enjoyment/openmouth
+		DoExpression()
+	endFunction
+
 	function AttachMarker()
 		ActorRef.SetVehicle(MarkerRef)
 		ActorRef.SetScale(AnimScale)
 	endFunction
+
 	function AlignTo(float[] offsets, bool forceTo = false)
 		float[] centerLoc = Controller.CenterLocation
 		loc = new float[6]
@@ -748,8 +747,8 @@ function Initialize()
 	GoToState("")
 endFunction
 
-function StartAnimating()
-	Debug.TraceStack("SexLab -- ERROR: ActorAlias -- "+ActorName+" -- StratAnimating() called from wrong state, you probably have really bad script lag from a heavily modded game, a slow computer, or something is horribly wrong.")
+function SyncThread(bool force = false)
+	Debug.TraceStack("SexLab -- ERROR: ActorAlias -- "+ActorName+" -- SyncThread() called from wrong state, you probably have really bad script lag from a heavily modded game, a slow computer, or something is horribly wrong.")
 endFunction
 function AttachMarker()
 	Debug.TraceStack("SexLab -- ERROR: ActorAlias -- "+ActorName+" -- AttachMarker() called from wrong state, you are either rushing through the animation or something is wrong. This can usually be ignored if seen after animation has recently ended.")

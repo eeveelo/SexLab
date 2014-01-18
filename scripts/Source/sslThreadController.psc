@@ -11,19 +11,14 @@ endProperty
 
 ; SFX
 float SFXDelay
-float SFXLast
+float SFXTimer
 
 ; Processing
-int stagePrev
-float timer
-float advanceAt
-bool timedStage
+float StageTimer
+bool TimedStage
 
 ; Hotkeys
 int AdjustingPosition
-
-; Locks
-bool looping
 
 ;/-----------------------------------------------\;
 ;|	Primary Starter                              |;
@@ -31,8 +26,9 @@ bool looping
 
 state Making
 	sslThreadController function PrimeThread()
+		Stage = 1
 		GotoState("Preparing")
-		RegisterForSingleUpdate(0.10)
+		RegisterForSingleUpdate(0.05)
 		return self
 	endFunction
 endState
@@ -55,45 +51,35 @@ function ActorAction(string stateAction, string stateFinish)
 		i -= 1
 		ActorAlias[i].GoToState(stateAction)
 	endWhile
-	; Wait for actors ready, or for 25 seconds to pass
-	float failsafe = Utility.GetCurrentRealTime() + 25.0
-	while !ActorWait(stateFinish) && failsafe > Utility.GetCurrentRealTime()
-		Utility.Wait(0.10)
+	; Wait for actors ready, or for ~30 seconds to pass
+	float failsafe = 30.0
+	while !ActorWait(stateFinish) && failsafe > 0.0
+		Utility.Wait(0.50)
+		failsafe -= 0.50
 	endWhile
 endFunction
 
 state Preparing
 	event OnUpdate()
-		; Setup actors
-		ActorAction("Prepare", "Ready")
-		; Init
-		SFXDelay = Lib.fSFXDelay
-		SFXLast = Utility.GetCurrentRealTime()
-		; Set random starting animation
-		SetAnimation()
-		; Set initial positioning actor
-		if IsPlayerPosition(AdjustingPosition) && ActorCount > 1 && !HasCreature
-			AdjustingPosition = ArrayWrap((AdjustingPosition + 1), ActorCount)
-		endIf
 		; Everything ready, send starting event
 		SendThreadEvent("AnimationStart")
-		if LeadIn
-			SendThreadEvent("LeadInStart")
-		endIf
-		; Start animation loops
-		int i = ActorCount
-		while i
-			i -= 1
-			ActorAlias[i].StartAnimating()
-		endWhile
-		; Begin first stage
-		Stage = 1
-		GoToState("Advancing")
-		RegisterForSingleUpdate(0.10)
+		; Set random starting animation
+		SetAnimation()
+		; Setup actors
+		ActorAction("Prepare", "Ready")
+		; Start ActorAlias animation loops from Ready state
+		SyncActors(true)
 		; Auto TFC
 		if HasPlayer && Lib.ControlLib.bAutoTFC
 			Lib.ControlLib.EnableFreeCamera(true)
 		endIf
+		; Send leadin start if doing one
+		if LeadIn
+			SendThreadEvent("LeadInStart")
+		endIf
+		; Begin first stage
+		GoToState("Advancing")
+		RegisterForSingleUpdate(0.05)
 	endEvent
 endState
 
@@ -101,32 +87,32 @@ endState
 ;|	Animation Loops/Functions                    |;
 ;\-----------------------------------------------/;
 
-function UpdateTimer(float toTimer = 0.0)
-	if toTimer > 0.0
-		advanceAt = Utility.GetCurrentRealTime() + toTimer
-		timedStage = true
-	else
-		advanceAt = Utility.GetCurrentRealTime() + StageTimer()
-		timedStage = false
+float function GetTimer()
+	; Custom acyclic stage timer
+	if Animation.HasTimer(Stage)
+		TimedStage = true
+		return Animation.GetTimer(Stage)
 	endIf
-endFunction
-
-float function StageTimer()
+	; Default stage timers
+	TimedStage = false
 	int last = ( Timers.Length - 1 )
-	if stage < last
-		return Timers[(stage - 1)]
-	elseif stage >= Animation.StageCount
+	if Stage < last
+		return Timers[(Stage - 1)]
+	elseIf Stage >= Animation.StageCount
 		return Timers[last]
 	endIf
 	return Timers[(last - 1)]
-endfunction
+endFunction
 
 state Advancing
 	event OnUpdate()
+		; Stage start events
+		; End animation
 		if !LeadIn && Stage > Animation.StageCount
 			Stage = Animation.StageCount
 			EndAnimation()
 			return ; No stage to advance to, end animation
+		; End LeadIn stages
 		elseIf LeadIn && Stage > Animation.StageCount
 			; Disable free camera now to help prevent CTD
 			bool toggled = Lib.ControlLib.TempToggleFreeCamera(HasPlayer, "LeadInEnd")
@@ -145,30 +131,10 @@ state Advancing
 			; Renable free camera
 			Lib.ControlLib.TempToggleFreeCamera(toggled, "LeadInEnd")
 			SendThreadEvent("LeadInEnd")
-		endIf
-		; Stage Delay
-		if Stage > 1
-			SFXDelay = (Lib.fSFXDelay - (Stage * 0.2))
-		endIf
-		; min 0.80 delay
-		if SFXDelay < 0.80
-			SFXDelay = 0.80
-		endIf
-		; Start Animations loop
-		GoToState("Animating")
-	endEvent
-endState
-
-state Animating
-
-	;/-----------------------------------------------\;
-	;|	Primary Animation Loop                       |;
-	;\-----------------------------------------------/;
-
-	event OnBeginState()
-		if !LeadIn && Stage >= Animation.StageCount
-			; Send orgasm stage specific event
-			SendThreadEvent("OrgasmStart")
+			GoToStage(1)
+			return ; Restart outisde of leadin
+		; Orgasm stage begin
+		elseIf !LeadIn && Stage >= Animation.StageCount
 			; Play optional orgasm effects
 			if Lib.bOrgasmEffects
 				; Perform actor orgasm stuff
@@ -187,33 +153,53 @@ state Animating
 				Sound.SetInstanceVolume(Lib.OrgasmEffect.Play(Positions[0]), Lib.fSFXVolume)
 				SFXDelay = 0.50
 			endIf
+			; Send orgasm stage specific event
+			SendThreadEvent("OrgasmStart")
+		; Regular stage advance
 		else
 			SendThreadEvent("StageStart")
 		endIf
-		; Start animation looping
-		looping = true
+		; Stage SFX Delay
+		SFXDelay = Lib.fSFXDelay
+		if Stage > 1
+			SFXDelay -= (Stage * 0.2)
+		endIf
+		; min 0.50 delay
+		if SFXDelay < 0.50
+			SFXDelay = 0.50
+		endIf
+		; Start Animations loop
+		GoToState("Animating")
+	endEvent
+endState
+
+state Animating
+
+	;/-----------------------------------------------\;
+	;|	Primary Animation Loop                       |;
+	;\-----------------------------------------------/;
+
+	event OnBeginState()
 		SyncActors()
 		PlayAnimation()
-		UpdateTimer(Animation.GetStageTimer(stage))
-		RegisterForSingleUpdate(0.10)
+		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
+		RegisterForSingleUpdate(0.05)
 	endEvent
 
 	event OnUpdate()
-		if !looping
+		; Advance stage on timer
+		if (AutoAdvance || TimedStage) && StageTimer < Utility.GetCurrentRealTime()
+			GoToStage((Stage + 1))
 			return
 		endIf
-		float time = Utility.GetCurrentRealTime()
-		if (AutoAdvance || timedStage) && advanceAt < time
-			GoToStage((Stage + 1))
-			return ; End Stage
-		endIf
 		; Play SFX
-		if SFXDelay <= (time - SFXLast) && Animation.SoundFX != none
+		SFXTimer -= 0.50
+		if SFXTimer <= 0.0 && Animation.SoundFX != none
 			Sound.SetInstanceVolume(Animation.SoundFX.Play(Positions[0]), Lib.fSFXVolume)
-			SFXLast = time
+			SFXTimer = SFXDelay
 		endIf
 		; Loop
-		RegisterForSingleUpdate(0.75)
+		RegisterForSingleUpdate(0.50)
 	endEvent
 
 	event OnEndState()
@@ -302,20 +288,17 @@ state Animating
 	endFunction
 
 	function MoveScene()
-		if !looping
-			return ; Don't attempt when not looping
-		endIf
 		; Stop animation loop
-		looping = false
 		UnregisterForUpdate()
 		; Enable Controls
 		sslActorAlias Slot = ActorAlias(Lib.PlayerRef)
 		Slot.UnlockActor()
 		Slot.StopAnimating(true)
 		Lib.PlayerRef.StopTranslation()
-		; Lock hotkeys and wait 6 seconds
-		Lib.mMoveScene.Show(6)
-		SexLabUtil.Wait(6.0)
+		; Lock hotkeys and wait 7 seconds
+		Lib.mMoveScene.Show(7.0)
+		StageTimer += 7.0
+		SexLabUtil.Wait(7.0)
 		; Disable Controls
 		Slot.LockActor()
 		; Give player time to settle incase airborne
@@ -325,13 +308,13 @@ state Animating
 			CenterOnObject(Lib.PlayerRef, true)
 		endIf
 		; Return to animation loop
-		looping = true
-		RegisterForSingleUpdate(0.15)
+		RegisterForSingleUpdate(0.05)
 	endFunction
 
 	;/-----------------------------------------------\;
 	;|	Actor Manipulation                           |;
 	;\-----------------------------------------------/;
+
 	function PlayAnimation()
 		; Send with as little overhead as possible to improve syncing
 		string[] events = Animation.FetchStage(Stage)
@@ -359,18 +342,9 @@ state Animating
 	endFunction
 
 	function GoToStage(int toStage)
-		; Stop looping
-		looping = false
-		UnregisterForUpdate()
-		; Set upcoming stage
-		stagePrev = Stage
-		if toStage < 0
-			toStage = 0
-		endIf
 		Stage = toStage
-		; Start advancement
 		GoToState("Advancing")
-		RegisterForSingleUpdate(0.10)
+		RegisterForSingleUpdate(0.05)
 	endFunction
 
 	function RealignActors()
@@ -399,15 +373,12 @@ function SetAnimation(int anim = -1)
 		anim = Utility.RandomInt(0, Animations.Length - 1)
 	endIf
 	aid = anim
-	; Check for animation specific stage timer
-	float stagetimer = Animation.GetStageTimer(stage)
-	if stagetimer > 0.0
-		UpdateTimer(stagetimer)
-	endIf
 	; Print name of animation to console
 	if HasPlayer
 		MiscUtil.PrintConsole("Playing Animation: " + Animation.Name)
 	endIf
+	; Update stage timer for new animation
+	StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 endFunction
 
 ;/-----------------------------------------------\;
@@ -438,13 +409,8 @@ endFunction
 
 function Initialize()
 	UnregisterForUpdate()
-	; Set states
-	looping = false
-	; Empty Floats
-	timer = 0.0
 	; Empty integers
 	AdjustingPosition = 0
-	stagePrev = 0
 	aid = 0
 	; Clear model
 	parent.Initialize()

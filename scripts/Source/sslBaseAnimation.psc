@@ -154,7 +154,7 @@ endFunction
 int function AddPositionStage(int position, string animation, float forward = 0.0, float side = 0.0, float up = 0.0, float rotate = 0.0, bool silent = false, bool openMouth = false, bool strapon = true, int sos = 0)
 	if !Exists("AddPositionStage", position)
 		return -1
-	endIf
+	endif
 	_WaitLock()
 	; Add animation event
 	animations = sslUtility.PushString(animation, animations)
@@ -232,11 +232,15 @@ int function GetSchlong(int position, int stage)
 	return StorageUtil.IntListGet(Storage, Key("Info"), DataIndex(4, position, stage, 3))
 endFunction
 
-float function GetStageTimer(int stage)
-	if stage > timers.Length || stage < 1 || stage > stages
-		return 0.0 ; There is no valid stage timer, skip the rest
+bool function HasTimer(int stage)
+	return stage > 0 && stage < timers.Length && timers[(stage - 1)] != 0.0
+endFunction
+
+float function GetTimer(int stage)
+	if HasTimer(stage)
+		return timers[(stage - 1)]
 	endIf
-	return timers[(stage - 1)]
+	return 0.0 ; Stage has no timer
 endFunction
 
 ;/-----------------------------------------------\;
