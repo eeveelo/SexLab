@@ -1,25 +1,12 @@
-scriptname sslBaseVoice extends ReferenceAlias
+scriptname sslBaseVoice extends sslBaseObject
 
 sslVoiceLibrary property Lib auto
 
-string property Name = "" auto hidden
-bool property Enabled = true auto hidden
 int property Gender auto hidden
-
-bool property Registered hidden
-	bool function get()
-		return Name != ""
-	endFunction
-endProperty
 
 Sound property Mild auto hidden
 Sound property Hot auto hidden
 Sound property Medium auto hidden
-
-; Storage key
-Quest Storage
-; Storage legend
-; string Key("Tags") = tags applied to animation
 
 ;/-----------------------------------------------\;
 ;|	API Functions                                |;
@@ -96,48 +83,14 @@ int function PlayHot(actor a)
 endFunction
 
 ;/-----------------------------------------------\;
-;|	Tag Functions                                |;
-;\-----------------------------------------------/;
-
-bool function HasTag(string tag)
-	return tag != "" && StorageUtil.StringListFind(Storage, Key("Tags"), tag) != -1
-endFunction
-
-bool function AddTag(string tag)
-	if HasTag(tag)
-		return false
-	endIf
-	StorageUtil.StringListAdd(Storage, Key("Tags"), tag, false)
-	return true
-endFunction
-
-bool function RemoveTag(string tag)
-	if !HasTag(tag)
-		return false
-	endIf
-	StorageUtil.StringListRemove(Storage, Key("Tags"), tag, true)
-	return true
-endFunction
-
-bool function ToggleTag(string tag)
-	return (RemoveTag(tag) || AddTag(tag)) && HasTag(tag)
-endFunction
-
-;/-----------------------------------------------\;
 ;|	System Use                                   |;
 ;\-----------------------------------------------/;
 
-string function Key(string type = "")
-	return Name+"."+type
+function Initialize()
+	Gender = 0
+	parent.Initialize()
 endFunction
 
-function Initialize()
-	Storage = GetOwningQuest()
-	Name = ""
-	Enabled = true
-	Gender = 0
-	StorageUtil.StringListClear(Storage, Key("Tags"))
-endFunction
 function _Export()
 	string exportkey ="SexLabConfig.Voices["+Name+"]."
 	StorageUtil.FileSetIntValue(exportkey+"Enabled", Enabled as int)

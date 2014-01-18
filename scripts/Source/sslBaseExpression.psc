@@ -1,22 +1,9 @@
 
-scriptname sslBaseExpression extends ReferenceAlias
+scriptname sslBaseExpression extends sslBaseObject
 
 sslExpressionLibrary property Lib auto
 import sslExpressionLibrary
 import MfgConsoleFunc
-
-string property Name = "" auto hidden
-
-bool property Registered hidden
-	bool function get()
-		return Name != ""
-	endFunction
-endProperty
-
-; Storage key
-Quest Storage
-; Storage legend
-; string Key("Tags") = tags applied to animation
 
 int[] male1
 int[] male2
@@ -155,34 +142,6 @@ function AddExpression(int phase, bool female, int id, int value)
 endFunction
 
 ;/-----------------------------------------------\;
-;|	Tag Functions                                |;
-;\-----------------------------------------------/;
-
-bool function HasTag(string tag)
-	return tag != "" && StorageUtil.StringListFind(Storage, Key("Tags"), tag) != -1
-endFunction
-
-bool function AddTag(string tag)
-	if HasTag(tag)
-		return false
-	endIf
-	StorageUtil.StringListAdd(Storage, Key("Tags"), tag, false)
-	return true
-endFunction
-
-bool function RemoveTag(string tag)
-	if !HasTag(tag)
-		return false
-	endIf
-	StorageUtil.StringListRemove(Storage, Key("Tags"), tag, true)
-	return true
-endFunction
-
-bool function ToggleTag(string tag)
-	return (RemoveTag(tag) || AddTag(tag)) && HasTag(tag)
-endFunction
-
-;/-----------------------------------------------\;
 ;|	System Use                                   |;
 ;\-----------------------------------------------/;
 
@@ -191,10 +150,6 @@ function InitList(string sKey, int phase, int slots)
 	while phase > StorageUtil.IntListCount(Storage, sKey)
 		StorageUtil.IntListAdd(Storage, sKey, 0)
 	endWhile
-endFunction
-
-string function Key(string type = "")
-	return Name+"."+type
 endFunction
 
 int function CalcPhase(int strength, bool female)
@@ -219,10 +174,6 @@ int function CalcPhase(int strength, bool female)
 endFunction
 
 function Initialize()
-	Storage = GetOwningQuest()
-	StorageUtil.StringListClear(Storage, Key("Tags"))
-
-	Name = ""
 	int[] intDel1
 	male1 = intDel1
 	int[] intDel2
@@ -244,6 +195,8 @@ function Initialize()
 	female4 = intDel9
 	int[] intDel10
 	female5 = intDel10
+
+	parent.Initialize()
 endFunction
 
 function _Export()

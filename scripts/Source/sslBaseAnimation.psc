@@ -1,8 +1,6 @@
-scriptname sslBaseAnimation extends ReferenceAlias
+scriptname sslBaseAnimation extends sslBaseObject
 
 ; Config
-string property Name = "" auto hidden
-bool property Enabled = true auto hidden
 ; int property SFX auto hidden
 Sound property SoundFX auto hidden
 
@@ -15,8 +13,6 @@ string[] animations
 float[] timers
 int[] genders
 
-; Storage key
-Quest Storage
 ; Storage legend
 ; int Key("Positions") = gender, cum
 ; int Key("Info") = silent (bool), openmouth (bool), strapon (bool), schlong offset (int)
@@ -25,14 +21,7 @@ Quest Storage
 ; string Key("Tags") = tags applied to animation
 ; float Name = forward, side, up, rotate
 
-bool waiting
-
 ; Information
-bool property Registered hidden
-	bool function get()
-		return Name != ""
-	endFunction
-endProperty
 bool property IsSexual hidden
 	bool function get()
 		return content < 3
@@ -158,7 +147,7 @@ int function AddPosition(int gender = 0, int addCum = -1)
 	; Update actor count
 	int aid = actors
 	actors += 1
-	waiting = false
+	_Unlock()
 	return aid
 endFunction
 
@@ -189,7 +178,7 @@ int function AddPositionStage(int position, string animation, float forward = 0.
 	StorageUtil.IntListAdd(Storage, Key("Info"), (openMouth as int))
 	StorageUtil.IntListAdd(Storage, Key("Info"), ((strapon && MalePosition(position)) as int))
 	StorageUtil.IntListAdd(Storage, Key("Info"), sos)
-	waiting = false
+	_Unlock()
 	return stage
 endFunction
 
@@ -439,50 +428,6 @@ string function GetGendersTag()
 	return sslAnimationLibrary.GetGenderTag(Females, Males, Creatures)
 endFunction
 
-bool function HasTag(string tag)
-	return tag != "" && StorageUtil.StringListFind(Storage, Key("Tags"), tag) != -1
-endFunction
-
-bool function AddTag(string tag)
-	if HasTag(tag)
-		return false
-	endIf
-	StorageUtil.StringListAdd(Storage, Key("Tags"), tag, false)
-	return true
-endFunction
-
-bool function RemoveTag(string tag)
-	if !HasTag(tag)
-		return false
-	endIf
-	StorageUtil.StringListRemove(Storage, Key("Tags"), tag, true)
-	return true
-endFunction
-
-bool function ToggleTag(string tag)
-	return (RemoveTag(tag) || AddTag(tag)) && HasTag(tag)
-endFunction
-
-bool function CheckTags(string[] find, bool requireAll = true, bool suppress = false)
-	int i = find.Length
-	while i
-		i -= 1
-		if find[i] != ""
-			bool check = HasTag(find[i])
-			if requireAll && !check && !suppress
-				return false ; Stop if we need all and don't have it
-			elseif !requireAll && check && !suppress
-				return true ; Stop if we don't need all and have one
-			elseif check && suppress
-				return false
-			endIf
-		endIf
-	endWhile
-	; If still here than we require all and had all
-	return true
-endFunction
-
-
 ;/-----------------------------------------------\;
 ;|	Creature Use                                 |;
 ;\-----------------------------------------------/;
@@ -499,17 +444,6 @@ endFunction
 ;|	System Use                                   |;
 ;\-----------------------------------------------/;
 
-string function Key(string type = "")
-	return Name+"."+type
-endFunction
-
-function _WaitLock()
-	while waiting
-		Utility.WaitMenuMode(0.10)
-	endWhile
-	waiting = true
-endFunction
-
 function _Log(string log, string method, string type = "NOTICE")
 	Debug.Trace("--------------------------------------------------------------------------------------------")
 	Debug.Trace("--- SexLab BaseAnimation '"+Name+"' ---")
@@ -520,21 +454,14 @@ function _Log(string log, string method, string type = "NOTICE")
 endFunction
 
 function Initialize()
-	Storage = GetOwningQuest()
-
 	StorageUtil.FloatListClear(Storage, Key("Offsets"))
 	StorageUtil.FloatListClear(Storage, Key("Forwards"))
 	StorageUtil.IntListClear(Storage, Key("Positions"))
 	StorageUtil.IntListClear(Storage, Key("Info"))
-	StorageUtil.StringListClear(Storage, Key("Tags"))
 	StorageUtil.FormListClear(Storage, Key("Creatures"))
 
-	Name = ""
-	Enabled = true
-	waiting = false
 	Actors = 0
 	Stages = 0
-	; SFX = 0
 	content = 0
 
 	genders = new int[3]
@@ -542,7 +469,10 @@ function Initialize()
 	timers = floatDel1
 	string[] stringDel1
 	animations = stringDel1
+
+	parent.Initialize()
 endFunction
+
 function _Export()
 	string exportkey ="SexLabConfig.Animation["+Name+"]."
 	StorageUtil.FileSetIntValue(exportkey+"Enabled", Enabled as int)

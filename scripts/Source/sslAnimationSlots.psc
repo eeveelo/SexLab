@@ -185,9 +185,10 @@ sslBaseAnimation function GetFree()
 endFunction
 
 int function Register(sslBaseAnimation Claiming, string registrar)
+	Claiming.Initialize()
+	Claiming.Registry = registrar
 	StorageUtil.StringListAdd(self, "Registry", registrar, false)
 	Slotted = StorageUtil.StringListCount(self, "Registry")
-	Claiming.Initialize()
 	return Slots.Find(Claiming)
 endFunction
 
