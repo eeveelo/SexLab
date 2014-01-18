@@ -10,7 +10,8 @@ sslBaseAnimation property Animation hidden
 endProperty
 
 ; SFX
-float[] sfx
+float SFXDelay
+float SFXLast
 
 ; Processing
 int stagePrev
@@ -66,7 +67,8 @@ state Preparing
 		; Setup actors
 		ActorAction("Prepare", "Ready")
 		; Init
-		sfx = new float[2]
+		SFXDelay = Lib.fSFXDelay
+		SFXLast = Utility.GetCurrentRealTime()
 		; Set random starting animation
 		SetAnimation()
 		; Set initial positioning actor
@@ -146,11 +148,11 @@ state Advancing
 		endIf
 		; Stage Delay
 		if Stage > 1
-			sfx[0] = sfx[0] - (Stage * 0.2)
+			SFXDelay = (Lib.fSFXDelay - (Stage * 0.2))
 		endIf
 		; min 0.80 delay
-		if sfx[0] < 0.80
-			sfx[0] = 0.80
+		if SFXDelay < 0.80
+			SFXDelay = 0.80
 		endIf
 		; Start Animations loop
 		GoToState("Animating")
@@ -183,7 +185,7 @@ state Animating
 				endIf
 				Lib.OrgasmEffect.PlayAndWait(Positions[0])
 				Sound.SetInstanceVolume(Lib.OrgasmEffect.Play(Positions[0]), Lib.fSFXVolume)
-				sfx[0] = 0.60
+				SFXDelay = 0.50
 			endIf
 		else
 			SendThreadEvent("StageStart")
@@ -206,12 +208,12 @@ state Animating
 			return ; End Stage
 		endIf
 		; Play SFX
-		if sfx[0] <= (time - sfx[1]) && Animation.SoundFX != none
+		if SFXDelay <= (time - SFXLast) && Animation.SoundFX != none
 			Sound.SetInstanceVolume(Animation.SoundFX.Play(Positions[0]), Lib.fSFXVolume)
-			sfx[1] = time
+			SFXLast = time
 		endIf
 		; Loop
-		RegisterForSingleUpdate(0.60)
+		RegisterForSingleUpdate(0.75)
 	endEvent
 
 	event OnEndState()
