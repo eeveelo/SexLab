@@ -52,33 +52,19 @@ int function PlaySound(actor a, sound soundset, topic lipsync)
 		base.SetVoiceType(type)
 		; debug.trace(base.GetName()+" returned to "+base.GetVoiceType())
 	endIf
-	return soundset.Play(a)
+	soundset.PlayAndWait(a)
+	return 1
 endFunction
 
 int function PlayMild(actor a)
-	if Mild == none
-		int r = Utility.RandomInt(0, (Lib.VanillaMild.Length - 1))
-		a.Say(Lib.VanillaMild[r])
-		return 0
-	endIf
 	return PlaySound(a, Mild, Lib.SexLabMoanMild)
 endFunction
 
 int function PlayMedium(actor a)
-	if Medium == none
-		int r = Utility.RandomInt(0, (Lib.VanillaMedium.Length - 1))
-		a.Say(Lib.VanillaMedium[r])
-		return 0
-	endIf
 	return PlaySound(a, Medium, Lib.SexLabMoanMedium)
 endFunction
 
 int function PlayHot(actor a)
-	if Hot == none
-		int r = Utility.RandomInt(0, (Lib.VanillaHot.Length - 1))
-		a.Say(Lib.VanillaHot[r])
-		return 0
-	endIf
 	return PlaySound(a, Hot, Lib.SexLabMoanHot)
 endFunction
 

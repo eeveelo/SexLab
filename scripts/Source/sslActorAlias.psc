@@ -14,6 +14,7 @@ ObjectReference property MarkerRef hidden
 	endFunction
 endProperty
 
+; Associated systems
 sslThreadController Controller
 sslBaseExpression Expression
 sslBaseAnimation Animation
@@ -145,7 +146,6 @@ function LockActor()
 		Game.ForceThirdPerson()
 		Game.SetPlayerAIDriven()
 		Game.DisablePlayerControls(false, false, false, false, false, false, true, false, 0)
-		; Game.SetInChargen(true, true, true)
 		; Enable hotkeys, if needed
 		if IsVictim && Lib.bDisablePlayer
 			Controller.AutoAdvance = true
@@ -155,7 +155,6 @@ function LockActor()
 	else
 		ActorRef.SetRestrained(true)
 		ActorRef.SetDontMove(true)
-		; ActorRef.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
 	endIf
 endFunction
 
@@ -172,11 +171,9 @@ function UnlockActor()
 		Lib.ControlLib._HKClear()
 		Game.SetPlayerAIDriven(false)
 		Game.EnablePlayerControls(false, false, false, false, false, false, true, false, 0)
-		; Game.SetInChargen(false, false, false)
 	else
 		ActorRef.SetRestrained(false)
 		ActorRef.SetDontMove(false)
-		; ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 	endIf
 	; Remove from animation faction
 	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
@@ -385,7 +382,7 @@ state Ready
 		if ActorRef != none && Controller != none
 			GoToState("Animating")
 			SyncThread(force)
-			RegisterForSingleUpdate(Utility.RandomFloat(0.5, 1.8))
+			RegisterForSingleUpdate(Utility.RandomFloat(0.5, 1.5))
 		endIf
 	endFunction
 endState
@@ -396,16 +393,11 @@ state Animating
 		if ActorRef.IsDead() || ActorRef.IsDisabled()
 			Controller.EndAnimation(true)
 			return
-		endIf
-		if Voice != none && !IsSilent
-			if Expression != none
-				sslExpressionLibrary.ClearPhoneme(ActorRef)
-			endIf
-			if VoiceInstance
-				Sound.StopInstance(VoiceInstance)
-			endIf
-			VoiceInstance = Voice.Moan(ActorRef, Strength, IsVictim)
-			Sound.SetInstanceVolume(VoiceInstance, Lib.fVoiceVolume)
+		elseIf Voice != none && !IsSilent
+			; Clear expression and modifiers before playing
+			sslExpressionLibrary.ClearPhoneme(ActorRef)
+			ActorRef.ClearExpressionOverride()
+			Voice.Moan(ActorRef, Strength, IsVictim)
 		endIf
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent

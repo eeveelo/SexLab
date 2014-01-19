@@ -163,7 +163,7 @@ state Animating
 		; Play SFX
 		SFXTimer -= 0.50
 		if SFXTimer <= 0.0 && Animation.SoundFX != none
-			Sound.SetInstanceVolume(Animation.SoundFX.Play(Positions[0]), Lib.fSFXVolume)
+			Animation.SoundFX.PlayAndWait(Positions[0])
 			SFXTimer = SFXDelay
 		endIf
 		; Loop

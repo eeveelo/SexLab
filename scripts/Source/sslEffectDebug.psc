@@ -5,36 +5,11 @@ import SexLabUtil
 import MiscUtil
 import ActorUtil
 
-string function Key(string type)
-	return "Missionary."+type
-endFunction
-
 event OnEffectStart(actor TargetRef, actor CasterRef)
-	sslActorLibrary Lib = SexLab.ActorLib
-
-	Lib.StripActorStorage(TargetRef, Lib.GetStrip(TargetRef, none, false), true)
-	Wait(6.0)
-	Lib.UnstripActorStorage(TargetRef)
-	Debug.TraceAndBox("Normal Done")
-
-	Lib.StripActorStorage(TargetRef, Lib.GetStrip(TargetRef, none, true), true)
-	Wait(6.0)
-	Lib.UnstripActorStorage(TargetRef)
-	Debug.TraceAndBox("LeadIn Done")
-
-	Lib.StripActorStorage(TargetRef, Lib.GetStrip(TargetRef, none, true), true)
-	Wait(4.0)
-	Lib.StripActorStorage(TargetRef, Lib.GetStrip(TargetRef, none, false), false)
-	Wait(5.0)
-	Lib.UnstripActorStorage(TargetRef)
-	Debug.TraceAndBox("LeadIn->Normal Done")
-
-	Lib.StripActorStorage(TargetRef, Lib.GetStrip(TargetRef, TargetRef, false), false)
-	Wait(6.0)
-	Lib.UnstripActorStorage(TargetRef)
-	Debug.TraceAndBox("Victim Done")
-
-
+	sslVoiceLibrary Lib = SexLab.VoiceLib
+	Lib.PickVoice(TargetRef).PlayMild(TargetRef)
+	Lib.PickVoice(TargetRef).PlayMedium(TargetRef)
+	Lib.PickVoice(TargetRef).PlayHot(TargetRef)
 	Dispel()
 endEvent
 
@@ -47,7 +22,7 @@ endEvent
 
 function LockActor(actor ActorRef)
 	; Start DoNothing package
-	AddPackageOverride(ActorRef, (Game.GetFormFromFile(0x0E50E, "SexLab.esm") as Package), 100)
+	AddPackageOverride(ActorRef, SexLAb.ActorLib.DoNothing, 100)
 	ActorRef.SetFactionRank(SexLab.AnimatingFaction, 1)
 	ActorRef.EvaluatePackage()
 	; Disable movement
@@ -58,7 +33,6 @@ function LockActor(actor ActorRef)
 	else
 		ActorRef.SetRestrained(true)
 		ActorRef.SetDontMove(true)
-		; ActorRef.SetAnimationVariableBool("bHumanoidFootIKDisable", true)
 	endIf
 endFunction
 
@@ -67,14 +41,12 @@ function UnlockActor(actor ActorRef)
 	if ActorRef == SexLab.PlayerRef
 		Game.EnablePlayerControls(false, false, false, false, false, false, true, false, 0)
 		Game.SetPlayerAIDriven(false)
-		; Game.SetInChargen(false, false, false)
 	else
 		ActorRef.SetRestrained(false)
 		ActorRef.SetDontMove(false)
-		; ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 	endIf
 	; Remove from animation faction
-	RemovePackageOverride(ActorRef, (Game.GetFormFromFile(0x0E50E, "SexLab.esm") as Package))
+	RemovePackageOverride(ActorRef, SexLAb.ActorLib.DoNothing)
 	ActorRef.RemoveFromFaction(SexLab.AnimatingFaction)
 	ActorRef.EvaluatePackage()
 	; Detach positioning marker

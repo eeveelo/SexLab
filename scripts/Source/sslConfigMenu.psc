@@ -51,8 +51,10 @@ endEvent
 
 event OnGameReload()
 	parent.OnGameReload()
-	ThreadSlots._StopAll()
 	ActorLib.ValidActorList.RemoveAddedForm(PlayerRef)
+	AudioVoice.SetVolume(ActorLib.fVoiceVolume)
+	AudioSFX.SetVolume(ThreadLib.fSFXVolume)
+	ThreadSlots._StopAll()
 endEvent
 
 ; Framework
@@ -90,6 +92,9 @@ spell property SexLabDebugSpell auto
 spell property SexLabDebugSelfSpell auto
 armor property aCalypsStrapon auto
 
+SoundCategory property AudioSFX auto
+SoundCategory property AudioVoice auto
+
 ; OIDs
 int[] oidStageTimer
 int[] oidStageTimerLeadIn
@@ -117,6 +122,9 @@ function SetDefaults()
 	ActorLib._Defaults()
 	ThreadLib._Defaults()
 	ControlLib._Defaults()
+
+	AudioVoice.SetVolume(ActorLib.fVoiceVolume)
+	AudioSFX.SetVolume(ThreadLib.fSFXVolume)
 
 	oidToggleVoice = new int[50]
 	oidToggleCreatureAnimation = new int[50]
@@ -870,7 +878,12 @@ state VoiceVolume
 		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
-		ActorLib.fVoiceVolume = ( value / 100 )
+		value = (value / 100.0)
+		if value <= 0.0
+			value = 0.01
+		endIf
+		ActorLib.fVoiceVolume = value
+		AudioVoice.SetVolume(ActorLib.fVoiceVolume)
 		SetSliderOptionValueST(value, "{0}%")
 	endEvent
 	event OnDefaultST()
@@ -927,7 +940,12 @@ state SFXVolume
 		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
-		ThreadLib.fSFXVolume = (value / 100.0)
+		value = (value / 100.0)
+		if value <= 0.0
+			value = 0.01
+		endIf
+		ThreadLib.fSFXVolume = value
+		AudioSFX.SetVolume(ThreadLib.fSFXVolume)
 		SetSliderOptionValueST(value, "{0}%")
 	endEvent
 	event OnDefaultST()

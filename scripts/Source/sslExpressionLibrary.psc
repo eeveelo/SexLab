@@ -70,8 +70,16 @@ endFunction
 
 function ClearPhoneme(actor ActorRef) global
 	int i
-	while i <= 15
+	while i <= 16
 		SetPhonemeModifier(ActorRef, 0, i, 0)
+		i += 1
+	endWhile
+endFunction
+
+function ClearModifier(actor ActorRef) global
+	int i
+	while i <= 16
+		SetPhonemeModifier(ActorRef, 1, i, 0)
 		i += 1
 	endWhile
 endFunction
