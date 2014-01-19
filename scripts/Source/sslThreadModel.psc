@@ -406,10 +406,11 @@ function CenterOnObject(ObjectReference centerOn, bool resync = true)
 	centerLoc = GetCoords(centerOn)
 	if Lib.BedsList.HasForm(centerOn.GetBaseObject())
 		bedObj = centerOn
-		centerLoc = GetCoords(centerOn)
-		centerLoc[0] = centerLoc[0] + (33.0 * Math.sin(centerLoc[5]))
-		centerLoc[1] = centerLoc[1] + (33.0 * Math.cos(centerLoc[5]))
-		centerLoc[2] = centerLoc[2] + 37.0
+		if !Lib.BedRollsList.HasForm(centerOn.GetBaseObject())
+			centerLoc[0] = centerLoc[0] + (33.0 * Math.sin(centerLoc[5]))
+			centerLoc[1] = centerLoc[1] + (33.0 * Math.cos(centerLoc[5]))
+			centerLoc[2] = centerLoc[2] + 37.0
+		endIf
 	endIf
 endFunction
 

@@ -8,6 +8,7 @@ sound property OrgasmEffect auto
 Static property LocationMarker auto
 ActorBase property SexLabStager auto
 FormList property BedsList auto
+FormList property BedRollsList auto
 message property mAdjustChange auto
 message property mUseBed auto
 message property mMoveScene auto
