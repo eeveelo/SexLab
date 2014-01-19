@@ -31,7 +31,7 @@ int[] gendercounts
 bool leadInDisabled
 actor PlayerRef
 actor victim
-string hook
+string[] hooks
 int bedding ; 0 allow, 1 force, -1 forbid
 Race Creature
 float started
@@ -380,11 +380,41 @@ endState
 ;\-----------------------------------------------/;
 
 function SetHook(string hookName)
-	hook = hookName
+	string[] newhooks = sslUtility.ArgString(hookName)
+	int i = newhooks.Length
+	while i
+		i -= 1
+		if newhooks[i] != ""
+			AddTag(newhooks[i])
+			if hooks.Find(newhooks[i]) == -1
+				hooks = sslUtility.PushString(newhooks[i], hooks)
+			endIf
+		endIf
+	endWhile
+endFunction
+
+bool function RemoveHook(string hookName)
+	if hooks.Find(hookName) == -1
+		return false
+	endIf
+	string[] newhooks
+	int i = hooks.Length
+	while i
+		i -= 1
+		if hooks[i] != hookName
+			newhooks = sslUtility.PushString(hooks[i], newhooks)
+		endIf
+	endWhile
+	hooks = newhooks
+	return true
 endFunction
 
 string function GetHook()
-	return hook
+	return hooks[0]
+endFunction
+
+string[] function GetHooks()
+	return hooks
 endFunction
 
 float[] function GetCoords(ObjectReference Object)
@@ -773,10 +803,12 @@ function SendThreadEvent(string eventName, float argNum = 0.0)
 	string threadid = (tid as string)
 	string events = eventName
 	; Send Custom Event
-	if hook != ""
-		SendModEvent(eventName+"_"+hook, threadid, argNum)
-		events += " // "+eventName+"_"+hook
-	endIf
+	int i = hooks.Length
+	while i
+		i -= 1
+		SendModEvent(eventName+"_"+hooks[i], threadid, argNum)
+		events += " // "+eventName+"_"+hooks[i]
+	endWhile
 	; Send Global Event
 	SendModEvent(eventName, threadid, argNum)
 	; Send Player Global Event
@@ -857,7 +889,8 @@ function Initialize()
 	; Clear tags
 	StorageUtil.StringListClear(Lib, Key("Tags"))
 	; Empty Strings
-	hook = ""
+	string[] strDel1
+	hooks = strDel1
 	Logging = "trace"
 	; Empty actors
 	actor[] acDel
