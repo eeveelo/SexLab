@@ -106,54 +106,22 @@ endFunction
 
 state Advancing
 	event OnUpdate()
-		; Stage start events
+		; Stage events
 		; End animation
 		if !LeadIn && Stage > Animation.StageCount
-			Stage = Animation.StageCount
 			EndAnimation()
-			return ; No stage to advance to, end animation
+			return
 		; End LeadIn stages
 		elseIf LeadIn && Stage > Animation.StageCount
-			; Disable free camera now to help prevent CTD
-			bool toggled = Lib.ControlLib.TempToggleFreeCamera(HasPlayer, "LeadInEnd")
-			; Swap to non lead in animations
-			Stage = 1
-			LeadIn = false
-			SetAnimation()
-			; Restrip with new strip options
-			if Animation.IsSexual
-				int i
-				while i < ActorCount
-					ActorAlias[i].Strip(false)
-					i += 1
-				endWhile
-			endIf
-			; Renable free camera
-			Lib.ControlLib.TempToggleFreeCamera(toggled, "LeadInEnd")
-			SendThreadEvent("LeadInEnd")
-			GoToStage(1)
-			return ; Restart outisde of leadin
+			EndLeadIn()
+			return
 		; Orgasm stage begin
 		elseIf !LeadIn && Stage >= Animation.StageCount
 			; Play optional orgasm effects
 			if Lib.bOrgasmEffects
-				; Perform actor orgasm stuff
 				PlayAnimation()
-				int i = ActorCount
-				while i
-					i -= 1
-					ActorAlias[i].OrgasmEffect()
-				endWhile
-				; Play Orgasm SFX
-				Lib.OrgasmEffect.PlayAndWait(Positions[0])
-				if Animation.SoundFX != none
-					Sound.SetInstanceVolume(Animation.SoundFX.Play(Positions[0]), Lib.fSFXVolume)
-				endIf
-				Lib.OrgasmEffect.PlayAndWait(Positions[0])
-				Sound.SetInstanceVolume(Lib.OrgasmEffect.Play(Positions[0]), Lib.fSFXVolume)
-				SFXDelay = 0.50
+				TriggerOrgasm()
 			endIf
-			; Send orgasm stage specific event
 			SendThreadEvent("OrgasmStart")
 		; Regular stage advance
 		else
@@ -223,10 +191,8 @@ state Animating
 	endFunction
 
 	function ChangeAnimation(bool backwards = false)
-		if Animations.Length == 1
-			return ; Single animation selected, nothing to change to
-		endIf
-		SetAnimation(ArrayWrap((aid + SignInt(1, backwards)), Animations.Length))
+ 		SetAnimation(ArrayWrap((aid + SignInt(1, backwards)), Animations.Length))
+ 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		RealignActors()
 		SendThreadEvent("AnimationChange")
 	endFunction
@@ -237,16 +203,10 @@ state Animating
 		endIf
 		; Set direction of swapping
 		int MovedTo = ArrayWrap((AdjustingPosition + SignInt(1, backwards)), ActorCount)
-		; Actors to swap
-		actor adjusting = Positions[AdjustingPosition]
-		actor moved = Positions[MovedTo]
-		; Actor slots
-		sslActorAlias AdjustAlias = ActorAlias(adjusting)
-		sslActorAlias MovedAlias = ActorAlias(moved)
 		; Shuffle
 		actor[] NewPositions = Positions
-		NewPositions[AdjustingPosition] = moved
-		NewPositions[MovedTo] = adjusting
+		NewPositions[AdjustingPosition] = Positions[MovedTo]
+		NewPositions[MovedTo] = Positions[AdjustingPosition]
 		Positions = NewPositions
 		; Sync new positions
 		RealignActors()
@@ -255,25 +215,19 @@ state Animating
 	endFunction
 
 	function AdjustForward(bool backwards = false, bool adjuststage = false)
-		float[] offsets = Animation.UpdateForward(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage)
-		sslActorAlias Slot = ActorSlot(AdjustingPosition)
-		Slot.AlignTo(offsets, true)
+		ActorSlot(AdjustingPosition).AlignTo(Animation.UpdateForward(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage), true)
 	endFunction
 
 	function AdjustSideways(bool backwards = false, bool adjuststage = false)
-		float[] offsets = Animation.UpdateSide(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage)
-		sslActorAlias Slot = ActorSlot(AdjustingPosition)
-		Slot.AlignTo(offsets, true)
+		ActorSlot(AdjustingPosition).AlignTo(Animation.UpdateSide(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage), true)
 	endFunction
 
 	function AdjustUpward(bool backwards = false, bool adjuststage = false)
-		float[] offsets = Animation.UpdateUp(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage)
-		sslActorAlias Slot = ActorSlot(AdjustingPosition)
-		Slot.AlignTo(offsets, true)
+		ActorSlot(AdjustingPosition).AlignTo(Animation.UpdateUp(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage), true)
 	endFunction
 
 	function RotateScene(bool backwards = false)
-		AdjustRotation(SignFloat(45, backwards))
+		AdjustRotation(SignFloat(45.0, backwards))
 		SyncActors(true)
 	endFunction
 
@@ -297,7 +251,6 @@ state Animating
 		Lib.PlayerRef.StopTranslation()
 		; Lock hotkeys and wait 7 seconds
 		Lib.mMoveScene.Show(7.0)
-		StageTimer += 7.0
 		SexLabUtil.Wait(7.0)
 		; Disable Controls
 		Slot.LockActor()
@@ -308,6 +261,7 @@ state Animating
 			CenterOnObject(Lib.PlayerRef, true)
 		endIf
 		; Return to animation loop
+		StageTimer += 8.0
 		RegisterForSingleUpdate(0.05)
 	endFunction
 
@@ -370,20 +324,57 @@ endState
 function SetAnimation(int anim = -1)
 	; Randomize if -1
 	if anim < 0 || anim >= Animations.Length
-		anim = Utility.RandomInt(0, Animations.Length - 1)
+		aid = Utility.RandomInt(0, (Animations.Length - 1))
+		; MiscUtil.PrintConsole("SetAnimation("+anim+"): "+aid+"/"+Animations.Length)
+	else
+		aid = anim
 	endIf
-	aid = anim
 	; Print name of animation to console
 	if HasPlayer
 		MiscUtil.PrintConsole("Playing Animation: " + Animation.Name)
 	endIf
-	; Update stage timer for new animation
-	StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 endFunction
 
-;/-----------------------------------------------\;
-;|	Ending Functions                             |;
-;\-----------------------------------------------/;
+function TriggerOrgasm()
+	; Perform actor orgasm stuff
+	int i = ActorCount
+	while i
+		i -= 1
+		ActorAlias[i].OrgasmEffect()
+	endWhile
+	; Play Orgasm SFX
+	Lib.OrgasmEffect.PlayAndWait(Positions[0])
+	if Animation.SoundFX != none
+		Sound.SetInstanceVolume(Animation.SoundFX.Play(Positions[0]), Lib.fSFXVolume)
+	endIf
+	Lib.OrgasmEffect.PlayAndWait(Positions[0])
+	Sound.SetInstanceVolume(Lib.OrgasmEffect.Play(Positions[0]), Lib.fSFXVolume)
+endFunction
+
+function EndLeadIn()
+	; Swap to non lead in animations
+	Stage = 1
+	LeadIn = false
+	SetAnimation()
+	; Restrip with new strip options
+	if Animation.IsSexual
+		int i = ActorCount
+		while i
+			i -= 1
+			ActorAlias[i].Strip(false)
+		endWhile
+		; Toggle free camera to update stripping
+		if HasPlayer && Game.GetCameraState() == 3
+			MiscUtil.ToggleFreeCamera()
+			SexLabUtil.Wait(1.0)
+			MiscUtil.ToggleFreeCamera()
+		endIf
+	endIf
+	; Start primary animations at stage 1
+	SendThreadEvent("LeadInEnd")
+	GoToState("Advancing")
+	RegisterForSingleUpdate(0.10)
+endFunction
 
 function EndAnimation(bool quick = false)
 	UnregisterForUpdate()
@@ -409,10 +400,8 @@ endFunction
 
 function Initialize()
 	UnregisterForUpdate()
-	; Empty integers
 	AdjustingPosition = 0
 	aid = 0
-	; Clear model
 	parent.Initialize()
 endFunction
 
