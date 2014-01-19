@@ -344,11 +344,16 @@ function TriggerOrgasm()
 	endWhile
 	; Play Orgasm SFX
 	Lib.OrgasmEffect.PlayAndWait(Positions[0])
+	Utility.Wait(0.2)
 	if Animation.SoundFX != none
-		Sound.SetInstanceVolume(Animation.SoundFX.Play(Positions[0]), Lib.fSFXVolume)
+		Animation.SoundFX.PlayAndWait(Positions[0])
+		Utility.Wait(0.2)
 	endIf
 	Lib.OrgasmEffect.PlayAndWait(Positions[0])
-	Sound.SetInstanceVolume(Lib.OrgasmEffect.Play(Positions[0]), Lib.fSFXVolume)
+	Utility.Wait(0.2)
+	if Animation.SoundFX != none
+		Animation.SoundFX.PlayAndWait(Positions[0])
+	endIf
 endFunction
 
 function EndLeadIn()
