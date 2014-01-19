@@ -365,6 +365,8 @@ state Prepare
 			MaleBonus = ((!IsFemale) as int)
 			PureBonus = (IsPure as int)
 			ImpureBonus = ((!IsPure) as int)
+			; Pick expression
+			Lib.ExpressionLib.PickExpression(ActorRef, Controller.VictimRef)
 			; Make erect for SOS
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 		endIf

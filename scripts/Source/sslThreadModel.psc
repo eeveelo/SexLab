@@ -25,7 +25,6 @@ bool property FastEnd auto hidden
 
 ObjectReference centerObj
 ObjectReference bedObj
-string[] tags
 float[] centerLoc
 float[] customtimers
 int[] gendercounts
@@ -251,21 +250,19 @@ state Making
 
 		int actors = ActorCount
 		int i
+
+		; Check for duplicate actors
 		while i < actors
-			; Check for duplicate actors
 			if Positions.Find(Positions[i]) != Positions.RFind(Positions[i])
 				_Log("Duplicate actor found in list", "StartThread", "FATAL")
 				return none
 			endIf
-			; Pick expression for actor
-			ActorAlias[i].SetExpression(Lib.ExpressionLib.PickExpression(Positions[i], Victim))
 			i += 1
 		endWhile
 
 		; Check for valid creature animations
 		if HasCreature
 			primaryAnimations = Lib.CreatureAnimations.GetByRace(actors, Creature)
-			DisableLeadIn(true)
 			; Bail if no valid creature animations
 			if primaryAnimations.Length == 0
 				_Log("Unable to find valid creature animations", "StartThread", "FATAL")
@@ -273,6 +270,7 @@ state Making
 			endIf
 			Positions = Lib.SortCreatures(Positions, primaryAnimations[0])
 			CenterOnObject(Positions[0])
+			DisableLeadIn(true)
 		endIf
 
 		; Remember present genders
@@ -710,93 +708,12 @@ float function GetTime()
 endfunction
 
 ;/-----------------------------------------------\;
-;|	Utility Functions                            |;
+;|	Tagging Functions                            |;
 ;\-----------------------------------------------/;
-
-function SyncActors(bool force = false)
-	int i = ActorCount
-	while i
-		i -= 1
-		ActorAlias[i].SyncThread(force)
-	endWhile
-endFunction
-
-function SendThreadEvent(string eventName, float argNum = 0.0)
-	string threadid = (tid as string)
-	string events = eventName+" /"
-	; Send Custom Event
-	if hook != ""
-		SendModEvent(eventName+"_"+hook, threadid, argNum)
-		events += "/ "+eventName+"_"+hook+" /"
-	endIf
-	; Send Global Event
-	SendModEvent(eventName, threadid, argNum)
-	; Send Player Global Event
-	if HasPlayer
-		SendModEvent("Player"+eventName, threadid, argNum)
-		events += "/ Player"+eventName
-	endIf
-	Debug.Trace("SexLab Thread["+_ThreadID+"] ModEvent: "+events)
-	; MiscUtil.PrintConsole("Thread["+_ThreadID+"] ModEvent: "+eventName)
-endFunction
-
-int function ArrayWrap(int value, int max)
-	max -= 1
-	if value > max
-		return 0
-	elseif value < 0
-		return max
-	endIf
-	return value
-endFunction
-
-float function SignFloat(float value, bool sign)
-	if sign
-		return value * -1
-	endIf
-	return value
-endFunction
-
-int function SignInt(int value, bool sign)
-	if sign
-		return value * -1
-	endIf
-	return value
-endFunction
-
-function _Log(string log, string method, string type = "ERROR")
-	int severity = 0
-	if type == "ERROR" || type == "FATAL"
-		severity = 2
-	elseif type == "NOTICE"
-		severity = 1
-	endIf
-
-	if Logging == "notification"
-		Debug.Notification(type+": "+log)
-	elseif Logging == "messagebox"
-		Debug.MessageBox(method+"() "+type+": "+log)
-	elseif Logging == "trace-minimal"
-		Debug.Trace("SexLab "+method+"() "+type+": "+log, severity)
-	else
-		Debug.Trace("--- SexLab ThreadController["+tid+"] ------------------------------------------------------", severity)
-		Debug.Trace(" "+type+": "+method+"()" )
-		Debug.Trace("   "+log)
-		Debug.Trace("--------------------------------------------------------------------------------------------", severity)
-	endIf
-	if type == "FATAL"
-		Initialize()
-		GoToState("Unlocked")
-	endIf
-endFunction
 
 string function Key(string type = "")
 	return _ThreadID+"."+type
 endFunction
-
-;/-----------------------------------------------\;
-;|	Tagging Functions                            |;
-;\-----------------------------------------------/;
 
 bool function HasTag(string tag)
 	return tag != "" && StorageUtil.StringListFind(Lib, Key("Tags"), tag) != -1
@@ -840,8 +757,76 @@ bool function CheckTags(string[] find, bool requireAll = true)
 endFunction
 
 ;/-----------------------------------------------\;
-;|	Ending Functions                             |;
+;|	System Functions                             |;
 ;\-----------------------------------------------/;
+
+function SyncActors(bool force = false)
+	int i = ActorCount
+	while i
+		i -= 1
+		ActorAlias[i].SyncThread(force)
+	endWhile
+endFunction
+
+function SendThreadEvent(string eventName, float argNum = 0.0)
+	string threadid = (tid as string)
+	string events = eventName
+	; Send Custom Event
+	if hook != ""
+		SendModEvent(eventName+"_"+hook, threadid, argNum)
+		events += " // "+eventName+"_"+hook
+	endIf
+	; Send Global Event
+	SendModEvent(eventName, threadid, argNum)
+	; Send Player Global Event
+	if HasPlayer
+		SendModEvent("Player"+eventName, threadid, argNum)
+		events += " // Player"+eventName
+	endIf
+	Debug.Trace("SexLab Thread["+_ThreadID+"] ModEvent: "+events)
+endFunction
+
+int function ArrayWrap(int value, int max)
+	if value >= max
+		return 0
+	elseif value < 0
+		return max - 1
+	endIf
+	return value
+endFunction
+
+float function SignFloat(float value, bool sign)
+	if sign
+		return -value
+	endIf
+	return value
+endFunction
+
+int function SignInt(int value, bool sign)
+	if sign
+		return -value
+	endIf
+	return value
+endFunction
+
+function _Log(string log, string method, string type = "ERROR")
+	if Logging == "notification"
+		Debug.Notification(type+": "+log)
+	elseif Logging == "messagebox"
+		Debug.MessageBox(method+"() "+type+": "+log)
+	elseif Logging == "trace-minimal"
+		Debug.Trace("SexLab "+method+"() "+type+": "+log)
+	else
+		Debug.Trace("--- SexLab ThreadController["+tid+"] ------------------------------------------------------")
+		Debug.Trace(" "+type+": "+method+"()" )
+		Debug.Trace("   "+log)
+		Debug.Trace("--------------------------------------------------------------------------------------------")
+	endIf
+	if type == "FATAL"
+		Initialize()
+		GoToState("Unlocked")
+	endIf
+endFunction
 
 function ClearActors()
 	FastEnd = true
