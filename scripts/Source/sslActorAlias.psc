@@ -21,9 +21,8 @@ sslBaseAnimation Animation
 sslBaseVoice Voice
 
 ; Voice
-float VoiceDelay
 bool IsSilent
-int VoiceInstance
+float VoiceDelay
 
 ; Info
 bool IsPlayer

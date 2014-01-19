@@ -874,20 +874,16 @@ state VoiceVolume
 	event OnSliderOpenST()
 		SetSliderDialogStartValue((ActorLib.fVoiceVolume * 100))
 		SetSliderDialogDefaultValue(70)
-		SetSliderDialogRange(0, 100)
+		SetSliderDialogRange(1, 100)
 		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
-		value = (value / 100.0)
-		if value <= 0.0
-			value = 0.01
-		endIf
-		ActorLib.fVoiceVolume = value
+		ActorLib.fVoiceVolume = (value / 100.0)
 		AudioVoice.SetVolume(ActorLib.fVoiceVolume)
 		SetSliderOptionValueST(value, "{0}%")
 	endEvent
 	event OnDefaultST()
-		ActorLib.fVoiceVolume = 1.0
+		ActorLib.fVoiceVolume = 0.7
 		SetSliderOptionValueST(70, "{0}%")
 	endEvent
 	event OnHighlightST()
@@ -936,20 +932,16 @@ state SFXVolume
 	event OnSliderOpenST()
 		SetSliderDialogStartValue((ThreadLib.fSFXVolume * 100))
 		SetSliderDialogDefaultValue(80)
-		SetSliderDialogRange(0, 100)
+		SetSliderDialogRange(1, 100)
 		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
-		value = (value / 100.0)
-		if value <= 0.0
-			value = 0.01
-		endIf
-		ThreadLib.fSFXVolume = value
+		ThreadLib.fSFXVolume = (value / 100.0)
 		AudioSFX.SetVolume(ThreadLib.fSFXVolume)
 		SetSliderOptionValueST(value, "{0}%")
 	endEvent
 	event OnDefaultST()
-		ThreadLib.fSFXVolume = 1.0
+		ThreadLib.fSFXVolume = 0.8
 		SetSliderOptionValueST(80, "{0}%")
 	endEvent
 	event OnHighlightST()

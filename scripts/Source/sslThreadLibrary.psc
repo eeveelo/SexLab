@@ -119,7 +119,7 @@ endFunction
 function _Defaults()
 	; Config
 	fSFXDelay = 4.0
-	fSFXVolume = 1.0
+	fSFXVolume = 0.8
 	bAutoAdvance = true
 	bForeplayStage = false
 	bOrgasmEffects = false
