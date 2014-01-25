@@ -71,7 +71,7 @@ endFunction
 
 function ArrokBlowjob(string eventName, string id, float argNum, form sender)
 	Name = "Arrok Blowjob"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Sucking)
 
@@ -101,7 +101,7 @@ endFunction
 
 function ArrokBoobjob(string eventName, string id, float argNum, form sender)
 	Name = "Arrok Boobjob"
-	enabled = false
+
 	SetContent(Sexual)
 
 	int a1 = AddPosition(Female, addCum=Oral)
@@ -130,7 +130,7 @@ endFunction
 
 function ArrokCowgirl(string eventName, string id, float argNum, form sender)
 	Name = "Arrok Cowgirl"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -163,7 +163,7 @@ endFunction
 
 function ArrokDevilsThreeway(string eventName, string id, float argNum, form sender)
 	Name = "Arrok Devils Threeway"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(SexMix)
 
@@ -201,7 +201,7 @@ endFunction
 
 function ArrokDoggyStyle(string eventName, string id, float argNum, form sender)
 	Name = "Arrok DoggyStyle"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -229,7 +229,7 @@ endFunction
 
 function ArrokForeplay(string eventName, string id, float argNum, form sender)
 	Name = "Arrok Foreplay"
-	enabled = false
+
 	SetContent(Foreplay)
 
 	int a1 = AddPosition(Female)
@@ -258,7 +258,7 @@ endFunction
 
 function ArrokLegUp(string eventName, string id, float argNum, form sender)
 	Name = "Arrok Leg Up Fuck"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -290,7 +290,7 @@ endFunction
 
 function ArrokMaleMasturbation(string eventName, string id, float argNum, form sender)
 	Name = "Arrok Male Masturbation"
-	enabled = false
+
 	SetContent(Sexual)
 
 	int a1 = AddPosition(Male)
@@ -310,7 +310,7 @@ endFunction
 
 function ArrokMissionary(string eventName, string id, float argNum, form sender)
 	Name = "Arrok Missionary"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -339,7 +339,7 @@ endFunction
 
 function ArrokOral(string eventName, string id, float argNum, form sender)
 	Name = "Arrok 69"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Sucking)
 
@@ -373,7 +373,7 @@ endFunction
 
 function ArrokReverseCowgirl(string eventName, string id, float argNum, form sender)
 	Name = "Arrok Reverse Cowgirl"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -402,7 +402,7 @@ endFunction
 
 function ArrokSideways(string eventName, string id, float argNum, form sender)
 	Name = "Arrok Sideways Fuck"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -432,7 +432,7 @@ endFunction
 
 function ArrokStanding(string eventName, string id, float argNum, form sender)
 	Name = "Arrok Standing Fuck"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -461,7 +461,7 @@ endFunction
 
 function ArrokStandingForeplay(string eventName, string id, float argNum, form sender)
 	Name = "Arrok Standing Foreplay"
-	enabled = false
+
 	SetContent(Foreplay)
 
 	int a1 = AddPosition(Female)
@@ -490,7 +490,7 @@ endFunction
 
 function ArrokTricycle(string eventName, string id, float argNum, form sender)
 	Name = "Arrok Tricycle"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(SexMix)
 
@@ -530,7 +530,7 @@ endFunction
 
 function ArrokHugFuck(string eventName, string id, float argNum, form sender)
 	Name = "Arrok HugFuck"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -560,7 +560,7 @@ endFunction
 
 function ArrokLesbian(string eventName, string id, float argNum, form sender)
 	Name = "Arrok Lesbian"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -588,7 +588,7 @@ endFunction
 
 function ArrokSittingForeplay(string eventName, string id, float argNum, form sender)
 	Name = "Arrok Sitting Foreplay"
-	enabled = false
+
 	SetContent(Foreplay)
 
 	int a1 = AddPosition(Female)
@@ -617,7 +617,7 @@ endFunction
 
 function ArrokAnal(string eventName, string id, float argNum, form sender)
 	Name = "Arrok Anal"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -646,7 +646,7 @@ endFunction
 
 function ArrokRape(string eventName, string id, float argNum, form sender)
 	Name = "Arrok Rape"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -677,7 +677,7 @@ endFunction
 
 function SexLabAggrBehind(string eventName, string id, float argNum, form sender)
 	Name = "Rough Behind"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -707,7 +707,7 @@ endFunction
 
 function SexLabAggrDoggyStyle(string eventName, string id, float argNum, form sender)
 	Name = "Rough Doggy Style"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -737,7 +737,7 @@ endFunction
 
 function SexLabAggrMissonary(string eventName, string id, float argNum, form sender)
 	Name = "Rough Missionary"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -767,7 +767,7 @@ endFunction
 
 function SexLabBoobjob(string eventName, string id, float argNum, form sender)
 	Name = "Boobjob"
-	enabled = false
+
 	SetContent(Sexual)
 
 	int a1 = AddPosition(Female, addCum=Oral)
@@ -794,7 +794,7 @@ endFunction
 
 function SexLabDoggyStyle(string eventName, string id, float argNum, form sender)
 	Name = "Doggy Style"
-	enabled = false
+
 	SetSFX(Squishing)
 	SetContent(Sexual)
 
@@ -821,7 +821,7 @@ endFunction
 
 function SexLabHuggingSex(string eventName, string id, float argNum, form sender)
 	Name = "Hugging Fuck"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -849,7 +849,7 @@ endFunction
 
 function SexLabMissonary(string eventName, string id, float argNum, form sender)
 	Name = "Missionary"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -877,7 +877,7 @@ endFunction
 
 function SexLabReverseCowgirl(string eventName, string id, float argNum, form sender)
 	Name = "Reverse Cowgirl"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -905,7 +905,7 @@ endFunction
 
 function SexLabSideways(string eventName, string id, float argNum, form sender)
 	Name = "Sideways Fuck"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -933,7 +933,7 @@ endFunction
 
 function SexLabStanding(string eventName, string id, float argNum, form sender)
 	Name = "Standing Fuck"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -961,7 +961,7 @@ endFunction
 
 function SexLabTribadism(string eventName, string id, float argNum, form sender)
 	Name = "Tribadism"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -1015,7 +1015,7 @@ endFunction
 
 function BleaghFemaleSolo(string eventName, string id, float argNum, form sender)
 	Name = "Bleagh Female Masturbation"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -1036,7 +1036,7 @@ endFunction
 
 function APAnal(string eventName, string id, float argNum, form sender)
 	Name = "AP Anal"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -1067,7 +1067,7 @@ endFunction
 
 function APBedMissionary(string eventName, string id, float argNum, form sender)
 	Name = "AP Bed Missionary"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -1099,7 +1099,7 @@ endFunction
 
 function APBlowjob(string eventName, string id, float argNum, form sender)
 	Name = "AP Blowjob"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Sucking)
 
@@ -1132,7 +1132,7 @@ endFunction
 
 function APBoobjob(string eventName, string id, float argNum, form sender)
 	Name = "AP Boobjob"
-	enabled = false
+
 	SetContent(Sexual)
 
 	int a1 = AddPosition(Female, addCum=Oral)
@@ -1163,7 +1163,7 @@ endFunction
 
 function APCowgirl(string eventName, string id, float argNum, form sender)
 	Name = "AP Cowgirl"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -1196,7 +1196,7 @@ endFunction
 
 function APFemaleSolo(string eventName, string id, float argNum, form sender)
 	Name = "AP Female Masturbation"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -1218,7 +1218,7 @@ endFunction
 
 function APFisting(string eventName, string id, float argNum, form sender)
 	Name = "AP Fisting"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -1251,7 +1251,7 @@ endFunction
 
 function APHandjob(string eventName, string id, float argNum, form sender)
 	Name = "AP Handjob"
-	enabled = false
+
 	SetContent(Sexual)
 
 	int a1 = AddPosition(Female, addCum=Oral)
@@ -1281,7 +1281,7 @@ endFunction
 
 function APKneelBlowjob(string eventName, string id, float argNum, form sender)
 	Name = "AP Kneeling Blowjob"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Sucking)
 
@@ -1314,7 +1314,7 @@ endFunction
 
 function APLegUp(string eventName, string id, float argNum, form sender)
 	Name = "AP Leg Up Fuck"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -1345,7 +1345,7 @@ endFunction
 
 function APShoulder(string eventName, string id, float argNum, form sender)
 	Name = "AP Shoulder"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -1375,7 +1375,7 @@ endFunction
 
 function APStandBlowjob(string eventName, string id, float argNum, form sender)
 	Name = "AP Standing Blowjob"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Sucking)
 
@@ -1408,7 +1408,7 @@ endFunction
 
 function APStanding(string eventName, string id, float argNum, form sender)
 	Name = "AP Standing"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -1438,7 +1438,7 @@ endFunction
 
 function APDoggyStyle(string eventName, string id, float argNum, form sender)
 	Name = "AP DoggyStyle"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -1469,7 +1469,7 @@ endFunction
 
 function APHoldLegUp(string eventName, string id, float argNum, form sender)
 	Name = "AP Holding Leg Up"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -1501,7 +1501,7 @@ endFunction
 
 function APFaceDown(string eventName, string id, float argNum, form sender)
 	Name = "AP Face Down Anal"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
@@ -1533,7 +1533,7 @@ endFunction
 
 function APSkullFuck(string eventName, string id, float argNum, form sender)
 	Name = "AP Skull Fuck"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Oral)
 
@@ -1567,7 +1567,7 @@ endFunction
 
 function ZynRoughStanding(string eventName, string id, float argNum, form sender)
 	Name = "Zyn Rough Standing"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Sucking)
 
@@ -1598,7 +1598,7 @@ endFunction
 
 function ZynLesbian(string eventName, string id, float argNum, form sender)
 	Name = "Zyn Lesbian"
-	enabled = false
+
 	SetContent(Sexual)
 	SetSFX(Squishing)
 
