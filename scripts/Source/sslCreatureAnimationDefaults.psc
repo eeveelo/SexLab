@@ -120,6 +120,8 @@ function LoadAnimations()
 	RegisterAnimation("TrollDoggystyle")
 	RegisterAnimation("TrollHolding")
 	RegisterAnimation("TrollMissionary")
+	RegisterAnimation("TrollDominate")
+	RegisterAnimation("TrollGrabbing")
 
 	RegisterAnimation("WerewolfAggrDoggystyle")
 	RegisterAnimation("WerewolfDoggystyle")
@@ -1259,6 +1261,59 @@ function TrollMissionary(string eventName, string id, float argNum, form sender)
 	Save()
 endFunction
 
+function TrollDominate(string eventName, string id, float argNum, form sender)
+	Name = "(Troll) Dominate"
+
+	SetSFX(Squishing)
+	AddRace(TrollRace)
+	AddRace(TrollFrostRace)
+
+	int a1 = AddPosition(Female, addCum=Vaginal)
+	AddPositionStage(a1, "Troll_Dominate_A1_S1")
+	AddPositionStage(a1, "Troll_Dominate_A1_S2")
+	AddPositionStage(a1, "Troll_Dominate_A1_S3")
+
+	int a2 = AddPosition(Creature)
+	AddPositionStage(a2, "Troll_Dominate_A2_S1")
+	AddPositionStage(a2, "Troll_Dominate_A2_S2")
+	AddPositionStage(a2, "Troll_Dominate_A2_S3")
+
+	AddTag("Panicforever")
+	AddTag("Creature")
+	AddTag("Bestiality")
+	AddTag("Dirty")
+	AddTag("Missionary")
+	AddTag("Troll")
+
+	Save()
+endFunction
+
+function TrollGrabbing(string eventName, string id, float argNum, form sender)
+	Name = "(Troll) Grabbing"
+
+	SetSFX(Squishing)
+	AddRace(TrollRace)
+	AddRace(TrollFrostRace)
+
+	int a1 = AddPosition(Female, addCum=VaginalAnal)
+	AddPositionStage(a1, "Troll_Grabbing_A1_S1")
+	AddPositionStage(a1, "Troll_Grabbing_A1_S2")
+	AddPositionStage(a1, "Troll_Grabbing_A1_S3")
+
+	int a2 = AddPosition(Creature)
+	AddPositionStage(a2, "Troll_Grabbing_A2_S1")
+	AddPositionStage(a2, "Troll_Grabbing_A2_S2")
+	AddPositionStage(a2, "Troll_Grabbing_A2_S3")
+
+	AddTag("Panicforever")
+	AddTag("Creature")
+	AddTag("Bestiality")
+	AddTag("Dirty")
+	AddTag("Doggystyle")
+	AddTag("Troll")
+
+	Save()
+endFunction
 
 function VampireLordDoggystyle(string eventName, string id, float argNum, form sender)
 	Name = "(Vampire Lord) Doggystyle"

@@ -13,3 +13,11 @@ s Troll_Missionary_A2_S1 Troll_Missionary_A2_S1.hkx
 + Troll_Missionary_A2_S2 Troll_Missionary_A2_S2.hkx
 + Troll_Missionary_A2_S3 Troll_Missionary_A2_S3.hkx
 + Troll_Missionary_A2_S4 Troll_Missionary_A2_S4.hkx
+
+s Troll_Dominate_A2_S1 Troll_Dominate_A2_S1.hkx
++ Troll_Dominate_A2_S2 Troll_Dominate_A2_S2.hkx
++ Troll_Dominate_A2_S3 Troll_Dominate_A2_S3.hkx
+
+s Troll_Grabbing_A2_S1 Troll_Grabbing_A2_S1.hkx
++ Troll_Grabbing_A2_S2 Troll_Grabbing_A2_S2.hkx
++ Troll_Grabbing_A2_S3 Troll_Grabbing_A2_S3.hkx
