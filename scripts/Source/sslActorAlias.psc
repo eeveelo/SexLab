@@ -395,7 +395,6 @@ state Animating
 		elseIf Voice != none && !IsSilent
 			; Clear expression and modifiers before playing
 			sslExpressionLibrary.ClearPhoneme(ActorRef)
-			ActorRef.ClearExpressionOverride()
 			Voice.Moan(ActorRef, Strength, IsVictim)
 		endIf
 		RegisterForSingleUpdate(VoiceDelay)

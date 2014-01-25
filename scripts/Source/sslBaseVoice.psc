@@ -35,22 +35,20 @@ int function Moan(actor a, int strength = 30, bool victim = false)
 endFunction
 
 int function PlaySound(actor a, sound soundset, topic lipsync)
-	ActorBase base = a.GetLeveledActorBase()
-	VoiceType type = base.GetVoiceType()
-	; debug.trace(type)
-	if Lib.VoicesPlayer.HasForm(type) || type == Lib.SexLabVoiceM || type == Lib.SexLabVoiceF
-		a.Say(lipsync)
-		; debug.trace(base.GetName()+" playing "+lipsync+" from playervoice: "+type)
-	else
-		if base.GetSex() > 0
-			base.SetVoiceType(Lib.SexLabVoiceF)
+	if Game.GetCameraState() != 3
+		ActorBase base = a.GetLeveledActorBase()
+		VoiceType type = base.GetVoiceType()
+		if Lib.VoicesPlayer.HasForm(type) || type == Lib.SexLabVoiceM || type == Lib.SexLabVoiceF
+			a.Say(lipsync)
 		else
-			base.SetVoiceType(Lib.SexLabVoiceM)
+			if base.GetSex() > 0
+				base.SetVoiceType(Lib.SexLabVoiceF)
+			else
+				base.SetVoiceType(Lib.SexLabVoiceM)
+			endIf
+			a.Say(lipsync)
+			base.SetVoiceType(type)
 		endIf
-		; debug.trace(base.GetName()+" playing "+lipsync+" from SEXLABVOICE: "+type+" -> "+base.GetVoiceType())
-		a.Say(lipsync)
-		base.SetVoiceType(type)
-		; debug.trace(base.GetName()+" returned to "+base.GetVoiceType())
 	endIf
 	soundset.PlayAndWait(a)
 	return 1

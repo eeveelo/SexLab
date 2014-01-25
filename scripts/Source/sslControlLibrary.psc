@@ -83,11 +83,6 @@ function _HKClear()
 	UnregisterForAllKeys()
 	PlayerController = none
 	hkReady = true
-	; Leave TFC
-	if InFreeCamera
-		MiscUtil.ToggleFreeCamera()
-		SexLabUtil.Wait(2.0)
-	endIf
 	; Keep TFC key enabled
 	RegisterForKey(kToggleFreeCamera)
 endFunction

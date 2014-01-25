@@ -6,10 +6,7 @@ import MiscUtil
 import ActorUtil
 
 event OnEffectStart(actor TargetRef, actor CasterRef)
-	sslVoiceLibrary Lib = SexLab.VoiceLib
-	Lib.PickVoice(TargetRef).PlayMild(TargetRef)
-	Lib.PickVoice(TargetRef).PlayMedium(TargetRef)
-	Lib.PickVoice(TargetRef).PlayHot(TargetRef)
+
 	Dispel()
 endEvent
 

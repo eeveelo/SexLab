@@ -361,19 +361,17 @@ function EndLeadIn()
 	Stage = 1
 	LeadIn = false
 	SetAnimation()
-	; Restrip with new strip options
 	if Animation.IsSexual
+		; Toggle free camera to update stripping
+		if HasPlayer && Game.GetCameraState() == 3
+			MiscUtil.ToggleFreeCamera()
+		endIf
+		; Restrip with new strip options
 		int i = ActorCount
 		while i
 			i -= 1
 			ActorAlias[i].Strip(false)
 		endWhile
-		; Toggle free camera to update stripping
-		if HasPlayer && Game.GetCameraState() == 3
-			MiscUtil.ToggleFreeCamera()
-			SexLabUtil.Wait(1.0)
-			MiscUtil.ToggleFreeCamera()
-		endIf
 	endIf
 	; Start primary animations at stage 1
 	SendThreadEvent("LeadInEnd")
