@@ -10,13 +10,11 @@ s -a DoggyStyle_A2_S1 DoggyStyle_A2_S1.hkx
 + DoggyStyle_A2_S3 DoggyStyle_A2_S3.hkx
 + DoggyStyle_A2_S4 DoggyStyle_A2_S4.hkx
 
-s -a,Tn Missionary_A1_S1 Enter_OnBack.hkx
-+ -a Missionary_A1_S0 Missionary_A1_S1.hkx
+s -a Missionary_A1_S1 Missionary_A1_S1.hkx
 + Missionary_A1_S2 Missionary_A1_S2.hkx
 + Missionary_A1_S3 Missionary_A1_S3.hkx
 + Missionary_A1_S4 Missionary_A1_S4.hkx
-s -a,Tn Missionary_A2_S1 Enter_LayForward.hkx
-+ -a Missionary_A2_S0 Missionary_A2_S1.hkx
+s -a Missionary_A2_S1 Missionary_A2_S1.hkx
 + Missionary_A2_S2 Missionary_A2_S2.hkx
 + Missionary_A2_S3 Missionary_A2_S3.hkx
 + Missionary_A2_S4 Missionary_A2_S4.hkx
@@ -171,13 +169,11 @@ s Arrok_StandingForeplay_A2_S1 Arrok_StandingForeplay_A2_S1.hkx
 + Arrok_StandingForeplay_A2_S3 Arrok_StandingForeplay_A2_S3.hkx
 + Arrok_StandingForeplay_A2_S4 Arrok_StandingForeplay_A2_S4.hkx
 
-s -a,Tn Arrok_Missionary_A1_S1 Enter_OnBack.hkx
-+ Arrok_Missionary_A1_S0 Arrok_Missionary_A1_S1.hkx
+s Arrok_Missionary_A1_S1 Arrok_Missionary_A1_S1.hkx
 + Arrok_Missionary_A1_S2 Arrok_Missionary_A1_S2.hkx
 + Arrok_Missionary_A1_S3 Arrok_Missionary_A1_S3.hkx
 + Arrok_Missionary_A1_S4 Arrok_Missionary_A1_S4.hkx
-s -a,Tn Arrok_Missionary_A2_S1 Enter_LayForward.hkx
-+ Arrok_Missionary_A2_S0 Arrok_Missionary_A2_S1.hkx
+s Arrok_Missionary_A2_S1 Arrok_Missionary_A2_S1.hkx
 + Arrok_Missionary_A2_S2 Arrok_Missionary_A2_S2.hkx
 + Arrok_Missionary_A2_S3 Arrok_Missionary_A2_S3.hkx
 + Arrok_Missionary_A2_S4 Arrok_Missionary_A2_S4.hkx
@@ -311,15 +307,13 @@ s AP_Anal_A2_S1 AP_Anal_A2_S1.hkx
 + AP_Anal_A2_S5 AP_Anal_A2_S5.hkx
 
 
-s -a,Tn AP_BedMissionary_A1_S1 Enter_OnBack.hkx
-+ AP_BedMissionary_A1_S0 AP_BedMissionary_A1_S1.hkx
+s AP_BedMissionary_A1_S1 AP_BedMissionary_A1_S1.hkx
 + AP_BedMissionary_A1_S2 AP_BedMissionary_A1_S2.hkx
 + AP_BedMissionary_A1_S3 AP_BedMissionary_A1_S3.hkx
 + AP_BedMissionary_A1_S4 AP_BedMissionary_A1_S4.hkx
 + AP_BedMissionary_A1_S5 AP_BedMissionary_A1_S5.hkx
 + AP_BedMissionary_A1_S6 AP_BedMissionary_A1_S6.hkx
-s -a,Tn AP_BedMissionary_A2_S1 Enter_LayForward.hkx
-+ AP_BedMissionary_A2_S0 AP_BedMissionary_A2_S1.hkx
+s AP_BedMissionary_A2_S1 AP_BedMissionary_A2_S1.hkx
 + AP_BedMissionary_A2_S2 AP_BedMissionary_A2_S2.hkx
 + AP_BedMissionary_A2_S3 AP_BedMissionary_A2_S3.hkx
 + AP_BedMissionary_A2_S4 AP_BedMissionary_A2_S4.hkx
@@ -494,3 +488,14 @@ s Bleagh_FemaleSolo_A1_S1 Bleagh_FemaleSolo_A1_S1.hkx
 + Bleagh_FemaleSolo_A1_S3 Bleagh_FemaleSolo_A1_S3.hkx
 + Bleagh_FemaleSolo_A1_S4 Bleagh_FemaleSolo_A1_S4.hkx
 + Bleagh_FemaleSolo_A1_S5 Bleagh_FemaleSolo_A1_S5.hkx
+
+s Bleagh_FootJob_A1_S1 Bleagh_FootJob_A1_S1.hkx
++ Bleagh_FootJob_A1_S2 Bleagh_FootJob_A1_S2.hkx
++ Bleagh_FootJob_A1_S3 Bleagh_FootJob_A1_S3.hkx
++ Bleagh_FootJob_A1_S4 Bleagh_FootJob_A1_S4.hkx
++ Bleagh_FootJob_A1_S5 Bleagh_FootJob_A1_S5.hkx
+s Bleagh_FootJob_A2_S1 Bleagh_FootJob_A2_S1.hkx
++ Bleagh_FootJob_A2_S2 Bleagh_FootJob_A2_S2.hkx
++ Bleagh_FootJob_A2_S3 Bleagh_FootJob_A2_S3.hkx
++ Bleagh_FootJob_A2_S4 Bleagh_FootJob_A2_S4.hkx
++ Bleagh_FootJob_A2_S5 Bleagh_FootJob_A2_S5.hkx
