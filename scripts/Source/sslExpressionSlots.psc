@@ -142,7 +142,7 @@ function Initialize()
 endFunction
 
 ; DEPRECATED: to be removed in 1.5
-function _Upgrade140()
+function _Upgrade138()
 	int i = Slotted
 	while i
 		i -= 1
