@@ -279,8 +279,10 @@ float[] function UpdateForward(int position, int stage, float adjust, bool adjus
 	if Exists("UpdateForward", position, stage)
 		if adjuststage
 			UpdateOffset(position, stage, 0, adjust)
+			CacheForwards(stage)
 		else
 			UpdateAllOffsets(position, 0, adjust)
+			CacheAllForwards()
 		endIf
 	endIf
 	return GetPositionOffsets(position, stage)
