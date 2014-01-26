@@ -518,13 +518,11 @@ state Animating
 		; endIf
 		; Force position if translation didn't move them properly
 		if ActorRef.GetDistance(MarkerRef) > 1.0
-			ActorRef.StopTranslation()
 			ActorRef.SetPosition(loc[0], loc[1], loc[2])
 			AttachMarker()
 		endIf
 		; Force angle if translation didn't rotate them properly
 		if Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ()) > 0.5; || Math.Abs(ActorRef.GetAngleX() - MarkerRef.GetAngleX()) > 0.5
-			ActorRef.StopTranslation()
 			ActorRef.SetAngle(loc[3], loc[4], loc[5])
 			AttachMarker()
 		endIf
