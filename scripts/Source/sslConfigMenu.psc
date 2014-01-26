@@ -6,7 +6,7 @@ int function GetVersion()
 endFunction
 
 string function GetStringVer()
-	return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)
+	return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)+"b"
 endFunction
 
 bool function DebugMode()
@@ -14,10 +14,8 @@ bool function DebugMode()
 endFunction
 
 event OnVersionUpdate(int version)
-	float current = (CurrentVersion as float / 10000.0)
-	float latest = (version as float / 10000.0)
 	; Notify update
-	if CurrentVersion < GetVersion() && CurrentVersion > 1
+	if CurrentVersion < version && CurrentVersion > 1
 		Debug.Notification("Updating SexLab to v"+GetStringVer())
 		if CurrentVersion < 13800
 			AnimLib.Animations._Upgrade138()
