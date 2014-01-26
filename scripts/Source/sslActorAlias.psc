@@ -362,7 +362,9 @@ state Prepare
 			PureBonus = (IsPure as int)
 			ImpureBonus = ((!IsPure) as int)
 			; Pick expression
-			Lib.ExpressionLib.PickExpression(ActorRef, Controller.VictimRef)
+			if Expression == none
+				Expression = Lib.ExpressionLib.PickExpression(ActorRef, Controller.VictimRef)
+			endIf
 			; Make erect for SOS
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 		endIf
@@ -508,6 +510,12 @@ state Animating
 		if ActorRef == none || MarkerObj == none
 			return
 		endIf
+		; ; Quickly move into place if actor isn't positioned right
+		; if ActorRef.GetDistance(MarkerRef) > 0.5
+		; 	ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 1.0, 50000, 0)
+		; 	AttachMarker()
+		; 	return ; OnTranslationComplete() will take over when in place
+		; endIf
 		; Force position if translation didn't move them properly
 		if ActorRef.GetDistance(MarkerRef) > 1.0
 			ActorRef.StopTranslation()
