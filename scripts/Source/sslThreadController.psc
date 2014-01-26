@@ -204,10 +204,10 @@ state Animating
 		; Set direction of swapping
 		int MovedTo = ArrayWrap((AdjustingPosition + SignInt(1, backwards)), ActorCount)
 		; Shuffle
-		actor[] NewPositions = Positions
-		NewPositions[AdjustingPosition] = Positions[MovedTo]
-		NewPositions[MovedTo] = Positions[AdjustingPosition]
-		Positions = NewPositions
+		actor adjusting = Positions[AdjustingPosition]
+		actor moved = Positions[MovedTo]
+		Positions[AdjustingPosition] = moved
+		Positions[MovedTo] = adjusting
 		; Sync new positions
 		RealignActors()
 		AdjustChange(backwards)
