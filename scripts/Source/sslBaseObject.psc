@@ -61,6 +61,16 @@ bool function CheckTags(string[] find, bool requireAll = true, bool suppress = f
 	return true
 endFunction
 
+string[] function GetTags()
+	int i = StorageUtil.StringListCount(Storage, Key("Tags"))
+	string[] tags = sslUtility.StringArray(i)
+	while i
+		i -= 1
+		tags[i] = StorageUtil.StringListGet(Storage, Key("Tags"), i)
+	endWhile
+	return tags
+endFunction
+
 ;/-----------------------------------------------\;
 ;|	System Use                                   |;
 ;\-----------------------------------------------/;
