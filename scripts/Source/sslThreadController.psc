@@ -115,17 +115,6 @@ state Advancing
 		elseIf LeadIn && Stage > Animation.StageCount
 			EndLeadIn()
 			return
-		; Orgasm stage begin
-		elseIf !LeadIn && Stage >= Animation.StageCount
-			; Play optional orgasm effects
-			if Lib.bOrgasmEffects
-				PlayAnimation()
-				TriggerOrgasm()
-			endIf
-			SendThreadEvent("OrgasmStart")
-		; Regular stage advance
-		else
-			SendThreadEvent("StageStart")
 		endIf
 		; Stage SFX Delay
 		SFXDelay = Lib.fSFXDelay
@@ -148,8 +137,19 @@ state Animating
 	;\-----------------------------------------------/;
 
 	event OnBeginState()
+		; Begin stage animation
 		SyncActors()
 		PlayAnimation()
+		; Send events
+		if !LeadIn && Stage >= Animation.StageCount
+			SendThreadEvent("OrgasmStart")
+			if Lib.bOrgasmEffects
+				TriggerOrgasm()
+			endIf
+		else
+			SendThreadEvent("StageStart")
+		endIf
+		; Begin loop
 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		RegisterForSingleUpdate(0.05)
 	endEvent
@@ -297,6 +297,9 @@ state Animating
 
 	function GoToStage(int toStage)
 		Stage = toStage
+		if Stage < 1
+			Stage = 1
+		endIf
 		GoToState("Advancing")
 		RegisterForSingleUpdate(0.05)
 	endFunction
@@ -325,13 +328,16 @@ function SetAnimation(int anim = -1)
 	; Randomize if -1
 	if anim < 0 || anim >= Animations.Length
 		aid = Utility.RandomInt(0, (Animations.Length - 1))
-		; MiscUtil.PrintConsole("SetAnimation("+anim+"): "+aid+"/"+Animations.Length)
 	else
 		aid = anim
 	endIf
 	; Print name of animation to console
 	if HasPlayer
 		MiscUtil.PrintConsole("Playing Animation: " + Animation.Name)
+	endIf
+	; Check for out of range stage
+	if Stage >= Animation.StageCount
+		GoToStage((Animation.StageCount - 1))
 	endIf
 endFunction
 

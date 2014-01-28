@@ -408,7 +408,7 @@ state Animating
 			return
 		endIf
 		; Sync from thread
-		int toPosition = Controller.GetPosition(ActorRef)
+		int toPosition = Controller.Positions.Find(ActorRef)
 		int toStage = Controller.Stage
 		sslBaseAnimation toAnimation = Controller.Animation
 		; Update marker postioning
@@ -427,8 +427,6 @@ state Animating
 			if stage == 1 && Animation.StageCount() == 1
 				strength = 70
 			endIf
-			; Update Silence
-			IsSilent = Animation.IsSilent(position, stage)
 			if IsSilent || IsCreature
 				; VoiceDelay is used as loop timer, must be set even if silent.
 				VoiceDelay = 2.5
@@ -462,11 +460,9 @@ state Animating
 				elseIf strapon != none
 					RemoveStrapon()
 				endIf
+				; Update animation enjoyment
+				UpdateBaseEnjoyment()
 			endIf
-		endIf
-		; Update base enjoyment when animation changes
-		if !IsCreature && Animation != toAnimation
-			UpdateBaseEnjoyment()
 		endIf
 		; Update expression/enjoyment/openmouth
 		DoExpression()
