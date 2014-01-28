@@ -32,6 +32,9 @@ endFunction
 
 ; Unlocks factory for next callback, MUST be called at end of callback
 function Save()
+	; Run animation caches
+	Animation.CacheAllForwards()
+	; Free up factory
 	Debug.Trace("SexLabCreatureAnimationFactory: Registered creature animation slot SexLabFramework.CreatureAnimation["+slot+"] to '"+Animation.Name+"' ")
 	Animation = none
 	slot = -1
