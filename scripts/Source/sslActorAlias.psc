@@ -506,16 +506,11 @@ state Animating
 		if ActorRef == none || MarkerObj == none
 			return
 		endIf
-		; ; Quickly move into place if actor isn't positioned right
-		; if ActorRef.GetDistance(MarkerRef) > 0.5
-		; 	ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 1.0, 50000, 0)
-		; 	AttachMarker()
-		; 	return ; OnTranslationComplete() will take over when in place
-		; endIf
-		; Force position if translation didn't move them properly
-		if ActorRef.GetDistance(MarkerRef) > 1.0
-			ActorRef.SetPosition(loc[0], loc[1], loc[2])
+		; Quickly move into place if actor isn't positioned right
+		if ActorRef.GetDistance(MarkerRef) > 0.5
+			ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 1.0, 50000, 0)
 			AttachMarker()
+			return ; OnTranslationComplete() will take over when in place
 		endIf
 		; Force angle if translation didn't rotate them properly
 		if Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ()) > 0.5; || Math.Abs(ActorRef.GetAngleX() - MarkerRef.GetAngleX()) > 0.5
