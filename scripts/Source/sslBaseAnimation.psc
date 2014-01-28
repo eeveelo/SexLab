@@ -29,7 +29,7 @@ bool property IsSexual hidden
 endProperty
 bool property IsCreature hidden
 	bool function get()
-		return StorageUtil.FormListCount(Storage, Key("Creatures")) != 0
+		return genders[2] != 0
 	endFunction
 endProperty
 int property StageCount hidden
@@ -94,7 +94,7 @@ float function GetForward(int position, int stage)
 	return StorageUtil.FloatListGet(Storage, Key("Forwards"), DataIndex(1, position, stage, 0))
 endFunction
 
-float function CacheForwards(int stage, int returnPosition = 0)
+function CacheForwards(int stage)
 	; Get forward offsets of all positions + find highest/lowest position
 	float adjuster
 	float[] forwards = new float[5]
@@ -115,8 +115,6 @@ float function CacheForwards(int stage, int returnPosition = 0)
 		forwards[i] = (forwards[i] + adjuster)
 		StorageUtil.FloatListSet(Storage, Key("Forwards"), DataIndex(1, i, stage, 0), forwards[i])
 	endWhile
-	; Return position forward
-	return forwards[i]
 endFunction
 
 function CacheAllForwards()
