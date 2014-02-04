@@ -1,4 +1,5 @@
 scriptname sslActorSlots extends Quest
+
 ; Scripts
 sslActorLibrary property Lib auto
 

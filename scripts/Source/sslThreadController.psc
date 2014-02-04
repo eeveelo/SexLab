@@ -2,12 +2,8 @@ scriptname sslThreadController extends sslThreadModel
 { Animation Thread Controller: Runs manipulation logic of thread based on information from model. Access only through functions; NEVER create a property directly to this. }
 
 ; Animation
-int aid
-sslBaseAnimation property Animation hidden
-	sslBaseAnimation function get()
-		return Animations[aid]
-	endFunction
-endProperty
+sslBaseAnimation property Animation auto hidden
+string[] AnimEvents
 
 ; SFX
 float SFXDelay
@@ -16,13 +12,13 @@ float SFXTimer
 ; Processing
 float StageTimer
 bool TimedStage
+int AdjustPos
+int aid
 
-; Hotkeys
-int AdjustingPosition
 
-;/-----------------------------------------------\;
-;|	Primary Starter                              |;
-;\-----------------------------------------------/;
+; ------------------------------------------------------- ;
+; --- Thread Starter                                  --- ;
+; ------------------------------------------------------- ;
 
 state Making
 	sslThreadController function PrimeThread()
@@ -33,39 +29,10 @@ state Making
 	endFunction
 endState
 
-bool function ActorWait(string waitfor)
-	int i = ActorCount
-	while i
-		i -= 1
-		if ActorAlias[i].GetState() != waitfor
-			return false
-		endIf
-	endWhile
-	return true
-endFunction
-
-function ActorAction(string stateAction, string stateFinish)
-	; Start actor action state
-	int i = ActorCount
-	while i
-		i -= 1
-		ActorAlias[i].GoToState(stateAction)
-	endWhile
-	; Wait for actors ready, or for ~30 seconds to pass
-	float failsafe = 30.0
-	while !ActorWait(stateFinish) && failsafe > 0.0
-		Utility.Wait(0.50)
-		failsafe -= 0.50
-	endWhile
-endFunction
-
 state Preparing
 	event OnUpdate()
-		; Everything ready, send starting event
-		SendThreadEvent("AnimationStart")
-		; Set random starting animation
 		SetAnimation()
-		; Setup actors
+		SendThreadEvent("AnimationStart")
 		ActorAction("Prepare", "Ready")
 		; Start ActorAlias animation loops from Ready state
 		SyncActors(true)
@@ -79,65 +46,43 @@ state Preparing
 		endIf
 		; Begin first stage
 		GoToState("Advancing")
-		RegisterForSingleUpdate(0.05)
+		RegisterForSingleUpdate(0.10)
 	endEvent
 endState
 
-;/-----------------------------------------------\;
-;|	Animation Loops/Functions                    |;
-;\-----------------------------------------------/;
-
-float function GetTimer()
-	; Custom acyclic stage timer
-	if Animation.HasTimer(Stage)
-		TimedStage = true
-		return Animation.GetTimer(Stage)
-	endIf
-	; Default stage timers
-	TimedStage = false
-	int last = ( Timers.Length - 1 )
-	if Stage < last
-		return Timers[(Stage - 1)]
-	elseIf Stage >= Animation.StageCount
-		return Timers[last]
-	endIf
-	return Timers[(last - 1)]
-endFunction
+; ------------------------------------------------------- ;
+; --- Animation Loop                                  --- ;
+; ------------------------------------------------------- ;
 
 state Advancing
 	event OnUpdate()
-		; Stage events
 		; End animation
 		if !LeadIn && Stage > Animation.StageCount
 			EndAnimation()
-			return
 		; End LeadIn stages
 		elseIf LeadIn && Stage > Animation.StageCount
 			EndLeadIn()
-			return
+		else
+			; Stage SFX Delay
+			SFXDelay = Lib.fSFXDelay
+			if Stage > 1
+				SFXDelay -= (Stage * 0.2)
+			endIf
+			; min 0.60 delay
+			if SFXDelay < 0.60
+				SFXDelay = 0.60
+			endIf
+			; Start Animations loop
+			GoToState("Animating")
 		endIf
-		; Stage SFX Delay
-		SFXDelay = Lib.fSFXDelay
-		if Stage > 1
-			SFXDelay -= (Stage * 0.2)
-		endIf
-		; min 0.50 delay
-		if SFXDelay < 0.50
-			SFXDelay = 0.50
-		endIf
-		; Start Animations loop
-		GoToState("Animating")
 	endEvent
 endState
 
 state Animating
-
-	;/-----------------------------------------------\;
-	;|	Primary Animation Loop                       |;
-	;\-----------------------------------------------/;
-
 	event OnBeginState()
-		; Begin stage animation
+		; Get animation events for stage
+		AnimEvents = Animation.FetchStage(Stage)
+		; Play animations
 		SyncActors()
 		PlayAnimation()
 		; Send events
@@ -151,9 +96,8 @@ state Animating
 		endIf
 		; Begin loop
 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
-		RegisterForSingleUpdate(0.05)
+		RegisterForSingleUpdate(0.10)
 	endEvent
-
 	event OnUpdate()
 		; Advance stage on timer
 		if (AutoAdvance || TimedStage) && StageTimer < Utility.GetCurrentRealTime()
@@ -161,15 +105,14 @@ state Animating
 			return
 		endIf
 		; Play SFX
-		SFXTimer -= 0.50
+		SFXTimer -= 0.60
 		if SFXTimer <= 0.0 && Animation.SoundFX != none
-			Animation.SoundFX.PlayAndWait(Positions[0])
+			Animation.SoundFX.Play(Positions[0])
 			SFXTimer = SFXDelay
 		endIf
 		; Loop
-		RegisterForSingleUpdate(0.50)
+		RegisterForSingleUpdate(0.60)
 	endEvent
-
 	event OnEndState()
 		if !LeadIn && Stage > Animation.StageCount
 			SendThreadEvent("OrgasmEnd")
@@ -178,9 +121,61 @@ state Animating
 		endIf
 	endEvent
 
-	;/-----------------------------------------------\;
-	;|	Hotkey Functions                             |;
-	;\-----------------------------------------------/;
+	; ------------------------------------------------------- ;
+	; --- Loop functions                                  --- ;
+	; ------------------------------------------------------- ;
+
+	function PlayAnimation()
+		; Send with as little overhead as possible to improve syncing
+		if ActorCount == 1
+			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
+		elseIf ActorCount == 2
+			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
+			Debug.SendAnimationEvent(Positions[1], AnimEvents[1])
+		elseIf ActorCount == 3
+			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
+			Debug.SendAnimationEvent(Positions[1], AnimEvents[1])
+			Debug.SendAnimationEvent(Positions[2], AnimEvents[2])
+		elseIf ActorCount == 4
+			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
+			Debug.SendAnimationEvent(Positions[1], AnimEvents[1])
+			Debug.SendAnimationEvent(Positions[2], AnimEvents[2])
+			Debug.SendAnimationEvent(Positions[3], AnimEvents[3])
+		elseIf ActorCount == 5
+			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
+			Debug.SendAnimationEvent(Positions[1], AnimEvents[1])
+			Debug.SendAnimationEvent(Positions[2], AnimEvents[2])
+			Debug.SendAnimationEvent(Positions[3], AnimEvents[3])
+			Debug.SendAnimationEvent(Positions[4], AnimEvents[4])
+		endIf
+	endFunction
+
+	function GoToStage(int toStage)
+		Stage = toStage
+		if Stage < 1
+			Stage = 1
+		endIf
+		GoToState("Advancing")
+		RegisterForSingleUpdate(0.05)
+	endFunction
+
+	function RealignActors()
+		SyncActors(true)
+		PlayAnimation()
+		MoveActors()
+	endFunction
+
+	function MoveActors()
+		int i = ActorCount
+		while i
+			i -= 1
+			ActorAlias[i].Snap()
+		endWhile
+	endFunction
+
+	; ------------------------------------------------------- ;
+	; --- Hotkey functions                                  --- ;
+	; ------------------------------------------------------- ;
 
 	function AdvanceStage(bool backwards = false)
 		if !backwards
@@ -191,10 +186,9 @@ state Animating
 	endFunction
 
 	function ChangeAnimation(bool backwards = false)
- 		SetAnimation(ArrayWrap((aid + SignInt(1, backwards)), Animations.Length))
- 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
-		RealignActors()
+		SetAnimation(sslUtility.WrapIndex((aid + sslUtility.SignInt(backwards, 1)), Animations.Length))
 		SendThreadEvent("AnimationChange")
+		RealignActors()
 	endFunction
 
 	function ChangePositions(bool backwards = false)
@@ -202,11 +196,11 @@ state Animating
 			return ; Solo/Creature Animation, nobody to swap with
 		endIf
 		; Set direction of swapping
-		int MovedTo = ArrayWrap((AdjustingPosition + SignInt(1, backwards)), ActorCount)
+		int MovedTo = sslUtility.WrapIndex((AdjustPos + sslUtility.SignInt(backwards, 1)), ActorCount)
 		; Shuffle
-		actor adjusting = Positions[AdjustingPosition]
+		actor adjusting = Positions[AdjustPos]
 		actor moved = Positions[MovedTo]
-		Positions[AdjustingPosition] = moved
+		Positions[AdjustPos] = moved
 		Positions[MovedTo] = adjusting
 		; Sync new positions
 		RealignActors()
@@ -215,25 +209,30 @@ state Animating
 	endFunction
 
 	function AdjustForward(bool backwards = false, bool adjuststage = false)
-		ActorSlot(AdjustingPosition).AlignTo(Animation.UpdateForward(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage), true)
+		ActorAlias[AdjustPos].AlignTo(Animation.UpdateForward(AdjustPos, stage, sslUtility.SignFloat(backwards, 1.0), adjuststage), true)
 	endFunction
 
 	function AdjustSideways(bool backwards = false, bool adjuststage = false)
-		ActorSlot(AdjustingPosition).AlignTo(Animation.UpdateSide(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage), true)
+		ActorAlias[AdjustPos].AlignTo(Animation.UpdateSide(AdjustPos, stage, sslUtility.SignFloat(backwards, 1.0), adjuststage), true)
 	endFunction
 
 	function AdjustUpward(bool backwards = false, bool adjuststage = false)
-		ActorSlot(AdjustingPosition).AlignTo(Animation.UpdateUp(AdjustingPosition, stage, SignFloat(1.0, backwards), adjuststage), true)
+		ActorAlias[AdjustPos].AlignTo(Animation.UpdateUp(AdjustPos, stage, sslUtility.SignFloat(backwards, 1.0), adjuststage), true)
 	endFunction
 
 	function RotateScene(bool backwards = false)
-		AdjustRotation(SignFloat(45.0, backwards))
+		CenterLocation[5] = CenterLocation[5] + sslUtility.SignFloat(backwards, 45.0)
+		if CenterLocation[5] >= 360.0
+			CenterLocation[5] = CenterLocation[5] - 360.0
+		elseIf CenterLocation[5] < 0.0
+			CenterLocation[5] = CenterLocation[5] + 360.0
+		endIf
 		SyncActors(true)
 	endFunction
 
 	function AdjustChange(bool backwards = false)
-		AdjustingPosition = ArrayWrap((AdjustingPosition + SignInt(1, backwards)), ActorCount)
-		Lib.mAdjustChange.Show((AdjustingPosition + 1))
+		AdjustPos = sslUtility.WrapIndex((AdjustPos + sslUtility.SignInt(backwards, 1)), ActorCount)
+		Lib.mAdjustChange.Show((AdjustPos + 1))
 	endFunction
 
 	function RestoreOffsets()
@@ -265,72 +264,19 @@ state Animating
 		RegisterForSingleUpdate(0.05)
 	endFunction
 
-	;/-----------------------------------------------\;
-	;|	Actor Manipulation                           |;
-	;\-----------------------------------------------/;
-
-	function PlayAnimation()
-		; Send with as little overhead as possible to improve syncing
-		string[] events = Animation.FetchStage(Stage)
-		if ActorCount == 1
-			Debug.SendAnimationEvent(Positions[0], events[0])
-		elseIf ActorCount == 2
-			Debug.SendAnimationEvent(Positions[0], events[0])
-			Debug.SendAnimationEvent(Positions[1], events[1])
-		elseIf ActorCount == 3
-			Debug.SendAnimationEvent(Positions[0], events[0])
-			Debug.SendAnimationEvent(Positions[1], events[1])
-			Debug.SendAnimationEvent(Positions[2], events[2])
-		elseIf ActorCount == 4
-			Debug.SendAnimationEvent(Positions[0], events[0])
-			Debug.SendAnimationEvent(Positions[1], events[1])
-			Debug.SendAnimationEvent(Positions[2], events[2])
-			Debug.SendAnimationEvent(Positions[3], events[3])
-		elseIf ActorCount == 5
-			Debug.SendAnimationEvent(Positions[0], events[0])
-			Debug.SendAnimationEvent(Positions[1], events[1])
-			Debug.SendAnimationEvent(Positions[2], events[2])
-			Debug.SendAnimationEvent(Positions[3], events[3])
-			Debug.SendAnimationEvent(Positions[4], events[4])
-		endIf
-	endFunction
-
-	function GoToStage(int toStage)
-		Stage = toStage
-		if Stage < 1
-			Stage = 1
-		endIf
-		GoToState("Advancing")
-		RegisterForSingleUpdate(0.05)
-	endFunction
-
-	function RealignActors()
-		SyncActors(true)
-		PlayAnimation()
-		MoveActors()
-	endFunction
-
-	function MoveActors()
-		int i = ActorCount
-		while i
-			i -= 1
-			ActorAlias[i].Snap()
-		endWhile
-	endFunction
-
 endState
 
-;/-----------------------------------------------\;
-;|	Animation Functions                           |;
-;\-----------------------------------------------/;
+; ------------------------------------------------------- ;
+; --- Context Sensitive Info                          --- ;
+; ------------------------------------------------------- ;
 
 function SetAnimation(int anim = -1)
 	; Randomize if -1
+	aid = anim
 	if anim < 0 || anim >= Animations.Length
 		aid = Utility.RandomInt(0, (Animations.Length - 1))
-	else
-		aid = anim
 	endIf
+	Animation = Animations[aid]
 	; Print name of animation to console
 	if HasPlayer
 		MiscUtil.PrintConsole("Playing Animation: " + Animation.Name)
@@ -338,7 +284,27 @@ function SetAnimation(int anim = -1)
 	; Check for out of range stage
 	if Stage >= Animation.StageCount
 		GoToStage((Animation.StageCount - 1))
+	else
+		AnimEvents = Animation.FetchStage(Stage)
+		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 	endIf
+endFunction
+
+float function GetTimer()
+	; Custom acyclic stage timer
+	if Animation.HasTimer(Stage)
+		TimedStage = true
+		return Animation.GetTimer(Stage)
+	endIf
+	; Default stage timers
+	TimedStage = false
+	int last = ( Timers.Length - 1 )
+	if Stage < last
+		return Timers[(Stage - 1)]
+	elseIf Stage >= Animation.StageCount
+		return Timers[last]
+	endIf
+	return Timers[(last - 1)]
 endFunction
 
 function TriggerOrgasm()
@@ -350,13 +316,10 @@ function TriggerOrgasm()
 	endWhile
 	; Play Orgasm SFX
 	Lib.OrgasmEffect.PlayAndWait(Positions[0])
-	Utility.Wait(0.2)
 	if Animation.SoundFX != none
 		Animation.SoundFX.PlayAndWait(Positions[0])
-		Utility.Wait(0.2)
 	endIf
 	Lib.OrgasmEffect.PlayAndWait(Positions[0])
-	Utility.Wait(0.2)
 	if Animation.SoundFX != none
 		Animation.SoundFX.PlayAndWait(Positions[0])
 	endIf
@@ -368,10 +331,6 @@ function EndLeadIn()
 	LeadIn = false
 	SetAnimation()
 	if Animation.IsSexual
-		; Toggle free camera to update stripping
-		if HasPlayer && Game.GetCameraState() == 3
-			MiscUtil.ToggleFreeCamera()
-		endIf
 		; Restrip with new strip options
 		int i = ActorCount
 		while i
@@ -407,19 +366,8 @@ function EndAnimation(bool quick = false)
 	Initialize()
 endFunction
 
-function Initialize()
-	UnregisterForUpdate()
-	AdjustingPosition = 0
-	aid = 0
-	parent.Initialize()
-endFunction
-
-;/-----------------------------------------------\;
-;|	Scene Manipulation                           |;
-;\-----------------------------------------------/;
-
-function CenterOnObject(ObjectReference centerOn, bool resync = true)
-	parent.CenterOnObject(centerOn, resync)
+function CenterOnObject(ObjectReference CenterOn, bool resync = true)
+	parent.CenterOnObject(CenterOn, resync)
 	if resync && GetState() == "Animating"
 		RealignActors()
 		SendThreadEvent("ActorsRelocated")
@@ -434,9 +382,46 @@ function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, fl
 	endIf
 endFunction
 
-;/-----------------------------------------------\;
-;|	Empty state dependent functions              |;
-;\-----------------------------------------------/;
+; ------------------------------------------------------- ;
+; --- System Use Only                                 --- ;
+; ------------------------------------------------------- ;
+
+bool function ActorWait(string waitfor)
+	int i = ActorCount
+	while i
+		i -= 1
+		if ActorAlias[i].GetState() != waitfor
+			return false
+		endIf
+	endWhile
+	return true
+endFunction
+
+function ActorAction(string stateAction, string stateFinish)
+	; Start actor action state
+	int i = ActorCount
+	while i
+		i -= 1
+		ActorAlias[i].GoToState(stateAction)
+	endWhile
+	; Wait for actors ready, or for ~30 seconds to pass
+	int failsafe = 30
+	while !ActorWait(stateFinish) && failsafe
+		Utility.Wait(1.0)
+		failsafe -= 1
+	endWhile
+endFunction
+
+function Initialize()
+	UnregisterForUpdate()
+	aid = 0
+	AdjustPos = 0
+	parent.Initialize()
+endFunction
+
+; ------------------------------------------------------- ;
+; --- State Restricted                                --- ;
+; ------------------------------------------------------- ;
 
 ; State Making
 sslThreadController function PrimeThread()
@@ -468,4 +453,6 @@ endFunction
 function RealignActors()
 endFunction
 function MoveActors()
+endFunction
+function GoToStage(int toStage)
 endFunction

@@ -113,6 +113,15 @@ int function ClampInt(int value, int min, int max) global
 	return value
 endFunction
 
+int function WrapIndex(int index, int len) global
+	if index >= len
+		return 0
+	elseif index < 0
+		return len - 1
+	endIf
+	return index
+endFunction
+
 int function SignInt(bool sign, int value) global
 	if sign
 		return value * -1

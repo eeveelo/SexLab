@@ -1,8 +1,8 @@
 scriptname sslBaseObject extends ReferenceAlias
 
-string property Name = "" auto hidden
+string property Name auto hidden
 string property Registry auto hidden
-bool property Enabled = true auto hidden
+bool property Enabled auto hidden
 bool Locked
 
 ; Storage key

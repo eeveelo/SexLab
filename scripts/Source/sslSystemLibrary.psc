@@ -1,6 +1,6 @@
 scriptname sslSystemLibrary extends Quest
 
-actor property PlayerRef auto
+Actor property PlayerRef auto
 
 ; Libraries
 sslAnimationLibrary property AnimLib auto
