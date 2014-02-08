@@ -22,6 +22,7 @@ sslBaseVoice Voice
 
 ; Voice
 bool IsSilent
+bool IsForcedSilent
 float VoiceDelay
 
 ; Info
@@ -111,7 +112,7 @@ bool function PrepareAlias(int tid, Actor ProspectRef, bool MakeVictim, sslBaseV
 	IsCreature = gender == 2
 	IsPlayer = ActorRef == Lib.PlayerRef
 	IsVictim = MakeVictim
-	IsSilent = ForceSilence
+	IsForcedSilent = ForceSilence
 	Voice = UseVoice
 	if MakeVictim
 		Controller.VictimRef = ActorRef
@@ -294,7 +295,7 @@ function SetVoice(sslBaseVoice toVoice, bool forceSilent = false)
 	if toVoice == none
 		Voice = Lib.VoiceLib.PickVoice(ActorRef)
 	endIf
-	IsSilent = forceSilent || IsSilent
+	IsForcedSilent = forceSilent
 endFunction
 
 sslBaseVoice function GetVoice()
@@ -398,7 +399,7 @@ state Animating
 		if ActorRef.IsDead() || ActorRef.IsDisabled()
 			Controller.EndAnimation(true)
 			return
-		elseIf Voice != none && !IsSilent
+		elseIf Voice != none && !(IsSilent || IsForcedSilent)
 			; Clear expression and modifiers before playing
 			sslExpressionLibrary.ClearPhoneme(ActorRef)
 			Voice.Moan(ActorRef, Strength, IsVictim)
@@ -431,7 +432,7 @@ state Animating
 			if stage == 1 && Animation.StageCount() == 1
 				strength = 70
 			endIf
-			if IsSilent || IsCreature
+			if IsSilent || IsForcedSilent || IsCreature
 				; VoiceDelay is used as loop timer, must be set even if silent.
 				VoiceDelay = 2.5
 			else
@@ -466,6 +467,8 @@ state Animating
 				endIf
 				; Update animation enjoyment
 				UpdateBaseEnjoyment()
+				; Update silence
+				IsSilent = Animation.IsSilent(Position, Stage)
 			endIf
 		endIf
 		; Update expression/enjoyment/openmouth
@@ -730,6 +733,7 @@ function Initialize()
 	Animation = none
 	Expression = none
 	strapon = none
+	IsForcedSilent = false
 	ActorScale = 0.0
 	AnimScale = 0.0
 	position = 0
