@@ -11,10 +11,11 @@ bool function SexLabIsActive() global
 endFunction
 
 SexLabFramework function GetAPI() global
-	if !SexLabIsActive()
-		return none
+	Quest API = Quest.GetQuest("SexLabQuestFramework")
+	if API != none
+		return (API as SexLabFramework)
 	endIf
-	return (Game.GetFormFromFile(0x0D62, "SexLab.esm") as Quest) as SexLabFramework
+	return none
 endFunction
 
 int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim = none, ObjectReference centerOn = none, bool allowBed = true, string hook = "") global
