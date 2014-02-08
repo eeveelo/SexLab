@@ -108,6 +108,9 @@ state Making
 		if ActorCount >= 5
 			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- Thread has reached actor limit", "FATAL")
 			return -1
+		elseIf Positions.Find(ActorRef) != -1
+			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They are already slotted into this thread", "FATAL")
+			return -1
 		endIf
 		; Attempt to claim a slot
 		sslActorAlias Slot = SlotActor(ActorRef)
@@ -116,7 +119,7 @@ state Making
 			return -1
 		endIf
 		; Add to thread Positions and return position location.
-		Positions[ActorCount] = ActorRef
+		Positions = sslUtility.PushActor(ActorRef, Positions)
 		ActorCount += 1
 		return Positions.Find(ActorRef)
 	endFunction
@@ -409,6 +412,8 @@ function SetupThreadEvent(string eventName)
 	if eid
 		ModEvent.PushInt(eid, thread_id)
 		ModEvent.PushBool(eid, HasPlayer)
+		ModEvent.PushForm(eid, VictimRef)
+		ModEvent.PushFloat(eid, StartedAt)
 		ModEvent.Send(eid)
 	endIf
 endFunction
@@ -459,7 +464,8 @@ endFunction
 function Initialize()
 	UnregisterForUpdate()
 	; Objects
-	Positions = new Actor[5]
+	Actor[] aDel
+	Positions = aDel
 	; Bools
 	Active = false
 	HasPlayer = false
