@@ -1,95 +1,37 @@
 scriptname sslThreadSlots extends Quest
 
-; Scripts
-sslThreadLibrary property Lib auto
-
-; Local
-sslThreadController[] ThreadView
-
-int property ActiveThreads hidden
-	int function get()
-		int count
-		int i
-		while i < 15
-			count += ThreadView[i].IsLocked as int
-			i += 1
-		endWhile
-		return count
+sslThreadController[] Slots
+sslThreadController[] property Threads hidden
+	sslThreadController[] function get()
+		return Slots
 	endFunction
 endProperty
 
-int function FindActorController(actor toFind)
-	if toFind != none
-		int i
-		while i < 15
-			if ThreadView[i].HasActor(toFind)
-				return i
-			endIf
-			i += 1
-		endWhile
-	endIf
-	return -1
-endFunction
-
-sslThreadController function GetActorController(actor toFind)
-	int tid = FindActorController(toFind)
-	if tid != -1
-		return ThreadView[tid]
-	endIf
-	return none
-endFunction
-
-int function FindPlayerController()
-	return FindActorController(Lib.PlayerRef)
-endFunction
-
-sslThreadController function GetPlayerController()
-	return GetActorController(Lib.PlayerRef)
-endFunction
-
-sslThreadController function GetController(int tid)
-	return ThreadView[tid]
-endFunction
-
-sslThreadController function PickController()
+sslThreadModel function PickModel()
 	int i
-	while i < 15
-		if !ThreadView[i].IsLocked
-			return ThreadView[i]
+	while i < Slots.Length
+		if !Slots[i].IsLocked
+			return Slots[i].Make()
 		endIf
 		i += 1
 	endWhile
 	return none
 endFunction
-
-;/-----------------------------------------------\;
-;|	Thread Slots Setup                           |;
-;\-----------------------------------------------/;
 
 function _Setup()
-	_StopAll()
-	ThreadView = new sslThreadController[15]
-	int i
-	while i < 15
-		ThreadView[i] = GetNthAlias(i) as sslThreadController
-		ThreadView[i]._SetThreadID(i)
-		ThreadView[i].Initialize()
-		i += 1
+	Slots = new sslThreadController[5]
+	int i = Slots.Length
+	while i
+		i -= 1
+		if i > 9
+			Slots[i] = (Quest.GetQuest("SexLabThread"+i) as sslThreadController)
+		else
+			Slots[i] = (Quest.GetQuest("SexLabThread0"+i) as sslThreadController)
+		endIf
+		Slots[i]._SetupThread(i)
 	endWhile
 endFunction
 
-function _StopAll()
-	int i = ThreadView.Length
-	while i
-		i -= 1
-		if ThreadView[i].GetState() != "Unlocked"
-			ThreadView[i].FastEnd = true
-			int n = ThreadView[i].ActorAlias.Length
-			while n
-				n -= 1
-				ThreadView[i].ActorAlias[n].GoToState("Reset")
-			endWhile
-		endIf
-		ThreadView[i].Initialize()
-	endWhile
-endFunction
+event OnInit()
+	_Setup()
+endEvent
