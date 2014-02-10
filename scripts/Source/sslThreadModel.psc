@@ -1,4 +1,5 @@
 scriptname sslThreadModel extends sslSystemLibrary
+{ Animation Thread Model: Runs storage and information about a thread. Access only through functions; NEVER create a property directly to this. }
 
 bool property IsLocked hidden
 	bool function get()
@@ -113,9 +114,11 @@ state Making
 			return -1
 		endIf
 		; Add to thread Positions and return position location.
+		; Update thread info
 		Positions = sslUtility.PushActor(ActorRef, Positions)
+		ActorCount = Positions.Length
+		HasPlayer = Positions.Find(PlayerRef) != -1
 		Genders[Slot.Gender] = Genders[Slot.Gender] + 1
-		ActorCount += 1
 		return Positions.Find(ActorRef)
 	endFunction
 
@@ -178,8 +181,183 @@ endState
 
 
 
+; ------------------------------------------------------- ;
+; --- Actor Setup                                     --- ;
+; ------------------------------------------------------- ;
+
+; Actor Overrides
+function SetStrip(Actor ActorRef, bool[] StripSlots)
+	if StripSlots.Length == 33
+		; ActorAlias(ActorRef).OverrideStrip(StripSlots)
+	else
+		Log("Malformed StripSlots bool[] passed, must be 33 length bool array, "+StripSlots.Length+" given", "ERROR")
+	endIf
+endFunction
+
+function DisableUndressAnimation(Actor ActorRef, bool disabling = true)
+	; ActorAlias(ActorRef).DisableUndressAnim(disabling)
+endFunction
+
+function DisableRagdollEnd(Actor ActorRef, bool disabling = true)
+	; ActorAlias(ActorRef).DisableRagdollEnd(disabling)
+endFunction
+
+; Voice
+; function SetVoice(Actor ActorRef, sslBaseVoice Voice, bool ForceSilent = false)
+; 	ActorAlias(ActorRef).SetVoice(Voice, ForceSilent)
+; endFunction
+; sslBaseVoice function GetVoice(Actor ActorRef)
+; 	return ActorAlias(ActorRef).GetVoice()
+; endFunction
+
+; Expressions
+; function SetExpression(Actor ActorRef, sslBaseExpression Expression)
+;	ActorAlias(ActorRef).SetExpression(Expression)
+; endFunction
+; sslBaseExpression function GetExpression(Actor ActorRef)
+;	return ActorAlias(ActorRef).GetExpression()
+; endFunction
+
+; Enjoyment/Pain
+int function GetEnjoyment(Actor ActorRef)
+	; ActorAlias(ActorRef).GetEnjoyment()
+endFunction
+int function GetPain(Actor ActorRef)
+	; ActorAlias(ActorRef).GetPain()
+endFunction
+
+; Actor Information
+int function GetPlayerPosition()
+	return Positions.Find(PlayerRef)
+endFunction
+
+int function GetPosition(Actor ActorRef)
+	return Positions.Find(ActorRef)
+endFunction
+
+bool function IsPlayerActor(Actor ActorRef)
+	return ActorRef == PlayerRef
+endFunction
+
+bool function IsPlayerPosition(int Position)
+	return Position == Positions.Find(PlayerRef)
+endFunction
+
+bool function HasActor(Actor ActorRef)
+	return Positions.Find(ActorRef) != -1
+endFunction
+
+bool function IsVictim(Actor ActorRef)
+	return VictimRef == ActorRef
+endFunction
 
 
+; ------------------------------------------------------- ;
+; --- Animation Setup                                 --- ;
+; ------------------------------------------------------- ;
+
+function SetForcedAnimations(sslBaseAnimation[] AnimationList)
+	if AnimationList.Length != 0
+		CustomAnimations = AnimationList
+		SetAnimation()
+	endIf
+endFunction
+
+function SetAnimations(sslBaseAnimation[] AnimationList)
+	if AnimationList.Length != 0
+		PrimaryAnimations = AnimationList
+		SetAnimation()
+	endIf
+endFunction
+
+function SetLeadAnimations(sslBaseAnimation[] AnimationList)
+	if AnimationList.Length != 0
+		LeadIn = true
+		LeadAnimations = AnimationList
+		SetAnimation()
+	endIf
+endFunction
+
+ bool function LocateBed(bool askPlayer = true, float radius = 750.0)
+	if bedding != -1
+		ObjectReference FoundBed
+		; Select a bed
+		if PlayerRef != none
+			FoundBed = ThreadLib.FindBed(PlayerRef, radius)
+			; A bed was selected, should we use it?
+			if FoundBed != none && (bedding == 1 || askPlayer == false || (ThreadLib.mUseBed.Show() as bool))
+				CenterOnObject(FoundBed)
+				return true
+			endIf
+		elseIf Config.sNPCBed == "$SSL_Always" || (Config.sNPCBed == "$SSL_Sometimes" && (Utility.RandomInt(0, 1) as bool)) || bedding == 1
+			FoundBed = ThreadLib.FindBed(Positions[0], radius)
+			; A bed was selected, use it
+			if FoundBed != none
+				CenterOnObject(FoundBed)
+				return true
+			endIf
+		endIf
+	endIf
+	return false
+endFunction
+
+; ------------------------------------------------------- ;
+; --- Thread Settings                                 --- ;
+; ------------------------------------------------------- ;
+
+function DisableLeadIn(bool disabling = true)
+	LeadInDisabled = disabling
+	if disabling
+		LeadIn = false
+	endIf
+endFunction
+
+function SetBedding(int flag = 0)
+	bedding = flag
+endFunction
+
+function SetTimers(float[] setTimers)
+	if setTimers.Length < 1
+		Log("SetTimers() - Empty timers given.", "ERROR")
+		return
+	endIf
+	CustomTimers = setTimers
+endFunction
+
+float function GetStageTimer(int maxstage)
+	int last = ( Timers.Length - 1 )
+	if stage == maxstage
+		return Timers[last]
+	elseif stage < last
+		return Timers[(stage - 1)]
+	endIf
+	return Timers[(last - 1)]
+endfunction
+
+function CenterOnObject(ObjectReference CenterOn, bool resync = true)
+	if CenterOn != none
+		CenterRef = CenterOn
+		CenterOnCoords(CenterOn.GetPositionX(), CenterOn.GetPositionY(), CenterOn.GetPositionZ(), CenterOn.GetAngleX(), CenterOn.GetAngleY(), CenterOn.GetAngleZ(), false)
+		if ThreadLib.BedsList.HasForm(CenterOn.GetBaseObject())
+			BedRef = CenterOn
+			CenterLocation[0] = CenterLocation[0] + (33.0 * Math.sin(CenterLocation[5]))
+			CenterLocation[1] = CenterLocation[1] + (33.0 * Math.cos(CenterLocation[5]))
+			if !ThreadLib.BedRollsList.HasForm(CenterOn.GetBaseObject())
+				CenterLocation[2] = CenterLocation[2] + 37.0
+			endIf
+		endIf
+	endIf
+endFunction
+
+function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, float RotX = 0.0, float RotY = 0.0, float RotZ = 0.0, bool resync = true)
+	CenterLocation = new float[6]
+	CenterLocation[0] = LocX
+	CenterLocation[1] = LocY
+	CenterLocation[2] = LocZ
+	CenterLocation[3] = RotX
+	CenterLocation[4] = RotY
+	CenterLocation[5] = RotZ
+endFunction
 
 ; ------------------------------------------------------- ;
 ; --- Event Hooks                                     --- ;
@@ -219,17 +397,54 @@ function RemoveHook(string delHooks)
 endFunction
 
 ; ------------------------------------------------------- ;
+; --- Actor Alias                                     --- ;
+; ------------------------------------------------------- ;
+
+int function FindSlot(Actor ActorRef)
+	return StorageUtil.GetIntValue(ActorRef, "SexLab.Position", -1)
+endFunction
+
+sslActorAlias function ActorAlias(Actor ActorRef)
+	return ActorAlias[FindSlot(ActorRef)]
+endFunction
+
+sslActorAlias function PositionAlias(int Position)
+	return ActorAlias[FindSlot(Positions[Position])]
+endFunction
+
+sslActorAlias function SlotActor(Actor ActorRef)
+	int i
+	while i < 5 && !ActorAlias[i].ForceRefIfEmpty(ActorRef)
+		i += 1
+	endWhile
+	if i < 5 && ActorAlias[i].GetReference() == ActorRef
+		return ActorAlias[i]
+	endIf
+	return none
+endFunction
+
+; ------------------------------------------------------- ;
 ; --- System Use Only                                 --- ;
 ; ------------------------------------------------------- ;
 
 function Initialize()
 	UnregisterForUpdate()
-	GoToState("Unlocked")
-
+	; Forms
 	Actor[] aDel
 	Positions = aDel
+	; Boolean
+	Active = false
+	HasPlayer = false
+	AutoAdvance = false
+	LeadIn = false
+	FastEnd = false
+	; Integers
 	ActorCount = 0
 	Genders = new int[3]
+	; Strings
+	string[] strDel1
+	Hooks = strDel1
+	GoToState("Unlocked")
 endFunction
 
 function Log(string log, string type = "NOTICE")
@@ -254,17 +469,6 @@ function SetupThreadEvent(string eventName)
 		ModEvent.PushFloat(eid, StartedAt)
 		ModEvent.Send(eid)
 	endIf
-endFunction
-
-sslActorAlias function SlotActor(Actor ActorRef)
-	int i
-	while i < 5 && !ActorAlias[i].ForceRefIfEmpty(ActorRef)
-		i += 1
-	endWhile
-	if i < 5 && ActorAlias[i].GetReference() == ActorRef
-		return ActorAlias[i]
-	endIf
-	return none
 endFunction
 
 int thread_id
