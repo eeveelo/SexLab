@@ -18,7 +18,7 @@ sslThreadModel function PickModel()
 	return none
 endFunction
 
-function _Setup()
+function Setup()
 	Slots = new sslThreadController[5]
 	int i = Slots.Length
 	while i
@@ -33,5 +33,5 @@ function _Setup()
 endFunction
 
 event OnInit()
-	_Setup()
+	Setup()
 endEvent

@@ -105,7 +105,7 @@ endFunction
 function Clear()
 	Name = ""
 	Registry = ""
-	Enabled = false
+	Enabled = true
 	Locked = false
 	parent.Clear()
 endFunction

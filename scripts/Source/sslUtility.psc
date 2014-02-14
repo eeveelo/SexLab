@@ -44,6 +44,15 @@ float[] function MergeFloatArray(float[] push, float[] array) global
 	return output
 endFunction
 
+float[] function TrimFloatArray(float[] array, int len) global
+	float[] output = FloatArray(len)
+	while len
+		len -= 1
+		output[len] = array[len]
+	endWhile
+	return output
+endFunction
+
 float function ClampFloat(float value, float min, float max) global
 	if value >= max
 		return max
@@ -100,6 +109,15 @@ int[] function MergeIntArray(int[] push, int[] array) global
 		len -= 1
 		pushing -= 1
 		output[len] = push[pushing]
+	endWhile
+	return output
+endFunction
+
+int[] function TrimIntArray(int[] array, int len) global
+	int[] output = IntArray(len)
+	while len
+		len -= 1
+		output[len] = array[len]
 	endWhile
 	return output
 endFunction
@@ -170,6 +188,15 @@ bool[] function MergeBoolArray(bool[] push, bool[] array) global
 		len -= 1
 		pushing -= 1
 		output[len] = push[pushing]
+	endWhile
+	return output
+endFunction
+
+bool[] function TrimBoolArray(bool[] array, int len) global
+	bool[] output = BoolArray(len)
+	while len
+		len -= 1
+		output[len] = array[len]
 	endWhile
 	return output
 endFunction
@@ -254,6 +281,15 @@ string[] function MergeStringArray(string[] push, string[] array) global
 		len -= 1
 		pushing -= 1
 		output[len] = push[pushing]
+	endWhile
+	return output
+endFunction
+
+string[] function TrimStringArray(string[] array, int len) global
+	string[] output = StringArray(len)
+	while len
+		len -= 1
+		output[len] = array[len]
 	endWhile
 	return output
 endFunction

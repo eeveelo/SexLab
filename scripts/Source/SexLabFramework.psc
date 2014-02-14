@@ -14,31 +14,42 @@ scriptname SexLabFramework extends Quest
 ;#------------------------------------------------------------------#
 ;####################################################################
 
-bool systemenabled = false
+bool SystemEnabled = false
 bool property Enabled hidden
 	bool function get()
-		return systemenabled
+		return SystemEnabled
 	endFunction
 endProperty
 
-; Scripts
-sslSystemConfig property Config auto
+; Animation Threads
 sslThreadSlots property ThreadSlots auto
+sslThreadController[] property Threads hidden
+	sslThreadController[] function get()
+		return ThreadSlots.Threads
+	endFunction
+endProperty
 
 ; Animation Sets
-
+sslAnimationSlots property AnimSlots auto
+sslBaseAnimation[] property Animations hidden
+	sslBaseAnimation[] function get()
+		return AnimSlots.Animations
+	endFunction
+endProperty
 
 ; Creature animations
 
 
 ; Voice Sets
 
-; Readonly Config Accessor
-; sslSystemConfig property Config auto
+; Configuration Accessor
+sslSystemConfig property Config auto
 
 ; Data
-actor[] property DebugActor auto hidden
+Faction property AnimatingFaction auto
 Actor property PlayerRef auto
+
+Actor[] property DebugActor auto hidden
 
 ;#---------------------------#
 ;#                           #

@@ -49,21 +49,15 @@ function Wait(float seconds) global
 	endWhile
 endFunction
 
-function Log(string msg, string source, string type = "NOTICE", string display = "trace", bool minimal = false) global
-	int severity = 0
-	if type == "ERROR" || type == "FATAL"
-		severity = 2
-	elseif type == "NOTICE" || type == "DEBUG"
-		severity = 1
-	endIf
+function Log(string msg, string source, string type = "NOTICE", string display = "trace", bool minimal = true) global
 	if StringUtil.Find(display, "trace") != -1
 		if minimal
-			Debug.Trace("-- SexLab "+type+"-- "+source+": "+msg, severity)
+			Debug.Trace("-- SexLab "+type+"-- "+source+": "+msg)
 		else
-			Debug.Trace("--- SexLab "+source+" --------------------------------", severity)
-			Debug.Trace(" "+type+":", severity)
-			Debug.Trace("   "+msg, severity)
-			Debug.Trace("-----------------------------------------------------------", severity)
+			Debug.Trace("--- SexLab "+source+" --------------------------------")
+			Debug.Trace(" "+type+":")
+			Debug.Trace("   "+msg)
+			Debug.Trace("-----------------------------------------------------------")
 		endIf
 	endIf
 	if StringUtil.Find(display, "box") != -1
@@ -73,7 +67,7 @@ function Log(string msg, string source, string type = "NOTICE", string display =
 		Debug.Notification(type+": "+msg)
 	endIf
 	if StringUtil.Find(display, "stack") != -1
-		Debug.TraceStack("-- SexLab "+type+"-- "+source+": "+msg, severity)
+		Debug.TraceStack("-- SexLab "+type+"-- "+source+": "+msg)
 	endIf
 	if StringUtil.Find(display, "console") != -1
 		MiscUtil.PrintConsole(type+" SexLab "+source+": "+msg)

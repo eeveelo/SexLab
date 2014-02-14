@@ -2,7 +2,6 @@ scriptname sslAnimationFactory extends Quest
 
 sslAnimationSlots property Slots auto
 sslBaseAnimation property Animation auto hidden
-int slot
 
 ; Gender Types
 int property Male = 0 autoreadonly hidden
@@ -30,34 +29,34 @@ int property Foreplay = 2 autoreadonly hidden
 ; ------------------------------------------------------- ;
 
 ; Send callback event to start registration
-int function RegisterAnimation(string registrar)
-	; if Slots.FindByRegistrar(registrar) != -1
-	; 	return Slots.FindByRegistrar(registrar) ; Duplicate
-	; elseif !Slots.FreeSlots
-	; 	return -1 ; No free slots
-	; endIf
-	; ; Wait for factory to be free
-	; while Animation != none
-	; 	Utility.WaitMenuMode(0.10)
-	; endWhile
-	; ; Get free animation slot
-	; Animation = Slots.GetFree()
-	; slot = Slots.Register(Animation, registrar)
-	; ; Send load event
-	; RegisterForModEvent("RegisterAnimation", registrar)
-	; SendModEvent("RegisterAnimation", registrar, 1)
-	; UnregisterForAllModEvents()
-	; return slot
+function RegisterAnimation(string Registrar)
+	if Slots.FindByRegistrar(Registrar) != -1
+		return ; Duplicate
+	endIf
+	; Wait for factory to be free
+	while Animation != none
+		Utility.WaitMenuMode(0.10)
+	endWhile
+	; Get free animation slot
+	Animation = Slots.Register(Registrar)
+	if Animation == none
+		return ; No available slot or duplicate
+	endIf
+	; Clear callback storage
+	InitCallbacks()
+	; Send load event
+	RegisterForModEvent("Register"+Registrar, Registrar)
+	ModEvent.Send(ModEvent.Create("Register"+Registrar))
+	UnregisterForAllModEvents()
 endFunction
 
 ; Unlocks factory for next callback, MUST be called at end of callback
 function Save()
-	; Run animation caches
-	; Animation.CacheAllForwards()
+	; Save animations stage+position data
+	SexLabUtil.Log("Setup animation '"+Animation.Name+"'", "SexLabAnimationFactory["+Slots.Animations.Find(Animation)+"]", "REGISTER ", "trace,console", true)
+	Animation._Save(sslUtility.TrimIntArray(positionData, positionID), sslUtility.TrimStringArray(animData, animID), sslUtility.TrimFloatArray(offsetData, offsetID), sslUtility.TrimIntArray(infoData, infoID))
 	; Free up factory
-	Debug.Trace("SexLabAnimationFactory: Registered animation slot SexLabFramework.Animation["+slot+"] to '"+Animation.Name+"' ")
 	Animation = none
-	slot = -1
 endfunction
 
 ; ------------------------------------------------------- ;
@@ -65,27 +64,28 @@ endfunction
 ; ------------------------------------------------------- ;
 
 int function AddPosition(int gender = 0, int addCum = -1)
-	posData[((actors * 2) + 0)] = gender
-	posData[((actors * 2) + 1)] = addCum
-	actors += 1
-	return (actors - 1)
+	Animation.Genders[gender] = Animation.Genders[gender] + 1
+	positionData[(positionID + 0)] = gender
+	positionData[(positionID + 1)] = addCum
+	positionID += 2
+	return (positionID / 2)
 endFunction
 
 function AddPositionStage(int position, string animationEvent, float forward = 0.0, float side = 0.0, float up = 0.0, float rotate = 0.0, bool silent = false, bool openMouth = false, bool strapon = true, int sos = 0)
-	animData[index] = animationEvent
-	schlongData[index] = sos
-	index += 1
+	animData[animID] = animationEvent
+	animID += 1
 
-	offsetData[(offsetIndex + 0)] = forward
-	offsetData[(offsetIndex + 1)] = side
-	offsetData[(offsetIndex + 2)] = up
-	offsetData[(offsetIndex + 3)] = rotate
-	offsetIndex += 4
+	offsetData[(offsetID + 0)] = forward
+	offsetData[(offsetID + 1)] = side
+	offsetData[(offsetID + 2)] = up
+	offsetData[(offsetID + 3)] = rotate
+	offsetID += 4
 
-	flagData[(flagIndex + 0)] = silent
-	flagData[(flagIndex + 1)] = openMouth
-	flagData[(flagIndex + 2)] = strapon && posData[(position * 2)] == Male
-	flagIndex += 3
+	infoData[(infoID + 0)] = (silent as int)
+	infoData[(infoID + 1)] = (openMouth as int)
+	infoData[(infoID + 2)] = ((strapon && positionData[(position * 2)] == Male) as int)
+	infoData[(infoID + 3)] = sos
+	infoID += 4
 endFunction
 
 function SetContent(int contentType)
@@ -136,27 +136,28 @@ endProperty
 ; --- Callback Data Handling - SYSTEM USE ONLY        --- ;
 ; ------------------------------------------------------- ;
 
-int actors
-int[] posData
+int positionID
+int[] positionData
 
-int index
+int animID
 string[] animData
-int[] schlongData
 
-int offsetIndex
+int offsetID
 float[] offsetData
 
-int flagIndex
-bool[] flagData
+int infoID
+int[] infoData
 
 function InitCallbacks()
-	actors = 0
-	index = 0
-	offsetIndex = 0
-	flagIndex = 0
+	positionID = 0
+	positionData = new int[10]
+
+	animID = 0
 	animData = new string[128]
+
+	offsetID = 0
 	offsetData = new float[128]
-	flagData = new bool[128]
-	schlongData = new int[128]
-	posData = new int[10]
+
+	infoID = 0
+	infoData = new int[128]
 endFunction

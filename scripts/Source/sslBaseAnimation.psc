@@ -4,29 +4,19 @@ scriptname sslBaseAnimation extends sslBaseObject
 ; int property SFX auto hidden
 Sound property SoundFX auto hidden
 
-int actors = 0
-int stages = 0
-int content = 0
+int Actors
+int Stages
+int Content
 
-
-int[] positions
-int[] genders
-
-; Animation Events
-string[] animations
+; Storage arrays
+int[] positions ; = gender, cum
+int[] info ; = silent (bool), openmouth (bool), strapon (bool), schlong offset (int)
+float[] offsets ; = forward, side, up, rotate
 float[] timers
+string[] animations
 
-float[] offsets
-bool[] flags
-int[] schlongs
-
-; Storage legend
-; int Key("Positions") = gender, cum
-; int Key("Info") = silent (bool), openmouth (bool), strapon (bool), schlong offset (int)
+; StorageUtil legend
 ; form Key("Creatures") = Valid races for creature animation
-; float Key("Offsets") = forward, side, up, rotate
-; string Key("Tags") = tags applied to animation
-; float Name = forward, side, up, rotate
 
 ; Information
 bool property IsSexual hidden
@@ -36,34 +26,37 @@ bool property IsSexual hidden
 endProperty
 bool property IsCreature hidden
 	bool function get()
-		return genders[2] != 0
+		return Genders[2] != 0
 	endFunction
 endProperty
 int property StageCount hidden
 	int function get()
-		return stages
+		return Stages
 	endFunction
 endProperty
 int property PositionCount hidden
 	int function get()
-		return actors
+		return Actors
 	endFunction
 endProperty
+
+int[] property Genders auto hidden
 int property Males hidden
 	int function get()
-		return genders[0]
+		return Genders[0]
 	endFunction
 endProperty
 int property Females hidden
 	int function get()
-		return genders[1]
+		return Genders[1]
 	endFunction
 endProperty
 int property Creatures hidden
 	int function get()
-		return genders[2]
+		return Genders[2]
 	endFunction
 endProperty
+
 form[] property CreatureRaces hidden
 	form[] function get()
 		int i = StorageUtil.FormListCount(Storage, Key("Creatures"))
@@ -83,96 +76,62 @@ endProperty
 float[] function GetPositionOffsets(int position, int stage)
 	int i = DataIndex(4, position, stage, 0)
 	float[] off = new float[4]
-	off[0] = offsets[i] + StorageUtil.FloatListGet(Storage, Name, i)
-	off[1] = offsets[i + 1]
-	off[2] = offsets[i + 2]
-	off[3] = offsets[i + 3]
+	off[0] = GetOffset(i)
+	off[1] = GetOffset((i + 1))
+	off[2] = GetOffset((i + 2))
+	off[3] = GetOffset((i + 3))
 	return off
 endFunction
 
 function CacheForwards(int stage)
 	; Get forward offsets of all positions + find highest/lowest position
-	float adjuster
-	float[] forwards = new float[5]
-	int i = actors
-	while i
-		i -= 1
-		forwards[i] = AccessOffset(i, stage, 0)
-		if Math.Abs(forwards[i]) > Math.Abs(adjuster)
-			adjuster = forwards[i]
-		endIf
-	endWhile
-	; Get signed half of highest/lowest offset
-	adjuster *= -0.5
-	; Cache forward offset adjusted by half of highest denomination
-	i = actors
-	while i
-		i -= 1
-		forwards[i] = (forwards[i] + adjuster)
-		StorageUtil.FloatListSet(Storage, Key("Forwards"), DataIndex(1, i, stage, 0), forwards[i])
-	endWhile
+	; float adjuster
+	; float[] forwards = new float[5]
+	; int i = Actors
+	; while i
+	; 	i -= 1
+	; 	forwards[i] = GetOffset(i, stage, 0)
+	; 	if Math.Abs(forwards[i]) > Math.Abs(adjuster)
+	; 		adjuster = forwards[i]
+	; 	endIf
+	; endWhile
+	; ; Get signed half of highest/lowest offset
+	; adjuster *= -0.5
+	; ; Cache forward offset adjusted by half of highest denomination
+	; i = Actors
+	; while i
+	; 	i -= 1
+	; 	forwards[i] = (forwards[i] + adjuster)
+	; 	StorageUtil.FloatListSet(Storage, Key("Forwards"), DataIndex(1, i, stage, 0), forwards[i])
+	; endWhile
 endFunction
 
 function CacheAllForwards()
-	int stage = stages
-	while stage
-		CacheForwards(stage)
-		stage -= 1
-	endWhile
-endFunction
-
-;/-----------------------------------------------\;
-;|	Animation Setup                              |;
-;\-----------------------------------------------/;
-
-function SetStageTimer(int stage, float timer)
-	; Validate stage
-	if stage > stages || stage < 1
-		_Log("Unknown animation stage, '"+stage+"' given.", "SetStageTimer")
-		return
-	endIf
-	; Initialize timer array if needed
-	if timers.Length != stages
-		timers = sslUtility.FloatArray(stages)
-	endIf
-	; Set timer
-	timers[(stage - 1)] = timer
+	; int stage = stages
+	; while stage
+	; 	CacheForwards(stage)
+	; 	stage -= 1
+	; endWhile
 endFunction
 
 ;/-----------------------------------------------\;
 ;|	Data Accessors                               |;
 ;\-----------------------------------------------/;
 
-bool function Exists(string method, int position, int stage = -99)
-	if position > actors || position < 0
-		_Log("Unknown actor position, '"+position+"' given.", method)
-		return false
-	elseif stage != -99 && ( stage > stages || stage < 0 )
-		_Log("Unknown animation stage, '"+stage+"' given.", method)
-		return false
-	endIf
-	return true
-endFunction
-
 int function DataIndex(int slots, int position, int stage, int slot)
 	return ( position * (stages * slots) ) + ( (stage - 1) * slots ) + slot
 endFunction
 
-float function AccessOffset(int position, int stage, int slot)
-	int i = DataIndex(4, position, stage, slot)
-	return StorageUtil.FloatListGet(Storage, Key("Offsets"), i) + StorageUtil.FloatListGet(Storage, Name, i)
+float function GetOffset(int i)
+	return offsets[i] + StorageUtil.FloatListGet(Storage, Name, i)
 endFunction
 
-bool function AccessSwitch(int position, int stage, int slot)
-	return flags[DataIndex(3, position, stage, slot)]
+int function AccessInfo(int position, int stage, int slot)
+	return info[DataIndex(4, position, stage, slot)]
 endFunction
 
 int function AccessPosition(int position, int slot)
 	return positions[((position * 2) + slot)]
-endFunction
-
-int function GetSchlong(int position, int stage)
-	return schlongs[((position * stages) + (stage - 1))]
 endFunction
 
 bool function HasTimer(int stage)
@@ -191,15 +150,15 @@ endFunction
 ;\-----------------------------------------------/;
 
 function SetAdjustment(int position, int stage, int slot, float to)
-	; Init adjustments
-	if StorageUtil.FloatListCount(Storage, Name) < 1
-		int i = StorageUtil.FloatListCount(Storage, Key("Offsets"))
-		while i > StorageUtil.FloatListCount(Storage, Name)
-			StorageUtil.FloatListAdd(Storage, Name, 0.0)
-		endWhile
-	endIf
-	; Set adjustment at index
-	StorageUtil.FloatListSet(Storage, Name, DataIndex(4, position, stage, slot), to)
+	; ; Init adjustments
+	; if StorageUtil.FloatListCount(Storage, Name) < 1
+	; 	int i = StorageUtil.FloatListCount(Storage, Key("Offsets"))
+	; 	while i > StorageUtil.FloatListCount(Storage, Name)
+	; 		StorageUtil.FloatListAdd(Storage, Name, 0.0)
+	; 	endWhile
+	; endIf
+	; ; Set adjustment at index
+	; StorageUtil.FloatListSet(Storage, Name, DataIndex(4, position, stage, slot), to)
 endFunction
 
 float function GetAdjustment(int position, int stage, int slot)
@@ -219,7 +178,7 @@ function UpdateAllOffsets(int position, int slot, float adjust)
 endFunction
 
 float[] function UpdateForward(int position, int stage, float adjust, bool adjuststage = false)
-	if Exists("UpdateForward", position, stage)
+	; if Exists("UpdateForward", position, stage)
 		if adjuststage
 			UpdateOffset(position, stage, 0, adjust)
 			CacheForwards(stage)
@@ -227,29 +186,29 @@ float[] function UpdateForward(int position, int stage, float adjust, bool adjus
 			UpdateAllOffsets(position, 0, adjust)
 			CacheAllForwards()
 		endIf
-	endIf
+	; endIf
 	return GetPositionOffsets(position, stage)
 endFunction
 
 float[] function UpdateSide(int position, int stage, float adjust, bool adjuststage = false)
-	if Exists("UpdateSide", position, stage)
+	; if Exists("UpdateSide", position, stage)
 		if adjuststage
 			UpdateOffset(position, stage, 1, adjust)
 		else
 			UpdateAllOffsets(position, 1, adjust)
 		endIf
-	endIf
+	; endIf
 	return GetPositionOffsets(position, stage)
 endFunction
 
 float[] function UpdateUp(int position, int stage, float adjust, bool adjuststage = false)
-	if Exists("UpdateUp", position, stage)
+	; if Exists("UpdateUp", position, stage)
 		if adjuststage
 			UpdateOffset(position, stage, 2, adjust)
 		else
 			UpdateAllOffsets(position, 2, adjust)
 		endIf
-	endIf
+	; endIf
 	return GetPositionOffsets(position, stage)
 endFunction
 
@@ -262,7 +221,7 @@ endFunction
 ;\-----------------------------------------------/;
 
 string[] function FetchPosition(int position)
-	if position > actors || position < 0
+	if position > Actors || position < 0
 		_Log("Unknown position, '"+stage+"' given", "FetchPosition")
 		return none
 	endIf
@@ -284,9 +243,9 @@ string[] function FetchStage(int stage)
 		_Log("Unknown stage, '"+stage+"' given", "FetchStage")
 		return none
 	endIf
-	string[] anims = sslUtility.StringArray(actors)
+	string[] anims = sslUtility.StringArray(Actors)
 	int position = 0
-	while position < actors
+	while position < Actors
 		anims[position] = FetchPositionStage(position, stage)
 		position += 1
 	endWhile
@@ -298,23 +257,27 @@ endFunction
 ;\-----------------------------------------------/;
 
 bool function IsSilent(int position, int stage)
-	return AccessSwitch(position, stage, 0)
+	return AccessInfo(position, stage, 0) as bool
 endFunction
 
-bool function UseOpenMouth(int position, int stage)
-	return AccessSwitch(position, stage, 1)
+bool function UseOpenMouthInfo(int position, int stage)
+	return AccessInfo(position, stage, 1) as bool
 endFunction
 
 bool function UseStrapon(int position, int stage)
-	return AccessSwitch(position, stage, 2)
+	return AccessInfo(position, stage, 2) as bool
+endFunction
+
+int function GetSchlong(int position, int stage)
+	return AccessInfo(position, stage, 3)
 endFunction
 
 int function ActorCount()
-	return actors
+	return Actors
 endFunction
 
 int function StageCount()
-	return stages
+	return Stages
 endFunction
 
 int function GetGender(int position)
@@ -336,7 +299,7 @@ endFunction
 int function FemaleCount()
 	int count = 0
 	int i = 0
-	while i < actors
+	while i < Actors
 		if AccessPosition(i, 0) == 1
 			count += 1
 		endIf
@@ -348,7 +311,7 @@ endFunction
 int function MaleCount()
 	int count = 0
 	int i = 0
-	while i < actors
+	while i < Actors
 		if AccessPosition(i, 0) == 0
 			count += 1
 		endIf
@@ -390,6 +353,36 @@ function AddRace(Race creature)
 endFunction
 
 ;/-----------------------------------------------\;
+;|	Animation Setup                              |;
+;\-----------------------------------------------/;
+
+function SetStageTimer(int stage, float timer)
+	; Validate stage
+	if stage > Stages || stage < 1
+		_Log("Unknown animation stage, '"+stage+"' given.", "SetStageTimer")
+		return
+	endIf
+	; Initialize timer array if needed
+	if timers.Length != Stages
+		timers = sslUtility.FloatArray(Stages)
+	endIf
+	; Set timer
+	timers[(stage - 1)] = timer
+endFunction
+
+function _Save(int[] posData, string[] animData, float[] offsetData, int[] infoData)
+	; Update config data
+	positions = posData
+	animations = animData
+	offsets = offsetData
+	info = infoData
+	Actors = (posData.Length / 2)
+	Stages = (animData.Length / Actors)
+	; Cache forward adjustments
+	CacheAllForwards()
+endFunction
+
+;/-----------------------------------------------\;
 ;|	System Use                                   |;
 ;\-----------------------------------------------/;
 
@@ -403,17 +396,17 @@ function _Log(string log, string method, string type = "NOTICE")
 endFunction
 
 function Initialize()
-	StorageUtil.FloatListClear(Storage, Key("Offsets"))
-	StorageUtil.FloatListClear(Storage, Key("Forwards"))
-	StorageUtil.IntListClear(Storage, Key("Positions"))
-	StorageUtil.IntListClear(Storage, Key("Info"))
+	; StorageUtil.FloatListClear(Storage, Key("Offsets"))
+	; StorageUtil.FloatListClear(Storage, Key("Forwards"))
+	; StorageUtil.IntListClear(Storage, Key("Positions"))
+	; StorageUtil.IntListClear(Storage, Key("Info"))
 	StorageUtil.FormListClear(Storage, Key("Creatures"))
 
 	Actors = 0
 	Stages = 0
-	content = 0
+	Content = 0
 
-	genders = new int[3]
+	Genders = new int[3]
 	float[] floatDel1
 	timers = floatDel1
 	string[] stringDel1

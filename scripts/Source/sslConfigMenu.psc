@@ -2,7 +2,7 @@ scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
 int function GetVersion()
-	return 13900
+	return 14000
 endFunction
 
 string function GetStringVer()
@@ -32,6 +32,7 @@ endEvent
 SexLabFramework property SexLab auto
 sslSystemConfig property Config auto
 sslThreadSlots property ThreadSlots auto
+sslAnimationSlots property AnimSlots auto
 
 ; Data
 Actor property PlayerRef auto
@@ -126,12 +127,15 @@ endEvent
 
 function _SetupSystem()
 	_CheckSystem()
+
+	; AnimSlots = (Quest.GetQuest("SexLabQuestAnimations") as sslAnimationSlots)
+
 	; SexLab._EnableSystem(false)
 	; Init Defaults
 	SetDefaults()
 	; Init animations
 	; AnimLib._Setup()
-	; AnimSlots._Setup()
+	AnimSlots.Setup()
 	; ; Init creature animations
 	; CreatureAnimSlots._Setup()
 	; ; Init voices
@@ -147,7 +151,7 @@ function _SetupSystem()
 	;Config._Setup()
 	; ; Init Thread Controllers
 	; Config._Setup()
-	ThreadSlots._Setup()
+	ThreadSlots.Setup()
 	; ; Init Sexlab
 	; SexLab._Setup()
 
