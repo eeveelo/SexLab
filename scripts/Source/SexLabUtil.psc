@@ -45,7 +45,7 @@ endFunction
 function Wait(float seconds) global
 	float timer = Utility.GetCurrentRealTime() + seconds
 	while Utility.GetCurrentRealTime() < timer
-		Utility.Wait(0.4)
+		Utility.Wait(0.50)
 	endWhile
 endFunction
 

@@ -260,7 +260,7 @@ bool function IsSilent(int position, int stage)
 	return AccessInfo(position, stage, 0) as bool
 endFunction
 
-bool function UseOpenMouthInfo(int position, int stage)
+bool function UseOpenMouth(int position, int stage)
 	return AccessInfo(position, stage, 1) as bool
 endFunction
 

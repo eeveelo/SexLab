@@ -91,7 +91,7 @@ endProperty
 bool Active
 bool LeadInDisabled
 string[] Hooks
-int bedding ; 0 allow, 1 force, -1 forbid
+int BedFlag ; 0 allow, 1 force, -1 forbid
 
 ; ------------------------------------------------------- ;
 ; --- Thread Making API                               --- ;
@@ -129,47 +129,43 @@ state Making
 		endIf
 		Active = true
 
-		; Check for duplicate actors
-		int i = ActorCount
-		while i
-			i -= 1
-			if Positions.Find(Positions[i]) != Positions.RFind(Positions[i])
-				Log("StartThread() - Duplicate actor found in list", "FATAL")
-				return none
+		; ------------------------- ;
+		; -- Validate Animations -- ;
+		; ------------------------- ;
+
+
+		; ------------------------- ;
+		; --    Locate Center    -- ;
+		; ------------------------- ;
+
+		; Search location marker near player or first position
+		if CenterRef == none
+			if HasPlayer
+				CenterOnObject(Game.FindClosestReferenceOfTypeFromRef(ThreadLib.LocationMarker, PlayerRef, 750.0))
+			else
+				CenterOnObject(Game.FindClosestReferenceOfTypeFromRef(ThreadLib.LocationMarker, Positions[0], 750.0))
 			endIf
-		endWhile
-
-		; ; Validate Animations
-
-		; ; Search for nearby bed
-		; if CenterRef == none && bedding != -1
-		; 	LocateBed(HasPlayer, 750.0)
-		; endIf
-		; ; Find a location marker near one of our actors and center there
-		; i = ActorCount
-		; while CenterRef == none && i
-		; 	i -= 1
-		; 	CenterOnObject(Game.FindClosestReferenceOfTypeFromRef(Lib.LocationMarker, Positions[i], 750.0))
-		; endWhile
-		; ; Still no center, fallback to something
-		; if CenterRef == none
-		; 	if IsAggressive ; Fallback to victim
-		; 		CenterOnObject(VictimRef)
-		; 	elseif HasPlayer ; Fallback to player
-		; 		CenterOnObject(PlayerRef)
-		; 	else
-		; 		CenterOnObject(Positions[0]) ; Fallback to first position actor
-		; 	endIf
-		; endIf
-
-		; Start the controller
-		sslThreadController Controller = PrimeThread()
-		if Controller == none
-			Log("StartThread() - Failed to start, controller is null", "FATAL")
-			return none
 		endIf
-		StartedAt = Utility.GetCurrentRealTime()
-		return Controller
+		; Search for nearby bed
+		if CenterRef == none && BedFlag != -1
+			CenterOnBed(HasPlayer, 750.0)
+		endIf
+		; Center on fallback choices
+		if CenterRef == none
+			if IsAggressive
+				CenterOnObject(VictimRef)
+			elseIf HasPlayer
+				CenterOnObject(PlayerRef)
+			else
+				CenterOnObject(Positions[0])
+			endIf
+		endIf
+
+		; ------------------------- ;
+		; --  Start Controller   -- ;
+		; ------------------------- ;
+
+		return PrimeThread()
 	endFunction
 
 	event OnUpdate()
@@ -278,29 +274,6 @@ function SetLeadAnimations(sslBaseAnimation[] AnimationList)
 	endIf
 endFunction
 
- bool function LocateBed(bool askPlayer = true, float radius = 750.0)
-	if bedding != -1
-		ObjectReference FoundBed
-		; Select a bed
-		if PlayerRef != none
-			FoundBed = ThreadLib.FindBed(PlayerRef, radius)
-			; A bed was selected, should we use it?
-			if FoundBed != none && (bedding == 1 || askPlayer == false || (ThreadLib.mUseBed.Show() as bool))
-				CenterOnObject(FoundBed)
-				return true
-			endIf
-		elseIf Config.sNPCBed == "$SSL_Always" || (Config.sNPCBed == "$SSL_Sometimes" && (Utility.RandomInt(0, 1) as bool)) || bedding == 1
-			FoundBed = ThreadLib.FindBed(Positions[0], radius)
-			; A bed was selected, use it
-			if FoundBed != none
-				CenterOnObject(FoundBed)
-				return true
-			endIf
-		endIf
-	endIf
-	return false
-endFunction
-
 ; ------------------------------------------------------- ;
 ; --- Thread Settings                                 --- ;
 ; ------------------------------------------------------- ;
@@ -312,8 +285,8 @@ function DisableLeadIn(bool disabling = true)
 	endIf
 endFunction
 
-function SetBedding(int flag = 0)
-	bedding = flag
+function SetBedFlag(int flag = 0)
+	BedFlag = flag
 endFunction
 
 function SetTimers(float[] setTimers)
@@ -357,6 +330,23 @@ function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, fl
 	CenterLocation[3] = RotX
 	CenterLocation[4] = RotY
 	CenterLocation[5] = RotZ
+endFunction
+
+ bool function CenterOnBed(bool AskPlayer = true, float Radius = 750.0)
+ 	ObjectReference FoundBed
+	if BedFlag == -1
+		return false ; Beds forbidden by flag
+	elseIf HasPlayer
+		FoundBed = ThreadLib.FindBed(PlayerRef, Radius) ; Check within radius of player
+	elseIf Config.sNPCBed == "$SSL_Always" || (Config.sNPCBed == "$SSL_Sometimes" && (Utility.RandomInt(0, 1) as bool))
+		FoundBed = ThreadLib.FindBed(Positions[0], Radius) ; Check within radius of first position, if NPC beds are allowed
+	endIf
+	; Found a bed AND EITHER forced use OR don't care about players choice OR or player approved
+	if FoundBed != none && (BedFlag == 1 || (!AskPlayer || (AskPlayer && (ThreadLib.mUseBed.Show() as bool))))
+		CenterOnObject(FoundBed)
+		return true ; Bed found and approved for use
+	endIf
+	return false ; No bed found
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -435,7 +425,7 @@ function Initialize()
 	; Boolean
 	Active = false
 	HasPlayer = false
-	AutoAdvance = false
+	AutoAdvance = true
 	LeadIn = false
 	FastEnd = false
 	; Integers
@@ -448,7 +438,7 @@ function Initialize()
 endFunction
 
 function Log(string log, string type = "NOTICE")
-	MiscUtil.PrintConsole("Thread["+thread_id+"]"+type+": "+log)
+	SexLabUtil.Log(log, "Thread["+thread_id+"]", type, "trace,console")
 endFunction
 
 function SendThreadEvent(string eventName)
@@ -487,6 +477,11 @@ function _SetupThread(int id)
 	ActorAlias[2] = GetNthAlias(2) as sslActorAlias
 	ActorAlias[3] = GetNthAlias(3) as sslActorAlias
 	ActorAlias[4] = GetNthAlias(4) as sslActorAlias
+	ActorAlias[0].Clear()
+	ActorAlias[1].Clear()
+	ActorAlias[2].Clear()
+	ActorAlias[3].Clear()
+	ActorAlias[4].Clear()
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -505,18 +500,19 @@ auto state Unlocked
 endState
 
 sslThreadModel function Make(float timeoutIn = 30.0)
-	Log("Cannot enter make on a locked thread", "FATAL")
+	Log("Make() - Cannot enter make on a locked thread", "FATAL")
 	return none
 endFunction
 sslThreadController function StartThread()
-	Log("Cannot start thread while not in a Making state", "FATAL")
+	Log("StartThread() - Cannot start thread while not in a Making state", "FATAL")
 	return none
 endFunction
 sslThreadController function PrimeThread()
+	Log("StartThread() - Failed to start, controller is null", "FATAL")
 	return none
 endFunction
 int function AddActor(Actor ActorRef, bool IsVictim = false, sslBaseVoice Voice = none, bool ForceSilent = false)
-	Log("Cannot add an actor to a locked thread", "FATAL")
+	Log("AddActor() - Cannot add an actor to a locked thread", "FATAL")
 	return -1
 endFunction
 function SetAnimation(int aid = -1)

@@ -13,6 +13,7 @@ event OnEffectStart(actor TargetRef, actor CasterRef)
 
 	Thread.AddActor(TargetRef)
 	Thread.AddActor(CasterRef)
+	Thread.StartThread()
 
 	Thread.Log(Thread.Positions)
 	; Thread.Initialize()

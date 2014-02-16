@@ -1,1 +1,1 @@
-scriptname sslBaseVoice extends ReferenceAlias
+scriptname sslBaseVoice extends sslBaseObject

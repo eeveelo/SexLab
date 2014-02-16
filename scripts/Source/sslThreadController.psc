@@ -12,6 +12,7 @@ float SFXTimer
 ; Processing
 float StageTimer
 bool TimedStage
+int StageCount
 int AdjustPos
 int aid
 
@@ -22,20 +23,22 @@ int aid
 
 state Making
 	sslThreadController function PrimeThread()
-		Stage = 1
-		GotoState("Preparing")
-		RegisterForSingleUpdate(0.05)
+		; Prepare Thread
+		Action("Preparing")
 		return self
 	endFunction
 endState
 
 state Preparing
+	function FireAction()
+		RegisterForSingleUpdate(0.05)
+	endFunction
 	event OnUpdate()
 		SetAnimation()
 		SendThreadEvent("AnimationStart")
-		ActorAction("Prepare", "Ready")
+		AliasAction("Prepare", "Ready")
 		; Start ActorAlias animation loops from Ready state
-		SyncActors(true)
+		; SyncActors(true)
 		; Auto TFC
 		if HasPlayer && Config.bAutoTFC
 			;ControlLib.EnableFreeCamera(true)
@@ -45,8 +48,8 @@ state Preparing
 			SendThreadEvent("LeadInStart")
 		endIf
 		; Begin first stage
-		GoToState("Advancing")
-		RegisterForSingleUpdate(0.10)
+		StartedAt = Utility.GetCurrentRealTime()
+		Action("Advancing")
 	endEvent
 endState
 
@@ -55,50 +58,59 @@ endState
 ; ------------------------------------------------------- ;
 
 state Advancing
-	event OnUpdate()
-		; End animation
-		if !LeadIn && Stage > Animation.StageCount
-			EndAnimation()
-		; End LeadIn stages
-		elseIf LeadIn && Stage > Animation.StageCount
-			EndLeadIn()
-		else
-			; Stage SFX Delay
-			SFXDelay = Config.fSFXDelay
-			if Stage > 1
-				SFXDelay -= (Stage * 0.2)
-			endIf
-			; min 0.60 delay
-			if SFXDelay < 0.60
-				SFXDelay = 0.60
-			endIf
-			; Start Animations loop
-			GoToState("Animating")
+	function FireAction()
+		; End animation/leadin
+		; if Stage > StageCount
+		; 	if LeadIn
+		; 		return EndLeadIn()
+		; 	else
+		; 		return EndAnimation()
+		; 	endIf
+		; endIf
+		; Stage SFX Delay
+		SFXDelay = Config.fSFXDelay
+		if Stage != 1
+			SFXDelay -= (Stage * 0.2)
 		endIf
-	endEvent
+		; min 0.60 delay
+		if SFXDelay < 0.60
+			SFXDelay = 0.60
+		endIf
+		; Sync stage
+		ActorAlias[0].SyncStage(Stage)
+		ActorAlias[1].SyncStage(Stage)
+		ActorAlias[2].SyncStage(Stage)
+		ActorAlias[3].SyncStage(Stage)
+		ActorAlias[4].SyncStage(Stage)
+		; Start Animations loop
+		Action("Animating")
+	endFunction
 endState
 
 state Animating
-	event OnBeginState()
+
+	function FireAction()
 		; Get animation events for stage
 		AnimEvents = Animation.FetchStage(Stage)
 		; Play animations
 		SyncActors()
 		PlayAnimation()
 		; Send events
-		if !LeadIn && Stage >= Animation.StageCount
-			SendThreadEvent("OrgasmStart")
-			if Config.bOrgasmEffects
-				TriggerOrgasm()
-			endIf
-		else
+		; if !LeadIn && Stage >= StageCount
+		; 	SendThreadEvent("OrgasmStart")
+		; 	if Config.bOrgasmEffects
+		; 		TriggerOrgasm()
+		; 	endIf
+		; else
 			SendThreadEvent("StageStart")
-		endIf
+		; endIf
 		; Begin loop
 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
-		RegisterForSingleUpdate(0.10)
-	endEvent
+		RegisterForSingleUpdate(0.05)
+	endFunction
+
 	event OnUpdate()
+		Log("Thread Animating Loop")
 		; Advance stage on timer
 		if (AutoAdvance || TimedStage) && StageTimer < Utility.GetCurrentRealTime()
 			GoToStage((Stage + 1))
@@ -107,19 +119,20 @@ state Animating
 		; Play SFX
 		SFXTimer -= 0.60
 		if SFXTimer <= 0.0 && Animation.SoundFX != none
-			Animation.SoundFX.Play(Positions[0])
+			Animation.SoundFX.Play(CenterRef)
 			SFXTimer = SFXDelay
 		endIf
 		; Loop
 		RegisterForSingleUpdate(0.60)
 	endEvent
-	event OnEndState()
-		if !LeadIn && Stage > Animation.StageCount
+
+	function EndAction()
+		if !LeadIn && Stage > StageCount
 			SendThreadEvent("OrgasmEnd")
 		else
 			SendThreadEvent("StageEnd")
 		endIf
-	endEvent
+	endFunction
 
 	; ------------------------------------------------------- ;
 	; --- Loop functions                                  --- ;
@@ -256,7 +269,7 @@ state Animating
 		; Give player time to settle incase airborne
 		Utility.Wait(1.0)
 		; Recenter on coords to avoid stager + resync animations
-		if !LocateBed(true, 400.0)
+		if !CenterOnBed(true, 400.0)
 			CenterOnObject(PlayerRef, true)
 		endIf
 		; Return to animation loop
@@ -270,20 +283,27 @@ endState
 ; --- Context Sensitive Info                          --- ;
 ; ------------------------------------------------------- ;
 
-function SetAnimation(int anim = -1)
+function SetAnimation(int AnimID = -1)
 	; Randomize if -1
-	aid = anim
-	if anim < 0 || anim >= Animations.Length
+	aid = AnimID
+	if AnimID < 0 || AnimID >= Animations.Length
 		aid = Utility.RandomInt(0, (Animations.Length - 1))
 	endIf
 	Animation = Animations[aid]
+	StageCount = Animation.StageCount
 	; Print name of animation to console
 	if HasPlayer
 		MiscUtil.PrintConsole("Playing Animation: " + Animation.Name)
 	endIf
+	; Sync alias animations
+	ActorAlias[0].SyncAnimation(Animation)
+	ActorAlias[1].SyncAnimation(Animation)
+	ActorAlias[2].SyncAnimation(Animation)
+	ActorAlias[3].SyncAnimation(Animation)
+	ActorAlias[4].SyncAnimation(Animation)
 	; Check for out of range stage
-	if Stage >= Animation.StageCount
-		GoToStage((Animation.StageCount - 1))
+	if Stage >= StageCount
+		GoToStage((StageCount - 1))
 	else
 		AnimEvents = Animation.FetchStage(Stage)
 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
@@ -301,7 +321,7 @@ float function GetTimer()
 	int last = ( Timers.Length - 1 )
 	if Stage < last
 		return Timers[(Stage - 1)]
-	elseIf Stage >= Animation.StageCount
+	elseIf Stage >= StageCount
 		return Timers[last]
 	endIf
 	return Timers[(last - 1)]
@@ -349,13 +369,13 @@ function EndAnimation(bool quick = false)
 	GoToState("Ending")
 	; Set fast flag to skip slow ending functions
 	FastEnd = quick
-	Stage = Animation.StageCount
+	Stage = StageCount
 	; Stop hotkeys to prevent further stage advancing + Leave TFC
 	if HasPlayer
 		; Lib.ControlLib._HKClear()
 	endIf
 	; Reset actors & wait for clear state
-	ActorAction("Reset", "")
+	AliasAction("Reset", "")
 	; Send end event
 	SendThreadEvent("AnimationEnd")
 	; Give AnimationEnd hooks some small room to breath
@@ -386,29 +406,36 @@ endFunction
 ; --- System Use Only                                 --- ;
 ; ------------------------------------------------------- ;
 
-bool function ActorWait(string waitfor)
+function Action(string FireState)
+	UnregisterForUpdate()
+	EndAction() ; OnEndState()
+	GoToState(FireState)
+	FireAction() ; OnBeginState()
+endFunction
+
+bool function ActorWait(string WaitFor)
 	int i = ActorCount
 	while i
 		i -= 1
-		if ActorAlias[i].GetState() != waitfor
+		if ActorAlias[i].GetState() != WaitFor
 			return false
 		endIf
 	endWhile
 	return true
 endFunction
 
-function ActorAction(string stateAction, string stateFinish)
+function AliasAction(string FireState, string StateFinish)
 	; Start actor action state
-	int i = ActorCount
-	while i
-		i -= 1
-		ActorAlias[i].GoToState(stateAction)
-	endWhile
+	ActorAlias[0].Action(FireState)
+	ActorAlias[1].Action(FireState)
+	ActorAlias[2].Action(FireState)
+	ActorAlias[3].Action(FireState)
+	ActorAlias[4].Action(FireState)
 	; Wait for actors ready, or for ~30 seconds to pass
 	int failsafe = 30
-	while !ActorWait(stateFinish) && failsafe
-		Utility.Wait(1.0)
+	while !ActorWait(StateFinish) && failsafe
 		failsafe -= 1
+		Utility.Wait(1.0)
 	endWhile
 endFunction
 
@@ -458,4 +485,9 @@ endFunction
 function MoveActors()
 endFunction
 function GoToStage(int toStage)
+endFunction
+; State varied
+function FireAction()
+endFunction
+function EndAction()
 endFunction

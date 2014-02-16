@@ -80,6 +80,3 @@ function Initialize()
 	endWhile
 endFunction
 
-event OnInit()
-	; Setup()
-endEvent

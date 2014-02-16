@@ -507,6 +507,10 @@ int function ValidateActor(actor a)
 		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They appear to already be animating")
 		return -10
 	endIf
+
+	;DEBUG
+	return 1
+
 	if ValidActorList.HasForm(a)
 		return 1
 	endIf

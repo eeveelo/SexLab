@@ -42,7 +42,7 @@ float AnimScale
 ; ------------------------------------------------------- ;
 
 bool function PrepareAlias(Actor ProspectRef, bool MakeVictim = false, sslBaseVoice UseVoice = none, bool ForceSilence = false)
-	if ProspectRef == none || GetReference() != ProspectRef || !Lib.ValidateActor(ProspectRef)
+	if ProspectRef == none || GetReference() != ProspectRef; || !Lib.ValidateActor(ProspectRef)
 		return false ; Failed to set prospective actor into alias
 	endIf
 	; Register actor as active
@@ -63,14 +63,43 @@ bool function PrepareAlias(Actor ProspectRef, bool MakeVictim = false, sslBaseVo
 		Thread.VictimRef = ActorRef
 	endIf
 	Thread.Log("ActorAlias has successfully slotted '"+ActorName+"'", self)
+	GoToState("")
 	return true
 endFunction
 
 function Clear()
-	TryToClear()
-	StorageUtil.FormListRemove(Lib, "Registry", ActorRef, true)
-	UnlockActor()
+	if GetReference() != none
+		StorageUtil.FormListRemove(Lib, "Registry", GetReference(), true)
+		UnlockActor()
+	endIf
+	parent.Clear()
 	Initialize()
+endFunction
+
+; ------------------------------------------------------- ;
+; --- Actor Thread Syncing                            --- ;
+; ------------------------------------------------------- ;
+
+function SyncThread()
+	Stage = Thread.Stage
+	Position = Thread.Positions.Find(ActorRef)
+	Animation = Thread.Animation
+endFunction
+
+function SyncAnimation(sslBaseAnimation ToAnimation)
+	Animation = ToAnimation
+	IsSilent = Animation.IsSilent(Position, Stage)
+	if Animation.UseOpenMouth(Position, Stage)
+		ActorRef.SetExpressionOverride(16, 100)
+	endIf
+endFunction
+
+function SyncStage(int ToStage)
+	Stage = ToStage
+endFunction
+
+function SyncPosition(int ToPosition)
+	Position = ToPosition
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -97,9 +126,17 @@ function LockActor()
 			; Lib.ControlLib._HKStart(Controller)
 		endIf
 	else
-		ActorRef.SetRestrained(true)
+		; ActorRef.SetRestrained(true)
 		ActorRef.SetDontMove(true)
 	endIf
+	; Attach positioning marker
+	if !MarkerRef
+		MarkerRef = ActorRef.PlaceAtMe(Lib.BaseMarker)
+	endIf
+	MarkerRef.Enable()
+	MarkerRef.MoveTo(ActorRef)
+	ActorRef.StopTranslation()
+	ActorRef.SetVehicle(MarkerRef)
 endFunction
 
 function UnlockActor()
@@ -134,20 +171,98 @@ function UnlockActor()
 	endIf
 endFunction
 
+state Prepare
+	function FireAction()
+		RegisterForSingleUpdate(0.05)
+	endFunction
+	event OnUpdate()
+		TryToStopCombat()
+		if ActorRef.IsWeaponDrawn()
+			ActorRef.SheatheWeapon()
+		endIf
+		LockActor()
+		; Calculate scales
+		float display = ActorRef.GetScale()
+		ActorRef.SetScale(1.0)
+		float base = ActorRef.GetScale()
+		ActorScale = ( display / base )
+		AnimScale = ActorScale
+		ActorRef.SetScale(ActorScale)
+		if Thread.ActorCount > 1 && Config.bScaleActors
+			AnimScale = (1.0 / base)
+		endIf
+		; Non Creatures
+		if !IsCreature
+
+		endIf
+		GoToState("Ready")
+	endEvent
+endState
+
+state Ready
+	function StartAnimating()
+		Action("Animating")
+	endFunction
+endState
+
+; ------------------------------------------------------- ;
+; --- Animation Loop                                  --- ;
+; ------------------------------------------------------- ;
+
+state Animating
+	function FireAction()
+		RegisterForSingleUpdate(Utility.RandomFloat(0.50,1.80))
+	endFunction
+
+	event OnUpdate()
+		Debug.TraceAndBox(ActorName+" Animating Update")
+	endEvent
+endState
+
+; ------------------------------------------------------- ;
+; --- System Use                                      --- ;
+; ------------------------------------------------------- ;
+
 
 function Initialize()
 	UnregisterForUpdate()
 	GoToState("")
-
-	ActorRef = none
+	Thread = (GetOwningQuest() as sslThreadController)
+	Lib = (Quest.GetQuest("SexLabQuestFramework") as sslActorLibrary)
+	Config = (Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig)
 
 	if MarkerRef
 		MarkerRef.Disable()
 		MarkerRef.Delete()
 	endIf
 	MarkerRef = none
+	ActorRef = none
+
 endFunction
 
-event OnInit()
-	Thread = (GetOwningQuest() as sslThreadController)
-endEvent
+; event OnInit()
+; 	Thread = (GetOwningQuest() as sslThreadController)
+; 	Lib = (Quest.GetQuest("SexLabQuestFramework") as sslActorLibrary)
+; 	Config = (Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig)
+; endEvent
+
+function Action(string FireState)
+	UnregisterForUpdate()
+	if ActorRef != none
+		GoToState(FireState)
+		FireAction()
+	endIf
+endFunction
+
+; ------------------------------------------------------- ;
+; --- State Restricted                                --- ;
+; ------------------------------------------------------- ;
+
+; Ready
+function StartAnimating()
+	SexLabUtil.Log("StartAnimating() - Null start, alias not in Ready state. Currently: '"+GetState()+"'", ActorName, "FATAL", "trace,stack,console")
+endFunction
+
+; Varied
+function FireAction()
+endFunction

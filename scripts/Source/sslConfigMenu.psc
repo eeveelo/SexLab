@@ -34,6 +34,9 @@ sslSystemConfig property Config auto
 sslThreadSlots property ThreadSlots auto
 sslAnimationSlots property AnimSlots auto
 
+sslThreadLibrary property ThreadLib auto
+sslActorLibrary property ActorLib auto
+
 ; Data
 Actor property PlayerRef auto
 Armor property CalypsStrapon auto
@@ -131,11 +134,9 @@ function _SetupSystem()
 	; AnimSlots = (Quest.GetQuest("SexLabQuestAnimations") as sslAnimationSlots)
 
 	; SexLab._EnableSystem(false)
-	; Init Defaults
-	SetDefaults()
+
 	; Init animations
 	; AnimLib._Setup()
-	AnimSlots.Setup()
 	; ; Init creature animations
 	; CreatureAnimSlots._Setup()
 	; ; Init voices
@@ -151,10 +152,17 @@ function _SetupSystem()
 	;Config._Setup()
 	; ; Init Thread Controllers
 	; Config._Setup()
-	ThreadSlots.Setup()
 	; ; Init Sexlab
 	; SexLab._Setup()
 
+	; Init Defaults
+	SetDefaults()
+	; Libraries
+	ThreadLib.Setup()
+	ActorLib.Setup()
+	; Slots
+	ThreadSlots.Setup()
+	AnimSlots.Setup()
 	; Finished
 	Debug.Notification("$SSL_SexLabUpdated")
 endFunction

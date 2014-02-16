@@ -16,44 +16,34 @@ Message property mMoveScene auto
 ;	return Threads.FindActorController(position) == -1
 ; endFunction
 
-bool function CheckBed(ObjectReference BedRef, bool ignoreUsed = true, bool ignoreOwned = true)
-	return BedRef != none && BedRef.IsEnabled() && BedRef.Is3DLoaded() && (!ignoreUsed || (ignoreUsed && !BedRef.IsFurnitureInUse(true)))
+bool function CheckBed(ObjectReference BedRef, bool IgnoreUsed = true)
+	return BedRef != none && BedRef.IsEnabled() && BedRef.Is3DLoaded() && (!IgnoreUsed || (IgnoreUsed && !BedRef.IsFurnitureInUse(true)))
 endFunction
 
-ObjectReference function FindBed(ObjectReference centerRef, float radius = 1000.0, bool ignoreUsed = true, ObjectReference ignore1 = none, ObjectReference ignore2 = none)
-	if centerRef == none || radius < 0
+ObjectREference function FindBed(ObjectReference CenterRef, float Radius = 1000.0, bool IgnoreUsed = true, ObjectReference IgnoreRef1 = none, ObjectReference IgnoreRef2 = none)
+	if CenterRef == none || Radius < 1.0
 		return none ; Invalid args
 	endIf
-	; Check nearest bed first
-	ObjectReference NearBed = Game.FindClosestReferenceOfAnyTypeInListFromRef(BedsList, centerRef, radius)
-	if CheckBed(NearBed, ignoreUsed) && NearBed != ignore1 && NearBed != ignore2
-		return NearBed ; Nearby valid bed found
-	elseIf NearBed == none
-		return none ; No nearby valid bed found at all, give up.
+	; Search for a nearby bed first before looking for random
+	ObjectReference NearRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
+	if NearRef == none || (CheckBed(NearRef, IgnoreUsed) && NearRef != IgnoreRef1 && NearRef != IgnoreRef2)
+		return NearRef ; Use the nearby bed if found, if none than give up now and just return none
 	endIf
-	; Create supression list
-	form[] supress = new Form[12]
-	supress[11] = ignore1
-	supress[10] = ignore2
-	; Attempt 10 times before giving up
-	int attempts = 10
-	while attempts
-		attempts -= 1
-		; Find nearby
-		ObjectReference BedRef = Game.FindRandomReferenceOfAnyTypeInListFromRef(BedsList, centerRef, radius)
-		if BedRef == none
-			return none ; If none, than none in radius, give up now.
-		elseIf supress.Find(BedRef) == -1
-			; Add to supression list
-			supress[attempts] = BedRef
-			; Check if free
-			if CheckBed(BedRef, ignoreUsed)
-				return BedRef
-			endIf
+	form[] Suppressed = new Form[10]
+	Suppressed[9] = NearRef
+	Suppressed[8] = IgnoreRef1
+	Suppressed[7] = IgnoreRef2
+	int i = 7
+	while i
+		i -= 1
+		ObjectReference BedRef = Game.FindRandomReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
+		if BedRef == none || (Suppressed.Find(BedRef) == -1 && CheckBed(BedRef, IgnoreUsed))
+			return BedRef ; Found valid bed or none nearby and we should give up
+		else
+			Suppressed[i] = BedRef ; Add to suppression list
 		endIf
 	endWhile
-	; No beds found in attempts
-	return none
+	return none ; Nothing found in search loop
 endFunction
 
 ; int function FindNext(actor[] Positions, sslBaseAnimation Animation, int offset, bool findCreature)

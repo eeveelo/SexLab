@@ -22,7 +22,7 @@ sslThreadSlots property ThreadSlots auto hidden
 ; Misc
 ; sslActorStats property ActorStats auto
 
-function _Setup()
+function Setup()
 	PlayerRef = Game.GetPlayer()
 	Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
 	ActorLib = Quest.GetQuest("SexLabQuestFramework") as sslActorLibrary
@@ -33,5 +33,5 @@ function _Setup()
 endFunction
 
 event OnInit()
-	_Setup()
+	Setup()
 endEvent
