@@ -7,15 +7,37 @@ sslThreadController[] property Threads hidden
 	endFunction
 endProperty
 
-sslThreadModel function PickModel()
+sslThreadModel function PickModel(float TimeOut = 30.0)
 	int i
 	while i < Slots.Length
 		if !Slots[i].IsLocked
-			return Slots[i].Make()
+			return Slots[i].Make(TimeOut)
 		endIf
 		i += 1
 	endWhile
 	return none
+endFunction
+
+sslThreadController function GetController(int tid)
+	if tid < 0 || tid >= Slots.Length
+		return none
+	endIf
+	return Slots[tid]
+endfunction
+
+int function FindActorController(Actor ActorRef)
+	int i
+	while i < Slots.Length
+		if Slots[i].Positions.Find(ActorRef) != -1
+			return i
+		endIf
+		i += 1
+	endWhile
+	return -1
+endFunction
+
+sslThreadController function GetActorController(Actor ActorRef)
+	return GetController(FindActorController(ActorRef))
 endFunction
 
 function Setup()
@@ -32,6 +54,15 @@ function Setup()
 	endWhile
 endFunction
 
-event OnInit()
+function StopAll()
+	int i = Slots.Length
+	while i
+		i -= 1
+		Slots[i].EndAnimation(true)
+	endWhile
 	Setup()
-endEvent
+endFunction
+
+; event OnInit()
+; 	Setup()
+; endEvent

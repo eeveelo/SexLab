@@ -14,13 +14,17 @@ sslActorLibrary property ActorLib auto hidden
 ; Object Registeries
 sslAnimationSlots property AnimSlots auto hidden
 ; sslCreatureAnimationSlots property CreatureAnimations auto
-; sslVoiceSlots property Voices auto
+sslVoiceSlots property VoiceSlots auto hidden
 sslThreadSlots property ThreadSlots auto hidden
 ; sslActorSlots property Actors auto
 ; sslExpressionSlots property Expressions auto
 
 ; Misc
-; sslActorStats property ActorStats auto
+sslActorStats property ActorStats auto
+
+function Log(string Log, string Type = "NOTICE")
+	SexLabUtil.DebugLog(Log, Type, Config.DebugMode)
+endFunction
 
 function Setup()
 	; PlayerRef = Game.GetPlayer()
@@ -31,6 +35,9 @@ function Setup()
 
 	ThreadSlots = Quest.GetQuest("SexLabQuestFramework") as sslThreadSlots
 	AnimSlots = Quest.GetQuest("SexLabQuestAnimations") as sslAnimationSlots
+	VoiceSlots = Quest.GetQuest("SexLabQuestRegistry") as sslVoiceSlots
+
+	ActorStats = Quest.GetQuest("SexLabQuestRegistry") as sslActorStats
 endFunction
 
 event OnInit()

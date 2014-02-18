@@ -89,7 +89,7 @@ bool property HasCreature hidden
 endProperty
 
 ; Local readonly
-bool LeadInDisabled
+bool NoLeadIn
 string[] Hooks
 int BedFlag ; 0 allow, 1 force, -1 forbid
 
@@ -100,7 +100,10 @@ int BedFlag ; 0 allow, 1 force, -1 forbid
 state Making
 	int function AddActor(Actor ActorRef, bool IsVictim = false, sslBaseVoice Voice = none, bool ForceSilent = false)
 		; Ensure we have room for actor
-		if ActorCount >= 5
+		if ActorRef == none
+			Log("AddActor() - Failed to add actor -- Actor is empty.", "FATAL")
+			return -1
+		elseIf ActorCount >= 5
 			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- Thread has reached actor limit", "FATAL")
 			return -1
 		elseIf Positions.Find(ActorRef) != -1 || ActorLib.IsActorActive(ActorRef)
@@ -119,6 +122,22 @@ state Making
 		HasPlayer = Positions.Find(PlayerRef) != -1
 		Genders[Slot.Gender] = Genders[Slot.Gender] + 1
 		return Positions.Find(ActorRef)
+	endFunction
+
+	bool function AddActors(Actor[] ActorList, Actor VictimActor = none)
+		int Count = ActorList.Length
+		if Count < 1 || ((Positions.Length + Count) > 5) || ActorList.Find(none) != -1
+			Log("AddActors() - Failed to add actor list as it either contains to many actors placing the thread over it's limit, none at all, or an invalid 'None' entry -- "+ActorList, "FATAL")
+			return false
+		endIf
+		int i
+		while i < Count
+			if AddActor(ActorList[i], (ActorList[i] == VictimActor)) == -1
+				return false
+			endIf
+			i += 1
+		endWhile
+		return true
 	endFunction
 
 	sslThreadController function StartThread()
@@ -173,7 +192,7 @@ state Making
 			endIf
 		endIf
 		; Get default foreplay if none and enabled
-		if !HasCreature && !IsAggressive && ActorCount == 2 && !LeadInDisabled && LeadAnimations.Length == 0 && Config.bForeplayStage
+		if !HasCreature && !IsAggressive && ActorCount == 2 && !NoLeadIn && LeadAnimations.Length == 0 && Config.bForeplayStage
 			if BedRef != none
 				SetLeadAnimations(AnimSlots.GetByTags(2, "LeadIn", "Standing"))
 			else
@@ -224,12 +243,13 @@ function DisableRagdollEnd(Actor ActorRef, bool disabling = true)
 endFunction
 
 ; Voice
-; function SetVoice(Actor ActorRef, sslBaseVoice Voice, bool ForceSilent = false)
-; 	ActorAlias(ActorRef).SetVoice(Voice, ForceSilent)
-; endFunction
-; sslBaseVoice function GetVoice(Actor ActorRef)
-; 	return ActorAlias(ActorRef).GetVoice()
-; endFunction
+function SetVoice(Actor ActorRef, sslBaseVoice Voice, bool ForceSilent = false)
+	ActorAlias(ActorRef).SetVoice(Voice, ForceSilent)
+endFunction
+
+sslBaseVoice function GetVoice(Actor ActorRef)
+	return ActorAlias(ActorRef).GetVoice()
+endFunction
 
 ; Expressions
 ; function SetExpression(Actor ActorRef, sslBaseExpression Expression)
@@ -303,9 +323,16 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function DisableLeadIn(bool disabling = true)
-	LeadInDisabled = disabling
+	NoLeadIn = disabling
 	if disabling
 		LeadIn = false
+	endIf
+endFunction
+
+function DisableBedUse(bool disabling = true)
+	BedFlag = 0
+	if disabling
+		BedFlag = -1
 	endIf
 endFunction
 
@@ -444,63 +471,70 @@ endFunction
 function Initialize()
 	UnregisterForUpdate()
 	; Clear aliases
-	ActorAlias[0].Clear()
-	ActorAlias[1].Clear()
-	ActorAlias[2].Clear()
-	ActorAlias[3].Clear()
-	ActorAlias[4].Clear()
+	ActorAlias[0].ClearAlias()
+	ActorAlias[1].ClearAlias()
+	ActorAlias[2].ClearAlias()
+	ActorAlias[3].ClearAlias()
+	ActorAlias[4].ClearAlias()
 	; Forms
-	Actor[] aDel
-	Positions = aDel
-	VictimRef = none
-	CenterRef = none
-	BedRef = none
+	VictimRef    = none
+	CenterRef    = none
+	BedRef       = none
 	; Boolean
-	HasPlayer = false
-	LeadIn = false
-	LeadInDisabled = false
-	FastEnd = false
+	HasPlayer    = false
+	LeadIn       = false
+	NoLeadIn     = false
+	FastEnd      = false
 	IsAggressive = false
-	AutoAdvance = true
+	AutoAdvance  = true
 	; Integers
-	BedFlag = 0
-	ActorCount = 0
-	Genders = new int[3]
-	; Floats
+	BedFlag      = 0
+	ActorCount   = 0
+	Genders      = new int[3]
+	; Storage
+	Actor[] aDel
 	float[] fDel1
+	string[] sDel1
+	Positions    = aDel
 	CustomTimers = fDel1
-	; Strings
-	string[] strDel1
-	Hooks = strDel1
+	Hooks        = sDel1
+	; Animations
+	sslBaseAnimation[] anDel1
+	sslBaseAnimation[] anDel2
+	sslBaseAnimation[] anDel3
+	CustomAnimations  = anDel1
+	PrimaryAnimations = anDel2
+	LeadAnimations    = anDel3
 	; Enter thread selection pool
 	GoToState("Unlocked")
+	Reset()
 endFunction
 
-function Log(string log, string type = "NOTICE")
-	SexLabUtil.Log(log, "Thread["+thread_id+"]", type, "trace,console")
-	if type == "FATAL"
+function Log(string Log, string Type = "NOTICE")
+	SexLabUtil.DebugLog(Log, Type, Config.DebugMode)
+	if Type == "FATAL"
 		Initialize()
 	endIf
 endFunction
 
-function SendThreadEvent(string eventName)
-	SetupThreadEvent(eventName)
+function SendThreadEvent(string HookEvent)
+	SetupThreadEvent(HookEvent)
 	int i = Hooks.Length
 	while i
 		i -= 1
-		SetupThreadEvent(eventName+"_"+Hooks[i])
+		SetupThreadEvent(HookEvent+"_"+Hooks[i])
 	endWhile
 endFunction
 
-function SetupThreadEvent(string eventName)
-	int eid = ModEvent.Create(eventName)
+function SetupThreadEvent(string HookEvent)
+	int eid = ModEvent.Create(HookEvent)
 	if eid
-		ModEvent.PushForm(eid, self)
-		ModEvent.PushBool(eid, HasPlayer)
-		ModEvent.PushForm(eid, VictimRef)
-		ModEvent.PushFloat(eid, StartedAt)
+		ModEvent.PushInt(eid, thread_id)
+		ModEvent.PushString(eid, HookEvent)
 		ModEvent.Send(eid)
+		Log("Thread Hook Sent: "+HookEvent)
 	endIf
+	SendModEvent(HookEvent, thread_id)
 endFunction
 
 function SyncActors(bool force = false)
@@ -568,6 +602,7 @@ endFunction
 
 auto state Unlocked
 	sslThreadModel function Make(float TimeOut = 30.0)
+		Log("Entering Making State", "Unlocked")
 		Initialize()
 		GoToState("Making")
 		RegisterForSingleUpdate(TimeOut)
@@ -576,7 +611,7 @@ auto state Unlocked
 endState
 
 ; Making
-sslThreadModel function Make(float timeoutIn = 30.0)
+sslThreadModel function Make(float TimeOut = 30.0)
 	Log("Make() - Cannot enter make on a locked thread", "FATAL")
 	return none
 endFunction
@@ -591,6 +626,10 @@ endFunction
 int function AddActor(Actor ActorRef, bool IsVictim = false, sslBaseVoice Voice = none, bool ForceSilent = false)
 	Log("AddActor() - Cannot add an actor to a locked thread", "FATAL")
 	return -1
+endFunction
+bool function AddActors(Actor[] ActorList, Actor VictimActor = none)
+	Log("AddActors() - Cannot add a list of actors to a locked thread", "FATAL")
+	return false
 endFunction
 ; State varied
 function SetAnimation(int AnimID = -1)
@@ -619,3 +658,6 @@ endFunction
 float function GetTime()
 	return StartedAt
 endfunction
+function SetBedding(int flag = 0)
+	SetBedFlag(flag)
+endFunction

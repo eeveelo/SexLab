@@ -1,6 +1,6 @@
 scriptname sslAnimationFactory extends Quest
 
-sslAnimationSlots property Slots auto
+sslAnimationSlots property Slots auto hidden
 sslBaseAnimation property Animation auto hidden
 
 ; Gender Types
@@ -36,39 +36,43 @@ Sound property SexMix hidden
 	endFunction
 endProperty
 
+bool Locked
+
 ; ------------------------------------------------------- ;
 ; --- Registering Animations                          --- ;
 ; ------------------------------------------------------- ;
 
 ; Send callback event to start registration
 function RegisterAnimation(string Registrar)
-	if Slots.FindByRegistrar(Registrar) != -1
-		return ; Duplicate
+	; Check duplicate
+	if Slots.IsRegistered(Registrar)
+		return
 	endIf
 	; Wait for factory to be free
-	while Animation != none
+	while Locked || Animation != none
 		Utility.WaitMenuMode(0.10)
 	endWhile
 	; Get free animation slot
+	Locked = true
 	Animation = Slots.Register(Registrar)
-	if Animation == none
-		return ; No available slot or duplicate
+	if Animation != none
+		Animation.Initialize()
+		Animation.Registry = Registrar
+		Animation.Enabled = true
+		; Send load event
+		RegisterForModEvent("Register"+Registrar, Registrar)
+		ModEvent.Send(ModEvent.Create("Register"+Registrar))
+		UnregisterForAllModEvents()
+	else
+		FreeFactory()
 	endIf
-	; Clear callback storage
-	InitCallbacks()
-	; Send load event
-	RegisterForModEvent("Register"+Registrar, Registrar)
-	ModEvent.Send(ModEvent.Create("Register"+Registrar))
-	UnregisterForAllModEvents()
 endFunction
 
 ; Unlocks factory for next callback, MUST be called at end of callback
 function Save()
-	; Save animations stage+position data
-	SexLabUtil.Log("Setup animation '"+Animation.Name+"'", "SexLabAnimationFactory["+Slots.Animations.Find(Animation)+"]", "REGISTER ", "trace,console", true)
-	Animation._Save(sslUtility.TrimIntArray(positionData, positionID), sslUtility.TrimStringArray(animData, animID), sslUtility.TrimFloatArray(offsetData, offsetID), sslUtility.TrimIntArray(infoData, infoID))
-	; Free up factory
-	Animation = none
+	SexLabUtil.Log("'"+Animation.Name+"'", "sslAnimationSlots["+Slots.Animations.Find(Animation)+"]", "REGISTER ANIMATION ", "trace,console", true)
+	Animation.Save(sslUtility.TrimIntArray(positionData, positionID), sslUtility.TrimStringArray(animData, animID), sslUtility.TrimFloatArray(offsetData, offsetID), sslUtility.TrimIntArray(infoData, infoID))
+	FreeFactory()
 endfunction
 
 ; ------------------------------------------------------- ;
@@ -140,7 +144,8 @@ int offsetID
 float[] offsetData
 int infoID
 int[] infoData
-function InitCallbacks()
+function FreeFactory()
+	; Reset callback storage
 	positionID = 0
 	positionData = new int[10]
 	animID = 0
@@ -149,5 +154,12 @@ function InitCallbacks()
 	offsetData = new float[128]
 	infoID = 0
 	infoData = new int[128]
+	; Init slots property if empty
+	if Slots == none
+		Slots = (Quest.GetQuest("SexLabQuestAnimations") as sslAnimationSlots)
+	endIf
+	; Clear wait lock
+	Animation = none
+	Locked = false
 endFunction
 

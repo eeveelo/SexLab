@@ -2,8 +2,8 @@ scriptname sslAnimationDefaults extends sslAnimationFactory
 
 function LoadAnimations()
 	; Missionary
-	RegisterAnimation("SexLabMissonary")
-	RegisterAnimation("SexLabAggrMissonary")
+	RegisterAnimation("SexLabMissionary")
+	RegisterAnimation("SexLabAggrMissionary")
 	RegisterAnimation("ArrokMissionary")
 	RegisterAnimation("ArrokLegUp")
 	RegisterAnimation("APBedMissionary")
@@ -735,7 +735,7 @@ function SexLabAggrDoggyStyle()
 	Save()
 endFunction
 
-function SexLabAggrMissonary()
+function SexLabAggrMissionary()
 	Name = "Rough Missionary"
 
 	SetContent(Sexual)
@@ -847,7 +847,7 @@ function SexLabHuggingSex()
 	Save()
 endFunction
 
-function SexLabMissonary()
+function SexLabMissionary()
 	Name = "Missionary"
 
 	SetContent(Sexual)

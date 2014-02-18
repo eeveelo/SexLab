@@ -15,17 +15,18 @@ endEvent
 
 event OnConfigInit()
 	; Init System
-	_SetupSystem()
+	SetupSystem()
 	; Init Stats
 	; Stats._Setup()
 endEvent
 
 event OnGameReload()
 	parent.OnGameReload()
-	; Config.ValidActorList.RemoveAddedForm(PlayerRef)
+	; Configure SFX & Voice volumes
 	AudioVoice.SetVolume(Config.fVoiceVolume)
 	AudioSFX.SetVolume(Config.fSFXVolume)
-	; ThreadSlots._StopAll()
+	; Debug reset
+	SetupSystem()
 endEvent
 
 ; Framework
@@ -33,6 +34,7 @@ SexLabFramework property SexLab auto
 sslSystemConfig property Config auto
 sslThreadSlots property ThreadSlots auto
 sslAnimationSlots property AnimSlots auto
+sslVoiceSlots property VoiceSlots auto
 
 sslThreadLibrary property ThreadLib auto
 sslActorLibrary property ActorLib auto
@@ -74,7 +76,8 @@ int[] oidForeplayAnimation
 int[] oidRemoveStrapon
 
 function SetDefaults()
-	Config._Defaults()
+
+	Config.SetDefaults()
 
 	AudioVoice.SetVolume(Config.fVoiceVolume)
 	AudioSFX.SetVolume(Config.fSFXVolume)
@@ -113,14 +116,14 @@ function SetDefaults()
 	Pages[8] = "$SSL_AggressiveAnimations"
 	Pages[9] = "$SSL_CreatureAnimations"
 	Pages[10] = "$SSL_ExpressionSelection"
-	if PlayerRef.GetLeveledActorBase().GetSex() > 0
+	if PlayerRef.GetLeveledActorBase().GetSex() == 1
 		Pages[11] = "$SSL_SexDiary"
 	else
 		Pages[11] = "$SSL_SexJournal"
 	endIf
 	Pages[12] = "$SSL_RebuildClean"
 
-	; FindStrapons()
+	FindStrapons()
 endFunction
 
 event OnPageReset(string page)
@@ -128,61 +131,84 @@ event OnPageReset(string page)
 endEvent
 
 
-function _SetupSystem()
-	_CheckSystem()
-
+function SetupSystem()
 	; AnimSlots = (Quest.GetQuest("SexLabQuestAnimations") as sslAnimationSlots)
 
-	; SexLab._EnableSystem(false)
-
-	; Init animations
-	; AnimLib._Setup()
-	; ; Init creature animations
-	; CreatureAnimSlots._Setup()
-	; ; Init voices
-	; Config._Setup()
-	; VoiceSlots._Setup()
-	; ; Init expressions
-	; ExpressionLib._Setup()
-	; ExpressionSlots._Setup()
-	; ; Init Alias Slots
-	; Config._Setup()
-	; ActorSlots._Setup()
-	; ; Init control Library
-	;Config._Setup()
-	; ; Init Thread Controllers
-	; Config._Setup()
-	; ; Init Sexlab
-	; SexLab._Setup()
-
 	; Init Defaults
+	SexLab.Initialize()
+	CheckSystem()
 	SetDefaults()
-	; Libraries
+	; Setup Libraries
 	ThreadLib.Setup()
 	ActorLib.Setup()
-	; Slots
+	; Setup Slots
 	ThreadSlots.Setup()
 	AnimSlots.Setup()
+	VoiceSlots.Setup()
 	; Finished
 	Debug.Notification("$SSL_SexLabUpdated")
 endFunction
 
-function _CheckSystem()
+function FindStrapons()
+	ActorLib.Strapons = new form[1]
+	ActorLib.Strapons[0] = CalypsStrapon
+	int i = Game.GetModCount()
+	while i
+		i -= 1
+		string Name = Game.GetModName(i)
+		if Name == "StrapOnbyaeonv1.1.esp"
+			ActorLib.LoadStrapon("StrapOnbyaeonv1.1.esp", 0x0D65)
+		elseif Name == "TG.esp"
+			ActorLib.LoadStrapon("TG.esp", 0x0182B)
+		elseif Name == "Futa equippable.esp"
+			ActorLib.LoadStrapon("Futa equippable.esp", 0x0D66)
+			ActorLib.LoadStrapon("Futa equippable.esp", 0x0D67)
+			ActorLib.LoadStrapon("Futa equippable.esp", 0x01D96)
+			ActorLib.LoadStrapon("Futa equippable.esp", 0x022FB)
+			ActorLib.LoadStrapon("Futa equippable.esp", 0x022FC)
+			ActorLib.LoadStrapon("Futa equippable.esp", 0x022FD)
+		elseif Name == "Skyrim_Strap_Ons.esp"
+			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x00D65)
+			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x02859)
+			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285A)
+			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285B)
+			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285C)
+			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285D)
+			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285E)
+			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285F)
+		elseif Name == "SOS Equipable Schlong.esp"
+			ActorLib.LoadStrapon("SOS Equipable Schlong.esp", 0x0D62)
+		endif
+	endWhile
+endFunction
+
+function CheckSystem()
 	; Check SKSE Version
 	float skseNeeded = 1.0616
 	float skseInstalled = SKSE.GetVersion() + SKSE.GetVersionMinor() * 0.01 + SKSE.GetVersionBeta() * 0.0001
 	if skseInstalled == 0
 		NoSKSE.Show()
-		; SexLab._EnableSystem(false)
+		SexLab.EnableSystem(false)
 	elseif skseInstalled < skseNeeded
 		OldSKSE.Show(skseInstalled, skseNeeded)
-		; SexLab._EnableSystem(false)
+		SexLab.EnableSystem(false)
 	endIf
 	; Check Skyrim Version
 	float skyrimNeeded = 1.9
 	float skyrimMajor = StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float
 	if skyrimMajor < skyrimNeeded
 		OldSkyrim.Show(skyrimMajor, skyrimNeeded)
-		; SexLab._EnableSystem(false)
+		SexLab.EnableSystem(false)
 	endIf
 endFunction
+
+event OnRaceSwitchComplete()
+	StorageUtil.FormListClear(ActorLib, "SexLab.ValidActors")
+	if Pages.Length > 0
+		if PlayerRef.GetLeveledActorBase().GetSex() == 1
+			Pages[11] = "$SSL_SexDiary"
+		else
+			Pages[11] = "$SSL_SexJournal"
+		endIf
+	endIf
+endEvent

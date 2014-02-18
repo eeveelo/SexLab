@@ -12,16 +12,26 @@ event OnEffectStart(actor TargetRef, actor CasterRef)
 	; Debug.TraceAndBox("Found: "+Anims.Length)
 	; Debug.Trace(Anims)
 
-	sslThreadModel Thread = NewThread()
+	SexLab = GetAPI()
 
-	Thread.AddActor(TargetRef)
-	Thread.AddActor(CasterRef)
-	Thread.StartThread()
+	Actor[] Positions = SexLab.MakeActorArray(SexLab.FindAvailableActor(TargetRef), CasterRef)
+	PrintConsole("Unsorted: "+Positions)
+	Positions = SexLab.SortActors(Positions)
+	PrintConsole("Sorted: "+Positions)
+
+	SexLab.QuickStart(Positions[0], Positions[1], VictimRef = TargetRef, Hook = "Test").Log("Started Test!")
 
 	; Thread.Log(Thread.Positions)
 	; Thread.Initialize()
-	Dispel()
 endEvent
+
+
+		; ModEvent.PushForm(eid, self)
+		; ModEvent.PushBool(eid, HasPlayer)
+		; ModEvent.PushForm(eid, VictimRef)
+		; ModEvent.PushFloat(eid, StartedAt)
+
+
 
 event OnEffectFinish(Actor TargetRef, Actor CasterRef)
 endEvent

@@ -15,7 +15,7 @@ bool function CheckBed(ObjectReference BedRef, bool IgnoreUsed = true)
 	return BedRef != none && BedRef.IsEnabled() && BedRef.Is3DLoaded() && (!IgnoreUsed || (IgnoreUsed && !BedRef.IsFurnitureInUse(true)))
 endFunction
 
-ObjectREference function FindBed(ObjectReference CenterRef, float Radius = 1000.0, bool IgnoreUsed = true, ObjectReference IgnoreRef1 = none, ObjectReference IgnoreRef2 = none)
+ObjectReference function FindBed(ObjectReference CenterRef, float Radius = 1000.0, bool IgnoreUsed = true, ObjectReference IgnoreRef1 = none, ObjectReference IgnoreRef2 = none)
 	if CenterRef == none || Radius < 1.0
 		return none ; Invalid args
 	endIf

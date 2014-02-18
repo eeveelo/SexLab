@@ -16,9 +16,9 @@ Spell property CumVaginalSpell auto
 Spell property CumOralSpell auto
 Spell property CumAnalSpell auto
 
-Keyword property kwCumOral auto
-Keyword property kwCumAnal auto
-Keyword property kwCumVaginal auto
+Keyword property CumOralKeyword auto
+Keyword property CumAnalKeyword auto
+Keyword property CumVaginalKeyword auto
 
 FormList property ValidActorList auto
 FormList property NoStripList auto
@@ -84,7 +84,7 @@ Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000
 endFunction
 
 ; TODO: probably needs some love
-actor[] function FindAvailablePartners(actor[] Positions, int total, int males = -1, int females = -1, float radius = 10000.0)
+Actor[] function FindAvailablePartners(actor[] Positions, int total, int males = -1, int females = -1, float radius = 10000.0)
 	int needed = (total - Positions.Length)
 	if needed <= 0 || Positions.Length < 1
 		return Positions ; Nothing to do
@@ -133,7 +133,7 @@ actor[] function FindAvailablePartners(actor[] Positions, int total, int males =
 	return Positions
 endFunction
 
-actor[] function SortActors(Actor[] Positions, bool FemaleFirst = true)
+Actor[] function SortActors(Actor[] Positions, bool FemaleFirst = true)
 	int ActorCount = Positions.Length
 	if ActorCount < 2
 		return Positions ; Why reorder a single actor?
@@ -165,31 +165,30 @@ actor[] function SortActors(Actor[] Positions, bool FemaleFirst = true)
 	return Sorted
 endFunction
 
-function ApplyCum(Actor ActorRef, int cumID)
-	; Apply passed id
+function ApplyCum(Actor ActorRef, int CumID)
 	AddCum(ActorRef, (cumID == 1 || cumID == 4 || cumID == 5 || cumID == 7), (cumID == 2 || cumID == 4 || cumID == 6 || cumID == 7), (cumID == 3 || cumID == 5 || cumID == 6 || cumID == 7))
 endFunction
 
-function AddCum(Actor ActorRef, bool vaginal = true, bool oral = true, bool anal = true)
-	vaginal = vaginal || ActorRef.HasMagicEffectWithKeyword(kwCumVaginal)
-	oral = oral || ActorRef.HasMagicEffectWithKeyword(kwCumOral)
-	anal = anal || ActorRef.HasMagicEffectWithKeyword(kwCumAnal)
+function AddCum(Actor ActorRef, bool Vaginal = true, bool Oral = true, bool Anal = true)
+	Vaginal = Vaginal || ActorRef.HasMagicEffectWithKeyword(CumVaginalKeyword)
+	Oral = Oral || ActorRef.HasMagicEffectWithKeyword(CumOralKeyword)
+	Anal = Anal || ActorRef.HasMagicEffectWithKeyword(CumAnalKeyword)
 	; To specific a scenario to really warrant the check
 	; bool ToggleGhost = ActorRef.IsGhost()
 	; if ToggleGhost
 	; 	ActorRef.SetGhost(false)
 	; endIf
-	if vaginal && !oral && !anal
+	if Vaginal && !Oral && !Anal
 		CumVaginalSpell.Cast(ActorRef, ActorRef)
-	elseIf oral && !vaginal && !anal
+	elseIf Oral && !Vaginal && !Anal
 		CumOralSpell.Cast(ActorRef, ActorRef)
-	elseIf anal && !vaginal && !oral
+	elseIf Anal && !Vaginal && !Oral
 		CumAnalSpell.Cast(ActorRef, ActorRef)
-	elseIf vaginal && oral && !anal
+	elseIf Vaginal && Oral && !Anal
 		CumVaginalOralSpell.Cast(ActorRef, ActorRef)
-	elseIf vaginal && anal && !oral
+	elseIf Vaginal && Anal && !Oral
 		CumVaginalAnalSpell.Cast(ActorRef, ActorRef)
-	elseIf oral && anal && !vaginal
+	elseIf Oral && Anal && !Vaginal
 		CumOralAnalSpell.Cast(ActorRef, ActorRef)
 	else
 		CumVaginalOralAnalSpell.Cast(ActorRef, ActorRef)
@@ -416,48 +415,45 @@ endFunction
 
 int function ValidateActor(Actor ActorRef)
 	if !ActorRef
-		Debug.Trace("--- SexLab --- Failed to validate (none) :: Because they don't exist.")
+		Log("ValidateActor() -- Failed to validate (NONE) -- Because they don't exist.")
 		return -1
 	elseIf IsActorActive(ActorRef)
-		Debug.Trace("--- SexLab --- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") :: They appear to already be animating")
+		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They appear to already be animating")
 		return -10
 	endIf
-
-	;DEBUG
-	return 1
 	; TODO: Doing this also means passing creatures that may have had animation disabled, might want to check that as well before bypassing
-	if ValidActorList.HasForm(ActorRef) ;TODO: Maybe an InvalidActorList as well, and convert to storageutil
+	if StorageUtil.FormListFind(self, "SexLab.ValidActors", ActorRef) != -1
+		Log("ValidateActor() -- Validated ("+ActorRef.GetLeveledActorBase().GetName()+") -- CACHE HIT")
 		return 1
 	elseIf !CanAnimate(ActorRef)
-		Debug.Trace("--- SexLab --- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") :: They are forbidden from animating")
+		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are forbidden from animating")
 		return -11
 	elseIf !ActorRef.Is3DLoaded()
-		Debug.Trace("--- SexLab --- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") :: They are not loaded")
+		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are not loaded")
 		return -12
 	elseIf ActorRef.IsDead()
-		Debug.Trace("--- SexLab --- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") :: He's dead Jim.")
+		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- He's dead Jim.")
 		return -13
 	elseIf ActorRef.IsDisabled()
-		Debug.Trace("--- SexLab --- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") :: They are disabled")
+		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are disabled")
 		return -14
 	elseIf ActorRef.IsFlying()
-		Debug.Trace("--- SexLab --- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") :: They are flying.")
+		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are flying.")
 		return -15
 	endIf
 	; TODO: Creature checking
 	if ActorRef != PlayerRef && !ActorRef.HasKeywordString("ActorTypeNPC") ;&& !AnimLib.AllowedCreature(ActorRace)
-		Debug.Trace("--- SexLab --- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") :: They are a creature that is currently not supported ("+ActorRef.GetLeveledActorBase().GetName()+")")
+		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are a creature that is currently not supported ("+ActorRef.GetLeveledActorBase().GetName()+")")
 		return -16
 	endIf
-	ValidActorList.AddForm(ActorRef)
+	StorageUtil.FormListAdd(self, "SexLab.ValidActors", ActorRef, false)
 	return 1
 endFunction
 
 bool function CanAnimate(Actor ActorRef)
 	Race ActorRace = ActorRef.GetLeveledActorBase().GetRace()
 	String RaceName = ActorRace.GetName()+MiscUtil.GetRaceEditorID(ActorRace)
-	return (ActorRef.IsInFaction(ForbiddenFaction)   || ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Child") != -1  || StringUtil.Find(RaceName, "Little") != -1 \
-	 || StringUtil.Find(RaceName, "117") != -1 || StringUtil.Find(RaceName, "Elin") != -1   || StringUtil.Find(RaceName, "Enfant") != -1 || (StringUtil.Find(RaceName, "Monli") != -1 && ActorRef.GetScale() < 0.93))
+	return !(ActorRef.IsInFaction(ForbiddenFaction) || ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Child") != -1  || StringUtil.Find(RaceName, "Little") != -1 || StringUtil.Find(RaceName, "117") != -1 || StringUtil.Find(RaceName, "Elin") != -1   || StringUtil.Find(RaceName, "Enfant") != -1 || (StringUtil.Find(RaceName, "Monli") != -1 && ActorRef.GetScale() < 0.93))
 endFunction
 
 bool function IsValidActor(Actor ActorRef)

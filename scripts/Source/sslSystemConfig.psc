@@ -1,5 +1,10 @@
 scriptname sslSystemConfig extends Quest
 
+bool property DebugMode hidden
+	bool function get()
+		return true
+	endFunction
+endProperty
 
 bool property SOSEnabled auto hidden
 bool property bDisablePlayer auto hidden
@@ -59,6 +64,13 @@ float[] property fStageTimer auto hidden
 float[] property fStageTimerLeadIn auto hidden
 float[] property fStageTimerAggr auto hidden
 
+function ToggleFreeCamera()
+	if Game.GetCameraState() != 3
+		MiscUtil.SetFreeCameraSpeed(fAutoSUCSM)
+	endIf
+	MiscUtil.ToggleFreeCamera()
+endFunction
+
 bool function BackwardsPressed()
 	return (Input.IsKeyPressed(kBackwards) || ((kBackwards == 42 || kBackwards == 54) && (Input.IsKeyPressed(42) || Input.IsKeyPressed(54))))
 endFunction
@@ -90,8 +102,8 @@ function HotkeyCallback(sslThreadController Thread, int keyCode)
 	; Rotate Scene
 	elseIf keyCode == kRotateScene
 		Thread.RotateScene(BackwardsPressed())
-	; Change Adjusted Actor
 
+	; Change Adjusted Actor
 	elseIf keyCode == kAdjustChange
 		Thread.AdjustChange(BackwardsPressed())
 
@@ -152,7 +164,7 @@ bool function UsesNudeSuit(bool IsFemale)
 endFunction
 
 
-function _Defaults()
+function SetDefaults()
 
 	sPlayerVoice = "$SSL_Random"
 	bNPCSaveVoice = true

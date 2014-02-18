@@ -186,7 +186,6 @@ state Animating
 	function ChangeAnimation(bool backwards = false)
 		SetAnimation(sslUtility.WrapIndex((aid + sslUtility.SignInt(backwards, 1)), Animations.Length))
 		SendThreadEvent("AnimationChange")
-		RealignActors()
 	endFunction
 
 	function ChangePositions(bool backwards = false)
@@ -293,7 +292,10 @@ function SetAnimation(int AnimID = -1)
 		GoToStage((StageCount - 1))
 	else
 		AnimEvents = Animation.FetchStage(Stage)
+		SyncActors(false)
+		PlayAnimation()
 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
+		MoveActors()
 	endIf
 endFunction
 
@@ -350,17 +352,17 @@ function EndLeadIn()
 	Action("Advancing")
 endFunction
 
-function EndAnimation(bool quick = false)
+function EndAnimation(bool Quickly = false)
 	UnregisterForUpdate()
 	GoToState("Ending")
 	; Set fast flag to skip slow ending functions
-	FastEnd = quick
+	FastEnd = Quickly
 	Stage = StageCount
 	; Reset actors & wait for clear state
 	AliasAction("Reset", "")
 	; Send end event
 	SendThreadEvent("AnimationEnd")
-	if !FastEnd
+	if !Quickly
 		SexLabUtil.Wait(2.0)
 	endIf
 	; Clear & Reset animation thread
@@ -413,13 +415,10 @@ function DisableHotkeys()
 endFunction
 
 function Initialize()
-	UnregisterForUpdate()
 	DisableHotkeys()
-
-	aid = 0
-	AdjustPos = 0
+	aid        = 0
+	AdjustPos  = 0
 	TimedStage = false
-
 	parent.Initialize()
 endFunction
 
@@ -432,6 +431,11 @@ state Making
 	function SetAnimation(int AnimID = -1)
 	endFunction
 	function EnableHotkeys()
+	endFunction
+endState
+
+auto state Unlocked
+	function EndAnimation(bool Quickly = false)
 	endFunction
 endState
 

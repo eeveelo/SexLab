@@ -19,42 +19,40 @@ Quest property Storage auto hidden
 ;|	Tagging System                               |;
 ;\-----------------------------------------------/;
 
-bool function HasTag(string tag)
-	return tag != "" && StorageUtil.StringListFind(Storage, Key("Tags"), tag) != -1
+bool function HasTag(string Tag)
+	return Tag != "" && StorageUtil.StringListFind(Storage, Key("Tags"), Tag) != -1
 endFunction
 
-bool function AddTag(string tag)
-	if HasTag(tag)
+bool function AddTag(string Tag)
+	if HasTag(Tag)
 		return false
 	endIf
-	StorageUtil.StringListAdd(Storage, Key("Tags"), tag, false)
+	StorageUtil.StringListAdd(Storage, Key("Tags"), Tag, false)
 	return true
 endFunction
 
-bool function RemoveTag(string tag)
-	if !HasTag(tag)
+bool function RemoveTag(string Tag)
+	if !HasTag(Tag)
 		return false
 	endIf
-	StorageUtil.StringListRemove(Storage, Key("Tags"), tag, true)
+	StorageUtil.StringListRemove(Storage, Key("Tags"), Tag, true)
 	return true
 endFunction
 
-bool function ToggleTag(string tag)
-	return (RemoveTag(tag) || AddTag(tag)) && HasTag(tag)
+bool function ToggleTag(string Tag)
+	return (RemoveTag(Tag) || AddTag(Tag)) && HasTag(Tag)
 endFunction
 
-bool function CheckTags(string[] find, bool requireAll = true, bool suppress = false)
-	int i = find.Length
+bool function CheckTags(string[] CheckTags, bool RequireAll = true, bool Suppress = false)
+	int i = CheckTags.Length
 	while i
 		i -= 1
-		if find[i] != ""
-			bool check = HasTag(find[i])
-			if requireAll && !check && !suppress
-				return false ; Stop if we need all and don't have it
-			elseif !requireAll && check && !suppress
+		if CheckTags[i] != ""
+			bool Check = HasTag(CheckTags[i])
+			if (Suppress && Check) || (!Suppress && RequireAll && !Check)
+				return false ; Stop if we need all and don't have it, or are supressing the found tag
+			elseif !Suppress && !RequireAll && Check
 				return true ; Stop if we don't need all and have one
-			elseif check && suppress
-				return false
 			endIf
 		endIf
 	endWhile
@@ -64,12 +62,12 @@ endFunction
 
 string[] function GetTags()
 	int i = StorageUtil.StringListCount(Storage, Key("Tags"))
-	string[] tags = sslUtility.StringArray(i)
+	string[] Tags = sslUtility.StringArray(i)
 	while i
 		i -= 1
-		tags[i] = StorageUtil.StringListGet(Storage, Key("Tags"), i)
+		Tags[i] = StorageUtil.StringListGet(Storage, Key("Tags"), i)
 	endWhile
-	return tags
+	return Tags
 endFunction
 
 ;/-----------------------------------------------\;
@@ -105,7 +103,7 @@ endFunction
 function Clear()
 	Name = ""
 	Registry = ""
-	Enabled = true
+	Enabled = false
 	Locked = false
 	parent.Clear()
 endFunction

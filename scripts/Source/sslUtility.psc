@@ -53,6 +53,11 @@ float[] function TrimFloatArray(float[] array, int len) global
 	return output
 endFunction
 
+float[] function EmptyFloatArray() global
+	float[] empty
+	return empty
+endFunction
+
 float function ClampFloat(float value, float min, float max) global
 	if value >= max
 		return max
@@ -120,6 +125,11 @@ int[] function TrimIntArray(int[] array, int len) global
 		output[len] = array[len]
 	endWhile
 	return output
+endFunction
+
+int[] function EmptyIntArray() global
+	int[] empty
+	return empty
 endFunction
 
 int function ClampInt(int value, int min, int max) global
@@ -201,6 +211,11 @@ bool[] function TrimBoolArray(bool[] array, int len) global
 	return output
 endFunction
 
+bool[] function EmptyBoolArray() global
+	bool[] empty
+	return empty
+endFunction
+
 int function CountTrue(bool[] array) global
 	int len = array.Length
 	int pos = array.Find(true)
@@ -254,6 +269,22 @@ string[] function ArgString(string args, string delimiter = ",") global
 		i += 1
 	endWhile
 	return output
+endFunction
+
+string function MakeArgs(string delimiter, string arg1, string arg2 = "", string arg3 = "", string arg4 = "", string arg5 = "") global
+	if arg2 != ""
+		arg1 += delimiter+arg2
+	endIf
+	if arg3 != ""
+		arg1 += delimiter+arg3
+	endIf
+	if arg4 != ""
+		arg1 += delimiter+arg4
+	endIf
+	if arg5 != ""
+		arg1 += delimiter+arg5
+	endIf
+	return arg1
 endFunction
 
 string function Trim(string var) global
@@ -312,6 +343,11 @@ string[] function TrimStringArray(string[] array, int len) global
 	return output
 endFunction
 
+string[] function EmptyStringArray() global
+	string[] empty
+	return empty
+endFunction
+
 ;/-----------------------------------------------\;
 ;|	Form Utility Functions                       |;
 ;\-----------------------------------------------/;
@@ -354,6 +390,11 @@ form[] function MergeFormArray(form[] push, form[] array) global
 		output[len] = push[pushing]
 	endWhile
 	return output
+endFunction
+
+form[] function EmptyFormArray() global
+	form[] empty
+	return empty
 endFunction
 
 int function CountNone(form[] array) global
@@ -415,16 +456,36 @@ sslBaseAnimation[] function PushAnimation(sslBaseAnimation var, sslBaseAnimation
 	return pushed
 endFunction
 
-actor[] function PushActor(actor var, actor[] array) global
+sslBaseAnimation[] function IncreaseAnimation(int by, sslBaseAnimation[] array) global
+	int len = array.Length
+	if by < 1 || (len+by > 100)
+		return array
+	elseIf len == 0
+		return AnimationArray(by)
+	endIf
+	sslBaseAnimation[] output = AnimationArray(len+by)
+	while len
+		len -= 1
+		output[len] = array[len]
+	endWhile
+	return output
+endFunction
+
+sslBaseAnimation[] function EmptyAnimationArray() global
+	sslBaseAnimation[] empty
+	return empty
+endFunction
+
+Actor[] function PushActor(Actor var, Actor[] array) global
 	int len = array.Length
 	if len >= 5
 		return array
 	elseIf len == 0
-		array = new actor[1]
+		array = new Actor[1]
 		array[0] = var
 		return array
 	endIf
-	actor[] pushed = ActorArray(len+1)
+	Actor[] pushed = ActorArray(len+1)
 	pushed[len] = var
 	while len
 		len -=1
@@ -447,17 +508,17 @@ int function ValidateSize(int size) global
 	endIf
 endFunction
 
-actor[] function ActorArray(int size) global
+Actor[] function ActorArray(int size) global
 	if size == 1
-		return new actor[1]
+		return new Actor[1]
 	elseIf size == 2
-		return new actor[2]
+		return new Actor[2]
 	elseIf size == 3
-		return new actor[3]
+		return new Actor[3]
 	elseIf size == 4
-		return new actor[4]
+		return new Actor[4]
 	else
-		return new actor[5]
+		return new Actor[5]
 	endIf
 endFunction
 
@@ -662,6 +723,110 @@ sslBaseAnimation[] function AnimationArray(int size) global
 		return new sslBaseAnimation[99]
 	else
 		return new sslBaseAnimation[100]
+	endIf
+endFunction
+
+sslBaseVoice[] function VoiceArray(int size) global
+	if size == 1
+		return new sslBaseVoice[1]
+	elseIf size == 2
+		return new sslBaseVoice[2]
+	elseIf size == 3
+		return new sslBaseVoice[3]
+	elseIf size == 4
+		return new sslBaseVoice[4]
+	elseIf size == 5
+		return new sslBaseVoice[5]
+	elseIf size == 6
+		return new sslBaseVoice[6]
+	elseIf size == 7
+		return new sslBaseVoice[7]
+	elseIf size == 8
+		return new sslBaseVoice[8]
+	elseIf size == 9
+		return new sslBaseVoice[9]
+	elseIf size == 10
+		return new sslBaseVoice[10]
+	elseIf size == 11
+		return new sslBaseVoice[11]
+	elseIf size == 12
+		return new sslBaseVoice[12]
+	elseIf size == 13
+		return new sslBaseVoice[13]
+	elseIf size == 14
+		return new sslBaseVoice[14]
+	elseIf size == 15
+		return new sslBaseVoice[15]
+	elseIf size == 16
+		return new sslBaseVoice[16]
+	elseIf size == 17
+		return new sslBaseVoice[17]
+	elseIf size == 18
+		return new sslBaseVoice[18]
+	elseIf size == 19
+		return new sslBaseVoice[19]
+	elseIf size == 20
+		return new sslBaseVoice[20]
+	elseIf size == 21
+		return new sslBaseVoice[21]
+	elseIf size == 22
+		return new sslBaseVoice[22]
+	elseIf size == 23
+		return new sslBaseVoice[23]
+	elseIf size == 24
+		return new sslBaseVoice[24]
+	elseIf size == 25
+		return new sslBaseVoice[25]
+	elseIf size == 26
+		return new sslBaseVoice[26]
+	elseIf size == 27
+		return new sslBaseVoice[27]
+	elseIf size == 28
+		return new sslBaseVoice[28]
+	elseIf size == 29
+		return new sslBaseVoice[29]
+	elseIf size == 30
+		return new sslBaseVoice[30]
+	elseIf size == 31
+		return new sslBaseVoice[31]
+	elseIf size == 32
+		return new sslBaseVoice[32]
+	elseIf size == 33
+		return new sslBaseVoice[33]
+	elseIf size == 34
+		return new sslBaseVoice[34]
+	elseIf size == 35
+		return new sslBaseVoice[35]
+	elseIf size == 36
+		return new sslBaseVoice[36]
+	elseIf size == 37
+		return new sslBaseVoice[37]
+	elseIf size == 38
+		return new sslBaseVoice[38]
+	elseIf size == 39
+		return new sslBaseVoice[39]
+	elseIf size == 40
+		return new sslBaseVoice[40]
+	elseIf size == 41
+		return new sslBaseVoice[41]
+	elseIf size == 42
+		return new sslBaseVoice[42]
+	elseIf size == 43
+		return new sslBaseVoice[43]
+	elseIf size == 44
+		return new sslBaseVoice[44]
+	elseIf size == 45
+		return new sslBaseVoice[45]
+	elseIf size == 46
+		return new sslBaseVoice[46]
+	elseIf size == 47
+		return new sslBaseVoice[47]
+	elseIf size == 48
+		return new sslBaseVoice[48]
+	elseIf size == 49
+		return new sslBaseVoice[49]
+	else
+		return new sslBaseVoice[50]
 	endIf
 endFunction
 

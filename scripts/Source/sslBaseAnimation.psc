@@ -138,10 +138,10 @@ endFunction
 int[] function GetPositionFlags(int position, int stage)
 	int i = DataIndex(4, position, stage, 0)
 	int[] output = new int[5]
-	output[0] = i
-	output[1] = (i + 1)
-	output[2] = (i + 2)
-	output[3] = (i + 3)
+	output[0] = flags[i]
+	output[1] = flags[(i + 1)]
+	output[2] = flags[(i + 2)]
+	output[3] = flags[(i + 3)]
 	output[4] = GetGender(position)
 	return output
 endFunction
@@ -381,7 +381,7 @@ function SetStageTimer(int stage, float timer)
 	timers[(stage - 1)] = timer
 endFunction
 
-function _Save(int[] posData, string[] animData, float[] offsetData, int[] flagData)
+function Save(int[] posData, string[] animData, float[] offsetData, int[] flagData)
 	; Update config data
 	positions = posData
 	animations = animData

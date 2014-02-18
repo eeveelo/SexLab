@@ -1,7 +1,8 @@
 scriptname sslActorAlias extends ReferenceAlias
 
-; Necessary libraries
+; Libraries
 sslActorLibrary property Lib auto
+sslActorStats property Stats auto
 sslSystemConfig property Config auto
 
 ; Actor Info
@@ -10,44 +11,47 @@ int property Gender auto hidden
 bool IsMale
 bool IsFemale
 bool IsCreature
-bool IsPlayer
 bool IsVictim
+bool IsPlayer
 string ActorName
 ActorBase BaseRef
 
 ; Current Thread state
-int Stage
-int Position
-int Strength
-sslBaseAnimation Animation
 sslThreadController Thread
+int Position
+int Stage
+
+; Animation
+sslBaseAnimation Animation
 
 ; Voice
+sslBaseVoice Voice
+VoiceType ActorVoice
 bool IsForcedSilent
 float VoiceDelay
-sslBaseVoice Voice
+int Strength
 
 ; Positioning
 ObjectReference MarkerRef
+float[] Offsets
 float[] Loc
 
 ; Storage
 int[] Flags
-float[] Offsets
 bool[] StripOverride
 float ActorScale
 float AnimScale
-form strapon
+form Strapon
 
 ; Animation Position/Stage flags
 bool property OpenMouth hidden
 	bool function get()
-		return Flags[0] == 0
+		return Flags[1] == 0
 	endFunction
 endProperty
 bool property IsSilent hidden
 	bool function get()
-		return (Voice == none || IsForcedSilent || IsCreature || Flags[0] == 1)
+		return (Voice == none || IsForcedSilent || IsCreature || Flags[0] == 1 || Flags[1] == 0)
 	endFunction
 endProperty
 bool property UseStrapon hidden
@@ -77,33 +81,24 @@ bool function PrepareAlias(Actor ProspectRef, bool MakeVictim = false, sslBaseVo
 	; Register actor as active
 	StorageUtil.FormListAdd(Lib, "Registry", ProspectRef, false)
 	; Init actor alias information
-	ActorRef = ProspectRef
-	BaseRef = ActorRef.GetLeveledActorBase()
-	ActorName = BaseRef.GetName()
-	Gender = Lib.GetGender(ActorRef)
-	IsMale = Gender == 0
-	IsFemale = Gender == 1
+	ActorRef   = ProspectRef
+	BaseRef    = ActorRef.GetLeveledActorBase()
+	ActorName  = BaseRef.GetName()
+	Gender     = Lib.GetGender(ActorRef)
+	IsMale     = Gender == 0
+	IsFemale   = Gender == 1
 	IsCreature = Gender == 2
-	IsPlayer = ActorRef == Lib.PlayerRef
-	IsForcedSilent = ForceSilence
-	Voice = UseVoice
-	IsVictim = MakeVictim
+	IsPlayer   = ActorRef == Lib.PlayerRef
+	ActorVoice = BaseRef.GetVoiceType()
+	IsVictim   = MakeVictim
 	if MakeVictim
 		Thread.VictimRef = ActorRef
 		Thread.IsAggressive = true
 	endIf
+	SetVoice(UseVoice, ForceSilence)
 	Thread.Log("Slotted '"+ActorName+"'", self)
 	GoToState("")
 	return true
-endFunction
-
-function Clear()
-	if GetReference() != none
-		StorageUtil.FormListRemove(Lib, "Registry", GetReference(), true)
-		UnlockActor()
-	endIf
-	parent.Clear()
-	Initialize()
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -150,13 +145,17 @@ function LockActor()
 	; Disable movement
 	if IsPlayer
 		Game.ForceThirdPerson()
-		Game.SetPlayerAIDriven()
 		Game.DisablePlayerControls(false, false, false, false, false, false, true, false, 0)
+		Game.SetPlayerAIDriven()
 		; Enable hotkeys, if needed
 		if IsVictim && Config.bDisablePlayer
 			Thread.AutoAdvance = true
 		else
 			Thread.EnableHotkeys()
+		endIf
+		; Auto TFC
+		if Config.bAutoTFC
+			Config.ToggleFreeCamera()
 		endIf
 	else
 		; ActorRef.SetRestrained(true)
@@ -183,25 +182,34 @@ function UnlockActor()
 	; Enable movement
 	if IsPlayer
 		Thread.DisableHotkeys()
-		Game.SetPlayerAIDriven(false)
 		Game.EnablePlayerControls(false, false, false, false, false, false, true, false, 0)
+		Game.SetPlayerAIDriven(false)
 	else
 		; ActorRef.SetRestrained(false)
 		ActorRef.SetDontMove(false)
 	endIf
+	; Detach positioning marker
+	ActorRef.StopTranslation()
+	ActorRef.SetVehicle(none)
 	; Remove from animation faction
 	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
 	ActorUtil.RemovePackageOverride(ActorRef, Lib.DoNothing)
 	ActorRef.EvaluatePackage()
-	; Detach positioning marker
-	ActorRef.StopTranslation()
-	ActorRef.SetVehicle(none)
-	; Cleanup
 	if !IsCreature
-		TryToStopCombat()
-		if ActorRef.IsWeaponDrawn()
-			ActorRef.SheatheWeapon()
-		endIf
+	endIf
+endFunction
+
+function RestoreActorDefaults()
+	if ActorRef == none
+		return
+	endIf
+	; Reset to starting scale
+	if ActorScale != 0.0
+		ActorRef.SetScale(ActorScale)
+	endIf
+	; Reset voice type
+	if ActorVoice != none
+		BaseRef.SetVoiceType(ActorVoice)
 	endIf
 endFunction
 
@@ -237,7 +245,13 @@ state Prepare
 		endIf
 		; Non Creatures
 		if !IsCreature
+			; Strip actor
 			Strip(DoUndress)
+			; Pick a voice if needed
+			if Voice == none && !IsForcedSilent
+				SetVoice(Lib.VoiceSlots.GetRandom(BaseRef.GetSex()), IsForcedSilent)
+				Thread.Log(ActorName+" - Searching for voice... found: "+Voice.Name)
+			endIf
 		endIf
 		; Make SOS erect
 		Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
@@ -264,10 +278,12 @@ state Animating
 
 	event OnUpdate()
 		if ActorRef.IsDead() || ActorRef.IsDisabled()
-			Debug.TraceAndBox(ActorName+" is dead or some shit happened.")
+			Thread.EndAnimation(true)
 			return
 		endIf
-		Moan()
+		if !IsSilent
+			Voice.Moan(ActorRef, Strength)
+		endIf
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent
 
@@ -293,6 +309,14 @@ state Animating
 			if Thread.LeadIn
 				Strength = ((Strength as float) * 0.70) as int
 			endIf
+		endIf
+		; Facial expression
+		if OpenMouth
+			ActorRef.SetExpressionOverride(16, 100)
+		elseIf IsVictim
+			ActorRef.SetExpressionOverride(14, Strength)
+		else
+			ActorRef.SetExpressionOverride(10, Strength)
 		endIf
 		; Send schlong offset
 		if MalePosition
@@ -327,7 +351,7 @@ state Animating
 	function Snap()
 		Thread.Log(ActorName+" - Snapping")
 		; Quickly move into place if actor isn't positioned right
-		if ActorRef.GetDistance(MarkerRef) > 0.60
+		if ActorRef.GetDistance(MarkerRef) > 1.0
 			Thread.Log(ActorName+" - Is out of position by "+ActorRef.GetDistance(MarkerRef))
 			ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 1.0, 50000, 0)
 			return ; OnTranslationComplete() will take over when in place
@@ -348,13 +372,6 @@ state Animating
 		Snap()
 	endEvent
 
-	function Moan()
-		if !IsSilent
-			Thread.Log(ActorName+" - MOANING")
-			; Voice.Moan(ActorRef, Strength)
-		endIf
-	endFunction
-
 endState
 
 state Reset
@@ -362,30 +379,48 @@ state Reset
 		RegisterForSingleUpdate(0.05)
 	endFunction
 	event OnUpdate()
-		; Reset to starting scale
-		if ActorScale != 0.0
-			ActorRef.SetScale(ActorScale)
-		endIf
+		; Restore scale and voicetype
+		RestoreActorDefaults()
 		; Apply cum
-		int cum = Animation.GetCum(position)
-		if !Thread.FastEnd && cum > 0 && Config.bUseCum && (Thread.Males > 0 || Config.bAllowFFCum || Thread.HasCreature)
-			Lib.ApplyCum(ActorRef, cum)
+		int CumID = Animation.GetCum(Position)
+		if !Thread.FastEnd && CumID > 0 && Config.bUseCum && (Thread.Males > 0 || Config.bAllowFFCum || Thread.HasCreature)
+			Lib.ApplyCum(ActorRef, CumID)
 		endIf
 		; Stop animating
 		StopAnimating(Thread.FastEnd)
 		Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
+		ActorRef.ClearExpressionOverride()
 		; Unstrip
 		if !ActorRef.IsDead()
 			Lib.UnstripStored(ActorRef, IsVictim)
 		endIf
-		; Unlock the actor and alias
-		Clear()
+		; Unlock movements
+		UnlockActor()
+		; Update stats
+		if !IsCreature
+			int[] Genders = Thread.Genders
+			Stats.AddSex(ActorRef, Thread.TotalTime, Thread.HasPlayer, Genders[0], Genders[1], Genders[2])
+		endIf
+		; Reset alias
+		Initialize()
 	endEvent
 endState
 
 ; ------------------------------------------------------- ;
 ; --- Data Accessors                                  --- ;
 ; ------------------------------------------------------- ;
+
+function SetVoice(sslBaseVoice ToVoice = none, bool ForceSilence = false)
+	IsForcedSilent = ForceSilence
+	if ToVoice != none
+		Voice = ToVoice
+		Voice.SetVoice(BaseRef)
+	endIf
+endFunction
+
+sslBaseVoice function GetVoice()
+	return Voice
+endFunction
 
 function OverrideStrip(bool[] SetStrip)
 	if SetStrip.Length != 33
@@ -405,29 +440,29 @@ function Strip(bool DoAnimate = true)
 	endIf
 endFunction
 
-bool DisableRagdoll
+bool NoRagdoll
 bool property DoRagdoll hidden
 	bool function get()
-		if DisableRagdoll
+		if NoRagdoll
 			return false
 		endIf
-		return Config.bRagDollEnd
+		return !NoRagdoll && Config.bRagDollEnd
 	endFunction
 	function set(bool value)
-		DisableRagdoll = !value
+		NoRagdoll = !value
 	endFunction
 endProperty
 
-bool DisableUndressAnim
+bool NoUndress
 bool property DoUndress hidden
 	bool function get()
-		if DisableUndressAnim
+		if NoUndress
 			return false
 		endIf
 		return Config.bUndressAnimation
 	endFunction
 	function set(bool value)
-		DisableUndressAnim = !value
+		NoUndress = !value
 	endFunction
 endProperty
 
@@ -438,17 +473,52 @@ endProperty
 function Initialize()
 	UnregisterForUpdate()
 	GoToState("")
-	Thread = (GetOwningQuest() as sslThreadController)
-	Lib = (Quest.GetQuest("SexLabQuestFramework") as sslActorLibrary)
-	Config = (Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig)
+	; Free actor for selection
+	if ActorRef
+		StorageUtil.FormListRemove(Lib, "Registry", ActorRef, false)
+	endIf
+	; Delete positioning marker
 	if MarkerRef
 		MarkerRef.Disable()
 		MarkerRef.Delete()
 	endIf
 	; Forms
-	MarkerRef = none
-	ActorRef = none
+	ActorRef       = none
+	MarkerRef      = none
+	Strapon        = none
+	; Voice
+	Voice          = none
+	ActorVoice     = none
 	IsForcedSilent = false
+	; Floats
+	ActorScale     = 0.0
+	AnimScale      = 0.0
+	; Flags
+	NoRagdoll      = false
+	NoUndress      = false
+	; Storage
+	bool[] bDel1
+	StripOverride  = bDel1
+	; Clear the alias
+	TryToClear()
+	TryToReset()
+endFunction
+
+function ClearAlias()
+	Lib    = (Quest.GetQuest("SexLabQuestFramework") as sslActorLibrary)
+	Stats  = (Quest.GetQuest("SexLabQuestFramework") as sslActorStats)
+	Config = (Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig)
+	Thread = (GetOwningQuest() as sslThreadController)
+	if GetReference() != none
+		Thread.Log("Had actor '"+GetReference()+"' During clear!", self)
+		ActorRef = GetReference() as Actor
+		RestoreActorDefaults()
+		StopAnimating(true)
+		UnlockActor()
+	endIf
+	TryToClear()
+	TryToReset()
+	Initialize()
 endFunction
 
 ; event OnInit()
@@ -481,8 +551,6 @@ function Snap()
 endFunction
 event OnTranslationComplete()
 endEvent
-function Moan()
-endFunction
 ; Varied
 function FireAction()
 endFunction
