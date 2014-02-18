@@ -73,7 +73,7 @@ function ArrokBlowjob()
 	Name = "Arrok Blowjob"
 
 	SetContent(Sexual)
-	SetSFX(Sucking)
+	SoundFX = Sucking
 
 	int a1 = AddPosition(Female, addCum=Oral)
 	AddPositionStage(a1, "Arrok_Blowjob_A1_S1", 0, silent = true, openMouth = true)
@@ -132,7 +132,7 @@ function ArrokCowgirl()
 	Name = "Arrok Cowgirl"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
 	AddPositionStage(a1, "Arrok_Cowgirl_A1_S1", 0)
@@ -165,7 +165,7 @@ function ArrokDevilsThreeway()
 	Name = "Arrok Devils Threeway"
 
 	SetContent(Sexual)
-	SetSFX(SexMix)
+	SoundFX = SexMix
 
 	int a1 = AddPosition(Female, addCum=VaginalOralAnal)
 	AddPositionStage(a1, "Arrok_DevilsThreeway_A1_S1", 0, silent = true, openMouth = true)
@@ -203,7 +203,7 @@ function ArrokDoggyStyle()
 	Name = "Arrok DoggyStyle"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=Anal)
 	AddPositionStage(a1, "Arrok_DoggyStyle_A1_S1", 0)
@@ -260,7 +260,7 @@ function ArrokLegUp()
 	Name = "Arrok Leg Up Fuck"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
 	AddPositionStage(a1, "Arrok_LegUp_A1_S1", 0)
@@ -312,7 +312,7 @@ function ArrokMissionary()
 	Name = "Arrok Missionary"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
 	AddPositionStage(a1, "Arrok_Missionary_A1_S1", 0)
@@ -341,7 +341,7 @@ function ArrokOral()
 	Name = "Arrok 69"
 
 	SetContent(Sexual)
-	SetSFX(Sucking)
+	SoundFX = Sucking
 
 	int a1 = AddPosition(Female, addCum=Oral)
 	AddPositionStage(a1, "Arrok_Oral_A1_S1", 0)
@@ -375,7 +375,7 @@ function ArrokReverseCowgirl()
 	Name = "Arrok Reverse Cowgirl"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
 	AddPositionStage(a1, "Arrok_ReverseCowgirl_A1_S1", 0)
@@ -404,7 +404,7 @@ function ArrokSideways()
 	Name = "Arrok Sideways Fuck"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
 	AddPositionStage(a1, "Arrok_Sideways_A1_S1", 0)
@@ -434,7 +434,7 @@ function ArrokStanding()
 	Name = "Arrok Standing Fuck"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
 	AddPositionStage(a1, "Arrok_Standing_A1_S1", 0)
@@ -492,7 +492,7 @@ function ArrokTricycle()
 	Name = "Arrok Tricycle"
 
 	SetContent(Sexual)
-	SetSFX(SexMix)
+	SoundFX = SexMix
 
 	int a1 = AddPosition(Female, addCum=Oral)
 	AddPositionStage(a1, "Arrok_Tricycle_A1_S1", -1, up = 2, silent = true, openMouth = true)
@@ -532,7 +532,7 @@ function ArrokHugFuck()
 	Name = "Arrok HugFuck"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
 	AddPositionStage(a1, "Arrok_Hugfuck_A1_S1", 0)
@@ -562,7 +562,7 @@ function ArrokLesbian()
 	Name = "Arrok Lesbian"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female)
 	AddPositionStage(a1, "Arrok_Lesbian_A1_S1", 0)
@@ -619,7 +619,7 @@ function ArrokAnal()
 	Name = "Arrok Anal"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=Anal)
 	AddPositionStage(a1, "Arrok_Anal_A1_S1", 0)
@@ -648,7 +648,7 @@ function ArrokRape()
 	Name = "Arrok Rape"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=Oral)
 	AddPositionStage(a1, "Arrok_Rape_A1_S1", 0)
@@ -679,7 +679,7 @@ function SexLabAggrBehind()
 	Name = "Rough Behind"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 
 	int a1 = AddPosition(Female, addCum=Anal)
@@ -709,7 +709,7 @@ function SexLabAggrDoggyStyle()
 	Name = "Rough Doggy Style"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=Anal)
 	AddPositionStage(a1, "AggrDoggyStyle_A1_S1", 0)
@@ -739,7 +739,7 @@ function SexLabAggrMissonary()
 	Name = "Rough Missionary"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
 	AddPositionStage(a1, "AggrMissionary_A1_S1", 0)
@@ -795,7 +795,7 @@ endFunction
 function SexLabDoggyStyle()
 	Name = "Doggy Style"
 
-	SetSFX(Squishing)
+	SoundFX = Squishing
 	SetContent(Sexual)
 
 	int a1 = AddPosition(Female, addCum=Anal)
@@ -823,7 +823,7 @@ function SexLabHuggingSex()
 	Name = "Hugging Fuck"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
 	AddPositionStage(a1, "HuggingSex_A1_S1", 0)
@@ -851,7 +851,7 @@ function SexLabMissonary()
 	Name = "Missionary"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
 	AddPositionStage(a1, "Missionary_A1_S1", 0)
@@ -879,7 +879,7 @@ function SexLabReverseCowgirl()
 	Name = "Reverse Cowgirl"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
 	AddPositionStage(a1, "ReverseCowgirl_A1_S1", 0)
@@ -907,7 +907,7 @@ function SexLabSideways()
 	Name = "Sideways Fuck"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
 	AddPositionStage(a1, "Sideways_A1_S1", 0)
@@ -935,7 +935,7 @@ function SexLabStanding()
 	Name = "Standing Fuck"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=Anal)
 	AddPositionStage(a1, "Standing_A1_S1", 0)
@@ -963,7 +963,7 @@ function SexLabTribadism()
 	Name = "Tribadism"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female)
 	AddPositionStage(a1, "Tribadism_A1_S1", 0)
@@ -1017,7 +1017,7 @@ function BleaghFemaleSolo()
 	Name = "Bleagh Female Masturbation"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female)
 	AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S1", 0)
@@ -1038,7 +1038,7 @@ function APAnal()
 	Name = "AP Anal"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=Anal)
 	AddPositionStage(a1, "AP_Anal_A1_S1", 0)
@@ -1069,7 +1069,7 @@ function APBedMissionary()
 	Name = "AP Bed Missionary"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
 	AddPositionStage(a1, "AP_BedMissionary_A1_S1", 0)
@@ -1101,7 +1101,7 @@ function APBlowjob()
 	Name = "AP Blowjob"
 
 	SetContent(Sexual)
-	SetSFX(Sucking)
+	SoundFX = Sucking
 
 	int a1 = AddPosition(Female, addCum=Oral)
 	AddPositionStage(a1, "AP_Blowjob_A1_S1", 0, silent = true, openMouth = true)
@@ -1165,7 +1165,7 @@ function APCowgirl()
 	Name = "AP Cowgirl"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
 	AddPositionStage(a1, "AP_Cowgirl_A1_S1", 0)
@@ -1198,7 +1198,7 @@ function APFemaleSolo()
 	Name = "AP Female Masturbation"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female)
 	AddPositionStage(a1, "AP_FemaleSolo_A1_S1", 0)
@@ -1220,7 +1220,7 @@ function APFisting()
 	Name = "AP Fisting"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female)
 	AddPositionStage(a1, "AP_Fisting_A1_S1", 0)
@@ -1283,7 +1283,7 @@ function APKneelBlowjob()
 	Name = "AP Kneeling Blowjob"
 
 	SetContent(Sexual)
-	SetSFX(Sucking)
+	SoundFX = Sucking
 
 	int a1 = AddPosition(Female, addCum=Oral)
 	AddPositionStage(a1, "AP_KneelBlowjob_A1_S1", 0, up = 1, silent = true, openMouth = true)
@@ -1316,7 +1316,7 @@ function APLegUp()
 	Name = "AP Leg Up Fuck"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
 	AddPositionStage(a1, "AP_LegUp_A1_S1", 0)
@@ -1347,7 +1347,7 @@ function APShoulder()
 	Name = "AP Shoulder"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=VaginalAnal)
 	AddPositionStage(a1, "AP_Shoulder_A1_S1", 0)
@@ -1377,7 +1377,7 @@ function APStandBlowjob()
 	Name = "AP Standing Blowjob"
 
 	SetContent(Sexual)
-	SetSFX(Sucking)
+	SoundFX = Sucking
 
 	int a1 = AddPosition(Female, addCum=Oral)
 	AddPositionStage(a1, "AP_StandBlowjob_A1_S1", 0, silent = true, openMouth = true)
@@ -1410,7 +1410,7 @@ function APStanding()
 	Name = "AP Standing"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
 	AddPositionStage(a1, "AP_Standing_A1_S1", 0)
@@ -1440,7 +1440,7 @@ function APDoggyStyle()
 	Name = "AP DoggyStyle"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=Anal)
 	AddPositionStage(a1, "AP_DoggyStyle_A1_S1", 0)
@@ -1471,7 +1471,7 @@ function APHoldLegUp()
 	Name = "AP Holding Leg Up"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
 	AddPositionStage(a1, "AP_HoldLegUp_A1_S1", 0)
@@ -1503,7 +1503,7 @@ function APFaceDown()
 	Name = "AP Face Down Anal"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=Anal)
 	AddPositionStage(a1, "AP_FaceDown_A1_S1", 0)
@@ -1535,7 +1535,7 @@ function APSkullFuck()
 	Name = "AP Skull Fuck"
 
 	SetContent(Sexual)
-	SetSFX(Oral)
+	SoundFX = Sucking
 
 	int a1 = AddPosition(Female, addCum=Oral)
 	AddPositionStage(a1, "AP_SkullFuck_A1_S1", 0, silent = true, openMouth = true)
@@ -1569,7 +1569,7 @@ function ZynRoughStanding()
 	Name = "Zyn Rough Standing"
 
 	SetContent(Sexual)
-	SetSFX(Sucking)
+	SoundFX = Sucking
 
 	int a1 = AddPosition(Female, addCum=VaginalOral)
 	AddPositionStage(a1, "Zyn_RoughStanding_A1_S1", 0)
@@ -1600,7 +1600,7 @@ function ZynLesbian()
 	Name = "Zyn Lesbian"
 
 	SetContent(Sexual)
-	SetSFX(Squishing)
+	SoundFX = Squishing
 
 	int a1 = AddPosition(Female, addCum=Vaginal)
 	AddPositionStage(a1, "Zyn_Lesbian_A1_S1", 0, silent = true)

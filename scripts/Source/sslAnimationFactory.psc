@@ -15,14 +15,26 @@ int property VaginalOral = 4 autoreadonly hidden
 int property VaginalAnal = 5 autoreadonly hidden
 int property OralAnal = 6 autoreadonly hidden
 int property VaginalOralAnal = 7 autoreadonly hidden
-; SFX Types
-int property Squishing = 1 autoreadonly hidden
-int property Sucking = 2 autoreadonly hidden
-int property SexMix = 3 autoreadonly hidden
 ; Content Types
 int property Misc = 0 autoreadonly hidden
 int property Sexual = 1 autoreadonly hidden
 int property Foreplay = 2 autoreadonly hidden
+; SFX Types
+Sound property Squishing hidden
+	Sound function get()
+		return Slots.Lib.SquishingFX
+	endFunction
+endProperty
+Sound property Sucking hidden
+	Sound function get()
+		return Slots.Lib.SuckingFX
+	endFunction
+endProperty
+Sound property SexMix hidden
+	Sound function get()
+		return Slots.Lib.SexMixedFX
+	endFunction
+endProperty
 
 ; ------------------------------------------------------- ;
 ; --- Registering Animations                          --- ;
@@ -74,13 +86,11 @@ endFunction
 function AddPositionStage(int position, string animationEvent, float forward = 0.0, float side = 0.0, float up = 0.0, float rotate = 0.0, bool silent = false, bool openMouth = false, bool strapon = true, int sos = 0)
 	animData[animID] = animationEvent
 	animID += 1
-
 	offsetData[(offsetID + 0)] = forward
 	offsetData[(offsetID + 1)] = side
 	offsetData[(offsetID + 2)] = up
 	offsetData[(offsetID + 3)] = rotate
 	offsetID += 4
-
 	infoData[(infoID + 0)] = (silent as int)
 	infoData[(infoID + 1)] = (openMouth as int)
 	infoData[(infoID + 2)] = ((strapon && positionData[(position * 2)] == Male) as int)
@@ -90,20 +100,6 @@ endFunction
 
 function SetContent(int contentType)
 	Animation.SetContent(contentType)
-endFunction
-
-function SetSFX(int iSFX)
-	if iSFX == Squishing
-		; Animation.SoundFX = Slots.Lib.ThreadLib.sfxSquishing01
-	elseIf iSFX == Sucking
-		; Animation.SoundFX = Slots.Lib.ThreadLib.sfxSucking01
-	elseIf iSFX == SexMix
-		; Animation.SoundFX = Slots.Lib.ThreadLib.sfxSexMix01
-	endIf
-endFunction
-
-function SetSound(Sound SoundFX)
-	Animation.SoundFX = SoundFX
 endFunction
 
 function SetStageTimer(int stage, float timer)
@@ -120,15 +116,15 @@ string property Name hidden
 	endFunction
 endProperty
 
-bool property TCL hidden
-	function set(bool value)
-		; No longer used
-	endFunction
-endProperty
-
 bool property Enabled hidden
 	function set(bool value)
 		Animation.Enabled = value
+	endFunction
+endProperty
+
+Sound property SoundFX hidden
+	function set(Sound value)
+		Animation.SoundFX = value
 	endFunction
 endProperty
 
@@ -138,26 +134,20 @@ endProperty
 
 int positionID
 int[] positionData
-
 int animID
 string[] animData
-
 int offsetID
 float[] offsetData
-
 int infoID
 int[] infoData
-
 function InitCallbacks()
 	positionID = 0
 	positionData = new int[10]
-
 	animID = 0
 	animData = new string[128]
-
 	offsetID = 0
 	offsetData = new float[128]
-
 	infoID = 0
 	infoData = new int[128]
 endFunction
+

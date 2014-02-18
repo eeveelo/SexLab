@@ -22,17 +22,18 @@ bool property IsAggressive auto hidden
 
 ; Animation Info
 int property Stage auto hidden
+sslBaseAnimation property Animation auto hidden
 sslBaseAnimation[] CustomAnimations
 sslBaseAnimation[] PrimaryAnimations
 sslBaseAnimation[] LeadAnimations
 sslBaseAnimation[] property Animations hidden
 	sslBaseAnimation[] function get()
-		if customAnimations.Length > 0
-			return customAnimations
-		elseIf leadIn
-			return leadAnimations
+		if CustomAnimations.Length > 0
+			return CustomAnimations
+		elseIf LeadIn
+			return LeadAnimations
 		else
-			return primaryAnimations
+			return PrimaryAnimations
 		endIf
 	endFunction
 endProperty
@@ -88,7 +89,6 @@ bool property HasCreature hidden
 endProperty
 
 ; Local readonly
-bool Active
 bool LeadInDisabled
 string[] Hooks
 int BedFlag ; 0 allow, 1 force, -1 forbid
@@ -104,7 +104,7 @@ state Making
 			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- Thread has reached actor limit", "FATAL")
 			return -1
 		elseIf Positions.Find(ActorRef) != -1 || ActorLib.IsActorActive(ActorRef)
-			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They are already slotted into this thread", "FATAL")
+			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They are already claimed by a thread", "FATAL")
 			return -1
 		endIf
 		; Attempt to claim a slot
@@ -113,7 +113,6 @@ state Making
 			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They were unable to fill an actor alias", "FATAL")
 			return -1
 		endIf
-		; Add to thread Positions and return position location.
 		; Update thread info
 		Positions = sslUtility.PushActor(ActorRef, Positions)
 		ActorCount = Positions.Length
@@ -123,16 +122,16 @@ state Making
 	endFunction
 
 	sslThreadController function StartThread()
-		if ActorCount < 1
+		UnregisterForUpdate()
+
+		; ------------------------- ;
+		; --   Validate Thread   -- ;
+		; ------------------------- ;
+
+		if ActorCount < 1 || Positions.Length == 0
 			Log("StartThread() - No valid actors available for animation", "FATAL")
 			return none
 		endIf
-		Active = true
-
-		; ------------------------- ;
-		; -- Validate Animations -- ;
-		; ------------------------- ;
-
 
 		; ------------------------- ;
 		; --    Locate Center    -- ;
@@ -162,10 +161,35 @@ state Making
 		endIf
 
 		; ------------------------- ;
-		; --  Start Controller   -- ;
+		; -- Validate Animations -- ;
 		; ------------------------- ;
 
-		return PrimeThread()
+		; Get default primary animations if none
+		if PrimaryAnimations.Length == 0
+			SetAnimations(AnimSlots.GetByDefault(Males, Females, IsAggressive, (BedRef != none), Config.bRestrictAggressive))
+			if PrimaryAnimations.Length == 0
+				Log("StartThread() - Unable to find valid default animations", "FATAL")
+				return none
+			endIf
+		endIf
+		; Get default foreplay if none and enabled
+		if !HasCreature && !IsAggressive && ActorCount == 2 && !LeadInDisabled && LeadAnimations.Length == 0 && Config.bForeplayStage
+			if BedRef != none
+				SetLeadAnimations(AnimSlots.GetByTags(2, "LeadIn", "Standing"))
+			else
+				SetLeadAnimations(AnimSlots.GetByTags(2, "LeadIn"))
+			endIf
+		endIf
+
+		; ------------------------- ;
+		; --  Start Controller   -- ;
+		; ------------------------- ;
+		sslThreadController Controller = PrimeThread()
+		if !Controller
+			Log("StartThread() - Failed to prime thread for unknown reasons!", "FATAL")
+			return none
+		endIf
+		return Controller
 	endFunction
 
 	event OnUpdate()
@@ -183,19 +207,20 @@ endState
 
 ; Actor Overrides
 function SetStrip(Actor ActorRef, bool[] StripSlots)
+	ActorAlias(ActorRef).OverrideStrip(StripSlots)
 	if StripSlots.Length == 33
-		; ActorAlias(ActorRef).OverrideStrip(StripSlots)
+		ActorAlias(ActorRef).OverrideStrip(StripSlots)
 	else
 		Log("Malformed StripSlots bool[] passed, must be 33 length bool array, "+StripSlots.Length+" given", "ERROR")
 	endIf
 endFunction
 
 function DisableUndressAnimation(Actor ActorRef, bool disabling = true)
-	; ActorAlias(ActorRef).DisableUndressAnim(disabling)
+	ActorAlias(ActorRef).DoUndress = !disabling
 endFunction
 
 function DisableRagdollEnd(Actor ActorRef, bool disabling = true)
-	; ActorAlias(ActorRef).DisableRagdollEnd(disabling)
+	ActorAlias(ActorRef).DoRagdoll = !disabling
 endFunction
 
 ; Voice
@@ -246,7 +271,6 @@ endFunction
 bool function IsVictim(Actor ActorRef)
 	return VictimRef == ActorRef
 endFunction
-
 
 ; ------------------------------------------------------- ;
 ; --- Animation Setup                                 --- ;
@@ -342,7 +366,7 @@ endFunction
 		FoundBed = ThreadLib.FindBed(Positions[0], Radius) ; Check within radius of first position, if NPC beds are allowed
 	endIf
 	; Found a bed AND EITHER forced use OR don't care about players choice OR or player approved
-	if FoundBed != none && (BedFlag == 1 || (!AskPlayer || (AskPlayer && (ThreadLib.mUseBed.Show() as bool))))
+	if FoundBed != none && (BedFlag == 1 || (!AskPlayer || (AskPlayer && (ThreadLib.UseBed.Show() as bool))))
 		CenterOnObject(FoundBed)
 		return true ; Bed found and approved for use
 	endIf
@@ -419,26 +443,44 @@ endFunction
 
 function Initialize()
 	UnregisterForUpdate()
+	; Clear aliases
+	ActorAlias[0].Clear()
+	ActorAlias[1].Clear()
+	ActorAlias[2].Clear()
+	ActorAlias[3].Clear()
+	ActorAlias[4].Clear()
 	; Forms
 	Actor[] aDel
 	Positions = aDel
+	VictimRef = none
+	CenterRef = none
+	BedRef = none
 	; Boolean
-	Active = false
 	HasPlayer = false
-	AutoAdvance = true
 	LeadIn = false
+	LeadInDisabled = false
 	FastEnd = false
+	IsAggressive = false
+	AutoAdvance = true
 	; Integers
+	BedFlag = 0
 	ActorCount = 0
 	Genders = new int[3]
+	; Floats
+	float[] fDel1
+	CustomTimers = fDel1
 	; Strings
 	string[] strDel1
 	Hooks = strDel1
+	; Enter thread selection pool
 	GoToState("Unlocked")
 endFunction
 
 function Log(string log, string type = "NOTICE")
 	SexLabUtil.Log(log, "Thread["+thread_id+"]", type, "trace,console")
+	if type == "FATAL"
+		Initialize()
+	endIf
 endFunction
 
 function SendThreadEvent(string eventName)
@@ -461,6 +503,47 @@ function SetupThreadEvent(string eventName)
 	endIf
 endFunction
 
+function SyncActors(bool force = false)
+	ActorAlias[0].SyncThread(Animation, Stage)
+	ActorAlias[1].SyncThread(Animation, Stage)
+	ActorAlias[2].SyncThread(Animation, Stage)
+	ActorAlias[3].SyncThread(Animation, Stage)
+	ActorAlias[4].SyncThread(Animation, Stage)
+endFunction
+
+bool function ActorWait(string WaitFor)
+	int i = ActorCount
+	while i
+		i -= 1
+		if ActorAlias[i].GetState() != WaitFor
+			return false
+		endIf
+	endWhile
+	return true
+endFunction
+
+function AliasAction(string FireState, string StateFinish)
+	; Start actor action state
+	ActorAlias[0].Action(FireState)
+	ActorAlias[1].Action(FireState)
+	ActorAlias[2].Action(FireState)
+	ActorAlias[3].Action(FireState)
+	ActorAlias[4].Action(FireState)
+	; Wait for actors ready, or for ~30 seconds to pass
+	int failsafe = 30
+	while !ActorWait(StateFinish) && failsafe
+		failsafe -= 1
+		Utility.Wait(1.0)
+	endWhile
+endFunction
+
+function Action(string FireState)
+	UnregisterForUpdate()
+	EndAction() ; OnEndState()
+	GoToState(FireState)
+	FireAction() ; OnBeginState()
+endFunction
+
 int thread_id
 int property tid hidden
 	int function get()
@@ -469,7 +552,6 @@ int property tid hidden
 endProperty
 
 function _SetupThread(int id)
-	Initialize()
 	thread_id = id
 	ActorAlias = new sslActorAlias[5]
 	ActorAlias[0] = GetNthAlias(0) as sslActorAlias
@@ -477,11 +559,7 @@ function _SetupThread(int id)
 	ActorAlias[2] = GetNthAlias(2) as sslActorAlias
 	ActorAlias[3] = GetNthAlias(3) as sslActorAlias
 	ActorAlias[4] = GetNthAlias(4) as sslActorAlias
-	ActorAlias[0].Clear()
-	ActorAlias[1].Clear()
-	ActorAlias[2].Clear()
-	ActorAlias[3].Clear()
-	ActorAlias[4].Clear()
+	Initialize()
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -489,8 +567,6 @@ endFunction
 ; ------------------------------------------------------- ;
 
 auto state Unlocked
-	function SendThreadEvent(string eventName)
-	endFunction
 	sslThreadModel function Make(float TimeOut = 30.0)
 		Initialize()
 		GoToState("Making")
@@ -499,6 +575,7 @@ auto state Unlocked
 	endFunction
 endState
 
+; Making
 sslThreadModel function Make(float timeoutIn = 30.0)
 	Log("Make() - Cannot enter make on a locked thread", "FATAL")
 	return none
@@ -515,8 +592,16 @@ int function AddActor(Actor ActorRef, bool IsVictim = false, sslBaseVoice Voice 
 	Log("AddActor() - Cannot add an actor to a locked thread", "FATAL")
 	return -1
 endFunction
-function SetAnimation(int aid = -1)
+; State varied
+function SetAnimation(int AnimID = -1)
 endFunction
+function FireAction()
+endFunction
+function EndAction()
+endFunction
+; Animating
+event OnKeyDown(int keyCode)
+endEvent
 
 ; ------------------------------------------------------- ;
 ; --- Legacy; do not use these functions anymore!     --- ;

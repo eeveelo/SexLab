@@ -8,14 +8,17 @@ import ActorUtil
 event OnEffectStart(actor TargetRef, actor CasterRef)
 
 
+	; sslBaseAnimation[] Anims = SexLab.AnimSlots.GetByTags(2, "Cowgirl")
+	; Debug.TraceAndBox("Found: "+Anims.Length)
+	; Debug.Trace(Anims)
+
 	sslThreadModel Thread = NewThread()
-	Debug.TraceAndBox(Thread)
 
 	Thread.AddActor(TargetRef)
 	Thread.AddActor(CasterRef)
 	Thread.StartThread()
 
-	Thread.Log(Thread.Positions)
+	; Thread.Log(Thread.Positions)
 	; Thread.Initialize()
 	Dispel()
 endEvent

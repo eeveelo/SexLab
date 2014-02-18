@@ -59,6 +59,98 @@ float[] property fStageTimer auto hidden
 float[] property fStageTimerLeadIn auto hidden
 float[] property fStageTimerAggr auto hidden
 
+bool function BackwardsPressed()
+	return (Input.IsKeyPressed(kBackwards) || ((kBackwards == 42 || kBackwards == 54) && (Input.IsKeyPressed(42) || Input.IsKeyPressed(54))))
+endFunction
+bool function AdjustStagePressed()
+	return (Input.IsKeyPressed(kAdjustStage) || ((kAdjustStage == 157 || kAdjustStage == 29) && (Input.IsKeyPressed(157) || Input.IsKeyPressed(29))))
+endFunction
+
+function HotkeyCallback(sslThreadController Thread, int keyCode)
+	; Advance Stage
+	if keyCode == kAdvanceAnimation
+		Thread.AdvanceStage(BackwardsPressed())
+
+	; Change Animation
+	elseIf keyCode == kChangeAnimation
+		Thread.ChangeAnimation(BackwardsPressed())
+
+	; Forward / Backward adjustments
+	elseIf keyCode == kAdjustForward
+		Thread.AdjustForward(BackwardsPressed(), AdjustStagePressed())
+
+	; Up / Down adjustments
+	elseIf keyCode == kAdjustUpward
+		Thread.AdjustUpward(BackwardsPressed(), AdjustStagePressed())
+
+	; Left / Right adjustments
+	elseIf keyCode == kAdjustSideways
+		Thread.AdjustSideways(BackwardsPressed(), AdjustStagePressed())
+
+	; Rotate Scene
+	elseIf keyCode == kRotateScene
+		Thread.RotateScene(BackwardsPressed())
+	; Change Adjusted Actor
+
+	elseIf keyCode == kAdjustChange
+		Thread.AdjustChange(BackwardsPressed())
+
+	; RePosition Actors
+	elseIf keyCode == kRealignActors
+		Thread.RealignActors()
+
+	; Change Positions
+	elseIf keyCode == kChangePositions
+		Thread.ChangePositions(BackwardsPressed())
+
+	; Restore animation offsets
+	elseIf keyCode == kRestoreOffsets
+		Thread.RestoreOffsets()
+
+	; Move Scene
+	elseIf keyCode == kMoveScene
+		Thread.MoveScene()
+	endIf
+endFunction
+
+
+float function GetVoiceDelay(bool IsFemale = false, int stage = 1)
+	float VoiceDelay
+	if IsFemale
+		VoiceDelay = fFemaleVoiceDelay
+	else
+		VoiceDelay = fMaleVoiceDelay
+	endIf
+	if stage > 1
+		return (VoiceDelay - (stage * 0.8)) + Utility.RandomFloat(-0.3, 0.3)
+	endIf
+	return VoiceDelay
+endFunction
+
+bool[] function GetStrip(bool IsFemale, bool IsLeadIn = false, bool IsAggressive = false, bool IsVictim = false)
+	if IsLeadIn
+		if IsFemale
+			return bStripLeadInFemale
+		else
+			return bStripLeadInMale
+		endIf
+ 	elseif IsAggressive
+ 		if IsVictim
+ 			return bStripVictim
+ 		else
+ 			return bStripAggressor
+ 		endIf
+ 	elseIf IsFemale
+ 		return bStripFemale
+ 	else
+ 		return bStripMale
+ 	endIf
+endFunction
+
+bool function UsesNudeSuit(bool IsFemale)
+	return ((!IsFemale && bUseMaleNudeSuit) || (IsFemale && bUseFemaleNudeSuit))
+endFunction
+
 
 function _Defaults()
 

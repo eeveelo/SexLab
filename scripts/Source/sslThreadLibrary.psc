@@ -1,16 +1,11 @@
 scriptname sslThreadLibrary extends sslSystemLibrary
 
 ; Data
-Sound property sfxSquishing01 auto
-Sound property sfxSucking01 auto
-Sound property sfxSexMix01 auto
-Sound property OrgasmEffect auto
+Sound property OrgasmFX auto
 Static property LocationMarker auto
 FormList property BedsList auto
 FormList property BedRollsList auto
-Message property mAdjustChange auto
-Message property mUseBed auto
-Message property mMoveScene auto
+Message property UseBed auto
 
 ; bool function IsActorFree(actor position)
 ;	return Threads.FindActorController(position) == -1
@@ -45,6 +40,7 @@ ObjectREference function FindBed(ObjectReference CenterRef, float Radius = 1000.
 	endWhile
 	return none ; Nothing found in search loop
 endFunction
+
 
 ; int function FindNext(actor[] Positions, sslBaseAnimation Animation, int offset, bool findCreature)
 ; 	while offset

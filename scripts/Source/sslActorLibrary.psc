@@ -27,74 +27,63 @@ FormList property StripList auto
 Furniture property BaseMarker auto
 Package property DoNothing auto
 
-
 ; Local
-
 
 ;/-----------------------------------------------\;
 ;|	Actor Handling/Effect Functions              |;
 ;\-----------------------------------------------/;
 
-actor[] function MakeActorArray(actor a1 = none, actor a2 = none, actor a3 = none, actor a4 = none, actor a5 = none)
-	actor[] output
-	if a1 != none
-		output = sslUtility.PushActor(a1, output)
+Actor[] function MakeActorArray(Actor Actor1 = none, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none)
+	Actor[] output
+	if Actor1 != none
+		output = sslUtility.PushActor(Actor1, output)
 	endIf
-	if a2 != none
-		output = sslUtility.PushActor(a2, output)
+	if Actor2 != none
+		output = sslUtility.PushActor(Actor2, output)
 	endIf
-	if a3 != none
-		output = sslUtility.PushActor(a3, output)
+	if Actor3 != none
+		output = sslUtility.PushActor(Actor3, output)
 	endIf
-	if a4 != none
-		output = sslUtility.PushActor(a4, output)
+	if Actor4 != none
+		output = sslUtility.PushActor(Actor4, output)
 	endIf
-	if a5 != none
-		output = sslUtility.PushActor(a5, output)
+	if Actor5 != none
+		output = sslUtility.PushActor(Actor5, output)
 	endIf
 	return output
 endFunction
 
-actor function FindAvailableActor(ObjectReference centerRef, float radius = 5000.0, int findGender = -1, actor ignore1 = none, actor ignore2 = none, actor ignore3 = none, actor ignore4 = none)
-	if centerRef == none || findGender > 2 || findGender < -1 || radius < 0
+bool function CheckActor(Actor CheckRef, int CheckGender = -1)
+	int IsGender = GetGender(CheckRef)
+	return (CheckGender != 2 && IsGender != 2 && (CheckGender == -1 || IsGender == CheckGender) && IsValidActor(CheckRef))
+endFunction
+
+Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, actor IgnoreRef1 = none, actor IgnoreRef2 = none, actor IgnoreRef3 = none, actor IgnoreRef4 = none)
+	if CenterRef == none || FindGender > 2 || FindGender < -1 || Radius < 0.1
 		return none ; Invalid args
 	endIf
 	; Create supression list
-	form[] supress = new form[35]
-	supress[34] = centerRef
-	supress[33] = ignore1
-	supress[32] = ignore2
-	supress[31] = ignore3
-	supress[30] = ignore4
-	; Attempt 30 times before giving up.
-	int attempts = 30
-	while attempts
-		attempts -= 1
-		; Get random actor
-		actor FoundRef = Game.FindRandomActorFromRef(centerRef, radius)
-		if FoundRef == none
-			return none ; None means no actor in radius, give up now
+	form[] Suppressed = new form[25]
+	Suppressed[24] = CenterRef
+	Suppressed[23] = IgnoreRef1
+	Suppressed[22] = IgnoreRef2
+	Suppressed[21] = IgnoreRef3
+	Suppressed[20] = IgnoreRef4
+	; Attempt 20 times before giving up.
+	int i = 20
+	while i
+		i -= 1
+		Actor FoundRef = Game.FindRandomActorFromRef(CenterRef, Radius)
+		if FoundRef == none || (Suppressed.Find(FoundRef) == -1 && CheckActor(FoundRef, FindGender))
+			return FoundRef ; None means no actor in radius, give up now
 		endIf
-		; Validate actor
-		int gender
-		bool valid = supress.Find(FoundRef) == -1
-		if valid
-			; Get their gender if we need it
-			gender = GetGender(FoundRef)
-			; Supress from future validation attempts
-			supress[attempts] = FoundRef
-		endIf
-		valid = valid && (findGender != 2 && gender != 2) ; Supress creatures
-		valid = valid && (findGender == -1 || findGender == gender) ; Validate gender
-		valid = valid && IsValidActor(FoundRef) ; Actor Validate
-		if valid
-			return FoundRef ; Actor passed validation, end loop/function
-		endIf
+		Suppressed[i] = FoundRef
 	endWhile
 	; No actor found in attempts
 	return none
 endFunction
 
+; TODO: probably needs some love
 actor[] function FindAvailablePartners(actor[] Positions, int total, int males = -1, int females = -1, float radius = 10000.0)
 	int needed = (total - Positions.Length)
 	if needed <= 0 || Positions.Length < 1
@@ -144,29 +133,29 @@ actor[] function FindAvailablePartners(actor[] Positions, int total, int males =
 	return Positions
 endFunction
 
-actor[] function SortActors(actor[] Positions, bool femaleFirst = true)
-	if Positions.Length < 2
+actor[] function SortActors(Actor[] Positions, bool FemaleFirst = true)
+	int ActorCount = Positions.Length
+	if ActorCount < 2
 		return Positions ; Why reorder a single actor?
 	endIf
-	int len = Positions.Length
-	int Female = femaleFirst as int
-	actor[] Sorted = sslUtility.ActorArray(len)
+	int PriorityGender = (FemaleFirst as int)
+	Actor[] Sorted = sslUtility.ActorArray(ActorCount)
 	int i
-	while i < len
+	while i < ActorCount
 		; Fill actor into sorted array
-		actor ActorRef = Positions[i]
+		Actor ActorRef = Positions[i]
 		Sorted[i] = ActorRef
 		; Check if actor is proper gender
-		if GetGender(ActorRef) != Female
+		if GetGender(ActorRef) != PriorityGender
 			int n = (i + 1)
-			while n < len
-				actor NextRef = Positions[n]
+			while n < ActorCount
 				; Swap for actor who has correct gender
-				if GetGender(NextRef) == Female
+				if GetGender(Positions[n]) == PriorityGender
+					Actor NextRef = Positions[n]
 					Sorted[i] = NextRef
 					Positions[i] = NextRef
 					Positions[n] = ActorRef
-					n = len
+					n = ActorCount
 				endIf
 				n += 1
 			endWhile
@@ -176,456 +165,363 @@ actor[] function SortActors(actor[] Positions, bool femaleFirst = true)
 	return Sorted
 endFunction
 
-function ApplyCum(actor a, int cumID)
+function ApplyCum(Actor ActorRef, int cumID)
 	; Apply passed id
-	AddCum(a, (cumID == 1 || cumID == 4 || cumID == 5 || cumID == 7), (cumID == 2 || cumID == 4 || cumID == 6 || cumID == 7), (cumID == 3 || cumID == 5 || cumID == 6 || cumID == 7))
+	AddCum(ActorRef, (cumID == 1 || cumID == 4 || cumID == 5 || cumID == 7), (cumID == 2 || cumID == 4 || cumID == 6 || cumID == 7), (cumID == 3 || cumID == 5 || cumID == 6 || cumID == 7))
 endFunction
 
-function AddCum(actor a, bool vaginal = true, bool oral = true, bool anal = true)
-	vaginal = vaginal || a.HasMagicEffectWithKeyword(kwCumVaginal)
-	oral = oral || a.HasMagicEffectWithKeyword(kwCumOral)
-	anal = anal || a.HasMagicEffectWithKeyword(kwCumAnal)
-	bool ToggleGhost = a.IsGhost()
-	if ToggleGhost
-		a.SetGhost(false)
-	endIf
+function AddCum(Actor ActorRef, bool vaginal = true, bool oral = true, bool anal = true)
+	vaginal = vaginal || ActorRef.HasMagicEffectWithKeyword(kwCumVaginal)
+	oral = oral || ActorRef.HasMagicEffectWithKeyword(kwCumOral)
+	anal = anal || ActorRef.HasMagicEffectWithKeyword(kwCumAnal)
+	; To specific a scenario to really warrant the check
+	; bool ToggleGhost = ActorRef.IsGhost()
+	; if ToggleGhost
+	; 	ActorRef.SetGhost(false)
+	; endIf
 	if vaginal && !oral && !anal
-		CumVaginalSpell.Cast(a, a)
+		CumVaginalSpell.Cast(ActorRef, ActorRef)
 	elseIf oral && !vaginal && !anal
-		CumOralSpell.Cast(a, a)
+		CumOralSpell.Cast(ActorRef, ActorRef)
 	elseIf anal && !vaginal && !oral
-		CumAnalSpell.Cast(a, a)
+		CumAnalSpell.Cast(ActorRef, ActorRef)
 	elseIf vaginal && oral && !anal
-		CumVaginalOralSpell.Cast(a, a)
+		CumVaginalOralSpell.Cast(ActorRef, ActorRef)
 	elseIf vaginal && anal && !oral
-		CumVaginalAnalSpell.Cast(a, a)
+		CumVaginalAnalSpell.Cast(ActorRef, ActorRef)
 	elseIf oral && anal && !vaginal
-		CumOralAnalSpell.Cast(a, a)
+		CumOralAnalSpell.Cast(ActorRef, ActorRef)
 	else
-		CumVaginalOralAnalSpell.Cast(a, a)
+		CumVaginalOralAnalSpell.Cast(ActorRef, ActorRef)
 	endIf
-	if ToggleGhost
-		a.SetGhost(true)
-	endIf
+	; if ToggleGhost
+	; 	ActorRef.SetGhost(true)
+	; endIf
 endFunction
 
-function ClearCum(actor a)
-	a.DispelSpell(CumVaginalSpell)
-	a.DispelSpell(CumOralSpell)
-	a.DispelSpell(CumAnalSpell)
-	a.DispelSpell(CumVaginalOralSpell)
-	a.DispelSpell(CumVaginalAnalSpell)
-	a.DispelSpell(CumOralAnalSpell)
-	a.DispelSpell(CumVaginalOralAnalSpell)
+function ClearCum(Actor ActorRef)
+	ActorRef.DispelSpell(CumVaginalSpell)
+	ActorRef.DispelSpell(CumOralSpell)
+	ActorRef.DispelSpell(CumAnalSpell)
+	ActorRef.DispelSpell(CumVaginalOralSpell)
+	ActorRef.DispelSpell(CumVaginalAnalSpell)
+	ActorRef.DispelSpell(CumOralAnalSpell)
+	ActorRef.DispelSpell(CumVaginalOralAnalSpell)
 endFunction
 
 ;/-----------------------------------------------\;
 ;|	Equipment Functions                          |;
 ;\-----------------------------------------------/;
 
-function StripAnimation(actor a)
-	; Determine gender and animation switch
-	int gender = a.GetLeveledActorBase().GetSex()
-	if gender == 1
-		Debug.SendAnimationEvent(a, "Arrok_FemaleUndress")
-	else
-		Debug.SendAnimationEvent(a, "Arrok_MaleUndress")
-	endIf
+form[] function StripActor(Actor ActorRef, Actor VictimRef = none, bool DoAnimate = true, bool LeadIn = false)
+	return StripSlots(ActorRef, Config.GetStrip((GetGender(ActorRef) == 1), LeadIn, (VictimRef != none), (VictimRef != none && ActorRef == VictimRef)), DoAnimate)
 endFunction
 
-form[] function StripActor(actor a, actor victim = none, bool animate = true, bool leadIn = false)
-	return StripSlots(a, GetStrip(a, victim, leadIn), animate)
-endFunction
-
-bool[] function GetStrip(actor a, actor victim, bool leadin)
-	bool female = GetGender(a) == 1
-	if leadin && !female
-		return Config.bStripLeadInMale
-	elseif leadin && female
-		return Config.bStripLeadInFemale
- 	elseif victim != none && a == victim
-		return Config.bStripVictim
- 	elseif victim != none && a != victim
- 		return Config.bStripAggressor
- 	elseif victim == none && !female
- 		return Config.bStripMale
- 	else
- 		return Config.bStripFemale
- 	endIf
-endFunction
-
-bool function IsStrippable(form item)
+bool function IsStrippable(form ItemRef)
 	; Check previous validations
-	if item != none && StorageUtil.FormListFind(none, "SexLab.StripList", item) != -1
+	if ItemRef != none && StorageUtil.FormListFind(self, "SexLab.StripList", ItemRef) != -1
 		return true
-	elseIf item == none || StorageUtil.FormListFind(none, "SexLab.NoStripList", item) != -1
+	elseIf ItemRef == none || StorageUtil.FormListFind(self, "SexLab.NoStripList", ItemRef) != -1
 		return false
 	endIf
 	; Check keywords
-	int i = item.GetNumKeywords()
+	int i = ItemRef.GetNumKeywords()
 	while i
 		i -= 1
-		string kw = item.GetNthKeyword(i).GetString()
+		string kw = ItemRef.GetNthKeyword(i).GetString()
 		if StringUtil.Find(kw, "NoStrip") != -1 || StringUtil.Find(kw, "Bound") != -1
-			StorageUtil.FormListAdd(none, "SexLab.NoStripList", item, true)
+			StorageUtil.FormListAdd(self, "SexLab.NoStripList", ItemRef, true)
 			return false
 		endIf
 	endWhile
-	StorageUtil.FormListAdd(none, "SexLab.StripList", item, true) != -1
+	StorageUtil.FormListAdd(self, "SexLab.StripList", ItemRef, true)
 	return true
 endFunction
 
-form function StripSlot(actor a, int slotmask, bool store = false)
-	form item = a.GetWornForm(slotmask)
-	if item != none && IsStrippable(item)
-		a.UnequipItem(item, false, true)
-		if store
-			StorageUtil.FormListAdd(a, "SexLab.StrippedItems", item)
-		endIf
-		return item
-	endIf
-	return none
-endFunction
-
-form function StripWeapon(actor a, bool rightHand = true, bool store = false)
-	Weapon item = a.GetEquippedWeapon(rightHand)
-	if item != none && IsStrippable(item)
-		int type = a.GetEquippedItemType((rightHand as int))
+form function StripWeapon(Actor ActorRef, bool RightHand = true)
+	Weapon ItemRef = ActorRef.GetEquippedWeapon(RightHand)
+	if IsStrippable(ItemRef)
+		int type = ActorRef.GetEquippedItemType((RightHand as int))
 		if type == 5 || type == 6 || type == 7
-			a.AddItem(DummyWeapon, 1, true)
-			a.EquipItem(DummyWeapon, false, true)
-			a.UnEquipItem(DummyWeapon, false, true)
-			a.RemoveItem(DummyWeapon, 1, true)
+			ActorRef.AddItem(DummyWeapon, 1, true)
+			ActorRef.EquipItem(DummyWeapon, false, true)
+			ActorRef.UnEquipItem(DummyWeapon, false, true)
+			ActorRef.RemoveItem(DummyWeapon, 1, true)
 		else
-			a.UnequipItem(item, false, true)
+			ActorRef.UnequipItem(ItemRef, false, true)
 		endIf
-		if store
-			StorageUtil.FormListAdd(a, "SexLab.StrippedItems", item)
-		endIf
-		return item
 	endIf
-	return none
+	return ItemRef
 endFunction
 
-form[] function StripSlots(actor a, bool[] strip, bool animate = false, bool allowNudesuit = true)
-	if strip.Length != 33
+form function StripSlot(Actor ActorRef, int SlotMask)
+	form ItemRef = ActorRef.GetWornForm(SlotMask)
+	if IsStrippable(ItemRef)
+		ActorRef.UnequipItem(ItemRef, false, true)
+		; StorageUtil.FormListAdd(ActorRef, "SexLab.StrippedItems", ItemRef)
+	endIf
+	return ItemRef
+endFunction
+
+form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false, bool AllowNudesuit = true, int Gender = 0)
+	if Strip.Length != 33
 		return none
 	endIf
-
 	; Start stripping animation
-	if animate
-		StripAnimation(a)
+	if DoAnimate
+		Debug.SendAnimationEvent(ActorRef, "Arrok_Undress_"+Gender)
 	endIf
-	; Item storage
-	form[] items = new form[34]
+	form[] Stripped = new form[34]
 	; Strip weapon
-	if strip[32]
-		items[32] = StripWeapon(a, true)
-		items[33] = StripWeapon(a, false)
-		if animate && (items[32] != none || items[32] != none)
-			Utility.Wait(0.15)
-		endIf
+	if Strip[32]
+		Stripped[33] = StripWeapon(ActorRef, true)
+		Stripped[32] = StripWeapon(ActorRef, false)
 	endIf
 	; Strip armors
-	int i
-	while i < 32
-		if strip[i]
-			items[i] = StripSlot(a, Armor.GetMaskForSlot(i + 30))
-			if animate && items[i] != none
-				Utility.Wait(0.15)
+	int i = 32
+	while i
+		i -= 1
+		if Strip[i]
+			Stripped[i] = StripSlot(ActorRef, Armor.GetMaskForSlot(i + 30))
+			if Stripped[i] && DoAnimate
+				Utility.Wait(0.25)
 			endIf
 		endIf
-		i += 1
 	endWhile
 	; Apply Nudesuit
-	if strip[2] && allowNudesuit && (Config.bUseMaleNudeSuit || Config.bUseFemaleNudeSuit)
-		int gender = a.GetLeveledActorBase().GetSex()
-		if (gender == 0 && Config.bUseMaleNudeSuit) || (gender == 1  && Config.bUseFemaleNudeSuit)
-			a.AddItem(NudeSuit, 1, true)
-			a.EquipItem(NudeSuit, false, true)
-		endIf
+	if Strip[2] && AllowNudesuit && ((Gender == 0 && Config.bUseMaleNudeSuit) || (Gender == 1  && Config.bUseFemaleNudeSuit)) && !ActorRef.IsEquipped(NudeSuit)
+		; ActorRef.AddItem(NudeSuit, 1, true)
+		ActorRef.EquipItem(NudeSuit, false, true)
 	endIf
-	return sslUtility.ClearNone(items)
+	return sslUtility.ClearNone(Stripped)
 endFunction
 
-function UnstripActor(actor a, form[] stripped, actor victim = none)
-	int i = stripped.Length
-	if i < 1
-		return
-	endIf
+function UnstripActor(Actor ActorRef, form[] Stripped, bool IsVictim = false)
+	int i = Stripped.Length
 	; Remove nudesuits
-	if a.IsEquipped(NudeSuit)
-		a.UnequipItem(NudeSuit, true, true)
-		a.RemoveItem(NudeSuit, 1, true)
+	if ActorRef.IsEquipped(NudeSuit)
+		ActorRef.UnequipItem(NudeSuit, true, true)
+		ActorRef.RemoveItem(NudeSuit, 1, true)
+	elseIf IsVictim && !Config.bReDressVictim
+		return ; Actor is victim, don't redress
 	endIf
-	if a == victim && !Config.bReDressVictim
-		return ; Don't requip victims
-	endIf
-	; Requip stripped
+	; Equip stripped
 	int hand = 1
 	while i
 		i -= 1
-		if stripped[i] != none
-			int type = stripped[i].GetType()
+		if Stripped[i]
+			int type = Stripped[i].GetType()
 			if type == 22 || type == 82
-				a.EquipSpell(stripped[i] as spell, hand)
+				ActorRef.EquipSpell((Stripped[i] as Spell), hand)
 			else
-				a.EquipItem(stripped[i], false, true)
+				ActorRef.EquipItem(Stripped[i], false, true)
 			endIf
 			; Move to other hand if weapon, light, spell, or leveledspell
 			hand -= ((hand == 1 && (type == 41 || type == 31 || type == 22 || type == 82)) as int)
 		endIf
-		Utility.Wait(0.25)
 	endWhile
 endFunction
 
-function StripActorStorage(actor a, bool[] strip, bool animate = false, bool allowNudesuit = true)
-	if strip.Length != 33
-		return none
-	endIf
-	; Start stripping animation
-	if animate
-		StripAnimation(a)
-	endIf
-	; Strip weapon
-	if strip[32]
-		StripWeapon(a, true, true)
-		StripWeapon(a, false, true)
-	endIf
-	; Strip armors
-	int i
-	while i < 32
-		if strip[i] && StripSlot(a, Armor.GetMaskForSlot(i + 30), true) != none && animate
-			Utility.Wait(0.15)
-		endIf
-		i += 1
-	endWhile
-	; Apply Nudesuit
-	if strip[2] && allowNudesuit && (Config.bUseMaleNudeSuit || Config.bUseFemaleNudeSuit)
-		int gender = a.GetLeveledActorBase().GetSex()
-		if (gender == 0 && Config.bUseMaleNudeSuit) || (gender == 1  && Config.bUseFemaleNudeSuit)
-			a.AddItem(NudeSuit, 1, true)
-			a.EquipItem(NudeSuit, false, true)
-		endIf
-	endIf
-endFunction
-
-function UnstripActorStorage(actor a, bool IsVictim = false)
-	; Remove nudesuits
-	if a.IsEquipped(NudeSuit)
-		a.UnequipItem(NudeSuit, true, true)
-		a.RemoveItem(NudeSuit, 1, true)
-	endIf
-	; Skip victim redressing
-	if IsVictim && !Config.bReDressVictim
-		StorageUtil.FormListClear(a, "SexLab.StrippedItems")
-		return ; Don't requip victims
-	endIf
-	; Equip items in storage
-	int hand = 1
-	int i = StorageUtil.FormListCount(a, "SexLab.StrippedItems")
+form[] function GetStripped(Actor ActorRef)
+	int i = StorageUtil.FormListCount(ActorRef, "SexLab.StrippedItems")
+	form[] output = sslUtility.FormArray(i)
 	while i
 		i -= 1
-		form item = StorageUtil.FormListGet(a, "SexLab.StrippedItems", i)
-		int type = item.GetType()
-		if type == 22 || type == 82
-			a.EquipSpell(item as Spell, hand)
-		else
-			a.EquipItem(item, false, true)
-		endIf
-		; Move to other hand if weapon, light, spell, or leveledspell
-		hand -= ((hand == 1 && (type == 41 || type == 31 || type == 22 || type == 82)) as int)
+		output[i] = StorageUtil.FormListGet(ActorRef, "SexLab.StrippedItems", i)
 	endWhile
-	; Clear stripped storage
-	StorageUtil.FormListClear(a, "SexLab.StrippedItems")
+	return output
 endFunction
 
-form function WornStrapon(actor a)
+function StoreStripped(Actor ActorRef, bool[] Strip, bool DoAnimate = false, bool AllowNudesuit = true, int Gender = 0)
+	form[] Stripped = StripSlots(ActorRef, Strip, DoAnimate, AllowNudesuit, Gender)
+	int i = Stripped.Length
+	while i
+		i -= 1
+		StorageUtil.FormListAdd(ActorRef, "SexLab.StrippedItems", Stripped[i])
+	endWhile
+endFunction
+
+function UnstripStored(Actor ActorRef, bool IsVictim = false)
+	UnstripActor(ActorRef, GetStripped(ActorRef), IsVictim)
+	StorageUtil.FormListClear(ActorRef, "SexLab.StrippedItems")
+endFunction
+
+; ------------------------------------------------------- ;
+; --- Strapon Functions                               --- ;
+; ------------------------------------------------------- ;
+
+form function WornStrapon(Actor ActorRef)
 	int i = Strapons.Length
 	while i
 		i -= 1
-		if a.IsEquipped(Strapons[i])
+		if ActorRef.IsEquipped(Strapons[i])
 			return Strapons[i]
 		endIf
 	endWhile
 	return none
 endFunction
 
-bool function HasStrapon(actor a)
-	return WornStrapon(a) != none
+bool function HasStrapon(Actor ActorRef)
+	return WornStrapon(ActorRef) != none
 endFunction
 
-form function PickStrapon(actor a)
-	int i = Strapons.Length
-	form strapon = WornStrapon(a)
+form function PickStrapon(Actor ActorRef)
+	form strapon = WornStrapon(ActorRef)
 	if strapon != none
 		return strapon
 	endIf
 	return Strapons[Utility.RandomInt(0, Strapons.Length - 1)]
 endFunction
 
-form function EquipStrapon(actor a)
-	if GetGender(a) == 1
-		form strapon = PickStrapon(a)
+form function EquipStrapon(Actor ActorRef)
+	if GetGender(ActorRef) == 1
+		form strapon = PickStrapon(ActorRef)
 		if strapon != none
-			a.AddItem(strapon, 1, true)
-			a.EquipItem(strapon, false, true)
+			ActorRef.AddItem(strapon, 1, true)
+			ActorRef.EquipItem(strapon, false, true)
 		endIf
 		return strapon
 	endIf
 	return none
 endFunction
 
-function UnequipStrapon(actor a)
-	int straponCount = Strapons.Length
-	if straponCount == 0
-		return
-	endIf
-	if GetGender(a) == 1
-		int i = 0
-		while i < straponCount
-			Form strapon = Strapons[i]
-			if a.IsEquipped(strapon)
-				a.UnequipItem(strapon, false, true)
-				a.RemoveItem(strapon, 1, true)
+function UnequipStrapon(Actor ActorRef)
+	if GetGender(ActorRef) == 1
+		int i = Strapons.Length
+		while i
+			i -= 1
+			if ActorRef.IsEquipped(Strapons[i])
+				ActorRef.UnequipItem(Strapons[i], false, true)
+				ActorRef.RemoveItem(Strapons[i], 1, true)
 			endIf
-			i += 1
 		endWhile
 	endIf
 endFunction
 
-;/-----------------------------------------------\;
-;|	Validation Functions                         |;
-;\-----------------------------------------------/;
-
-bool function IsActorActive(actor a)
-	return StorageUtil.FormListFind(self, "Registry", a) != -1
+Armor function LoadStrapon(string esp, int id)
+	Armor strapon = Game.GetFormFromFile(id, esp) as Armor
+	if strapon != none
+		Strapons = sslUtility.PushForm(strapon, Strapons)
+	endif
+	return strapon
 endFunction
 
-int function ValidateActor(actor a)
-	if IsActorActive(a)
-		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They appear to already be animating")
+; ------------------------------------------------------- ;
+; --- Actor Validation                                --- ;
+; ------------------------------------------------------- ;
+
+bool function IsActorActive(Actor ActorRef)
+	return StorageUtil.FormListFind(self, "Registry", ActorRef) != -1
+endFunction
+
+int function ValidateActor(Actor ActorRef)
+	if !ActorRef
+		Debug.Trace("--- SexLab --- Failed to validate (none) :: Because they don't exist.")
+		return -1
+	elseIf IsActorActive(ActorRef)
+		Debug.Trace("--- SexLab --- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") :: They appear to already be animating")
 		return -10
 	endIf
 
 	;DEBUG
 	return 1
-
-	if ValidActorList.HasForm(a)
+	; TODO: Doing this also means passing creatures that may have had animation disabled, might want to check that as well before bypassing
+	if ValidActorList.HasForm(ActorRef) ;TODO: Maybe an InvalidActorList as well, and convert to storageutil
 		return 1
-	endIf
-	if a.IsInFaction(ForbiddenFaction)
-		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They are forbidden from animating")
+	elseIf !CanAnimate(ActorRef)
+		Debug.Trace("--- SexLab --- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") :: They are forbidden from animating")
 		return -11
-	endIf
-	if !a.Is3DLoaded()
-		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They are not loaded")
+	elseIf !ActorRef.Is3DLoaded()
+		Debug.Trace("--- SexLab --- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") :: They are not loaded")
 		return -12
-	endIf
-	if a.IsDead()
-		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: He's dead Jim.")
+	elseIf ActorRef.IsDead()
+		Debug.Trace("--- SexLab --- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") :: He's dead Jim.")
 		return -13
-	endIf
-	if a.IsDisabled()
-		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They are disabled")
+	elseIf ActorRef.IsDisabled()
+		Debug.Trace("--- SexLab --- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") :: They are disabled")
 		return -14
-	endIf
-	if a.IsFlying()
-		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They are flying.")
+	elseIf ActorRef.IsFlying()
+		Debug.Trace("--- SexLab --- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") :: They are flying.")
 		return -15
 	endIf
-	Race ActorRace = a.GetLeveledActorBase().GetRace()
-	String RaceName = ActorRace.GetName()+MiscUtil.GetRaceEditorID(ActorRace)
-	if ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Child") != -1 || StringUtil.Find(RaceName, "Little") != -1 || StringUtil.Find(RaceName, "117") != -1 || (StringUtil.Find(RaceName, "Monli") != -1 && a.GetScale() < 0.93) || StringUtil.Find(RaceName, "Elin") != -1 || StringUtil.Find(RaceName, "Enfant") != -1
-		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They are forbidden from animating")
-		return -11
-	endIf
 	; TODO: Creature checking
-	if a != PlayerRef && !a.HasKeywordString("ActorTypeNPC") ;&& !AnimLib.AllowedCreature(ActorRace)
-		Debug.Trace("--- SexLab --- Failed to validate ("+a.GetLeveledActorBase().GetName()+") :: They are a creature that is currently not supported ("+ActorRace.GetName()+")")
+	if ActorRef != PlayerRef && !ActorRef.HasKeywordString("ActorTypeNPC") ;&& !AnimLib.AllowedCreature(ActorRace)
+		Debug.Trace("--- SexLab --- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") :: They are a creature that is currently not supported ("+ActorRef.GetLeveledActorBase().GetName()+")")
 		return -16
 	endIf
-	ValidActorList.AddForm(a)
+	ValidActorList.AddForm(ActorRef)
 	return 1
 endFunction
 
-bool function IsValidActor(actor a)
-	return ValidateActor(a) == 1
+bool function CanAnimate(Actor ActorRef)
+	Race ActorRace = ActorRef.GetLeveledActorBase().GetRace()
+	String RaceName = ActorRace.GetName()+MiscUtil.GetRaceEditorID(ActorRace)
+	return (ActorRef.IsInFaction(ForbiddenFaction)   || ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Child") != -1  || StringUtil.Find(RaceName, "Little") != -1 \
+	 || StringUtil.Find(RaceName, "117") != -1 || StringUtil.Find(RaceName, "Elin") != -1   || StringUtil.Find(RaceName, "Enfant") != -1 || (StringUtil.Find(RaceName, "Monli") != -1 && ActorRef.GetScale() < 0.93))
 endFunction
 
-function ForbidActor(actor a)
-	a.AddToFaction(ForbiddenFaction)
+bool function IsValidActor(Actor ActorRef)
+	return ValidateActor(ActorRef) == 1
 endFunction
 
-function AllowActor(actor a)
-	a.RemoveFromFaction(ForbiddenFaction)
+function ForbidActor(Actor ActorRef)
+	ActorRef.AddToFaction(ForbiddenFaction)
 endFunction
 
-bool function IsForbidden(actor a)
-	return a.IsInFaction(ForbiddenFaction) || a.HasKeyWordString("SexLabForbid")
+function AllowActor(Actor ActorRef)
+	ActorRef.RemoveFromFaction(ForbiddenFaction)
 endFunction
 
-;/-----------------------------------------------\;
-;|	Gender Functions                             |;
-;\-----------------------------------------------/;
-
-function TreatAsMale(actor a)
-	a.SetFactionRank(GenderFaction, 0)
+bool function IsForbidden(Actor ActorRef)
+	return ActorRef.IsInFaction(ForbiddenFaction) ;|| ActorRef.HasKeyWordString("SexLabForbid")
 endFunction
 
-function TreatAsFemale(actor a)
-	a.SetFactionRank(GenderFaction, 1)
+; ------------------------------------------------------- ;
+; --- Gender Functions                                --- ;
+; ------------------------------------------------------- ;
+
+function TreatAsMale(Actor ActorRef)
+	ActorRef.SetFactionRank(GenderFaction, 0)
 endFunction
 
-function ClearForcedGender(actor a)
-	a.RemoveFromFaction(GenderFaction)
+function TreatAsFemale(Actor ActorRef)
+	ActorRef.SetFactionRank(GenderFaction, 1)
 endFunction
 
-int function GetGender(actor a)
-	if a.IsInFaction(GenderFaction)
-		return a.GetFactionRank(GenderFaction)
+function ClearForcedGender(Actor ActorRef)
+	ActorRef.RemoveFromFaction(GenderFaction)
+endFunction
+
+int function GetGender(Actor ActorRef)
+	if ActorRef.IsInFaction(GenderFaction)
+		return ActorRef.GetFactionRank(GenderFaction)
 	endIf
-	ActorBase Base = a.GetLeveledActorBase()
+	ActorBase Base = ActorRef.GetLeveledActorBase()
 	if StorageUtil.GetIntValue(Base.GetRace(), "SexLab.HasRace") == 1
 		return 2 ; Creature
 	endIf
 	return Base.GetSex() ; Default
 endFunction
 
-int[] function GenderCount(actor[] pos)
-	int[] genders = new int[3]
-	int i = 0
-	while i < pos.Length
-		int g = GetGender(pos[i])
-		genders[g] = genders[g] + 1
-		i += 1
+int[] function GenderCount(Actor[] Positions)
+	int[] Genders = new int[3]
+	int i = Positions.Length
+	while i
+		i -= 1
+		int g = GetGender(Positions[i])
+		Genders[g] = Genders[g] + 1
 	endWhile
-	return genders
+	return Genders
 endFunction
 
-int function MaleCount(actor[] pos)
-	int[] gender = GenderCount(pos)
-	return gender[0]
+int function MaleCount(Actor[] Positions)
+	return GenderCount(Positions)[0]
 endFunction
 
-int function FemaleCount(actor[] pos)
-	int[] gender = GenderCount(pos)
-	return gender[1]
+int function FemaleCount(Actor[] Positions)
+	return GenderCount(Positions)[1]
 endFunction
 
-int function CreatureCount(actor[] pos)
-	int[] gender = GenderCount(pos)
-	return gender[2]
-endFunction
-
-;/-----------------------------------------------\;
-;|	System Use Only                              |;
-;\-----------------------------------------------/;
-
-armor function LoadStrapon(string esp, int id)
-	armor strapon = Game.GetFormFromFile(id, esp) as armor
-	if strapon != none
-		Strapons = sslUtility.PushForm(strapon, Strapons)
-	endif
-	return strapon
+int function CreatureCount(Actor[] Positions)
+	return GenderCount(Positions)[2]
 endFunction

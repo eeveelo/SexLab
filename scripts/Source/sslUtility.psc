@@ -224,25 +224,43 @@ endFunction
 
 string[] function ArgString(string args, string delimiter = ",") global
 	string[] output
-	if args == "" || args == " "
-		return output ; Empty arg string, return empty array
+	; Empty args
+	if args == ""
+		return output
 	endIf
+	; Has no delimiter present
+	int Next = StringUtil.Find(args, delimiter)
+	if Next == -1
+		return PushString(args, output)
+	endIf
+	; Count occurences of delimiter
 	args += delimiter
-	int delLen = StringUtil.GetLength(delimiter)
-	int prev = 0
-	int next = StringUtil.Find(args, delimiter, prev)
-	while next != -1
-		string arg = StringUtil.SubString(args, prev, (next - prev))
-		if StringUtil.GetNthChar(arg, 0) == " "
-			arg = StringUtil.SubString(arg, 1)
-		endIf
-		if arg != "" && arg != delimiter
-			output = PushString(arg, output)
-		endIf
-		prev = next + delLen
-		next = StringUtil.Find(args, delimiter, prev)
+	int Len = StringUtil.GetLength(args)
+	int Count
+	while Next != -1 && Next < Len
+		Count += 1
+		Next = StringUtil.Find(args, delimiter, (Next + 1))
+	endWhile
+	; Parse the argurments out of string
+	int i
+	output = StringArray(Count)
+	int DelimLen = StringUtil.GetLength(delimiter)
+	int Prev
+	Next = StringUtil.Find(args, delimiter)
+	while Next != -1 && Next < Len
+		output[i] = Trim(StringUtil.SubString(args, Prev, (Next - Prev)))
+		Prev = Next + DelimLen
+		Next = StringUtil.Find(args, delimiter, Prev)
+		i += 1
 	endWhile
 	return output
+endFunction
+
+string function Trim(string var) global
+	if StringUtil.GetNthChar(var, 0) == " "
+		return StringUtil.SubString(var, 1)
+	endIf
+	return var
 endFunction
 
 string[] function IncreaseString(int by, string[] array) global

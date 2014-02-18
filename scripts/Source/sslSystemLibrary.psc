@@ -4,7 +4,7 @@ Actor property PlayerRef auto
 
 ; Libraries
 sslSystemConfig property Config auto hidden
-; sslAnimationLibrary property AnimLib auto
+sslAnimationLibrary property AnimLib auto hidden
 ; sslVoiceLibrary property VoiceLib auto
 sslThreadLibrary property ThreadLib auto hidden
 sslActorLibrary property ActorLib auto hidden
@@ -23,8 +23,9 @@ sslThreadSlots property ThreadSlots auto hidden
 ; sslActorStats property ActorStats auto
 
 function Setup()
-	PlayerRef = Game.GetPlayer()
+	; PlayerRef = Game.GetPlayer()
 	Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
+	AnimLib = Quest.GetQuest("SexLabQuestFramework") as sslAnimationLibrary
 	ActorLib = Quest.GetQuest("SexLabQuestFramework") as sslActorLibrary
 	ThreadLib = Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary
 

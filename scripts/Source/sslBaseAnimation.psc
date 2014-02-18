@@ -10,7 +10,7 @@ int Content
 
 ; Storage arrays
 int[] positions ; = gender, cum
-int[] info ; = silent (bool), openmouth (bool), strapon (bool), schlong offset (int)
+int[] flags ; = silent (bool), openmouth (bool), strapon (bool), schlong offset (int)
 float[] offsets ; = forward, side, up, rotate
 float[] timers
 string[] animations
@@ -73,16 +73,6 @@ endProperty
 ;|	Animation Offsets                            |;
 ;\-----------------------------------------------/;
 
-float[] function GetPositionOffsets(int position, int stage)
-	int i = DataIndex(4, position, stage, 0)
-	float[] off = new float[4]
-	off[0] = GetOffset(i)
-	off[1] = GetOffset((i + 1))
-	off[2] = GetOffset((i + 2))
-	off[3] = GetOffset((i + 3))
-	return off
-endFunction
-
 function CacheForwards(int stage)
 	; Get forward offsets of all positions + find highest/lowest position
 	; float adjuster
@@ -126,8 +116,8 @@ float function GetOffset(int i)
 	return offsets[i] + StorageUtil.FloatListGet(Storage, Name, i)
 endFunction
 
-int function AccessInfo(int position, int stage, int slot)
-	return info[DataIndex(4, position, stage, slot)]
+int function AccessFlag(int position, int stage, int slot)
+	return flags[DataIndex(4, position, stage, slot)]
 endFunction
 
 int function AccessPosition(int position, int slot)
@@ -143,6 +133,27 @@ float function GetTimer(int stage)
 		return timers[(stage - 1)]
 	endIf
 	return 0.0 ; Stage has no timer
+endFunction
+
+int[] function GetPositionFlags(int position, int stage)
+	int i = DataIndex(4, position, stage, 0)
+	int[] output = new int[5]
+	output[0] = i
+	output[1] = (i + 1)
+	output[2] = (i + 2)
+	output[3] = (i + 3)
+	output[4] = GetGender(position)
+	return output
+endFunction
+
+float[] function GetPositionOffsets(int position, int stage)
+	int i = DataIndex(4, position, stage, 0)
+	float[] off = new float[4]
+	off[0] = GetOffset(i)
+	off[1] = GetOffset((i + 1))
+	off[2] = GetOffset((i + 2))
+	off[3] = GetOffset((i + 3))
+	return off
 endFunction
 
 ;/-----------------------------------------------\;
@@ -257,19 +268,19 @@ endFunction
 ;\-----------------------------------------------/;
 
 bool function IsSilent(int position, int stage)
-	return AccessInfo(position, stage, 0) as bool
+	return AccessFlag(position, stage, 0) as bool
 endFunction
 
 bool function UseOpenMouth(int position, int stage)
-	return AccessInfo(position, stage, 1) as bool
+	return AccessFlag(position, stage, 1) as bool
 endFunction
 
 bool function UseStrapon(int position, int stage)
-	return AccessInfo(position, stage, 2) as bool
+	return AccessFlag(position, stage, 2) as bool
 endFunction
 
 int function GetSchlong(int position, int stage)
-	return AccessInfo(position, stage, 3)
+	return AccessFlag(position, stage, 3)
 endFunction
 
 int function ActorCount()
@@ -370,12 +381,12 @@ function SetStageTimer(int stage, float timer)
 	timers[(stage - 1)] = timer
 endFunction
 
-function _Save(int[] posData, string[] animData, float[] offsetData, int[] infoData)
+function _Save(int[] posData, string[] animData, float[] offsetData, int[] flagData)
 	; Update config data
 	positions = posData
 	animations = animData
 	offsets = offsetData
-	info = infoData
+	flags = flagData
 	Actors = (posData.Length / 2)
 	Stages = (animData.Length / Actors)
 	; Cache forward adjustments

@@ -2,7 +2,6 @@ scriptname sslThreadController extends sslThreadModel
 { Animation Thread Controller: Runs manipulation logic of thread based on information from model. Access only through functions; NEVER create a property directly to this. }
 
 ; Animation
-sslBaseAnimation property Animation auto hidden
 string[] AnimEvents
 
 ; SFX
@@ -10,44 +9,37 @@ float SFXDelay
 float SFXTimer
 
 ; Processing
-float StageTimer
+bool hkReady
 bool TimedStage
+float StageTimer
 int StageCount
 int AdjustPos
 int aid
 
-
 ; ------------------------------------------------------- ;
 ; --- Thread Starter                                  --- ;
 ; ------------------------------------------------------- ;
-
-state Making
-	sslThreadController function PrimeThread()
-		; Prepare Thread
-		Action("Preparing")
-		return self
-	endFunction
-endState
 
 state Preparing
 	function FireAction()
 		RegisterForSingleUpdate(0.05)
 	endFunction
 	event OnUpdate()
+		; Init loop info
+		Stage = 1
 		SetAnimation()
-		SendThreadEvent("AnimationStart")
+		AutoAdvance = (!HasPlayer || (VictimRef == PlayerRef && Config.bDisablePlayer) || Config.bAutoAdvance)
 		AliasAction("Prepare", "Ready")
-		; Start ActorAlias animation loops from Ready state
-		; SyncActors(true)
-		; Auto TFC
-		if HasPlayer && Config.bAutoTFC
-			;ControlLib.EnableFreeCamera(true)
-		endIf
-		; Send leadin start if doing one
+		; Begin loop
+		ActorAlias[0].StartAnimating()
+		ActorAlias[1].StartAnimating()
+		ActorAlias[2].StartAnimating()
+		ActorAlias[3].StartAnimating()
+		ActorAlias[4].StartAnimating()
+		SendThreadEvent("AnimationStart")
 		if LeadIn
 			SendThreadEvent("LeadInStart")
 		endIf
-		; Begin first stage
 		StartedAt = Utility.GetCurrentRealTime()
 		Action("Advancing")
 	endEvent
@@ -60,13 +52,13 @@ endState
 state Advancing
 	function FireAction()
 		; End animation/leadin
-		; if Stage > StageCount
-		; 	if LeadIn
-		; 		return EndLeadIn()
-		; 	else
-		; 		return EndAnimation()
-		; 	endIf
-		; endIf
+		if Stage > StageCount
+			if LeadIn
+				return EndLeadIn()
+			else
+				return EndAnimation()
+			endIf
+		endIf
 		; Stage SFX Delay
 		SFXDelay = Config.fSFXDelay
 		if Stage != 1
@@ -76,12 +68,6 @@ state Advancing
 		if SFXDelay < 0.60
 			SFXDelay = 0.60
 		endIf
-		; Sync stage
-		ActorAlias[0].SyncStage(Stage)
-		ActorAlias[1].SyncStage(Stage)
-		ActorAlias[2].SyncStage(Stage)
-		ActorAlias[3].SyncStage(Stage)
-		ActorAlias[4].SyncStage(Stage)
 		; Start Animations loop
 		Action("Animating")
 	endFunction
@@ -96,21 +82,21 @@ state Animating
 		SyncActors()
 		PlayAnimation()
 		; Send events
-		; if !LeadIn && Stage >= StageCount
-		; 	SendThreadEvent("OrgasmStart")
-		; 	if Config.bOrgasmEffects
+		if !LeadIn && Stage >= StageCount
+			SendThreadEvent("OrgasmStart")
+			; if Config.bOrgasmEffects
 		; 		TriggerOrgasm()
 		; 	endIf
-		; else
+		else
 			SendThreadEvent("StageStart")
-		; endIf
+		endIf
 		; Begin loop
+		Log("Thread Animating Start Loop Stage: "+Stage)
 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		RegisterForSingleUpdate(0.05)
 	endFunction
 
 	event OnUpdate()
-		Log("Thread Animating Loop")
 		; Advance stage on timer
 		if (AutoAdvance || TimedStage) && StageTimer < Utility.GetCurrentRealTime()
 			GoToStage((Stage + 1))
@@ -168,8 +154,7 @@ state Animating
 		if Stage < 1
 			Stage = 1
 		endIf
-		GoToState("Advancing")
-		RegisterForSingleUpdate(0.05)
+		Action("Advancing")
 	endFunction
 
 	function RealignActors()
@@ -182,7 +167,7 @@ state Animating
 		int i = ActorCount
 		while i
 			i -= 1
-			; ActorAlias[i].Snap()
+			ActorAlias[i].Snap()
 		endWhile
 	endFunction
 
@@ -245,7 +230,7 @@ state Animating
 
 	function AdjustChange(bool backwards = false)
 		AdjustPos = sslUtility.WrapIndex((AdjustPos + sslUtility.SignInt(backwards, 1)), ActorCount)
-		ThreadLib.mAdjustChange.Show((AdjustPos + 1))
+		Debug.Notification("Adjusting Position For: "+Positions[AdjustPos].GetLeveledActorBase().GetName())
 	endFunction
 
 	function RestoreOffsets()
@@ -262,7 +247,7 @@ state Animating
 		; Slot.StopAnimating(true)
 		PlayerRef.StopTranslation()
 		; Lock hotkeys and wait 7 seconds
-		ThreadLib.mMoveScene.Show(7.0)
+		Debug.Notification("Player movement unlocked - repositioning scene in 7 seconds...")
 		SexLabUtil.Wait(7.0)
 		; Disable Controls
 		Slot.LockActor()
@@ -276,6 +261,14 @@ state Animating
 		StageTimer += 8.0
 		RegisterForSingleUpdate(0.05)
 	endFunction
+
+	event OnKeyDown(int keyCode)
+		if hkReady && !(Utility.IsInMenuMode() || UI.IsMenuOpen("Console") || UI.IsMenuOpen("Loading Menu"))
+			hkReady = false
+			Config.HotkeyCallback(self, keyCode)
+			hkReady = true
+		endIf
+	endEvent
 
 endState
 
@@ -295,12 +288,6 @@ function SetAnimation(int AnimID = -1)
 	if HasPlayer
 		MiscUtil.PrintConsole("Playing Animation: " + Animation.Name)
 	endIf
-	; Sync alias animations
-	ActorAlias[0].SyncAnimation(Animation)
-	ActorAlias[1].SyncAnimation(Animation)
-	ActorAlias[2].SyncAnimation(Animation)
-	ActorAlias[3].SyncAnimation(Animation)
-	ActorAlias[4].SyncAnimation(Animation)
 	; Check for out of range stage
 	if Stage >= StageCount
 		GoToStage((StageCount - 1))
@@ -335,11 +322,11 @@ function TriggerOrgasm()
 		; ActorAlias[i].OrgasmEffect()
 	endWhile
 	; Play Orgasm SFX
-	ThreadLib.OrgasmEffect.PlayAndWait(Positions[0])
+	ThreadLib.OrgasmFX.PlayAndWait(Positions[0])
 	if Animation.SoundFX != none
 		Animation.SoundFX.PlayAndWait(Positions[0])
 	endIf
-	ThreadLib.OrgasmEffect.PlayAndWait(Positions[0])
+	ThreadLib.OrgasmFX.PlayAndWait(Positions[0])
 	if Animation.SoundFX != none
 		Animation.SoundFX.PlayAndWait(Positions[0])
 	endIf
@@ -360,8 +347,7 @@ function EndLeadIn()
 	endIf
 	; Start primary animations at stage 1
 	SendThreadEvent("LeadInEnd")
-	GoToState("Advancing")
-	RegisterForSingleUpdate(0.10)
+	Action("Advancing")
 endFunction
 
 function EndAnimation(bool quick = false)
@@ -370,15 +356,10 @@ function EndAnimation(bool quick = false)
 	; Set fast flag to skip slow ending functions
 	FastEnd = quick
 	Stage = StageCount
-	; Stop hotkeys to prevent further stage advancing + Leave TFC
-	if HasPlayer
-		; Lib.ControlLib._HKClear()
-	endIf
 	; Reset actors & wait for clear state
 	AliasAction("Reset", "")
 	; Send end event
 	SendThreadEvent("AnimationEnd")
-	; Give AnimationEnd hooks some small room to breath
 	if !FastEnd
 		SexLabUtil.Wait(2.0)
 	endIf
@@ -406,48 +387,53 @@ endFunction
 ; --- System Use Only                                 --- ;
 ; ------------------------------------------------------- ;
 
-function Action(string FireState)
-	UnregisterForUpdate()
-	EndAction() ; OnEndState()
-	GoToState(FireState)
-	FireAction() ; OnBeginState()
+function EnableHotkeys()
+	if HasPlayer
+		RegisterForKey(Config.kBackwards)
+		RegisterForKey(Config.kAdjustStage)
+		RegisterForKey(Config.kAdvanceAnimation)
+		RegisterForKey(Config.kChangeAnimation)
+		RegisterForKey(Config.kChangePositions)
+		RegisterForKey(Config.kAdjustChange)
+		RegisterForKey(Config.kAdjustForward)
+		RegisterForKey(Config.kAdjustSideways)
+		RegisterForKey(Config.kAdjustUpward)
+		RegisterForKey(Config.kRealignActors)
+		RegisterForKey(Config.kRestoreOffsets)
+		RegisterForKey(Config.kMoveScene)
+		RegisterForKey(Config.kRotateScene)
+		hkReady = true
+		; RegisterForKey(Config.kToggleFreeCamera)
+	endIf
 endFunction
 
-bool function ActorWait(string WaitFor)
-	int i = ActorCount
-	while i
-		i -= 1
-		if ActorAlias[i].GetState() != WaitFor
-			return false
-		endIf
-	endWhile
-	return true
-endFunction
-
-function AliasAction(string FireState, string StateFinish)
-	; Start actor action state
-	ActorAlias[0].Action(FireState)
-	ActorAlias[1].Action(FireState)
-	ActorAlias[2].Action(FireState)
-	ActorAlias[3].Action(FireState)
-	ActorAlias[4].Action(FireState)
-	; Wait for actors ready, or for ~30 seconds to pass
-	int failsafe = 30
-	while !ActorWait(StateFinish) && failsafe
-		failsafe -= 1
-		Utility.Wait(1.0)
-	endWhile
-endFunction
-
-function SyncActors(bool force = false)
+function DisableHotkeys()
+	UnregisterForAllKeys()
+	hkReady = false
 endFunction
 
 function Initialize()
 	UnregisterForUpdate()
+	DisableHotkeys()
+
 	aid = 0
 	AdjustPos = 0
+	TimedStage = false
+
 	parent.Initialize()
 endFunction
+
+state Making
+	sslThreadController function PrimeThread()
+		Log("Thread Primed")
+		Action("Preparing")
+		return self
+	endFunction
+	function SetAnimation(int AnimID = -1)
+	endFunction
+	function EnableHotkeys()
+	endFunction
+endState
 
 ; ------------------------------------------------------- ;
 ; --- State Restricted                                --- ;
