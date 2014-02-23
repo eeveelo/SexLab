@@ -1,7 +1,9 @@
 scriptname sslVoiceSlots extends Quest
 
 ; Library for voice
-sslVoiceLibrary property Lib auto hidden
+sslThreadLibrary property Lib auto hidden
+sslSystemConfig property Config auto hidden
+
 int property Slotted auto hidden
 ; Voices readonly storage
 sslBaseVoice[] Slots
@@ -62,30 +64,33 @@ sslBaseVoice function Register(string Registrar)
 	return none
 endFunction
 
-function Setup()
-	Initialize()
-	(Quest.GetQuest("SexLabQuestRegistry") as sslVoiceDefaults).FreeFactory()
+function RegisterVoices()
+	; Register default animations
 	(Quest.GetQuest("SexLabQuestRegistry") as sslVoiceDefaults).LoadVoices()
+	; Send mod event for 3rd party animations
 	ModEvent.Send(ModEvent.Create("SexLabSlotVoices"))
 	Debug.Notification("$SSL_NotifyVoiceInstall")
 endFunction
 
-function Initialize()
+function Setup()
+	; Clear Slots
 	Slots = new sslBaseVoice[50]
 	int i = Slots.Length
 	while i
 		i -= 1
-		if i < 10
-			Slots[i] = (GetAliasByName("VoiceSlot00"+i) as sslBaseVoice)
-		else
-			Slots[i] = (GetAliasByName("VoiceSlot0"+i) as sslBaseVoice)
+		Alias BaseAlias = GetNthAlias(i)
+		if BaseAlias != none
+			Slots[i] = BaseAlias as sslBaseVoice
+			Slots[i].Clear()
 		endIf
-		Slots[i].Clear()
 	endWhile
+	; Init variables
 	Slotted = 0
 	StorageUtil.StringListClear(self, "Voice.Registry")
 	StorageUtil.StringListClear(self, "Voice.Female")
 	StorageUtil.StringListClear(self, "Voice.Male")
-	Lib = (Quest.GetQuest("SexLabQuestFramework") as sslVoiceLibrary)
+	Lib = (Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary)
+	Config = (Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig)
+	; Register animations
+	RegisterVoices()
 endFunction
-

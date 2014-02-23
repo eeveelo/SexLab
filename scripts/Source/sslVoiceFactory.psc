@@ -102,10 +102,6 @@ Sound property Hot hidden
 endProperty
 
 function FreeFactory()
-	; Init slots property if empty
-	if Slots == none
-		Slots = (Quest.GetQuest("SexLabQuestRegistry") as sslVoiceSlots)
-	endIf
 	; Clear wait lock
 	Voice = none
 	Locked = false

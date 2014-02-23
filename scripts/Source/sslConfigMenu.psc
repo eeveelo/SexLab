@@ -26,18 +26,21 @@ event OnGameReload()
 	AudioVoice.SetVolume(Config.fVoiceVolume)
 	AudioSFX.SetVolume(Config.fSFXVolume)
 	; Debug reset
-	SetupSystem()
+	; SetupSystem()
 endEvent
 
 ; Framework
-SexLabFramework property SexLab auto
-sslSystemConfig property Config auto
-sslThreadSlots property ThreadSlots auto
-sslAnimationSlots property AnimSlots auto
-sslVoiceSlots property VoiceSlots auto
-
-sslThreadLibrary property ThreadLib auto
-sslActorLibrary property ActorLib auto
+SexLabFramework property SexLab auto hidden
+sslSystemConfig property Config auto hidden
+; Libraries
+sslActorLibrary property ActorLib auto hidden
+sslThreadLibrary property ThreadLib auto hidden
+sslActorStats property Stats auto hidden
+; Object Registeries
+sslAnimationSlots property AnimSlots auto hidden
+sslCreatureAnimationSlots property CreatureSlots auto hidden
+sslVoiceSlots property VoiceSlots auto hidden
+sslThreadSlots property ThreadSlots auto hidden
 
 ; Data
 Actor property PlayerRef auto
@@ -76,7 +79,6 @@ int[] oidForeplayAnimation
 int[] oidRemoveStrapon
 
 function SetDefaults()
-
 	Config.SetDefaults()
 
 	AudioVoice.SetVolume(Config.fVoiceVolume)
@@ -130,20 +132,33 @@ event OnPageReset(string page)
 	LoadCustomContent("SexLab/logo.dds", 184, 31)
 endEvent
 
-
 function SetupSystem()
-	; AnimSlots = (Quest.GetQuest("SexLabQuestAnimations") as sslAnimationSlots)
-
+	; Wait until out of menus to setup
+	while Utility.IsInMenuMode() || !PlayerRef.Is3DLoaded()
+		Utility.Wait(1.0)
+	endWhile
+	; Grab properties to make sure they are all set properly
+	SexLab        = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework
+	Config        = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
+	ActorLib      = Quest.GetQuest("SexLabQuestFramework") as sslActorLibrary
+	ThreadLib     = Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary
+	Stats         = Quest.GetQuest("SexLabQuestFramework") as sslActorStats
+	ThreadSlots   = Quest.GetQuest("SexLabQuestFramework") as sslThreadSlots
+	AnimSlots     = Quest.GetQuest("SexLabQuestAnimations") as sslAnimationSlots
+	CreatureSlots = Quest.GetQuest("SexLabQuestCreatureAnimations") as sslCreatureAnimationSlots
+	VoiceSlots    = Quest.GetQuest("SexLabQuestRegistry") as sslVoiceSlots
 	; Init Defaults
 	SexLab.Initialize()
 	CheckSystem()
 	SetDefaults()
 	; Setup Libraries
-	ThreadLib.Setup()
 	ActorLib.Setup()
+	ThreadLib.Setup()
+	Stats.Setup()
 	; Setup Slots
 	ThreadSlots.Setup()
 	AnimSlots.Setup()
+	CreatureSlots.Setup()
 	VoiceSlots.Setup()
 	; Finished
 	Debug.Notification("$SSL_SexLabUpdated")

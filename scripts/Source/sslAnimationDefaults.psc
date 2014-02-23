@@ -1,6 +1,9 @@
 scriptname sslAnimationDefaults extends sslAnimationFactory
 
 function LoadAnimations()
+	; Prepare factory for load
+	Slots = Quest.GetQuest("SexLabQuestAnimations") as sslAnimationSlots
+	FreeFactory()
 	; Missionary
 	RegisterAnimation("SexLabMissionary")
 	RegisterAnimation("SexLabAggrMissionary")

@@ -22,7 +22,7 @@ bool property Enabled hidden
 endProperty
 
 ; Animation Threads
-sslThreadSlots property ThreadSlots auto
+sslThreadSlots property ThreadSlots auto hidden
 sslThreadController[] property Threads hidden
 	sslThreadController[] function get()
 		return ThreadSlots.Threads
@@ -30,7 +30,7 @@ sslThreadController[] property Threads hidden
 endProperty
 
 ; Animation Sets
-sslAnimationSlots property AnimSlots auto
+sslAnimationSlots property AnimSlots auto hidden
 sslBaseAnimation[] property Animations hidden
 	sslBaseAnimation[] function get()
 		return AnimSlots.Animations
@@ -38,10 +38,15 @@ sslBaseAnimation[] property Animations hidden
 endProperty
 
 ; Creature animations
-
+sslCreatureAnimationSlots property CreatureSlots auto hidden
+sslBaseAnimation[] property CreatureAnimations hidden
+	sslBaseAnimation[] function get()
+		return AnimSlots.Animations
+	endFunction
+endProperty
 
 ; Voice Sets
-sslVoiceSlots property VoiceSlots auto
+sslVoiceSlots property VoiceSlots auto hidden
 sslBaseVoice[] property Voices hidden
 	sslBaseVoice[] function get()
 		return VoiceSlots.Voices
@@ -49,21 +54,16 @@ sslBaseVoice[] property Voices hidden
 endProperty
 
 ; Configuration Accessor
-sslSystemConfig property Config auto
+sslSystemConfig property Config auto hidden
 
 ; API Library
-sslActorLibrary property ActorLib auto
-sslThreadLibrary property ThreadLib auto
-sslAnimationLibrary property AnimLib auto
-sslVoiceLibrary property VoiceLib auto
-
-sslActorStats property Stats auto
+sslActorLibrary property ActorLib auto hidden
+sslThreadLibrary property ThreadLib auto hidden
+sslActorStats property Stats auto hidden
 
 ; Data
-Faction property AnimatingFaction auto
 Actor property PlayerRef auto
-
-Actor[] property DebugActor auto hidden
+Faction property AnimatingFaction auto
 
 ;#---------------------------#
 ;#                           #
@@ -712,24 +712,19 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function Initialize()
-	Actor[] aInit
-	DebugActor    = aInit
 	SystemEnabled = true
 
-	RegisterForModEvent("StageStart", "PlainHook")
-	RegisterForModEvent("StageEnd_Test", "TestHook")
+	Config        = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
+	ActorLib      = Quest.GetQuest("SexLabQuestFramework") as sslActorLibrary
+	ThreadLib     = Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary
+	Stats         = Quest.GetQuest("SexLabQuestFramework") as sslActorStats
+	ThreadSlots   = Quest.GetQuest("SexLabQuestFramework") as sslThreadSlots
+	AnimSlots     = Quest.GetQuest("SexLabQuestAnimations") as sslAnimationSlots
+	CreatureSlots = Quest.GetQuest("SexLabQuestCreatureAnimations") as sslCreatureAnimationSlots
+	VoiceSlots    = Quest.GetQuest("SexLabQuestRegistry") as sslVoiceSlots
+
 	Log("SexLab Initialized")
 endFunction
-
-event PlainHook(int tid, string HookEvent)
-	sslThreadController Thread = GetController(tid)
-	Log("Plain hook --  "+HookEvent+" -- on "+Thread.tid)
-endEvent
-event TestHook(int tid, string HookEvent)
-	sslThreadController Thread = GetController(tid)
-	Log("Custom hook --  "+HookEvent+" -- on "+Thread.tid)
-endEvent
-
 
 function EnableSystem(bool EnableSexLab = true)
 	SystemEnabled = EnableSexLab

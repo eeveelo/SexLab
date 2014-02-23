@@ -70,7 +70,7 @@ endFunction
 
 ; Unlocks factory for next callback, MUST be called at end of callback
 function Save()
-	SexLabUtil.Log("'"+Animation.Name+"'", "sslAnimationSlots["+Slots.Animations.Find(Animation)+"]", "REGISTER ANIMATION ", "trace,console", true)
+	SexLabUtil.Log("'"+Animation.Name+"'", "Slot["+Slots.Animations.Find(Animation)+"]", "REGISTER ANIMATION ", "trace,console", true)
 	Animation.Save(sslUtility.TrimIntArray(positionData, positionID), sslUtility.TrimStringArray(animData, animID), sslUtility.TrimFloatArray(offsetData, offsetID), sslUtility.TrimIntArray(infoData, infoID))
 	FreeFactory()
 endfunction
@@ -154,10 +154,6 @@ function FreeFactory()
 	offsetData = new float[128]
 	infoID = 0
 	infoData = new int[128]
-	; Init slots property if empty
-	if Slots == none
-		Slots = (Quest.GetQuest("SexLabQuestAnimations") as sslAnimationSlots)
-	endIf
 	; Clear wait lock
 	Animation = none
 	Locked = false

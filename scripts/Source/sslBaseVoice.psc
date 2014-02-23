@@ -1,6 +1,6 @@
 scriptname sslBaseVoice extends sslBaseObject
 
-sslVoiceLibrary property Lib auto hidden
+sslThreadLibrary property Lib auto hidden
 
 Sound property Mild auto hidden
 Sound property Medium auto hidden
@@ -55,6 +55,6 @@ function Initialize()
 	Mild = none
 	Medium = none
 	Hot = none
-	Lib = (Quest.GetQuest("SexLabQuestFramework") as sslVoiceLibrary)
+	Lib = (Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary)
 	parent.Initialize()
 endFunction

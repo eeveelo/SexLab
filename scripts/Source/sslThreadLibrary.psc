@@ -2,14 +2,19 @@ scriptname sslThreadLibrary extends sslSystemLibrary
 
 ; Data
 Sound property OrgasmFX auto
+Sound property SquishingFX auto
+Sound property SuckingFX auto
+Sound property SexMixedFX auto
+
 Static property LocationMarker auto
 FormList property BedsList auto
 FormList property BedRollsList auto
 Message property UseBed auto
 
-; bool function IsActorFree(actor position)
-;	return Threads.FindActorController(position) == -1
-; endFunction
+Topic property LipSync auto
+VoiceType property SexLabVoiceM auto
+VoiceType property SexLabVoiceF auto
+FormList property VoicesPlayer auto
 
 bool function CheckBed(ObjectReference BedRef, bool IgnoreUsed = true)
 	return BedRef != none && BedRef.IsEnabled() && BedRef.Is3DLoaded() && (!IgnoreUsed || (IgnoreUsed && !BedRef.IsFurnitureInUse(true)))

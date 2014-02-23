@@ -19,10 +19,11 @@ Spell property CumAnalSpell auto
 Keyword property CumOralKeyword auto
 Keyword property CumAnalKeyword auto
 Keyword property CumVaginalKeyword auto
+Keyword property ActorTypeNPC auto
 
-FormList property ValidActorList auto
-FormList property NoStripList auto
-FormList property StripList auto
+; FormList property ValidActorList auto
+; FormList property NoStripList auto
+; FormList property StripList auto
 
 Furniture property BaseMarker auto
 Package property DoNothing auto
@@ -442,7 +443,7 @@ int function ValidateActor(Actor ActorRef)
 		return -15
 	endIf
 	; TODO: Creature checking
-	if ActorRef != PlayerRef && !ActorRef.HasKeywordString("ActorTypeNPC") ;&& !AnimLib.AllowedCreature(ActorRace)
+	if ActorRef != PlayerRef && !ActorRef.HasKeyword(ActorTypeNPC) ;&& !AnimLib.AllowedCreature(ActorRace)
 		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are a creature that is currently not supported ("+ActorRef.GetLeveledActorBase().GetName()+")")
 		return -16
 	endIf
