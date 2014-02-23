@@ -46,7 +46,33 @@ bool dragonborn
 Race DLC2SeekerRace
 Race DLC2AshSpawnRace
 
-function DLCLoad()
+function LoadRaces()
+	BearBlackRace = Game.GetForm(0x131E8) as Race
+	BearBrownRace = Game.GetForm(0x131E7) as Race
+	BearSnowRace = Game.GetForm(0x131E9) as Race
+	SabreCatRace = Game.GetForm(0x13200) as Race
+	SabreCatSnowyRace = Game.GetForm(0x13202) as Race
+	ChaurusRace = Game.GetForm(0x131EB) as Race
+	ChaurusReaperRace = Game.GetForm(0xA5601) as Race
+	DragonRace = Game.GetForm(0x12E82) as Race
+	UndeadDragonRace = Game.GetForm(0x1052A3) as Race
+	DraugrRace = Game.GetForm(0x0D53) as Race
+	DraugrMagicRace = Game.GetForm(0xF71DC) as Race
+	FalmerRace = Game.GetForm(0x131F4) as Race
+	GiantRace = Game.GetForm(0x131F9) as Race
+	HorseRace = Game.GetForm(0x131FD) as Race
+	FrostbiteSpiderRace = Game.GetForm(0x131F8) as Race
+	FrostbiteSpiderRaceGiant = Game.GetForm(0x4E507) as Race
+	FrostbiteSpiderRaceLarge = Game.GetForm(0x53477) as Race
+	TrollRace = Game.GetForm(0x13205) as Race
+	TrollFrostRace = Game.GetForm(0x105A3) as Race
+	WerewolfBeastRace = Game.GetForm(0xCDD84) as Race
+	WolfRace = Game.GetForm(0x1320A) as Race
+	DogRace = Game.GetForm(0x131EE) as Race
+	DogCompanionRace = Game.GetForm(0xF1AC4) as Race
+	MG07DogRace = Game.GetForm(0xF905F) as Race
+	DA03BarbasDogRace = Game.GetForm(0xCD657) as Race
+
 	dawnguard = false
 	dragonborn = false
 	int mods = Game.GetModCount()
@@ -91,8 +117,7 @@ function LoadAnimations()
 	; Prepare factory for load
 	Slots = Quest.GetQuest("SexLabQuestCreatureAnimations") as sslCreatureAnimationSlots
 	FreeFactory()
-	DLCLoad()
-	return ; DEBUG
+	LoadRaces()
 	; Bear
 	RegisterAnimation("BearDoggystyle")
 	; Dog
