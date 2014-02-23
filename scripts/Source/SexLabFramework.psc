@@ -55,6 +55,9 @@ sslSystemConfig property Config auto
 sslActorLibrary property ActorLib auto
 sslThreadLibrary property ThreadLib auto
 sslAnimationLibrary property AnimLib auto
+sslVoiceLibrary property VoiceLib auto
+
+sslActorStats property Stats auto
 
 ; Data
 Faction property AnimatingFaction auto
@@ -104,7 +107,7 @@ int function StartSex(Actor[] Positions, sslBaseAnimation[] Anims, Actor VictimR
 	return -1
 endFunction
 
-sslThreadController function QuickStart(Actor Actor1, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none, actor VictimRef = none, string Hook = "")
+sslThreadController function QuickStart(Actor Actor1, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none, Actor VictimRef = none, string Hook = "")
 	sslBaseAnimation[] Anims
 	return ThreadSlots.GetController(StartSex(ActorLib.MakeActorArray(Actor1, Actor2, Actor3, Actor4, Actor5), Anims, VictimRef, none, true, Hook))
 endFunction
@@ -129,7 +132,7 @@ Actor[] function MakeActorArray(Actor Actor1 = none, Actor Actor2 = none, Actor 
 	return ActorLib.MakeActorArray(Actor1, Actor2, Actor3, Actor4, Actor5)
 endFunction
 
-Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, actor IgnoreRef1 = none, actor IgnoreRef2 = none, actor IgnoreRef3 = none, actor IgnoreRef4 = none)
+Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none)
 	return ActorLib.FindAvailableActor(CenterRef, Radius, FindGender, IgnoreRef1, IgnoreRef2, IgnoreRef3, IgnoreRef4)
 endFunction
 
@@ -342,20 +345,20 @@ endFunction
 ; ;#   BEGIN VOICE FUNCTIONS   #
 ; ;#---------------------------#
 
-; sslBaseVoice function PickVoice(actor a)
-; 	return VoiceLib.PickVoice(a)
+; sslBaseVoice function PickVoice(Actor ActorRef)
+; 	return VoiceLib.PickVoice(ActorRef)
 ; endFunction
 
-; function SaveVoice(actor a, sslBaseVoice saving)
+; function SaveVoice(Actor a, sslBaseVoice saving)
 ; 	VoiceLib.SaveVoice(a, saving)
 ; endFunction
 
-; function ForgetVoice(actor a)
-; 	VoiceLib.ForgetVoice(a)
+; function ForgetVoice(Actor ActorRef)
+; 	VoiceLib.ForgetVoice(ActorRef)
 ; endFunction
 
-; sslBaseVoice function GetVoice(actor a)
-; 	return VoiceLib.GetVoice(a)
+; sslBaseVoice function GetVoice(Actor ActorRef)
+; 	return VoiceLib.GetVoice(ActorRef)
 ; endFunction
 
 ; sslBaseVoice function GetVoiceByGender(int g)
@@ -390,23 +393,23 @@ endFunction
 ; ;# BEGIN EXPRESSION FUNCTION #
 ; ;#---------------------------#
 
-; function ClearMFG(actor ActorRef)
+; function ClearMFG(Actor ActorRef)
 ; 	sslExpressionLibrary.ClearMFG(ActorRef)
 ; endFunction
 
-; function ClearPhoneme(actor ActorRef)
+; function ClearPhoneme(Actor ActorRef)
 ; 	sslExpressionLibrary.ClearPhoneme(ActorRef)
 ; endFunction
 
-; function OpenMouth(actor ActorRef)
+; function OpenMouth(Actor ActorRef)
 ; 	sslExpressionLibrary.OpenMouth(ActorRef)
 ; endFunction
 
-; bool function IsMouthOpen(actor ActorRef)
+; bool function IsMouthOpen(Actor ActorRef)
 ; 	return sslExpressionLibrary.IsMouthOpen(ActorRef)
 ; endFunction
 
-; sslBaseExpression function PickExpression(actor ActorRef, actor VictimRef = none)
+; sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none)
 ; 	return ExpressionLib.PickExpression(ActorRef, VictimRef)
 ; endFunction
 
@@ -434,29 +437,29 @@ endFunction
 ; ;#    START HOOK FUNCTIONS   #
 ; ;#---------------------------#
 
-; sslThreadController function HookController(string argString)
-; 	return ThreadSlots.GetController(argString as int)
-; endFunction
+sslThreadController function HookController(string argString)
+	return ThreadSlots.GetController(argString as int)
+endFunction
 
-; sslBaseAnimation function HookAnimation(string argString)
-; 	return ThreadSlots.GetController(argString as int).Animation
-; endFunction
+sslBaseAnimation function HookAnimation(string argString)
+	return ThreadSlots.GetController(argString as int).Animation
+endFunction
 
-; int function HookStage(string argString)
-; 	return ThreadSlots.GetController(argString as int).Stage
-; endFunction
+int function HookStage(string argString)
+	return ThreadSlots.GetController(argString as int).Stage
+endFunction
 
-; actor function HookVictim(string argString)
-; 	return ThreadSlots.GetController(argString as int).VictimRef
-; endFunction
+Actor function HookVictim(string argString)
+	return ThreadSlots.GetController(argString as int).VictimRef
+endFunction
 
-; actor[] function HookActors(string argString)
-; 	return ThreadSlots.GetController(argString as int).Positions
-; endFunction
+actor[] function HookActors(string argString)
+	return ThreadSlots.GetController(argString as int).Positions
+endFunction
 
-; float function HookTime(string argString)
-; 	return ThreadSlots.GetController(argString as int).TotalTime
-; endFunction
+float function HookTime(string argString)
+	return ThreadSlots.GetController(argString as int).TotalTime
+endFunction
 
 ; ;#---------------------------#
 ; ;#    END HOOK FUNCTIONS     #
@@ -466,236 +469,230 @@ endFunction
 ; ;#   START STAT FUNCTIONS    #
 ; ;#---------------------------#
 
-; int function RegisterStat(string name, string value, string prepend = "", string append = "")
-; 	return Stats.RegisterStat(name, value, prepend, append)
-; endFunction
+int function RegisterStat(string Name, string Value, string Prepend = "", string Append = "")
+	return Stats.RegisterStat(Name, Value, Prepend, Append)
+endFunction
 
-; int function FindStat(string name)
-; 	return Stats.FindStat(name)
-; endFunction
+int function FindStat(string Name)
+	return Stats.FindStat(Name)
+endFunction
 
-; function Alter(string name, string newName = "", string value = "", string prepend = "", string append = "")
-; 	Stats.Alter(name, newName, value, prepend, append)
-; endFunction
+function Alter(string Name, string NewName = "", string Value = "", string Prepend = "", string Append = "")
+	Stats.Alter(Name, NewName, Value, Prepend, Append)
+endFunction
 
-; string function GetActorStat(actor ActorRef, string name)
-; 	return Stats.GetStat(ActorRef, name)
-; endFunction
+string function GetActorStat(Actor ActorRef, string Name)
+	return Stats.GetStat(ActorRef, Name)
+endFunction
 
-; int function GetActorStatInt(actor ActorRef, string name)
-; 	return Stats.GetStatInt(ActorRef, name)
-; endFunction
+int function GetActorStatInt(Actor ActorRef, string Name)
+	return Stats.GetStatInt(ActorRef, Name)
+endFunction
 
-; float function GetActorStatFloat(actor ActorRef, string name)
-; 	return Stats.GetStatFloat(ActorRef, name)
-; endFunction
+float function GetActorStatFloat(Actor ActorRef, string Name)
+	return Stats.GetStatFloat(ActorRef, Name)
+endFunction
 
-; string function SetActorStat(actor ActorRef, string name, string value)
-; 	return Stats.SetStat(ActorRef, name, value)
-; endFunction
+string function SetActorStat(Actor ActorRef, string Name, string Value)
+	return Stats.SetStat(ActorRef, Name, Value)
+endFunction
 
-; int function ActorAdjustBy(actor ActorRef, string name, int adjust)
-; 	return Stats.AdjustBy(ActorRef, name, adjust)
-; endFunction
+int function ActorAdjustBy(Actor ActorRef, string Name, int AdjustBy)
+	return Stats.AdjustBy(ActorRef, Name, AdjustBy)
+endFunction
 
-; string function GetActorStatFull(actor ActorRef, string name)
-; 	return Stats.GetStatFull(ActorRef, name)
-; endFunction
+string function GetActorStatFull(Actor ActorRef, string Name)
+	return Stats.GetStatFull(ActorRef, Name)
+endFunction
 
-; string function GetStatFull(string name)
-; 	return Stats.GetStatFull(PlayerRef, name)
-; endFunction
+string function GetStatFull(string Name)
+	return Stats.GetStatFull(PlayerRef, Name)
+endFunction
 
-; string function GetStat(string name)
-; 	return Stats.GetStat(PlayerRef, name)
-; endFunction
+string function GetStat(string Name)
+	return Stats.GetStat(PlayerRef, Name)
+endFunction
 
-; int function GetStatInt(string name)
-; 	return Stats.GetStatInt(PlayerRef, name)
-; endFunction
+int function GetStatInt(string Name)
+	return Stats.GetStatInt(PlayerRef, Name)
+endFunction
 
-; float function GetStatFloat(string name)
-; 	return Stats.GetStatFloat(PlayerRef, name)
-; endFunction
+float function GetStatFloat(string Name)
+	return Stats.GetStatFloat(PlayerRef, Name)
+endFunction
 
-; string function SetStat(string name, string value)
-; 	return Stats.SetStat(PlayerRef, name, value)
-; endFunction
+string function SetStat(string Name, string Value)
+	return Stats.SetStat(PlayerRef, Name, Value)
+endFunction
 
-; int function AdjustBy(string name, int adjust)
-; 	return Stats.AdjustBy(PlayerRef, name, adjust)
-; endFunction
+int function AdjustBy(string Name, int AdjustBy)
+	return Stats.AdjustBy(PlayerRef, Name, AdjustBy)
+endFunction
 
-; int function CalcSexuality(bool IsFemale, int males, int females)
-; 	return Stats.CalcSexuality(IsFemale, males, females)
-; endFunction
+int function CalcSexuality(bool IsFemale, int males, int females)
+	return Stats.CalcSexuality(IsFemale, males, females)
+endFunction
 
-; int function CalcLevel(float total, float curve = 0.65)
-; 	return Stats.CalcLevel(total, curve)
-; endFunction
+int function CalcLevel(float total, float curve = 0.65)
+	return Stats.CalcLevel(total, curve)
+endFunction
 
-; string function ParseTime(int time)
-; 	return Stats.ParseTime(time)
-; endFunction
+string function ParseTime(int time)
+	return Stats.ParseTime(time)
+endFunction
 
-; int function PlayerSexCount(actor a)
-; 	return Stats.PlayerSexCount(a)
-; endFunction
+int function PlayerSexCount(Actor ActorRef)
+	return Stats.PlayerSexCount(ActorRef)
+endFunction
 
-; bool function HadPlayerSex(actor a)
-; 	return Stats.HadPlayerSex(a)
-; endFunction
+bool function HadPlayerSex(Actor ActorRef)
+	return Stats.HadPlayerSex(ActorRef)
+endFunction
 
-; function AddPlayerSex(actor a)
-; 	Stats.AddPlayerSex(a)
-; endFunction
+float function AdjustPurity(Actor ActorRef, float amount)
+	Stats.AdjustFloat(ActorRef, "Purity", amount)
+	return Stats.GetPurity(ActorRef)
+endFunction
 
-; float function AdjustPurity(actor ActorRef, float amount)
-; 	Stats.AdjustFloat(ActorRef, "Purity", amount)
-; 	return Stats.GetPurity(ActorRef)
-; endFunction
+int function GetSexuality(Actor ActorRef)
+	return Stats.GetSexuality(ActorRef)
+endFunction
 
-; float function AdjustPlayerPurity(float amount)
-; 	Stats.AdjustFloat(PlayerRef, "Purity", amount)
-; 	return Stats.GetPurity(PlayerRef)
-; endFunction
+string function GetSexualityTitle(Actor ActorRef)
+	return Stats.GetSexualityTitle(ActorRef)
+endFunction
 
-; int function GetPlayerPurityLevel()
-; 	return Stats.GetPlayerPurityLevel()
-; endFunction
+string function GetSkillTitle(Actor ActorRef, string Skill)
+	return Stats.GetSkillTitle(ActorRef, Skill)
+endFunction
 
-; string function GetPlayerPurityTitle()
-; 	return Stats.GetPlayerPurityTitle()
-; endFunction
+int function GetSkill(Actor ActorRef, string Skill)
+	return Stats.GetSkill(ActorRef, Skill)
+endFunction
 
-; string function GetPlayerSexualityTitle()
-; 	return Stats.GetSexualityTitle(PlayerRef)
-; endFunction
+int function GetSkillLevel(Actor ActorRef, string Skill)
+	return Stats.GetSkillLevel(ActorRef, Skill)
+endFunction
 
-; int function GetPlayerStatLevel(string type)
-; 	return Stats.GetPlayerSkillLevel(type)
-; endFunction
-; int function GetPlayerSkillLevel(string skill)
-; 	return Stats.GetPlayerSkillLevel(skill)
-; endFunction
+float function GetPurity(Actor ActorRef)
+	return Stats.GetPurity(ActorRef)
+endFunction
 
-; string function GetPlayerSkillTitle(string skill)
-; 	return Stats.GetPlayerSkillTitle(skill)
-; endFunction
+int function GetPurityLevel(Actor ActorRef)
+	return Stats.GetPurityLevel(ActorRef)
+endFunction
 
-; int function GetSexuality(actor ActorRef)
-; 	return Stats.GetSexuality(ActorRef)
-; endFunction
+string function GetPurityTitle(Actor ActorRef)
+	return Stats.GetPurityTitle(ActorRef)
+endFunction
 
-; string function GetSexualityTitle(actor ActorRef)
-; 	return Stats.GetSexualityTitle(ActorRef)
-; endFunction
+bool function IsPure(Actor ActorRef)
+	return Stats.IsPure(ActorRef)
+endFunction
 
-; string function GetSkillTitle(actor ActorRef, string skill)
-; 	return Stats.GetSkillTitle(ActorRef, skill)
-; endFunction
+bool function IsImpure(Actor ActorRef)
+	return Stats.IsImpure(ActorRef)
+endFunction
 
-; int function GetSkill(actor ActorRef, string skill)
-; 	return Stats.GetSkill(ActorRef, skill)
-; endFunction
+bool function IsStraight(Actor ActorRef)
+	return IsStraight(ActorRef)
+endFunction
 
-; int function GetSkillLevel(actor ActorRef, string skill)
-; 	return Stats.GetSkillLevel(ActorRef, skill)
-; endFunction
+bool function IsBisexual(Actor ActorRef)
+	return IsBisexual(ActorRef)
+endFunction
 
-; float function GetPurity(actor ActorRef)
-; 	return Stats.GetPurity(ActorRef)
-; endFunction
+bool function IsGay(Actor ActorRef)
+	return IsGay(ActorRef)
+endFunction
 
-; int function GetPurityLevel(actor ActorRef)
-; 	return Stats.GetPurityLevel(ActorRef)
-; endFunction
+int function SexCount(Actor ActorRef)
+	return Stats.SexCount(ActorRef)
+endFunction
 
-; string function GetPurityTitle(actor ActorRef)
-; 	return Stats.GetPurityTitle(ActorRef)
-; endFunction
+bool function HadSex(Actor ActorRef)
+	return Stats.HadSex(ActorRef)
+endFunction
 
-; bool function IsPure(actor ActorRef)
-; 	return Stats.IsPure(ActorRef)
-; endFunction
+; Last sex - Game time - float days
+float function LastSexGameTime(Actor ActorRef)
+	return Stats.LastSexGameTime(ActorRef)
+endFunction
 
-; bool function IsImpure(actor ActorRef)
-; 	return Stats.IsImpure(ActorRef)
-; endFunction
+float function DaysSinceLastSex(Actor ActorRef)
+	return Stats.DaysSinceLastSex(ActorRef)
+endFunction
 
-; bool function IsStraight(actor ActorRef)
-; 	return IsStraight(ActorRef)
-; endFunction
+float function HoursSinceLastSex(Actor ActorRef)
+	return Stats.HoursSinceLastSex(ActorRef)
+endFunction
 
-; bool function IsBisexual(actor ActorRef)
-; 	return IsBisexual(ActorRef)
-; endFunction
+float function MinutesSinceLastSex(Actor ActorRef)
+	return Stats.MinutesSinceLastSex(ActorRef)
+endFunction
 
-; bool function IsGay(actor ActorRef)
-; 	return IsGay(ActorRef)
-; endFunction
+float function SecondsSinceLastSex(Actor ActorRef)
+	return Stats.SecondsSinceLastSex(ActorRef)
+endFunction
 
-; int function SexCount(actor a)
-; 	return Stats.SexCount(a)
-; endFunction
+string function LastSexTimerString(Actor ActorRef)
+	return Stats.LastSexTimerString(ActorRef)
+endFunction
 
-; bool function HadSex(actor a)
-; 	return Stats.HadSex(a)
-; endFunction
+; Last sex - Real Time - float seconds
+float function LastSexRealTime(Actor ActorRef)
+	return Stats.LastSexRealTime(ActorRef)
+endFunction
 
-; ; Last sex - Game time - float days
-; float function LastSexGameTime(actor a)
-; 	return Stats.LastSexGameTime(a)
-; endFunction
+float function SecondsSinceLastSexRealTime(Actor ActorRef)
+	return Stats.SecondsSinceLastSexRealTime(ActorRef)
+endFunction
 
-; float function DaysSinceLastSex(actor a)
-; 	return Stats.DaysSinceLastSex(a)
-; endFunction
+float function MinutesSinceLastSexRealTime(Actor ActorRef)
+	return Stats.MinutesSinceLastSexRealTime(ActorRef)
+endFunction
 
-; float function HoursSinceLastSex(actor a)
-; 	return Stats.HoursSinceLastSex(a)
-; endFunction
+float function HoursSinceLastSexRealTime(Actor ActorRef)
+	return Stats.HoursSinceLastSexRealTime(ActorRef)
+endFunction
 
-; float function MinutesSinceLastSex(actor a)
-; 	return Stats.MinutesSinceLastSex(a)
-; endFunction
+float function DaysSinceLastSexRealTime(Actor ActorRef)
+	return Stats.DaysSinceLastSexRealTime(ActorRef)
+endFunction
 
-; float function SecondsSinceLastSex(actor a)
-; 	return Stats.SecondsSinceLastSex(a)
-; endFunction
+string function LastSexTimerStringRealTime(Actor ActorRef)
+	return Stats.LastSexTimerStringRealTime(ActorRef)
+endFunction
 
-; string function LastSexTimerString(actor a)
-; 	return Stats.LastSexTimerString(a)
-; endFunction
+; Player shortcuts
+float function AdjustPlayerPurity(float amount)
+	Stats.AdjustFloat(PlayerRef, "Purity", amount)
+	return Stats.GetPurity(PlayerRef)
+endFunction
 
-; ; Last sex - Real Time - float seconds
-; float function LastSexRealTime(actor a)
-; 	return Stats.LastSexRealTime(a)
-; endFunction
+int function GetPlayerPurityLevel()
+	return Stats.GetPurityLevel(PlayerRef)
+endFunction
 
-; float function SecondsSinceLastSexRealTime(actor a)
-; 	return Stats.SecondsSinceLastSexRealTime(a)
-; endFunction
+string function GetPlayerPurityTitle()
+	return Stats.GetPurityTitle(PlayerRef)
+endFunction
 
-; float function MinutesSinceLastSexRealTime(actor a)
-; 	return Stats.MinutesSinceLastSexRealTime(a)
-; endFunction
+string function GetPlayerSexualityTitle()
+	return Stats.GetSexualityTitle(PlayerRef)
+endFunction
 
-; float function HoursSinceLastSexRealTime(actor a)
-; 	return Stats.HoursSinceLastSexRealTime(a)
-; endFunction
+int function GetPlayerStatLevel(string Skill)
+	return Stats.GetSkillLevel(PlayerRef, Skill)
+endFunction
 
-; float function DaysSinceLastSexRealTime(actor a)
-; 	return Stats.DaysSinceLastSexRealTime(a)
-; endFunction
+int function GetPlayerSkillLevel(string Skill)
+	return Stats.GetSkillLevel(PlayerRef, Skill)
+endFunction
 
-; string function LastSexTimerStringRealTime(actor a)
-; 	return Stats.LastSexTimerStringRealTime(a)
-; endFunction
-
-; string[] function GetInfo(string name)
-; 	return none ; Removed in 1.32
-; endFunction
+string function GetPlayerSkillTitle(string Skill)
+	return Stats.GetSkillTitle(PlayerRef, Skill)
+endFunction
 
 ; ;#---------------------------#
 ; ;#    END STAT FUNCTIONS     #

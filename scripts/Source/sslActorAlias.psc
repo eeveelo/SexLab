@@ -46,12 +46,12 @@ form Strapon
 ; Animation Position/Stage flags
 bool property OpenMouth hidden
 	bool function get()
-		return Flags[1] == 0
+		return Flags[1] == 1
 	endFunction
 endProperty
 bool property IsSilent hidden
 	bool function get()
-		return (Voice == none || IsForcedSilent || IsCreature || Flags[0] == 1 || Flags[1] == 0)
+		return (Voice == none || IsForcedSilent || IsCreature || Flags[0] == 1 || Flags[1] == 1)
 	endFunction
 endProperty
 bool property UseStrapon hidden
