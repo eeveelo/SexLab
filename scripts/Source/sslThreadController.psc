@@ -206,15 +206,18 @@ state Animating
 	endFunction
 
 	function AdjustForward(bool backwards = false, bool adjuststage = false)
-		; ActorAlias[AdjustPos].AlignTo(Animation.UpdateForward(AdjustPos, stage, sslUtility.SignFloat(backwards, 1.0), adjuststage), true)
+		Animation.UpdateForward(AdjustPos, stage, sslUtility.SignFloat(backwards, 1.0), adjuststage)
+		RealignActors()
 	endFunction
 
 	function AdjustSideways(bool backwards = false, bool adjuststage = false)
-		; ActorAlias[AdjustPos].AlignTo(Animation.UpdateSide(AdjustPos, stage, sslUtility.SignFloat(backwards, 1.0), adjuststage), true)
+		Animation.UpdateSide(AdjustPos, stage, sslUtility.SignFloat(backwards, 1.0), adjuststage)
+		RealignActors()
 	endFunction
 
 	function AdjustUpward(bool backwards = false, bool adjuststage = false)
-		; ActorAlias[AdjustPos].AlignTo(Animation.UpdateUp(AdjustPos, stage, sslUtility.SignFloat(backwards, 1.0), adjuststage), true)
+		Animation.UpdateUp(AdjustPos, stage, sslUtility.SignFloat(backwards, 1.0), adjuststage)
+		RealignActors()
 	endFunction
 
 	function RotateScene(bool backwards = false)

@@ -20,6 +20,9 @@ bool property LeadIn auto hidden
 bool property FastEnd auto hidden
 bool property IsAggressive auto hidden
 
+; Creature animation
+Race property CreatureRef auto hidden
+
 ; Animation Info
 int property Stage auto hidden
 sslBaseAnimation property Animation auto hidden
@@ -183,8 +186,16 @@ state Making
 		; -- Validate Animations -- ;
 		; ------------------------- ;
 
+		if HasCreature
+			LeadIn = false
+			PrimaryAnimations = CreatureSlots.GetByRace(ActorCount, CreatureRef)
+			if PrimaryAnimations.Length == 0
+				Log("StartThread() - Failed to find valid creature animations.", "FATAL")
+				return none
+			endIf
+			Positions = ThreadLib.SortCreatures(Positions, PrimaryAnimations[0])
 		; Get default primary animations if none
-		if PrimaryAnimations.Length == 0
+		elseIf PrimaryAnimations.Length == 0
 			SetAnimations(AnimSlots.GetByDefault(Males, Females, IsAggressive, (BedRef != none), Config.bRestrictAggressive))
 			if PrimaryAnimations.Length == 0
 				Log("StartThread() - Unable to find valid default animations", "FATAL")

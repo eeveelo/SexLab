@@ -149,10 +149,10 @@ endFunction
 float[] function GetPositionOffsets(int position, int stage)
 	int i = DataIndex(4, position, stage, 0)
 	float[] off = new float[4]
-	off[0] = GetOffset(i)
-	off[1] = GetOffset((i + 1))
-	off[2] = GetOffset((i + 2))
-	off[3] = GetOffset((i + 3))
+	off[0] = GetOffset(i) + StorageUtil.FloatListGet(Storage, Key("Adjustments"), i)
+	off[1] = GetOffset((i + 1)) + StorageUtil.FloatListGet(Storage, Key("Adjustments"), (i + 1))
+	off[2] = GetOffset((i + 2)) + StorageUtil.FloatListGet(Storage, Key("Adjustments"), (i + 2))
+	off[3] = GetOffset((i + 3)) + StorageUtil.FloatListGet(Storage, Key("Adjustments"), (i + 3))
 	return off
 endFunction
 
@@ -161,70 +161,61 @@ endFunction
 ;\-----------------------------------------------/;
 
 function SetAdjustment(int position, int stage, int slot, float to)
-	; ; Init adjustments
-	; if StorageUtil.FloatListCount(Storage, Name) < 1
-	; 	int i = StorageUtil.FloatListCount(Storage, Key("Offsets"))
-	; 	while i > StorageUtil.FloatListCount(Storage, Name)
-	; 		StorageUtil.FloatListAdd(Storage, Name, 0.0)
-	; 	endWhile
-	; endIf
-	; ; Set adjustment at index
-	; StorageUtil.FloatListSet(Storage, Name, DataIndex(4, position, stage, slot), to)
+	; Init adjustments
+	if StorageUtil.FloatListCount(Storage, Key("Adjustments")) < 1
+		int i = offsets.Length
+		while i > StorageUtil.FloatListCount(Storage, Key("Adjustments"))
+			StorageUtil.FloatListAdd(Storage, Key("Adjustments"), 0.0)
+		endWhile
+	endIf
+	; Set adjustment at index
+	StorageUtil.FloatListSet(Storage, Key("Adjustments"), DataIndex(4, position, stage, slot), to)
 endFunction
 
 float function GetAdjustment(int position, int stage, int slot)
-	return StorageUtil.FloatListGet(Storage, Name, DataIndex(4, position, stage, slot))
+	return StorageUtil.FloatListGet(Storage, Key("Adjustments"), DataIndex(4, position, stage, slot))
 endFunction
 
-function UpdateOffset(int position, int stage, int slot, float adjust)
+function UpdateAdjustment(int position, int stage, int slot, float adjust)
 	SetAdjustment(position, stage, slot, (GetAdjustment(position, stage, slot) + adjust))
 endFunction
 
-function UpdateAllOffsets(int position, int slot, float adjust)
+function UpdateAdjustmentAll(int position, int slot, float adjust)
 	int stage = stages
 	while stage
-		UpdateOffset(position, stage, slot, adjust)
+		UpdateAdjustment(position, stage, slot, adjust)
 		stage -= 1
 	endWhile
 endFunction
 
-float[] function UpdateForward(int position, int stage, float adjust, bool adjuststage = false)
-	; if Exists("UpdateForward", position, stage)
-		if adjuststage
-			UpdateOffset(position, stage, 0, adjust)
-			CacheForwards(stage)
-		else
-			UpdateAllOffsets(position, 0, adjust)
-			CacheAllForwards()
-		endIf
-	; endIf
-	return GetPositionOffsets(position, stage)
+function UpdateForward(int position, int stage, float adjust, bool adjuststage = false)
+	if adjuststage
+		UpdateAdjustment(position, stage, 0, adjust)
+		CacheForwards(stage)
+	else
+		UpdateAdjustmentAll(position, 0, adjust)
+		CacheAllForwards()
+	endIf
 endFunction
 
-float[] function UpdateSide(int position, int stage, float adjust, bool adjuststage = false)
-	; if Exists("UpdateSide", position, stage)
-		if adjuststage
-			UpdateOffset(position, stage, 1, adjust)
-		else
-			UpdateAllOffsets(position, 1, adjust)
-		endIf
-	; endIf
-	return GetPositionOffsets(position, stage)
+function UpdateSide(int position, int stage, float adjust, bool adjuststage = false)
+	if adjuststage
+		UpdateAdjustment(position, stage, 1, adjust)
+	else
+		UpdateAdjustmentAll(position, 1, adjust)
+	endIf
 endFunction
 
-float[] function UpdateUp(int position, int stage, float adjust, bool adjuststage = false)
-	; if Exists("UpdateUp", position, stage)
-		if adjuststage
-			UpdateOffset(position, stage, 2, adjust)
-		else
-			UpdateAllOffsets(position, 2, adjust)
-		endIf
-	; endIf
-	return GetPositionOffsets(position, stage)
+function UpdateUp(int position, int stage, float adjust, bool adjuststage = false)
+	if adjuststage
+		UpdateAdjustment(position, stage, 2, adjust)
+	else
+		UpdateAdjustmentAll(position, 2, adjust)
+	endIf
 endFunction
 
 function RestoreOffsets()
-	StorageUtil.FloatListClear(Storage, Name)
+	StorageUtil.FloatListClear(Storage,  Key("Adjustments"))
 endFunction
 
 ;/-----------------------------------------------\;

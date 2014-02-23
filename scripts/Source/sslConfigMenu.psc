@@ -18,6 +18,7 @@ event OnConfigInit()
 	SetupSystem()
 	; Init Stats
 	; Stats._Setup()
+	SetDefaults()
 endEvent
 
 event OnGameReload()

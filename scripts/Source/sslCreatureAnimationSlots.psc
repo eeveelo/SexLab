@@ -4,6 +4,16 @@ scriptname sslCreatureAnimationSlots extends sslAnimationSlots
 ; --- Creature aniamtion support                      --- ;
 ; ------------------------------------------------------- ;
 
+sslBaseAnimation[] function GetByRace(int ActorCount, Race CreatureRace)
+	bool[] Valid = sslUtility.BoolArray(Slotted)
+	int i = Slotted
+	while i
+		i -= 1
+		Valid[i] = Slots[i].Enabled && ActorCount == Slots.PositionCount && Slots[i].HasRace(CreatureRace)
+	endWhile
+	return GetList(valid)
+endFunction
+
 bool function HasRace(Race CreatureRace)
 	return StorageUtil.GetIntValue(CreatureRace, "SexLab.HasCreature") == 1
 endFunction
@@ -11,6 +21,10 @@ endFunction
 function AddRace(Race CreatureRace)
 	StorageUtil.SetIntValue(CreatureRace, "SexLab.HasCreature", 1)
 	StorageUtil.FormListAdd(self, "CreatureTypes", CreatureRace, false)
+endFunction
+
+bool function AllowedCreature(Race CreatureRace)
+	return  Config.bAllowCreatures && StorageUtil.GetIntValue(CreatureRace, "SexLab.HasCreature") == 1
 endFunction
 
 ; ------------------------------------------------------- ;

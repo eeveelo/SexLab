@@ -443,7 +443,7 @@ int function ValidateActor(Actor ActorRef)
 		return -15
 	endIf
 	; TODO: Creature checking
-	if ActorRef != PlayerRef && !ActorRef.HasKeyword(ActorTypeNPC) ;&& !AnimLib.AllowedCreature(ActorRace)
+	if ActorRef != PlayerRef && !ActorRef.HasKeyword(ActorTypeNPC) && !CreatureSlots.AllowedCreature(ActorRef.GetLeveledActorBase().GetRace())
 		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are a creature that is currently not supported ("+ActorRef.GetLeveledActorBase().GetName()+")")
 		return -16
 	endIf

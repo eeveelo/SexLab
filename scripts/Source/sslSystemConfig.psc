@@ -189,7 +189,7 @@ function SetDefaults()
 	fAutoSUCSM = 5.0
 
 	bRestrictAggressive = true
-	bAllowCreatures = false
+	bAllowCreatures = true
 
 	; Config
 	bDisablePlayer = false
@@ -201,7 +201,7 @@ function SetDefaults()
 	bUseCum = true
 	bAllowFFCum = false
 	fCumTimer = 120.0
-	bUseStrapons = true
+bUseStrapons = true
 	bReDressVictim = true
 	bRagdollEnd = false
 	bUseMaleNudeSuit = false

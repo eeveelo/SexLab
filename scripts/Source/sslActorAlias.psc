@@ -95,6 +95,9 @@ bool function PrepareAlias(Actor ProspectRef, bool MakeVictim = false, sslBaseVo
 		Thread.VictimRef = ActorRef
 		Thread.IsAggressive = true
 	endIf
+	if IsCreature
+		Thread.CreatureRef = BaseRef.GetRace()
+	endIf
 	SetVoice(UseVoice, ForceSilence)
 	Thread.Log("Slotted '"+ActorName+"'", self)
 	GoToState("")
@@ -400,6 +403,9 @@ state Reset
 		if !IsCreature
 			int[] Genders = Thread.Genders
 			Stats.AddSex(ActorRef, Thread.TotalTime, Thread.HasPlayer, Genders[0], Genders[1], Genders[2])
+			Stats.AdjustSkill(ActorRef, "Vaginal", (Animation.HasTag("Vaginal") as int))
+			Stats.AdjustSkill(ActorRef, "Oral", (Animation.HasTag("Oral") as int))
+			Stats.AdjustSkill(ActorRef, "Anal", (Animation.HasTag("Anal") as int))
 		endIf
 		; Reset alias
 		Initialize()
