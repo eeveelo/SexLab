@@ -11,8 +11,9 @@ int Content
 ; Storage arrays
 int[] positions ; = gender, cum
 int[] flags ; = silent (bool), openmouth (bool), strapon (bool), schlong offset (int)
-float[] offsets ; = forward, side, up, rotate
+float[] Offsets ; = forward, side, up, rotate
 float[] timers
+float[] CenterAdjust
 string[] animations
 
 ; StorageUtil legend
@@ -70,38 +71,39 @@ form[] property CreatureRaces hidden
 endProperty
 
 ;/-----------------------------------------------\;
-;|	Animation Offsets                            |;
+;|	Animation Events                             |;
 ;\-----------------------------------------------/;
 
-function CacheForwards(int stage)
-	; Get forward offsets of all positions + find highest/lowest position
-	; float adjuster
-	; float[] forwards = new float[5]
-	; int i = Actors
-	; while i
-	; 	i -= 1
-	; 	forwards[i] = GetOffset(i, stage, 0)
-	; 	if Math.Abs(forwards[i]) > Math.Abs(adjuster)
-	; 		adjuster = forwards[i]
-	; 	endIf
-	; endWhile
-	; ; Get signed half of highest/lowest offset
-	; adjuster *= -0.5
-	; ; Cache forward offset adjusted by half of highest denomination
-	; i = Actors
-	; while i
-	; 	i -= 1
-	; 	forwards[i] = (forwards[i] + adjuster)
-	; 	StorageUtil.FloatListSet(Storage, Key("Forwards"), DataIndex(1, i, stage, 0), forwards[i])
-	; endWhile
+string[] function FetchPosition(int position)
+	if position > Actors || position < 0
+		_Log("Unknown position, '"+stage+"' given", "FetchPosition")
+		return none
+	endIf
+	string[] anims = sslUtility.StringArray(Stages)
+	int stage = 0
+	while stage <= Stages
+		anims[stage] = FetchPositionStage(position, (stage + 1))
+		stage += 1
+	endWhile
+	return anims
 endFunction
 
-function CacheAllForwards()
-	; int stage = stages
-	; while stage
-	; 	CacheForwards(stage)
-	; 	stage -= 1
-	; endWhile
+string function FetchPositionStage(int position, int stage)
+	return animations[((position * Stages) + (stage - 1))]
+endFunction
+
+string[] function FetchStage(int stage)
+	if stage > Stages
+		_Log("Unknown stage, '"+stage+"' given", "FetchStage")
+		return none
+	endIf
+	string[] anims = sslUtility.StringArray(Actors)
+	int position = 0
+	while position < Actors
+		anims[position] = FetchPositionStage(position, stage)
+		position += 1
+	endWhile
+	return anims
 endFunction
 
 ;/-----------------------------------------------\;
@@ -109,11 +111,7 @@ endFunction
 ;\-----------------------------------------------/;
 
 int function DataIndex(int slots, int position, int stage, int slot)
-	return ( position * (stages * slots) ) + ( (stage - 1) * slots ) + slot
-endFunction
-
-float function GetOffset(int i)
-	return offsets[i] + StorageUtil.FloatListGet(Storage, Name, i)
+	return ( position * (Stages * slots) ) + ( (stage - 1) * slots ) + slot
 endFunction
 
 int function AccessFlag(int position, int stage, int slot)
@@ -137,121 +135,90 @@ endFunction
 
 int[] function GetPositionFlags(int position, int stage)
 	int i = DataIndex(4, position, stage, 0)
-	int[] output = new int[5]
-	output[0] = flags[i]
-	output[1] = flags[(i + 1)]
-	output[2] = flags[(i + 2)]
-	output[3] = flags[(i + 3)]
-	output[4] = GetGender(position)
-	return output
+	int[] Output = new int[5]
+	Output[0] = flags[i]
+	Output[1] = flags[(i + 1)]
+	Output[2] = flags[(i + 2)]
+	Output[3] = flags[(i + 3)]
+	Output[4] = GetGender(position)
+	return Output
 endFunction
 
-float[] function GetPositionOffsets(int position, int stage)
-	int i = DataIndex(4, position, stage, 0)
-	float[] off = new float[4]
-	off[0] = GetOffset(i) + StorageUtil.FloatListGet(Storage, Key("Adjustments"), i)
-	off[1] = GetOffset((i + 1)) + StorageUtil.FloatListGet(Storage, Key("Adjustments"), (i + 1))
-	off[2] = GetOffset((i + 2)) + StorageUtil.FloatListGet(Storage, Key("Adjustments"), (i + 2))
-	off[3] = GetOffset((i + 3)) + StorageUtil.FloatListGet(Storage, Key("Adjustments"), (i + 3))
-	return off
+float[] function GetPositionOffsets(string AdjustKey, int Position, int Stage)
+	int i = DataIndex(4, Position, Stage, 0)
+	; Get default offsets
+	float[] Output = new float[4]
+	Output[0] = Offsets[i] + CenterAdjust[(Stage - 1)] ; Forward
+	Output[1] = Offsets[(i + 1)] ; Side
+	Output[2] = Offsets[(i + 2)] ; Up
+	Output[3] = Offsets[(i + 3)] ; Rot
+	; Apply adjustments
+	if StorageUtil.FloatListCount(Storage, AdjustKey) > i
+		Output[0] = Output[0] + StorageUtil.FloatListGet(Storage, AdjustKey, i)
+		Output[1] = Output[1] + StorageUtil.FloatListGet(Storage, AdjustKey, (i + 1))
+		Output[2] = Output[2] + StorageUtil.FloatListGet(Storage, AdjustKey, (i + 2))
+	endIf
+	return Output
 endFunction
 
 ;/-----------------------------------------------\;
 ;|	Update Offsets                               |;
 ;\-----------------------------------------------/;
 
-function SetAdjustment(int position, int stage, int slot, float to)
+function SetAdjustment(string AdjustKey, int Position, int Stage, int Slot, float Adjustment)
 	; Init adjustments
-	if StorageUtil.FloatListCount(Storage, Key("Adjustments")) < 1
-		int i = offsets.Length
-		while i > StorageUtil.FloatListCount(Storage, Key("Adjustments"))
-			StorageUtil.FloatListAdd(Storage, Key("Adjustments"), 0.0)
+	if StorageUtil.FloatListCount(Storage, AdjustKey) < 1
+		int i = Offsets.Length
+		while i > StorageUtil.FloatListCount(Storage, AdjustKey)
+			StorageUtil.FloatListAdd(Storage, AdjustKey, 0.0)
 		endWhile
 	endIf
 	; Set adjustment at index
-	StorageUtil.FloatListSet(Storage, Key("Adjustments"), DataIndex(4, position, stage, slot), to)
+	StorageUtil.FloatListSet(Storage, AdjustKey, DataIndex(4, Position, Stage, Slot), Adjustment)
 endFunction
 
-float function GetAdjustment(int position, int stage, int slot)
-	return StorageUtil.FloatListGet(Storage, Key("Adjustments"), DataIndex(4, position, stage, slot))
+float function GetAdjustment(string AdjustKey, int Position, int Stage, int Slot)
+	return StorageUtil.FloatListGet(Storage, AdjustKey, DataIndex(4, Position, Stage, Slot))
 endFunction
 
-function UpdateAdjustment(int position, int stage, int slot, float adjust)
-	SetAdjustment(position, stage, slot, (GetAdjustment(position, stage, slot) + adjust))
+function UpdateAdjustment(string AdjustKey, int Position, int Stage, int Slot, float AdjustBy)
+	SetAdjustment(AdjustKey, Position, Stage, Slot, (GetAdjustment(AdjustKey, Position, Stage, Slot) + AdjustBy))
 endFunction
 
-function UpdateAdjustmentAll(int position, int slot, float adjust)
-	int stage = stages
-	while stage
-		UpdateAdjustment(position, stage, slot, adjust)
-		stage -= 1
+function UpdateAdjustmentAll(string AdjustKey, int Position, int Slot, float AdjustBy)
+	int Stage = Stages
+	while Stage
+		SetAdjustment(AdjustKey, Position, Stage, Slot, (GetAdjustment(AdjustKey, Position, Stage, Slot) + AdjustBy))
+		Stage -= 1
 	endWhile
 endFunction
 
-function UpdateForward(int position, int stage, float adjust, bool adjuststage = false)
-	if adjuststage
-		UpdateAdjustment(position, stage, 0, adjust)
-		CacheForwards(stage)
+function AdjustForward(string AdjustKey, int Position, int Stage, float AdjustBy, bool AdjustStage = false)
+	if AdjustStage
+		UpdateAdjustment(AdjustKey, Position, Stage, 0, AdjustBy)
 	else
-		UpdateAdjustmentAll(position, 0, adjust)
-		CacheAllForwards()
+		UpdateAdjustmentAll(AdjustKey, Position, 0, AdjustBy)
 	endIf
 endFunction
 
-function UpdateSide(int position, int stage, float adjust, bool adjuststage = false)
-	if adjuststage
-		UpdateAdjustment(position, stage, 1, adjust)
+function AdjustSideways(string AdjustKey, int Position, int Stage, float AdjustBy, bool AdjustStage = false)
+	if AdjustStage
+		UpdateAdjustment(AdjustKey, Position, Stage, 1, AdjustBy)
 	else
-		UpdateAdjustmentAll(position, 1, adjust)
+		UpdateAdjustmentAll(AdjustKey, Position, 1, AdjustBy)
 	endIf
 endFunction
 
-function UpdateUp(int position, int stage, float adjust, bool adjuststage = false)
-	if adjuststage
-		UpdateAdjustment(position, stage, 2, adjust)
+function AdjustUpward(string AdjustKey, int Position, int Stage, float AdjustBy, bool AdjustStage = false)
+	if AdjustStage
+		UpdateAdjustment(AdjustKey, Position, Stage, 2, AdjustBy)
 	else
-		UpdateAdjustmentAll(position, 2, adjust)
+		UpdateAdjustmentAll(AdjustKey, Position, 2, AdjustBy)
 	endIf
 endFunction
 
-function RestoreOffsets()
-	StorageUtil.FloatListClear(Storage,  Key("Adjustments"))
-endFunction
-
-;/-----------------------------------------------\;
-;|	Animation Events                             |;
-;\-----------------------------------------------/;
-
-string[] function FetchPosition(int position)
-	if position > Actors || position < 0
-		_Log("Unknown position, '"+stage+"' given", "FetchPosition")
-		return none
-	endIf
-	string[] anims = sslUtility.StringArray(stages)
-	int stage = 0
-	while stage <= stages
-		anims[stage] = FetchPositionStage(position, (stage + 1))
-		stage += 1
-	endWhile
-	return anims
-endFunction
-
-string function FetchPositionStage(int position, int stage)
-	return animations[((position * stages) + (stage - 1))]
-endFunction
-
-string[] function FetchStage(int stage)
-	if stage > stages
-		_Log("Unknown stage, '"+stage+"' given", "FetchStage")
-		return none
-	endIf
-	string[] anims = sslUtility.StringArray(Actors)
-	int position = 0
-	while position < Actors
-		anims[position] = FetchPositionStage(position, stage)
-		position += 1
-	endWhile
-	return anims
+function RestoreOffsets(string AdjustKey)
+	StorageUtil.FloatListClear(Storage, AdjustKey)
 endFunction
 
 ;/-----------------------------------------------\;
@@ -376,12 +343,50 @@ function Save(int[] posData, string[] animData, float[] offsetData, int[] flagDa
 	; Update config data
 	positions = posData
 	animations = animData
-	offsets = offsetData
+	Offsets = offsetData
 	flags = flagData
 	Actors = (posData.Length / 2)
 	Stages = (animData.Length / Actors)
-	; Cache forward adjustments
-	CacheAllForwards()
+	; Create and add gender tag
+	string GenderTag
+	int i
+	while i < Actors
+		int gender = AccessPosition(i, 0)
+		if gender == 0
+			GenderTag += "M"
+		elseIf gender == 1
+			GenderTag += "F"
+		elseIf gender == 2
+			GenderTag += "C"
+		endIf
+		i += 1
+	endWhile
+	AddTag(GenderTag)
+	; Init forward offset list
+	CenterAdjust = sslUtility.FloatArray(Stages)
+	if Actors > 1
+		int Stage = Stages
+		while Stage
+			CenterAdjust[(Stage - 1)] = CalcCenterAdjuster(Stage)
+			Stage -= 1
+		endWhile
+	endIf
+endFunction
+
+float function CalcCenterAdjuster(int Stage)
+	; Get forward Offsets of all positions + find highest/lowest position
+	float Adjuster
+	int i = Actors
+	while i
+		i -= 1
+		float Forward = Offsets[DataIndex(4, i, Stage, 0)]
+		if Math.Abs(Forward) > Math.Abs(Adjuster)
+			Adjuster = Forward
+		endIf
+	endWhile
+	; Get signed half of highest/lowest offset
+	Adjuster *= -0.5
+	return Adjuster
 endFunction
 
 ;/-----------------------------------------------\;

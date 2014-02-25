@@ -202,22 +202,23 @@ state Animating
 		; Sync new positions
 		RealignActors()
 		AdjustChange(backwards)
+		UpdateAdjustKey()
 		SendThreadEvent("PositionChange")
 	endFunction
 
-	function AdjustForward(bool backwards = false, bool adjuststage = false)
-		Animation.UpdateForward(AdjustPos, stage, sslUtility.SignFloat(backwards, 1.0), adjuststage)
-		RealignActors()
+	function AdjustForward(bool backwards = false, bool adjustStage = false)
+		Animation.AdjustForward(AdjustKey, AdjustPos, Stage, sslUtility.SignFloat(backwards, 1.0), adjustStage)
+		PositionAlias(AdjustPos).UpdateOffsets()
 	endFunction
 
-	function AdjustSideways(bool backwards = false, bool adjuststage = false)
-		Animation.UpdateSide(AdjustPos, stage, sslUtility.SignFloat(backwards, 1.0), adjuststage)
-		RealignActors()
+	function AdjustSideways(bool backwards = false, bool adjustStage = false)
+		Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, sslUtility.SignFloat(backwards, 1.0), adjustStage)
+		PositionAlias(AdjustPos).UpdateOffsets()
 	endFunction
 
-	function AdjustUpward(bool backwards = false, bool adjuststage = false)
-		Animation.UpdateUp(AdjustPos, stage, sslUtility.SignFloat(backwards, 1.0), adjuststage)
-		RealignActors()
+	function AdjustUpward(bool backwards = false, bool adjustStage = false)
+		Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, sslUtility.SignFloat(backwards, 1.0), adjustStage)
+		PositionAlias(AdjustPos).UpdateOffsets()
 	endFunction
 
 	function RotateScene(bool backwards = false)
@@ -236,7 +237,7 @@ state Animating
 	endFunction
 
 	function RestoreOffsets()
-		Animation.RestoreOffsets()
+		Animation.RestoreOffsets(AdjustKey)
 		RealignActors()
 	endFunction
 
@@ -286,6 +287,7 @@ function SetAnimation(int AnimID = -1)
 	endIf
 	Animation = Animations[aid]
 	StageCount = Animation.StageCount
+	UpdateAdjustKey()
 	; Print name of animation to console
 	if HasPlayer
 		MiscUtil.PrintConsole("Playing Animation: " + Animation.Name)

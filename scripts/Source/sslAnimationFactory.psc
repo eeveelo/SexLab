@@ -50,7 +50,7 @@ function RegisterAnimation(string Registrar)
 	endIf
 	; Wait for factory to be free
 	while Locked || Animation != none
-		Utility.WaitMenuMode(0.10)
+		Utility.WaitMenuMode(0.20)
 	endWhile
 	; Get free animation slot
 	Locked = true

@@ -22,7 +22,7 @@ function RegisterVoice(string Registrar)
 	endIf
 	; Wait for factory to be free
 	while Locked || Voice != none
-		Utility.WaitMenuMode(0.10)
+		Utility.WaitMenuMode(0.20)
 	endWhile
 	Locked = true
 	; Get free voice slot

@@ -14,12 +14,12 @@ event OnEffectStart(actor TargetRef, actor CasterRef)
 
 	SexLab = GetAPI()
 
-	Actor[] Positions = SexLab.MakeActorArray(SexLab.FindAvailableActor(TargetRef), CasterRef)
+	Actor[] Positions = SexLab.MakeActorArray(SexLab.FindAvailableActor(TargetRef), SexLab.PlayerRef)
 	PrintConsole("Unsorted: "+Positions)
 	Positions = SexLab.SortActors(Positions)
 	PrintConsole("Sorted: "+Positions)
 
-	SexLab.QuickStart(Positions[0], Positions[1], VictimRef = TargetRef, Hook = "Test").Log("Started Test!")
+	SexLab.QuickStart(Positions[0], Positions[1]).Log("Started Test!")
 
 	; Thread.Log(Thread.Positions)
 	; Thread.Initialize()

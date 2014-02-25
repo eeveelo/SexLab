@@ -11,6 +11,7 @@ endProperty
 Actor[] property Positions auto hidden
 Actor property VictimRef auto hidden
 int property ActorCount auto hidden
+string property AdjustKey auto hidden
 sslActorAlias[] property ActorAlias auto hidden
 
 ; Thread status
@@ -214,6 +215,7 @@ state Making
 		; ------------------------- ;
 		; --  Start Controller   -- ;
 		; ------------------------- ;
+
 		sslThreadController Controller = PrimeThread()
 		if !Controller
 			Log("StartThread() - Failed to prime thread for unknown reasons!", "FATAL")
@@ -228,8 +230,6 @@ state Making
 	endEvent
 
 endState
-
-
 
 ; ------------------------------------------------------- ;
 ; --- Actor Setup                                     --- ;
@@ -453,7 +453,14 @@ endFunction
 ; ------------------------------------------------------- ;
 
 int function FindSlot(Actor ActorRef)
-	return StorageUtil.GetIntValue(ActorRef, "SexLab.Position", -1)
+	int i
+	while i < 5
+		if ActorAlias[i].ActorRef == ActorRef
+			return i
+		endIf
+		i += 1
+	endWhile
+	return -1
 endFunction
 
 sslActorAlias function ActorAlias(Actor ActorRef)
@@ -502,6 +509,8 @@ function Initialize()
 	BedFlag      = 0
 	ActorCount   = 0
 	Genders      = new int[3]
+	; Strings
+	AdjustKey    = ""
 	; Storage
 	Actor[] aDel
 	float[] fDel1
@@ -595,6 +604,28 @@ int property tid hidden
 		return thread_id
 	endFunction
 endProperty
+
+function UpdateAdjustKey()
+	AdjustKey = Animation.Key("Adjust")
+	if ActorCount > 1 && Config.bRaceAdjustments
+		int i
+		while i < ActorCount
+			ActorBase BaseRef = Positions[i].GetLeveledActorBase()
+			AdjustKey += "."+MiscUtil.GetRaceEditorID(BaseRef.GetRace())
+			if Genders[2] > 0 && PositionAlias(i).Gender == 2
+				; No gender preference for creatures
+			elseIf BaseRef.GetSex() == 1
+				AdjustKey += "F"
+			else
+				AdjustKey += "M"
+			endIf
+			i += 1
+		endWhile
+	else
+		AdjustKey += ".Global"
+	endIf
+	MiscUtil.PrintConsole(AdjustKey)
+endFunction
 
 function _SetupThread(int id)
 	thread_id = id

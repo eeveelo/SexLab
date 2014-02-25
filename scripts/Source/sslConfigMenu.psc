@@ -27,7 +27,7 @@ event OnGameReload()
 	AudioVoice.SetVolume(Config.fVoiceVolume)
 	AudioSFX.SetVolume(Config.fSFXVolume)
 	; Debug reset
-	; SetupSystem()
+	AnimSlots.Setup()
 endEvent
 
 ; Framework

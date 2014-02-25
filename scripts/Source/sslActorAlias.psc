@@ -185,7 +185,7 @@ function UnlockActor()
 	; Enable movement
 	if IsPlayer
 		Thread.DisableHotkeys()
-		Game.EnablePlayerControls(false, false, false, false, false, false, true, false, 0)
+		Game.EnablePlayerControls()
 		Game.SetPlayerAIDriven(false)
 	else
 		; ActorRef.SetRestrained(false)
@@ -296,7 +296,7 @@ state Animating
 		Stage     = ToStage
 		Position  = Thread.Positions.Find(ActorRef)
 		Flags     = Animation.GetPositionFlags(Position, Stage)
-		Offsets   = Animation.GetPositionOffsets(Position, Stage)
+		Offsets   = Animation.GetPositionOffsets(Thread.AdjustKey, Position, Stage)
 		; Update positioning marker
 		UpdateLocation(force)
 		; Voice loop delay
@@ -325,6 +325,11 @@ state Animating
 		if MalePosition
 			Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
 		endIf
+	endFunction
+
+	function UpdateOffsets()
+		Offsets = Animation.GetPositionOffsets(Thread.AdjustKey, Position, Stage)
+		UpdateLocation(true)
 	endFunction
 
 	function UpdateLocation(bool force = false)
@@ -527,6 +532,8 @@ function ClearAlias()
 	Initialize()
 endFunction
 
+
+
 ; event OnInit()
 ; 	Thread = (GetOwningQuest() as sslThreadController)
 ; 	Lib = (Quest.GetQuest("SexLabQuestFramework") as sslActorLibrary)
@@ -550,6 +557,8 @@ function StartAnimating()
 endFunction
 ; Animating
 function SyncThread(sslBaseAnimation ToAnimation, int ToStage, bool force = false)
+endFunction
+function UpdateOffsets()
 endFunction
 function UpdateLocation(bool force = false)
 endFunction

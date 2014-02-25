@@ -59,6 +59,7 @@ float property fSFXVolume auto hidden
 bool property bAutoAdvance auto hidden
 bool property bForeplayStage auto hidden
 bool property bOrgasmEffects auto hidden
+bool property bRaceAdjustments auto hidden
 string property sNPCBed auto hidden
 float[] property fStageTimer auto hidden
 float[] property fStageTimerLeadIn auto hidden
@@ -293,6 +294,7 @@ bUseStrapons = true
 	bAutoAdvance = true
 	bForeplayStage = false
 	bOrgasmEffects = false
+	bRaceAdjustments = true
 	sNPCBed = "$SSL_Never"
 	; Timers
 	fStageTimer = new float[5]
