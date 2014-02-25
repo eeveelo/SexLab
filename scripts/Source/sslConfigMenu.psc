@@ -129,10 +129,6 @@ function SetDefaults()
 	FindStrapons()
 endFunction
 
-event OnPageReset(string page)
-	LoadCustomContent("SexLab/logo.dds", 184, 31)
-endEvent
-
 function SetupSystem()
 	; Wait until out of menus to setup
 	while Utility.IsInMenuMode() || !PlayerRef.Is3DLoaded()
@@ -164,6 +160,345 @@ function SetupSystem()
 	; Finished
 	Debug.Notification("$SSL_SexLabUpdated")
 endFunction
+
+event OnPageReset(string page)
+	int i
+
+	; Logo
+	if page == ""
+		LoadCustomContent("SexLab/logo.dds", 184, 31)
+		return
+	endIf
+	UnloadCustomContent()
+
+	; Animation Settings
+	if page == "$SSL_AnimationSettings"
+		SetCursorFillMode(TOP_TO_BOTTOM)
+		AddHeaderOption("$SSL_PlayerSettings")
+		AddToggleOptionST("AutoAdvance","$SSL_AutoAdvanceStages", Config.bAutoAdvance)
+		AddToggleOptionST("DisableVictim","$SSL_DisableVictimControls", Config.bDisablePlayer)
+		AddToggleOptionST("AutomaticTFC","$SSL_AutomaticTFC", Config.bAutoTFC)
+		AddSliderOptionST("AutomaticSUCSM","$SSL_AutomaticSUCSM", Config.fAutoSUCSM, "{0}")
+
+		AddHeaderOption("$SSL_ExtraEffects")
+		AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", Config.bScaleActors)
+		AddToggleOptionST("ReDressVictim","$SSL_VictimsRedress", Config.bReDressVictim)
+		AddToggleOptionST("UseCum","$SSL_ApplyCumEffects", Config.bUseCum)
+		AddToggleOptionST("AllowFemaleFemaleCum","$SSL_AllowFemaleFemaleCum", Config.bAllowFFCum)
+		AddSliderOptionST("CumEffectTimer","$SSL_CumEffectTimer", Config.fCumTimer, "$SSL_Seconds")
+		AddToggleOptionST("OrgasmEffects","$SSL_OrgasmEffects", Config.bOrgasmEffects)
+
+		SetCursorPosition(1)
+		AddHeaderOption("$SSL_AnimationHandling")
+		AddToggleOptionST("AllowCreatures","$SSL_AllowCreatures", Config.bAllowCreatures)
+		AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", Config.bRagdollEnd)
+		AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", Config.bForeplayStage)
+		AddToggleOptionST("RestrictAggressive","$SSL_RestrictAggressive", Config.bRestrictAggressive)
+		AddToggleOptionST("UndressAnimation","$SSL_UndressAnimation", Config.bUndressAnimation)
+		AddToggleOptionST("StraponsFemale","$SSL_FemalesUseStrapons", Config.bUseStrapons)
+		AddToggleOptionST("NudeSuitMales","$SSL_UseNudeSuitMales", Config.bUseMaleNudeSuit)
+		AddToggleOptionST("NudeSuitFemales","$SSL_UseNudeSuitFemales", Config.bUseFemaleNudeSuit)
+		AddTextOptionST("NPCBed","$SSL_NPCsUseBeds", Config.sNPCBed)
+
+	; Player Diary/Journal
+	elseIf page == "$SSL_SexDiary" || page == "$SSL_SexJournal"
+		SetCursorFillMode(TOP_TO_BOTTOM)
+
+		AddHeaderOption("$SSL_SexualExperience")
+		AddTextOption("$SSL_TimeSpentHavingSex", Stats.ParseTime(Stats.GetFloat(PlayerRef, "TimeSpent") as int))
+		AddTextOption("$SSL_TimeSinceLastSex", Stats.LastSexTimerString(PlayerRef))
+		AddTextOption("$SSL_MaleSexualPartners", Stats.GetInt(PlayerRef, "Males"))
+		AddTextOption("$SSL_FemaleSexualPartners", Stats.GetInt(PlayerRef, "Females"))
+		AddTextOption("$SSL_CreatureSexualPartners", Stats.GetInt(PlayerRef, "Creatures"))
+		AddTextOption("$SSL_TimesMasturbated", Stats.GetInt(PlayerRef, "Masturbation"))
+		AddTextOption("$SSL_VaginalExperience", Stats.GetInt(PlayerRef, "Vaginal"))
+		AddTextOption("$SSL_AnalExperience", Stats.GetInt(PlayerRef, "Anal"))
+		AddTextOption("$SSL_OralExperience", Stats.GetInt(PlayerRef, "Oral"))
+		AddTextOption("$SSL_TimesVictim", Stats.GetInt(PlayerRef, "Victim"))
+		AddTextOption("$SSL_TimesAggressive", Stats.GetInt(PlayerRef, "Aggressor"))
+
+		SetCursorPosition(1)
+		AddHeaderOption("$SSL_SexualStats")
+		AddTextOption("$SSL_Sexuality", Stats.GetSexualityTitle(PlayerRef))
+		AddTextOption("$SSL_SexualPurity", Stats.GetPureLevel(PlayerRef))
+		AddTextOption("$SSL_SexualPerversion", Stats.GetImpureLevel(PlayerRef))
+		AddTextOption("$SSL_VaginalProficiency", Stats.GetSkillTitle(PlayerRef, "Vaginal"))
+		AddTextOption("$SSL_AnalProficiency", Stats.GetSkillTitle(PlayerRef, "Anal"))
+		AddTextOption("$SSL_OralProficiency", Stats.GetSkillTitle(PlayerRef, "Oral"))
+		AddEmptyOption()
+	endIf
+
+endEvent
+
+state AutoAdvance
+	event OnSelectST()
+		Config.bAutoAdvance = !Config.bAutoAdvance
+		SetToggleOptionValueST(Config.bAutoAdvance)
+	endEvent
+	event OnDefaultST()
+		Config.bAutoAdvance = false
+		SetToggleOptionValueST(Config.bAutoAdvance)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoAutoAdvance")
+	endEvent
+endState
+state DisableVictim
+	event OnSelectST()
+		Config.bDisablePlayer = !Config.bDisablePlayer
+		SetToggleOptionValueST(Config.bDisablePlayer)
+	endEvent
+	event OnDefaultST()
+		Config.bDisablePlayer = false
+		SetToggleOptionValueST(Config.bDisablePlayer)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoDisablePlayer")
+	endEvent
+endState
+state AutomaticTFC
+	event OnSelectST()
+		Config.bAutoTFC = !Config.bAutoTFC
+		SetToggleOptionValueST(Config.bAutoTFC)
+	endEvent
+	event OnDefaultST()
+		Config.bAutoTFC = false
+		SetToggleOptionValueST(Config.bAutoTFC)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoAutomaticTFC")
+	endEvent
+endState
+state AutomaticSUCSM
+	event OnSliderOpenST()
+		SetSliderDialogStartValue(Config.fAutoSUCSM)
+		SetSliderDialogDefaultValue(3.0)
+		SetSliderDialogRange(1.0, 20.0)
+		SetSliderDialogInterval(1.0)
+	endEvent
+	event OnSliderAcceptST(float value)
+		Config.fAutoSUCSM = value
+		SetSliderOptionValueST(Config.fAutoSUCSM, "{0}")
+	endEvent
+	event OnDefaultST()
+		Config.fAutoSUCSM = 5.0
+		SetToggleOptionValueST(Config.fAutoSUCSM, "{0}")
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoAutomaticSUCSM")
+	endEvent
+endState
+
+state ScaleActors
+	event OnSelectST()
+		Config.bScaleActors = !Config.bScaleActors
+		SetToggleOptionValueST(Config.bScaleActors)
+	endEvent
+	event OnDefaultST()
+		Config.bScaleActors = true
+		SetToggleOptionValueST(Config.bScaleActors)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoScaleActors")
+	endEvent
+endState
+state ReDressVictim
+	event OnSelectST()
+		Config.bReDressVictim = !Config.bReDressVictim
+		SetToggleOptionValueST(Config.bReDressVictim)
+	endEvent
+	event OnDefaultST()
+		Config.bReDressVictim = true
+		SetToggleOptionValueST(Config.bReDressVictim)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoReDressVictim")
+	endEvent
+endState
+state UseCum
+	event OnSelectST()
+		Config.bUseCum = !Config.bUseCum
+		SetToggleOptionValueST(Config.bUseCum)
+	endEvent
+	event OnDefaultST()
+		Config.bUseCum = true
+		SetToggleOptionValueST(Config.bUseCum)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoUseCum")
+	endEvent
+endState
+state AllowFemaleFemaleCum
+	event OnSelectST()
+		Config.bAllowFFCum = !Config.bAllowFFCum
+		SetToggleOptionValueST(Config.bAllowFFCum)
+	endEvent
+	event OnDefaultST()
+		Config.bAllowFFCum = false
+		SetToggleOptionValueST(Config.bAllowFFCum)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoAllowFFCum")
+	endEvent
+endState
+state CumEffectTimer
+	event OnSliderOpenST()
+		SetSliderDialogStartValue(Config.fCumTimer)
+		SetSliderDialogDefaultValue(120.0)
+		SetSliderDialogRange(5.0, 900.0)
+		SetSliderDialogInterval(5.0)
+	endEvent
+	event OnSliderAcceptST(float value)
+		Config.fCumTimer = value
+		SetSliderOptionValueST(Config.fCumTimer, "$SSL_Seconds")
+	endEvent
+	event OnDefaultST()
+		Config.fCumTimer = 120.0
+		SetToggleOptionValueST(Config.fCumTimer, "$SSL_Seconds")
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoCumTimer")
+	endEvent
+endState
+state OrgasmEffects
+	event OnSelectST()
+		Config.bOrgasmEffects = !Config.bOrgasmEffects
+		SetToggleOptionValueST(Config.bOrgasmEffects)
+	endEvent
+	event OnDefaultST()
+		Config.bOrgasmEffects = true
+		SetToggleOptionValueST(Config.bOrgasmEffects)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoOrgasmEffects")
+	endEvent
+endState
+
+state AllowCreatures
+	event OnSelectST()
+		Config.bAllowCreatures = !Config.bAllowCreatures
+		SetToggleOptionValueST(Config.bAllowCreatures)
+	endEvent
+	event OnDefaultST()
+		Config.bAllowCreatures = false
+		SetToggleOptionValueST(Config.bAllowCreatures)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoAllowCreatures")
+	endEvent
+endState
+state RagdollEnd
+	event OnSelectST()
+		Config.bRagdollEnd = !Config.bRagdollEnd
+		SetToggleOptionValueST(Config.bRagdollEnd)
+	endEvent
+	event OnDefaultST()
+		Config.bRagdollEnd = false
+		SetToggleOptionValueST(Config.bRagdollEnd)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoRagdollEnd")
+	endEvent
+endState
+state ForeplayStage
+	event OnSelectST()
+		Config.bForeplayStage = !Config.bForeplayStage
+		SetToggleOptionValueST(Config.bForeplayStage)
+	endEvent
+	event OnDefaultST()
+		Config.bForeplayStage = true
+		SetToggleOptionValueST(Config.bForeplayStage)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoForeplayStage")
+	endEvent
+endState
+state RestrictAggressive
+	event OnSelectST()
+		Config.bRestrictAggressive = !Config.bRestrictAggressive
+		SetToggleOptionValueST(Config.bRestrictAggressive)
+	endEvent
+	event OnDefaultST()
+		Config.bRestrictAggressive = true
+		SetToggleOptionValueST(Config.bRestrictAggressive)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoRestrictAggressive")
+	endEvent
+endState
+state UndressAnimation
+	event OnSelectST()
+		Config.bUndressAnimation = !Config.bUndressAnimation
+		SetToggleOptionValueST(Config.bUndressAnimation)
+	endEvent
+	event OnDefaultST()
+		Config.bUndressAnimation = false
+		SetToggleOptionValueST(Config.bUndressAnimation)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoUndressAnimation")
+	endEvent
+endState
+state StraponsFemale
+	event OnSelectST()
+		Config.bUseStrapons = !Config.bUseStrapons
+		SetToggleOptionValueST(Config.bUseStrapons)
+	endEvent
+	event OnDefaultST()
+		Config.bUseStrapons = true
+		SetToggleOptionValueST(Config.bUseStrapons)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoUseStrapons")
+	endEvent
+endState
+state NudeSuitMales
+	event OnSelectST()
+		Config.bUseMaleNudeSuit = !Config.bUseMaleNudeSuit
+		SetToggleOptionValueST(Config.bUseMaleNudeSuit)
+	endEvent
+	event OnDefaultST()
+		Config.bUseMaleNudeSuit = false
+		SetToggleOptionValueST(Config.bUseMaleNudeSuit)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoMaleNudeSuit")
+	endEvent
+endState
+state NudeSuitFemales
+	event OnSelectST()
+		Config.bUseFemaleNudeSuit = !Config.bUseFemaleNudeSuit
+		SetToggleOptionValueST(Config.bUseFemaleNudeSuit)
+	endEvent
+	event OnDefaultST()
+		Config.bUseFemaleNudeSuit = false
+		SetToggleOptionValueST(Config.bUseFemaleNudeSuit)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoFemaleNudeSuit")
+	endEvent
+endState
+state NPCBed
+	event OnSelectST()
+		if Config.sNPCBed == "$SSL_Never"
+			Config.sNPCBed = "$SSL_Sometimes"
+		elseif Config.sNPCBed == "$SSL_Sometimes"
+			Config.sNPCBed = "$SSL_Always"
+		else
+			Config.sNPCBed = "$SSL_Never"
+		endIf
+		SetTextOptionValueST(Config.sNPCBed)
+	endEvent
+	event OnDefaultST()
+		Config.sNPCBed = "$SSL_Never"
+		SetTextOptionValueST(Config.sNPCBed)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoNPCBed")
+	endEvent
+endState
+
+
 
 function FindStrapons()
 	ActorLib.Strapons = new form[1]
