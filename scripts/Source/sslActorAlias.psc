@@ -390,6 +390,7 @@ state Reset
 		; Restore scale and voicetype
 		RestoreActorDefaults()
 		; Apply cum
+		; TODO: look into using SKSE Art objects to make cum effect use single spell
 		int CumID = Animation.GetCum(Position)
 		if !Thread.FastEnd && CumID > 0 && Config.bUseCum && (Thread.Males > 0 || Config.bAllowFFCum || Thread.HasCreature)
 			Lib.ApplyCum(ActorRef, CumID)

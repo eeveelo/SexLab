@@ -531,7 +531,7 @@ function Initialize()
 endFunction
 
 function Log(string Log, string Type = "NOTICE")
-	SexLabUtil.DebugLog(Log, Type, Config.DebugMode)
+	SexLabUtil.DebugLog(Log, "Thread["+thread_id+"] - "+Type, Config.DebugMode)
 	if Type == "FATAL"
 		Initialize()
 	endIf

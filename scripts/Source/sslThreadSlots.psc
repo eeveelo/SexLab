@@ -41,7 +41,7 @@ sslThreadController function GetActorController(Actor ActorRef)
 endFunction
 
 function Setup()
-	Slots = new sslThreadController[2]
+	Slots = new sslThreadController[15]
 	int i = Slots.Length
 	while i
 		i -= 1
