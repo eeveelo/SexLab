@@ -289,12 +289,12 @@ endFunction
 ; ;# BEGIN ANIMATION FUNCTIONS #
 ; ;#---------------------------#
 
-sslBaseAnimation[] function GetAnimationsByTags(int ActorCount, string Tags, string TagsSuppressed = "", bool RequireAll = true)
-	return AnimSlots.GetByTags(ActorCount, Tags, TagsSuppressed, RequireAll)
+sslBaseAnimation[] function GetAnimationsByTags(int ActorCount, string Tags, string TagSuppress = "", bool RequireAll = true)
+	return AnimSlots.GetByTags(ActorCount, Tags, TagSuppress, RequireAll)
 endFunction
 
-sslBaseAnimation[] function GetAnimationsByTag(int ActorCount, string Tag1, string Tag2 = "", string Tag3 = "", string TagsSuppressed = "", bool RequireAll = true)
-	return AnimSlots.GetByTags(ActorCount, sslUtility.MakeArgs(",", Tag1, Tag2, Tag3), TagsSuppressed, RequireAll)
+sslBaseAnimation[] function GetAnimationsByTag(int ActorCount, string Tag1, string Tag2 = "", string Tag3 = "", string TagSuppress = "", bool RequireAll = true)
+	return AnimSlots.GetByTags(ActorCount, sslUtility.MakeArgs(",", Tag1, Tag2, Tag3), TagSuppress, RequireAll)
 endFunction
 
 sslBaseAnimation[] function GetAnimationsByType(int ActorCount, int Males = -1, int Females = -1, int StageCount = -1, bool Aggressive = false, bool Sexual = true)
@@ -325,17 +325,21 @@ int function GetAnimationCount(bool IgnoreDisabled = true)
 	return AnimSlots.GetCount(IgnoreDisabled)
 endFunction
 
-; bool function AllowedCreature(Race creature)
-; 	return AnimLib.AllowedCreature(creature)
-; endFunction
+bool function AllowedCreature(Race CreatureRace)
+	return CreatureSlots.AllowedCreature(CreatureRace)
+endFunction
 
-; bool function AllowedCreatureCombination(Race creature, Race creature2)
-; 	return AnimLib.AllowedCreatureCombination(creature, creature2)
-; endFunction
+bool function AllowedCreatureCombination(Race CreatureRace, Race CreatureRace2)
+	return CreatureSlots.AllowedCreatureCombination(CreatureRace, CreatureRace2)
+endFunction
 
-; string function MakeAnimationGenderTag(actor[] Positions)
-; 	AnimLib.MakeGenderTag(Positions)
-; endFunction
+string function MakeAnimationGenderTag(Actor[] Positions)
+	return ActorLib.MakeGenderTag(Positions)
+endFunction
+
+string function GetGenderTag(int Females = 0, int Males = 0, int Creatures = 0)
+	return ActorLib.GetGenderTag(Females, Males, Creatures)
+endFunction
 
 ; ;#---------------------------#
 ; ;#  END ANIMATION FUNCTIONS  #
@@ -345,45 +349,46 @@ endFunction
 ; ;#   BEGIN VOICE FUNCTIONS   #
 ; ;#---------------------------#
 
-; sslBaseVoice function PickVoice(Actor ActorRef)
-; 	return VoiceLib.PickVoice(ActorRef)
-; endFunction
+sslBaseVoice function PickVoice(Actor ActorRef)
+	return VoiceSlots.PickVoice(ActorRef)
+endFunction
 
-; function SaveVoice(Actor a, sslBaseVoice saving)
-; 	VoiceLib.SaveVoice(a, saving)
-; endFunction
+; Alias of PickVoice()
+sslBaseVoice function GetVoice(Actor ActorRef)
+	return VoiceSlots.PickVoice(ActorRef)
+endFunction
 
-; function ForgetVoice(Actor ActorRef)
-; 	VoiceLib.ForgetVoice(ActorRef)
-; endFunction
+function SaveVoice(Actor ActorRef, sslBaseVoice Saving)
+	VoiceSlots.SaveVoice(ActorRef, Saving)
+endFunction
 
-; sslBaseVoice function GetVoice(Actor ActorRef)
-; 	return VoiceLib.GetVoice(ActorRef)
-; endFunction
+function ForgetVoice(Actor ActorRef)
+	VoiceSlots.ForgetVoice(ActorRef)
+endFunction
 
-; sslBaseVoice function GetVoiceByGender(int g)
-; 	return VoiceSlots.GetRandom(g)
-; endFunction
+sslBaseVoice function GetVoiceByGender(int Gender)
+	return VoiceSlots.GetRandom(Gender)
+endFunction
 
-; sslBaseVoice function GetVoiceByName(string findName)
-; 	return VoiceSlots.GetByName(findName)
-; endFunction
+sslBaseVoice function GetVoiceByName(string FindName)
+	return VoiceSlots.GetByName(FindName)
+endFunction
 
-; int function FindVoiceByName(string findName)
-; 	return VoiceSlots.FindByName(findName)
-; endFunction
+int function FindVoiceByName(string FindName)
+	return VoiceSlots.FindByName(FindName)
+endFunction
 
-; sslBaseVoice function GetVoiceByTag(string tag1, string tag2 = "", string tagSuppress = "", bool requireAll = true)
-; 	return VoiceSlots.GetByTag(tag1, tag2, tagSuppress, requireAll)
-; endFunction
+sslBaseVoice function GetVoiceBySlot(int slot)
+	return VoiceSlots.GetBySlot(slot)
+endFunction
 
-; sslBaseVoice function GetVoiceBySlot(int slot)
-; 	return VoiceSlots.GetBySlot(slot)
-; endFunction
+sslBaseVoice function GetVoiceByTags(string Tags, string TagSuppress = "", bool RequireAll = true)
+	return VoiceSlots.GetByTags(Tags, TagSuppress, RequireAll)
+endFunction
 
-; int function RegisterVoice(sslBaseVoice voice)
-; 	return -1
-; endFunction
+sslBaseVoice function GetVoiceByTag(string Tag1, string Tag2 = "", string TagSuppress = "", bool RequireAll = true)
+	return VoiceSlots.GetByTags(sslUtility.MakeArgs(",", Tag1, Tag2), TagSuppress, RequireAll)
+endFunction
 
 ; ;#---------------------------#
 ; ;#    END VOICE FUNCTIONS    #
@@ -713,7 +718,6 @@ endFunction
 
 function Initialize()
 	SystemEnabled = true
-
 	Config        = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
 	ActorLib      = Quest.GetQuest("SexLabQuestFramework") as sslActorLibrary
 	ThreadLib     = Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary
@@ -722,7 +726,6 @@ function Initialize()
 	AnimSlots     = Quest.GetQuest("SexLabQuestAnimations") as sslAnimationSlots
 	CreatureSlots = Quest.GetQuest("SexLabQuestCreatureAnimations") as sslCreatureAnimationSlots
 	VoiceSlots    = Quest.GetQuest("SexLabQuestRegistry") as sslVoiceSlots
-
 	Log("SexLab Initialized")
 endFunction
 

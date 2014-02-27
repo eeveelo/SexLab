@@ -24,16 +24,44 @@ sslBaseVoice function GetRandom(int Gender = 1)
 		List = "Voice.Male"
 	endIf
 	int Count = StorageUtil.StringListCount(self, List)
-	SexLabUtil.Log("GetRandom("+Gender+") - "+Count, List, "NOTICE", "trace,console")
+	; SexLabUtil.Log("GetRandom("+Gender+") - "+Count, List, "NOTICE", "trace,console")
 	if Count > 0
 		return GetByRegistrar(StorageUtil.StringListGet(self, List, Utility.RandomInt(0, (Count - 1))))
 	endIf
 	return none
 endFunction
 
-; ------------------------------------------------------- ;
-; --- Find single voice object                        --- ;
-; ------------------------------------------------------- ;
+sslBaseVoice function PickVoice(Actor ActorRef)
+	; Find if a saved voice exists and in what slot
+	int i = FindByRegistrar(StorageUtil.GetStringValue(ActorRef, "SexLab.SavedVoice"))
+	if i != -1
+		return Slots[i]
+	endIf
+	; Pick a random voice based on gender
+	sslBaseVoice Picked = GetRandom(ActorRef.GetLeveledActorBase().GetSex())
+	; Save the voice to NPC for reuse, if enabled
+	if Picked != none && Config.bNPCSaveVoice
+		SaveVoice(ActorRef, Picked)
+	endIf
+	return Picked
+endFunction
+
+sslBaseVoice function GetByTags(string Tags, string TagsSuppressed = "", bool RequireAll = true)
+	string[] Search = sslUtility.ArgString(Tags)
+	if Search.Length == 0
+		return none
+	endIf
+	string[] Suppress = sslUtility.ArgString(TagsSuppressed)
+	bool[] Valid = sslUtility.BoolArray(Slotted)
+	int i = Slotted
+	while i
+		i -= 1
+		Valid[i] = Slots[i].Enabled && (TagsSuppressed == "" || Slots[i].CheckTags(Suppress, false, true)) && Slots[i].CheckTags(Search, RequireAll)
+	endWhile
+	sslBaseVoice[] Found = GetList(valid)
+	int r = Utility.RandomInt(0, (Found.Length - 1))
+	return Found[r]
+endFunction
 
 sslBaseVoice function GetByRegistrar(string Registrar)
 	int i = FindByRegistrar(Registrar)
@@ -43,9 +71,57 @@ sslBaseVoice function GetByRegistrar(string Registrar)
 	return none
 endFunction
 
+int function FindByName(string FindName)
+	int i = Slotted
+	while i < Slotted
+		i -= 1
+		if Slots[i].Name == FindName
+			return i
+		endIf
+	endWhile
+	return -1
+endFunction
+
+sslBaseVoice function GetByName(string FindName)
+	return GetBySlot(FindByName(FindName))
+endFunction
+
+sslBaseVoice function GetBySlot(int index)
+	if index < 0 || index >= Slotted
+		return none
+	endIf
+	return Slots[index]
+endFunction
+
+function SaveVoice(Actor ActorRef, sslBaseVoice Saving)
+	StorageUtil.SetStringValue(ActorRef, "SexLab.SavedVoice", Saving.Registry)
+endFunction
+
+function ForgetVoice(Actor ActorRef)
+	StorageUtil.UnsetStringValue(ActorRef, "SexLab.SavedVoice")
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- System Use Only                                 --- ;
 ; ------------------------------------------------------- ;
+
+sslBaseVoice[] function GetList(bool[] Valid)
+	int i = sslUtility.CountTrue(Valid)
+	if i == 0
+		return none ; OR empty array?
+	endIf
+	string Found
+	sslBaseVoice[] Output = sslUtility.VoiceArray(i)
+	int pos = Valid.Find(true)
+	while pos != -1 && pos < Slotted
+		i -= 1
+		Output[i] = Slots[pos]
+		pos = Valid.Find(true, (pos + 1))
+		Found += Output[i].Name+", "
+	endWhile
+	Lib.Log("Found Voices("+Output.Length+"): "+Found)
+	return Output
+endFunction
 
 bool function IsRegistered(string Registrar)
 	return FindByRegistrar(Registrar) != -1

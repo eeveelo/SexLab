@@ -27,6 +27,19 @@ bool function AllowedCreature(Race CreatureRace)
 	return  Config.bAllowCreatures && StorageUtil.GetIntValue(CreatureRace, "SexLab.HasCreature") == 1
 endFunction
 
+bool function AllowedCreatureCombination(Race CreatureRace1, Race CreatureRace2)
+	if AllowedCreature(CreatureRace1) && AllowedCreature(CreatureRace2)
+		int i = Slotted
+		while i
+			i -= 1
+			if Slots[i].Enabled && Slots[i].HasRace(CreatureRace1) && Slots[i].HasRace(CreatureRace2)
+				return true
+			endIf
+		endWhile
+	endIf
+	return false
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- System Use Only                                 --- ;
 ; ------------------------------------------------------- ;

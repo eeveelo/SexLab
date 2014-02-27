@@ -522,3 +522,38 @@ endFunction
 int function CreatureCount(Actor[] Positions)
 	return GenderCount(Positions)[2]
 endFunction
+
+string function MakeGenderTag(Actor[] Positions)
+	string Tag
+	int[] Genders = ActorLib.GenderCount(Positions)
+	while Genders[1]
+		Genders[1] = (Genders[1] - 1)
+		Tag += "F"
+	endWhile
+	while Genders[0]
+		Genders[0] = (Genders[0] - 1)
+		Tag += "M"
+	endWhile
+	while Genders[2]
+		Genders[2] = (Genders[2] - 1)
+		Tag += "C"
+	endWhile
+	return Tag
+endFunction
+
+string function GetGenderTag(int Females = 0, int Males = 0, int Creatures = 0)
+	string Tag
+	while Females
+		Females -= 1
+		Tag += "F"
+	endWhile
+	while Males
+		Males -= 1
+		Tag += "M"
+	endWhile
+	while Creatures
+		Creatures -= 1
+		Tag += "C"
+	endWhile
+	return Tag
+endFunction

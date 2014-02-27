@@ -20,7 +20,6 @@ endProperty
 sslBaseAnimation[] function GetByTags(int ActorCount, string Tags, string TagsSuppressed = "", bool RequireAll = true)
 	string[] Search = sslUtility.ArgString(Tags)
 	if Search.Length == 0
-		; _Log("No tags given.", "GetByTags", "ERROR")
 		return none
 	endIf
 	string[] Suppress = sslUtility.ArgString(TagsSuppressed)
