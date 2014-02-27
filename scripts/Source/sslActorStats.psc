@@ -294,6 +294,15 @@ float function GetPurity(Actor ActorRef)
 	endIf
 endFunction
 
+float function AdjustPurity(Actor ActorRef, float adjust)
+	string type = "Pure"
+	if adjust < 0
+		type = "Impure"
+	endIf
+	AdjustFloat(ActorRef, type, Math.Abs(adjust))
+	return GetFloat(ActorRef, type)
+endFunction
+
 bool function IsPure(Actor ActorRef)
 	return GetPure(ActorRef) >= GetImpure(ActorRef)
 endFunction

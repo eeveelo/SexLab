@@ -458,7 +458,7 @@ Actor function HookVictim(string argString)
 	return ThreadSlots.GetController(argString as int).VictimRef
 endFunction
 
-actor[] function HookActors(string argString)
+Actor[] function HookActors(string argString)
 	return ThreadSlots.GetController(argString as int).Positions
 endFunction
 
@@ -555,8 +555,7 @@ bool function HadPlayerSex(Actor ActorRef)
 endFunction
 
 float function AdjustPurity(Actor ActorRef, float amount)
-	Stats.AdjustFloat(ActorRef, "Purity", amount)
-	return Stats.GetPurity(ActorRef)
+	return Stats.AdjustPurity(ActorRef, amount)
 endFunction
 
 int function GetSexuality(Actor ActorRef)
