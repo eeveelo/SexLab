@@ -89,7 +89,7 @@ bool function PrepareAlias(Actor ProspectRef, bool MakeVictim = false, sslBaseVo
 	IsFemale   = Gender == 1
 	IsCreature = Gender == 2
 	IsPlayer   = ActorRef == Lib.PlayerRef
-	ActorVoice = BaseRef.GetVoiceType()
+	ActorVoice = ActorRef.GetVoiceType()
 	IsVictim   = MakeVictim
 	if MakeVictim
 		Thread.VictimRef = ActorRef
@@ -99,7 +99,7 @@ bool function PrepareAlias(Actor ProspectRef, bool MakeVictim = false, sslBaseVo
 		Thread.CreatureRef = BaseRef.GetRace()
 	endIf
 	SetVoice(UseVoice, ForceSilence)
-	Thread.Log("Slotted '"+ActorName+"'", self)
+	Thread.Log("Slotted '"+ActorName+"' - VoiceType: "+ActorVoice, self)
 	GoToState("")
 	return true
 endFunction
@@ -253,7 +253,6 @@ state Prepare
 			; Pick a voice if needed
 			if Voice == none && !IsForcedSilent
 				SetVoice(Lib.VoiceSlots.GetRandom(BaseRef.GetSex()), IsForcedSilent)
-				Thread.Log(ActorName+" - Searching for voice... found: "+Voice.Name)
 			endIf
 		endIf
 		; Make SOS erect
@@ -357,10 +356,8 @@ state Animating
 	endFunction
 
 	function Snap()
-		Thread.Log(ActorName+" - Snapping")
 		; Quickly move into place if actor isn't positioned right
 		if ActorRef.GetDistance(MarkerRef) > 1.0
-			Thread.Log(ActorName+" - Is out of position by "+ActorRef.GetDistance(MarkerRef))
 			ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 1.0, 50000, 0)
 			return ; OnTranslationComplete() will take over when in place
 		endIf
@@ -380,6 +377,8 @@ state Animating
 		Snap()
 	endEvent
 
+	function UpdateStats(float Time, bool IsVaginal, bool IsAnal, bool IsOral, bool IsDirty, bool IsLoving)
+	endFunction
 endState
 
 state Reset
@@ -412,6 +411,8 @@ state Reset
 			Stats.AdjustSkill(ActorRef, "Vaginal", (Animation.HasTag("Vaginal") as int))
 			Stats.AdjustSkill(ActorRef, "Oral", (Animation.HasTag("Oral") as int))
 			Stats.AdjustSkill(ActorRef, "Anal", (Animation.HasTag("Anal") as int))
+			; Stats.AdjustSkill(ActorRef, "Pure", ((Animation.HasTag("Loving") as float) * 1.3))
+			; Stats.AdjustSkill(ActorRef, "Impure", ((Animation.HasTag("Dirty") as float) * 1.3))
 		endIf
 		; Reset alias
 		Initialize()
@@ -533,8 +534,6 @@ function ClearAlias()
 	Initialize()
 endFunction
 
-
-
 ; event OnInit()
 ; 	Thread = (GetOwningQuest() as sslThreadController)
 ; 	Lib = (Quest.GetQuest("SexLabQuestFramework") as sslActorLibrary)
@@ -544,6 +543,7 @@ endFunction
 function Action(string FireState)
 	UnregisterForUpdate()
 	if ActorRef != none
+		EndAction()
 		GoToState(FireState)
 		FireAction()
 	endIf
@@ -567,6 +567,10 @@ function Snap()
 endFunction
 event OnTranslationComplete()
 endEvent
+function UpdateStats(float Time, bool IsVaginal, bool IsAnal, bool IsOral, bool IsDirty, bool IsLoving)
+endFunction
 ; Varied
 function FireAction()
+endFunction
+function EndAction()
 endFunction

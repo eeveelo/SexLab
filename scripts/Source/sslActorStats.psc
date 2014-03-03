@@ -344,6 +344,8 @@ function AddSex(Actor ActorRef, float TimeSpent = 0.0, bool WithPlayer = false, 
 		AdjustInt(ActorRef, "Females", Females)
 		AdjustInt(ActorRef, "Creatures", Creatures)
 		AdjustInt(ActorRef, "SexCount", 1)
+	else
+		AdjustInt(ActorRef, "Masturbation", 1)
 	endIf
 	if WithPlayer && ActorRef != PlayerRef
 		AdjustInt(ActorRef, "PlayerSex", 1)
@@ -467,6 +469,38 @@ endFunction
 ; ------------------------------------------------------- ;
 
 
+function ResetActor(Actor ActorRef)
+	; Native stats
+	ClearInt(ActorRef, "Males")
+	ClearInt(ActorRef, "Females")
+	ClearInt(ActorRef, "Creatures")
+	ClearInt(ActorRef, "Vaginal")
+	ClearInt(ActorRef, "Oral")
+	ClearInt(ActorRef, "Anal")
+	ClearInt(ActorRef, "SexCount")
+	ClearInt(ActorRef, "PlayerSex")
+	ClearFloat(ActorRef, "LastSex.RealTime")
+	ClearFloat(ActorRef, "LastSex.GameTime")
+	ClearFloat(ActorRef, "TimeSpent")
+	ClearFloat(ActorRef, "Pure")
+	ClearFloat(ActorRef, "Impure")
+	; Custom stats
+	int i = StorageUtil.StringListCount(self, "Custom")
+	while i
+		i -= 1
+		ClearStr(ActorRef, "Custom."+StorageUtil.StringListGet(self, "Custom", i))
+	endWhile
+	; Clear Partners
+	if ActorRef == PlayerRef
+		i = Storageutil.FormListCount(ActorRef, "SexPartners")
+		while i
+			i -= 1
+			ClearInt((StorageUtil.FormListGet(ActorRef, "SexPartners", i) as Actor), "PlayerSex")
+		endWhile
+	endIf
+	StorageUtil.FormListClear(ActorRef, "SexPartners")
+endFunction
+
 function Setup()
 	StatTitles = new string[7]
 	StatTitles[0] = "$SSL_Unskilled"
@@ -536,10 +570,10 @@ string function GetStr(actor ActorRef, string stat)
 	return StorageUtil.GetStringValue(ActorRef, "sslActorStats."+stat)
 endFunction
 
-function ClearInt(actor ActorRef, int stat)
+function ClearInt(actor ActorRef, string stat)
 	StorageUtil.UnsetIntValue(ActorRef, "sslActorStats."+stat)
 endFunction
-function ClearFloat(actor ActorRef, float stat)
+function ClearFloat(actor ActorRef, string stat)
 	StorageUtil.UnsetFloatValue(ActorRef, "sslActorStats."+stat)
 endFunction
 function ClearStr(actor ActorRef, string stat)

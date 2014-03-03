@@ -285,13 +285,23 @@ function SetAnimation(int AnimID = -1)
 	if AnimID < 0 || AnimID >= Animations.Length
 		aid = Utility.RandomInt(0, (Animations.Length - 1))
 	endIf
+	if Animations[aid] == Animation
+		return ; Nothings changed.
+	endIf
+	; Set active animation
 	Animation = Animations[aid]
-	StageCount = Animation.StageCount
-	UpdateAdjustKey()
-	; Print name of animation to console
 	if HasPlayer
 		MiscUtil.PrintConsole("Playing Animation: " + Animation.Name)
 	endIf
+	; Update animation info
+	UpdateAdjustKey()
+	StageCount = Animation.StageCount
+	IsVaginal = Animation.HasTag("Vaginal")
+	IsAnal = Animation.HasTag("Anal")
+	IsOral = Animation.HasTag("Oral")
+	IsDirty = Animation.HasTag("Dirty")
+	IsLoving = Animation.HasTag("Loving")
+	AnimationStarted = Utility.GetCurrentRealTime()
 	; Check for out of range stage
 	if Stage >= StageCount
 		GoToStage((StageCount - 1))

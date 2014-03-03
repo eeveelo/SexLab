@@ -32,15 +32,21 @@ sslBaseVoice function GetRandom(int Gender = 1)
 endFunction
 
 sslBaseVoice function PickVoice(Actor ActorRef)
+	bool IsPlayer = ActorRef == Lib.PlayerRef
 	; Find if a saved voice exists and in what slot
-	int i = FindByRegistrar(StorageUtil.GetStringValue(ActorRef, "SexLab.SavedVoice"))
-	if i != -1
-		return Slots[i]
+	sslBaseVoice Saved = GetSaved(ActorRef)
+	if Saved != none
+		if !Config.bNPCSaveVoice && !IsPlayer
+			; They have a saved voice, but NPC saved voices is disabled
+			ForgetVoice(ActorRef)
+		else
+			return Saved ; Use the saved voice
+		endIf
 	endIf
 	; Pick a random voice based on gender
 	sslBaseVoice Picked = GetRandom(ActorRef.GetLeveledActorBase().GetSex())
 	; Save the voice to NPC for reuse, if enabled
-	if Picked != none && Config.bNPCSaveVoice
+	if Picked != none && !IsPlayer && Config.bNPCSaveVoice
 		SaveVoice(ActorRef, Picked)
 	endIf
 	return Picked
@@ -91,6 +97,18 @@ sslBaseVoice function GetBySlot(int index)
 		return none
 	endIf
 	return Slots[index]
+endFunction
+
+sslBaseVoice function GetSaved(Actor ActorRef)
+	return GetByRegistrar(StorageUtil.GetStringValue(ActorRef, "SexLab.SavedVoice", ""))
+endFunction
+
+string function GetSavedName(Actor ActorRef)
+	sslBaseVoice Voice = GetSaved(ActorRef)
+	if Voice == none || !Voice.Registered
+		return "$SSL_Random"
+	endIf
+	return Voice.Name
 endFunction
 
 function SaveVoice(Actor ActorRef, sslBaseVoice Saving)

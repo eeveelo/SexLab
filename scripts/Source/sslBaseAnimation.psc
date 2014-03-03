@@ -16,6 +16,9 @@ float[] timers
 float[] CenterAdjust
 string[] animations
 
+float Purity
+float Impurity
+
 ; StorageUtil legend
 ; form Key("Creatures") = Valid races for creature animation
 
@@ -371,6 +374,14 @@ function Save(int[] posData, string[] animData, float[] offsetData, int[] flagDa
 			Stage -= 1
 		endWhile
 	endIf
+	; Init purity/impurity amounts
+	; Purity = 0.0
+	; Impurity = 0.0
+
+	; Purity +=   (HasTag("Loving") as float) * 2.50
+	; Impurity += (HasTag("Dirty") as float)  * 2.00
+	; Impurity += ((Actors == 1) as float)    * 1.25
+	; Impurity += ((Actors > 2) as float)     * ((Actors - 2) * 1.75)
 endFunction
 
 float function CalcCenterAdjuster(int Stage)

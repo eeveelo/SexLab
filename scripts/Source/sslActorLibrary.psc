@@ -441,9 +441,7 @@ int function ValidateActor(Actor ActorRef)
 	elseIf ActorRef.IsFlying()
 		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are flying.")
 		return -15
-	endIf
-	; TODO: Creature checking
-	if ActorRef != PlayerRef && !ActorRef.HasKeyword(ActorTypeNPC) && !CreatureSlots.AllowedCreature(ActorRef.GetLeveledActorBase().GetRace())
+	elseIf ActorRef != PlayerRef && !ActorRef.HasKeyword(ActorTypeNPC) && !CreatureSlots.AllowedCreature(ActorRef.GetLeveledActorBase().GetRace())
 		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are a creature that is currently not supported ("+ActorRef.GetLeveledActorBase().GetName()+")")
 		return -16
 	endIf
@@ -509,6 +507,10 @@ int[] function GenderCount(Actor[] Positions)
 		Genders[g] = Genders[g] + 1
 	endWhile
 	return Genders
+endFunction
+
+bool function IsCreature(Actor ActorRef)
+	return CreatureSlots.AllowedCreature(ActorRef.GetLeveledActorBase().GetRace())
 endFunction
 
 int function MaleCount(Actor[] Positions)

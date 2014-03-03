@@ -65,12 +65,71 @@ float[] property fStageTimer auto hidden
 float[] property fStageTimerLeadIn auto hidden
 float[] property fStageTimerAggr auto hidden
 
+; ------------------------------------------------------- ;
+; --- Config Accessors                                --- ;
+; ------------------------------------------------------- ;
+
+float function GetVoiceDelay(bool IsFemale = false, int stage = 1)
+	float VoiceDelay
+	if IsFemale
+		VoiceDelay = fFemaleVoiceDelay
+	else
+		VoiceDelay = fMaleVoiceDelay
+	endIf
+	if stage > 1
+		return (VoiceDelay - (stage * 0.8)) + Utility.RandomFloat(-0.3, 0.3)
+	endIf
+	return VoiceDelay
+endFunction
+
+bool[] function GetStrip(bool IsFemale, bool IsLeadIn = false, bool IsAggressive = false, bool IsVictim = false)
+	if IsLeadIn
+		if IsFemale
+			return bStripLeadInFemale
+		else
+			return bStripLeadInMale
+		endIf
+ 	elseif IsAggressive
+ 		if IsVictim
+ 			return bStripVictim
+ 		else
+ 			return bStripAggressor
+ 		endIf
+ 	elseIf IsFemale
+ 		return bStripFemale
+ 	else
+ 		return bStripMale
+ 	endIf
+endFunction
+
+bool function UsesNudeSuit(bool IsFemale)
+	return ((!IsFemale && bUseMaleNudeSuit) || (IsFemale && bUseFemaleNudeSuit))
+endFunction
+
+
+; ------------------------------------------------------- ;
+; --- Hotkeys                                         --- ;
+; ------------------------------------------------------- ;
+
 function ToggleFreeCamera()
 	if Game.GetCameraState() != 3
 		MiscUtil.SetFreeCameraSpeed(fAutoSUCSM)
 	endIf
 	MiscUtil.ToggleFreeCamera()
 endFunction
+
+function ToggleFreeCameraEnable()
+	UnregisterForAllKeys()
+	RegisterForKey(kToggleFreeCamera)
+endFunction
+
+event OnKeyDown(int keyCode)
+	if !Utility.IsInMenuMode() && !UI.IsMenuOpen("Console") && !UI.IsMenuOpen("Loading Menu")
+		if keyCode == kToggleFreeCamera
+			ToggleFreeCamera()
+		endIf
+	endIf
+endEvent
 
 bool function BackwardsPressed()
 	return (Input.IsKeyPressed(kBackwards) || ((kBackwards == 42 || kBackwards == 54) && (Input.IsKeyPressed(42) || Input.IsKeyPressed(54))))
@@ -123,52 +182,18 @@ function HotkeyCallback(sslThreadController Thread, int keyCode)
 	; Move Scene
 	elseIf keyCode == kMoveScene
 		Thread.MoveScene()
+
 	endIf
 endFunction
 
-
-float function GetVoiceDelay(bool IsFemale = false, int stage = 1)
-	float VoiceDelay
-	if IsFemale
-		VoiceDelay = fFemaleVoiceDelay
-	else
-		VoiceDelay = fMaleVoiceDelay
-	endIf
-	if stage > 1
-		return (VoiceDelay - (stage * 0.8)) + Utility.RandomFloat(-0.3, 0.3)
-	endIf
-	return VoiceDelay
-endFunction
-
-bool[] function GetStrip(bool IsFemale, bool IsLeadIn = false, bool IsAggressive = false, bool IsVictim = false)
-	if IsLeadIn
-		if IsFemale
-			return bStripLeadInFemale
-		else
-			return bStripLeadInMale
-		endIf
- 	elseif IsAggressive
- 		if IsVictim
- 			return bStripVictim
- 		else
- 			return bStripAggressor
- 		endIf
- 	elseIf IsFemale
- 		return bStripFemale
- 	else
- 		return bStripMale
- 	endIf
-endFunction
-
-bool function UsesNudeSuit(bool IsFemale)
-	return ((!IsFemale && bUseMaleNudeSuit) || (IsFemale && bUseFemaleNudeSuit))
-endFunction
-
+; ------------------------------------------------------- ;
+; --- System Use                                      --- ;
+; ------------------------------------------------------- ;
 
 function SetDefaults()
 
 	sPlayerVoice = "$SSL_Random"
-	bNPCSaveVoice = true
+	bNPCSaveVoice = false
 
 	; Config Hotkeys
 	kBackwards = 54 ; Right Shift
@@ -196,13 +221,13 @@ function SetDefaults()
 	bDisablePlayer = false
 	fMaleVoiceDelay = 7.0
 	fFemaleVoiceDelay = 6.0
-	fVoiceVolume = 0.7
+	fVoiceVolume = 0.8
 	bEnableTCL = false
 	bScaleActors = false
 	bUseCum = true
 	bAllowFFCum = false
 	fCumTimer = 120.0
-bUseStrapons = true
+	bUseStrapons = true
 	bReDressVictim = true
 	bRagdollEnd = false
 	bUseMaleNudeSuit = false

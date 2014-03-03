@@ -42,6 +42,19 @@ sslBaseAnimation[] property Animations hidden
 	endFunction
 endProperty
 
+; Stat Tracking Info
+bool property IsVaginal auto hidden
+bool property IsAnal auto hidden
+bool property IsOral auto hidden
+bool property IsDirty auto hidden
+bool property IsLoving auto hidden
+float property AnimationStarted auto hidden
+float property AnimationTotalTime hidden
+	float function get()
+		return Utility.GetCurrentRealTime() -  AnimationStarted
+	endFunction
+endProperty
+
 ; Timer Info
 float[] CustomTimers
 float[] property Timers hidden
@@ -552,7 +565,7 @@ function SetupThreadEvent(string HookEvent)
 		ModEvent.PushInt(eid, thread_id)
 		ModEvent.PushString(eid, HookEvent)
 		ModEvent.Send(eid)
-		Log("Thread Hook Sent: "+HookEvent)
+		; Log("Thread Hook Sent: "+HookEvent)
 	endIf
 	SendModEvent(HookEvent, thread_id)
 endFunction
@@ -598,13 +611,6 @@ function Action(string FireState)
 	FireAction() ; OnBeginState()
 endFunction
 
-int thread_id
-int property tid hidden
-	int function get()
-		return thread_id
-	endFunction
-endProperty
-
 function UpdateAdjustKey()
 	AdjustKey = Animation.Key("Adjust")
 	if ActorCount > 1 && Config.bRaceAdjustments
@@ -626,6 +632,27 @@ function UpdateAdjustKey()
 	endIf
 	MiscUtil.PrintConsole(AdjustKey)
 endFunction
+
+
+function UpdateAnimationStats()
+	float Time = AnimationTotalTime
+	int i = ActorCount
+	while i
+		i -= 1
+		; ActorAlias[0].UpdateStats(Time, IsVaginal, IsAnal, IsOral, IsDirty, IsLoving)
+		; ActorAlias[1].UpdateStats(Time, IsVaginal, IsAnal, IsOral, IsDirty, IsLoving)
+		; ActorAlias[2].UpdateStats(Time, IsVaginal, IsAnal, IsOral, IsDirty, IsLoving)
+		; ActorAlias[3].UpdateStats(Time, IsVaginal, IsAnal, IsOral, IsDirty, IsLoving)
+		; ActorAlias[4].UpdateStats(Time, IsVaginal, IsAnal, IsOral, IsDirty, IsLoving)
+	endWhile
+endFunction
+
+int thread_id
+int property tid hidden
+	int function get()
+		return thread_id
+	endFunction
+endProperty
 
 function _SetupThread(int id)
 	thread_id = id
