@@ -173,7 +173,7 @@ bool function IsStrippable(form ItemRef)
 endFunction
 
 form function StripWeapon(Actor ActorRef, bool RightHand = true)
-	return ActorLib.StripWeapon(ActorRef, RightHand)
+	return none ; ActorLib.StripWeapon(ActorRef, RightHand)
 endFunction
 
 form function StripSlot(Actor ActorRef, int SlotMask)

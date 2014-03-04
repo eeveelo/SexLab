@@ -102,8 +102,8 @@ s Tribadism_A2_S1 Tribadism_A2_S1.hkx
 '
 ' Arrok's Animations
 '
-b Arrok_MaleUndress Arrok_MaleUndress.hkx
-b Arrok_FemaleUndress Arrok_FemaleUndress.hkx
+b Arrok_Undress_G0 Arrok_MaleUndress.hkx
+b Arrok_Undress_G1 Arrok_FemaleUndress.hkx
 
 s Arrok_Anal_A1_S1 Arrok_Anal_A1_S1.hkx
 + Arrok_Anal_A1_S2 Arrok_Anal_A1_S2.hkx
@@ -499,3 +499,10 @@ s Bleagh_FootJob_A2_S1 Bleagh_FootJob_A2_S1.hkx
 + Bleagh_FootJob_A2_S3 Bleagh_FootJob_A2_S3.hkx
 + Bleagh_FootJob_A2_S4 Bleagh_FootJob_A2_S4.hkx
 + Bleagh_FootJob_A2_S5 Bleagh_FootJob_A2_S5.hkx
+
+
+'
+' Nshell
+'
+pa -D3.1 Nshell_Looped_PA_S1 Nshell_Looped_PA_S1.hkx
+pa -D36.2 Nshell_Full_PA_S1 Nshell_Full_PA_S1.hkx

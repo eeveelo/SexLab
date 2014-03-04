@@ -238,22 +238,6 @@ bool function IsStrippable(form ItemRef)
 	return true
 endFunction
 
-form function StripWeapon(Actor ActorRef, bool RightHand = true)
-	Weapon ItemRef = ActorRef.GetEquippedWeapon(RightHand)
-	if IsStrippable(ItemRef)
-		int type = ActorRef.GetEquippedItemType((RightHand as int))
-		if type == 5 || type == 6 || type == 7
-			ActorRef.AddItem(DummyWeapon, 1, true)
-			ActorRef.EquipItem(DummyWeapon, false, true)
-			ActorRef.UnEquipItem(DummyWeapon, false, true)
-			ActorRef.RemoveItem(DummyWeapon, 1, true)
-		else
-			ActorRef.UnequipItem(ItemRef, false, true)
-		endIf
-	endIf
-	return ItemRef
-endFunction
-
 form function StripSlot(Actor ActorRef, int SlotMask)
 	form ItemRef = ActorRef.GetWornForm(SlotMask)
 	if IsStrippable(ItemRef)
@@ -269,13 +253,19 @@ form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 	endIf
 	; Start stripping animation
 	if DoAnimate
-		Debug.SendAnimationEvent(ActorRef, "Arrok_Undress_"+Gender)
+		Debug.SendAnimationEvent(ActorRef, "Arrok_Undress_G"+Gender)
 	endIf
 	form[] Stripped = new form[34]
 	; Strip weapon
 	if Strip[32]
-		Stripped[33] = StripWeapon(ActorRef, true)
-		Stripped[32] = StripWeapon(ActorRef, false)
+		Stripped[33] = ActorRef.GetEquippedWeapon(true)
+		Stripped[32] = ActorRef.GetEquippedWeapon(false)
+		if Stripped[33] != none || Stripped[32] != none
+			ActorRef.AddItem(DummyWeapon, 1, true)
+			ActorRef.EquipItem(DummyWeapon, false, true)
+			ActorRef.UnEquipItem(DummyWeapon, false, true)
+			ActorRef.RemoveItem(DummyWeapon, 1, true)
+		endIf
 	endIf
 	; Strip armors
 	int i = 32
