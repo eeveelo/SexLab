@@ -43,6 +43,9 @@ float ActorScale
 float AnimScale
 form Strapon
 
+int[] StatLevel
+int[] StatTimes
+
 ; Animation Position/Stage flags
 bool property OpenMouth hidden
 	bool function get()
@@ -51,12 +54,12 @@ bool property OpenMouth hidden
 endProperty
 bool property IsSilent hidden
 	bool function get()
-		return (Voice == none || IsForcedSilent || IsCreature || Flags[0] == 1 || Flags[1] == 1)
+		return Voice == none || IsForcedSilent || IsCreature || Flags[0] == 1 || Flags[1] == 1
 	endFunction
 endProperty
 bool property UseStrapon hidden
 	bool function get()
-		return Flags[0] == 1
+		return Flags[2] == 1 && Flags[4] == 0
 	endFunction
 endProperty
 int property Schlong hidden
@@ -130,8 +133,8 @@ function StopAnimating(bool Quick = false)
 		; Ragdoll NPC/PC if enabled and not in TFC
 		if !Quick && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
 			ActorRef.StopTranslation()
-			ActorRef.SetPosition(loc[0], loc[1], loc[2])
-			ActorRef.SetAngle(loc[3], loc[4], loc[5])
+			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
+			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			ActorRef.PushActorAway(ActorRef, 0.75)
 		endIf
 	endIf
@@ -248,12 +251,22 @@ state Prepare
 		endIf
 		; Non Creatures
 		if !IsCreature
-			; Strip actor
-			Strip(DoUndress)
 			; Pick a voice if needed
 			if Voice == none && !IsForcedSilent
 				SetVoice(Lib.VoiceSlots.GetRandom(BaseRef.GetSex()), IsForcedSilent)
 			endIf
+			; Get actor stats
+			StatLevel = new int[3]
+			StatLevel[0] = Stats.GetSkillLevel(ActorRef, "Vaginal")
+			StatLevel[1] = Stats.GetSkillLevel(ActorRef, "Anal")
+			StatLevel[2] = Stats.GetSkillLevel(ActorRef, "Oral")
+			; Pick a strapon on females to use
+			if IsFemale && Config.bUseStrapons && Lib.Strapons.Length > 0
+				Strapon = Lib.Strapons[Utility.RandomInt(0, (Lib.Strapons.Length - 1))]
+				ActorRef.AddItem(Strapon, 1, true)
+			endIf
+			; Strip actor
+			Strip(DoUndress)
 		endIf
 		; Make SOS erect
 		Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
@@ -303,22 +316,33 @@ state Animating
 		if !IsSilent
 			VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage)
 		endIf
-		; Voice strength
-		if Stage == 1 && Animation.StageCount == 1
-			Strength = 75
-		else
-			Strength = ((Stage as float) / (Animation.StageCount as float) * 100.0) as int
-			if Thread.LeadIn
-				Strength = ((Strength as float) * 0.70) as int
+		; Creature skipped
+		if !IsCreature
+			; Voice strength
+			if Stage == 1 && Animation.StageCount == 1
+				Strength = 75
+			else
+				Strength = ((Stage as float) / (Animation.StageCount as float) * 100.0) as int
+				if Thread.LeadIn
+					Strength = ((Strength as float) * 0.70) as int
+				endIf
 			endIf
-		endIf
-		; Facial expression
-		if OpenMouth
-			ActorRef.SetExpressionOverride(16, 100)
-		elseIf IsVictim
-			ActorRef.SetExpressionOverride(14, Strength)
-		else
-			ActorRef.SetExpressionOverride(10, Strength)
+			; Facial expression
+			if OpenMouth
+				ActorRef.SetExpressionOverride(16, 100)
+			elseIf IsVictim
+				ActorRef.SetExpressionOverride(14, Strength)
+			else
+				ActorRef.SetExpressionOverride(10, Strength)
+			endIf
+			; Equip Strapon if needed and enabled
+			if Strapon != none
+				if UseStrapon && !ActorRef.IsEquipped(Strapon)
+					ActorRef.EquipItem(Strapon, true, true)
+				elseif !UseStrapon && ActorRef.IsEquipped(Strapon)
+					ActorRef.UnequipItem(Strapon, true, true)
+				endIf
+			endIf
 		endIf
 		; Send schlong offset
 		if MalePosition
@@ -347,8 +371,8 @@ state Animating
 		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		if force
-			ActorRef.SetPosition(loc[0], loc[1], loc[2])
-			ActorRef.SetAngle(loc[3], loc[4], loc[5])
+			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
+			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		endIf
 		ActorRef.SetVehicle(MarkerRef)
 		ActorRef.SetScale(AnimScale)
@@ -358,17 +382,17 @@ state Animating
 	function Snap()
 		; Quickly move into place if actor isn't positioned right
 		if ActorRef.GetDistance(MarkerRef) > 1.0
-			ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5], 1.0, 50000, 0)
+			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 50000, 0)
 			return ; OnTranslationComplete() will take over when in place
 		endIf
 		; Force angle if translation didn't rotate them properly
 		if Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ()) > 0.50; || Math.Abs(ActorRef.GetAngleX() - MarkerRef.GetAngleX()) > 0.5
-			ActorRef.SetAngle(loc[3], loc[4], loc[5])
+			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			ActorRef.SetVehicle(MarkerRef)
 			ActorRef.SetScale(AnimScale)
 		endIf
 		; Begin very slowly rotating a small amount to hold position
-		ActorRef.SplineTranslateTo(loc[0], loc[1], loc[2], loc[3], loc[4], loc[5]+0.1, 1.0, 10000, 0.0001)
+		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.1, 1.0, 10000, 0.0001)
 	endFunction
 
 	event OnTranslationComplete()
@@ -377,8 +401,6 @@ state Animating
 		Snap()
 	endEvent
 
-	function UpdateStats(float Time, bool IsVaginal, bool IsAnal, bool IsOral, bool IsDirty, bool IsLoving)
-	endFunction
 endState
 
 state Reset
@@ -402,15 +424,23 @@ state Reset
 		if !ActorRef.IsDead()
 			Lib.UnstripStored(ActorRef, IsVictim)
 		endIf
+		; Remove strapon
+		if Strapon != none
+			ActorRef.UnequipItem(Strapon, true, true)
+			ActorRef.RemoveItem(Strapon, 1, true)
+		endIf
 		; Unlock movements
 		UnlockActor()
 		; Update stats
 		if !IsCreature
 			int[] Genders = Thread.Genders
 			Stats.AddSex(ActorRef, Thread.TotalTime, Thread.HasPlayer, Genders[0], Genders[1], Genders[2])
-			Stats.AdjustSkill(ActorRef, "Vaginal", (Animation.HasTag("Vaginal") as int))
-			Stats.AdjustSkill(ActorRef, "Oral", (Animation.HasTag("Oral") as int))
-			Stats.AdjustSkill(ActorRef, "Anal", (Animation.HasTag("Anal") as int))
+			; Stats.AdjustSkill(ActorRef, "Vaginal", (Animation.HasTag("Vaginal") as int))
+			; Stats.AdjustSkill(ActorRef, "Anal", (Animation.HasTag("Anal") as int))
+			; Stats.AdjustSkill(ActorRef, "Oral", (Animation.HasTag("Oral") as int))
+			Stats.AdjustSkill(ActorRef, "Vaginal", Thread.SecondsVaginal)
+			Stats.AdjustSkill(ActorRef, "Anal", Thread.SecondsAnal)
+			Stats.AdjustSkill(ActorRef, "Oral", Thread.SecondsOral)
 			; Stats.AdjustSkill(ActorRef, "Pure", ((Animation.HasTag("Loving") as float) * 1.3))
 			; Stats.AdjustSkill(ActorRef, "Impure", ((Animation.HasTag("Dirty") as float) * 1.3))
 		endIf
@@ -433,6 +463,18 @@ endFunction
 
 sslBaseVoice function GetVoice()
 	return Voice
+endFunction
+
+function EquipStrapon()
+	if Strapon != none && !ActorRef.IsEquipped(Strapon)
+		ActorRef.EquipItem(Strapon, true, true)
+	endIf
+endFunction
+
+function UnequipStrapon()
+	if Strapon != none && ActorRef.IsEquipped(Strapon)
+		ActorRef.UnequipItem(Strapon, true, true)
+	endIf
 endFunction
 
 function OverrideStrip(bool[] SetStrip)
@@ -567,8 +609,6 @@ function Snap()
 endFunction
 event OnTranslationComplete()
 endEvent
-function UpdateStats(float Time, bool IsVaginal, bool IsAnal, bool IsOral, bool IsDirty, bool IsLoving)
-endFunction
 ; Varied
 function FireAction()
 endFunction

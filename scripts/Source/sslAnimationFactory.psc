@@ -97,7 +97,7 @@ function AddPositionStage(int position, string animationEvent, float forward = 0
 	offsetID += 4
 	infoData[(infoID + 0)] = (silent as int)
 	infoData[(infoID + 1)] = (openMouth as int)
-	infoData[(infoID + 2)] = ((strapon && positionData[(position * 2)] == Male) as int)
+	infoData[(infoID + 2)] = (strapon as int)
 	infoData[(infoID + 3)] = sos
 	infoID += 4
 endFunction
