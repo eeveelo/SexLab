@@ -288,10 +288,10 @@ endFunction
 
 ; Enjoyment/Pain
 int function GetEnjoyment(Actor ActorRef)
-	; ActorAlias(ActorRef).GetEnjoyment()
+	return ActorAlias(ActorRef).GetEnjoyment()
 endFunction
 int function GetPain(Actor ActorRef)
-	; ActorAlias(ActorRef).GetPain()
+	return ActorAlias(ActorRef).GetPain()
 endFunction
 
 ; Actor Information

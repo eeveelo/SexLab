@@ -486,6 +486,14 @@ sslBaseVoice function GetVoice()
 	return Voice
 endFunction
 
+int function GetEnjoyment()
+	return Strength ; Temporary, replace with stat based version later
+endFunction
+
+int function GetPain()
+	return (Strength as float / 2.0) as int ; Temporary, replace with stat based version later
+endFunction
+
 function EquipStrapon()
 	if Strapon != none && !ActorRef.IsEquipped(Strapon)
 		ActorRef.EquipItem(Strapon, true, true)
