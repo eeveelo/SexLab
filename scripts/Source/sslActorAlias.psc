@@ -159,10 +159,6 @@ function LockActor()
 		else
 			Thread.EnableHotkeys()
 		endIf
-		; Auto TFC
-		if Config.bAutoTFC
-			Config.ToggleFreeCamera()
-		endIf
 	else
 		; ActorRef.SetRestrained(true)
 		ActorRef.SetDontMove(true)
@@ -267,6 +263,10 @@ state Prepare
 			endIf
 			; Strip actor
 			Strip(DoUndress)
+		endIf
+		; Start Auto TFC if enabled
+		if IsPlayer && Config.bAutoTFC
+			Config.ToggleFreeCamera()
 		endIf
 		; Make SOS erect
 		Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
@@ -380,19 +380,19 @@ state Animating
 	endFunction
 
 	function Snap()
-		; Quickly move into place if actor isn't positioned right
-		if ActorRef.GetDistance(MarkerRef) > 1.0
-			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 50000, 0)
-			return ; OnTranslationComplete() will take over when in place
-		endIf
-		; Force angle if translation didn't rotate them properly
-		if Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ()) > 0.50; || Math.Abs(ActorRef.GetAngleX() - MarkerRef.GetAngleX()) > 0.5
+		; Quickly move into place and angle if actor is off by a lot
+		float distance = ActorRef.GetDistance(MarkerRef)
+		if distance > 9.0 || ((Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ())) > 0.50)
+			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			ActorRef.SetVehicle(MarkerRef)
 			ActorRef.SetScale(AnimScale)
+		elseIf distance > 0.8
+			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 50000, 0)
+			return ; OnTranslationComplete() will take over when in place
 		endIf
 		; Begin very slowly rotating a small amount to hold position
-		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.1, 1.0, 10000, 0.0001)
+		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.01, 1.0, 10000, 0.0001)
 	endFunction
 
 	event OnTranslationComplete()
@@ -441,6 +441,8 @@ state Reset
 			Stats.AdjustSkill(ActorRef, "Vaginal", Thread.SecondsVaginal)
 			Stats.AdjustSkill(ActorRef, "Anal", Thread.SecondsAnal)
 			Stats.AdjustSkill(ActorRef, "Oral", Thread.SecondsOral)
+			Stats.AdjustSkill(ActorRef, "Victim", (Thread.IsVictim(ActorRef) as int))
+			Stats.AdjustSkill(ActorRef, "Aggressor", (Thread.IsAggressor(ActorRef) as int))
 			; Stats.AdjustSkill(ActorRef, "Pure", ((Animation.HasTag("Loving") as float) * 1.3))
 			; Stats.AdjustSkill(ActorRef, "Impure", ((Animation.HasTag("Dirty") as float) * 1.3))
 		endIf
@@ -448,6 +450,25 @@ state Reset
 		Initialize()
 	endEvent
 endState
+
+function OrgasmEffect()
+	if ActorRef != none
+		; Apply cum
+		int CumID = Animation.GetCum(position)
+		if CumID > 0 && Config.bUseCum && (Thread.Males > 0 || Config.bAllowFFCum || Thread.HasCreature)
+			Lib.ApplyCum(ActorRef, CumID)
+		endIf
+		; Play OrgasmSFX
+		Lib.ThreadLib.OrgasmFX.Play(ActorRef)
+		; Shake camera for player
+		if IsPlayer && Game.GetCameraState() != 3
+			Game.ShakeCamera(none, 0.75, 1.5)
+		endIf
+		; Voice
+		Strength = 100
+		VoiceDelay = 1.0
+	endIf
+endFunction
 
 ; ------------------------------------------------------- ;
 ; --- Data Accessors                                  --- ;
@@ -486,7 +507,7 @@ function OverrideStrip(bool[] SetStrip)
 endFunction
 
 function Strip(bool DoAnimate = true)
-	if !IsCreature
+	if ActorRef != none && !IsCreature
 		if StripOverride.Length != 33
 			Lib.StoreStripped(ActorRef, Config.GetStrip(IsFemale, Thread.LeadIn, Thread.IsAggressive, IsVictim), DoAnimate)
 		else

@@ -84,9 +84,9 @@ state Animating
 		; Send events
 		if !LeadIn && Stage >= StageCount
 			SendThreadEvent("OrgasmStart")
-			; if Config.bOrgasmEffects
-		; 		TriggerOrgasm()
-		; 	endIf
+			if Config.bOrgasmEffects
+				TriggerOrgasm()
+			endIf
 		else
 			SendThreadEvent("StageStart")
 		endIf
@@ -338,17 +338,8 @@ function TriggerOrgasm()
 	int i = ActorCount
 	while i
 		i -= 1
-		; ActorAlias[i].OrgasmEffect()
+		ActorAlias[i].OrgasmEffect()
 	endWhile
-	; Play Orgasm SFX
-	ThreadLib.OrgasmFX.PlayAndWait(Positions[0])
-	if Animation.SoundFX != none
-		Animation.SoundFX.PlayAndWait(Positions[0])
-	endIf
-	ThreadLib.OrgasmFX.PlayAndWait(Positions[0])
-	if Animation.SoundFX != none
-		Animation.SoundFX.PlayAndWait(Positions[0])
-	endIf
 endFunction
 
 function EndLeadIn()
@@ -361,7 +352,7 @@ function EndLeadIn()
 		int i = ActorCount
 		while i
 			i -= 1
-			; ActorAlias[i].Strip(false)
+			ActorAlias[i].Strip(false)
 		endWhile
 	endIf
 	; Start primary animations at stage 1
