@@ -319,6 +319,10 @@ bool function IsVictim(Actor ActorRef)
 	return VictimRef == ActorRef
 endFunction
 
+bool function IsAggressor(Actor ActorRef)
+	return VictimRef != none && VictimRef != ActorRef
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Animation Setup                                 --- ;
 ; ------------------------------------------------------- ;
