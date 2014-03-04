@@ -181,12 +181,12 @@ function AdjustSkill(actor ActorRef, string Skill, int AdjustBy)
 	endIf
 endFunction
 
-int function GetSkillLevel(Actor ActorRef, string Skill)
-	return CalcLevel(GetSkill(ActorRef, Skill), 0.65)
+int function GetSkillLevel(Actor ActorRef, string Skill, float Curve = 0.3)
+	return CalcLevel(GetSkill(ActorRef, Skill), Curve)
 endFunction
 
-string function GetSkillTitle(Actor ActorRef, string Skill)
-	return StatTitles[sslUtility.ClampInt(GetSkillLevel(ActorRef, Skill), 0, 6)]
+string function GetSkillTitle(Actor ActorRef, string Skill, float Curve = 0.3)
+	return StatTitles[sslUtility.ClampInt(GetSkillLevel(ActorRef, Skill, Curve), 0, 6)]
 endFunction
 
 ; ------------------------------------------------------- ;
