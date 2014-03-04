@@ -79,7 +79,7 @@ endFunction
 
 int function FindByName(string FindName)
 	int i = Slotted
-	while i < Slotted
+	while i
 		i -= 1
 		if Slots[i].Name == FindName
 			return i
