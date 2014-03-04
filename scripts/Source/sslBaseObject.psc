@@ -43,6 +43,18 @@ bool function ToggleTag(string Tag)
 	return (RemoveTag(Tag) || AddTag(Tag)) && HasTag(Tag)
 endFunction
 
+bool function AddTagConditional(string Tag, bool AddTag)
+	if Tag != ""
+		int i = StorageUtil.StringListFind(Storage, Key("Tags"), Tag)
+		if AddTag && i == -1
+			StorageUtil.StringListAdd(Storage, Key("Tags"), Tag, false)
+		elseIf !AddTag && i != -1
+			StorageUtil.StringListRemove(Storage, Key("Tags"), Tag, true)
+		endIf
+	endIf
+	return AddTag
+endFunction
+
 bool function CheckTags(string[] CheckTags, bool RequireAll = true, bool Suppress = false)
 	int i = CheckTags.Length
 	while i

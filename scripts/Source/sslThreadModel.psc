@@ -48,10 +48,13 @@ bool property IsAnal auto hidden
 bool property IsOral auto hidden
 bool property IsDirty auto hidden
 bool property IsLoving auto hidden
-float property AnimationStarted auto hidden
+int property SecondsVaginal auto hidden
+int property SecondsAnal auto hidden
+int property SecondsOral auto hidden
+float property AnimStarted auto hidden
 float property AnimationTotalTime hidden
 	float function get()
-		return Utility.GetCurrentRealTime() -  AnimationStarted
+		return Utility.GetCurrentRealTime() -  AnimStarted
 	endFunction
 endProperty
 
@@ -428,13 +431,13 @@ endFunction
 ; --- Event Hooks                                     --- ;
 ; ------------------------------------------------------- ;
 
-function SetHook(string addHooks)
-	string[] Setting = sslUtility.ArgString(addHooks)
+function SetHook(string AddHooks)
+	string[] Setting = sslUtility.ArgString(AddHooks)
 	int i = Setting.Length
 	while i
 		i -= 1
 		if Setting[i] != "" && Hooks.Find(Setting[i]) == -1
-			; AddTag(Setting[i])
+			AddTag(Setting[i])
 			Hooks = sslUtility.PushString(Setting[i], Hooks)
 		endIf
 	endWhile
@@ -448,17 +451,86 @@ string[] function GetHooks()
 	return Hooks
 endFunction
 
-function RemoveHook(string delHooks)
-	string[] Removing = sslUtility.ArgString(delHooks)
+function RemoveHook(string DelHooks)
+	string[] Removing = sslUtility.ArgString(DelHooks)
 	string[] NewHooks
 	int i = Hooks.Length
 	while i
 		i -= 1
-		if Removing.Find(Hooks[i]) == -1
+		if Removing.Find(Hooks[i]) != -1
+			RemoveTag(Hooks[i])
+		else
 			NewHooks = sslUtility.PushString(Hooks[i], NewHooks)
 		endIf
 	endWhile
 	Hooks = NewHooks
+endFunction
+
+; ------------------------------------------------------- ;
+; --- Tagging System                                     --- ;
+; ------------------------------------------------------- ;
+
+bool function HasTag(string Tag)
+	return Tag != "" && StorageUtil.StringListFind(self, "Tags", Tag) != -1
+endFunction
+
+bool function AddTag(string Tag)
+	if HasTag(Tag)
+		return false
+	endIf
+	StorageUtil.StringListAdd(self, "Tags", Tag, false)
+	return true
+endFunction
+
+bool function RemoveTag(string Tag)
+	if !HasTag(Tag)
+		return false
+	endIf
+	StorageUtil.StringListRemove(self, "Tags", Tag, true)
+	return true
+endFunction
+
+bool function ToggleTag(string Tag)
+	return (RemoveTag(Tag) || AddTag(Tag)) && HasTag(Tag)
+endFunction
+
+bool function AddTagConditional(string Tag, bool AddTag)
+	if Tag != ""
+		int i = StorageUtil.StringListFind(self, "Tags", Tag)
+		if AddTag && i == -1
+			StorageUtil.StringListAdd(self, "Tags", Tag, false)
+		elseIf !AddTag && i != -1
+			StorageUtil.StringListRemove(self, "Tags", Tag, true)
+		endIf
+	endIf
+	return AddTag
+endFunction
+
+bool function CheckTags(string[] CheckTags, bool RequireAll = true, bool Suppress = false)
+	int i = CheckTags.Length
+	while i
+		i -= 1
+		if CheckTags[i] != ""
+			bool Check = HasTag(CheckTags[i])
+			if (Suppress && Check) || (!Suppress && RequireAll && !Check)
+				return false ; Stop if we need all and don't have it, or are supressing the found tag
+			elseif !Suppress && !RequireAll && Check
+				return true ; Stop if we don't need all and have one
+			endIf
+		endIf
+	endWhile
+	; If still here than we require all and had all
+	return true
+endFunction
+
+string[] function GetTags()
+	int i = StorageUtil.StringListCount(self, "Tags")
+	string[] Tags = sslUtility.StringArray(i)
+	while i
+		i -= 1
+		Tags[i] = StorageUtil.StringListGet(self, "Tags", i)
+	endWhile
+	return Tags
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -508,29 +580,35 @@ function Initialize()
 	ActorAlias[3].ClearAlias()
 	ActorAlias[4].ClearAlias()
 	; Forms
-	VictimRef    = none
-	CenterRef    = none
-	BedRef       = none
+	VictimRef      = none
+	CenterRef      = none
+	BedRef         = none
 	; Boolean
-	HasPlayer    = false
-	LeadIn       = false
-	NoLeadIn     = false
-	FastEnd      = false
-	IsAggressive = false
-	AutoAdvance  = true
+	HasPlayer      = false
+	LeadIn         = false
+	NoLeadIn       = false
+	FastEnd        = false
+	IsAggressive   = false
+	AutoAdvance    = true
+	; Flaots
+	AnimStarted = 0.0
+	StartedAt      = 0.0
 	; Integers
-	BedFlag      = 0
-	ActorCount   = 0
-	Genders      = new int[3]
+	BedFlag        = 0
+	ActorCount     = 0
+	SecondsVaginal = 0
+	SecondsAnal    = 0
+	SecondsOral    = 0
+	Genders        = new int[3]
 	; Strings
-	AdjustKey    = ""
+	AdjustKey      = ""
 	; Storage
 	Actor[] aDel
 	float[] fDel1
 	string[] sDel1
-	Positions    = aDel
-	CustomTimers = fDel1
-	Hooks        = sDel1
+	Positions      = aDel
+	CustomTimers   = fDel1
+	Hooks          = sDel1
 	; Animations
 	sslBaseAnimation[] anDel1
 	sslBaseAnimation[] anDel2
@@ -538,6 +616,8 @@ function Initialize()
 	CustomAnimations  = anDel1
 	PrimaryAnimations = anDel2
 	LeadAnimations    = anDel3
+	; Clear tags
+	StorageUtil.StringListClear(self, "Tags")
 	; Enter thread selection pool
 	GoToState("Unlocked")
 	Reset()
@@ -634,17 +714,19 @@ function UpdateAdjustKey()
 endFunction
 
 
-function UpdateAnimationStats()
-	float Time = AnimationTotalTime
-	int i = ActorCount
-	while i
-		i -= 1
-		; ActorAlias[0].UpdateStats(Time, IsVaginal, IsAnal, IsOral, IsDirty, IsLoving)
-		; ActorAlias[1].UpdateStats(Time, IsVaginal, IsAnal, IsOral, IsDirty, IsLoving)
-		; ActorAlias[2].UpdateStats(Time, IsVaginal, IsAnal, IsOral, IsDirty, IsLoving)
-		; ActorAlias[3].UpdateStats(Time, IsVaginal, IsAnal, IsOral, IsDirty, IsLoving)
-		; ActorAlias[4].UpdateStats(Time, IsVaginal, IsAnal, IsOral, IsDirty, IsLoving)
-	endWhile
+function UpdateSkillTimers()
+	int Seconds = AnimationTotalTime as int
+	if Seconds > 3
+		if IsVaginal
+			SecondsVaginal += Seconds
+		endIf
+		if IsAnal
+			SecondsAnal += Seconds
+		endIf
+		if IsOral
+			SecondsOral += Seconds
+		endIf
+	endIf
 endFunction
 
 int thread_id

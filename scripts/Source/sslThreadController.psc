@@ -288,6 +288,8 @@ function SetAnimation(int AnimID = -1)
 	if Animations[aid] == Animation
 		return ; Nothings changed.
 	endIf
+	; Save times spent on current animation before changing
+	UpdateSkillTimers()
 	; Set active animation
 	Animation = Animations[aid]
 	if HasPlayer
@@ -295,13 +297,13 @@ function SetAnimation(int AnimID = -1)
 	endIf
 	; Update animation info
 	UpdateAdjustKey()
+	AnimStarted = Utility.GetCurrentRealTime()
 	StageCount = Animation.StageCount
-	IsVaginal = Animation.HasTag("Vaginal")
-	IsAnal = Animation.HasTag("Anal")
-	IsOral = Animation.HasTag("Oral")
-	IsDirty = Animation.HasTag("Dirty")
-	IsLoving = Animation.HasTag("Loving")
-	AnimationStarted = Utility.GetCurrentRealTime()
+	IsVaginal = AddTagConditional("Vaginal", Animation.HasTag("Vaginal"))
+	IsAnal = AddTagConditional("Anal", Animation.HasTag("Anal"))
+	IsOral = AddTagConditional("Oral", Animation.HasTag("Oral"))
+	IsLoving = AddTagConditional("Dirty", Animation.HasTag("Dirty"))
+	IsDirty = AddTagConditional("Loving", Animation.HasTag("Loving"))
 	; Check for out of range stage
 	if Stage >= StageCount
 		GoToStage((StageCount - 1))
@@ -373,6 +375,8 @@ function EndAnimation(bool Quickly = false)
 	; Set fast flag to skip slow ending functions
 	FastEnd = Quickly
 	Stage = StageCount
+	; Save skill timers
+	UpdateSkillTimers()
 	; Reset actors & wait for clear state
 	AliasAction("Reset", "")
 	; Send end event
