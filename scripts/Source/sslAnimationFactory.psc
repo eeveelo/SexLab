@@ -50,7 +50,7 @@ function RegisterAnimation(string Registrar)
 	endIf
 	; Wait for factory to be free
 	while Locked || Animation != none
-		Utility.WaitMenuMode(0.20)
+		Utility.WaitMenuMode(0.15)
 	endWhile
 	; Get free animation slot
 	Locked = true
@@ -60,17 +60,23 @@ function RegisterAnimation(string Registrar)
 		Animation.Registry = Registrar
 		Animation.Enabled = true
 		; Send load event
-		RegisterForModEvent("Register"+Registrar, Registrar)
-		ModEvent.Send(ModEvent.Create("Register"+Registrar))
-		UnregisterForAllModEvents()
+		SendEvent(Registrar)
 	else
 		FreeFactory()
 	endIf
 endFunction
 
+; Temporary alpha testing
+function SendEvent(string Registrar)
+	RegisterForModEvent("Register"+Registrar, Registrar)
+	; ModEvent.Send(ModEvent.Create("Register"+Registrar))
+	SendModEvent("Register"+Registrar)
+	UnregisterForAllModEvents()
+endFunction
+
 ; Unlocks factory for next callback, MUST be called at end of callback
 function Save()
-	SexLabUtil.Log("'"+Animation.Name+"'", "Slot["+Slots.Animations.Find(Animation)+"]", "REGISTER ANIMATION ", "trace,console", true)
+	SexLabUtil.Log("'"+Animation.Name+"'", "Slot["+Slots.Animations.Find(Animation)+"]", "REGISTER ANIMATION", "trace,console", true)
 	Animation.Save(sslUtility.TrimIntArray(positionData, positionID), sslUtility.TrimStringArray(animData, animID), sslUtility.TrimFloatArray(offsetData, offsetID), sslUtility.TrimIntArray(infoData, infoID))
 	FreeFactory()
 endfunction

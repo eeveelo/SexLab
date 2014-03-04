@@ -22,7 +22,7 @@ function RegisterVoice(string Registrar)
 	endIf
 	; Wait for factory to be free
 	while Locked || Voice != none
-		Utility.WaitMenuMode(0.20)
+		Utility.WaitMenuMode(0.15)
 	endWhile
 	Locked = true
 	; Get free voice slot
@@ -33,12 +33,18 @@ function RegisterVoice(string Registrar)
 		Voice.Registry = Registrar
 		Voice.Enabled = true
 		; Send load event
-		RegisterForModEvent("Register"+Registrar, Registrar)
-		ModEvent.Send(ModEvent.Create("Register"+Registrar))
-		UnregisterForAllModEvents()
+		SendEvent(Registrar)
 	else
 		FreeFactory()
 	endIf
+endFunction
+
+; Temporary alpha testing
+function SendEvent(string Registrar)
+	RegisterForModEvent("Register"+Registrar, Registrar)
+	; ModEvent.Send(ModEvent.Create("Register"+Registrar))
+	SendModEvent("Register"+Registrar)
+	UnregisterForAllModEvents()
 endFunction
 
 ; Unlocks factory for next callback, MUST be called at end of callback
@@ -53,7 +59,7 @@ function Save()
 		endIf
 	endIf
 	; Free up factory for use
-	SexLabUtil.Log("'"+Voice.Name+"'", "sslVoiceSlots["+Slots.Voices.Find(Voice)+"]", "REGISTER VOICE ", "trace,console", true)
+	SexLabUtil.Log("'"+Voice.Name+"'", "Slot["+Slots.Voices.Find(Voice)+"]", "REGISTER VOICE", "trace,console", true)
 	FreeFactory()
 endfunction
 
