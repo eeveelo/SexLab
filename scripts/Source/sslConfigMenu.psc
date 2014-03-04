@@ -2,15 +2,16 @@ scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
 int function GetVersion()
-	return 14000
+	return 14200
 endFunction
 
 string function GetStringVer()
-	return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)+""
+	return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)+" Alpha 2"
 endFunction
 
 event OnVersionUpdate(int version)
-	if CurrentVersion < version && CurrentVersion > 1
+	if CurrentVersion < GetVersion() && CurrentVersion > 1
+		Debug.Notification("Updating SexLab to v"+GetStringVer())
 		SetupSystem()
 	endIf
 endEvent
@@ -420,27 +421,29 @@ event OnPageReset(string page)
 		SetCursorFillMode(TOP_TO_BOTTOM)
 
 		AddHeaderOption("$SSL_SexualExperience")
-		AddTextOption("$SSL_TimeSpentHavingSex", Stats.ParseTime(Stats.GetFloat(PlayerRef, "TimeSpent") as int))
-		AddTextOption("$SSL_TimeSinceLastSex", Stats.LastSexTimerString(PlayerRef))
-		AddTextOption("$SSL_VaginalExperience", Stats.ParseTime(Stats.GetInt(PlayerRef, "Vaginal")))
-		AddTextOption("$SSL_AnalExperience", Stats.ParseTime(Stats.GetInt(PlayerRef, "Anal")))
-		AddTextOption("$SSL_OralExperience", Stats.ParseTime(Stats.GetInt(PlayerRef, "Oral")))
+		AddTextOption("$SSL_VaginalExperience", Stats.GetSkillLevel(PlayerRef, "Vaginal"))
+		AddTextOption("$SSL_AnalExperience", Stats.GetSkillLevel(PlayerRef, "Anal"))
+		AddTextOption("$SSL_OralExperience", Stats.GetSkillLevel(PlayerRef, "Oral"))
 		AddTextOption("$SSL_MaleSexualPartners", Stats.GetInt(PlayerRef, "Males"))
 		AddTextOption("$SSL_FemaleSexualPartners", Stats.GetInt(PlayerRef, "Females"))
 		AddTextOption("$SSL_CreatureSexualPartners", Stats.GetInt(PlayerRef, "Creatures"))
 		AddTextOption("$SSL_TimesMasturbated", Stats.GetInt(PlayerRef, "Masturbation"))
-
-		AddTextOption("$SSL_TimesVictim", Stats.GetInt(PlayerRef, "Victim"))
 		AddTextOption("$SSL_TimesAggressive", Stats.GetInt(PlayerRef, "Aggressor"))
+		AddTextOption("$SSL_TimesVictim", Stats.GetInt(PlayerRef, "Victim"))
+		AddTextOption("$SSL_TimeSpentHavingSex", Stats.ParseTime(Stats.GetFloat(PlayerRef, "TimeSpent") as int))
+		AddTextOption("$SSL_TimeSinceLastSex", Stats.LastSexTimerString(PlayerRef))
+
 
 		SetCursorPosition(1)
 		AddHeaderOption("$SSL_SexualStats")
-		AddTextOption("$SSL_Sexuality", Stats.GetSexualityTitle(PlayerRef))
-		AddTextOption("$SSL_SexualPurity", Stats.GetPureLevel(PlayerRef))
-		AddTextOption("$SSL_SexualPerversion", Stats.GetImpureLevel(PlayerRef))
 		AddTextOption("$SSL_VaginalProficiency", Stats.GetSkillTitle(PlayerRef, "Vaginal"))
 		AddTextOption("$SSL_AnalProficiency", Stats.GetSkillTitle(PlayerRef, "Anal"))
 		AddTextOption("$SSL_OralProficiency", Stats.GetSkillTitle(PlayerRef, "Oral"))
+		AddTextOption("$SSL_Sexuality", Stats.GetSexualityTitle(PlayerRef))
+		AddTextOption("$SSL_SexualPurity", Stats.GetPureLevel(PlayerRef))
+		AddTextOption("$SSL_SexualPerversion", Stats.GetImpureLevel(PlayerRef))
+
+
 		AddEmptyOption()
 
 	; System rebuild & clean
