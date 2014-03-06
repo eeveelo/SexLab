@@ -5,7 +5,7 @@ scriptname sslCreatureAnimationSlots extends sslAnimationSlots
 ; ------------------------------------------------------- ;
 
 sslBaseAnimation[] function GetByRace(int ActorCount, Race CreatureRace)
-	bool[] Valid = sslUtility.BoolArray(Slotted)
+	bool[] Valid = new bool[75]
 	int i = Slotted
 	while i
 		i -= 1

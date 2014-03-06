@@ -32,6 +32,6 @@ function Setup()
 	VoiceSlots    = Quest.GetQuest("SexLabQuestRegistry") as sslVoiceSlots
 endFunction
 
-event OnInit()
-	Setup()
-endEvent
+; event OnInit()
+; 	Setup()
+; endEvent

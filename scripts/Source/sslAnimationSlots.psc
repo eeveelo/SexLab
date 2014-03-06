@@ -23,7 +23,7 @@ sslBaseAnimation[] function GetByTags(int ActorCount, string Tags, string TagsSu
 		return none
 	endIf
 	string[] Suppress = sslUtility.ArgString(TagsSuppressed)
-	bool[] Valid = sslUtility.BoolArray(Slotted)
+	bool[] Valid = new bool[125]
 	int i = Slotted
 	while i
 		i -= 1
@@ -34,7 +34,7 @@ endFunction
 
 sslBaseAnimation[] function GetByType(int ActorCount, int Males = -1, int Females = -1, int StageCount = -1, bool Aggressive = false, bool Sexual = true)
 	; Search
-	bool[] Valid = sslUtility.BoolArray(Slotted)
+	bool[] Valid = new bool[125]
 	int i = Slotted
 	while i
 		i -=1
@@ -75,7 +75,7 @@ sslBaseAnimation[] function GetByDefault(int Males, int Females, bool IsAggressi
 	int ActorCount = (Males + Females)
 	bool SameSex = (Females == 2 && Males == 0) || (Males == 2 && Females == 0)
 	; Search
-	bool[] Valid = sslUtility.BoolArray(Slotted)
+	bool[] Valid = new bool[125]
 	int i = Slotted
 	while i
 		i -= 1
