@@ -150,6 +150,22 @@ int function WrapIndex(int index, int len) global
 	return index
 endFunction
 
+int function IndexTravel(int index, int len, bool backwards = false) global
+	; Direction of travel
+	if backwards
+		index -= 1
+	else
+		index += 1
+	endIf
+	; Wrap around
+	if index >= len
+		return 0
+	elseif index < 0
+		return len - 1
+	endIf
+	return index
+endFunction
+
 int function SignInt(bool sign, int value) global
 	if sign
 		return value * -1
