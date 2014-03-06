@@ -367,7 +367,7 @@ function ForgetVoice(Actor ActorRef)
 endFunction
 
 sslBaseVoice function GetVoiceByGender(int Gender)
-	return VoiceSlots.GetRandom(Gender)
+	return VoiceSlots.PickGender(Gender)
 endFunction
 
 sslBaseVoice function GetVoiceByName(string FindName)

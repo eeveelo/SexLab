@@ -32,6 +32,8 @@ event OnGameReload()
 	CheckSystem()
 	; TFC Toggle key
 	Config.ToggleFreeCameraEnable()
+	; ALPHA DEBUG:
+	Config.SetDebugMode(true)
 endEvent
 
 ; Framework
@@ -831,9 +833,9 @@ state NPCBed
 endState
 state PlayerVoice
 	event OnSelectST()
-		sslBaseVoice PV = VoiceSlots.GetBySlot((VoiceSlots.Voices.Find(VoiceSlots.PickVoice(PlayerRef)) + 1))
-		if PV != none && PV.Registered
-			VoiceSlots.SaveVoice(PlayerRef, PV)
+		int Next = VoiceSlots.FindSaved(PlayerRef) + 1
+		if Next < VoiceSlots.Slotted
+			VoiceSlots.SaveVoice(PlayerRef, VoiceSlots.GetBySlot(Next))
 		else
 			VoiceSlots.ForgetVoice(PlayerRef)
 		endIf

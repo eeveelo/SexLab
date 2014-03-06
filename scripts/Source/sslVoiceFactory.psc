@@ -49,14 +49,14 @@ endFunction
 
 ; Unlocks factory for next callback, MUST be called at end of callback
 function Save()
-	if Voice.Enabled
-		; Cache the genders used on voice for easier searching later
-		if Voice.Male && Voice.Enabled
-			StorageUtil.StringListAdd(Slots, "Voice.Male", Voice.Registry, false)
-		endIf
-		if Voice.Female && Voice.Enabled
-			StorageUtil.StringListAdd(Slots, "Voice.Female", Voice.Registry, false)
-		endIf
+	; Make sure we have a gender tag
+	if Voice.Gender == 0
+		Voice.AddTag("Male")
+	elseIf Voice.Gender == 1
+		Voice.AddTag("Female")
+	elseIf Voice.Gender == -1
+		Voice.AddTag("Male")
+		Voice.AddTag("Female")
 	endIf
 	; Free up factory for use
 	SexLabUtil.Log("'"+Voice.Name+"'", "Slot["+Slots.Voices.Find(Voice)+"]", "REGISTER VOICE", "trace,console", true)

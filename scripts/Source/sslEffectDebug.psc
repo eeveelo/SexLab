@@ -13,66 +13,62 @@ actor Ref2
 float scale1
 float scale2
 
-event OnEffectStart(actor TargetRef, actor CasterRef)
+event OnEffectStart(Actor TargetRef, Actor CasterRef)
+	Ref1 = TargetRef
+	Ref2 = CasterRef
 
 
-	; sslBaseAnimation[] Anims = SexLab.AnimSlots.GetByTags(2, "Cowgirl")
-	; Debug.TraceAndBox("Found: "+Anims.Length)
-	; Debug.Trace(Anims)
-
-	SexLab = GetAPI()
-
-	Ref2 = TargetRef
-	Ref1 = SexLab.FindAvailableActor(Ref2, 5000.0, 1, SexLab.PlayerRef)
-
-	; Ref1.SetRestrained(true)
-	; Ref2.SetRestrained(true)
-
-	; Playing = Game.GetFormFromFile(0x6AB40, "SexLab.esm") as Idle ; Looped
-	Playing = Game.GetFormFromFile(0x6AB41, "SexLab.esm") as Idle ; Not Looped
-
-	Ref1.UnequipAll()
-	Ref2.UnequipAll()
-
-	Ref1.MoveTo(Ref2)
-
-	Ref1.PlayIdleWithTarget(Playing, Ref2)
-
-	RegisterForSingleUpdate(8.0)
-
-	; Utility.Wait(2.0)
+	sslBaseVoice Voice = GetAPI().PickVoice(TargetRef)
+	Log(TargetRef.GetLeveledActorBase().GetName()+" Selected: "+Voice.Name)
 
 
-	; LockActor(Ref1)
-	; LockActor(Ref2)
-
-	scale1 = Scale(Ref1)
-	scale2 = Scale(Ref2)
-
-	Ref1.SetScale(scale1)
-	Ref2.SetScale(scale2)
-
-	; DebugLog(CasterRef.GetLeveledActorBase().GetName()+" -> "+TargetRef.GetLeveledActorBase().GetName(), Looped, true)
-	; float started = Utility.GetCurrentRealTime()
-	; CasterRef.PlayIdleWithTarget(Playing, TargetRef)
-	; float ended = (Utility.GetCurrentRealTime() - started)
-	; DebugLog("Ended After: "+ended, "Looped", true)
-
-	; UnlockActor(TargetRef)
-	; UnlockActor(CasterRef)
-
-	; Actor[] Positions = SexLab.MakeActorArray(SexLab.FindAvailableActor(TargetRef), SexLab.PlayerRef)
-	; PrintConsole("Unsorted: "+Positions)
-	; Positions = SexLab.SortActors(Positions)
-	; PrintConsole("Sorted: "+Positions)
-
-	; SexLab.QuickStart(Positions[0], Positions[1]).Log("Started Test!")
-
-	; Thread.Log(Thread.Positions)
-	; Thread.Initialize()
+	Utility.Wait(1.0)
+	Dispel()
 endEvent
 
-float function Scale(actor ActorRef)
+event OnUpdate()
+	; PrintConsole("OnUpdate")
+	; Ref1.PlayIdleWithTarget(Playing, Ref2)
+	; RegisterForSingleUpdate(8.0)
+endEvent
+
+event OnEffectFinish(Actor TargetRef, Actor CasterRef)
+	Log("Debug effect spell expired("+TargetRef+", "+CasterRef+")")
+endEvent
+
+;/-----------------------------------------------\;
+;|	Debug Utility Functions                      |;
+;\-----------------------------------------------/;
+
+function Benchmark(int iterations = 100000, float started = 0.0, float finished = 0.0)
+	Debug.Notification("Starting benchmark...")
+
+	; Benchmark prep
+
+
+	started = Utility.GetCurrentRealTime()
+	while iterations
+		iterations -= 1
+		; Code to benchmark
+
+
+	endWhile
+	finished = Utility.GetCurrentRealTime()
+
+	Utility.Wait(1.0)
+	Log(" Started: " + started)
+	Log("Finished: " + finished)
+	Log("Total Time: " + (finished - started))
+
+	Debug.Notification("Benchmark end...")
+endFunction
+
+function Log(string log)
+	Debug.Trace(log)
+	MiscUtil.PrintConsole(log)
+endfunction
+
+float function Scale(Actor ActorRef)
 	float display = ActorRef.GetScale()
 	ActorRef.SetScale(1.0)
 	float base = ActorRef.GetScale()
@@ -81,22 +77,6 @@ float function Scale(actor ActorRef)
 	float AnimScale = (1.0 / base)
 	return AnimScale
 endFunction
-
-event OnUpdate()
-	PrintConsole("OnUpdate")
-	Ref1.PlayIdleWithTarget(Playing, Ref2)
-	RegisterForSingleUpdate(8.0)
-endEvent
-
-event OnEffectFinish(Actor TargetRef, Actor CasterRef)
-	Ref1.SetRestrained(false)
-	Ref2.SetRestrained(false)
-	debug.traceandbox("effect finish")
-endEvent
-
-;/-----------------------------------------------\;
-;|	Debug Utility Functions                      |;
-;\-----------------------------------------------/;
 
 function LockActor(actor ActorRef)
 	; Start DoNothing package

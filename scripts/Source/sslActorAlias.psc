@@ -249,7 +249,7 @@ state Prepare
 		if !IsCreature
 			; Pick a voice if needed
 			if Voice == none && !IsForcedSilent
-				SetVoice(Lib.VoiceSlots.GetRandom(BaseRef.GetSex()), IsForcedSilent)
+				SetVoice(Lib.VoiceSlots.PickGender(BaseRef.GetSex()), IsForcedSilent)
 			endIf
 			; Get actor stats
 			StatLevel = new int[3]

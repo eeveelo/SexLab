@@ -1,9 +1,5 @@
 scriptname sslVoiceSlots extends Quest
 
-; Library for voice
-sslThreadLibrary property Lib auto hidden
-sslSystemConfig property Config auto hidden
-
 int property Slotted auto hidden
 ; Voices readonly storage
 sslBaseVoice[] Slots
@@ -13,38 +9,49 @@ sslBaseVoice[] property Voices hidden
 	endFunction
 endProperty
 
+Actor PlayerRef
+sslSystemConfig Config
+
 ; ------------------------------------------------------- ;
 ; --- Voice Filtering                                 --- ;
 ; ------------------------------------------------------- ;
 
-sslBaseVoice function GetRandom(int Gender = 1)
-	; Select valid voices by gender
-	String List = "Voice.Female"
-	if Gender == 0
-		List = "Voice.Male"
+sslBaseVoice[] function GetAllGender(int Gender)
+	bool[] Valid = sslUtility.BoolArray(Slotted)
+	int i = Slotted
+	while i
+		i -= 1
+		Valid[i] = Slots[i].Enabled && (Gender == Slots[i].Gender || Slots[i].Gender == -1)
+	endwhile
+	return GetList(Valid)
+endFunction
+
+sslBaseVoice function PickGender(int Gender = 1)
+	; Get list of valid voices
+	bool[] Valid = new bool[50]
+	int i = Slotted
+	while i
+		i -= 1
+		Valid[i] = Slots[i].Enabled && (Gender == Slots[i].Gender || Slots[i].Gender == -1)
+	endwhile
+	; Select a random true in the list
+	i = Utility.RandomInt(0, (Slotted - 1))
+	int Slot = Valid.Find(true, i)
+	if Slot == -1
+		Slot = Valid.RFind(true, i)
 	endIf
-	int Count = StorageUtil.StringListCount(self, List)
-	; SexLabUtil.Log("GetRandom("+Gender+") - "+Count, List, "NOTICE", "trace,console")
-	if Count > 0
-		return GetByRegistrar(StorageUtil.StringListGet(self, List, Utility.RandomInt(0, (Count - 1))))
-	endIf
-	return none
+	return GetbySlot(Slot)
 endFunction
 
 sslBaseVoice function PickVoice(Actor ActorRef)
-	bool IsPlayer = ActorRef == Lib.PlayerRef
+	bool IsPlayer = ActorRef == PlayerRef
 	; Find if a saved voice exists and in what slot
 	sslBaseVoice Saved = GetSaved(ActorRef)
-	if Saved != none
-		if !Config.bNPCSaveVoice && !IsPlayer
-			; They have a saved voice, but NPC saved voices is disabled
-			ForgetVoice(ActorRef)
-		else
-			return Saved ; Use the saved voice
-		endIf
+	if Saved != none && (IsPlayer || Config.bNPCSaveVoice)
+		return Saved ; Use saved voice
 	endIf
 	; Pick a random voice based on gender
-	sslBaseVoice Picked = GetRandom(ActorRef.GetLeveledActorBase().GetSex())
+	sslBaseVoice Picked = PickGender(ActorRef.GetLeveledActorBase().GetSex())
 	; Save the voice to NPC for reuse, if enabled
 	if Picked != none && !IsPlayer && Config.bNPCSaveVoice
 		SaveVoice(ActorRef, Picked)
@@ -58,34 +65,19 @@ sslBaseVoice function GetByTags(string Tags, string TagsSuppressed = "", bool Re
 		return none
 	endIf
 	string[] Suppress = sslUtility.ArgString(TagsSuppressed)
-	bool[] Valid = sslUtility.BoolArray(Slotted)
+	bool[] Valid = new bool[50]
 	int i = Slotted
 	while i
 		i -= 1
 		Valid[i] = Slots[i].Enabled && (TagsSuppressed == "" || Slots[i].CheckTags(Suppress, false, true)) && Slots[i].CheckTags(Search, RequireAll)
 	endWhile
-	sslBaseVoice[] Found = GetList(valid)
+	sslBaseVoice[] Found = GetList(Valid)
 	int r = Utility.RandomInt(0, (Found.Length - 1))
 	return Found[r]
 endFunction
 
 sslBaseVoice function GetByRegistrar(string Registrar)
-	int i = FindByRegistrar(Registrar)
-	if i != -1
-		return Slots[i]
-	endIf
-	return none
-endFunction
-
-int function FindByName(string FindName)
-	int i = Slotted
-	while i
-		i -= 1
-		if Slots[i].Name == FindName
-			return i
-		endIf
-	endWhile
-	return -1
+	return GetBySlot(FindByRegistrar(Registrar))
 endFunction
 
 sslBaseVoice function GetByName(string FindName)
@@ -99,8 +91,12 @@ sslBaseVoice function GetBySlot(int index)
 	return Slots[index]
 endFunction
 
+int function FindSaved(Actor ActorRef)
+	return FindByRegistrar(StorageUtil.GetStringValue(ActorRef, "SexLab.SavedVoice", ""))
+endFunction
+
 sslBaseVoice function GetSaved(Actor ActorRef)
-	return GetByRegistrar(StorageUtil.GetStringValue(ActorRef, "SexLab.SavedVoice", ""))
+	return GetBySlot(FindSaved(ActorRef))
 endFunction
 
 string function GetSavedName(Actor ActorRef)
@@ -137,12 +133,37 @@ sslBaseVoice[] function GetList(bool[] Valid)
 		pos = Valid.Find(true, (pos + 1))
 		Found += Output[i].Name+", "
 	endWhile
-	Lib.Log("Found Voices("+Output.Length+"): "+Found)
+	SexLabUtil.DebugLog("Found Voices("+Output.Length+"): "+Found, "", Config.DebugMode)
 	return Output
+endFunction
+
+bool function Toggle(int slot)
+	sslBaseVoice Voice = GetBySlot(slot)
+	if Voice != none
+		Voice.Enabled = !Voice.Enabled
+		if Voice.Enabled
+			StorageUtil.StringListAdd(self, "Voice."+Voice.Gender, Voice.Registry, false)
+		else
+			StorageUtil.StringListRemove(self, "Voice."+Voice.Gender, Voice.Registry, true)
+		endIf
+		return Voice.Enabled
+	endIf
+	return false
 endFunction
 
 bool function IsRegistered(string Registrar)
 	return FindByRegistrar(Registrar) != -1
+endFunction
+
+int function FindByName(string FindName)
+	int i = Slotted
+	while i
+		i -= 1
+		if Slots[i].Name == FindName
+			return i
+		endIf
+	endWhile
+	return -1
 endFunction
 
 int function FindByRegistrar(string Registrar)
@@ -159,9 +180,9 @@ sslBaseVoice function Register(string Registrar)
 endFunction
 
 function RegisterVoices()
-	; Register default animations
+	; Register default voices
 	(Quest.GetQuest("SexLabQuestRegistry") as sslVoiceDefaults).LoadVoices()
-	; Send mod event for 3rd party animations
+	; Send mod event for 3rd party voices
 	ModEvent.Send(ModEvent.Create("SexLabSlotVoices"))
 	Debug.Notification("$SSL_NotifyVoiceInstall")
 endFunction
@@ -181,10 +202,9 @@ function Setup()
 	; Init variables
 	Slotted = 0
 	StorageUtil.StringListClear(self, "Voice.Registry")
-	StorageUtil.StringListClear(self, "Voice.Female")
-	StorageUtil.StringListClear(self, "Voice.Male")
-	Lib = (Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary)
-	Config = (Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig)
-	; Register animations
+	; Setup library - shortened override of sslSystemLibrary
+	Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
+	PlayerRef = Game.GetPlayer()
+	; Register voices
 	RegisterVoices()
 endFunction

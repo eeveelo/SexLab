@@ -88,6 +88,7 @@ function DebugLog(string Log, string Type = "NOTICE", bool DebugMode = false) gl
 	endIf
 endFunction
 
+
 ;#------------------------------#
 ;#  SKSE Bound functions        #
 ;#        by h38fh2mf           #
