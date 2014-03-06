@@ -1,12 +1,5 @@
 scriptname sslSystemConfig extends Quest
 
-bool property DebugMode hidden
-	bool function get()
-		return true
-	endFunction
-endProperty
-
-bool property SOSEnabled auto hidden
 bool property bDisablePlayer auto hidden
 float property fMaleVoiceDelay auto hidden
 float property fFemaleVoiceDelay auto hidden
@@ -38,6 +31,11 @@ bool property bNPCSaveVoice auto hidden
 
 int property kBackwards auto hidden ; Right Shift
 int property kAdjustStage auto hidden; Right Ctrl
+
+int property kBackwardsAlt auto hidden ; Left Shift
+int property kAdjustStageAlt auto hidden; Left Ctrl
+
+
 int property kAdvanceAnimation auto hidden ; Space
 int property kChangeAnimation auto hidden ; O
 int property kChangePositions auto hidden ; =
@@ -64,6 +62,15 @@ string property sNPCBed auto hidden
 float[] property fStageTimer auto hidden
 float[] property fStageTimerLeadIn auto hidden
 float[] property fStageTimerAggr auto hidden
+
+bool bDebugMode
+bool property DebugMode hidden
+	bool function get()
+		return bDebugMode
+	endFunction
+endProperty
+
+Actor PlayerRef
 
 ; ------------------------------------------------------- ;
 ; --- Config Accessors                                --- ;
@@ -132,13 +139,15 @@ event OnKeyDown(int keyCode)
 endEvent
 
 bool function BackwardsPressed()
-	return (Input.IsKeyPressed(kBackwards) || ((kBackwards == 42 || kBackwards == 54) && (Input.IsKeyPressed(42) || Input.IsKeyPressed(54))))
+	return Input.GetNumKeysPressed() > 1 && (Input.IsKeyPressed(kBackwards) || (kBackwards == 54 && Input.IsKeyPressed(42)) || (kBackwards == 42 && Input.IsKeyPressed(54)))
 endFunction
+
 bool function AdjustStagePressed()
-	return (Input.IsKeyPressed(kAdjustStage) || ((kAdjustStage == 157 || kAdjustStage == 29) && (Input.IsKeyPressed(157) || Input.IsKeyPressed(29))))
+	return Input.GetNumKeysPressed() > 1 && (Input.IsKeyPressed(kAdjustStage) || (kAdjustStage == 157 && Input.IsKeyPressed(29)) || (kAdjustStage == 29 && Input.IsKeyPressed(157)))
 endFunction
 
 function HotkeyCallback(sslThreadController Thread, int keyCode)
+
 	; Advance Stage
 	if keyCode == kAdvanceAnimation
 		Thread.AdvanceStage(BackwardsPressed())
@@ -190,7 +199,20 @@ endFunction
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
 
+function SetDebugMode(bool enabling)
+	bDebugMode = enabling
+	if enabling
+		PlayerRef.AddSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
+		PlayerRef.AddSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
+	else
+		PlayerRef.RemoveSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
+		PlayerRef.RemoveSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
+	endIf
+endFunction
+
 function SetDefaults()
+
+	PlayerRef = Game.GetPlayer()
 
 	sPlayerVoice = "$SSL_Random"
 	bNPCSaveVoice = false
@@ -342,7 +364,6 @@ function SetDefaults()
 	fStageTimerAggr[2] = 10.0
 	fStageTimerAggr[3] = 10.0
 	fStageTimerAggr[4] = 3.0
-
 endFunction
 
 

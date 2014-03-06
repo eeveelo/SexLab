@@ -13,8 +13,9 @@ bool hkReady
 bool TimedStage
 float StageTimer
 int StageCount
-int AdjustPos
 int aid
+int AdjustPos
+sslActorAlias AdjustAlias
 
 ; ------------------------------------------------------- ;
 ; --- Thread Starter                                  --- ;
@@ -97,19 +98,19 @@ state Animating
 	endFunction
 
 	event OnUpdate()
+		float CurrentTime = Utility.GetCurrentRealTime()
 		; Advance stage on timer
-		if (AutoAdvance || TimedStage) && StageTimer < Utility.GetCurrentRealTime()
+		if (AutoAdvance || TimedStage) && StageTimer < CurrentTime
 			GoToStage((Stage + 1))
 			return
 		endIf
 		; Play SFX
-		SFXTimer -= 0.60
-		if SFXTimer <= 0.0 && Animation.SoundFX != none
+		if SFXTimer < CurrentTime && Animation.SoundFX != none
 			Animation.SoundFX.Play(CenterRef)
-			SFXTimer = SFXDelay
+			SFXTimer = CurrentTime + SFXDelay
 		endIf
 		; Loop
-		RegisterForSingleUpdate(0.60)
+		RegisterForSingleUpdate(0.30)
 	endEvent
 
 	function EndAction()
@@ -184,7 +185,7 @@ state Animating
 	endFunction
 
 	function ChangeAnimation(bool backwards = false)
-		SetAnimation(sslUtility.WrapIndex((aid + sslUtility.SignInt(backwards, 1)), Animations.Length))
+		SetAnimation(sslUtility.IndexTravel(aid, Animations.Length, backwards))
 		SendThreadEvent("AnimationChange")
 	endFunction
 
@@ -192,33 +193,31 @@ state Animating
 		if ActorCount < 2 || HasCreature
 			return ; Solo/Creature Animation, nobody to swap with
 		endIf
-		; Set direction of swapping
-		int MovedTo = sslUtility.WrapIndex((AdjustPos + sslUtility.SignInt(backwards, 1)), ActorCount)
-		; Shuffle
-		actor adjusting = Positions[AdjustPos]
-		actor moved = Positions[MovedTo]
-		Positions[AdjustPos] = moved
-		Positions[MovedTo] = adjusting
+		; Find position to swap to
+		int MovedPos = sslUtility.IndexTravel(AdjustPos, ActorCount, backwards)
+		; Shuffle actor positions
+		Positions[AdjustPos] = PositionAlias(MovedPos).ActorRef
+		Positions[MovedPos] = AdjustAlias.ActorRef
 		; Sync new positions
-		RealignActors()
-		AdjustChange(backwards)
+		AdjustPos = MovedPos
 		UpdateAdjustKey()
+		RealignActors()
 		SendThreadEvent("PositionChange")
 	endFunction
 
 	function AdjustForward(bool backwards = false, bool adjustStage = false)
 		Animation.AdjustForward(AdjustKey, AdjustPos, Stage, sslUtility.SignFloat(backwards, 1.0), adjustStage)
-		PositionAlias(AdjustPos).UpdateOffsets()
+		AdjustAlias.UpdateOffsets()
 	endFunction
 
 	function AdjustSideways(bool backwards = false, bool adjustStage = false)
 		Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, sslUtility.SignFloat(backwards, 1.0), adjustStage)
-		PositionAlias(AdjustPos).UpdateOffsets()
+		AdjustAlias.UpdateOffsets()
 	endFunction
 
 	function AdjustUpward(bool backwards = false, bool adjustStage = false)
 		Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, sslUtility.SignFloat(backwards, 1.0), adjustStage)
-		PositionAlias(AdjustPos).UpdateOffsets()
+		AdjustAlias.UpdateOffsets()
 	endFunction
 
 	function RotateScene(bool backwards = false)
@@ -232,8 +231,11 @@ state Animating
 	endFunction
 
 	function AdjustChange(bool backwards = false)
-		AdjustPos = sslUtility.WrapIndex((AdjustPos + sslUtility.SignInt(backwards, 1)), ActorCount)
-		Debug.Notification("Adjusting Position For: "+Positions[AdjustPos].GetLeveledActorBase().GetName())
+		if ActorCount > 1
+			AdjustPos = sslUtility.IndexTravel(Positions.Find(AdjustAlias.ActorRef), ActorCount, backwards)
+			AdjustAlias = PositionAlias(AdjustPos)
+			Debug.Notification("Adjusting Position For: "+AdjustAlias.ActorRef.GetLeveledActorBase().GetName())
+		endIf
 	endFunction
 
 	function RestoreOffsets()
@@ -265,10 +267,10 @@ state Animating
 		RegisterForSingleUpdate(0.05)
 	endFunction
 
-	event OnKeyDown(int keyCode)
-		if hkReady && !(Utility.IsInMenuMode() || UI.IsMenuOpen("Console") || UI.IsMenuOpen("Loading Menu"))
+	event OnKeyDown(int KeyCode)
+		if hkReady && !Utility.IsInMenuMode() ; || UI.IsMenuOpen("Console") || UI.IsMenuOpen("Loading Menu")
 			hkReady = false
-			Config.HotkeyCallback(self, keyCode)
+			Config.HotkeyCallback(self, KeyCode)
 			hkReady = true
 		endIf
 	endEvent
@@ -401,8 +403,8 @@ endFunction
 
 function EnableHotkeys()
 	if HasPlayer
-		RegisterForKey(Config.kBackwards)
-		RegisterForKey(Config.kAdjustStage)
+		; RegisterForKey(Config.kBackwards)
+		; RegisterForKey(Config.kAdjustStage)
 		RegisterForKey(Config.kAdvanceAnimation)
 		RegisterForKey(Config.kChangeAnimation)
 		RegisterForKey(Config.kChangePositions)
@@ -415,7 +417,6 @@ function EnableHotkeys()
 		RegisterForKey(Config.kMoveScene)
 		RegisterForKey(Config.kRotateScene)
 		hkReady = true
-		; RegisterForKey(Config.kToggleFreeCamera)
 	endIf
 endFunction
 
@@ -426,9 +427,9 @@ endFunction
 
 function Initialize()
 	DisableHotkeys()
-	aid        = 0
-	AdjustPos  = 0
-	TimedStage = false
+	aid         = 0
+	TimedStage  = false
+	AdjustAlias = ActorAlias[0]
 	parent.Initialize()
 endFunction
 
