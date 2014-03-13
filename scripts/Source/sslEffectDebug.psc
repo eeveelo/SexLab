@@ -14,12 +14,43 @@ float scale1
 float scale2
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
-	Ref1 = TargetRef
-	Ref2 = CasterRef
+	; Ref1 = TargetRef
+	; Ref2 = CasterRef
+	Ref1 = CasterRef
+	Ref2 = TargetRef
+
+	int seed = Utility.RandomInt(TargetRef.GetLevel(), TargetRef.GetLevel() * 4) * 2
+
+	debug.messagebox(SeedSkill(TargetRef, seed, 0.45, 2.5))
+	debug.messagebox(SeedSkill(TargetRef, seed, 0.45, 1.5))
 
 
-	sslBaseVoice Voice = GetAPI().PickVoice(TargetRef)
-	Log(TargetRef.GetLeveledActorBase().GetName()+" Selected: "+Voice.Name)
+	; Idle NextClip = Game.GetForm(0x10EB3C) as Idle
+	; Idle PAFull = Game.GetFormFromFile(0x6AB41, "SexLab.esm") as Idle
+	; Idle PALoop = Game.GetFormFromFile(0x6AB40, "SexLab.esm") as Idle
+
+	; ObjectUtil.SetReplaceAnimation(Ref1, "NPCKillMoveStart", NextClip)
+	; ObjectUtil.SetReplaceAnimation(Ref2, "2_KillMoveStart", NextClip)
+
+	; ObjectUtil.SetReplaceAnimation(Ref2, "NPCKillMoveStart", NextClip)
+	; ObjectUtil.SetReplaceAnimation(Ref1, "2_KillMoveStart", NextClip)
+
+	; ; LockActor(Ref1)
+	; ; LockActor(Ref2)
+	; Ref1.UnequipAll()
+	; Ref2.UnequipAll()
+
+	; Ref1.PlayIdleWithTarget(PAFull, Ref2)
+	; Game.EnablePlayerControls(false, false, true, true, false, false, false, false)
+	; Game.ForceThirdPerson()
+	; Debug.SendAnimationEvent(Ref1, "NPCKillMoveEnd")
+	; Debug.SendAnimationEvent(Ref2, "NPCKillMoveEnd")
+
+	; Debug.SendAnimationEvent(Ref1, "NPCPairedStop")
+	; Debug.SendAnimationEvent(Ref2, "NPCPairedStop")
+
+	; Debug.SendAnimationEvent(Ref1, "PairEnd")
+	; Debug.SendAnimationEvent(Ref2, "PairEnd")
 
 
 	Utility.Wait(1.0)
@@ -35,6 +66,32 @@ endEvent
 event OnEffectFinish(Actor TargetRef, Actor CasterRef)
 	Log("Debug effect spell expired("+TargetRef+", "+CasterRef+")")
 endEvent
+
+int function SeedSkill(Actor ActorRef, int seed, float curve = 0.4, float adjuster = 2.2)
+	Log("\n\n##############################################################\n\n")
+	String ActorName = ActorRef.GetLeveledActorBase().GetName()
+	Log(ActorName+" -- Level: "+ActorRef.GetLevel())
+
+	Log(ActorName+" -- Seed: "+seed)
+
+	float speech = ActorRef.GetActorValue("Speechcraft")
+	Log(ActorName+" -- Speech: "+speech)
+
+	float conf = ActorRef.GetActorValue("Confidence")
+	Log(ActorName+" -- Confidence: "+conf)
+
+	int modifier = (((speech * conf) + 1.0) / adjuster) as int
+	Log(ActorName+" -- Speech/Confidence Mod: "+modifier)
+	Log(ActorName+" -- Using: "+seed+" + ("+speech+" * "+conf+") / "+adjuster)
+
+	int skill = seed + (((speech * conf) / adjuster) as int)
+
+
+	Log(ActorName+" -- FINAL SKILL ("+curve+"): "+skill+" -> "+SexLab.CalcLevel(skill, curve))
+	Log("\n\n##############################################################")
+
+	return skill
+endFunction
 
 ;/-----------------------------------------------\;
 ;|	Debug Utility Functions                      |;

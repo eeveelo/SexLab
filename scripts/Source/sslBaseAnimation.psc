@@ -16,8 +16,8 @@ float[] timers
 float[] CenterAdjust
 string[] animations
 
-float Purity
-float Impurity
+float property Pure auto hidden
+float property Impure auto hidden
 
 ; StorageUtil legend
 ; form Key("Creatures") = Valid races for creature animation
@@ -374,15 +374,15 @@ function Save(int[] posData, string[] animData, float[] offsetData, int[] flagDa
 			Stage -= 1
 		endWhile
 	endIf
-	; Init purity/impurity amounts
-	; Purity = 0.0
-	; Impurity = 0.0
-
-	; Purity +=   (HasTag("Loving") as float) * 2.50
-	; Impurity += (HasTag("Dirty") as float)  * 2.00
-	; Impurity += ((Actors == 1) as float)    * 1.25
-	; Impurity += ((Actors > 2) as float)     * ((Actors - 2) * 1.75)
+	; Init Pure/Impure amounts
+	; Pure   += (HasTag("Loving") as float) * 2.50
+	; Impure += (HasTag("Dirty") as float)  * 1.50
+	; Impure += (IsCreature as float)       * 2.00
+	; Impure += ((Actors == 1) as float)    * 1.25
+	; Impure += ((Actors > 2) as float)     * ((Actors - 2) * 1.50)
 endFunction
+
+; function GetBasePure(bool IsCourting)
 
 float function CalcCenterAdjuster(int Stage)
 	; Get forward Offsets of all positions + find highest/lowest position
@@ -423,6 +423,9 @@ function Initialize()
 	Actors = 0
 	Stages = 0
 	Content = 0
+
+	Pure   = 0.0
+	Impure = 0.0
 
 	Genders = new int[3]
 	float[] floatDel1
