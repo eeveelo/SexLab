@@ -13,7 +13,6 @@ bool hkReady
 bool TimedStage
 float StageTimer
 int StageCount
-int aid
 int AdjustPos
 sslActorAlias AdjustAlias
 
@@ -41,7 +40,6 @@ state Preparing
 		if LeadIn
 			SendThreadEvent("LeadInStart")
 		endIf
-		StartedAt = Utility.GetCurrentRealTime()
 		Action("Advancing")
 	endEvent
 endState
@@ -185,7 +183,7 @@ state Animating
 	endFunction
 
 	function ChangeAnimation(bool backwards = false)
-		SetAnimation(sslUtility.IndexTravel(aid, Animations.Length, backwards))
+		SetAnimation(sslUtility.IndexTravel(Animations.Find(Animation), Animations.Length, backwards))
 		SendThreadEvent("AnimationChange")
 	endFunction
 
@@ -249,6 +247,7 @@ state Animating
 		; Enable Controls
 		sslActorAlias Slot = ActorAlias(PlayerRef)
 		Slot.UnlockActor()
+		Debug.SendAnimationEvent(PlayerRef, "IdleForceDefaultState")
 		; Slot.StopAnimating(true)
 		PlayerRef.StopTranslation()
 		; Lock hotkeys and wait 7 seconds
@@ -281,31 +280,24 @@ endState
 ; --- Context Sensitive Info                          --- ;
 ; ------------------------------------------------------- ;
 
-function SetAnimation(int AnimID = -1)
+function SetAnimation(int aid = -1)
 	; Randomize if -1
-	aid = AnimID
-	if AnimID < 0 || AnimID >= Animations.Length
+	if aid < 0 || aid >= Animations.Length
 		aid = Utility.RandomInt(0, (Animations.Length - 1))
 	endIf
 	if Animations[aid] == Animation
 		return ; Nothings changed.
 	endIf
-	; Save times spent on current animation before changing
-	UpdateSkillTimers()
 	; Set active animation
 	Animation = Animations[aid]
+	; Update animation info
+	StageCount = Animation.StageCount
+	UpdateAdjustKey()
+	RecordSkills()
+	; Inform player of animation being played now
 	if HasPlayer
 		MiscUtil.PrintConsole("Playing Animation: " + Animation.Name)
 	endIf
-	; Update animation info
-	UpdateAdjustKey()
-	AnimStarted = Utility.GetCurrentRealTime()
-	StageCount = Animation.StageCount
-	IsVaginal = AddTagConditional("Vaginal", Animation.HasTag("Vaginal"))
-	IsAnal = AddTagConditional("Anal", Animation.HasTag("Anal"))
-	IsOral = AddTagConditional("Oral", Animation.HasTag("Oral"))
-	IsLoving = AddTagConditional("Dirty", Animation.HasTag("Dirty"))
-	IsDirty = AddTagConditional("Loving", Animation.HasTag("Loving"))
 	; Check for out of range stage
 	if Stage >= StageCount
 		GoToStage((StageCount - 1))
@@ -368,8 +360,8 @@ function EndAnimation(bool Quickly = false)
 	; Set fast flag to skip slow ending functions
 	FastEnd = Quickly
 	Stage = StageCount
-	; Save skill timers
-	UpdateSkillTimers()
+	; Save skill timers for xp
+	RecordSkills()
 	; Reset actors & wait for clear state
 	AliasAction("Reset", "")
 	; Send end event
@@ -427,7 +419,6 @@ endFunction
 
 function Initialize()
 	DisableHotkeys()
-	aid         = 0
 	TimedStage  = false
 	AdjustAlias = ActorAlias[0]
 	parent.Initialize()
@@ -438,8 +429,6 @@ state Making
 		Log("Thread Primed")
 		Action("Preparing")
 		return self
-	endFunction
-	function SetAnimation(int AnimID = -1)
 	endFunction
 	function EnableHotkeys()
 	endFunction

@@ -43,22 +43,17 @@ sslBaseAnimation[] property Animations hidden
 endProperty
 
 ; Stat Tracking Info
-bool property IsVaginal auto hidden
-bool property IsAnal auto hidden
-bool property IsOral auto hidden
-bool property IsDirty auto hidden
-bool property IsLoving auto hidden
-int property SecondsVaginal auto hidden
-int property SecondsAnal auto hidden
-int property SecondsOral auto hidden
-float property AnimStarted auto hidden
-float property AnimationTotalTime hidden
-	float function get()
-		return Utility.GetCurrentRealTime() -  AnimStarted
-	endFunction
-endProperty
+; bool property IsVaginal auto hidden
+; bool property IsAnal auto hidden
+; bool property IsOral auto hidden
+; bool property IsDirty auto hidden
+; bool property IsLoving auto hidden
+; int property SecondsVaginal auto hidden
+; int property SecondsAnal auto hidden
+; int property SecondsOral auto hidden
 
 ; Timer Info
+; TODO: maybe a little excessive for a property?
 float[] CustomTimers
 float[] property Timers hidden
 	float[] function get()
@@ -104,14 +99,16 @@ int property Creatures hidden
 endProperty
 bool property HasCreature hidden
 	bool function get()
-		return Creatures != 0
+		return CreatureRef != none
 	endFunction
 endProperty
 
 ; Local readonly
-bool NoLeadIn
 string[] Hooks
+float[] SkillUse ; [0] Vaginal, [1] Anal, [2] Oral, [3] Foreplay
+float AnimStarted
 int BedFlag ; 0 allow, 1 force, -1 forbid
+bool NoLeadIn
 
 ; ------------------------------------------------------- ;
 ; --- Thread Making API                               --- ;
@@ -323,9 +320,45 @@ bool function IsAggressor(Actor ActorRef)
 	return VictimRef != none && VictimRef != ActorRef
 endFunction
 
+int function GetHighestPresentRelationshipRank(Actor ActorRef)
+	if ActorCount == 1
+		return 0 ; No special relationship with yourself...
+	elseIf ActorCount == 2
+		return ActorRef.GetRelationshipRank(Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)]) ; Get opposing actors relationship rank
+	endIf
+	; Next position
+	Actor NextActor = Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)]
+	int Highest = ActorRef.GetRelationshipRank(NextActor)
+	; loop through each position until reaching ActorRef
+	while NextActor != ActorRef
+		NextActor = Positions[sslUtility.IndexTravel(Positions.Find(NextActor), ActorCount)]
+		if NextActor != ActorRef && ActorRef.GetRelationshipRank(NextActor) > Highest
+			Highest = ActorRef.GetRelationshipRank(NextActor)
+		endIf
+	endWhile
+	return Highest
+endFunction
+
+int function GetLowestPresentRelationshipRank(Actor ActorRef)
+	if ActorCount < 3
+		return GetHighestPresentRelationshipRank(ActorRef) ; Results will be same for 1 and 2 actors
+	endIf
+	; Next position
+	Actor NextActor = Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)]
+	int Lowest = ActorRef.GetRelationshipRank(NextActor)
+	; loop through each position until reaching ActorRef
+	while NextActor != ActorRef
+		NextActor = Positions[sslUtility.IndexTravel(Positions.Find(NextActor), ActorCount)]
+		if NextActor != ActorRef && ActorRef.GetRelationshipRank(NextActor) < Lowest
+			Lowest = ActorRef.GetRelationshipRank(NextActor)
+		endIf
+	endWhile
+	return Lowest
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Animation Setup                                 --- ;
-; ------------------------------------------------------- ;
+; ------------------------------------------------------- ;B
 
 function SetForcedAnimations(sslBaseAnimation[] AnimationList)
 	if AnimationList.Length != 0
@@ -430,6 +463,24 @@ endFunction
 	endIf
 	return false ; No bed found
 endFunction
+
+
+; int[] Skills
+; function SetSkilledActor(Actor ActorRef)
+; 	Skills = new int[3]
+; 	Skills[0] = Stats.GetskillLevel(ActorRef, "Vaginal")
+; 	Skills[1] = Stats.GetskillLevel(ActorRef, "Anal")
+; 	Skills[2] = Stats.GetskillLevel(ActorRef, "Oral")
+; endFunction
+
+; int[] function GetSkillWeights()
+; 	int[] Weights = new int[5]
+; 	Weights[0] = (Skills[0] * 0.5) * SecondsVaginal
+; 	Weights[1] = (Skills[1] * 0.5) * SecondsAnal
+; 	Weights[2] = (Skills[2] * 0.5) * SecondsOral
+; 	if IsVaginal
+; 		Weights[0]
+; endFunction
 
 ; ------------------------------------------------------- ;
 ; --- Event Hooks                                     --- ;
@@ -588,31 +639,35 @@ function Initialize()
 	CenterRef      = none
 	BedRef         = none
 	; Boolean
+	AutoAdvance    = true
 	HasPlayer      = false
 	LeadIn         = false
 	NoLeadIn       = false
 	FastEnd        = false
 	IsAggressive   = false
-	AutoAdvance    = true
-	; Flaots
-	AnimStarted = 0.0
+	; IsVaginal      = false
+	; IsAnal         = false
+	; IsOral         = false
+	; Floats
+	AnimStarted    = 0.0
 	StartedAt      = 0.0
 	; Integers
 	BedFlag        = 0
 	ActorCount     = 0
-	SecondsVaginal = 0
-	SecondsAnal    = 0
-	SecondsOral    = 0
-	Genders        = new int[3]
+	; SecondsVaginal = 0
+	; SecondsAnal    = 0
+	; SecondsOral    = 0
 	; Strings
 	AdjustKey      = ""
 	; Storage
 	Actor[] aDel
-	float[] fDel1
 	string[] sDel1
+	float[] fDel1
 	Positions      = aDel
-	CustomTimers   = fDel1
 	Hooks          = sDel1
+	CustomTimers   = fDel1
+	Genders        = new int[3]
+	SkillUse       = new float[4]
 	; Animations
 	sslBaseAnimation[] anDel1
 	sslBaseAnimation[] anDel2
@@ -652,14 +707,55 @@ function SetupThreadEvent(string HookEvent)
 		; Log("Thread Hook Sent: "+HookEvent)
 	endIf
 	SendModEvent(HookEvent, thread_id)
+	if HasPlayer
+		SendModEvent("Player"+HookEvent, thread_id)
+	endIf
+endFunction
+
+int function GetXP(int i)
+	return SkillUse[i] as int
+endFunction
+
+function RecordSkills()
+	; 1 xp point every 8 seconds of runtime
+	float xp = ((Utility.GetCurrentRealTime() - AnimStarted) / 8.0)
+	if xp < 0.375
+		return ; Didn't play long enough - 0.375 == 3 seconds
+	endIf
+	; Add xp to vaginal, if there is actually any vaginas
+	if AddTagConditional("Vaginal", (Animation.HasTag("Vaginal") && Genders[1] > 0))
+		SkillUse[0] = SkillUse[0] + xp
+	endIf
+	; Add xp to anal, or force it as anal if vaginal and no vaginas.
+	if AddTagConditional("Anal", (Animation.HasTag("Anal") || (Genders[1] == 0 && Animation.HasTag("Vaginal"))))
+		SkillUse[1] = SkillUse[1] + xp
+	endIf
+	; Add xp to oral
+	if AddTagConditional("Oral", Animation.HasTag("Oral"))
+		SkillUse[2] = SkillUse[2] + xp
+	endIf
+	; Add xp to foreplay
+	if AddTagConditional("LeadIn", Animation.HasTag("LeadIn"))
+		SkillUse[3] = SkillUse[3] + xp
+	endIf
+	; Start runtime counter over
+	AnimStarted = Utility.GetCurrentRealTime()
 endFunction
 
 function SyncActors(bool force = false)
-	ActorAlias[0].SyncThread(Animation, Stage)
-	ActorAlias[1].SyncThread(Animation, Stage)
-	ActorAlias[2].SyncThread(Animation, Stage)
-	ActorAlias[3].SyncThread(Animation, Stage)
-	ActorAlias[4].SyncThread(Animation, Stage)
+	ActorAlias[0].SyncThread(force)
+	ActorAlias[1].SyncThread(force)
+	ActorAlias[2].SyncThread(force)
+	ActorAlias[3].SyncThread(force)
+	ActorAlias[4].SyncThread(force)
+endFunction
+
+function SyncAnimation(bool force = false)
+	ActorAlias[0].SyncAnimation(force)
+	ActorAlias[1].SyncAnimation(force)
+	ActorAlias[2].SyncAnimation(force)
+	ActorAlias[3].SyncAnimation(force)
+	ActorAlias[4].SyncAnimation(force)
 endFunction
 
 bool function ActorWait(string WaitFor)
@@ -717,22 +813,6 @@ function UpdateAdjustKey()
 	MiscUtil.PrintConsole(AdjustKey)
 endFunction
 
-
-function UpdateSkillTimers()
-	int Seconds = AnimationTotalTime as int
-	if Seconds > 3
-		if IsVaginal
-			SecondsVaginal += Seconds
-		endIf
-		if IsAnal
-			SecondsAnal += Seconds
-		endIf
-		if IsOral
-			SecondsOral += Seconds
-		endIf
-	endIf
-endFunction
-
 int thread_id
 int property tid hidden
 	int function get()
@@ -787,11 +867,11 @@ bool function AddActors(Actor[] ActorList, Actor VictimActor = none)
 	return false
 endFunction
 ; State varied
-function SetAnimation(int AnimID = -1)
-endFunction
 function FireAction()
 endFunction
 function EndAction()
+endFunction
+function SetAnimation(int aid = -1)
 endFunction
 ; Animating
 event OnKeyDown(int keyCode)

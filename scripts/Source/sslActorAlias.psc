@@ -13,6 +13,7 @@ bool IsFemale
 bool IsCreature
 bool IsVictim
 bool IsPlayer
+bool IsStraight
 string ActorName
 ActorBase BaseRef
 
@@ -43,8 +44,15 @@ float ActorScale
 float AnimScale
 form Strapon
 
-int[] StatLevel
-int[] StatTimes
+; int BaseWeight
+int Enjoyment
+
+int Vaginal
+int Anal
+int Oral
+int Foreplay
+float Pure
+float Impure
 
 ; Animation Position/Stage flags
 bool property OpenMouth hidden
@@ -252,10 +260,36 @@ state Prepare
 				SetVoice(Lib.VoiceSlots.PickGender(BaseRef.GetSex()), IsForcedSilent)
 			endIf
 			; Get actor stats
-			StatLevel = new int[3]
-			StatLevel[0] = Stats.GetSkillLevel(ActorRef, "Vaginal")
-			StatLevel[1] = Stats.GetSkillLevel(ActorRef, "Anal")
-			StatLevel[2] = Stats.GetSkillLevel(ActorRef, "Oral")
+			Actor SkilledActor = ActorRef
+			; Always use players stats if present, so players stats mean something more for npcs
+			if !IsPlayer && Thread.HasPlayer
+				SkilledActor = Thread.PlayerRef
+			; If a non-creature couple, base skills off partner
+			elseIf Thread.ActorCount == 2 && !Thread.HasCreature
+				SkilledActor = Thread.Positions[sslUtility.IndexTravel(Position, Thread.ActorCount)]
+			endIf
+			Vaginal = Stats.GetSkillLevel(SkilledActor, "Vaginal")
+			Anal = Stats.GetSkillLevel(SkilledActor, "Anal")
+			Oral = Stats.GetSkillLevel(SkilledActor, "Oral")
+			Foreplay = Stats.GetSkillLevel(SkilledActor, "Foreplay")
+			; Check for heterosexual preference
+			IsStraight = Stats.IsStraight(ActorRef)
+			; Get Pure/Impure
+			Pure = Stats.GetPureLevel(ActorRef)
+			Impure = Stats.GetImpureLevel(ActorRef)
+			; Adjust starting purity for couples
+			; if Thread.ActorCount > 1
+			; 	; Adjust for present couples
+			; 	if ActorRef.GetHighestRelationshipRank() == 4
+			; 		if Thread.GetHighestPresentRelationshipRank(ActorRef) == 4 ; Present Lover - couple
+			; 			Pure += 2.5
+			; 			Impure -= 1.0
+			; 		else ; Absent lover - cheating
+			; 			Pure -= 1.5
+			; 			Impure += 2.0
+			; 		endIf
+			; 	endIf
+			; endIf
 			; Pick a strapon on females to use
 			if IsFemale && Config.bUseStrapons && Lib.Strapons.Length > 0
 				Strapon = Lib.Strapons[Utility.RandomInt(0, (Lib.Strapons.Length - 1))]
@@ -287,8 +321,8 @@ endState
 
 state Animating
 	function FireAction()
-		RegisterForSingleUpdate(Utility.RandomFloat(0.50,1.80))
-		SyncThread(Thread.Animation, Thread.Stage, true)
+		SyncThread(true)
+		RegisterForSingleUpdate(Utility.RandomFloat(0.30, 1.80))
 	endFunction
 
 	event OnUpdate()
@@ -302,20 +336,18 @@ state Animating
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent
 
-	function SyncThread(sslBaseAnimation ToAnimation, int ToStage, bool force = false)
+	function SyncThread(bool force = false)
 		; Sync info
-		Animation = ToAnimation
-		Stage     = ToStage
+		Animation = Thread.Animation
+		Stage     = Thread.Stage
 		Position  = Thread.Positions.Find(ActorRef)
 		Flags     = Animation.GetPositionFlags(Position, Stage)
 		Offsets   = Animation.GetPositionOffsets(Thread.AdjustKey, Position, Stage)
 		; Update positioning marker
 		UpdateLocation(force)
 		; Voice loop delay
-		VoiceDelay = 3.0
-		if !IsSilent
-			VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage)
-		endIf
+		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
+		GetEnjoyment()
 		; Creature skipped
 		if !IsCreature
 			; Voice strength
@@ -328,13 +360,13 @@ state Animating
 				endIf
 			endIf
 			; Facial expression
-			if OpenMouth
-				ActorRef.SetExpressionOverride(16, 100)
-			elseIf IsVictim
-				ActorRef.SetExpressionOverride(14, Strength)
-			else
-				ActorRef.SetExpressionOverride(10, Strength)
-			endIf
+			; if OpenMouth
+			; 	ActorRef.SetExpressionOverride(16, 100)
+			; elseIf IsVictim
+			; 	ActorRef.SetExpressionOverride(14, Strength)
+			; else
+			; 	ActorRef.SetExpressionOverride(10, Strength)
+			; endIf
 			; Equip Strapon if needed and enabled
 			if Strapon != none
 				if UseStrapon && !ActorRef.IsEquipped(Strapon)
@@ -435,13 +467,11 @@ state Reset
 		if !IsCreature
 			int[] Genders = Thread.Genders
 			Stats.AddSex(ActorRef, Thread.TotalTime, Thread.HasPlayer, Genders[0], Genders[1], Genders[2])
-			; Stats.AdjustSkill(ActorRef, "Vaginal", (Animation.HasTag("Vaginal") as int))
-			; Stats.AdjustSkill(ActorRef, "Anal", (Animation.HasTag("Anal") as int))
-			; Stats.AdjustSkill(ActorRef, "Oral", (Animation.HasTag("Oral") as int))
-			Stats.AdjustSkill(ActorRef, "Vaginal", Thread.SecondsVaginal)
-			Stats.AdjustSkill(ActorRef, "Anal", Thread.SecondsAnal)
-			Stats.AdjustSkill(ActorRef, "Oral", Thread.SecondsOral)
-			Stats.AdjustSkill(ActorRef, "Victim", (Thread.IsVictim(ActorRef) as int))
+			Stats.AdjustSkill(ActorRef, "Vaginal", Thread.GetXP(0))
+			Stats.AdjustSkill(ActorRef, "Anal", Thread.GetXP(1))
+			Stats.AdjustSkill(ActorRef, "Oral", Thread.GetXP(2))
+			Stats.AdjustSkill(ActorRef, "Foreplay", Thread.GetXP(3))
+			Stats.AdjustSkill(ActorRef, "Victim", (IsVictim as int))
 			Stats.AdjustSkill(ActorRef, "Aggressor", (Thread.IsAggressor(ActorRef) as int))
 			; Stats.AdjustSkill(ActorRef, "Pure", ((Animation.HasTag("Loving") as float) * 1.3))
 			; Stats.AdjustSkill(ActorRef, "Impure", ((Animation.HasTag("Dirty") as float) * 1.3))
@@ -487,7 +517,79 @@ sslBaseVoice function GetVoice()
 endFunction
 
 int function GetEnjoyment()
-	return Strength ; Temporary, replace with stat based version later
+	Enjoyment = 0
+	; ; Actor in uncomfortable position
+	; if IsStraight && ((IsFemale && !Animation.FemalePosition(Position)) || !IsFemale && !Animation.MalePosition(Position))
+	; 	Enjoyment -= 5
+	; endIf
+	; ; Gender bonuses
+	; if IsFemale
+	; 	; Female bonus
+	; 	if Thread.IsVaginal
+	; 		Enjoyment += 2
+	; 	endIf
+	; 	if Thread.IsAnal
+	; 		Enjoyment += -1
+	; 	endIf
+	; 	if Thread.IsOral
+	; 		Enjoyment += 1
+	; 	endIf
+	; else
+	; 	; Male bonus
+	; 	if Thread.IsVaginal
+	; 		Enjoyment += 2
+	; 	endIf
+	; 	if Thread.IsAnal
+	; 		Enjoyment += -1
+	; 	endIf
+	; 	if Thread.IsOral
+	; 		Enjoyment += 1
+	; 	endIf
+	; endIf
+	; Thread.Log("Gender: "+Enjoyment, ActorName)
+	; ; Adjust for actors purity
+	; int PureMod = ((1 + Pure) / 2.0) as int
+	; int ImpureMod = ((1 + Impure) / 2.0) as int
+	; if Thread.IsDirty
+	; 	Enjoyment += ImpureMod
+	; 	Enjoyment -= (PureMod / 2)
+	; elseIf Thread.IsLoving
+	; 	Enjoyment += PureMod
+	; 	Enjoyment -= (ImpureMod / 2)
+	; endIf
+	; if Thread.HasCreature
+	; 	if Pure > Impure
+	; 		Enjoyment -= 5
+	; 	else
+	; 		Enjoyment += 3
+	; 	endIf
+	; endIf
+	; if Thread.ActorCount > 2
+	; 	if Pure > Impure
+	; 		Enjoyment -= 2 * (Thread.ActorCount - 2)
+	; 	else
+	; 		Enjoyment += 2 * (Thread.ActorCount - 2)
+	; 	endIf
+	; endIf
+	; Thread.Log("Purity: "+Enjoyment, ActorName)
+	; if IsVictim
+	; 	Enjoyment -= sslUtility.ClampInt(PureMod * 4, 10, 50)
+	; endIf
+	; ; Adjust for actor skills
+	; if Thread.IsVaginal
+	; 	Enjoyment += (Vaginal * 2)
+	; endIf
+	; if Thread.IsAnal
+	; 	Enjoyment += (Anal * 2)
+	; endIf
+	; if Thread.IsOral
+	; 	Enjoyment += (Oral * 2)
+	; endIf
+	; Thread.Log("Skills: "+Enjoyment, ActorName)
+	; ; Increase by 1 every 8 seconds of animation
+	; Enjoyment += sslUtility.ClampInt((Thread.TotalTime / 8.0) as int, 0, 25)
+	; Thread.Log("Enjoyment: "+Enjoyment, ActorName)
+	return Enjoyment
 endFunction
 
 int function GetPain()
@@ -574,18 +676,31 @@ function Initialize()
 	Voice          = none
 	ActorVoice     = none
 	IsForcedSilent = false
-	; Floats
-	ActorScale     = 0.0
-	AnimScale      = 0.0
 	; Flags
 	NoRagdoll      = false
 	NoUndress      = false
+	; Floats
+	ActorScale     = 0.0
+	AnimScale      = 0.0
+	; Stats
+	Vaginal        = 0
+	Anal           = 0
+	Oral           = 0
 	; Storage
 	bool[] bDel1
 	StripOverride  = bDel1
 	; Clear the alias
 	TryToClear()
 	TryToReset()
+endFunction
+
+function UpdateBaseEnjoyment()
+	; Init weights
+	; float[] StatWeight = new float[3]
+	; BaseWeight       = 0
+	; ProficencyWeight = 0
+	; PurityWeight     = 0
+
 endFunction
 
 function ClearAlias()
@@ -628,7 +743,9 @@ endFunction
 function StartAnimating()
 endFunction
 ; Animating
-function SyncThread(sslBaseAnimation ToAnimation, int ToStage, bool force = false)
+function SyncThread(bool force = false)
+endFunction
+function SyncAnimation(bool force = false)
 endFunction
 function UpdateOffsets()
 endFunction
