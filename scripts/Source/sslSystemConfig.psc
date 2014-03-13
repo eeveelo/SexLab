@@ -76,15 +76,21 @@ Actor PlayerRef
 ; --- Config Accessors                                --- ;
 ; ------------------------------------------------------- ;
 
-float function GetVoiceDelay(bool IsFemale = false, int stage = 1)
+float function GetVoiceDelay(bool IsFemale = false, int Stage = 1, bool IsSilent = false)
+	if IsSilent
+		return 3.0 ; Return basic delay for loop
+	endIf
 	float VoiceDelay
 	if IsFemale
 		VoiceDelay = fFemaleVoiceDelay
 	else
 		VoiceDelay = fMaleVoiceDelay
 	endIf
-	if stage > 1
-		return (VoiceDelay - (stage * 0.8)) + Utility.RandomFloat(-0.3, 0.3)
+	if Stage > 1
+		VoiceDelay -= (Stage * 0.8) + Utility.RandomFloat(-0.4, 0.4)
+		if VoiceDelay < 0.6
+			return Utility.RandomFloat(0.6, 1.3) ; Can't have delay shorter than animation update loop
+		endIf
 	endIf
 	return VoiceDelay
 endFunction
