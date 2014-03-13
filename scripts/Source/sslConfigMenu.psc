@@ -426,6 +426,8 @@ event OnPageReset(string page)
 		AddTextOption("$SSL_VaginalExperience", Stats.GetSkillLevel(PlayerRef, "Vaginal"))
 		AddTextOption("$SSL_AnalExperience", Stats.GetSkillLevel(PlayerRef, "Anal"))
 		AddTextOption("$SSL_OralExperience", Stats.GetSkillLevel(PlayerRef, "Oral"))
+		AddTextOption("$SSL_ForeplayExperience", Stats.GetSkillLevel(PlayerRef, "Foreplay"))
+
 		AddTextOption("$SSL_MaleSexualPartners", Stats.GetInt(PlayerRef, "Males"))
 		AddTextOption("$SSL_FemaleSexualPartners", Stats.GetInt(PlayerRef, "Females"))
 		AddTextOption("$SSL_CreatureSexualPartners", Stats.GetInt(PlayerRef, "Creatures"))
@@ -435,16 +437,16 @@ event OnPageReset(string page)
 		AddTextOption("$SSL_TimeSpentHavingSex", Stats.ParseTime(Stats.GetFloat(PlayerRef, "TimeSpent") as int))
 		AddTextOption("$SSL_TimeSinceLastSex", Stats.LastSexTimerString(PlayerRef))
 
-
 		SetCursorPosition(1)
 		AddHeaderOption("$SSL_SexualStats")
 		AddTextOption("$SSL_VaginalProficiency", Stats.GetSkillTitle(PlayerRef, "Vaginal"))
 		AddTextOption("$SSL_AnalProficiency", Stats.GetSkillTitle(PlayerRef, "Anal"))
 		AddTextOption("$SSL_OralProficiency", Stats.GetSkillTitle(PlayerRef, "Oral"))
+		AddTextOption("$SSL_ForeplayProficiency", Stats.GetSkillTitle(PlayerRef, "Foreplay"))
+
 		AddTextOption("$SSL_Sexuality", Stats.GetSexualityTitle(PlayerRef))
 		AddTextOption("$SSL_SexualPurity", Stats.GetPureLevel(PlayerRef))
 		AddTextOption("$SSL_SexualPerversion", Stats.GetImpureLevel(PlayerRef))
-
 
 		AddEmptyOption()
 

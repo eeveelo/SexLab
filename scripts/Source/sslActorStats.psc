@@ -98,12 +98,12 @@ int function GetStatInt(actor ActorRef, string Stat)
 	return GetStat(ActorRef, Stat) as int
 endFunction
 
-int function GetStatLevel(actor ActorRef, string Stat, float curve = 0.65)
-	return CalcLevel(GetStatInt(ActorRef, Stat), curve)
+int function GetStatLevel(actor ActorRef, string Stat, float Curve = 0.65)
+	return CalcLevel(GetStatInt(ActorRef, Stat), Curve)
 endFunction
 
-string function GetStatTitle(actor ActorRef, string Stat, float curve = 0.65)
-	return StatTitles[sslUtility.ClampInt(CalcLevel(GetStatInt(ActorRef, Stat), curve), 0, 6)]
+string function GetStatTitle(actor ActorRef, string Stat, float Curve = 0.65)
+	return StatTitles[sslUtility.ClampInt(CalcLevel(GetStatInt(ActorRef, Stat), Curve), 0, 6)]
 endFunction
 
 string function GetStatDefault(string Stat)
@@ -135,8 +135,8 @@ int function CalcSexuality(bool IsFemale, int Males, int Females)
 	endIf
 endFunction
 
-int function CalcLevel(float total, float curve = 0.65)
-	return Math.Sqrt(((Math.Abs(total) + 1.0) / 2.0) * Math.Abs(curve)) as int
+int function CalcLevel(float total, float Curve = 0.5)
+	return Math.Sqrt(((Math.Abs(total) + 1.0) / 2.0) * Math.Abs(Curve)) as int
 endFunction
 
 string function ZeroFill(string num)
@@ -156,18 +156,29 @@ endFunction
 
 int function GetSkill(Actor ActorRef, string Skill)
 	; Seed for NPC native skills
-	if ActorRef != PlayerRef && !HasInt(ActorRef, Skill)
-		if Skill == "Vaginal" || Skill == "Anal" || Skill == "Oral"
-			SetInt(ActorRef, Skill, (Utility.RandomInt(ActorRef.GetLevel(), (ActorRef.GetLevel() * 2)) + ((((ActorRef.GetActorValue("Speechcraft")*ActorRef.GetActorValue("Confidence")) + 1) / 2.3) as int)))
+	if ActorRef != PlayerRef && !HasInt(ActorRef, Skill) && !CreatureSlots.HasRace(ActorRef.GetLeveledActorBase().GetRace()) && ActorLib.ValidateActor(ActorRef) == 1
+		if Skill == "Vaginal" || Skill == "Anal" || Skill == "Oral" || Skill == "Foreplay"
+			SetInt(ActorRef, Skill, ((Utility.RandomInt(ActorRef.GetLevel() * 2, ActorRef.GetLevel() * 4) * 2) + ((((ActorRef.GetActorValue("Speechcraft") * ActorRef.GetActorValue("Confidence")) + 1) / 2.0) as int)))
 		elseIf Skill == "Males" || Skill == "Females"
 			bool IsFemale = ActorLib.GetGender(ActorRef) == 1
 			int Seed = Utility.RandomInt(0, ActorRef.GetLevel())
 			; Same sex
 			if (IsFemale && Skill == "Females") || (!IsFemale && Skill == "Males")
 				Seed += ((Math.Abs(ActorRef.GetLowestRelationshipRank() as float) + 1) as int)*(((ActorRef.GetActorValue("Energy") + 1) / 3) as int)
+				; 33% chance of never having had same sex
+				if Utility.RandomInt(0, 2) == 0
+					SetInt(ActorRef, Skill, 0)
+					return 0
+				endIf
 			else
 				Seed *= 2
 				Seed += ((Math.Abs(ActorRef.GetLowestRelationshipRank() as float) + 1) as int)*(((ActorRef.GetActorValue("Energy") + ActorRef.GetActorValue("Assistance")) / 3) as int) + (ActorRef.GetActorValue("Assistance") as int)
+			endIf
+			if ActorRef.GetActorValue("Confidence") == 0
+				Seed = Seed / 2
+			endIf
+			if ActorRef.GetActorValue("Aggression") > 1
+				Seed = (Seed * 1.25) as int
 			endIf
 			SetInt(ActorRef, Skill, Seed)
 		endIf
@@ -181,11 +192,11 @@ function AdjustSkill(Actor ActorRef, string Skill, int AdjustBy)
 	endIf
 endFunction
 
-int function GetSkillLevel(Actor ActorRef, string Skill, float Curve = 0.3)
+int function GetSkillLevel(Actor ActorRef, string Skill, float Curve = 0.65)
 	return CalcLevel(GetSkill(ActorRef, Skill), Curve)
 endFunction
 
-string function GetSkillTitle(Actor ActorRef, string Skill, float Curve = 0.3)
+string function GetSkillTitle(Actor ActorRef, string Skill, float Curve = 0.65)
 	return StatTitles[sslUtility.ClampInt(GetSkillLevel(ActorRef, Skill, Curve), 0, 6)]
 endFunction
 
@@ -198,15 +209,25 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function SeedPurityStat(Actor ActorRef)
-	if ActorRef != PlayerRef
+	if ActorRef != PlayerRef && !CreatureSlots.HasRace(ActorRef.GetLeveledActorBase().GetRace()) && ActorLib.ValidateActor(ActorRef) == 1
 		; Get relevant-ish AI data
 		int Aggression = ActorRef.GetActorValue("Aggression") as int
 		int Morality = ActorRef.GetActorValue("Morality") as int
 		int Assistance = ActorRef.GetActorValue("Assistance") as int
+		int HighestRelation = ActorRef.GetHighestRelationshipRank()
+		int LowestRelation = ActorRef.GetLowestRelationshipRank()
 		; Init base purity based on level and how aggressive they are
-		float seed = ((ActorRef.GetLevel() / 2 ) * 9)
 		float impurity = (Aggression * 0.40)
 		float purity = ((Morality + 1) * 0.40)
+		; Adjust both by highest/lowest relationship
+		int Relation = Math.Abs(HighestRelation + LowestRelation) as int
+		if Relation > 0 && Math.Abs(HighestRelation) > Math.Abs(LowestRelation)
+			purity += Relation
+			impurity -=  Relation
+		elseif Relation > 0 ; Larger enemey than friend, more impure
+			purity -= Relation
+			impurity +=  Relation
+		endIf
 		; Doesn't care about crime
 		if Morality == 0
 			purity -= 0.10
@@ -239,13 +260,25 @@ function SeedPurityStat(Actor ActorRef)
 			impurity -= 0.04
 		endIf
 		; Generate largish amount with seed and base purity/impurity
-		purity += ((Math.Abs(purity) * seed) * 1.75) * 1.5
-		impurity += ((Math.Abs(impurity) * seed) * 1.75) * 1.5
+		float seed = (((ActorRef.GetLevel() as float) / 2.5 ) * 9)
+		; Adjust opposites if either is negative
+		if purity < 0
+			impurity += Math.Abs(purity)
+			purity = 0.0
+		else ; Adjust by seed amount
+			purity += ((purity * seed) * 1.75) * 1.5
+		endIf
+		if impurity < 0
+			purity += Math.Abs(impurity)
+			impurity = 0.0
+		else ; Adjust by seed amount
+			impurity += ((impurity * seed) * 1.75) * 1.5
+		endIf
 		if !HasFloat(ActorRef, "Pure")
 			SetFloat(ActorRef, "Pure", Math.Abs(purity))
 		endIf
 		if !HasFloat(ActorRef, "Impure")
-			SetFloat(ActorRef, "Impure", Math.Abs(purity))
+			SetFloat(ActorRef, "Impure", Math.Abs(impurity))
 		endIf
 	endIf
 endFunction
@@ -481,6 +514,7 @@ function ResetActor(Actor ActorRef)
 	ClearInt(ActorRef, "Vaginal")
 	ClearInt(ActorRef, "Oral")
 	ClearInt(ActorRef, "Anal")
+	ClearInt(ActorRef, "Foreplay")
 	ClearInt(ActorRef, "SexCount")
 	ClearInt(ActorRef, "PlayerSex")
 	ClearFloat(ActorRef, "LastSex.RealTime")
