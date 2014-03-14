@@ -65,7 +65,7 @@ function SetStat(Actor ActorRef, string Stat, string Value)
 	endIf
 endFunction
 
-int function AdjustBy(actor ActorRef, string Stat, int adjust)
+int function AdjustBy(Actor ActorRef, string Stat, int adjust)
 	if FindStat(Stat) == -1
 		return 0
 	endIf
@@ -75,35 +75,35 @@ int function AdjustBy(actor ActorRef, string Stat, int adjust)
 	return Value
 endFunction
 
-bool function HasStat(actor ActorRef, string Stat)
+bool function HasStat(Actor ActorRef, string Stat)
 	return HasStr(ActorRef, "Custom."+Stat)
 endFunction
 
-string function GetStat(actor ActorRef, string Stat)
+string function GetStat(Actor ActorRef, string Stat)
 	if !HasStat(ActorRef, Stat)
 		return GetStatDefault(Stat)
 	endIf
 	return GetStr(ActorRef, "Custom."+Stat)
 endFunction
 
-string function GetStatString(actor ActorRef, string Stat)
+string function GetStatString(Actor ActorRef, string Stat)
 	return GetStat(ActorRef, Stat)
 endFunction
 
-float function GetStatFloat(actor ActorRef, string Stat)
+float function GetStatFloat(Actor ActorRef, string Stat)
 	return GetStat(ActorRef, Stat) as float
 endFunction
 
-int function GetStatInt(actor ActorRef, string Stat)
+int function GetStatInt(Actor ActorRef, string Stat)
 	return GetStat(ActorRef, Stat) as int
 endFunction
 
-int function GetStatLevel(actor ActorRef, string Stat, float Curve = 0.65)
+int function GetStatLevel(Actor ActorRef, string Stat, float Curve = 0.85)
 	return CalcLevel(GetStatInt(ActorRef, Stat), Curve)
 endFunction
 
-string function GetStatTitle(actor ActorRef, string Stat, float Curve = 0.65)
-	return StatTitles[sslUtility.ClampInt(CalcLevel(GetStatInt(ActorRef, Stat), Curve), 0, 6)]
+string function GetStatTitle(Actor ActorRef, string Stat, float Curve = 0.85)
+	return StatTitles[sslUtility.ClampInt(CalcLevel(GetStatFloat(ActorRef, Stat), Curve), 0, 6)]
 endFunction
 
 string function GetStatDefault(string Stat)
@@ -118,7 +118,7 @@ string function GetStatAppend(string Stat)
 	return StorageUtil.GetStringValue(self, "Custom.Append."+Stat, "")
 endFunction
 
-string function GetStatFull(actor ActorRef, string Stat)
+string function GetStatFull(Actor ActorRef, string Stat)
 	return GetStatPrepend(Stat) + GetStat(ActorRef, Stat) + GetStatAppend(Stat)
 endFunction
 
@@ -135,8 +135,12 @@ int function CalcSexuality(bool IsFemale, int Males, int Females)
 	endIf
 endFunction
 
-int function CalcLevel(float total, float Curve = 0.5)
-	return Math.Sqrt(((Math.Abs(total) + 1.0) / 2.0) * Math.Abs(Curve)) as int
+int function CalcLevel(float total, float Curve = 0.85)
+	total = Math.Abs(total)
+	if total == 0
+		return 0
+	endIf
+	return Math.Sqrt((total / 2.0) * Curve) as int
 endFunction
 
 string function ZeroFill(string num)
@@ -155,10 +159,11 @@ endFunction
 ; ------------------------------------------------------- ;
 
 int function GetSkill(Actor ActorRef, string Skill)
+	return Utility.RandomInt(10,100)
 	; Seed for NPC native skills
-	if ActorRef != PlayerRef && !HasInt(ActorRef, Skill) && !CreatureSlots.HasRace(ActorRef.GetLeveledActorBase().GetRace()) && ActorLib.ValidateActor(ActorRef) == 1
+	if ActorRef != PlayerRef && !HasInt(ActorRef, Skill) && !CreatureSlots.HasRace(ActorRef.GetLeveledActorBase().GetRace())
 		if Skill == "Vaginal" || Skill == "Anal" || Skill == "Oral" || Skill == "Foreplay"
-			SetInt(ActorRef, Skill, ((Utility.RandomInt(ActorRef.GetLevel() * 2, ActorRef.GetLevel() * 4) * 2) + ((((ActorRef.GetActorValue("Speechcraft") * ActorRef.GetActorValue("Confidence")) + 1) / 2.0) as int)))
+			SetInt(ActorRef, Skill, ((Utility.RandomInt(ActorRef.GetLevel() * 2, ActorRef.GetLevel() * 3) * Utility.RandomInt(1, 2)) + ((((ActorRef.GetActorValue("Speechcraft") * ActorRef.GetActorValue("Confidence")) + 1) / 2.0) as int)))
 		elseIf Skill == "Males" || Skill == "Females"
 			bool IsFemale = ActorLib.GetGender(ActorRef) == 1
 			int Seed = Utility.RandomInt(0, ActorRef.GetLevel())
@@ -192,13 +197,21 @@ function AdjustSkill(Actor ActorRef, string Skill, int AdjustBy)
 	endIf
 endFunction
 
-int function GetSkillLevel(Actor ActorRef, string Skill, float Curve = 0.65)
+int function GetSkillLevel(Actor ActorRef, string Skill, float Curve = 0.85)
 	return CalcLevel(GetSkill(ActorRef, Skill), Curve)
 endFunction
 
-string function GetSkillTitle(Actor ActorRef, string Skill, float Curve = 0.65)
+string function GetSkillTitle(Actor ActorRef, string Skill, float Curve = 0.85)
 	return StatTitles[sslUtility.ClampInt(GetSkillLevel(ActorRef, Skill, Curve), 0, 6)]
 endFunction
+
+; float function GetProficiencyLevel(Actor ActorRef, string Skill, float Increments = 21.0)
+	; return (GetSkill(actorRef, Skill) as float) / Increments
+; endFunction
+;
+; string function GetProficiencyTitle(Actor ActorRef, string Skill, float Increments = 21.0)
+	; return StatTitles[sslUtility.ClampInt((GetProficiencyLevel(ActorRef, Skill, Increments) as int), 0, 6)]
+; endFunction
 
 string function GetTitle(int Level)
 	return StatTitles[sslUtility.ClampInt(Level, 0, 6)]
@@ -209,7 +222,7 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function SeedPurityStat(Actor ActorRef)
-	if ActorRef != PlayerRef && !CreatureSlots.HasRace(ActorRef.GetLeveledActorBase().GetRace()) && ActorLib.ValidateActor(ActorRef) == 1
+	if ActorRef != PlayerRef && !CreatureSlots.HasRace(ActorRef.GetLeveledActorBase().GetRace())
 		; Get relevant-ish AI data
 		int Aggression = ActorRef.GetActorValue("Aggression") as int
 		int Morality = ActorRef.GetActorValue("Morality") as int
@@ -294,7 +307,7 @@ int function GetPureLevel(Actor ActorRef)
 	return CalcLevel(GetPure(ActorRef), 0.2)
 endFunction
 
-string function GetPureTitle(actor ActorRef)
+string function GetPureTitle(Actor ActorRef)
 	if ActorRef.GetLeveledActorBase().GetSex() == 1
 		return PureTitlesFemale[sslUtility.ClampInt(GetPureLevel(ActorRef), 0, 6)]
 	else
@@ -588,52 +601,52 @@ function Setup()
 	parent.Setup()
 endFunction
 
-bool function HasInt(actor ActorRef, string stat)
+bool function HasInt(Actor ActorRef, string stat)
 	return StorageUtil.HasIntValue(ActorRef, "sslActorStats."+stat)
 endFunction
-bool function HasFloat(actor ActorRef, string stat)
+bool function HasFloat(Actor ActorRef, string stat)
 	return StorageUtil.HasFloatValue(ActorRef, "sslActorStats."+stat)
 endFunction
-bool function HasStr(actor ActorRef, string stat)
+bool function HasStr(Actor ActorRef, string stat)
 	return StorageUtil.HasStringValue(ActorRef, "sslActorStats."+stat)
 endFunction
 
-int function GetInt(actor ActorRef, string stat)
+int function GetInt(Actor ActorRef, string stat)
 	return StorageUtil.GetIntValue(ActorRef, "sslActorStats."+stat)
 endFunction
-float function GetFloat(actor ActorRef, string stat)
+float function GetFloat(Actor ActorRef, string stat)
 	return StorageUtil.GetFloatValue(ActorRef, "sslActorStats."+stat)
 endFunction
-string function GetStr(actor ActorRef, string stat)
+string function GetStr(Actor ActorRef, string stat)
 	return StorageUtil.GetStringValue(ActorRef, "sslActorStats."+stat)
 endFunction
 
-function ClearInt(actor ActorRef, string stat)
+function ClearInt(Actor ActorRef, string stat)
 	StorageUtil.UnsetIntValue(ActorRef, "sslActorStats."+stat)
 endFunction
-function ClearFloat(actor ActorRef, string stat)
+function ClearFloat(Actor ActorRef, string stat)
 	StorageUtil.UnsetFloatValue(ActorRef, "sslActorStats."+stat)
 endFunction
-function ClearStr(actor ActorRef, string stat)
+function ClearStr(Actor ActorRef, string stat)
 	StorageUtil.UnsetStringValue(ActorRef, "sslActorStats."+stat)
 endFunction
 
-function SetInt(actor ActorRef, string stat, int value)
+function SetInt(Actor ActorRef, string stat, int value)
 	StorageUtil.SetIntValue(ActorRef, "sslActorStats."+stat, value)
 endFunction
-function SetFloat(actor ActorRef, string stat, float value)
+function SetFloat(Actor ActorRef, string stat, float value)
 	StorageUtil.SetFloatValue(ActorRef, "sslActorStats."+stat, value)
 endFunction
-function SetStr(actor ActorRef, string stat, string value)
+function SetStr(Actor ActorRef, string stat, string value)
 	StorageUtil.SetStringValue(ActorRef, "sslActorStats."+stat, value)
 endFunction
 
-function AdjustInt(actor ActorRef, string stat, int amount)
+function AdjustInt(Actor ActorRef, string stat, int amount)
 	if amount != 0
 		StorageUtil.SetIntValue(ActorRef, "sslActorStats."+stat, (StorageUtil.GetIntValue(ActorRef, "sslActorStats."+stat) + amount))
 	endIF
 endFunction
-function AdjustFloat(actor ActorRef, string stat, float amount)
+function AdjustFloat(Actor ActorRef, string stat, float amount)
 	if amount != 0.0
 		StorageUtil.SetFloatValue(ActorRef, "sslActorStats."+stat, (StorageUtil.GetFloatValue(ActorRef, "sslActorStats."+stat) + amount))
 	endIf
