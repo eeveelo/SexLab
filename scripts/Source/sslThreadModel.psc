@@ -43,9 +43,9 @@ sslBaseAnimation[] property Animations hidden
 endProperty
 
 ; Stat Tracking Info
-; bool property IsVaginal auto hidden
-; bool property IsAnal auto hidden
-; bool property IsOral auto hidden
+bool property IsVaginal auto hidden
+bool property IsAnal auto hidden
+bool property IsOral auto hidden
 ; bool property IsDirty auto hidden
 ; bool property IsLoving auto hidden
 ; int property SecondsVaginal auto hidden
@@ -104,11 +104,10 @@ bool property HasCreature hidden
 endProperty
 
 ; Local readonly
-string[] Hooks
-float[] SkillUse ; [0] Vaginal, [1] Anal, [2] Oral, [3] Foreplay
-float AnimStarted
-int BedFlag ; 0 allow, 1 force, -1 forbid
+int BedFlag ; 0 = allow, 1 = force, -1 = forbid
 bool NoLeadIn
+float[] SkillXP ; [0] Foreplay, [1] Vaginal, [2] Anal, [3] Oral
+string[] Hooks
 
 ; ------------------------------------------------------- ;
 ; --- Thread Making API                               --- ;
@@ -363,14 +362,12 @@ endFunction
 function SetForcedAnimations(sslBaseAnimation[] AnimationList)
 	if AnimationList.Length != 0
 		CustomAnimations = AnimationList
-		SetAnimation()
 	endIf
 endFunction
 
 function SetAnimations(sslBaseAnimation[] AnimationList)
 	if AnimationList.Length != 0
 		PrimaryAnimations = AnimationList
-		SetAnimation()
 	endIf
 endFunction
 
@@ -378,7 +375,6 @@ function SetLeadAnimations(sslBaseAnimation[] AnimationList)
 	if AnimationList.Length != 0
 		LeadIn = true
 		LeadAnimations = AnimationList
-		SetAnimation()
 	endIf
 endFunction
 
@@ -645,11 +641,10 @@ function Initialize()
 	NoLeadIn       = false
 	FastEnd        = false
 	IsAggressive   = false
-	; IsVaginal      = false
-	; IsAnal         = false
-	; IsOral         = false
+	IsVaginal      = false
+	IsAnal         = false
+	IsOral         = false
 	; Floats
-	AnimStarted    = 0.0
 	StartedAt      = 0.0
 	; Integers
 	BedFlag        = 0
@@ -667,7 +662,7 @@ function Initialize()
 	Hooks          = sDel1
 	CustomTimers   = fDel1
 	Genders        = new int[3]
-	SkillUse       = new float[4]
+	SkillXP       = new float[4]
 	; Animations
 	sslBaseAnimation[] anDel1
 	sslBaseAnimation[] anDel2
@@ -675,6 +670,7 @@ function Initialize()
 	CustomAnimations  = anDel1
 	PrimaryAnimations = anDel2
 	LeadAnimations    = anDel3
+	Animation         = none
 	; Clear tags
 	StorageUtil.StringListClear(self, "Tags")
 	; Enter thread selection pool
@@ -713,33 +709,34 @@ function SetupThreadEvent(string HookEvent)
 endFunction
 
 int function GetXP(int i)
-	return SkillUse[i] as int
+	return SkillXP[i] as int
 endFunction
 
-function RecordSkills()
-	; 1 xp point every 8 seconds of runtime
-	float xp = ((Utility.GetCurrentRealTime() - AnimStarted) / 8.0)
-	if xp < 0.375
-		return ; Didn't play long enough - 0.375 == 3 seconds
+function AddXP(int i, float amount, bool condition = true)
+	if condition && amount >= 0.375 && SkillXP[i] < 5
+		SkillXP[i] = SkillXP[i] + amount
 	endIf
-	; Add xp to vaginal, if there is actually any vaginas
-	if AddTagConditional("Vaginal", (Animation.HasTag("Vaginal") && Genders[1] > 0))
-		SkillUse[0] = SkillUse[0] + xp
+endFunction
+
+float function GetSkillBonus(float[] Levels)
+	float bonus
+	if SkillXP[0] > 0.0
+		bonus += (SkillXP[0] + (Levels[0] * 2.0))
 	endIf
-	; Add xp to anal, or force it as anal if vaginal and no vaginas.
-	if AddTagConditional("Anal", (Animation.HasTag("Anal") || (Genders[1] == 0 && Animation.HasTag("Vaginal"))))
-		SkillUse[1] = SkillUse[1] + xp
+	if IsVaginal
+		bonus += ((SkillXP[1] * 2.0) + Levels[1]) * 4.0
 	endIf
-	; Add xp to oral
-	if AddTagConditional("Oral", Animation.HasTag("Oral"))
-		SkillUse[2] = SkillUse[2] + xp
+	if IsAnal
+		bonus += ((SkillXP[2] * 2.0) + Levels[2]) * 4.0
 	endIf
-	; Add xp to foreplay
-	if AddTagConditional("LeadIn", Animation.HasTag("LeadIn"))
-		SkillUse[3] = SkillUse[3] + xp
+	if IsOral
+		bonus += ((SkillXP[3] * 2.0) + Levels[3]) * 4.0
 	endIf
-	; Start runtime counter over
-	AnimStarted = Utility.GetCurrentRealTime()
+	if LeadIn
+		bonus *= 0.6
+	endIf
+	bonus += sslUtility.ClampInt((TotalTime / 15.0) as int, 0, 15) + (Stage * 6)
+	return bonus
 endFunction
 
 function SyncActors(bool force = false)

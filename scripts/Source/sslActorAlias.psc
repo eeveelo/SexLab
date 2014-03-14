@@ -46,11 +46,7 @@ form Strapon
 
 ; int BaseWeight
 int Enjoyment
-
-int Vaginal
-int Anal
-int Oral
-int Foreplay
+float[] Skills
 float Pure
 float Impure
 
@@ -268,10 +264,13 @@ state Prepare
 			elseIf Thread.ActorCount == 2 && !Thread.HasCreature
 				SkilledActor = Thread.Positions[sslUtility.IndexTravel(Position, Thread.ActorCount)]
 			endIf
-			Vaginal = Stats.GetSkillLevel(SkilledActor, "Vaginal")
-			Anal = Stats.GetSkillLevel(SkilledActor, "Anal")
-			Oral = Stats.GetSkillLevel(SkilledActor, "Oral")
-			Foreplay = Stats.GetSkillLevel(SkilledActor, "Foreplay")
+			Skills = new float[4]
+			Skills[0] = Stats.GetSkillLevel(SkilledActor, "Foreplay") as float
+			Skills[1] = Stats.GetSkillLevel(SkilledActor, "Vaginal") as float
+			Skills[2] = Stats.GetSkillLevel(SkilledActor, "Anal") as float
+			Skills[3] = Stats.GetSkillLevel(SkilledActor, "Oral") as float
+			Thread.Log("Using Skills Of: "+SkilledActor, ActorName)
+			Thread.Log("Skills: "+Skills, ActorName)
 			; Check for heterosexual preference
 			IsStraight = Stats.IsStraight(ActorRef)
 			; Get Pure/Impure
@@ -326,13 +325,18 @@ state Animating
 	endFunction
 
 	event OnUpdate()
+		; First actor periodically pings thread for xp update
+		GetEnjoyment()
+		; Check if still amonst the living and able.
 		if ActorRef.IsDead() || ActorRef.IsDisabled()
 			Thread.EndAnimation(true)
 			return
 		endIf
+		; Moan if not silent
 		if !IsSilent
-			Voice.Moan(ActorRef, Strength)
+			Voice.Moan(ActorRef, Enjoyment)
 		endIf
+		; Loop
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent
 
@@ -347,7 +351,6 @@ state Animating
 		UpdateLocation(force)
 		; Voice loop delay
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
-		GetEnjoyment()
 		; Creature skipped
 		if !IsCreature
 			; Voice strength
@@ -433,6 +436,25 @@ state Animating
 		Snap()
 	endEvent
 
+	function OrgasmEffect()
+		if ActorRef != none
+			; Apply cum
+			int CumID = Animation.GetCum(position)
+			if CumID > 0 && Config.bUseCum && (Thread.Males > 0 || Config.bAllowFFCum || Thread.HasCreature)
+				Lib.ApplyCum(ActorRef, CumID)
+			endIf
+			; Play OrgasmSFX
+			Lib.ThreadLib.OrgasmFX.Play(ActorRef)
+			; Shake camera for player
+			if IsPlayer && Game.GetCameraState() != 3
+				Game.ShakeCamera(none, 0.75, 1.5)
+			endIf
+			; Voice
+			Strength = 100
+			VoiceDelay = 1.0
+		endIf
+	endFunction
+
 endState
 
 state Reset
@@ -481,25 +503,6 @@ state Reset
 	endEvent
 endState
 
-function OrgasmEffect()
-	if ActorRef != none
-		; Apply cum
-		int CumID = Animation.GetCum(position)
-		if CumID > 0 && Config.bUseCum && (Thread.Males > 0 || Config.bAllowFFCum || Thread.HasCreature)
-			Lib.ApplyCum(ActorRef, CumID)
-		endIf
-		; Play OrgasmSFX
-		Lib.ThreadLib.OrgasmFX.Play(ActorRef)
-		; Shake camera for player
-		if IsPlayer && Game.GetCameraState() != 3
-			Game.ShakeCamera(none, 0.75, 1.5)
-		endIf
-		; Voice
-		Strength = 100
-		VoiceDelay = 1.0
-	endIf
-endFunction
-
 ; ------------------------------------------------------- ;
 ; --- Data Accessors                                  --- ;
 ; ------------------------------------------------------- ;
@@ -517,35 +520,41 @@ sslBaseVoice function GetVoice()
 endFunction
 
 int function GetEnjoyment()
-	Enjoyment = 0
-	; ; Actor in uncomfortable position
-	; if IsStraight && ((IsFemale && !Animation.FemalePosition(Position)) || !IsFemale && !Animation.MalePosition(Position))
-	; 	Enjoyment -= 5
-	; endIf
-	; ; Gender bonuses
-	; if IsFemale
-	; 	; Female bonus
-	; 	if Thread.IsVaginal
-	; 		Enjoyment += 2
-	; 	endIf
-	; 	if Thread.IsAnal
-	; 		Enjoyment += -1
-	; 	endIf
-	; 	if Thread.IsOral
-	; 		Enjoyment += 1
-	; 	endIf
-	; else
-	; 	; Male bonus
-	; 	if Thread.IsVaginal
-	; 		Enjoyment += 2
-	; 	endIf
-	; 	if Thread.IsAnal
-	; 		Enjoyment += -1
-	; 	endIf
-	; 	if Thread.IsOral
-	; 		Enjoyment += 1
-	; 	endIf
-	; endIf
+	Thread.RecordSkills()
+	; Base enjoyment from sex skills and total runtime
+	Enjoyment = Thread.GetSkillBonus(Skills) as int
+
+	; Gender bonuses
+	if IsFemale
+		; Female bonus
+		if Thread.IsVaginal
+			Enjoyment += 8
+		endIf
+		if Thread.IsAnal
+			Enjoyment += 3
+		endIf
+		if Thread.IsOral
+			Enjoyment += 5
+		endIf
+	else
+		; Male bonus
+		if Thread.IsVaginal
+			Enjoyment += 6
+		endIf
+		if Thread.IsAnal
+			Enjoyment += 7
+		endIf
+		if Thread.IsOral
+			Enjoyment += 5
+		endIf
+	endIf
+	; Actor is outside sexuality comfort zone
+	if IsStraight && ((IsFemale && Thread.Females > 1) || !IsFemale && Thread.Males > 1)
+		Enjoyment -= 7
+	endIf
+
+	Enjoyment = ((Enjoyment as float) * ((Stage as float / Animation.StageCount as float) + 0.5)) as int
+	Thread.Log("Enjoyment: "+Enjoyment, ActorName)
 	; Thread.Log("Gender: "+Enjoyment, ActorName)
 	; ; Adjust for actors purity
 	; int PureMod = ((1 + Pure) / 2.0) as int
@@ -682,10 +691,6 @@ function Initialize()
 	; Floats
 	ActorScale     = 0.0
 	AnimScale      = 0.0
-	; Stats
-	Vaginal        = 0
-	Anal           = 0
-	Oral           = 0
 	; Storage
 	bool[] bDel1
 	StripOverride  = bDel1
@@ -755,6 +760,8 @@ function Snap()
 endFunction
 event OnTranslationComplete()
 endEvent
+function OrgasmEffect()
+endFunction
 ; Varied
 function FireAction()
 endFunction

@@ -3,6 +3,7 @@ scriptname sslThreadController extends sslThreadModel
 
 ; Animation
 string[] AnimEvents
+float SkillTime
 
 ; SFX
 float SFXDelay
@@ -72,6 +73,7 @@ state Advancing
 	endFunction
 endState
 
+; bool DoRecord
 state Animating
 
 	function FireAction()
@@ -80,6 +82,7 @@ state Animating
 		; Play animations
 		SyncActors()
 		PlayAnimation()
+		RecordSkills()
 		; Send events
 		if !LeadIn && Stage >= StageCount
 			SendThreadEvent("OrgasmStart")
@@ -107,6 +110,12 @@ state Animating
 			Animation.SoundFX.Play(CenterRef)
 			SFXTimer = CurrentTime + SFXDelay
 		endIf
+		; DoRecord = !DoRecord
+		; if DoRecord
+		; 	AddXP(1, 0.075, IsVaginal)
+		; 	AddXP(2, 0.075, IsAnal)
+		; 	AddXP(3, 0.075, IsOral)
+		; endIf
 		; Loop
 		RegisterForSingleUpdate(0.30)
 	endEvent
@@ -285,15 +294,16 @@ function SetAnimation(int aid = -1)
 	if aid < 0 || aid >= Animations.Length
 		aid = Utility.RandomInt(0, (Animations.Length - 1))
 	endIf
-	if Animations[aid] == Animation
-		return ; Nothings changed.
-	endIf
 	; Set active animation
 	Animation = Animations[aid]
 	; Update animation info
-	StageCount = Animation.StageCount
-	UpdateAdjustKey()
 	RecordSkills()
+	StageCount = Animation.StageCount
+	IsVaginal = AddTagConditional("Vaginal", (Animation.HasTag("Vaginal") && Genders[1] > 0))
+	IsAnal = AddTagConditional("Anal", (Animation.HasTag("Anal") || (Genders[1] == 0 && Animation.HasTag("Vaginal"))))
+	IsOral = AddTagConditional("Oral", Animation.HasTag("Oral"))
+	; Offset adjustment key
+	UpdateAdjustKey()
 	; Inform player of animation being played now
 	if HasPlayer
 		MiscUtil.PrintConsole("Playing Animation: " + Animation.Name)
@@ -328,30 +338,31 @@ float function GetTimer()
 endFunction
 
 function TriggerOrgasm()
-	; Perform actor orgasm stuff
-	int i = ActorCount
-	while i
-		i -= 1
-		ActorAlias[i].OrgasmEffect()
-	endWhile
+	ActorAlias[0].OrgasmEffect()
+	ActorAlias[1].OrgasmEffect()
+	ActorAlias[2].OrgasmEffect()
+	ActorAlias[3].OrgasmEffect()
+	ActorAlias[4].OrgasmEffect()
 endFunction
 
 function EndLeadIn()
-	; Swap to non lead in animations
-	Stage = 1
-	LeadIn = false
-	SetAnimation()
-	if Animation.IsSexual
+	if LeadIn
+		; Swap to non lead in animations
+		Stage = 1
+		LeadIn = false
+		SetAnimation()
+		; Add runtime to foreplay skill xp
+		AddXP(0, (TotalTime / 11.0))
 		; Restrip with new strip options
-		int i = ActorCount
-		while i
-			i -= 1
-			ActorAlias[i].Strip(false)
-		endWhile
+		ActorAlias[0].Strip(false)
+		ActorAlias[1].Strip(false)
+		ActorAlias[2].Strip(false)
+		ActorAlias[3].Strip(false)
+		ActorAlias[4].Strip(false)
+		; Start primary animations at stage 1
+		SendThreadEvent("LeadInEnd")
+		Action("Advancing")
 	endIf
-	; Start primary animations at stage 1
-	SendThreadEvent("LeadInEnd")
-	Action("Advancing")
 endFunction
 
 function EndAnimation(bool Quickly = false)
@@ -360,7 +371,7 @@ function EndAnimation(bool Quickly = false)
 	; Set fast flag to skip slow ending functions
 	FastEnd = Quickly
 	Stage = StageCount
-	; Save skill timers for xp
+	; Save skill xp for actor update
 	RecordSkills()
 	; Reset actors & wait for clear state
 	AliasAction("Reset", "")
@@ -393,6 +404,15 @@ endFunction
 ; --- System Use Only                                 --- ;
 ; ------------------------------------------------------- ;
 
+function RecordSkills()
+	float xp = ((TotalTime - SkillTime) / 15.0)
+	AddXP(1, xp, IsVaginal)
+	AddXP(2, xp, IsAnal)
+	AddXP(3, xp, IsOral)
+	Log("ADDING XP: "+xp+" -- Foreplay: "+GetXP(0)+" Vaginal: "+GetXP(1)+" Anal: "+GetXP(2)+" Oral: "+GetXP(3))
+	SkillTime = TotalTime
+endfunction
+
 function EnableHotkeys()
 	if HasPlayer
 		; RegisterForKey(Config.kBackwards)
@@ -419,6 +439,7 @@ endFunction
 
 function Initialize()
 	DisableHotkeys()
+	SkillTime   = 0.0
 	TimedStage  = false
 	AdjustAlias = ActorAlias[0]
 	parent.Initialize()
