@@ -44,11 +44,12 @@ float ActorScale
 float AnimScale
 form Strapon
 
-; int BaseWeight
-int Enjoyment
+; Stats
 float[] Skills
 float Pure
 float Impure
+float BaseWeight
+int Enjoyment
 
 ; Animation Position/Stage flags
 bool property OpenMouth hidden
@@ -269,26 +270,27 @@ state Prepare
 			Skills[1] = Stats.GetSkillLevel(SkilledActor, "Vaginal") as float
 			Skills[2] = Stats.GetSkillLevel(SkilledActor, "Anal") as float
 			Skills[3] = Stats.GetSkillLevel(SkilledActor, "Oral") as float
-			Thread.Log("Using Skills Of: "+SkilledActor, ActorName)
-			Thread.Log("Skills: "+Skills, ActorName)
 			; Check for heterosexual preference
 			IsStraight = Stats.IsStraight(ActorRef)
 			; Get Pure/Impure
-			Pure = Stats.GetPureLevel(ActorRef)
-			Impure = Stats.GetImpureLevel(ActorRef)
+			Pure = Stats.GetPure(ActorRef)
+			Impure = Stats.GetImpure(ActorRef)
+			; Enjoyment mods
+			; PureMod = (Pure >= Impure) as float
+			; ImpureMod = (Impure >= Pure) as float
 			; Adjust starting purity for couples
-			; if Thread.ActorCount > 1
-			; 	; Adjust for present couples
-			; 	if ActorRef.GetHighestRelationshipRank() == 4
-			; 		if Thread.GetHighestPresentRelationshipRank(ActorRef) == 4 ; Present Lover - couple
-			; 			Pure += 2.5
-			; 			Impure -= 1.0
-			; 		else ; Absent lover - cheating
-			; 			Pure -= 1.5
-			; 			Impure += 2.0
-			; 		endIf
-			; 	endIf
-			; endIf
+			if Thread.ActorCount > 1
+				; Adjust for present couples
+				if ActorRef.GetHighestRelationshipRank() == 4
+					if Thread.GetHighestPresentRelationshipRank(ActorRef) == 4 ; Present Lover - couple
+						Pure += 2.5
+						Impure -= 1.0
+					else ; Absent lover - cheating
+						Pure -= 1.5
+						Impure += 2.0
+					endIf
+				endIf
+			endIf
 			; Pick a strapon on females to use
 			if IsFemale && Config.bUseStrapons && Lib.Strapons.Length > 0
 				Strapon = Lib.Strapons[Utility.RandomInt(0, (Lib.Strapons.Length - 1))]
@@ -552,6 +554,9 @@ int function GetEnjoyment()
 	if IsStraight && ((IsFemale && Thread.Females > 1) || !IsFemale && Thread.Males > 1)
 		Enjoyment -= 7
 	endIf
+
+
+
 
 	Enjoyment = ((Enjoyment as float) * ((Stage as float / Animation.StageCount as float) + 0.5)) as int
 	Thread.Log("Enjoyment: "+Enjoyment, ActorName)

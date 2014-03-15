@@ -159,34 +159,83 @@ endFunction
 ; ------------------------------------------------------- ;
 
 int function GetSkill(Actor ActorRef, string Skill)
-	return Utility.RandomInt(10,100)
 	; Seed for NPC native skills
 	if ActorRef != PlayerRef && !HasInt(ActorRef, Skill) && !CreatureSlots.HasRace(ActorRef.GetLeveledActorBase().GetRace())
+		float Seed
 		if Skill == "Vaginal" || Skill == "Anal" || Skill == "Oral" || Skill == "Foreplay"
-			SetInt(ActorRef, Skill, ((Utility.RandomInt(ActorRef.GetLevel() * 2, ActorRef.GetLevel() * 3) * Utility.RandomInt(1, 2)) + ((((ActorRef.GetActorValue("Speechcraft") * ActorRef.GetActorValue("Confidence")) + 1) / 2.0) as int)))
+			Seed  = Utility.RandomFloat(0.0, (ActorRef.GetLevel() as float) * 2.5) * Utility.RandomFloat(0.5, 2.5)
+			Seed  = sslUtility.ClampFloat(Seed, 0.0, 80.0)
+			Seed += (ActorRef.GetActorValue("Speechcraft") / 2.0) * ((ActorRef.GetActorValue("Confidence") + 0.5) / 1.5)
 		elseIf Skill == "Males" || Skill == "Females"
 			bool IsFemale = ActorLib.GetGender(ActorRef) == 1
-			int Seed = Utility.RandomInt(0, ActorRef.GetLevel())
-			; Same sex
-			if (IsFemale && Skill == "Females") || (!IsFemale && Skill == "Males")
-				Seed += ((Math.Abs(ActorRef.GetLowestRelationshipRank() as float) + 1) as int)*(((ActorRef.GetActorValue("Energy") + 1) / 3) as int)
-				; 33% chance of never having had same sex
-				if Utility.RandomInt(0, 2) == 0
+			Seed = Utility.RandomFloat(0.0, (ActorRef.GetLevel() as float) / 2.0)
+			; Same sex count
+			if ((IsFemale && Skill == "Females") || (!IsFemale && Skill == "Males"))
+				if Utility.RandomInt(0, 4) < 2
 					SetInt(ActorRef, Skill, 0)
-					return 0
+					return 0 ; 40% chance to have never had
 				endIf
+				Seed += (Math.Abs(ActorRef.GetLowestRelationshipRank() as float) + 1.0)
+				Seed *= Math.Sqrt((ActorRef.GetActorValue("Energy") + 1.0) / 3.0)
 			else
-				Seed *= 2
-				Seed += ((Math.Abs(ActorRef.GetLowestRelationshipRank() as float) + 1) as int)*(((ActorRef.GetActorValue("Energy") + ActorRef.GetActorValue("Assistance")) / 3) as int) + (ActorRef.GetActorValue("Assistance") as int)
+				Seed += (Math.Abs(ActorRef.GetHighestRelationshipRank() as float) + 1.0) + Seed
+				Seed *= Math.Sqrt(((ActorRef.GetActorValue("Energy") + 1.0) / 3.0) + (ActorRef.GetActorValue("Assistance") * 1.5) + 1.0)
 			endIf
-			if ActorRef.GetActorValue("Confidence") == 0
-				Seed = Seed / 2
+			; Cowardly - less likely to have had partners
+			if ActorRef.GetActorValue("Confidence") == 0.0
+				Seed = Seed / 2.0
 			endIf
-			if ActorRef.GetActorValue("Aggression") > 1
-				Seed = (Seed * 1.25) as int
+			; Very aggressive / frenzied - make more likely to have had more
+			if ActorRef.GetActorValue("Aggression") > 1.0
+				Seed *= 1.25
 			endIf
-			SetInt(ActorRef, Skill, Seed)
+		elseIf Skill == "Pure" || Skill == "Impure"
+			; Get relevant-ish AI data
+			float Aggression = ActorRef.GetActorValue("Aggression")
+			float Morality = ActorRef.GetActorValue("Morality")
+			float Assistance = ActorRef.GetActorValue("Assistance")
+			; Seed Pure
+			float Pure = (Morality * 1.25) - (Aggression * 0.5)
+			Pure +=  1.0 * Math.Abs(ActorRef.GetHighestRelationshipRank())
+			Pure += -1.5 * ((Morality == 0.0) as float)
+			Pure +=  3.0 * ((Morality == 3.0) as float)
+			Pure +=  2.5 * ((Aggression == 0 && Morality != 0) as float)
+			Pure += -1.5 * ((Assistance == 0.0) as float)
+			Pure +=  2.0 * ((Assistance == 2.0) as float)
+			Pure +=  1.2 * ((Assistance == 2.0 && Morality == 0.0) as float)
+			; Seed Impure
+			float Impure = (Aggression * 2.0)
+			Impure +=  1.0 * Math.Abs(ActorRef.GetLowestRelationshipRank())
+			Impure +=  1.8 * ((ActorRef.GetLowestRelationshipRank() < 0) as float)
+			Impure +=  2.0 * ((Morality == 0.0) as float)
+			Impure += -1.5 * ((Morality == 3.0) as float)
+			Impure +=  2.2 * ((Assistance == 0.0) as float)
+			Impure += -1.5 * ((Assistance == 2.0) as float)
+			Impure +=  3.0 * ((Morality == 0.0 && Aggression > 1.0) as float)
+			; If one is signed, add it to it's oppoiste and get a random amount to avoid having none
+			if Pure < 0.0
+				Impure += Math.Abs(Pure)
+				Pure = Utility.RandomFloat(0.0, Math.Abs(Pure))
+			endIf
+			if Impure < 0.0
+				Pure += Math.Abs(Impure)
+				Impure = Utility.RandomFloat(0.0, Math.Abs(Impure))
+			endIf
+			; Curved increase with actor level and slight randomness
+			float Curve = Math.Abs(Math.Sqrt(((Math.Pow(ActorRef.GetLevel() as float, 2.0)) / 2.0 ) * (8.5 + Utility.RandomFloat(-1.0, 1.8))))
+			Pure   *= Curve
+			Impure *= Curve
+			; Save Purity stats
+			SetInt(ActorRef, "Pure", Math.Abs(Pure) as int)
+			SetInt(ActorRef, "Impure", Math.Abs(Impure) as int)
+			if Skill == "Pure"
+				return Math.Abs(Pure) as int
+			else
+				return Math.Abs(Impure) as int
+			endIf
 		endIf
+		SetInt(ActorRef, Skill, Seed as int)
+		return Seed as int
 	endIf
 	return GetInt(ActorRef, Skill)
 endFunction
@@ -217,6 +266,24 @@ string function GetTitle(int Level)
 	return StatTitles[sslUtility.ClampInt(Level, 0, 6)]
 endFunction
 
+float[] function GetSkills(Actor ActorRef)
+	float[] Output = new float[4]
+	Output[0] = GetSkill(ActorRef, "Foreplay") as float
+	Output[1] = GetSkill(ActorRef, "Vaginal") as float
+	Output[2] = GetSkill(ActorRef, "Anal") as float
+	Output[3] = GetSkill(ActorRef, "Oral") as float
+	return Output
+endFunction
+
+int[] function GetSkillLevels(Actor ActorRef)
+	int[] Output = new int[4]
+	Output[0] = GetSkillLevel(ActorRef, "Foreplay")
+	Output[1] = GetSkillLevel(ActorRef, "Vaginal")
+	Output[2] = GetSkillLevel(ActorRef, "Anal")
+	Output[3] = GetSkillLevel(ActorRef, "Oral")
+	return Output
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Purity/Impurty Stat                             --- ;
 ; ------------------------------------------------------- ;
@@ -224,87 +291,55 @@ endFunction
 function SeedPurityStat(Actor ActorRef)
 	if ActorRef != PlayerRef && !CreatureSlots.HasRace(ActorRef.GetLeveledActorBase().GetRace())
 		; Get relevant-ish AI data
-		int Aggression = ActorRef.GetActorValue("Aggression") as int
-		int Morality = ActorRef.GetActorValue("Morality") as int
-		int Assistance = ActorRef.GetActorValue("Assistance") as int
+		float Aggression = ActorRef.GetActorValue("Aggression")
+		float Morality = ActorRef.GetActorValue("Morality")
+		float Assistance = ActorRef.GetActorValue("Assistance")
 		int HighestRelation = ActorRef.GetHighestRelationshipRank()
 		int LowestRelation = ActorRef.GetLowestRelationshipRank()
-		; Init base purity based on level and how aggressive they are
-		float impurity = (Aggression * 0.40)
-		float purity = ((Morality + 1) * 0.40)
-		; Adjust both by highest/lowest relationship
-		int Relation = Math.Abs(HighestRelation + LowestRelation) as int
-		if Relation > 0 && Math.Abs(HighestRelation) > Math.Abs(LowestRelation)
-			purity += Relation
-			impurity -=  Relation
-		elseif Relation > 0 ; Larger enemey than friend, more impure
-			purity -= Relation
-			impurity +=  Relation
+		; Seed Pure
+		float Pure = (Morality * 0.75) - (Aggression * 0.5)
+		Pure += Math.Abs(HighestRelation + LowestRelation)
+		Pure += -1.5 * ((Morality == 0.0) as float)
+		Pure +=  3.0 * ((Morality == 3.0) as float)
+		Pure +=  2.5 * ((Aggression == 0 && Morality != 0) as float)
+		Pure +=  2.0 * ((Assistance == 2.0) as float)
+		Pure +=  1.2 * ((Assistance == 2.0 && Morality == 0.0) as float)
+		; Seed Impure
+		float Impure = (Aggression * 0.75) - (Morality * 0.5)
+		Impure += Math.Abs(LowestRelation)
+		Impure +=  1.8 * ((LowestRelation < 0.0) as float)
+		Impure +=  2.0 * ((Morality == 0.0) as float)
+		Impure += -1.5 * ((Morality == 3.0) as float)
+		Impure +=  2.2 * ((Assistance == 0.0) as float)
+		Impure +=  3.0 * ((Morality == 0.0 && Aggression > 1.0) as float)
+		; If one is signed, add it to it's oppoiste and get a random amount to avoid having none
+		if Pure < 0.0
+			Impure += Math.Abs(Pure)
+			Pure = Utility.RandomFloat(0.0, Math.Abs(Pure))
 		endIf
-		; Doesn't care about crime
-		if Morality == 0
-			purity -= 0.10
-			impurity += 0.15
-		; Actor refuses crime
-		elseIf Morality == 3
-			purity += 0.07
-			impurity -= 0.10
+		if Impure < 0.0
+			Pure += Math.Abs(Impure)
+			Impure = Utility.RandomFloat(0.0, Math.Abs(Impure))
 		endIf
-		; Actor is a morale pacifist
-		if Aggression == 0 && Morality != 0
-			purity += 0.15
-			impurity -= 0.20
-		; Aggressive only towards enemies
-		elseIf Aggression == 1
-			purity += 0.01
-		endIf
-		; 0 = Actor won't help anybody, make more impure
-		; 2 = Actor helps friends+allies, make more pure
-		if Assistance == 0
-			purity -= 0.05
-			impurity += 0.05
-		elseIf Assistance == 2
-			purity += 0.05
-			impurity -= 0.05
-		endIf
-		; Actor is immorale but helps friends+allies, make more pure
-		if Assistance == 2 && Morality == 0
-			purity += 0.07
-			impurity -= 0.04
-		endIf
-		; Generate largish amount with seed and base purity/impurity
-		float seed = (((ActorRef.GetLevel() as float) / 2.5 ) * 9)
-		; Adjust opposites if either is negative
-		if purity < 0
-			impurity += Math.Abs(purity)
-			purity = 0.0
-		else ; Adjust by seed amount
-			purity += ((purity * seed) * 1.75) * 1.5
-		endIf
-		if impurity < 0
-			purity += Math.Abs(impurity)
-			impurity = 0.0
-		else ; Adjust by seed amount
-			impurity += ((impurity * seed) * 1.75) * 1.5
-		endIf
-		if !HasFloat(ActorRef, "Pure")
-			SetFloat(ActorRef, "Pure", Math.Abs(purity))
-		endIf
-		if !HasFloat(ActorRef, "Impure")
-			SetFloat(ActorRef, "Impure", Math.Abs(impurity))
-		endIf
+		; Curved increase with actor level and slight randomness
+		float Curve = Math.Abs(Math.Sqrt(((Math.Pow(ActorRef.GetLevel() as float, 2.0)) / 1.5 ) * 9.0))
+		Pure   *= Curve
+		Impure *= Curve
+		; Save Purity stats
+		SetInt(ActorRef, "Pure", Math.Abs(Pure) as int)
+		SetInt(ActorRef, "Impure", Math.Abs(Impure) as int)
 	endIf
 endFunction
 
-float function GetPure(Actor ActorRef)
-	if ActorRef != PlayerRef && !HasFloat(ActorRef, "Pure")
-		SeedPurityStat(ActorRef)
-	endIf
-	return GetFloat(ActorRef, "Pure")
+int function GetPure(Actor ActorRef)
+	; if ActorRef != PlayerRef && !HasInt(ActorRef, "Pure")
+		; SeedPurityStat(ActorRef)
+	; endIf
+	return GetSkill(ActorRef, "Pure")
 endFunction
 
 int function GetPureLevel(Actor ActorRef)
-	return CalcLevel(GetPure(ActorRef), 0.2)
+	return CalcLevel(GetPure(ActorRef), 0.4)
 endFunction
 
 string function GetPureTitle(Actor ActorRef)
@@ -315,15 +350,15 @@ string function GetPureTitle(Actor ActorRef)
 	endIf
 endFunction
 
-float function GetImpure(Actor ActorRef)
-	if ActorRef != PlayerRef && !HasFloat(ActorRef, "Impure")
-		SeedPurityStat(ActorRef)
-	endIf
-	return GetFloat(ActorRef, "Impure")
+int function GetImpure(Actor ActorRef)
+	; if ActorRef != PlayerRef && !HasInt(ActorRef, "Impure")
+		; SeedPurityStat(ActorRef)
+	; endIf
+	return GetSkill(ActorRef, "Impure")
 endFunction
 
 int function GetImpureLevel(Actor ActorRef)
-	return CalcLevel(GetImpure(ActorRef), 0.2)
+	return CalcLevel(GetImpure(ActorRef), 0.4)
 endFunction
 
 string function GetImpureTitle(Actor ActorRef)
@@ -332,25 +367,6 @@ string function GetImpureTitle(Actor ActorRef)
 	else
 		return ImpureTitlesMale[sslUtility.ClampInt(GetImpureLevel(ActorRef), 0, 6)]
 	endIf
-endFunction
-
-float function GetPurity(Actor ActorRef)
-	float pure = GetPure(ActorRef)
-	float impure = GetImpure(ActorRef)
-	if pure >= impure
-		return pure
-	else
-		return -impure
-	endIf
-endFunction
-
-float function AdjustPurity(Actor ActorRef, float adjust)
-	string type = "Pure"
-	if adjust < 0
-		type = "Impure"
-	endIf
-	AdjustFloat(ActorRef, type, Math.Abs(adjust))
-	return GetFloat(ActorRef, type)
 endFunction
 
 bool function IsPure(Actor ActorRef)
@@ -376,6 +392,25 @@ string function GetPurityTitle(Actor ActorRef)
 	else
 		return GetPureTitle(ActorRef)
 	endIf
+endFunction
+
+float function GetPurity(Actor ActorRef)
+	int Pure = GetPure(ActorRef)
+	int Impure = GetImpure(ActorRef)
+	if Pure >= Impure
+		return Pure as float
+	else
+		return -Impure as float
+	endIf
+endFunction
+
+float function AdjustPurity(Actor ActorRef, float adjust)
+	string type = "Pure"
+	if adjust < 0.0
+		type = "Impure"
+	endIf
+	AdjustInt(ActorRef, type, Math.Abs(adjust) as int)
+	return GetInt(ActorRef, type) as float
 endFunction
 
 ; ------------------------------------------------------- ;

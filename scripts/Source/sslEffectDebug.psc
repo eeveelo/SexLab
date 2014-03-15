@@ -13,18 +13,33 @@ actor Ref2
 float scale1
 float scale2
 
+string ActorName
+
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
-	; Ref1 = TargetRef
+	Ref1 = TargetRef
 	; Ref2 = CasterRef
-	Ref1 = CasterRef
-	Ref2 = TargetRef
+	; Ref1 = CasterRef
+	; Ref2 = TargetRef
+	ActorName = Ref1.GetLeveledActorBase().GetName()
+	; ActorName = Ref2.GetLeveledActorBase().GetName()
 
-	int seed = Utility.RandomInt(TargetRef.GetLevel(), TargetRef.GetLevel() * 4) * 2
+	sslActorStats Stats = SexLab.Stats
 
-	debug.messagebox(SeedSkill(TargetRef, seed, 0.45, 2.5))
-	debug.messagebox(SeedSkill(TargetRef, seed, 0.45, 1.5))
+	Log(ActorName+"\nMales: "+Stats.GetSkill(Ref1, "Males")+"\nFemales: "+Stats.GetSkill(Ref1, "Females"))
+	Log(ActorName+"\nGay: "+Stats.IsGay(Ref1)+"\nBi: "+Stats.IsBisexual(Ref1)+"\nStraight: "+Stats.IsStraight(Ref1))
+	Log(ActorName+"\nPure: "+Stats.GetPure(Ref1)+" ("+Stats.GetPureLevel(Ref1)+")\nImpure: "+Stats.GetImpure(Ref1)+" ("+Stats.GetImpureLevel(Ref1)+")")
 
+	Log(ActorName+"\n"+Stats.GetSkills(Ref1))
+	Log(ActorName+"\n"+Stats.GetSkillLevels(Ref1))
 
+	Stats.ClearInt(Ref1, "Foreplay")
+	Stats.ClearInt(Ref1, "Vaginal")
+	Stats.ClearInt(Ref1, "Anal")
+	Stats.ClearInt(Ref1, "Oral")
+	Stats.ClearInt(Ref1, "Males")
+	Stats.ClearInt(Ref1, "Females")
+	Stats.ClearFloat(Ref1, "Pure")
+	Stats.ClearFloat(Ref1, "Impure")
 	; Idle NextClip = Game.GetForm(0x10EB3C) as Idle
 	; Idle PAFull = Game.GetFormFromFile(0x6AB41, "SexLab.esm") as Idle
 	; Idle PALoop = Game.GetFormFromFile(0x6AB40, "SexLab.esm") as Idle
@@ -64,34 +79,10 @@ event OnUpdate()
 endEvent
 
 event OnEffectFinish(Actor TargetRef, Actor CasterRef)
-	Log("Debug effect spell expired("+TargetRef+", "+CasterRef+")")
+	; Log("Debug effect spell expired("+TargetRef+", "+CasterRef+")")
 endEvent
 
-int function SeedSkill(Actor ActorRef, int seed, float curve = 0.4, float adjuster = 2.2)
-	Log("\n\n##############################################################\n\n")
-	String ActorName = ActorRef.GetLeveledActorBase().GetName()
-	Log(ActorName+" -- Level: "+ActorRef.GetLevel())
 
-	Log(ActorName+" -- Seed: "+seed)
-
-	float speech = ActorRef.GetActorValue("Speechcraft")
-	Log(ActorName+" -- Speech: "+speech)
-
-	float conf = ActorRef.GetActorValue("Confidence")
-	Log(ActorName+" -- Confidence: "+conf)
-
-	int modifier = (((speech * conf) + 1.0) / adjuster) as int
-	Log(ActorName+" -- Speech/Confidence Mod: "+modifier)
-	Log(ActorName+" -- Using: "+seed+" + ("+speech+" * "+conf+") / "+adjuster)
-
-	int skill = seed + (((speech * conf) / adjuster) as int)
-
-
-	Log(ActorName+" -- FINAL SKILL ("+curve+"): "+skill+" -> "+SexLab.CalcLevel(skill, curve))
-	Log("\n\n##############################################################")
-
-	return skill
-endFunction
 
 ;/-----------------------------------------------\;
 ;|	Debug Utility Functions                      |;
@@ -121,7 +112,8 @@ function Benchmark(int iterations = 100000, float started = 0.0, float finished 
 endFunction
 
 function Log(string log)
-	Debug.Trace(log)
+	Debug.TraceAndBox(log)
+	; Debug.Trace(log)
 	MiscUtil.PrintConsole(log)
 endfunction
 
