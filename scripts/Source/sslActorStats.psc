@@ -4,8 +4,8 @@ scriptname sslActorStats extends sslSystemLibrary
 string[] StatTitles
 string[] PureTitlesMale
 string[] PureTitlesFemale
-string[] ImpureTitlesMale
-string[] ImpureTitlesFemale
+string[] LewdTitlesMale
+string[] LewdTitlesFemale
 
 ; ------------------------------------------------------- ;
 ; --- Manipulate Custom Stats                         --- ;
@@ -65,12 +65,12 @@ function SetStat(Actor ActorRef, string Stat, string Value)
 	endIf
 endFunction
 
-int function AdjustBy(Actor ActorRef, string Stat, int adjust)
+int function AdjustBy(Actor ActorRef, string Stat, int Adjust)
 	if FindStat(Stat) == -1
 		return 0
 	endIf
 	int Value = GetStatInt(ActorRef, Stat)
-	Value += adjust
+	Value += Adjust
 	SetStat(ActorRef, Stat, (Value as string))
 	return Value
 endFunction
@@ -135,12 +135,11 @@ int function CalcSexuality(bool IsFemale, int Males, int Females)
 	endIf
 endFunction
 
-int function CalcLevel(float total, float Curve = 0.85)
-	total = Math.Abs(total)
-	if total == 0
+int function CalcLevel(float Total, float Curve = 0.85)
+	if Total < 0.0
 		return 0
 	endIf
-	return Math.Sqrt((total / 2.0) * Curve) as int
+	return Math.Sqrt((Math.Abs(Total) / 2.0) * Curve) as int
 endFunction
 
 string function ZeroFill(string num)
@@ -189,7 +188,7 @@ int function GetSkill(Actor ActorRef, string Skill)
 			if ActorRef.GetActorValue("Aggression") > 1.0
 				Seed *= 1.25
 			endIf
-		elseIf Skill == "Pure" || Skill == "Impure"
+		elseIf Skill == "Pure" || Skill == "Lewd"
 			; Get relevant-ish AI data
 			float Aggression = ActorRef.GetActorValue("Aggression")
 			float Morality = ActorRef.GetActorValue("Morality")
@@ -203,35 +202,35 @@ int function GetSkill(Actor ActorRef, string Skill)
 			Pure += -1.5 * ((Assistance == 0.0) as float)
 			Pure +=  2.0 * ((Assistance == 2.0) as float)
 			Pure +=  1.2 * ((Assistance == 2.0 && Morality == 0.0) as float)
-			; Seed Impure
-			float Impure = (Aggression * 2.0)
-			Impure +=  1.0 * Math.Abs(ActorRef.GetLowestRelationshipRank())
-			Impure +=  1.8 * ((ActorRef.GetLowestRelationshipRank() < 0) as float)
-			Impure +=  2.0 * ((Morality == 0.0) as float)
-			Impure += -1.5 * ((Morality == 3.0) as float)
-			Impure +=  2.2 * ((Assistance == 0.0) as float)
-			Impure += -1.5 * ((Assistance == 2.0) as float)
-			Impure +=  3.0 * ((Morality == 0.0 && Aggression > 1.0) as float)
+			; Seed Lewd
+			float Lewd = (Aggression * 2.0)
+			Lewd +=  1.0 * Math.Abs(ActorRef.GetLowestRelationshipRank())
+			Lewd +=  1.8 * ((ActorRef.GetLowestRelationshipRank() < 0) as float)
+			Lewd +=  2.0 * ((Morality == 0.0) as float)
+			Lewd += -1.5 * ((Morality == 3.0) as float)
+			Lewd +=  2.2 * ((Assistance == 0.0) as float)
+			Lewd += -1.5 * ((Assistance == 2.0) as float)
+			Lewd +=  3.0 * ((Morality == 0.0 && Aggression > 1.0) as float)
 			; If one is signed, add it to it's oppoiste and get a random amount to avoid having none
 			if Pure < 0.0
-				Impure += Math.Abs(Pure)
+				Lewd += Math.Abs(Pure)
 				Pure = Utility.RandomFloat(0.0, Math.Abs(Pure))
 			endIf
-			if Impure < 0.0
-				Pure += Math.Abs(Impure)
-				Impure = Utility.RandomFloat(0.0, Math.Abs(Impure))
+			if Lewd < 0.0
+				Pure += Math.Abs(Lewd)
+				Lewd = Utility.RandomFloat(0.0, Math.Abs(Lewd))
 			endIf
 			; Curved increase with actor level and slight randomness
 			float Curve = Math.Abs(Math.Sqrt(((Math.Pow(ActorRef.GetLevel() as float, 2.0)) / 2.0 ) * (8.5 + Utility.RandomFloat(-1.0, 1.8))))
-			Pure   *= Curve
-			Impure *= Curve
+			Pure = Math.Abs(Pure * Curve)
+			Lewd = Math.Abs(Lewd * Curve)
 			; Save Purity stats
-			SetInt(ActorRef, "Pure", Math.Abs(Pure) as int)
-			SetInt(ActorRef, "Impure", Math.Abs(Impure) as int)
+			SetInt(ActorRef, "Pure", Pure as int)
+			SetInt(ActorRef, "Lewd", Lewd as int)
 			if Skill == "Pure"
-				return Math.Abs(Pure) as int
+				return Pure as int
 			else
-				return Math.Abs(Impure) as int
+				return Lewd as int
 			endIf
 		endIf
 		SetInt(ActorRef, Skill, Seed as int)
@@ -240,9 +239,9 @@ int function GetSkill(Actor ActorRef, string Skill)
 	return GetInt(ActorRef, Skill)
 endFunction
 
-function AdjustSkill(Actor ActorRef, string Skill, int AdjustBy)
-	if AdjustBy != 0 && ActorRef != none && Skill != ""
-		SetInt(ActorRef, Skill, (GetSkill(ActorRef, Skill) + AdjustBy))
+function AdjustSkill(Actor ActorRef, string Skill, int Amount)
+	if Amount != 0 && ActorRef != none && Skill != ""
+		SetInt(ActorRef, Skill, (GetSkill(ActorRef, Skill) + Amount))
 	endIf
 endFunction
 
@@ -267,74 +266,39 @@ string function GetTitle(int Level)
 endFunction
 
 float[] function GetSkills(Actor ActorRef)
-	float[] Output = new float[4]
+	float[] Output = new float[6]
 	Output[0] = GetSkill(ActorRef, "Foreplay") as float
 	Output[1] = GetSkill(ActorRef, "Vaginal") as float
 	Output[2] = GetSkill(ActorRef, "Anal") as float
 	Output[3] = GetSkill(ActorRef, "Oral") as float
+	Output[4] = GetPure(ActorRef) as float
+	Output[5] = GetLewd(ActorRef) as float
 	return Output
 endFunction
 
-int[] function GetSkillLevels(Actor ActorRef)
-	int[] Output = new int[4]
-	Output[0] = GetSkillLevel(ActorRef, "Foreplay")
-	Output[1] = GetSkillLevel(ActorRef, "Vaginal")
-	Output[2] = GetSkillLevel(ActorRef, "Anal")
-	Output[3] = GetSkillLevel(ActorRef, "Oral")
+float[] function GetSkillLevels(Actor ActorRef)
+	float[] Output = new float[6]
+	Output[0] = GetSkillLevel(ActorRef, "Foreplay") as float
+	Output[1] = GetSkillLevel(ActorRef, "Vaginal") as float
+	Output[2] = GetSkillLevel(ActorRef, "Anal") as float
+	Output[3] = GetSkillLevel(ActorRef, "Oral") as float
+	Output[4] = GetPureLevel(ActorRef) as float
+	Output[5] = GetLewdLevel(ActorRef) as float
 	return Output
+endFunction
+
+function AddSkillXP(Actor ActorRef, float Foreplay = 0.0, float Vaginal = 0.0, float Anal = 0.0, float Oral = 0.0)
+	AdjustSkill(ActorRef, "Foreplay", Foreplay as int)
+	AdjustSkill(ActorRef, "Vaginal", Vaginal as int)
+	AdjustSkill(ActorRef, "Anal", Anal as int)
+	AdjustSkill(ActorRef, "Oral", Oral as int)
 endFunction
 
 ; ------------------------------------------------------- ;
 ; --- Purity/Impurty Stat                             --- ;
 ; ------------------------------------------------------- ;
 
-function SeedPurityStat(Actor ActorRef)
-	if ActorRef != PlayerRef && !CreatureSlots.HasRace(ActorRef.GetLeveledActorBase().GetRace())
-		; Get relevant-ish AI data
-		float Aggression = ActorRef.GetActorValue("Aggression")
-		float Morality = ActorRef.GetActorValue("Morality")
-		float Assistance = ActorRef.GetActorValue("Assistance")
-		int HighestRelation = ActorRef.GetHighestRelationshipRank()
-		int LowestRelation = ActorRef.GetLowestRelationshipRank()
-		; Seed Pure
-		float Pure = (Morality * 0.75) - (Aggression * 0.5)
-		Pure += Math.Abs(HighestRelation + LowestRelation)
-		Pure += -1.5 * ((Morality == 0.0) as float)
-		Pure +=  3.0 * ((Morality == 3.0) as float)
-		Pure +=  2.5 * ((Aggression == 0 && Morality != 0) as float)
-		Pure +=  2.0 * ((Assistance == 2.0) as float)
-		Pure +=  1.2 * ((Assistance == 2.0 && Morality == 0.0) as float)
-		; Seed Impure
-		float Impure = (Aggression * 0.75) - (Morality * 0.5)
-		Impure += Math.Abs(LowestRelation)
-		Impure +=  1.8 * ((LowestRelation < 0.0) as float)
-		Impure +=  2.0 * ((Morality == 0.0) as float)
-		Impure += -1.5 * ((Morality == 3.0) as float)
-		Impure +=  2.2 * ((Assistance == 0.0) as float)
-		Impure +=  3.0 * ((Morality == 0.0 && Aggression > 1.0) as float)
-		; If one is signed, add it to it's oppoiste and get a random amount to avoid having none
-		if Pure < 0.0
-			Impure += Math.Abs(Pure)
-			Pure = Utility.RandomFloat(0.0, Math.Abs(Pure))
-		endIf
-		if Impure < 0.0
-			Pure += Math.Abs(Impure)
-			Impure = Utility.RandomFloat(0.0, Math.Abs(Impure))
-		endIf
-		; Curved increase with actor level and slight randomness
-		float Curve = Math.Abs(Math.Sqrt(((Math.Pow(ActorRef.GetLevel() as float, 2.0)) / 1.5 ) * 9.0))
-		Pure   *= Curve
-		Impure *= Curve
-		; Save Purity stats
-		SetInt(ActorRef, "Pure", Math.Abs(Pure) as int)
-		SetInt(ActorRef, "Impure", Math.Abs(Impure) as int)
-	endIf
-endFunction
-
 int function GetPure(Actor ActorRef)
-	; if ActorRef != PlayerRef && !HasInt(ActorRef, "Pure")
-		; SeedPurityStat(ActorRef)
-	; endIf
 	return GetSkill(ActorRef, "Pure")
 endFunction
 
@@ -350,67 +314,89 @@ string function GetPureTitle(Actor ActorRef)
 	endIf
 endFunction
 
-int function GetImpure(Actor ActorRef)
-	; if ActorRef != PlayerRef && !HasInt(ActorRef, "Impure")
-		; SeedPurityStat(ActorRef)
-	; endIf
-	return GetSkill(ActorRef, "Impure")
+int function GetLewd(Actor ActorRef)
+	return GetSkill(ActorRef, "Lewd")
 endFunction
 
-int function GetImpureLevel(Actor ActorRef)
-	return CalcLevel(GetImpure(ActorRef), 0.4)
+int function GetLewdLevel(Actor ActorRef)
+	return CalcLevel(GetLewd(ActorRef), 0.4)
 endFunction
 
-string function GetImpureTitle(Actor ActorRef)
+string function GetLewdTitle(Actor ActorRef)
 	if ActorRef.GetLeveledActorBase().GetSex() == 1
-		return ImpureTitlesFemale[sslUtility.ClampInt(GetImpureLevel(ActorRef), 0, 6)]
+		return LewdTitlesFemale[sslUtility.ClampInt(GetLewdLevel(ActorRef), 0, 6)]
 	else
-		return ImpureTitlesMale[sslUtility.ClampInt(GetImpureLevel(ActorRef), 0, 6)]
+		return LewdTitlesMale[sslUtility.ClampInt(GetLewdLevel(ActorRef), 0, 6)]
 	endIf
 endFunction
 
 bool function IsPure(Actor ActorRef)
-	return GetPure(ActorRef) >= GetImpure(ActorRef)
+	return GetPurity(ActorRef) >= 0.0;GetPure(ActorRef) >= GetLewd(ActorRef)
 endFunction
 
-bool function IsImpure(Actor ActorRef)
-	return GetPure(ActorRef) < GetImpure(ActorRef)
+bool function IsLewd(Actor ActorRef)
+	return GetPurity(ActorRef) < 0.0 ;GetPure(ActorRef) < GetLewd(ActorRef)
 endFunction
 
-int function GetPurityLevel(Actor ActorRef)
-	if IsImpure(ActorRef)
-		return GetImpureLevel(ActorRef)
-	else
-		return GetPureLevel(ActorRef)
+float function GetPurity(Actor ActorRef)
+	return ((GetPure(ActorRef) - GetLewd(ActorRef)) as float) * 1.5
+endFunction
+
+float function AdjustPurity(Actor ActorRef, float Adjust)
+	string type = "Pure"
+	if Adjust < 0.0
+		type = "Lewd"
 	endIf
+	AdjustInt(ActorRef, type, Math.Abs(Adjust) as int)
+	return GetInt(ActorRef, type) as float
 endFunction
 
 string function GetPurityTitle(Actor ActorRef)
-	bool IsFemale = ActorRef.GetLeveledActorBase().GetSex() == 1
-	if IsImpure(ActorRef)
-		return GetImpureTitle(ActorRef)
+	if IsLewd(ActorRef)
+		return GetLewdTitle(ActorRef)
 	else
 		return GetPureTitle(ActorRef)
 	endIf
 endFunction
 
-float function GetPurity(Actor ActorRef)
-	int Pure = GetPure(ActorRef)
-	int Impure = GetImpure(ActorRef)
-	if Pure >= Impure
-		return Pure as float
-	else
-		return -Impure as float
-	endIf
+int function GetPurityLevel(Actor ActorRef)
+	return CalcLevel(Math.Abs(GetPurity(ActorRef)), 0.4)
 endFunction
 
-float function AdjustPurity(Actor ActorRef, float adjust)
-	string type = "Pure"
-	if adjust < 0.0
-		type = "Impure"
+function AddPurityXP(Actor ActorRef, float Pure, float Lewd, bool IsAggressive, bool IsVictim, bool WithCreature, int ActorCount, int HadRelation)
+	; Aggressive modifier for victim/aggressor
+	if IsAggressive && IsVictim
+		AdjustInt(ActorRef, "Victim", 1)
+		Pure -= 1.0
+		Lewd += 1.0
+	elseIf IsAggressive
+		AdjustInt(ActorRef, "Aggressor", 1)
+		Pure -= 2.0
+		Lewd += 2.0
 	endIf
-	AdjustInt(ActorRef, type, Math.Abs(adjust) as int)
-	return GetInt(ActorRef, type) as float
+	; Creature modifier
+	if WithCreature
+		Pure -= 1.0
+		Lewd += 2.0
+	endIf
+	; Actor count modifier
+	if ActorCount == 1
+		Lewd += 1.0
+	elseIf ActorCount > 2
+		Pure -= (ActorCount - 1) * 2.0
+		Lewd += (ActorCount - 1) * 2.0
+	endIf
+	; Relationship modifier
+	int HighestRelation = ActorRef.GetHighestRelationshipRank()
+	if HighestRelation == 4 && HadRelation == 4
+		Pure += 4.0
+	elseIf HighestRelation == 4 && !IsVictim
+		Pure -= 2.0
+		Lewd += 2.0
+	endIf
+	; Save adjustments
+	AdjustSkill(ActorRef, "Pure", sslUtility.ClampInt(Pure as int, 0, 20))
+	AdjustSkill(ActorRef, "Lewd", sslUtility.ClampInt(Lewd as int, 0, 20))
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -421,8 +407,10 @@ function AddSex(Actor ActorRef, float TimeSpent = 0.0, bool WithPlayer = false, 
 	AdjustFloat(ActorRef, "TimeSpent", TimeSpent)
 	SetFloat(ActorRef, "LastSex.GameTime", Utility.GetCurrentGameTime())
 	SetFloat(ActorRef, "LastSex.RealTime", Utility.GetCurrentRealTime())
-	if (Males + Females + Creatures) > 1
-		int Gender = ActorRef.GetLeveledActorBase().GetSex()
+
+	int ActorCount = (Males + Females + Creatures)
+	if ActorCount > 1
+		int Gender = Actorlib.GetGender(ActorRef)
 		Males -= (Gender == 0) as int
 		Females -= (Gender == 1) as int
 		AdjustInt(ActorRef, "Males", Males)
@@ -563,13 +551,15 @@ function ResetActor(Actor ActorRef)
 	ClearInt(ActorRef, "Oral")
 	ClearInt(ActorRef, "Anal")
 	ClearInt(ActorRef, "Foreplay")
+	ClearInt(ActorRef, "Pure")
+	ClearInt(ActorRef, "Deviant")
+
 	ClearInt(ActorRef, "SexCount")
 	ClearInt(ActorRef, "PlayerSex")
 	ClearFloat(ActorRef, "LastSex.RealTime")
 	ClearFloat(ActorRef, "LastSex.GameTime")
 	ClearFloat(ActorRef, "TimeSpent")
-	ClearFloat(ActorRef, "Pure")
-	ClearFloat(ActorRef, "Impure")
+	ClearFloat(ActorRef, "Purity")
 	; Custom stats
 	int i = StorageUtil.StringListCount(self, "Custom")
 	while i
@@ -606,14 +596,14 @@ function Setup()
 	PureTitlesMale[5] = "$SSL_Lordly"
 	PureTitlesMale[6] = "$SSL_Saintly"
 
-	ImpureTitlesMale = new string[7]
-	ImpureTitlesMale[0] = "$SSL_Neutral"
-	ImpureTitlesMale[1] = "$SSL_Experimenting"
-	ImpureTitlesMale[2] = "$SSL_UnusuallyHorny"
-	ImpureTitlesMale[3] = "$SSL_Promiscuous"
-	ImpureTitlesMale[4] = "$SSL_SexualDeviant"
-	ImpureTitlesMale[5] = "$SSL_Depraved"
-	ImpureTitlesMale[6] = "$SSL_Hypersexual"
+	LewdTitlesMale = new string[7]
+	LewdTitlesMale[0] = "$SSL_Neutral"
+	LewdTitlesMale[1] = "$SSL_Experimenting"
+	LewdTitlesMale[2] = "$SSL_UnusuallyHorny"
+	LewdTitlesMale[3] = "$SSL_Promiscuous"
+	LewdTitlesMale[4] = "$SSL_SexualDeviant"
+	LewdTitlesMale[5] = "$SSL_Depraved"
+	LewdTitlesMale[6] = "$SSL_Hypersexual"
 
 	PureTitlesFemale = new string[7]
 	PureTitlesFemale[0] = "$SSL_Neutral"
@@ -624,66 +614,66 @@ function Setup()
 	PureTitlesFemale[5] = "$SSL_Ladylike"
 	PureTitlesFemale[6] = "$SSL_Saintly"
 
-	ImpureTitlesFemale = new string[7]
-	ImpureTitlesFemale[0] = "$SSL_Neutral"
-	ImpureTitlesFemale[1] = "$SSL_Experimenting"
-	ImpureTitlesFemale[2] = "$SSL_UnusuallyHorny"
-	ImpureTitlesFemale[3] = "$SSL_Promiscuous"
-	ImpureTitlesFemale[4] = "$SSL_SexualDeviant"
-	ImpureTitlesFemale[5] = "$SSL_Debaucherous"
-	ImpureTitlesFemale[6] = "$SSL_Nymphomaniac"
+	LewdTitlesFemale = new string[7]
+	LewdTitlesFemale[0] = "$SSL_Neutral"
+	LewdTitlesFemale[1] = "$SSL_Experimenting"
+	LewdTitlesFemale[2] = "$SSL_UnusuallyHorny"
+	LewdTitlesFemale[3] = "$SSL_Promiscuous"
+	LewdTitlesFemale[4] = "$SSL_SexualDeviant"
+	LewdTitlesFemale[5] = "$SSL_Debaucherous"
+	LewdTitlesFemale[6] = "$SSL_Nymphomaniac"
 
 	parent.Setup()
 endFunction
 
-bool function HasInt(Actor ActorRef, string stat)
-	return StorageUtil.HasIntValue(ActorRef, "sslActorStats."+stat)
+bool function HasInt(Actor ActorRef, string Stat)
+	return StorageUtil.HasIntValue(ActorRef, "sslActorStats."+Stat)
 endFunction
-bool function HasFloat(Actor ActorRef, string stat)
-	return StorageUtil.HasFloatValue(ActorRef, "sslActorStats."+stat)
+bool function HasFloat(Actor ActorRef, string Stat)
+	return StorageUtil.HasFloatValue(ActorRef, "sslActorStats."+Stat)
 endFunction
-bool function HasStr(Actor ActorRef, string stat)
-	return StorageUtil.HasStringValue(ActorRef, "sslActorStats."+stat)
-endFunction
-
-int function GetInt(Actor ActorRef, string stat)
-	return StorageUtil.GetIntValue(ActorRef, "sslActorStats."+stat)
-endFunction
-float function GetFloat(Actor ActorRef, string stat)
-	return StorageUtil.GetFloatValue(ActorRef, "sslActorStats."+stat)
-endFunction
-string function GetStr(Actor ActorRef, string stat)
-	return StorageUtil.GetStringValue(ActorRef, "sslActorStats."+stat)
+bool function HasStr(Actor ActorRef, string Stat)
+	return StorageUtil.HasStringValue(ActorRef, "sslActorStats."+Stat)
 endFunction
 
-function ClearInt(Actor ActorRef, string stat)
-	StorageUtil.UnsetIntValue(ActorRef, "sslActorStats."+stat)
+int function GetInt(Actor ActorRef, string Stat)
+	return StorageUtil.GetIntValue(ActorRef, "sslActorStats."+Stat)
 endFunction
-function ClearFloat(Actor ActorRef, string stat)
-	StorageUtil.UnsetFloatValue(ActorRef, "sslActorStats."+stat)
+float function GetFloat(Actor ActorRef, string Stat)
+	return StorageUtil.GetFloatValue(ActorRef, "sslActorStats."+Stat)
 endFunction
-function ClearStr(Actor ActorRef, string stat)
-	StorageUtil.UnsetStringValue(ActorRef, "sslActorStats."+stat)
-endFunction
-
-function SetInt(Actor ActorRef, string stat, int value)
-	StorageUtil.SetIntValue(ActorRef, "sslActorStats."+stat, value)
-endFunction
-function SetFloat(Actor ActorRef, string stat, float value)
-	StorageUtil.SetFloatValue(ActorRef, "sslActorStats."+stat, value)
-endFunction
-function SetStr(Actor ActorRef, string stat, string value)
-	StorageUtil.SetStringValue(ActorRef, "sslActorStats."+stat, value)
+string function GetStr(Actor ActorRef, string Stat)
+	return StorageUtil.GetStringValue(ActorRef, "sslActorStats."+Stat)
 endFunction
 
-function AdjustInt(Actor ActorRef, string stat, int amount)
-	if amount != 0
-		StorageUtil.SetIntValue(ActorRef, "sslActorStats."+stat, (StorageUtil.GetIntValue(ActorRef, "sslActorStats."+stat) + amount))
+function ClearInt(Actor ActorRef, string Stat)
+	StorageUtil.UnsetIntValue(ActorRef, "sslActorStats."+Stat)
+endFunction
+function ClearFloat(Actor ActorRef, string Stat)
+	StorageUtil.UnsetFloatValue(ActorRef, "sslActorStats."+Stat)
+endFunction
+function ClearStr(Actor ActorRef, string Stat)
+	StorageUtil.UnsetStringValue(ActorRef, "sslActorStats."+Stat)
+endFunction
+
+function SetInt(Actor ActorRef, string Stat, int Value)
+	StorageUtil.SetIntValue(ActorRef, "sslActorStats."+Stat, Value)
+endFunction
+function SetFloat(Actor ActorRef, string Stat, float Value)
+	StorageUtil.SetFloatValue(ActorRef, "sslActorStats."+Stat, Value)
+endFunction
+function SetStr(Actor ActorRef, string Stat, string Value)
+	StorageUtil.SetStringValue(ActorRef, "sslActorStats."+Stat, Value)
+endFunction
+
+function AdjustInt(Actor ActorRef, string Stat, int Amount)
+	if Amount != 0
+		StorageUtil.SetIntValue(ActorRef, "sslActorStats."+Stat, (StorageUtil.GetIntValue(ActorRef, "sslActorStats."+Stat) + Amount))
 	endIF
 endFunction
-function AdjustFloat(Actor ActorRef, string stat, float amount)
-	if amount != 0.0
-		StorageUtil.SetFloatValue(ActorRef, "sslActorStats."+stat, (StorageUtil.GetFloatValue(ActorRef, "sslActorStats."+stat) + amount))
+function AdjustFloat(Actor ActorRef, string Stat, float Amount)
+	if Amount != 0.0
+		StorageUtil.SetFloatValue(ActorRef, "sslActorStats."+Stat, (StorageUtil.GetFloatValue(ActorRef, "sslActorStats."+Stat) + Amount))
 	endIf
 endFunction
 

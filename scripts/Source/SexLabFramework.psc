@@ -594,8 +594,13 @@ bool function IsPure(Actor ActorRef)
 	return Stats.IsPure(ActorRef)
 endFunction
 
+; Impure replaced by Lewd, legacy support alias, do not use.
 bool function IsImpure(Actor ActorRef)
-	return Stats.IsImpure(ActorRef)
+	return Stats.IsLewd(ActorRef)
+endFunction
+
+bool function IsLewd(Actor ActorRef)
+	return Stats.IsLewd(ActorRef)
 endFunction
 
 bool function IsStraight(Actor ActorRef)
