@@ -552,7 +552,7 @@ function ResetActor(Actor ActorRef)
 	ClearInt(ActorRef, "Anal")
 	ClearInt(ActorRef, "Foreplay")
 	ClearInt(ActorRef, "Pure")
-	ClearInt(ActorRef, "Deviant")
+	ClearInt(ActorRef, "Lewd")
 
 	ClearInt(ActorRef, "SexCount")
 	ClearInt(ActorRef, "PlayerSex")

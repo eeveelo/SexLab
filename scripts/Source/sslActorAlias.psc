@@ -30,7 +30,6 @@ sslBaseVoice Voice
 VoiceType ActorVoice
 bool IsForcedSilent
 float VoiceDelay
-int Strength
 
 ; Positioning
 ObjectReference MarkerRef
@@ -46,9 +45,6 @@ form Strapon
 
 ; Stats
 float[] Skills
-float Pure
-float Impure
-float BaseWeight
 int Enjoyment
 
 ; Animation Position/Stage flags
@@ -149,6 +145,8 @@ function LockActor()
 	if ActorRef == none
 		return
 	endIf
+	; Stop whatever they are doing
+	Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 	; Start DoNothing package
 	ActorRef.SetFactionRank(Lib.AnimatingFaction, 1)
 	ActorUtil.AddPackageOverride(ActorRef, Lib.DoNothing, 100, 1)
@@ -256,7 +254,8 @@ state Prepare
 			if Voice == none && !IsForcedSilent
 				SetVoice(Lib.VoiceSlots.PickGender(BaseRef.GetSex()), IsForcedSilent)
 			endIf
-			; Get actor stats
+			; Check for heterosexual preference
+			IsStraight = Stats.IsStraight(ActorRef)
 			Actor SkilledActor = ActorRef
 			; Always use players stats if present, so players stats mean something more for npcs
 			if !IsPlayer && Thread.HasPlayer
@@ -265,32 +264,7 @@ state Prepare
 			elseIf Thread.ActorCount == 2 && !Thread.HasCreature
 				SkilledActor = Thread.Positions[sslUtility.IndexTravel(Position, Thread.ActorCount)]
 			endIf
-			Skills = new float[4]
-			Skills[0] = Stats.GetSkillLevel(SkilledActor, "Foreplay") as float
-			Skills[1] = Stats.GetSkillLevel(SkilledActor, "Vaginal") as float
-			Skills[2] = Stats.GetSkillLevel(SkilledActor, "Anal") as float
-			Skills[3] = Stats.GetSkillLevel(SkilledActor, "Oral") as float
-			; Check for heterosexual preference
-			IsStraight = Stats.IsStraight(ActorRef)
-			; Get Pure/Impure
-			Pure = Stats.GetPure(ActorRef)
-			Impure = Stats.GetImpure(ActorRef)
-			; Enjoyment mods
-			; PureMod = (Pure >= Impure) as float
-			; ImpureMod = (Impure >= Pure) as float
-			; Adjust starting purity for couples
-			if Thread.ActorCount > 1
-				; Adjust for present couples
-				if ActorRef.GetHighestRelationshipRank() == 4
-					if Thread.GetHighestPresentRelationshipRank(ActorRef) == 4 ; Present Lover - couple
-						Pure += 2.5
-						Impure -= 1.0
-					else ; Absent lover - cheating
-						Pure -= 1.5
-						Impure += 2.0
-					endIf
-				endIf
-			endIf
+			Skills = Stats.GetSkillLevels(SkilledActor)
 			; Pick a strapon on females to use
 			if IsFemale && Config.bUseStrapons && Lib.Strapons.Length > 0
 				Strapon = Lib.Strapons[Utility.RandomInt(0, (Lib.Strapons.Length - 1))]
@@ -355,15 +329,8 @@ state Animating
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
 		; Creature skipped
 		if !IsCreature
-			; Voice strength
-			if Stage == 1 && Animation.StageCount == 1
-				Strength = 75
-			else
-				Strength = ((Stage as float) / (Animation.StageCount as float) * 100.0) as int
-				if Thread.LeadIn
-					Strength = ((Strength as float) * 0.70) as int
-				endIf
-			endIf
+			; Sync enjoyment level
+			GetEnjoyment()
 			; Facial expression
 			; if OpenMouth
 			; 	ActorRef.SetExpressionOverride(16, 100)
@@ -452,7 +419,6 @@ state Animating
 				Game.ShakeCamera(none, 0.75, 1.5)
 			endIf
 			; Voice
-			Strength = 100
 			VoiceDelay = 1.0
 		endIf
 	endFunction
@@ -491,14 +457,9 @@ state Reset
 		if !IsCreature
 			int[] Genders = Thread.Genders
 			Stats.AddSex(ActorRef, Thread.TotalTime, Thread.HasPlayer, Genders[0], Genders[1], Genders[2])
-			Stats.AdjustSkill(ActorRef, "Vaginal", Thread.GetXP(0))
-			Stats.AdjustSkill(ActorRef, "Anal", Thread.GetXP(1))
-			Stats.AdjustSkill(ActorRef, "Oral", Thread.GetXP(2))
-			Stats.AdjustSkill(ActorRef, "Foreplay", Thread.GetXP(3))
-			Stats.AdjustSkill(ActorRef, "Victim", (IsVictim as int))
-			Stats.AdjustSkill(ActorRef, "Aggressor", (Thread.IsAggressor(ActorRef) as int))
-			; Stats.AdjustSkill(ActorRef, "Pure", ((Animation.HasTag("Loving") as float) * 1.3))
-			; Stats.AdjustSkill(ActorRef, "Impure", ((Animation.HasTag("Dirty") as float) * 1.3))
+			float[] SkillXP = Thread.SkillXP
+			Stats.AddSkillXP(ActorRef, SkillXP[0], SkillXP[1], SkillXP[2], SkillXP[3])
+			Stats.AddPurityXP(ActorRef, Skills[4], SkillXP[5], Thread.IsAggressive, IsVictim, Genders[2] > 0, Thread.ActorCount, Thread.GetHighestPresentRelationshipRank(ActorRef))
 		endIf
 		; Reset alias
 		Initialize()
@@ -522,92 +483,45 @@ sslBaseVoice function GetVoice()
 endFunction
 
 int function GetEnjoyment()
-	Thread.RecordSkills()
 	; Base enjoyment from sex skills and total runtime
 	Enjoyment = Thread.GetSkillBonus(Skills) as int
-
 	; Gender bonuses
 	if IsFemale
-		; Female bonus
-		if Thread.IsVaginal
-			Enjoyment += 8
-		endIf
-		if Thread.IsAnal
-			Enjoyment += 3
-		endIf
-		if Thread.IsOral
-			Enjoyment += 5
-		endIf
+		Enjoyment += 9 * (Thread.IsVaginal as int)
+		Enjoyment += 6 * (Thread.IsAnal as int)
+		Enjoyment += 7 * (Thread.IsOral as int)
 	else
-		; Male bonus
-		if Thread.IsVaginal
-			Enjoyment += 6
-		endIf
-		if Thread.IsAnal
-			Enjoyment += 7
-		endIf
-		if Thread.IsOral
-			Enjoyment += 5
-		endIf
+		Enjoyment += 8 * (Thread.IsVaginal as int)
+		Enjoyment += 8 * (Thread.IsAnal as int)
+		Enjoyment += 7 * (Thread.IsOral as int)
 	endIf
 	; Actor is outside sexuality comfort zone
-	if IsStraight && ((IsFemale && Thread.Females > 1) || !IsFemale && Thread.Males > 1)
-		Enjoyment -= 7
+	if IsStraight
+		if (IsFemale && Thread.Females > 1) || (!IsFemale && Thread.Males > 1)
+			Enjoyment -= 8
+		elseIf (IsFemale && MalePosition) || (!IsFemale && !MalePosition)
+			Enjoyment -= 6
+		endIf
 	endIf
-
-
-
-
+	; Actor is victim/agressor
+	if Thread.IsAggressive
+		if IsVictim
+			Enjoyment = Enjoyment / 2
+		else
+			Enjoyment += 8
+		endIf
+	endIf
 	Enjoyment = ((Enjoyment as float) * ((Stage as float / Animation.StageCount as float) + 0.5)) as int
 	Thread.Log("Enjoyment: "+Enjoyment, ActorName)
-	; Thread.Log("Gender: "+Enjoyment, ActorName)
-	; ; Adjust for actors purity
-	; int PureMod = ((1 + Pure) / 2.0) as int
-	; int ImpureMod = ((1 + Impure) / 2.0) as int
-	; if Thread.IsDirty
-	; 	Enjoyment += ImpureMod
-	; 	Enjoyment -= (PureMod / 2)
-	; elseIf Thread.IsLoving
-	; 	Enjoyment += PureMod
-	; 	Enjoyment -= (ImpureMod / 2)
-	; endIf
-	; if Thread.HasCreature
-	; 	if Pure > Impure
-	; 		Enjoyment -= 5
-	; 	else
-	; 		Enjoyment += 3
-	; 	endIf
-	; endIf
-	; if Thread.ActorCount > 2
-	; 	if Pure > Impure
-	; 		Enjoyment -= 2 * (Thread.ActorCount - 2)
-	; 	else
-	; 		Enjoyment += 2 * (Thread.ActorCount - 2)
-	; 	endIf
-	; endIf
-	; Thread.Log("Purity: "+Enjoyment, ActorName)
-	; if IsVictim
-	; 	Enjoyment -= sslUtility.ClampInt(PureMod * 4, 10, 50)
-	; endIf
-	; ; Adjust for actor skills
-	; if Thread.IsVaginal
-	; 	Enjoyment += (Vaginal * 2)
-	; endIf
-	; if Thread.IsAnal
-	; 	Enjoyment += (Anal * 2)
-	; endIf
-	; if Thread.IsOral
-	; 	Enjoyment += (Oral * 2)
-	; endIf
-	; Thread.Log("Skills: "+Enjoyment, ActorName)
-	; ; Increase by 1 every 8 seconds of animation
-	; Enjoyment += sslUtility.ClampInt((Thread.TotalTime / 8.0) as int, 0, 25)
-	; Thread.Log("Enjoyment: "+Enjoyment, ActorName)
 	return Enjoyment
 endFunction
 
 int function GetPain()
-	return (Strength as float / 2.0) as int ; Temporary, replace with stat based version later
+	float Pain = Math.Abs(100.0 - sslUtility.ClampFloat(GetEnjoyment() as float, 1.0, 99.0))
+	if IsVictim
+		return (Pain * 1.5) as int
+	endIf
+	return (Pain * 0.5) as int
 endFunction
 
 function EquipStrapon()
@@ -702,15 +616,6 @@ function Initialize()
 	; Clear the alias
 	TryToClear()
 	TryToReset()
-endFunction
-
-function UpdateBaseEnjoyment()
-	; Init weights
-	; float[] StatWeight = new float[3]
-	; BaseWeight       = 0
-	; ProficencyWeight = 0
-	; PurityWeight     = 0
-
 endFunction
 
 function ClearAlias()

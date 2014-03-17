@@ -20,7 +20,7 @@ event OnConfigInit()
 	; Init System
 	SetupSystem()
 	; Init Stats
-	; Stats._Setup()
+	Stats.Setup()
 endEvent
 
 event OnGameReload()
@@ -34,6 +34,8 @@ event OnGameReload()
 	Config.ToggleFreeCameraEnable()
 	; ALPHA DEBUG:
 	Config.SetDebugMode(true)
+	Stats.Setup()
+
 endEvent
 
 ; Framework
@@ -444,9 +446,9 @@ event OnPageReset(string page)
 		AddTextOption("$SSL_OralProficiency", Stats.GetSkillTitle(PlayerRef, "Oral"))
 		AddTextOption("$SSL_ForeplayProficiency", Stats.GetSkillTitle(PlayerRef, "Foreplay"))
 
+		AddTextOption("$SSL_SexualPurity", Stats.GetPureTitle(PlayerRef))
+		AddTextOption("$SSL_SexualPerversion", Stats.GetLewdTitle(PlayerRef))
 		AddTextOption("$SSL_Sexuality", Stats.GetSexualityTitle(PlayerRef))
-		AddTextOption("$SSL_SexualPurity", Stats.GetPureLevel(PlayerRef))
-		AddTextOption("$SSL_SexualPerversion", Stats.GetImpureLevel(PlayerRef))
 
 		AddEmptyOption()
 

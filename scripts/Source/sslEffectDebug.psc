@@ -16,30 +16,37 @@ float scale2
 string ActorName
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
-	Ref1 = TargetRef
+	; Ref1 = TargetRef
 	; Ref2 = CasterRef
-	; Ref1 = CasterRef
+	Ref1 = CasterRef
 	; Ref2 = TargetRef
 	ActorName = Ref1.GetLeveledActorBase().GetName()
 	; ActorName = Ref2.GetLeveledActorBase().GetName()
 
+
+
 	sslActorStats Stats = SexLab.Stats
 
-	Log(ActorName+"\nMales: "+Stats.GetSkill(Ref1, "Males")+"\nFemales: "+Stats.GetSkill(Ref1, "Females"))
-	Log(ActorName+"\nGay: "+Stats.IsGay(Ref1)+"\nBi: "+Stats.IsBisexual(Ref1)+"\nStraight: "+Stats.IsStraight(Ref1))
-	Log(ActorName+"\nPure: "+Stats.GetPure(Ref1)+" ("+Stats.GetPureLevel(Ref1)+")\nImpure: "+Stats.GetImpure(Ref1)+" ("+Stats.GetImpureLevel(Ref1)+")")
+	Log("Pure: "+Stats.GetPure(Ref1)+" ("+Stats.GetPureLevel(Ref1)+")\nImpure: "+Stats.GetLewd(Ref1)+" ("+Stats.GetLewdLevel(Ref1)+")")
+	Log("Purity: "+Stats.GetPurity(Ref1)+" ("+Stats.GetPurityLevel(Ref1)+")\n"+Stats.GetPurityTitle(Ref1))
 
-	Log(ActorName+"\n"+Stats.GetSkills(Ref1))
-	Log(ActorName+"\n"+Stats.GetSkillLevels(Ref1))
+	Stats.AddPurityXP(Ref1, Utility.RandomInt(0, 5) as float, Utility.RandomInt(0, 5) as float, Utility.RandomInt(0, 1) as bool, Utility.RandomInt(0, 1) as bool, Utility.RandomInt(0, 4) == 4, Utility.RandomInt(1, 3), Utility.RandomInt(0, 4))
 
-	Stats.ClearInt(Ref1, "Foreplay")
-	Stats.ClearInt(Ref1, "Vaginal")
-	Stats.ClearInt(Ref1, "Anal")
-	Stats.ClearInt(Ref1, "Oral")
-	Stats.ClearInt(Ref1, "Males")
-	Stats.ClearInt(Ref1, "Females")
-	Stats.ClearFloat(Ref1, "Pure")
-	Stats.ClearFloat(Ref1, "Impure")
+	; Log(ActorName+"\nMales: "+Stats.GetSkill(Ref1, "Males")+"\nFemales: "+Stats.GetSkill(Ref1, "Females"))
+	; Log(ActorName+"\nGay: "+Stats.IsGay(Ref1)+"\nBi: "+Stats.IsBisexual(Ref1)+"\nStraight: "+Stats.IsStraight(Ref1))
+	; Log(ActorName+"\nPure: "+Stats.GetPure(Ref1)+" ("+Stats.GetPureLevel(Ref1)+")\nImpure: "+Stats.GetImpure(Ref1)+" ("+Stats.GetImpureLevel(Ref1)+")")
+
+	; Log(ActorName+"\n"+Stats.GetSkills(Ref1))
+	; Log(ActorName+"\n"+Stats.GetSkillLevels(Ref1))
+
+	; Stats.ClearInt(Ref1, "Foreplay")
+	; Stats.ClearInt(Ref1, "Vaginal")
+	; Stats.ClearInt(Ref1, "Anal")
+	; Stats.ClearInt(Ref1, "Oral")
+	; Stats.ClearInt(Ref1, "Males")
+	; Stats.ClearInt(Ref1, "Females")
+	; Stats.ClearFloat(Ref1, "Pure")
+	; Stats.ClearFloat(Ref1, "Impure")
 	; Idle NextClip = Game.GetForm(0x10EB3C) as Idle
 	; Idle PAFull = Game.GetFormFromFile(0x6AB41, "SexLab.esm") as Idle
 	; Idle PALoop = Game.GetFormFromFile(0x6AB40, "SexLab.esm") as Idle
@@ -112,9 +119,9 @@ function Benchmark(int iterations = 100000, float started = 0.0, float finished 
 endFunction
 
 function Log(string log)
-	Debug.TraceAndBox(log)
+	Debug.TraceAndBox(ActorName+"\n"+log)
 	; Debug.Trace(log)
-	MiscUtil.PrintConsole(log)
+	MiscUtil.PrintConsole(ActorName+"\n"+log)
 endfunction
 
 float function Scale(Actor ActorRef)

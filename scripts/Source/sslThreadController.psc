@@ -166,6 +166,7 @@ state Animating
 	endFunction
 
 	function RealignActors()
+		RecordSkills()
 		SyncActors(true)
 		PlayAnimation()
 		MoveActors()
@@ -302,6 +303,8 @@ function SetAnimation(int aid = -1)
 	IsVaginal = AddTagConditional("Vaginal", (Animation.HasTag("Vaginal") && Genders[1] > 0))
 	IsAnal = AddTagConditional("Anal", (Animation.HasTag("Anal") || (Genders[1] == 0 && Animation.HasTag("Vaginal"))))
 	IsOral = AddTagConditional("Oral", Animation.HasTag("Oral"))
+	IsLoving = AddTagConditional("Loving", Animation.HasTag("Loving"))
+	IsDirty = AddTagConditional("Dirty", Animation.HasTag("Dirty"))
 	; Offset adjustment key
 	UpdateAdjustKey()
 	; Inform player of animation being played now
@@ -409,7 +412,9 @@ function RecordSkills()
 	AddXP(1, xp, IsVaginal)
 	AddXP(2, xp, IsAnal)
 	AddXP(3, xp, IsOral)
-	Log("ADDING XP: "+xp+" -- Foreplay: "+GetXP(0)+" Vaginal: "+GetXP(1)+" Anal: "+GetXP(2)+" Oral: "+GetXP(3))
+	AddXP(4, xp, IsLoving)
+	AddXP(5, xp, IsDirty)
+	; Log("ADDING XP: "+xp+" -- Foreplay: "+GetXP(0)+" Vaginal: "+GetXP(1)+" Anal: "+GetXP(2)+" Oral: "+GetXP(3))
 	SkillTime = TotalTime
 endfunction
 

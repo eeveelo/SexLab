@@ -43,11 +43,12 @@ sslBaseAnimation[] property Animations hidden
 endProperty
 
 ; Stat Tracking Info
+float[] property SkillXP auto hidden ; [0] Foreplay, [1] Vaginal, [2] Anal, [3] Oral, [4] Pure, [5] Lewd
 bool property IsVaginal auto hidden
 bool property IsAnal auto hidden
 bool property IsOral auto hidden
-; bool property IsDirty auto hidden
-; bool property IsLoving auto hidden
+bool property IsDirty auto hidden
+bool property IsLoving auto hidden
 ; int property SecondsVaginal auto hidden
 ; int property SecondsAnal auto hidden
 ; int property SecondsOral auto hidden
@@ -106,7 +107,6 @@ endProperty
 ; Local readonly
 int BedFlag ; 0 = allow, 1 = force, -1 = forbid
 bool NoLeadIn
-float[] SkillXP ; [0] Foreplay, [1] Vaginal, [2] Anal, [3] Oral
 string[] Hooks
 
 ; ------------------------------------------------------- ;
@@ -325,6 +325,15 @@ int function GetHighestPresentRelationshipRank(Actor ActorRef)
 	elseIf ActorCount == 2
 		return ActorRef.GetRelationshipRank(Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)]) ; Get opposing actors relationship rank
 	endIf
+	; int Highest
+	; int i = ActorCount
+	; while i
+	; 	i -= 1
+	; 	if Positions[i] != ActorRef && ActorRef.GetRelationshipRank(Positions[i]) > Highest
+	; 		Highest = ActorRef.GetRelationshipRank(Positions[i])
+	; 	endIf
+	; endWhile
+	; return Highest
 	; Next position
 	Actor NextActor = Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)]
 	int Highest = ActorRef.GetRelationshipRank(NextActor)
@@ -357,7 +366,7 @@ endFunction
 
 ; ------------------------------------------------------- ;
 ; --- Animation Setup                                 --- ;
-; ------------------------------------------------------- ;B
+; ------------------------------------------------------- ;
 
 function SetForcedAnimations(sslBaseAnimation[] AnimationList)
 	if AnimationList.Length != 0
@@ -662,7 +671,7 @@ function Initialize()
 	Hooks          = sDel1
 	CustomTimers   = fDel1
 	Genders        = new int[3]
-	SkillXP       = new float[4]
+	SkillXP        = new float[6]
 	; Animations
 	sslBaseAnimation[] anDel1
 	sslBaseAnimation[] anDel2
@@ -712,9 +721,9 @@ int function GetXP(int i)
 	return SkillXP[i] as int
 endFunction
 
-function AddXP(int i, float amount, bool condition = true)
-	if condition && amount >= 0.375 && SkillXP[i] < 5
-		SkillXP[i] = SkillXP[i] + amount
+function AddXP(int i, float Amount, bool Condition = true)
+	if Condition && Amount >= 0.375 && SkillXP[i] < 5
+		SkillXP[i] = SkillXP[i] + Amount
 	endIf
 endFunction
 
@@ -732,10 +741,16 @@ float function GetSkillBonus(float[] Levels)
 	if IsOral
 		bonus += ((SkillXP[3] * 2.0) + Levels[3]) * 4.0
 	endIf
+	if IsLoving
+		bonus += ((SkillXP[4] * 2.5) + Levels[4]) * 3.0
+	endIf
+	if IsDirty
+		bonus += ((SkillXP[5] * 2.5) + Levels[5]) * ActorCount
+	endIf
+	bonus += sslUtility.ClampInt((TotalTime / 15.0) as int, 0, 20) + (Stage * 6)
 	if LeadIn
 		bonus *= 0.6
 	endIf
-	bonus += sslUtility.ClampInt((TotalTime / 15.0) as int, 0, 15) + (Stage * 6)
 	return bonus
 endFunction
 
