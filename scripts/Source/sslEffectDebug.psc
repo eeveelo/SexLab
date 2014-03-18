@@ -5,10 +5,8 @@ import SexLabUtil
 import MiscUtil
 import ActorUtil
 
-Idle Playing
-
-actor Ref1
-actor Ref2
+Actor Ref1
+Actor Ref2
 
 float scale1
 float scale2
@@ -18,65 +16,45 @@ string ActorName
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	; Ref1 = TargetRef
 	; Ref2 = CasterRef
-	Ref1 = CasterRef
+	; Ref1 = CasterRef
 	; Ref2 = TargetRef
-	ActorName = Ref1.GetLeveledActorBase().GetName()
+	; ActorName = Ref1.GetLeveledActorBase().GetName()
 	; ActorName = Ref2.GetLeveledActorBase().GetName()
 
-
-
-	sslActorStats Stats = SexLab.Stats
-
-	Log("Pure: "+Stats.GetPure(Ref1)+" ("+Stats.GetPureLevel(Ref1)+")\nImpure: "+Stats.GetLewd(Ref1)+" ("+Stats.GetLewdLevel(Ref1)+")")
-	Log("Purity: "+Stats.GetPurity(Ref1)+" ("+Stats.GetPurityLevel(Ref1)+")\n"+Stats.GetPurityTitle(Ref1))
-
-	Stats.AddPurityXP(Ref1, Utility.RandomInt(0, 5) as float, Utility.RandomInt(0, 5) as float, Utility.RandomInt(0, 1) as bool, Utility.RandomInt(0, 1) as bool, Utility.RandomInt(0, 4) == 4, Utility.RandomInt(1, 3), Utility.RandomInt(0, 4))
-
-	; Log(ActorName+"\nMales: "+Stats.GetSkill(Ref1, "Males")+"\nFemales: "+Stats.GetSkill(Ref1, "Females"))
-	; Log(ActorName+"\nGay: "+Stats.IsGay(Ref1)+"\nBi: "+Stats.IsBisexual(Ref1)+"\nStraight: "+Stats.IsStraight(Ref1))
-	; Log(ActorName+"\nPure: "+Stats.GetPure(Ref1)+" ("+Stats.GetPureLevel(Ref1)+")\nImpure: "+Stats.GetImpure(Ref1)+" ("+Stats.GetImpureLevel(Ref1)+")")
-
-	; Log(ActorName+"\n"+Stats.GetSkills(Ref1))
-	; Log(ActorName+"\n"+Stats.GetSkillLevels(Ref1))
-
-	; Stats.ClearInt(Ref1, "Foreplay")
-	; Stats.ClearInt(Ref1, "Vaginal")
-	; Stats.ClearInt(Ref1, "Anal")
-	; Stats.ClearInt(Ref1, "Oral")
-	; Stats.ClearInt(Ref1, "Males")
-	; Stats.ClearInt(Ref1, "Females")
-	; Stats.ClearFloat(Ref1, "Pure")
-	; Stats.ClearFloat(Ref1, "Impure")
-	; Idle NextClip = Game.GetForm(0x10EB3C) as Idle
-	; Idle PAFull = Game.GetFormFromFile(0x6AB41, "SexLab.esm") as Idle
-	; Idle PALoop = Game.GetFormFromFile(0x6AB40, "SexLab.esm") as Idle
-
-	; ObjectUtil.SetReplaceAnimation(Ref1, "NPCKillMoveStart", NextClip)
-	; ObjectUtil.SetReplaceAnimation(Ref2, "2_KillMoveStart", NextClip)
-
-	; ObjectUtil.SetReplaceAnimation(Ref2, "NPCKillMoveStart", NextClip)
-	; ObjectUtil.SetReplaceAnimation(Ref1, "2_KillMoveStart", NextClip)
-
-	; ; LockActor(Ref1)
-	; ; LockActor(Ref2)
-	; Ref1.UnequipAll()
-	; Ref2.UnequipAll()
-
-	; Ref1.PlayIdleWithTarget(PAFull, Ref2)
-	; Game.EnablePlayerControls(false, false, true, true, false, false, false, false)
-	; Game.ForceThirdPerson()
-	; Debug.SendAnimationEvent(Ref1, "NPCKillMoveEnd")
-	; Debug.SendAnimationEvent(Ref2, "NPCKillMoveEnd")
-
-	; Debug.SendAnimationEvent(Ref1, "NPCPairedStop")
-	; Debug.SendAnimationEvent(Ref2, "NPCPairedStop")
-
-	; Debug.SendAnimationEvent(Ref1, "PairEnd")
-	; Debug.SendAnimationEvent(Ref2, "PairEnd")
-
+	sslExpressionSlots Expressions = Quest.GetQuest("SexLabQuestObjectRegistry") as sslExpressionSlots
+	Log("Expressions: "+Expressions)
+	Utility.Wait(1.0)
+	sslTestSlots Voices = Quest.GetQuest("SexLabQuestObjectRegistry") as sslTestSlots
+	Log("Voices: "+Voices)
+	Utility.Wait(1.0)
+	Expressions.Setup()
+	Utility.Wait(1.0)
+	Log("Expression:"+ Expressions.Key("Slots"))
+	Voices.Setup()
+	Utility.Wait(1.0)
+	Log("Voices:"+ Voices.Key("Slots"))
+	Utility.Wait(1.0)
+	Log("OVERWRITE Expression:"+ Expressions.Key("Slots"))
+	Utility.Wait(1.0)
+	Expressions.Setup()
+	Utility.Wait(1.0)
+	Log("OVERWRITE Voices:"+ Voices.Key("Slots"))
+	Utility.Wait(1.0)
+	Log("AFTER Expression:"+ Expressions.Key("Slots"))
 
 	Utility.Wait(1.0)
-	Dispel()
+	Log("Expressions Slotted: "+Expressions.Slotted)
+	Log("Voices Slotted: "+Voices.Slotted)
+
+	Expressions.Slotted += 20
+	Voices.Slotted += 13
+
+	Log("Expressions Slotted: "+Expressions.Slotted)
+	Log("Voices Slotted: "+Voices.Slotted)
+
+
+	Debug.TraceAndBox("DONE")
+
 endEvent
 
 event OnUpdate()
@@ -119,9 +97,10 @@ function Benchmark(int iterations = 100000, float started = 0.0, float finished 
 endFunction
 
 function Log(string log)
-	Debug.TraceAndBox(ActorName+"\n"+log)
-	; Debug.Trace(log)
-	MiscUtil.PrintConsole(ActorName+"\n"+log)
+	; Debug.TraceAndBox(ActorName+"\n"+log)
+	Debug.Trace(log)
+	; MiscUtil.PrintConsole(ActorName+"\n"+log)
+	MiscUtil.PrintConsole(log)
 endfunction
 
 float function Scale(Actor ActorRef)

@@ -189,7 +189,7 @@ endFunction
 
 function Setup()
 	; Clear Slots
-	Slots = new sslBaseVoice[50]
+	Slots = new sslBaseVoice[75]
 	int i = Slots.Length
 	while i
 		i -= 1

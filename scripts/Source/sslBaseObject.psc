@@ -13,8 +13,6 @@ endProperty
 ; Storage key
 Quest property Storage auto hidden
 
-
-
 ;/-----------------------------------------------\;
 ;|	Tagging System                               |;
 ;\-----------------------------------------------/;
