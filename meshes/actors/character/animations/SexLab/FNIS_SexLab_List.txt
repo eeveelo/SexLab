@@ -504,5 +504,7 @@ s Bleagh_FootJob_A2_S1 Bleagh_FootJob_A2_S1.hkx
 '
 ' Nshell
 '
-pa -D3.1 Nshell_Looped_PA_S1 Nshell_Looped_PA_S1.hkx
+' pa -D3.1 Nshell_Looped_PA_S1 Nshell_Looped_PA_S1.hkx
+
+pa -D33.1 Nshell_Looped_PA_S1 Paired_CamTest.hkx
 pa -D36.2 Nshell_Full_PA_S1 Nshell_Full_PA_S1.hkx
