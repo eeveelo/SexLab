@@ -1,7 +1,7 @@
 scriptname sslExpressionSlots extends Quest
 
+; Expression readonly storage
 int property Slotted auto hidden
-; Expressions readonly storage
 sslBaseExpression[] Slots
 sslBaseExpression[] property Expressions hidden
 	sslBaseExpression[] function get()
@@ -9,70 +9,54 @@ sslBaseExpression[] property Expressions hidden
 	endFunction
 endProperty
 
+; Local use
+sslSystemConfig Config
 
-; ; ------------------------------------------------------- ;
-; ; --- Expression Filtering                            --- ;
-; ; ------------------------------------------------------- ;
+; ------------------------------------------------------- ;
+; --- Expression Filtering                            --- ;
+; ------------------------------------------------------- ;
 
-; sslBaseExpression function PickExpression(Actor ActorRef)
-; endFunction
+sslBaseExpression[] function GetAllGender(int Gender)
+endFunction
 
-; sslBaseExpression function GetByTags(string Tags, string TagsSuppressed = "", bool RequireAll = true)
-; 	string[] Search = sslUtility.ArgString(Tags)
-; 	if Search.Length == 0
-; 		return none
-; 	endIf
-; 	string[] Suppress = sslUtility.ArgString(TagsSuppressed)
-; 	bool[] Valid = new bool[50]
-; 	int i = Slotted
-; 	while i
-; 		i -= 1
-; 		Valid[i] = Slots[i].Enabled && (TagsSuppressed == "" || Slots[i].CheckTags(Suppress, false, true)) && Slots[i].CheckTags(Search, RequireAll)
-; 	endWhile
-; 	sslBaseExpression[] Found = GetList(Valid)
-; 	int r = Utility.RandomInt(0, (Found.Length - 1))
-; 	return Found[r]
-; endFunction
+sslBaseExpression function PickGender(int Gender = 1)
+endFunction
 
-; sslBaseExpression function GetByRegistrar(string Registrar)
-; 	return GetBySlot(FindByRegistrar(Registrar))
-; endFunction
+sslBaseExpression function PickExpression(Actor ActorRef)
+endFunction
 
-; sslBaseExpression function GetByName(string FindName)
-; 	return GetBySlot(FindByName(FindName))
-; endFunction
+sslBaseExpression function GetByTags(string Tags, string TagsSuppressed = "", bool RequireAll = true)
+endFunction
 
-; sslBaseExpression function GetBySlot(int index)
-; 	if index < 0 || index >= Slotted
-; 		return none
-; 	endIf
-; 	return Slots[index]
-; endFunction
+; ------------------------------------------------------- ;
+; --- Slotting Common                                 --- ;
+; ------------------------------------------------------- ;
 
-; ; ------------------------------------------------------- ;
-; ; --- System Use Only                                 --- ;
-; ; ------------------------------------------------------- ;
+sslBaseExpression[] function GetList(bool[] Valid)
+	return none
+endFunction
 
-; sslBaseExpression[] function GetList(bool[] Valid)
-; 	; int i = sslUtility.CountTrue(Valid)
-; 	; if i == 0
-; 	; 	return none ; OR empty array?
-; 	; endIf
-; 	; string Found
-; 	; sslBaseExpression[] Output = sslUtility.VoiceArray(i)
-; 	; int pos = Valid.Find(true)
-; 	; while pos != -1 && pos < Slotted
-; 	; 	i -= 1
-; 	; 	Output[i] = Slots[pos]
-; 	; 	pos = Valid.Find(true, (pos + 1))
-; 	; 	Found += Output[i].Name+", "
-; 	; endWhile
-; 	; SexLabUtil.DebugLog("Found Voices("+Output.Length+"): "+Found, "", Config.DebugMode)
-; 	; return Output
-; endFunction
+sslBaseExpression function GetByRegistrar(string Registrar)
+	return GetBySlot(FindByRegistrar(Registrar))
+endFunction
+
+sslBaseExpression function GetByName(string FindName)
+	return GetBySlot(FindByName(FindName))
+endFunction
+
+sslBaseExpression function GetBySlot(int index)
+	if index < 0 || index >= Slotted
+		return none
+	endIf
+	return Slots[index]
+endFunction
+
+int function FindByRegistrar(string Registrar)
+	return StorageUtil.StringListFind(self, "Expressions", Registrar)
+endFunction
 
 bool function IsRegistered(string Registrar)
-	return FindByRegistrar(Registrar) != -1
+	return StorageUtil.StringListFind(self, "Expressions", Registrar) != -1
 endFunction
 
 int function FindByName(string FindName)
@@ -86,42 +70,39 @@ int function FindByName(string FindName)
 	return -1
 endFunction
 
-int function FindByRegistrar(string Registrar)
-	return StorageUtil.StringListFind(self, "Expression.Registry", Registrar)
+; ------------------------------------------------------- ;
+; --- System Use Only                                 --- ;
+; ------------------------------------------------------- ;
+
+sslBaseExpression function Register(string Registrar)
+	if FindByRegistrar(Registrar) == -1 && Slotted < Slots.Length
+		sslBaseExpression Slot = GetNthAlias(Slotted) as sslBaseExpression
+		Slots[Slotted] = Slot
+		StorageUtil.StringListAdd(self, "Expressions", Registrar, false)
+		Slotted = StorageUtil.StringListCount(self, "Expressions")
+		return Slot
+	endIf
+	return none
 endFunction
 
-; sslBaseExpression function Register(string Registrar)
-; 	if FindByRegistrar(Registrar) == -1 && Slotted < Slots.Length
-; 		StorageUtil.StringListAdd(self, "Expression.Registry", Registrar, false)
-; 		Slotted = StorageUtil.StringListCount(self, "Expression.Registry")
-; 		return Slots[(Slotted - 1)]
-; 	endIf
-; 	return none
-; endFunction
-
 function RegisterExpressions()
-	; Register default voices
-	; (Quest.GetQuest("SexLabQuestRegistry") as sslExpressionDefaults).LoadExpressions()
-	; Send mod event for 3rd party voices
-	; ModEvent.Send(ModEvent.Create("SexLabSlotExpressions"))
-	; Debug.Notification("$SSL_NotifyVoiceInstall")
+	; Register default Expressions
+	sslExpressionDefaults Defaults = Quest.GetQuest("SexLabQuestRegistry") as sslExpressionDefaults
+	Defaults.Slots = self
+	Defaults.LoadExpressions()
+	; Send mod event for 3rd party Expressions
+	ModEvent.Send(ModEvent.Create("SexLabSlotExpressions"))
+	Debug.Notification("$SSL_NotifyVoiceInstall")
 endFunction
 
 function Setup()
-	; Clear Slots
-	Slots = new sslBaseExpression[75]
-	int i = Slots.Length
-	while i
-		i -= 1
-		Alias BaseAlias = GetNthAlias(i)
-		if BaseAlias != none
-			Slots[i] = BaseAlias as sslBaseExpression
-			Slots[i].Clear()
-		endIf
-	endWhile
 	; Init variables
 	Slotted = 0
-	StorageUtil.StringListClear(self, "Expression.Registry")
-	; Register voices
+	Slots = new sslBaseExpression[40]
+	StorageUtil.StringListClear(self, "Expressions")
+	Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
+	; Register Expressions
 	RegisterExpressions()
 endFunction
+
+

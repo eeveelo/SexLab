@@ -21,39 +21,10 @@ event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	; ActorName = Ref1.GetLeveledActorBase().GetName()
 	; ActorName = Ref2.GetLeveledActorBase().GetName()
 
-	sslExpressionSlots Expressions = Quest.GetQuest("SexLabQuestObjectRegistry") as sslExpressionSlots
-	Log("Expressions: "+Expressions)
-	Utility.Wait(1.0)
-	sslTestSlots Voices = Quest.GetQuest("SexLabQuestObjectRegistry") as sslTestSlots
-	Log("Voices: "+Voices)
-	Utility.Wait(1.0)
-	Expressions.Setup()
-	Utility.Wait(1.0)
-	Log("Expression:"+ Expressions.Key("Slots"))
+	sslVoiceSlots Voices = Quest.GetQuest("SexLabQuestRegistry") as sslVoiceSlots
 	Voices.Setup()
-	Utility.Wait(1.0)
-	Log("Voices:"+ Voices.Key("Slots"))
-	Utility.Wait(1.0)
-	Log("OVERWRITE Expression:"+ Expressions.Key("Slots"))
-	Utility.Wait(1.0)
-	Expressions.Setup()
-	Utility.Wait(1.0)
-	Log("OVERWRITE Voices:"+ Voices.Key("Slots"))
-	Utility.Wait(1.0)
-	Log("AFTER Expression:"+ Expressions.Key("Slots"))
-
-	Utility.Wait(1.0)
-	Log("Expressions Slotted: "+Expressions.Slotted)
-	Log("Voices Slotted: "+Voices.Slotted)
-
-	Expressions.Slotted += 20
-	Voices.Slotted += 13
-
-	Log("Expressions Slotted: "+Expressions.Slotted)
-	Log("Voices Slotted: "+Voices.Slotted)
-
-
-	Debug.TraceAndBox("DONE")
+	Utility.Wait(2.0)
+	Voices.Benchmark()
 
 endEvent
 

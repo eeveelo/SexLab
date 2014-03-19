@@ -34,22 +34,22 @@ event OnGameReload()
 	Config.ToggleFreeCameraEnable()
 	; ALPHA DEBUG:
 	Config.SetDebugMode(true)
-	Stats.Setup()
-
+	SetupSystem()
 endEvent
 
 ; Framework
-SexLabFramework property SexLab auto hidden
-sslSystemConfig property Config auto hidden
+SexLabFramework SexLab
+sslSystemConfig Config
 ; Libraries
-sslActorLibrary property ActorLib auto hidden
-sslThreadLibrary property ThreadLib auto hidden
-sslActorStats property Stats auto hidden
+sslActorLibrary ActorLib
+sslThreadLibrary ThreadLib
+sslActorStats Stats
 ; Object Registeries
-sslAnimationSlots property AnimSlots auto hidden
-sslCreatureAnimationSlots property CreatureSlots auto hidden
-sslVoiceSlots property VoiceSlots auto hidden
-sslThreadSlots property ThreadSlots auto hidden
+sslAnimationSlots AnimSlots
+sslCreatureAnimationSlots CreatureSlots
+sslThreadSlots ThreadSlots
+sslVoiceSlots VoiceSlots
+sslExpressionSlots ExpressionSlots
 
 ; Data
 Actor property PlayerRef auto
@@ -180,16 +180,19 @@ function SetupSystem()
 	while Utility.IsInMenuMode() || !PlayerRef.Is3DLoaded()
 		Utility.Wait(1.0)
 	endWhile
-	; Grab properties to make sure they are all set properly
-	SexLab        = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework
-	Config        = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
-	ActorLib      = Quest.GetQuest("SexLabQuestFramework") as sslActorLibrary
-	ThreadLib     = Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary
-	Stats         = Quest.GetQuest("SexLabQuestFramework") as sslActorStats
-	ThreadSlots   = Quest.GetQuest("SexLabQuestFramework") as sslThreadSlots
-	AnimSlots     = Quest.GetQuest("SexLabQuestAnimations") as sslAnimationSlots
-	CreatureSlots = Quest.GetQuest("SexLabQuestCreatureAnimations") as sslCreatureAnimationSlots
-	VoiceSlots    = Quest.GetQuest("SexLabQuestRegistry") as sslVoiceSlots
+	; Grab libraries to make sure they are all set properly
+	Quest SexLabQuestFramework  = Quest.GetQuest("SexLabQuestFramework")
+	Config          = SexLabQuestFramework as sslSystemConfig
+	ActorLib        = SexLabQuestFramework as sslActorLibrary
+	ThreadLib       = SexLabQuestFramework as sslThreadLibrary
+	Stats           = SexLabQuestFramework as sslActorStats
+	ThreadSlots     = SexLabQuestFramework as sslThreadSlots
+	Quest SexLabQuestAnimations = Quest.GetQuest("SexLabQuestAnimations")
+	AnimSlots       = SexLabQuestAnimations as sslAnimationSlots
+	Quest SexLabQuestRegistry   = Quest.GetQuest("SexLabQuestRegistry")
+	CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
+	VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
+	ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
 	; Init Defaults
 	SexLab.Initialize()
 	CheckSystem()

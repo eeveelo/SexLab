@@ -46,40 +46,32 @@ bool dragonborn
 Race DLC2SeekerRace
 Race DLC2AshSpawnRace
 
-; Temporary alpha testing - SKSE 1.7.0 compatibility
-function SendEvent(string Registrar)
-	RegisterForModEvent("Register"+Registrar, Registrar)
-	ModEvent.Send(ModEvent.Create("Register"+Registrar))
-	; SendModEvent("Register"+Registrar)
-	UnregisterForAllModEvents()
-endFunction
-
 function LoadRaces()
-	BearBlackRace = Game.GetForm(0x131E8) as Race
-	BearBrownRace = Game.GetForm(0x131E7) as Race
-	BearSnowRace = Game.GetForm(0x131E9) as Race
-	SabreCatRace = Game.GetForm(0x13200) as Race
-	SabreCatSnowyRace = Game.GetForm(0x13202) as Race
-	ChaurusRace = Game.GetForm(0x131EB) as Race
-	ChaurusReaperRace = Game.GetForm(0xA5601) as Race
-	DragonRace = Game.GetForm(0x12E82) as Race
-	UndeadDragonRace = Game.GetForm(0x1052A3) as Race
-	DraugrRace = Game.GetForm(0x0D53) as Race
-	DraugrMagicRace = Game.GetForm(0xF71DC) as Race
-	FalmerRace = Game.GetForm(0x131F4) as Race
-	GiantRace = Game.GetForm(0x131F9) as Race
-	HorseRace = Game.GetForm(0x131FD) as Race
-	FrostbiteSpiderRace = Game.GetForm(0x131F8) as Race
+	BearBlackRace            = Game.GetForm(0x131E8) as Race
+	BearBrownRace            = Game.GetForm(0x131E7) as Race
+	BearSnowRace             = Game.GetForm(0x131E9) as Race
+	SabreCatRace             = Game.GetForm(0x13200) as Race
+	SabreCatSnowyRace        = Game.GetForm(0x13202) as Race
+	ChaurusRace              = Game.GetForm(0x131EB) as Race
+	ChaurusReaperRace        = Game.GetForm(0xA5601) as Race
+	DragonRace               = Game.GetForm(0x12E82) as Race
+	UndeadDragonRace         = Game.GetForm(0x1052A3) as Race
+	DraugrRace               = Game.GetForm(0x0D53) as Race
+	DraugrMagicRace          = Game.GetForm(0xF71DC) as Race
+	FalmerRace               = Game.GetForm(0x131F4) as Race
+	GiantRace                = Game.GetForm(0x131F9) as Race
+	HorseRace                = Game.GetForm(0x131FD) as Race
+	FrostbiteSpiderRace      = Game.GetForm(0x131F8) as Race
 	FrostbiteSpiderRaceGiant = Game.GetForm(0x4E507) as Race
 	FrostbiteSpiderRaceLarge = Game.GetForm(0x53477) as Race
-	TrollRace = Game.GetForm(0x13205) as Race
-	TrollFrostRace = Game.GetForm(0x105A3) as Race
-	WerewolfBeastRace = Game.GetForm(0xCDD84) as Race
-	WolfRace = Game.GetForm(0x1320A) as Race
-	DogRace = Game.GetForm(0x131EE) as Race
-	DogCompanionRace = Game.GetForm(0xF1AC4) as Race
-	MG07DogRace = Game.GetForm(0xF905F) as Race
-	DA03BarbasDogRace = Game.GetForm(0xCD657) as Race
+	TrollRace                = Game.GetForm(0x13205) as Race
+	TrollFrostRace           = Game.GetForm(0x105A3) as Race
+	WerewolfBeastRace        = Game.GetForm(0xCDD84) as Race
+	WolfRace                 = Game.GetForm(0x1320A) as Race
+	DogRace                  = Game.GetForm(0x131EE) as Race
+	DogCompanionRace         = Game.GetForm(0xF1AC4) as Race
+	MG07DogRace              = Game.GetForm(0xF905F) as Race
+	DA03BarbasDogRace        = Game.GetForm(0xCD657) as Race
 
 	dawnguard = false
 	dragonborn = false
@@ -90,25 +82,25 @@ function LoadRaces()
 		if !dawnguard && modname == "Dawnguard.esm"
 			dawnguard = true
 			; Dogs
-			DLC1HuskyArmoredCompanionRace = Game.GetFormFromFile(0x3D01, "Dawnguard.esm") as Race
-			DLC1DeathHoundCompanionRace = Game.GetFormFromFile(0x3D02, "Dawnguard.esm") as Race
-			DLC1DeathHoundRace = Game.GetFormFromFile(0xC5F0, "Dawnguard.esm") as Race
+			DLC1HuskyArmoredCompanionRace  = Game.GetFormFromFile(0x3D01, "Dawnguard.esm") as Race
+			DLC1DeathHoundCompanionRace    = Game.GetFormFromFile(0x3D02, "Dawnguard.esm") as Race
+			DLC1DeathHoundRace             = Game.GetFormFromFile(0xC5F0, "Dawnguard.esm") as Race
 			; Draugr
-			SkeletonArmorRace = Game.GetFormFromFile(0x23E2, "Dawnguard.esm") as Race
-			DLC1SoulCairnKeeperRace = Game.GetFormFromFile(0x7AF3, "Dawnguard.esm") as Race
+			SkeletonArmorRace              = Game.GetFormFromFile(0x23E2, "Dawnguard.esm") as Race
+			DLC1SoulCairnKeeperRace        = Game.GetFormFromFile(0x7AF3, "Dawnguard.esm") as Race
 			DLC1SoulCairnSkeletonArmorRace = Game.GetFormFromFile(0x894D, "Dawnguard.esm") as Race
 			; Vampire Lord
-			DLC1VampireBeastRace = Game.GetFormFromFile(0x283A, "Dawnguard.esm") as Race
+			DLC1VampireBeastRace           = Game.GetFormFromFile(0x283A, "Dawnguard.esm") as Race
 			; Gargoyle
-			DLC1GargoyleRace = Game.GetFormFromFile(0xA2C6, "Dawnguard.esm") as Race
-			DLC1GargoyleVariantBossRace = Game.GetFormFromFile(0x10D00, "Dawnguard.esm") as Race
-			DLC1GargoyleVariantGreenRace = Game.GetFormFromFile(0x19D86, "Dawnguard.esm") as Race
+			DLC1GargoyleRace               = Game.GetFormFromFile(0xA2C6, "Dawnguard.esm") as Race
+			DLC1GargoyleVariantBossRace    = Game.GetFormFromFile(0x10D00, "Dawnguard.esm") as Race
+			DLC1GargoyleVariantGreenRace   = Game.GetFormFromFile(0x19D86, "Dawnguard.esm") as Race
 		elseif !dragonborn && modname == "Dragonborn.esm"
 			dragonborn = true
 			; Seeker
-			DLC2SeekerRace = Game.GetFormFromFile(0x1DCB9, "Dragonborn.esm") as Race
+			DLC2SeekerRace   = Game.GetFormFromFile(0x1DCB9, "Dragonborn.esm") as Race
 			; Draugr
-			DLC2AshSpawnRace  = Game.GetFormFromFile(0x1B637, "Dragonborn.esm") as Race
+			DLC2AshSpawnRace = Game.GetFormFromFile(0x1B637, "Dragonborn.esm") as Race
 		elseif dawnguard && dragonborn
 			return
 		endIf
@@ -123,7 +115,7 @@ endFunction
 
 function LoadAnimations()
 	; Prepare factory for load
-	Slots = Quest.GetQuest("SexLabQuestCreatureAnimations") as sslCreatureAnimationSlots
+	Slots = Quest.GetQuest("SexLabQuestRegistry") as sslCreatureAnimationSlots
 	FreeFactory()
 	LoadRaces()
 	; Bear

@@ -482,8 +482,6 @@ function Joy(string eventName, string id, float argNum, form sender)
 	AddModifier(1, Female, 12, 70)
 	AddModifier(1, Female, 13, 70)
 
-	SetModifiers(i0 = 30)
-
 	AddExpression(2, Female, 10, 60)
 	AddPhoneme(2, Female, 7, 100)
 	AddPhoneme(2, Female, 15, 50)

@@ -1,9 +1,5 @@
 scriptname sslAnimationSlots extends Quest
 
-; Library for animation
-sslThreadLibrary property Lib auto hidden
-sslSystemConfig property Config auto hidden
-
 int property Slotted auto hidden
 ; Animation readonly storage
 sslBaseAnimation[] property Slots auto hidden
@@ -12,6 +8,10 @@ sslBaseAnimation[] property Animations hidden
 		return Slots
 	endFunction
 endProperty
+
+; Local use
+sslSystemConfig Config
+sslThreadLibrary Lib
 
 ; ------------------------------------------------------- ;
 ; --- Animation Filtering                             --- ;
@@ -170,17 +170,19 @@ endFunction
 ; ------------------------------------------------------- ;
 
 int function FindByRegistrar(string Registrar)
-	return StorageUtil.StringListFind(self, "Registry", Registrar)
+	return StorageUtil.StringListFind(self, "Animations", Registrar)
 endFunction
 
 bool function IsRegistered(string Registrar)
-	return StorageUtil.StringListFind(self, "Registry", Registrar) != -1
+	return StorageUtil.StringListFind(self, "Animations", Registrar) != -1
 endFunction
 
 sslBaseAnimation function Register(string Registrar)
 	if FindByRegistrar(Registrar) == -1 && Slotted < Slots.Length
-		StorageUtil.StringListAdd(self, "Registry", Registrar, false)
-		Slotted = StorageUtil.StringListCount(self, "Registry")
+		sslBaseAnimation Slot = GetNthAlias(Slotted) as sslBaseAnimation
+		Slots[Slotted] = Slot
+		StorageUtil.StringListAdd(self, "Animations", Registrar, false)
+		Slotted = StorageUtil.StringListCount(self, "Animations")
 		return Slots[(Slotted - 1)]
 	endIf
 	return none
@@ -206,29 +208,21 @@ endFunction
 
 function RegisterAnimations()
 	; Register default animations
-	(Quest.GetQuest("SexLabQuestAnimations") as sslAnimationDefaults).LoadAnimations()
+	sslAnimationDefaults Defaults = Quest.GetQuest("SexLabQuestAnimations") as sslAnimationDefaults
+	Defaults.Slots = self
+	Defaults.LoadAnimations()
 	; Send mod event for 3rd party animations
 	ModEvent.Send(ModEvent.Create("SexLabSlotAnimations"))
 	Debug.Notification("$SSL_NotifyAnimationInstall")
 endFunction
 
 function Setup()
-	; Clear Slots
-	Slots = new sslBaseAnimation[125]
-	int i = Slots.Length
-	while i
-		i -= 1
-		Alias BaseAlias = GetNthAlias(i)
-		if BaseAlias != none
-			Slots[i] = BaseAlias as sslBaseAnimation
-			Slots[i].Clear()
-		endIf
-	endWhile
 	; Init variables
 	Slotted = 0
-	StorageUtil.StringListClear(self, "Registry")
-	Lib = (Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary)
-	Config = (Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig)
+	Slots = new sslBaseAnimation[125]
+	StorageUtil.StringListClear(self, "Animations")
+	Lib = Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary
+	Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
 	; Register animations
 	RegisterAnimations()
 endFunction

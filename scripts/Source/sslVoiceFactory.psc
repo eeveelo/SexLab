@@ -33,18 +33,12 @@ function RegisterVoice(string Registrar)
 		Voice.Registry = Registrar
 		Voice.Enabled = true
 		; Send load event
-		SendEvent(Registrar)
+		RegisterForModEvent("Register"+Registrar, Registrar)
+		ModEvent.Send(ModEvent.Create("Register"+Registrar))
+		UnregisterForAllModEvents()
 	else
 		FreeFactory()
 	endIf
-endFunction
-
-; Temporary alpha testing
-function SendEvent(string Registrar)
-	RegisterForModEvent("Register"+Registrar, Registrar)
-	; ModEvent.Send(ModEvent.Create("Register"+Registrar))
-	SendModEvent("Register"+Registrar)
-	UnregisterForAllModEvents()
 endFunction
 
 ; Unlocks factory for next callback, MUST be called at end of callback
@@ -63,9 +57,9 @@ function Save()
 	FreeFactory()
 endfunction
 
-;/-----------------------------------------------\;
-;|	Callback Voice Property Shortcuts            |;
-;\-----------------------------------------------/;
+; ------------------------------------------------------- ;
+; --- Registering Callbacks                           --- ;
+; ------------------------------------------------------- ;
 
 bool function AddTag(string tag)
 	return Voice.AddTag(tag)

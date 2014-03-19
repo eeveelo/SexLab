@@ -1,16 +1,8 @@
 scriptname sslVoiceDefaults extends sslVoiceFactory
 
-; Temporary alpha testing - SKSE 1.7.0 compatibility
-function SendEvent(string Registrar)
-	RegisterForModEvent("Register"+Registrar, Registrar)
-	ModEvent.Send(ModEvent.Create("Register"+Registrar))
-	; SendModEvent("Register"+Registrar)
-	UnregisterForAllModEvents()
-endFunction
-
 function LoadVoices()
 	; Prepare factory for load
-	Slots = (Quest.GetQuest("SexLabQuestRegistry") as sslVoiceSlots)
+	Slots = Quest.GetQuest("SexLabQuestRegistry") as sslVoiceSlots
 	FreeFactory()
 	; Female voices
 	RegisterVoice("FemaleClassic")

@@ -1,5 +1,7 @@
 scriptname sslBaseExpression extends sslBaseObject
 
+int property Gender auto hidden
+
 int[] phases
 
 int[] male1

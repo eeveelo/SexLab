@@ -53,6 +53,14 @@ sslBaseVoice[] property Voices hidden
 	endFunction
 endProperty
 
+; Expression Sets
+sslExpressionSlots property ExpressionSlots auto hidden
+sslBaseExpression[] property Expressions hidden
+	sslBaseExpression[] function get()
+		return ExpressionSlots.Expressions
+	endFunction
+endProperty
+
 ; Configuration Accessor
 sslSystemConfig property Config auto hidden
 
@@ -721,15 +729,20 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function Initialize()
+	Quest SexLabQuestFramework  = Quest.GetQuest("SexLabQuestFramework")
+	Config          = SexLabQuestFramework as sslSystemConfig
+	ActorLib        = SexLabQuestFramework as sslActorLibrary
+	ThreadLib       = SexLabQuestFramework as sslThreadLibrary
+	Stats           = SexLabQuestFramework as sslActorStats
+	ThreadSlots     = SexLabQuestFramework as sslThreadSlots
+	Quest SexLabQuestAnimations = Quest.GetQuest("SexLabQuestAnimations")
+	AnimSlots       = SexLabQuestAnimations as sslAnimationSlots
+	Quest SexLabQuestRegistry   = Quest.GetQuest("SexLabQuestRegistry")
+	CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
+	VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
+	ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
+
 	SystemEnabled = true
-	Config        = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
-	ActorLib      = Quest.GetQuest("SexLabQuestFramework") as sslActorLibrary
-	ThreadLib     = Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary
-	Stats         = Quest.GetQuest("SexLabQuestFramework") as sslActorStats
-	ThreadSlots   = Quest.GetQuest("SexLabQuestFramework") as sslThreadSlots
-	AnimSlots     = Quest.GetQuest("SexLabQuestAnimations") as sslAnimationSlots
-	CreatureSlots = Quest.GetQuest("SexLabQuestCreatureAnimations") as sslCreatureAnimationSlots
-	VoiceSlots    = Quest.GetQuest("SexLabQuestRegistry") as sslVoiceSlots
 	Log("SexLab Initialized")
 endFunction
 

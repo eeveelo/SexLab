@@ -20,21 +20,9 @@ int property Misc = 0 autoreadonly hidden
 int property Sexual = 1 autoreadonly hidden
 int property Foreplay = 2 autoreadonly hidden
 ; SFX Types
-Sound property Squishing hidden
-	Sound function get()
-		return Slots.Lib.SquishingFX
-	endFunction
-endProperty
-Sound property Sucking hidden
-	Sound function get()
-		return Slots.Lib.SuckingFX
-	endFunction
-endProperty
-Sound property SexMix hidden
-	Sound function get()
-		return Slots.Lib.SexMixedFX
-	endFunction
-endProperty
+Sound property Squishing auto hidden
+Sound property Sucking auto hidden
+Sound property SexMix auto hidden
 
 bool Locked
 
@@ -60,18 +48,12 @@ function RegisterAnimation(string Registrar)
 		Animation.Registry = Registrar
 		Animation.Enabled = true
 		; Send load event
-		SendEvent(Registrar)
+		RegisterForModEvent("Register"+Registrar, Registrar)
+		ModEvent.Send(ModEvent.Create("Register"+Registrar))
+		UnregisterForAllModEvents()
 	else
 		FreeFactory()
 	endIf
-endFunction
-
-; Temporary alpha testing
-function SendEvent(string Registrar)
-	RegisterForModEvent("Register"+Registrar, Registrar)
-	; ModEvent.Send(ModEvent.Create("Register"+Registrar))
-	SendModEvent("Register"+Registrar)
-	UnregisterForAllModEvents()
 endFunction
 
 ; Unlocks factory for next callback, MUST be called at end of callback
@@ -82,7 +64,7 @@ function Save()
 endfunction
 
 ; ------------------------------------------------------- ;
-; --- Animation Setup Callbacks                       --- ;
+; --- Registering Callbacks                           --- ;
 ; ------------------------------------------------------- ;
 
 int function AddPosition(int gender = 0, int addCum = -1)
@@ -160,6 +142,13 @@ function FreeFactory()
 	offsetData = new float[128]
 	infoID = 0
 	infoData = new int[128]
+	; Init SFX if needed
+	if Squishing == none || Sucking == none || SexMix == none
+		sslThreadLibrary Lib = Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary
+		Squishing = Lib.SquishingFX
+		Sucking = Lib.SuckingFX
+		SexMix = Lib.SexMixedFX
+	endIf
 	; Clear wait lock
 	Animation = none
 	Locked = false

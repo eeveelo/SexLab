@@ -1,7 +1,9 @@
 scriptname sslVoiceSlots extends Quest
 
-int property Slotted auto hidden
+import StorageUtil
+
 ; Voices readonly storage
+int property Slotted auto hidden
 sslBaseVoice[] Slots
 sslBaseVoice[] property Voices hidden
 	sslBaseVoice[] function get()
@@ -9,8 +11,9 @@ sslBaseVoice[] property Voices hidden
 	endFunction
 endProperty
 
-Actor PlayerRef
+; Local use
 sslSystemConfig Config
+Actor PlayerRef
 
 ; ------------------------------------------------------- ;
 ; --- Voice Filtering                                 --- ;
@@ -76,23 +79,8 @@ sslBaseVoice function GetByTags(string Tags, string TagsSuppressed = "", bool Re
 	return Found[r]
 endFunction
 
-sslBaseVoice function GetByRegistrar(string Registrar)
-	return GetBySlot(FindByRegistrar(Registrar))
-endFunction
-
-sslBaseVoice function GetByName(string FindName)
-	return GetBySlot(FindByName(FindName))
-endFunction
-
-sslBaseVoice function GetBySlot(int index)
-	if index < 0 || index >= Slotted
-		return none
-	endIf
-	return Slots[index]
-endFunction
-
 int function FindSaved(Actor ActorRef)
-	return FindByRegistrar(StorageUtil.GetStringValue(ActorRef, "SexLab.SavedVoice", ""))
+	return FindByRegistrar(GetStringValue(ActorRef, "SexLab.SavedVoice", ""))
 endFunction
 
 sslBaseVoice function GetSaved(Actor ActorRef)
@@ -108,15 +96,15 @@ string function GetSavedName(Actor ActorRef)
 endFunction
 
 function SaveVoice(Actor ActorRef, sslBaseVoice Saving)
-	StorageUtil.SetStringValue(ActorRef, "SexLab.SavedVoice", Saving.Registry)
+	SetStringValue(ActorRef, "SexLab.SavedVoice", Saving.Registry)
 endFunction
 
 function ForgetVoice(Actor ActorRef)
-	StorageUtil.UnsetStringValue(ActorRef, "SexLab.SavedVoice")
+	UnsetStringValue(ActorRef, "SexLab.SavedVoice")
 endFunction
 
 ; ------------------------------------------------------- ;
-; --- System Use Only                                 --- ;
+; --- Slotting Common                                 --- ;
 ; ------------------------------------------------------- ;
 
 sslBaseVoice[] function GetList(bool[] Valid)
@@ -137,22 +125,27 @@ sslBaseVoice[] function GetList(bool[] Valid)
 	return Output
 endFunction
 
-bool function Toggle(int slot)
-	sslBaseVoice Voice = GetBySlot(slot)
-	if Voice != none
-		Voice.Enabled = !Voice.Enabled
-		if Voice.Enabled
-			StorageUtil.StringListAdd(self, "Voice."+Voice.Gender, Voice.Registry, false)
-		else
-			StorageUtil.StringListRemove(self, "Voice."+Voice.Gender, Voice.Registry, true)
-		endIf
-		return Voice.Enabled
+sslBaseVoice function GetByRegistrar(string Registrar)
+	return GetBySlot(FindByRegistrar(Registrar))
+endFunction
+
+sslBaseVoice function GetByName(string FindName)
+	return GetBySlot(FindByName(FindName))
+endFunction
+
+sslBaseVoice function GetBySlot(int index)
+	if index < 0 || index >= Slotted
+		return none
 	endIf
-	return false
+	return Slots[index]
+endFunction
+
+int function FindByRegistrar(string Registrar)
+	return StringListFind(self, "Voices", Registrar)
 endFunction
 
 bool function IsRegistered(string Registrar)
-	return FindByRegistrar(Registrar) != -1
+	return StringListFind(self, "Voices", Registrar) != -1
 endFunction
 
 int function FindByName(string FindName)
@@ -166,43 +159,36 @@ int function FindByName(string FindName)
 	return -1
 endFunction
 
-int function FindByRegistrar(string Registrar)
-	return StorageUtil.StringListFind(self, "Voice.Registry", Registrar)
-endFunction
+; ------------------------------------------------------- ;
+; --- System Use Only                                 --- ;
+; ------------------------------------------------------- ;
 
 sslBaseVoice function Register(string Registrar)
 	if FindByRegistrar(Registrar) == -1 && Slotted < Slots.Length
-		StorageUtil.StringListAdd(self, "Voice.Registry", Registrar, false)
-		Slotted = StorageUtil.StringListCount(self, "Voice.Registry")
-		return Slots[(Slotted - 1)]
+		sslBaseVoice Slot = GetNthAlias(Slotted) as sslBaseVoice
+		Slots[Slotted] = Slot
+		StringListAdd(self, "Voices", Registrar, false)
+		Slotted = StringListCount(self, "Voices")
+		return Slot
 	endIf
 	return none
 endFunction
 
 function RegisterVoices()
 	; Register default voices
-	(Quest.GetQuest("SexLabQuestRegistry") as sslVoiceDefaults).LoadVoices()
+	sslVoiceDefaults Defaults = Quest.GetQuest("SexLabQuestRegistry") as sslVoiceDefaults
+	Defaults.Slots = self
+	Defaults.LoadVoices()
 	; Send mod event for 3rd party voices
 	ModEvent.Send(ModEvent.Create("SexLabSlotVoices"))
 	Debug.Notification("$SSL_NotifyVoiceInstall")
 endFunction
 
 function Setup()
-	; Clear Slots
-	Slots = new sslBaseVoice[75]
-	int i = Slots.Length
-	while i
-		i -= 1
-		Alias BaseAlias = GetNthAlias(i)
-		if BaseAlias != none
-			Slots[i] = BaseAlias as sslBaseVoice
-			Slots[i].Clear()
-		endIf
-	endWhile
 	; Init variables
 	Slotted = 0
-	StorageUtil.StringListClear(self, "Voice.Registry")
-	; Setup library - shortened override of sslSystemLibrary
+	Slots = new sslBaseVoice[125]
+	StringListClear(self, "Voices")
 	Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
 	PlayerRef = Game.GetPlayer()
 	; Register voices

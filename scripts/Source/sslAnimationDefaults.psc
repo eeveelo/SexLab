@@ -10,7 +10,6 @@ endFunction
 
 function LoadAnimations()
 	; Prepare factory for load
-	Slots = Quest.GetQuest("SexLabQuestAnimations") as sslAnimationSlots
 	FreeFactory()
 	; Missionary
 	RegisterAnimation("SexLabMissionary")
