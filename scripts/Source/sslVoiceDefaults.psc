@@ -2,7 +2,6 @@ scriptname sslVoiceDefaults extends sslVoiceFactory
 
 function LoadVoices()
 	; Prepare factory for load
-	Slots = Quest.GetQuest("SexLabQuestRegistry") as sslVoiceSlots
 	FreeFactory()
 	; Female voices
 	RegisterVoice("FemaleClassic")

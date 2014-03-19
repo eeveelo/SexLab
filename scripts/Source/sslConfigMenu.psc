@@ -206,6 +206,7 @@ function SetupSystem()
 	AnimSlots.Setup()
 	CreatureSlots.Setup()
 	VoiceSlots.Setup()
+	ExpressionSlots.Setup()
 	; Finished
 	Debug.Notification("$SSL_SexLabUpdated")
 endFunction

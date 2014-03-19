@@ -115,9 +115,8 @@ endFunction
 
 function LoadAnimations()
 	; Prepare factory for load
-	Slots = Quest.GetQuest("SexLabQuestRegistry") as sslCreatureAnimationSlots
-	FreeFactory()
 	LoadRaces()
+	FreeFactory()
 	; Bear
 	RegisterAnimation("BearDoggystyle")
 	; Dog
