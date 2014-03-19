@@ -92,7 +92,7 @@ function RegisterExpressions()
 	Defaults.LoadExpressions()
 	; Send mod event for 3rd party Expressions
 	ModEvent.Send(ModEvent.Create("SexLabSlotExpressions"))
-	Debug.Notification("$SSL_NotifyVoiceInstall")
+	Debug.Notification("$SSL_NotifyExpressionsInstall")
 endFunction
 
 function Setup()
