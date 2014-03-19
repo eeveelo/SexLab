@@ -14,7 +14,7 @@ function LoadExpressions()
 	RegisterExpression("Angry")
 endFunction
 
-function Pleasure(string eventName, string id, float argNum, form sender)
+function Pleasure()
 	Name = "Pleasure"
 
 	AddTag("Happy")
@@ -96,7 +96,7 @@ function Pleasure(string eventName, string id, float argNum, form sender)
 	Save()
 endFunction
 
-function Shy(string eventName, string id, float argNum, form sender)
+function Shy()
 	Name = "Shy"
 
 	AddTag("Normal")
@@ -145,7 +145,7 @@ function Shy(string eventName, string id, float argNum, form sender)
 	Save()
 endFunction
 
-function Afraid(string eventName, string id, float argNum, form sender)
+function Afraid()
 	Name = "Afraid"
 
 	AddTag("Afraid")
@@ -235,7 +235,7 @@ function Afraid(string eventName, string id, float argNum, form sender)
 endFunction
 
 
-function Pained(string eventName, string id, float argNum, form sender)
+function Pained()
 	Name = "Pained"
 
 	AddTag("Afraid")
@@ -322,7 +322,7 @@ function Pained(string eventName, string id, float argNum, form sender)
 	Save()
 endFunction
 
-function Angry(string eventName, string id, float argNum, form sender)
+function Angry()
 	Name = "Angry"
 
 	AddTag("Mad")
@@ -369,7 +369,7 @@ function Angry(string eventName, string id, float argNum, form sender)
 	Save()
 endFunction
 
-function Happy(string eventName, string id, float argNum, form sender)
+function Happy()
 	Name = "Happy"
 
 	AddTag("Happy")
@@ -416,7 +416,7 @@ function Happy(string eventName, string id, float argNum, form sender)
 	Save()
 endFunction
 
-function Sad(string eventName, string id, float argNum, form sender)
+function Sad()
 	Name = "Sad"
 
 	AddTag("Sad")
@@ -463,7 +463,7 @@ function Sad(string eventName, string id, float argNum, form sender)
 	Save()
 endFunction
 
-function Joy(string eventName, string id, float argNum, form sender)
+function Joy()
 	Name = "Joy"
 
 	AddTag("Happy")
