@@ -1,7 +1,7 @@
 scriptname sslVoiceFactory extends Quest
 
 sslVoiceSlots property Slots auto hidden
-sslBaseVoice property Voice auto hidden
+sslBaseVoice property Slot auto hidden
 
 ; Gender Types
 int property Male = 0 autoreadonly hidden
@@ -21,17 +21,14 @@ function RegisterVoice(string Registrar)
 		return
 	endIf
 	; Wait for factory to be free
-	while Locked || Voice != none
-		Utility.WaitMenuMode(0.15)
-	endWhile
-	Locked = true
+	FactoryWait()
 	; Get free voice slot
-	Voice = Slots.Register(Registrar)
-	if Voice != none
+	Slot = Slots.Register(Registrar)
+	if Slot != none
 		; Init voice
-		Voice.Initialize()
-		Voice.Registry = Registrar
-		Voice.Enabled = true
+		Slot.Initialize()
+		Slot.Registry = Registrar
+		Slot.Enabled = true
 		; Send load event
 		RegisterForModEvent("Register"+Registrar, Registrar)
 		ModEvent.Send(ModEvent.Create("Register"+Registrar))
@@ -44,16 +41,16 @@ endFunction
 ; Unlocks factory for next callback, MUST be called at end of callback
 function Save()
 	; Make sure we have a gender tag
-	if Voice.Gender == 0
-		Voice.AddTag("Male")
-	elseIf Voice.Gender == 1
-		Voice.AddTag("Female")
-	elseIf Voice.Gender == -1
-		Voice.AddTag("Male")
-		Voice.AddTag("Female")
+	if Slot.Gender == 0
+		Slot.AddTag("Male")
+	elseIf Slot.Gender == 1
+		Slot.AddTag("Female")
+	elseIf Slot.Gender == -1
+		Slot.AddTag("Male")
+		Slot.AddTag("Female")
 	endIf
 	; Free up factory for use
-	SexLabUtil.Log("'"+Voice.Name+"'", "Slot["+Slots.Voices.Find(Voice)+"]", "REGISTER VOICE", "trace,console", true)
+	SexLabUtil.Log("'"+Slot.Name+"'", "Voices["+Slots.Voices.Find(Slot)+"]", "REGISTER", "trace,console", true)
 	FreeFactory()
 endfunction
 
@@ -62,47 +59,59 @@ endfunction
 ; ------------------------------------------------------- ;
 
 bool function AddTag(string tag)
-	return Voice.AddTag(tag)
+	return Slot.AddTag(tag)
 endFunction
 
 string property Name hidden
 	function set(string value)
-		Voice.Name = value
+		Slot.Name = value
 	endFunction
 endProperty
 
 bool property Enabled hidden
 	function set(bool value)
-		Voice.Enabled = value
+		Slot.Enabled = value
 	endFunction
 endProperty
 
 int property Gender hidden
 	function set(int value)
-		Voice.Gender = value
+		Slot.Gender = value
 	endFunction
 endProperty
 
 Sound property Mild hidden
 	function set(Sound value)
-		Voice.Mild = value
+		Slot.Mild = value
 	endFunction
 endProperty
 
 Sound property Medium hidden
 	function set(Sound value)
-		Voice.Medium = value
+		Slot.Medium = value
 	endFunction
 endProperty
 
 Sound property Hot hidden
 	function set(Sound value)
-		Voice.Hot = value
+		Slot.Hot = value
 	endFunction
 endProperty
 
+; ------------------------------------------------------- ;
+; --- Callback Data Handling - SYSTEM USE ONLY        --- ;
+; ------------------------------------------------------- ;
+
 function FreeFactory()
 	; Clear wait lock
-	Voice = none
+	Slot = none
 	Locked = false
+endFunction
+
+function FactoryWait()
+	Utility.WaitMenuMode(0.30)
+	while Locked
+		Utility.WaitMenuMode(0.30)
+	endWhile
+	Locked = true
 endFunction

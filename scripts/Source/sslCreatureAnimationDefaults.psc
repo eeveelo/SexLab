@@ -109,7 +109,7 @@ function LoadRaces()
 endFunction
 
 function AddRace(Race CreatureRace)
-	Animation.AddRace(CreatureRace)
+	Slot.AddRace(CreatureRace)
 	(Slots as sslCreatureAnimationSlots).AddRace(CreatureRace)
 endFunction
 

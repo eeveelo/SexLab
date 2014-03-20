@@ -1,7 +1,7 @@
 scriptname sslAnimationFactory extends Quest
 
 sslAnimationSlots property Slots auto hidden
-sslBaseAnimation property Animation auto hidden
+sslBaseAnimation property Slot auto hidden
 
 ; Gender Types
 int property Male = 0 autoreadonly hidden
@@ -37,16 +37,13 @@ function RegisterAnimation(string Registrar)
 		return
 	endIf
 	; Wait for factory to be free
-	while Locked || Animation != none
-		Utility.WaitMenuMode(0.15)
-	endWhile
+	FactoryWait()
 	; Get free animation slot
-	Locked = true
-	Animation = Slots.Register(Registrar)
-	if Animation != none
-		Animation.Initialize()
-		Animation.Registry = Registrar
-		Animation.Enabled = true
+	Slot = Slots.Register(Registrar)
+	if Slot != none
+		Slot.Initialize()
+		Slot.Registry = Registrar
+		Slot.Enabled = true
 		; Send load event
 		RegisterForModEvent("Register"+Registrar, Registrar)
 		ModEvent.Send(ModEvent.Create("Register"+Registrar))
@@ -58,8 +55,8 @@ endFunction
 
 ; Unlocks factory for next callback, MUST be called at end of callback
 function Save()
-	SexLabUtil.Log("'"+Animation.Name+"'", "Slot["+Slots.Animations.Find(Animation)+"]", "REGISTER ANIMATION", "trace,console", true)
-	Animation.Save(sslUtility.TrimIntArray(positionData, positionID), sslUtility.TrimStringArray(animData, animID), sslUtility.TrimFloatArray(offsetData, offsetID), sslUtility.TrimIntArray(infoData, infoID))
+	SexLabUtil.Log("'"+Slot.Name+"'", "Animation["+Slots.Animations.Find(Slot)+"]", "REGISTER", "trace,console", true)
+	Slot.Save(sslUtility.TrimIntArray(positionData, positionID), sslUtility.TrimStringArray(animData, animID), sslUtility.TrimFloatArray(offsetData, offsetID), sslUtility.TrimIntArray(infoData, infoID))
 	FreeFactory()
 endfunction
 
@@ -68,7 +65,7 @@ endfunction
 ; ------------------------------------------------------- ;
 
 int function AddPosition(int gender = 0, int addCum = -1)
-	Animation.Genders[gender] = Animation.Genders[gender] + 1
+	Slot.Genders[gender] = Slot.Genders[gender] + 1
 	positionData[(positionID + 0)] = gender
 	positionData[(positionID + 1)] = addCum
 	positionID += 2
@@ -91,32 +88,32 @@ function AddPositionStage(int position, string animationEvent, float forward = 0
 endFunction
 
 function SetContent(int contentType)
-	Animation.SetContent(contentType)
+	Slot.SetContent(contentType)
 endFunction
 
 function SetStageTimer(int stage, float timer)
-	Animation.SetStageTimer(stage, timer)
+	Slot.SetStageTimer(stage, timer)
 endFunction
 
 bool function AddTag(string tag)
-	return Animation.AddTag(tag)
+	return Slot.AddTag(tag)
 endFunction
 
 string property Name hidden
 	function set(string value)
-		Animation.Name = value
+		Slot.Name = value
 	endFunction
 endProperty
 
 bool property Enabled hidden
 	function set(bool value)
-		Animation.Enabled = value
+		Slot.Enabled = value
 	endFunction
 endProperty
 
 Sound property SoundFX hidden
 	function set(Sound value)
-		Animation.SoundFX = value
+		Slot.SoundFX = value
 	endFunction
 endProperty
 
@@ -150,7 +147,14 @@ function FreeFactory()
 		SexMix = Lib.SexMixedFX
 	endIf
 	; Clear wait lock
-	Animation = none
+	Slot = none
 	Locked = false
 endFunction
 
+function FactoryWait()
+	Utility.WaitMenuMode(0.30)
+	while Locked
+		Utility.WaitMenuMode(0.30)
+	endWhile
+	Locked = true
+endFunction
