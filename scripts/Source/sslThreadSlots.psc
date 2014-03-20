@@ -46,10 +46,12 @@ function Setup()
 	while i
 		i -= 1
 		if i > 9
-			Slots[i] = (Quest.GetQuest("SexLabThread"+i) as sslThreadController)
+			Slots[i] = Quest.GetQuest("SexLabThread"+i) as sslThreadController
 		else
-			Slots[i] = (Quest.GetQuest("SexLabThread0"+i) as sslThreadController)
+			Slots[i] = Quest.GetQuest("SexLabThread0"+i) as sslThreadController
 		endIf
+		Slots[i].Stop()
+		Slots[i].Start()
 		Slots[i]._SetupThread(i)
 	endWhile
 endFunction

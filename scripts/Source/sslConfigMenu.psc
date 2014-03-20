@@ -17,24 +17,23 @@ event OnVersionUpdate(int version)
 endEvent
 
 event OnConfigInit()
-	; Init System
 	SetupSystem()
-	; Init Stats
-	Stats.Setup()
 endEvent
 
 event OnGameReload()
 	parent.OnGameReload()
-	; Configure SFX & Voice volumes
-	AudioVoice.SetVolume(Config.fVoiceVolume)
-	AudioSFX.SetVolume(Config.fSFXVolume)
 	; Check system
 	CheckSystem()
-	; TFC Toggle key
-	Config.ToggleFreeCameraEnable()
-	; ALPHA DEBUG:
-	Config.SetDebugMode(true)
-	SetupSystem()
+	; Init startup settings
+	if Config
+		; Configure SFX & Voice volumes
+		AudioVoice.SetVolume(Config.fVoiceVolume)
+		AudioSFX.SetVolume(Config.fSFXVolume)
+		; TFC Toggle key
+		Config.ToggleFreeCameraEnable()
+		; ALPHA DEBUG:
+		Config.SetDebugMode(true)
+	endIf
 endEvent
 
 ; Framework
@@ -153,7 +152,7 @@ function SetDefaults()
 	SlotNames[31] = "$SSL_MiscSlot61"
 	SlotNames[32] = "$SSL_Weapons"
 
-	Pages = new string[12]
+	Pages = new string[13]
 	Pages[0] = "$SSL_AnimationSettings"
 	Pages[1] = "$SSL_SoundSettings"
 	Pages[2] = "$SSL_PlayerHotkeys"
@@ -164,13 +163,13 @@ function SetDefaults()
 	Pages[7] = "$SSL_ForeplayAnimations"
 	Pages[8] = "$SSL_AggressiveAnimations"
 	Pages[9] = "$SSL_CreatureAnimations"
-	; Pages[10] = "$SSL_ExpressionSelection"
+	Pages[10] = "$SSL_ExpressionSelection"
 	if PlayerRef.GetLeveledActorBase().GetSex() == 1
-		Pages[10] = "$SSL_SexDiary"
+		Pages[11] = "$SSL_SexDiary"
 	else
-		Pages[10] = "$SSL_SexJournal"
+		Pages[11] = "$SSL_SexJournal"
 	endIf
-	Pages[11] = "$SSL_RebuildClean"
+	Pages[12] = "$SSL_RebuildClean"
 
 	FindStrapons()
 endFunction
@@ -180,24 +179,24 @@ function SetupSystem()
 	while Utility.IsInMenuMode() || !PlayerRef.Is3DLoaded()
 		Utility.Wait(1.0)
 	endWhile
-	; Grab libraries to make sure they are all set properly
-	Quest SexLabQuestFramework  = Quest.GetQuest("SexLabQuestFramework")
-	Config          = SexLabQuestFramework as sslSystemConfig
-	ActorLib        = SexLabQuestFramework as sslActorLibrary
-	ThreadLib       = SexLabQuestFramework as sslThreadLibrary
-	Stats           = SexLabQuestFramework as sslActorStats
-	ThreadSlots     = SexLabQuestFramework as sslThreadSlots
-	Quest SexLabQuestAnimations = Quest.GetQuest("SexLabQuestAnimations")
-	AnimSlots       = SexLabQuestAnimations as sslAnimationSlots
-	Quest SexLabQuestRegistry   = Quest.GetQuest("SexLabQuestRegistry")
-	CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
-	VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
-	ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
-	; Init Defaults
+	; Prepare base framework script
+	Quest SexLabQuestFramework = Quest.GetQuest("SexLabQuestFramework")
+	SexLab = SexLabQuestFramework as SexLabFramework
 	SexLab.Initialize()
 	CheckSystem()
+	; Grab libraries to make sure they are all set properly
+	Config          = SexLab.Config
+	ActorLib        = SexLab.ActorLib
+	ThreadLib       = SexLab.ThreadLib
+	Stats           = SexLab.Stats
+	ThreadSlots     = SexLab.ThreadSlots
+	AnimSlots       = SexLab.AnimSlots
+	CreatureSlots   = SexLab.CreatureSlots
+	VoiceSlots      = SexLab.VoiceSlots
+	ExpressionSlots = SexLab.ExpressionSlots
+	; Init Defaults
 	SetDefaults()
-	; Setup Libraries
+	; Setup library resources
 	ActorLib.Setup()
 	ThreadLib.Setup()
 	Stats.Setup()
@@ -207,6 +206,7 @@ function SetupSystem()
 	CreatureSlots.Setup()
 	VoiceSlots.Setup()
 	ExpressionSlots.Setup()
+	ModEvent.Send(ModEvent.Create("SexLabSetup"))
 	; Finished
 	Debug.Notification("$SSL_SexLabUpdated")
 endFunction

@@ -76,7 +76,7 @@ endFunction
 
 function DebugLog(string Log, string Type = "NOTICE", bool DebugMode = false) global
 	if DebugMode
-		MiscUtil.PrintConsole("SexLab - "+Type+": "+Log)
+		MiscUtil.PrintConsole(Type+": "+Log)
 		Debug.Trace("---  SexLab "+Type+"  --------------------------------")
 		if Type == "ERROR" || Type == "FATAL"
 			Debug.TraceStack("--- STACK")
@@ -87,7 +87,6 @@ function DebugLog(string Log, string Type = "NOTICE", bool DebugMode = false) gl
 		Debug.Trace("SexLab - "+Type+": "+Log)
 	endIf
 endFunction
-
 
 ;#------------------------------#
 ;#  SKSE Bound functions        #

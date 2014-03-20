@@ -1,40 +1,39 @@
 scriptname sslSystemLibrary extends Quest
 
-Actor property PlayerRef auto
+Actor property PlayerRef auto hidden
 
-; Libraries
+; Settings access
 sslSystemConfig property Config auto hidden
 
+; Function libraries
 sslActorLibrary property ActorLib auto hidden
 sslThreadLibrary property ThreadLib auto hidden
 sslActorStats property Stats auto hidden
 
-; Object Registeries
+; Object registeries
 sslThreadSlots property ThreadSlots auto hidden
 sslAnimationSlots property AnimSlots auto hidden
 sslCreatureAnimationSlots property CreatureSlots auto hidden
 sslVoiceSlots property VoiceSlots auto hidden
 sslExpressionSlots property ExpressionSlots auto hidden
 
-; Misc
-
 function Log(string Log, string Type = "NOTICE")
 	SexLabUtil.DebugLog(Log, Type, Config.DebugMode)
 endFunction
 
 function Setup()
-	Quest SexLabQuestFramework  = Quest.GetQuest("SexLabQuestFramework")
-	Config          = SexLabQuestFramework as sslSystemConfig
-	ActorLib        = SexLabQuestFramework as sslActorLibrary
-	ThreadLib       = SexLabQuestFramework as sslThreadLibrary
-	Stats           = SexLabQuestFramework as sslActorStats
-	ThreadSlots     = SexLabQuestFramework as sslThreadSlots
-	Quest SexLabQuestAnimations = Quest.GetQuest("SexLabQuestAnimations")
-	AnimSlots       = SexLabQuestAnimations as sslAnimationSlots
-	Quest SexLabQuestRegistry   = Quest.GetQuest("SexLabQuestRegistry")
-	CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
-	VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
-	ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
+	SexLabFramework SexLab = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework
+	; Sync resources across framework
+	PlayerRef       = SexLab.PlayerRef
+	Config          = SexLab.Config
+	ActorLib        = SexLab.ActorLib
+	ThreadLib       = SexLab.ThreadLib
+	Stats           = SexLab.Stats
+	ThreadSlots     = SexLab.ThreadSlots
+	AnimSlots       = SexLab.AnimSlots
+	CreatureSlots   = SexLab.CreatureSlots
+	VoiceSlots      = SexLab.VoiceSlots
+	ExpressionSlots = SexLab.ExpressionSlots
 endFunction
 
 ; event OnInit()

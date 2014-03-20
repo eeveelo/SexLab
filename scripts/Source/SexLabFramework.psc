@@ -729,19 +729,28 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function Initialize()
+	; Reset all Libraries
 	Quest SexLabQuestFramework  = Quest.GetQuest("SexLabQuestFramework")
+	SexLabQuestFramework.Stop()
+	SexLabQuestFramework.Start()
 	Config          = SexLabQuestFramework as sslSystemConfig
 	ActorLib        = SexLabQuestFramework as sslActorLibrary
 	ThreadLib       = SexLabQuestFramework as sslThreadLibrary
 	Stats           = SexLabQuestFramework as sslActorStats
 	ThreadSlots     = SexLabQuestFramework as sslThreadSlots
+	; Reset animation registry
 	Quest SexLabQuestAnimations = Quest.GetQuest("SexLabQuestAnimations")
+	SexLabQuestAnimations.Stop()
+	SexLabQuestAnimations.Start()
 	AnimSlots       = SexLabQuestAnimations as sslAnimationSlots
+	; Reset secondary object registry
 	Quest SexLabQuestRegistry   = Quest.GetQuest("SexLabQuestRegistry")
+	SexLabQuestRegistry.Stop()
+	SexLabQuestRegistry.Start()
 	CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
 	VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
 	ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
-
+	; Enable system for use
 	SystemEnabled = true
 	Log("SexLab Initialized")
 endFunction
