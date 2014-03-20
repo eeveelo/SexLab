@@ -20,12 +20,9 @@ event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	; Ref2 = TargetRef
 	; ActorName = Ref1.GetLeveledActorBase().GetName()
 	; ActorName = Ref2.GetLeveledActorBase().GetName()
-
-	sslVoiceSlots Voices = Quest.GetQuest("SexLabQuestRegistry") as sslVoiceSlots
-	Voices.Setup()
-	Utility.Wait(2.0)
-	Voices.Benchmark()
-
+	Log("----- "+SexLab.ExpressionSlots.Expressions[0])
+	SexLab.ExpressionSlots.Expressions[0].ApplyPhase(TargetRef, 2, TargetRef.GetLeveledActorBase().GetSex())
+	SexLab.Initialize()
 endEvent
 
 event OnUpdate()

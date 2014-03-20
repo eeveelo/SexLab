@@ -1,16 +1,16 @@
 scriptname sslExpressionFactory extends Quest
 
 sslExpressionSlots property Slots auto hidden
-sslBaseExpression property Registering auto hidden
+sslBaseExpression property Slot auto hidden
 
 ; Gender Types
 int property Male = 0 autoreadonly hidden
 int property Female = 1 autoreadonly hidden
 int property MaleFemale = -1 autoreadonly hidden
 ; MFG Types
-int property Phoneme = 0 autoreadonly hidden
-int property Modifier = 1 autoreadonly hidden
-int property Expression = 2 autoreadonly hidden
+int property Modifier = 0 autoreadonly hidden
+int property Phoneme = 14 autoreadonly hidden
+int property Expression = 30 autoreadonly hidden
 
 bool Locked
 
@@ -25,17 +25,14 @@ function RegisterExpression(string Registrar)
 		return
 	endIf
 	; Wait for factory to be free
-	while Locked || Registering != none
-		Utility.WaitMenuMode(0.15)
-	endWhile
-	Locked = true
+	FactoryWait()
 	; Get free Expression slot
-	Registering = Slots.Register(Registrar)
-	if Registering != none
+	Slot = Slots.Register(Registrar)
+	if Slot != none
 		; Init Expression
-		Registering.Initialize()
-		Registering.Registry = Registrar
-		Registering.Enabled = true
+		Slot.Initialize()
+		Slot.Registry = Registrar
+		Slot.Enabled = true
 		; Send load event
 		RegisterForModEvent("Register"+Registrar, Registrar)
 		ModEvent.Send(ModEvent.Create("Register"+Registrar))
@@ -47,17 +44,15 @@ endFunction
 
 ; Unlocks factory for next callback, MUST be called at end of callback
 function Save()
-	; Make sure we have a gender tag
-	if Registering.Gender == 0
-		Registering.AddTag("Male")
-	elseIf Registering.Gender == 1
-		Registering.AddTag("Female")
-	elseIf Registering.Gender == -1
-		Registering.AddTag("Male")
-		Registering.AddTag("Female")
+	; Make sure we have a Gender tag
+	if Slot.PhasesMale > 0
+		Slot.AddTag("Male")
+	endIf
+	if Slot.PhasesFemale > 0
+		Slot.AddTag("Female")
 	endIf
 	; Free up factory for use
-	SexLabUtil.Log("'"+Registering.Name+"'", "Slot["+Slots.Expressions.Find(Registering)+"]", "REGISTER Expression", "trace,console", true)
+	SexLabUtil.Log("'"+Slot.Name+"'", "Expressions["+Slots.Expressions.Find(Slot)+"]", "REGISTER", "trace,console", true)
 	FreeFactory()
 endfunction
 
@@ -66,51 +61,74 @@ endfunction
 ; ------------------------------------------------------- ;
 
 bool function AddTag(string tag)
-	return Registering.AddTag(tag)
+	return Slot.AddTag(tag)
 endFunction
 
 string property Name hidden
 	function set(string value)
-		Registering.Name = value
+		Slot.Name = value
 	endFunction
 endProperty
 
 bool property Enabled hidden
 	function set(bool value)
-		Registering.Enabled = value
+		Slot.Enabled = value
 	endFunction
 endProperty
 
-int property Gender hidden
-	function set(int value)
-		Registering.Gender = value
-	endFunction
-endProperty
-
-function AddPreset(int phase, int gender, int mode, int id, int value)
-	if mode == Expression
-		; AddExpression(phase, gender, id, value)
-	elseif mode == Modifier
-		; AddModifier(phase, gender, id, value)
-	elseif mode == Phoneme
-		; AddPhoneme(phase, gender, id, value)
+function AddPreset(int Phase, int Gender, int Mode, int id, int value)
+	if Mode == Expression
+		AddExpression(Phase, Gender, id, value)
+	elseif Mode == Modifier
+		AddModifier(Phase, Gender, id, value)
+	elseif Mode == Phoneme
+		AddPhoneme(Phase, Gender, id, value)
 	endIf
 endFunction
 
-function AddExpression(int phase, int gender, int id, int value)
-	; Registering.AddExpression(phase, gender, id, value)
+function AddExpression(int Phase, int Gender, int id, int value)
+	if Gender == Female || Gender == MaleFemale
+		Slot.SetIndex(Phase, Female, Expression, 0, value)
+		Slot.SetIndex(Phase, Female, Expression, 1, value)
+	endIf
+	if Gender == Male || Gender == MaleFemale
+		Slot.SetIndex(Phase, Male, Expression, 0, value)
+		Slot.SetIndex(Phase, Male, Expression, 1, value)
+	endIf
 endFunction
 
-function AddModifier(int phase, int gender, int id, int value)
-	; Registering.AddModifier(phase, gender, id, value)
+function AddModifier(int Phase, int Gender, int id, int value)
+	if Gender == Female || Gender == MaleFemale
+		Slot.SetIndex(Phase, Female, Modifier, id, value)
+	endIf
+	if Gender == Male || Gender == MaleFemale
+		Slot.SetIndex(Phase, Male, Modifier, id, value)
+	endIf
 endFunction
 
-function AddPhoneme(int phase, int gender, int id, int value)
-	; Registering.AddPhoneme(phase, gender, id, value)
+function AddPhoneme(int Phase, int Gender, int id, int value)
+	if Gender == Female || Gender == MaleFemale
+		Slot.SetIndex(Phase, Female, Phoneme, id, value)
+	endIf
+	if Gender == Male || Gender == MaleFemale
+		Slot.SetIndex(Phase, Male, Phoneme, id, value)
+	endIf
 endFunction
+
+; ------------------------------------------------------- ;
+; --- Callback Data Handling - SYSTEM USE ONLY        --- ;
+; ------------------------------------------------------- ;
 
 function FreeFactory()
 	; Clear wait lock
-	Registering = none
+	Slot = none
 	Locked = false
+endFunction
+
+function FactoryWait()
+	Utility.WaitMenuMode(0.30)
+	while Locked
+		Utility.WaitMenuMode(0.30)
+	endWhile
+	Locked = true
 endFunction
