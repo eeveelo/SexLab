@@ -833,6 +833,8 @@ int property tid hidden
 endProperty
 
 function _SetupThread(int id)
+	Stop()
+	Start()
 	thread_id = id
 	ActorAlias = new sslActorAlias[5]
 	ActorAlias[0] = GetNthAlias(0) as sslActorAlias

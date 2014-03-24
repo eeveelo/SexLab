@@ -40,22 +40,6 @@ sslThreadController function GetActorController(Actor ActorRef)
 	return GetController(FindActorController(ActorRef))
 endFunction
 
-function Setup()
-	Slots = new sslThreadController[15]
-	int i = Slots.Length
-	while i
-		i -= 1
-		if i > 9
-			Slots[i] = Quest.GetQuest("SexLabThread"+i) as sslThreadController
-		else
-			Slots[i] = Quest.GetQuest("SexLabThread0"+i) as sslThreadController
-		endIf
-		Slots[i].Stop()
-		Slots[i].Start()
-		Slots[i]._SetupThread(i)
-	endWhile
-endFunction
-
 function StopAll()
 	int i = Slots.Length
 	while i
@@ -65,6 +49,31 @@ function StopAll()
 	Setup()
 endFunction
 
-; event OnInit()
-; 	Setup()
-; endEvent
+; ------------------------------------------------------- ;
+; --- System Use Only                                 --- ;
+; ------------------------------------------------------- ;
+
+function Setup()
+	GoToState("Setup")
+endFunction
+
+state Setup
+	event OnBeginState()
+		RegisterForSingleUpdate(0.5)
+	endEvent
+	event OnUpdate()
+		; Init variables
+		Slots = new sslThreadController[15]
+		int i = Slots.Length
+		while i
+			i -= 1
+			if i > 9
+				Slots[i] = Quest.GetQuest("SexLabThread"+i) as sslThreadController
+			else
+				Slots[i] = Quest.GetQuest("SexLabThread0"+i) as sslThreadController
+			endIf
+			Slots[i]._SetupThread(i)
+		endWhile
+		GoToState("")
+	endEvent
+endState

@@ -110,12 +110,6 @@ state Animating
 			Animation.SoundFX.Play(CenterRef)
 			SFXTimer = CurrentTime + SFXDelay
 		endIf
-		; DoRecord = !DoRecord
-		; if DoRecord
-		; 	AddXP(1, 0.075, IsVaginal)
-		; 	AddXP(2, 0.075, IsAnal)
-		; 	AddXP(3, 0.075, IsOral)
-		; endIf
 		; Loop
 		RegisterForSingleUpdate(0.30)
 	endEvent
@@ -338,6 +332,11 @@ float function GetTimer()
 		return Timers[last]
 	endIf
 	return Timers[(last - 1)]
+endFunction
+
+function UpdateTimer(float AddSeconds = 0.0)
+	TimedStage = true
+	StageTimer += AddSeconds
 endFunction
 
 function TriggerOrgasm()

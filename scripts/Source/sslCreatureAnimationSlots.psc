@@ -48,24 +48,29 @@ endFunction
 ; --- System Use Only                                 --- ;
 ; ------------------------------------------------------- ;
 
-function RegisterAnimations()
-	; Register default animations
-	sslCreatureAnimationDefaults Defaults = Quest.GetQuest("SexLabQuestRegistry") as sslCreatureAnimationDefaults
-	Defaults.Slots = self
-	Defaults.LoadAnimations()
-	; Send mod event for 3rd party animations
-	ModEvent.Send(ModEvent.Create("SexLabSlotCreatureAnimations"))
-	Debug.Notification("$SSL_NotifyCreatureAnimationInstall")
+function Setup()
+	GoToState("Setup")
 endFunction
 
-function Setup()
-	; Init variables
-	Slotted = 0
-	Slots = new sslBaseAnimation[125]
-	StorageUtil.StringListClear(self, "Animations")
-	StorageUtil.FormListClear(self, "CreatureTypes")
-	Lib = Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary
-	Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
-	; Register animations
-	RegisterAnimations()
-endFunction
+state Setup
+	event OnBeginState()
+		RegisterForSingleUpdate(0.5)
+	endEvent
+	event OnUpdate()
+		; Init variables
+		Slotted = 0
+		Slots = new sslBaseAnimation[125]
+		StorageUtil.StringListClear(self, "Animations")
+		StorageUtil.FormListClear(self, "CreatureTypes")
+		Lib = Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary
+		Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
+		; Register default animations
+		sslCreatureAnimationDefaults Defaults = Quest.GetQuest("SexLabQuestRegistry") as sslCreatureAnimationDefaults
+		Defaults.Slots = self
+		Defaults.LoadAnimations()
+		; Send mod event for 3rd party animations
+		ModEvent.Send(ModEvent.Create("SexLabSlotCreatureAnimations"))
+		Debug.Notification("$SSL_NotifyCreatureAnimationInstall")
+		GoToState("")
+	endEvent
+endState

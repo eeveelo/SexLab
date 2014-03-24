@@ -15,6 +15,8 @@ bool property bRagdollEnd auto hidden
 bool property bUseMaleNudeSuit auto hidden
 bool property bUseFemaleNudeSuit auto hidden
 bool property bUndressAnimation auto hidden
+bool property bUseLipSync auto hidden
+bool property bUseExpressions auto hidden
 
 bool[] property bStripMale auto hidden
 bool[] property bStripFemale auto hidden
@@ -247,9 +249,9 @@ function SetDefaults()
 
 	; Config
 	bDisablePlayer = false
-	fMaleVoiceDelay = 7.0
-	fFemaleVoiceDelay = 6.0
-	fVoiceVolume = 0.8
+	fMaleVoiceDelay = 6.0
+	fFemaleVoiceDelay = 5.0
+	fVoiceVolume = 1.0
 	bEnableTCL = false
 	bScaleActors = false
 	bUseCum = true
@@ -261,6 +263,8 @@ function SetDefaults()
 	bUseMaleNudeSuit = false
 	bUseFemaleNudeSuit = false
 	bUndressAnimation = false
+	bUseLipSync = true
+	bUseExpressions = true
 
 	; Strip
 	bStripMale = new bool[33]
@@ -343,7 +347,7 @@ function SetDefaults()
 
 	; Config
 	fSFXDelay = 4.0
-	fSFXVolume = 0.8
+	fSFXVolume = 1.0
 	bAutoAdvance = true
 	bForeplayStage = false
 	bOrgasmEffects = false
