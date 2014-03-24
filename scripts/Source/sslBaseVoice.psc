@@ -1,6 +1,9 @@
 scriptname sslBaseVoice extends sslBaseObject
 
-sslThreadLibrary property Lib auto hidden
+Topic LipSync
+FormList VoicesPlayer
+VoiceType SexLabVoiceM
+VoiceType SexLabVoiceF
 
 Sound property Mild auto hidden
 Sound property Medium auto hidden
@@ -18,21 +21,20 @@ bool property Female hidden
 	endFunction
 endProperty
 
-
-function Moan(Actor ActorRef, int Strength = 30, bool IsVictim = false)
-	if Game.GetCameraState() != 3
-		ActorRef.Say(Lib.LipSync)
+function Moan(Actor ActorRef, int Strength = 30, bool IsVictim = false, bool UseLipSync = false)
+	if UseLipSync && Game.GetCameraState() != 3
+		ActorRef.Say(LipSync)
 	endIf
 	GetSound(Strength, IsVictim).PlayAndWait(ActorRef)
 endFunction
 
 function SetVoice(ActorBase BaseRef)
 	VoiceType Type = BaseRef.GetVoiceType()
-	if !Lib.VoicesPlayer.HasForm(Type) && Type != Lib.SexLabVoiceM && Type != Lib.SexLabVoiceF
+	if !VoicesPlayer.HasForm(Type) && Type != SexLabVoiceM && Type != SexLabVoiceF
 		if BaseRef.GetSex() == 1
-			BaseRef.SetVoiceType(Lib.SexLabVoiceF)
+			BaseRef.SetVoiceType(SexLabVoiceF)
 		else
-			BaseRef.SetVoiceType(Lib.SexLabVoiceM)
+			BaseRef.SetVoiceType(SexLabVoiceM)
 		endIf
 	endIf
 endFunction
@@ -55,6 +57,10 @@ function Initialize()
 	Mild = none
 	Medium = none
 	Hot = none
-	Lib = (Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary)
+	sslThreadLibrary Lib = Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary
+	LipSync = Lib.LipSync
+	VoicesPlayer = Lib.VoicesPlayer
+	SexLabVoiceM = Lib.SexLabVoiceM
+	SexLabVoiceF = Lib.SexLabVoiceF
 	parent.Initialize()
 endFunction

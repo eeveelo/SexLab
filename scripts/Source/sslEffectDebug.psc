@@ -21,8 +21,8 @@ event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	; ActorName = Ref1.GetLeveledActorBase().GetName()
 	; ActorName = Ref2.GetLeveledActorBase().GetName()
 	Log("----- "+SexLab.ExpressionSlots.Expressions[0])
-	SexLab.ExpressionSlots.Expressions[0].ApplyPhase(TargetRef, 2, TargetRef.GetLeveledActorBase().GetSex())
-	SexLab.Initialize()
+	SexLab.ExpressionSlots.Expressions[0].ApplyPhase(TargetRef, 3, TargetRef.GetLeveledActorBase().GetSex())
+	; SexLab.Initialize()
 endEvent
 
 event OnUpdate()

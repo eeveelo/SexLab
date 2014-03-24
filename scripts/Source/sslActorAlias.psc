@@ -1,9 +1,9 @@
 scriptname sslActorAlias extends ReferenceAlias
 
 ; Libraries
-sslActorLibrary property Lib auto
-sslActorStats property Stats auto
-sslSystemConfig property Config auto
+sslActorLibrary Lib
+sslActorStats Stats
+sslSystemConfig Config
 
 ; Actor Info
 Actor property ActorRef auto hidden
@@ -16,6 +16,7 @@ bool IsPlayer
 bool IsStraight
 string ActorName
 ActorBase BaseRef
+int BaseSex
 
 ; Current Thread state
 sslThreadController Thread
@@ -30,6 +31,10 @@ sslBaseVoice Voice
 VoiceType ActorVoice
 bool IsForcedSilent
 float VoiceDelay
+
+; Expression
+sslBaseExpression Expression
+int Phase
 
 ; Positioning
 ObjectReference MarkerRef
@@ -88,6 +93,7 @@ bool function PrepareAlias(Actor ProspectRef, bool MakeVictim = false, sslBaseVo
 	ActorRef   = ProspectRef
 	BaseRef    = ActorRef.GetLeveledActorBase()
 	ActorName  = BaseRef.GetName()
+	BaseSex    = BaseRef.GetSex()
 	Gender     = Lib.GetGender(ActorRef)
 	IsMale     = Gender == 0
 	IsFemale   = Gender == 1
@@ -252,7 +258,12 @@ state Prepare
 		if !IsCreature
 			; Pick a voice if needed
 			if Voice == none && !IsForcedSilent
-				SetVoice(Lib.VoiceSlots.PickGender(BaseRef.GetSex()), IsForcedSilent)
+				SetVoice(Lib.VoiceSlots.PickGender(BaseSex), IsForcedSilent)
+			endIf
+			; Pick an expression if needed
+			if Expression == none && Config.bUseExpressions
+				Expression = Lib.ExpressionSlots.PickExpression(((IsVictim as int) + (Thread.IsAggressive as int)))
+				Thread.Log("Expression: "+Expression.Name, ActorName)
 			endIf
 			; Check for heterosexual preference
 			IsStraight = Stats.IsStraight(ActorRef)
@@ -302,7 +313,9 @@ state Animating
 
 	event OnUpdate()
 		; First actor periodically pings thread for xp update
-		GetEnjoyment()
+		if Position == 0
+			Thread.RecordSkills()
+		endIf
 		; Check if still amonst the living and able.
 		if ActorRef.IsDead() || ActorRef.IsDisabled()
 			Thread.EndAnimation(true)
@@ -310,8 +323,10 @@ state Animating
 		endIf
 		; Moan if not silent
 		if !IsSilent
-			Voice.Moan(ActorRef, Enjoyment)
+			Voice.Moan(ActorRef, Enjoyment, IsVictim, Config.bUseLipSync)
 		endIf
+		; Apply Expression / sync enjoyment
+		ApplyExpression()
 		; Loop
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent
@@ -329,16 +344,8 @@ state Animating
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
 		; Creature skipped
 		if !IsCreature
-			; Sync enjoyment level
-			GetEnjoyment()
-			; Facial expression
-			; if OpenMouth
-			; 	ActorRef.SetExpressionOverride(16, 100)
-			; elseIf IsVictim
-			; 	ActorRef.SetExpressionOverride(14, Strength)
-			; else
-			; 	ActorRef.SetExpressionOverride(10, Strength)
-			; endIf
+			; Apply Expression / sync enjoyment
+			ApplyExpression()
 			; Equip Strapon if needed and enabled
 			if Strapon != none
 				if UseStrapon && !ActorRef.IsEquipped(Strapon)
@@ -351,6 +358,19 @@ state Animating
 		; Send schlong offset
 		if MalePosition
 			Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
+		endIf
+	endFunction
+
+	function ApplyExpression()
+		if !IsCreature
+			; Sync enjoyment level
+			GetEnjoyment()
+			; Facial expression
+			if OpenMouth
+				ActorRef.SetExpressionOverride(16, 100)
+			elseIf Expression != none && Phase > 0
+				Expression.ApplyPhase(ActorRef, Phase, BaseSex)
+			endIf
 		endIf
 	endFunction
 
@@ -442,6 +462,9 @@ state Reset
 		StopAnimating(Thread.FastEnd)
 		Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
 		ActorRef.ClearExpressionOverride()
+		if Expression != none
+			MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
+		endIf
 		; Unstrip
 		if !ActorRef.IsDead()
 			Lib.UnstripStored(ActorRef, IsVictim)
@@ -511,8 +534,13 @@ int function GetEnjoyment()
 			Enjoyment += 8
 		endIf
 	endIf
+	; Set final enjoyment
 	Enjoyment = ((Enjoyment as float) * ((Stage as float / Animation.StageCount as float) + 0.5)) as int
-	Thread.Log("Enjoyment: "+Enjoyment, ActorName)
+	; Get current expression phase from enjoyment
+	if Expression != none
+		Phase = Expression.PickPhase(Enjoyment, BaseSex)
+	endIf
+	Thread.Log("Enjoyment: "+Enjoyment+" Phase: "+Phase, ActorName)
 	return Enjoyment
 endFunction
 
@@ -604,6 +632,9 @@ function Initialize()
 	Voice          = none
 	ActorVoice     = none
 	IsForcedSilent = false
+	; Expression
+	Expression     = none
+	Phase          = 0
 	; Flags
 	NoRagdoll      = false
 	NoUndress      = false
@@ -619,10 +650,10 @@ function Initialize()
 endFunction
 
 function ClearAlias()
-	Lib    = (Quest.GetQuest("SexLabQuestFramework") as sslActorLibrary)
-	Stats  = (Quest.GetQuest("SexLabQuestFramework") as sslActorStats)
-	Config = (Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig)
-	Thread = (GetOwningQuest() as sslThreadController)
+	Lib    = Quest.GetQuest("SexLabQuestFramework") as sslActorLibrary
+	Stats  = Quest.GetQuest("SexLabQuestFramework") as sslActorStats
+	Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
+	Thread = GetOwningQuest() as sslThreadController
 	if GetReference() != none
 		Thread.Log("Had actor '"+GetReference()+"' During clear!", self)
 		ActorRef = GetReference() as Actor
@@ -661,6 +692,8 @@ endFunction
 function SyncThread(bool force = false)
 endFunction
 function SyncAnimation(bool force = false)
+endFunction
+function ApplyExpression()
 endFunction
 function UpdateOffsets()
 endFunction

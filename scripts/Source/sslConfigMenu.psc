@@ -80,9 +80,9 @@ int[] oidStripAggressor
 int[] oidToggleVoice
 int[] oidToggleAnimation
 int[] oidToggleCreatureAnimation
-; int[] oidToggleExpressionNormal
-; int[] oidToggleExpressionVictim
-; int[] oidToggleExpressionAggressor
+int[] oidToggleExpressionNormal
+int[] oidToggleExpressionVictim
+int[] oidToggleExpressionAggressor
 int[] oidAggrAnimation
 int[] oidForeplayAnimation
 int[] oidRemoveStrapon
@@ -100,16 +100,16 @@ function SetDefaults()
 	oidToggleAnimation = new int[125]
 	oidAggrAnimation = new int[125]
 	oidForeplayAnimation = new int[125]
-	; oidToggleExpressionNormal = new int[40]
-	; oidToggleExpressionVictim = new int[40]
-	; oidToggleExpressionAggressor = new int[40]
+	oidToggleExpressionNormal = new int[40]
+	oidToggleExpressionVictim = new int[40]
+	oidToggleExpressionAggressor = new int[40]
 
-	; oidStripMale = new int[33]
-	; oidStripFemale = new int[33]
-	; oidStripLeadInFemale = new int[33]
-	; oidStripLeadInMale = new int[33]
-	; oidStripVictim = new int[33]
-	; oidStripAggressor = new int[33]
+	oidStripMale = new int[33]
+	oidStripFemale = new int[33]
+	oidStripLeadInFemale = new int[33]
+	oidStripLeadInMale = new int[33]
+	oidStripVictim = new int[33]
+	oidStripAggressor = new int[33]
 
 	oidStageTimer = new int[5]
 	oidStageTimerLeadIn = new int[5]
@@ -206,9 +206,8 @@ function SetupSystem()
 	CreatureSlots.Setup()
 	VoiceSlots.Setup()
 	ExpressionSlots.Setup()
-	ModEvent.Send(ModEvent.Create("SexLabSetup"))
 	; Finished
-	Debug.Notification("$SSL_SexLabUpdated")
+	; Debug.Notification("$SSL_SexLabUpdated")
 endFunction
 
 string function GetSlotName(int slot)
@@ -235,20 +234,22 @@ event OnPageReset(string page)
 		AddSliderOptionST("AutomaticSUCSM","$SSL_AutomaticSUCSM", Config.fAutoSUCSM, "{0}")
 
 		AddHeaderOption("$SSL_ExtraEffects")
-		AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", Config.bScaleActors)
-		AddToggleOptionST("ReDressVictim","$SSL_VictimsRedress", Config.bReDressVictim)
+		AddToggleOptionST("UseExpressions","$SSL_UseExpressions", Config.bUseExpressions)
+		AddToggleOptionST("UseLipSync", "$SSL_UseLipSync", Config.bUseLipSync)
+		AddToggleOptionST("OrgasmEffects","$SSL_OrgasmEffects", Config.bOrgasmEffects)
 		AddToggleOptionST("UseCum","$SSL_ApplyCumEffects", Config.bUseCum)
 		AddToggleOptionST("AllowFemaleFemaleCum","$SSL_AllowFemaleFemaleCum", Config.bAllowFFCum)
 		AddSliderOptionST("CumEffectTimer","$SSL_CumEffectTimer", Config.fCumTimer, "$SSL_Seconds")
-		AddToggleOptionST("OrgasmEffects","$SSL_OrgasmEffects", Config.bOrgasmEffects)
 
 		SetCursorPosition(1)
 		AddHeaderOption("$SSL_AnimationHandling")
 		AddToggleOptionST("AllowCreatures","$SSL_AllowCreatures", Config.bAllowCreatures)
-		AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", Config.bRagdollEnd)
+		AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", Config.bScaleActors)
 		AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", Config.bForeplayStage)
 		AddToggleOptionST("RestrictAggressive","$SSL_RestrictAggressive", Config.bRestrictAggressive)
 		AddToggleOptionST("UndressAnimation","$SSL_UndressAnimation", Config.bUndressAnimation)
+		AddToggleOptionST("ReDressVictim","$SSL_VictimsRedress", Config.bReDressVictim)
+		AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", Config.bRagdollEnd)
 		AddToggleOptionST("StraponsFemale","$SSL_FemalesUseStrapons", Config.bUseStrapons)
 		AddToggleOptionST("NudeSuitMales","$SSL_UseNudeSuitMales", Config.bUseMaleNudeSuit)
 		AddToggleOptionST("NudeSuitFemales","$SSL_UseNudeSuitFemales", Config.bUseFemaleNudeSuit)
@@ -262,10 +263,10 @@ event OnPageReset(string page)
 		AddToggleOptionST("NPCSaveVoice","$SSL_NPCSaveVoice", Config.bNPCSaveVoice)
 		AddSliderOptionST("SFXVolume","$SSL_SFXVolume", (Config.fSFXVolume * 100), "{0}%")
 		AddSliderOptionST("VoiceVolume","$SSL_VoiceVolume", (Config.fVoiceVolume * 100), "{0}%")
-		AddSliderOptionST("SFXDelay","$SSL_SFXDelay", Config.fSFXDelay, "$SSL_Seconds")
 		AddSliderOptionST("MaleVoiceDelay","$SSL_MaleVoiceDelay", Config.fMaleVoiceDelay, "$SSL_Seconds")
-		AddEmptyOption()
 		AddSliderOptionST("FemaleVoiceDelay","$SSL_FemaleVoiceDelay", Config.fFemaleVoiceDelay, "$SSL_Seconds")
+		AddSliderOptionST("SFXDelay","$SSL_SFXDelay", Config.fSFXDelay, "$SSL_Seconds")
+		AddEmptyOption()
 
 		; Toggle Voices
 		AddHeaderOption("$SSL_ToggleVoices")
@@ -313,7 +314,6 @@ event OnPageReset(string page)
 		AddEmptyOption()
 
 		AddHeaderOption("$SSL_FemaleStripFrom")
-		oidStripFemale = new int[33]
 		StripSlots(oidStripFemale, Config.bStripFemale)
 
 		SetCursorPosition(1)
@@ -324,7 +324,6 @@ event OnPageReset(string page)
 		AddEmptyOption()
 
 		AddHeaderOption("$SSL_MaleStripFrom")
-		oidStripMale = new int[33]
 		StripSlots(oidStripMale, Config.bStripMale)
 
 	; Foreplay/Leadin timers + stripping
@@ -338,7 +337,6 @@ event OnPageReset(string page)
 		AddEmptyOption()
 
 		AddHeaderOption("$SSL_FemaleStripFrom")
-		oidStripLeadInFemale = new int[33]
 		StripSlots(oidStripLeadInFemale, Config.bStripLeadInFemale)
 
 		SetCursorPosition(1)
@@ -349,7 +347,6 @@ event OnPageReset(string page)
 		AddEmptyOption()
 
 		AddHeaderOption("$SSL_MaleStripFrom")
-		oidStripLeadInMale = new int[33]
 		StripSlots(oidStripLeadInMale, Config.bStripLeadInMale)
 
 	; Aggressive timers + stripping
@@ -363,7 +360,6 @@ event OnPageReset(string page)
 		AddEmptyOption()
 
 		AddHeaderOption("$SSL_VictimStripFrom")
-		oidStripVictim = new int[33]
 		StripSlots(oidStripVictim, Config.bStripVictim)
 
 		SetCursorPosition(1)
@@ -374,7 +370,6 @@ event OnPageReset(string page)
 		AddEmptyOption()
 
 		AddHeaderOption("$SSL_AggressorStripFrom")
-		oidStripAggressor = new int[33]
 		StripSlots(oidStripAggressor, Config.bStripAggressor)
 
 	; Toggle animations on/off
@@ -416,13 +411,72 @@ event OnPageReset(string page)
 	; Toggle creature animatons
 	elseIf page == "$SSL_CreatureAnimations"
 		SetCursorFillMode(LEFT_TO_RIGHT)
+
+		int flag = OPTION_FLAG_NONE
+		if !Config.bAllowCreatures
+			AddHeaderOption("$SSL_CreaturesDisabled1")
+			AddHeaderOption("$SSL_CreaturesDisabled2")
+			flag = OPTION_FLAG_DISABLED
+		endIf
+
 		i = 0
 		while i < CreatureSlots.Slotted
 			if CreatureSlots.Slots[i].Registered
-				oidToggleCreatureAnimation[i] = AddToggleOption(CreatureSlots.Slots[i].Name, CreatureSlots.Slots[i].Enabled)
+				oidToggleCreatureAnimation[i] = AddToggleOption(CreatureSlots.Slots[i].Name, CreatureSlots.Slots[i].Enabled && flag == OPTION_FLAG_NONE, flag)
 			endIf
 			i += 1
 		endWhile
+
+	; Toggle expressions
+	elseIf page == "$SSL_ExpressionSelection"
+		SetCursorFillMode(LEFT_TO_RIGHT)
+
+
+		int flag = OPTION_FLAG_NONE
+		if !Config.bUseExpressions
+			AddHeaderOption("$SSL_ExpressionsDisabled1")
+			AddHeaderOption("$SSL_ExpressionsDisabled2")
+			flag = OPTION_FLAG_DISABLED
+		endIf
+
+		AddHeaderOption("$SSL_ExpressionsNormal")
+		AddHeaderOption("")
+		i = 0
+		while i < ExpressionSlots.Slotted
+			if ExpressionSlots.Expressions[i].Registered
+				oidToggleExpressionNormal[i] = AddToggleOption(ExpressionSlots.Expressions[i].Name, ExpressionSlots.Expressions[i].HasTag("Normal"), flag)
+			endIf
+			i += 1
+		endWhile
+
+		if ExpressionSlots.Slotted % 2 != 0
+			AddEmptyOption()
+		endIf
+
+		AddHeaderOption("$SSL_ExpressionsVictim")
+		AddHeaderOption("")
+		i = 0
+		while i < ExpressionSlots.Slotted
+			if ExpressionSlots.Expressions[i].Registered
+				oidToggleExpressionVictim[i] = AddToggleOption(ExpressionSlots.Expressions[i].Name, ExpressionSlots.Expressions[i].HasTag("Victim"), flag)
+			endIf
+			i += 1
+		endWhile
+
+		if ExpressionSlots.Slotted % 2 != 0
+			AddEmptyOption()
+		endIf
+
+		AddHeaderOption("$SSL_ExpressionsAggressor")
+		AddHeaderOption("")
+		i = 0
+		while i < ExpressionSlots.Slotted
+			if ExpressionSlots.Expressions[i].Registered
+				oidToggleExpressionAggressor[i] = AddToggleOption(ExpressionSlots.Expressions[i].Name, ExpressionSlots.Expressions[i].HasTag("Aggressor"), flag)
+			endIf
+			i += 1
+		endWhile
+
 
 	; Player Diary/Journal
 	elseIf page == "$SSL_SexDiary" || page == "$SSL_SexJournal"
@@ -631,17 +685,30 @@ state AutomaticSUCSM
 	endEvent
 endState
 
-state ScaleActors
+state UseExpressions
 	event OnSelectST()
-		Config.bScaleActors = !Config.bScaleActors
-		SetToggleOptionValueST(Config.bScaleActors)
+		Config.bUseExpressions = !Config.bUseExpressions
+		SetToggleOptionValueST(Config.bUseExpressions)
 	endEvent
 	event OnDefaultST()
-		Config.bScaleActors = true
-		SetToggleOptionValueST(Config.bScaleActors)
+		Config.bUseExpressions = false
+		SetToggleOptionValueST(Config.bUseExpressions)
 	endEvent
 	event OnHighlightST()
-		SetInfoText("$SSL_InfoScaleActors")
+		SetInfoText("$SSL_InfoUseExpressions")
+	endEvent
+endState
+state UseLipSync
+	event OnSelectST()
+		Config.bUseLipSync = !Config.bUseLipSync
+		SetToggleOptionValueST(Config.bUseLipSync)
+	endEvent
+	event OnDefaultST()
+		Config.bUseLipSync = false
+		SetToggleOptionValueST(Config.bUseLipSync)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoUseLipSync")
 	endEvent
 endState
 state ReDressVictim
@@ -753,6 +820,19 @@ state ForeplayStage
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoForeplayStage")
+	endEvent
+endState
+state ScaleActors
+	event OnSelectST()
+		Config.bScaleActors = !Config.bScaleActors
+		SetToggleOptionValueST(Config.bScaleActors)
+	endEvent
+	event OnDefaultST()
+		Config.bScaleActors = true
+		SetToggleOptionValueST(Config.bScaleActors)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoScaleActors")
 	endEvent
 endState
 state RestrictAggressive
@@ -873,7 +953,7 @@ endState
 state SFXVolume
 	event OnSliderOpenST()
 		SetSliderDialogStartValue((Config.fSFXVolume * 100))
-		SetSliderDialogDefaultValue(80)
+		SetSliderDialogDefaultValue(100)
 		SetSliderDialogRange(1, 100)
 		SetSliderDialogInterval(1)
 	endEvent
@@ -883,8 +963,8 @@ state SFXVolume
 		SetSliderOptionValueST(value, "{0}%")
 	endEvent
 	event OnDefaultST()
-		Config.fSFXVolume = 0.8
-		SetSliderOptionValueST(80, "{0}%")
+		Config.fSFXVolume = 1.0
+		SetSliderOptionValueST(Config.fSFXVolume, "{0}%")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoSFXVolume")
@@ -893,7 +973,7 @@ endState
 state VoiceVolume
 	event OnSliderOpenST()
 		SetSliderDialogStartValue((Config.fVoiceVolume * 100))
-		SetSliderDialogDefaultValue(80)
+		SetSliderDialogDefaultValue(100)
 		SetSliderDialogRange(1, 100)
 		SetSliderDialogInterval(1)
 	endEvent
@@ -903,8 +983,8 @@ state VoiceVolume
 		SetSliderOptionValueST(value, "{0}%")
 	endEvent
 	event OnDefaultST()
-		Config.fVoiceVolume = 0.8
-		SetSliderOptionValueST(780, "{0}%")
+		Config.fVoiceVolume = 1.0
+		SetSliderOptionValueST(Config.fVoiceVolume, "{0}%")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoVoiceVolume")
@@ -914,7 +994,7 @@ state SFXDelay
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(Config.fSFXDelay)
 		SetSliderDialogDefaultValue(4.0)
-		SetSliderDialogRange(4.0, 30.0)
+		SetSliderDialogRange(2.0, 30.0)
 		SetSliderDialogInterval(1.0)
 	endEvent
 	event OnSliderAcceptST(float value)
@@ -932,8 +1012,8 @@ endState
 state MaleVoiceDelay
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(Config.fMaleVoiceDelay)
-		SetSliderDialogDefaultValue(7.0)
-		SetSliderDialogRange(4.0, 45.0)
+		SetSliderDialogDefaultValue(6.0)
+		SetSliderDialogRange(2.0, 45.0)
 		SetSliderDialogInterval(1.0)
 	endEvent
 	event OnSliderAcceptST(float value)
@@ -941,7 +1021,7 @@ state MaleVoiceDelay
 		SetSliderOptionValueST(Config.fMaleVoiceDelay, "$SSL_Seconds")
 	endEvent
 	event OnDefaultST()
-		Config.fMaleVoiceDelay = 7.0
+		Config.fMaleVoiceDelay = 6.0
 		SetSliderOptionValueST(Config.fMaleVoiceDelay, "$SSL_Seconds")
 	endEvent
 	event OnHighlightST()
@@ -951,8 +1031,8 @@ endState
 state FemaleVoiceDelay
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(Config.fFemaleVoiceDelay)
-		SetSliderDialogDefaultValue(6.0)
-		SetSliderDialogRange(4.0, 45.0)
+		SetSliderDialogDefaultValue(5.0)
+		SetSliderDialogRange(2.0, 45.0)
 		SetSliderDialogInterval(1.0)
 	endEvent
 	event OnSliderAcceptST(float value)
@@ -960,7 +1040,7 @@ state FemaleVoiceDelay
 		SetSliderOptionValueST(Config.fFemaleVoiceDelay, "$SSL_Seconds")
 	endEvent
 	event OnDefaultST()
-		Config.fFemaleVoiceDelay = 6.0
+		Config.fFemaleVoiceDelay = 5.0
 		SetSliderOptionValueST(Config.fFemaleVoiceDelay, "$SSL_Seconds")
 	endEvent
 	event OnHighlightST()
@@ -1258,6 +1338,10 @@ state CleanSystem
 			ShowMessage("$SSL_RunCleanSystem", false)
 			Utility.Wait(0.10)
 			SetupSystem()
+			Utility.WaitMenuMode(3.0)
+			while AnimSlots.GetState() == "Setup" || CreatureSlots.GetState() == "Setup"
+				Utility.WaitMenuMode(1.0)
+			endWhile
 			CleanSystemFinish.Show()
 		endIf
 	endEvent
@@ -1371,22 +1455,22 @@ event OnOptionSelect(int option)
 		endIf
 
 	; Toggle expressions
-	; elseif CurrentPage == "$SSL_ExpressionSelection"
-	; 	i = oidToggleExpressionNormal.Find(option)
-	; 	if i != -1
-	; 		SetToggleOptionValue(option, ExpressionSlots.Expression[i].ToggleTag("Normal"))
-	; 		return
-	; 	endIf
-	; 	i = oidToggleExpressionVictim.Find(option)
-	; 	if i != -1
-	; 		SetToggleOptionValue(option, ExpressionSlots.Expression[i].ToggleTag("Victim"))
-	; 		return
-	; 	endIf
-	; 	i = oidToggleExpressionAggressor.Find(option)
-	; 	if i != -1
-	; 		SetToggleOptionValue(option, ExpressionSlots.Expression[i].ToggleTag("Aggressor"))
-	; 		return
-	; 	endIf
+	elseif CurrentPage == "$SSL_ExpressionSelection"
+		i = oidToggleExpressionNormal.Find(option)
+		if i != -1
+			SetToggleOptionValue(option, ExpressionSlots.Expressions[i].ToggleTag("Normal"))
+			return
+		endIf
+		i = oidToggleExpressionVictim.Find(option)
+		if i != -1
+			SetToggleOptionValue(option, ExpressionSlots.Expressions[i].ToggleTag("Victim"))
+			return
+		endIf
+		i = oidToggleExpressionAggressor.Find(option)
+		if i != -1
+			SetToggleOptionValue(option, ExpressionSlots.Expressions[i].ToggleTag("Aggressor"))
+			return
+		endIf
 
 	elseIf CurrentPage == "$SSL_RebuildClean"
 		i = oidRemoveStrapon.Find(option)

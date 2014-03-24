@@ -1,5 +1,7 @@
 scriptname sslExpressionSlots extends Quest
 
+import StorageUtil
+
 ; Expression readonly storage
 int property Slotted auto hidden
 sslBaseExpression[] Slots
@@ -16,13 +18,27 @@ sslSystemConfig Config
 ; --- Expression Filtering                            --- ;
 ; ------------------------------------------------------- ;
 
-sslBaseExpression[] function GetAllGender(int Gender)
-endFunction
-
-sslBaseExpression function PickGender(int Gender = 1)
-endFunction
-
-sslBaseExpression function PickExpression(Actor ActorRef)
+sslBaseExpression function PickExpression(int Flag = 0)
+	string Tag = "Consensual"
+	if Flag == 1
+		Tag = "Victim"
+	elseIf Flag == 2
+		Tag = "Aggressor"
+	endIf
+	string Search = "PickExpression["+Utility.RandomFloat(1.0, 10.0)+"]"
+	int i = Slotted
+	while i
+		i -= 1
+		if Slots[i].Enabled && Slots[i].HasTag(Tag)
+			IntListAdd(self, Search, i)
+		endIf
+	endWhile
+	sslBaseExpression Output
+	if IntListCount(self, Search) > 0
+		Output = GetBySlot(IntListGet(self, Search, Utility.RandomInt(0, IntListCount(self, Search))))
+		IntListClear(self, Search)
+	endIf
+	return Output
 endFunction
 
 sslBaseExpression function GetByTags(string Tags, string TagsSuppressed = "", bool RequireAll = true)
@@ -85,24 +101,27 @@ sslBaseExpression function Register(string Registrar)
 	return none
 endFunction
 
-function RegisterExpressions()
-	; Register default Expressions
-	sslExpressionDefaults Defaults = Quest.GetQuest("SexLabQuestRegistry") as sslExpressionDefaults
-	Defaults.Slots = self
-	Defaults.LoadExpressions()
-	; Send mod event for 3rd party Expressions
-	ModEvent.Send(ModEvent.Create("SexLabSlotExpressions"))
-	Debug.Notification("$SSL_NotifyExpressionInstall")
-endFunction
-
 function Setup()
-	; Init variables
-	Slotted = 0
-	Slots = new sslBaseExpression[40]
-	StorageUtil.StringListClear(self, "Expressions")
-	Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
-	; Register Expressions
-	RegisterExpressions()
+	GoToState("Setup")
 endFunction
 
-
+state Setup
+	event OnBeginState()
+		RegisterForSingleUpdate(0.5)
+	endEvent
+	event OnUpdate()
+		; Init variables
+		Slotted = 0
+		Slots = new sslBaseExpression[40]
+		StorageUtil.StringListClear(self, "Expressions")
+		Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
+		; Register default Expressions
+		sslExpressionDefaults Defaults = Quest.GetQuest("SexLabQuestRegistry") as sslExpressionDefaults
+		Defaults.Slots = self
+		Defaults.LoadExpressions()
+		; Send mod event for 3rd party Expressions
+		ModEvent.Send(ModEvent.Create("SexLabSlotExpressions"))
+		Debug.Notification("$SSL_NotifyExpressionInstall")
+		GoToState("")
+	endEvent
+endState

@@ -29,36 +29,32 @@ int Modifier = 0
 int Phoneme = 14
 int Expression = 30
 
+int function PickPhase(int Amount, int Gender)
+	return sslUtility.ClampInt(((sslUtility.ClampInt(Amount, 1, 100) * Phases[Gender]) / 100), 1, Phases[Gender])
+endFunction
 
 function ApplyPhase(Actor ActorRef, int Phase, int Gender)
 	if Phase > Phases[Gender]
 		return
 	endIf
-	string log = "["
 	int[] Preset = GetPhase(Phase)
 	int g = 32 * ((Gender == Male) as int)
-	int mode = 1 ; Inside MfcConsoleFunc.psc Modifiers = 1, Phoneme = 0
-	int i
 	; Set Modifers
-	while i < 14
+	int i
+	while i <= 13
 		SetPhonemeModifier(ActorRef, 1, i, Preset[g])
-		log += Preset[g]+", "
 		g += 1
 		i += 1
 	endWhile
 	; Set Phoneme
-	while i < 30
+	i = 0
+	while i <= 15
 		SetPhonemeModifier(ActorRef, 0, i, Preset[g])
-		log += Preset[g]+", "
 		g += 1
 		i += 1
 	endWhile
-
-	log += Preset[g]+", "+Preset[(g + 1)]+"]"
+	; Set expression
 	ActorRef.SetExpressionOverride(Preset[g], Preset[(g + 1)])
-
-	Log("Applied: "+log)
-	Log(" Gender: "+GetGenderPhase(Phase, Gender))
 endFunction
 
 function Log(string Log)

@@ -88,11 +88,11 @@ endFunction
 
 function AddExpression(int Phase, int Gender, int id, int value)
 	if Gender == Female || Gender == MaleFemale
-		Slot.SetIndex(Phase, Female, Expression, 0, value)
+		Slot.SetIndex(Phase, Female, Expression, 0, id)
 		Slot.SetIndex(Phase, Female, Expression, 1, value)
 	endIf
 	if Gender == Male || Gender == MaleFemale
-		Slot.SetIndex(Phase, Male, Expression, 0, value)
+		Slot.SetIndex(Phase, Male, Expression, 0, id)
 		Slot.SetIndex(Phase, Male, Expression, 1, value)
 	endIf
 endFunction
