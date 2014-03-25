@@ -14,10 +14,17 @@ scriptname SexLabFramework extends Quest
 ;#------------------------------------------------------------------#
 ;####################################################################
 
-bool SystemEnabled = false
+int function GetVersion()
+	return SexLabUtil.GetVersion()
+endFunction
+
+string function GetStringVer()
+	return SexLabUtil.GetStringVer()
+endFunction
+
 bool property Enabled hidden
 	bool function get()
-		return SystemEnabled
+		return GetState() == "Enabled"
 	endFunction
 endProperty
 
@@ -72,6 +79,11 @@ sslActorStats property Stats auto hidden
 ; Data
 Actor property PlayerRef auto
 Faction property AnimatingFaction auto
+Message property CheckSKSE auto
+Message property CheckFNIS auto
+Message property CheckSkyrim auto
+Message property CheckPapyrusUtil auto
+Message property CheckSkyUI auto
 
 ;#---------------------------#
 ;#                           #
@@ -80,19 +92,11 @@ Faction property AnimatingFaction auto
 ;#---------------------------#
 
 sslThreadModel function NewThread(float TimeOut = 30.0)
-	if !SystemEnabled
-		Log("NewThread() - Failed to make new thread model; system is currently disabled", "FATAL")
-		return none
-	endIf
 	; Claim an available thread
 	return ThreadSlots.PickModel(TimeOut)
 endFunction
 
 int function StartSex(Actor[] Positions, sslBaseAnimation[] Anims, Actor VictimRef = none, ObjectReference CenterOn = none, bool AllowBed = true, string Hook = "")
-	if !SystemEnabled
-		Log("StartSex() - Failed to make new thread model; system is currently disabled", "FATAL")
-		return -99
-	endIf
 	; Claim a thread
 	sslThreadModel Make = NewThread()
 	if Make == none
@@ -115,9 +119,13 @@ int function StartSex(Actor[] Positions, sslBaseAnimation[] Anims, Actor VictimR
 	return -1
 endFunction
 
-sslThreadController function QuickStart(Actor Actor1, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none, Actor VictimRef = none, string Hook = "")
+sslThreadController function QuickStart(Actor Actor1, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none, Actor VictimRef = none, string AnimationTags = "", string Hook = "")
+	Actor[] Positions = ActorLib.MakeActorArray(Actor1, Actor2, Actor3, Actor4, Actor5)
 	sslBaseAnimation[] Anims
-	return ThreadSlots.GetController(StartSex(ActorLib.MakeActorArray(Actor1, Actor2, Actor3, Actor4, Actor5), Anims, VictimRef, none, true, Hook))
+	if AnimationTags != ""
+		Anims = AnimSlots.GetByTags(Positions.Length, "Anims")
+	endIf
+	return ThreadSlots.GetController(StartSex(Positions, Anims, VictimRef, none, true, Hook))
 endFunction
 
 ; ;#------------------------------#
@@ -728,40 +736,88 @@ endFunction
 ; --- Intended for system use only - DO NOT USE       --- ;
 ; ------------------------------------------------------- ;
 
-function Initialize()
-	; Reset all Libraries
-	Quest SexLabQuestFramework  = Quest.GetQuest("SexLabQuestFramework")
-	SexLabQuestFramework.Stop()
-	SexLabQuestFramework.Start()
-	Config          = SexLabQuestFramework as sslSystemConfig
-	ActorLib        = SexLabQuestFramework as sslActorLibrary
-	ThreadLib       = SexLabQuestFramework as sslThreadLibrary
-	Stats           = SexLabQuestFramework as sslActorStats
-	ThreadSlots     = SexLabQuestFramework as sslThreadSlots
-	; Reset animation registry
-	Quest SexLabQuestAnimations = Quest.GetQuest("SexLabQuestAnimations")
-	SexLabQuestAnimations.Stop()
-	SexLabQuestAnimations.Start()
-	AnimSlots       = SexLabQuestAnimations as sslAnimationSlots
-	; Reset secondary object registry
-	Quest SexLabQuestRegistry   = Quest.GetQuest("SexLabQuestRegistry")
-	SexLabQuestRegistry.Stop()
-	SexLabQuestRegistry.Start()
-	CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
-	VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
-	ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
-	; Enable system for use
-	SystemEnabled = true
-	Log("SexLab Initialized")
-endFunction
-
-function EnableSystem(bool EnableSexLab = true)
-	SystemEnabled = EnableSexLab
-	if !EnableSexLab
-		ThreadSlots.StopAll()
-	endIf
-endFunction
-
 function Log(string Log, string Type = "NOTICE")
 	SexLabUtil.DebugLog(Log, Type, Config.DebugMode)
 endFunction
+
+function Initialize()
+	; Reset function Libraries
+	Quest SexLabQuestFramework = Quest.GetQuest("SexLabQuestFramework")
+	if SexLabQuestFramework != none
+		SexLabQuestFramework.Stop()
+		SexLabQuestFramework.Start()
+		Config      = SexLabQuestFramework as sslSystemConfig
+		ActorLib    = SexLabQuestFramework as sslActorLibrary
+		ThreadLib   = SexLabQuestFramework as sslThreadLibrary
+		Stats       = SexLabQuestFramework as sslActorStats
+		ThreadSlots = SexLabQuestFramework as sslThreadSlots
+	endIf
+	; Reset animation registry
+	Quest SexLabQuestAnimations = Quest.GetQuest("SexLabQuestAnimations")
+	if SexLabQuestAnimations != none
+		SexLabQuestAnimations.Stop()
+		SexLabQuestAnimations.Start()
+		AnimSlots = SexLabQuestAnimations as sslAnimationSlots
+	endIf
+	; Reset secondary object registry
+	Quest SexLabQuestRegistry = Quest.GetQuest("SexLabQuestRegistry")
+	if SexLabQuestRegistry != none
+		SexLabQuestRegistry.Stop()
+		SexLabQuestRegistry.Start()
+		CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
+		VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
+		ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
+	endIf
+	; Disable system to ensure nothing is run until setup completes
+	GoToState("Disabled")
+endFunction
+
+bool function CheckSystem()
+	bool Passed = true
+	; Check SKSE install
+	if SKSE.GetScriptVersionRelease() < 45
+		CheckSKSE.Show(1.70)
+		Passed = false
+	; Check SkyUI install - depends on passing SKSE check passing
+	elseIf Quest.GetQuest("SKI_ConfigManagerInstance") == none
+		CheckSkyUI.Show(4.1)
+		Passed = false
+	; Check PapyrusUtil install - depends on passing SKSE check passing
+	elseIf PapyrusUtil.GetVersion() < 19
+		CheckPapyrusUtil.Show(1.9)
+		Passed = false
+	endIf
+	; Check Skyrim Version
+	if (StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float) < 1.9
+		CheckSkyrim.Show()
+		Passed = false
+	endIf
+	; Check FNIS version
+	if Game.GetPlayer().GetAnimationVariableInt("FNISmajor") < 4
+		CheckFNIS.Show(4.1)
+		Passed = false
+	endIf
+	; Return result
+	return Passed
+endFunction
+
+auto state Disabled
+	sslThreadModel function NewThread(float TimeOut = 30.0)
+		Log("NewThread() - Failed to make new thread model; system is currently disabled or not installed", "FATAL")
+		return none
+	endFunction
+	int function StartSex(Actor[] Positions, sslBaseAnimation[] Anims, Actor VictimRef = none, ObjectReference CenterOn = none, bool AllowBed = true, string Hook = "")
+		Log("StartSex() - Failed to make new thread model; system is currently disabled or not installed", "FATAL")
+		return -1
+	endFunction
+	sslThreadController function QuickStart(Actor Actor1, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none, Actor VictimRef = none, string AnimationTags = "", string Hook = "")
+		Log("QuestStart() - Failed to make new thread model; system is currently disabled or not installed", "FATAL")
+		return none
+	endFunction
+endState
+
+state Enabled
+	event OnBeginState()
+		Log("SexLab Framework - Enabled")
+	endEvent
+endState
