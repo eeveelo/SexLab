@@ -701,6 +701,9 @@ function SendThreadEvent(string HookEvent)
 		i -= 1
 		SetupThreadEvent(HookEvent+"_"+Hooks[i])
 	endWhile
+	if HasPlayer
+		SendModEvent("Player"+HookEvent, thread_id)
+	endIf
 endFunction
 
 function SetupThreadEvent(string HookEvent)
@@ -712,9 +715,6 @@ function SetupThreadEvent(string HookEvent)
 		; Log("Thread Hook Sent: "+HookEvent)
 	endIf
 	SendModEvent(HookEvent, thread_id)
-	if HasPlayer
-		SendModEvent("Player"+HookEvent, thread_id)
-	endIf
 endFunction
 
 int function GetXP(int i)
@@ -733,19 +733,19 @@ float function GetSkillBonus(float[] Levels)
 		bonus += (SkillXP[0] + (Levels[0] * 2.0))
 	endIf
 	if IsVaginal
-		bonus += ((SkillXP[1] * 2.0) + Levels[1]) * 4.0
+		bonus += ((SkillXP[1] * 2.0) + Levels[1]) * 1.5
 	endIf
 	if IsAnal
-		bonus += ((SkillXP[2] * 2.0) + Levels[2]) * 4.0
+		bonus += ((SkillXP[2] * 2.0) + Levels[2]) * 1.5
 	endIf
 	if IsOral
-		bonus += ((SkillXP[3] * 2.0) + Levels[3]) * 4.0
+		bonus += ((SkillXP[3] * 2.0) + Levels[3]) * 1.5
 	endIf
 	if IsLoving
-		bonus += ((SkillXP[4] * 2.5) + Levels[4]) * 3.0
+		bonus += (SkillXP[4] + Levels[4]) * 1.5
 	endIf
 	if IsDirty
-		bonus += ((SkillXP[5] * 2.5) + Levels[5]) * ActorCount
+		bonus += (SkillXP[5] + Levels[5]) * ActorCount
 	endIf
 	bonus += sslUtility.ClampInt((TotalTime / 15.0) as int, 0, 20) + (Stage * 6)
 	if LeadIn
@@ -832,7 +832,7 @@ int property tid hidden
 	endFunction
 endProperty
 
-function _SetupThread(int id)
+function SetupThread(int id)
 	Stop()
 	Start()
 	thread_id = id
