@@ -505,6 +505,16 @@ sslBaseVoice function GetVoice()
 	return Voice
 endFunction
 
+function SetExpression(sslBaseExpression ToExpression)
+	if ToExpression != none
+		Expression = ToExpression
+	endIf
+endFunction
+
+sslBaseExpression function GetExpression()
+	return Expression
+endFunction
+
 int function GetEnjoyment()
 	; Base enjoyment from sex skills and total runtime
 	Enjoyment = Thread.GetSkillBonus(Skills) as int
