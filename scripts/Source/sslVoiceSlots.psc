@@ -175,27 +175,17 @@ sslBaseVoice function Register(string Registrar)
 endFunction
 
 function Setup()
-	GoToState("Setup")
+	; Init variables
+	Slotted = 0
+	Slots = new sslBaseVoice[125]
+	StringListClear(self, "Voices")
+	Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
+	PlayerRef = Game.GetPlayer()
+	; Register default voices
+	sslVoiceDefaults Defaults = Quest.GetQuest("SexLabQuestRegistry") as sslVoiceDefaults
+	Defaults.Slots = self
+	Defaults.LoadVoices()
+	; Send mod event for 3rd party voices
+	ModEvent.Send(ModEvent.Create("SexLabSlotVoices"))
+	Debug.Notification("$SSL_NotifyVoiceInstall")
 endFunction
-
-state Setup
-	event OnBeginState()
-		RegisterForSingleUpdate(0.5)
-	endEvent
-	event OnUpdate()
-		; Init variables
-		Slotted = 0
-		Slots = new sslBaseVoice[125]
-		StringListClear(self, "Voices")
-		Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
-		PlayerRef = Game.GetPlayer()
-		; Register default voices
-		sslVoiceDefaults Defaults = Quest.GetQuest("SexLabQuestRegistry") as sslVoiceDefaults
-		Defaults.Slots = self
-		Defaults.LoadVoices()
-		; Send mod event for 3rd party voices
-		ModEvent.Send(ModEvent.Create("SexLabSlotVoices"))
-		Debug.Notification("$SSL_NotifyVoiceInstall")
-		GoToState("")
-	endEvent
-endState

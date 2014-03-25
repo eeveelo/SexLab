@@ -54,7 +54,7 @@ endFunction
 
 state Setup
 	event OnBeginState()
-		RegisterForSingleUpdate(0.5)
+		RegisterForSingleUpdate(1.0)
 	endEvent
 	event OnUpdate()
 		; Init variables

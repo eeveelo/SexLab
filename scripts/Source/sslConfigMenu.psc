@@ -1,43 +1,47 @@
 scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
+; Proxy to SexLabUtil.psc so modders don't have to add dependency to this script, and thus SkyUI SDK
 int function GetVersion()
-	return 14200
+	return SexLabUtil.GetVersion()
 endFunction
 
 string function GetStringVer()
-	return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)+" Alpha 2"
+	return SexLabUtil.GetStringVer()
 endFunction
 
 event OnVersionUpdate(int version)
-	if CurrentVersion < GetVersion() && CurrentVersion > 1
-		Debug.Notification("Updating SexLab to v"+GetStringVer())
-		SetupSystem()
+	if CurrentVersion < GetVersion()
+		Debug.Notification("Installing SexLab v"+GetStringVer())
+		; Start full system setup
+		SetUpSystem()
+		; Finished
+		Debug.Notification("$SSL_SexLabUpdated")
 	endIf
 endEvent
 
-event OnConfigInit()
-	SetupSystem()
-endEvent
+; event OnConfigInit()
+; 	SetupSystem()
+; endEvent
 
 event OnGameReload()
 	parent.OnGameReload()
-	; Check system
-	CheckSystem()
-	; Init startup settings
+	if CurrentVersion > 0 && !SexLab.CheckSystem()
+		SexLab.GoToState("Disabled")
+	endIf	; Init startup settings
 	if Config
+		; ALPHA DEBUG:
+		Config.SetDebugMode(true)
+		; TFC Toggle key
+		Config.ToggleFreeCameraEnable()
 		; Configure SFX & Voice volumes
 		AudioVoice.SetVolume(Config.fVoiceVolume)
 		AudioSFX.SetVolume(Config.fSFXVolume)
-		; TFC Toggle key
-		Config.ToggleFreeCameraEnable()
-		; ALPHA DEBUG:
-		Config.SetDebugMode(true)
 	endIf
 endEvent
 
 ; Framework
-SexLabFramework SexLab
+SexLabFramework property SexLab auto
 sslSystemConfig Config
 ; Libraries
 sslActorLibrary ActorLib
@@ -56,16 +60,7 @@ Armor property CalypsStrapon auto
 SoundCategory property AudioSFX auto
 SoundCategory property AudioVoice auto
 
-Message property OldSkyrim auto
-Message property OldSKSE auto
-Message property NoSKSE auto
 Message property CleanSystemFinish auto
-; message property mCleanSystemFinish auto
-; message property mSystemDisabled auto
-; message property mSystemUpdated auto
-; spell property SexLabDebugSpell auto
-; spell property SexLabDebugSelfSpell auto
-
 
 ; OIDs
 int[] oidStageTimer
@@ -90,11 +85,25 @@ int[] oidRemoveStrapon
 string[] SlotNames
 
 function SetDefaults()
-	Config.SetDefaults()
+	; Grab libraries to make sure they are all set properly
+	Config          = SexLab.Config
+	ActorLib        = SexLab.ActorLib
+	ThreadLib       = SexLab.ThreadLib
+	Stats           = SexLab.Stats
+	ThreadSlots     = SexLab.ThreadSlots
+	AnimSlots       = SexLab.AnimSlots
+	CreatureSlots   = SexLab.CreatureSlots
+	VoiceSlots      = SexLab.VoiceSlots
+	ExpressionSlots = SexLab.ExpressionSlots
 
+	; Init default settings
+	Config.SetDefaults()
+	Config.ToggleFreeCameraEnable()
 	AudioVoice.SetVolume(Config.fVoiceVolume)
 	AudioSFX.SetVolume(Config.fSFXVolume)
+	FindStrapons()
 
+	; OIDs
 	oidToggleVoice = new int[75]
 	oidToggleCreatureAnimation = new int[75]
 	oidToggleAnimation = new int[125]
@@ -103,20 +112,18 @@ function SetDefaults()
 	oidToggleExpressionNormal = new int[40]
 	oidToggleExpressionVictim = new int[40]
 	oidToggleExpressionAggressor = new int[40]
-
 	oidStripMale = new int[33]
 	oidStripFemale = new int[33]
 	oidStripLeadInFemale = new int[33]
 	oidStripLeadInMale = new int[33]
 	oidStripVictim = new int[33]
 	oidStripAggressor = new int[33]
-
 	oidStageTimer = new int[5]
 	oidStageTimerLeadIn = new int[5]
 	oidStageTimerAggr = new int[5]
-
 	oidRemoveStrapon = new int[10]
 
+	; Slot labels for stripping options
 	SlotNames = new string[33]
 	SlotNames[0] = "$SSL_Head"
 	SlotNames[1] = "$SSL_Hair"
@@ -152,6 +159,7 @@ function SetDefaults()
 	SlotNames[31] = "$SSL_MiscSlot61"
 	SlotNames[32] = "$SSL_Weapons"
 
+	; MCM option pages
 	Pages = new string[13]
 	Pages[0] = "$SSL_AnimationSettings"
 	Pages[1] = "$SSL_SoundSettings"
@@ -171,43 +179,35 @@ function SetDefaults()
 	endIf
 	Pages[12] = "$SSL_RebuildClean"
 
-	FindStrapons()
 endFunction
 
 function SetupSystem()
-	; Wait until out of menus to setup
+	; Wait until out of menus to setup resources
 	while Utility.IsInMenuMode() || !PlayerRef.Is3DLoaded()
 		Utility.Wait(1.0)
 	endWhile
 	; Prepare base framework script
-	Quest SexLabQuestFramework = Quest.GetQuest("SexLabQuestFramework")
-	SexLab = SexLabQuestFramework as SexLabFramework
 	SexLab.Initialize()
-	CheckSystem()
-	; Grab libraries to make sure they are all set properly
-	Config          = SexLab.Config
-	ActorLib        = SexLab.ActorLib
-	ThreadLib       = SexLab.ThreadLib
-	Stats           = SexLab.Stats
-	ThreadSlots     = SexLab.ThreadSlots
-	AnimSlots       = SexLab.AnimSlots
-	CreatureSlots   = SexLab.CreatureSlots
-	VoiceSlots      = SexLab.VoiceSlots
-	ExpressionSlots = SexLab.ExpressionSlots
-	; Init Defaults
-	SetDefaults()
-	; Setup library resources
-	ActorLib.Setup()
-	ThreadLib.Setup()
-	Stats.Setup()
-	; Setup Slots
-	ThreadSlots.Setup()
-	AnimSlots.Setup()
-	CreatureSlots.Setup()
-	VoiceSlots.Setup()
-	ExpressionSlots.Setup()
-	; Finished
-	; Debug.Notification("$SSL_SexLabUpdated")
+	; Disable system from being used during setup
+	SexLab.GoToState("Disabled")
+	; Check is system able to be setup properly
+	if SexLab.CheckSystem()
+		; Init Defaults
+		SetDefaults()
+		; Setup library resources
+		ActorLib.Setup()
+		ThreadLib.Setup()
+		Stats.Setup()
+		; Setup Slots
+		ThreadSlots.Setup()
+		VoiceSlots.Setup()
+		ExpressionSlots.Setup()
+		AnimSlots.Setup()
+		CreatureSlots.Setup()
+		; Wait sometime for things to finish installing
+		SexLabUtil.Wait(30.0)
+		SexLab.GoToState("Enabled")
+	endIf
 endFunction
 
 string function GetSlotName(int slot)
@@ -414,8 +414,8 @@ event OnPageReset(string page)
 
 		int flag = OPTION_FLAG_NONE
 		if !Config.bAllowCreatures
-			AddHeaderOption("$SSL_CreaturesDisabled1")
-			AddHeaderOption("$SSL_CreaturesDisabled2")
+			AddHeaderOption("$SSL_CreaturesDisabled")
+			AddHeaderOption("")
 			flag = OPTION_FLAG_DISABLED
 		endIf
 
@@ -434,8 +434,8 @@ event OnPageReset(string page)
 
 		int flag = OPTION_FLAG_NONE
 		if !Config.bUseExpressions
-			AddHeaderOption("$SSL_ExpressionsDisabled1")
-			AddHeaderOption("$SSL_ExpressionsDisabled2")
+			AddHeaderOption("$SSL_ExpressionsDisabled")
+			AddHeaderOption("")
 			flag = OPTION_FLAG_DISABLED
 		endIf
 
@@ -444,7 +444,7 @@ event OnPageReset(string page)
 		i = 0
 		while i < ExpressionSlots.Slotted
 			if ExpressionSlots.Expressions[i].Registered
-				oidToggleExpressionNormal[i] = AddToggleOption(ExpressionSlots.Expressions[i].Name, ExpressionSlots.Expressions[i].HasTag("Normal"), flag)
+				oidToggleExpressionNormal[i] = AddToggleOption(ExpressionSlots.Expressions[i].Name, ExpressionSlots.Expressions[i].HasTag("Normal") && flag == OPTION_FLAG_NONE, flag)
 			endIf
 			i += 1
 		endWhile
@@ -458,7 +458,7 @@ event OnPageReset(string page)
 		i = 0
 		while i < ExpressionSlots.Slotted
 			if ExpressionSlots.Expressions[i].Registered
-				oidToggleExpressionVictim[i] = AddToggleOption(ExpressionSlots.Expressions[i].Name, ExpressionSlots.Expressions[i].HasTag("Victim"), flag)
+				oidToggleExpressionVictim[i] = AddToggleOption(ExpressionSlots.Expressions[i].Name, ExpressionSlots.Expressions[i].HasTag("Victim") && flag == OPTION_FLAG_NONE, flag)
 			endIf
 			i += 1
 		endWhile
@@ -472,7 +472,7 @@ event OnPageReset(string page)
 		i = 0
 		while i < ExpressionSlots.Slotted
 			if ExpressionSlots.Expressions[i].Registered
-				oidToggleExpressionAggressor[i] = AddToggleOption(ExpressionSlots.Expressions[i].Name, ExpressionSlots.Expressions[i].HasTag("Aggressor"), flag)
+				oidToggleExpressionAggressor[i] = AddToggleOption(ExpressionSlots.Expressions[i].Name, ExpressionSlots.Expressions[i].HasTag("Aggressor") && flag == OPTION_FLAG_NONE, flag)
 			endIf
 			i += 1
 		endWhile
@@ -565,21 +565,6 @@ function StripSlots(int[] OIDs, bool[] Enabled)
 		endIf
 		i += 1
 	endWhile
-endFunction
-
-function CheckSystem()
-	; Check SKSE Version
-	if SKSE.GetScriptVersionRelease() < 45
-		Debug.MessageBox("Outdated or no SKSE install detected, SexLab currently requires SKSE v1.7.0 or newer in order to function.")
-		SexLab.EnableSystem(false)
-	endIf
-	; Check Skyrim Version
-	float skyrimNeeded = 1.9
-	float skyrimMajor = StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float
-	if skyrimMajor < skyrimNeeded
-		Debug.MessageBox("SexLab requires Skyrim v1.9.32 or newer in order to function, please update your install before continuing to use the mod.")
-		SexLab.EnableSystem(false)
-	endIf
 endFunction
 
 event OnRaceSwitchComplete()
@@ -1279,16 +1264,12 @@ endState
 
 state ToggleSystem
 	event OnSelectST()
-		bool run
-		if SexLab.Enabled
-			run = ShowMessage("$SSL_WarnDisableSexLab")
-		else
-			run = ShowMessage("$SSL_WarnEnableSexLab")
+		if SexLab.Enabled && ShowMessage("$SSL_WarnDisableSexLab")
+			SexLab.GoToState("Disabled")
+		elseIf !SexLab.Enabled && ShowMessage("$SSL_WarnEnableSexLab")
+			SexLab.GoToState("Enabled")
 		endIf
-		if run
-			SexLab.EnableSystem(!SexLab.Enabled)
-			ForcePageReset()
-		endIf
+		ForcePageReset()
 	endEvent
 endState
 state RestoreDefaultSettings
@@ -1312,6 +1293,7 @@ state ResetAnimationRegistry
 			ThreadSlots.StopAll()
 			AnimSlots.Setup()
 			CreatureSlots.Setup()
+			SexLabUtil.Wait(30.0)
 			Debug.Notification("$SSL_RunRebuildAnimations")
 		endIf
 	endEvent
@@ -1320,6 +1302,7 @@ state ResetVoiceRegistry
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnRebuildVoices")
 			VoiceSlots.Setup()
+			SexLabUtil.Wait(10.0)
 			Debug.Notification("$SSL_RunRebuildVoices")
 		endIf
 	endEvent
@@ -1338,10 +1321,6 @@ state CleanSystem
 			ShowMessage("$SSL_RunCleanSystem", false)
 			Utility.Wait(0.10)
 			SetupSystem()
-			Utility.WaitMenuMode(3.0)
-			while AnimSlots.GetState() == "Setup" || CreatureSlots.GetState() == "Setup"
-				Utility.WaitMenuMode(1.0)
-			endWhile
 			CleanSystemFinish.Show()
 		endIf
 	endEvent

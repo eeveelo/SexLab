@@ -46,7 +46,6 @@ function StopAll()
 		i -= 1
 		Slots[i].EndAnimation(true)
 	endWhile
-	Setup()
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -54,26 +53,16 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function Setup()
-	GoToState("Setup")
+	; Init variables
+	Slots = new sslThreadController[15]
+	int i = Slots.Length
+	while i
+		i -= 1
+		if i > 9
+			Slots[i] = Quest.GetQuest("SexLabThread"+i) as sslThreadController
+		else
+			Slots[i] = Quest.GetQuest("SexLabThread0"+i) as sslThreadController
+		endIf
+		Slots[i].SetupThread(i)
+	endWhile
 endFunction
-
-state Setup
-	event OnBeginState()
-		RegisterForSingleUpdate(0.5)
-	endEvent
-	event OnUpdate()
-		; Init variables
-		Slots = new sslThreadController[15]
-		int i = Slots.Length
-		while i
-			i -= 1
-			if i > 9
-				Slots[i] = Quest.GetQuest("SexLabThread"+i) as sslThreadController
-			else
-				Slots[i] = Quest.GetQuest("SexLabThread0"+i) as sslThreadController
-			endIf
-			Slots[i]._SetupThread(i)
-		endWhile
-		GoToState("")
-	endEvent
-endState

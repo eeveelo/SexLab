@@ -1,13 +1,15 @@
 scriptname SexLabUtil hidden
 
+int function GetVersion() global
+	return 14200
+endFunction
+
+string function GetStringVer() global
+	return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)+" Alpha 2"
+endFunction
+
 bool function SexLabIsActive() global
-	bool active
-	int i
-	while i < Game.GetModCount() && !active
-		active = Game.GetModName(i) == "SexLab.esm"
-		i += 1
-	endWhile
-	return active
+	return GetAPI() != none
 endFunction
 
 SexLabFramework function GetAPI() global
@@ -77,9 +79,9 @@ endFunction
 function DebugLog(string Log, string Type = "NOTICE", bool DebugMode = false) global
 	if DebugMode
 		MiscUtil.PrintConsole(Type+": "+Log)
-		Debug.Trace("---  SexLab "+Type+"  --------------------------------")
+		Debug.Trace("---  SexLab "+Type+" --------------------------------")
 		if Type == "ERROR" || Type == "FATAL"
-			Debug.TraceStack("--- STACK")
+			Debug.TraceStack(Log)
 		else
 			Debug.Trace(Log)
 		endIf

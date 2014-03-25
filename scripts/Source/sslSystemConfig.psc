@@ -37,7 +37,6 @@ int property kAdjustStage auto hidden; Right Ctrl
 int property kBackwardsAlt auto hidden ; Left Shift
 int property kAdjustStageAlt auto hidden; Left Ctrl
 
-
 int property kAdvanceAnimation auto hidden ; Space
 int property kChangeAnimation auto hidden ; O
 int property kChangePositions auto hidden ; =
@@ -69,6 +68,13 @@ bool bDebugMode
 bool property DebugMode hidden
 	bool function get()
 		return bDebugMode
+	endFunction
+endProperty
+
+SexLabFramework SexLab
+bool property Enabled hidden
+	bool function get()
+		return SexLab.Enabled
 	endFunction
 endProperty
 
@@ -220,7 +226,9 @@ endFunction
 
 function SetDefaults()
 
+	SexLab = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework
 	PlayerRef = Game.GetPlayer()
+	bDebugMode = true
 
 	sPlayerVoice = "$SSL_Random"
 	bNPCSaveVoice = false
@@ -263,7 +271,7 @@ function SetDefaults()
 	bUseMaleNudeSuit = false
 	bUseFemaleNudeSuit = false
 	bUndressAnimation = false
-	bUseLipSync = true
+	bUseLipSync = false
 	bUseExpressions = true
 
 	; Strip
@@ -353,6 +361,7 @@ function SetDefaults()
 	bOrgasmEffects = false
 	bRaceAdjustments = true
 	sNPCBed = "$SSL_Never"
+
 	; Timers
 	fStageTimer = new float[5]
 	fStageTimer[0] = 30.0

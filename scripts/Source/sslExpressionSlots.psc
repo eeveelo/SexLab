@@ -102,26 +102,16 @@ sslBaseExpression function Register(string Registrar)
 endFunction
 
 function Setup()
-	GoToState("Setup")
+	; Init variables
+	Slotted = 0
+	Slots = new sslBaseExpression[40]
+	StorageUtil.StringListClear(self, "Expressions")
+	Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
+	; Register default Expressions
+	sslExpressionDefaults Defaults = Quest.GetQuest("SexLabQuestRegistry") as sslExpressionDefaults
+	Defaults.Slots = self
+	Defaults.LoadExpressions()
+	; Send mod event for 3rd party Expressions
+	ModEvent.Send(ModEvent.Create("SexLabSlotExpressions"))
+	Debug.Notification("$SSL_NotifyExpressionInstall")
 endFunction
-
-state Setup
-	event OnBeginState()
-		RegisterForSingleUpdate(0.5)
-	endEvent
-	event OnUpdate()
-		; Init variables
-		Slotted = 0
-		Slots = new sslBaseExpression[40]
-		StorageUtil.StringListClear(self, "Expressions")
-		Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
-		; Register default Expressions
-		sslExpressionDefaults Defaults = Quest.GetQuest("SexLabQuestRegistry") as sslExpressionDefaults
-		Defaults.Slots = self
-		Defaults.LoadExpressions()
-		; Send mod event for 3rd party Expressions
-		ModEvent.Send(ModEvent.Create("SexLabSlotExpressions"))
-		Debug.Notification("$SSL_NotifyExpressionInstall")
-		GoToState("")
-	endEvent
-endState
