@@ -11,33 +11,50 @@ string function GetStringVer()
 endFunction
 
 event OnVersionUpdate(int version)
-	if CurrentVersion < GetVersion()
-		Debug.Notification("Installing SexLab v"+GetStringVer())
-		; Start full system setup
-		SetUpSystem()
-		; Finished
-		Debug.Notification("$SSL_SexLabUpdated")
-	endIf
+	SetupSystem()
 endEvent
 
-; event OnConfigInit()
-; 	SetupSystem()
-; endEvent
+function SetupSystem()
+	; Wait until out of menus to setup resources
+	while Utility.IsInMenuMode() || !PlayerRef.Is3DLoaded()
+		Utility.Wait(1.0)
+	endWhile
+	Debug.Notification("Installing SexLab v"+GetStringVer())
+	; Init Defaults and check is sytem is able to install
+	if SetDefaults()
+		; Disable system from being used during setup
+		SexLab.GoToState("Disabled")
+		; Setup object slots
+		VoiceSlots.Setup()
+		ExpressionSlots.Setup()
+		CreatureSlots.Setup()
+		AnimSlots.Setup()
+		ThreadSlots.Setup()
+		; Enable system for use
+		SexLab.GoToState("Enabled")
+		Debug.Notification("$SSL_SexLabUpdated")
+		; ALPHA DEBUG
+		Config.SetDebugMode(true)
+	endIf
+endFunction
 
 event OnGameReload()
 	parent.OnGameReload()
+	MiscUtil.PrintConsole("OnGameReload")
+	Debug.Trace("SexLab Loaded CurrentVerison: "+CurrentVersion)
 	if CurrentVersion > 0 && !SexLab.CheckSystem()
 		SexLab.GoToState("Disabled")
-	endIf	; Init startup settings
-	if Config
-		; ALPHA DEBUG:
-		Config.SetDebugMode(true)
+	elseIf Config != none
 		; TFC Toggle key
 		Config.ToggleFreeCameraEnable()
 		; Configure SFX & Voice volumes
 		AudioVoice.SetVolume(Config.fVoiceVolume)
 		AudioSFX.SetVolume(Config.fSFXVolume)
 	endIf
+endEvent
+
+event OnPlayerLoadGame()
+	MiscUtil.PrintConsole("OnPlayerLoadGame")
 endEvent
 
 ; Framework
@@ -84,24 +101,26 @@ int[] oidRemoveStrapon
 
 string[] SlotNames
 
-function SetDefaults()
-	; Grab libraries to make sure they are all set properly
-	Config          = SexLab.Config
-	ActorLib        = SexLab.ActorLib
-	ThreadLib       = SexLab.ThreadLib
-	Stats           = SexLab.Stats
-	ThreadSlots     = SexLab.ThreadSlots
-	AnimSlots       = SexLab.AnimSlots
-	CreatureSlots   = SexLab.CreatureSlots
-	VoiceSlots      = SexLab.VoiceSlots
-	ExpressionSlots = SexLab.ExpressionSlots
-
-	; Init default settings
-	Config.SetDefaults()
-	Config.ToggleFreeCameraEnable()
-	AudioVoice.SetVolume(Config.fVoiceVolume)
-	AudioSFX.SetVolume(Config.fSFXVolume)
-	FindStrapons()
+bool function SetDefaults()
+	; MCM option pages
+	Pages     = new string[13]
+	Pages[0]  = "$SSL_AnimationSettings"
+	Pages[1]  = "$SSL_SoundSettings"
+	Pages[2]  = "$SSL_PlayerHotkeys"
+	Pages[3]  = "$SSL_NormalTimersStripping"
+	Pages[4]  = "$SSL_ForeplayTimersStripping"
+	Pages[5]  = "$SSL_AggressiveTimersStripping"
+	Pages[6]  = "$SSL_ToggleAnimations"
+	Pages[7]  = "$SSL_ForeplayAnimations"
+	Pages[8]  = "$SSL_AggressiveAnimations"
+	Pages[9]  = "$SSL_CreatureAnimations"
+	Pages[10] = "$SSL_ExpressionSelection"
+	if PlayerRef.GetLeveledActorBase().GetSex() == 1
+		Pages[11] = "$SSL_SexDiary"
+	else
+		Pages[11] = "$SSL_SexJournal"
+	endIf
+	Pages[12] = "$SSL_RebuildClean"
 
 	; OIDs
 	oidToggleVoice = new int[75]
@@ -159,55 +178,33 @@ function SetDefaults()
 	SlotNames[31] = "$SSL_MiscSlot61"
 	SlotNames[32] = "$SSL_Weapons"
 
-	; MCM option pages
-	Pages = new string[13]
-	Pages[0] = "$SSL_AnimationSettings"
-	Pages[1] = "$SSL_SoundSettings"
-	Pages[2] = "$SSL_PlayerHotkeys"
-	Pages[3] = "$SSL_NormalTimersStripping"
-	Pages[4] = "$SSL_ForeplayTimersStripping"
-	Pages[5] = "$SSL_AggressiveTimersStripping"
-	Pages[6] = "$SSL_ToggleAnimations"
-	Pages[7] = "$SSL_ForeplayAnimations"
-	Pages[8] = "$SSL_AggressiveAnimations"
-	Pages[9] = "$SSL_CreatureAnimations"
-	Pages[10] = "$SSL_ExpressionSelection"
-	if PlayerRef.GetLeveledActorBase().GetSex() == 1
-		Pages[11] = "$SSL_SexDiary"
-	else
-		Pages[11] = "$SSL_SexJournal"
+	; Check system install before we continue
+	if !SexLab.CheckSystem()
+		SexLab.GoToState("Disabled")
+		return false
 	endIf
-	Pages[12] = "$SSL_RebuildClean"
 
-endFunction
-
-function SetupSystem()
-	; Wait until out of menus to setup resources
-	while Utility.IsInMenuMode() || !PlayerRef.Is3DLoaded()
-		Utility.Wait(1.0)
-	endWhile
 	; Prepare base framework script
-	SexLab.Initialize()
-	; Disable system from being used during setup
-	SexLab.GoToState("Disabled")
-	; Check is system able to be setup properly
-	if SexLab.CheckSystem()
-		; Init Defaults
-		SetDefaults()
-		; Setup library resources
-		ActorLib.Setup()
-		ThreadLib.Setup()
-		Stats.Setup()
-		; Setup Slots
-		ThreadSlots.Setup()
-		VoiceSlots.Setup()
-		ExpressionSlots.Setup()
-		AnimSlots.Setup()
-		CreatureSlots.Setup()
-		; Wait sometime for things to finish installing
-		SexLabUtil.Wait(30.0)
-		SexLab.GoToState("Enabled")
-	endIf
+	SexLab.Setup()
+	; Grab libraries to make sure they are all set properly
+	Config          = SexLab.Config
+	ActorLib        = SexLab.ActorLib
+	ThreadLib       = SexLab.ThreadLib
+	Stats           = SexLab.Stats
+	ThreadSlots     = SexLab.ThreadSlots
+	AnimSlots       = SexLab.AnimSlots
+	CreatureSlots   = SexLab.CreatureSlots
+	VoiceSlots      = SexLab.VoiceSlots
+	ExpressionSlots = SexLab.ExpressionSlots
+
+	; Init default settings
+	Config.SetDefaults()
+	Config.ToggleFreeCameraEnable()
+	AudioVoice.SetVolume(Config.fVoiceVolume)
+	AudioSFX.SetVolume(Config.fSFXVolume)
+	FindStrapons()
+
+	return true
 endFunction
 
 string function GetSlotName(int slot)
