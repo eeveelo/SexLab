@@ -2,17 +2,16 @@ scriptname sslExpressionSlots extends Quest
 
 import StorageUtil
 
-; Expression readonly storage
+; Expression storage
 int property Slotted auto hidden
+string[] Registry
+
 sslBaseExpression[] Slots
 sslBaseExpression[] property Expressions hidden
 	sslBaseExpression[] function get()
 		return Slots
 	endFunction
 endProperty
-
-; Local use
-sslSystemConfig Config
 
 ; ------------------------------------------------------- ;
 ; --- Expression Filtering                            --- ;
@@ -29,7 +28,7 @@ sslBaseExpression function PickExpression(int Flag = 0)
 	int i = Slotted
 	while i
 		i -= 1
-		if Slots[i].Enabled && Slots[i].HasTag(Tag)
+		if Slots[i].Registered && Slots[i].HasTag(Tag)
 			IntListAdd(self, Search, i)
 		endIf
 	endWhile
@@ -68,11 +67,11 @@ sslBaseExpression function GetBySlot(int index)
 endFunction
 
 int function FindByRegistrar(string Registrar)
-	return StorageUtil.StringListFind(self, "Expressions", Registrar)
+	return Registry.Find(Registrar)
 endFunction
 
 bool function IsRegistered(string Registrar)
-	return StorageUtil.StringListFind(self, "Expressions", Registrar) != -1
+	return Registry.Find(Registrar) != -1
 endFunction
 
 int function FindByName(string FindName)
@@ -90,23 +89,18 @@ endFunction
 ; --- System Use Only                                 --- ;
 ; ------------------------------------------------------- ;
 
-sslBaseExpression function Register(string Registrar)
-	if FindByRegistrar(Registrar) == -1 && Slotted < Slots.Length
-		sslBaseExpression Slot = GetNthAlias(Slotted) as sslBaseExpression
-		Slots[Slotted] = Slot
-		StorageUtil.StringListAdd(self, "Expressions", Registrar, false)
-		Slotted = StorageUtil.StringListCount(self, "Expressions")
-		return Slot
-	endIf
-	return none
+function Setup()
+	GoToState("Locked")
+	; Init slots
+	Slotted = 0
+	Registry = new string[40]
+	Slots = new sslBaseExpression[40]
+	; Init defaults
+	RegisterSlots()
+	GoToState("")
 endFunction
 
-function Setup()
-	; Init variables
-	Slotted = 0
-	Slots = new sslBaseExpression[40]
-	StorageUtil.StringListClear(self, "Expressions")
-	Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
+function RegisterSlots()
 	; Register default Expressions
 	sslExpressionDefaults Defaults = Quest.GetQuest("SexLabQuestRegistry") as sslExpressionDefaults
 	Defaults.Slots = self
@@ -115,3 +109,18 @@ function Setup()
 	ModEvent.Send(ModEvent.Create("SexLabSlotExpressions"))
 	Debug.Notification("$SSL_NotifyExpressionInstall")
 endFunction
+
+int function Register(string Registrar)
+	int i = Registry.Find("")
+	if Registry.Find(Registrar) == -1 && i != -1
+		Registry[i] = Registrar
+		Slotted = i + 1
+		return i
+	endIf
+	return -1
+endFunction
+
+state Locked
+	function Setup()
+	endFunction
+endState

@@ -9,12 +9,14 @@ int Stages
 int Content
 
 ; Storage arrays
-int[] positions ; = gender, cum
-int[] flags ; = silent (bool), openmouth (bool), strapon (bool), schlong offset (int)
+int[] Positions ; = gender, cum
+int[] Flags ; = silent (bool), openmouth (bool), strapon (bool), schlong offset (int)
 float[] Offsets ; = forward, side, up, rotate
-float[] timers
+float[] Timers
 float[] CenterAdjust
-string[] animations
+string[] Animations
+int sid
+int aid
 
 float property Pure auto hidden
 float property Impure auto hidden
@@ -79,7 +81,7 @@ endProperty
 
 string[] function FetchPosition(int position)
 	if position > Actors || position < 0
-		_Log("Unknown position, '"+stage+"' given", "FetchPosition")
+		Log("Unknown position, '"+stage+"' given", "FetchPosition")
 		return none
 	endIf
 	string[] anims = sslUtility.StringArray(Stages)
@@ -92,12 +94,12 @@ string[] function FetchPosition(int position)
 endFunction
 
 string function FetchPositionStage(int position, int stage)
-	return animations[((position * Stages) + (stage - 1))]
+	return Animations[((position * Stages) + (stage - 1))]
 endFunction
 
 string[] function FetchStage(int stage)
 	if stage > Stages
-		_Log("Unknown stage, '"+stage+"' given", "FetchStage")
+		Log("Unknown stage, '"+stage+"' given", "FetchStage")
 		return none
 	endIf
 	string[] anims = sslUtility.StringArray(Actors)
@@ -118,20 +120,20 @@ int function DataIndex(int slots, int position, int stage, int slot)
 endFunction
 
 int function AccessFlag(int position, int stage, int slot)
-	return flags[DataIndex(4, position, stage, slot)]
+	return Flags[DataIndex(4, position, stage, slot)]
 endFunction
 
 int function AccessPosition(int position, int slot)
-	return positions[((position * 2) + slot)]
+	return Positions[((position * 2) + slot)]
 endFunction
 
 bool function HasTimer(int stage)
-	return stage > 0 && stage < timers.Length ; && timers[(stage - 1)] != 0.0
+	return stage > 0 && stage < Timers.Length ; && Timers[(stage - 1)] != 0.0
 endFunction
 
 float function GetTimer(int stage)
 	if HasTimer(stage)
-		return timers[(stage - 1)]
+		return Timers[(stage - 1)]
 	endIf
 	return 0.0 ; Stage has no timer
 endFunction
@@ -139,10 +141,10 @@ endFunction
 int[] function GetPositionFlags(int position, int stage)
 	int i = DataIndex(4, position, stage, 0)
 	int[] Output = new int[5]
-	Output[0] = flags[i]
-	Output[1] = flags[(i + 1)]
-	Output[2] = flags[(i + 2)]
-	Output[3] = flags[(i + 3)]
+	Output[0] = Flags[i]
+	Output[1] = Flags[(i + 1)]
+	Output[2] = Flags[(i + 2)]
+	Output[3] = Flags[(i + 3)]
 	Output[4] = GetGender(position)
 	return Output
 endFunction
@@ -322,6 +324,7 @@ endFunction
 
 function AddRace(Race creature)
 	StorageUtil.FormListAdd(Storage, Key("Creatures"), creature, false)
+	StorageUtil.SetIntValue(creature, "SexLab.HasCreature", 1)
 endFunction
 
 ;/-----------------------------------------------\;
@@ -331,40 +334,67 @@ endFunction
 function SetStageTimer(int stage, float timer)
 	; Validate stage
 	if stage > Stages || stage < 1
-		_Log("Unknown animation stage, '"+stage+"' given.", "SetStageTimer")
+		Log("Unknown animation stage, '"+stage+"' given.", "SetStageTimer")
 		return
 	endIf
 	; Initialize timer array if needed
-	if timers.Length != Stages
-		timers = sslUtility.FloatArray(Stages)
+	if Timers.Length != Stages
+		Timers = sslUtility.FloatArray(Stages)
 	endIf
 	; Set timer
-	timers[(stage - 1)] = timer
+	Timers[(stage - 1)] = timer
 endFunction
 
-function Save(int[] posData, string[] animData, float[] offsetData, int[] flagData)
-	; Update config data
-	positions = posData
-	animations = animData
-	Offsets = offsetData
-	flags = flagData
-	Actors = (posData.Length / 2)
-	Stages = (animData.Length / Actors)
+int function AddPosition(int Gender = 0, int AddCum = -1)
+	; Record gender
+	Genders[Gender] = Genders[Gender] + 1
+	; Save position data
+	int pid = (Actors * 2)
+	Positions[pid + 0] = Gender
+	Positions[pid + 1] = AddCum
+	Actors += 1
+	return (Actors - 1)
+endFunction
+
+function AddPositionStage(int Position, string AnimationEvent, float forward = 0.0, float side = 0.0, float up = 0.0, float rotate = 0.0, bool silent = false, bool openMouth = false, bool strapon = true, int sos = 0)
+	Animations[aid] = AnimationEvent
+	aid += 1
+
+	Offsets[sid + 0] = forward
+	Offsets[sid + 1] = side
+	Offsets[sid + 2] = up
+	Offsets[sid + 3] = rotate
+
+	Flags[sid + 0] = silent as int
+	Flags[sid + 1] = openMouth as int
+	Flags[sid + 2] = strapon as int
+	Flags[sid + 3] = sos
+
+	sid += 4
+endFunction
+
+function Save(int id)
+	; Finalize config data
+	Flags      = sslUtility.TrimIntArray(Flags, sid)
+	Offsets    = sslUtility.TrimFloatArray(Offsets, sid)
+	Positions  = sslUtility.TrimIntArray(Positions, (Actors * 2))
+	Animations = sslUtility.TrimStringArray(Animations, aid)
+	Stages     = Animations.Length / Actors
 	; Create and add gender tag
-	string GenderTag
+	string Tag
 	int i
 	while i < Actors
-		int gender = AccessPosition(i, 0)
-		if gender == 0
-			GenderTag += "M"
-		elseIf gender == 1
-			GenderTag += "F"
-		elseIf gender == 2
-			GenderTag += "C"
+		int Gender = AccessPosition(i, 0)
+		if Gender == 0
+			Tag += "M"
+		elseIf Gender == 1
+			Tag += "F"
+		elseIf Gender == 2
+			Tag += "C"
 		endIf
 		i += 1
 	endWhile
-	AddTag(GenderTag)
+	AddTag(Tag)
 	; Init forward offset list
 	CenterAdjust = sslUtility.FloatArray(Stages)
 	if Actors > 1
@@ -374,18 +404,16 @@ function Save(int[] posData, string[] animData, float[] offsetData, int[] flagDa
 			Stage -= 1
 		endWhile
 	endIf
-	; Init Pure/Impure amounts
-	; Pure   += (HasTag("Loving") as float) * 2.50
-	; Impure += (HasTag("Dirty") as float)  * 1.50
-	; Impure += (IsCreature as float)       * 2.00
-	; Impure += ((Actors == 1) as float)    * 1.25
-	; Impure += ((Actors > 2) as float)     * ((Actors - 2) * 1.50)
+	; Log the new animation
+	if IsCreature
+		Log(Name, "Creatures["+id+"]")
+	else
+		Log(Name, "Animations["+id+"]")
+	endIf
 endFunction
 
-; function GetBasePure(bool IsCourting)
-
 float function CalcCenterAdjuster(int Stage)
-	; Get forward Offsets of all positions + find highest/lowest position
+	; Get forward Offsets of all Positions + find highest/lowest position
 	float Adjuster
 	int i = Actors
 	while i
@@ -404,34 +432,28 @@ endFunction
 ;|	System Use                                   |;
 ;\-----------------------------------------------/;
 
-function _Log(string log, string method, string type = "NOTICE")
-	Debug.Trace("--------------------------------------------------------------------------------------------")
-	Debug.Trace("--- SexLab BaseAnimation '"+Name+"' ---")
-	Debug.Trace("--------------------------------------------------------------------------------------------")
-	Debug.Trace(" "+type+": "+method+"()" )
-	Debug.Trace("   "+log)
-	Debug.Trace("--------------------------------------------------------------------------------------------")
-endFunction
-
 function Initialize()
-	; StorageUtil.FloatListClear(Storage, Key("Offsets"))
-	; StorageUtil.FloatListClear(Storage, Key("Forwards"))
-	; StorageUtil.IntListClear(Storage, Key("Positions"))
-	; StorageUtil.IntListClear(Storage, Key("Info"))
-	StorageUtil.FormListClear(Storage, Key("Creatures"))
+	if Storage != none && Registered
+		StorageUtil.FormListClear(Storage, Key("Creatures"))
+	endIf
 
-	Actors = 0
-	Stages = 0
+	Actors  = 0
+	Stages  = 0
 	Content = 0
 
 	Pure   = 0.0
 	Impure = 0.0
 
-	Genders = new int[3]
+	Genders    = new int[3]
+	Positions  = new int[10]
+	Flags      = new int[128]
+	Offsets    = new float[128]
+	Animations = new string[128]
+	sid        = 0
+	aid        = 0
+
 	float[] floatDel1
-	timers = floatDel1
-	string[] stringDel1
-	animations = stringDel1
+	Timers = floatDel1
 
 	parent.Initialize()
 endFunction

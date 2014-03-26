@@ -57,11 +57,6 @@ function ApplyPhase(Actor ActorRef, int Phase, int Gender)
 	ActorRef.SetExpressionOverride(Preset[g], Preset[(g + 1)])
 endFunction
 
-function Log(string Log)
-	Debug.Trace(Name+" -- "+Log)
-	MiscUtil.PrintConsole(Name+" -- "+Log)
-endFunction
-
 int[] function GetPhase(int Phase)
 	int[] Preset
 	if Phase == 2
@@ -128,6 +123,57 @@ function SetPhase(int Phase, int[] Preset)
 	elseIf Phase == 5
 		Phase5 = Preset
 	endIf
+endFunction
+
+function AddPreset(int Phase, int Gender, int Mode, int id, int value)
+	if Mode == Expression
+		AddExpression(Phase, Gender, id, value)
+	elseif Mode == Modifier
+		AddModifier(Phase, Gender, id, value)
+	elseif Mode == Phoneme
+		AddPhoneme(Phase, Gender, id, value)
+	endIf
+endFunction
+
+function AddExpression(int Phase, int Gender, int id, int value)
+	if Gender == Female || Gender == MaleFemale
+		SetIndex(Phase, Female, Expression, 0, id)
+		SetIndex(Phase, Female, Expression, 1, value)
+	endIf
+	if Gender == Male || Gender == MaleFemale
+		SetIndex(Phase, Male, Expression, 0, id)
+		SetIndex(Phase, Male, Expression, 1, value)
+	endIf
+endFunction
+
+function AddModifier(int Phase, int Gender, int id, int value)
+	if Gender == Female || Gender == MaleFemale
+		SetIndex(Phase, Female, Modifier, id, value)
+	endIf
+	if Gender == Male || Gender == MaleFemale
+		SetIndex(Phase, Male, Modifier, id, value)
+	endIf
+endFunction
+
+function AddPhoneme(int Phase, int Gender, int id, int value)
+	if Gender == Female || Gender == MaleFemale
+		SetIndex(Phase, Female, Phoneme, id, value)
+	endIf
+	if Gender == Male || Gender == MaleFemale
+		SetIndex(Phase, Male, Phoneme, id, value)
+	endIf
+endFunction
+
+function Save(int id)
+	; Make sure we have a Gender tag
+	if PhasesMale > 0
+		AddTag("Male")
+	endIf
+	if PhasesFemale > 0
+		AddTag("Female")
+	endIf
+	; Log
+	Log(Name, "Expressions["+id+"]")
 endFunction
 
 function Initialize()

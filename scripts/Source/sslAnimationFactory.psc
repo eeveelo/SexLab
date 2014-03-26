@@ -1,7 +1,6 @@
 scriptname sslAnimationFactory extends Quest
 
 sslAnimationSlots property Slots auto hidden
-sslBaseAnimation property Slot auto hidden
 
 ; Gender Types
 int property Male = 0 autoreadonly hidden
@@ -24,137 +23,43 @@ Sound property Squishing auto hidden
 Sound property Sucking auto hidden
 Sound property SexMix auto hidden
 
-bool Locked
-
 ; ------------------------------------------------------- ;
 ; --- Registering Animations                          --- ;
 ; ------------------------------------------------------- ;
 
 ; Send callback event to start registration
 function RegisterAnimation(string Registrar)
-	; Check duplicate
-	if Slots.IsRegistered(Registrar)
-		return
-	endIf
-	; Wait for factory to be free
-	FactoryWait()
-	; Get free animation slot
-	Slot = Slots.Register(Registrar)
-	if Slot != none
+	; Get free Animation slot
+	int id = Slots.Register(Registrar)
+	if id != -1
+		; Get slot
+		sslBaseAnimation Slot = Slots.GetNthAlias(id) as sslBaseAnimation
+		Slots.Animations[id] = Slot
+		; Init Animation
 		Slot.Initialize()
 		Slot.Registry = Registrar
 		Slot.Enabled = true
 		; Send load event
-		RegisterForModEvent("Register"+Registrar, Registrar)
-		ModEvent.Send(ModEvent.Create("Register"+Registrar))
-		UnregisterForAllModEvents()
-	else
-		FreeFactory()
+		RegisterForModEvent(Registrar, Registrar)
+		int handle = ModEvent.Create(Registrar)
+		ModEvent.PushInt(handle, id)
+		ModEvent.Send(handle)
 	endIf
 endFunction
 
-; Unlocks factory for next callback, MUST be called at end of callback
-function Save()
-	SexLabUtil.Log("'"+Slot.Name+"'", "Animation["+Slots.Animations.Find(Slot)+"]", "REGISTER", "trace,console", true)
-	Slot.Save(sslUtility.TrimIntArray(positionData, positionID), sslUtility.TrimStringArray(animData, animID), sslUtility.TrimFloatArray(offsetData, offsetID), sslUtility.TrimIntArray(infoData, infoID))
-	FreeFactory()
-endfunction
-
-; ------------------------------------------------------- ;
-; --- Registering Callbacks                           --- ;
-; ------------------------------------------------------- ;
-
-int function AddPosition(int gender = 0, int addCum = -1)
-	Slot.Genders[gender] = Slot.Genders[gender] + 1
-	positionData[(positionID + 0)] = gender
-	positionData[(positionID + 1)] = addCum
-	positionID += 2
-	return (positionID / 2)
+; Gets the Animation resource object for use in the callback, MUST be called at start of callback to get the appropiate resource
+sslBaseAnimation function Create(int id)
+	sslBaseAnimation Slot = Slots.GetbySlot(id)
+	UnregisterForModEvent(Slot.Registry)
+	return Slot
 endFunction
-
-function AddPositionStage(int position, string animationEvent, float forward = 0.0, float side = 0.0, float up = 0.0, float rotate = 0.0, bool silent = false, bool openMouth = false, bool strapon = true, int sos = 0)
-	animData[animID] = animationEvent
-	animID += 1
-	offsetData[(offsetID + 0)] = forward
-	offsetData[(offsetID + 1)] = side
-	offsetData[(offsetID + 2)] = up
-	offsetData[(offsetID + 3)] = rotate
-	offsetID += 4
-	infoData[(infoID + 0)] = (silent as int)
-	infoData[(infoID + 1)] = (openMouth as int)
-	infoData[(infoID + 2)] = (strapon as int)
-	infoData[(infoID + 3)] = sos
-	infoID += 4
-endFunction
-
-function SetContent(int contentType)
-	Slot.SetContent(contentType)
-endFunction
-
-function SetStageTimer(int stage, float timer)
-	Slot.SetStageTimer(stage, timer)
-endFunction
-
-bool function AddTag(string tag)
-	return Slot.AddTag(tag)
-endFunction
-
-string property Name hidden
-	function set(string value)
-		Slot.Name = value
-	endFunction
-endProperty
-
-bool property Enabled hidden
-	function set(bool value)
-		Slot.Enabled = value
-	endFunction
-endProperty
-
-Sound property SoundFX hidden
-	function set(Sound value)
-		Slot.SoundFX = value
-	endFunction
-endProperty
 
 ; ------------------------------------------------------- ;
 ; --- Callback Data Handling - SYSTEM USE ONLY        --- ;
 ; ------------------------------------------------------- ;
 
-int positionID
-int[] positionData
-int animID
-string[] animData
-int offsetID
-float[] offsetData
-int infoID
-int[] infoData
-function FreeFactory()
-	; Reset callback storage
-	positionID = 0
-	positionData = new int[10]
-	animID = 0
-	animData = new string[128]
-	offsetID = 0
-	offsetData = new float[128]
-	infoID = 0
-	infoData = new int[128]
-	; Init SFX if needed
-	if Squishing == none || Sucking == none || SexMix == none
-		sslThreadLibrary Lib = Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary
-		Squishing = Lib.SquishingFX
-		Sucking = Lib.SuckingFX
-		SexMix = Lib.SexMixedFX
-	endIf
-	; Clear wait lock
-	Slot = none
-	Locked = false
-endFunction
-
-function FactoryWait()
-	Utility.WaitMenuMode(0.30)
-	while Locked
-		Utility.WaitMenuMode(0.30)
-	endWhile
-	Locked = true
+function Initialize()
+	Squishing = Slots.ThreadLib.SquishingFX
+	Sucking = Slots.ThreadLib.SuckingFX
+	SexMix = Slots.ThreadLib.SexMixedFX
 endFunction

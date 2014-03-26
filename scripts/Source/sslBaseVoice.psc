@@ -48,8 +48,19 @@ Sound function GetSound(int Strength, bool IsVictim = false)
 	return Mild
 endFunction
 
-bool function GenderUsed(int CheckGender)
+bool function CheckGender(int CheckGender)
 	return Gender == CheckGender || (Gender == -1 && (CheckGender == 1 || CheckGender == 0))
+endFunction
+
+function Save(int id)
+	; Make sure we have a gender tag
+	if Gender == 0 || Gender == -1
+		AddTag("Male")
+	elseIf Gender == 1 || Gender == -1
+		AddTag("Female")
+	endIf
+	; Log
+	Log(Name, "Voices["+id+"]")
 endFunction
 
 function Initialize()

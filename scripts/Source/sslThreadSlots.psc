@@ -53,6 +53,7 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function Setup()
+	GoToState("Locked")
 	; Init variables
 	Slots = new sslThreadController[15]
 	int i = Slots.Length
@@ -63,6 +64,15 @@ function Setup()
 		else
 			Slots[i] = Quest.GetQuest("SexLabThread0"+i) as sslThreadController
 		endIf
-		Slots[i].SetupThread(i)
+		Slots[i].Setup()
+		Slots[i].tid = i
 	endWhile
+	Debug.Trace("SexLab Threads: "+Slots)
+	GoToState("")
 endFunction
+
+state Locked
+	function Setup()
+	endFunction
+endState
+

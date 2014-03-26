@@ -1,16 +1,6 @@
 scriptname sslAnimationDefaults extends sslAnimationFactory
 
-; Temporary alpha testing - SKSE 1.7.0 compatibility
-function SendEvent(string Registrar)
-	RegisterForModEvent("Register"+Registrar, Registrar)
-	ModEvent.Send(ModEvent.Create("Register"+Registrar))
-	; SendModEvent("Register"+Registrar)
-	UnregisterForAllModEvents()
-endFunction
-
 function LoadAnimations()
-	; Prepare factory for load
-	FreeFactory()
 	; Missionary
 	RegisterAnimation("SexLabMissionary")
 	RegisterAnimation("SexLabAggrMissionary")
@@ -79,1558 +69,1662 @@ function LoadAnimations()
 	RegisterAnimation("ArrokTricycle")
 endFunction
 
-function ArrokBlowjob()
-	Name = "Arrok Blowjob"
+function ArrokBlowjob(int id)
+	sslBaseAnimation Base = Create(id)
 
-	SetContent(Sexual)
-	SoundFX = Sucking
+	Base.Name = "Arrok Blowjob"
 
-	int a1 = AddPosition(Female, addCum=Oral)
-	AddPositionStage(a1, "Arrok_Blowjob_A1_S1", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "Arrok_Blowjob_A1_S2", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "Arrok_Blowjob_A1_S2", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "Arrok_Blowjob_A1_S3", 0, silent = true, openMouth = true)
+	Base.SetContent(Sexual)
+	Base.SoundFX = Sucking
 
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "Arrok_Blowjob_A2_S1", -120, side = -3.5, sos = -1)
-	AddPositionStage(a2, "Arrok_Blowjob_A2_S2", -120, side = -3.5, sos = -1)
-	AddPositionStage(a2, "Arrok_Blowjob_A2_S2", -120, side = -3.5, sos = 1)
-	AddPositionStage(a2, "Arrok_Blowjob_A2_S3", -120, side = -3.5, sos = 2)
+	int a1 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a1, "Arrok_Blowjob_A1_S1", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "Arrok_Blowjob_A1_S2", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "Arrok_Blowjob_A1_S2", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "Arrok_Blowjob_A1_S3", 0, silent = true, openMouth = true)
 
-	AddTag("Arrok")
-	AddTag("BBP")
-	AddTag("Sex")
-	AddTag("Oral")
-	AddTag("Dirty")
-	AddTag("Blowjob")
-	AddTag("LeadIn")
-	AddTag("MF")
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Arrok_Blowjob_A2_S1", -120, side = -3.5, sos = -1)
+	Base.AddPositionStage(a2, "Arrok_Blowjob_A2_S2", -120, side = -3.5, sos = -1)
+	Base.AddPositionStage(a2, "Arrok_Blowjob_A2_S2", -120, side = -3.5, sos = 1)
+	Base.AddPositionStage(a2, "Arrok_Blowjob_A2_S3", -120, side = -3.5, sos = 2)
 
-	Save()
+	Base.AddTag("Arrok")
+	Base.AddTag("BBP")
+	Base.AddTag("Sex")
+	Base.AddTag("Oral")
+	Base.AddTag("Dirty")
+	Base.AddTag("Blowjob")
+	Base.AddTag("LeadIn")
+	Base.AddTag("MF")
+
+	Base.Save(id)
 endFunction
 
-function ArrokBoobjob()
-	Name = "Arrok Boobjob"
+function ArrokBoobjob(int id)
+	sslBaseAnimation Base = Create(id)
 
-	SetContent(Sexual)
+	Base.Name = "Arrok Boobjob"
 
-	int a1 = AddPosition(Female, addCum=Oral)
-	AddPositionStage(a1, "Arrok_Boobjob_A1_S1", 0)
-	AddPositionStage(a1, "Arrok_Boobjob_A1_S2", 0)
-	AddPositionStage(a1, "Arrok_Boobjob_A1_S3", 0)
-	AddPositionStage(a1, "Arrok_Boobjob_A1_S4", 0, silent = true, openMouth = true)
+	Base.SetContent(Sexual)
 
-	int a2 = AddPosition(Male) ; 102
-	AddPositionStage(a2, "Arrok_Boobjob_A2_S1", -119, sos = 2)
-	AddPositionStage(a2, "Arrok_Boobjob_A2_S2", -119, sos = 3)
-	AddPositionStage(a2, "Arrok_Boobjob_A2_S3", -119, sos = -2)
-	AddPositionStage(a2, "Arrok_Boobjob_A2_S4", -119, sos = -2)
+	int a1 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a1, "Arrok_Boobjob_A1_S1", 0)
+	Base.AddPositionStage(a1, "Arrok_Boobjob_A1_S2", 0)
+	Base.AddPositionStage(a1, "Arrok_Boobjob_A1_S3", 0)
+	Base.AddPositionStage(a1, "Arrok_Boobjob_A1_S4", 0, silent = true, openMouth = true)
 
-	AddTag("Arrok")
-	AddTag("BBP")
-	AddTag("Sex")
-	AddTag("Dirty")
-	AddTag("Boobjob")
-	AddTag("Breast")
-	AddTag("LeadIn")
-	AddTag("MF")
+	int a2 = Base.AddPosition(Male) ; 102
+	Base.AddPositionStage(a2, "Arrok_Boobjob_A2_S1", -119, sos = 2)
+	Base.AddPositionStage(a2, "Arrok_Boobjob_A2_S2", -119, sos = 3)
+	Base.AddPositionStage(a2, "Arrok_Boobjob_A2_S3", -119, sos = -2)
+	Base.AddPositionStage(a2, "Arrok_Boobjob_A2_S4", -119, sos = -2)
 
-	Save()
+	Base.AddTag("Arrok")
+	Base.AddTag("BBP")
+	Base.AddTag("Sex")
+	Base.AddTag("Dirty")
+	Base.AddTag("Boobjob")
+	Base.AddTag("Breast")
+	Base.AddTag("LeadIn")
+	Base.AddTag("MF")
+
+	Base.Save(id)
 endFunction
 
-function ArrokCowgirl()
-	Name = "Arrok Cowgirl"
+function ArrokCowgirl(int id)
+	sslBaseAnimation Base = Create(id)
 
-	SetContent(Sexual)
-	SoundFX = Squishing
+	Base.Name = "Arrok Cowgirl"
 
-	int a1 = AddPosition(Female, addCum=VaginalAnal)
-	AddPositionStage(a1, "Arrok_Cowgirl_A1_S1", 0)
-	AddPositionStage(a1, "Arrok_Cowgirl_A1_S2", 0)
-	AddPositionStage(a1, "Arrok_Cowgirl_A1_S3", 0)
-	AddPositionStage(a1, "Arrok_Cowgirl_A1_S4", 0)
-	AddPositionStage(a1, "Arrok_Cowgirl_A1_S5", 0)
-	AddPositionStage(a1, "Arrok_Cowgirl_A1_S6", 0)
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
 
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "Arrok_Cowgirl_A2_S1", -102)
-	AddPositionStage(a2, "Arrok_Cowgirl_A2_S2", -102)
-	AddPositionStage(a2, "Arrok_Cowgirl_A2_S2", -102)
-	AddPositionStage(a2, "Arrok_Cowgirl_A2_S3", -102)
-	AddPositionStage(a2, "Arrok_Cowgirl_A2_S4", -102)
-	AddPositionStage(a2, "Arrok_Cowgirl_A2_S4", -102)
+	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	Base.AddPositionStage(a1, "Arrok_Cowgirl_A1_S1", 0)
+	Base.AddPositionStage(a1, "Arrok_Cowgirl_A1_S2", 0)
+	Base.AddPositionStage(a1, "Arrok_Cowgirl_A1_S3", 0)
+	Base.AddPositionStage(a1, "Arrok_Cowgirl_A1_S4", 0)
+	Base.AddPositionStage(a1, "Arrok_Cowgirl_A1_S5", 0)
+	Base.AddPositionStage(a1, "Arrok_Cowgirl_A1_S6", 0)
 
-	AddTag("Arrok")
-	AddTag("BBP")
-	AddTag("Sex")
-	AddTag("Dirty")
-	AddTag("Cowgirl")
-	AddTag("Vaginal")
-	AddTag("MF")
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Arrok_Cowgirl_A2_S1", -102)
+	Base.AddPositionStage(a2, "Arrok_Cowgirl_A2_S2", -102)
+	Base.AddPositionStage(a2, "Arrok_Cowgirl_A2_S2", -102)
+	Base.AddPositionStage(a2, "Arrok_Cowgirl_A2_S3", -102)
+	Base.AddPositionStage(a2, "Arrok_Cowgirl_A2_S4", -102)
+	Base.AddPositionStage(a2, "Arrok_Cowgirl_A2_S4", -102)
 
-	Save()
+	Base.AddTag("Arrok")
+	Base.AddTag("BBP")
+	Base.AddTag("Sex")
+	Base.AddTag("Dirty")
+	Base.AddTag("Cowgirl")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
 endFunction
 
-function ArrokDevilsThreeway()
-	Name = "Arrok Devils Threeway"
+function ArrokDevilsThreeway(int id)
+	sslBaseAnimation Base = Create(id)
 
-	SetContent(Sexual)
-	SoundFX = SexMix
+	Base.Name = "Arrok Devils Threeway"
 
-	int a1 = AddPosition(Female, addCum=VaginalOralAnal)
-	AddPositionStage(a1, "Arrok_DevilsThreeway_A1_S1", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "Arrok_DevilsThreeway_A1_S2", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "Arrok_DevilsThreeway_A1_S3", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "Arrok_DevilsThreeway_A1_S4", 0)
+	Base.SetContent(Sexual)
+	Base.SoundFX = SexMix
 
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "Arrok_DevilsThreeway_A2_S1", -105, side = -2, sos = -1)
-	AddPositionStage(a2, "Arrok_DevilsThreeway_A2_S2", -98, sos = 5)
-	AddPositionStage(a2, "Arrok_DevilsThreeway_A2_S3", -114, sos = 7)
-	AddPositionStage(a2, "Arrok_DevilsThreeway_A2_S4", -100, sos = 3)
+	int a1 = Base.AddPosition(Female, addCum=VaginalOralAnal)
+	Base.AddPositionStage(a1, "Arrok_DevilsThreeway_A1_S1", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "Arrok_DevilsThreeway_A1_S2", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "Arrok_DevilsThreeway_A1_S3", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "Arrok_DevilsThreeway_A1_S4", 0)
 
-	int a3 = AddPosition(Male)
-	AddPositionStage(a3, "Arrok_DevilsThreeway_A3_S1", 105, sos = -3)
-	AddPositionStage(a3, "Arrok_DevilsThreeway_A3_S2", 100, sos = 9)
-	AddPositionStage(a3, "Arrok_DevilsThreeway_A3_S3", 120, sos = -3)
-	AddPositionStage(a3, "Arrok_DevilsThreeway_A3_S4", 100, sos = -3)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Arrok_DevilsThreeway_A2_S1", -105, side = -2, sos = -1)
+	Base.AddPositionStage(a2, "Arrok_DevilsThreeway_A2_S2", -98, sos = 5)
+	Base.AddPositionStage(a2, "Arrok_DevilsThreeway_A2_S3", -114, sos = 7)
+	Base.AddPositionStage(a2, "Arrok_DevilsThreeway_A2_S4", -100, sos = 3)
 
-	AddTag("Sex")
-	AddTag("Arrok")
-	AddTag("BBP")
-	AddTag("MMF")
-	AddTag("Doggy")
-	AddTag("Blowjob")
-	AddTag("Oral")
-	AddTag("Orgy")
-	AddTag("Vaginal")
-	AddTag("Dirty")
+	int a3 = Base.AddPosition(Male)
+	Base.AddPositionStage(a3, "Arrok_DevilsThreeway_A3_S1", 105, sos = -3)
+	Base.AddPositionStage(a3, "Arrok_DevilsThreeway_A3_S2", 100, sos = 9)
+	Base.AddPositionStage(a3, "Arrok_DevilsThreeway_A3_S3", 120, sos = -3)
+	Base.AddPositionStage(a3, "Arrok_DevilsThreeway_A3_S4", 100, sos = -3)
 
-	Save()
+	Base.AddTag("Sex")
+	Base.AddTag("Arrok")
+	Base.AddTag("BBP")
+	Base.AddTag("MMF")
+	Base.AddTag("Doggy")
+	Base.AddTag("Blowjob")
+	Base.AddTag("Oral")
+	Base.AddTag("Orgy")
+	Base.AddTag("Vaginal")
+	Base.AddTag("Dirty")
+
+	Base.Save(id)
 endFunction
 
-function ArrokDoggyStyle()
-	Name = "Arrok DoggyStyle"
+function ArrokDoggyStyle(int id)
+	sslBaseAnimation Base = Create(id)
 
-	SetContent(Sexual)
-	SoundFX = Squishing
+	Base.Name = "Arrok DoggyStyle"
 
-	int a1 = AddPosition(Female, addCum=Anal)
-	AddPositionStage(a1, "Arrok_DoggyStyle_A1_S1", 0)
-	AddPositionStage(a1, "Arrok_DoggyStyle_A1_S2", 0)
-	AddPositionStage(a1, "Arrok_DoggyStyle_A1_S3", 0)
-	AddPositionStage(a1, "Arrok_DoggyStyle_A1_S4", 0)
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
 
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "Arrok_DoggyStyle_A2_S1", -100, sos = -2)
-	AddPositionStage(a2, "Arrok_DoggyStyle_A2_S2", -100, sos = -2)
-	AddPositionStage(a2, "Arrok_DoggyStyle_A2_S3", -100, sos = -2)
-	AddPositionStage(a2, "Arrok_DoggyStyle_A2_S4", -100, sos = -2)
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "Arrok_DoggyStyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "Arrok_DoggyStyle_A1_S2", 0)
+	Base.AddPositionStage(a1, "Arrok_DoggyStyle_A1_S3", 0)
+	Base.AddPositionStage(a1, "Arrok_DoggyStyle_A1_S4", 0)
 
-	AddTag("Arrok")
-	AddTag("BBP")
-	AddTag("Sex")
-	AddTag("Doggy Style")
-	AddTag("Anal")
-	AddTag("MF")
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Arrok_DoggyStyle_A2_S1", -100, sos = -2)
+	Base.AddPositionStage(a2, "Arrok_DoggyStyle_A2_S2", -100, sos = -2)
+	Base.AddPositionStage(a2, "Arrok_DoggyStyle_A2_S3", -100, sos = -2)
+	Base.AddPositionStage(a2, "Arrok_DoggyStyle_A2_S4", -100, sos = -2)
 
-	Save()
+	Base.AddTag("Arrok")
+	Base.AddTag("BBP")
+	Base.AddTag("Sex")
+	Base.AddTag("Doggy Style")
+	Base.AddTag("Anal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
 endFunction
 
-function ArrokForeplay()
-	Name = "Arrok Foreplay"
+function ArrokForeplay(int id)
+	sslBaseAnimation Base = Create(id)
 
-	SetContent(Foreplay)
+	Base.Name = "Arrok Foreplay"
 
-	int a1 = AddPosition(Female)
-	AddPositionStage(a1, "Arrok_Foreplay_A1_S1", 0)
-	AddPositionStage(a1, "Arrok_Foreplay_A1_S2", 0)
-	AddPositionStage(a1, "Arrok_Foreplay_A1_S3", 0)
-	AddPositionStage(a1, "Arrok_Foreplay_A1_S4", 0)
+	Base.SetContent(Foreplay)
 
-	int a2 = AddPosition(Male) ; -104
-	AddPositionStage(a2, "Arrok_Foreplay_A2_S1", -106, strapon = false, sos = 0)
-	AddPositionStage(a2, "Arrok_Foreplay_A2_S2", -106, strapon = false, sos = 0)
-	AddPositionStage(a2, "Arrok_Foreplay_A2_S3", -106, strapon = false, sos = 5)
-	AddPositionStage(a2, "Arrok_Foreplay_A2_S4", -106, strapon = false, sos = 5)
+	int a1 = Base.AddPosition(Female)
+	Base.AddPositionStage(a1, "Arrok_Foreplay_A1_S1", 0)
+	Base.AddPositionStage(a1, "Arrok_Foreplay_A1_S2", 0)
+	Base.AddPositionStage(a1, "Arrok_Foreplay_A1_S3", 0)
+	Base.AddPositionStage(a1, "Arrok_Foreplay_A1_S4", 0)
 
-	AddTag("Arrok")
-	AddTag("BBP")
-	AddTag("Foreplay")
-	AddTag("Laying")
-	AddTag("Loving")
-	AddTag("Cuddling")
-	AddTag("LeadIn")
-	AddTag("MF")
+	int a2 = Base.AddPosition(Male) ; -104
+	Base.AddPositionStage(a2, "Arrok_Foreplay_A2_S1", -106, strapon = false, sos = 0)
+	Base.AddPositionStage(a2, "Arrok_Foreplay_A2_S2", -106, strapon = false, sos = 0)
+	Base.AddPositionStage(a2, "Arrok_Foreplay_A2_S3", -106, strapon = false, sos = 5)
+	Base.AddPositionStage(a2, "Arrok_Foreplay_A2_S4", -106, strapon = false, sos = 5)
 
-	Save()
+	Base.AddTag("Arrok")
+	Base.AddTag("BBP")
+	Base.AddTag("Foreplay")
+	Base.AddTag("Laying")
+	Base.AddTag("Loving")
+	Base.AddTag("Cuddling")
+	Base.AddTag("LeadIn")
+	Base.AddTag("MF")
+
+	Base.Save(id)
 endFunction
 
-function ArrokLegUp()
-	Name = "Arrok Leg Up Fuck"
+function ArrokLegUp(int id)
+	sslBaseAnimation Base = Create(id)
 
-	SetContent(Sexual)
-	SoundFX = Squishing
+	Base.Name = "Arrok Leg Up Fuck"
 
-	int a1 = AddPosition(Female, addCum=VaginalAnal)
-	AddPositionStage(a1, "Arrok_LegUp_A1_S1", 0)
-	AddPositionStage(a1, "Arrok_LegUp_A1_S2", 0)
-	AddPositionStage(a1, "Arrok_LegUp_A1_S3", 0)
-	AddPositionStage(a1, "Arrok_LegUp_A1_S4", 0)
-	AddPositionStage(a1, "Arrok_LegUp_A1_S5", 0)
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
 
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "Arrok_LegUp_A2_S1", 44, rotate = 180, sos = 2)
-	AddPositionStage(a2, "Arrok_LegUp_A2_S2", 44, rotate = 180, sos = 2)
-	AddPositionStage(a2, "Arrok_LegUp_A2_S3", 44, rotate = 180, sos = 2)
-	AddPositionStage(a2, "Arrok_LegUp_A2_S4", 44, rotate = 180, sos = 4)
-	AddPositionStage(a2, "Arrok_LegUp_A2_S5", 44, rotate = 180, sos = 3)
+	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	Base.AddPositionStage(a1, "Arrok_LegUp_A1_S1", 0)
+	Base.AddPositionStage(a1, "Arrok_LegUp_A1_S2", 0)
+	Base.AddPositionStage(a1, "Arrok_LegUp_A1_S3", 0)
+	Base.AddPositionStage(a1, "Arrok_LegUp_A1_S4", 0)
+	Base.AddPositionStage(a1, "Arrok_LegUp_A1_S5", 0)
 
-	AddTag("Arrok")
-	AddTag("BBP")
-	AddTag("Dirty")
-	AddTag("Laying")
-	AddTag("Aggressive")
-	AddTAg("AggressiveDefault")
-	AddTag("Vaginal")
-	AddTag("MF")
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Arrok_LegUp_A2_S1", 44, rotate = 180, sos = 2)
+	Base.AddPositionStage(a2, "Arrok_LegUp_A2_S2", 44, rotate = 180, sos = 2)
+	Base.AddPositionStage(a2, "Arrok_LegUp_A2_S3", 44, rotate = 180, sos = 2)
+	Base.AddPositionStage(a2, "Arrok_LegUp_A2_S4", 44, rotate = 180, sos = 4)
+	Base.AddPositionStage(a2, "Arrok_LegUp_A2_S5", 44, rotate = 180, sos = 3)
 
-	Save()
+	Base.AddTag("Arrok")
+	Base.AddTag("BBP")
+	Base.AddTag("Dirty")
+	Base.AddTag("Laying")
+	Base.AddTag("Aggressive")
+	Base.AddTAg("AggressiveDefault")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
 endFunction
 
-function ArrokMaleMasturbation()
-	Name = "Arrok Male Masturbation"
+function ArrokMaleMasturbation(int id)
+	sslBaseAnimation Base = Create(id)
 
-	SetContent(Sexual)
+	Base.Name = "Arrok Male Masturbation"
 
-	int a1 = AddPosition(Male)
-	AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S1", 0, sos = 3)
-	AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S2", 0, sos = 3)
-	AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S3", 0, sos = 3)
-	AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S4", 0, sos = 3)
+	Base.SetContent(Sexual)
 
-	AddTag("Sex")
-	AddTag("Solo")
-	AddTag("Masturbation")
-	AddTag("Standing")
-	AddTag("Dirty")
+	int a1 = Base.AddPosition(Male)
+	Base.AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S1", 0, sos = 3)
+	Base.AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S2", 0, sos = 3)
+	Base.AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S3", 0, sos = 3)
+	Base.AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S4", 0, sos = 3)
 
-	Save()
+	Base.AddTag("Sex")
+	Base.AddTag("Solo")
+	Base.AddTag("Masturbation")
+	Base.AddTag("Standing")
+	Base.AddTag("Dirty")
+
+	Base.Save(id)
 endFunction
 
-function ArrokMissionary()
-	Name = "Arrok Missionary"
+function ArrokMissionary(int id)
+	sslBaseAnimation Base = Create(id)
 
-	SetContent(Sexual)
-	SoundFX = Squishing
+	Base.Name = "Arrok Missionary"
 
-	int a1 = AddPosition(Female, addCum=Vaginal)
-	AddPositionStage(a1, "Arrok_Missionary_A1_S1", 0)
-	AddPositionStage(a1, "Arrok_Missionary_A1_S2", 0)
-	AddPositionStage(a1, "Arrok_Missionary_A1_S3", 0)
-	AddPositionStage(a1, "Arrok_Missionary_A1_S4", 0)
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
 
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "Arrok_Missionary_A2_S1", -105)
-	AddPositionStage(a2, "Arrok_Missionary_A2_S2", -105)
-	AddPositionStage(a2, "Arrok_Missionary_A2_S3", -105, sos = 3)
-	AddPositionStage(a2, "Arrok_Missionary_A2_S4", -107, sos = 7)
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "Arrok_Missionary_A1_S1", 0)
+	Base.AddPositionStage(a1, "Arrok_Missionary_A1_S2", 0)
+	Base.AddPositionStage(a1, "Arrok_Missionary_A1_S3", 0)
+	Base.AddPositionStage(a1, "Arrok_Missionary_A1_S4", 0)
 
-	AddTag("Arrok")
-	AddTag("BBP")
-	AddTag("Sex")
-	AddTag("Missionary")
-	AddTag("Laying")
-	AddTag("Vaginal")
-	AddTag("MF")
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Arrok_Missionary_A2_S1", -105)
+	Base.AddPositionStage(a2, "Arrok_Missionary_A2_S2", -105)
+	Base.AddPositionStage(a2, "Arrok_Missionary_A2_S3", -105, sos = 3)
+	Base.AddPositionStage(a2, "Arrok_Missionary_A2_S4", -107, sos = 7)
 
-	Save()
+	Base.AddTag("Arrok")
+	Base.AddTag("BBP")
+	Base.AddTag("Sex")
+	Base.AddTag("Missionary")
+	Base.AddTag("Laying")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
 endFunction
 
-function ArrokOral()
-	Name = "Arrok 69"
-
-	SetContent(Sexual)
-	SoundFX = Sucking
-
-	int a1 = AddPosition(Female, addCum=Oral)
-	AddPositionStage(a1, "Arrok_Oral_A1_S1", 0)
-	AddPositionStage(a1, "Arrok_Oral_A1_S2", 0)
-	AddPositionStage(a1, "Arrok_Oral_A1_S3", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "Arrok_Oral_A1_S3", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "Arrok_Oral_A1_S4", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "Arrok_Oral_A2_S1", 46, rotate = 180, silent = true, openMouth = true)
-	AddPositionStage(a2, "Arrok_Oral_A2_S1", 46, rotate = 180, silent = true, openMouth = true)
-	AddPositionStage(a2, "Arrok_Oral_A2_S2", 46, rotate = 180, silent = true, openMouth = true)
-	AddPositionStage(a2, "Arrok_Oral_A2_S3", 46, rotate = 180, silent = true, openMouth = true)
-	AddPositionStage(a2, "Arrok_Oral_A2_S3", 46, rotate = 180, silent = true, openMouth = true)
-
-	AddTag("Arrok")
-	AddTag("BBP")
-	AddTag("Sex")
-	AddTag("Oral")
-	AddTag("Cunnilingus")
-	AddTag("Blowjob")
-	AddTag("69")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-
-
-function ArrokReverseCowgirl()
-	Name = "Arrok Reverse Cowgirl"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=VaginalAnal)
-	AddPositionStage(a1, "Arrok_ReverseCowgirl_A1_S1", 0)
-	AddPositionStage(a1, "Arrok_ReverseCowgirl_A1_S2", 0)
-	AddPositionStage(a1, "Arrok_ReverseCowgirl_A1_S3", 0)
-	AddPositionStage(a1, "Arrok_ReverseCowgirl_A1_S4", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "Arrok_ReverseCowgirl_A2_S1", -105, sos = 5)
-	AddPositionStage(a2, "Arrok_ReverseCowgirl_A2_S2", -105, sos = 5)
-	AddPositionStage(a2, "Arrok_ReverseCowgirl_A2_S3", -105, sos = 8)
-	AddPositionStage(a2, "Arrok_ReverseCowgirl_A2_S4", -105, sos = 8)
-
-	AddTag("Arrok")
-	AddTag("BBP")
-	AddTag("Sex")
-	AddTag("Dirty")
-	AddTag("Cowgirl")
-	AddTag("Anal")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function ArrokSideways()
-	Name = "Arrok Sideways Fuck"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=VaginalAnal)
-	AddPositionStage(a1, "Arrok_Sideways_A1_S1", 0)
-	AddPositionStage(a1, "Arrok_Sideways_A1_S2", 0)
-	AddPositionStage(a1, "Arrok_Sideways_A1_S3", 0)
-	AddPositionStage(a1, "Arrok_Sideways_A1_S4", 0)
-
-	int a2 = AddPosition(Male) ; -100
-	AddPositionStage(a2, "Arrok_Sideways_A2_S1", -118.5, sos = 8)
-	AddPositionStage(a2, "Arrok_Sideways_A2_S2", -118.5, sos = 8)
-	AddPositionStage(a2, "Arrok_Sideways_A2_S3", -118.5, sos = 6)
-	AddPositionStage(a2, "Arrok_Sideways_A2_S4", -118.5, sos = 5)
-
-	AddTag("Arrok")
-	AddTag("BBP")
-	AddTag("Sex")
-	AddTag("Standing")
-	AddTag("Sideways")
-	AddTag("Dirty")
-	AddTag("Vaginal")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function ArrokStanding()
-	Name = "Arrok Standing Fuck"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=VaginalAnal)
-	AddPositionStage(a1, "Arrok_Standing_A1_S1", 0)
-	AddPositionStage(a1, "Arrok_Standing_A1_S2", 0)
-	AddPositionStage(a1, "Arrok_Standing_A1_S3", 0)
-	AddPositionStage(a1, "Arrok_Standing_A1_S4", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "Arrok_Standing_A2_S1", -104, sos = 9)
-	AddPositionStage(a2, "Arrok_Standing_A2_S2", -104, sos = 6)
-	AddPositionStage(a2, "Arrok_Standing_A2_S3", -104, sos = -7)
-	AddPositionStage(a2, "Arrok_Standing_A2_S4", -104, sos = 7)
-
-	AddTag("Arrok")
-	AddTag("BBP")
-	AddTag("Sex")
-	AddTag("Standing")
-	AddTag("Dirty")
-	AddTag("Vaginal")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function ArrokStandingForeplay()
-	Name = "Arrok Standing Foreplay"
-
-	SetContent(Foreplay)
-
-	int a1 = AddPosition(Female)
-	AddPositionStage(a1, "Arrok_StandingForeplay_A1_S1", 0)
-	AddPositionStage(a1, "Arrok_StandingForeplay_A1_S2", 0)
-	AddPositionStage(a1, "Arrok_StandingForeplay_A1_S3", 0)
-	AddPositionStage(a1, "Arrok_StandingForeplay_A1_S4", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "Arrok_StandingForeplay_A2_S1", -101, strapon = false, sos = -1)
-	AddPositionStage(a2, "Arrok_StandingForeplay_A2_S2", -101, strapon = false, sos = -1)
-	AddPositionStage(a2, "Arrok_StandingForeplay_A2_S3", -101, silent = true, strapon = false, sos = 5)
-	AddPositionStage(a2, "Arrok_StandingForeplay_A2_S4", -101, silent = true, strapon = false, sos = 5)
-
-	AddTag("Arrok")
-	AddTag("BBP")
-	AddTag("Foreplay")
-	AddTag("Standing")
-	AddTag("Loving")
-	AddTag("Kissing")
-	AddTag("LeadIn")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function ArrokTricycle()
-	Name = "Arrok Tricycle"
-
-	SetContent(Sexual)
-	SoundFX = SexMix
-
-	int a1 = AddPosition(Female, addCum=Oral)
-	AddPositionStage(a1, "Arrok_Tricycle_A1_S1", -1, up = 2, silent = true, openMouth = true)
-	AddPositionStage(a1, "Arrok_Tricycle_A1_S2", 0)
-	AddPositionStage(a1, "Arrok_Tricycle_A1_S3", 0)
-	AddPositionStage(a1, "Arrok_Tricycle_A1_S4", 1, side = 2.5, up = 3, silent = true, openMouth = true)
-
-	int a2 = AddPosition(Female, addCum=Oral)
-	AddPositionStage(a2, "Arrok_Tricycle_A2_S1", -100)
-	AddPositionStage(a2, "Arrok_Tricycle_A2_S2", -100)
-	AddPositionStage(a2, "Arrok_Tricycle_A2_S3", -100.5, silent = true, openMouth = true)
-	AddPositionStage(a2, "Arrok_Tricycle_A2_S4", -100, side = -1, up = 2, silent = true, openMouth = true)
-
-	int a3 = AddPosition(Male)
-	AddPositionStage(a3, "Arrok_Tricycle_A3_S1", 108, sos = -2)
-	AddPositionStage(a3, "Arrok_Tricycle_A3_S2", 108, silent = true, openMouth = true, sos = 5)
-	AddPositionStage(a3, "Arrok_Tricycle_A3_S3", 108, sos = -1)
-	AddPositionStage(a3, "Arrok_Tricycle_A3_S4", 108, sos = -3)
-
-	AddTag("Sex")
-	AddTag("Arrok")
-	AddTag("BBP")
-	AddTag("Tricycle")
-	AddTag("Threeway")
-	AddTag("Blowjob")
-	AddTag("Oral")
-	AddTag("Cunnilingus")
-	AddTag("Orgy")
-	AddTag("Vaginal")
-	AddTag("Dirty")
-	AddTag("MFF")
-
-	Save()
-endFunction
-
-function ArrokHugFuck()
-	Name = "Arrok HugFuck"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=Vaginal)
-	AddPositionStage(a1, "Arrok_Hugfuck_A1_S1", 0)
-	AddPositionStage(a1, "Arrok_Hugfuck_A1_S2", 0)
-	AddPositionStage(a1, "Arrok_Hugfuck_A1_S3", 0)
-	AddPositionStage(a1, "Arrok_Hugfuck_A1_S4", 0)
-
-	int a2 = AddPosition(Male) ; -99
-	AddPositionStage(a2, "Arrok_Hugfuck_A2_S1", -103.5, sos = 9)
-	AddPositionStage(a2, "Arrok_Hugfuck_A2_S2", -103.5, sos = 9)
-	AddPositionStage(a2, "Arrok_Hugfuck_A2_S3", -103.5, sos = 9)
-	AddPositionStage(a2, "Arrok_Hugfuck_A2_S4", -103.5, sos = 9)
-
-	AddTag("Arrok")
-	AddTag("BBP")
-	AddTag("Sex")
-	AddTag("Hugging")
-	AddTag("Loving")
-	AddTag("Vaginal")
-	AddTag("Standing")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function ArrokLesbian()
-	Name = "Arrok Lesbian"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female)
-	AddPositionStage(a1, "Arrok_Lesbian_A1_S1", 0)
-	AddPositionStage(a1, "Arrok_Lesbian_A1_S2", 0)
-	AddPositionStage(a1, "Arrok_Lesbian_A1_S3", 0)
-	AddPositionStage(a1, "Arrok_Lesbian_A1_S4", 0)
-
-	int a2 = AddPosition(Female)
-	AddPositionStage(a2, "Arrok_Lesbian_A2_S1", -100)
-	AddPositionStage(a2, "Arrok_Lesbian_A2_S2", -100)
-	AddPositionStage(a2, "Arrok_Lesbian_A2_S3", -100)
-	AddPositionStage(a2, "Arrok_Lesbian_A2_S4", -100)
-
-	AddTag("Arrok")
-	AddTag("BBP")
-	AddTag("Sex")
-	AddTag("Lesbian")
-	AddTag("Oral")
-	AddTag("Vaginal")
-
-	Save()
-endFunction
-
-function ArrokSittingForeplay()
-	Name = "Arrok Sitting Foreplay"
-
-	SetContent(Foreplay)
-
-	int a1 = AddPosition(Female)
-	AddPositionStage(a1, "Arrok_SittingForeplay_A1_S1", 0)
-	AddPositionStage(a1, "Arrok_SittingForeplay_A1_S2", 0)
-	AddPositionStage(a1, "Arrok_SittingForeplay_A1_S3", 0)
-	AddPositionStage(a1, "Arrok_SittingForeplay_A1_S4", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "Arrok_SittingForeplay_A2_S1", -100, strapon = false)
-	AddPositionStage(a2, "Arrok_SittingForeplay_A2_S2", -100, strapon = false)
-	AddPositionStage(a2, "Arrok_SittingForeplay_A2_S3", -100, strapon = false)
-	AddPositionStage(a2, "Arrok_SittingForeplay_A2_S4", -100, strapon = false)
-
-	AddTag("Arrok")
-	AddTag("BBP")
-	AddTag("Kissing")
-	AddTag("Cuddling")
-	AddTag("Loving")
-	AddTag("Foreplay")
-	AddTag("LeadIn")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function ArrokAnal()
-	Name = "Arrok Anal"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=Anal)
-	AddPositionStage(a1, "Arrok_Anal_A1_S1", 0)
-	AddPositionStage(a1, "Arrok_Anal_A1_S2", 0)
-	AddPositionStage(a1, "Arrok_Anal_A1_S3", 0)
-	AddPositionStage(a1, "Arrok_Anal_A1_S4", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "Arrok_Anal_A2_S1", -117, silent = true, openMouth = true)
-	AddPositionStage(a2, "Arrok_Anal_A2_S2", -103.5, sos = 3)
-	AddPositionStage(a2, "Arrok_Anal_A2_S3", -121.5, sos = 4)
-	AddPositionStage(a2, "Arrok_Anal_A2_S4", -123.5, sos = 3)
-
-	AddTag("Arrok")
-	AddTag("TBBP")
-	AddTag("Anal")
-	AddTag("Sex")
-	AddTag("Standing")
-	AddTag("Dirty")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function ArrokRape()
-	Name = "Arrok Rape"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=Oral)
-	AddPositionStage(a1, "Arrok_Rape_A1_S1", 0)
-	AddPositionStage(a1, "Arrok_Rape_A1_S2", 0)
-	AddPositionStage(a1, "Arrok_Rape_A1_S3", 0)
-	AddPositionStage(a1, "Arrok_Rape_A1_S4", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "Arrok_Rape_A2_S1", -125)
-	AddPositionStage(a2, "Arrok_Rape_A2_S2", -125)
-	AddPositionStage(a2, "Arrok_Rape_A2_S3", -125, sos = 4)
-	AddPositionStage(a2, "Arrok_Rape_A2_S4", -125, up = 4)
-
-	AddTag("Arrok")
-	AddTag("TBBP")
-	AddTag("Anal")
-	AddTag("Sex")
-	AddTag("Aggressive")
-	AddTAg("AggressiveDefault")
-	AddTag("Dirty")
-	AddTag("Behind")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function SexLabAggrBehind()
-	Name = "Rough Behind"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-
-	int a1 = AddPosition(Female, addCum=Anal)
-	AddPositionStage(a1, "AggrBehind_A1_S1", 0)
-	AddPositionStage(a1, "AggrBehind_A1_S2", 0)
-	AddPositionStage(a1, "AggrBehind_A1_S3", 0)
-	AddPositionStage(a1, "AggrBehind_A1_S4", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AggrBehind_A2_S1", -12)
-	AddPositionStage(a2, "AggrBehind_A2_S2", -12)
-	AddPositionStage(a2, "AggrBehind_A2_S3", -12)
-	AddPositionStage(a2, "AggrBehind_A2_S4", -12)
-
-	AddTag("Default")
-	AddTag("Sex")
-	AddTag("Behind")
-	AddTag("Anal")
-	AddTag("Aggressive")
-	AddTAg("AggressiveDefault")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function SexLabAggrDoggyStyle()
-	Name = "Rough Doggy Style"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=Anal)
-	AddPositionStage(a1, "AggrDoggyStyle_A1_S1", 0)
-	AddPositionStage(a1, "AggrDoggyStyle_A1_S2", 0)
-	AddPositionStage(a1, "AggrDoggyStyle_A1_S3", 0)
-	AddPositionStage(a1, "AggrDoggyStyle_A1_S4", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AggrDoggyStyle_A2_S1", -100, sos = 5)
-	AddPositionStage(a2, "AggrDoggyStyle_A2_S2", -100, sos = 5)
-	AddPositionStage(a2, "AggrDoggyStyle_A2_S3", -100, sos = 7)
-	AddPositionStage(a2, "AggrDoggyStyle_A2_S4", -100, sos = 5)
-
-	AddTag("Default")
-	AddTag("Sex")
-	AddTag("Doggystyle")
-	AddTag("Behind")
-	AddTag("Anal")
-	AddTag("Aggressive")
-	AddTAg("AggressiveDefault")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function SexLabAggrMissionary()
-	Name = "Rough Missionary"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=VaginalAnal)
-	AddPositionStage(a1, "AggrMissionary_A1_S1", 0)
-	AddPositionStage(a1, "AggrMissionary_A1_S2", 0)
-	AddPositionStage(a1, "AggrMissionary_A1_S3", 0)
-	AddPositionStage(a1, "AggrMissionary_A1_S4", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AggrMissionary_A2_S1", -86, sos = 4)
-	AddPositionStage(a2, "AggrMissionary_A2_S2", -86, sos = 4)
-	AddPositionStage(a2, "AggrMissionary_A2_S3", -86, sos = 3)
-	AddPositionStage(a2, "AggrMissionary_A2_S4", -86, sos = 3)
-
-	AddTag("Default")
-	AddTag("Sex")
-	AddTag("Missionary")
-	AddTag("Laying")
-	AddTag("Vaginal")
-	AddTag("Aggressive")
-	AddTAg("AggressiveDefault")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function SexLabBoobjob()
-	Name = "Boobjob"
-
-	SetContent(Sexual)
-
-	int a1 = AddPosition(Female, addCum=Oral)
-	AddPositionStage(a1, "Boobjob_A1_S1", 0)
-	AddPositionStage(a1, "Boobjob_A1_S2", 0)
-	AddPositionStage(a1, "Boobjob_A1_S3", 0)
-	AddPositionStage(a1, "Boobjob_A1_S4", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "Boobjob_A2_S1", -102)
-	AddPositionStage(a2, "Boobjob_A2_S2", -102)
-	AddPositionStage(a2, "Boobjob_A2_S3", -102)
-	AddPositionStage(a2, "Boobjob_A2_S4", -102)
-
-	AddTag("Default")
-	AddTag("Sex")
-	AddTag("Boobjob")
-	AddTag("Dirty")
-	AddTag("Breast")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function SexLabDoggyStyle()
-	Name = "Doggy Style"
-
-	SoundFX = Squishing
-	SetContent(Sexual)
-
-	int a1 = AddPosition(Female, addCum=Anal)
-	AddPositionStage(a1, "DoggyStyle_A1_S1", 0)
-	AddPositionStage(a1, "DoggyStyle_A1_S2", 0)
-	AddPositionStage(a1, "DoggyStyle_A1_S3", 0)
-	AddPositionStage(a1, "DoggyStyle_A1_S4", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "DoggyStyle_A2_S1", -104, sos = 3)
-	AddPositionStage(a2, "DoggyStyle_A2_S2", -104, sos = 3)
-	AddPositionStage(a2, "DoggyStyle_A2_S3", -104, sos = 3)
-	AddPositionStage(a2, "DoggyStyle_A2_S4", -104, sos = 3)
-
-	AddTag("Default")
-	AddTag("Sex")
-	AddTag("Doggy Style")
-	AddTag("Vaginal")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function SexLabHuggingSex()
-	Name = "Hugging Fuck"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=Vaginal)
-	AddPositionStage(a1, "HuggingSex_A1_S1", 0)
-	AddPositionStage(a1, "HuggingSex_A1_S2", 0)
-	AddPositionStage(a1, "HuggingSex_A1_S3", 0)
-	AddPositionStage(a1, "HuggingSex_A1_S4", 0)
-
-	int a2 = AddPosition(Male) ; -99
-	AddPositionStage(a2, "HuggingSex_A2_S1", -102, sos = 9)
-	AddPositionStage(a2, "HuggingSex_A2_S2", -102, sos = 9)
-	AddPositionStage(a2, "HuggingSex_A2_S3", -102, sos = 9)
-	AddPositionStage(a2, "HuggingSex_A2_S4", -102, sos = 9)
-
-	AddTag("Default")
-	AddTag("Sex")
-	AddTag("Hugging")
-	AddTag("Loving")
-	AddTag("Vaginal")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function SexLabMissionary()
-	Name = "Missionary"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=Vaginal)
-	AddPositionStage(a1, "Missionary_A1_S1", 0)
-	AddPositionStage(a1, "Missionary_A1_S2", 0)
-	AddPositionStage(a1, "Missionary_A1_S3", 0)
-	AddPositionStage(a1, "Missionary_A1_S4", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "Missionary_A2_S1", -104, sos = 4)
-	AddPositionStage(a2, "Missionary_A2_S2", -104, sos = 4)
-	AddPositionStage(a2, "Missionary_A2_S3", -104, sos = 4)
-	AddPositionStage(a2, "Missionary_A2_S4", -104, sos = 4)
-
-	AddTag("Default")
-	AddTag("Sex")
-	AddTag("Missionary")
-	AddTag("Laying")
-	AddTag("Vaginal")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function SexLabReverseCowgirl()
-	Name = "Reverse Cowgirl"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=VaginalAnal)
-	AddPositionStage(a1, "ReverseCowgirl_A1_S1", 0)
-	AddPositionStage(a1, "ReverseCowgirl_A1_S2", 0)
-	AddPositionStage(a1, "ReverseCowgirl_A1_S3", 0)
-	AddPositionStage(a1, "ReverseCowgirl_A1_S4", 0)
-
-	int a2 = AddPosition(Male) ; -102
-	AddPositionStage(a2, "ReverseCowgirl_A2_S1", -107, sos = 3)
-	AddPositionStage(a2, "ReverseCowgirl_A2_S2", -107, sos = 3)
-	AddPositionStage(a2, "ReverseCowgirl_A2_S3", -107, sos = 3)
-	AddPositionStage(a2, "ReverseCowgirl_A2_S4", -107, sos = 3)
-
-	AddTag("Default")
-	AddTag("Sex")
-	AddTag("Dirty")
-	AddTag("Cowgirl")
-	AddTag("Anal")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function SexLabSideways()
-	Name = "Sideways Fuck"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=VaginalAnal)
-	AddPositionStage(a1, "Sideways_A1_S1", 0)
-	AddPositionStage(a1, "Sideways_A1_S2", 0)
-	AddPositionStage(a1, "Sideways_A1_S3", 0)
-	AddPositionStage(a1, "Sideways_A1_S4", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "Sideways_A2_S1", -104, sos = 9)
-	AddPositionStage(a2, "Sideways_A2_S2", -104, sos = 9)
-	AddPositionStage(a2, "Sideways_A2_S3", -104, sos = 9)
-	AddPositionStage(a2, "Sideways_A2_S4", -104, sos = 9)
-
-	AddTag("Default")
-	AddTag("Sex")
-	AddTag("Standing")
-	AddTag("Sideways")
-	AddTag("Vaginal")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function SexLabStanding()
-	Name = "Standing Fuck"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=Anal)
-	AddPositionStage(a1, "Standing_A1_S1", 0)
-	AddPositionStage(a1, "Standing_A1_S2", 0)
-	AddPositionStage(a1, "Standing_A1_S3", 0)
-	AddPositionStage(a1, "Standing_A1_S4", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "Standing_A2_S1", -81, sos = 4)
-	AddPositionStage(a2, "Standing_A2_S2", -81, sos = 3)
-	AddPositionStage(a2, "Standing_A2_S3", -81, sos = 5)
-	AddPositionStage(a2, "Standing_A2_S4", -81, sos = 6)
-
-	AddTag("Default")
-	AddTag("Sex")
-	AddTag("Standing")
-	AddTag("Dirty")
-	AddTag("Vaginal")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function SexLabTribadism()
-	Name = "Tribadism"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female)
-	AddPositionStage(a1, "Tribadism_A1_S1", 0)
-	AddPositionStage(a1, "Tribadism_A1_S2", 0)
-	AddPositionStage(a1, "Tribadism_A1_S2", 0)
-
-	int a2 = AddPosition(Female)
-	AddPositionStage(a2, "Tribadism_A2_S1", 60)
-	AddPositionStage(a2, "Tribadism_A2_S2", 60)
-	AddPositionStage(a2, "Tribadism_A2_S2", 60)
-
-	AddTag("Default")
-	AddTag("Sex")
-	AddTag("Lesbian")
-	AddTag("Tribadism")
-	AddTag("Vaginal")
-
-	Save()
-endFunction
-
-function BleaghFootJob()
-	Name = "Bleagh FootJob"
-
-	SetContent(Sexual)
-
-	int a1 = AddPosition(Female, addCum=Anal)
-	AddPositionStage(a1, "Bleagh_FootJob_A1_S1", 0)
-	AddPositionStage(a1, "Bleagh_FootJob_A1_S2", 0)
-	AddPositionStage(a1, "Bleagh_FootJob_A1_S3", 0)
-	AddPositionStage(a1, "Bleagh_FootJob_A1_S4", 0)
-	AddPositionStage(a1, "Bleagh_FootJob_A1_S5", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "Bleagh_FootJob_A2_S1", 42, rotate = 180)
-	AddPositionStage(a2, "Bleagh_FootJob_A2_S2", 42, rotate = 180)
-	AddPositionStage(a2, "Bleagh_FootJob_A2_S3", 42, rotate = 180)
-	AddPositionStage(a2, "Bleagh_FootJob_A2_S4", 42, rotate = 180)
-	AddPositionStage(a2, "Bleagh_FootJob_A2_S5", 42, rotate = 180)
-
-	AddTag("Sex")
-	AddTag("MF")
-	AddTag("Fetish")
-	AddTag("Feet")
-	AddTag("Footjob")
-	AddTag("Bleagh")
-
-	Save()
-endFunction
-
-function BleaghFemaleSolo()
-	Name = "Bleagh Female Masturbation"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female)
-	AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S1", 0)
-	AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S2", 0)
-	AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S3", 0)
-	AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S4", 0)
-	AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S5", 0)
-
-	AddTag("Sex")
-	AddTag("Solo")
-	AddTag("Masturbation")
-	AddTag("Dirty")
-
-	Save()
-endFunction
-
-function APAnal()
-	Name = "AP Anal"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=Anal)
-	AddPositionStage(a1, "AP_Anal_A1_S1", 0)
-	AddPositionStage(a1, "AP_Anal_A1_S2", 0)
-	AddPositionStage(a1, "AP_Anal_A1_S3", 0)
-	AddPositionStage(a1, "AP_Anal_A1_S4", 0)
-	AddPositionStage(a1, "AP_Anal_A1_S5", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AP_Anal_A2_S1", 44, rotate = 180)
-	AddPositionStage(a2, "AP_Anal_A2_S2", 44, rotate = 180)
-	AddPositionStage(a2, "AP_Anal_A2_S3", 44, rotate = 180)
-	AddPositionStage(a2, "AP_Anal_A2_S4", 44, rotate = 180)
-	AddPositionStage(a2, "AP_Anal_A2_S5", 44, rotate = 180)
-
-	AddTag("AP")
-	AddTag("Sex")
-	AddTag("Straight")
-	AddTag("Aggressive")
-	AddTAg("AggressiveDefault")
-	AddTag("Anal")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function APBedMissionary()
-	Name = "AP Bed Missionary"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=Vaginal)
-	AddPositionStage(a1, "AP_BedMissionary_A1_S1", 0)
-	AddPositionStage(a1, "AP_BedMissionary_A1_S2", 0)
-	AddPositionStage(a1, "AP_BedMissionary_A1_S3", 0)
-	AddPositionStage(a1, "AP_BedMissionary_A1_S4", 0)
-	AddPositionStage(a1, "AP_BedMissionary_A1_S5", 0)
-	AddPositionStage(a1, "AP_BedMissionary_A1_S6", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AP_BedMissionary_A2_S1", 44, rotate = 180, sos = 5)
-	AddPositionStage(a2, "AP_BedMissionary_A2_S2", 44, rotate = 180, sos = 5)
-	AddPositionStage(a2, "AP_BedMissionary_A2_S3", 44, rotate = 180, sos = 5)
-	AddPositionStage(a2, "AP_BedMissionary_A2_S4", 44, rotate = 180, sos = 5)
-	AddPositionStage(a2, "AP_BedMissionary_A2_S4", 44, rotate = 180, sos = 5)
-	AddPositionStage(a2, "AP_BedMissionary_A2_S4", 44, rotate = 180, sos = 5)
-
-	AddTag("AP")
-	AddTag("Sex")
-	AddTag("Straight")
-	AddTag("Missionary")
-	AddTag("Vaginal")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function APBlowjob()
-	Name = "AP Blowjob"
-
-	SetContent(Sexual)
-	SoundFX = Sucking
-
-	int a1 = AddPosition(Female, addCum=Oral)
-	AddPositionStage(a1, "AP_Blowjob_A1_S1", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "AP_Blowjob_A1_S2", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "AP_Blowjob_A1_S3", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "AP_Blowjob_A1_S4", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "AP_Blowjob_A1_S5", 0, silent = true, openMouth = true)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AP_Cowgirl_A2_S1", 43, rotate = 180, sos = 1)
-	AddPositionStage(a2, "AP_Cowgirl_A2_S2", 43, rotate = 180, sos = 1)
-	AddPositionStage(a2, "AP_Cowgirl_A2_S2", 43, rotate = 180, sos = 1)
-	AddPositionStage(a2, "AP_Cowgirl_A2_S3", 43, rotate = 180, sos = 1)
-	AddPositionStage(a2, "AP_Cowgirl_A2_S4", 43, rotate = 180, sos = 1)
-
-	AddTag("AP")
-	AddTag("Sex")
-	AddTag("Straight")
-	AddTag("Dirty")
-	AddTag("Oral")
-	AddTag("Blowjob")
-	AddTag("Standing")
-	AddTag("LeadIn")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function APBoobjob()
-	Name = "AP Boobjob"
-
-	SetContent(Sexual)
-
-	int a1 = AddPosition(Female, addCum=Oral)
-	AddPositionStage(a1, "AP_Boobjob_A1_S1", 0)
-	AddPositionStage(a1, "AP_Boobjob_A1_S2", 0)
-	AddPositionStage(a1, "AP_Boobjob_A1_S3", 0)
-	AddPositionStage(a1, "AP_Boobjob_A1_S4", 0)
-	AddPositionStage(a1, "AP_Boobjob_A1_S5", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AP_IdleStand_A2_S1", 30, rotate = 180, sos = 6)
-	AddPositionStage(a2, "AP_IdleStand_A2_S2", 30, rotate = 180, sos = 6)
-	AddPositionStage(a2, "AP_IdleStand_A2_S3", 30, rotate = 180, sos = 6)
-	AddPositionStage(a2, "AP_IdleStand_A2_S4", 30, rotate = 180, sos = 6)
-	AddPositionStage(a2, "AP_IdleStand_A2_S5", 30, rotate = 180, sos = 6)
-
-	AddTag("AP")
-	AddTag("Sex")
-	AddTag("Straight")
-	AddTag("Dirty")
-	AddTag("Boobjob")
-	AddTag("Standing")
-	AddTag("Breast")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function APCowgirl()
-	Name = "AP Cowgirl"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=VaginalAnal)
-	AddPositionStage(a1, "AP_Cowgirl_A1_S1", 0)
-	AddPositionStage(a1, "AP_Cowgirl_A1_S2", 0)
-	AddPositionStage(a1, "AP_Cowgirl_A1_S3", 0)
-	AddPositionStage(a1, "AP_Cowgirl_A1_S4", 0)
-	AddPositionStage(a1, "AP_Cowgirl_A1_S5", 0)
-	AddPositionStage(a1, "AP_Cowgirl_A1_S6", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AP_Cowgirl_A2_S1", 44, rotate = 180, sos = 1)
-	AddPositionStage(a2, "AP_Cowgirl_A2_S2", 44, rotate = 180, sos = 1)
-	AddPositionStage(a2, "AP_Cowgirl_A2_S2", 44, rotate = 180, sos = 1)
-	AddPositionStage(a2, "AP_Cowgirl_A2_S3", 44, rotate = 180, sos = 1)
-	AddPositionStage(a2, "AP_Cowgirl_A2_S4", 44, rotate = 180, sos = 2)
-	AddPositionStage(a2, "AP_Cowgirl_A2_S4", 44, rotate = 180, sos = 2)
-
-	AddTag("AP")
-	AddTag("Sex")
-	AddTag("Straight")
-	AddTag("Cowgirl")
-	AddTag("Dirty")
-	AddTag("Vaginal")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function APFemaleSolo()
-	Name = "AP Female Masturbation"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female)
-	AddPositionStage(a1, "AP_FemaleSolo_A1_S1", 0)
-	AddPositionStage(a1, "AP_FemaleSolo_A1_S2", 0)
-	AddPositionStage(a1, "AP_FemaleSolo_A1_S3", 0)
-	AddPositionStage(a1, "AP_FemaleSolo_A1_S4", 0)
-	AddPositionStage(a1, "AP_FemaleSolo_A1_S5", 0)
-	AddPositionStage(a1, "AP_FemaleSolo_A1_S6", 0)
-
-	AddTag("Sex")
-	AddTag("Solo")
-	AddTag("Masturbation")
-	AddTag("Dirty")
-
-	Save()
-endFunction
-
-function APFisting()
-	Name = "AP Fisting"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female)
-	AddPositionStage(a1, "AP_Fisting_A1_S1", 0)
-	AddPositionStage(a1, "AP_Fisting_A1_S2", 0)
-	AddPositionStage(a1, "AP_Fisting_A1_S3", 0)
-	AddPositionStage(a1, "AP_Fisting_A1_S4", 0)
-	AddPositionStage(a1, "AP_Fisting_A1_S5", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AP_Fisting_A2_S1", 44, rotate = 180, strapon = false)
-	AddPositionStage(a2, "AP_Fisting_A2_S2", 44, rotate = 180, strapon = false)
-	AddPositionStage(a2, "AP_Fisting_A2_S3", 44, rotate = 180, strapon = false)
-	AddPositionStage(a2, "AP_Fisting_A2_S4", 44, rotate = 180, strapon = false)
-	AddPositionStage(a2, "AP_Fisting_A2_S4", 44, rotate = 180, strapon = false)
-
-	AddTag("AP")
-	AddTag("Sex")
-	AddTag("Straight")
-	AddTag("Aggressive")
-	AddTAg("AggressiveDefault")
-	AddTag("Fisting")
-	AddTag("Rough")
-	AddTag("Dirty")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function APHandjob()
-	Name = "AP Handjob"
-
-	SetContent(Sexual)
-
-	int a1 = AddPosition(Female, addCum=Oral)
-	AddPositionStage(a1, "AP_Handjob_A1_S1", 0, up = 0.5, silent = true)
-	AddPositionStage(a1, "AP_Handjob_A1_S2", 0, up = 0.5, silent = true)
-	AddPositionStage(a1, "AP_Handjob_A1_S3", 0, up = 0.5, silent = true)
-	AddPositionStage(a1, "AP_Handjob_A1_S4", 0, up = 0.5, silent = true)
-	AddPositionStage(a1, "AP_Handjob_A1_S5", 0, up = 0.5, silent = true, openMouth = true)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AP_IdleStand_A2_S1", 44, side = -3, rotate = 180, sos = -1)
-	AddPositionStage(a2, "AP_IdleStand_A2_S2", 44, side = -3, rotate = 180, sos = -1)
-	AddPositionStage(a2, "AP_IdleStand_A2_S3", 44, side = -3, rotate = 180, sos = -1)
-	AddPositionStage(a2, "AP_IdleStand_A2_S4", 44, side = -3, rotate = 180, sos = -1)
-	AddPositionStage(a2, "AP_IdleStand_A2_S5", 44, side = -3, rotate = 180, sos = -1)
-
-	AddTag("AP")
-	AddTag("Sex")
-	AddTag("Straight")
-	AddTag("Dirty")
-	AddTag("Handjob")
-	AddTag("Standing")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function APKneelBlowjob()
-	Name = "AP Kneeling Blowjob"
-
-	SetContent(Sexual)
-	SoundFX = Sucking
-
-	int a1 = AddPosition(Female, addCum=Oral)
-	AddPositionStage(a1, "AP_KneelBlowjob_A1_S1", 0, up = 1, silent = true, openMouth = true)
-	AddPositionStage(a1, "AP_KneelBlowjob_A1_S2", 0, up = 1, silent = true, openMouth = true)
-	AddPositionStage(a1, "AP_KneelBlowjob_A1_S3", 0, up = 1, silent = true, openMouth = true)
-	AddPositionStage(a1, "AP_KneelBlowjob_A1_S4", 0, up = 1, silent = true, openMouth = true)
-	AddPositionStage(a1, "AP_KneelBlowjob_A1_S5", 0, up = 1, silent = true, openMouth = true)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AP_IdleStand_A2_S1", 44, rotate = 180, sos = -2)
-	AddPositionStage(a2, "AP_IdleStand_A2_S2", 44, rotate = 180, sos = -2)
-	AddPositionStage(a2, "AP_IdleStand_A2_S3", 44, rotate = 180, sos = -2)
-	AddPositionStage(a2, "AP_IdleStand_A2_S4", 44, rotate = 180, sos = -2)
-	AddPositionStage(a2, "AP_IdleStand_A2_S5", 44, rotate = 180, sos = -2)
-
-	AddTag("AP")
-	AddTag("Sex")
-	AddTag("Straight")
-	AddTag("Dirty")
-	AddTag("Oral")
-	AddTag("Blowjob")
-	AddTag("Standing")
-	AddTag("LeadIn")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function APLegUp()
-	Name = "AP Leg Up Fuck"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=Vaginal)
-	AddPositionStage(a1, "AP_LegUp_A1_S1", 0)
-	AddPositionStage(a1, "AP_LegUp_A1_S2", 0)
-	AddPositionStage(a1, "AP_LegUp_A1_S3", 0)
-	AddPositionStage(a1, "AP_LegUp_A1_S4", 0)
-	AddPositionStage(a1, "AP_LegUp_A1_S5", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AP_LegUp_A2_S1", 44, up = 5, rotate = 180, sos = 3)
-	AddPositionStage(a2, "AP_LegUp_A2_S2", 44, up = 5, rotate = 180, sos = 3)
-	AddPositionStage(a2, "AP_LegUp_A2_S3", 44, up = 5, rotate = 180, sos = 3)
-	AddPositionStage(a2, "AP_LegUp_A2_S4", 44, up = 5, rotate = 180, sos = 3)
-	AddPositionStage(a2, "AP_LegUp_A2_S5", 44, up = 5, rotate = 180, sos = 3)
-
-	AddTag("AP")
-	AddTag("Dirty")
-	AddTag("Laying")
-	AddTag("Aggressive")
-	AddTAg("AggressiveDefault")
-	AddTag("Vaginal")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function APShoulder()
-	Name = "AP Shoulder"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=VaginalAnal)
-	AddPositionStage(a1, "AP_Shoulder_A1_S1", 0)
-	AddPositionStage(a1, "AP_Shoulder_A1_S2", 0)
-	AddPositionStage(a1, "AP_Shoulder_A1_S3", 0)
-	AddPositionStage(a1, "AP_Shoulder_A1_S4", 0)
-	AddPositionStage(a1, "AP_Shoulder_A1_S5", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AP_IdleStand_A2_S1", 44, rotate = 180, sos = 2)
-	AddPositionStage(a2, "AP_IdleStand_A2_S2", 44, rotate = 180, sos = 2)
-	AddPositionStage(a2, "AP_IdleStand_A2_S3", 44, rotate = 180, sos = 2)
-	AddPositionStage(a2, "AP_IdleStand_A2_S4", 44, rotate = 180, sos = 2)
-	AddPositionStage(a2, "AP_IdleStand_A2_S5", 44, rotate = 180, sos = 2)
-
-	AddTag("AP")
-	AddTag("Sex")
-	AddTag("Straight")
-	AddTag("Standing")
-	AddTag("Vaginal")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function APStandBlowjob()
-	Name = "AP Standing Blowjob"
-
-	SetContent(Sexual)
-	SoundFX = Sucking
-
-	int a1 = AddPosition(Female, addCum=Oral)
-	AddPositionStage(a1, "AP_StandBlowjob_A1_S1", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "AP_StandBlowjob_A1_S2", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "AP_StandBlowjob_A1_S3", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "AP_StandBlowjob_A1_S4", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "AP_StandBlowjob_A1_S5", 0, silent = true, openMouth = true)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AP_IdleStand_A2_S1", 44, rotate = 180, sos = -1)
-	AddPositionStage(a2, "AP_IdleStand_A2_S2", 44, rotate = 180, sos = -1)
-	AddPositionStage(a2, "AP_IdleStand_A2_S3", 44, rotate = 180, sos = -1)
-	AddPositionStage(a2, "AP_IdleStand_A2_S4", 44, rotate = 180, sos = -1)
-	AddPositionStage(a2, "AP_IdleStand_A2_S5", 44, rotate = 180, sos = -1)
-
-	AddTag("AP")
-	AddTag("Sex")
-	AddTag("Straight")
-	AddTag("Dirty")
-	AddTag("Oral")
-	AddTag("Blowjob")
-	AddTag("LeadIn")
-	AddTag("Standing")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function APStanding()
-	Name = "AP Standing"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=Vaginal)
-	AddPositionStage(a1, "AP_Standing_A1_S1", 0)
-	AddPositionStage(a1, "AP_Standing_A1_S2", 0)
-	AddPositionStage(a1, "AP_Standing_A1_S3", 0)
-	AddPositionStage(a1, "AP_Standing_A1_S4", 0)
-	AddPositionStage(a1, "AP_Standing_A1_S5", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AP_Standing_A2_S1", 43, rotate = 180, sos = 2)
-	AddPositionStage(a2, "AP_Standing_A2_S2", 43, rotate = 180, sos = 2)
-	AddPositionStage(a2, "AP_Standing_A2_S2", 43, rotate = 180, sos = 2)
-	AddPositionStage(a2, "AP_Standing_A2_S3", 43, rotate = 180, sos = 2)
-	AddPositionStage(a2, "AP_Standing_A2_S3", 43, rotate = 180, sos = 2)
-
-	AddTag("AP")
-	AddTag("Sex")
-	AddTag("Straight")
-	AddTag("Standing")
-	AddTag("Vaginal")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function APDoggyStyle()
-	Name = "AP DoggyStyle"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=Anal)
-	AddPositionStage(a1, "AP_DoggyStyle_A1_S1", 0)
-	AddPositionStage(a1, "AP_DoggyStyle_A1_S2", 0)
-	AddPositionStage(a1, "AP_DoggyStyle_A1_S3", 0)
-	AddPositionStage(a1, "AP_DoggyStyle_A1_S4", 0)
-	AddPositionStage(a1, "AP_DoggyStyle_A1_S5", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AP_HoldLegUp_A2_S1", 44, rotate = 180)
-	AddPositionStage(a2, "AP_HoldLegUp_A2_S2", 44, rotate = 180)
-	AddPositionStage(a2, "AP_HoldLegUp_A2_S2", 44, rotate = 180)
-	AddPositionStage(a2, "AP_HoldLegUp_A2_S3", 44, rotate = 180)
-	AddPositionStage(a2, "AP_HoldLegUp_A2_S3", 44, rotate = 180)
-
-	AddTag("AP")
-	AddTag("Sex")
-	AddTag("Straight")
-	AddTag("DoggyStyle")
-	AddTag("Knees")
-	AddTag("Anal")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function APHoldLegUp()
-	Name = "AP Holding Leg Up"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=Vaginal)
-	AddPositionStage(a1, "AP_HoldLegUp_A1_S1", 0)
-	AddPositionStage(a1, "AP_HoldLegUp_A1_S2", 0)
-	AddPositionStage(a1, "AP_HoldLegUp_A1_S3", 0)
-	AddPositionStage(a1, "AP_HoldLegUp_A1_S4", 0)
-	AddPositionStage(a1, "AP_HoldLegUp_A1_S5", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AP_HoldLegUp_A2_S1", 44, rotate = 180)
-	AddPositionStage(a2, "AP_HoldLegUp_A2_S2", 44, rotate = 180)
-	AddPositionStage(a2, "AP_HoldLegUp_A2_S2", 44, rotate = 180)
-	AddPositionStage(a2, "AP_HoldLegUp_A2_S3", 44, rotate = 180)
-	AddPositionStage(a2, "AP_HoldLegUp_A2_S3", 44, rotate = 180)
-
-	AddTag("AP")
-	AddTag("Sex")
-	AddTag("Laying")
-	AddTag("Aggressive")
-	AddTAg("AggressiveDefault")
-	AddTag("Straight")
-	AddTag("Anal")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function APFaceDown()
-	Name = "AP Face Down Anal"
-
-	SetContent(Sexual)
-	SoundFX = Squishing
-
-	int a1 = AddPosition(Female, addCum=Anal)
-	AddPositionStage(a1, "AP_FaceDown_A1_S1", 0)
-	AddPositionStage(a1, "AP_FaceDown_A1_S2", 0)
-	AddPositionStage(a1, "AP_FaceDown_A1_S3", 0)
-	AddPositionStage(a1, "AP_FaceDown_A1_S4", 0)
-	AddPositionStage(a1, "AP_FaceDown_A1_S5", 0)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AP_FaceDown_A2_S1", 44, rotate = 180)
-	AddPositionStage(a2, "AP_FaceDown_A2_S2", 44, rotate = 180)
-	AddPositionStage(a2, "AP_FaceDown_A2_S3", 44, rotate = 180)
-	AddPositionStage(a2, "AP_FaceDown_A2_S3", 44, rotate = 180)
-	AddPositionStage(a2, "AP_FaceDown_A2_S4", 44, rotate = 180)
-
-	AddTag("AP")
-	AddTag("Sex")
-	AddTag("Laying")
-	AddTag("Aggressive")
-	AddTAg("AggressiveDefault")
-	AddTag("Straight")
-	AddTag("Anal")
-	AddTag("MF")
-
-	Save()
-endFunction
-
-function APSkullFuck()
-	Name = "AP Skull Fuck"
-
-	SetContent(Sexual)
-	SoundFX = Sucking
-
-	int a1 = AddPosition(Female, addCum=Oral)
-	AddPositionStage(a1, "AP_SkullFuck_A1_S1", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "AP_SkullFuck_A1_S2", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "AP_SkullFuck_A1_S3", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "AP_SkullFuck_A1_S4", 0, silent = true, openMouth = true)
-	AddPositionStage(a1, "AP_SkullFuck_A1_S5", 0, silent = true, openMouth = true)
-
-	int a2 = AddPosition(Male)
-	AddPositionStage(a2, "AP_SkullFuck_A2_S1", 49, rotate = 180, sos = 1)
-	AddPositionStage(a2, "AP_SkullFuck_A2_S2", 49, rotate = 180, sos = 1)
-	AddPositionStage(a2, "AP_SkullFuck_A2_S3", 49, rotate = 180, sos = 2)
-	AddPositionStage(a2, "AP_SkullFuck_A2_S4", 49, rotate = 180, sos = 2)
-	AddPositionStage(a2, "AP_SkullFuck_A2_S5", 49, rotate = 180, sos = 2)
-
-	AddTag("AP")
-	AddTag("Sex")
-	AddTag("Straight")
-	AddTag("Aggressive")
-	AddTAg("AggressiveDefault")
-	AddTag("Blowjob")
-	AddTag("Oral")
-	AddTag("MF")
-
-	Save()
+function ArrokOral(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Arrok 69"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Sucking
+
+	int a1 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a1, "Arrok_Oral_A1_S1", 0)
+	Base.AddPositionStage(a1, "Arrok_Oral_A1_S2", 0)
+	Base.AddPositionStage(a1, "Arrok_Oral_A1_S3", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "Arrok_Oral_A1_S3", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "Arrok_Oral_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Arrok_Oral_A2_S1", 46, rotate = 180, silent = true, openMouth = true)
+	Base.AddPositionStage(a2, "Arrok_Oral_A2_S1", 46, rotate = 180, silent = true, openMouth = true)
+	Base.AddPositionStage(a2, "Arrok_Oral_A2_S2", 46, rotate = 180, silent = true, openMouth = true)
+	Base.AddPositionStage(a2, "Arrok_Oral_A2_S3", 46, rotate = 180, silent = true, openMouth = true)
+	Base.AddPositionStage(a2, "Arrok_Oral_A2_S3", 46, rotate = 180, silent = true, openMouth = true)
+
+	Base.AddTag("Arrok")
+	Base.AddTag("BBP")
+	Base.AddTag("Sex")
+	Base.AddTag("Oral")
+	Base.AddTag("Cunnilingus")
+	Base.AddTag("Blowjob")
+	Base.AddTag("69")
+	Base.AddTag("MF")
+
+	Base.Save(id)
 endFunction
 
 
 
-function ZynRoughStanding()
-	Name = "Zyn Rough Standing"
+function ArrokReverseCowgirl(int id)
+	sslBaseAnimation Base = Create(id)
 
-	SetContent(Sexual)
-	SoundFX = Sucking
+	Base.Name = "Arrok Reverse Cowgirl"
 
-	int a1 = AddPosition(Female, addCum=VaginalOral)
-	AddPositionStage(a1, "Zyn_RoughStanding_A1_S1", 0)
-	AddPositionStage(a1, "Zyn_RoughStanding_A1_S2", silent = true, openMouth = true)
-	AddPositionStage(a1, "Zyn_RoughStanding_A1_S3", 0)
-	AddPositionStage(a1, "Zyn_RoughStanding_A1_S4", 0)
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
 
-	int a2 = AddPosition(Male) ; -102
-	AddPositionStage(a2, "Zyn_RoughStanding_A2_S1", -107, sos = 9)
-	AddPositionStage(a2, "Zyn_RoughStanding_A2_S2", -107, sos = 9)
-	AddPositionStage(a2, "Zyn_RoughStanding_A2_S3", -107, sos = 9)
-	AddPositionStage(a2, "Zyn_RoughStanding_A2_S4", -107, sos = 9)
+	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	Base.AddPositionStage(a1, "Arrok_ReverseCowgirl_A1_S1", 0)
+	Base.AddPositionStage(a1, "Arrok_ReverseCowgirl_A1_S2", 0)
+	Base.AddPositionStage(a1, "Arrok_ReverseCowgirl_A1_S3", 0)
+	Base.AddPositionStage(a1, "Arrok_ReverseCowgirl_A1_S4", 0)
 
-	AddTag("Zyn")
-	AddTag("Sex")
-	AddTag("Rough")
-	AddTag("Standing")
-	AddTag("Aggressive")
-	AddTAg("AggressiveDefault")
-	AddTag("Oral")
-	AddTag("Vaginal")
-	AddTag("MF")
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Arrok_ReverseCowgirl_A2_S1", -105, sos = 5)
+	Base.AddPositionStage(a2, "Arrok_ReverseCowgirl_A2_S2", -105, sos = 5)
+	Base.AddPositionStage(a2, "Arrok_ReverseCowgirl_A2_S3", -105, sos = 8)
+	Base.AddPositionStage(a2, "Arrok_ReverseCowgirl_A2_S4", -105, sos = 8)
 
-	Save()
+	Base.AddTag("Arrok")
+	Base.AddTag("BBP")
+	Base.AddTag("Sex")
+	Base.AddTag("Dirty")
+	Base.AddTag("Cowgirl")
+	Base.AddTag("Anal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
 endFunction
 
-function ZynLesbian()
-	Name = "Zyn Lesbian"
+function ArrokSideways(int id)
+	sslBaseAnimation Base = Create(id)
 
-	SetContent(Sexual)
-	SoundFX = Squishing
+	Base.Name = "Arrok Sideways Fuck"
 
-	int a1 = AddPosition(Female, addCum=Vaginal)
-	AddPositionStage(a1, "Zyn_Lesbian_A1_S1", 0, silent = true)
-	AddPositionStage(a1, "Zyn_Lesbian_A1_S2", 0)
-	AddPositionStage(a1, "Zyn_Lesbian_A1_S3", 0)
-	AddPositionStage(a1, "Zyn_Lesbian_A1_S4", 0)
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
 
-	int a2 = AddPosition(Female)
-	AddPositionStage(a2, "Zyn_Lesbian_A2_S1", -81, silent = true)
-	AddPositionStage(a2, "Zyn_Lesbian_A2_S2", -81, silent = true, openMouth = true)
-	AddPositionStage(a2, "Zyn_Lesbian_A2_S3", -81)
-	AddPositionStage(a2, "Zyn_Lesbian_A2_S4", -81)
+	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	Base.AddPositionStage(a1, "Arrok_Sideways_A1_S1", 0)
+	Base.AddPositionStage(a1, "Arrok_Sideways_A1_S2", 0)
+	Base.AddPositionStage(a1, "Arrok_Sideways_A1_S3", 0)
+	Base.AddPositionStage(a1, "Arrok_Sideways_A1_S4", 0)
 
-	AddTag("Zyn")
-	AddTag("Sex")
-	AddTag("Lesbian")
-	AddTag("Dirty")
-	AddTag("Vaginal")
-	AddTag("Oral")
-	AddTag("Kissing")
+	int a2 = Base.AddPosition(Male) ; -100
+	Base.AddPositionStage(a2, "Arrok_Sideways_A2_S1", -118.5, sos = 8)
+	Base.AddPositionStage(a2, "Arrok_Sideways_A2_S2", -118.5, sos = 8)
+	Base.AddPositionStage(a2, "Arrok_Sideways_A2_S3", -118.5, sos = 6)
+	Base.AddPositionStage(a2, "Arrok_Sideways_A2_S4", -118.5, sos = 5)
 
-	Save()
+	Base.AddTag("Arrok")
+	Base.AddTag("BBP")
+	Base.AddTag("Sex")
+	Base.AddTag("Standing")
+	Base.AddTag("Sideways")
+	Base.AddTag("Dirty")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function ArrokStanding(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Arrok Standing Fuck"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	Base.AddPositionStage(a1, "Arrok_Standing_A1_S1", 0)
+	Base.AddPositionStage(a1, "Arrok_Standing_A1_S2", 0)
+	Base.AddPositionStage(a1, "Arrok_Standing_A1_S3", 0)
+	Base.AddPositionStage(a1, "Arrok_Standing_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Arrok_Standing_A2_S1", -104, sos = 9)
+	Base.AddPositionStage(a2, "Arrok_Standing_A2_S2", -104, sos = 6)
+	Base.AddPositionStage(a2, "Arrok_Standing_A2_S3", -104, sos = -7)
+	Base.AddPositionStage(a2, "Arrok_Standing_A2_S4", -104, sos = 7)
+
+	Base.AddTag("Arrok")
+	Base.AddTag("BBP")
+	Base.AddTag("Sex")
+	Base.AddTag("Standing")
+	Base.AddTag("Dirty")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function ArrokStandingForeplay(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Arrok Standing Foreplay"
+
+	Base.SetContent(Foreplay)
+
+	int a1 = Base.AddPosition(Female)
+	Base.AddPositionStage(a1, "Arrok_StandingForeplay_A1_S1", 0)
+	Base.AddPositionStage(a1, "Arrok_StandingForeplay_A1_S2", 0)
+	Base.AddPositionStage(a1, "Arrok_StandingForeplay_A1_S3", 0)
+	Base.AddPositionStage(a1, "Arrok_StandingForeplay_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Arrok_StandingForeplay_A2_S1", -101, strapon = false, sos = -1)
+	Base.AddPositionStage(a2, "Arrok_StandingForeplay_A2_S2", -101, strapon = false, sos = -1)
+	Base.AddPositionStage(a2, "Arrok_StandingForeplay_A2_S3", -101, silent = true, strapon = false, sos = 5)
+	Base.AddPositionStage(a2, "Arrok_StandingForeplay_A2_S4", -101, silent = true, strapon = false, sos = 5)
+
+	Base.AddTag("Arrok")
+	Base.AddTag("BBP")
+	Base.AddTag("Foreplay")
+	Base.AddTag("Standing")
+	Base.AddTag("Loving")
+	Base.AddTag("Kissing")
+	Base.AddTag("LeadIn")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function ArrokTricycle(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Arrok Tricycle"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = SexMix
+
+	int a1 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a1, "Arrok_Tricycle_A1_S1", -1, up = 2, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "Arrok_Tricycle_A1_S2", 0)
+	Base.AddPositionStage(a1, "Arrok_Tricycle_A1_S3", 0)
+	Base.AddPositionStage(a1, "Arrok_Tricycle_A1_S4", 1, side = 2.5, up = 3, silent = true, openMouth = true)
+
+	int a2 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a2, "Arrok_Tricycle_A2_S1", -100)
+	Base.AddPositionStage(a2, "Arrok_Tricycle_A2_S2", -100)
+	Base.AddPositionStage(a2, "Arrok_Tricycle_A2_S3", -100.5, silent = true, openMouth = true)
+	Base.AddPositionStage(a2, "Arrok_Tricycle_A2_S4", -100, side = -1, up = 2, silent = true, openMouth = true)
+
+	int a3 = Base.AddPosition(Male)
+	Base.AddPositionStage(a3, "Arrok_Tricycle_A3_S1", 108, sos = -2)
+	Base.AddPositionStage(a3, "Arrok_Tricycle_A3_S2", 108, silent = true, openMouth = true, sos = 5)
+	Base.AddPositionStage(a3, "Arrok_Tricycle_A3_S3", 108, sos = -1)
+	Base.AddPositionStage(a3, "Arrok_Tricycle_A3_S4", 108, sos = -3)
+
+	Base.AddTag("Sex")
+	Base.AddTag("Arrok")
+	Base.AddTag("BBP")
+	Base.AddTag("Tricycle")
+	Base.AddTag("Threeway")
+	Base.AddTag("Blowjob")
+	Base.AddTag("Oral")
+	Base.AddTag("Cunnilingus")
+	Base.AddTag("Orgy")
+	Base.AddTag("Vaginal")
+	Base.AddTag("Dirty")
+	Base.AddTag("MFF")
+
+	Base.Save(id)
+endFunction
+
+function ArrokHugFuck(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Arrok HugFuck"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "Arrok_Hugfuck_A1_S1", 0)
+	Base.AddPositionStage(a1, "Arrok_Hugfuck_A1_S2", 0)
+	Base.AddPositionStage(a1, "Arrok_Hugfuck_A1_S3", 0)
+	Base.AddPositionStage(a1, "Arrok_Hugfuck_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male) ; -99
+	Base.AddPositionStage(a2, "Arrok_Hugfuck_A2_S1", -103.5, sos = 9)
+	Base.AddPositionStage(a2, "Arrok_Hugfuck_A2_S2", -103.5, sos = 9)
+	Base.AddPositionStage(a2, "Arrok_Hugfuck_A2_S3", -103.5, sos = 9)
+	Base.AddPositionStage(a2, "Arrok_Hugfuck_A2_S4", -103.5, sos = 9)
+
+	Base.AddTag("Arrok")
+	Base.AddTag("BBP")
+	Base.AddTag("Sex")
+	Base.AddTag("Hugging")
+	Base.AddTag("Loving")
+	Base.AddTag("Vaginal")
+	Base.AddTag("Standing")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function ArrokLesbian(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Arrok Lesbian"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female)
+	Base.AddPositionStage(a1, "Arrok_Lesbian_A1_S1", 0)
+	Base.AddPositionStage(a1, "Arrok_Lesbian_A1_S2", 0)
+	Base.AddPositionStage(a1, "Arrok_Lesbian_A1_S3", 0)
+	Base.AddPositionStage(a1, "Arrok_Lesbian_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Female)
+	Base.AddPositionStage(a2, "Arrok_Lesbian_A2_S1", -100)
+	Base.AddPositionStage(a2, "Arrok_Lesbian_A2_S2", -100)
+	Base.AddPositionStage(a2, "Arrok_Lesbian_A2_S3", -100)
+	Base.AddPositionStage(a2, "Arrok_Lesbian_A2_S4", -100)
+
+	Base.AddTag("Arrok")
+	Base.AddTag("BBP")
+	Base.AddTag("Sex")
+	Base.AddTag("Lesbian")
+	Base.AddTag("Oral")
+	Base.AddTag("Vaginal")
+
+	Base.Save(id)
+endFunction
+
+function ArrokSittingForeplay(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Arrok Sitting Foreplay"
+
+	Base.SetContent(Foreplay)
+
+	int a1 = Base.AddPosition(Female)
+	Base.AddPositionStage(a1, "Arrok_SittingForeplay_A1_S1", 0)
+	Base.AddPositionStage(a1, "Arrok_SittingForeplay_A1_S2", 0)
+	Base.AddPositionStage(a1, "Arrok_SittingForeplay_A1_S3", 0)
+	Base.AddPositionStage(a1, "Arrok_SittingForeplay_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Arrok_SittingForeplay_A2_S1", -100, strapon = false)
+	Base.AddPositionStage(a2, "Arrok_SittingForeplay_A2_S2", -100, strapon = false)
+	Base.AddPositionStage(a2, "Arrok_SittingForeplay_A2_S3", -100, strapon = false)
+	Base.AddPositionStage(a2, "Arrok_SittingForeplay_A2_S4", -100, strapon = false)
+
+	Base.AddTag("Arrok")
+	Base.AddTag("BBP")
+	Base.AddTag("Kissing")
+	Base.AddTag("Cuddling")
+	Base.AddTag("Loving")
+	Base.AddTag("Foreplay")
+	Base.AddTag("LeadIn")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function ArrokAnal(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Arrok Anal"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "Arrok_Anal_A1_S1", 0)
+	Base.AddPositionStage(a1, "Arrok_Anal_A1_S2", 0)
+	Base.AddPositionStage(a1, "Arrok_Anal_A1_S3", 0)
+	Base.AddPositionStage(a1, "Arrok_Anal_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Arrok_Anal_A2_S1", -117, silent = true, openMouth = true)
+	Base.AddPositionStage(a2, "Arrok_Anal_A2_S2", -103.5, sos = 3)
+	Base.AddPositionStage(a2, "Arrok_Anal_A2_S3", -121.5, sos = 4)
+	Base.AddPositionStage(a2, "Arrok_Anal_A2_S4", -123.5, sos = 3)
+
+	Base.AddTag("Arrok")
+	Base.AddTag("TBBP")
+	Base.AddTag("Anal")
+	Base.AddTag("Sex")
+	Base.AddTag("Standing")
+	Base.AddTag("Dirty")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function ArrokRape(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Arrok Rape"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a1, "Arrok_Rape_A1_S1", 0)
+	Base.AddPositionStage(a1, "Arrok_Rape_A1_S2", 0)
+	Base.AddPositionStage(a1, "Arrok_Rape_A1_S3", 0)
+	Base.AddPositionStage(a1, "Arrok_Rape_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Arrok_Rape_A2_S1", -125)
+	Base.AddPositionStage(a2, "Arrok_Rape_A2_S2", -125)
+	Base.AddPositionStage(a2, "Arrok_Rape_A2_S3", -125, sos = 4)
+	Base.AddPositionStage(a2, "Arrok_Rape_A2_S4", -125, up = 4)
+
+	Base.AddTag("Arrok")
+	Base.AddTag("TBBP")
+	Base.AddTag("Anal")
+	Base.AddTag("Sex")
+	Base.AddTag("Aggressive")
+	Base.AddTAg("AggressiveDefault")
+	Base.AddTag("Dirty")
+	Base.AddTag("Behind")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function SexLabAggrBehind(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Rough Behind"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "AggrBehind_A1_S1", 0)
+	Base.AddPositionStage(a1, "AggrBehind_A1_S2", 0)
+	Base.AddPositionStage(a1, "AggrBehind_A1_S3", 0)
+	Base.AddPositionStage(a1, "AggrBehind_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AggrBehind_A2_S1", -12)
+	Base.AddPositionStage(a2, "AggrBehind_A2_S2", -12)
+	Base.AddPositionStage(a2, "AggrBehind_A2_S3", -12)
+	Base.AddPositionStage(a2, "AggrBehind_A2_S4", -12)
+
+	Base.AddTag("Default")
+	Base.AddTag("Sex")
+	Base.AddTag("Behind")
+	Base.AddTag("Anal")
+	Base.AddTag("Aggressive")
+	Base.AddTAg("AggressiveDefault")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function SexLabAggrDoggyStyle(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Rough Doggy Style"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "AggrDoggyStyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "AggrDoggyStyle_A1_S2", 0)
+	Base.AddPositionStage(a1, "AggrDoggyStyle_A1_S3", 0)
+	Base.AddPositionStage(a1, "AggrDoggyStyle_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AggrDoggyStyle_A2_S1", -100, sos = 5)
+	Base.AddPositionStage(a2, "AggrDoggyStyle_A2_S2", -100, sos = 5)
+	Base.AddPositionStage(a2, "AggrDoggyStyle_A2_S3", -100, sos = 7)
+	Base.AddPositionStage(a2, "AggrDoggyStyle_A2_S4", -100, sos = 5)
+
+	Base.AddTag("Default")
+	Base.AddTag("Sex")
+	Base.AddTag("Doggystyle")
+	Base.AddTag("Behind")
+	Base.AddTag("Anal")
+	Base.AddTag("Aggressive")
+	Base.AddTAg("AggressiveDefault")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function SexLabAggrMissionary(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Rough Missionary"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	Base.AddPositionStage(a1, "AggrMissionary_A1_S1", 0)
+	Base.AddPositionStage(a1, "AggrMissionary_A1_S2", 0)
+	Base.AddPositionStage(a1, "AggrMissionary_A1_S3", 0)
+	Base.AddPositionStage(a1, "AggrMissionary_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AggrMissionary_A2_S1", -86, sos = 4)
+	Base.AddPositionStage(a2, "AggrMissionary_A2_S2", -86, sos = 4)
+	Base.AddPositionStage(a2, "AggrMissionary_A2_S3", -86, sos = 3)
+	Base.AddPositionStage(a2, "AggrMissionary_A2_S4", -86, sos = 3)
+
+	Base.AddTag("Default")
+	Base.AddTag("Sex")
+	Base.AddTag("Missionary")
+	Base.AddTag("Laying")
+	Base.AddTag("Vaginal")
+	Base.AddTag("Aggressive")
+	Base.AddTAg("AggressiveDefault")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function SexLabBoobjob(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Boobjob"
+
+	Base.SetContent(Sexual)
+
+	int a1 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a1, "Boobjob_A1_S1", 0)
+	Base.AddPositionStage(a1, "Boobjob_A1_S2", 0)
+	Base.AddPositionStage(a1, "Boobjob_A1_S3", 0)
+	Base.AddPositionStage(a1, "Boobjob_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Boobjob_A2_S1", -102)
+	Base.AddPositionStage(a2, "Boobjob_A2_S2", -102)
+	Base.AddPositionStage(a2, "Boobjob_A2_S3", -102)
+	Base.AddPositionStage(a2, "Boobjob_A2_S4", -102)
+
+	Base.AddTag("Default")
+	Base.AddTag("Sex")
+	Base.AddTag("Boobjob")
+	Base.AddTag("Dirty")
+	Base.AddTag("Breast")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function SexLabDoggyStyle(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Doggy Style"
+
+	Base.SoundFX = Squishing
+	Base.SetContent(Sexual)
+
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "DoggyStyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "DoggyStyle_A1_S2", 0)
+	Base.AddPositionStage(a1, "DoggyStyle_A1_S3", 0)
+	Base.AddPositionStage(a1, "DoggyStyle_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "DoggyStyle_A2_S1", -104, sos = 3)
+	Base.AddPositionStage(a2, "DoggyStyle_A2_S2", -104, sos = 3)
+	Base.AddPositionStage(a2, "DoggyStyle_A2_S3", -104, sos = 3)
+	Base.AddPositionStage(a2, "DoggyStyle_A2_S4", -104, sos = 3)
+
+	Base.AddTag("Default")
+	Base.AddTag("Sex")
+	Base.AddTag("Doggy Style")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function SexLabHuggingSex(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Hugging Fuck"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "HuggingSex_A1_S1", 0)
+	Base.AddPositionStage(a1, "HuggingSex_A1_S2", 0)
+	Base.AddPositionStage(a1, "HuggingSex_A1_S3", 0)
+	Base.AddPositionStage(a1, "HuggingSex_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male) ; -99
+	Base.AddPositionStage(a2, "HuggingSex_A2_S1", -102, sos = 9)
+	Base.AddPositionStage(a2, "HuggingSex_A2_S2", -102, sos = 9)
+	Base.AddPositionStage(a2, "HuggingSex_A2_S3", -102, sos = 9)
+	Base.AddPositionStage(a2, "HuggingSex_A2_S4", -102, sos = 9)
+
+	Base.AddTag("Default")
+	Base.AddTag("Sex")
+	Base.AddTag("Hugging")
+	Base.AddTag("Loving")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function SexLabMissionary(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Missionary"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "Missionary_A1_S1", 0)
+	Base.AddPositionStage(a1, "Missionary_A1_S2", 0)
+	Base.AddPositionStage(a1, "Missionary_A1_S3", 0)
+	Base.AddPositionStage(a1, "Missionary_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Missionary_A2_S1", -104, sos = 4)
+	Base.AddPositionStage(a2, "Missionary_A2_S2", -104, sos = 4)
+	Base.AddPositionStage(a2, "Missionary_A2_S3", -104, sos = 4)
+	Base.AddPositionStage(a2, "Missionary_A2_S4", -104, sos = 4)
+
+	Base.AddTag("Default")
+	Base.AddTag("Sex")
+	Base.AddTag("Missionary")
+	Base.AddTag("Laying")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function SexLabReverseCowgirl(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Reverse Cowgirl"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	Base.AddPositionStage(a1, "ReverseCowgirl_A1_S1", 0)
+	Base.AddPositionStage(a1, "ReverseCowgirl_A1_S2", 0)
+	Base.AddPositionStage(a1, "ReverseCowgirl_A1_S3", 0)
+	Base.AddPositionStage(a1, "ReverseCowgirl_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male) ; -102
+	Base.AddPositionStage(a2, "ReverseCowgirl_A2_S1", -107, sos = 3)
+	Base.AddPositionStage(a2, "ReverseCowgirl_A2_S2", -107, sos = 3)
+	Base.AddPositionStage(a2, "ReverseCowgirl_A2_S3", -107, sos = 3)
+	Base.AddPositionStage(a2, "ReverseCowgirl_A2_S4", -107, sos = 3)
+
+	Base.AddTag("Default")
+	Base.AddTag("Sex")
+	Base.AddTag("Dirty")
+	Base.AddTag("Cowgirl")
+	Base.AddTag("Anal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function SexLabSideways(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Sideways Fuck"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	Base.AddPositionStage(a1, "Sideways_A1_S1", 0)
+	Base.AddPositionStage(a1, "Sideways_A1_S2", 0)
+	Base.AddPositionStage(a1, "Sideways_A1_S3", 0)
+	Base.AddPositionStage(a1, "Sideways_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Sideways_A2_S1", -104, sos = 9)
+	Base.AddPositionStage(a2, "Sideways_A2_S2", -104, sos = 9)
+	Base.AddPositionStage(a2, "Sideways_A2_S3", -104, sos = 9)
+	Base.AddPositionStage(a2, "Sideways_A2_S4", -104, sos = 9)
+
+	Base.AddTag("Default")
+	Base.AddTag("Sex")
+	Base.AddTag("Standing")
+	Base.AddTag("Sideways")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function SexLabStanding(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Standing Fuck"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "Standing_A1_S1", 0)
+	Base.AddPositionStage(a1, "Standing_A1_S2", 0)
+	Base.AddPositionStage(a1, "Standing_A1_S3", 0)
+	Base.AddPositionStage(a1, "Standing_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Standing_A2_S1", -81, sos = 4)
+	Base.AddPositionStage(a2, "Standing_A2_S2", -81, sos = 3)
+	Base.AddPositionStage(a2, "Standing_A2_S3", -81, sos = 5)
+	Base.AddPositionStage(a2, "Standing_A2_S4", -81, sos = 6)
+
+	Base.AddTag("Default")
+	Base.AddTag("Sex")
+	Base.AddTag("Standing")
+	Base.AddTag("Dirty")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function SexLabTribadism(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Tribadism"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female)
+	Base.AddPositionStage(a1, "Tribadism_A1_S1", 0)
+	Base.AddPositionStage(a1, "Tribadism_A1_S2", 0)
+	Base.AddPositionStage(a1, "Tribadism_A1_S2", 0)
+
+	int a2 = Base.AddPosition(Female)
+	Base.AddPositionStage(a2, "Tribadism_A2_S1", 60)
+	Base.AddPositionStage(a2, "Tribadism_A2_S2", 60)
+	Base.AddPositionStage(a2, "Tribadism_A2_S2", 60)
+
+	Base.AddTag("Default")
+	Base.AddTag("Sex")
+	Base.AddTag("Lesbian")
+	Base.AddTag("Tribadism")
+	Base.AddTag("Vaginal")
+
+	Base.Save(id)
+endFunction
+
+function BleaghFootJob(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Bleagh FootJob"
+
+	Base.SetContent(Sexual)
+
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "Bleagh_FootJob_A1_S1", 0)
+	Base.AddPositionStage(a1, "Bleagh_FootJob_A1_S2", 0)
+	Base.AddPositionStage(a1, "Bleagh_FootJob_A1_S3", 0)
+	Base.AddPositionStage(a1, "Bleagh_FootJob_A1_S4", 0)
+	Base.AddPositionStage(a1, "Bleagh_FootJob_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Bleagh_FootJob_A2_S1", 42, rotate = 180)
+	Base.AddPositionStage(a2, "Bleagh_FootJob_A2_S2", 42, rotate = 180)
+	Base.AddPositionStage(a2, "Bleagh_FootJob_A2_S3", 42, rotate = 180)
+	Base.AddPositionStage(a2, "Bleagh_FootJob_A2_S4", 42, rotate = 180)
+	Base.AddPositionStage(a2, "Bleagh_FootJob_A2_S5", 42, rotate = 180)
+
+	Base.AddTag("Sex")
+	Base.AddTag("MF")
+	Base.AddTag("Fetish")
+	Base.AddTag("Feet")
+	Base.AddTag("Footjob")
+	Base.AddTag("Bleagh")
+
+	Base.Save(id)
+endFunction
+
+function BleaghFemaleSolo(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Bleagh Female Masturbation"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female)
+	Base.AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S1", 0)
+	Base.AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S2", 0)
+	Base.AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S3", 0)
+	Base.AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S4", 0)
+	Base.AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S5", 0)
+
+	Base.AddTag("Sex")
+	Base.AddTag("Solo")
+	Base.AddTag("Masturbation")
+	Base.AddTag("Dirty")
+
+	Base.Save(id)
+endFunction
+
+function APAnal(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "AP Anal"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "AP_Anal_A1_S1", 0)
+	Base.AddPositionStage(a1, "AP_Anal_A1_S2", 0)
+	Base.AddPositionStage(a1, "AP_Anal_A1_S3", 0)
+	Base.AddPositionStage(a1, "AP_Anal_A1_S4", 0)
+	Base.AddPositionStage(a1, "AP_Anal_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AP_Anal_A2_S1", 44, rotate = 180)
+	Base.AddPositionStage(a2, "AP_Anal_A2_S2", 44, rotate = 180)
+	Base.AddPositionStage(a2, "AP_Anal_A2_S3", 44, rotate = 180)
+	Base.AddPositionStage(a2, "AP_Anal_A2_S4", 44, rotate = 180)
+	Base.AddPositionStage(a2, "AP_Anal_A2_S5", 44, rotate = 180)
+
+	Base.AddTag("AP")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Aggressive")
+	Base.AddTAg("AggressiveDefault")
+	Base.AddTag("Anal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function APBedMissionary(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "AP Bed Missionary"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "AP_BedMissionary_A1_S1", 0)
+	Base.AddPositionStage(a1, "AP_BedMissionary_A1_S2", 0)
+	Base.AddPositionStage(a1, "AP_BedMissionary_A1_S3", 0)
+	Base.AddPositionStage(a1, "AP_BedMissionary_A1_S4", 0)
+	Base.AddPositionStage(a1, "AP_BedMissionary_A1_S5", 0)
+	Base.AddPositionStage(a1, "AP_BedMissionary_A1_S6", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AP_BedMissionary_A2_S1", 44, rotate = 180, sos = 5)
+	Base.AddPositionStage(a2, "AP_BedMissionary_A2_S2", 44, rotate = 180, sos = 5)
+	Base.AddPositionStage(a2, "AP_BedMissionary_A2_S3", 44, rotate = 180, sos = 5)
+	Base.AddPositionStage(a2, "AP_BedMissionary_A2_S4", 44, rotate = 180, sos = 5)
+	Base.AddPositionStage(a2, "AP_BedMissionary_A2_S4", 44, rotate = 180, sos = 5)
+	Base.AddPositionStage(a2, "AP_BedMissionary_A2_S4", 44, rotate = 180, sos = 5)
+
+	Base.AddTag("AP")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Missionary")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function APBlowjob(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "AP Blowjob"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Sucking
+
+	int a1 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a1, "AP_Blowjob_A1_S1", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_Blowjob_A1_S2", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_Blowjob_A1_S3", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_Blowjob_A1_S4", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_Blowjob_A1_S5", 0, silent = true, openMouth = true)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AP_Cowgirl_A2_S1", 43, rotate = 180, sos = 1)
+	Base.AddPositionStage(a2, "AP_Cowgirl_A2_S2", 43, rotate = 180, sos = 1)
+	Base.AddPositionStage(a2, "AP_Cowgirl_A2_S2", 43, rotate = 180, sos = 1)
+	Base.AddPositionStage(a2, "AP_Cowgirl_A2_S3", 43, rotate = 180, sos = 1)
+	Base.AddPositionStage(a2, "AP_Cowgirl_A2_S4", 43, rotate = 180, sos = 1)
+
+	Base.AddTag("AP")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Dirty")
+	Base.AddTag("Oral")
+	Base.AddTag("Blowjob")
+	Base.AddTag("Standing")
+	Base.AddTag("LeadIn")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function APBoobjob(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "AP Boobjob"
+
+	Base.SetContent(Sexual)
+
+	int a1 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a1, "AP_Boobjob_A1_S1", 0)
+	Base.AddPositionStage(a1, "AP_Boobjob_A1_S2", 0)
+	Base.AddPositionStage(a1, "AP_Boobjob_A1_S3", 0)
+	Base.AddPositionStage(a1, "AP_Boobjob_A1_S4", 0)
+	Base.AddPositionStage(a1, "AP_Boobjob_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S1", 30, rotate = 180, sos = 6)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S2", 30, rotate = 180, sos = 6)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S3", 30, rotate = 180, sos = 6)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S4", 30, rotate = 180, sos = 6)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S5", 30, rotate = 180, sos = 6)
+
+	Base.AddTag("AP")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Dirty")
+	Base.AddTag("Boobjob")
+	Base.AddTag("Standing")
+	Base.AddTag("Breast")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function APCowgirl(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "AP Cowgirl"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	Base.AddPositionStage(a1, "AP_Cowgirl_A1_S1", 0)
+	Base.AddPositionStage(a1, "AP_Cowgirl_A1_S2", 0)
+	Base.AddPositionStage(a1, "AP_Cowgirl_A1_S3", 0)
+	Base.AddPositionStage(a1, "AP_Cowgirl_A1_S4", 0)
+	Base.AddPositionStage(a1, "AP_Cowgirl_A1_S5", 0)
+	Base.AddPositionStage(a1, "AP_Cowgirl_A1_S6", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AP_Cowgirl_A2_S1", 44, rotate = 180, sos = 1)
+	Base.AddPositionStage(a2, "AP_Cowgirl_A2_S2", 44, rotate = 180, sos = 1)
+	Base.AddPositionStage(a2, "AP_Cowgirl_A2_S2", 44, rotate = 180, sos = 1)
+	Base.AddPositionStage(a2, "AP_Cowgirl_A2_S3", 44, rotate = 180, sos = 1)
+	Base.AddPositionStage(a2, "AP_Cowgirl_A2_S4", 44, rotate = 180, sos = 2)
+	Base.AddPositionStage(a2, "AP_Cowgirl_A2_S4", 44, rotate = 180, sos = 2)
+
+	Base.AddTag("AP")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Cowgirl")
+	Base.AddTag("Dirty")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function APFemaleSolo(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "AP Female Masturbation"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female)
+	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S1", 0)
+	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S2", 0)
+	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S3", 0)
+	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S4", 0)
+	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S5", 0)
+	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S6", 0)
+
+	Base.AddTag("Sex")
+	Base.AddTag("Solo")
+	Base.AddTag("Masturbation")
+	Base.AddTag("Dirty")
+
+	Base.Save(id)
+endFunction
+
+function APFisting(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "AP Fisting"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female)
+	Base.AddPositionStage(a1, "AP_Fisting_A1_S1", 0)
+	Base.AddPositionStage(a1, "AP_Fisting_A1_S2", 0)
+	Base.AddPositionStage(a1, "AP_Fisting_A1_S3", 0)
+	Base.AddPositionStage(a1, "AP_Fisting_A1_S4", 0)
+	Base.AddPositionStage(a1, "AP_Fisting_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AP_Fisting_A2_S1", 44, rotate = 180, strapon = false)
+	Base.AddPositionStage(a2, "AP_Fisting_A2_S2", 44, rotate = 180, strapon = false)
+	Base.AddPositionStage(a2, "AP_Fisting_A2_S3", 44, rotate = 180, strapon = false)
+	Base.AddPositionStage(a2, "AP_Fisting_A2_S4", 44, rotate = 180, strapon = false)
+	Base.AddPositionStage(a2, "AP_Fisting_A2_S4", 44, rotate = 180, strapon = false)
+
+	Base.AddTag("AP")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Aggressive")
+	Base.AddTAg("AggressiveDefault")
+	Base.AddTag("Fisting")
+	Base.AddTag("Rough")
+	Base.AddTag("Dirty")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function APHandjob(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "AP Handjob"
+
+	Base.SetContent(Sexual)
+
+	int a1 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a1, "AP_Handjob_A1_S1", 0, up = 0.5, silent = true)
+	Base.AddPositionStage(a1, "AP_Handjob_A1_S2", 0, up = 0.5, silent = true)
+	Base.AddPositionStage(a1, "AP_Handjob_A1_S3", 0, up = 0.5, silent = true)
+	Base.AddPositionStage(a1, "AP_Handjob_A1_S4", 0, up = 0.5, silent = true)
+	Base.AddPositionStage(a1, "AP_Handjob_A1_S5", 0, up = 0.5, silent = true, openMouth = true)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S1", 44, side = -3, rotate = 180, sos = -1)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S2", 44, side = -3, rotate = 180, sos = -1)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S3", 44, side = -3, rotate = 180, sos = -1)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S4", 44, side = -3, rotate = 180, sos = -1)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S5", 44, side = -3, rotate = 180, sos = -1)
+
+	Base.AddTag("AP")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Dirty")
+	Base.AddTag("Handjob")
+	Base.AddTag("Standing")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function APKneelBlowjob(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "AP Kneeling Blowjob"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Sucking
+
+	int a1 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a1, "AP_KneelBlowjob_A1_S1", 0, up = 1, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_KneelBlowjob_A1_S2", 0, up = 1, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_KneelBlowjob_A1_S3", 0, up = 1, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_KneelBlowjob_A1_S4", 0, up = 1, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_KneelBlowjob_A1_S5", 0, up = 1, silent = true, openMouth = true)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S1", 44, rotate = 180, sos = -2)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S2", 44, rotate = 180, sos = -2)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S3", 44, rotate = 180, sos = -2)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S4", 44, rotate = 180, sos = -2)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S5", 44, rotate = 180, sos = -2)
+
+	Base.AddTag("AP")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Dirty")
+	Base.AddTag("Oral")
+	Base.AddTag("Blowjob")
+	Base.AddTag("Standing")
+	Base.AddTag("LeadIn")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function APLegUp(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "AP Leg Up Fuck"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "AP_LegUp_A1_S1", 0)
+	Base.AddPositionStage(a1, "AP_LegUp_A1_S2", 0)
+	Base.AddPositionStage(a1, "AP_LegUp_A1_S3", 0)
+	Base.AddPositionStage(a1, "AP_LegUp_A1_S4", 0)
+	Base.AddPositionStage(a1, "AP_LegUp_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AP_LegUp_A2_S1", 44, up = 5, rotate = 180, sos = 3)
+	Base.AddPositionStage(a2, "AP_LegUp_A2_S2", 44, up = 5, rotate = 180, sos = 3)
+	Base.AddPositionStage(a2, "AP_LegUp_A2_S3", 44, up = 5, rotate = 180, sos = 3)
+	Base.AddPositionStage(a2, "AP_LegUp_A2_S4", 44, up = 5, rotate = 180, sos = 3)
+	Base.AddPositionStage(a2, "AP_LegUp_A2_S5", 44, up = 5, rotate = 180, sos = 3)
+
+	Base.AddTag("AP")
+	Base.AddTag("Dirty")
+	Base.AddTag("Laying")
+	Base.AddTag("Aggressive")
+	Base.AddTAg("AggressiveDefault")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function APShoulder(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "AP Shoulder"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	Base.AddPositionStage(a1, "AP_Shoulder_A1_S1", 0)
+	Base.AddPositionStage(a1, "AP_Shoulder_A1_S2", 0)
+	Base.AddPositionStage(a1, "AP_Shoulder_A1_S3", 0)
+	Base.AddPositionStage(a1, "AP_Shoulder_A1_S4", 0)
+	Base.AddPositionStage(a1, "AP_Shoulder_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S1", 44, rotate = 180, sos = 2)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S2", 44, rotate = 180, sos = 2)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S3", 44, rotate = 180, sos = 2)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S4", 44, rotate = 180, sos = 2)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S5", 44, rotate = 180, sos = 2)
+
+	Base.AddTag("AP")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Standing")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function APStandBlowjob(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "AP Standing Blowjob"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Sucking
+
+	int a1 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a1, "AP_StandBlowjob_A1_S1", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_StandBlowjob_A1_S2", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_StandBlowjob_A1_S3", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_StandBlowjob_A1_S4", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_StandBlowjob_A1_S5", 0, silent = true, openMouth = true)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S1", 44, rotate = 180, sos = -1)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S2", 44, rotate = 180, sos = -1)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S3", 44, rotate = 180, sos = -1)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S4", 44, rotate = 180, sos = -1)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S5", 44, rotate = 180, sos = -1)
+
+	Base.AddTag("AP")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Dirty")
+	Base.AddTag("Oral")
+	Base.AddTag("Blowjob")
+	Base.AddTag("LeadIn")
+	Base.AddTag("Standing")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function APStanding(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "AP Standing"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "AP_Standing_A1_S1", 0)
+	Base.AddPositionStage(a1, "AP_Standing_A1_S2", 0)
+	Base.AddPositionStage(a1, "AP_Standing_A1_S3", 0)
+	Base.AddPositionStage(a1, "AP_Standing_A1_S4", 0)
+	Base.AddPositionStage(a1, "AP_Standing_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AP_Standing_A2_S1", 43, rotate = 180, sos = 2)
+	Base.AddPositionStage(a2, "AP_Standing_A2_S2", 43, rotate = 180, sos = 2)
+	Base.AddPositionStage(a2, "AP_Standing_A2_S2", 43, rotate = 180, sos = 2)
+	Base.AddPositionStage(a2, "AP_Standing_A2_S3", 43, rotate = 180, sos = 2)
+	Base.AddPositionStage(a2, "AP_Standing_A2_S3", 43, rotate = 180, sos = 2)
+
+	Base.AddTag("AP")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Standing")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function APDoggyStyle(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "AP DoggyStyle"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "AP_DoggyStyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "AP_DoggyStyle_A1_S2", 0)
+	Base.AddPositionStage(a1, "AP_DoggyStyle_A1_S3", 0)
+	Base.AddPositionStage(a1, "AP_DoggyStyle_A1_S4", 0)
+	Base.AddPositionStage(a1, "AP_DoggyStyle_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AP_HoldLegUp_A2_S1", 44, rotate = 180)
+	Base.AddPositionStage(a2, "AP_HoldLegUp_A2_S2", 44, rotate = 180)
+	Base.AddPositionStage(a2, "AP_HoldLegUp_A2_S2", 44, rotate = 180)
+	Base.AddPositionStage(a2, "AP_HoldLegUp_A2_S3", 44, rotate = 180)
+	Base.AddPositionStage(a2, "AP_HoldLegUp_A2_S3", 44, rotate = 180)
+
+	Base.AddTag("AP")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("DoggyStyle")
+	Base.AddTag("Knees")
+	Base.AddTag("Anal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function APHoldLegUp(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "AP Holding Leg Up"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "AP_HoldLegUp_A1_S1", 0)
+	Base.AddPositionStage(a1, "AP_HoldLegUp_A1_S2", 0)
+	Base.AddPositionStage(a1, "AP_HoldLegUp_A1_S3", 0)
+	Base.AddPositionStage(a1, "AP_HoldLegUp_A1_S4", 0)
+	Base.AddPositionStage(a1, "AP_HoldLegUp_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AP_HoldLegUp_A2_S1", 44, rotate = 180)
+	Base.AddPositionStage(a2, "AP_HoldLegUp_A2_S2", 44, rotate = 180)
+	Base.AddPositionStage(a2, "AP_HoldLegUp_A2_S2", 44, rotate = 180)
+	Base.AddPositionStage(a2, "AP_HoldLegUp_A2_S3", 44, rotate = 180)
+	Base.AddPositionStage(a2, "AP_HoldLegUp_A2_S3", 44, rotate = 180)
+
+	Base.AddTag("AP")
+	Base.AddTag("Sex")
+	Base.AddTag("Laying")
+	Base.AddTag("Aggressive")
+	Base.AddTAg("AggressiveDefault")
+	Base.AddTag("Straight")
+	Base.AddTag("Anal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function APFaceDown(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "AP Face Down Anal"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "AP_FaceDown_A1_S1", 0)
+	Base.AddPositionStage(a1, "AP_FaceDown_A1_S2", 0)
+	Base.AddPositionStage(a1, "AP_FaceDown_A1_S3", 0)
+	Base.AddPositionStage(a1, "AP_FaceDown_A1_S4", 0)
+	Base.AddPositionStage(a1, "AP_FaceDown_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AP_FaceDown_A2_S1", 44, rotate = 180)
+	Base.AddPositionStage(a2, "AP_FaceDown_A2_S2", 44, rotate = 180)
+	Base.AddPositionStage(a2, "AP_FaceDown_A2_S3", 44, rotate = 180)
+	Base.AddPositionStage(a2, "AP_FaceDown_A2_S3", 44, rotate = 180)
+	Base.AddPositionStage(a2, "AP_FaceDown_A2_S4", 44, rotate = 180)
+
+	Base.AddTag("AP")
+	Base.AddTag("Sex")
+	Base.AddTag("Laying")
+	Base.AddTag("Aggressive")
+	Base.AddTAg("AggressiveDefault")
+	Base.AddTag("Straight")
+	Base.AddTag("Anal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function APSkullFuck(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "AP Skull Fuck"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Sucking
+
+	int a1 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a1, "AP_SkullFuck_A1_S1", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_SkullFuck_A1_S2", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_SkullFuck_A1_S3", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_SkullFuck_A1_S4", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_SkullFuck_A1_S5", 0, silent = true, openMouth = true)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "AP_SkullFuck_A2_S1", 49, rotate = 180, sos = 1)
+	Base.AddPositionStage(a2, "AP_SkullFuck_A2_S2", 49, rotate = 180, sos = 1)
+	Base.AddPositionStage(a2, "AP_SkullFuck_A2_S3", 49, rotate = 180, sos = 2)
+	Base.AddPositionStage(a2, "AP_SkullFuck_A2_S4", 49, rotate = 180, sos = 2)
+	Base.AddPositionStage(a2, "AP_SkullFuck_A2_S5", 49, rotate = 180, sos = 2)
+
+	Base.AddTag("AP")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Aggressive")
+	Base.AddTAg("AggressiveDefault")
+	Base.AddTag("Blowjob")
+	Base.AddTag("Oral")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+
+
+function ZynRoughStanding(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Zyn Rough Standing"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Sucking
+
+	int a1 = Base.AddPosition(Female, addCum=VaginalOral)
+	Base.AddPositionStage(a1, "Zyn_RoughStanding_A1_S1", 0)
+	Base.AddPositionStage(a1, "Zyn_RoughStanding_A1_S2", silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "Zyn_RoughStanding_A1_S3", 0)
+	Base.AddPositionStage(a1, "Zyn_RoughStanding_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male) ; -102
+	Base.AddPositionStage(a2, "Zyn_RoughStanding_A2_S1", -107, sos = 9)
+	Base.AddPositionStage(a2, "Zyn_RoughStanding_A2_S2", -107, sos = 9)
+	Base.AddPositionStage(a2, "Zyn_RoughStanding_A2_S3", -107, sos = 9)
+	Base.AddPositionStage(a2, "Zyn_RoughStanding_A2_S4", -107, sos = 9)
+
+	Base.AddTag("Zyn")
+	Base.AddTag("Sex")
+	Base.AddTag("Rough")
+	Base.AddTag("Standing")
+	Base.AddTag("Aggressive")
+	Base.AddTAg("AggressiveDefault")
+	Base.AddTag("Oral")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function ZynLesbian(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Zyn Lesbian"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "Zyn_Lesbian_A1_S1", 0, silent = true)
+	Base.AddPositionStage(a1, "Zyn_Lesbian_A1_S2", 0)
+	Base.AddPositionStage(a1, "Zyn_Lesbian_A1_S3", 0)
+	Base.AddPositionStage(a1, "Zyn_Lesbian_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Female)
+	Base.AddPositionStage(a2, "Zyn_Lesbian_A2_S1", -81, silent = true)
+	Base.AddPositionStage(a2, "Zyn_Lesbian_A2_S2", -81, silent = true, openMouth = true)
+	Base.AddPositionStage(a2, "Zyn_Lesbian_A2_S3", -81)
+	Base.AddPositionStage(a2, "Zyn_Lesbian_A2_S4", -81)
+
+	Base.AddTag("Zyn")
+	Base.AddTag("Sex")
+	Base.AddTag("Lesbian")
+	Base.AddTag("Dirty")
+	Base.AddTag("Vaginal")
+	Base.AddTag("Oral")
+	Base.AddTag("Kissing")
+
+	Base.Save(id)
 endFunction

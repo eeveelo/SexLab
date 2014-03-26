@@ -10,30 +10,41 @@ bool property Registered hidden
 	endFunction
 endProperty
 
+; Config accessor
+sslSystemConfig property Config auto hidden
+
 ; Storage key
 Quest property Storage auto hidden
 
-;/-----------------------------------------------\;
-;|	Tagging System                               |;
-;\-----------------------------------------------/;
+; Search tags
+string[] Tags
+
+; ------------------------------------------------------- ;
+; --- Tagging System                                  --- ;
+; ------------------------------------------------------- ;
 
 bool function HasTag(string Tag)
-	return Tag != "" && StorageUtil.StringListFind(Storage, Key("Tags"), Tag) != -1
+	return Tag != "" && Tags.Find(Tag) != -1
 endFunction
 
 bool function AddTag(string Tag)
-	if HasTag(Tag)
+	if HasTag(Tag) || Tag == ""
 		return false
 	endIf
-	StorageUtil.StringListAdd(Storage, Key("Tags"), Tag, false)
+	int i = Tags.Find(Tag)
+	if i == -1
+		Tags = sslUtility.PushString(Tag, Tags)
+	else
+		Tags[i] = Tag
+	endIf
 	return true
 endFunction
 
 bool function RemoveTag(string Tag)
-	if !HasTag(Tag)
+	if !HasTag(Tag) || Tag == ""
 		return false
 	endIf
-	StorageUtil.StringListRemove(Storage, Key("Tags"), Tag, true)
+	Tags[Tags.Find(Tag)] = ""
 	return true
 endFunction
 
@@ -43,11 +54,10 @@ endFunction
 
 bool function AddTagConditional(string Tag, bool AddTag)
 	if Tag != ""
-		int i = StorageUtil.StringListFind(Storage, Key("Tags"), Tag)
-		if AddTag && i == -1
-			StorageUtil.StringListAdd(Storage, Key("Tags"), Tag, false)
-		elseIf !AddTag && i != -1
-			StorageUtil.StringListRemove(Storage, Key("Tags"), Tag, true)
+		if AddTag
+			AddTag(Tag)
+		elseIf !AddTag
+			RemoveTag(Tag)
 		endIf
 	endIf
 	return AddTag
@@ -58,7 +68,7 @@ bool function CheckTags(string[] CheckTags, bool RequireAll = true, bool Suppres
 	while i
 		i -= 1
 		if CheckTags[i] != ""
-			bool Check = HasTag(CheckTags[i])
+			bool Check = Tags.Find(CheckTags[i]) != -1
 			if (Suppress && Check) || (!Suppress && RequireAll && !Check)
 				return false ; Stop if we need all and don't have it, or are supressing the found tag
 			elseif !Suppress && !RequireAll && Check
@@ -71,49 +81,26 @@ bool function CheckTags(string[] CheckTags, bool RequireAll = true, bool Suppres
 endFunction
 
 string[] function GetTags()
-	int i = StorageUtil.StringListCount(Storage, Key("Tags"))
-	string[] Tags = sslUtility.StringArray(i)
-	while i
-		i -= 1
-		Tags[i] = StorageUtil.StringListGet(Storage, Key("Tags"), i)
-	endWhile
 	return Tags
 endFunction
 
-;/-----------------------------------------------\;
-;|	System Use                                   |;
-;\-----------------------------------------------/;
+; ------------------------------------------------------- ;
+; --- System Use                                      --- ;
+; ------------------------------------------------------- ;
 
 string function Key(string type = "")
 	return Registry+"."+type
 endFunction
 
-bool Locked
-function _WaitLock()
-	while Locked
-		Utility.WaitMenuMode(0.10)
-	endWhile
-	Locked = true
-endFunction
-
-function _Unlock()
-	Locked = false
-endFunction
-
-bool function _IsLocked()
-	return Locked
+function Log(string Log, string Type = "NOTICE")
+	SexLabUtil.DebugLog(Log, Type, Config.DebugMode)
 endFunction
 
 function Initialize()
-	Storage = GetOwningQuest()
-	StorageUtil.StringListClear(Storage, Key("Tags"))
-	Clear()
-endFunction
-
-function Clear()
 	Name = ""
 	Registry = ""
 	Enabled = false
-	Locked = false
-	parent.Clear()
+	Storage = GetOwningQuest()
+	Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
+	Tags = new string[5]
 endFunction

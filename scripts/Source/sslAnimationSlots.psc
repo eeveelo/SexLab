@@ -1,7 +1,9 @@
 scriptname sslAnimationSlots extends Quest
 
+
+; Animation storage
+string[] Registry
 int property Slotted auto hidden
-; Animation readonly storage
 sslBaseAnimation[] property Slots auto hidden
 sslBaseAnimation[] property Animations hidden
 	sslBaseAnimation[] function get()
@@ -9,9 +11,11 @@ sslBaseAnimation[] property Animations hidden
 	endFunction
 endProperty
 
-; Local use
-sslSystemConfig Config
-sslThreadLibrary Lib
+; Properties for creature script access
+Actor property PlayerRef auto hidden
+sslSystemConfig property Config auto hidden
+sslActorLibrary property ActorLib auto hidden
+sslThreadLibrary property ThreadLib auto hidden
 
 ; ------------------------------------------------------- ;
 ; --- Animation Filtering                             --- ;
@@ -19,11 +23,8 @@ sslThreadLibrary Lib
 
 sslBaseAnimation[] function GetByTags(int ActorCount, string Tags, string TagsSuppressed = "", bool RequireAll = true)
 	string[] Search = sslUtility.ArgString(Tags)
-	if Search.Length == 0
-		return none
-	endIf
 	string[] Suppress = sslUtility.ArgString(TagsSuppressed)
-	bool[] Valid = new bool[125]
+	bool[] Valid = sslUtility.BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
@@ -34,7 +35,7 @@ endFunction
 
 sslBaseAnimation[] function GetByType(int ActorCount, int Males = -1, int Females = -1, int StageCount = -1, bool Aggressive = false, bool Sexual = true)
 	; Search
-	bool[] Valid = new bool[125]
+	bool[] Valid = sslUtility.BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -=1
@@ -45,7 +46,7 @@ sslBaseAnimation[] function GetByType(int ActorCount, int Males = -1, int Female
 endFunction
 
 sslBaseAnimation[] function PickByActors(Actor[] Positions, int Limit = 64, bool Aggressive = false)
-	int[] Genders = Lib.ActorLib.GenderCount(Positions)
+	int[] Genders = ActorLib.GenderCount(Positions)
 	sslBaseAnimation[] Matches = GetByDefault(Genders[0], Genders[1], Aggressive)
 	if Matches.Length <= Limit
 		return Matches
@@ -74,8 +75,9 @@ sslBaseAnimation[] function GetByDefault(int Males, int Females, bool IsAggressi
 	; Info
 	int ActorCount = (Males + Females)
 	bool SameSex = (Females == 2 && Males == 0) || (Males == 2 && Females == 0)
+
 	; Search
-	bool[] Valid = new bool[125]
+	bool[] Valid = sslUtility.BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
@@ -165,27 +167,12 @@ int function GetCount(bool IgnoreDisabled = true)
 	return Count
 endFunction
 
-; ------------------------------------------------------- ;
-; --- System Use Only                                 --- ;
-; ------------------------------------------------------- ;
-
 int function FindByRegistrar(string Registrar)
-	return StorageUtil.StringListFind(self, "Animations", Registrar)
+	return Registry.Find(Registrar)
 endFunction
 
 bool function IsRegistered(string Registrar)
-	return StorageUtil.StringListFind(self, "Animations", Registrar) != -1
-endFunction
-
-sslBaseAnimation function Register(string Registrar)
-	if FindByRegistrar(Registrar) == -1 && Slotted < Slots.Length
-		sslBaseAnimation Slot = GetNthAlias(Slotted) as sslBaseAnimation
-		Slots[Slotted] = Slot
-		StorageUtil.StringListAdd(self, "Animations", Registrar, false)
-		Slotted = StorageUtil.StringListCount(self, "Animations")
-		return Slots[(Slotted - 1)]
-	endIf
-	return none
+	return Registry.Find(Registrar) != -1
 endFunction
 
 sslBaseAnimation[] function GetList(bool[] Valid)
@@ -202,32 +189,53 @@ sslBaseAnimation[] function GetList(bool[] Valid)
 		pos = Valid.Find(true, (pos + 1))
 		Anims += Output[i].Name+", "
 	endWhile
-	Lib.Log("Found Animations("+Output.Length+"): "+Anims)
+	ThreadLib.Log("Found Animations("+Output.Length+"): "+Anims)
 	return Output
 endFunction
 
+; ------------------------------------------------------- ;
+; --- System Use Only                                 --- ;
+; ------------------------------------------------------- ;
+
 function Setup()
-	GoToState("Setup")
+	GoToState("Locked")
+	; Init slots
+	Slotted = 0
+	Registry = new string[125]
+	Slots = new sslBaseAnimation[125]
+	; Init Libraries
+	SexLabFramework SexLab = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework
+	PlayerRef = SexLab.PlayerRef
+	Config    = SexLab.Config
+	ActorLib  = SexLab.ActorLib
+	ThreadLib = SexLab.ThreadLib
+	; Init defaults
+	RegisterSlots()
+	GoToState("")
 endFunction
 
-state Setup
-	event OnBeginState()
-		RegisterForSingleUpdate(1.0)
-	endEvent
-	event OnUpdate()
-		; Init variables
-		Slotted = 0
-		Slots = new sslBaseAnimation[125]
-		StorageUtil.StringListClear(self, "Animations")
-		Lib = Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary
-		Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
-		; Register default animations
-		sslAnimationDefaults Defaults = Quest.GetQuest("SexLabQuestAnimations") as sslAnimationDefaults
-		Defaults.Slots = self
-		Defaults.LoadAnimations()
-		; Send mod event for 3rd party animations
-		ModEvent.Send(ModEvent.Create("SexLabSlotAnimations"))
-		Debug.Notification("$SSL_NotifyAnimationInstall")
-		GoToState("")
-	endEvent
+function RegisterSlots()
+	; Register default animation
+	sslAnimationDefaults Defaults = Quest.GetQuest("SexLabQuestAnimations") as sslAnimationDefaults
+	Defaults.Slots = self
+	Defaults.Initialize()
+	Defaults.LoadAnimations()
+	; Send mod event for 3rd party animation
+	ModEvent.Send(ModEvent.Create("SexLabSlotAnimations"))
+	Debug.Notification("$SSL_NotifyAnimationInstall")
+endFunction
+
+int function Register(string Registrar)
+	int i = Registry.Find("")
+	if Registry.Find(Registrar) == -1 && i != -1
+		Registry[i] = Registrar
+		Slotted = i + 1
+		return i
+	endIf
+	return -1
+endFunction
+
+state Locked
+	function Setup()
+	endFunction
 endState
