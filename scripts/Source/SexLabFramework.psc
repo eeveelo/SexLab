@@ -128,9 +128,9 @@ sslThreadController function QuickStart(Actor Actor1, Actor Actor2 = none, Actor
 	return ThreadSlots.GetController(StartSex(Positions, Anims, VictimRef, none, true, Hook))
 endFunction
 
-; ;#------------------------------#
-; ;#  ACTOR FUNCTIONS             #
-; ;#------------------------------#
+;#------------------------------#
+;#  ACTOR FUNCTIONS             #
+;#------------------------------#
 
 int function ValidateActor(Actor ActorRef)
 	return ActorLib.ValidateActor(ActorRef)
@@ -264,14 +264,14 @@ int function CreatureCount(Actor[] Positions)
 	return ActorLib.CreatureCount(Positions)
 endFunction
 
-; ;#------------------------------#
-; ;#     END ACTOR FUNCTIONS      #
-; ;#------------------------------#
+;#------------------------------#
+;#     END ACTOR FUNCTIONS      #
+;#------------------------------#
 
 
-; ;#------------------------------#
-; ;#  BEGIN CONTROLLER FUNCTIONS  #
-; ;#------------------------------#
+;#------------------------------#
+;#  BEGIN CONTROLLER FUNCTIONS  #
+;#------------------------------#
 
 ObjectReference function FindBed(ObjectReference CenterRef, float Radius = 1000.0, bool IgnoreUsed = true, ObjectReference IgnoreRef1 = none, ObjectReference IgnoreRef2 = none)
 	return ThreadLib.FindBed(CenterRef, Radius, IgnoreUsed, IgnoreRef1, IgnoreRef2)
@@ -297,13 +297,13 @@ int function FindPlayerController()
 	return ThreadSlots.FindActorController(PlayerRef)
 endFunction
 
-; ;#---------------------------#
-; ;#   END THREAD FUNCTIONS    #
-; ;#---------------------------#
+;#---------------------------#
+;#   END THREAD FUNCTIONS    #
+;#---------------------------#
 
-; ;#---------------------------#
-; ;# BEGIN ANIMATION FUNCTIONS #
-; ;#---------------------------#
+;#---------------------------#
+;# BEGIN ANIMATION FUNCTIONS #
+;#---------------------------#
 
 sslBaseAnimation[] function GetAnimationsByTags(int ActorCount, string Tags, string TagSuppress = "", bool RequireAll = true)
 	return AnimSlots.GetByTags(ActorCount, Tags, TagSuppress, RequireAll)
@@ -357,13 +357,13 @@ string function GetGenderTag(int Females = 0, int Males = 0, int Creatures = 0)
 	return ActorLib.GetGenderTag(Females, Males, Creatures)
 endFunction
 
-; ;#---------------------------#
-; ;#  END ANIMATION FUNCTIONS  #
-; ;#---------------------------#
+;#---------------------------#
+;#  END ANIMATION FUNCTIONS  #
+;#---------------------------#
 
-; ;#---------------------------#
-; ;#   BEGIN VOICE FUNCTIONS   #
-; ;#---------------------------#
+;#---------------------------#
+;#   BEGIN VOICE FUNCTIONS   #
+;#---------------------------#
 
 sslBaseVoice function PickVoice(Actor ActorRef)
 	return VoiceSlots.PickVoice(ActorRef)
@@ -406,13 +406,13 @@ sslBaseVoice function GetVoiceByTag(string Tag1, string Tag2 = "", string TagSup
 	return VoiceSlots.GetByTags(sslUtility.MakeArgs(",", Tag1, Tag2), TagSuppress, RequireAll)
 endFunction
 
-; ;#---------------------------#
-; ;#    END VOICE FUNCTIONS    #
-; ;#---------------------------#
+;#---------------------------#
+;#    END VOICE FUNCTIONS    #
+;#---------------------------#
 
-; ;#---------------------------#
-; ;# BEGIN EXPRESSION FUNCTION #
-; ;#---------------------------#
+;#---------------------------#
+;# BEGIN EXPRESSION FUNCTION #
+;#---------------------------#
 
 ; function ClearMFG(Actor ActorRef)
 ; 	sslExpressionLibrary.ClearMFG(ActorRef)
@@ -438,25 +438,25 @@ endFunction
 ; 	return ExpressionSlots.RandomByTag(tag)
 ; endFunction
 
-; sslBaseExpression  function GetExpressionByName(string findName)
-; 	return ExpressionSlots.GetByName(findName)
-; endFunction
+sslBaseExpression  function GetExpressionByName(string findName)
+	return ExpressionSlots.GetByName(findName)
+endFunction
 
-; int function FindExpressionByName(string findName)
-; 	return ExpressionSlots.FindByName(findName)
-; endFunction
+int function FindExpressionByName(string findName)
+	return ExpressionSlots.FindByName(findName)
+endFunction
 
-; sslBaseExpression function GetExpressionBySlot(int slot)
-; 	return ExpressionSlots.GetBySlot(slot)
-; endFunction
+sslBaseExpression function GetExpressionBySlot(int slot)
+	return ExpressionSlots.GetBySlot(slot)
+endFunction
 
-; ;#---------------------------#
-; ;#  END EXPRESSION FUNCTIONS #
-; ;#---------------------------#
+;#---------------------------#
+;#  END EXPRESSION FUNCTIONS #
+;#---------------------------#
 
-; ;#---------------------------#
-; ;#    START HOOK FUNCTIONS   #
-; ;#---------------------------#
+;#---------------------------#
+;#    START HOOK FUNCTIONS   #
+;#---------------------------#
 
 sslThreadController function HookController(string argString)
 	return ThreadSlots.GetController(argString as int)
@@ -482,13 +482,13 @@ float function HookTime(string argString)
 	return ThreadSlots.GetController(argString as int).TotalTime
 endFunction
 
-; ;#---------------------------#
-; ;#    END HOOK FUNCTIONS     #
-; ;#---------------------------#
+;#---------------------------#
+;#    END HOOK FUNCTIONS     #
+;#---------------------------#
 
-; ;#---------------------------#
-; ;#   START STAT FUNCTIONS    #
-; ;#---------------------------#
+;#---------------------------#
+;#   START STAT FUNCTIONS    #
+;#---------------------------#
 
 int function RegisterStat(string Name, string Value, string Prepend = "", string Append = "")
 	return Stats.RegisterStat(Name, Value, Prepend, Append)
@@ -719,17 +719,17 @@ string function GetPlayerSkillTitle(string Skill)
 	return Stats.GetSkillTitle(PlayerRef, Skill)
 endFunction
 
-; ;#---------------------------#
-; ;#    END STAT FUNCTIONS     #
-; ;#---------------------------#
+;#---------------------------#
+;#    END STAT FUNCTIONS     #
+;#---------------------------#
 
 
 
-; ;#---------------------------#
-; ;#                           #
-; ;# END API RELATED FUNCTIONS #
-; ;#                           #
-; ;#---------------------------#
+;#---------------------------#
+;#                           #
+;# END API RELATED FUNCTIONS #
+;#                           #
+;#---------------------------#
 
 
 ; ------------------------------------------------------- ;
@@ -740,68 +740,56 @@ function Log(string Log, string Type = "NOTICE")
 	SexLabUtil.DebugLog(Log, Type, Config.DebugMode)
 endFunction
 
-function Initialize()
+function Setup()
 	; Reset function Libraries
 	Quest SexLabQuestFramework = Quest.GetQuest("SexLabQuestFramework")
-	if SexLabQuestFramework != none
-		SexLabQuestFramework.Stop()
-		SexLabQuestFramework.Start()
-		Config      = SexLabQuestFramework as sslSystemConfig
-		ActorLib    = SexLabQuestFramework as sslActorLibrary
-		ThreadLib   = SexLabQuestFramework as sslThreadLibrary
-		Stats       = SexLabQuestFramework as sslActorStats
-		ThreadSlots = SexLabQuestFramework as sslThreadSlots
-	endIf
+	Config      = SexLabQuestFramework as sslSystemConfig
+	ActorLib    = SexLabQuestFramework as sslActorLibrary
+	ThreadLib   = SexLabQuestFramework as sslThreadLibrary
+	Stats       = SexLabQuestFramework as sslActorStats
+	ThreadSlots = SexLabQuestFramework as sslThreadSlots
 	; Reset animation registry
 	Quest SexLabQuestAnimations = Quest.GetQuest("SexLabQuestAnimations")
-	if SexLabQuestAnimations != none
-		SexLabQuestAnimations.Stop()
-		SexLabQuestAnimations.Start()
-		AnimSlots = SexLabQuestAnimations as sslAnimationSlots
-	endIf
+	AnimSlots = SexLabQuestAnimations as sslAnimationSlots
 	; Reset secondary object registry
 	Quest SexLabQuestRegistry = Quest.GetQuest("SexLabQuestRegistry")
-	if SexLabQuestRegistry != none
-		SexLabQuestRegistry.Stop()
-		SexLabQuestRegistry.Start()
-		CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
-		VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
-		ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
-	endIf
-	; Disable system to ensure nothing is run until setup completes
-	GoToState("Disabled")
+	CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
+	VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
+	ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
+	; Setup library resources
+	ActorLib.Setup()
+	ThreadLib.Setup()
+	Stats.Setup()
 endFunction
 
 bool function CheckSystem()
-	bool Passed = true
-	; Check SKSE install
-	if SKSE.GetScriptVersionRelease() < 45
-		CheckSKSE.Show(1.70)
-		Passed = false
-	; Check SkyUI install - depends on passing SKSE check passing
-	elseIf Quest.GetQuest("SKI_ConfigManagerInstance") == none
-		CheckSkyUI.Show(4.1)
-		Passed = false
-	; Check PapyrusUtil install - depends on passing SKSE check passing
-	elseIf PapyrusUtil.GetVersion() < 19
-		CheckPapyrusUtil.Show(1.9)
-		Passed = false
-	endIf
 	; Check Skyrim Version
 	if (StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float) < 1.9
 		CheckSkyrim.Show()
-		Passed = false
+		return false
+	; Check SKSE install
+	elseIf SKSE.GetScriptVersionRelease() < 45
+		CheckSKSE.Show(1.70)
+		return false
+	; Check SkyUI install - depends on passing SKSE check passing
+	elseIf Quest.GetQuest("SKI_ConfigManagerInstance") == none
+		CheckSkyUI.Show(4.1)
+		return false
+	; Check PapyrusUtil install - depends on passing SKSE check passing
+	elseIf PapyrusUtil.GetVersion() < 19
+		CheckPapyrusUtil.Show(1.9)
+		return false
 	endIf
 	; Check FNIS version
-	if Game.GetPlayer().GetAnimationVariableInt("FNISmajor") < 4
-		CheckFNIS.Show(4.1)
-		Passed = false
-	endIf
+	; elseIf Game.GetPlayer().GetAnimationVariableInt("FNISmajor") < 4
+	; 	CheckFNIS.Show(4.0)
+	; 	return false
+	; endIf
 	; Return result
-	return Passed
+	return true
 endFunction
 
-auto state Disabled
+state Disabled
 	sslThreadModel function NewThread(float TimeOut = 30.0)
 		Log("NewThread() - Failed to make new thread model; system is currently disabled or not installed", "FATAL")
 		return none
@@ -816,8 +804,8 @@ auto state Disabled
 	endFunction
 endState
 
-state Enabled
-	event OnBeginState()
-		Log("SexLab Framework - Enabled")
-	endEvent
-endState
+; state Enabled
+; 	event OnBeginState()
+; 		Log("SexLab Framework - Enabled")
+; 	endEvent
+; endState
