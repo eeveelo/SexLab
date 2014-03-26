@@ -77,17 +77,20 @@ function Log(string msg, string source, string type = "NOTICE", string display =
 endFunction
 
 function DebugLog(string Log, string Type = "NOTICE", bool DebugMode = false) global
+	Log = Type+": "+Log
 	if DebugMode
-		MiscUtil.PrintConsole(Type+": "+Log)
-		Debug.Trace("---  SexLab "+Type+" --------------------------------")
-		if Type == "ERROR" || Type == "FATAL"
-			Debug.TraceStack(Log)
-		else
-			Debug.Trace(Log)
-		endIf
-	else
-		Debug.Trace("SexLab - "+Type+": "+Log)
+		MiscUtil.PrintConsole(Log)
 	endIf
+	if Type == "FATAL" || Type == "ERROR"
+		Debug.TraceStack("-- SexLab -- "+Log)
+	else
+		Debug.Trace("-- SexLab -- "+Log)
+	endIf
+endFunction
+
+float function Timer(float Timestamp, string Log) global
+	DebugLog(Log, "["+(Utility.GetCurrentRealTime() - Timestamp)+"] Seconds", true)
+	return Utility.GetCurrentRealTime()
 endFunction
 
 ;#------------------------------#
