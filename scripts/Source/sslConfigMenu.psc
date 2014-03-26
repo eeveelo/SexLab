@@ -40,7 +40,6 @@ endFunction
 
 event OnGameReload()
 	parent.OnGameReload()
-	MiscUtil.PrintConsole("OnGameReload")
 	Debug.Trace("SexLab Loaded CurrentVerison: "+CurrentVersion)
 	if CurrentVersion > 0 && !SexLab.CheckSystem()
 		SexLab.GoToState("Disabled")
@@ -51,10 +50,6 @@ event OnGameReload()
 		AudioVoice.SetVolume(Config.fVoiceVolume)
 		AudioSFX.SetVolume(Config.fSFXVolume)
 	endIf
-endEvent
-
-event OnPlayerLoadGame()
-	MiscUtil.PrintConsole("OnPlayerLoadGame")
 endEvent
 
 ; Framework
