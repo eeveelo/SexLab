@@ -14,21 +14,11 @@ float scale2
 string ActorName
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
-	; Ref1 = TargetRef
-	; Ref2 = CasterRef
-	; Ref1 = CasterRef
-	; Ref2 = TargetRef
-	; ActorName = Ref1.GetLeveledActorBase().GetName()
-	; ActorName = Ref2.GetLeveledActorBase().GetName()
-	Log("----- "+SexLab.ExpressionSlots.Expressions[0])
-	SexLab.ExpressionSlots.Expressions[0].ApplyPhase(TargetRef, 3, TargetRef.GetLeveledActorBase().GetSex())
-	; SexLab.Initialize()
+	Dispel()
 endEvent
 
 event OnUpdate()
-	; PrintConsole("OnUpdate")
-	; Ref1.PlayIdleWithTarget(Playing, Ref2)
-	; RegisterForSingleUpdate(8.0)
+
 endEvent
 
 event OnEffectFinish(Actor TargetRef, Actor CasterRef)
