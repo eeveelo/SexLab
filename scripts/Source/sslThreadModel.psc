@@ -108,7 +108,7 @@ endProperty
 int BedFlag ; 0 = allow, 1 = force, -1 = forbid
 bool NoLeadIn
 string[] Hooks
-
+string[] Tags
 ; ------------------------------------------------------- ;
 ; --- Thread Making API                               --- ;
 ; ------------------------------------------------------- ;
@@ -132,6 +132,7 @@ state Making
 			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They were unable to fill an actor alias", "FATAL")
 			return -1
 		endIf
+
 		; Update thread info
 		Positions = sslUtility.PushActor(ActorRef, Positions)
 		ActorCount = Positions.Length
@@ -527,26 +528,31 @@ function RemoveHook(string DelHooks)
 endFunction
 
 ; ------------------------------------------------------- ;
-; --- Tagging System                                     --- ;
+; --- Tagging System                                  --- ;
 ; ------------------------------------------------------- ;
 
 bool function HasTag(string Tag)
-	return Tag != "" && StorageUtil.StringListFind(self, "Tags", Tag) != -1
+	return Tag != "" && Tags.Find(Tag) != -1
 endFunction
 
 bool function AddTag(string Tag)
-	if HasTag(Tag)
+	if HasTag(Tag) || Tag == ""
 		return false
 	endIf
-	StorageUtil.StringListAdd(self, "Tags", Tag, false)
+	int i = Tags.Find(Tag)
+	if i == -1
+		Tags = sslUtility.PushString(Tag, Tags)
+	else
+		Tags[i] = Tag
+	endIf
 	return true
 endFunction
 
 bool function RemoveTag(string Tag)
-	if !HasTag(Tag)
+	if !HasTag(Tag) || Tag == ""
 		return false
 	endIf
-	StorageUtil.StringListRemove(self, "Tags", Tag, true)
+	Tags[Tags.Find(Tag)] = ""
 	return true
 endFunction
 
@@ -556,11 +562,10 @@ endFunction
 
 bool function AddTagConditional(string Tag, bool AddTag)
 	if Tag != ""
-		int i = StorageUtil.StringListFind(self, "Tags", Tag)
-		if AddTag && i == -1
-			StorageUtil.StringListAdd(self, "Tags", Tag, false)
-		elseIf !AddTag && i != -1
-			StorageUtil.StringListRemove(self, "Tags", Tag, true)
+		if AddTag
+			AddTag(Tag)
+		elseIf !AddTag
+			RemoveTag(Tag)
 		endIf
 	endIf
 	return AddTag
@@ -571,7 +576,7 @@ bool function CheckTags(string[] CheckTags, bool RequireAll = true, bool Suppres
 	while i
 		i -= 1
 		if CheckTags[i] != ""
-			bool Check = HasTag(CheckTags[i])
+			bool Check = Tags.Find(CheckTags[i]) != -1
 			if (Suppress && Check) || (!Suppress && RequireAll && !Check)
 				return false ; Stop if we need all and don't have it, or are supressing the found tag
 			elseif !Suppress && !RequireAll && Check
@@ -584,12 +589,6 @@ bool function CheckTags(string[] CheckTags, bool RequireAll = true, bool Suppres
 endFunction
 
 string[] function GetTags()
-	int i = StorageUtil.StringListCount(self, "Tags")
-	string[] Tags = sslUtility.StringArray(i)
-	while i
-		i -= 1
-		Tags[i] = StorageUtil.StringListGet(self, "Tags", i)
-	endWhile
 	return Tags
 endFunction
 
@@ -830,20 +829,16 @@ int property tid hidden
 	int function get()
 		return thread_id
 	endFunction
+	function set(int value)
+		thread_id = value
+		ActorAlias = new sslActorAlias[5]
+		ActorAlias[0] = GetNthAlias(0) as sslActorAlias
+		ActorAlias[1] = GetNthAlias(1) as sslActorAlias
+		ActorAlias[2] = GetNthAlias(2) as sslActorAlias
+		ActorAlias[3] = GetNthAlias(3) as sslActorAlias
+		ActorAlias[4] = GetNthAlias(4) as sslActorAlias
+	endFunction
 endProperty
-
-function SetupThread(int id)
-	Stop()
-	Start()
-	thread_id = id
-	ActorAlias = new sslActorAlias[5]
-	ActorAlias[0] = GetNthAlias(0) as sslActorAlias
-	ActorAlias[1] = GetNthAlias(1) as sslActorAlias
-	ActorAlias[2] = GetNthAlias(2) as sslActorAlias
-	ActorAlias[3] = GetNthAlias(3) as sslActorAlias
-	ActorAlias[4] = GetNthAlias(4) as sslActorAlias
-	Initialize()
-endFunction
 
 ; ------------------------------------------------------- ;
 ; --- State Restricted                                --- ;
