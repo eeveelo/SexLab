@@ -24,7 +24,7 @@ endFunction
 
 bool property Enabled hidden
 	bool function get()
-		return GetState() == "Enabled"
+		return GetState() != "Disabled"
 	endFunction
 endProperty
 
@@ -79,11 +79,6 @@ sslActorStats property Stats auto hidden
 ; Data
 Actor property PlayerRef auto
 Faction property AnimatingFaction auto
-Message property CheckSKSE auto
-Message property CheckFNIS auto
-Message property CheckSkyrim auto
-Message property CheckPapyrusUtil auto
-Message property CheckSkyUI auto
 
 ;#---------------------------#
 ;#                           #
@@ -731,14 +726,9 @@ endFunction
 ;#                           #
 ;#---------------------------#
 
-
 ; ------------------------------------------------------- ;
 ; --- Intended for system use only - DO NOT USE       --- ;
 ; ------------------------------------------------------- ;
-
-function Log(string Log, string Type = "NOTICE")
-	SexLabUtil.DebugLog(Log, Type, Config.DebugMode)
-endFunction
 
 function Setup()
 	; Reset function Libraries
@@ -762,31 +752,8 @@ function Setup()
 	Stats.Setup()
 endFunction
 
-bool function CheckSystem()
-	; Check Skyrim Version
-	if (StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float) < 1.9
-		CheckSkyrim.Show()
-		return false
-	; Check SKSE install
-	elseIf SKSE.GetScriptVersionRelease() < 45
-		CheckSKSE.Show(1.70)
-		return false
-	; Check SkyUI install - depends on passing SKSE check passing
-	elseIf Quest.GetQuest("SKI_ConfigManagerInstance") == none
-		CheckSkyUI.Show(4.1)
-		return false
-	; Check PapyrusUtil install - depends on passing SKSE check passing
-	elseIf PapyrusUtil.GetVersion() < 19
-		CheckPapyrusUtil.Show(1.9)
-		return false
-	endIf
-	; Check FNIS version
-	; elseIf Game.GetPlayer().GetAnimationVariableInt("FNISmajor") < 4
-	; 	CheckFNIS.Show(4.0)
-	; 	return false
-	; endIf
-	; Return result
-	return true
+function Log(string Log, string Type = "NOTICE")
+	SexLabUtil.DebugLog(Log, Type, Config.DebugMode)
 endFunction
 
 state Disabled
