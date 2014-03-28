@@ -1,5 +1,29 @@
 scriptname sslSystemConfig extends Quest
 
+; ------------------------------------------------------- ;
+; --- Config Resources                                --- ;
+; ------------------------------------------------------- ;
+
+SexLabFramework property SexLab auto
+Actor property PlayerRef auto
+
+bool bDebugMode
+bool property DebugMode hidden
+	bool function get()
+		return bDebugMode
+	endFunction
+endProperty
+
+bool property Enabled hidden
+	bool function get()
+		return SexLab.Enabled
+	endFunction
+endProperty
+
+; ------------------------------------------------------- ;
+; --- Config Properties                               --- ;
+; ------------------------------------------------------- ;
+
 bool property bDisablePlayer auto hidden
 float property fMaleVoiceDelay auto hidden
 float property fFemaleVoiceDelay auto hidden
@@ -64,22 +88,6 @@ float[] property fStageTimer auto hidden
 float[] property fStageTimerLeadIn auto hidden
 float[] property fStageTimerAggr auto hidden
 
-bool bDebugMode
-bool property DebugMode hidden
-	bool function get()
-		return bDebugMode
-	endFunction
-endProperty
-
-SexLabFramework SexLab
-bool property Enabled hidden
-	bool function get()
-		return SexLab.Enabled
-	endFunction
-endProperty
-
-Actor PlayerRef
-
 ; ------------------------------------------------------- ;
 ; --- Config Accessors                                --- ;
 ; ------------------------------------------------------- ;
@@ -126,7 +134,6 @@ endFunction
 bool function UsesNudeSuit(bool IsFemale)
 	return ((!IsFemale && bUseMaleNudeSuit) || (IsFemale && bUseFemaleNudeSuit))
 endFunction
-
 
 ; ------------------------------------------------------- ;
 ; --- Hotkeys                                         --- ;
@@ -248,7 +255,8 @@ function SetDefaults()
 	kRestoreOffsets = 12 ; -
 	kRotateScene = 22 ; U
 	kToggleFreeCamera = 81 ; NUM 3
-	; MCM TFC settings
+
+	; TFC hotkey settings
 	bAutoTFC = false
 	fAutoSUCSM = 5.0
 
