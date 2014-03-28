@@ -109,6 +109,9 @@ int BedFlag ; 0 = allow, 1 = force, -1 = forbid
 bool NoLeadIn
 string[] Hooks
 string[] Tags
+
+bool[] WaitAlias
+
 ; ------------------------------------------------------- ;
 ; --- Thread Making API                               --- ;
 ; ------------------------------------------------------- ;
@@ -117,7 +120,7 @@ state Making
 	int function AddActor(Actor ActorRef, bool IsVictim = false, sslBaseVoice Voice = none, bool ForceSilent = false)
 		; Ensure we have room for actor
 		if ActorRef == none
-			Log("AddActor() - Failed to add actor -- Actor is empty.", "FATAL")
+			Log("AddActor() - Failed to add actor -- Actor is a figment of your imagination", "FATAL")
 			return -1
 		elseIf ActorCount >= 5
 			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- Thread has reached actor limit", "FATAL")
@@ -125,7 +128,11 @@ state Making
 		elseIf Positions.Find(ActorRef) != -1 || ActorLib.IsActorActive(ActorRef)
 			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They are already claimed by a thread", "FATAL")
 			return -1
+		elseIf !ActorLib.ValidateActor(ActorRef)
+			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They are not a valid target for animation", "FATAL")
+			return -1
 		endIf
+
 		; Attempt to claim a slot
 		sslActorAlias Slot = SlotActor(ActorRef)
 		if !Slot || !Slot.PrepareAlias(ActorRef, IsVictim, Voice, ForceSilent)
@@ -659,6 +666,7 @@ function Initialize()
 	; Integers
 	BedFlag        = 0
 	ActorCount     = 0
+	Stage          = 1
 	; SecondsVaginal = 0
 	; SecondsAnal    = 0
 	; SecondsOral    = 0
@@ -755,46 +763,30 @@ float function GetSkillBonus(float[] Levels)
 	return bonus
 endFunction
 
-function SyncActors(bool force = false)
-	ActorAlias[0].SyncThread(force)
-	ActorAlias[1].SyncThread(force)
-	ActorAlias[2].SyncThread(force)
-	ActorAlias[3].SyncThread(force)
-	ActorAlias[4].SyncThread(force)
-endFunction
-
-function SyncAnimation(bool force = false)
-	ActorAlias[0].SyncAnimation(force)
-	ActorAlias[1].SyncAnimation(force)
-	ActorAlias[2].SyncAnimation(force)
-	ActorAlias[3].SyncAnimation(force)
-	ActorAlias[4].SyncAnimation(force)
-endFunction
-
-bool function ActorWait(string WaitFor)
-	int i = ActorCount
+function AliasEvent(string Callback, bool Switch = false)
+	WaitAlias = new bool[5]
+	string EventName = "SSL_"+thread_id+"_"+Callback
+	int i = 5
 	while i
 		i -= 1
-		if ActorAlias[i].GetState() != WaitFor
-			return false
+		if ActorAlias[i].ActorRef != none
+			ActorAlias[i].RegisterForModEvent(EventName, Callback)
+			WaitAlias[i] = true
 		endIf
 	endWhile
-	return true
+	int eid = ModEvent.Create(EventName)
+	ModEvent.PushBool(eid, Switch)
+	ModEvent.Send(eid)
+	Log(WaitAlias, EventName)
+	; Wait for actors to finish
+	float Failsafe = Utility.GetCurrentRealTime() + 30.0
+	while WaitAlias.Find(true) != -1 && Utility.GetCurrentRealTime() < FailSafe
+		Utility.Wait(0.5)
+	endWhile
 endFunction
 
-function AliasAction(string FireState, string StateFinish)
-	; Start actor action state
-	ActorAlias[0].Action(FireState)
-	ActorAlias[1].Action(FireState)
-	ActorAlias[2].Action(FireState)
-	ActorAlias[3].Action(FireState)
-	ActorAlias[4].Action(FireState)
-	; Wait for actors ready, or for ~30 seconds to pass
-	int failsafe = 30
-	while !ActorWait(StateFinish) && failsafe
-		failsafe -= 1
-		Utility.Wait(1.0)
-	endWhile
+function EventDone(sslActorAlias Slot)
+	WaitAlias[ActorAlias.Find(Slot)] = false
 endFunction
 
 function Action(string FireState)

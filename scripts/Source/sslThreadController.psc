@@ -27,16 +27,11 @@ state Preparing
 	endFunction
 	event OnUpdate()
 		; Init loop info
-		Stage = 1
 		SetAnimation()
 		AutoAdvance = (!HasPlayer || (VictimRef == PlayerRef && Config.bDisablePlayer) || Config.bAutoAdvance)
-		AliasAction("Prepare", "Ready")
-		; Begin loop
-		ActorAlias[0].StartAnimating()
-		ActorAlias[1].StartAnimating()
-		ActorAlias[2].StartAnimating()
-		ActorAlias[3].StartAnimating()
-		ActorAlias[4].StartAnimating()
+		; Prepare actors
+		AliasEvent("Prepare", true)
+		; Begin animating loop
 		SendThreadEvent("AnimationStart")
 		if LeadIn
 			SendThreadEvent("LeadInStart")
@@ -51,38 +46,29 @@ endState
 
 state Advancing
 	function FireAction()
-		; End animation/leadin
-		if Stage > StageCount
+		if Stage < 1
+			Stage = 1
+		elseIf Stage > StageCount
 			if LeadIn
 				return EndLeadIn()
 			else
 				return EndAnimation()
 			endIf
 		endIf
-		; Stage SFX Delay
-		SFXDelay = Config.fSFXDelay
-		if Stage != 1
-			SFXDelay -= (Stage * 0.2)
-		endIf
-		; min 0.60 delay
-		if SFXDelay < 0.60
-			SFXDelay = 0.60
-		endIf
-		; Start Animations loop
 		Action("Animating")
 	endFunction
 endState
 
-; bool DoRecord
 state Animating
 
 	function FireAction()
-		; Get animation events for stage
+		; Update information for stage
+		AliasEvent("SyncThread", false)
+		SFXDelay   = sslUtility.ClampFloat(Config.fSFXDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
 		AnimEvents = Animation.FetchStage(Stage)
-		; Play animations
-		SyncActors()
+		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		PlayAnimation()
-		RecordSkills()
+		MoveActors()
 		; Send events
 		if !LeadIn && Stage >= StageCount
 			SendThreadEvent("OrgasmStart")
@@ -94,7 +80,6 @@ state Animating
 		endIf
 		; Begin loop
 		Log("Thread Animating Start Loop Stage: "+Stage)
-		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		RegisterForSingleUpdate(0.05)
 	endFunction
 
@@ -126,6 +111,11 @@ state Animating
 	; --- Loop functions                                  --- ;
 	; ------------------------------------------------------- ;
 
+	function GoToStage(int ToStage)
+		Stage = ToStage
+		Action("Advancing")
+	endFunction
+
 	function PlayAnimation()
 		; Send with as little overhead as possible to improve syncing
 		if ActorCount == 1
@@ -151,27 +141,18 @@ state Animating
 		endIf
 	endFunction
 
-	function GoToStage(int toStage)
-		Stage = toStage
-		if Stage < 1
-			Stage = 1
-		endIf
-		Action("Advancing")
-	endFunction
-
 	function RealignActors()
-		RecordSkills()
-		SyncActors(true)
+		AliasEvent("SyncThread", true)
 		PlayAnimation()
 		MoveActors()
 	endFunction
 
 	function MoveActors()
-		int i = ActorCount
-		while i
-			i -= 1
-			ActorAlias[i].Snap()
-		endWhile
+		ActorAlias[0].Snap()
+		ActorAlias[1].Snap()
+		ActorAlias[2].Snap()
+		ActorAlias[3].Snap()
+		ActorAlias[4].Snap()
 	endFunction
 
 	; ------------------------------------------------------- ;
@@ -229,7 +210,7 @@ state Animating
 		elseIf CenterLocation[5] < 0.0
 			CenterLocation[5] = CenterLocation[5] + 360.0
 		endIf
-		SyncActors(true)
+		AliasEvent("SyncThread", true)
 	endFunction
 
 	function AdjustChange(bool backwards = false)
@@ -310,7 +291,7 @@ function SetAnimation(int aid = -1)
 		GoToStage((StageCount - 1))
 	else
 		AnimEvents = Animation.FetchStage(Stage)
-		SyncActors(false)
+		AliasEvent("SyncThread", false)
 		PlayAnimation()
 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		MoveActors()
@@ -340,11 +321,7 @@ function UpdateTimer(float AddSeconds = 0.0)
 endFunction
 
 function TriggerOrgasm()
-	ActorAlias[0].OrgasmEffect()
-	ActorAlias[1].OrgasmEffect()
-	ActorAlias[2].OrgasmEffect()
-	ActorAlias[3].OrgasmEffect()
-	ActorAlias[4].OrgasmEffect()
+	AliasEvent("TriggerOrgasm", false)
 endFunction
 
 function EndLeadIn()
@@ -371,12 +348,11 @@ function EndAnimation(bool Quickly = false)
 	UnregisterForUpdate()
 	GoToState("Ending")
 	; Set fast flag to skip slow ending functions
-	FastEnd = Quickly
 	Stage = StageCount
 	; Save skill xp for actor update
 	RecordSkills()
 	; Reset actors & wait for clear state
-	AliasAction("Reset", "")
+	AliasEvent("ResetActor", Quickly)
 	; Send end event
 	SendThreadEvent("AnimationEnd")
 	if !Quickly
