@@ -318,13 +318,16 @@ endFunction
 ;|	Creature Use                                 |;
 ;\-----------------------------------------------/;
 
-bool function HasRace(Race creature)
-	return StorageUtil.FormListFind(Storage, Key("Creatures"), creature) != -1
+bool function HasRace(Race CreatureRace)
+	return StorageUtil.FormListFind(Storage, Key("Creatures"), CreatureRace) != -1
 endFunction
 
-function AddRace(Race creature)
-	StorageUtil.FormListAdd(Storage, Key("Creatures"), creature, false)
-	StorageUtil.SetIntValue(creature, "SexLab.HasCreature", 1)
+function AddRace(Race CreatureRace)
+	StorageUtil.FormListAdd(Storage, Key("Creatures"), CreatureRace, false)
+	StorageUtil.SetIntValue(CreatureRace, "SexLab.HasCreature", 1)
+	if Enabled
+		StorageUtil.FormListAdd(none, "SexLab.CreatureRaces", CreatureRace, true)
+	endIf
 endFunction
 
 ;/-----------------------------------------------\;

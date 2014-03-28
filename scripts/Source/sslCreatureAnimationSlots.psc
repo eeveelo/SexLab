@@ -19,7 +19,12 @@ bool function HasRace(Race CreatureRace)
 endFunction
 
 bool function AllowedCreature(Race CreatureRace)
-	return  Config.bAllowCreatures && StorageUtil.GetIntValue(CreatureRace, "SexLab.HasCreature") == 1
+	return  Config.bAllowCreatures && StorageUtil.FormListFind(none, "SexLab.CreatureRaces", CreatureRace) != -1 ;StorageUtil.GetIntValue(CreatureRace, "SexLab.HasCreature") == 1
+endFunction
+
+function AddRace(Race CreatureRace) global
+	StorageUtil.SetIntValue(CreatureRace, "SexLab.HasCreature", 1)
+	StorageUtil.FormListAdd(none, "SexLab.CreatureRaces", CreatureRace)
 endFunction
 
 bool function AllowedCreatureCombination(Race CreatureRace1, Race CreatureRace2)
