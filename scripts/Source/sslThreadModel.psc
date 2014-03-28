@@ -1,4 +1,4 @@
-scriptname sslThreadModel extends sslSystemLibrary
+scriptname sslThreadModel extends sslSystemLibrary hidden
 { Animation Thread Model: Runs storage and information about a thread. Access only through functions; NEVER create a property directly to this. }
 
 bool property IsLocked hidden
@@ -241,7 +241,9 @@ state Making
 		Log("Thread has timed out of the making process; resetting model for selection pool", "FATAL")
 		Initialize()
 	endEvent
-
+	event OnBeginState()
+		Log("Entering Making State", "Thread["+thread_id+"]")
+	endEvent
 endState
 
 ; ------------------------------------------------------- ;
@@ -665,9 +667,11 @@ function Initialize()
 	; Storage
 	Actor[] aDel
 	string[] sDel1
+	string[] sDel2
 	float[] fDel1
 	Positions      = aDel
 	Hooks          = sDel1
+	Tags           = sDel2
 	CustomTimers   = fDel1
 	Genders        = new int[3]
 	SkillXP        = new float[6]
@@ -679,8 +683,6 @@ function Initialize()
 	PrimaryAnimations = anDel2
 	LeadAnimations    = anDel3
 	Animation         = none
-	; Clear tags
-	StorageUtil.StringListClear(self, "Tags")
 	; Enter thread selection pool
 	GoToState("Unlocked")
 	Reset()
@@ -837,6 +839,7 @@ int property tid hidden
 		ActorAlias[2] = GetNthAlias(2) as sslActorAlias
 		ActorAlias[3] = GetNthAlias(3) as sslActorAlias
 		ActorAlias[4] = GetNthAlias(4) as sslActorAlias
+		GoToState("Unlocked")
 	endFunction
 endProperty
 
@@ -846,7 +849,6 @@ endProperty
 
 auto state Unlocked
 	sslThreadModel function Make(float TimeOut = 30.0)
-		Log("Entering Making State", "Unlocked")
 		Initialize()
 		GoToState("Making")
 		RegisterForSingleUpdate(TimeOut)
