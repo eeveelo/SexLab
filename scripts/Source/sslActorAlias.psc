@@ -660,9 +660,10 @@ function Initialize()
 endFunction
 
 function ClearAlias()
-	Lib    = Quest.GetQuest("SexLabQuestFramework") as sslActorLibrary
-	Stats  = Quest.GetQuest("SexLabQuestFramework") as sslActorStats
-	Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
+	Quest SexLabQuestFramework = Quest.GetQuest("SexLabQuestFramework")
+	Lib    = SexLabQuestFramework as sslActorLibrary
+	Stats  = SexLabQuestFramework as sslActorStats
+	Config = SexLabQuestFramework as sslSystemConfig
 	Thread = GetOwningQuest() as sslThreadController
 	if GetReference() != none
 		Thread.Log("Had actor '"+GetReference()+"' During clear!", self)
