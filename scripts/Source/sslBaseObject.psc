@@ -1,4 +1,4 @@
-scriptname sslBaseObject extends ReferenceAlias
+scriptname sslBaseObject extends ReferenceAlias hidden
 
 bool property Enabled auto hidden
 

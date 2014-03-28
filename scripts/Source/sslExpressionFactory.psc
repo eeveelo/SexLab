@@ -1,4 +1,4 @@
-scriptname sslExpressionFactory extends Quest
+scriptname sslExpressionFactory extends Quest hidden
 
 sslExpressionSlots property Slots auto hidden
 

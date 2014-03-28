@@ -1,4 +1,4 @@
-scriptname sslVoiceFactory extends Quest
+scriptname sslVoiceFactory extends Quest hidden
 
 sslVoiceSlots property Slots auto hidden
 

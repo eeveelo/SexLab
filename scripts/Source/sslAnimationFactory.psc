@@ -1,4 +1,4 @@
-scriptname sslAnimationFactory extends Quest
+scriptname sslAnimationFactory extends Quest hidden
 
 sslAnimationSlots property Slots auto hidden
 
