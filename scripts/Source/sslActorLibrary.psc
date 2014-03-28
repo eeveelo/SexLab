@@ -242,9 +242,10 @@ form function StripSlot(Actor ActorRef, int SlotMask)
 	form ItemRef = ActorRef.GetWornForm(SlotMask)
 	if IsStrippable(ItemRef)
 		ActorRef.UnequipItem(ItemRef, false, true)
-		; StorageUtil.FormListAdd(ActorRef, "SexLab.StrippedItems", ItemRef)
+		StorageUtil.FormListAdd(ActorRef, "SexLab.StrippedItems", ItemRef)
+		return ItemRef
 	endIf
-	return ItemRef
+	return none
 endFunction
 
 form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false, bool AllowNudesuit = true, int Gender = 0)
@@ -255,35 +256,49 @@ form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 	if DoAnimate
 		Debug.SendAnimationEvent(ActorRef, "Arrok_Undress_G"+Gender)
 	endIf
+
 	form[] Stripped = new form[34]
+
 	; Strip weapon
 	if Strip[32]
-		Stripped[33] = ActorRef.GetEquippedWeapon(true)
+		; Left hand
 		Stripped[32] = ActorRef.GetEquippedWeapon(false)
-		if Stripped[33] != none || Stripped[32] != none
+		if Stripped[32] != none
 			ActorRef.AddItem(DummyWeapon, 1, true)
 			ActorRef.EquipItem(DummyWeapon, false, true)
 			ActorRef.UnEquipItem(DummyWeapon, false, true)
 			ActorRef.RemoveItem(DummyWeapon, 1, true)
+			ActorRef.UnequipItem(Stripped[32], false, true)
+			StorageUtil.FormListAdd(ActorRef, "SexLab.StrippedItems", Stripped[32])
+		endIf
+		; Right hand
+		Stripped[33] = ActorRef.GetEquippedWeapon(true)
+		if Stripped[33] != none
+			ActorRef.UnequipItem(Stripped[33], false, true)
+			StorageUtil.FormListAdd(ActorRef, "SexLab.StrippedItems", Stripped[33])
 		endIf
 	endIf
+
 	; Strip armors
 	int i = 32
 	while i
 		i -= 1
 		if Strip[i]
-			Stripped[i] = StripSlot(ActorRef, Armor.GetMaskForSlot(i + 30))
-			if Stripped[i] && DoAnimate
-				Utility.Wait(0.25)
+			Stripped[i] = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
+			if IsStrippable(Stripped[i])
+				StorageUtil.FormListAdd(ActorRef, "SexLab.StrippedItems", Stripped[i])
+				ActorRef.UnequipItem(Stripped[i], false, true)
 			endIf
 		endIf
 	endWhile
+
 	; Apply Nudesuit
 	if Strip[2] && AllowNudesuit && ((Gender == 0 && Config.bUseMaleNudeSuit) || (Gender == 1  && Config.bUseFemaleNudeSuit)) && !ActorRef.IsEquipped(NudeSuit)
 		; ActorRef.AddItem(NudeSuit, 1, true)
 		ActorRef.EquipItem(NudeSuit, false, true)
 	endIf
-	return sslUtility.ClearNone(Stripped)
+	return Stripped
+	; return sslUtility.ClearNone(Stripped)
 endFunction
 
 function UnstripActor(Actor ActorRef, form[] Stripped, bool IsVictim = false)
@@ -303,6 +318,7 @@ function UnstripActor(Actor ActorRef, form[] Stripped, bool IsVictim = false)
 			int type = Stripped[i].GetType()
 			if type == 22 || type == 82
 				ActorRef.EquipSpell((Stripped[i] as Spell), hand)
+				; hand -= 1
 			else
 				ActorRef.EquipItem(Stripped[i], false, true)
 			endIf
@@ -327,7 +343,9 @@ function StoreStripped(Actor ActorRef, bool[] Strip, bool DoAnimate = false, boo
 	int i = Stripped.Length
 	while i
 		i -= 1
-		StorageUtil.FormListAdd(ActorRef, "SexLab.StrippedItems", Stripped[i])
+		if Stripped[i] != none
+			StorageUtil.FormListAdd(ActorRef, "SexLab.StrippedItems", Stripped[i])
+		endIf
 	endWhile
 endFunction
 
@@ -432,7 +450,7 @@ int function ValidateActor(Actor ActorRef)
 		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are flying.")
 		return -15
 	elseIf ActorRef != PlayerRef && !ActorRef.HasKeyword(ActorTypeNPC) && !CreatureSlots.AllowedCreature(ActorRef.GetLeveledActorBase().GetRace())
-		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are a creature that is currently not supported ("+ActorRef.GetLeveledActorBase().GetName()+")")
+		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are a creature that is currently not supported ("+MiscUtil.GetRaceEditorID(ActorRef.GetLeveledActorBase().GetRace())+")")
 		return -16
 	endIf
 	StorageUtil.FormListAdd(self, "SexLab.ValidActors", ActorRef, false)
