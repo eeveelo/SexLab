@@ -9,7 +9,7 @@ sslBaseAnimation[] function GetByRace(int ActorCount, Race CreatureRace)
 	int i = Slotted
 	while i
 		i -= 1
-		Valid[i] = Animations[i].Enabled && ActorCount == Animations.PositionCount && Animations[i].HasRace(CreatureRace)
+		Valid[i] = Slots[i].Enabled && ActorCount == Slots[i].PositionCount && Slots[i].HasRace(CreatureRace)
 	endWhile
 	return GetList(valid)
 endFunction
@@ -32,7 +32,7 @@ bool function AllowedCreatureCombination(Race CreatureRace1, Race CreatureRace2)
 		int i = Slotted
 		while i
 			i -= 1
-			if Animations[i].Enabled && Animations[i].HasRace(CreatureRace1) && Animations[i].HasRace(CreatureRace2)
+			if Slots[i].Enabled && Slots[i].HasRace(CreatureRace1) && Slots[i].HasRace(CreatureRace2)
 				return true
 			endIf
 		endWhile
@@ -45,6 +45,8 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function RegisterSlots()
+	; Clear creature list
+	StorageUtil.FormListClear(none, "SexLab.CreatureRaces")
 	; Register default voices
 	sslCreatureAnimationDefaults Defaults = Quest.GetQuest("SexLabQuestRegistry") as sslCreatureAnimationDefaults
 	Defaults.Slots = self

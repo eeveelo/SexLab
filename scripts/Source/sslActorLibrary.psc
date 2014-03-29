@@ -213,6 +213,17 @@ endFunction
 ;|	Equipment Functions                          |;
 ;\-----------------------------------------------/;
 
+function CacheStrippable(Actor ActorRef)
+	int i = ActorRef.GetNumItems()
+	while i
+		i -= 1
+		form ItemRef = ActorRef.GetNthForm(i)
+		if ItemRef.GetType() == 26 && IsStrippable(ItemRef)
+			Log(ItemRef.GetName()+" Is Strippable")
+		endIf
+	endWhile
+endFunction
+
 form[] function StripActor(Actor ActorRef, Actor VictimRef = none, bool DoAnimate = true, bool LeadIn = false)
 	return StripSlots(ActorRef, Config.GetStrip((GetGender(ActorRef) == 1), LeadIn, (VictimRef != none), (VictimRef != none && ActorRef == VictimRef)), DoAnimate)
 endFunction
@@ -429,10 +440,7 @@ int function ValidateActor(Actor ActorRef)
 	elseIf IsActorActive(ActorRef)
 		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They appear to already be animating")
 		return -10
-	endIf
-	; TODO: Doing this also means passing creatures that may have had animation disabled, might want to check that as well before bypassing
-	if StorageUtil.FormListFind(self, "SexLab.ValidActors", ActorRef) != -1
-		Log("ValidateActor() -- Validated ("+ActorRef.GetLeveledActorBase().GetName()+") -- CACHE HIT")
+	elseIf StorageUtil.FormListFind(self, "SexLab.ValidActors", ActorRef) != -1
 		return 1
 	elseIf !CanAnimate(ActorRef)
 		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are forbidden from animating")
@@ -500,7 +508,7 @@ int function GetGender(Actor ActorRef)
 		return ActorRef.GetFactionRank(GenderFaction)
 	endIf
 	ActorBase Base = ActorRef.GetLeveledActorBase()
-	if StorageUtil.GetIntValue(Base.GetRace(), "SexLab.HasRace") == 1
+	if CreatureSlots.AllowedCreature(Base.GetRace())
 		return 2 ; Creature
 	endIf
 	return Base.GetSex() ; Default
