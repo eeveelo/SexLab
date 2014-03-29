@@ -21,7 +21,7 @@ sslActorAlias AdjustAlias
 ; --- Thread Starter                                  --- ;
 ; ------------------------------------------------------- ;
 
-state Preparing
+state PrimeThread
 	function FireAction()
 		RegisterForSingleUpdate(0.05)
 	endFunction
@@ -79,7 +79,7 @@ state Animating
 			SendThreadEvent("StageStart")
 		endIf
 		; Begin loop
-		Log("Thread Animating Start Loop Stage: "+Stage)
+		Log("Starting Stage: "+Stage, "Animating")
 		RegisterForSingleUpdate(0.05)
 	endFunction
 
@@ -333,11 +333,7 @@ function EndLeadIn()
 		; Add runtime to foreplay skill xp
 		AddXP(0, (TotalTime / 11.0))
 		; Restrip with new strip options
-		ActorAlias[0].Strip(false)
-		ActorAlias[1].Strip(false)
-		ActorAlias[2].Strip(false)
-		ActorAlias[3].Strip(false)
-		ActorAlias[4].Strip(false)
+		AliasEvent("Strip", false)
 		; Start primary animations at stage 1
 		SendThreadEvent("LeadInEnd")
 		Action("Advancing")
@@ -425,15 +421,6 @@ function Initialize()
 	parent.Initialize()
 endFunction
 
-state Making
-	sslThreadController function PrimeThread()
-		Log("Thread Primed")
-		Action("Preparing")
-		return self
-	endFunction
-	function EnableHotkeys()
-	endFunction
-endState
 
 auto state Unlocked
 	function EndAnimation(bool Quickly = false)
@@ -444,10 +431,6 @@ endState
 ; --- State Restricted                                --- ;
 ; ------------------------------------------------------- ;
 
-; State Making
-sslThreadController function PrimeThread()
-	return none
-endFunction
 ; State Animating
 function PlayAnimation()
 endFunction

@@ -1,4 +1,5 @@
 scriptname sslActorAlias extends ReferenceAlias
+import ObjectReference
 
 ; Libraries
 sslActorLibrary Lib
@@ -120,13 +121,14 @@ endFunction
 
 state Ready
 	function Prepare(bool Force = false)
+		; Remove any unwanted combat effects
+		ActorRef.StopCombat()
 		if ActorRef.IsWeaponDrawn()
 			ActorRef.SheatheWeapon()
 		endIf
 		LockActor()
 		; Init alias info
 		Loc = new float[6]
-		; Update info
 		Animation = Thread.Animation
 		Stage     = Thread.Stage
 		Position  = Thread.Positions.Find(ActorRef)
@@ -136,6 +138,7 @@ state Ready
 		; Non Creatures
 		if !IsCreature
 			; Strip actor
+			Lib.CacheStrippable(ActorRef)
 			Strip(DoUndress)
 			; Pick a voice if needed
 			if Voice == none && !IsForcedSilent
@@ -174,7 +177,7 @@ state Ready
 			Config.ToggleFreeCamera()
 		endIf
 		; Make SOS erect
-		Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
+		; Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 		; Enter animation state
 		GoToState("Animating")
 		SyncThread(true)
@@ -187,10 +190,6 @@ endState
 
 state Animating
 	event OnUpdate()
-		; First actor periodically pings thread for xp update
-		if Position == 0
-			Thread.RecordSkills()
-		endIf
 		; Check if still amonst the living and able.
 		if ActorRef.IsDead() || ActorRef.IsDisabled()
 			Thread.EndAnimation(true)
@@ -247,8 +246,8 @@ state Animating
 			; Facial expression
 			if OpenMouth
 				ActorRef.SetExpressionOverride(16, 100)
-			elseIf Expression != none && Phase > 0
-				Expression.ApplyPhase(ActorRef, Phase, BaseSex)
+			elseIf Expression != none
+				Expression.Apply(ActorRef, Enjoyment, BaseSex)
 			endIf
 		endIf
 	endFunction
@@ -258,7 +257,7 @@ state Animating
 		UpdateLocation(true)
 	endFunction
 
-	function UpdateLocation(bool force = false)
+	function UpdateLocation(bool Force = false)
 		float[] CenterLoc = Thread.CenterLocation
 		Loc[0] = CenterLoc[0] + ( Math.sin(CenterLoc[5]) * Offsets[0] ) + ( Math.cos(CenterLoc[5]) * Offsets[1] )
 		Loc[1] = CenterLoc[1] + ( Math.cos(CenterLoc[5]) * Offsets[0] ) + ( Math.sin(CenterLoc[5]) * Offsets[1] )
@@ -273,7 +272,7 @@ state Animating
 		endIf
 		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
-		if force
+		if Force
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		endIf
@@ -325,7 +324,6 @@ state Animating
 		; Restore scale and voicetype
 		RestoreActorDefaults()
 		; Apply cum
-		; TODO: look into using SKSE Art objects to make cum effect use single spell
 		int CumID = Animation.GetCum(Position)
 		if !Quick && CumID > 0 && Config.bUseCum && (Thread.Males > 0 || Config.bAllowFFCum || Thread.HasCreature)
 			Lib.ApplyCum(ActorRef, CumID)
@@ -357,13 +355,11 @@ state Animating
 			Stats.AddPurityXP(ActorRef, Skills[4], SkillXP[5], Thread.IsAggressive, IsVictim, Genders[2] > 0, Thread.ActorCount, Thread.GetHighestPresentRelationshipRank(ActorRef))
 		endIf
 		; Reset alias
-		Done()
 		Initialize()
+		Done()
 	endEvent
 
-
 endState
-
 
 ; ------------------------------------------------------- ;
 ; --- Actor Manipulation                              --- ;
@@ -531,7 +527,7 @@ int function GetEnjoyment()
 		endIf
 	endIf
 	; Set final enjoyment
-	Enjoyment = ((Enjoyment as float) * ((Stage as float / Animation.StageCount as float) + 0.5)) as int
+	Enjoyment = ((Enjoyment as float) * (Stage as float / Animation.StageCount as float)) as int
 	; Get current expression phase from enjoyment
 	if Expression != none
 		Phase = Expression.PickPhase(Enjoyment, BaseSex)
@@ -654,9 +650,10 @@ function ClearAlias()
 	if GetReference() != none
 		Thread.Log("Had actor '"+GetReference()+"' During clear!", self)
 		ActorRef = GetReference() as Actor
-		RestoreActorDefaults()
-		StopAnimating(true)
+		LockActor()
 		UnlockActor()
+		StopAnimating(true)
+		RestoreActorDefaults()
 	endIf
 	TryToClear()
 	TryToReset()

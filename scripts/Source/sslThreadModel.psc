@@ -49,12 +49,8 @@ bool property IsAnal auto hidden
 bool property IsOral auto hidden
 bool property IsDirty auto hidden
 bool property IsLoving auto hidden
-; int property SecondsVaginal auto hidden
-; int property SecondsAnal auto hidden
-; int property SecondsOral auto hidden
 
 ; Timer Info
-; TODO: maybe a little excessive for a property?
 float[] CustomTimers
 float[] property Timers hidden
 	float[] function get()
@@ -100,7 +96,7 @@ int property Creatures hidden
 endProperty
 bool property HasCreature hidden
 	bool function get()
-		return CreatureRef != none
+		return Creatures > 0
 	endFunction
 endProperty
 
@@ -236,12 +232,8 @@ state Making
 		; --  Start Controller   -- ;
 		; ------------------------- ;
 
-		sslThreadController Controller = PrimeThread()
-		if !Controller
-			Log("StartThread() - Failed to prime thread for unknown reasons!", "FATAL")
-			return none
-		endIf
-		return Controller
+		Action("PrimeThread")
+		return self as sslThreadController
 	endFunction
 
 	event OnUpdate()
@@ -720,6 +712,7 @@ function SetupThreadEvent(string HookEvent)
 	if eid
 		ModEvent.PushInt(eid, thread_id)
 		ModEvent.PushString(eid, HookEvent)
+		ModEvent.PushBool(eid, HasPlayer)
 		ModEvent.Send(eid)
 		; Log("Thread Hook Sent: "+HookEvent)
 	endIf
@@ -777,7 +770,6 @@ function AliasEvent(string Callback, bool Switch = false)
 	int eid = ModEvent.Create(EventName)
 	ModEvent.PushBool(eid, Switch)
 	ModEvent.Send(eid)
-	Log(WaitAlias, EventName)
 	; Wait for actors to finish
 	float Failsafe = Utility.GetCurrentRealTime() + 30.0
 	while WaitAlias.Find(true) != -1 && Utility.GetCurrentRealTime() < FailSafe
@@ -846,6 +838,8 @@ auto state Unlocked
 		RegisterForSingleUpdate(TimeOut)
 		return self
 	endFunction
+	function EnableHotkeys()
+	endFunction
 endState
 
 ; Making
@@ -855,10 +849,6 @@ sslThreadModel function Make(float TimeOut = 30.0)
 endFunction
 sslThreadController function StartThread()
 	Log("StartThread() - Cannot start thread while not in a Making state", "FATAL")
-	return none
-endFunction
-sslThreadController function PrimeThread()
-	Log("StartThread() - Failed to start, controller is null", "FATAL")
 	return none
 endFunction
 int function AddActor(Actor ActorRef, bool IsVictim = false, sslBaseVoice Voice = none, bool ForceSilent = false)
@@ -879,6 +869,8 @@ endFunction
 ; Animating
 event OnKeyDown(int keyCode)
 endEvent
+function EnableHotkeys()
+endFunction
 
 ; ------------------------------------------------------- ;
 ; --- Legacy; do not use these functions anymore!     --- ;

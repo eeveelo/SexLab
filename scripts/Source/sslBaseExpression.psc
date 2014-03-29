@@ -33,6 +33,10 @@ int function PickPhase(int Amount, int Gender)
 	return sslUtility.ClampInt(((sslUtility.ClampInt(Amount, 1, 100) * Phases[Gender]) / 100), 1, Phases[Gender])
 endFunction
 
+function Apply(Actor ActorRef, int Amount, int Gender)
+	ApplyPhase(ActorRef, PickPhase(Amount, Gender), Gender)
+endFunction
+
 function ApplyPhase(Actor ActorRef, int Phase, int Gender)
 	if Phase > Phases[Gender]
 		return

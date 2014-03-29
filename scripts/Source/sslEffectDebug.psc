@@ -4,6 +4,7 @@ SexLabFramework property SexLab Auto
 import SexLabUtil
 import MiscUtil
 import ActorUtil
+import StorageUtil
 
 Actor Ref1
 Actor Ref2
@@ -14,6 +15,18 @@ float scale2
 string ActorName
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
+
+	sslBenchmark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
+
+	FormListAdd(Dev, "Positions", TargetRef, false)
+	Debug.TraceAndBox("Stored Actors: "+FormListCount(Dev, "Positions"))
+
+	if FormListCount(Dev, "Positions") > 2
+		Debug.TraceAndBox("Starting Benchmark!")
+		Utility.Wait(1.0)
+		Dev.StartBenchmark(2)
+	endIf
+
 	Dispel()
 endEvent
 
