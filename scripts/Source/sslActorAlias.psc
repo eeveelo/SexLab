@@ -108,8 +108,26 @@ bool function PrepareAlias(Actor ProspectRef, bool MakeVictim = false, sslBaseVo
 	endIf
 	if IsCreature
 		Thread.CreatureRef = BaseRef.GetRace()
+	else
+		SetVoice(UseVoice, ForceSilence)
+		Lib.CacheStrippable(ActorRef)
 	endIf
-	SetVoice(UseVoice, ForceSilence)
+	; Calculate scales
+	float display = ActorRef.GetScale()
+	ActorRef.SetScale(1.0)
+	float base = ActorRef.GetScale()
+	ActorScale = ( display / base )
+	AnimScale = ActorScale
+	ActorRef.SetScale(ActorScale)
+	if Thread.ActorCount > 1 && Config.bScaleActors
+		AnimScale = (1.0 / base)
+	endIf
+	; Get ready for mod events
+	string eid = "SSL_"+Thread.tid+"_"
+	RegisterForModEvent(eid+"Prepare", "PrepareActor")
+	RegisterForModEvent(eid+"Reset", "ResetActor")
+	RegisterForModEvent(eid+"Orgasm", "OrgasmEffect")
+	; Ready
 	Thread.Log("Slotted '"+ActorName, self)
 	GoToState("Ready")
 	return true
@@ -120,25 +138,22 @@ endFunction
 ; ------------------------------------------------------- ;
 
 state Ready
-	function Prepare(bool Force = false)
+	function PrepareActor()
 		; Remove any unwanted combat effects
 		ActorRef.StopCombat()
 		if ActorRef.IsWeaponDrawn()
 			ActorRef.SheatheWeapon()
 		endIf
 		LockActor()
-		; Init alias info
-		Loc = new float[6]
-		Animation = Thread.Animation
-		Stage     = Thread.Stage
-		Position  = Thread.Positions.Find(ActorRef)
-		if Thread.ActorCount > 1 && Config.bScaleActors
-			AnimScale = (1.0 / base)
-		endIf
+		; Sync thread information
+		Animation  = Thread.Animation
+		Stage      = Thread.Stage
+		Position   = Thread.Positions.Find(ActorRef)
+		Flags      = Animation.GetPositionFlags(Position, Stage)
+		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
 		; Non Creatures
 		if !IsCreature
 			; Strip actor
-			Lib.CacheStrippable(ActorRef)
 			Strip(DoUndress)
 			; Pick a voice if needed
 			if Voice == none && !IsForcedSilent
@@ -165,22 +180,14 @@ state Ready
 				ActorRef.AddItem(Strapon, 1, true)
 			endIf
 		endIf
-		; Calculate scales
-		float display = ActorRef.GetScale()
-		ActorRef.SetScale(1.0)
-		float base = ActorRef.GetScale()
-		ActorScale = ( display / base )
-		AnimScale = ActorScale
-		ActorRef.SetScale(ActorScale)
 		; Start Auto TFC if enabled
 		if IsPlayer && Config.bAutoTFC
 			Config.ToggleFreeCamera()
 		endIf
 		; Make SOS erect
 		; Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
-		; Enter animation state
+		; Enter animatable state
 		GoToState("Animating")
-		SyncThread(true)
 	endFunction
 endState
 
@@ -189,38 +196,40 @@ endState
 ; ------------------------------------------------------- ;
 
 state Animating
+
+	function StartAnimating()
+		RegisterForSingleUpdate(Utility.RandomFloat(1.0, 6.0))
+	endFunction
+
 	event OnUpdate()
 		; Check if still amonst the living and able.
 		if ActorRef.IsDead() || ActorRef.IsDisabled()
 			Thread.EndAnimation(true)
 			return
 		endIf
+		; Sync enjoyment level
+		GetEnjoyment()
+		; Apply Expression / sync enjoyment
+		if !IsCreature && Expression != none && !OpenMouth
+			Expression.Apply(ActorRef, Enjoyment, BaseSex)
+		endIf
 		; Moan if not silent
 		if !IsSilent
 			Voice.Moan(ActorRef, Enjoyment, IsVictim, Config.bUseLipSync)
 		endIf
-		; Apply Expression / sync enjoyment
-		ApplyExpression()
 		; Loop
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent
 
-	function SyncThread(bool Force = false)
-		UnregisterForUpdate()
-		; Sync info
-		Animation = Thread.Animation
-		Stage     = Thread.Stage
-		Position  = Thread.Positions.Find(ActorRef)
-		Flags     = Animation.GetPositionFlags(Position, Stage)
-		Offsets   = Animation.GetPositionOffsets(Thread.AdjustKey, Position, Stage)
-		; Update positioning marker
-		UpdateLocation(Force)
-		; Voice loop delay
+	function SyncThread()
+		; Sync thread information
+		Animation  = Thread.Animation
+		Stage      = Thread.Stage
+		Position   = Thread.Positions.Find(ActorRef)
+		Flags      = Animation.GetPositionFlags(Position, Stage)
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
 		; Creature skipped
 		if !IsCreature
-			; Apply Expression / sync enjoyment
-			ApplyExpression()
 			; Equip Strapon if needed and enabled
 			if Strapon != none
 				if UseStrapon && !ActorRef.IsEquipped(Strapon)
@@ -229,35 +238,26 @@ state Animating
 					ActorRef.UnequipItem(Strapon, true, true)
 				endIf
 			endIf
+			; Open mouth if needed
+			if OpenMouth
+				if Expression != none
+					MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
+				endIf
+				ActorRef.SetExpressionOverride(16, 100)
+			endIf
 		endIf
 		; Send schlong offset
 		if MalePosition
 			Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
 		endIf
-		; Continue loop
-		RegisterForSingleUpdate(Utility.RandomFloat(1.0, 5.0))
-		Done()
-	endFunction
-
-	function ApplyExpression()
-		if !IsCreature
-			; Sync enjoyment level
-			GetEnjoyment()
-			; Facial expression
-			if OpenMouth
-				ActorRef.SetExpressionOverride(16, 100)
-			elseIf Expression != none
-				Expression.Apply(ActorRef, Enjoyment, BaseSex)
-			endIf
-		endIf
 	endFunction
 
 	function UpdateOffsets()
-		Offsets = Animation.GetPositionOffsets(Thread.AdjustKey, Position, Stage)
-		UpdateLocation(true)
+		SyncLocation(true)
 	endFunction
 
-	function UpdateLocation(bool Force = false)
+	function SyncLocation(bool Force = false)
+		Offsets = Animation.GetPositionOffsets(Thread.AdjustKey, Position, Stage)
 		float[] CenterLoc = Thread.CenterLocation
 		Loc[0] = CenterLoc[0] + ( Math.sin(CenterLoc[5]) * Offsets[0] ) + ( Math.cos(CenterLoc[5]) * Offsets[1] )
 		Loc[1] = CenterLoc[1] + ( Math.cos(CenterLoc[5]) * Offsets[0] ) + ( Math.sin(CenterLoc[5]) * Offsets[1] )
@@ -317,10 +317,10 @@ state Animating
 		endIf
 		; Voice
 		VoiceDelay = 0.8
-		Done()
 	endFunction
 
-	event ResetActor(bool Quick = false)
+	event ResetActor()
+		bool Quick = Thread.FastEnd
 		; Restore scale and voicetype
 		RestoreActorDefaults()
 		; Apply cum
@@ -356,7 +356,6 @@ state Animating
 		endIf
 		; Reset alias
 		Initialize()
-		Done()
 	endEvent
 
 endState
@@ -567,10 +566,14 @@ endFunction
 function Strip(bool DoAnimate = true)
 	if ActorRef != none && !IsCreature
 		if StripOverride.Length != 33
+			; Default slots
 			Lib.StripSlots(ActorRef, Config.GetStrip(IsFemale, Thread.LeadIn, Thread.IsAggressive, IsVictim), DoAnimate)
 		else
+			; Custom slots
 			Lib.StripSlots(ActorRef, StripOverride, DoAnimate)
 		endIf
+		; Only allow once, unless overwritten
+		NoUndress = true
 	endIf
 endFunction
 
@@ -636,6 +639,7 @@ function Initialize()
 	; Storage
 	bool[] bDel1
 	StripOverride  = bDel1
+	Loc            = new float[6]
 	; Clear the alias
 	TryToClear()
 	TryToReset()
@@ -660,11 +664,6 @@ function ClearAlias()
 	Initialize()
 endFunction
 
-function Done()
-	Thread.EventDone(self)
-	UnregisterForAllModEvents()
-endFunction
-
 ; event OnInit()
 ; 	Thread = (GetOwningQuest() as sslThreadController)
 ; 	Lib = (Quest.GetQuest("SexLabQuestFramework") as sslActorLibrary)
@@ -676,20 +675,17 @@ endFunction
 ; ------------------------------------------------------- ;
 
 ; Ready
-function Prepare(bool Force = false)
-	Done()
+function PrepareActor()
 endFunction
 ; Animating
-function SyncThread(bool Force = false)
-	Done()
+function StartAnimating()
 endFunction
-function SyncAnimation(bool Force = false)
-endFunction
-function ApplyExpression()
+
+function SyncThread()
 endFunction
 function UpdateOffsets()
 endFunction
-function UpdateLocation(bool Force = false)
+function SyncLocation(bool Force = false)
 endFunction
 function Snap()
 endFunction
@@ -697,10 +693,7 @@ event OnTranslationComplete()
 endEvent
 function OrgasmEffect()
 endFunction
-event ResetActor(bool Quick = false)
-	Done()
+event ResetActor()
 endEvent
-event OnOrgasm(bool Force = false)
-	OrgasmEffect()
-	Done()
+event OnOrgasm()
 endEvent

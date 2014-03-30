@@ -83,7 +83,7 @@ function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10)
 		Base = Test(Iterations)
 		GoToState("RunTest"+Benchmark)
 		Utility.WaitMenuMode(1.0)
-		; Log("Starting Test #"+Benchmark+": "+Label())
+		Log("Starting Test #"+Benchmark+": "+Label())
 		Total = 0.0
 		n = 1
 		while n <= Loops

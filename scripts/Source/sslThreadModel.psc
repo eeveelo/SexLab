@@ -756,32 +756,41 @@ float function GetSkillBonus(float[] Levels)
 	return bonus
 endFunction
 
-function AliasEvent(string Callback, bool Switch = false)
-	WaitAlias = new bool[5]
-	string EventName = "SSL_"+thread_id+"_"+Callback
-	int i = 5
-	while i
-		i -= 1
-		if ActorAlias[i].ActorRef != none
-			ActorAlias[i].RegisterForModEvent(EventName, Callback)
-			WaitAlias[i] = true
-		endIf
-	endWhile
-	int eid = ModEvent.Create(EventName)
-	ModEvent.PushBool(eid, Switch)
-	ModEvent.Send(eid)
-	; Wait for actors to finish
+function AliasEvent(string Callback, string WaitFor = "")
+	ModEvent.Send(ModEvent.Create("SSL_"+thread_id+"_"+Callback))
+	if WaitFor != ""
+		float Failsafe = Utility.GetCurrentRealTime() + 30.0
+		while !CheckState(WaitFor) && FailSafe > Utility.GetCurrentRealTime()
+			Utility.Wait(0.5)
+		endWhile
+	endIf
+endFunction
+
+function AliasWait(string ReadyState)
 	float Failsafe = Utility.GetCurrentRealTime() + 30.0
-	while WaitAlias.Find(true) != -1 && Utility.GetCurrentRealTime() < FailSafe
+	while !CheckState(ReadyState) && FailSafe > Utility.GetCurrentRealTime()
 		Utility.Wait(0.5)
 	endWhile
 endFunction
 
+bool function CheckState(string ReadyState)
+	int i = ActorCount
+	while i
+		i -= 1
+		if PositionAlias(i).GetState() != ReadyState
+			return false
+		endIf
+	endWhile
+	return true
+endFunction
+
 function EventDone(sslActorAlias Slot)
 	WaitAlias[ActorAlias.Find(Slot)] = false
+	Log("Finished: "+WaitAlias, Slot)
 endFunction
 
 function Action(string FireState)
+	Log(FireState, "Action")
 	UnregisterForUpdate()
 	EndAction() ; OnEndState()
 	GoToState(FireState)

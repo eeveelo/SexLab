@@ -219,7 +219,7 @@ function CacheStrippable(Actor ActorRef)
 		i -= 1
 		form ItemRef = ActorRef.GetNthForm(i)
 		if ItemRef.GetType() == 26 && IsStrippable(ItemRef)
-			Log(ItemRef.GetName()+" Is Strippable")
+			; Log(ItemRef.GetName()+" Is Strippable")
 		endIf
 	endWhile
 endFunction
