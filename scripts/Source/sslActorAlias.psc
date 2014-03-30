@@ -153,6 +153,11 @@ state Ready
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
 		; Non Creatures
 		if !IsCreature
+			; Pick a strapon on females to use
+			if IsFemale && Config.bUseStrapons && Lib.Strapons.Length > 0
+				Strapon = Lib.Strapons[Utility.RandomInt(0, (Lib.Strapons.Length - 1))]
+				ActorRef.AddItem(Strapon, 1, true)
+			endIf
 			; Strip actor
 			Strip(DoUndress)
 			; Pick a voice if needed
@@ -174,11 +179,6 @@ state Ready
 				SkilledActor = Thread.Positions[sslUtility.IndexTravel(Position, Thread.ActorCount)]
 			endIf
 			Skills = Stats.GetSkillLevels(SkilledActor)
-			; Pick a strapon on females to use
-			if IsFemale && Config.bUseStrapons && Lib.Strapons.Length > 0
-				Strapon = Lib.Strapons[Utility.RandomInt(0, (Lib.Strapons.Length - 1))]
-				ActorRef.AddItem(Strapon, 1, true)
-			endIf
 		endIf
 		; Start Auto TFC if enabled
 		if IsPlayer && Config.bAutoTFC
