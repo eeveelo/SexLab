@@ -423,6 +423,7 @@ function EnableHotkeys()
 		RegisterForKey(Config.kRestoreOffsets)
 		RegisterForKey(Config.kMoveScene)
 		RegisterForKey(Config.kRotateScene)
+		RegisterForKey(Config.kEndAnimation)
 		hkReady = true
 	endIf
 endFunction

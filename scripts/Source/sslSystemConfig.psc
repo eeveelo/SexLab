@@ -73,6 +73,7 @@ int property kMoveScene auto hidden ; ]
 int property kRestoreOffsets auto hidden ; -
 int property kRotateScene auto hidden ; U
 int property kToggleFreeCamera auto hidden ; NUM 3
+int property kEndAnimation auto hidden ; End
 
 bool property bAutoTFC auto hidden
 float property fAutoSUCSM auto hidden
@@ -213,6 +214,10 @@ function HotkeyCallback(sslThreadController Thread, int keyCode)
 	elseIf keyCode == kMoveScene
 		Thread.MoveScene()
 
+	; EndAnimation
+	elseIf keyCode == kEndAnimation
+		Thread.EndAnimation(true)
+
 	endIf
 endFunction
 
@@ -255,6 +260,7 @@ function SetDefaults()
 	kRestoreOffsets = 12 ; -
 	kRotateScene = 22 ; U
 	kToggleFreeCamera = 81 ; NUM 3
+	kEndAnimation = 207 ; End
 
 	; TFC hotkey settings
 	bAutoTFC = false

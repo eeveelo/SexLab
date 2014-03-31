@@ -326,6 +326,7 @@ event OnPageReset(string page)
 		AddKeyMapOptionST("ChangePositions", "$SSL_SwapActorPositions", Config.kChangePositions)
 		AddKeyMapOptionST("MoveSceneLocation", "$SSL_MoveSceneLocation", Config.kMoveScene)
 		AddKeyMapOptionST("BackwardsModifier", "$SSL_ReverseDirectionModifier", Config.kBackwards)
+		AddKeyMapOptionST("EndAnimation", "$SSL_EndAnimation", Config.kEndAnimation)
 		AddKeyMapOptionST("ToggleFreeCamera", "$SSL_ToggleFreeCamera", Config.kToggleFreeCamera)
 
 	; Normal timers + stripping
@@ -1266,6 +1267,21 @@ state BackwardsModifier
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoBackwards")
+	endEvent
+endState
+state EndAnimation
+	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
+		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+			Config.kEndAnimation = newKeyCode
+			SetKeyMapOptionValueST(Config.kEndAnimation)
+		endIf
+	endEvent
+	event OnDefaultST()
+		Config.kEndAnimation = 207
+		SetKeyMapOptionValueST(Config.kEndAnimation)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoEndAnimation")
 	endEvent
 endState
 state ToggleFreeCamera
