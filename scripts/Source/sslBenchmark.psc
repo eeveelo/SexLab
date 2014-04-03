@@ -3,38 +3,11 @@ scriptname sslBenchmark extends sslSystemLibrary
 
 function PreBenchmarkSetup()
 	Setup()
-
 endFunction
 
 state RunTest1
 	string function Label()
 		return ""
-	endFunction
-
-	string function Proof()
-		return ""
-	endFunction
-
-	float function Test(int nth = 5000, float baseline = 0.0)
-		; START any variable preparions needed
-
-		; END any variable preparions needed
-		Utility.WaitMenuMode(1.0)
-		baseline += Utility.GetCurrentRealTime()
-		while nth
-			nth -= 1
-			; START code to benchmark
-
-
-			; END code to benchmark
-		endWhile
-		return Utility.GetCurrentRealTime() - baseline
-	endFunction
-endState
-
-state RunTest2
-	string function Label()
-		return "4"
 	endFunction
 
 	string function Proof()
@@ -115,4 +88,32 @@ float function Test(int nth = 5000, float baseline = 0.0)
 	return Utility.GetCurrentRealTime() - baseline
 endFunction
 
+int Count
+int Result
+float Delay
+float Loop
+float Started
 
+int function LatencyTest()
+	Result  = 0
+	Count   = 0
+	Delay   = 0.0
+	Started = Utility.GetCurrentRealTime()
+	RegisterForSingleUpdate(0)
+	while Result == 0
+		Utility.Wait(0.01)
+	endWhile
+	return Result
+endFunction
+
+event OnUpdate()
+	Delay += (Utility.GetCurrentRealTime() - Started)
+	Count += 1
+	if Count < 10
+		Started = Utility.GetCurrentRealTime()
+		RegisterForSingleUpdate(0)
+	else
+		Result = ((Delay / 10.0) * 1000.0) as int
+		Debug.Notification("Latency Test Result: "+Result+"ms")
+	endIf
+endEvent
