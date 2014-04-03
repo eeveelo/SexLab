@@ -347,10 +347,6 @@ state Animating
 		; Stop animating
 		StopAnimating(Quick)
 		Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
-		ActorRef.ClearExpressionOverride()
-		if Expression != none
-			MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
-		endIf
 		; Unstrip
 		if !ActorRef.IsDead()
 			Lib.UnstripStored(ActorRef, IsVictim)
@@ -486,6 +482,11 @@ function RestoreActorDefaults()
 	if ActorRef == Lib.PlayerRef
 		Thread.DisableHotkeys()
 	endIf
+	; Reset expression
+	ActorRef.ClearExpressionOverride()
+	if Expression != none
+		MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
+	endIf
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -523,6 +524,10 @@ sslBaseExpression function GetExpression()
 endFunction
 
 int function GetEnjoyment()
+	; First actor pings thread to update skill xp
+	if Position == 0
+		Thread.RecordSkills()
+	endIf
 	; Base enjoyment from sex skills and total runtime
 	Enjoyment = Thread.GetSkillBonus(Skills) as int
 	; Gender bonuses
@@ -538,9 +543,9 @@ int function GetEnjoyment()
 	; Actor is outside sexuality comfort zone
 	if IsStraight
 		if (IsFemale && Thread.Females > 1) || (!IsFemale && Thread.Males > 1)
-			Enjoyment -= 8
+			Enjoyment -= 7
 		elseIf (IsFemale && MalePosition) || (!IsFemale && !MalePosition)
-			Enjoyment -= 6
+			Enjoyment -= 5
 		endIf
 	endIf
 	; Actor is victim/agressor
@@ -553,7 +558,7 @@ int function GetEnjoyment()
 	endIf
 	; Set final enjoyment
 	Enjoyment = ((Enjoyment as float) * (Stage as float / Animation.StageCount as float)) as int
-	; Thread.Log("Enjoyment = "+Enjoyment, ActorName)
+	Thread.Log("Enjoyment = "+Enjoyment, ActorName)
 	return Enjoyment
 endFunction
 

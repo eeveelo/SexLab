@@ -12,6 +12,7 @@ float SFXTimer
 ; Processing
 bool hkReady
 bool TimedStage
+bool Adjusted
 float StageTimer
 int StageCount
 int AdjustPos
@@ -207,16 +208,19 @@ state Animating
 	function AdjustForward(bool backwards = false, bool adjustStage = false)
 		Animation.AdjustForward(AdjustKey, AdjustPos, Stage, sslUtility.SignFloat(backwards, 1.0), adjustStage)
 		AdjustAlias.UpdateOffsets()
+		Adjusted = true
 	endFunction
 
 	function AdjustSideways(bool backwards = false, bool adjustStage = false)
 		Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, sslUtility.SignFloat(backwards, 1.0), adjustStage)
 		AdjustAlias.UpdateOffsets()
+		Adjusted = true
 	endFunction
 
 	function AdjustUpward(bool backwards = false, bool adjustStage = false)
 		Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, sslUtility.SignFloat(backwards, 1.0), adjustStage)
 		AdjustAlias.UpdateOffsets()
+		Adjusted = true
 	endFunction
 
 	function RotateScene(bool backwards = false)
@@ -373,14 +377,6 @@ function EndAnimation(bool Quickly = false)
 	if !Quickly
 		SexLabUtil.Wait(2.0)
 	endIf
-	; Export adjustments if player was present
-	if HasPlayer
-		if HasCreature
-			CreatureSlots.ExportAdjustments()
-		else
-			AnimSlots.ExportAdjustments()
-		endIf
-	endIf
 	; Clear & Reset animation thread
 	Initialize()
 endFunction
@@ -445,6 +441,7 @@ function Initialize()
 	DisableHotkeys()
 	SkillTime   = 0.0
 	TimedStage  = false
+	Adjusted    = false
 	AdjustAlias = ActorAlias[0]
 	parent.Initialize()
 endFunction

@@ -240,18 +240,3 @@ state Locked
 	endFunction
 endState
 
-function ExportAdjustments()
-	int i = Slotted
-	while i
-		i -= 1
-		Slots[i].ExportAdjustments()
-	endWhile
-endFunction
-
-function ImportAdjustments()
-	int i = Slotted
-	while i
-		i -= 1
-		Slots[i].ExportAdjustments()
-	endWhile
-endFunction

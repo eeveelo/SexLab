@@ -462,7 +462,6 @@ function ExportJSON()
 endFunction
 
 function ImportJSON()
-	; bool function ImportFile(string fileName, string restrictKey = "", int restrictType = -1, Form restrictForm = none, bool restrictGlobal = false, bool keyContains = false) global native
 	sPlayerVoice        = ImportString("sPlayerVoice", sPlayerVoice)
 	sNPCBed             = ImportString("sNPCBed", sNPCBed)
 
@@ -528,113 +527,86 @@ endFunction
 
 
 
-
-
-
-
 function ExportFloat(string Name, float Value)
-	Name = "SexLabConfig."+Name
-	SetFloatValue(none, Name, Value)
-	ExportFile("SexLabConfig.json", Name, 2, none, true, false, true)
-	UnsetFloatValue(none, Name)
+	FileSetFloatValue("SexLabConfig."+Name, Value)
 endFunction
 float function ImportFloat(string Name, float Value)
 	Name = "SexLabConfig."+Name
-	ImportFile("SexLabConfig.json", Name, 2, none, true, false)
-	Value = GetFloatValue(none, Name, Value)
-	UnsetFloatValue(none, Name)
+	Value = FileGetFloatValue(Name, Value)
+	FileUnsetFloatValue(Name)
 	return Value
 endFunction
 
 function ExportInt(string Name, int Value)
-	Name = "SexLabConfig."+Name
-	SetIntValue(none, Name, Value)
-	ExportFile("SexLabConfig.json", Name, 1, none, true, false, true)
-	UnsetIntValue(none, Name)
+	FileSetIntValue("SexLabConfig."+Name, Value)
 endFunction
 int function ImportInt(string Name, int Value)
 	Name = "SexLabConfig."+Name
-	ImportFile("SexLabConfig.json", Name, 1, none, true, false)
-	Value = GetIntValue(none, Name, Value)
-	UnsetIntValue(none, Name)
+	Value = FileGetIntValue(Name, Value)
+	FileUnsetIntValue(Name)
 	return Value
 endFunction
 
 function ExportBool(string Name, bool Value)
-	Name = "SexLabConfig."+Name
-	SetIntValue(none, Name, Value as int)
-	ExportFile("SexLabConfig.json", Name, 1, none, true, false, true)
-	UnsetIntValue(none, Name)
+	FileSetIntValue("SexLabConfig."+Name, Value as int)
 endFunction
 bool function ImportBool(string Name, bool Value)
 	Name = "SexLabConfig."+Name
-	ImportFile("SexLabConfig.json", Name, 1, none, true, false)
-	Value = GetIntValue(none, Name, Value as int) as bool
-	UnsetIntValue(none, Name)
+	Value = FileGetIntValue(Name, Value as int) as bool
+	FileUnsetIntValue(Name)
 	return Value
 endFunction
 
 function ExportString(string Name, string Value)
-	Name = "SexLabConfig."+Name
-	SetStringValue(none, Name, Value as int)
-	ExportFile("SexLabConfig.json", Name, 4, none, true, false, true)
-	UnsetStringValue(none, Name)
+	FileSetStringValue("SexLabConfig."+Name, Value)
 endFunction
 string function ImportString(string Name, string Value)
 	Name = "SexLabConfig."+Name
-	ImportFile("SexLabConfig.json", Name, 4, none, true, false)
-	Value = GetStringValue(none, Name, Value)
-	UnsetStringValue(none, Name)
+	Value = FileGetStringValue(Name, Value)
+	FileUnsetStringValue(Name)
 	return Value
 endFunction
 
-
 function ExportFloatList(string Name, float[] Values, int len)
 	Name = "SexLabConfig."+Name
-	FloatListClear(none, Name)
+	FileFloatListClear(Name)
 	int i
 	while i < len
-		FloatListAdd(none, Name, Values[i])
+		FileFloatListAdd(Name, Values[i])
 		i += 1
 	endWhile
-	ExportFile("SexLabConfig.json", Name, 32, none, true, false, true)
-	FloatListClear(none, Name)
 endFunction
 float[] function ImportFloatList(string Name, float[] Values, int len)
 	Name = "SexLabConfig."+Name
-	ImportFile("SexLabConfig.json", Name, 32, none, true, false)
-	if FloatListCount(none, Name) == len
+	if FileFloatListCount(Name) == len
 		int i
 		while i < len
-			Values[i] = FloatListGet(none, Name, i)
+			Values[i] = FileFloatListGet(Name, i)
 			i += 1
 		endWhile
 	endIf
-	FloatListClear(none, Name)
+	FileFloatListClear(Name)
 	return Values
 endFunction
 
 function ExportBoolList(string Name, bool[] Values, int len)
 	Name = "SexLabConfig."+Name
-	IntListClear(none, Name)
+	FileIntListClear(Name)
 	int i
 	while i < len
-		IntListAdd(none, Name, Values[i] as int)
+		FileIntListAdd(Name, Values[i] as int)
 		i += 1
 	endWhile
-	ExportFile("SexLabConfig.json", Name, 16, none, true, false, true)
-	IntListClear(none, Name)
 endFunction
 bool[] function ImportBoolList(string Name, bool[] Values, int len)
 	Name = "SexLabConfig."+Name
-	ImportFile("SexLabConfig.json", Name, 32, none, true, false)
-	if IntListCount(none, Name) == len
+	if FileIntListCount(Name) == len
 		int i
 		while i < len
-			Values[i] = IntListGet(none, Name, i) as bool
+			Values[i] = FileIntListGet(Name, i) as bool
 			i += 1
 		endWhile
 	endIf
-	IntListClear(none, Name)
+	FileIntListClear(Name)
 	return Values
 endFunction

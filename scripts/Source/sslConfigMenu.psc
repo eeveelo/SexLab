@@ -43,13 +43,19 @@ event OnGameReload()
 	Debug.Trace("SexLab Loaded CurrentVerison: "+CurrentVersion)
 	if CurrentVersion > 0 && !CheckSystem()
 		SexLab.GoToState("Disabled")
-	elseIf Config != none
+	endIf
+	if Config != none
 		; TFC Toggle key
 		Config.ToggleFreeCameraEnable()
 		; Configure SFX & Voice volumes
 		AudioVoice.SetVolume(Config.fVoiceVolume)
 		AudioSFX.SetVolume(Config.fSFXVolume)
 	endIf
+	; ; Import JSON adjustments
+	; if AnimSlots != none && CreatureSlots != none
+	; 	AnimSlots.ImportAdjustments()
+	; 	CreatureSlots.ImportAdjustments()
+	; endIf
 endEvent
 
 ; Framework
