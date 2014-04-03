@@ -1,11 +1,12 @@
-scriptname sslSystemConfig extends Quest
+scriptname sslSystemConfig extends sslSystemLibrary
+
+import StorageUtil
 
 ; ------------------------------------------------------- ;
 ; --- Config Resources                                --- ;
 ; ------------------------------------------------------- ;
 
 SexLabFramework property SexLab auto
-Actor property PlayerRef auto
 
 bool bDebugMode
 bool property DebugMode hidden
@@ -28,7 +29,6 @@ bool property bDisablePlayer auto hidden
 float property fMaleVoiceDelay auto hidden
 float property fFemaleVoiceDelay auto hidden
 float property fVoiceVolume auto hidden
-bool property bEnableTCL auto hidden
 bool property bScaleActors auto hidden
 bool property bUseCum auto hidden
 bool property bAllowFFCum auto hidden
@@ -274,7 +274,6 @@ function SetDefaults()
 	fMaleVoiceDelay = 6.0
 	fFemaleVoiceDelay = 5.0
 	fVoiceVolume = 1.0
-	bEnableTCL = false
 	bScaleActors = false
 	bUseCum = true
 	bAllowFFCum = false
@@ -286,7 +285,7 @@ function SetDefaults()
 	bUseFemaleNudeSuit = false
 	bUndressAnimation = false
 	bUseLipSync = false
-	bUseExpressions = true
+	bUseExpressions = false
 
 	; Strip
 	bStripMale = new bool[33]
@@ -400,84 +399,242 @@ function SetDefaults()
 endFunction
 
 
-function _ExportFloat(string name, float value)
-	StorageUtil.FileSetFloatValue("SexLabConfig."+name, value)
-endFunction
-function _ExportInt(string name, int value)
-	StorageUtil.FileSetIntValue("SexLabConfig."+name, value)
-endFunction
-function _ExportBool(string name, bool value)
-	StorageUtil.FileSetIntValue("SexLabConfig."+name, value as int)
-endFunction
-function _ExportString(string name, string value)
-	StorageUtil.FileSetStringValue("SexLabConfig."+name, value)
+function ExportJSON()
+	ExportString("sPlayerVoice", sPlayerVoice)
+	ExportString("sNPCBed", sNPCBed)
+	ExportBool("bRestrictAggressive", bRestrictAggressive)
+	ExportBool("bAllowCreatures", bAllowCreatures)
+	ExportBool("bNPCSaveVoice", bNPCSaveVoice)
+	ExportBool("bUseStrapons", bUseStrapons)
+	ExportBool("bReDressVictim", bReDressVictim)
+	ExportBool("bRagdollEnd", bRagdollEnd)
+	ExportBool("bUseMaleNudeSuit", bUseMaleNudeSuit)
+	ExportBool("bUseFemaleNudeSuit", bUseFemaleNudeSuit)
+	ExportBool("bUndressAnimation", bUndressAnimation)
+	ExportBool("bUseLipSync", bUseLipSync)
+	ExportBool("bUseExpressions", bUseExpressions)
+	ExportBool("bScaleActors", bScaleActors)
+	ExportBool("bUseCum", bUseCum)
+	ExportBool("bAllowFFCum", bAllowFFCum)
+	ExportBool("bDisablePlayer", bDisablePlayer)
+	ExportBool("bAutoTFC", bAutoTFC)
+	ExportBool("bDebugMode", bDebugMode)
+	ExportBool("bAutoAdvance", bAutoAdvance)
+	ExportBool("bForeplayStage", bForeplayStage)
+	ExportBool("bOrgasmEffects", bOrgasmEffects)
+	ExportBool("bRaceAdjustments", bRaceAdjustments)
+	ExportInt("kBackwards", kBackwards)
+	ExportInt("kAdjustStage", kAdjustStage)
+	ExportInt("kBackwardsAlt", kBackwardsAlt)
+	ExportInt("kAdjustStageAlt", kAdjustStageAlt)
+	ExportInt("kAdvanceAnimation", kAdvanceAnimation)
+	ExportInt("kChangeAnimation", kChangeAnimation)
+	ExportInt("kChangePositions", kChangePositions)
+	ExportInt("kAdjustChange", kAdjustChange)
+	ExportInt("kAdjustForward", kAdjustForward)
+	ExportInt("kAdjustSideways", kAdjustSideways)
+	ExportInt("kAdjustUpward", kAdjustUpward)
+	ExportInt("kRealignActors", kRealignActors)
+	ExportInt("kMoveScene", kMoveScene)
+	ExportInt("kRestoreOffsets", kRestoreOffsets)
+	ExportInt("kRotateScene", kRotateScene)
+	ExportInt("kToggleFreeCamera", kToggleFreeCamera)
+	ExportInt("kEndAnimation", kEndAnimation)
+	ExportFloat("fCumTimer", fCumTimer)
+	ExportFloat("fAutoSUCSM", fAutoSUCSM)
+	ExportFloat("fMaleVoiceDelay", fMaleVoiceDelay)
+	ExportFloat("fFemaleVoiceDelay", fFemaleVoiceDelay)
+	ExportFloat("fVoiceVolume", fVoiceVolume)
+	ExportFloat("fSFXDelay", fSFXDelay)
+	ExportFloat("fSFXVolume", fSFXVolume)
+
+	ExportBoolList("bStripMale", bStripMale, 33)
+	ExportBoolList("bStripFemale", bStripFemale, 33)
+	ExportBoolList("bStripLeadInFemale", bStripLeadInFemale, 33)
+	ExportBoolList("bStripLeadInMale", bStripLeadInMale, 33)
+	ExportBoolList("bStripVictim", bStripVictim, 33)
+	ExportBoolList("bStripAggressor", bStripAggressor, 33)
+
+	ExportFloatList("fStageTimer", fStageTimer, 5)
+	ExportFloatList("fStageTimerLeadIn", fStageTimerLeadIn, 5)
+	ExportFloatList("fStageTimerAggr", fStageTimerAggr, 5)
+
 endFunction
 
-float function _ImportFloat(string name, float value)
-	if StorageUtil.FileHasFloatValue("SexLabConfig."+name)
-		value = StorageUtil.FileGetFloatValue("SexLabConfig."+name, value)
-		StorageUtil.FileUnsetFloatValue("SexLabConfig."+name)
-	endIf
-	return value
-endFunction
-int function _ImportInt(string name, int value)
-	if StorageUtil.FileHasIntValue("SexLabConfig."+name)
-		value = StorageUtil.FileGetIntValue("SexLabConfig."+name, value)
-		StorageUtil.FileUnsetIntValue("SexLabConfig."+name)
-	endIf
-	return value
-endFunction
-bool function _ImportBool(string name, bool value)
-	if StorageUtil.FileHasIntValue("SexLabConfig."+name)
-		value = StorageUtil.FileGetIntValue("SexLabConfig."+name, value as int) as bool
-		StorageUtil.FileUnsetIntValue("SexLabConfig."+name)
-	endIf
-	return value
-endFunction
-string function _ImportString(string name, string value)
-	if StorageUtil.FileHasStringValue("SexLabConfig."+name)
-		value = StorageUtil.FileGetStringValue("SexLabConfig."+name, value)
-		StorageUtil.FileUnsetStringValue("SexLabConfig."+name)
-	endIf
-	return value
+function ImportJSON()
+	; bool function ImportFile(string fileName, string restrictKey = "", int restrictType = -1, Form restrictForm = none, bool restrictGlobal = false, bool keyContains = false) global native
+	sPlayerVoice        = ImportString("sPlayerVoice", sPlayerVoice)
+	sNPCBed             = ImportString("sNPCBed", sNPCBed)
+
+	bRestrictAggressive = ImportBool("bRestrictAggressive", bRestrictAggressive)
+	bAllowCreatures     = ImportBool("bAllowCreatures", bAllowCreatures)
+	bNPCSaveVoice       = ImportBool("bNPCSaveVoice", bNPCSaveVoice)
+	bUseStrapons        = ImportBool("bUseStrapons", bUseStrapons)
+	bReDressVictim      = ImportBool("bReDressVictim", bReDressVictim)
+	bRagdollEnd         = ImportBool("bRagdollEnd", bRagdollEnd)
+	bUseMaleNudeSuit    = ImportBool("bUseMaleNudeSuit", bUseMaleNudeSuit)
+	bUseFemaleNudeSuit  = ImportBool("bUseFemaleNudeSuit", bUseFemaleNudeSuit)
+	bUndressAnimation   = ImportBool("bUndressAnimation", bUndressAnimation)
+	bUseLipSync         = ImportBool("bUseLipSync", bUseLipSync)
+	bUseExpressions     = ImportBool("bUseExpressions", bUseExpressions)
+	bScaleActors        = ImportBool("bScaleActors", bScaleActors)
+	bUseCum             = ImportBool("bUseCum", bUseCum)
+	bAllowFFCum         = ImportBool("bAllowFFCum", bAllowFFCum)
+	bDisablePlayer      = ImportBool("bDisablePlayer", bDisablePlayer)
+	bAutoTFC            = ImportBool("bAutoTFC", bAutoTFC)
+	bDebugMode          = ImportBool("bDebugMode", bDebugMode)
+	bAutoAdvance        = ImportBool("bAutoAdvance", bAutoAdvance)
+	bForeplayStage      = ImportBool("bForeplayStage", bForeplayStage)
+	bOrgasmEffects      = ImportBool("bOrgasmEffects", bOrgasmEffects)
+	bRaceAdjustments    = ImportBool("bRaceAdjustments", bRaceAdjustments)
+
+	kBackwards          = ImportInt("kBackwards", kBackwards)
+	kAdjustStage        = ImportInt("kAdjustStage", kAdjustStage)
+	kBackwardsAlt       = ImportInt("kBackwardsAlt", kBackwardsAlt)
+	kAdjustStageAlt     = ImportInt("kAdjustStageAlt", kAdjustStageAlt)
+	kAdvanceAnimation   = ImportInt("kAdvanceAnimation", kAdvanceAnimation)
+	kChangeAnimation    = ImportInt("kChangeAnimation", kChangeAnimation)
+	kChangePositions    = ImportInt("kChangePositions", kChangePositions)
+	kAdjustChange       = ImportInt("kAdjustChange", kAdjustChange)
+	kAdjustForward      = ImportInt("kAdjustForward", kAdjustForward)
+	kAdjustSideways     = ImportInt("kAdjustSideways", kAdjustSideways)
+	kAdjustUpward       = ImportInt("kAdjustUpward", kAdjustUpward)
+	kRealignActors      = ImportInt("kRealignActors", kRealignActors)
+	kMoveScene          = ImportInt("kMoveScene", kMoveScene)
+	kRestoreOffsets     = ImportInt("kRestoreOffsets", kRestoreOffsets)
+	kRotateScene        = ImportInt("kRotateScene", kRotateScene)
+	kToggleFreeCamera   = ImportInt("kToggleFreeCamera", kToggleFreeCamera)
+	kEndAnimation       = ImportInt("kEndAnimation", kEndAnimation)
+
+	fCumTimer           = ImportFloat("fCumTimer", fCumTimer)
+	fAutoSUCSM          = ImportFloat("fAutoSUCSM", fAutoSUCSM)
+	fMaleVoiceDelay     = ImportFloat("fMaleVoiceDelay", fMaleVoiceDelay)
+	fFemaleVoiceDelay   = ImportFloat("fFemaleVoiceDelay", fFemaleVoiceDelay)
+	fVoiceVolume        = ImportFloat("fVoiceVolume", fVoiceVolume)
+	fSFXDelay           = ImportFloat("fSFXDelay", fSFXDelay)
+	fSFXVolume          = ImportFloat("fSFXVolume", fSFXVolume)
+
+	bStripMale          = ImportBoolList("bStripMale", bStripMale, 33)
+	bStripFemale        = ImportBoolList("bStripFemale", bStripFemale, 33)
+	bStripLeadInFemale  = ImportBoolList("bStripLeadInFemale", bStripLeadInFemale, 33)
+	bStripLeadInMale    = ImportBoolList("bStripLeadInMale", bStripLeadInMale, 33)
+	bStripVictim        = ImportBoolList("bStripVictim", bStripVictim, 33)
+	bStripAggressor     = ImportBoolList("bStripAggressor", bStripAggressor, 33)
+
+	fStageTimer         = ImportFloatList("fStageTimer", fStageTimer, 5)
+	fStageTimerLeadIn   = ImportFloatList("fStageTimerLeadIn", fStageTimerLeadIn, 5)
+	fStageTimerAggr     = ImportFloatList("fStageTimerAggr", fStageTimerAggr, 5)
 endFunction
 
-function _ExportFloatList(string name, float[] values, int len)
-	StorageUtil.FileFloatListClear("SexLabConfig."+name)
+
+
+
+
+
+
+function ExportFloat(string Name, float Value)
+	Name = "SexLabConfig."+Name
+	SetFloatValue(none, Name, Value)
+	ExportFile("SexLabConfig.json", Name, 2, none, true, false, true)
+	UnsetFloatValue(none, Name)
+endFunction
+float function ImportFloat(string Name, float Value)
+	Name = "SexLabConfig."+Name
+	ImportFile("SexLabConfig.json", Name, 2, none, true, false)
+	Value = GetFloatValue(none, Name, Value)
+	UnsetFloatValue(none, Name)
+	return Value
+endFunction
+
+function ExportInt(string Name, int Value)
+	Name = "SexLabConfig."+Name
+	SetIntValue(none, Name, Value)
+	ExportFile("SexLabConfig.json", Name, 1, none, true, false, true)
+	UnsetIntValue(none, Name)
+endFunction
+int function ImportInt(string Name, int Value)
+	Name = "SexLabConfig."+Name
+	ImportFile("SexLabConfig.json", Name, 1, none, true, false)
+	Value = GetIntValue(none, Name, Value)
+	UnsetIntValue(none, Name)
+	return Value
+endFunction
+
+function ExportBool(string Name, bool Value)
+	Name = "SexLabConfig."+Name
+	SetIntValue(none, Name, Value as int)
+	ExportFile("SexLabConfig.json", Name, 1, none, true, false, true)
+	UnsetIntValue(none, Name)
+endFunction
+bool function ImportBool(string Name, bool Value)
+	Name = "SexLabConfig."+Name
+	ImportFile("SexLabConfig.json", Name, 1, none, true, false)
+	Value = GetIntValue(none, Name, Value as int) as bool
+	UnsetIntValue(none, Name)
+	return Value
+endFunction
+
+function ExportString(string Name, string Value)
+	Name = "SexLabConfig."+Name
+	SetStringValue(none, Name, Value as int)
+	ExportFile("SexLabConfig.json", Name, 4, none, true, false, true)
+	UnsetStringValue(none, Name)
+endFunction
+string function ImportString(string Name, string Value)
+	Name = "SexLabConfig."+Name
+	ImportFile("SexLabConfig.json", Name, 4, none, true, false)
+	Value = GetStringValue(none, Name, Value)
+	UnsetStringValue(none, Name)
+	return Value
+endFunction
+
+
+function ExportFloatList(string Name, float[] Values, int len)
+	Name = "SexLabConfig."+Name
+	FloatListClear(none, Name)
 	int i
 	while i < len
-		StorageUtil.FileFloatListAdd("SexLabConfig."+name, values[i])
+		FloatListAdd(none, Name, Values[i])
 		i += 1
 	endWhile
+	ExportFile("SexLabConfig.json", Name, 32, none, true, false, true)
+	FloatListClear(none, Name)
 endFunction
-function _ExportBoolList(string name, bool[] values, int len)
-	StorageUtil.FileIntListClear("SexLabConfig."+name)
-	int i
-	while i < len
-		StorageUtil.FileIntListAdd("SexLabConfig."+name, values[i] as int)
-		i += 1
-	endWhile
-endFunction
-
-float[] function _ImportFloatList(string name, float[] values, int len)
-	if StorageUtil.FileFloatListCount("SexLabConfig."+name) == len
+float[] function ImportFloatList(string Name, float[] Values, int len)
+	Name = "SexLabConfig."+Name
+	ImportFile("SexLabConfig.json", Name, 32, none, true, false)
+	if FloatListCount(none, Name) == len
 		int i
 		while i < len
-			values[i] = StorageUtil.FileFloatListGet("SexLabConfig."+name, i)
+			Values[i] = FloatListGet(none, Name, i)
 			i += 1
 		endWhile
 	endIf
-	StorageUtil.FileFloatListClear("SexLabConfig."+name)
-	return values
+	FloatListClear(none, Name)
+	return Values
 endFunction
-bool[] function _ImportBoolList(string name, bool[] values, int len)
-	if StorageUtil.FileIntListCount("SexLabConfig."+name) == len
+
+function ExportBoolList(string Name, bool[] Values, int len)
+	Name = "SexLabConfig."+Name
+	IntListClear(none, Name)
+	int i
+	while i < len
+		IntListAdd(none, Name, Values[i] as int)
+		i += 1
+	endWhile
+	ExportFile("SexLabConfig.json", Name, 16, none, true, false, true)
+	IntListClear(none, Name)
+endFunction
+bool[] function ImportBoolList(string Name, bool[] Values, int len)
+	Name = "SexLabConfig."+Name
+	ImportFile("SexLabConfig.json", Name, 32, none, true, false)
+	if IntListCount(none, Name) == len
 		int i
 		while i < len
-			values[i] = StorageUtil.FileIntListGet("SexLabConfig."+name, i) as bool
+			Values[i] = IntListGet(none, Name, i) as bool
 			i += 1
 		endWhile
 	endIf
-	StorageUtil.FileIntListClear("SexLabConfig."+name)
-	return values
+	IntListClear(none, Name)
+	return Values
 endFunction

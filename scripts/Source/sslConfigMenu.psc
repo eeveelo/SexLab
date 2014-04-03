@@ -559,8 +559,8 @@ event OnPageReset(string page)
 		SetCursorPosition(1)
 		AddEmptyOption()
 		AddHeaderOption("")
-		; AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
-		; AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
+		AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
+		AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
 		AddEmptyOption()
 		AddHeaderOption("$SSL_AvailableStrapons")
 		AddTextOptionST("RebuildStraponList","$SSL_RebuildStraponList", "$SSL_ClickHere")
@@ -1375,6 +1375,32 @@ state RebuildStraponList
 			ShowMessage("$SSL_NoStrapons", false)
 		endIf
 		ForcePageReset()
+	endEvent
+endState
+state ExportSettings
+	event OnSelectST()
+		if ShowMessage("$SSL_WarnExportSettings")
+			Config.ExportJSON()
+			StorageUtil.FileSetIntValue("SexLabConfig.Exported", 1)
+			ShowMessage("$SSL_RunExportSettings", false)
+		endIf
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoExportSettings")
+	endEvent
+endState
+state ImportSettings
+	event OnSelectST()
+		if StorageUtil.FileGetIntValue("SexLabConfig.Exported") != 1
+			ShowMessage("$SSL_WarnImportSettingsEmpty", false)
+		elseif ShowMessage("$SSL_WarnImportSettings")
+			Config.ImportJSON()
+			StorageUtil.FileUnsetIntValue("SexLabConfig.Exported")
+			ShowMessage("$SSL_RunImportSettings", false)
+		endIf
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoImportSettings")
 	endEvent
 endState
 

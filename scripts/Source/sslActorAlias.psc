@@ -1,5 +1,4 @@
 scriptname sslActorAlias extends ReferenceAlias
-import ObjectReference
 
 ; Libraries
 sslActorLibrary Lib
@@ -35,7 +34,6 @@ float VoiceDelay
 
 ; Expression
 sslBaseExpression Expression
-int Phase
 
 ; Positioning
 ObjectReference MarkerRef
@@ -84,12 +82,34 @@ endProperty
 ; --- Load/Clear Alias For Use                        --- ;
 ; ------------------------------------------------------- ;
 
-bool function PrepareAlias(Actor ProspectRef, bool MakeVictim = false, sslBaseVoice UseVoice = none, bool ForceSilence = false)
-	if ProspectRef == none || GetReference() != ProspectRef || !Lib.ValidateActor(ProspectRef)
+function ClearAlias()
+	; Set libraries
+	Thread = GetOwningQuest() as sslThreadController
+	Lib    = Thread.ActorLib
+	Stats  = Thread.Stats
+	Config = Thread.Config
+	; Make sure actor is reset
+	if GetReference() != none
+		Thread.Log("Had actor '"+GetReference()+"' during clear!", self)
+		; Init variables needed for reset
+		ActorRef   = GetReference() as Actor
+		BaseRef    = ActorRef.GetLeveledActorBase()
+		IsPlayer   = ActorRef == Game.GetPlayer()
+		IsCreature = Gender == Lib.GetGender(ActorRef)
+		; Reset actor back to default
+		RestoreActorDefaults()
+		StopAnimating(true)
+		UnlockActor()
+	endIf
+	Initialize()
+endFunction
+
+bool function SlotActor(Actor ProspectRef)
+	if ProspectRef == none || !ForceRefIfEmpty(ProspectRef)
 		return false ; Failed to set prospective actor into alias
 	endIf
 	; Register actor as active
-	StorageUtil.FormListAdd(Lib, "Registry", ProspectRef, false)
+	StorageUtil.FormListAdd(none, "SexLab.ActiveActors", ActorRef, false)
 	; Init actor alias information
 	ActorRef   = ProspectRef
 	BaseRef    = ActorRef.GetLeveledActorBase()
@@ -101,34 +121,15 @@ bool function PrepareAlias(Actor ProspectRef, bool MakeVictim = false, sslBaseVo
 	IsCreature = Gender == 2
 	IsPlayer   = ActorRef == Lib.PlayerRef
 	ActorVoice = ActorRef.GetVoiceType()
-	IsVictim   = MakeVictim
-	if MakeVictim
-		Thread.VictimRef = ActorRef
-		Thread.IsAggressive = true
-	endIf
-	if IsCreature
-		Thread.CreatureRef = BaseRef.GetRace()
-	else
-		SetVoice(UseVoice, ForceSilence)
-		Lib.CacheStrippable(ActorRef)
-	endIf
-	; Calculate scales
-	float display = ActorRef.GetScale()
-	ActorRef.SetScale(1.0)
-	float base = ActorRef.GetScale()
-	ActorScale = ( display / base )
-	AnimScale = ActorScale
-	ActorRef.SetScale(ActorScale)
-	if Thread.ActorCount > 1 && Config.bScaleActors
-		AnimScale = (1.0 / base)
-	endIf
+	; Notify thread of actors genders
+	Thread.Genders[Gender] = Thread.Genders[Gender] + 1
 	; Get ready for mod events
 	string eid = "SSL_"+Thread.tid+"_"
 	RegisterForModEvent(eid+"Prepare", "PrepareActor")
 	RegisterForModEvent(eid+"Reset", "ResetActor")
 	RegisterForModEvent(eid+"Orgasm", "OrgasmEffect")
 	; Ready
-	Thread.Log("Slotted '"+ActorName, self)
+	Thread.Log("Slotted '"+ActorName+"'", self)
 	GoToState("Ready")
 	return true
 endFunction
@@ -151,6 +152,16 @@ state Ready
 		Position   = Thread.Positions.Find(ActorRef)
 		Flags      = Animation.GetPositionFlags(Position, Stage)
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
+		; Calculate scales
+		float display = ActorRef.GetScale()
+		ActorRef.SetScale(1.0)
+		float base = ActorRef.GetScale()
+		ActorScale = ( display / base )
+		AnimScale = ActorScale
+		ActorRef.SetScale(ActorScale)
+		if Thread.ActorCount > 1 && Config.bScaleActors
+			AnimScale = (1.0 / base)
+		endIf
 		; Non Creatures
 		if !IsCreature
 			; Pick a strapon on females to use
@@ -159,6 +170,7 @@ state Ready
 				ActorRef.AddItem(Strapon, 1, true)
 			endIf
 			; Strip actor
+			Lib.CacheStrippable(ActorRef)
 			Strip(DoUndress)
 			; Pick a voice if needed
 			if Voice == none && !IsForcedSilent
@@ -188,6 +200,10 @@ state Ready
 		; Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 		; Enter animatable state
 		GoToState("Animating")
+	endFunction
+
+	bool function SlotActor(Actor ProspectRef)
+		return false
 	endFunction
 endState
 
@@ -356,6 +372,7 @@ state Animating
 		endIf
 		; Reset alias
 		Initialize()
+		TryToClear()
 	endEvent
 
 endState
@@ -432,19 +449,6 @@ function UnlockActor()
 	if ActorRef == none
 		return
 	endIf
-	; Disable free camera, if in it
-	if IsPlayer && Game.GetCameraState() == 3
-		MiscUtil.ToggleFreeCamera()
-	endIf
-	; Enable movement
-	if IsPlayer
-		Thread.DisableHotkeys()
-		Game.EnablePlayerControls()
-		Game.SetPlayerAIDriven(false)
-	else
-		; ActorRef.SetRestrained(false)
-		ActorRef.SetDontMove(false)
-	endIf
 	; Detach positioning marker
 	ActorRef.StopTranslation()
 	ActorRef.SetVehicle(none)
@@ -452,7 +456,17 @@ function UnlockActor()
 	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
 	ActorUtil.RemovePackageOverride(ActorRef, Lib.DoNothing)
 	ActorRef.EvaluatePackage()
-	if !IsCreature
+	; Enable movement
+	if IsPlayer
+		Thread.DisableHotkeys()
+		Game.EnablePlayerControls()
+		Game.SetPlayerAIDriven(false)
+		; Disable free camera, if in it
+		if Game.GetCameraState() == 3
+			MiscUtil.ToggleFreeCamera()
+		endIf
+	else
+		ActorRef.SetDontMove(false)
 	endIf
 endFunction
 
@@ -468,11 +482,23 @@ function RestoreActorDefaults()
 	if ActorVoice != none
 		BaseRef.SetVoiceType(ActorVoice)
 	endIf
+	; Enable player controls
+	if ActorRef == Lib.PlayerRef
+		Thread.DisableHotkeys()
+	endIf
 endFunction
 
 ; ------------------------------------------------------- ;
 ; --- Data Accessors                                  --- ;
 ; ------------------------------------------------------- ;
+
+function MakeVictim(bool Victimize = true)
+	IsVictim = Victimize
+	if Victimize
+		Thread.VictimRef    = ActorRef
+		Thread.IsAggressive = true
+	endIf
+endFunction
 
 function SetVoice(sslBaseVoice ToVoice = none, bool ForceSilence = false)
 	IsForcedSilent = ForceSilence
@@ -527,11 +553,7 @@ int function GetEnjoyment()
 	endIf
 	; Set final enjoyment
 	Enjoyment = ((Enjoyment as float) * (Stage as float / Animation.StageCount as float)) as int
-	; Get current expression phase from enjoyment
-	if Expression != none
-		Phase = Expression.PickPhase(Enjoyment, BaseSex)
-	endIf
-	; Thread.Log("Enjoyment: "+Enjoyment+" Phase: "+Phase, ActorName)
+	; Thread.Log("Enjoyment = "+Enjoyment, ActorName)
 	return Enjoyment
 endFunction
 
@@ -608,11 +630,13 @@ endProperty
 ; ------------------------------------------------------- ;
 
 function Initialize()
-	UnregisterForUpdate()
 	GoToState("")
+	UnregisterForUpdate()
+	; Clear the alias of actor
+	TryToClear()
 	; Free actor for selection
-	if ActorRef
-		StorageUtil.FormListRemove(Lib, "Registry", ActorRef, false)
+	if ActorRef != none
+		StorageUtil.FormListRemove(none, "SexLab.ActiveActors", ActorRef, true)
 	endIf
 	; Delete positioning marker
 	if MarkerRef
@@ -629,7 +653,6 @@ function Initialize()
 	IsForcedSilent = false
 	; Expression
 	Expression     = none
-	Phase          = 0
 	; Flags
 	NoRagdoll      = false
 	NoUndress      = false
@@ -640,28 +663,6 @@ function Initialize()
 	bool[] bDel1
 	StripOverride  = bDel1
 	Loc            = new float[6]
-	; Clear the alias
-	TryToClear()
-	TryToReset()
-endFunction
-
-function ClearAlias()
-	Quest SexLabQuestFramework = Quest.GetQuest("SexLabQuestFramework")
-	Lib    = SexLabQuestFramework as sslActorLibrary
-	Stats  = SexLabQuestFramework as sslActorStats
-	Config = SexLabQuestFramework as sslSystemConfig
-	Thread = GetOwningQuest() as sslThreadController
-	if GetReference() != none
-		Thread.Log("Had actor '"+GetReference()+"' During clear!", self)
-		ActorRef = GetReference() as Actor
-		LockActor()
-		UnlockActor()
-		StopAnimating(true)
-		RestoreActorDefaults()
-	endIf
-	TryToClear()
-	TryToReset()
-	Initialize()
 endFunction
 
 ; event OnInit()

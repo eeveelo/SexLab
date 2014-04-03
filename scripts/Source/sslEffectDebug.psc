@@ -16,16 +16,9 @@ string ActorName
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	sslBenchmark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
+	(Quest.GetQuest("SexLabDev") as sslBenchmark).LatencyTest()
 
-	FormListAdd(Dev, "Positions", TargetRef, false)
-	Debug.TraceAndBox("Stored Actors: "+FormListCount(Dev, "Positions"))
-
-	if FormListCount(Dev, "Positions") > 2
-		Debug.TraceAndBox("Starting Benchmark!")
-		Utility.Wait(1.0)
-		Dev.StartBenchmark(2)
-	endIf
+	SexLab.QuickStart(CasterRef, TargetRef)
 
 	Dispel()
 endEvent

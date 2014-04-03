@@ -64,10 +64,10 @@ function Setup()
 		else
 			Slots[i] = Quest.GetQuest("SexLabThread0"+i) as sslThreadController
 		endIf
-		Slots[i].Setup()
-		Slots[i].tid = i
+		Slots[i].ThreadInit(i)
 	endWhile
 	Debug.Trace("SexLab Threads: "+Slots)
+	StorageUtil.FormListClear(none, "SexLab.ActiveActors")
 	GoToState("")
 endFunction
 

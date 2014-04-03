@@ -373,6 +373,14 @@ function EndAnimation(bool Quickly = false)
 	if !Quickly
 		SexLabUtil.Wait(2.0)
 	endIf
+	; Export adjustments if player was present
+	if HasPlayer
+		if HasCreature
+			CreatureSlots.ExportAdjustments()
+		else
+			AnimSlots.ExportAdjustments()
+		endIf
+	endIf
 	; Clear & Reset animation thread
 	Initialize()
 endFunction

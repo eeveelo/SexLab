@@ -1,5 +1,9 @@
 scriptname SexLabUtil hidden
 
+; ------------------------------------------------------- ;
+; --- SexLab Accessors                                --- ;
+; ------------------------------------------------------- ;
+
 int function GetVersion() global
 	return 14400
 endFunction
@@ -19,6 +23,10 @@ SexLabFramework function GetAPI() global
 	endIf
 	return none
 endFunction
+
+; ------------------------------------------------------- ;
+; --- Animation Starters                              --- ;
+; ------------------------------------------------------- ;
 
 int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim = none, ObjectReference centerOn = none, bool allowBed = true, string hook = "") global
 	SexLabFramework SexLab = GetAPI()
@@ -43,6 +51,18 @@ sslThreadController function QuickStart(actor a1, actor a2 = none, actor a3 = no
 	endIf
 	return SexLab.QuickStart(a1, a2, a3, a4, a5, victim, hook)
 endFunction
+
+; ------------------------------------------------------- ;
+; --- Common Utilities                                --- ;
+; ------------------------------------------------------- ;
+
+bool function IsActorActive(Actor ActorRef) global
+	return StorageUtil.FormListFind(none, "SexLab.ActiveActors", ActorRef) != -1
+endFunction
+
+; ------------------------------------------------------- ;
+; --- Developer Utilities                             --- ;
+; ------------------------------------------------------- ;
 
 function Wait(float seconds) global
 	float timer = Utility.GetCurrentRealTime() + seconds
@@ -89,7 +109,7 @@ function DebugLog(string Log, string Type = "NOTICE", bool DebugMode = false) gl
 endFunction
 
 float function Timer(float Timestamp, string Log) global
-	DebugLog(Log, "["+(Utility.GetCurrentRealTime() - Timestamp)+"] Seconds", true)
+	DebugLog(Log, "["+(Utility.GetCurrentRealTime() - Timestamp)+"]", true)
 	return Utility.GetCurrentRealTime()
 endFunction
 
@@ -98,12 +118,12 @@ endFunction
 ;#        by h38fh2mf           #
 ;#------------------------------#
 
-function EnableFreeCamera(bool enabling = true, float sucsm = 5.0) global
+function EnableFreeCamera(bool Enabling = true, float sucsm = 5.0) global
 	bool InFreeCamera = Game.GetCameraState() == 3
-	if enabling && !InFreeCamera
+	if Enabling && !InFreeCamera
 		MiscUtil.SetFreeCameraSpeed(sucsm)
 		MiscUtil.ToggleFreeCamera()
-	elseIf !enabling && InFreeCamera
+	elseIf !Enabling && InFreeCamera
 		MiscUtil.ToggleFreeCamera()
 	endIf
 endFunction

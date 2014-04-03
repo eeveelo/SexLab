@@ -170,6 +170,14 @@ endFunction
 ;|	Update Offsets                               |;
 ;\-----------------------------------------------/;
 
+function ExportAdjustments()
+	StorageUtil.ExportFile("SexLab/"+Registry+".json", Key("Adjust"), -1, Storage, false, true, true)
+endFunction
+
+function ImportAdjustments()
+	StorageUtil.ImportFile("SexLab/"+Registry+".json", Key("Adjust"), -1, Storage, false, true)
+endFunction
+
 function SetAdjustment(string AdjustKey, int Position, int Stage, int Slot, float Adjustment)
 	; Init adjustments
 	if StorageUtil.FloatListCount(Storage, AdjustKey) < 1
@@ -460,3 +468,4 @@ function Initialize()
 
 	parent.Initialize()
 endFunction
+

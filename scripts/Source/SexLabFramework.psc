@@ -136,7 +136,7 @@ bool function IsValidActor(Actor ActorRef)
 endFunction
 
 bool function IsActorActive(Actor ActorRef)
-	return ActorLib.IsActorActive(ActorRef)
+	return SexLabUtil.IsActorActive(ActorRef)
 endFunction
 
 Actor[] function MakeActorArray(Actor Actor1 = none, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none)

@@ -230,9 +230,9 @@ endFunction
 
 bool function IsStrippable(form ItemRef)
 	; Check previous validations
-	if ItemRef != none && StorageUtil.FormListFind(self, "SexLab.StripList", ItemRef) != -1
+	if ItemRef != none && StorageUtil.FormListFind(self, "StripList", ItemRef) != -1
 		return true
-	elseIf ItemRef == none || StorageUtil.FormListFind(self, "SexLab.NoStripList", ItemRef) != -1
+	elseIf ItemRef == none || StorageUtil.FormListFind(self, "NoStripList", ItemRef) != -1
 		return false
 	endIf
 	; Check keywords
@@ -241,11 +241,11 @@ bool function IsStrippable(form ItemRef)
 		i -= 1
 		string kw = ItemRef.GetNthKeyword(i).GetString()
 		if StringUtil.Find(kw, "NoStrip") != -1 || StringUtil.Find(kw, "Bound") != -1
-			StorageUtil.FormListAdd(self, "SexLab.NoStripList", ItemRef, true)
+			StorageUtil.FormListAdd(self, "NoStripList", ItemRef, true)
 			return false
 		endIf
 	endWhile
-	StorageUtil.FormListAdd(self, "SexLab.StripList", ItemRef, true)
+	StorageUtil.FormListAdd(self, "StripList", ItemRef, true)
 	return true
 endFunction
 
@@ -429,18 +429,14 @@ endFunction
 ; --- Actor Validation                                --- ;
 ; ------------------------------------------------------- ;
 
-bool function IsActorActive(Actor ActorRef)
-	return StorageUtil.FormListFind(self, "Registry", ActorRef) != -1
-endFunction
-
 int function ValidateActor(Actor ActorRef)
 	if !ActorRef
 		Log("ValidateActor() -- Failed to validate (NONE) -- Because they don't exist.")
 		return -1
-	elseIf IsActorActive(ActorRef)
+	elseIf SexLabUtil.IsActorActive(ActorRef)
 		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They appear to already be animating")
 		return -10
-	elseIf StorageUtil.FormListFind(self, "SexLab.ValidActors", ActorRef) != -1
+	elseIf StorageUtil.FormListFind(self, "ValidActors", ActorRef) != -1
 		return 1
 	elseIf !CanAnimate(ActorRef)
 		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are forbidden from animating")
@@ -461,7 +457,7 @@ int function ValidateActor(Actor ActorRef)
 		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are a creature that is currently not supported ("+MiscUtil.GetRaceEditorID(ActorRef.GetLeveledActorBase().GetRace())+")")
 		return -16
 	endIf
-	StorageUtil.FormListAdd(self, "SexLab.ValidActors", ActorRef, false)
+	StorageUtil.FormListAdd(self, "ValidActors", ActorRef, false)
 	return 1
 endFunction
 
@@ -574,4 +570,16 @@ string function GetGenderTag(int Females = 0, int Males = 0, int Creatures = 0)
 		Tag += "C"
 	endWhile
 	return Tag
+endFunction
+
+; ------------------------------------------------------- ;
+; --- System Use Only                                 --- ;
+; ------------------------------------------------------- ;
+
+function Setup()
+	parent.Setup()
+	StorageUtil.FormListClear(self, "Registry")
+	StorageUtil.FormListClear(self, "StripList")
+	StorageUtil.FormListClear(self, "NoStripList")
+	StorageUtil.FormListClear(self, "ValidActors")
 endFunction

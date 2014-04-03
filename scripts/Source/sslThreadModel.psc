@@ -121,26 +121,27 @@ state Making
 		elseIf ActorCount >= 5
 			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- Thread has reached actor limit", "FATAL")
 			return -1
-		elseIf Positions.Find(ActorRef) != -1 || ActorLib.IsActorActive(ActorRef)
-			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They are already claimed by a thread", "FATAL")
+		elseIf Positions.Find(ActorRef) != -1
+			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They have been already added to this thread", "FATAL")
 			return -1
 		elseIf !ActorLib.ValidateActor(ActorRef)
 			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They are not a valid target for animation", "FATAL")
 			return -1
 		endIf
-
-		; Attempt to claim a slot
+		; Attempt to fill an alias slot
 		sslActorAlias Slot = SlotActor(ActorRef)
-		if !Slot || !Slot.PrepareAlias(ActorRef, IsVictim, Voice, ForceSilent)
+		if Slot == none
 			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They were unable to fill an actor alias", "FATAL")
 			return -1
 		endIf
-
 		; Update thread info
 		Positions = sslUtility.PushActor(ActorRef, Positions)
 		ActorCount = Positions.Length
 		HasPlayer = Positions.Find(PlayerRef) != -1
-		Genders[Slot.Gender] = Genders[Slot.Gender] + 1
+		; Update alias info
+		Slot.MakeVictim(IsVictim)
+		Slot.SetVoice(Voice, ForceSilent)
+		; Return position
 		return Positions.Find(ActorRef)
 	endFunction
 
@@ -618,12 +619,12 @@ endFunction
 
 sslActorAlias function SlotActor(Actor ActorRef)
 	int i
-	while i < 5 && !ActorAlias[i].ForceRefIfEmpty(ActorRef)
+	while i < 5
+		if ActorAlias[i].SlotActor(ActorRef)
+			return ActorAlias[i]
+		endIf
 		i += 1
 	endWhile
-	if i < 5 && ActorAlias[i].GetReference() == ActorRef
-		return ActorAlias[i]
-	endIf
 	return none
 endFunction
 
@@ -685,7 +686,6 @@ function Initialize()
 	Animation         = none
 	; Enter thread selection pool
 	GoToState("Unlocked")
-	Reset()
 endFunction
 
 function Log(string Log, string Type = "NOTICE")
@@ -790,7 +790,6 @@ function EventDone(sslActorAlias Slot)
 endFunction
 
 function Action(string FireState)
-	Log(FireState, "Action")
 	UnregisterForUpdate()
 	EndAction() ; OnEndState()
 	GoToState(FireState)
@@ -819,20 +818,24 @@ function UpdateAdjustKey()
 	MiscUtil.PrintConsole(AdjustKey)
 endFunction
 
+
+function ThreadInit(int value)
+	thread_id = value
+	ActorAlias = new sslActorAlias[5]
+	ActorAlias[0] = GetNthAlias(0) as sslActorAlias
+	ActorAlias[1] = GetNthAlias(1) as sslActorAlias
+	ActorAlias[2] = GetNthAlias(2) as sslActorAlias
+	ActorAlias[3] = GetNthAlias(3) as sslActorAlias
+	ActorAlias[4] = GetNthAlias(4) as sslActorAlias
+
+	Setup()
+	Initialize()
+endFunction
+
 int thread_id
 int property tid hidden
 	int function get()
 		return thread_id
-	endFunction
-	function set(int value)
-		thread_id = value
-		ActorAlias = new sslActorAlias[5]
-		ActorAlias[0] = GetNthAlias(0) as sslActorAlias
-		ActorAlias[1] = GetNthAlias(1) as sslActorAlias
-		ActorAlias[2] = GetNthAlias(2) as sslActorAlias
-		ActorAlias[3] = GetNthAlias(3) as sslActorAlias
-		ActorAlias[4] = GetNthAlias(4) as sslActorAlias
-		GoToState("Unlocked")
 	endFunction
 endProperty
 
