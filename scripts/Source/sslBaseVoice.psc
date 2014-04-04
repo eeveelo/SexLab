@@ -68,7 +68,7 @@ function Initialize()
 	Mild = none
 	Medium = none
 	Hot = none
-	sslThreadLibrary Lib = Quest.GetQuest("SexLabQuestFramework") as sslThreadLibrary
+	sslThreadLibrary Lib = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslThreadLibrary
 	LipSync = Lib.LipSync
 	VoicesPlayer = Lib.VoicesPlayer
 	SexLabVoiceM = Lib.SexLabVoiceM

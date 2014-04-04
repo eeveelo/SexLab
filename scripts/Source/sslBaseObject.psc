@@ -101,7 +101,7 @@ function Initialize()
 	Registry = ""
 	Enabled = false
 	Storage = GetOwningQuest()
-	Config = Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig
+	Config = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
 	Tags = new string[5]
 endFunction
 
