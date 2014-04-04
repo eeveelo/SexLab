@@ -1,11 +1,10 @@
 scriptname sslBenchmark extends sslSystemLibrary
 
-
 function PreBenchmarkSetup()
 	Setup()
 endFunction
 
-state RunTest1
+state Test1
 	string function Label()
 		return ""
 	endFunction
@@ -18,7 +17,6 @@ state RunTest1
 		; START any variable preparions needed
 
 		; END any variable preparions needed
-		Utility.WaitMenuMode(1.0)
 		baseline += Utility.GetCurrentRealTime()
 		while nth
 			nth -= 1
@@ -31,7 +29,32 @@ state RunTest1
 	endFunction
 endState
 
-function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10)
+state Test2
+	string function Label()
+		return ""
+	endFunction
+
+	string function Proof()
+		return ""
+	endFunction
+
+	float function Test(int nth = 5000, float baseline = 0.0)
+		; START any variable preparions needed
+
+		; END any variable preparions needed
+		baseline += Utility.GetCurrentRealTime()
+		while nth
+			nth -= 1
+			; START code to benchmark
+
+
+			; END code to benchmark
+		endWhile
+		return Utility.GetCurrentRealTime() - baseline
+	endFunction
+endState
+
+function StartBenchmark(int Tests = 2, int Iterations = 5000, int Loops = 10)
 
 	PreBenchmarkSetup()
 
@@ -45,7 +68,7 @@ function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10)
 
 	int Proof = 1
 	while Proof <= Tests
-		GoToState("RunTest"+Proof)
+		GoToState("Test"+Proof)
 		Log("Functionality Proof: "+Proof(), Label())
 		Proof += 1
 	endWhile
@@ -54,13 +77,18 @@ function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10)
 	while Benchmark <= Tests
 		GoToState("")
 		Base = Test(Iterations)
-		GoToState("RunTest"+Benchmark)
-		Utility.WaitMenuMode(1.0)
+		; Base = 0.0
+		GoToState("Test"+Benchmark)
+		Utility.WaitMenuMode(0.5)
 		Log("Starting Test #"+Benchmark+": "+Label())
 		Total = 0.0
 		n = 1
 		while n <= Loops
-			Utility.WaitMenuMode(1.0)
+			Utility.WaitMenuMode(0.5)
+			GoToState("")
+			Base = Test(Iterations)
+			GoToState("Test"+Benchmark)
+			Utility.WaitMenuMode(0.5)
 			Time = Test(Iterations, Base)
 			Total += Time
 			Log("Result #"+n+": "+Time, Label())
@@ -80,7 +108,6 @@ string function Proof()
 	return ""
 endFunction
 float function Test(int nth = 5000, float baseline = 0.0)
-	Utility.WaitMenuMode(1.0)
 	baseline += Utility.GetCurrentRealTime()
 	while nth
 		nth -= 1
