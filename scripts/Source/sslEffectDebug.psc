@@ -17,10 +17,6 @@ string ActorName
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
 	(Quest.GetQuest("SexLabDev") as sslBenchmark).LatencyTest()
-	Utility.Wait(1.0)
-	(Quest.GetQuest("SexLabDev") as sslBenchmark).StartBenchmark(2, 1000, 5)
-
-	; SexLab.QuickStart(CasterRef, TargetRef)
 
 	Dispel()
 endEvent
