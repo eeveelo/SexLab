@@ -22,7 +22,7 @@ function Log(string Log, string Type = "NOTICE")
 endFunction
 
 function Setup()
-	SexLabFramework SexLab = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework
+	SexLabFramework SexLab = Game.GetFormFromFile(0xD62, "SexLab.esm") as SexLabFramework
 	; Sync resources across framework
 	PlayerRef       = SexLab.PlayerRef
 	Config          = SexLab.Config
