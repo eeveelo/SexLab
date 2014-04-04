@@ -17,8 +17,10 @@ string ActorName
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
 	(Quest.GetQuest("SexLabDev") as sslBenchmark).LatencyTest()
+	Utility.Wait(1.0)
+	(Quest.GetQuest("SexLabDev") as sslBenchmark).StartBenchmark(2, 1000, 5)
 
-	SexLab.QuickStart(CasterRef, TargetRef)
+	; SexLab.QuickStart(CasterRef, TargetRef)
 
 	Dispel()
 endEvent
@@ -36,29 +38,6 @@ endEvent
 ;/-----------------------------------------------\;
 ;|	Debug Utility Functions                      |;
 ;\-----------------------------------------------/;
-
-function Benchmark(int iterations = 100000, float started = 0.0, float finished = 0.0)
-	Debug.Notification("Starting benchmark...")
-
-	; Benchmark prep
-
-
-	started = Utility.GetCurrentRealTime()
-	while iterations
-		iterations -= 1
-		; Code to benchmark
-
-
-	endWhile
-	finished = Utility.GetCurrentRealTime()
-
-	Utility.Wait(1.0)
-	Log(" Started: " + started)
-	Log("Finished: " + finished)
-	Log("Total Time: " + (finished - started))
-
-	Debug.Notification("Benchmark end...")
-endFunction
 
 function Log(string log)
 	; Debug.TraceAndBox(ActorName+"\n"+log)

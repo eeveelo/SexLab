@@ -1,7 +1,5 @@
 scriptname sslVoiceSlots extends Quest
 
-import StorageUtil
-
 ; Voices storage
 int property Slotted auto hidden
 string[] Registry
@@ -82,7 +80,7 @@ sslBaseVoice function GetByTags(string Tags, string TagsSuppressed = "", bool Re
 endFunction
 
 int function FindSaved(Actor ActorRef)
-	return FindByRegistrar(GetStringValue(ActorRef, "SexLab.SavedVoice", ""))
+	return FindByRegistrar(StorageUtil.GetStringValue(ActorRef, "SexLab.SavedVoice", ""))
 endFunction
 
 sslBaseVoice function GetSaved(Actor ActorRef)
@@ -91,18 +89,18 @@ endFunction
 
 string function GetSavedName(Actor ActorRef)
 	sslBaseVoice Voice = GetSaved(ActorRef)
-	if Voice == none || !Voice.Registered
+	if Voice == none
 		return "$SSL_Random"
 	endIf
 	return Voice.Name
 endFunction
 
 function SaveVoice(Actor ActorRef, sslBaseVoice Saving)
-	SetStringValue(ActorRef, "SexLab.SavedVoice", Saving.Registry)
+	StorageUtil.SetStringValue(ActorRef, "SexLab.SavedVoice", Saving.Registry)
 endFunction
 
 function ForgetVoice(Actor ActorRef)
-	UnsetStringValue(ActorRef, "SexLab.SavedVoice")
+	StorageUtil.UnsetStringValue(ActorRef, "SexLab.SavedVoice")
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -143,11 +141,14 @@ sslBaseVoice function GetBySlot(int index)
 endFunction
 
 int function FindByRegistrar(string Registrar)
+	if Registrar == ""
+		return -1
+	endIf
 	return Registry.Find(Registrar)
 endFunction
 
 bool function IsRegistered(string Registrar)
-	return Registry.Find(Registrar) != -1
+	return FindByRegistrar(Registrar) != -1
 endFunction
 
 int function FindByName(string FindName)

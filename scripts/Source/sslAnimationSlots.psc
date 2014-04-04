@@ -168,11 +168,14 @@ int function GetCount(bool IgnoreDisabled = true)
 endFunction
 
 int function FindByRegistrar(string Registrar)
+	if Registrar == ""
+		return -1
+	endIf
 	return Registry.Find(Registrar)
 endFunction
 
 bool function IsRegistered(string Registrar)
-	return Registry.Find(Registrar) != -1
+	return FindByRegistrar(Registrar) != -1
 endFunction
 
 sslBaseAnimation[] function GetList(bool[] Valid)
@@ -239,4 +242,5 @@ state Locked
 	function Setup()
 	endFunction
 endState
+
 
