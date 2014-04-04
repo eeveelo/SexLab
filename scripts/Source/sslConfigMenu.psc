@@ -315,6 +315,7 @@ event OnPageReset(string page)
 		SetCursorFillMode(TOP_TO_BOTTOM)
 
 		AddHeaderOption("$SSL_AlignmentAdjustments")
+		AddKeyMapOptionST("BackwardsModifier", "$SSL_ReverseDirectionModifier", Config.kBackwards)
 		AddKeyMapOptionST("AdjustStage","$SSL_AdjustStage", Config.kAdjustStage)
 		AddKeyMapOptionST("AdjustChange","$SSL_ChangeActorBeingMoved", Config.kAdjustChange)
 		AddKeyMapOptionST("AdjustForward","$SSL_MoveActorForwardBackward", Config.kAdjustForward)
@@ -327,12 +328,11 @@ event OnPageReset(string page)
 
 		AddHeaderOption("$SSL_SceneManipulation")
 		AddKeyMapOptionST("RealignActors","$SSL_RealignActors", Config.kRealignActors)
+		AddKeyMapOptionST("EndAnimation", "$SSL_EndAnimation", Config.kEndAnimation)
 		AddKeyMapOptionST("AdvanceAnimation", "$SSL_AdvanceAnimationStage", Config.kAdvanceAnimation)
 		AddKeyMapOptionST("ChangeAnimation", "$SSL_ChangeAnimationSet", Config.kChangeAnimation)
 		AddKeyMapOptionST("ChangePositions", "$SSL_SwapActorPositions", Config.kChangePositions)
 		AddKeyMapOptionST("MoveSceneLocation", "$SSL_MoveSceneLocation", Config.kMoveScene)
-		AddKeyMapOptionST("BackwardsModifier", "$SSL_ReverseDirectionModifier", Config.kBackwards)
-		AddKeyMapOptionST("EndAnimation", "$SSL_EndAnimation", Config.kEndAnimation)
 		AddKeyMapOptionST("ToggleFreeCamera", "$SSL_ToggleFreeCamera", Config.kToggleFreeCamera)
 
 	; Normal timers + stripping
