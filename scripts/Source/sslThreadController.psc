@@ -367,16 +367,13 @@ function EndAnimation(bool Quickly = false)
 	UnregisterForUpdate()
 	GoToState("Ending")
 	; Set fast flag to skip slow ending functions
+	FastEnd = Quickly
 	Stage = StageCount
-	; Save skill xp for actor update
-	RecordSkills()
-	; Reset actors & wait for clear state
-	AliasEvent("Reset", "")
 	; Send end event
 	SendThreadEvent("AnimationEnd")
-	if !Quickly
-		SexLabUtil.Wait(2.0)
-	endIf
+	; Reset actors & wait for clear state
+	RecordSkills()
+	AliasEvent("Reset", "Empty")
 	; Clear & Reset animation thread
 	Initialize()
 endFunction

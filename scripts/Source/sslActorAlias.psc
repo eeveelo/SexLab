@@ -101,6 +101,7 @@ function ClearAlias()
 		StopAnimating(true)
 		UnlockActor()
 	endIf
+	TryToClear()
 	Initialize()
 endFunction
 
@@ -191,10 +192,10 @@ state Ready
 				SkilledActor = Thread.Positions[sslUtility.IndexTravel(Position, Thread.ActorCount)]
 			endIf
 			Skills = Stats.GetSkillLevels(SkilledActor)
-		endIf
-		; Start Auto TFC if enabled
-		if IsPlayer && Config.bAutoTFC
-			Config.ToggleFreeCamera()
+			; Start Auto TFC if enabled
+			if IsPlayer && Config.bAutoTFC
+				Config.ToggleFreeCamera()
+			endIf
 		endIf
 		; Make SOS erect
 		; Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
@@ -214,6 +215,12 @@ endState
 state Animating
 
 	function StartAnimating()
+		; Position
+		SyncLocation(true)
+		Utility.Wait(0.50)
+		ActorRef.StopTranslation()
+		Snap()
+		; Start update loop
 		RegisterForSingleUpdate(Utility.RandomFloat(1.0, 6.0))
 	endFunction
 
@@ -336,30 +343,29 @@ state Animating
 	endFunction
 
 	event ResetActor()
-		bool Quick = Thread.FastEnd
+		UnregisterForUpdate()
+		UnregisterForAllModEvents()
 		; Restore scale and voicetype
 		RestoreActorDefaults()
 		; Apply cum
 		int CumID = Animation.GetCum(Position)
-		if !Quick && CumID > 0 && Config.bUseCum && (Thread.Males > 0 || Config.bAllowFFCum || Thread.HasCreature)
+		if !Thread.FastEnd && CumID > 0 && Config.bUseCum && (Thread.Males > 0 || Config.bAllowFFCum || Thread.HasCreature)
 			Lib.ApplyCum(ActorRef, CumID)
 		endIf
 		; Stop animating
-		StopAnimating(Quick)
-		Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
-		; Unstrip
-		if !ActorRef.IsDead()
-			Lib.UnstripStored(ActorRef, IsVictim)
-		endIf
-		; Remove strapon
-		if Strapon != none
-			ActorRef.UnequipItem(Strapon, true, true)
-			ActorRef.RemoveItem(Strapon, 1, true)
-		endIf
-		; Unlock movements
+		StopAnimating(Thread.FastEnd)
 		UnlockActor()
-		; Update stats
 		if !IsCreature
+			; Unstrip
+			if !ActorRef.IsDead()
+				Lib.UnstripStored(ActorRef, IsVictim)
+			endIf
+			; Remove strapon
+			if Strapon != none
+				ActorRef.UnequipItem(Strapon, true, true)
+				ActorRef.RemoveItem(Strapon, 1, true)
+			endIf
+			; Update stats
 			int[] Genders = Thread.Genders
 			Stats.AddSex(ActorRef, Thread.TotalTime, Thread.HasPlayer, Genders[0], Genders[1], Genders[2])
 			float[] SkillXP = Thread.SkillXP
@@ -367,8 +373,8 @@ state Animating
 			Stats.AddPurityXP(ActorRef, Skills[4], SkillXP[5], Thread.IsAggressive, IsVictim, Genders[2] > 0, Thread.ActorCount, Thread.GetHighestPresentRelationshipRank(ActorRef))
 		endIf
 		; Reset alias
-		Initialize()
 		TryToClear()
+		Initialize()
 	endEvent
 
 endState
@@ -487,6 +493,8 @@ function RestoreActorDefaults()
 	if Expression != none
 		MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
 	endIf
+	; Remove SOS erection
+	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -635,10 +643,10 @@ endProperty
 ; ------------------------------------------------------- ;
 
 function Initialize()
-	GoToState("")
 	UnregisterForUpdate()
+	UnregisterForAllModEvents()
 	; Clear the alias of actor
-	TryToClear()
+	GoToState("Empty")
 	; Free actor for selection
 	if ActorRef != none
 		StorageUtil.FormListRemove(none, "SexLab.ActiveActors", ActorRef, true)
