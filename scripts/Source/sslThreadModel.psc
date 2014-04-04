@@ -732,24 +732,24 @@ endFunction
 float function GetSkillBonus(float[] Levels)
 	float bonus
 	if SkillXP[0] > 0.0
-		bonus += (SkillXP[0] + (Levels[0] * 2.0))
+		bonus += (SkillXP[0] + (Levels[0] * 1.75))
 	endIf
 	if IsVaginal
-		bonus += ((SkillXP[1] * 2.0) + Levels[1]) * 1.5
+		bonus += (SkillXP[1] * ((Levels[1] + 1.0) * 1.5))
 	endIf
 	if IsAnal
-		bonus += ((SkillXP[2] * 2.0) + Levels[2]) * 1.5
+		bonus += (SkillXP[2] * ((Levels[2] + 1.0) * 1.5))
 	endIf
 	if IsOral
-		bonus += ((SkillXP[3] * 2.0) + Levels[3]) * 1.5
+		bonus += (SkillXP[3] * ((Levels[3] + 1.0) * 1.5))
 	endIf
 	if IsLoving
-		bonus += (SkillXP[4] + Levels[4]) * 1.5
+		bonus += (SkillXP[4] * ((Levels[4] + 1.0) * 1.5))
 	endIf
 	if IsDirty
 		bonus += (SkillXP[5] + Levels[5]) * ActorCount
 	endIf
-	bonus += sslUtility.ClampInt((TotalTime / 15.0) as int, 0, 20) + (Stage * 6)
+	bonus += sslUtility.ClampInt((TotalTime / 15.0) as int, 0, 20) + (Stage * 5)
 	if LeadIn
 		bonus *= 0.6
 	endIf
