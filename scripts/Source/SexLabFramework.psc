@@ -401,6 +401,10 @@ sslBaseVoice function GetVoiceByTag(string Tag1, string Tag2 = "", string TagSup
 	return VoiceSlots.GetByTags(sslUtility.MakeArgs(",", Tag1, Tag2), TagSuppress, RequireAll)
 endFunction
 
+bool function HasCustomVoice(Actor ActorRef)
+	return VoiceSlots.HasCustomVoice(ActorRef)
+endFunction
+
 ;#---------------------------#
 ;#    END VOICE FUNCTIONS    #
 ;#---------------------------#

@@ -84,6 +84,13 @@ int function FindSaved(Actor ActorRef)
 endFunction
 
 sslBaseVoice function GetSaved(Actor ActorRef)
+	if HasCustomVoice(ActorRef)
+		form QuestForm = StorageUtil.GetFormValue(ActorRef, "SexLab.CustomVoiceQuest")
+		string AliasName = StorageUtil.GetStringValue(ActorRef, "SexLab.CustomVoiceAlias")
+		if QuestForm != none && AliasName != ""
+			return (QuestForm as Quest).GetAliasByName(AliasName) as sslBaseVoice
+		endIf
+	endIf
 	return GetBySlot(FindSaved(ActorRef))
 endFunction
 
@@ -96,11 +103,27 @@ string function GetSavedName(Actor ActorRef)
 endFunction
 
 function SaveVoice(Actor ActorRef, sslBaseVoice Saving)
-	StorageUtil.SetStringValue(ActorRef, "SexLab.SavedVoice", Saving.Registry)
+	ForgetVoice(ActorRef)
+	if Slots.Find(Saving) != -1
+		; Voice is a default one from this script
+		StorageUtil.SetStringValue(ActorRef, "SexLab.SavedVoice", Saving.Registry)
+	else
+		; Voice is a custom one from another quest/script
+		StorageUtil.SetFormValue(ActorRef, "SexLab.CustomVoiceQuest", Saving.GetOwningQuest())
+		StorageUtil.SetStringValue(ActorRef, "SexLab.CustomVoiceAlias", Saving.GetName())
+	endIf
 endFunction
 
 function ForgetVoice(Actor ActorRef)
+	; Local default voices
 	StorageUtil.UnsetStringValue(ActorRef, "SexLab.SavedVoice")
+	; Custom voice
+	StorageUtil.UnsetFormValue(ActorRef, "SexLab.CustomVoiceQuest")
+	StorageUtil.UnsetStringValue(ActorRef, "SexLab.CustomVoiceAlias")
+endFunction
+
+bool function HasCustomVoice(Actor ActorRef)
+	return StorageUtil.HasFormValue(ActorRef, "SexLab.CustomVoiceQuest") && StorageUtil.HasStringValue(ActorRef, "SexLab.CustomVoiceAlias")
 endFunction
 
 ; ------------------------------------------------------- ;
