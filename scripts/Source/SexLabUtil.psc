@@ -17,7 +17,7 @@ bool function SexLabIsActive() global
 endFunction
 
 SexLabFramework function GetAPI() global
-	Quest API = Quest.GetQuest("SexLabQuestFramework")
+	Quest API = Game.GetFormFromFile(0xD62, "SexLab.esm") as Quest
 	if API != none
 		return (API as SexLabFramework)
 	endIf

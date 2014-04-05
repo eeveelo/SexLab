@@ -171,8 +171,8 @@ form[] function StripActor(Actor ActorRef, Actor VictimRef = none, bool DoAnimat
 	return ActorLib.StripActor(ActorRef, VictimRef, DoAnimate, LeadIn)
 endFunction
 
-form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false, bool AllowNudesuit = true, int Gender = 0)
-	return ActorLib.StripSlots(ActorRef, Strip, DoAnimate, AllowNudesuit, Gender)
+form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false, bool AllowNudesuit = true)
+	return ActorLib.StripSlots(ActorRef, Strip, DoAnimate, AllowNudesuit)
 endFunction
 
 function UnstripActor(Actor ActorRef, form[] Stripped, bool IsVictim = false)

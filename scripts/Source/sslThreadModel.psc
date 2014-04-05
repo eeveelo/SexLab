@@ -162,6 +162,7 @@ state Making
 	endFunction
 
 	sslThreadController function StartThread()
+		GoToState("Starting")
 		UnregisterForUpdate()
 
 		; ------------------------- ;
@@ -233,7 +234,7 @@ state Making
 		; --  Start Controller   -- ;
 		; ------------------------- ;
 
-		Action("PrimeThread")
+		Action("Prepare")
 		return self as sslThreadController
 	endFunction
 
@@ -696,6 +697,7 @@ function Log(string Log, string Type = "NOTICE")
 endFunction
 
 function SendThreadEvent(string HookEvent)
+	; Log(HookEvent, "Event Hook")
 	SetupThreadEvent(HookEvent)
 	int i = Hooks.Length
 	while i
@@ -756,45 +758,31 @@ float function GetSkillBonus(float[] Levels)
 	return bonus
 endFunction
 
-function AliasEvent(string Callback, string WaitFor = "")
-	ModEvent.Send(ModEvent.Create("SSL_"+thread_id+"_"+Callback))
-	if WaitFor != ""
-		float Failsafe = Utility.GetCurrentRealTime() + 30.0
-		while !CheckState(WaitFor) && FailSafe > Utility.GetCurrentRealTime()
-			Utility.Wait(0.5)
-		endWhile
+int AliasDone
+function AliasEvent(string Callback)
+	if AliasDone != 0
+		Log(Callback+" attempting to start during previous event")
+		return
 	endIf
+	AliasDone = 0
+	RegisterForModEvent("SSL_"+thread_id+"_AliasDone", "AliasDone")
+	ModEvent.Send(ModEvent.Create("SSL_"+thread_id+"_"+Callback))
 endFunction
 
-function AliasWait(string ReadyState)
-	float Failsafe = Utility.GetCurrentRealTime() + 30.0
-	while !CheckState(ReadyState) && FailSafe > Utility.GetCurrentRealTime()
-		Utility.Wait(0.5)
-	endWhile
-endFunction
-
-bool function CheckState(string ReadyState)
-	int i = ActorCount
-	while i
-		i -= 1
-		if PositionAlias(i).GetState() != ReadyState
-			return false
-		endIf
-	endWhile
-	return true
-endFunction
-
-function EventDone(sslActorAlias Slot)
-	WaitAlias[ActorAlias.Find(Slot)] = false
-	Log("Finished: "+WaitAlias, Slot)
+function AliasEventDone()
+	AliasDone += 1
+	if AliasDone >= ActorCount
+		AliasDone = 0
+		ModEvent.Send(ModEvent.Create("SSL_"+thread_id+"_AliasDone"))
+	endIf
 endFunction
 
 function Action(string FireState)
 	UnregisterForUpdate()
-	EndAction() ; OnEndState()
+	EndAction()
 	GoToState(FireState)
-	FireAction() ; OnBeginState()
-endFunction
+	FireAction()
+endfunction
 
 function UpdateAdjustKey()
 	AdjustKey = Animation.Key("Adjust")
@@ -877,6 +865,8 @@ endFunction
 function EndAction()
 endFunction
 function SetAnimation(int aid = -1)
+endFunction
+function AliasDone()
 endFunction
 ; Animating
 event OnKeyDown(int keyCode)

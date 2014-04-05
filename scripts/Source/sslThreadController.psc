@@ -18,30 +18,33 @@ int StageCount
 int AdjustPos
 sslActorAlias AdjustAlias
 
+int Primed
+
 ; ------------------------------------------------------- ;
 ; --- Thread Starter                                  --- ;
 ; ------------------------------------------------------- ;
 
-state PrimeThread
+state Prepare
 	function FireAction()
-		RegisterForSingleUpdate(0.05)
-	endFunction
-	event OnUpdate()
-		; Init loop info
 		SetAnimation()
 		AutoAdvance = (!HasPlayer || (VictimRef == PlayerRef && Config.bDisablePlayer) || Config.bAutoAdvance)
-		; Prepare actors
-		AliasEvent("Prepare", "Animating")
-		ActorAlias[0].StartAnimating()
-		ActorAlias[1].StartAnimating()
-		ActorAlias[2].StartAnimating()
-		ActorAlias[3].StartAnimating()
-		ActorAlias[4].StartAnimating()
-		; Begin animating loop
+		RegisterForSingleUpdate(30.0)
+		AliasEvent("Prepare")
+	endFunction
+
+	function AliasDone()
+		UnregisterForAllModEvents()
+		Log("Prepare", "AliasDone")
+		RegisterForSingleUpdate(0.01)
+	endFunction
+
+	event OnUpdate()
+		; Send starter events
 		SendThreadEvent("AnimationStart")
 		if LeadIn
 			SendThreadEvent("LeadInStart")
 		endIf
+		; Begin animating loop
 		Action("Advancing")
 	endEvent
 endState
@@ -61,31 +64,36 @@ state Advancing
 				return EndAnimation()
 			endIf
 		endIf
-		SFXDelay = sslUtility.ClampFloat(Config.fSFXDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
-		Action("Animating")
-	endFunction
-endState
-
-state Animating
-	function FireAction()
-		; Update information for stage
 		AnimEvents = Animation.FetchStage(Stage)
-		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
+		SFXDelay   = sslUtility.ClampFloat(Config.fSFXDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
+		RegisterForSingleUpdate(10.0)
+		AliasEvent("Sync")
+	endFunction
+
+	function AliasDone()
+		UnregisterForAllModEvents()
+		Log("Sync", "AliasDone")
+		RegisterForSingleUpdate(0.01)
+	endFunction
+
+	event OnUpdate()
+		UnregisterForAllModEvents()
+		GoToState("Animating")
 		PlayAnimation()
-		MoveActors()
 		; Send events
 		if !LeadIn && Stage >= StageCount
 			SendThreadEvent("OrgasmStart")
-			if Config.bOrgasmEffects
-				TriggerOrgasm()
-			endIf
 		else
 			SendThreadEvent("StageStart")
 		endIf
 		; Begin loop
-		Log("Starting Stage: "+Stage, "Animating Loop")
-		RegisterForSingleUpdate(0.01)
-	endFunction
+		Log("Starting Stage: "+Stage, "Advancing")
+		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
+		RegisterForSingleUpdate(0.5)
+	endEvent
+endState
+
+state Animating
 
 	event OnUpdate()
 		float CurrentTime = Utility.GetCurrentRealTime()
@@ -104,7 +112,7 @@ state Animating
 	endEvent
 
 	function EndAction()
-		if !LeadIn && Stage > StageCount
+		if !LeadIn && Stage == StageCount
 			SendThreadEvent("OrgasmEnd")
 		else
 			SendThreadEvent("StageEnd")
@@ -117,7 +125,16 @@ state Animating
 
 	function GoToStage(int ToStage)
 		Stage = ToStage
-		Action("Advancing")
+
+		if Stage > StageCount
+			if LeadIn
+				EndLeadIn()
+			else
+				EndAnimation()
+			endIf
+		else
+			Action("Advancing")
+		endIf
 	endFunction
 
 	function PlayAnimation()
@@ -206,20 +223,20 @@ state Animating
 	endFunction
 
 	function AdjustForward(bool backwards = false, bool adjustStage = false)
-		Animation.AdjustForward(AdjustKey, AdjustPos, Stage, sslUtility.SignFloat(backwards, 1.0), adjustStage)
-		AdjustAlias.UpdateOffsets()
+		Animation.AdjustForward(AdjustKey, AdjustPos, Stage, sslUtility.SignFloat(backwards, 0.75), adjustStage)
+		AdjustAlias.SyncLocation()
 		Adjusted = true
 	endFunction
 
 	function AdjustSideways(bool backwards = false, bool adjustStage = false)
-		Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, sslUtility.SignFloat(backwards, 1.0), adjustStage)
-		AdjustAlias.UpdateOffsets()
+		Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, sslUtility.SignFloat(backwards, 0.75), adjustStage)
+		AdjustAlias.SyncLocation()
 		Adjusted = true
 	endFunction
 
 	function AdjustUpward(bool backwards = false, bool adjustStage = false)
-		Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, sslUtility.SignFloat(backwards, 1.0), adjustStage)
-		AdjustAlias.UpdateOffsets()
+		Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, sslUtility.SignFloat(backwards, 0.75), adjustStage)
+		AdjustAlias.SyncLocation()
 		Adjusted = true
 	endFunction
 
@@ -352,11 +369,11 @@ function EndLeadIn()
 		; Add runtime to foreplay skill xp
 		AddXP(0, (TotalTime / 11.0))
 		; Restrip with new strip options
-		ActorAlias[0].Strip(false)
-		ActorAlias[1].Strip(false)
-		ActorAlias[2].Strip(false)
-		ActorAlias[3].Strip(false)
-		ActorAlias[4].Strip(false)
+		ActorAlias[0].StripActor()
+		ActorAlias[1].StripActor()
+		ActorAlias[2].StripActor()
+		ActorAlias[3].StripActor()
+		ActorAlias[4].StripActor()
 		; Start primary animations at stage 1
 		SendThreadEvent("LeadInEnd")
 		Action("Advancing")
@@ -364,19 +381,28 @@ function EndLeadIn()
 endFunction
 
 function EndAnimation(bool Quickly = false)
-	UnregisterForUpdate()
 	GoToState("Ending")
+	RegisterForSingleUpdate(15.0)
+	DisableHotkeys()
+	RecordSkills()
 	; Set fast flag to skip slow ending functions
 	FastEnd = Quickly
 	Stage = StageCount
 	; Send end event
 	SendThreadEvent("AnimationEnd")
-	; Reset actors & wait for clear state
-	RecordSkills()
-	AliasEvent("Reset", "Empty")
-	; Clear & Reset animation thread
-	Initialize()
+	AliasEvent("Reset")
 endFunction
+
+state Ending
+	function AliasDone()
+		UnregisterForAllModEvents()
+		Log("Reset", "AliasEvent")
+		RegisterForSingleUpdate(1.0)
+	endFunction
+	event OnUpdate()
+		Initialize()
+	endEvent
+endState
 
 function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 	parent.CenterOnObject(CenterOn, resync)
@@ -484,6 +510,4 @@ function GoToStage(int ToStage)
 endFunction
 ; State varied
 function FireAction()
-endFunction
-function EndAction()
 endFunction

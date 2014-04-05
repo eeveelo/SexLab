@@ -1,5 +1,8 @@
 scriptname sslActorAlias extends ReferenceAlias
 
+import StorageUtil
+import sslUtility
+
 ; Libraries
 sslActorLibrary Lib
 sslActorStats Stats
@@ -43,10 +46,10 @@ float[] Loc
 ; Storage
 int[] Flags
 bool[] StripOverride
+form[] Equipment
 float ActorScale
 float AnimScale
 form Strapon
-
 ; Stats
 float[] Skills
 int Enjoyment
@@ -95,7 +98,7 @@ function ClearAlias()
 		ActorRef   = GetReference() as Actor
 		BaseRef    = ActorRef.GetLeveledActorBase()
 		IsPlayer   = ActorRef == Game.GetPlayer()
-		IsCreature = Gender == Lib.GetGender(ActorRef)
+		IsCreature = Lib.GetGender(ActorRef) == 2
 		; Reset actor back to default
 		RestoreActorDefaults()
 		StopAnimating(true)
@@ -124,14 +127,20 @@ bool function SlotActor(Actor ProspectRef)
 	ActorVoice = ActorRef.GetVoiceType()
 	; Notify thread of actors genders
 	Thread.Genders[Gender] = Thread.Genders[Gender] + 1
+	if IsCreature
+		Thread.CreatureRef = BaseRef.GetRace()
+	else
+		Lib.CacheStrippable(ActorRef)
+	endIf
 	; Get ready for mod events
 	string eid = "SSL_"+Thread.tid+"_"
 	RegisterForModEvent(eid+"Prepare", "PrepareActor")
 	RegisterForModEvent(eid+"Reset", "ResetActor")
+	RegisterForModEvent(eid+"Sync", "SyncActor")
 	RegisterForModEvent(eid+"Orgasm", "OrgasmEffect")
 	; Ready
 	Thread.Log("Slotted '"+ActorName+"'", self)
-	GoToState("Ready")
+	GoToState("Prepare")
 	return true
 endFunction
 
@@ -139,20 +148,25 @@ endFunction
 ; --- Actor Prepartion                                --- ;
 ; ------------------------------------------------------- ;
 
-state Ready
+state Prepare
 	function PrepareActor()
 		; Remove any unwanted combat effects
 		ActorRef.StopCombat()
 		if ActorRef.IsWeaponDrawn()
 			ActorRef.SheatheWeapon()
 		endIf
+		; Stop movement
 		LockActor()
-		; Sync thread information
-		Animation  = Thread.Animation
-		Stage      = Thread.Stage
-		Position   = Thread.Positions.Find(ActorRef)
-		Flags      = Animation.GetPositionFlags(Position, Stage)
-		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
+		; Strip non creatures
+		if !IsCreature
+			; Pick a strapon on females to use
+			if IsFemale && Config.bUseStrapons && Lib.Strapons.Length > 0
+				Strapon = Lib.Strapons[Utility.RandomInt(0, (Lib.Strapons.Length - 1))]
+				ActorRef.AddItem(Strapon, 1, true)
+			endIf
+			; Strip actor
+			StripActor()
+		endIf
 		; Calculate scales
 		float display = ActorRef.GetScale()
 		ActorRef.SetScale(1.0)
@@ -163,16 +177,12 @@ state Ready
 		if Thread.ActorCount > 1 && Config.bScaleActors
 			AnimScale = (1.0 / base)
 		endIf
+		; Enter animatable state - rest is non vital and can finish as queued
+		GoToState("Animating")
+		Thread.AliasEventDone()
+		StartAnimating()
 		; Non Creatures
 		if !IsCreature
-			; Pick a strapon on females to use
-			if IsFemale && Config.bUseStrapons && Lib.Strapons.Length > 0
-				Strapon = Lib.Strapons[Utility.RandomInt(0, (Lib.Strapons.Length - 1))]
-				ActorRef.AddItem(Strapon, 1, true)
-			endIf
-			; Strip actor
-			Lib.CacheStrippable(ActorRef)
-			Strip(DoUndress)
 			; Pick a voice if needed
 			if Voice == none && !IsForcedSilent
 				SetVoice(Lib.VoiceSlots.PickGender(BaseSex), IsForcedSilent)
@@ -189,7 +199,7 @@ state Ready
 				SkilledActor = Thread.PlayerRef
 			; If a non-creature couple, base skills off partner
 			elseIf Thread.ActorCount == 2 && !Thread.HasCreature
-				SkilledActor = Thread.Positions[sslUtility.IndexTravel(Position, Thread.ActorCount)]
+				SkilledActor = Thread.Positions[sslUtility.IndexTravel(Thread.Positions.Find(ActorRef), Thread.ActorCount)]
 			endIf
 			Skills = Stats.GetSkillLevels(SkilledActor)
 			; Start Auto TFC if enabled
@@ -197,15 +207,15 @@ state Ready
 				Config.ToggleFreeCamera()
 			endIf
 		endIf
-		; Make SOS erect
-		; Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
-		; Enter animatable state
-		GoToState("Animating")
 	endFunction
 
 	bool function SlotActor(Actor ProspectRef)
 		return false
 	endFunction
+endState
+
+state Ready
+
 endState
 
 ; ------------------------------------------------------- ;
@@ -215,13 +225,14 @@ endState
 state Animating
 
 	function StartAnimating()
-		; Position
+		; Position / fix SOS side bend
+		SyncThread()
 		SyncLocation(true)
-		Utility.Wait(0.50)
+		Utility.Wait(0.2)
 		ActorRef.StopTranslation()
 		Snap()
 		; Start update loop
-		RegisterForSingleUpdate(Utility.RandomFloat(1.0, 6.0))
+		RegisterForSingleUpdate(Utility.RandomFloat(1.5, 6.0))
 	endFunction
 
 	event OnUpdate()
@@ -244,6 +255,12 @@ state Animating
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent
 
+	function SyncActor()
+		SyncThread()
+		Thread.AliasEventDone()
+		SyncLocation(false)
+	endFunction
+
 	function SyncThread()
 		; Sync thread information
 		Animation  = Thread.Animation
@@ -261,12 +278,15 @@ state Animating
 					ActorRef.UnequipItem(Strapon, true, true)
 				endIf
 			endIf
-			; Open mouth if needed
+			; Clear any existing expression as a default - to remove open mouth
+			ActorRef.ClearExpressionOverride()
 			if OpenMouth
-				if Expression != none
-					MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
-				endIf
+				; Open mouth if needed
+				MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
 				ActorRef.SetExpressionOverride(16, 100)
+			elseIf Expression != none
+				; Apply expression otherwise - overrides open mouth
+				Expression.Apply(ActorRef, Enjoyment, BaseSex)
 			endIf
 		endIf
 		; Send schlong offset
@@ -358,7 +378,7 @@ state Animating
 		if !IsCreature
 			; Unstrip
 			if !ActorRef.IsDead()
-				Lib.UnstripStored(ActorRef, IsVictim)
+				UnstripActor()
 			endIf
 			; Remove strapon
 			if Strapon != none
@@ -375,6 +395,7 @@ state Animating
 		; Reset alias
 		TryToClear()
 		Initialize()
+		Thread.AliasEventDone()
 	endEvent
 
 endState
@@ -428,9 +449,7 @@ function LockActor()
 		Game.DisablePlayerControls(false, false, false, false, false, false, true, false, 0)
 		Game.SetPlayerAIDriven()
 		; Enable hotkeys, if needed
-		if IsVictim && Config.bDisablePlayer
-			Thread.AutoAdvance = true
-		else
+		if !(IsVictim && Config.bDisablePlayer)
 			Thread.EnableHotkeys()
 		endIf
 	else
@@ -566,7 +585,7 @@ int function GetEnjoyment()
 	endIf
 	; Set final enjoyment
 	Enjoyment = ((Enjoyment as float) * (Stage as float / Animation.StageCount as float)) as int
-	Thread.Log("Enjoyment = "+Enjoyment, ActorName)
+	; Thread.Log("Enjoyment = "+Enjoyment, ActorName)
 	return Enjoyment
 endFunction
 
@@ -598,18 +617,87 @@ function OverrideStrip(bool[] SetStrip)
 	endIf
 endFunction
 
-function Strip(bool DoAnimate = true)
-	if ActorRef != none && !IsCreature
-		if StripOverride.Length != 33
-			; Default slots
-			Lib.StripSlots(ActorRef, Config.GetStrip(IsFemale, Thread.LeadIn, Thread.IsAggressive, IsVictim), DoAnimate)
-		else
-			; Custom slots
-			Lib.StripSlots(ActorRef, StripOverride, DoAnimate)
-		endIf
-		; Only allow once, unless overwritten
-		NoUndress = true
+function StripActor()
+	if ActorRef == none || IsCreature
+		return
 	endIf
+	; Start stripping animation
+	if DoUndress
+		Debug.SendAnimationEvent(ActorRef, "Arrok_Undress_G"+Gender)
+	endIf
+	; Only allow it to be played first time actor strips
+	NoUndress = true
+	; Get strip slots array
+	bool[] Strip
+	if StripOverride.Length == 33
+		Strip = StripOverride
+	else
+		Strip = Config.GetStrip(IsFemale, Thread.LeadIn, Thread.IsAggressive, IsVictim)
+	endIf
+	; Storage for items stripped now
+	Form[] Stripped = new Form[34]
+	; Strip weapons
+	if Strip[32]
+		; Left hand
+		Stripped[32] = ActorRef.GetEquippedWeapon(false)
+		if Stripped[32] != none && FormListFind(none, "StripList", Stripped[32]) != -1
+			Weapon DummyWeapon = Lib.DummyWeapon
+			ActorRef.AddItem(DummyWeapon, 1, true)
+			ActorRef.EquipItem(DummyWeapon, false, true)
+			ActorRef.UnEquipItem(DummyWeapon, false, true)
+			ActorRef.RemoveItem(DummyWeapon, 1, true)
+			ActorRef.UnequipItem(Stripped[32], false, true)
+		endIf
+		; Right hand
+		Stripped[33] = ActorRef.GetEquippedWeapon(true)
+		if Stripped[33] != none && FormListFind(none, "StripList", Stripped[33]) != -1
+			ActorRef.UnequipItem(Stripped[33], false, true)
+		endIf
+	endIf
+	; Strip armors
+	Form ItemRef
+	int i = Strip.Find(true)
+	while i != -1
+		; Grab item in slot
+		ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
+		if ItemRef != none && FormListFind(none, "StripList", ItemRef) != -1
+			ActorRef.UnequipItem(ItemRef, false, true)
+			Stripped[i] = ItemRef
+		endIf
+		; Move to next slot
+		i += 1
+		if i < 32
+			i = Strip.Find(true, i)
+		else
+			i = -1
+		endIf
+	endWhile
+	; Apply Nudesuit
+	if Strip[2] && ((Gender == 0 && Config.bUseMaleNudeSuit) || (Gender == 1  && Config.bUseFemaleNudeSuit)) && !ActorRef.IsEquipped(Lib.NudeSuit)
+		ActorRef.EquipItem(Lib.NudeSuit, false, true)
+	endIf
+	; Add to existing equipment storage (if secondary strip after lead in)
+	Equipment = MergeFormArray(ClearNone(Stripped), Equipment)
+endFunction
+
+function UnstripActor()
+	if ActorRef == none || IsCreature
+		return
+	endIf
+	; Remove nudesuits
+	if ActorRef.IsEquipped(Lib.NudeSuit)
+		ActorRef.UnequipItem(Lib.NudeSuit, true, true)
+		ActorRef.RemoveItem(Lib.NudeSuit, 1, true)
+	elseIf IsVictim && !Config.bReDressVictim
+		return ; Actor is victim, don't redress
+	endIf
+	int i = Equipment.Length
+	while i
+		i -= 1
+		if Equipment[i] != none
+			ActorRef.EquipItem(Equipment[i], false, true)
+		endIf
+	endWhile
 endFunction
 
 bool NoRagdoll
@@ -645,8 +733,6 @@ endProperty
 function Initialize()
 	UnregisterForUpdate()
 	UnregisterForAllModEvents()
-	; Clear the alias of actor
-	GoToState("Empty")
 	; Free actor for selection
 	if ActorRef != none
 		StorageUtil.FormListRemove(none, "SexLab.ActiveActors", ActorRef, true)
@@ -674,15 +760,13 @@ function Initialize()
 	AnimScale      = 0.0
 	; Storage
 	bool[] bDel1
+	form[] fDel1
 	StripOverride  = bDel1
+	Equipment      = fDel1
 	Loc            = new float[6]
+	; Clear the alias of actor
+	GoToState("Empty")
 endFunction
-
-; event OnInit()
-; 	Thread = (GetOwningQuest() as sslThreadController)
-; 	Lib = (Quest.GetQuest("SexLabQuestFramework") as sslActorLibrary)
-; 	Config = (Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig)
-; endEvent
 
 ; ------------------------------------------------------- ;
 ; --- State Restricted                                --- ;
@@ -694,7 +778,8 @@ endFunction
 ; Animating
 function StartAnimating()
 endFunction
-
+function SyncActor()
+endFunction
 function SyncThread()
 endFunction
 function UpdateOffsets()

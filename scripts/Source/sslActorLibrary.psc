@@ -230,9 +230,9 @@ endFunction
 
 bool function IsStrippable(form ItemRef)
 	; Check previous validations
-	if ItemRef != none && StorageUtil.FormListFind(self, "StripList", ItemRef) != -1
+	if ItemRef != none && StorageUtil.FormListFind(none, "StripList", ItemRef) != -1
 		return true
-	elseIf ItemRef == none || StorageUtil.FormListFind(self, "NoStripList", ItemRef) != -1
+	elseIf ItemRef == none || StorageUtil.FormListFind(none, "NoStripList", ItemRef) != -1
 		return false
 	endIf
 	; Check keywords
@@ -241,11 +241,11 @@ bool function IsStrippable(form ItemRef)
 		i -= 1
 		string kw = ItemRef.GetNthKeyword(i).GetString()
 		if StringUtil.Find(kw, "NoStrip") != -1 || StringUtil.Find(kw, "Bound") != -1
-			StorageUtil.FormListAdd(self, "NoStripList", ItemRef, true)
+			StorageUtil.FormListAdd(none, "NoStripList", ItemRef, true)
 			return false
 		endIf
 	endWhile
-	StorageUtil.FormListAdd(self, "StripList", ItemRef, true)
+	StorageUtil.FormListAdd(none, "StripList", ItemRef, true)
 	return true
 endFunction
 
@@ -253,63 +253,64 @@ form function StripSlot(Actor ActorRef, int SlotMask)
 	form ItemRef = ActorRef.GetWornForm(SlotMask)
 	if IsStrippable(ItemRef)
 		ActorRef.UnequipItem(ItemRef, false, true)
-		StorageUtil.FormListAdd(ActorRef, "SexLab.StrippedItems", ItemRef)
 		return ItemRef
 	endIf
 	return none
 endFunction
 
-form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false, bool AllowNudesuit = true, int Gender = 0)
+form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false, bool AllowNudesuit = true)
 	if Strip.Length != 33
 		return none
 	endIf
+	int Gender = ActorRef.GetLeveledActorBase().GetSex()
+	; Figure out which items can be stripped ahead of time
+	CacheStrippable(ActorRef)
 	; Start stripping animation
 	if DoAnimate
 		Debug.SendAnimationEvent(ActorRef, "Arrok_Undress_G"+Gender)
 	endIf
-
 	form[] Stripped = new form[34]
-
 	; Strip weapon
 	if Strip[32]
 		; Left hand
 		Stripped[32] = ActorRef.GetEquippedWeapon(false)
-		if Stripped[32] != none
+		if IsStrippable(Stripped[32])
 			ActorRef.AddItem(DummyWeapon, 1, true)
 			ActorRef.EquipItem(DummyWeapon, false, true)
 			ActorRef.UnEquipItem(DummyWeapon, false, true)
 			ActorRef.RemoveItem(DummyWeapon, 1, true)
 			ActorRef.UnequipItem(Stripped[32], false, true)
-			StorageUtil.FormListAdd(ActorRef, "SexLab.StrippedItems", Stripped[32])
 		endIf
 		; Right hand
 		Stripped[33] = ActorRef.GetEquippedWeapon(true)
-		if Stripped[33] != none
+		if IsStrippable(Stripped[33])
 			ActorRef.UnequipItem(Stripped[33], false, true)
-			StorageUtil.FormListAdd(ActorRef, "SexLab.StrippedItems", Stripped[33])
 		endIf
 	endIf
-
 	; Strip armors
-	int i = 32
-	while i
-		i -= 1
-		if Strip[i]
-			Stripped[i] = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
-			if IsStrippable(Stripped[i])
-				StorageUtil.FormListAdd(ActorRef, "SexLab.StrippedItems", Stripped[i])
-				ActorRef.UnequipItem(Stripped[i], false, true)
-			endIf
+	Form ItemRef
+	int i = Strip.Find(true)
+	while i != -1
+		; Grab item in slot
+		ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
+		if IsStrippable(ItemRef)
+			ActorRef.UnequipItem(ItemRef, false, true)
+			Stripped[i] = ItemRef
+		endIf
+		; Move to next slot
+		i += 1
+		if i < 32
+			i = Strip.Find(true, i)
+		else
+			i = -1
 		endIf
 	endWhile
-
 	; Apply Nudesuit
 	if Strip[2] && AllowNudesuit && ((Gender == 0 && Config.bUseMaleNudeSuit) || (Gender == 1  && Config.bUseFemaleNudeSuit)) && !ActorRef.IsEquipped(NudeSuit)
-		; ActorRef.AddItem(NudeSuit, 1, true)
 		ActorRef.EquipItem(NudeSuit, false, true)
 	endIf
-	return Stripped
-	; return sslUtility.ClearNone(Stripped)
+	; output stripped items
+	return sslUtility.ClearNone(Stripped)
 endFunction
 
 function UnstripActor(Actor ActorRef, form[] Stripped, bool IsVictim = false)
@@ -337,32 +338,6 @@ function UnstripActor(Actor ActorRef, form[] Stripped, bool IsVictim = false)
 			hand -= ((hand == 1 && (type == 41 || type == 31 || type == 22 || type == 82)) as int)
 		endIf
 	endWhile
-endFunction
-
-form[] function GetStripped(Actor ActorRef)
-	int i = StorageUtil.FormListCount(ActorRef, "SexLab.StrippedItems")
-	form[] output = sslUtility.FormArray(i)
-	while i
-		i -= 1
-		output[i] = StorageUtil.FormListGet(ActorRef, "SexLab.StrippedItems", i)
-	endWhile
-	return output
-endFunction
-
-function StoreStripped(Actor ActorRef, bool[] Strip, bool DoAnimate = false, bool AllowNudesuit = true, int Gender = 0)
-	form[] Stripped = StripSlots(ActorRef, Strip, DoAnimate, AllowNudesuit, Gender)
-	int i = Stripped.Length
-	while i
-		i -= 1
-		if Stripped[i] != none
-			StorageUtil.FormListAdd(ActorRef, "SexLab.StrippedItems", Stripped[i])
-		endIf
-	endWhile
-endFunction
-
-function UnstripStored(Actor ActorRef, bool IsVictim = false)
-	UnstripActor(ActorRef, GetStripped(ActorRef), IsVictim)
-	StorageUtil.FormListClear(ActorRef, "SexLab.StrippedItems")
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -578,8 +553,11 @@ endFunction
 
 function Setup()
 	parent.Setup()
-	StorageUtil.FormListClear(self, "Registry")
+	StorageUtil.FormListClear(self, "ValidActors")
+	StorageUtil.FormListClear(none, "StripList")
+	StorageUtil.FormListClear(none, "NoStripList")
+	; No longer used
 	StorageUtil.FormListClear(self, "StripList")
 	StorageUtil.FormListClear(self, "NoStripList")
-	StorageUtil.FormListClear(self, "ValidActors")
+	StorageUtil.FormListClear(self, "Registry")
 endFunction

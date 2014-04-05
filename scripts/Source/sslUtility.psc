@@ -31,7 +31,10 @@ endFunction
 
 float[] function MergeFloatArray(float[] push, float[] array) global
 	int pushing = push.Length
-	if pushing+array.Length > 128 || pushing == 0
+	int have = array.length
+	if have == 0
+		return push
+	elseIf pushing == 0 || pushing+have > 128
 		return array
 	endIf
 	float[] output = IncreaseFloat(pushing, array)
@@ -105,7 +108,10 @@ endFunction
 
 int[] function MergeIntArray(int[] push, int[] array) global
 	int pushing = push.Length
-	if pushing+array.Length > 128 || pushing == 0
+	int have = array.length
+	if have == 0
+		return push
+	elseIf pushing == 0 || pushing+have > 128
 		return array
 	endIf
 	int[] output = IncreaseInt(pushing, array)
@@ -205,7 +211,10 @@ endFunction
 
 bool[] function MergeBoolArray(bool[] push, bool[] array) global
 	int pushing = push.Length
-	if pushing+array.Length > 128 || pushing == 0
+	int have = array.length
+	if have == 0
+		return push
+	elseIf pushing == 0 || pushing+have > 128
 		return array
 	endIf
 	bool[] output = IncreaseBool(pushing, array)
@@ -234,15 +243,15 @@ endFunction
 
 int function CountTrue(bool[] array) global
 	int len = array.Length
-	int pos = array.Find(true)
+	int i = array.Find(true)
 	int count
-	while pos != -1 && pos < len
+	while i != -1
 		count += 1
-		pos += 1
-		if pos < len
-			pos = array.Find(true, pos)
+		i += 1
+		if i < len
+			i = array.Find(true, i)
 		else
-			pos = -1
+			i = -1
 		endIf
 	endWhile
 	return count
@@ -337,7 +346,10 @@ endFunction
 
 string[] function MergeStringArray(string[] push, string[] array) global
 	int pushing = push.Length
-	if pushing+array.Length > 128 || pushing == 0
+	int have = array.length
+	if have == 0
+		return push
+	elseIf pushing == 0 || pushing+have > 128
 		return array
 	endIf
 	string[] output = IncreaseString(pushing, array)
@@ -395,7 +407,10 @@ endFunction
 
 form[] function MergeFormArray(form[] push, form[] array) global
 	int pushing = push.Length
-	if pushing+array.Length > 128 || pushing == 0
+	int have = array.length
+	if have == 0
+		return push
+	elseIf pushing == 0 || pushing+have > 128
 		return array
 	endIf
 	form[] output = IncreaseForm(pushing, array)
@@ -415,15 +430,15 @@ endFunction
 
 int function CountNone(form[] array) global
 	int len = array.Length
-	int pos = array.Find(none)
+	int i = array.Find(none)
 	int count
-	while pos != -1
+	while i != -1
 		count += 1
-		pos += 1
-		if pos < len
-			pos = array.Find(none, pos)
+		i += 1
+		if i < len
+			i = array.Find(none, i)
 		else
-			pos = -1
+			i = -1
 		endIf
 	endWhile
 	return count

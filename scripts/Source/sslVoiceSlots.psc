@@ -138,10 +138,15 @@ sslBaseVoice[] function GetList(bool[] Valid)
 	string Found
 	sslBaseVoice[] Output = sslUtility.VoiceArray(i)
 	int pos = Valid.Find(true)
-	while pos != -1 && pos < Slotted
+	while pos != -1
 		i -= 1
 		Output[i] = Slots[pos]
-		pos = Valid.Find(true, (pos + 1))
+		pos += 1
+		if pos < Slotted
+			pos = Valid.Find(true, pos)
+		else
+			pos = -1
+		endIf
 		Found += Output[i].Name+", "
 	endWhile
 	SexLabUtil.DebugLog("Found Voices("+Output.Length+"): "+Found, "", Config.DebugMode)

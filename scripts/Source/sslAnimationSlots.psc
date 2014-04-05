@@ -186,10 +186,15 @@ sslBaseAnimation[] function GetList(bool[] Valid)
 	string Anims
 	sslBaseAnimation[] Output = sslUtility.AnimationArray(i)
 	int pos = Valid.Find(true)
-	while pos != -1 && pos < Slotted
+	while pos != -1
 		i -= 1
 		Output[i] = Slots[pos]
-		pos = Valid.Find(true, (pos + 1))
+		pos += 1
+		if pos < Slotted
+			pos = Valid.Find(true, pos)
+		else
+			pos = -1
+		endIf
 		Anims += Output[i].Name+", "
 	endWhile
 	ThreadLib.Log("Found Animations("+Output.Length+"): "+Anims)

@@ -16,7 +16,7 @@ string ActorName
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	(Quest.GetQuest("SexLabDev") as sslBenchmark).LatencyTest()
+	; (Quest.GetQuest("SexLabDev") as sslBenchmark).StartBenchmark(2, 10, 5)
 
 	Dispel()
 endEvent
@@ -36,8 +36,8 @@ endEvent
 ;\-----------------------------------------------/;
 
 function Log(string log)
-	; Debug.TraceAndBox(ActorName+"\n"+log)
-	Debug.Trace(log)
+	Debug.TraceAndBox(ActorName+"\n"+log)
+	; Debug.Trace(log)
 	; MiscUtil.PrintConsole(ActorName+"\n"+log)
 	MiscUtil.PrintConsole(log)
 endfunction
