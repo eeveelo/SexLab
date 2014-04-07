@@ -2,6 +2,15 @@ scriptname sslBaseExpression extends sslBaseObject
 
 import MfgConsoleFunc
 
+; Gender Types
+int property Male = 0 autoreadonly
+int property Female = 1 autoreadonly
+int property MaleFemale = -1 autoreadonly
+; MFG Types
+int property Phoneme = 0 autoreadonly
+int property Modifier = 16 autoreadonly
+int property Expression = 30 autoreadonly
+
 int[] Phases
 int property PhasesMale hidden
 	int function get()
@@ -20,14 +29,6 @@ int[] Phase3
 int[] Phase4
 int[] Phase5
 
-; Gender Types
-int Male = 0
-int Female = 1
-int MaleFemale = -1
-; MFG Types
-int Modifier = 0
-int Phoneme = 14
-int Expression = 30
 
 int function PickPhase(int Amount, int Gender)
 	return sslUtility.ClampInt(((sslUtility.ClampInt(Amount, 1, 100) * Phases[Gender]) / 100), 1, Phases[Gender])
@@ -41,24 +42,36 @@ function ApplyPhase(Actor ActorRef, int Phase, int Gender)
 	if Phase > Phases[Gender]
 		return
 	endIf
+	string Gen = "Female"
+	if Gender == Male
+		Gen = "Male"
+	endIf
+
 	int[] Preset = GetPhase(Phase)
-	int g = 32 * ((Gender == Male) as int)
-	; Set Modifers
-	int i
-	while i <= 13
-		SetPhonemeModifier(ActorRef, 1, i, Preset[g])
-		g += 1
-		i += 1
-	endWhile
+	int i = 32 * ((Gender == Male) as int)
 	; Set Phoneme
-	i = 0
-	while i <= 15
-		SetPhonemeModifier(ActorRef, 0, i, Preset[g])
-		g += 1
+	int p
+	while p <= 15
+		if Preset[i] > 0
+			Log("["+i+"] AddPhoneme("+phase+", "+Gen+", "+p+", "+Preset[i]+")", Name)
+		endIf
+		SetPhonemeModifier(ActorRef, 0, p, Preset[i])
 		i += 1
+		p += 1
+	endWhile
+	; Set Modifers
+	int m
+	while m <= 13
+		if Preset[i] > 0
+			Log("["+i+"] AddModifier("+phase+", "+Gen+", "+m+", "+Preset[i]+")", Name)
+		endIf
+		SetPhonemeModifier(ActorRef, 1, m, Preset[i])
+		i += 1
+		m += 1
 	endWhile
 	; Set expression
-	ActorRef.SetExpressionOverride(Preset[g], Preset[(g + 1)])
+	Log("["+i+"] AddExpression("+phase+", "+Gen+", "+Preset[i]+", "+Preset[(i + 1)]+")", Name)
+	ActorRef.SetExpressionOverride(Preset[i], Preset[(i + 1)])
 endFunction
 
 int[] function GetPhase(int Phase)
@@ -194,13 +207,5 @@ function Initialize()
 	Phase3 = dPhase3
 	Phase4 = dPhase4
 	Phase5 = dPhase5
-	; Gender Types
-	Male = 0
-	Female = 1
-	MaleFemale = -1
-	; MFG Types
-	Phoneme = 0
-	Modifier = 14
-	Expression = 30
 	parent.Initialize()
 endFunction

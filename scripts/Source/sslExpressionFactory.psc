@@ -7,8 +7,8 @@ int property Male = 0 autoreadonly hidden
 int property Female = 1 autoreadonly hidden
 int property MaleFemale = -1 autoreadonly hidden
 ; MFG Types
-int property Modifier = 0 autoreadonly hidden
-int property Phoneme = 14 autoreadonly hidden
+int property Phoneme = 0 autoreadonly hidden
+int property Modifier = 16 autoreadonly hidden
 int property Expression = 30 autoreadonly hidden
 
 ; ------------------------------------------------------- ;
