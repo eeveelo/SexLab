@@ -1,3 +1,5 @@
+AnimVar SexLabVer INT32 150
+
 '
 ' Unknown Animators Animations
 '
