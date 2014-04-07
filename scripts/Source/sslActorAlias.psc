@@ -195,6 +195,7 @@ state Ready
 				SkilledActor = Thread.Positions[sslUtility.IndexTravel(Thread.Positions.Find(ActorRef), Thread.ActorCount)]
 			endIf
 			Skills = Stats.GetSkillLevels(SkilledActor)
+			Thread.Log(SkilledActor.GetLeveledActorBase().GetName()+" Skills: "+Skills, ActorName)
 			; Start Auto TFC if enabled
 			if IsPlayer && Config.bAutoTFC
 				Config.ToggleFreeCamera()
@@ -218,7 +219,7 @@ state Animating
 		ActorRef.StopTranslation()
 		Snap()
 		; Start update loop
-		RegisterForSingleUpdate(Utility.RandomFloat(1.5, 6.0))
+		RegisterForSingleUpdate(Utility.RandomFloat(1.5, 3.0))
 	endFunction
 
 	event OnUpdate()
@@ -256,6 +257,8 @@ state Animating
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
 		; Creature skipped
 		if !IsCreature
+			; Sync enjoyment level
+			GetEnjoyment()
 			; Equip Strapon if needed and enabled
 			if Strapon != none
 				if UseStrapon && !ActorRef.IsEquipped(Strapon)
@@ -388,13 +391,78 @@ state Animating
 		Thread.AliasEventDone("Reset")
 	endEvent
 
+	int function GetEnjoyment()
+		; First actor pings thread to update skill xp
+		if Position == 0
+			Thread.RecordSkills()
+		endIf
+		float[] XP = Thread.GetSkillBonus()
+		; Gender skill bonuses
+		if IsFemale
+			XP[0] = XP[0] + (Skills[0] * 1.3) ; Foreplay
+			XP[1] = XP[1] + (Skills[1] * 1.8) ; Vaginal
+			XP[2] = XP[2] + (Skills[2] * 1.3) ; Anal
+			XP[3] = XP[3] + (Skills[3] * 1.4) ; Oral
+		else
+			XP[0] = XP[0] + (Skills[0] * 1.1) ; Foreplay
+			XP[1] = XP[1] + (Skills[1] * 1.7) ; Vaginal
+			XP[2] = XP[2] + (Skills[2] * 1.7) ; Anal
+			XP[3] = XP[3] + (Skills[3] * 1.7) ; Oral
+		endIf
+
+		; Purity Bonuses
+		XP[4] = XP[4] + (Skills[4] * 1.5)
+		XP[5] = XP[5] + (Skills[5] * 1.5)
+
+		; Get base totals
+		float SkillBonus  = sslUtility.ClampFloat((XP[0] + XP[1] + XP[2] + XP[3]), 0, 35.0)
+		float PurityBonus = sslUtility.ClampFloat((XP[4] + XP[5]), 0.0, 15.0)
+		float TimeBonus   = sslUtility.ClampFloat(Thread.TotalTime / 9.0, 0.0, 20.0)
+		float StageBonus  = (Stage as float / Animation.StageCount as float) * 45.0
+
+		; Actor is victim/agressor
+		if Thread.IsAggressive
+			if IsVictim
+				StageBonus = 0.0
+				SkillBonus *= 1.1
+			else
+				StageBonus *= 1.3
+				SkillBonus *= 0.5
+			endIf
+		endIf
+
+		; Keep leadin numbers lower
+		if Thread.LeadIn
+			SkillBonus  *= 0.5
+			TimeBonus   *= 0.8
+			StageBonus  *= 0.8
+		endIf
+
+		; Actor is outside sexuality comfort zone
+		; if IsStraight
+		; 	if (IsFemale && Thread.Females > 1) || (!IsFemale && Thread.Males > 1)
+		; 		GenderBonus -= 4.0
+		; 	elseIf (IsFemale && MalePosition) || (!IsFemale && !MalePosition)
+		; 		GenderBonus -= 2.5
+		; 	endIf
+		; endIf
+
+		; Set final enjoyment
+		Enjoyment = (SkillBonus + PurityBonus + StageBonus + TimeBonus) as int
+		Thread.Log("Skill: "+SkillBonus+" PurityBonus: "+PurityBonus+" Stage: "+StageBonus+" Time: "+TimeBonus, ActorName)
+		Thread.Log("Enjoyment: "+Enjoyment, ActorName)
+		return Enjoyment
+	endFunction
+
+	int function GetPain()
+		float Pain = Math.Abs(100.0 - sslUtility.ClampFloat(GetEnjoyment() as float, 1.0, 99.0))
+		if IsVictim
+			return (Pain * 1.5) as int
+		endIf
+		return (Pain * 0.5) as int
+	endFunction
+
 endState
-
-; ------------------------------------------------------- ;
-; --- Thread Syncing                                  --- ;
-; ------------------------------------------------------- ;
-
-
 
 ; ------------------------------------------------------- ;
 ; --- Actor Manipulation                              --- ;
@@ -534,53 +602,6 @@ endFunction
 
 sslBaseExpression function GetExpression()
 	return Expression
-endFunction
-
-int function GetEnjoyment()
-	; First actor pings thread to update skill xp
-	if Position == 0
-		Thread.RecordSkills()
-	endIf
-	; Base enjoyment from sex skills and total runtime
-	Enjoyment = Thread.GetSkillBonus(Skills) as int
-	; Gender bonuses
-	if IsFemale
-		Enjoyment += 9 * (Thread.IsVaginal as int)
-		Enjoyment += 6 * (Thread.IsAnal as int)
-		Enjoyment += 7 * (Thread.IsOral as int)
-	else
-		Enjoyment += 8 * (Thread.IsVaginal as int)
-		Enjoyment += 8 * (Thread.IsAnal as int)
-		Enjoyment += 7 * (Thread.IsOral as int)
-	endIf
-	; Actor is outside sexuality comfort zone
-	if IsStraight
-		if (IsFemale && Thread.Females > 1) || (!IsFemale && Thread.Males > 1)
-			Enjoyment -= 7
-		elseIf (IsFemale && MalePosition) || (!IsFemale && !MalePosition)
-			Enjoyment -= 5
-		endIf
-	endIf
-	; Actor is victim/agressor
-	if Thread.IsAggressive
-		if IsVictim
-			Enjoyment = Enjoyment / 2
-		else
-			Enjoyment += 8
-		endIf
-	endIf
-	; Set final enjoyment
-	Enjoyment = ((Enjoyment as float) * (Stage as float / Animation.StageCount as float)) as int
-	; Thread.Log("Enjoyment = "+Enjoyment, ActorName)
-	return Enjoyment
-endFunction
-
-int function GetPain()
-	float Pain = Math.Abs(100.0 - sslUtility.ClampFloat(GetEnjoyment() as float, 1.0, 99.0))
-	if IsVictim
-		return (Pain * 1.5) as int
-	endIf
-	return (Pain * 0.5) as int
 endFunction
 
 function EquipStrapon()
@@ -724,3 +745,9 @@ event ResetActor()
 endEvent
 event OnOrgasm()
 endEvent
+int function GetEnjoyment()
+	return 0
+endFunction
+int function GetPain()
+	return 0
+endFunction

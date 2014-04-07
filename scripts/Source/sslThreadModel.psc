@@ -731,37 +731,31 @@ int function GetXP(int i)
 	return SkillXP[i] as int
 endFunction
 
+float[] function GetSkillBonus()
+	float[] Bonus = new float[6]
+	Bonus[0] = SkillXP[0] as float
+	if IsVaginal
+		Bonus[1] = SkillXP[1] as float
+	endIf
+	if IsAnal
+		Bonus[2] = SkillXP[2] as float
+	endIf
+	if IsOral
+		Bonus[3] = SkillXP[3] as float
+	endIf
+	if IsLoving
+		Bonus[4] = SkillXP[4] as float
+	endIf
+	if IsDirty
+		Bonus[5] = SkillXP[5] as float
+	endIf
+	return Bonus
+endFunction
+
 function AddXP(int i, float Amount, bool Condition = true)
 	if Condition && Amount >= 0.375 && SkillXP[i] < 5
 		SkillXP[i] = SkillXP[i] + Amount
 	endIf
-endFunction
-
-float function GetSkillBonus(float[] Levels)
-	float bonus
-	if SkillXP[0] > 0.0
-		bonus += (SkillXP[0] + (Levels[0] * 1.75))
-	endIf
-	if IsVaginal
-		bonus += (SkillXP[1] * ((Levels[1] + 1.0) * 1.5))
-	endIf
-	if IsAnal
-		bonus += (SkillXP[2] * ((Levels[2] + 1.0) * 1.5))
-	endIf
-	if IsOral
-		bonus += (SkillXP[3] * ((Levels[3] + 1.0) * 1.5))
-	endIf
-	if IsLoving
-		bonus += (SkillXP[4] * ((Levels[4] + 1.0) * 1.5))
-	endIf
-	if IsDirty
-		bonus += (SkillXP[5] + Levels[5]) * ActorCount
-	endIf
-	bonus += ClampInt((TotalTime / 15.0) as int, 0, 20) + (Stage * 5)
-	if LeadIn
-		bonus *= 0.6
-	endIf
-	return bonus
 endFunction
 
 string function Key(string Callback)
