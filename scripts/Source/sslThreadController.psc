@@ -39,6 +39,12 @@ state Prepare
 	endFunction
 
 	event OnUpdate()
+		; Start actor loops
+		ActorAlias[0].StartAnimating()
+		ActorAlias[1].StartAnimating()
+		ActorAlias[2].StartAnimating()
+		ActorAlias[3].StartAnimating()
+		ActorAlias[4].StartAnimating()
 		; Send starter events
 		StartedAt = Utility.GetCurrentRealTime()
 		SendThreadEvent("AnimationStart")
@@ -420,7 +426,7 @@ function RecordSkills()
 	AddXP(3, xp, IsOral)
 	AddXP(4, xp, IsLoving)
 	AddXP(5, xp, IsDirty)
-	; Log("ADDING XP: "+xp+" -- Foreplay: "+GetXP(0)+" Vaginal: "+GetXP(1)+" Anal: "+GetXP(2)+" Oral: "+GetXP(3))
+	Log("ADDING XP: "+xp+" -- Foreplay: "+GetXP(0)+" Vaginal: "+GetXP(1)+" Anal: "+GetXP(2)+" Oral: "+GetXP(3))
 	SkillTime = Utility.GetCurrentRealTime()
 endfunction
 
