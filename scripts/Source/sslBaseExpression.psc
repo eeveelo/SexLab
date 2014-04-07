@@ -29,7 +29,6 @@ int[] Phase3
 int[] Phase4
 int[] Phase5
 
-
 int function PickPhase(int Amount, int Gender)
 	return sslUtility.ClampInt(((sslUtility.ClampInt(Amount, 1, 100) * Phases[Gender]) / 100), 1, Phases[Gender])
 endFunction
@@ -42,19 +41,11 @@ function ApplyPhase(Actor ActorRef, int Phase, int Gender)
 	if Phase > Phases[Gender]
 		return
 	endIf
-	string Gen = "Female"
-	if Gender == Male
-		Gen = "Male"
-	endIf
-
 	int[] Preset = GetPhase(Phase)
 	int i = 32 * ((Gender == Male) as int)
 	; Set Phoneme
 	int p
 	while p <= 15
-		if Preset[i] > 0
-			Log("["+i+"] AddPhoneme("+phase+", "+Gen+", "+p+", "+Preset[i]+")", Name)
-		endIf
 		SetPhonemeModifier(ActorRef, 0, p, Preset[i])
 		i += 1
 		p += 1
@@ -62,15 +53,11 @@ function ApplyPhase(Actor ActorRef, int Phase, int Gender)
 	; Set Modifers
 	int m
 	while m <= 13
-		if Preset[i] > 0
-			Log("["+i+"] AddModifier("+phase+", "+Gen+", "+m+", "+Preset[i]+")", Name)
-		endIf
 		SetPhonemeModifier(ActorRef, 1, m, Preset[i])
 		i += 1
 		m += 1
 	endWhile
 	; Set expression
-	Log("["+i+"] AddExpression("+phase+", "+Gen+", "+Preset[i]+", "+Preset[(i + 1)]+")", Name)
 	ActorRef.SetExpressionOverride(Preset[i], Preset[(i + 1)])
 endFunction
 
