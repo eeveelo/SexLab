@@ -115,10 +115,10 @@ int function StartSex(Actor[] Positions, sslBaseAnimation[] Anims, Actor VictimR
 endFunction
 
 sslThreadController function QuickStart(Actor Actor1, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none, Actor VictimRef = none, string AnimationTags = "", string Hook = "")
-	Actor[] Positions = ActorLib.MakeActorArray(Actor1, Actor2, Actor3, Actor4, Actor5)
+	Actor[] Positions = sslUtility.MakeActorArray(Actor1, Actor2, Actor3, Actor4, Actor5)
 	sslBaseAnimation[] Anims
 	if AnimationTags != ""
-		Anims = AnimSlots.GetByTags(Positions.Length, "Anims")
+		Anims = AnimSlots.GetByTags(Positions.Length, AnimationTags)
 	endIf
 	return ThreadSlots.GetController(StartSex(Positions, Anims, VictimRef, none, true, Hook))
 endFunction
@@ -140,19 +140,19 @@ bool function IsActorActive(Actor ActorRef)
 endFunction
 
 Actor[] function MakeActorArray(Actor Actor1 = none, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none)
-	return ActorLib.MakeActorArray(Actor1, Actor2, Actor3, Actor4, Actor5)
+	return sslUtility.MakeActorArray(Actor1, Actor2, Actor3, Actor4, Actor5)
 endFunction
 
 Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none)
-	return ActorLib.FindAvailableActor(CenterRef, Radius, FindGender, IgnoreRef1, IgnoreRef2, IgnoreRef3, IgnoreRef4)
+	return ThreadLib.FindAvailableActor(CenterRef, Radius, FindGender, IgnoreRef1, IgnoreRef2, IgnoreRef3, IgnoreRef4)
 endFunction
 
 Actor[] function FindAvailablePartners(actor[] Positions, int TotalActors, int Males = -1, int Females = -1, float Radius = 10000.0)
-	return ActorLib.FindAvailablePartners(Positions, TotalActors, Males, Females, Radius)
+	return ThreadLib.FindAvailablePartners(Positions, TotalActors, Males, Females, Radius)
 endFunction
 
 Actor[] function SortActors(Actor[] Positions, bool FemaleFirst = true)
-	return ActorLib.SortActors(Positions, FemaleFirst)
+	return ThreadLib.SortActors(Positions, FemaleFirst)
 endFunction
 
 function ApplyCum(Actor ActorRef, int CumID)
@@ -192,27 +192,27 @@ form function StripSlot(Actor ActorRef, int SlotMask)
 endFunction
 
 form function WornStrapon(Actor ActorRef)
-	return ActorLib.WornStrapon(ActorRef)
+	return Config.WornStrapon(ActorRef)
 endFunction
 
 bool function HasStrapon(Actor ActorRef)
-	return ActorLib.HasStrapon(ActorRef)
+	return Config.HasStrapon(ActorRef)
 endFunction
 
 form function PickStrapon(Actor ActorRef)
-	return ActorLib.PickStrapon(ActorRef)
+	return Config.PickStrapon(ActorRef)
 endFunction
 
 form function EquipStrapon(Actor ActorRef)
-	return ActorLib.EquipStrapon(ActorRef)
+	return Config.EquipStrapon(ActorRef)
 endFunction
 
 function UnequipStrapon(Actor ActorRef)
-	ActorLib.UnequipStrapon(ActorRef)
+	Config.UnequipStrapon(ActorRef)
 endFunction
 
 Armor function LoadStrapon(string esp, int id)
-	return ActorLib.LoadStrapon(esp, id)
+	return Config.LoadStrapon(esp, id)
 endFunction
 
 function ForbidActor(Actor ActorRef)
@@ -738,10 +738,10 @@ function Setup()
 	; Reset function Libraries - SexLabQuestFramework
 	Quest SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm") as Quest
 	Config      = SexLabQuestFramework as sslSystemConfig
-	ActorLib    = SexLabQuestFramework as sslActorLibrary
 	ThreadLib   = SexLabQuestFramework as sslThreadLibrary
-	Stats       = SexLabQuestFramework as sslActorStats
 	ThreadSlots = SexLabQuestFramework as sslThreadSlots
+	ActorLib    = SexLabQuestFramework.GetAliasByName("SystemAlias") as sslActorLibrary
+	Stats       = SexLabQuestFramework.GetAliasByName("SystemAlias") as sslActorStats
 	; Reset animation registry - SexLabQuestAnimations
 	Quest SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm") as Quest
 	AnimSlots = SexLabQuestAnimations as sslAnimationSlots
@@ -750,6 +750,10 @@ function Setup()
 	CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
 	VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
 	ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
+	; Clear library caches
+	StorageUtil.FormListClear(self, "ValidActors")
+	StorageUtil.FormListClear(none, "StripList")
+	StorageUtil.FormListClear(none, "NoStripList")
 	; Setup library resources
 	ActorLib.Setup()
 	ThreadLib.Setup()

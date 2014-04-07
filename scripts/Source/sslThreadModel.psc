@@ -1,5 +1,8 @@
-scriptname sslThreadModel extends sslSystemLibrary hidden
+scriptname sslThreadModel extends sslThreadLibrary hidden
 { Animation Thread Model: Runs storage and information about a thread. Access only through functions; NEVER create a property directly to this. }
+
+import sslUtility
+import StorageUtil
 
 bool property IsLocked hidden
 	bool function get()
@@ -106,11 +109,23 @@ bool NoLeadIn
 string[] Hooks
 string[] Tags
 
-bool[] WaitAlias
+; Debug testing
+float property t auto hidden
 
 ; ------------------------------------------------------- ;
 ; --- Thread Making API                               --- ;
 ; ------------------------------------------------------- ;
+
+sslActorAlias function PickAlias(Actor ActorRef)
+	int i
+	while i < 5
+		if ActorAlias[i].ForceRefIfEmpty(ActorRef)
+			return ActorAlias[i]
+		endIf
+		i += 1
+	endWhile
+	return none
+endFunction
 
 state Making
 	int function AddActor(Actor ActorRef, bool IsVictim = false, sslBaseVoice Voice = none, bool ForceSilent = false)
@@ -127,20 +142,30 @@ state Making
 		elseIf !ActorLib.ValidateActor(ActorRef)
 			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They are not a valid target for animation", "FATAL")
 			return -1
+		elseIf ActorRef == PlayerRef && !CheckFNIS()
+			Log("AddActor() - Failed to start animation -- Game was unable to verify that you have a properly installed and up to date version of FNIS", "FATAL")
+			return -1
 		endIf
-		; Attempt to fill an alias slot
-		sslActorAlias Slot = SlotActor(ActorRef)
-		if Slot == none
+		sslActorAlias Slot = PickAlias(ActorRef)
+		if Slot == none || !Slot.SetupAlias(ActorRef, IsVictim, Voice, ForceSilent)
 			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They were unable to fill an actor alias", "FATAL")
 			return -1
 		endIf
 		; Update thread info
-		Positions = sslUtility.PushActor(ActorRef, Positions)
+		Positions  = PushActor(ActorRef, Positions)
 		ActorCount = Positions.Length
-		HasPlayer = Positions.Find(PlayerRef) != -1
-		; Update alias info
-		Slot.MakeVictim(IsVictim)
-		Slot.SetVoice(Voice, ForceSilent)
+		HasPlayer  = Positions.Find(PlayerRef) != -1
+		; Update gender count
+		int g = Slot.Gender
+		Genders[g] = Genders[g] + 1
+		if g == 2
+			CreatureRef = ActorRef.GetLeveledActorBase().GetRace()
+		endIf
+		; Flag as victim
+		if IsVictim
+			VictimRef = ActorRef
+			IsAggressive = true
+		endIf
 		; Return position
 		return Positions.Find(ActorRef)
 	endFunction
@@ -181,9 +206,9 @@ state Making
 		; Search location marker near player or first position
 		if CenterRef == none
 			if HasPlayer
-				CenterOnObject(Game.FindClosestReferenceOfTypeFromRef(ThreadLib.LocationMarker, PlayerRef, 750.0))
+				CenterOnObject(Game.FindClosestReferenceOfTypeFromRef(LocationMarker, PlayerRef, 750.0))
 			else
-				CenterOnObject(Game.FindClosestReferenceOfTypeFromRef(ThreadLib.LocationMarker, Positions[0], 750.0))
+				CenterOnObject(Game.FindClosestReferenceOfTypeFromRef(LocationMarker, Positions[0], 750.0))
 			endIf
 		endIf
 		; Search for nearby bed
@@ -205,6 +230,7 @@ state Making
 		; -- Validate Animations -- ;
 		; ------------------------- ;
 
+		; Get creature animations
 		if HasCreature
 			LeadIn = false
 			PrimaryAnimations = CreatureSlots.GetByRace(ActorCount, CreatureRef)
@@ -212,7 +238,7 @@ state Making
 				Log("StartThread() - Failed to find valid creature animations.", "FATAL")
 				return none
 			endIf
-			Positions = ThreadLib.SortCreatures(Positions, PrimaryAnimations[0])
+			Positions = SortCreatures(Positions, PrimaryAnimations[0])
 		; Get default primary animations if none
 		elseIf PrimaryAnimations.Length == 0
 			SetAnimations(AnimSlots.GetByDefault(Males, Females, IsAggressive, (BedRef != none), Config.bRestrictAggressive))
@@ -231,6 +257,16 @@ state Making
 		endIf
 
 		; ------------------------- ;
+		; --  Prepare Events     -- ;
+		; ------------------------- ;
+
+		RegisterForModEvent(Key(EventTypes[0]+"Done"), EventTypes[0]+"Done")
+		RegisterForModEvent(Key(EventTypes[1]+"Done"), EventTypes[1]+"Done")
+		RegisterForModEvent(Key(EventTypes[2]+"Done"), EventTypes[2]+"Done")
+		RegisterForModEvent(Key(EventTypes[3]+"Done"), EventTypes[3]+"Done")
+		RegisterForModEvent(Key(EventTypes[4]+"Done"), EventTypes[4]+"Done")
+
+		; ------------------------- ;
 		; --  Start Controller   -- ;
 		; ------------------------- ;
 
@@ -243,6 +279,7 @@ state Making
 		Initialize()
 	endEvent
 	event OnBeginState()
+		t = Utility.GetCurrentRealTime()
 		Log("Entering Making State", "Thread["+thread_id+"]")
 	endEvent
 endState
@@ -279,12 +316,12 @@ sslBaseVoice function GetVoice(Actor ActorRef)
 endFunction
 
 ; Expressions
-; function SetExpression(Actor ActorRef, sslBaseExpression Expression)
-;	ActorAlias(ActorRef).SetExpression(Expression)
-; endFunction
-; sslBaseExpression function GetExpression(Actor ActorRef)
-;	return ActorAlias(ActorRef).GetExpression()
-; endFunction
+function SetExpression(Actor ActorRef, sslBaseExpression Expression)
+	ActorAlias(ActorRef).SetExpression(Expression)
+endFunction
+sslBaseExpression function GetExpression(Actor ActorRef)
+	return ActorAlias(ActorRef).GetExpression()
+endFunction
 
 ; Enjoyment/Pain
 int function GetEnjoyment(Actor ActorRef)
@@ -327,7 +364,7 @@ int function GetHighestPresentRelationshipRank(Actor ActorRef)
 	if ActorCount == 1
 		return 0 ; No special relationship with yourself...
 	elseIf ActorCount == 2
-		return ActorRef.GetRelationshipRank(Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)]) ; Get opposing actors relationship rank
+		return ActorRef.GetRelationshipRank(Positions[IndexTravel(Positions.Find(ActorRef), ActorCount)]) ; Get opposing actors relationship rank
 	endIf
 	; int Highest
 	; int i = ActorCount
@@ -339,11 +376,11 @@ int function GetHighestPresentRelationshipRank(Actor ActorRef)
 	; endWhile
 	; return Highest
 	; Next position
-	Actor NextActor = Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)]
+	Actor NextActor = Positions[IndexTravel(Positions.Find(ActorRef), ActorCount)]
 	int Highest = ActorRef.GetRelationshipRank(NextActor)
 	; loop through each position until reaching ActorRef
 	while NextActor != ActorRef
-		NextActor = Positions[sslUtility.IndexTravel(Positions.Find(NextActor), ActorCount)]
+		NextActor = Positions[IndexTravel(Positions.Find(NextActor), ActorCount)]
 		if NextActor != ActorRef && ActorRef.GetRelationshipRank(NextActor) > Highest
 			Highest = ActorRef.GetRelationshipRank(NextActor)
 		endIf
@@ -356,11 +393,11 @@ int function GetLowestPresentRelationshipRank(Actor ActorRef)
 		return GetHighestPresentRelationshipRank(ActorRef) ; Results will be same for 1 and 2 actors
 	endIf
 	; Next position
-	Actor NextActor = Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)]
+	Actor NextActor = Positions[IndexTravel(Positions.Find(ActorRef), ActorCount)]
 	int Lowest = ActorRef.GetRelationshipRank(NextActor)
 	; loop through each position until reaching ActorRef
 	while NextActor != ActorRef
-		NextActor = Positions[sslUtility.IndexTravel(Positions.Find(NextActor), ActorCount)]
+		NextActor = Positions[IndexTravel(Positions.Find(NextActor), ActorCount)]
 		if NextActor != ActorRef && ActorRef.GetRelationshipRank(NextActor) < Lowest
 			Lowest = ActorRef.GetRelationshipRank(NextActor)
 		endIf
@@ -435,11 +472,11 @@ function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 	if CenterOn != none
 		CenterRef = CenterOn
 		CenterOnCoords(CenterOn.GetPositionX(), CenterOn.GetPositionY(), CenterOn.GetPositionZ(), CenterOn.GetAngleX(), CenterOn.GetAngleY(), CenterOn.GetAngleZ(), false)
-		if ThreadLib.BedsList.HasForm(CenterOn.GetBaseObject())
+		if BedsList.HasForm(CenterOn.GetBaseObject())
 			BedRef = CenterOn
 			CenterLocation[0] = CenterLocation[0] + (33.0 * Math.sin(CenterLocation[5]))
 			CenterLocation[1] = CenterLocation[1] + (33.0 * Math.cos(CenterLocation[5]))
-			if !ThreadLib.BedRollsList.HasForm(CenterOn.GetBaseObject())
+			if !BedRollsList.HasForm(CenterOn.GetBaseObject())
 				CenterLocation[2] = CenterLocation[2] + 37.0
 			endIf
 		endIf
@@ -461,48 +498,30 @@ endFunction
 	if BedFlag == -1
 		return false ; Beds forbidden by flag
 	elseIf HasPlayer
-		FoundBed = ThreadLib.FindBed(PlayerRef, Radius) ; Check within radius of player
+		FoundBed = FindBed(PlayerRef, Radius) ; Check within radius of player
 	elseIf Config.sNPCBed == "$SSL_Always" || (Config.sNPCBed == "$SSL_Sometimes" && (Utility.RandomInt(0, 1) as bool))
-		FoundBed = ThreadLib.FindBed(Positions[0], Radius) ; Check within radius of first position, if NPC beds are allowed
+		FoundBed = FindBed(Positions[0], Radius) ; Check within radius of first position, if NPC beds are allowed
 	endIf
 	; Found a bed AND EITHER forced use OR don't care about players choice OR or player approved
-	if FoundBed != none && (BedFlag == 1 || (!AskPlayer || (AskPlayer && (ThreadLib.UseBed.Show() as bool))))
+	if FoundBed != none && (BedFlag == 1 || (!AskPlayer || (AskPlayer && (UseBed.Show() as bool))))
 		CenterOnObject(FoundBed)
 		return true ; Bed found and approved for use
 	endIf
 	return false ; No bed found
 endFunction
 
-
-; int[] Skills
-; function SetSkilledActor(Actor ActorRef)
-; 	Skills = new int[3]
-; 	Skills[0] = Stats.GetskillLevel(ActorRef, "Vaginal")
-; 	Skills[1] = Stats.GetskillLevel(ActorRef, "Anal")
-; 	Skills[2] = Stats.GetskillLevel(ActorRef, "Oral")
-; endFunction
-
-; int[] function GetSkillWeights()
-; 	int[] Weights = new int[5]
-; 	Weights[0] = (Skills[0] * 0.5) * SecondsVaginal
-; 	Weights[1] = (Skills[1] * 0.5) * SecondsAnal
-; 	Weights[2] = (Skills[2] * 0.5) * SecondsOral
-; 	if IsVaginal
-; 		Weights[0]
-; endFunction
-
 ; ------------------------------------------------------- ;
 ; --- Event Hooks                                     --- ;
 ; ------------------------------------------------------- ;
 
 function SetHook(string AddHooks)
-	string[] Setting = sslUtility.ArgString(AddHooks)
+	string[] Setting = ArgString(AddHooks)
 	int i = Setting.Length
 	while i
 		i -= 1
 		if Setting[i] != "" && Hooks.Find(Setting[i]) == -1
 			AddTag(Setting[i])
-			Hooks = sslUtility.PushString(Setting[i], Hooks)
+			Hooks = PushString(Setting[i], Hooks)
 		endIf
 	endWhile
 endFunction
@@ -516,7 +535,7 @@ string[] function GetHooks()
 endFunction
 
 function RemoveHook(string DelHooks)
-	string[] Removing = sslUtility.ArgString(DelHooks)
+	string[] Removing = ArgString(DelHooks)
 	string[] NewHooks
 	int i = Hooks.Length
 	while i
@@ -524,7 +543,7 @@ function RemoveHook(string DelHooks)
 		if Removing.Find(Hooks[i]) != -1
 			RemoveTag(Hooks[i])
 		else
-			NewHooks = sslUtility.PushString(Hooks[i], NewHooks)
+			NewHooks = PushString(Hooks[i], NewHooks)
 		endIf
 	endWhile
 	Hooks = NewHooks
@@ -544,7 +563,7 @@ bool function AddTag(string Tag)
 	endIf
 	int i = Tags.Find(Tag)
 	if i == -1
-		Tags = sslUtility.PushString(Tag, Tags)
+		Tags = PushString(Tag, Tags)
 	else
 		Tags[i] = Tag
 	endIf
@@ -618,17 +637,6 @@ sslActorAlias function PositionAlias(int Position)
 	return ActorAlias[FindSlot(Positions[Position])]
 endFunction
 
-sslActorAlias function SlotActor(Actor ActorRef)
-	int i
-	while i < 5
-		if ActorAlias[i].SlotActor(ActorRef)
-			return ActorAlias[i]
-		endIf
-		i += 1
-	endWhile
-	return none
-endFunction
-
 ; ------------------------------------------------------- ;
 ; --- System Use Only                                 --- ;
 ; ------------------------------------------------------- ;
@@ -661,22 +669,19 @@ function Initialize()
 	BedFlag        = 0
 	ActorCount     = 0
 	Stage          = 1
-	; SecondsVaginal = 0
-	; SecondsAnal    = 0
-	; SecondsOral    = 0
 	; Strings
 	AdjustKey      = ""
 	; Storage
 	Actor[] aDel
 	string[] sDel1
-	string[] sDel2
 	float[] fDel1
 	Positions      = aDel
 	Hooks          = sDel1
-	Tags           = sDel2
 	CustomTimers   = fDel1
 	Genders        = new int[3]
+	AliasDone      = new int[5]
 	SkillXP        = new float[6]
+	Tags           = new string[5]
 	; Animations
 	sslBaseAnimation[] anDel1
 	sslBaseAnimation[] anDel2
@@ -712,9 +717,10 @@ endFunction
 function SetupThreadEvent(string HookEvent)
 	int eid = ModEvent.Create(HookEvent)
 	if eid
-		ModEvent.PushInt(eid, thread_id)
 		ModEvent.PushString(eid, HookEvent)
-		ModEvent.PushBool(eid, HasPlayer)
+		ModEvent.PushInt(eid, thread_id)
+		ModEvent.PushInt(eid, HasPlayer as int)
+		ModEvent.PushForm(eid, self)
 		ModEvent.Send(eid)
 		; Log("Thread Hook Sent: "+HookEvent)
 	endIf
@@ -751,29 +757,37 @@ float function GetSkillBonus(float[] Levels)
 	if IsDirty
 		bonus += (SkillXP[5] + Levels[5]) * ActorCount
 	endIf
-	bonus += sslUtility.ClampInt((TotalTime / 15.0) as int, 0, 20) + (Stage * 5)
+	bonus += ClampInt((TotalTime / 15.0) as int, 0, 20) + (Stage * 5)
 	if LeadIn
 		bonus *= 0.6
 	endIf
 	return bonus
 endFunction
 
-int AliasDone
-function AliasEvent(string Callback)
-	if AliasDone != 0
-		Log(Callback+" attempting to start during previous event")
-		return
-	endIf
-	AliasDone = 0
-	RegisterForModEvent("SSL_"+thread_id+"_AliasDone", "AliasDone")
-	ModEvent.Send(ModEvent.Create("SSL_"+thread_id+"_"+Callback))
+string function Key(string Callback)
+	return "SSL_"+thread_id+"_"+Callback
 endFunction
 
-function AliasEventDone()
-	AliasDone += 1
-	if AliasDone >= ActorCount
-		AliasDone = 0
-		ModEvent.Send(ModEvent.Create("SSL_"+thread_id+"_AliasDone"))
+int[] AliasDone
+string[] EventTypes
+function AliasEvent(string Callback, bool AliasWait = true)
+	if AliasWait
+		int i = EventTypes.Find(Callback)
+		if AliasDone[i] != 0
+			Log(Callback+" attempting to start during previous event")
+			return
+		endIf
+		AliasDone[i] = 0
+	endIf
+	ModEvent.Send(ModEvent.Create(Key(Callback)))
+endFunction
+
+function AliasEventDone(string Callback = "Alias")
+	int i = EventTypes.Find(Callback)
+	AliasDone[i] = AliasDone[i] + 1
+	if AliasDone[i] >= ActorCount
+		AliasDone[i] = 0
+		ModEvent.Send(ModEvent.Create(Key(Callback+"Done")))
 	endIf
 endFunction
 
@@ -816,6 +830,19 @@ function ThreadInit(int value)
 	ActorAlias[3] = GetNthAlias(3) as sslActorAlias
 	ActorAlias[4] = GetNthAlias(4) as sslActorAlias
 
+	ActorAlias[0].Setup()
+	ActorAlias[1].Setup()
+	ActorAlias[2].Setup()
+	ActorAlias[3].Setup()
+	ActorAlias[4].Setup()
+
+	EventTypes = new string[5]
+	EventTypes[0] = "Sync"
+	EventTypes[1] = "Prepare"
+	EventTypes[2] = "Reset"
+	EventTypes[3] = "Strip"
+	EventTypes[4] = "Orgasm"
+
 	Setup()
 	Initialize()
 endFunction
@@ -832,10 +859,10 @@ endProperty
 ; ------------------------------------------------------- ;
 
 auto state Unlocked
-	sslThreadModel function Make(float TimeOut = 30.0)
+	sslThreadModel function Make()
 		Initialize()
 		GoToState("Making")
-		RegisterForSingleUpdate(TimeOut)
+		RegisterForSingleUpdate(30.0)
 		return self
 	endFunction
 	function EnableHotkeys()
@@ -843,7 +870,7 @@ auto state Unlocked
 endState
 
 ; Making
-sslThreadModel function Make(float TimeOut = 30.0)
+sslThreadModel function Make()
 	Log("Make() - Cannot enter make on a locked thread", "FATAL")
 	return none
 endFunction
@@ -864,9 +891,17 @@ function FireAction()
 endFunction
 function EndAction()
 endFunction
-function SetAnimation(int aid = -1)
+function SyncDone()
 endFunction
-function AliasDone()
+function PrepareDone()
+endFunction
+function ResetDone()
+endFunction
+function StripDone()
+endFunction
+function OrgasmDone()
+endFunction
+function SetAnimation(int aid = -1)
 endFunction
 ; Animating
 event OnKeyDown(int keyCode)

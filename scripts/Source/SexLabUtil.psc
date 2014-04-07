@@ -5,11 +5,11 @@ scriptname SexLabUtil hidden
 ; ------------------------------------------------------- ;
 
 int function GetVersion() global
-	return 14500
+	return 14600
 endFunction
 
 string function GetStringVer() global
-	return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)+" Beta 1"
+	return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)+" EXPERIMENTAL"
 endFunction
 
 bool function SexLabIsActive() global
@@ -57,7 +57,7 @@ endFunction
 ; ------------------------------------------------------- ;
 
 bool function IsActorActive(Actor ActorRef) global
-	return StorageUtil.FormListFind(none, "SexLab.ActiveActors", ActorRef) != -1
+	return StorageUtil.FormListFind(none, "SexLabActors", ActorRef) != -1
 endFunction
 
 ; ------------------------------------------------------- ;

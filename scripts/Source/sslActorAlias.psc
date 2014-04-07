@@ -1,12 +1,6 @@
-scriptname sslActorAlias extends ReferenceAlias
+scriptname sslActorAlias extends sslActorLibrary
 
 import StorageUtil
-import sslUtility
-
-; Libraries
-sslActorLibrary Lib
-sslActorStats Stats
-sslSystemConfig Config
 
 ; Actor Info
 Actor property ActorRef auto hidden
@@ -88,17 +82,15 @@ endProperty
 function ClearAlias()
 	; Set libraries
 	Thread = GetOwningQuest() as sslThreadController
-	Lib    = Thread.ActorLib
-	Stats  = Thread.Stats
-	Config = Thread.Config
 	; Make sure actor is reset
 	if GetReference() != none
+		Debug.TraceStack("Clear")
 		Thread.Log("Had actor '"+GetReference()+"' during clear!", self)
 		; Init variables needed for reset
 		ActorRef   = GetReference() as Actor
 		BaseRef    = ActorRef.GetLeveledActorBase()
 		IsPlayer   = ActorRef == Game.GetPlayer()
-		IsCreature = Lib.GetGender(ActorRef) == 2
+		IsCreature = GetGender(ActorRef) == 2
 		; Reset actor back to default
 		RestoreActorDefaults()
 		StopAnimating(true)
@@ -108,39 +100,38 @@ function ClearAlias()
 	Initialize()
 endFunction
 
-bool function SlotActor(Actor ProspectRef)
-	if ProspectRef == none || !ForceRefIfEmpty(ProspectRef)
+bool function SetupAlias(Actor ProspectRef, bool Victimize = false, sslBaseVoice UseVoice = none, bool ForceSilent = false)
+	if ProspectRef == none || GetReference() != ProspectRef
 		return false ; Failed to set prospective actor into alias
 	endIf
 	; Register actor as active
-	StorageUtil.FormListAdd(none, "SexLab.ActiveActors", ActorRef, false)
+	FormListAdd(none, "SexLabActors", ActorRef, false)
 	; Init actor alias information
 	ActorRef   = ProspectRef
 	BaseRef    = ActorRef.GetLeveledActorBase()
 	ActorName  = BaseRef.GetName()
 	BaseSex    = BaseRef.GetSex()
-	Gender     = Lib.GetGender(ActorRef)
+	Gender     = GetGender(ActorRef)
 	IsMale     = Gender == 0
 	IsFemale   = Gender == 1
 	IsCreature = Gender == 2
-	IsPlayer   = ActorRef == Lib.PlayerRef
+	IsPlayer   = ActorRef == PlayerRef
+	IsVictim   = Victimize
 	ActorVoice = ActorRef.GetVoiceType()
-	; Notify thread of actors genders
-	Thread.Genders[Gender] = Thread.Genders[Gender] + 1
-	if IsCreature
-		Thread.CreatureRef = BaseRef.GetRace()
-	else
-		Lib.CacheStrippable(ActorRef)
+	SetVoice(UseVoice, ForceSilent)
+	if !IsCreature
+		CacheStrippable(ActorRef)
 	endIf
 	; Get ready for mod events
-	string eid = "SSL_"+Thread.tid+"_"
-	RegisterForModEvent(eid+"Prepare", "PrepareActor")
-	RegisterForModEvent(eid+"Reset", "ResetActor")
-	RegisterForModEvent(eid+"Sync", "SyncActor")
-	RegisterForModEvent(eid+"Orgasm", "OrgasmEffect")
+	string e = Thread.Key("")
+	RegisterForModEvent(e+"Prepare", "PrepareActor")
+	RegisterForModEvent(e+"Reset", "ResetActor")
+	RegisterForModEvent(e+"Sync", "SyncActor")
+	RegisterForModEvent(e+"Orgasm", "OrgasmEffect")
+	RegisterForModEvent(e+"Strip", "Strip")
 	; Ready
 	Thread.Log("Slotted '"+ActorName+"'", self)
-	GoToState("Prepare")
+	GoToState("Ready")
 	return true
 endFunction
 
@@ -148,24 +139,18 @@ endFunction
 ; --- Actor Prepartion                                --- ;
 ; ------------------------------------------------------- ;
 
-state Prepare
+state Ready
+
+	bool function SetupAlias(Actor ProspectRef, bool MakeVictim = false, sslBaseVoice UseVoice = none, bool ForceSilent = false)
+		return false
+	endFunction
+
 	function PrepareActor()
+		Thread.Log("Preparing", ActorName)
 		; Remove any unwanted combat effects
 		ActorRef.StopCombat()
 		if ActorRef.IsWeaponDrawn()
 			ActorRef.SheatheWeapon()
-		endIf
-		; Stop movement
-		LockActor()
-		; Strip non creatures
-		if !IsCreature
-			; Pick a strapon on females to use
-			if IsFemale && Config.bUseStrapons && Lib.Strapons.Length > 0
-				Strapon = Lib.Strapons[Utility.RandomInt(0, (Lib.Strapons.Length - 1))]
-				ActorRef.AddItem(Strapon, 1, true)
-			endIf
-			; Strip actor
-			StripActor()
 		endIf
 		; Calculate scales
 		float display = ActorRef.GetScale()
@@ -177,19 +162,27 @@ state Prepare
 		if Thread.ActorCount > 1 && Config.bScaleActors
 			AnimScale = (1.0 / base)
 		endIf
+		; Stop movement
+		LockActor()
 		; Enter animatable state - rest is non vital and can finish as queued
 		GoToState("Animating")
-		Thread.AliasEventDone()
-		StartAnimating()
-		; Non Creatures
+		Thread.AliasEventDone("Prepare")
+		; Strip non creatures
 		if !IsCreature
+			; Pick a strapon on females to use
+			if IsFemale && Config.bUseStrapons && Strapons.Length > 0
+				Strapon = Strapons[Utility.RandomInt(0, (Strapons.Length - 1))]
+				ActorRef.AddItem(Strapon, 1, true)
+			endIf
+			; Strip actor
+			Strip()
 			; Pick a voice if needed
 			if Voice == none && !IsForcedSilent
-				SetVoice(Lib.VoiceSlots.PickGender(BaseSex), IsForcedSilent)
+				SetVoice(VoiceSlots.PickGender(BaseSex), IsForcedSilent)
 			endIf
 			; Pick an expression if needed
 			if Expression == none && Config.bUseExpressions
-				Expression = Lib.ExpressionSlots.PickExpression(((IsVictim as int) + (Thread.IsAggressive as int)))
+				Expression = ExpressionSlots.PickExpression(((IsVictim as int) + (Thread.IsAggressive as int)))
 			endIf
 			; Check for heterosexual preference
 			IsStraight = Stats.IsStraight(ActorRef)
@@ -208,14 +201,6 @@ state Prepare
 			endIf
 		endIf
 	endFunction
-
-	bool function SlotActor(Actor ProspectRef)
-		return false
-	endFunction
-endState
-
-state Ready
-
 endState
 
 ; ------------------------------------------------------- ;
@@ -226,9 +211,10 @@ state Animating
 
 	function StartAnimating()
 		; Position / fix SOS side bend
+		Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
+		Utility.Wait(0.2)
 		SyncThread()
 		SyncLocation(true)
-		Utility.Wait(0.2)
 		ActorRef.StopTranslation()
 		Snap()
 		; Start update loop
@@ -257,8 +243,8 @@ state Animating
 
 	function SyncActor()
 		SyncThread()
-		Thread.AliasEventDone()
 		SyncLocation(false)
+		Thread.AliasEventDone("Sync")
 	endFunction
 
 	function SyncThread()
@@ -350,14 +336,18 @@ state Animating
 		; Apply cum
 		int CumID = Animation.GetCum(Position)
 		if CumID > 0 && Config.bUseCum && (Thread.Males > 0 || Config.bAllowFFCum || Thread.HasCreature)
-			Lib.ApplyCum(ActorRef, CumID)
+			ApplyCum(ActorRef, CumID)
 		endIf
-		; Play OrgasmSFX
-		Lib.ThreadLib.OrgasmFX.Play(ActorRef)
+		; Moan if not silent
+		if !IsSilent
+			Voice.Moan(ActorRef, 100, IsVictim, Config.bUseLipSync)
+		endIf
 		; Shake camera for player
 		if IsPlayer && Game.GetCameraState() != 3
 			Game.ShakeCamera(none, 0.75, 1.5)
 		endIf
+		; Play OrgasmSFX
+		Config.OrgasmFX.Play(ActorRef)
 		; Voice
 		VoiceDelay = 0.8
 	endFunction
@@ -370,7 +360,7 @@ state Animating
 		; Apply cum
 		int CumID = Animation.GetCum(Position)
 		if !Thread.FastEnd && CumID > 0 && Config.bUseCum && (Thread.Males > 0 || Config.bAllowFFCum || Thread.HasCreature)
-			Lib.ApplyCum(ActorRef, CumID)
+			ApplyCum(ActorRef, CumID)
 		endIf
 		; Stop animating
 		StopAnimating(Thread.FastEnd)
@@ -378,7 +368,7 @@ state Animating
 		if !IsCreature
 			; Unstrip
 			if !ActorRef.IsDead()
-				UnstripActor()
+				Unstrip()
 			endIf
 			; Remove strapon
 			if Strapon != none
@@ -395,10 +385,16 @@ state Animating
 		; Reset alias
 		TryToClear()
 		Initialize()
-		Thread.AliasEventDone()
+		Thread.AliasEventDone("Reset")
 	endEvent
 
 endState
+
+; ------------------------------------------------------- ;
+; --- Thread Syncing                                  --- ;
+; ------------------------------------------------------- ;
+
+
 
 ; ------------------------------------------------------- ;
 ; --- Actor Manipulation                              --- ;
@@ -440,8 +436,8 @@ function LockActor()
 	; Stop whatever they are doing
 	Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 	; Start DoNothing package
-	ActorRef.SetFactionRank(Lib.AnimatingFaction, 1)
-	ActorUtil.AddPackageOverride(ActorRef, Lib.DoNothing, 100, 1)
+	ActorRef.SetFactionRank(AnimatingFaction, 1)
+	ActorUtil.AddPackageOverride(ActorRef, DoNothing, 100, 1)
 	ActorRef.EvaluatePackage()
 	; Disable movement
 	if IsPlayer
@@ -458,7 +454,7 @@ function LockActor()
 	endIf
 	; Attach positioning marker
 	if !MarkerRef
-		MarkerRef = ActorRef.PlaceAtMe(Lib.BaseMarker)
+		MarkerRef = ActorRef.PlaceAtMe(BaseMarker)
 	endIf
 	MarkerRef.Enable()
 	MarkerRef.MoveTo(ActorRef)
@@ -474,8 +470,8 @@ function UnlockActor()
 	ActorRef.StopTranslation()
 	ActorRef.SetVehicle(none)
 	; Remove from animation faction
-	ActorRef.RemoveFromFaction(Lib.AnimatingFaction)
-	ActorUtil.RemovePackageOverride(ActorRef, Lib.DoNothing)
+	ActorRef.RemoveFromFaction(AnimatingFaction)
+	ActorUtil.RemovePackageOverride(ActorRef, DoNothing)
 	ActorRef.EvaluatePackage()
 	; Enable movement
 	if IsPlayer
@@ -504,14 +500,12 @@ function RestoreActorDefaults()
 		BaseRef.SetVoiceType(ActorVoice)
 	endIf
 	; Enable player controls
-	if ActorRef == Lib.PlayerRef
+	if ActorRef == PlayerRef
 		Thread.DisableHotkeys()
 	endIf
 	; Reset expression
 	ActorRef.ClearExpressionOverride()
-	if Expression != none
-		MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
-	endIf
+	MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
 	; Remove SOS erection
 	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
 endFunction
@@ -519,14 +513,6 @@ endFunction
 ; ------------------------------------------------------- ;
 ; --- Data Accessors                                  --- ;
 ; ------------------------------------------------------- ;
-
-function MakeVictim(bool Victimize = true)
-	IsVictim = Victimize
-	if Victimize
-		Thread.VictimRef    = ActorRef
-		Thread.IsAggressive = true
-	endIf
-endFunction
 
 function SetVoice(sslBaseVoice ToVoice = none, bool ForceSilence = false)
 	IsForcedSilent = ForceSilence
@@ -617,87 +603,25 @@ function OverrideStrip(bool[] SetStrip)
 	endIf
 endFunction
 
-function StripActor()
+function Strip()
 	if ActorRef == none || IsCreature
 		return
 	endIf
-	; Start stripping animation
-	if DoUndress
-		Debug.SendAnimationEvent(ActorRef, "Arrok_Undress_G"+Gender)
-	endIf
-	; Only allow it to be played first time actor strips
-	NoUndress = true
-	; Get strip slots array
-	bool[] Strip
+	form[] Stripped
 	if StripOverride.Length == 33
-		Strip = StripOverride
+		Stripped = StripSlots(ActorRef, StripOverride, DoUndress)
 	else
-		Strip = Config.GetStrip(IsFemale, Thread.LeadIn, Thread.IsAggressive, IsVictim)
+		Stripped = StripSlots(ActorRef, Config.GetStrip(IsFemale, Thread.LeadIn, Thread.IsAggressive, IsVictim), DoUndress)
 	endIf
-	; Storage for items stripped now
-	Form[] Stripped = new Form[34]
-	; Strip weapons
-	if Strip[32]
-		; Left hand
-		Stripped[32] = ActorRef.GetEquippedWeapon(false)
-		if Stripped[32] != none && FormListFind(none, "StripList", Stripped[32]) != -1
-			Weapon DummyWeapon = Lib.DummyWeapon
-			ActorRef.AddItem(DummyWeapon, 1, true)
-			ActorRef.EquipItem(DummyWeapon, false, true)
-			ActorRef.UnEquipItem(DummyWeapon, false, true)
-			ActorRef.RemoveItem(DummyWeapon, 1, true)
-			ActorRef.UnequipItem(Stripped[32], false, true)
-		endIf
-		; Right hand
-		Stripped[33] = ActorRef.GetEquippedWeapon(true)
-		if Stripped[33] != none && FormListFind(none, "StripList", Stripped[33]) != -1
-			ActorRef.UnequipItem(Stripped[33], false, true)
-		endIf
-	endIf
-	; Strip armors
-	Form ItemRef
-	int i = Strip.Find(true)
-	while i != -1
-		; Grab item in slot
-		ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
-		if ItemRef != none && FormListFind(none, "StripList", ItemRef) != -1
-			ActorRef.UnequipItem(ItemRef, false, true)
-			Stripped[i] = ItemRef
-		endIf
-		; Move to next slot
-		i += 1
-		if i < 32
-			i = Strip.Find(true, i)
-		else
-			i = -1
-		endIf
-	endWhile
-	; Apply Nudesuit
-	if Strip[2] && ((Gender == 0 && Config.bUseMaleNudeSuit) || (Gender == 1  && Config.bUseFemaleNudeSuit)) && !ActorRef.IsEquipped(Lib.NudeSuit)
-		ActorRef.EquipItem(Lib.NudeSuit, false, true)
-	endIf
-	; Add to existing equipment storage (if secondary strip after lead in)
-	Equipment = MergeFormArray(ClearNone(Stripped), Equipment)
+	NoUndress = true
+	Equipment = sslUtility.MergeFormArray(Stripped, Equipment)
 endFunction
 
-function UnstripActor()
-	if ActorRef == none || IsCreature
-		return
-	endIf
-	; Remove nudesuits
-	if ActorRef.IsEquipped(Lib.NudeSuit)
-		ActorRef.UnequipItem(Lib.NudeSuit, true, true)
-		ActorRef.RemoveItem(Lib.NudeSuit, 1, true)
-	elseIf IsVictim && !Config.bReDressVictim
-		return ; Actor is victim, don't redress
-	endIf
-	int i = Equipment.Length
-	while i
-		i -= 1
-		if Equipment[i] != none
-			ActorRef.EquipItem(Equipment[i], false, true)
-		endIf
-	endWhile
+function UnStrip()
+ 	if ActorRef == none || IsCreature || Equipment.Length == 0
+ 		return
+ 	endIf
+ 	UnstripActor(ActorRef, Equipment, IsVictim)
 endFunction
 
 bool NoRagdoll
@@ -733,9 +657,10 @@ endProperty
 function Initialize()
 	UnregisterForUpdate()
 	UnregisterForAllModEvents()
+	GoToState("")
 	; Free actor for selection
 	if ActorRef != none
-		StorageUtil.FormListRemove(none, "SexLab.ActiveActors", ActorRef, true)
+		FormListRemove(none, "SexLabActors", ActorRef, true)
 	endIf
 	; Delete positioning marker
 	if MarkerRef
@@ -764,9 +689,12 @@ function Initialize()
 	StripOverride  = bDel1
 	Equipment      = fDel1
 	Loc            = new float[6]
-	; Clear the alias of actor
-	GoToState("Empty")
 endFunction
+
+function Setup()
+	parent.Setup()
+	ClearAlias()
+endfunction
 
 ; ------------------------------------------------------- ;
 ; --- State Restricted                                --- ;

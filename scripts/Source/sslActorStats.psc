@@ -1,4 +1,7 @@
-scriptname sslActorStats extends sslSystemLibrary
+scriptname sslActorStats extends sslActorLibrary
+
+import StorageUtil
+import sslUtility
 
 ; Titles
 string[] StatTitles
@@ -12,15 +15,15 @@ string[] LewdTitlesFemale
 ; ------------------------------------------------------- ;
 
 int function FindStat(string Stat)
-	return StorageUtil.StringListFind(self, "Custom", Stat)
+	return StringListFind(Storage, "Custom", Stat)
 endFunction
 
 int function RegisterStat(string Stat, string Value, string Prepend = "", string Append = "")
 	if FindStat(Stat) == -1
-		StorageUtil.StringListAdd(self, "Custom", Stat, false)
-		StorageUtil.SetStringValue(self, "Custom.Default."+Stat, Value)
-		StorageUtil.SetStringValue(self, "Custom.Prepend."+Stat, Prepend)
-		StorageUtil.SetStringValue(self, "Custom.Append."+Stat, Append)
+		StringListAdd(Storage, "Custom", Stat, false)
+		SetStringValue(Storage, "Custom.Default."+Stat, Value)
+		SetStringValue(Storage, "Custom.Prepend."+Stat, Prepend)
+		SetStringValue(Storage, "Custom.Append."+Stat, Append)
 		SetStat(PlayerRef, Stat, Value)
 	endIf
 	return FindStat(Stat)
@@ -30,23 +33,23 @@ function Alter(string Name, string NewName = "", string Value = "", string Prepe
 	int i = FindStat(Name)
 	if i != -1
 		if NewName != ""
-			StorageUtil.StringListSet(self, "Custom", i, NewName)
-			StorageUtil.SetStringValue(self, "Custom.Default."+NewName, StorageUtil.GetStringValue(self, "Custom.Default."+Name))
-			StorageUtil.SetStringValue(self, "Custom.Prepend."+NewName, StorageUtil.GetStringValue(self, "Custom.Prepend."+Name))
-			StorageUtil.SetStringValue(self, "Custom.Append."+NewName, StorageUtil.GetStringValue(self, "Custom.Append."+Name))
-			StorageUtil.UnsetStringValue(self, "Custom.Default."+Name)
-			StorageUtil.UnsetStringValue(self, "Custom.Prepend."+Name)
-			StorageUtil.UnsetStringValue(self, "Custom.Append."+Name)
+			StringListSet(Storage, "Custom", i, NewName)
+			SetStringValue(Storage, "Custom.Default."+NewName, GetStringValue(Storage, "Custom.Default."+Name))
+			SetStringValue(Storage, "Custom.Prepend."+NewName, GetStringValue(Storage, "Custom.Prepend."+Name))
+			SetStringValue(Storage, "Custom.Append."+NewName, GetStringValue(Storage, "Custom.Append."+Name))
+			UnsetStringValue(Storage, "Custom.Default."+Name)
+			UnsetStringValue(Storage, "Custom.Prepend."+Name)
+			UnsetStringValue(Storage, "Custom.Append."+Name)
 			Name = NewName
 		endIf
 		if Value != ""
-			StorageUtil.SetStringValue(self, "Custom.Default."+Name, Value)
+			SetStringValue(Storage, "Custom.Default."+Name, Value)
 		endIf
 		if Prepend != ""
-			StorageUtil.SetStringValue(self, "Custom.Prepend."+Name, Prepend)
+			SetStringValue(Storage, "Custom.Prepend."+Name, Prepend)
 		endIf
 		if Append != ""
-			StorageUtil.SetStringValue(self, "Custom.Append."+Name, Append)
+			SetStringValue(Storage, "Custom.Append."+Name, Append)
 		endIf
 	endIf
 endFunction
@@ -103,19 +106,19 @@ int function GetStatLevel(Actor ActorRef, string Stat, float Curve = 0.85)
 endFunction
 
 string function GetStatTitle(Actor ActorRef, string Stat, float Curve = 0.85)
-	return StatTitles[sslUtility.ClampInt(CalcLevel(GetStatFloat(ActorRef, Stat), Curve), 0, 6)]
+	return StatTitles[ClampInt(CalcLevel(GetStatFloat(ActorRef, Stat), Curve), 0, 6)]
 endFunction
 
 string function GetStatDefault(string Stat)
-	return StorageUtil.GetStringValue(self, "Custom.Default."+Stat, "0")
+	return GetStringValue(Storage, "Custom.Default."+Stat, "0")
 endFunction
 
 string function GetStatPrepend(string Stat)
-	return StorageUtil.GetStringValue(self, "Custom.Prepend."+Stat, "")
+	return GetStringValue(Storage, "Custom.Prepend."+Stat, "")
 endFunction
 
 string function GetStatAppend(string Stat)
-	return StorageUtil.GetStringValue(self, "Custom.Append."+Stat, "")
+	return GetStringValue(Storage, "Custom.Append."+Stat, "")
 endFunction
 
 string function GetStatFull(Actor ActorRef, string Stat)
@@ -157,84 +160,138 @@ endFunction
 ; --- Sex Skills                                      --- ;
 ; ------------------------------------------------------- ;
 
-int function GetSkill(Actor ActorRef, string Skill)
-	; Seed for NPC native skills
-	if ActorRef != PlayerRef && !HasInt(ActorRef, Skill) && !CreatureSlots.HasRace(ActorRef.GetLeveledActorBase().GetRace())
-		float Seed
-		if Skill == "Vaginal" || Skill == "Anal" || Skill == "Oral" || Skill == "Foreplay"
-			Seed  = Utility.RandomFloat(0.0, (ActorRef.GetLevel() as float) * 2.5) * Utility.RandomFloat(0.5, 2.5)
-			Seed  = sslUtility.ClampFloat(Seed, 0.0, 80.0)
-			Seed += (ActorRef.GetActorValue("Speechcraft") / 2.0) * ((ActorRef.GetActorValue("Confidence") + 0.5) / 1.5)
-		elseIf Skill == "Males" || Skill == "Females"
-			bool IsFemale = ActorLib.GetGender(ActorRef) == 1
-			Seed = Utility.RandomFloat(0.0, (ActorRef.GetLevel() as float) / 2.0)
-			; Same sex count
-			if ((IsFemale && Skill == "Females") || (!IsFemale && Skill == "Males"))
-				if Utility.RandomInt(0, 4) < 2
-					SetInt(ActorRef, Skill, 0)
-					return 0 ; 40% chance to have never had
-				endIf
-				Seed += (Math.Abs(ActorRef.GetLowestRelationshipRank() as float) + 1.0)
-				Seed *= Math.Sqrt((ActorRef.GetActorValue("Energy") + 1.0) / 3.0)
-			else
-				Seed += (Math.Abs(ActorRef.GetHighestRelationshipRank() as float) + 1.0) + Seed
-				Seed *= Math.Sqrt(((ActorRef.GetActorValue("Energy") + 1.0) / 3.0) + (ActorRef.GetActorValue("Assistance") * 1.5) + 1.0)
-			endIf
-			; Cowardly - less likely to have had partners
-			if ActorRef.GetActorValue("Confidence") == 0.0
-				Seed = Seed / 2.0
-			endIf
-			; Very aggressive / frenzied - make more likely to have had more
-			if ActorRef.GetActorValue("Aggression") > 1.0
-				Seed *= 1.25
-			endIf
-		elseIf Skill == "Pure" || Skill == "Lewd"
-			; Get relevant-ish AI data
-			float Aggression = ActorRef.GetActorValue("Aggression")
-			float Morality = ActorRef.GetActorValue("Morality")
-			float Assistance = ActorRef.GetActorValue("Assistance")
-			; Seed Pure
-			float Pure = (Morality * 1.25) - (Aggression * 0.5)
-			Pure +=  1.0 * Math.Abs(ActorRef.GetHighestRelationshipRank())
-			Pure += -1.5 * ((Morality == 0.0) as float)
-			Pure +=  3.0 * ((Morality == 3.0) as float)
-			Pure +=  2.5 * ((Aggression == 0 && Morality != 0) as float)
-			Pure += -1.5 * ((Assistance == 0.0) as float)
-			Pure +=  2.0 * ((Assistance == 2.0) as float)
-			Pure +=  1.2 * ((Assistance == 2.0 && Morality == 0.0) as float)
-			; Seed Lewd
-			float Lewd = (Aggression * 2.0)
-			Lewd +=  1.0 * Math.Abs(ActorRef.GetLowestRelationshipRank())
-			Lewd +=  1.8 * ((ActorRef.GetLowestRelationshipRank() < 0) as float)
-			Lewd +=  2.0 * ((Morality == 0.0) as float)
-			Lewd += -1.5 * ((Morality == 3.0) as float)
-			Lewd +=  2.2 * ((Assistance == 0.0) as float)
-			Lewd += -1.5 * ((Assistance == 2.0) as float)
-			Lewd +=  3.0 * ((Morality == 0.0 && Aggression > 1.0) as float)
-			; If one is signed, add it to it's oppoiste and get a random amount to avoid having none
-			if Pure < 0.0
-				Lewd += Math.Abs(Pure)
-				Pure = Utility.RandomFloat(0.0, Math.Abs(Pure))
-			endIf
-			if Lewd < 0.0
-				Pure += Math.Abs(Lewd)
-				Lewd = Utility.RandomFloat(0.0, Math.Abs(Lewd))
-			endIf
-			; Curved increase with actor level and slight randomness
-			float Curve = Math.Abs(Math.Sqrt(((Math.Pow(ActorRef.GetLevel() as float, 2.0)) / 2.0 ) * (8.5 + Utility.RandomFloat(-1.0, 1.8))))
-			Pure = Math.Abs(Pure * Curve)
-			Lewd = Math.Abs(Lewd * Curve)
-			; Save Purity stats
-			SetInt(ActorRef, "Pure", Pure as int)
-			SetInt(ActorRef, "Lewd", Lewd as int)
-			if Skill == "Pure"
-				return Pure as int
-			else
-				return Lewd as int
-			endIf
+function SeedActor(Actor ActorRef)
+	if ActorRef == PlayerRef || !ActorRef.HasKeyword(ActorTypeNPC)
+		return
+	endIf
+	bool HasVaginal  = HasInt(ActorRef, "Vaginal")
+	bool HasAnal     = HasInt(ActorRef, "Anal")
+	bool HasOral     = HasInt(ActorRef, "Oral")
+	bool HasForeplay = HasInt(ActorRef, "Foreplay")
+	bool HasMales    = HasInt(ActorRef, "Males")
+	bool HasFemales  = HasInt(ActorRef, "Females")
+	bool HasPurity   = HasInt(ActorRef, "Pure") && HasInt(ActorRef, "Lewd")
+	if !HasVaginal || !HasAnal || !HasOral || !HasForeplay || !HasMales || !HasFemales || !HasPurity
+		bool IsFemale     = GetGender(ActorRef) == 1
+		float Level       = ActorRef.GetLevel() as float
+		float Energy      = ActorRef.GetActorValue("Energy")
+		float Assistance  = ActorRef.GetActorValue("Assistance")
+		float Aggression  = ActorRef.GetActorValue("Aggression")
+		float Confidence  = ActorRef.GetActorValue("Confidence")
+		float Morality    = ActorRef.GetActorValue("Morality")
+		float Speechcraft = ActorRef.GetActorValue("Speechcraft")
+
+		MiscUtil.PrintConsole(ActorRef.GetLeveledActorBase().GetName()+": IsFemale: "+IsFemale+", Level: "+Level+", Energy: "+Energy+", Assistance: "+Assistance+", Aggression: "+Aggression+", Confidence: "+Confidence+", Morality: "+Morality+", Speechcraft: "+Speechcraft)
+		Debug.Trace(ActorRef.GetLeveledActorBase().GetName()+": IsFemale: "+IsFemale+", Level: "+Level+", Energy: "+Energy+", Assistance: "+Assistance+", Aggression: "+Aggression+", Confidence: "+Confidence+", Morality: "+Morality+", Speechcraft: "+Speechcraft)
+
+		if !HasVaginal
+			SeedSkill(ActorRef, "Vaginal", IsFemale, Level, Energy, Assistance, Aggression, Confidence, Morality, Speechcraft)
 		endIf
+		if !HasAnal
+			SeedSkill(ActorRef, "Anal", IsFemale, Level, Energy, Assistance, Aggression, Confidence, Morality, Speechcraft)
+		endIf
+		if !HasOral
+			SeedSkill(ActorRef, "Oral", IsFemale, Level, Energy, Assistance, Aggression, Confidence, Morality, Speechcraft)
+		endIf
+		if !HasForeplay
+			SeedSkill(ActorRef, "Foreplay", IsFemale, Level, Energy, Assistance, Aggression, Confidence, Morality, Speechcraft)
+		endIf
+		if !HasMales
+			SeedSkill(ActorRef, "Males", IsFemale, Level, Energy, Assistance, Aggression, Confidence, Morality, Speechcraft)
+		endIf
+		if !HasFemales
+			SeedSkill(ActorRef, "Females", IsFemale, Level, Energy, Assistance, Aggression, Confidence, Morality, Speechcraft)
+		endIf
+		if !HasPurity
+			SeedSkill(ActorRef, "Purity", IsFemale, Level, Energy, Assistance, Aggression, Confidence, Morality, Speechcraft)
+		endIf
+	endIf
+endFunction
+
+function SeedSkill(Actor ActorRef, string Skill, bool IsFemale, float Level, float Energy, float Assistance, float Aggression, float Confidence, float Morality, float Speechcraft)
+	if ActorRef == PlayerRef || HasInt(ActorRef, Skill)
+		return
+	endIf
+
+	; Sex skills
+	if Skill == "Vaginal" || Skill == "Anal" || Skill == "Oral" || Skill == "Foreplay"
+		float Seed  = Utility.RandomFloat(0.0, ((Level * 2.5) * Utility.RandomFloat(0.5, 2.5)))
+		Seed  = ClampFloat(Seed, 0.0, 80.0)
+		Seed += (Speechcraft / 2.0) * ((Confidence + 0.5) / 1.5)
+
 		SetInt(ActorRef, Skill, Seed as int)
-		return Seed as int
+
+	; Sexuality
+	elseIf Skill == "Males" || Skill == "Females"
+		float Seed = Utility.RandomFloat(0.0, Level / 2.0)
+		; Same sex count
+		if ((IsFemale && Skill == "Females") || (!IsFemale && Skill == "Males"))
+			if Utility.RandomInt(0, 4) < 2
+				SetInt(ActorRef, Skill, 0)
+				return ; 40% chance to have never had
+			endIf
+			Seed += (Math.Abs(ActorRef.GetLowestRelationshipRank() as float) + 1.0)
+			Seed *= Math.Sqrt((Energy + 1.0) / 3.0)
+		else
+			Seed += (Math.Abs(ActorRef.GetHighestRelationshipRank() as float) + 1.0) + Seed
+			Seed *= Math.Sqrt(((Energy + 1.0) / 3.0) + (Assistance * 1.5) + 1.0)
+		endIf
+		; Cowardly - less likely to have had partners
+		if Confidence == 0.0
+			Seed = Seed / 2.0
+		endIf
+		; Very aggressive / frenzied - make more likely to have had more
+		if Aggression > 1.0
+			Seed *= 1.25
+		endIf
+
+		SetInt(ActorRef, Skill, Seed as int)
+
+	; Purity stats
+	elseIf Skill == "Purity" || Skill == "Pure" || Skill == "Lewd"
+		; Seed Pure
+		float Pure = (Morality * 1.25) - (Aggression * 0.5)
+		Pure +=  1.0 * Math.Abs(ActorRef.GetHighestRelationshipRank())
+		Pure += -1.5 * ((Morality == 0.0) as float)
+		Pure +=  3.0 * ((Morality == 3.0) as float)
+		Pure +=  2.5 * ((Aggression == 0 && Morality != 0) as float)
+		Pure += -1.5 * ((Assistance == 0.0) as float)
+		Pure +=  2.0 * ((Assistance == 2.0) as float)
+		Pure +=  1.2 * ((Assistance == 2.0 && Morality == 0.0) as float)
+		; Seed Lewd
+		float Lewd = (Aggression * 2.0)
+		Lewd +=  1.0 * Math.Abs(ActorRef.GetLowestRelationshipRank())
+		Lewd +=  1.8 * ((ActorRef.GetLowestRelationshipRank() < 0) as float)
+		Lewd +=  2.0 * ((Morality == 0.0) as float)
+		Lewd += -1.5 * ((Morality == 3.0) as float)
+		Lewd +=  2.2 * ((Assistance == 0.0) as float)
+		Lewd += -1.5 * ((Assistance == 2.0) as float)
+		Lewd +=  3.0 * ((Morality == 0.0 && Aggression > 1.0) as float)
+		; If one is signed, add it to it's oppoiste and get a random amount to avoid having none
+		if Pure < 0.0
+			Lewd += Math.Abs(Pure)
+			Pure = Utility.RandomFloat(0.0, Math.Abs(Pure))
+		endIf
+		if Lewd < 0.0
+			Pure += Math.Abs(Lewd)
+			Lewd = Utility.RandomFloat(0.0, Math.Abs(Lewd))
+		endIf
+		; Curved increase with actor level and slight randomness
+		float Curve = Math.Abs(Math.Sqrt(((Math.Pow(ActorRef.GetLevel() as float, 2.0)) / 2.0 ) * (8.5 + Utility.RandomFloat(-1.0, 1.8))))
+		Pure = Math.Abs(Pure * Curve)
+		Lewd = Math.Abs(Lewd * Curve)
+
+		; Save Purity stats
+		SetInt(ActorRef, "Pure", Pure as int)
+		SetInt(ActorRef, "Lewd", Lewd as int)
+
+	endIf
+
+endFunction
+
+int function GetSkill(Actor ActorRef, string Skill)
+	if ActorRef != PlayerRef && !HasInt(ActorRef, Skill) && ActorRef.HasKeyword(ActorTypeNPC)
+		SeedSkill(ActorRef, Skill, GetGender(ActorRef) == 1, ActorRef.GetLevel(), ActorRef.GetActorValue("Energy"), ActorRef.GetActorValue("Assistance"), ActorRef.GetActorValue("Aggression"), ActorRef.GetActorValue("Confidence"), ActorRef.GetActorValue("Morality"), ActorRef.GetActorValue("Speechcraft"))
 	endIf
 	return GetInt(ActorRef, Skill)
 endFunction
@@ -250,7 +307,7 @@ int function GetSkillLevel(Actor ActorRef, string Skill, float Curve = 0.85)
 endFunction
 
 string function GetSkillTitle(Actor ActorRef, string Skill, float Curve = 0.85)
-	return StatTitles[sslUtility.ClampInt(GetSkillLevel(ActorRef, Skill, Curve), 0, 6)]
+	return StatTitles[ClampInt(GetSkillLevel(ActorRef, Skill, Curve), 0, 6)]
 endFunction
 
 ; float function GetProficiencyLevel(Actor ActorRef, string Skill, float Increments = 21.0)
@@ -258,11 +315,11 @@ endFunction
 ; endFunction
 ;
 ; string function GetProficiencyTitle(Actor ActorRef, string Skill, float Increments = 21.0)
-	; return StatTitles[sslUtility.ClampInt((GetProficiencyLevel(ActorRef, Skill, Increments) as int), 0, 6)]
+	; return StatTitles[ClampInt((GetProficiencyLevel(ActorRef, Skill, Increments) as int), 0, 6)]
 ; endFunction
 
 string function GetTitle(int Level)
-	return StatTitles[sslUtility.ClampInt(Level, 0, 6)]
+	return StatTitles[ClampInt(Level, 0, 6)]
 endFunction
 
 float[] function GetSkills(Actor ActorRef)
@@ -308,9 +365,9 @@ endFunction
 
 string function GetPureTitle(Actor ActorRef)
 	if ActorRef.GetLeveledActorBase().GetSex() == 1
-		return PureTitlesFemale[sslUtility.ClampInt(GetPureLevel(ActorRef), 0, 6)]
+		return PureTitlesFemale[ClampInt(GetPureLevel(ActorRef), 0, 6)]
 	else
-		return PureTitlesMale[sslUtility.ClampInt(GetPureLevel(ActorRef), 0, 6)]
+		return PureTitlesMale[ClampInt(GetPureLevel(ActorRef), 0, 6)]
 	endIf
 endFunction
 
@@ -324,9 +381,9 @@ endFunction
 
 string function GetLewdTitle(Actor ActorRef)
 	if ActorRef.GetLeveledActorBase().GetSex() == 1
-		return LewdTitlesFemale[sslUtility.ClampInt(GetLewdLevel(ActorRef), 0, 6)]
+		return LewdTitlesFemale[ClampInt(GetLewdLevel(ActorRef), 0, 6)]
 	else
-		return LewdTitlesMale[sslUtility.ClampInt(GetLewdLevel(ActorRef), 0, 6)]
+		return LewdTitlesMale[ClampInt(GetLewdLevel(ActorRef), 0, 6)]
 	endIf
 endFunction
 
@@ -395,8 +452,8 @@ function AddPurityXP(Actor ActorRef, float Pure, float Lewd, bool IsAggressive, 
 		Lewd += 2.0
 	endIf
 	; Save adjustments
-	AdjustSkill(ActorRef, "Pure", sslUtility.ClampInt(Pure as int, 0, 20))
-	AdjustSkill(ActorRef, "Lewd", sslUtility.ClampInt(Lewd as int, 0, 20))
+	AdjustSkill(ActorRef, "Pure", ClampInt(Pure as int, 0, 20))
+	AdjustSkill(ActorRef, "Lewd", ClampInt(Lewd as int, 0, 20))
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -410,7 +467,7 @@ function AddSex(Actor ActorRef, float TimeSpent = 0.0, bool WithPlayer = false, 
 
 	int ActorCount = (Males + Females + Creatures)
 	if ActorCount > 1
-		int Gender = Actorlib.GetGender(ActorRef)
+		int Gender = GetGender(ActorRef)
 		Males -= (Gender == 0) as int
 		Females -= (Gender == 1) as int
 		AdjustInt(ActorRef, "Males", Males)
@@ -422,7 +479,7 @@ function AddSex(Actor ActorRef, float TimeSpent = 0.0, bool WithPlayer = false, 
 	endIf
 	if WithPlayer && ActorRef != PlayerRef
 		AdjustInt(ActorRef, "PlayerSex", 1)
-		StorageUtil.FormListAdd(PlayerRef, "SexPartners", ActorRef, false)
+		FormListAdd(PlayerRef, "SexPartners", ActorRef, false)
 	endIf
 endFunction
 
@@ -447,11 +504,11 @@ endFunction
 ; ------------------------------------------------------- ;
 
 int function GetSexuality(Actor ActorRef)
-	return CalcSexuality((ActorLib.GetGender(ActorRef) == 1), GetSkill(ActorRef, "Males"), GetSkill(ActorRef, "Females"))
+	return CalcSexuality((GetGender(ActorRef) == 1), GetSkill(ActorRef, "Males"), GetSkill(ActorRef, "Females"))
 endFunction
 
 string function GetSexualityTitle(Actor ActorRef)
-	bool IsFemale = ActorLib.GetGender(ActorRef) == 1
+	bool IsFemale = GetGender(ActorRef) == 1
 	int ratio = CalcSexuality(IsFemale, GetSkill(ActorRef, "Males"), GetSkill(ActorRef, "Females"))
 	; Return sexuality title
 	if ratio >= 65
@@ -477,7 +534,6 @@ endFunction
 bool function IsGay(Actor ActorRef)
 	return GetSexuality(ActorRef) <= 35
 endFunction
-
 
 ; ------------------------------------------------------- ;
 ; --- Time Based Stats                                --- ;
@@ -561,23 +617,25 @@ function ResetActor(Actor ActorRef)
 	ClearFloat(ActorRef, "TimeSpent")
 	ClearFloat(ActorRef, "Purity")
 	; Custom stats
-	int i = StorageUtil.StringListCount(self, "Custom")
+	int i = StringListCount(Storage, "Custom")
 	while i
 		i -= 1
-		ClearStr(ActorRef, "Custom."+StorageUtil.StringListGet(self, "Custom", i))
+		ClearStr(ActorRef, "Custom."+StringListGet(Storage, "Custom", i))
 	endWhile
 	; Clear Partners
 	if ActorRef == PlayerRef
-		i = Storageutil.FormListCount(ActorRef, "SexPartners")
+		i = FormListCount(ActorRef, "SexPartners")
 		while i
 			i -= 1
-			ClearInt((StorageUtil.FormListGet(ActorRef, "SexPartners", i) as Actor), "PlayerSex")
+			ClearInt((FormListGet(ActorRef, "SexPartners", i) as Actor), "PlayerSex")
 		endWhile
 	endIf
-	StorageUtil.FormListClear(ActorRef, "SexPartners")
+	FormListClear(ActorRef, "SexPartners")
 endFunction
 
 function Setup()
+	parent.Setup()
+
 	StatTitles = new string[7]
 	StatTitles[0] = "$SSL_Unskilled"
 	StatTitles[1] = "$SSL_Novice"
@@ -623,57 +681,56 @@ function Setup()
 	LewdTitlesFemale[5] = "$SSL_Debaucherous"
 	LewdTitlesFemale[6] = "$SSL_Nymphomaniac"
 
-	parent.Setup()
 endFunction
 
 bool function HasInt(Actor ActorRef, string Stat)
-	return StorageUtil.HasIntValue(ActorRef, "sslActorStats."+Stat)
+	return HasIntValue(ActorRef, "sslActorStats."+Stat)
 endFunction
 bool function HasFloat(Actor ActorRef, string Stat)
-	return StorageUtil.HasFloatValue(ActorRef, "sslActorStats."+Stat)
+	return HasFloatValue(ActorRef, "sslActorStats."+Stat)
 endFunction
 bool function HasStr(Actor ActorRef, string Stat)
-	return StorageUtil.HasStringValue(ActorRef, "sslActorStats."+Stat)
+	return HasStringValue(ActorRef, "sslActorStats."+Stat)
 endFunction
 
 int function GetInt(Actor ActorRef, string Stat)
-	return StorageUtil.GetIntValue(ActorRef, "sslActorStats."+Stat)
+	return GetIntValue(ActorRef, "sslActorStats."+Stat)
 endFunction
 float function GetFloat(Actor ActorRef, string Stat)
-	return StorageUtil.GetFloatValue(ActorRef, "sslActorStats."+Stat)
+	return GetFloatValue(ActorRef, "sslActorStats."+Stat)
 endFunction
 string function GetStr(Actor ActorRef, string Stat)
-	return StorageUtil.GetStringValue(ActorRef, "sslActorStats."+Stat)
+	return GetStringValue(ActorRef, "sslActorStats."+Stat)
 endFunction
 
 function ClearInt(Actor ActorRef, string Stat)
-	StorageUtil.UnsetIntValue(ActorRef, "sslActorStats."+Stat)
+	UnsetIntValue(ActorRef, "sslActorStats."+Stat)
 endFunction
 function ClearFloat(Actor ActorRef, string Stat)
-	StorageUtil.UnsetFloatValue(ActorRef, "sslActorStats."+Stat)
+	UnsetFloatValue(ActorRef, "sslActorStats."+Stat)
 endFunction
 function ClearStr(Actor ActorRef, string Stat)
-	StorageUtil.UnsetStringValue(ActorRef, "sslActorStats."+Stat)
+	UnsetStringValue(ActorRef, "sslActorStats."+Stat)
 endFunction
 
 function SetInt(Actor ActorRef, string Stat, int Value)
-	StorageUtil.SetIntValue(ActorRef, "sslActorStats."+Stat, Value)
+	SetIntValue(ActorRef, "sslActorStats."+Stat, Value)
 endFunction
 function SetFloat(Actor ActorRef, string Stat, float Value)
-	StorageUtil.SetFloatValue(ActorRef, "sslActorStats."+Stat, Value)
+	SetFloatValue(ActorRef, "sslActorStats."+Stat, Value)
 endFunction
 function SetStr(Actor ActorRef, string Stat, string Value)
-	StorageUtil.SetStringValue(ActorRef, "sslActorStats."+Stat, Value)
+	SetStringValue(ActorRef, "sslActorStats."+Stat, Value)
 endFunction
 
 function AdjustInt(Actor ActorRef, string Stat, int Amount)
 	if Amount != 0
-		StorageUtil.SetIntValue(ActorRef, "sslActorStats."+Stat, (StorageUtil.GetIntValue(ActorRef, "sslActorStats."+Stat) + Amount))
+		SetIntValue(ActorRef, "sslActorStats."+Stat, (GetIntValue(ActorRef, "sslActorStats."+Stat) + Amount))
 	endIF
 endFunction
 function AdjustFloat(Actor ActorRef, string Stat, float Amount)
 	if Amount != 0.0
-		StorageUtil.SetFloatValue(ActorRef, "sslActorStats."+Stat, (StorageUtil.GetFloatValue(ActorRef, "sslActorStats."+Stat) + Amount))
+		SetFloatValue(ActorRef, "sslActorStats."+Stat, (GetFloatValue(ActorRef, "sslActorStats."+Stat) + Amount))
 	endIf
 endFunction
 

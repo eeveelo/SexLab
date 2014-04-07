@@ -13,11 +13,19 @@ float scale1
 float scale2
 
 string ActorName
+ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	; (Quest.GetQuest("SexLabDev") as sslBenchmark).StartBenchmark(2, 10, 5)
+	Utility.Wait(0.5)
 
+	LockActor(TargetRef)
+	MarkerRef = TargetRef.PlaceAtMe(SexLab.ActorLib.BaseMarker)
+	MarkerRef.MoveTo(TargetRef)
+	MarkerRef.Activate(TargetRef)
+	TargetRef.SetVehicle(MarkerRef)
+
+	Utility.Wait(6.0)
 	Dispel()
 endEvent
 
@@ -26,6 +34,10 @@ event OnUpdate()
 endEvent
 
 event OnEffectFinish(Actor TargetRef, Actor CasterRef)
+	Debug.Notification("End")
+	TargetRef.SetVehicle(none)
+	MarkerRef.Disable()
+	MarkerRef.Delete()
 	; Log("Debug effect spell expired("+TargetRef+", "+CasterRef+")")
 endEvent
 

@@ -11,7 +11,7 @@ sslThreadModel function PickModel(float TimeOut = 30.0)
 	int i
 	while i < Slots.Length
 		if !Slots[i].IsLocked
-			return Slots[i].Make(TimeOut)
+			return Slots[i].Make()
 		endIf
 		i += 1
 	endWhile
@@ -67,7 +67,7 @@ function Setup()
 		Slots[i].ThreadInit(i)
 	endWhile
 	Debug.Trace("SexLab Threads: "+Slots)
-	StorageUtil.FormListClear(none, "SexLab.ActiveActors")
+	StorageUtil.FormListClear(none, "SexLabActors")
 	GoToState("")
 endFunction
 

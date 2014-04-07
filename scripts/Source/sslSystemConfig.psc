@@ -3,7 +3,7 @@ scriptname sslSystemConfig extends sslSystemLibrary
 import StorageUtil
 
 ; ------------------------------------------------------- ;
-; --- Config Resources                                --- ;
+; --- System Resources                                --- ;
 ; ------------------------------------------------------- ;
 
 SexLabFramework property SexLab auto
@@ -20,6 +20,49 @@ bool property Enabled hidden
 		return SexLab.Enabled
 	endFunction
 endProperty
+
+Faction property AnimatingFaction auto
+Faction property GenderFaction auto
+Faction property ForbiddenFaction auto
+Weapon property DummyWeapon auto
+Armor property NudeSuit auto
+form[] property Strapons auto hidden
+
+Spell property CumVaginalOralAnalSpell auto
+Spell property CumOralAnalSpell auto
+Spell property CumVaginalOralSpell auto
+Spell property CumVaginalAnalSpell auto
+Spell property CumVaginalSpell auto
+Spell property CumOralSpell auto
+Spell property CumAnalSpell auto
+
+Keyword property CumOralKeyword auto
+Keyword property CumAnalKeyword auto
+Keyword property CumVaginalKeyword auto
+Keyword property ActorTypeNPC auto
+
+; FormList property ValidActorList auto
+; FormList property NoStripList auto
+; FormList property StripList auto
+
+Furniture property BaseMarker auto
+Package property DoNothing auto
+
+Sound property OrgasmFX auto
+Sound property SquishingFX auto
+Sound property SuckingFX auto
+Sound property SexMixedFX auto
+
+Static property LocationMarker auto
+FormList property BedsList auto
+FormList property BedRollsList auto
+Message property CheckFNIS auto
+Message property UseBed auto
+
+Topic property LipSync auto
+VoiceType property SexLabVoiceM auto
+VoiceType property SexLabVoiceF auto
+FormList property VoicesPlayer auto
 
 ; ------------------------------------------------------- ;
 ; --- Config Properties                               --- ;
@@ -219,6 +262,61 @@ function HotkeyCallback(sslThreadController Thread, int keyCode)
 		Thread.EndAnimation(true)
 
 	endIf
+endFunction
+
+; ------------------------------------------------------- ;
+; --- Strapon Functions                               --- ;
+; ------------------------------------------------------- ;
+
+form function WornStrapon(Actor ActorRef)
+	int i = Strapons.Length
+	while i
+		i -= 1
+		if ActorRef.IsEquipped(Strapons[i])
+			return Strapons[i]
+		endIf
+	endWhile
+	return none
+endFunction
+
+bool function HasStrapon(Actor ActorRef)
+	return WornStrapon(ActorRef) != none
+endFunction
+
+form function PickStrapon(Actor ActorRef)
+	form Strapon = WornStrapon(ActorRef)
+	if Strapon != none
+		return Strapon
+	endIf
+	return Config.Strapons[Utility.RandomInt(0, Config.Strapons.Length - 1)]
+endFunction
+
+form function EquipStrapon(Actor ActorRef)
+	form Strapon = PickStrapon(ActorRef)
+	if Strapon != none
+		ActorRef.AddItem(Strapon, 1, true)
+		ActorRef.EquipItem(Strapon, false, true)
+	endIf
+	return Strapon
+endFunction
+
+function UnequipStrapon(Actor ActorRef)
+	int i = Strapons.Length
+	while i
+		i -= 1
+		if ActorRef.IsEquipped(Strapons[i])
+			ActorRef.UnequipItem(Strapons[i], false, true)
+			ActorRef.RemoveItem(Strapons[i], 1, true)
+		endIf
+	endWhile
+endFunction
+
+Armor function LoadStrapon(string esp, int id)
+	Armor Strapon = Game.GetFormFromFile(id, esp) as Armor
+	if Strapon != none
+		Strapons = sslUtility.PushForm(Strapon, Strapons)
+	endif
+	return Strapon
 endFunction
 
 ; ------------------------------------------------------- ;

@@ -257,7 +257,6 @@ int function CountTrue(bool[] array) global
 	return count
 endFunction
 
-
 ;/-----------------------------------------------\;
 ;|	String Utility Functions                     |;
 ;\-----------------------------------------------/;
@@ -523,6 +522,26 @@ Actor[] function PushActor(Actor var, Actor[] array) global
 		pushed[len] = array[len]
 	endWhile
 	return pushed
+endFunction
+
+Actor[] function MakeActorArray(Actor Actor1 = none, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none) global
+	Actor[] output
+	if Actor1 != none
+		output = PushActor(Actor1, output)
+	endIf
+	if Actor2 != none
+		output = PushActor(Actor2, output)
+	endIf
+	if Actor3 != none
+		output = PushActor(Actor3, output)
+	endIf
+	if Actor4 != none
+		output = PushActor(Actor4, output)
+	endIf
+	if Actor5 != none
+		output = PushActor(Actor5, output)
+	endIf
+	return output
 endFunction
 
 ;##############################################

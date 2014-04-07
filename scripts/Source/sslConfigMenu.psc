@@ -236,11 +236,6 @@ bool function CheckSystem()
 		CheckPapyrusUtil.Show(1.9)
 		return false
 	endIf
-	; Check FNIS version
-	; elseIf Game.GetPlayer().GetAnimationVariableInt("FNISmajor") < 4
-	; 	CheckFNIS.Show(4.0)
-	; 	return false
-	; endIf
 	; Return result
 	return true
 endFunction
@@ -570,11 +565,11 @@ event OnPageReset(string page)
 		AddEmptyOption()
 		AddHeaderOption("$SSL_AvailableStrapons")
 		AddTextOptionST("RebuildStraponList","$SSL_RebuildStraponList", "$SSL_ClickHere")
-		i = ActorLib.Strapons.Length
+		i = Config.Strapons.Length
 		while i
 			i -= 1
-			if ActorLib.Strapons[i] != none
-				string Name = ActorLib.Strapons[i].GetName()
+			if Config.Strapons[i] != none
+				string Name = Config.Strapons[i].GetName()
 				if Name == "strapon"
 					Name = "Aeon/Horker"
 				endIf
@@ -600,7 +595,7 @@ function StripSlots(int[] OIDs, bool[] Enabled)
 endFunction
 
 event OnRaceSwitchComplete()
-	StorageUtil.FormListClear(ActorLib, "SexLab.ValidActors")
+	StorageUtil.FormListClear(SexLab, "ValidActors")
 	if Pages.Length > 0
 		if PlayerRef.GetLeveledActorBase().GetSex() == 1
 			Pages[11] = "$SSL_SexDiary"
@@ -611,34 +606,34 @@ event OnRaceSwitchComplete()
 endEvent
 
 function FindStrapons()
-	ActorLib.Strapons = new form[1]
-	ActorLib.Strapons[0] = CalypsStrapon
+	Config.Strapons = new form[1]
+	Config.Strapons[0] = CalypsStrapon
 	int i = Game.GetModCount()
 	while i
 		i -= 1
 		string Name = Game.GetModName(i)
 		if Name == "StrapOnbyaeonv1.1.esp"
-			ActorLib.LoadStrapon("StrapOnbyaeonv1.1.esp", 0x0D65)
+			Config.LoadStrapon("StrapOnbyaeonv1.1.esp", 0x0D65)
 		elseif Name == "TG.esp"
-			ActorLib.LoadStrapon("TG.esp", 0x0182B)
+			Config.LoadStrapon("TG.esp", 0x0182B)
 		elseif Name == "Futa equippable.esp"
-			ActorLib.LoadStrapon("Futa equippable.esp", 0x0D66)
-			ActorLib.LoadStrapon("Futa equippable.esp", 0x0D67)
-			ActorLib.LoadStrapon("Futa equippable.esp", 0x01D96)
-			ActorLib.LoadStrapon("Futa equippable.esp", 0x022FB)
-			ActorLib.LoadStrapon("Futa equippable.esp", 0x022FC)
-			ActorLib.LoadStrapon("Futa equippable.esp", 0x022FD)
+			Config.LoadStrapon("Futa equippable.esp", 0x0D66)
+			Config.LoadStrapon("Futa equippable.esp", 0x0D67)
+			Config.LoadStrapon("Futa equippable.esp", 0x01D96)
+			Config.LoadStrapon("Futa equippable.esp", 0x022FB)
+			Config.LoadStrapon("Futa equippable.esp", 0x022FC)
+			Config.LoadStrapon("Futa equippable.esp", 0x022FD)
 		elseif Name == "Skyrim_Strap_Ons.esp"
-			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x00D65)
-			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x02859)
-			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285A)
-			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285B)
-			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285C)
-			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285D)
-			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285E)
-			ActorLib.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285F)
+			Config.LoadStrapon("Skyrim_Strap_Ons.esp", 0x00D65)
+			Config.LoadStrapon("Skyrim_Strap_Ons.esp", 0x02859)
+			Config.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285A)
+			Config.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285B)
+			Config.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285C)
+			Config.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285D)
+			Config.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285E)
+			Config.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285F)
 		elseif Name == "SOS Equipable Schlong.esp"
-			ActorLib.LoadStrapon("SOS Equipable Schlong.esp", 0x0D62)
+			Config.LoadStrapon("SOS Equipable Schlong.esp", 0x0D62)
 		endif
 	endWhile
 endFunction

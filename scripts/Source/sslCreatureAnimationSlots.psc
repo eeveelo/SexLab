@@ -14,6 +14,10 @@ sslBaseAnimation[] function GetByRace(int ActorCount, Race CreatureRace)
 	return GetList(valid)
 endFunction
 
+bool function HasCreature(Actor ActorRef)
+	return ActorRef != PlayerRef && HasRace(ActorRef.GetLeveledActorBase().GetRace())
+endFunction
+
 bool function HasRace(Race CreatureRace)
 	return StorageUtil.GetIntValue(CreatureRace, "SexLab.HasCreature") == 1
 endFunction
