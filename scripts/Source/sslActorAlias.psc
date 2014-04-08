@@ -1,6 +1,7 @@
 scriptname sslActorAlias extends sslActorLibrary
 
 import StorageUtil
+import sslUtility
 
 ; Actor Info
 Actor property ActorRef auto hidden
@@ -192,7 +193,7 @@ state Ready
 				SkilledActor = Thread.PlayerRef
 			; If a non-creature couple, base skills off partner
 			elseIf Thread.ActorCount == 2 && !Thread.HasCreature
-				SkilledActor = Thread.Positions[sslUtility.IndexTravel(Thread.Positions.Find(ActorRef), Thread.ActorCount)]
+				SkilledActor = Thread.Positions[IndexTravel(Thread.Positions.Find(ActorRef), Thread.ActorCount)]
 			endIf
 			Skills = Stats.GetSkillLevels(SkilledActor)
 			Thread.Log(SkilledActor.GetLeveledActorBase().GetName()+" Skills: "+Skills, ActorName)
@@ -409,17 +410,14 @@ state Animating
 			XP[2] = XP[2] + (Skills[2] * 1.7) ; Anal
 			XP[3] = XP[3] + (Skills[3] * 1.7) ; Oral
 		endIf
-
 		; Purity Bonuses
 		XP[4] = XP[4] + (Skills[4] * 1.5)
 		XP[5] = XP[5] + (Skills[5] * 1.5)
-
 		; Get base totals
-		float SkillBonus  = sslUtility.ClampFloat((XP[0] + XP[1] + XP[2] + XP[3]), 0, 35.0)
-		float PurityBonus = sslUtility.ClampFloat((XP[4] + XP[5]), 0.0, 15.0)
-		float TimeBonus   = sslUtility.ClampFloat(Thread.TotalTime / 9.0, 0.0, 20.0)
+		float SkillBonus  = ClampFloat((XP[0] + XP[1] + XP[2] + XP[3]), 0, 35.0)
+		float PurityBonus = ClampFloat((XP[4] + XP[5]), 0.0, 15.0)
+		float TimeBonus   = ClampFloat(Thread.TotalTime / 9.0, 0.0, 20.0)
 		float StageBonus  = (Stage as float / Animation.StageCount as float) * 45.0
-
 		; Actor is victim/agressor
 		if Thread.IsAggressive
 			if IsVictim
@@ -430,14 +428,12 @@ state Animating
 				SkillBonus *= 0.5
 			endIf
 		endIf
-
 		; Keep leadin numbers lower
 		if Thread.LeadIn
 			SkillBonus  *= 0.5
 			TimeBonus   *= 0.8
 			StageBonus  *= 0.8
 		endIf
-
 		; Actor is outside sexuality comfort zone
 		; if IsStraight
 		; 	if (IsFemale && Thread.Females > 1) || (!IsFemale && Thread.Males > 1)
@@ -455,7 +451,7 @@ state Animating
 	endFunction
 
 	int function GetPain()
-		float Pain = Math.Abs(100.0 - sslUtility.ClampFloat(GetEnjoyment() as float, 1.0, 99.0))
+		float Pain = Math.Abs(100.0 - ClampFloat(GetEnjoyment() as float, 1.0, 99.0))
 		if IsVictim
 			return (Pain * 1.5) as int
 		endIf
@@ -635,7 +631,7 @@ function Strip()
 		Stripped = StripSlots(ActorRef, Config.GetStrip(IsFemale, Thread.LeadIn, Thread.IsAggressive, IsVictim), DoUndress)
 	endIf
 	NoUndress = true
-	Equipment = sslUtility.MergeFormArray(Stripped, Equipment)
+	Equipment = MergeFormArray(Stripped, Equipment)
 endFunction
 
 function UnStrip()
