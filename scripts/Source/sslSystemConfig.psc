@@ -26,6 +26,7 @@ Faction property GenderFaction auto
 Faction property ForbiddenFaction auto
 Weapon property DummyWeapon auto
 Armor property NudeSuit auto
+Armor property CalypsStrapon auto
 form[] property Strapons auto hidden
 
 Spell property CumVaginalOralAnalSpell auto
@@ -311,6 +312,41 @@ function UnequipStrapon(Actor ActorRef)
 	endWhile
 endFunction
 
+
+
+function FindStrapons()
+	Strapons = new form[1]
+	Strapons[0] = CalypsStrapon
+	int i = Game.GetModCount()
+	while i
+		i -= 1
+		string Name = Game.GetModName(i)
+		if Name == "StrapOnbyaeonv1.1.esp"
+			LoadStrapon("StrapOnbyaeonv1.1.esp", 0x0D65)
+		elseif Name == "TG.esp"
+			LoadStrapon("TG.esp", 0x0182B)
+		elseif Name == "Futa equippable.esp"
+			LoadStrapon("Futa equippable.esp", 0x0D66)
+			LoadStrapon("Futa equippable.esp", 0x0D67)
+			LoadStrapon("Futa equippable.esp", 0x01D96)
+			LoadStrapon("Futa equippable.esp", 0x022FB)
+			LoadStrapon("Futa equippable.esp", 0x022FC)
+			LoadStrapon("Futa equippable.esp", 0x022FD)
+		elseif Name == "Skyrim_Strap_Ons.esp"
+			LoadStrapon("Skyrim_Strap_Ons.esp", 0x00D65)
+			LoadStrapon("Skyrim_Strap_Ons.esp", 0x02859)
+			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285A)
+			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285B)
+			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285C)
+			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285D)
+			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285E)
+			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285F)
+		elseif Name == "SOS Equipable Schlong.esp"
+			LoadStrapon("SOS Equipable Schlong.esp", 0x0D62)
+		endif
+	endWhile
+endFunction
+
 Armor function LoadStrapon(string esp, int id)
 	Armor Strapon = Game.GetFormFromFile(id, esp) as Armor
 	if Strapon != none
@@ -335,6 +371,8 @@ function SetDebugMode(bool enabling)
 endFunction
 
 function SetDefaults()
+
+	FindStrapons()
 
 	SexLab = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework
 	PlayerRef = Game.GetPlayer()

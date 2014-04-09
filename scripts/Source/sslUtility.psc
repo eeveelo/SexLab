@@ -138,6 +138,33 @@ int[] function EmptyIntArray() global
 	return empty
 endFunction
 
+int[] function SliceIntArray(int[] array, int startindex = 0, int endindex = -1) global
+	int len = array.Length
+	if startindex >= len || (startindex == 0 && endindex == -1) || (endindex <= startindex && endindex != -1)
+		return array
+	elseIf endindex >= len || endindex == -1
+		endindex = len - 1
+	endIf
+	int[] output = IntArray((endindex - startindex) + 1)
+	int i = output.Length
+	while i
+		i -= 1
+		output[i] = array[endindex]
+		endindex -= 1
+	endWhile
+	return output
+endfunction
+
+int function AddValues(int[] array) global
+	int value
+	int i = array.Length
+	while i
+		i -= 1
+		value += array[i]
+	endWhile
+	return value
+endFunction
+
 int function ClampInt(int value, int min, int max) global
 	if value >= max
 		return max

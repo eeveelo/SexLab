@@ -1,6 +1,8 @@
 scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
+import sslUtility
+
 ; Proxy to SexLabUtil.psc so modders don't have to add dependency to this script, and thus SkyUI SDK
 int function GetVersion()
 	return SexLabUtil.GetVersion()
@@ -74,7 +76,6 @@ sslExpressionSlots ExpressionSlots
 
 ; Data
 Actor property PlayerRef auto
-Armor property CalypsStrapon auto
 SoundCategory property AudioSFX auto
 SoundCategory property AudioVoice auto
 
@@ -105,84 +106,110 @@ int[] oidAggrAnimation
 int[] oidForeplayAnimation
 int[] oidRemoveStrapon
 
-string[] SlotNames
+int[] oidFemaleModifiers
+int[] oidFemalePhonemes
+
+int[] oidMaleModifiers
+int[] oidMalePhonemes
+
+; Gender Types
+int property Male = 0 autoreadonly
+int property Female = 1 autoreadonly
+; MFG Types
+int property Phoneme = 0 autoreadonly
+int property Modifier = 16 autoreadonly
+int property Mood = 30 autoreadonly
+
+sslBaseExpression Expression
+int PhaseF
+int PhaseM
+
+string SubMenu
+string[] Moods
 
 bool function SetDefaults()
 	; MCM option pages
-	Pages     = new string[13]
-	Pages[0]  = "$SSL_AnimationSettings"
-	Pages[1]  = "$SSL_SoundSettings"
-	Pages[2]  = "$SSL_PlayerHotkeys"
-	Pages[3]  = "$SSL_NormalTimersStripping"
-	Pages[4]  = "$SSL_ForeplayTimersStripping"
-	Pages[5]  = "$SSL_AggressiveTimersStripping"
-	Pages[6]  = "$SSL_ToggleAnimations"
-	Pages[7]  = "$SSL_ForeplayAnimations"
-	Pages[8]  = "$SSL_AggressiveAnimations"
-	Pages[9]  = "$SSL_CreatureAnimations"
-	Pages[10] = "$SSL_ExpressionSelection"
+	Pages    = new string[10]
 	if PlayerRef.GetLeveledActorBase().GetSex() == 1
-		Pages[11] = "$SSL_SexDiary"
+		Pages[0] = "$SSL_SexDiary"
 	else
-		Pages[11] = "$SSL_SexJournal"
+		Pages[0] = "$SSL_SexJournal"
 	endIf
-	Pages[12] = "$SSL_RebuildClean"
+	Pages[1] = "$SSL_AnimationSettings"
+	Pages[2] = "$SSL_SoundSettings"
+	Pages[3] = "$SSL_PlayerHotkeys"
+	Pages[4] = "$SSL_NormalTimersStripping"
+	Pages[5] = "$SSL_ForeplayTimersStripping"
+	Pages[6] = "$SSL_AggressiveTimersStripping"
+	Pages[7] = "Expressions"
+	Pages[8] = "Animations"
+	Pages[9] = "$SSL_RebuildClean"
+
+	; Pages     = new string[13]
+	; Pages[0]  = "$SSL_AnimationSettings"
+	; Pages[1]  = "$SSL_SoundSettings"
+	; Pages[2]  = "$SSL_PlayerHotkeys"
+	; Pages[3]  = "$SSL_NormalTimersStripping"
+	; Pages[4]  = "$SSL_ForeplayTimersStripping"
+	; Pages[5]  = "$SSL_AggressiveTimersStripping"
+	; Pages[6]  = "$SSL_ToggleAnimations"
+	; Pages[7]  = "$SSL_ForeplayAnimations"
+	; Pages[8]  = "$SSL_AggressiveAnimations"
+	; Pages[9]  = "$SSL_CreatureAnimations"
+	; Pages[10] = "$SSL_ExpressionSelection"
+	; if PlayerRef.GetLeveledActorBase().GetSex() == 1
+	; 	Pages[11] = "$SSL_SexDiary"
+	; else
+	; 	Pages[11] = "$SSL_SexJournal"
+	; endIf
+	; Pages[12] = "$SSL_RebuildClean"
+
+	Moods = new string[17]
+	Moods[0]  = "Dialogue Anger"
+	Moods[1]  = "Dialogue Fear"
+	Moods[2]  = "Dialogue Happy"
+	Moods[3]  = "Dialogue Sad"
+	Moods[4]  = "Dialogue Surprise"
+	Moods[5]  = "Dialogue Puzzled"
+	Moods[6]  = "Dialogue Disgusted"
+	Moods[7]  = "Mood Neutral"
+	Moods[8]  = "Mood Anger"
+	Moods[9]  = "Mood Fear"
+	Moods[10] = "Mood Happy"
+	Moods[11] = "Mood Sad"
+	Moods[12] = "Mood Surprise"
+	Moods[13] = "Mood Puzzled"
+	Moods[14] = "Mood Disgusted"
+	Moods[15] = "Combat Anger"
+	Moods[16] = "Combat Shout"
 
 	; OIDs
-	oidToggleVoice = new int[75]
-	oidToggleCreatureAnimation = new int[75]
-	oidToggleAnimation = new int[125]
-	oidAggrAnimation = new int[125]
-	oidForeplayAnimation = new int[125]
-	oidToggleExpressionNormal = new int[40]
-	oidToggleExpressionVictim = new int[40]
-	oidToggleExpressionAggressor = new int[40]
-	oidStripMale = new int[33]
-	oidStripFemale = new int[33]
-	oidStripLeadInFemale = new int[33]
-	oidStripLeadInMale = new int[33]
-	oidStripVictim = new int[33]
-	oidStripAggressor = new int[33]
-	oidStageTimer = new int[5]
-	oidStageTimerLeadIn = new int[5]
-	oidStageTimerAggr = new int[5]
-	oidRemoveStrapon = new int[10]
+	oidToggleVoice               = new int[125]
+	oidToggleCreatureAnimation   = new int[125]
+	oidToggleAnimation           = new int[125]
+	oidAggrAnimation             = new int[125]
+	oidForeplayAnimation         = new int[125]
 
-	; Slot labels for stripping options
-	SlotNames = new string[33]
-	SlotNames[0] = "$SSL_Head"
-	SlotNames[1] = "$SSL_Hair"
-	SlotNames[2] = "$SSL_Torso"
-	SlotNames[3] = "$SSL_Hands"
-	SlotNames[4] = "$SSL_Forearms"
-	SlotNames[5] = "$SSL_Amulet"
-	SlotNames[6] = "$SSL_Ring"
-	SlotNames[7] = "$SSL_Feet"
-	SlotNames[8] = "$SSL_Calves"
-	SlotNames[9] = "$SSL_Shield"
-	SlotNames[10] = "$SSL_Tail"
-	SlotNames[11] = "$SSL_LongHair"
-	SlotNames[12] = "$SSL_Circlet"
-	SlotNames[13] = "$SSL_Ears"
-	SlotNames[14] = "$SSL_FaceMouth"
-	SlotNames[15] = "$SSL_Neck"
-	SlotNames[16] = "$SSL_Chest"
-	SlotNames[17] = "$SSL_Back"
-	SlotNames[18] = "$SSL_MiscSlot48"
-	SlotNames[19] = "$SSL_PelvisOutergarnments"
-	SlotNames[20] = "" ; decapitated head [NordRace]
-	SlotNames[21] = "" ; decapitate [NordRace]
-	SlotNames[22] = "$SSL_PelvisUndergarnments"
-	SlotNames[23] = "$SSL_LegsRightLeg"
-	SlotNames[24] = "$SSL_LegsLeftLeg"
-	SlotNames[25] = "$SSL_FaceJewelry"
-	SlotNames[26] = "$SSL_ChestUndergarnments"
-	SlotNames[27] = "$SSL_Shoulders"
-	SlotNames[28] = "$SSL_ArmsLeftArmUndergarnments"
-	SlotNames[29] = "$SSL_ArmsRightArmOutergarnments"
-	SlotNames[30] = "$SSL_MiscSlot60"
-	SlotNames[31] = "$SSL_MiscSlot61"
-	SlotNames[32] = "$SSL_Weapons"
+	oidStripMale                 = new int[33]
+	oidStripFemale               = new int[33]
+	oidStripLeadInFemale         = new int[33]
+	oidStripLeadInMale           = new int[33]
+	oidStripVictim               = new int[33]
+	oidStripAggressor            = new int[33]
+
+	oidStageTimer                = new int[5]
+	oidStageTimerLeadIn          = new int[5]
+	oidStageTimerAggr            = new int[5]
+
+	oidRemoveStrapon             = new int[20]
+
+	oidToggleExpressionNormal    = new int[40]
+	oidToggleExpressionVictim    = new int[40]
+	oidToggleExpressionAggressor = new int[40]
+	oidFemaleModifiers           = new int[14]
+	oidFemalePhonemes            = new int[16]
+	oidMaleModifiers             = new int[14]
+	oidMalePhonemes              = new int[16]
 
 	; Check system install before we continue
 	if !CheckSystem()
@@ -209,13 +236,8 @@ bool function SetDefaults()
 	Config.ToggleFreeCameraEnable()
 	AudioVoice.SetVolume(Config.fVoiceVolume)
 	AudioSFX.SetVolume(Config.fSFXVolume)
-	FindStrapons()
 
 	return true
-endFunction
-
-string function GetSlotName(int slot)
-	return SlotNames[(slot - 30)]
 endFunction
 
 bool function CheckSystem()
@@ -240,6 +262,65 @@ bool function CheckSystem()
 	return true
 endFunction
 
+; UI.InvokeStringA(JOURNAL_MENU, MENU_ROOT + ".setPageNames", Pages)
+; SetPage("", -1)
+; SetPage("Toggle Animations", 2)
+; OnPageReset("Information")
+
+function SetPages(string page)
+	if page == "Animations"
+		SubMenu  = page
+		Pages    = new string[7]
+		Pages[0] = "$Back"
+		Pages[1] = "Information"
+		Pages[2] = "Configure Animation"
+		Pages[3] = "$SSL_ToggleAnimations"
+		Pages[4] = "$SSL_ForeplayAnimations"
+		Pages[5] = "$SSL_AggressiveAnimations"
+		Pages[6] = "$SSL_CreatureAnimations"
+		OpenConfig()
+	elseIf page == "Expressions"
+		SubMenu  = page
+
+		Expression = none
+		PhaseF = 1
+		PhaseM = 1
+
+		Pages    = StringArray(ExpressionSlots.Slotted + 2)
+		Pages[0] = "$Back"
+		Pages[1] = "$SSL_ExpressionSelection"
+		int i = 2
+		while i < Pages.Length
+			Pages[i] = ExpressionSlots.Expressions[(i - 2)].Name
+			i += 1
+		endWhile
+		OpenConfig()
+	elseIf page == "$Back"
+		SubMenu = ""
+
+		Pages    = new string[10]
+		Pages[0] = "$SSL_AnimationSettings"
+		Pages[1] = "$SSL_SoundSettings"
+		Pages[2] = "$SSL_PlayerHotkeys"
+		Pages[3] = "$SSL_NormalTimersStripping"
+		Pages[4] = "$SSL_ForeplayTimersStripping"
+		Pages[5] = "$SSL_AggressiveTimersStripping"
+		Pages[6] = "Animations"
+		Pages[7] = "Expressions"
+		if PlayerRef.GetLeveledActorBase().GetSex() == 1
+			Pages[8] = "$SSL_SexDiary"
+		else
+			Pages[8] = "$SSL_SexJournal"
+		endIf
+		Pages[9] = "$SSL_RebuildClean"
+		OpenConfig()
+	endIf
+endfunction
+
+event OnConfigClose()
+	SubMenu = ""
+endEvent
+
 event OnPageReset(string page)
 	int i
 
@@ -250,8 +331,64 @@ event OnPageReset(string page)
 	endIf
 	UnloadCustomContent()
 
+	SetPages(page)
+
+	if SubMenu == "Expressions" && page != "$SSL_ExpressionSelection"
+		int slot = Pages.Find(page) - 2
+		; Expression changed
+		sslBaseExpression ToExp = ExpressionSlots.GetBySlot(slot)
+		if ToExp != none && Expression != ToExp
+			Expression = ToExp
+			PhaseF = 1
+			PhaseM = 1
+		endIf
+		; Show expression customization menu
+		if Expression != none
+			SetCursorFillMode(LEFT_TO_RIGHT)
+
+			int[] FemaleModifiers = Expression.GetModifiers(PhaseF, Female)
+			int[] FemalePhonemes  = Expression.GetPhonemes(PhaseF, Female)
+
+			int[] MaleModifiers   = Expression.GetModifiers(PhaseM, Male)
+			int[] MalePhonemes    = Expression.GetPhonemes(PhaseM, Male)
+
+			; AddToggleOptionST("ToggleExpression","$SSL_EndableExpression", Expression.Enabled)
+			; AddHeaderOption("")
+
+			AddTextOptionST("ExpressionPhaseFemale", "$SSL_Modify{$SSL_Female}Phase", PhaseF)
+			AddTextOptionST("ExpressionPhaseMale", "$SSL_Modify{$SSL_Male}Phase", PhaseM)
+
+			AddHeaderOption("$SSL_{$SSL_Female}-{$SSL_Mood}")
+			AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Mood}")
+
+			AddMenuOptionST("MoodTypeFemale", "$SSL_MoodType", Moods[Expression.GetMoodType(PhaseF, Female)])
+			AddMenuOptionST("MoodTypeMale", "$SSL_MoodType", Moods[Expression.GetMoodType(PhaseM, Male)])
+
+			AddSliderOptionST("MoodAmountFemale", "$SSL_MoodStrength", Expression.GetMoodAmount(PhaseF, Female), "{0}")
+			AddSliderOptionST("MoodAmountMale", "$SSL_MoodStrength", Expression.GetMoodAmount(PhaseM, Male), "{0}")
+
+			AddHeaderOption("$SSL_{$SSL_Female}-{$SSL_Modifier}")
+			AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Modifier}")
+			i = 0
+			while i < 14
+				oidFemaleModifiers[i] = AddSliderOption(SexLabUtil.ModifierLabel(i), FemaleModifiers[i], "{0}")
+				oidMaleModifiers[i]   = AddSliderOption(SexLabUtil.ModifierLabel(i), MaleModifiers[i], "{0}")
+				i += 1
+			endWhile
+			AddHeaderOption("$SSL_{$SSL_Female}-{$SSL_Phoneme}")
+			AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Phoneme}")
+			i = 0
+			while i < 16
+				oidFemalePhonemes[i] = AddSliderOption(SexLabUtil.PhonemeLabel(i), FemalePhonemes[i], "{0}")
+				oidMalePhonemes[i]   = AddSliderOption(SexLabUtil.PhonemeLabel(i), MalePhonemes[i], "{0}")
+				i += 1
+			endWhile
+		endIf
+	endIf
+
 	; Animation Settings
 	if page == "$SSL_AnimationSettings"
+
 		SetCursorFillMode(TOP_TO_BOTTOM)
 		AddHeaderOption("$SSL_PlayerSettings")
 		AddToggleOptionST("AutoAdvance","$SSL_AutoAdvanceStages", Config.bAutoAdvance)
@@ -284,8 +421,9 @@ event OnPageReset(string page)
 	; Sound Settings
 	elseIf page == "$SSL_SoundSettings"
 		SetCursorFillMode(LEFT_TO_RIGHT)
+
 		; Voices & SFX
-		AddTextOptionST("PlayerVoice","$SSL_PCVoice", VoiceSlots.GetSavedName(PlayerRef))
+		AddMenuOptionST("PlayerVoice","$SSL_PCVoice", VoiceSlots.GetSavedName(PlayerRef))
 		AddToggleOptionST("NPCSaveVoice","$SSL_NPCSaveVoice", Config.bNPCSaveVoice)
 		AddSliderOptionST("SFXVolume","$SSL_SFXVolume", (Config.fSFXVolume * 100), "{0}%")
 		AddSliderOptionST("VoiceVolume","$SSL_VoiceVolume", (Config.fVoiceVolume * 100), "{0}%")
@@ -415,10 +553,17 @@ event OnPageReset(string page)
 	elseIf page == "$SSL_ForeplayAnimations"
 		SetCursorFillMode(LEFT_TO_RIGHT)
 
+		int flag = 0x00
+		if !Config.bForeplayStage
+			AddHeaderOption("$SSL_ForeplayDisabled")
+			AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", Config.bForeplayStage)
+			flag = OPTION_FLAG_DISABLED
+		endIf
+
 		i = 0
 		while i < AnimSlots.Slotted
 			if AnimSlots.Slots[i].Registered
-				oidForeplayAnimation[i] = AddToggleOption(AnimSlots.Slots[i].Name, AnimSlots.Slots[i].HasTag("LeadIn"))
+				oidForeplayAnimation[i] = AddToggleOption(AnimSlots.Slots[i].Name, AnimSlots.Slots[i].HasTag("LeadIn") && flag == 0x00, flag)
 			endIf
 			i += 1
 		endWhile
@@ -439,17 +584,17 @@ event OnPageReset(string page)
 	elseIf page == "$SSL_CreatureAnimations"
 		SetCursorFillMode(LEFT_TO_RIGHT)
 
-		int flag = OPTION_FLAG_NONE
+		int flag = 0x00
 		if !Config.bAllowCreatures
 			AddHeaderOption("$SSL_CreaturesDisabled")
-			AddHeaderOption("")
+			AddToggleOptionST("AllowCreatures","$SSL_AllowCreatures", Config.bAllowCreatures)
 			flag = OPTION_FLAG_DISABLED
 		endIf
 
 		i = 0
 		while i < CreatureSlots.Slotted
 			if CreatureSlots.Slots[i].Registered
-				oidToggleCreatureAnimation[i] = AddToggleOption(CreatureSlots.Slots[i].Name, CreatureSlots.Slots[i].Enabled && flag == OPTION_FLAG_NONE, flag)
+				oidToggleCreatureAnimation[i] = AddToggleOption(CreatureSlots.Slots[i].Name, CreatureSlots.Slots[i].Enabled && flag == 0x00, flag)
 			endIf
 			i += 1
 		endWhile
@@ -458,11 +603,10 @@ event OnPageReset(string page)
 	elseIf page == "$SSL_ExpressionSelection"
 		SetCursorFillMode(LEFT_TO_RIGHT)
 
-
-		int flag = OPTION_FLAG_NONE
+		int flag = 0x00
 		if !Config.bUseExpressions
 			AddHeaderOption("$SSL_ExpressionsDisabled")
-			AddHeaderOption("")
+			AddToggleOptionST("UseExpressions","$SSL_UseExpressions", Config.bUseExpressions)
 			flag = OPTION_FLAG_DISABLED
 		endIf
 
@@ -470,8 +614,9 @@ event OnPageReset(string page)
 		AddHeaderOption("")
 		i = 0
 		while i < ExpressionSlots.Slotted
-			if ExpressionSlots.Expressions[i].Registered
-				oidToggleExpressionNormal[i] = AddToggleOption(ExpressionSlots.Expressions[i].Name, ExpressionSlots.Expressions[i].HasTag("Normal") && flag == OPTION_FLAG_NONE, flag)
+			sslBaseExpression Exp = ExpressionSlots.Expressions[i]
+			if Exp.Registered && Exp.Enabled
+				oidToggleExpressionNormal[i] = AddToggleOption(Exp.Name, Exp.HasTag("Normal") && flag == 0x00, flag)
 			endIf
 			i += 1
 		endWhile
@@ -484,8 +629,9 @@ event OnPageReset(string page)
 		AddHeaderOption("")
 		i = 0
 		while i < ExpressionSlots.Slotted
-			if ExpressionSlots.Expressions[i].Registered
-				oidToggleExpressionVictim[i] = AddToggleOption(ExpressionSlots.Expressions[i].Name, ExpressionSlots.Expressions[i].HasTag("Victim") && flag == OPTION_FLAG_NONE, flag)
+			sslBaseExpression Exp = ExpressionSlots.Expressions[i]
+			if Exp.Registered && Exp.Enabled
+				oidToggleExpressionVictim[i] = AddToggleOption(Exp.Name, Exp.HasTag("Victim") && flag == 0x00, flag)
 			endIf
 			i += 1
 		endWhile
@@ -496,10 +642,12 @@ event OnPageReset(string page)
 
 		AddHeaderOption("$SSL_ExpressionsAggressor")
 		AddHeaderOption("")
+
 		i = 0
 		while i < ExpressionSlots.Slotted
-			if ExpressionSlots.Expressions[i].Registered
-				oidToggleExpressionAggressor[i] = AddToggleOption(ExpressionSlots.Expressions[i].Name, ExpressionSlots.Expressions[i].HasTag("Aggressor") && flag == OPTION_FLAG_NONE, flag)
+			sslBaseExpression Exp = ExpressionSlots.Expressions[i]
+			if Exp.Registered && Exp.Enabled
+				oidToggleExpressionAggressor[i] = AddToggleOption(Exp.Name, Exp.HasTag("Aggressor") && flag == 0x00, flag)
 			endIf
 			i += 1
 		endWhile
@@ -584,8 +732,9 @@ function StripSlots(int[] OIDs, bool[] Enabled)
 	OIDs[32] = AddToggleOption("$SSL_Weapons", Enabled[32])
 	int i
 	while i < 32
-		if SlotNames[i] != ""
-			OIDs[i] = AddToggleOption(SlotNames[i], Enabled[i])
+		string Label = SexLabUtil.SlotLabel(i)
+		if Label != ""
+			OIDs[i] = AddToggleOption(Label, Enabled[i])
 		endIf
 		if i == 13
 			AddHeaderOption("$SSL_ExtraSlots")
@@ -605,38 +754,294 @@ event OnRaceSwitchComplete()
 	endIf
 endEvent
 
-function FindStrapons()
-	Config.Strapons = new form[1]
-	Config.Strapons[0] = CalypsStrapon
-	int i = Game.GetModCount()
-	while i
-		i -= 1
-		string Name = Game.GetModName(i)
-		if Name == "StrapOnbyaeonv1.1.esp"
-			Config.LoadStrapon("StrapOnbyaeonv1.1.esp", 0x0D65)
-		elseif Name == "TG.esp"
-			Config.LoadStrapon("TG.esp", 0x0182B)
-		elseif Name == "Futa equippable.esp"
-			Config.LoadStrapon("Futa equippable.esp", 0x0D66)
-			Config.LoadStrapon("Futa equippable.esp", 0x0D67)
-			Config.LoadStrapon("Futa equippable.esp", 0x01D96)
-			Config.LoadStrapon("Futa equippable.esp", 0x022FB)
-			Config.LoadStrapon("Futa equippable.esp", 0x022FC)
-			Config.LoadStrapon("Futa equippable.esp", 0x022FD)
-		elseif Name == "Skyrim_Strap_Ons.esp"
-			Config.LoadStrapon("Skyrim_Strap_Ons.esp", 0x00D65)
-			Config.LoadStrapon("Skyrim_Strap_Ons.esp", 0x02859)
-			Config.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285A)
-			Config.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285B)
-			Config.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285C)
-			Config.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285D)
-			Config.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285E)
-			Config.LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285F)
-		elseif Name == "SOS Equipable Schlong.esp"
-			Config.LoadStrapon("SOS Equipable Schlong.esp", 0x0D62)
-		endif
-	endWhile
-endFunction
+state ToggleExpression
+	event OnSelectST()
+		Expression.Enabled = !Expression.Enabled
+		ForcePageReset()
+	endEvent
+endState
+
+state ExpressionPhaseFemale
+	event OnSelectST()
+		PhaseF += 1
+		if PhaseF > 5
+			PhaseF = 1
+		endIf
+		SetTextOptionValueST(PhaseF)
+		ForcePageReset()
+	endEvent
+	event OnDefaultST()
+		PhaseF = 1
+		SetTextOptionValueST(1)
+	endEvent
+endState
+state MoodTypeFemale
+	event OnMenuOpenST()
+		SetMenuDialogStartIndex(Expression.GetMoodType(PhaseF, Female))
+		SetMenuDialogDefaultIndex(7)
+		SetMenuDialogOptions(Moods)
+	endEvent
+	event OnMenuAcceptST(int i)
+		Expression.SetIndex(PhaseF, Female, Mood, 0, i)
+		SetMenuOptionValueST(Moods[i])
+	endEvent
+	event OnDefaultST()
+		Expression.SetIndex(PhaseF, Female, Mood, 0, 7)
+		SetMenuOptionValueST(Moods[7])
+	endEvent
+endState
+state MoodAmountFemale
+	event OnSliderOpenST()
+		SetSliderDialogStartValue(Expression.GetMoodAmount(PhaseF, Female))
+		SetSliderDialogDefaultValue(50)
+		SetSliderDialogRange(0, 100)
+		SetSliderDialogInterval(1)
+	endEvent
+	event OnSliderAcceptST(float value)
+		Expression.SetIndex(PhaseF, Female, Mood, 1, value as int)
+		SetSliderOptionValueST(value as int)
+	endEvent
+	event OnDefaultST()
+		Expression.SetIndex(PhaseF, Female, Mood, 1, 50)
+		SetSliderOptionValueST(50)
+	endEvent
+endState
+
+
+state ExpressionPhaseMale
+	event OnSelectST()
+		PhaseM += 1
+		if PhaseM > 5
+			PhaseM = 1
+		endIf
+		SetTextOptionValueST(PhaseM)
+		ForcePageReset()
+	endEvent
+	event OnDefaultST()
+		PhaseM = 1
+		SetTextOptionValueST(1)
+	endEvent
+endState
+state MoodTypeMale
+	event OnMenuOpenST()
+		SetMenuDialogStartIndex(Expression.GetMoodType(PhaseM, Male))
+		SetMenuDialogDefaultIndex(7)
+		SetMenuDialogOptions(Moods)
+	endEvent
+	event OnMenuAcceptST(int i)
+		Expression.SetIndex(PhaseM, Male, Expression.Mood, 0, i)
+		SetMenuOptionValueST(Moods[i])
+	endEvent
+	event OnDefaultST()
+		Expression.SetIndex(PhaseM, Male, Expression.Mood, 0, 7)
+		SetMenuOptionValueST(Moods[7])
+	endEvent
+endState
+state MoodAmountMale
+	event OnSliderOpenST()
+		SetSliderDialogStartValue(Expression.GetMoodAmount(PhaseM, Male))
+		SetSliderDialogDefaultValue(50)
+		SetSliderDialogRange(0, 100)
+		SetSliderDialogInterval(1)
+	endEvent
+	event OnSliderAcceptST(float value)
+		Expression.SetIndex(PhaseM, Male, Expression.Mood, 1, value as int)
+		SetSliderOptionValueST(value as int)
+	endEvent
+	event OnDefaultST()
+		Expression.SetIndex(PhaseM, Male, Expression.Mood, 1, 50)
+		SetSliderOptionValueST(50)
+	endEvent
+endState
+
+
+
+event OnOptionSliderOpen(int option)
+	int i
+
+	if SubMenu == "Expressions"
+
+		; Female presets
+		if oidFemalePhonemes.Find(option) != -1
+			i = oidFemalePhonemes.Find(option)
+			SetSliderDialogStartValue(Expression.GetIndex(PhaseF, Female, Phoneme, i))
+
+		elseIf oidFemaleModifiers.Find(option) != -1
+			i = oidFemaleModifiers.Find(option)
+			SetSliderDialogStartValue(Expression.GetIndex(PhaseF, Female, Modifier, i))
+
+		; Male presets
+		elseIf oidMalePhonemes.Find(option) != -1
+			i = oidMalePhonemes.Find(option)
+			SetSliderDialogStartValue(Expression.GetIndex(PhaseM, Male, Phoneme, i))
+
+		elseIf oidMaleModifiers.Find(option) != -1
+			i = oidMaleModifiers.Find(option)
+			SetSliderDialogStartValue(Expression.GetIndex(PhaseM, Male, Modifier, i))
+		endIf
+
+		SetSliderDialogRange(0, 100)
+		SetSliderDialogInterval(1)
+		SetSliderDialogDefaultValue(0)
+		return
+
+	elseIf CurrentPage == "$SSL_NormalTimersStripping"
+		i = oidStageTimer.find(option)
+		SetSliderDialogStartValue(Config.fStageTimer[i])
+	elseIf CurrentPage == "$SSL_ForeplayTimersStripping"
+		i = oidStageTimerLeadIn.find(option)
+		SetSliderDialogStartValue(Config.fStageTimerLeadIn[i])
+	elseIf CurrentPage == "$SSL_AggressiveTimersStripping"
+		i = oidStageTimerAggr.find(option)
+		SetSliderDialogStartValue(Config.fStageTimerAggr[i])
+	endIf
+	SetSliderDialogRange(3.0, 300.0)
+	SetSliderDialogInterval(1.0)
+	SetSliderDialogDefaultValue(15.0)
+endEvent
+
+event OnOptionSliderAccept(int option, float value)
+	int i
+
+	if SubMenu == "Expressions"
+		; Female presets
+		if oidFemalePhonemes.Find(option) != -1
+			i = oidFemalePhonemes.Find(option)
+			Expression.SetIndex(PhaseF, Female, Phoneme, i, value as int)
+
+		elseIf oidFemaleModifiers.Find(option) != -1
+			i = oidFemaleModifiers.Find(option)
+			Expression.SetIndex(PhaseF, Female, Modifier, i, value as int)
+
+		; Male presets
+		elseIf oidMalePhonemes.Find(option) != -1
+			i = oidMalePhonemes.Find(option)
+			Expression.SetIndex(PhaseM, Male, Phoneme, i, value as int)
+
+		elseIf oidMaleModifiers.Find(option) != -1
+			i = oidMaleModifiers.Find(option)
+			Expression.SetIndex(PhaseM, Male, Modifier, i, value as int)
+		endIf
+
+		SetSliderOptionValue(option, value, "{0}")
+		Expression.CountPhases()
+
+	elseIf CurrentPage == "$SSL_NormalTimersStripping"
+		i = oidStageTimer.find(option)
+		Config.fStageTimer[i] = value
+		SetSliderOptionValue(option, value, "$SSL_Seconds")
+
+	elseIf CurrentPage == "$SSL_ForeplayTimersStripping"
+		i = oidStageTimerLeadIn.find(option)
+		Config.fStageTimerLeadIn[i] = value
+		SetSliderOptionValue(option, value, "$SSL_Seconds")
+
+	elseIf CurrentPage == "$SSL_AggressiveTimersStripping"
+		i = oidStageTimerAggr.find(option)
+		Config.fStageTimerAggr[i] = value
+		SetSliderOptionValue(option, value, "$SSL_Seconds")
+	endIf
+
+endEvent
+
+
+event OnOptionSelect(int option)
+	int i
+	if CurrentPage == "$SSL_SoundSettings"
+		i = oidToggleVoice.Find(option)
+		VoiceSlots.Voices[i].Enabled = !VoiceSlots.Voices[i].Enabled
+		SetToggleOptionValue(option, VoiceSlots.Voices[i].Enabled)
+
+	elseif CurrentPage == "$SSL_CreatureAnimations"
+		i = oidToggleCreatureAnimation.Find(option)
+		CreatureSlots.Slots[i].Enabled = !CreatureSlots.Slots[i].Enabled
+		SetToggleOptionValue(option, CreatureSlots.Slots[i].Enabled)
+
+	elseif CurrentPage == "$SSL_ToggleAnimations"
+		i = oidToggleAnimation.Find(option)
+		AnimSlots.Slots[i].Enabled = !AnimSlots.Slots[i].Enabled
+		SetToggleOptionValue(option, AnimSlots.Slots[i].Enabled)
+
+	elseif CurrentPage == "$SSL_AggressiveAnimations"
+		i = oidAggrAnimation.Find(option)
+		SetToggleOptionValue(option, AnimSlots.Slots[i].ToggleTag("Aggressive"))
+
+	elseif CurrentPage == "$SSL_ForeplayAnimations"
+		i = oidForeplayAnimation.Find(option)
+		SetToggleOptionValue(option, AnimSlots.Slots[i].ToggleTag("LeadIn"))
+
+	; Toggle male/female stripping
+	elseIf CurrentPage == "$SSL_NormalTimersStripping"
+		i = oidStripMale.Find(option)
+		if i >= 0
+			Config.bStripMale[i] = !Config.bStripMale[i]
+			SetToggleOptionValue(option, Config.bStripMale[i])
+		else
+			i = oidStripFemale.Find(option)
+			Config.bStripFemale[i] = !Config.bStripFemale[i]
+			SetToggleOptionValue(option, Config.bStripFemale[i])
+		endIf
+
+	; Toggle foreplay stripping
+	elseIf CurrentPage == "$SSL_ForeplayTimersStripping"
+		i = oidStripLeadInMale.Find(option)
+		if i >= 0
+			Config.bStripLeadInMale[i] = !Config.bStripLeadInMale[i]
+			SetToggleOptionValue(option, Config.bStripLeadInMale[i])
+		else
+			i = oidStripLeadInFemale.Find(option)
+			Config.bStripLeadInFemale[i] = !Config.bStripLeadInFemale[i]
+			SetToggleOptionValue(option, Config.bStripLeadInFemale[i])
+		endIf
+
+	; Toggle victim/aggressor
+	elseIf CurrentPage == "$SSL_AggressiveTimersStripping"
+		i = oidStripVictim.Find(option)
+		if i >= 0
+			Config.bStripVictim[i] = !Config.bStripVictim[i]
+			SetToggleOptionValue(option, Config.bStripVictim[i])
+		else
+			i = oidStripAggressor.Find(option)
+			Config.bStripAggressor[i] = !Config.bStripAggressor[i]
+			SetToggleOptionValue(option, Config.bStripAggressor[i])
+		endIf
+
+	; Toggle expressions
+	elseif CurrentPage == "$SSL_ExpressionSelection"
+		i = oidToggleExpressionNormal.Find(option)
+		if i != -1
+			SetToggleOptionValue(option, ExpressionSlots.Expressions[i].ToggleTag("Normal"))
+			return
+		endIf
+		i = oidToggleExpressionVictim.Find(option)
+		if i != -1
+			SetToggleOptionValue(option, ExpressionSlots.Expressions[i].ToggleTag("Victim"))
+			return
+		endIf
+		i = oidToggleExpressionAggressor.Find(option)
+		if i != -1
+			SetToggleOptionValue(option, ExpressionSlots.Expressions[i].ToggleTag("Aggressor"))
+			return
+		endIf
+
+	elseIf CurrentPage == "$SSL_RebuildClean"
+		i = oidRemoveStrapon.Find(option)
+		form[] newStrapons
+		form[] strapons = ActorLib.Strapons
+		form toRemove = strapons[i]
+		int s = strapons.Length
+		while s
+			s -= 1
+			if strapons[s] != toRemove
+				newStrapons = PushForm(strapons[s], newStrapons)
+			endIf
+		endWhile
+		ActorLib.Strapons = newStrapons
+		ForcePageReset()
+	endIf
+endEvent
+
+
 
 state AutoAdvance
 	event OnSelectST()
@@ -932,18 +1337,31 @@ state NPCBed
 	endEvent
 endState
 state PlayerVoice
-	event OnSelectST()
-		int Next = VoiceSlots.FindSaved(PlayerRef) + 1
-		if Next < VoiceSlots.Slotted
-			VoiceSlots.SaveVoice(PlayerRef, VoiceSlots.GetBySlot(Next))
-		else
+	event OnMenuOpenST()
+		int i = VoiceSlots.Slotted
+		string[] VoiceNames = sslUtility.StringArray(i + 1)
+		VoiceNames[0] = "$SSL_Random"
+		while i
+			i -= 1
+			VoiceNames[(i + 1)] = VoiceSlots.Voices[i].Name
+		endWhile
+		SetMenuDialogStartIndex(VoiceSlots.FindSaved(PlayerRef) + 1)
+		SetMenuDialogDefaultIndex(0)
+		SetMenuDialogOptions(VoiceNames)
+	endEvent
+	event OnMenuAcceptST(int i)
+		i -= 1
+		if i < 0
 			VoiceSlots.ForgetVoice(PlayerRef)
+			SetMenuOptionValueST("$SSL_Random")
+		else
+			VoiceSlots.SaveVoice(PlayerRef, VoiceSlots.GetBySlot(i))
+			SetMenuOptionValueST(VoiceSlots.GetBySlot(i).Name)
 		endIf
-		SetTextOptionValueST(VoiceSlots.GetSavedName(PlayerRef))
 	endEvent
 	event OnDefaultST()
 		VoiceSlots.ForgetVoice(PlayerRef)
-		SetTextOptionValueST("$SSL_Random")
+		SetMenuOptionValueST("$SSL_Random")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoPlayerVoice")
@@ -1369,7 +1787,7 @@ state CleanSystem
 endState
 state RebuildStraponList
 	event OnSelectST()
-		FindStrapons()
+		Config.FindStrapons()
 		if ActorLib.Strapons.Length > 0
 			ShowMessage("$SSL_FoundStrapon", false)
 		else
@@ -1404,134 +1822,3 @@ state ImportSettings
 		SetInfoText("$SSL_InfoImportSettings")
 	endEvent
 endState
-
-event OnOptionSliderOpen(int option)
-	int i
-	if CurrentPage == "$SSL_NormalTimersStripping"
-		i = oidStageTimer.find(option)
-		SetSliderDialogStartValue(Config.fStageTimer[i])
-	elseIf CurrentPage == "$SSL_ForeplayTimersStripping"
-		i = oidStageTimerLeadIn.find(option)
-		SetSliderDialogStartValue(Config.fStageTimerLeadIn[i])
-	elseIf CurrentPage == "$SSL_AggressiveTimersStripping"
-		i = oidStageTimerAggr.find(option)
-		SetSliderDialogStartValue(Config.fStageTimerAggr[i])
-	endIf
-	SetSliderDialogRange(3.0, 300.0)
-	SetSliderDialogInterval(1.0)
-	SetSliderDialogDefaultValue(15.0)
-endEvent
-
-event OnOptionSliderAccept(int option, float value)
-	int i
-	if CurrentPage == "$SSL_NormalTimersStripping"
-		i = oidStageTimer.find(option)
-		Config.fStageTimer[i] = value
-		SetSliderOptionValue(option, value, "$SSL_Seconds")
-	elseIf CurrentPage == "$SSL_ForeplayTimersStripping"
-		i = oidStageTimerLeadIn.find(option)
-		Config.fStageTimerLeadIn[i] = value
-		SetSliderOptionValue(option, value, "$SSL_Seconds")
-	elseIf CurrentPage == "$SSL_AggressiveTimersStripping"
-		i = oidStageTimerAggr.find(option)
-		Config.fStageTimerAggr[i] = value
-		SetSliderOptionValue(option, value, "$SSL_Seconds")
-	endIf
-endEvent
-
-
-event OnOptionSelect(int option)
-	int i
-	if CurrentPage == "$SSL_SoundSettings"
-		i = oidToggleVoice.Find(option)
-		VoiceSlots.Voices[i].Enabled = !VoiceSlots.Voices[i].Enabled
-		SetToggleOptionValue(option, VoiceSlots.Voices[i].Enabled)
-
-	elseif CurrentPage == "$SSL_CreatureAnimations"
-		i = oidToggleCreatureAnimation.Find(option)
-		CreatureSlots.Slots[i].Enabled = !CreatureSlots.Slots[i].Enabled
-		SetToggleOptionValue(option, CreatureSlots.Slots[i].Enabled)
-
-	elseif CurrentPage == "$SSL_ToggleAnimations"
-		i = oidToggleAnimation.Find(option)
-		AnimSlots.Slots[i].Enabled = !AnimSlots.Slots[i].Enabled
-		SetToggleOptionValue(option, AnimSlots.Slots[i].Enabled)
-
-	elseif CurrentPage == "$SSL_AggressiveAnimations"
-		i = oidAggrAnimation.Find(option)
-		SetToggleOptionValue(option, AnimSlots.Slots[i].ToggleTag("Aggressive"))
-
-	elseif CurrentPage == "$SSL_ForeplayAnimations"
-		i = oidForeplayAnimation.Find(option)
-		SetToggleOptionValue(option, AnimSlots.Slots[i].ToggleTag("LeadIn"))
-
-	; Toggle male/female stripping
-	elseIf CurrentPage == "$SSL_NormalTimersStripping"
-		i = oidStripMale.Find(option)
-		if i >= 0
-			Config.bStripMale[i] = !Config.bStripMale[i]
-			SetToggleOptionValue(option, Config.bStripMale[i])
-		else
-			i = oidStripFemale.Find(option)
-			Config.bStripFemale[i] = !Config.bStripFemale[i]
-			SetToggleOptionValue(option, Config.bStripFemale[i])
-		endIf
-
-	; Toggle foreplay stripping
-	elseIf CurrentPage == "$SSL_ForeplayTimersStripping"
-		i = oidStripLeadInMale.Find(option)
-		if i >= 0
-			Config.bStripLeadInMale[i] = !Config.bStripLeadInMale[i]
-			SetToggleOptionValue(option, Config.bStripLeadInMale[i])
-		else
-			i = oidStripLeadInFemale.Find(option)
-			Config.bStripLeadInFemale[i] = !Config.bStripLeadInFemale[i]
-			SetToggleOptionValue(option, Config.bStripLeadInFemale[i])
-		endIf
-
-	; Toggle victim/aggressor
-	elseIf CurrentPage == "$SSL_AggressiveTimersStripping"
-		i = oidStripVictim.Find(option)
-		if i >= 0
-			Config.bStripVictim[i] = !Config.bStripVictim[i]
-			SetToggleOptionValue(option, Config.bStripVictim[i])
-		else
-			i = oidStripAggressor.Find(option)
-			Config.bStripAggressor[i] = !Config.bStripAggressor[i]
-			SetToggleOptionValue(option, Config.bStripAggressor[i])
-		endIf
-
-	; Toggle expressions
-	elseif CurrentPage == "$SSL_ExpressionSelection"
-		i = oidToggleExpressionNormal.Find(option)
-		if i != -1
-			SetToggleOptionValue(option, ExpressionSlots.Expressions[i].ToggleTag("Normal"))
-			return
-		endIf
-		i = oidToggleExpressionVictim.Find(option)
-		if i != -1
-			SetToggleOptionValue(option, ExpressionSlots.Expressions[i].ToggleTag("Victim"))
-			return
-		endIf
-		i = oidToggleExpressionAggressor.Find(option)
-		if i != -1
-			SetToggleOptionValue(option, ExpressionSlots.Expressions[i].ToggleTag("Aggressor"))
-			return
-		endIf
-
-	elseIf CurrentPage == "$SSL_RebuildClean"
-		i = oidRemoveStrapon.Find(option)
-		form[] newStrapons
-		form[] strapons = ActorLib.Strapons
-		form toRemove = strapons[i]
-		int s = strapons.Length
-		while s
-			s -= 1
-			if strapons[s] != toRemove
-				newStrapons = sslUtility.PushForm(strapons[s], newStrapons)
-			endIf
-		endWhile
-		ActorLib.Strapons = newStrapons
-		ForcePageReset()
-	endIf
-endEvent

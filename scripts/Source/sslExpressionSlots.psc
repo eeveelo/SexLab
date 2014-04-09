@@ -28,7 +28,7 @@ sslBaseExpression function PickExpression(int Flag = 0)
 	int i = Slotted
 	while i
 		i -= 1
-		if Slots[i].Registered && Slots[i].HasTag(Tag)
+		if Slots[i].Registered && Slots[i].Enabled && Slots[i].HasTag(Tag)
 			IntListAdd(self, Search, i)
 		endIf
 	endWhile

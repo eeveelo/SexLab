@@ -19,11 +19,14 @@ event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
 	Utility.Wait(0.5)
 
-	LockActor(TargetRef)
-	MarkerRef = TargetRef.PlaceAtMe(SexLab.ActorLib.BaseMarker)
-	MarkerRef.MoveTo(TargetRef)
-	MarkerRef.Activate(TargetRef)
-	TargetRef.SetVehicle(MarkerRef)
+	int[] array = new int[64]
+	int i = 64
+	while i
+		i -= 1
+		array[i] = i
+	endWhile
+
+	Miscutil.PrintConsole(sslUtility.SliceIntArray(array, 32))
 
 	Utility.Wait(6.0)
 	Dispel()
