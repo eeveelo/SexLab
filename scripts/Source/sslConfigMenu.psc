@@ -105,64 +105,45 @@ int[] oidToggleExpressionAggressor
 int[] oidAggrAnimation
 int[] oidForeplayAnimation
 int[] oidRemoveStrapon
-
 int[] oidFemaleModifiers
 int[] oidFemalePhonemes
-
 int[] oidMaleModifiers
 int[] oidMalePhonemes
 
-; Gender Types
+; Expression editor
 int property Male = 0 autoreadonly
 int property Female = 1 autoreadonly
-; MFG Types
 int property Phoneme = 0 autoreadonly
 int property Modifier = 16 autoreadonly
 int property Mood = 30 autoreadonly
 
 sslBaseExpression Expression
-int PhaseF
-int PhaseM
+int Phase
 
 string SubMenu
 string[] Moods
 
 bool function SetDefaults()
 	; MCM option pages
-	Pages    = new string[10]
+	Pages     = new string[14]
+	Pages[0]  = "$SSL_AnimationSettings"
+	Pages[1]  = "$SSL_SoundSettings"
+	Pages[2]  = "$SSL_PlayerHotkeys"
+	Pages[3]  = "$SSL_NormalTimersStripping"
+	Pages[4]  = "$SSL_ForeplayTimersStripping"
+	Pages[5]  = "$SSL_AggressiveTimersStripping"
+	Pages[6]  = "$SSL_ToggleAnimations"
+	Pages[7]  = "$SSL_ForeplayAnimations"
+	Pages[8]  = "$SSL_AggressiveAnimations"
+	Pages[9]  = "$SSL_CreatureAnimations"
+	Pages[10] = "$SSL_ExpressionSelection"
+	Pages[11] = "$SSL_ExpressionEditor"
 	if PlayerRef.GetLeveledActorBase().GetSex() == 1
-		Pages[0] = "$SSL_SexDiary"
+		Pages[12] = "$SSL_SexDiary"
 	else
-		Pages[0] = "$SSL_SexJournal"
+		Pages[12] = "$SSL_SexJournal"
 	endIf
-	Pages[1] = "$SSL_AnimationSettings"
-	Pages[2] = "$SSL_SoundSettings"
-	Pages[3] = "$SSL_PlayerHotkeys"
-	Pages[4] = "$SSL_NormalTimersStripping"
-	Pages[5] = "$SSL_ForeplayTimersStripping"
-	Pages[6] = "$SSL_AggressiveTimersStripping"
-	Pages[7] = "Expressions"
-	Pages[8] = "Animations"
-	Pages[9] = "$SSL_RebuildClean"
-
-	; Pages     = new string[13]
-	; Pages[0]  = "$SSL_AnimationSettings"
-	; Pages[1]  = "$SSL_SoundSettings"
-	; Pages[2]  = "$SSL_PlayerHotkeys"
-	; Pages[3]  = "$SSL_NormalTimersStripping"
-	; Pages[4]  = "$SSL_ForeplayTimersStripping"
-	; Pages[5]  = "$SSL_AggressiveTimersStripping"
-	; Pages[6]  = "$SSL_ToggleAnimations"
-	; Pages[7]  = "$SSL_ForeplayAnimations"
-	; Pages[8]  = "$SSL_AggressiveAnimations"
-	; Pages[9]  = "$SSL_CreatureAnimations"
-	; Pages[10] = "$SSL_ExpressionSelection"
-	; if PlayerRef.GetLeveledActorBase().GetSex() == 1
-	; 	Pages[11] = "$SSL_SexDiary"
-	; else
-	; 	Pages[11] = "$SSL_SexJournal"
-	; endIf
-	; Pages[12] = "$SSL_RebuildClean"
+	Pages[13] = "$SSL_RebuildClean"
 
 	Moods = new string[17]
 	Moods[0]  = "Dialogue Anger"
@@ -267,58 +248,11 @@ endFunction
 ; SetPage("Toggle Animations", 2)
 ; OnPageReset("Information")
 
-function SetPages(string page)
-	if page == "Animations"
-		SubMenu  = page
-		Pages    = new string[7]
-		Pages[0] = "$Back"
-		Pages[1] = "Information"
-		Pages[2] = "Configure Animation"
-		Pages[3] = "$SSL_ToggleAnimations"
-		Pages[4] = "$SSL_ForeplayAnimations"
-		Pages[5] = "$SSL_AggressiveAnimations"
-		Pages[6] = "$SSL_CreatureAnimations"
-		OpenConfig()
-	elseIf page == "Expressions"
-		SubMenu  = page
-
-		Expression = none
-		PhaseF = 1
-		PhaseM = 1
-
-		Pages    = StringArray(ExpressionSlots.Slotted + 2)
-		Pages[0] = "$Back"
-		Pages[1] = "$SSL_ExpressionSelection"
-		int i = 2
-		while i < Pages.Length
-			Pages[i] = ExpressionSlots.Expressions[(i - 2)].Name
-			i += 1
-		endWhile
-		OpenConfig()
-	elseIf page == "$Back"
-		SubMenu = ""
-
-		Pages    = new string[10]
-		Pages[0] = "$SSL_AnimationSettings"
-		Pages[1] = "$SSL_SoundSettings"
-		Pages[2] = "$SSL_PlayerHotkeys"
-		Pages[3] = "$SSL_NormalTimersStripping"
-		Pages[4] = "$SSL_ForeplayTimersStripping"
-		Pages[5] = "$SSL_AggressiveTimersStripping"
-		Pages[6] = "Animations"
-		Pages[7] = "Expressions"
-		if PlayerRef.GetLeveledActorBase().GetSex() == 1
-			Pages[8] = "$SSL_SexDiary"
-		else
-			Pages[8] = "$SSL_SexJournal"
-		endIf
-		Pages[9] = "$SSL_RebuildClean"
-		OpenConfig()
-	endIf
-endfunction
 
 event OnConfigClose()
-	SubMenu = ""
+	SubMenu    = ""
+	Expression = none
+	Phase      = 1
 endEvent
 
 event OnPageReset(string page)
@@ -331,56 +265,83 @@ event OnPageReset(string page)
 	endIf
 	UnloadCustomContent()
 
-	SetPages(page)
+	if page == "$SSL_ExpressionEditor"
+		SetCursorFillMode(LEFT_TO_RIGHT)
 
-	if SubMenu == "Expressions" && page != "$SSL_ExpressionSelection"
-		int slot = Pages.Find(page) - 2
-		; Expression changed
-		sslBaseExpression ToExp = ExpressionSlots.GetBySlot(slot)
-		if ToExp != none && Expression != ToExp
-			Expression = ToExp
-			PhaseF = 1
-			PhaseM = 1
+		if Expression == none
+			Expression = ExpressionSlots.GetBySlot(0)
+			Phase = 1
 		endIf
+
+		SetTitleText(Expression.Name)
+		AddMenuOptionST("ExpressionSelect", "$SSL_ModifyingExpression", Expression.Name)
+		AddTextOptionST("ExpressionPhase", "$SSL_Modifying{"+Expression.Name+"}Phase", Phase)
+
 		; Show expression customization menu
 		if Expression != none
-			SetCursorFillMode(LEFT_TO_RIGHT)
 
-			int[] FemaleModifiers = Expression.GetModifiers(PhaseF, Female)
-			int[] FemalePhonemes  = Expression.GetPhonemes(PhaseF, Female)
+			int[] FemaleModifiers = Expression.GetModifiers(Phase, Female)
+			int[] FemalePhonemes  = Expression.GetPhonemes(Phase, Female)
 
-			int[] MaleModifiers   = Expression.GetModifiers(PhaseM, Male)
-			int[] MalePhonemes    = Expression.GetPhonemes(PhaseM, Male)
+			int[] MaleModifiers   = Expression.GetModifiers(Phase, Male)
+			int[] MalePhonemes    = Expression.GetPhonemes(Phase, Male)
 
 			; AddToggleOptionST("ToggleExpression","$SSL_EndableExpression", Expression.Enabled)
 			; AddHeaderOption("")
 
-			AddTextOptionST("ExpressionPhaseFemale", "$SSL_Modify{$SSL_Female}Phase", PhaseF)
-			AddTextOptionST("ExpressionPhaseMale", "$SSL_Modify{$SSL_Male}Phase", PhaseM)
+			int FlagF = OPTION_FLAG_NONE
+			int FlagM = OPTION_FLAG_NONE
 
-			AddHeaderOption("$SSL_{$SSL_Female}-{$SSL_Mood}")
-			AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Mood}")
+			if Phase > Expression.PhasesFemale
+				FlagF = OPTION_FLAG_DISABLED
+			endIf
+			if Phase > Expression.PhasesMale
+				FlagM = OPTION_FLAG_DISABLED
+			endIf
 
-			AddMenuOptionST("MoodTypeFemale", "$SSL_MoodType", Moods[Expression.GetMoodType(PhaseF, Female)])
-			AddMenuOptionST("MoodTypeMale", "$SSL_MoodType", Moods[Expression.GetMoodType(PhaseM, Male)])
+			if Phase == (Expression.PhasesFemale + 1)
+				AddTextOptionST("ExpressionAddPhaseFemale", "Add Female Phase", "$SSL_ClickHere")
+			elseIf Phase == Expression.PhasesFemale
+				AddTextOptionST("ExpressionRemovePhaseFemale", "Remove Female Phase", "$SSL_ClickHere")
+			else
+				AddHeaderOption("")
+			endIf
 
-			AddSliderOptionST("MoodAmountFemale", "$SSL_MoodStrength", Expression.GetMoodAmount(PhaseF, Female), "{0}")
-			AddSliderOptionST("MoodAmountMale", "$SSL_MoodStrength", Expression.GetMoodAmount(PhaseM, Male), "{0}")
+			if Phase == (Expression.PhasesMale + 1)
+				AddTextOptionST("ExpressionAddPhaseMale", "Add Male Phase", "$SSL_ClickHere")
+			elseIf Phase == Expression.PhasesMale
+				AddTextOptionST("ExpressionRemovePhaseMale", "Remove Male Phase", "$SSL_ClickHere")
+			else
+				AddHeaderOption("")
+			endIf
 
-			AddHeaderOption("$SSL_{$SSL_Female}-{$SSL_Modifier}")
-			AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Modifier}")
+			; AddTextOptionST("ExpressionPhaseFemale", "$SSL_Modify{$SSL_Female}Phase", Phase)
+			; AddTextOptionST("ExpressionPhaseMale", "$SSL_Modify{$SSL_Male}Phase", Phase)
+
+			AddHeaderOption("$SSL_{$SSL_Female}-{$SSL_Mood}", FlagF)
+			AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Mood}", FlagM)
+
+
+			AddMenuOptionST("MoodTypeFemale", "$SSL_MoodType", Moods[Expression.GetMoodType(Phase, Female)], FlagF)
+			AddMenuOptionST("MoodTypeMale", "$SSL_MoodType", Moods[Expression.GetMoodType(Phase, Male)], FlagM)
+
+			AddSliderOptionST("MoodAmountFemale", "$SSL_MoodStrength", Expression.GetMoodAmount(Phase, Female), "{0}", FlagF)
+			AddSliderOptionST("MoodAmountMale", "$SSL_MoodStrength", Expression.GetMoodAmount(Phase, Male), "{0}", FlagM)
+
+			AddHeaderOption("$SSL_{$SSL_Female}-{$SSL_Modifier}", FlagF)
+			AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Modifier}", FlagM)
 			i = 0
 			while i < 14
-				oidFemaleModifiers[i] = AddSliderOption(SexLabUtil.ModifierLabel(i), FemaleModifiers[i], "{0}")
-				oidMaleModifiers[i]   = AddSliderOption(SexLabUtil.ModifierLabel(i), MaleModifiers[i], "{0}")
+				oidFemaleModifiers[i] = AddSliderOption(SexLabUtil.ModifierLabel(i), FemaleModifiers[i], "{0}", FlagF)
+				oidMaleModifiers[i]   = AddSliderOption(SexLabUtil.ModifierLabel(i), MaleModifiers[i], "{0}", FlagM)
 				i += 1
 			endWhile
-			AddHeaderOption("$SSL_{$SSL_Female}-{$SSL_Phoneme}")
-			AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Phoneme}")
+			AddHeaderOption("$SSL_{$SSL_Female}-{$SSL_Phoneme}", FlagF)
+			AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Phoneme}", FlagM)
 			i = 0
 			while i < 16
-				oidFemalePhonemes[i] = AddSliderOption(SexLabUtil.PhonemeLabel(i), FemalePhonemes[i], "{0}")
-				oidMalePhonemes[i]   = AddSliderOption(SexLabUtil.PhonemeLabel(i), MalePhonemes[i], "{0}")
+				oidFemalePhonemes[i] = AddSliderOption(SexLabUtil.PhonemeLabel(i), FemalePhonemes[i], "{0}", FlagF)
+				oidMalePhonemes[i]   = AddSliderOption(SexLabUtil.PhonemeLabel(i), MalePhonemes[i], "{0}", FlagM)
 				i += 1
 			endWhile
 		endIf
@@ -652,7 +613,6 @@ event OnPageReset(string page)
 			i += 1
 		endWhile
 
-
 	; Player Diary/Journal
 	elseIf page == "$SSL_SexDiary" || page == "$SSL_SexJournal"
 		SetCursorFillMode(TOP_TO_BOTTOM)
@@ -706,11 +666,8 @@ event OnPageReset(string page)
 		AddTextOptionST("CleanSystem","$SSL_CleanSystem", "$SSL_ClickHere")
 
 		SetCursorPosition(1)
-		AddEmptyOption()
-		AddHeaderOption("")
 		AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
 		AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
-		AddEmptyOption()
 		AddHeaderOption("$SSL_AvailableStrapons")
 		AddTextOptionST("RebuildStraponList","$SSL_RebuildStraponList", "$SSL_ClickHere")
 		i = Config.Strapons.Length
@@ -754,102 +711,127 @@ event OnRaceSwitchComplete()
 	endIf
 endEvent
 
-state ToggleExpression
-	event OnSelectST()
-		Expression.Enabled = !Expression.Enabled
+state ExpressionSelect
+	event OnMenuOpenST()
+		SetMenuDialogStartIndex(ExpressionSlots.Expressions.Find(Expression))
+		SetMenuDialogDefaultIndex(0)
+		SetMenuDialogOptions(ExpressionSlots.GetNames())
+	endEvent
+	event OnMenuAcceptST(int i)
+		Phase = 1
+		Expression = ExpressionSlots.GetBySlot(i)
+		SetMenuOptionValueST(Expression.Name)
+		ForcePageReset()
+	endEvent
+	event OnDefaultST()
+		Expression = ExpressionSlots.GetBySlot(0)
+		SetMenuOptionValueST(Expression.Name)
 		ForcePageReset()
 	endEvent
 endState
 
-state ExpressionPhaseFemale
+state ExpressionPhase
 	event OnSelectST()
-		PhaseF += 1
-		if PhaseF > 5
-			PhaseF = 1
+		Phase += 1
+		if Phase > 5
+			Phase = 1
 		endIf
-		SetTextOptionValueST(PhaseF)
+		SetTextOptionValueST(Phase)
 		ForcePageReset()
 	endEvent
 	event OnDefaultST()
-		PhaseF = 1
+		Phase = 1
 		SetTextOptionValueST(1)
+		ForcePageReset()
 	endEvent
 endState
+
+state ExpressionAddPhaseFemale
+	event OnSelectST()
+		Expression.AddPhase(Phase, Female)
+		ForcePageReset()
+	endEvent
+endState
+state ExpressionAddPhaseMale
+	event OnSelectST()
+		Expression.AddPhase(Phase, Male)
+		ForcePageReset()
+	endEvent
+endState
+
+state ExpressionRemovePhaseFemale
+	event OnSelectST()
+		Expression.EmptyPhase(Phase, Female)
+		ForcePageReset()
+	endEvent
+endState
+state ExpressionRemovePhaseMale
+	event OnSelectST()
+		Expression.EmptyPhase(Phase, Male)
+		ForcePageReset()
+	endEvent
+endState
+
 state MoodTypeFemale
 	event OnMenuOpenST()
-		SetMenuDialogStartIndex(Expression.GetMoodType(PhaseF, Female))
+		SetMenuDialogStartIndex(Expression.GetMoodType(Phase, Female))
 		SetMenuDialogDefaultIndex(7)
 		SetMenuDialogOptions(Moods)
 	endEvent
 	event OnMenuAcceptST(int i)
-		Expression.SetIndex(PhaseF, Female, Mood, 0, i)
+		Expression.SetIndex(Phase, Female, Mood, 0, i)
 		SetMenuOptionValueST(Moods[i])
 	endEvent
 	event OnDefaultST()
-		Expression.SetIndex(PhaseF, Female, Mood, 0, 7)
+		Expression.SetIndex(Phase, Female, Mood, 0, 7)
 		SetMenuOptionValueST(Moods[7])
 	endEvent
 endState
 state MoodAmountFemale
 	event OnSliderOpenST()
-		SetSliderDialogStartValue(Expression.GetMoodAmount(PhaseF, Female))
+		SetSliderDialogStartValue(Expression.GetMoodAmount(Phase, Female))
 		SetSliderDialogDefaultValue(50)
 		SetSliderDialogRange(0, 100)
 		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
-		Expression.SetIndex(PhaseF, Female, Mood, 1, value as int)
+		Expression.SetIndex(Phase, Female, Mood, 1, value as int)
 		SetSliderOptionValueST(value as int)
 	endEvent
 	event OnDefaultST()
-		Expression.SetIndex(PhaseF, Female, Mood, 1, 50)
+		Expression.SetIndex(Phase, Female, Mood, 1, 50)
 		SetSliderOptionValueST(50)
 	endEvent
 endState
 
-
-state ExpressionPhaseMale
-	event OnSelectST()
-		PhaseM += 1
-		if PhaseM > 5
-			PhaseM = 1
-		endIf
-		SetTextOptionValueST(PhaseM)
-		ForcePageReset()
-	endEvent
-	event OnDefaultST()
-		PhaseM = 1
-		SetTextOptionValueST(1)
-	endEvent
-endState
 state MoodTypeMale
 	event OnMenuOpenST()
-		SetMenuDialogStartIndex(Expression.GetMoodType(PhaseM, Male))
+		SetMenuDialogStartIndex(Expression.GetMoodType(Phase, Male))
 		SetMenuDialogDefaultIndex(7)
 		SetMenuDialogOptions(Moods)
 	endEvent
 	event OnMenuAcceptST(int i)
-		Expression.SetIndex(PhaseM, Male, Expression.Mood, 0, i)
+		Expression.SetIndex(Phase, Male, Mood, 0, i)
 		SetMenuOptionValueST(Moods[i])
 	endEvent
 	event OnDefaultST()
-		Expression.SetIndex(PhaseM, Male, Expression.Mood, 0, 7)
+		Expression.SetIndex(Phase, Male, Mood, 0, 7)
 		SetMenuOptionValueST(Moods[7])
 	endEvent
 endState
 state MoodAmountMale
 	event OnSliderOpenST()
-		SetSliderDialogStartValue(Expression.GetMoodAmount(PhaseM, Male))
+		SetSliderDialogStartValue(Expression.GetMoodAmount(Phase, Male))
 		SetSliderDialogDefaultValue(50)
 		SetSliderDialogRange(0, 100)
 		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
-		Expression.SetIndex(PhaseM, Male, Expression.Mood, 1, value as int)
+		Expression.SetIndex(Phase, Male, Mood, 1, value as int)
 		SetSliderOptionValueST(value as int)
 	endEvent
 	event OnDefaultST()
-		Expression.SetIndex(PhaseM, Male, Expression.Mood, 1, 50)
+		Expression.SetIndex(Phase, Male, Mood, 1, 50)
 		SetSliderOptionValueST(50)
 	endEvent
 endState
@@ -859,40 +841,36 @@ endState
 event OnOptionSliderOpen(int option)
 	int i
 
-	if SubMenu == "Expressions"
+	if CurrentPage == "$SSL_ExpressionEditor"
 
 		; Female presets
 		if oidFemalePhonemes.Find(option) != -1
-			i = oidFemalePhonemes.Find(option)
-			SetSliderDialogStartValue(Expression.GetIndex(PhaseF, Female, Phoneme, i))
+			SetSliderDialogStartValue(Expression.GetIndex(Phase, Female, Phoneme, oidFemalePhonemes.Find(option)))
 
 		elseIf oidFemaleModifiers.Find(option) != -1
-			i = oidFemaleModifiers.Find(option)
-			SetSliderDialogStartValue(Expression.GetIndex(PhaseF, Female, Modifier, i))
+			SetSliderDialogStartValue(Expression.GetIndex(Phase, Female, Modifier, oidFemaleModifiers.Find(option)))
 
 		; Male presets
 		elseIf oidMalePhonemes.Find(option) != -1
-			i = oidMalePhonemes.Find(option)
-			SetSliderDialogStartValue(Expression.GetIndex(PhaseM, Male, Phoneme, i))
+			SetSliderDialogStartValue(Expression.GetIndex(Phase, Male, Phoneme, oidMalePhonemes.Find(option)))
 
 		elseIf oidMaleModifiers.Find(option) != -1
-			i = oidMaleModifiers.Find(option)
-			SetSliderDialogStartValue(Expression.GetIndex(PhaseM, Male, Modifier, i))
-		endIf
+			SetSliderDialogStartValue(Expression.GetIndex(Phase, Male, Modifier, oidMaleModifiers.Find(option)))
 
+		endIf
 		SetSliderDialogRange(0, 100)
 		SetSliderDialogInterval(1)
 		SetSliderDialogDefaultValue(0)
 		return
 
 	elseIf CurrentPage == "$SSL_NormalTimersStripping"
-		i = oidStageTimer.find(option)
+		i = oidStageTimer.Find(option)
 		SetSliderDialogStartValue(Config.fStageTimer[i])
 	elseIf CurrentPage == "$SSL_ForeplayTimersStripping"
-		i = oidStageTimerLeadIn.find(option)
+		i = oidStageTimerLeadIn.Find(option)
 		SetSliderDialogStartValue(Config.fStageTimerLeadIn[i])
 	elseIf CurrentPage == "$SSL_AggressiveTimersStripping"
-		i = oidStageTimerAggr.find(option)
+		i = oidStageTimerAggr.Find(option)
 		SetSliderDialogStartValue(Config.fStageTimerAggr[i])
 	endIf
 	SetSliderDialogRange(3.0, 300.0)
@@ -906,38 +884,34 @@ event OnOptionSliderAccept(int option, float value)
 	if SubMenu == "Expressions"
 		; Female presets
 		if oidFemalePhonemes.Find(option) != -1
-			i = oidFemalePhonemes.Find(option)
-			Expression.SetIndex(PhaseF, Female, Phoneme, i, value as int)
+			Expression.SetIndex(Phase, Female, Phoneme, oidFemalePhonemes.Find(option), value as int)
 
 		elseIf oidFemaleModifiers.Find(option) != -1
-			i = oidFemaleModifiers.Find(option)
-			Expression.SetIndex(PhaseF, Female, Modifier, i, value as int)
+			Expression.SetIndex(Phase, Female, Modifier, oidFemaleModifiers.Find(option), value as int)
 
 		; Male presets
 		elseIf oidMalePhonemes.Find(option) != -1
-			i = oidMalePhonemes.Find(option)
-			Expression.SetIndex(PhaseM, Male, Phoneme, i, value as int)
+			Expression.SetIndex(Phase, Male, Phoneme, oidMalePhonemes.Find(option), value as int)
 
 		elseIf oidMaleModifiers.Find(option) != -1
-			i = oidMaleModifiers.Find(option)
-			Expression.SetIndex(PhaseM, Male, Modifier, i, value as int)
+			Expression.SetIndex(Phase, Male, Modifier, oidMaleModifiers.Find(option), value as int)
 		endIf
 
 		SetSliderOptionValue(option, value, "{0}")
 		Expression.CountPhases()
 
 	elseIf CurrentPage == "$SSL_NormalTimersStripping"
-		i = oidStageTimer.find(option)
+		i = oidStageTimer.Find(option)
 		Config.fStageTimer[i] = value
 		SetSliderOptionValue(option, value, "$SSL_Seconds")
 
 	elseIf CurrentPage == "$SSL_ForeplayTimersStripping"
-		i = oidStageTimerLeadIn.find(option)
+		i = oidStageTimerLeadIn.Find(option)
 		Config.fStageTimerLeadIn[i] = value
 		SetSliderOptionValue(option, value, "$SSL_Seconds")
 
 	elseIf CurrentPage == "$SSL_AggressiveTimersStripping"
-		i = oidStageTimerAggr.find(option)
+		i = oidStageTimerAggr.Find(option)
 		Config.fStageTimerAggr[i] = value
 		SetSliderOptionValue(option, value, "$SSL_Seconds")
 	endIf
