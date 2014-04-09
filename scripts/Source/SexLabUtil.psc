@@ -9,7 +9,7 @@ int function GetVersion() global
 endFunction
 
 string function GetStringVer() global
-	return StringUtil.Substring((((GetVersion() - 1) as float / 10000.0) as string), 0, 4)+" beta thing"
+	return StringUtil.Substring((((GetVersion() - 1) as float / 10000.0) as string), 0, 4)+" Beta 2"
 endFunction
 
 bool function SexLabIsActive() global
