@@ -156,6 +156,10 @@ function EmptyPhase(int Phase, int Gender)
 	int[] Preset = new int[32]
 	SetPhase(Phase, Gender, Preset)
 	Phases[Gender] = ClampInt((Phases[Gender] - 1), 0, 5)
+	CountPhases()
+	if Phases[0] == 0 && Phases[1] == 0
+		Enabled = false
+	endIf
 endFunction
 
 function AddPhase(int Phase, int Gender)
@@ -166,6 +170,7 @@ function AddPhase(int Phase, int Gender)
 	endIf
 	SetPhase(Phase, Gender, Preset)
 	Phases[Gender] = ClampInt((Phases[Gender] + 1), 0, 5)
+	Enabled = true
 endFunction
 
 ; ------------------------------------------------------- ;
