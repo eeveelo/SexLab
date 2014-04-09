@@ -5,11 +5,11 @@ scriptname SexLabUtil hidden
 ; ------------------------------------------------------- ;
 
 int function GetVersion() global
-	return 14600
+	return 14601
 endFunction
 
 string function GetStringVer() global
-	return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)+" EXPERIMENTAL"
+	return StringUtil.Substring((((GetVersion() - 1) as float / 10000.0) as string), 0, 4)+" beta thing"
 endFunction
 
 bool function SexLabIsActive() global
@@ -36,7 +36,7 @@ int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim 
 	return SexLab.StartSex(sexActors, anims, victim, centerOn, allowBed, hook)
 endFunction
 
-sslThreadModel function NewThread(float timeout = 10.0) global
+sslThreadModel function NewThread(float timeout = 30.0) global
 	SexLabFramework SexLab = GetAPI()
 	if SexLab == none
 		return none
@@ -44,12 +44,12 @@ sslThreadModel function NewThread(float timeout = 10.0) global
 	return SexLab.NewThread(timeout)
 endFunction
 
-sslThreadController function QuickStart(actor a1, actor a2 = none, actor a3 = none, actor a4 = none, actor a5 = none, actor victim = none, string hook = "") global
+sslThreadController function QuickStart(actor a1, actor a2 = none, actor a3 = none, actor a4 = none, actor a5 = none, actor victim = none, string hook = "", string animationTags = "") global
 	SexLabFramework SexLab = GetAPI()
 	if SexLab == none
 		return none
 	endIf
-	return SexLab.QuickStart(a1, a2, a3, a4, a5, victim, hook)
+	return SexLab.QuickStart(a1, a2, a3, a4, a5, victim, hook, animationTags)
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -58,76 +58,6 @@ endFunction
 
 bool function IsActorActive(Actor ActorRef) global
 	return StorageUtil.FormListFind(none, "SexLabActors", ActorRef) != -1
-endFunction
-
-string function PhonemeLabel(int id) global
-	if id == 0
-		return "[0] Aah"
-	elseIf id == 1
-		return "[1] BigAah"
-	elseIf id == 2
-		return "[2] BMP"
-	elseIf id == 3
-		return "[3] ChjSh"
-	elseIf id == 4
-		return "[4] DST"
-	elseIf id == 5
-		return "[5] Eee"
-	elseIf id == 6
-		return "[6] Eh"
-	elseIf id == 7
-		return "[7] FV"
-	elseIf id == 8
-		return "[8] i"
-	elseIf id == 9
-		return "[9] k"
-	elseIf id == 10
-		return "[10] N"
-	elseIf id == 11
-		return "[11] Oh"
-	elseIf id == 12
-		return "[12] OohQ"
-	elseIf id == 13
-		return "[13] R"
-	elseIf id == 14
-		return "[14] Th"
-	elseIf id == 15
-		return "[15] W"
-	endIf
-	return ""
-endFunction
-
-string function ModifierLabel(int id) global
-	if id == 0
-		return "[0] BlinkL"
-	elseIf id == 1
-		return "[1] BlinkR"
-	elseIf id == 2
-		return "[2] BrowDownL"
-	elseIf id == 3
-		return "[3] BrownDownR"
-	elseIf id == 4
-		return "[4] BrowInL"
-	elseIf id == 5
-		return "[5] BrowInR"
-	elseIf id == 6
-		return "[6] BrowUpL"
-	elseIf id == 7
-		return "[7] BrowUpR"
-	elseIf id == 8
-		return "[8] LookDown"
-	elseIf id == 9
-		return "[9] LookLeft"
-	elseIf id == 10
-		return "[10] LookRight"
-	elseIf id == 11
-		return "[11] LookUp"
-	elseIf id == 12
-		return "[12] SquintL"
-	elseIf id == 13
-		return "[13] SquintR"
-	endIf
-	return ""
 endFunction
 
 string function SlotLabel(int id) global
@@ -197,6 +127,76 @@ string function SlotLabel(int id) global
 		return "$SSL_MiscSlot61"
 	elseIf id == 32
 		return "$SSL_Weapons"
+	endIf
+	return ""
+endFunction
+
+string function PhonemeLabel(int id) global
+	if id == 0
+		return "0: Aah"
+	elseIf id == 1
+		return "1: BigAah"
+	elseIf id == 2
+		return "2: BMP"
+	elseIf id == 3
+		return "3: ChjSh"
+	elseIf id == 4
+		return "4: DST"
+	elseIf id == 5
+		return "5: Eee"
+	elseIf id == 6
+		return "6: Eh"
+	elseIf id == 7
+		return "7: FV"
+	elseIf id == 8
+		return "8: i"
+	elseIf id == 9
+		return "9: k"
+	elseIf id == 10
+		return "10: N"
+	elseIf id == 11
+		return "11: Oh"
+	elseIf id == 12
+		return "12: OohQ"
+	elseIf id == 13
+		return "13: R"
+	elseIf id == 14
+		return "14: Th"
+	elseIf id == 15
+		return "15: W"
+	endIf
+	return ""
+endFunction
+
+string function ModifierLabel(int id) global
+	if id == 0
+		return "0: BlinkL"
+	elseIf id == 1
+		return "1: BlinkR"
+	elseIf id == 2
+		return "2: BrowDownL"
+	elseIf id == 3
+		return "3: BrownDownR"
+	elseIf id == 4
+		return "4: BrowInL"
+	elseIf id == 5
+		return "5: BrowInR"
+	elseIf id == 6
+		return "6: BrowUpL"
+	elseIf id == 7
+		return "7: BrowUpR"
+	elseIf id == 8
+		return "8: LookDown"
+	elseIf id == 9
+		return "9: LookLeft"
+	elseIf id == 10
+		return "10: LookRight"
+	elseIf id == 11
+		return "11: LookUp"
+	elseIf id == 12
+		return "12: SquintL"
+	elseIf id == 13
+		return "13: SquintR"
 	endIf
 	return ""
 endFunction

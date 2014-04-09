@@ -88,6 +88,16 @@ int function FindByName(string FindName)
 	return -1
 endFunction
 
+string[] function GetNames()
+	string[] output = sslUtility.StringArray(Slotted)
+	int i = Slotted
+	while i
+		i -= 1
+		output[i] = Slots[i].Name
+	endWhile
+	return output
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- System Use Only                                 --- ;
 ; ------------------------------------------------------- ;

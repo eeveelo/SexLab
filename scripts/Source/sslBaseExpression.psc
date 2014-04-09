@@ -1,5 +1,6 @@
 scriptname sslBaseExpression extends sslBaseObject
 
+import sslUtility
 import MfgConsoleFunc
 
 ; Gender Types
@@ -23,28 +24,24 @@ int property PhasesFemale hidden
 	endFunction
 endProperty
 
-int[] Phase1
-int[] Phase2
-int[] Phase3
-int[] Phase4
-int[] Phase5
+int[] Male1
+int[] Male2
+int[] Male3
+int[] Male4
+int[] Male5
 
-int function PickPhase(int Amount, int Gender)
-	return sslUtility.ClampInt(((sslUtility.ClampInt(Amount, 1, 100) * Phases[Gender]) / 100), 1, Phases[Gender])
-endFunction
-
-function Apply(Actor ActorRef, int Amount, int Gender)
-	int Phase = PickPhase(Amount, Gender)
-	Log("Phase: "+Phase, Amount)
-	ApplyPhase(ActorRef, Phase, Gender)
-endFunction
+int[] Female1
+int[] Female2
+int[] Female3
+int[] Female4
+int[] Female5
 
 function ApplyPhase(Actor ActorRef, int Phase, int Gender)
 	if Phase > Phases[Gender]
 		return
 	endIf
-	int[] Preset = GetPhase(Phase)
-	int i = 32 * ((Gender == Male) as int)
+	int i
+	int[] Preset = GetPhase(Phase, Gender)
 	; Set Phoneme
 	int p
 	while p <= 15
@@ -60,52 +57,24 @@ function ApplyPhase(Actor ActorRef, int Phase, int Gender)
 		m += 1
 	endWhile
 	; Set expression
-	ActorRef.SetExpressionOverride(Preset[i], Preset[(i + 1)])
+	ActorRef.SetExpressionOverride(Preset[30], Preset[31])
 endFunction
 
-int[] function GetPhase(int Phase)
-	int[] Preset
-	if Phase == 1
-		Preset = Phase1
-	elseIf Phase == 2
-		Preset = Phase2
-	elseIf Phase == 3
-		Preset = Phase3
-	elseIf Phase == 4
-		Preset = Phase4
-	elseIf Phase == 5
-		Preset = Phase5
-	else
-		return none
-	endIf
-	if Preset.Length == 64
-		return Preset
-	endIf
-	return new int[64]
+function Apply(Actor ActorRef, int Strength, int Gender)
+	Log("Phase: "+PickPhase(Strength, Gender), Strength)
+	ApplyPhase(ActorRef, PickPhase(Strength, Gender), Gender)
 endFunction
 
-int[] function GetGenderPhase(int Phase, int Gender)
-	if Phase > Phases[Gender]
-		return none
-	endIf
-	int[] Output = new int[32]
-	int[] Preset = GetPhase(Phase)
-	int g = GI(Gender)
-	int i
-	while i < 32
-		Output[i] = Preset[i + g]
-		i += 1
-	endWhile
-	return Output
+int function PickPhase(int Strength, int Gender)
+	return ClampInt(((ClampInt(Strength, 1, 100) * Phases[Gender]) / 100), 1, Phases[Gender])
 endFunction
 
 int[] function GetPhonemes(int Phase, int Gender)
 	int[] Output = new int[16]
-	int[] Preset = GetPhase(Phase)
-	int g = GI(Gender) + Phoneme
+	int[] Preset = GetPhase(Phase, Gender)
 	int i
 	while i < 16
-		Output[i] = Preset[i + g]
+		Output[i] = Preset[Phoneme + i]
 		i += 1
 	endWhile
 	return Output
@@ -113,85 +82,48 @@ endFunction
 
 int[] function GetModifiers(int Phase, int Gender)
 	int[] Output = new int[14]
-	int[] Preset = GetPhase(Phase)
-	int g = GI(Gender) + Modifier
+	int[] Preset = GetPhase(Phase, Gender)
 	int i
 	while i < 14
-		Output[i] = Preset[i + g]
+		Output[i] = Preset[Modifier + i]
 		i += 1
 	endWhile
 	return Output
 endFunction
 
 int function GetMoodType(int Phase, int Gender)
-	return GetPhase(Phase)[GI(Gender) + 30]
+	return GetPhase(Phase, Gender)[30]
 endFunction
+
 int function GetMoodAmount(int Phase, int Gender)
-	return GetPhase(Phase)[GI(Gender) + 31]
-endFunction
-
-;/-----------------------------------------------\;
-;|	Editing Functions                            |;
-;\-----------------------------------------------/;
-
-int function GI(int Gender)
-	if Gender == 0
-		return 32
-	endIf
-	return 0
-endFunction
-
-function SetIndex(int Phase, int Gender, int Mode, int id, int value)
-	int[] Preset = GetPhase(Phase)
-	id += GI(Gender) + Mode
-	; Set index of phase
-	Preset[id] = value
-	; Save new array
-	SetPhase(Phase, Preset)
+	return GetPhase(Phase, Gender)[31]
 endFunction
 
 int function GetIndex(int Phase, int Gender, int Mode, int id)
-	int[] Preset = GetPhase(Phase)
-	id += GI(Gender) + Mode
-	return Preset[id]
+	return GetPhase(Phase, Gender)[Mode + id]
 endFunction
 
-function SetPhase(int Phase, int[] Preset)
-	if Phase == 1
-		Phase1 = Preset
-	elseIf Phase == 2
-		Phase2 = Preset
-	elseIf Phase == 3
-		Phase3 = Preset
-	elseIf Phase == 4
-		Phase4 = Preset
-	elseIf Phase == 5
-		Phase5 = Preset
-	endIf
+; ------------------------------------------------------- ;
+; --- Editing Functions                               --- ;
+; ------------------------------------------------------- ;
+
+function SetIndex(int Phase, int Gender, int Mode, int id, int value)
+	int[] Preset = GetPhase(Phase, Gender)
+	Preset[(Mode + id)] = value
+	SetPhase(Phase, Gender, Preset)
 endFunction
 
-function CountPhases()
-	Phases = new int[2]
-	int Phase
-	while Phase < 5
-		Phase += 1
-		int[] Preset = GetPhase(Phase)
-		Phases[1] = Phases[1] + ((sslUtility.AddValues(sslUtility.SliceIntArray(Preset, 0, 29)) > 0) as int)
-		Phases[0] = Phases[0] + ((sslUtility.AddValues(sslUtility.SliceIntArray(Preset, 32, 61)) > 0) as int)
-	endWhile
-endFunction
-
-function AddPreset(int Phase, int Gender, int Mode, int id, int value)
+function SetPreset(int Phase, int Gender, int Mode, int id, int value)
 	if Mode == Mood
-		AddMood(Phase, Gender, id, value)
+		SetMood(Phase, Gender, id, value)
 	elseif Mode == Modifier
-		AddModifier(Phase, Gender, id, value)
+		SetModifier(Phase, Gender, id, value)
 	elseif Mode == Phoneme
-		AddPhoneme(Phase, Gender, id, value)
+		SetPhoneme(Phase, Gender, id, value)
 	endIf
 endFunction
 
-function AddMood(int Phase, int Gender, int id, int value)
+function SetMood(int Phase, int Gender, int id, int value)
 	if Gender == Female || Gender == MaleFemale
 		SetIndex(Phase, Female, Mood, 0, id)
 		SetIndex(Phase, Female, Mood, 1, value)
@@ -200,46 +132,131 @@ function AddMood(int Phase, int Gender, int id, int value)
 		SetIndex(Phase, Male, Mood, 0, id)
 		SetIndex(Phase, Male, Mood, 1, value)
 	endIf
-	if Phases[Gender] < Phase
-		Phases[Gender] = Phase
-	endIf
 endFunction
 
-function AddModifier(int Phase, int Gender, int id, int value)
+function SetModifier(int Phase, int Gender, int id, int value)
 	if Gender == Female || Gender == MaleFemale
 		SetIndex(Phase, Female, Modifier, id, value)
 	endIf
 	if Gender == Male || Gender == MaleFemale
 		SetIndex(Phase, Male, Modifier, id, value)
 	endIf
-	if Phases[Gender] < Phase
-		Phases[Gender] = Phase
-	endIf
 endFunction
 
-function AddPhoneme(int Phase, int Gender, int id, int value)
+function SetPhoneme(int Phase, int Gender, int id, int value)
 	if Gender == Female || Gender == MaleFemale
 		SetIndex(Phase, Female, Phoneme, id, value)
 	endIf
 	if Gender == Male || Gender == MaleFemale
 		SetIndex(Phase, Male, Phoneme, id, value)
 	endIf
-	if Phases[Gender] < Phase
-		Phases[Gender] = Phase
+endFunction
+
+function EmptyPhase(int Phase, int Gender)
+	int[] Preset = new int[32]
+	SetPhase(Phase, Gender, Preset)
+	Phases[Gender] = ClampInt((Phases[Gender] - 1), 0, 5)
+endFunction
+
+function AddPhase(int Phase, int Gender)
+	int[] Preset = GetPhase(Phase, Gender)
+	if Preset[30] == 0 || Preset[31] == 0
+		Preset[30] = 7
+		Preset[31] = 50
+	endIf
+	SetPhase(Phase, Gender, Preset)
+	Phases[Gender] = ClampInt((Phases[Gender] + 1), 0, 5)
+endFunction
+
+; ------------------------------------------------------- ;
+; --- Phase Accessors                                 --- ;
+; ------------------------------------------------------- ;
+
+int[] function GetPhase(int Phase, int Gender)
+	if Gender == Male
+		if Phase == 1
+			return Male1
+		elseIf Phase == 2
+			return Male2
+		elseIf Phase == 3
+			return Male3
+		elseIf Phase == 4
+			return Male4
+		elseIf Phase == 5
+			return Male5
+		endIf
+	else
+		if Phase == 1
+			return Female1
+		elseIf Phase == 2
+			return Female2
+		elseIf Phase == 3
+			return Female3
+		elseIf Phase == 4
+			return Female4
+		elseIf Phase == 5
+			return Female5
+		endIf
+	endIf
+	return new int[32]
+endFunction
+
+function SetPhase(int Phase, int Gender, int[] Preset)
+	if Gender == Male
+		if Phase == 1
+			Male1 = Preset
+		elseIf Phase == 2
+			Male2 = Preset
+		elseIf Phase == 3
+			Male3 = Preset
+		elseIf Phase == 4
+			Male4 = Preset
+		elseIf Phase == 5
+			Male5 = Preset
+		endIf
+	else
+		if Phase == 1
+			Female1 = Preset
+		elseIf Phase == 2
+			Female2 = Preset
+		elseIf Phase == 3
+			Female3 = Preset
+		elseIf Phase == 4
+			Female4 = Preset
+		elseIf Phase == 5
+			Female5 = Preset
+		endIf
+	endIf
+endFunction
+
+; ------------------------------------------------------- ;
+; --- System Use                                      --- ;
+; ------------------------------------------------------- ;
+
+function CountPhases()
+	Phases = new int[2]
+	; Male phases
+	Phases[0] = Phases[0] + ((AddValues(Male1) > 0) as int)
+	Phases[0] = Phases[0] + ((AddValues(Male2) > 0) as int)
+	Phases[0] = Phases[0] + ((AddValues(Male3) > 0) as int)
+	Phases[0] = Phases[0] + ((AddValues(Male4) > 0) as int)
+	Phases[0] = Phases[0] + ((AddValues(Male5) > 0) as int)
+	; Female phases
+	Phases[1] = Phases[1] + ((AddValues(Female1) > 0) as int)
+	Phases[1] = Phases[1] + ((AddValues(Female2) > 0) as int)
+	Phases[1] = Phases[1] + ((AddValues(Female3) > 0) as int)
+	Phases[1] = Phases[1] + ((AddValues(Female4) > 0) as int)
+	Phases[1] = Phases[1] + ((AddValues(Female5) > 0) as int)
+	; Enable it if phases are present
+	if Phases[0] > 0 || Phases[1] > 0
+		Enabled = true
+	else
+		Enabled = false
 	endIf
 endFunction
 
 function Save(int id)
-	; Calculate how many phases have presets
 	CountPhases()
-	; Make sure we have a Gender tag
-	if PhasesMale > 0
-		AddTag("Male")
-	endIf
-	if PhasesFemale > 0
-		AddTag("Female")
-	endIf
-	; Log
 	Log(Name, "Expressions["+id+"]")
 endFunction
 
@@ -247,15 +264,15 @@ function Initialize()
 	; Gender phase counts
 	Phases = new int[2]
 	; Individual Phases
-	int[] dPhase1
-	int[] dPhase2
-	int[] dPhase3
-	int[] dPhase4
-	int[] dPhase5
-	Phase1 = dPhase1
-	Phase2 = dPhase2
-	Phase3 = dPhase3
-	Phase4 = dPhase4
-	Phase5 = dPhase5
+	Male1   = new int[32]
+	Male2   = new int[32]
+	Male3   = new int[32]
+	Male4   = new int[32]
+	Male5   = new int[32]
+	Female1 = new int[32]
+	Female2 = new int[32]
+	Female3 = new int[32]
+	Female4 = new int[32]
+	Female5 = new int[32]
 	parent.Initialize()
 endFunction
