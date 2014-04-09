@@ -248,13 +248,6 @@ endFunction
 ; SetPage("Toggle Animations", 2)
 ; OnPageReset("Information")
 
-
-event OnConfigClose()
-	SubMenu    = ""
-	Expression = none
-	Phase      = 1
-endEvent
-
 event OnPageReset(string page)
 	int i
 
@@ -277,6 +270,22 @@ event OnPageReset(string page)
 		AddMenuOptionST("ExpressionSelect", "$SSL_ModifyingExpression", Expression.Name)
 		AddTextOptionST("ExpressionPhase", "$SSL_Modifying{"+Expression.Name+"}Phase", Phase)
 
+		int FlagF = OPTION_FLAG_NONE
+		int FlagM = OPTION_FLAG_NONE
+
+		if Phase > Expression.PhasesFemale
+			FlagF = OPTION_FLAG_DISABLED
+		endIf
+		if Phase > Expression.PhasesMale
+			FlagM = OPTION_FLAG_DISABLED
+		endIf
+
+		AddTextOptionST("ExpressionTestPlayer", "Test On Player", "$SSL_ClickHere")
+		AddTextOptionST("ExpressionTestTarget", "Test On Target", "$SSL_ClickHere", OPTION_FLAG_DISABLED)
+
+		AddEmptyOption()
+		AddEmptyOption()
+
 		; Show expression customization menu
 		if Expression != none
 
@@ -288,16 +297,6 @@ event OnPageReset(string page)
 
 			; AddToggleOptionST("ToggleExpression","$SSL_EndableExpression", Expression.Enabled)
 			; AddHeaderOption("")
-
-			int FlagF = OPTION_FLAG_NONE
-			int FlagM = OPTION_FLAG_NONE
-
-			if Phase > Expression.PhasesFemale
-				FlagF = OPTION_FLAG_DISABLED
-			endIf
-			if Phase > Expression.PhasesMale
-				FlagM = OPTION_FLAG_DISABLED
-			endIf
 
 			if Phase == (Expression.PhasesFemale + 1)
 				AddTextOptionST("ExpressionAddPhaseFemale", "Add Female Phase", "$SSL_ClickHere")
@@ -344,6 +343,7 @@ event OnPageReset(string page)
 				oidMalePhonemes[i]   = AddSliderOption(SexLabUtil.PhonemeLabel(i), MalePhonemes[i], "{0}", FlagM)
 				i += 1
 			endWhile
+
 		endIf
 	endIf
 
@@ -746,6 +746,28 @@ state ExpressionPhase
 	endEvent
 endState
 
+state ExpressionTestPlayer
+	event OnSelectST()
+		sslBaseExpression Exp = Expression
+		if ShowMessage("Expression will be applied to player for preview purposes, after 30 seconds they will be reset to their default.\n\nDo you wish to continue?", true, "$Yes", "$No")
+			ShowMessage("Applying "+Exp.Name+" phase "+Phase+" on Player.\n NOTICE: Close all menus and return to the game in order to continue.")
+			Utility.Wait(0.1)
+			Game.ForceThirdPerson()
+			Exp.ApplyPhase(PlayerRef, Phase, PlayerRef.GetLeveledActorBase().GetSex())
+			Debug.Notification(Exp.Name+" has been applied to "+PlayerRef.GetLeveledActorBase().GetName())
+			Debug.Notification("Reverting expression in 30 seconds...")
+			RegisterForSingleUpdate(30)
+		endIf
+	endEvent
+endState
+
+event OnUpdate()
+	Debug.Notification("Reverting expression...")
+	PlayerRef.ClearExpressionOverride()
+	MfgConsoleFunc.ResetPhonemeModifier(PlayerRef)
+endEvent
+
+
 state ExpressionAddPhaseFemale
 	event OnSelectST()
 		Expression.AddPhase(Phase, Female)
@@ -881,7 +903,7 @@ endEvent
 event OnOptionSliderAccept(int option, float value)
 	int i
 
-	if SubMenu == "Expressions"
+	if CurrentPage == "$SSL_ExpressionEditor"
 		; Female presets
 		if oidFemalePhonemes.Find(option) != -1
 			Expression.SetIndex(Phase, Female, Phoneme, oidFemalePhonemes.Find(option), value as int)
@@ -898,7 +920,6 @@ event OnOptionSliderAccept(int option, float value)
 		endIf
 
 		SetSliderOptionValue(option, value, "{0}")
-		Expression.CountPhases()
 
 	elseIf CurrentPage == "$SSL_NormalTimersStripping"
 		i = oidStageTimer.Find(option)
