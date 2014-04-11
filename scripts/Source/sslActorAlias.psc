@@ -198,7 +198,7 @@ state Ready
 			Skills = Stats.GetSkillLevels(SkilledActor)
 			Thread.Log(SkilledActor.GetLeveledActorBase().GetName()+" Skills: "+Skills, ActorName)
 			; Start Auto TFC if enabled
-			if IsPlayer && Config.bAutoTFC
+			if IsPlayer && Config.bAutoTFC && Game.GetCameraState() != 3
 				Config.ToggleFreeCamera()
 			endIf
 		endIf
