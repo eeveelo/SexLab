@@ -153,6 +153,7 @@ string function ZeroFill(string num)
 endFunction
 
 string function ParseTime(int time)
+	MiscUtil.PrintConsole("Time: "+time)
 	return ZeroFill(((time / 3600) as int))+":"+ZeroFill((((time / 60) % 60) as int))+":"+ZeroFill((time % 60 as int))
 endFunction
 
@@ -167,7 +168,6 @@ function SeedActor(Actor ActorRef)
 	; Added to seeded list so they skip this in future
 	FormListAdd(Storage, "SeededActors", ActorRef, false)
 
-	bool IsFemale     = GetGender(ActorRef) == 1
 	float Level       = ActorRef.GetLevel() as float
 	float Energy      = ActorRef.GetActorValue("Energy")
 	float Assistance  = ActorRef.GetActorValue("Assistance")
@@ -179,43 +179,43 @@ function SeedActor(Actor ActorRef)
 	int HighestRelation = ActorRef.GetHighestRelationshipRank()
 	int LowestRelation = ActorRef.GetLowestRelationshipRank()
 
+	; Seed Sexuality
+	float Gay      = (Utility.RandomFloat(0.0, Level / 2.0) + Math.Abs(LowestRelation))  + Math.Sqrt(Energy * 0.5)
+	float Straight = (Utility.RandomFloat(0.0, Level / 2.0) + Math.Abs(HighestRelation)) + Math.Sqrt(Energy * 0.5) + (Assistance * 1.5)
+	; Very aggressive / frenzied - make more likely to have had more
+	if Aggression > 1.0
+		Gay      *= Utility.RandomFloat(1.10, 1.45)
+		Straight *= Utility.RandomFloat(1.10, 1.45)
+	endIf
+	; Cowardly - less likely to have had partners
+	if Confidence == 0.0
+		Gay      *= Utility.RandomFloat(0.4, 0.7)
+		Straight *= Utility.RandomFloat(0.4, 0.7)
+	endIf
+	; Chance for never having had a certain type
+	Gay      *= ((Utility.RandomInt(1, 5) != 1) as float)
+	Straight *= ((Utility.RandomInt(1, 10) != 1) as float)
+
+	; Seed time spent
+	float TimeSpent = ((Straight + Gay) * Utility.RandomFloat(20.0, 45.0))
+	if GetGender(ActorRef) == 1
+		SetInt(ActorRef, "Sexuality", 60)
+		AddSex(ActorRef, TimeSpent, false, false, Straight as int, Gay as int, 0)
+	else
+		SetInt(ActorRef, "Sexuality", 80)
+		AddSex(ActorRef, TimeSpent, false, false, Gay as int, Straight as int, 0)
+	endIf
+
 	; Sex Skills
-	int Vaginal  = (ClampFloat(Utility.RandomFloat(0.0, ((Level * 1.8) * Utility.RandomFloat(-0.2, 1.5))), 0.0, 80.0) + ((Speechcraft / 1.5) * ((Confidence + 0.5) / Utility.RandomFloat(1.0, 1.5)))) as int
-	int Anal     = (ClampFloat(Utility.RandomFloat(0.0, ((Level * 1.6) * Utility.RandomFloat(-0.2, 1.4))), 0.0, 80.0) + ((Speechcraft / 1.6) * ((Confidence + 0.5) / Utility.RandomFloat(1.0, 1.5)))) as int
-	int Oral     = (ClampFloat(Utility.RandomFloat(0.0, ((Level * 1.6) * Utility.RandomFloat(-0.2, 1.5))), 0.0, 80.0) + ((Speechcraft / 1.7) * ((Confidence + 0.5) / Utility.RandomFloat(1.0, 1.5)))) as int
-	int Foreplay = (ClampFloat(Utility.RandomFloat(0.0, ((Level * 1.4) * Utility.RandomFloat(-0.2, 1.6))), 0.0, 80.0) + ((Speechcraft / 1.8) * ((Confidence + 0.5) / Utility.RandomFloat(1.0, 1.5)))) as int
+	int Vaginal  = ((TimeSpent + Utility.RandomFloat(0.25, Level * 1.5)) / Utility.RandomFloat(8.0, 15.0)) as int
+	int Anal     = ((TimeSpent + Utility.RandomFloat(0.25, Level * 1.3)) / Utility.RandomFloat(8.0, 15.0)) as int
+	int Oral     = ((TimeSpent + Utility.RandomFloat(0.25, Level * 1.4)) / Utility.RandomFloat(8.0, 15.0)) as int
+	int Foreplay = ((TimeSpent + Utility.RandomFloat(0.25, Level * 1.1)) / Utility.RandomFloat(8.0, 15.0)) as int
 
 	SetInt(ActorRef, "Vaginal", Vaginal)
 	SetInt(ActorRef, "Anal", Anal)
 	SetInt(ActorRef, "Oral", Oral)
 	SetInt(ActorRef, "Foreplay", Foreplay)
-
-	; Seed Sexuality
-	float Gay      = (Utility.RandomFloat(0.0, Level / 2.0) + Math.Abs(LowestRelation))  + Math.Sqrt(Energy * 0.5)
-	float Straight = (Utility.RandomFloat(0.0, Level / 2.0) + Math.Abs(HighestRelation)) + Math.Sqrt(Energy * 0.5) + (Assistance * 1.5)
-	; Cowardly - less likely to have had partners
-	if Confidence == 0.0
-		Gay      *= 0.5
-		Straight *= 0.5
-	endIf
-	; Very aggressive / frenzied - make more likely to have had more
-	if Aggression > 1.0
-		Gay      *= 1.25
-		Straight *= 1.25
-	endIf
-	; Chance for never having had a certain type
-	Gay      *= ((Utility.RandomInt(1, 3) == 3) as float)
-	Straight *= ((Utility.RandomInt(1, 8) == 1) as float)
-
-	if IsFemale
-		SetInt(ActorRef, "Females", Gay as int)
-		SetInt(ActorRef, "Males", Straight as int)
-		SetInt(ActorRef, "Sexuality", CalcSexuality(IsFemale, Straight as int, Gay as int))
-	else
-		SetInt(ActorRef, "Males", Gay as int)
-		SetInt(ActorRef, "Females", Straight as int)
-		SetInt(ActorRef, "Sexuality", CalcSexuality(IsFemale, Gay as int, Straight as int))
-	endIf
 
 	; Seed Pure
 	float Pure = (Morality * 1.25) - (Aggression * 0.5)
@@ -433,8 +433,12 @@ function AddSex(Actor ActorRef, float TimeSpent = 0.0, bool WithPlayer = false, 
 		AdjustInt(ActorRef, "Females", Females)
 		AdjustInt(ActorRef, "Creatures", Creatures)
 		AdjustInt(ActorRef, "SexCount", 1)
-		if !IsAggressive && ActorRef != PlayerRef
-			AdjustSexuality(ActorRef, Males, Females)
+		if ActorRef != PlayerRef
+			if !IsAggressive
+				AdjustSexuality(ActorRef, Males * 2, Females * 2)
+			else
+				AdjustSexuality(ActorRef, Males, Females)
+			endIf
 		endIf
 	else
 		AdjustInt(ActorRef, "Masturbation", 1)
@@ -469,23 +473,26 @@ function AdjustSexuality(Actor ActorRef, int Males, int Females)
 	bool IsFemale = GetGender(ActorRef) == 1
 	int Ratio = GetSkill(ActorRef, "Sexuality")
 	if IsFemale
-		Ratio += Males
-		Ratio -= Females
+		Ratio += (Males - Females)
 	else
-		Ratio += Females
-		Ratio -= Males
+		Ratio += (Females - Males)
 	endIf
-	SetInt(ActorRef, "Sexuality", ClampInt(Ratio, 0, 100))
+	SetInt(ActorRef, "Sexuality", ClampInt(Ratio, 1, 100))
 endFunction
 
 int function GetSexuality(Actor ActorRef)
-	return GetSkill(ActorRef, "Sexuality")
+	int Ratio = GetSkill(ActorRef, "Sexuality")
+	if Ratio > 0
+		return Ratio
+	else
+		return 100
+	endIf
 endFunction
 
 string function GetSexualityTitle(Actor ActorRef)
 	int ratio = GetSkill(ActorRef, "Sexuality")
 	; Return sexuality title
-	if ratio >= 65
+	if ratio >= 65 || ratio == 0
 		return "$SSL_Heterosexual"
 	elseif ratio < 65 && ratio > 35
 		return "$SSL_Bisexual"
