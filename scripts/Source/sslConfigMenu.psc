@@ -66,9 +66,11 @@ event OnKeyDown(int keyCode)
 endEvent
 
 event OnCrosshairRefChange(ObjectReference Ref)
-	if (Ref as Actor)
-		TargetRef = (Ref as Actor)
-		MiscUtil.PrintConsole("SexLab Target: "+TargetRef.GetLeveledActorBase().GetName())
+	TargetRef = (Ref as Actor)
+	if TargetRef != none && TargetRef.HasKeyword(Config.ActorTypeNPC)
+		Stats.SeedActor(StatTarget)
+		Debug.Notification("SexLab Target Selected: "+TargetRef.GetLeveledActorBase().GetName())
+		MiscUtil.PrintConsole("SexLab Target Selected: "+TargetRef.GetLeveledActorBase().GetName())
 		UnregisterforCrosshairRef()
 	endIF
 endEvent
@@ -236,6 +238,21 @@ endFunction
 ; SetPage("", -1)
 ; SetPage("Toggle Animations", 2)
 ; OnPageReset("Information")
+string TargetName
+int TargetFlag
+Actor StatTarget
+event OnConfigOpen()
+	if TargetRef != none && TargetRef.Is3DLoaded()
+		TargetName = TargetRef.GetLeveledActorBase().GetName()
+		TargetFlag = OPTION_FLAG_NONE
+	else
+		TargetRef = none
+		TargetName = "$SSL_NoTarget"
+		TargetFlag = OPTION_FLAG_DISABLED
+	endIf
+	StatTarget = PlayerRef
+endEvent
+
 
 event OnPageReset(string page)
 	int i
@@ -245,11 +262,6 @@ event OnPageReset(string page)
 		return
 	endIf
 	UnloadCustomContent()
-
-	; Clear config target if unloaded
-	if TargetRef != none && !TargetRef.Is3DLoaded()
-		TargetRef == none
-	endIf
 
 	if page == "$SSL_ExpressionEditor"
 		SetCursorFillMode(LEFT_TO_RIGHT)
@@ -273,12 +285,8 @@ event OnPageReset(string page)
 			FlagM = OPTION_FLAG_DISABLED
 		endIf
 
-		AddTextOptionST("ExpressionTestPlayer", "Test On Player", "$SSL_ClickHere")
-		if TargetRef != none
-			AddTextOptionST("ExpressionTestTarget", "Test On "+TargetRef.GetLeveledActorBase().GetName(), "$SSL_ClickHere")
-		else
-			AddTextOption("Test On (No Target)", "$SSL_ClickHere", OPTION_FLAG_DISABLED)
-		endIf
+		AddTextOptionST("ExpressionTestPlayer", "$SSL_TestOnPlayer", "$SSL_Apply")
+		AddTextOptionST("ExpressionTestTarget", "$SSL_TestOn{"+TargetName+"}", "$SSL_Apply", TargetFlag)
 
 		AddEmptyOption()
 		AddEmptyOption()
@@ -383,12 +391,12 @@ event OnPageReset(string page)
 		; Voices & SFX
 		AddMenuOptionST("PlayerVoice","$SSL_PCVoice", VoiceSlots.GetSavedName(PlayerRef))
 		AddToggleOptionST("NPCSaveVoice","$SSL_NPCSaveVoice", Config.bNPCSaveVoice)
-		AddSliderOptionST("SFXVolume","$SSL_SFXVolume", (Config.fSFXVolume * 100), "{0}%")
+		AddMenuOptionST("TargetVoice","$SSL_Target{"+TargetName+"}Voice", VoiceSlots.GetSavedName(TargetRef), TargetFlag)
 		AddSliderOptionST("VoiceVolume","$SSL_VoiceVolume", (Config.fVoiceVolume * 100), "{0}%")
+		AddSliderOptionST("SFXVolume","$SSL_SFXVolume", (Config.fSFXVolume * 100), "{0}%")
 		AddSliderOptionST("MaleVoiceDelay","$SSL_MaleVoiceDelay", Config.fMaleVoiceDelay, "$SSL_Seconds")
-		AddSliderOptionST("FemaleVoiceDelay","$SSL_FemaleVoiceDelay", Config.fFemaleVoiceDelay, "$SSL_Seconds")
 		AddSliderOptionST("SFXDelay","$SSL_SFXDelay", Config.fSFXDelay, "$SSL_Seconds")
-		AddEmptyOption()
+		AddSliderOptionST("FemaleVoiceDelay","$SSL_FemaleVoiceDelay", Config.fFemaleVoiceDelay, "$SSL_Seconds")
 
 		; Toggle Voices
 		AddHeaderOption("$SSL_ToggleVoices")
@@ -416,6 +424,9 @@ event OnPageReset(string page)
 		AddKeyMapOptionST("RestoreOffsets","$SSL_DeleteSavedAdjustments", Config.kRestoreOffsets)
 
 		SetCursorPosition(1)
+		AddHeaderOption("$SSL_GlobalHotkeys")
+		AddKeyMapOptionST("TargetActor", "$SSL_TargetActor", Config.kTargetActor)
+		AddKeyMapOptionST("ToggleFreeCamera", "$SSL_ToggleFreeCamera", Config.kToggleFreeCamera)
 
 		AddHeaderOption("$SSL_SceneManipulation")
 		AddKeyMapOptionST("RealignActors","$SSL_RealignActors", Config.kRealignActors)
@@ -424,7 +435,6 @@ event OnPageReset(string page)
 		AddKeyMapOptionST("ChangeAnimation", "$SSL_ChangeAnimationSet", Config.kChangeAnimation)
 		AddKeyMapOptionST("ChangePositions", "$SSL_SwapActorPositions", Config.kChangePositions)
 		AddKeyMapOptionST("MoveSceneLocation", "$SSL_MoveSceneLocation", Config.kMoveScene)
-		AddKeyMapOptionST("ToggleFreeCamera", "$SSL_ToggleFreeCamera", Config.kToggleFreeCamera)
 
 	; Normal timers + stripping
 	elseIf page == "$SSL_NormalTimersStripping"
@@ -614,32 +624,35 @@ event OnPageReset(string page)
 	elseIf page == "$SSL_SexDiary" || page == "$SSL_SexJournal"
 		SetCursorFillMode(TOP_TO_BOTTOM)
 
-		AddHeaderOption("$SSL_SexualExperience")
-		AddTextOption("$SSL_TimeSpentHavingSex", Stats.ParseTime(Stats.GetFloat(PlayerRef, "TimeSpent") as int))
-		AddTextOption("$SSL_VaginalExperience", Stats.GetSkill(PlayerRef, "Vaginal"))
-		AddTextOption("$SSL_AnalExperience", Stats.GetSkill(PlayerRef, "Anal"))
-		AddTextOption("$SSL_OralExperience", Stats.GetSkill(PlayerRef, "Oral"))
-		AddTextOption("$SSL_ForeplayExperience", Stats.GetSkill(PlayerRef, "Foreplay"))
+		if TargetRef != StatTarget
+			AddTextOptionST("SetStatTarget", "$SSL_Viewing{"+StatTarget.GetLeveledActorBase().GetName()+"}", "$SSL_View{"+TargetName+"}", TargetFlag)
+		else
+			AddTextOptionST("SetStatTarget", "$SSL_Viewing{"+TargetName+"}", "$SSL_View{"+PlayerRef.GetLeveledActorBase().GetName()+"}")
+		endIf
 
-		AddTextOption("$SSL_MaleSexualPartners", Stats.GetInt(PlayerRef, "Males"))
-		AddTextOption("$SSL_FemaleSexualPartners", Stats.GetInt(PlayerRef, "Females"))
-		AddTextOption("$SSL_CreatureSexualPartners", Stats.GetInt(PlayerRef, "Creatures"))
-		AddTextOption("$SSL_TimesMasturbated", Stats.GetInt(PlayerRef, "Masturbation"))
-		AddTextOption("$SSL_TimesAggressive", Stats.GetInt(PlayerRef, "Aggressor"))
-		AddTextOption("$SSL_TimesVictim", Stats.GetInt(PlayerRef, "Victim"))
+		AddHeaderOption("$SSL_SexualExperience")
+		AddTextOption("$SSL_TimeSpentHavingSex", Stats.ParseTime(Stats.GetFloat(StatTarget, "TimeSpent") as int))
+		AddTextOption("$SSL_VaginalProficiency", Stats.GetSkillTitle(StatTarget, "Vaginal"))
+		AddTextOption("$SSL_AnalProficiency", Stats.GetSkillTitle(StatTarget, "Anal"))
+		AddTextOption("$SSL_OralProficiency", Stats.GetSkillTitle(StatTarget, "Oral"))
+		AddTextOption("$SSL_ForeplayProficiency", Stats.GetSkillTitle(StatTarget, "Foreplay"))
+		AddTextOption("$SSL_SexualPurity", Stats.GetPureTitle(StatTarget))
+		AddTextOption("$SSL_SexualPerversion", Stats.GetLewdTitle(StatTarget))
+		AddEmptyOption()
+
 
 		SetCursorPosition(1)
+
+		AddTextOptionST("ResetTargetStats", "$SSL_Reset{"+StatTarget.GetLeveledActorBase().GetName()+"}Stats", "$SSL_ClickHere")
+
 		AddHeaderOption("$SSL_SexualStats")
-		AddTextOption("$SSL_TimeSinceLastSex", Stats.LastSexTimerString(PlayerRef))
-		AddTextOption("$SSL_VaginalProficiency", Stats.GetSkillTitle(PlayerRef, "Vaginal"))
-		AddTextOption("$SSL_AnalProficiency", Stats.GetSkillTitle(PlayerRef, "Anal"))
-		AddTextOption("$SSL_OralProficiency", Stats.GetSkillTitle(PlayerRef, "Oral"))
-		AddTextOption("$SSL_ForeplayProficiency", Stats.GetSkillTitle(PlayerRef, "Foreplay"))
-
-		AddTextOptionST("PlayerSexuality", "$SSL_Sexuality", Stats.GetSexualityTitle(PlayerRef))
-		AddTextOption("$SSL_SexualPurity", Stats.GetPureTitle(PlayerRef))
-		AddTextOption("$SSL_SexualPerversion", Stats.GetLewdTitle(PlayerRef))
-
+		AddTextOptionST("SetStatSexuality", "$SSL_Sexuality", Stats.GetSexualityTitle(StatTarget))
+		AddTextOption("$SSL_MaleSexualPartners", Stats.GetInt(StatTarget, "Males"))
+		AddTextOption("$SSL_FemaleSexualPartners", Stats.GetInt(StatTarget, "Females"))
+		AddTextOption("$SSL_CreatureSexualPartners", Stats.GetInt(StatTarget, "Creatures"))
+		AddTextOption("$SSL_TimesMasturbated", Stats.GetInt(StatTarget, "Masturbation"))
+		AddTextOption("$SSL_TimesAggressive", Stats.GetInt(StatTarget, "Aggressor"))
+		AddTextOption("$SSL_TimesVictim", Stats.GetInt(StatTarget, "Victim"))
 		AddEmptyOption()
 
 	; System rebuild & clean
@@ -1377,6 +1390,37 @@ state PlayerVoice
 		SetInfoText("$SSL_InfoPlayerVoice")
 	endEvent
 endState
+state TargetVoice
+	event OnMenuOpenST()
+		int i = VoiceSlots.Slotted
+		string[] VoiceNames = sslUtility.StringArray(i + 1)
+		VoiceNames[0] = "$SSL_Random"
+		while i
+			i -= 1
+			VoiceNames[(i + 1)] = VoiceSlots.Voices[i].Name
+		endWhile
+		SetMenuDialogStartIndex(VoiceSlots.FindSaved(TargetRef) + 1)
+		SetMenuDialogDefaultIndex(0)
+		SetMenuDialogOptions(VoiceNames)
+	endEvent
+	event OnMenuAcceptST(int i)
+		i -= 1
+		if i < 0
+			VoiceSlots.ForgetVoice(TargetRef)
+			SetMenuOptionValueST("$SSL_Random")
+		else
+			VoiceSlots.SaveVoice(TargetRef, VoiceSlots.GetBySlot(i))
+			SetMenuOptionValueST(VoiceSlots.GetBySlot(i).Name)
+		endIf
+	endEvent
+	event OnDefaultST()
+		VoiceSlots.ForgetVoice(TargetRef)
+		SetMenuOptionValueST("$SSL_Random")
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoPlayerVoice")
+	endEvent
+endState
 state NPCSaveVoice
 	event OnSelectST()
 		Config.bNPCSaveVoice = !Config.bNPCSaveVoice
@@ -1713,6 +1757,25 @@ state EndAnimation
 		SetInfoText("$SSL_InfoEndAnimation")
 	endEvent
 endState
+state TargetActor
+	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
+		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+			Config.kTargetActor = newKeyCode
+			UnregisterForAllKeys()
+			RegisterForKey(Config.kTargetActor)
+			SetKeyMapOptionValueST(Config.kTargetActor)
+		endIf
+	endEvent
+	event OnDefaultST()
+		Config.kTargetActor = 49
+		UnregisterForAllKeys()
+		RegisterForKey(Config.kTargetActor)
+		SetKeyMapOptionValueST(Config.kTargetActor)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoTargetActor")
+	endEvent
+endState
 state ToggleFreeCamera
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
@@ -1730,20 +1793,37 @@ state ToggleFreeCamera
 		SetInfoText("$SSL_InfoToggleFreeCamera")
 	endEvent
 endState
-state PlayerSexuality
+state SetStatTarget
 	event OnSelectST()
-		int Ratio = Stats.GetSexuality(PlayerRef)
-		if Stats.IsStraight(PlayerRef)
-			Stats.SetInt(PlayerRef, "Sexuality", 50)
-		elseIf Stats.IsBisexual(PlayerRef)
-			Stats.SetInt(PlayerRef, "Sexuality", 0)
+		if StatTarget == PlayerRef || TargetRef == none
+			StatTarget = TargetRef
 		else
-			Stats.SetInt(PlayerRef, "Sexuality", 100)
+			StatTarget = PlayerRef
 		endIf
-		SetTextOptionValueST(Stats.GetSexualityTitle(PlayerRef))
+		ForcePageReset()
 	endEvent
 endState
-
+state SetStatSexuality
+	event OnSelectST()
+		int Ratio = Stats.GetSexuality(StatTarget)
+		if Stats.IsStraight(StatTarget)
+			Stats.SetInt(StatTarget, "Sexuality", 50)
+		elseIf Stats.IsBisexual(StatTarget)
+			Stats.SetInt(StatTarget, "Sexuality", 0)
+		else
+			Stats.SetInt(StatTarget, "Sexuality", 100)
+		endIf
+		SetTextOptionValueST(Stats.GetSexualityTitle(StatTarget))
+	endEvent
+endState
+state ResetTargetStats
+	event OnSelectST()
+		if ShowMessage("$SSL_WarnReset{"+StatTarget.GetLeveledActorBase().GetName()+"}Stats")
+			Stats.ResetStats(StatTarget)
+			ForcePageReset()
+		endIf
+	endEvent
+endState
 
 state ToggleSystem
 	event OnSelectST()

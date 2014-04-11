@@ -97,6 +97,9 @@ sslBaseVoice function GetSaved(Actor ActorRef)
 endFunction
 
 string function GetSavedName(Actor ActorRef)
+	if ActorRef == none
+		return "$SSL_Random"
+	endIf
 	sslBaseVoice Voice = GetSaved(ActorRef)
 	if Voice == none
 		return "$SSL_Random"
