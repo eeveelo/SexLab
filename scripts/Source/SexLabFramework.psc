@@ -735,18 +735,25 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function Setup()
-	; Reset function Libraries - SexLabQuestFramework
-	Quest SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm") as Quest
-	Config      = SexLabQuestFramework as sslSystemConfig
-	ThreadLib   = SexLabQuestFramework as sslThreadLibrary
-	ThreadSlots = SexLabQuestFramework as sslThreadSlots
-	ActorLib    = SexLabQuestFramework.GetAliasByName("SystemAlias") as sslActorLibrary
-	Stats       = SexLabQuestFramework.GetAliasByName("SystemAlias") as sslActorStats
-	; Reset animation registry - SexLabQuestAnimations
+	; Reset quests
+	Quest SexLabQuestFramework  = Game.GetFormFromFile(0xD62, "SexLab.esm") as Quest
 	Quest SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm") as Quest
-	AnimSlots = SexLabQuestAnimations as sslAnimationSlots
+	Quest SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm") as Quest
+	SexLabQuestFramework.Stop()
+	SexLabQuestFramework.Start()
+	SexLabQuestAnimations.Stop()
+	SexLabQuestAnimations.Start()
+	SexLabQuestRegistry.Stop()
+	SexLabQuestRegistry.Start()
+	; Reset function Libraries - SexLabQuestFramework
+	Config          = SexLabQuestFramework as sslSystemConfig
+	ThreadLib       = SexLabQuestFramework as sslThreadLibrary
+	ThreadSlots     = SexLabQuestFramework as sslThreadSlots
+	ActorLib        = SexLabQuestFramework.GetAliasByName("SystemAlias") as sslActorLibrary
+	Stats           = SexLabQuestFramework.GetAliasByName("SystemAlias") as sslActorStats
+	; Reset animation registry - SexLabQuestAnimations
+	AnimSlots       = SexLabQuestAnimations as sslAnimationSlots
 	; Reset secondary object registry - SexLabQuestRegistry
-	Quest SexLabQuestRegistry = Game.GetFormFromFile(0x664FB, "SexLab.esm") as Quest
 	CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
 	VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
 	ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots

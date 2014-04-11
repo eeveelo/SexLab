@@ -47,6 +47,7 @@ state Prepare
 		ActorAlias[4].StartAnimating()
 		; Send starter events
 		StartedAt = Utility.GetCurrentRealTime()
+		SkillTime = Utility.GetCurrentRealTime()
 		SendThreadEvent("AnimationStart")
 		if LeadIn
 			SendThreadEvent("LeadInStart")
@@ -54,6 +55,9 @@ state Prepare
 		; Begin animating loop
 		Action("Advancing")
 	endEvent
+
+	function RecordSkills()
+	endFunction
 endState
 
 ; ------------------------------------------------------- ;
@@ -324,8 +328,8 @@ function SetAnimation(int aid = -1)
 	endIf
 	; Set active animation
 	Animation = Animations[aid]
-	UpdateAdjustKey()
 	RecordSkills()
+	UpdateAdjustKey()
 	; Update animation info
 	string[] Tags = Animation.GetTags()
 	IsVaginal   = Tags.Find("Vaginal") != -1 && Females > 0
@@ -393,7 +397,6 @@ endFunction
 
 function EndAnimation(bool Quickly = false)
 	UnregisterForUpdate()
-	GoToState("Ending")
 	DisableHotkeys()
 	RecordSkills()
 	; Set fast flag to skip slow ending functions
@@ -401,7 +404,7 @@ function EndAnimation(bool Quickly = false)
 	Stage = StageCount
 	; Send end event
 	RegisterForSingleUpdate(15.0)
-	SendThreadEvent("AnimationEnd")
+	GoToState("Ending")
 	AliasEvent("Reset")
 endFunction
 
@@ -411,6 +414,7 @@ state Ending
 		RegisterForSingleUpdate(1.0)
 	endFunction
 	event OnUpdate()
+		SendThreadEvent("AnimationEnd")
 		Initialize()
 	endEvent
 endState
@@ -463,7 +467,6 @@ function Initialize()
 	AdjustAlias = ActorAlias[0]
 	parent.Initialize()
 endFunction
-
 
 auto state Unlocked
 	function EndAnimation(bool Quickly = false)

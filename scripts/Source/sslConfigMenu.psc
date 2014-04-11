@@ -22,6 +22,8 @@ function SetupSystem()
 		Utility.Wait(1.0)
 	endWhile
 	Debug.Notification("Installing SexLab v"+GetStringVer())
+	; Stop()
+	; Start()
 	; Init Defaults and check is sytem is able to install
 	if SetDefaults()
 		; Disable system from being used during setup
@@ -43,26 +45,33 @@ endFunction
 event OnGameReload()
 	parent.OnGameReload()
 	Debug.Trace("SexLab Loaded CurrentVerison: "+CurrentVersion)
-	if CurrentVersion > 0 && !CheckSystem()
+	; Ensure we have the important varables
+	Quest SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm") as Quest
+	SexLab = SexLabQuestFramework as SexLabFramework
+	Config = SexLabQuestFramework as sslSystemConfig
+	; Reload SexLab's voice/tfc config at load
+	if CurrentVersion > 0 && Config.CheckSystem()
+		Config.ReloadConfig()
+	else
 		SexLab.GoToState("Disabled")
 	endIf
-	if Config != none
-		; TFC Toggle key
-		Config.ToggleFreeCameraEnable()
-		; Configure SFX & Voice volumes
-		AudioVoice.SetVolume(Config.fVoiceVolume)
-		AudioSFX.SetVolume(Config.fSFXVolume)
-	endIf
-	; ; Import JSON adjustments
-	; if AnimSlots != none && CreatureSlots != none
-	; 	AnimSlots.ImportAdjustments()
-	; 	CreatureSlots.ImportAdjustments()
-	; endIf
 endEvent
+
+; Data
+Actor property PlayerRef auto
+Message property CleanSystemFinish auto
+
+; Expression editor
+int property Male = 0 autoreadonly
+int property Female = 1 autoreadonly
+int property Phoneme = 0 autoreadonly
+int property Modifier = 16 autoreadonly
+int property Mood = 30 autoreadonly
 
 ; Framework
 SexLabFramework property SexLab auto
-sslSystemConfig Config
+sslSystemConfig property Config auto
+
 ; Libraries
 sslActorLibrary ActorLib
 sslThreadLibrary ThreadLib
@@ -74,17 +83,11 @@ sslThreadSlots ThreadSlots
 sslVoiceSlots VoiceSlots
 sslExpressionSlots ExpressionSlots
 
-; Data
-Actor property PlayerRef auto
-SoundCategory property AudioSFX auto
-SoundCategory property AudioVoice auto
+sslBaseExpression Expression
+int Phase
 
-Message property CleanSystemFinish auto
-Message property CheckSKSE auto
-Message property CheckFNIS auto
-Message property CheckSkyrim auto
-Message property CheckPapyrusUtil auto
-Message property CheckSkyUI auto
+string SubMenu
+string[] Moods
 
 ; OIDs
 int[] oidStageTimer
@@ -110,18 +113,6 @@ int[] oidFemalePhonemes
 int[] oidMaleModifiers
 int[] oidMalePhonemes
 
-; Expression editor
-int property Male = 0 autoreadonly
-int property Female = 1 autoreadonly
-int property Phoneme = 0 autoreadonly
-int property Modifier = 16 autoreadonly
-int property Mood = 30 autoreadonly
-
-sslBaseExpression Expression
-int Phase
-
-string SubMenu
-string[] Moods
 
 bool function SetDefaults()
 	; MCM option pages
@@ -193,16 +184,16 @@ bool function SetDefaults()
 	oidMalePhonemes              = new int[16]
 
 	; Check system install before we continue
-	if !CheckSystem()
+	if !Config.CheckSystem()
 		SexLab.GoToState("Disabled")
 		return false
 	endIf
 
 	; Prepare base framework script
 	SexLab.Setup()
+	Config.SetDefaults()
 
 	; Grab libraries to make sure they are all set properly
-	Config          = SexLab.Config
 	ActorLib        = SexLab.ActorLib
 	ThreadLib       = SexLab.ThreadLib
 	Stats           = SexLab.Stats
@@ -212,34 +203,6 @@ bool function SetDefaults()
 	VoiceSlots      = SexLab.VoiceSlots
 	ExpressionSlots = SexLab.ExpressionSlots
 
-	; Init default settings
-	Config.SetDefaults()
-	Config.ToggleFreeCameraEnable()
-	AudioVoice.SetVolume(Config.fVoiceVolume)
-	AudioSFX.SetVolume(Config.fSFXVolume)
-
-	return true
-endFunction
-
-bool function CheckSystem()
-	; Check Skyrim Version
-	if (StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float) < 1.9
-		CheckSkyrim.Show()
-		return false
-	; Check SKSE install
-	elseIf SKSE.GetScriptVersionRelease() < 45
-		CheckSKSE.Show(1.7)
-		return false
-	; Check SkyUI install - depends on passing SKSE check passing
-	elseIf Quest.GetQuest("SKI_ConfigManagerInstance") == none
-		CheckSkyUI.Show(4.1)
-		return false
-	; Check PapyrusUtil install - depends on passing SKSE check passing
-	elseIf PapyrusUtil.GetVersion() < 19
-		CheckPapyrusUtil.Show(1.9)
-		return false
-	endIf
-	; Return result
 	return true
 endFunction
 
@@ -1021,17 +984,16 @@ event OnOptionSelect(int option)
 
 	elseIf CurrentPage == "$SSL_RebuildClean"
 		i = oidRemoveStrapon.Find(option)
-		form[] newStrapons
-		form[] strapons = ActorLib.Strapons
-		form toRemove = strapons[i]
-		int s = strapons.Length
-		while s
-			s -= 1
-			if strapons[s] != toRemove
-				newStrapons = PushForm(strapons[s], newStrapons)
+		Form[] Output
+		Form[] Strapons = Config.Strapons
+		int n = Strapons.Length
+		while n
+			n -= 1
+			if n != i
+				Output = PushForm(Strapons[n], Output)
 			endIf
 		endWhile
-		ActorLib.Strapons = newStrapons
+		Config.Strapons = Output
 		ForcePageReset()
 	endIf
 endEvent
@@ -1384,7 +1346,7 @@ state SFXVolume
 	endEvent
 	event OnSliderAcceptST(float value)
 		Config.fSFXVolume = (value / 100.0)
-		AudioSFX.SetVolume(Config.fSFXVolume)
+		Config.AudioSFX.SetVolume(Config.fSFXVolume)
 		SetSliderOptionValueST(value, "{0}%")
 	endEvent
 	event OnDefaultST()
@@ -1404,7 +1366,7 @@ state VoiceVolume
 	endEvent
 	event OnSliderAcceptST(float value)
 		Config.fVoiceVolume = (value / 100.0)
-		AudioVoice.SetVolume(Config.fVoiceVolume)
+		Config.AudioVoice.SetVolume(Config.fVoiceVolume)
 		SetSliderOptionValueST(value, "{0}%")
 	endEvent
 	event OnDefaultST()
@@ -1702,14 +1664,14 @@ state ToggleFreeCamera
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
 			Config.kToggleFreeCamera = newKeyCode
+			Config.ReloadConfig()
 			SetKeyMapOptionValueST(Config.kToggleFreeCamera)
-			Config.ToggleFreeCameraEnable()
 		endIf
 	endEvent
 	event OnDefaultST()
 		Config.kToggleFreeCamera = 81
+		Config.ReloadConfig()
 		SetKeyMapOptionValueST(Config.kToggleFreeCamera)
-		Config.ToggleFreeCameraEnable()
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoToggleFreeCamera")
@@ -1765,7 +1727,7 @@ endState
 state ResetPlayerSexStats
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnResetStats")
-			Stats.ResetActor(PlayerRef)
+			Stats.ResetStats(PlayerRef)
 			Debug.Notification("$SSL_RunResetStats")
 		endIf
 	endEvent
@@ -1774,16 +1736,16 @@ state CleanSystem
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnCleanSystem")
 			ShowMessage("$SSL_RunCleanSystem", false)
-			Utility.Wait(0.10)
+			Utility.Wait(0.1)
 			SetupSystem()
-			CleanSystemFinish.Show()
+			Config.CleanSystemFinish.Show()
 		endIf
 	endEvent
 endState
 state RebuildStraponList
 	event OnSelectST()
 		Config.FindStrapons()
-		if ActorLib.Strapons.Length > 0
+		if Config.Strapons.Length > 0
 			ShowMessage("$SSL_FoundStrapon", false)
 		else
 			ShowMessage("$SSL_NoStrapons", false)
@@ -1794,7 +1756,7 @@ endState
 state ExportSettings
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnExportSettings")
-			Config.ExportJSON()
+			Config.ExportSettings()
 			StorageUtil.FileSetIntValue("SexLabConfig.Exported", 1)
 			ShowMessage("$SSL_RunExportSettings", false)
 		endIf
@@ -1808,7 +1770,7 @@ state ImportSettings
 		if StorageUtil.FileGetIntValue("SexLabConfig.Exported") != 1
 			ShowMessage("$SSL_WarnImportSettingsEmpty", false)
 		elseif ShowMessage("$SSL_WarnImportSettings")
-			Config.ImportJSON()
+			Config.ImportSettings()
 			StorageUtil.FileUnsetIntValue("SexLabConfig.Exported")
 			ShowMessage("$SSL_RunImportSettings", false)
 		endIf

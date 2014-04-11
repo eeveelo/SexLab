@@ -735,19 +735,19 @@ float[] function GetSkillBonus()
 	float[] Bonus = new float[6]
 	Bonus[0] = SkillXP[0] as float
 	if IsVaginal
-		Bonus[1] = SkillXP[1] as float
+		Bonus[1] = 1.0 + SkillXP[1] as float
 	endIf
 	if IsAnal
-		Bonus[2] = SkillXP[2] as float
+		Bonus[2] = 1.0 + SkillXP[2] as float
 	endIf
 	if IsOral
-		Bonus[3] = SkillXP[3] as float
+		Bonus[3] = 1.0 + SkillXP[3] as float
 	endIf
 	if IsLoving
-		Bonus[4] = SkillXP[4] as float
+		Bonus[4] = 1.0 + SkillXP[4] as float
 	endIf
 	if IsDirty
-		Bonus[5] = SkillXP[5] as float
+		Bonus[5] = 1.0 + SkillXP[5] as float
 	endIf
 	return Bonus
 endFunction
@@ -856,7 +856,7 @@ auto state Unlocked
 	sslThreadModel function Make()
 		Initialize()
 		GoToState("Making")
-		RegisterForSingleUpdate(30.0)
+		RegisterForSingleUpdate(60.0)
 		return self
 	endFunction
 	function EnableHotkeys()

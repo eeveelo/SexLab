@@ -1,4 +1,4 @@
-scriptname sslActorAlias extends sslActorLibrary
+scriptname sslActorAlias extends sslActorStats
 
 import StorageUtil
 import sslUtility
@@ -85,8 +85,7 @@ function ClearAlias()
 	Thread = GetOwningQuest() as sslThreadController
 	; Make sure actor is reset
 	if GetReference() != none
-		Debug.TraceStack("Clear")
-		Thread.Log("Had actor '"+GetReference()+"' during clear!", self)
+		Log(self+" had actor '"+GetReference()+"' during clear!", "FATAL")
 		; Init variables needed for reset
 		ActorRef   = GetReference() as Actor
 		BaseRef    = ActorRef.GetLeveledActorBase()
@@ -96,6 +95,7 @@ function ClearAlias()
 		RestoreActorDefaults()
 		StopAnimating(true)
 		UnlockActor()
+		Unstrip()
 	endIf
 	TryToClear()
 	Initialize()
@@ -120,8 +120,9 @@ bool function SetupAlias(Actor ProspectRef, bool Victimize = false, sslBaseVoice
 	IsVictim   = Victimize
 	ActorVoice = ActorRef.GetVoiceType()
 	SetVoice(UseVoice, ForceSilent)
-	if !IsCreature
+	if !IsCreature && !IsPlayer
 		CacheStrippable(ActorRef)
+		SeedActor(ActorRef)
 	endIf
 	; Get ready for mod events
 	string e = Thread.Key("")
@@ -131,7 +132,7 @@ bool function SetupAlias(Actor ProspectRef, bool Victimize = false, sslBaseVoice
 	RegisterForModEvent(e+"Orgasm", "OrgasmEffect")
 	RegisterForModEvent(e+"Strip", "Strip")
 	; Ready
-	Thread.Log("Slotted '"+ActorName+"'", self)
+	Log("Slotted '"+ActorName+"'", self)
 	GoToState("Ready")
 	return true
 endFunction
@@ -165,14 +166,11 @@ state Ready
 		endIf
 		; Stop movement
 		LockActor()
-		; Enter animatable state - rest is non vital and can finish as queued
-		GoToState("Animating")
-		Thread.AliasEventDone("Prepare")
 		; Strip non creatures
 		if !IsCreature
 			; Pick a strapon on females to use
-			if IsFemale && Config.bUseStrapons && Strapons.Length > 0
-				Strapon = Strapons[Utility.RandomInt(0, (Strapons.Length - 1))]
+			if IsFemale && Config.bUseStrapons && Config.Strapons.Length > 0
+				Strapon = Config.GetStrapon()
 				ActorRef.AddItem(Strapon, 1, true)
 			endIf
 			; Strip actor
@@ -186,7 +184,7 @@ state Ready
 				Expression = ExpressionSlots.PickExpression(((IsVictim as int) + (Thread.IsAggressive as int)))
 			endIf
 			; Check for heterosexual preference
-			IsStraight = Stats.IsStraight(ActorRef)
+			IsStraight = IsStraight(ActorRef)
 			Actor SkilledActor = ActorRef
 			; Always use players stats if present, so players stats mean something more for npcs
 			if !IsPlayer && Thread.HasPlayer
@@ -195,13 +193,18 @@ state Ready
 			elseIf Thread.ActorCount == 2 && !Thread.HasCreature
 				SkilledActor = Thread.Positions[IndexTravel(Thread.Positions.Find(ActorRef), Thread.ActorCount)]
 			endIf
-			Skills = Stats.GetSkillLevels(SkilledActor)
+			Skills = GetSkillLevels(SkilledActor)
 			Thread.Log(SkilledActor.GetLeveledActorBase().GetName()+" Skills: "+Skills, ActorName)
 			; Start Auto TFC if enabled
 			if IsPlayer && Config.bAutoTFC && Game.GetCameraState() != 3
 				Config.ToggleFreeCamera()
 			endIf
 		endIf
+		; Enter animatable state - rest is non vital and can finish as queued
+		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
+		Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
+		GoToState("Animating")
+		Thread.AliasEventDone("Prepare")
 	endFunction
 endState
 
@@ -213,12 +216,11 @@ state Animating
 
 	function StartAnimating()
 		; Position / fix SOS side bend
-		Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 		Utility.Wait(0.2)
 		SyncThread()
 		SyncLocation(true)
 		ActorRef.StopTranslation()
-		Snap()
+		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 50000, 0)
 		; Start update loop
 		RegisterForSingleUpdate(Utility.RandomFloat(1.5, 3.0))
 	endFunction
@@ -228,6 +230,10 @@ state Animating
 		if ActorRef.IsDead() || ActorRef.IsDisabled()
 			Thread.EndAnimation(true)
 			return
+		endIf
+		; Ping thread to update skill xp
+		if Position == 0
+			Thread.RecordSkills()
 		endIf
 		; Sync enjoyment level
 		GetEnjoyment()
@@ -327,7 +333,7 @@ state Animating
 			return ; OnTranslationComplete() will take over when in place
 		endIf
 		; Begin very slowly rotating a small amount to hold position
-		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.01, 1.0, 10000, 0.0001)
+		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.001, 1.0, 10000, 0.0001)
 	endFunction
 
 	event OnTranslationComplete()
@@ -359,32 +365,27 @@ state Animating
 	event ResetActor()
 		UnregisterForUpdate()
 		UnregisterForAllModEvents()
-		; Restore scale and voicetype
-		RestoreActorDefaults()
+		GoToState("")
+		; Update stats
+		if !IsCreature
+			int[] Genders = Thread.Genders
+			float[] SkillXP = Thread.SkillXP
+			AddSkillXP(ActorRef, SkillXP[0], SkillXP[1], SkillXP[2], SkillXP[3])
+			AddPurityXP(ActorRef, Skills[4], SkillXP[5], Thread.IsAggressive, IsVictim, Genders[2] > 0, Thread.ActorCount, Thread.GetHighestPresentRelationshipRank(ActorRef))
+			AddSex(ActorRef, Thread.TotalTime, Thread.HasPlayer, Thread.IsAggressive, Genders[0], Genders[1], Genders[2])
+		endIf
 		; Apply cum
 		int CumID = Animation.GetCum(Position)
 		if !Thread.FastEnd && CumID > 0 && Config.bUseCum && (Thread.Males > 0 || Config.bAllowFFCum || Thread.HasCreature)
 			ApplyCum(ActorRef, CumID)
 		endIf
-		; Stop animating
+		; Restore actor to starting point
+		RestoreActorDefaults()
 		StopAnimating(Thread.FastEnd)
 		UnlockActor()
-		if !IsCreature
-			; Unstrip
-			if !ActorRef.IsDead()
-				Unstrip()
-			endIf
-			; Remove strapon
-			if Strapon != none
-				ActorRef.UnequipItem(Strapon, true, true)
-				ActorRef.RemoveItem(Strapon, 1, true)
-			endIf
-			; Update stats
-			int[] Genders = Thread.Genders
-			Stats.AddSex(ActorRef, Thread.TotalTime, Thread.HasPlayer, Genders[0], Genders[1], Genders[2])
-			float[] SkillXP = Thread.SkillXP
-			Stats.AddSkillXP(ActorRef, SkillXP[0], SkillXP[1], SkillXP[2], SkillXP[3])
-			Stats.AddPurityXP(ActorRef, Skills[4], SkillXP[5], Thread.IsAggressive, IsVictim, Genders[2] > 0, Thread.ActorCount, Thread.GetHighestPresentRelationshipRank(ActorRef))
+		; Unstrip items in storage, if any
+		if !ActorRef.IsDead()
+			Unstrip()
 		endIf
 		; Reset alias
 		TryToClear()
@@ -394,21 +395,18 @@ state Animating
 
 	int function GetEnjoyment()
 		; First actor pings thread to update skill xp
-		if Position == 0
-			Thread.RecordSkills()
-		endIf
 		float[] XP = Thread.GetSkillBonus()
 		; Gender skill bonuses
 		if IsFemale
-			XP[0] = XP[0] + (Skills[0] * 1.3) ; Foreplay
-			XP[1] = XP[1] + (Skills[1] * 1.8) ; Vaginal
-			XP[2] = XP[2] + (Skills[2] * 1.3) ; Anal
-			XP[3] = XP[3] + (Skills[3] * 1.4) ; Oral
+			XP[0] = ((XP[0] > 0.0) as int) * (XP[0] + (Skills[0] * 1.3)) ; Foreplay
+			XP[1] = ((XP[1] > 0.0) as int) * (XP[1] + (Skills[1] * 1.6)) ; Vaginal
+			XP[2] = ((XP[2] > 0.0) as int) * (XP[2] + (Skills[2] * 1.3)) ; Anal
+			XP[3] = ((XP[3] > 0.0) as int) * (XP[3] + (Skills[3] * 1.2)) ; Oral
 		else
-			XP[0] = XP[0] + (Skills[0] * 1.1) ; Foreplay
-			XP[1] = XP[1] + (Skills[1] * 1.7) ; Vaginal
-			XP[2] = XP[2] + (Skills[2] * 1.7) ; Anal
-			XP[3] = XP[3] + (Skills[3] * 1.7) ; Oral
+			XP[0] = ((XP[0] > 0.0) as int) * (XP[0] + (Skills[0] * 1.1)) ; Foreplay
+			XP[1] = ((XP[1] > 0.0) as int) * (XP[1] + (Skills[1] * 1.5)) ; Vaginal
+			XP[2] = ((XP[2] > 0.0) as int) * (XP[2] + (Skills[2] * 1.5)) ; Anal
+			XP[3] = ((XP[3] > 0.0) as int) * (XP[3] + (Skills[3] * 1.5)) ; Oral
 		endIf
 		; Purity Bonuses
 		XP[4] = XP[4] + (Skills[4] * 1.5)
@@ -434,6 +432,7 @@ state Animating
 			TimeBonus   *= 0.8
 			StageBonus  *= 0.8
 		endIf
+
 		; Actor is outside sexuality comfort zone
 		; if IsStraight
 		; 	if (IsFemale && Thread.Females > 1) || (!IsFemale && Thread.Males > 1)
@@ -445,8 +444,7 @@ state Animating
 
 		; Set final enjoyment
 		Enjoyment = (SkillBonus + PurityBonus + StageBonus + TimeBonus) as int
-		Thread.Log("Skill: "+SkillBonus+" PurityBonus: "+PurityBonus+" Stage: "+StageBonus+" Time: "+TimeBonus, ActorName)
-		Thread.Log("Enjoyment: "+Enjoyment, ActorName)
+		; Log("Skill: "+SkillBonus+" PurityBonus: "+PurityBonus+" Stage: "+StageBonus+" Time: "+TimeBonus+" -- Enjoyment: "+Enjoyment, ActorName)
 		return Enjoyment
 	endFunction
 
@@ -488,7 +486,7 @@ function StopAnimating(bool Quick = false)
 			ActorRef.StopTranslation()
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
-			ActorRef.PushActorAway(ActorRef, 0.75)
+			ActorRef.PushActorAway(ActorRef, 0.1)
 		endIf
 	endIf
 endFunction
@@ -566,6 +564,11 @@ function RestoreActorDefaults()
 	; Enable player controls
 	if ActorRef == PlayerRef
 		Thread.DisableHotkeys()
+	endIf
+	; Remove strapon
+	if Strapon != none
+		ActorRef.UnequipItem(Strapon, true, true)
+		ActorRef.RemoveItem(Strapon, 1, true)
 	endIf
 	; Reset expression
 	ActorRef.ClearExpressionOverride()

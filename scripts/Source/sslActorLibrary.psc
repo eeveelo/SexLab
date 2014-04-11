@@ -8,7 +8,6 @@ Faction property GenderFaction auto hidden
 Faction property ForbiddenFaction auto hidden
 Weapon property DummyWeapon auto hidden
 Armor property NudeSuit auto hidden
-form[] property Strapons auto hidden
 
 Spell property CumVaginalOralAnalSpell auto hidden
 Spell property CumOralAnalSpell auto hidden
@@ -123,6 +122,11 @@ form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 	if DoAnimate
 		Debug.SendAnimationEvent(ActorRef, "Arrok_Undress_G"+Gender)
 	endIf
+	; Get Nudesuit
+	bool UseNudeSuit = Strip[2] && AllowNudesuit && ((Gender == 0 && Config.bUseMaleNudeSuit) || (Gender == 1  && Config.bUseFemaleNudeSuit)) && !ActorRef.IsEquipped(NudeSuit)
+	if UseNudeSuit
+		ActorRef.AddItem(NudeSuit, 1, true)
+	endIf
 	form[] Stripped = new form[34]
 	; Strip weapon
 	if Strip[32]
@@ -160,7 +164,7 @@ form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 		endIf
 	endWhile
 	; Apply Nudesuit
-	if Strip[2] && AllowNudesuit && ((Gender == 0 && Config.bUseMaleNudeSuit) || (Gender == 1  && Config.bUseFemaleNudeSuit)) && !ActorRef.IsEquipped(NudeSuit)
+	if UseNudeSuit
 		ActorRef.EquipItem(NudeSuit, false, true)
 	endIf
 	; output stripped items
@@ -199,31 +203,32 @@ endFunction
 ; ------------------------------------------------------- ;
 
 int function ValidateActor(Actor ActorRef)
+	ActorBase BaseRef = ActorRef.GetLeveledActorBase()
 	if !ActorRef
 		Log("ValidateActor() -- Failed to validate (NONE) -- Because they don't exist.")
 		return -1
 	elseIf SexLabUtil.IsActorActive(ActorRef)
-		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They appear to already be animating")
+		Log("ValidateActor() -- Failed to validate ("+BaseRef.GetName()+") -- They appear to already be animating")
 		return -10
 	elseIf FormListFind(Storage, "ValidActors", ActorRef) != -1
 		return 1
 	elseIf !CanAnimate(ActorRef)
-		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are forbidden from animating")
+		Log("ValidateActor() -- Failed to validate ("+BaseRef.GetName()+") -- They are forbidden from animating")
 		return -11
 	elseIf !ActorRef.Is3DLoaded()
-		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are not loaded")
+		Log("ValidateActor() -- Failed to validate ("+BaseRef.GetName()+") -- They are not loaded")
 		return -12
 	elseIf ActorRef.IsDead()
-		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- He's dead Jim.")
+		Log("ValidateActor() -- Failed to validate ("+BaseRef.GetName()+") -- He's dead Jim.")
 		return -13
 	elseIf ActorRef.IsDisabled()
-		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are disabled")
+		Log("ValidateActor() -- Failed to validate ("+BaseRef.GetName()+") -- They are disabled")
 		return -14
 	elseIf ActorRef.IsFlying()
-		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are flying.")
+		Log("ValidateActor() -- Failed to validate ("+BaseRef.GetName()+") -- They are flying.")
 		return -15
-	elseIf ActorRef != PlayerRef && !ActorRef.HasKeyword(ActorTypeNPC) && !CreatureSlots.AllowedCreature(ActorRef.GetLeveledActorBase().GetRace())
-		Log("ValidateActor() -- Failed to validate ("+ActorRef.GetLeveledActorBase().GetName()+") -- They are a creature that is currently not supported ("+MiscUtil.GetRaceEditorID(ActorRef.GetLeveledActorBase().GetRace())+")")
+	elseIf ActorRef != PlayerRef && !ActorRef.HasKeyword(ActorTypeNPC) && !CreatureSlots.AllowedCreature(BaseRef.GetRace())
+		Log("ValidateActor() -- Failed to validate ("+BaseRef.GetName()+") -- They are a creature that is currently not supported ("+MiscUtil.GetRaceEditorID(BaseRef.GetRace())+")")
 		return -16
 	endIf
 	FormListAdd(Storage, "ValidActors", ActorRef, false)
@@ -362,7 +367,6 @@ function Setup()
 	ForbiddenFaction        = Config.ForbiddenFaction
 	DummyWeapon             = Config.DummyWeapon
 	NudeSuit                = Config.NudeSuit
-	Strapons                = Config.Strapons
 	CumVaginalOralAnalSpell = Config.CumVaginalOralAnalSpell
 	CumOralAnalSpell        = Config.CumOralAnalSpell
 	CumVaginalOralSpell     = Config.CumVaginalOralSpell

@@ -57,13 +57,20 @@ Sound property SexMixedFX auto
 Static property LocationMarker auto
 FormList property BedsList auto
 FormList property BedRollsList auto
-Message property CheckFNIS auto
 Message property UseBed auto
+Message property CleanSystemFinish auto
+Message property CheckSKSE auto
+Message property CheckFNIS auto
+Message property CheckSkyrim auto
+Message property CheckPapyrusUtil auto
+Message property CheckSkyUI auto
 
 Topic property LipSync auto
 VoiceType property SexLabVoiceM auto
 VoiceType property SexLabVoiceF auto
 FormList property VoicesPlayer auto
+SoundCategory property AudioSFX auto
+SoundCategory property AudioVoice auto
 
 ; ------------------------------------------------------- ;
 ; --- Config Properties                               --- ;
@@ -180,6 +187,13 @@ bool function UsesNudeSuit(bool IsFemale)
 	return ((!IsFemale && bUseMaleNudeSuit) || (IsFemale && bUseFemaleNudeSuit))
 endFunction
 
+Form function GetStrapon()
+	if Strapons.Length > 0
+		return Strapons[Utility.RandomInt(0, (Strapons.Length - 1))]
+	endIf
+	return none
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Hotkeys                                         --- ;
 ; ------------------------------------------------------- ;
@@ -189,11 +203,6 @@ function ToggleFreeCamera()
 		MiscUtil.SetFreeCameraSpeed(fAutoSUCSM)
 	endIf
 	MiscUtil.ToggleFreeCamera()
-endFunction
-
-function ToggleFreeCameraEnable()
-	UnregisterForAllKeys()
-	RegisterForKey(kToggleFreeCamera)
 endFunction
 
 event OnKeyDown(int keyCode)
@@ -312,8 +321,6 @@ function UnequipStrapon(Actor ActorRef)
 	endWhile
 endFunction
 
-
-
 function FindStrapons()
 	Strapons = new form[1]
 	Strapons[0] = CalypsStrapon
@@ -359,6 +366,37 @@ endFunction
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
 
+bool function CheckSystem()
+	; Check Skyrim Version
+	if (StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float) < 1.9
+		CheckSkyrim.Show()
+		return false
+	; Check SKSE install
+	elseIf SKSE.GetScriptVersionRelease() < 45
+		CheckSKSE.Show(1.7)
+		return false
+	; Check SkyUI install - depends on passing SKSE check passing
+	elseIf Quest.GetQuest("SKI_ConfigManagerInstance") == none
+		CheckSkyUI.Show(4.1)
+		return false
+	; Check PapyrusUtil install - depends on passing SKSE check passing
+	elseIf PapyrusUtil.GetVersion() < 19
+		CheckPapyrusUtil.Show(1.9)
+		return false
+	endIf
+	; Return result
+	return true
+endFunction
+
+function ReloadConfig()
+	; TFC Toggle key
+	UnregisterForAllKeys()
+	RegisterForKey(kToggleFreeCamera)
+	; Configure SFX & Voice volumes
+	AudioVoice.SetVolume(fVoiceVolume)
+	AudioSFX.SetVolume(fSFXVolume)
+endFunction
+
 function SetDebugMode(bool enabling)
 	bDebugMode = enabling
 	if enabling
@@ -371,9 +409,6 @@ function SetDebugMode(bool enabling)
 endFunction
 
 function SetDefaults()
-
-	FindStrapons()
-
 	SexLab = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework
 	PlayerRef = Game.GetPlayer()
 	bDebugMode = true
@@ -532,10 +567,55 @@ function SetDefaults()
 	fStageTimerAggr[2] = 10.0
 	fStageTimerAggr[3] = 10.0
 	fStageTimerAggr[4] = 3.0
+
+	; Config loaders
+	FindStrapons()
+	ReloadConfig()
 endFunction
 
+function ReloadData()
+	; ActorTypeNPC =            Game.GetForm(0x13794)
+	; AnimatingFaction =        Game.GetFormFromFile(0xE50F, "SexLab.esm")
+	; AudioSFX =                Game.GetFormFromFile(0x61428, "SexLab.esm")
+	; AudioVoice =              Game.GetFormFromFile(0x61429, "SexLab.esm")
+	; BaseMarker =              Game.GetFormFromFile(0x45A93 "SexLab.esm")
+	; BedRollsList =            Game.GetFormFromFile(0x6198C, "SexLab.esm")
+	; BedsList =                Game.GetFormFromFile(0x181B1, "SexLab.esm")
+	; CalypsStrapon =           Game.GetFormFromFile(0x1A22A, "SexLab.esm")
+	; CheckFNIS =               Game.GetFormFromFile(0x70C38, "SexLab.esm")
+	; CheckPapyrusUtil =        Game.GetFormFromFile(0x70C3B, "SexLab.esm")
+	; CheckSKSE =               Game.GetFormFromFile(0x70C39, "SexLab.esm")
+	; CheckSkyrim =             Game.GetFormFromFile(0x70C3A, "SexLab.esm")
+	; CheckSkyUI =              Game.GetFormFromFile(0x70C3C, "SexLab.esm")
+	; CleanSystemFinish =       Game.GetFormFromFile(0x6CB9E, "SexLab.esm")
+	; CumAnalKeyword =          Game.GetFormFromFile(0x, "SexLab.esm")
+	; CumAnalSpell =            Game.GetFormFromFile(0x, "SexLab.esm")
+	; CumOralAnalSpell =        Game.GetFormFromFile(0x, "SexLab.esm")
+	; CumOralKeyword =          Game.GetFormFromFile(0x, "SexLab.esm")
+	; CumOralSpell =            Game.GetFormFromFile(0x, "SexLab.esm")
+	; CumVaginalAnalSpell =     Game.GetFormFromFile(0x, "SexLab.esm")
+	; CumVaginalKeyword =       Game.GetFormFromFile(0x, "SexLab.esm")
+	; CumVaginalOralAnalSpell = Game.GetFormFromFile(0x, "SexLab.esm")
+	; CumVaginalOralSpell =     Game.GetFormFromFile(0x, "SexLab.esm")
+	; CumVaginalSpell =         Game.GetFormFromFile(0x, "SexLab.esm")
+	; DoNothing =               Game.GetFormFromFile(0x, "SexLab.esm")
+	; DummyWeapon =             Game.GetFormFromFile(0x, "SexLab.esm")
+	; ForbiddenFaction =        Game.GetFormFromFile(0x, "SexLab.esm")
+	; GenderFaction =           Game.GetFormFromFile(0x, "SexLab.esm")
+	; LipSync =                 Game.GetFormFromFile(0x, "SexLab.esm")
+	; LocationMarker =          Game.GetFormFromFile(0x, "SexLab.esm")
+	; NudeSuit =                Game.GetFormFromFile(0x, "SexLab.esm")
+	; OrgasmFX =                Game.GetFormFromFile(0x, "SexLab.esm")
+	; SexLabVoiceF =            Game.GetFormFromFile(0x, "SexLab.esm")
+	; SexLabVoiceM =            Game.GetFormFromFile(0x, "SexLab.esm")
+	; SexMixedFX =              Game.GetFormFromFile(0x, "SexLab.esm")
+	; SquishingFX =             Game.GetFormFromFile(0x, "SexLab.esm")
+	; SuckingFX =               Game.GetFormFromFile(0x, "SexLab.esm")
+	; UseBed =                  Game.GetFormFromFile(0x, "SexLab.esm")
+	; VoicesPlayer =            Game.GetFormFromFile(0x, "SexLab.esm")
+endFunction
 
-function ExportJSON()
+function ExportSettings()
 	ExportString("sPlayerVoice", sPlayerVoice)
 	ExportString("sNPCBed", sNPCBed)
 	ExportBool("bRestrictAggressive", bRestrictAggressive)
@@ -594,10 +674,9 @@ function ExportJSON()
 	ExportFloatList("fStageTimer", fStageTimer, 5)
 	ExportFloatList("fStageTimerLeadIn", fStageTimerLeadIn, 5)
 	ExportFloatList("fStageTimerAggr", fStageTimerAggr, 5)
-
 endFunction
 
-function ImportJSON()
+function ImportSettings()
 	sPlayerVoice        = ImportString("sPlayerVoice", sPlayerVoice)
 	sNPCBed             = ImportString("sNPCBed", sNPCBed)
 
