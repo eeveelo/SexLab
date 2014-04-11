@@ -51,15 +51,32 @@ event OnGameReload()
 	Config = SexLabQuestFramework as sslSystemConfig
 	; Reload SexLab's voice/tfc config at load
 	if CurrentVersion > 0 && Config.CheckSystem()
+		TargetRef = none
+		RegisterForKey(Config.kTargetActor)
 		Config.ReloadConfig()
 	else
 		SexLab.GoToState("Disabled")
 	endIf
 endEvent
 
+event OnKeyDown(int keyCode)
+	If keyCode == Config.kTargetActor
+		RegisterforCrosshairRef()
+	endIf
+endEvent
+
+event OnCrosshairRefChange(ObjectReference Ref)
+	if (Ref as Actor)
+		TargetRef = (Ref as Actor)
+		MiscUtil.PrintConsole("SexLab Target: "+TargetRef.GetLeveledActorBase().GetName())
+		UnregisterforCrosshairRef()
+	endIF
+endEvent
+
 ; Data
 Actor property PlayerRef auto
 Message property CleanSystemFinish auto
+Actor TargetRef
 
 ; Expression editor
 int property Male = 0 autoreadonly
@@ -222,13 +239,17 @@ endFunction
 
 event OnPageReset(string page)
 	int i
-
 	; Logo
 	if page == ""
 		LoadCustomContent("SexLab/logo.dds", 184, 31)
 		return
 	endIf
 	UnloadCustomContent()
+
+	; Clear config target if unloaded
+	if TargetRef != none && !TargetRef.Is3DLoaded()
+		TargetRef == none
+	endIf
 
 	if page == "$SSL_ExpressionEditor"
 		SetCursorFillMode(LEFT_TO_RIGHT)
@@ -253,7 +274,11 @@ event OnPageReset(string page)
 		endIf
 
 		AddTextOptionST("ExpressionTestPlayer", "Test On Player", "$SSL_ClickHere")
-		AddTextOptionST("ExpressionTestTarget", "Test On Target", "$SSL_ClickHere", OPTION_FLAG_DISABLED)
+		if TargetRef != none
+			AddTextOptionST("ExpressionTestTarget", "Test On "+TargetRef.GetLeveledActorBase().GetName(), "$SSL_ClickHere")
+		else
+			AddTextOption("Test On (No Target)", "$SSL_ClickHere", OPTION_FLAG_DISABLED)
+		endIf
 
 		AddEmptyOption()
 		AddEmptyOption()
@@ -722,23 +747,40 @@ endState
 
 state ExpressionTestPlayer
 	event OnSelectST()
-		sslBaseExpression Exp = Expression
-		if ShowMessage("Expression will be applied to player for preview purposes, after 30 seconds they will be reset to their default.\n\nDo you wish to continue?", true, "$Yes", "$No")
-			ShowMessage("Applying "+Exp.Name+" phase "+Phase+" on Player.\n NOTICE: Close all menus and return to the game in order to continue.")
-			Utility.Wait(0.1)
-			Game.ForceThirdPerson()
-			Exp.ApplyPhase(PlayerRef, Phase, PlayerRef.GetLeveledActorBase().GetSex())
-			Debug.Notification(Exp.Name+" has been applied to "+PlayerRef.GetLeveledActorBase().GetName())
-			Debug.Notification("Reverting expression in 30 seconds...")
-			RegisterForSingleUpdate(30)
+		if PlayerRef.Is3DLoaded()
+			TestApply(PlayerRef)
 		endIf
 	endEvent
 endState
+
+state ExpressionTestTarget
+	event OnSelectST()
+		if TargetRef != none && TargetRef.Is3DLoaded()
+			TestApply(TargetRef)
+		endIf
+	endEvent
+endState
+
+function TestApply(Actor ActorRef)
+	string ActorName = ActorRef.GetLeveledActorBase().GetName()
+	sslBaseExpression Exp = Expression
+	if ShowMessage("Expression will be applied to "+ActorName+" for preview purposes, after 30 seconds they will be reset to their default.\n\nDo you wish to continue?", true, "$Yes", "$No")
+		ShowMessage("Applying "+Exp.Name+" phase "+Phase+" on "+ActorName+"...\n NOTICE: Close all menus and return to the game in order to continue.")
+		Utility.Wait(0.1)
+		Game.ForceThirdPerson()
+		Exp.ApplyPhase(ActorRef, Phase, ActorRef.GetLeveledActorBase().GetSex())
+		Debug.Notification(Exp.Name+" has been applied to "+ActorName)
+		Debug.Notification("Reverting expression in 15 seconds...")
+		RegisterForSingleUpdate(15)
+	endIf
+endFunction
 
 event OnUpdate()
 	Debug.Notification("Reverting expression...")
 	PlayerRef.ClearExpressionOverride()
 	MfgConsoleFunc.ResetPhonemeModifier(PlayerRef)
+	TargetRef.ClearExpressionOverride()
+	MfgConsoleFunc.ResetPhonemeModifier(TargetRef)
 endEvent
 
 

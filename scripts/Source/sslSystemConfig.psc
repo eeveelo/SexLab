@@ -125,6 +125,7 @@ int property kRestoreOffsets auto hidden ; -
 int property kRotateScene auto hidden ; U
 int property kToggleFreeCamera auto hidden ; NUM 3
 int property kEndAnimation auto hidden ; End
+int property kTargetActor auto hidden ; N
 
 bool property bAutoTFC auto hidden
 float property fAutoSUCSM auto hidden
@@ -212,6 +213,7 @@ event OnKeyDown(int keyCode)
 		endIf
 	endIf
 endEvent
+
 
 bool function BackwardsPressed()
 	return Input.GetNumKeysPressed() > 1 && (Input.IsKeyPressed(kBackwards) || (kBackwards == 54 && Input.IsKeyPressed(42)) || (kBackwards == 42 && Input.IsKeyPressed(54)))
@@ -435,6 +437,7 @@ function SetDefaults()
 	kRotateScene = 22 ; U
 	kToggleFreeCamera = 81 ; NUM 3
 	kEndAnimation = 207 ; End
+	kTargetActor = 49 ; N
 
 	; TFC hotkey settings
 	bAutoTFC = false
