@@ -88,6 +88,7 @@ int Phase
 
 string SubMenu
 string[] Moods
+string[] Phases
 
 ; OIDs
 int[] oidStageTimer
@@ -154,6 +155,14 @@ bool function SetDefaults()
 	Moods[14] = "Mood Disgusted"
 	Moods[15] = "Combat Anger"
 	Moods[16] = "Combat Shout"
+
+	Phases = new string[5]
+	Phases[0] = "Phase 1"
+	Phases[1] = "Phase 2"
+	Phases[2] = "Phase 3"
+	Phases[3] = "Phase 4"
+	Phases[4] = "Phase 5"
+
 
 	; OIDs
 	oidToggleVoice               = new int[125]
@@ -231,7 +240,7 @@ event OnPageReset(string page)
 
 		SetTitleText(Expression.Name)
 		AddMenuOptionST("ExpressionSelect", "$SSL_ModifyingExpression", Expression.Name)
-		AddTextOptionST("ExpressionPhase", "$SSL_Modifying{"+Expression.Name+"}Phase", Phase)
+		AddMenuOptionST("ExpressionPhase", "$SSL_Modifying{"+Expression.Name+"}Phase", Phase)
 
 		int FlagF = OPTION_FLAG_NONE
 		int FlagM = OPTION_FLAG_NONE
@@ -581,6 +590,7 @@ event OnPageReset(string page)
 		SetCursorFillMode(TOP_TO_BOTTOM)
 
 		AddHeaderOption("$SSL_SexualExperience")
+		AddTextOption("$SSL_TimeSpentHavingSex", Stats.ParseTime(Stats.GetFloat(PlayerRef, "TimeSpent") as int))
 		AddTextOption("$SSL_VaginalExperience", Stats.GetSkill(PlayerRef, "Vaginal"))
 		AddTextOption("$SSL_AnalExperience", Stats.GetSkill(PlayerRef, "Anal"))
 		AddTextOption("$SSL_OralExperience", Stats.GetSkill(PlayerRef, "Oral"))
@@ -592,19 +602,18 @@ event OnPageReset(string page)
 		AddTextOption("$SSL_TimesMasturbated", Stats.GetInt(PlayerRef, "Masturbation"))
 		AddTextOption("$SSL_TimesAggressive", Stats.GetInt(PlayerRef, "Aggressor"))
 		AddTextOption("$SSL_TimesVictim", Stats.GetInt(PlayerRef, "Victim"))
-		AddTextOption("$SSL_TimeSpentHavingSex", Stats.ParseTime(Stats.GetFloat(PlayerRef, "TimeSpent") as int))
-		AddTextOption("$SSL_TimeSinceLastSex", Stats.LastSexTimerString(PlayerRef))
 
 		SetCursorPosition(1)
 		AddHeaderOption("$SSL_SexualStats")
+		AddTextOption("$SSL_TimeSinceLastSex", Stats.LastSexTimerString(PlayerRef))
 		AddTextOption("$SSL_VaginalProficiency", Stats.GetSkillTitle(PlayerRef, "Vaginal"))
 		AddTextOption("$SSL_AnalProficiency", Stats.GetSkillTitle(PlayerRef, "Anal"))
 		AddTextOption("$SSL_OralProficiency", Stats.GetSkillTitle(PlayerRef, "Oral"))
 		AddTextOption("$SSL_ForeplayProficiency", Stats.GetSkillTitle(PlayerRef, "Foreplay"))
 
+		AddTextOptionST("PlayerSexuality", "$SSL_Sexuality", Stats.GetSexualityTitle(PlayerRef))
 		AddTextOption("$SSL_SexualPurity", Stats.GetPureTitle(PlayerRef))
 		AddTextOption("$SSL_SexualPerversion", Stats.GetLewdTitle(PlayerRef))
-		AddTextOption("$SSL_Sexuality", Stats.GetSexualityTitle(PlayerRef))
 
 		AddEmptyOption()
 
@@ -694,17 +703,19 @@ state ExpressionSelect
 endState
 
 state ExpressionPhase
-	event OnSelectST()
-		Phase += 1
-		if Phase > 5
-			Phase = 1
-		endIf
-		SetTextOptionValueST(Phase)
+	event OnMenuOpenST()
+		SetMenuDialogStartIndex(Phase - 1)
+		SetMenuDialogDefaultIndex(0)
+		SetMenuDialogOptions(Phases)
+	endEvent
+	event OnMenuAcceptST(int i)
+		Phase = i + 1
+		SetMenuOptionValueST(Phase)
 		ForcePageReset()
 	endEvent
 	event OnDefaultST()
 		Phase = 1
-		SetTextOptionValueST(1)
+		SetMenuOptionValueST(Phase)
 		ForcePageReset()
 	endEvent
 endState
@@ -1675,6 +1686,19 @@ state ToggleFreeCamera
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoToggleFreeCamera")
+	endEvent
+endState
+state PlayerSexuality
+	event OnSelectST()
+		int Ratio = Stats.GetSexuality(PlayerRef)
+		if Stats.IsStraight(PlayerRef)
+			Stats.SetInt(PlayerRef, "Sexuality", 50)
+		elseIf Stats.IsBisexual(PlayerRef)
+			Stats.SetInt(PlayerRef, "Sexuality", 0)
+		else
+			Stats.SetInt(PlayerRef, "Sexuality", 100)
+		endIf
+		SetTextOptionValueST(Stats.GetSexualityTitle(PlayerRef))
 	endEvent
 endState
 
