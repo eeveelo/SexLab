@@ -5,11 +5,11 @@ scriptname SexLabUtil hidden
 ; ------------------------------------------------------- ;
 
 int function GetVersion() global
-	return 14601
+	return 14700
 endFunction
 
 string function GetStringVer() global
-	return StringUtil.Substring((((GetVersion() - 1) as float / 10000.0) as string), 0, 4)+" Beta 2"
+	return StringUtil.Substring(((GetVersion() as float / 10000.0) as string), 0, 4)+" Beta 3"
 endFunction
 
 bool function SexLabIsActive() global

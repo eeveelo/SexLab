@@ -656,7 +656,6 @@ function Setup()
 	LewdTitlesFemale[4] = "$SSL_SexualDeviant"
 	LewdTitlesFemale[5] = "$SSL_Debaucherous"
 	LewdTitlesFemale[6] = "$SSL_Nymphomaniac"
-
 endFunction
 
 bool function HasInt(Actor ActorRef, string Stat)

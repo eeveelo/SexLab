@@ -411,6 +411,9 @@ endFunction
 function SetDefaults()
 	SexLab = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework
 	PlayerRef = Game.GetPlayer()
+
+	SetIntValue(PlayerRef, "sslActorStats.Sexuality", 100)
+
 	bDebugMode = true
 
 	sPlayerVoice = "$SSL_Random"
