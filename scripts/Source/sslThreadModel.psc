@@ -142,9 +142,9 @@ state Making
 		elseIf !ActorLib.ValidateActor(ActorRef)
 			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They are not a valid target for animation", "FATAL")
 			return -1
-		elseIf ActorRef == PlayerRef && !CheckFNIS()
-			Log("AddActor() - Failed to start animation -- Game was unable to verify that you have a properly installed and up to date version of FNIS", "FATAL")
-			return -1
+		; elseIf ActorRef == PlayerRef && !CheckFNIS()
+		; 	Log("AddActor() - Failed to start animation -- Game was unable to verify that you have a properly installed and up to date version of FNIS", "FATAL")
+		; 	return -1
 		endIf
 		sslActorAlias Slot = PickAlias(ActorRef)
 		if Slot == none || !Slot.SetupAlias(ActorRef, IsVictim, Voice, ForceSilent)
