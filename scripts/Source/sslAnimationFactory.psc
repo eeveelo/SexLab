@@ -59,7 +59,8 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function Initialize()
-	Squishing = Slots.ThreadLib.SquishingFX
-	Sucking = Slots.ThreadLib.SuckingFX
-	SexMix = Slots.ThreadLib.SexMixedFX
+	sslSystemConfig Config = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
+	Squishing = Config.SquishingFX
+	Sucking   = Config.SuckingFX
+	SexMix    = Config.SexMixedFX
 endFunction
