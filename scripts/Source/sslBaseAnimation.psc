@@ -1,5 +1,8 @@
 scriptname sslBaseAnimation extends sslBaseObject
 
+import sslUtility
+import StorageUtil
+
 ; Config
 ; int property SFX auto hidden
 Sound property SoundFX auto hidden
@@ -17,9 +20,6 @@ float[] CenterAdjust
 string[] Animations
 int sid
 int aid
-
-float property Pure auto hidden
-float property Impure auto hidden
 
 ; StorageUtil legend
 ; form Key("Creatures") = Valid races for creature animation
@@ -65,11 +65,11 @@ endProperty
 
 form[] property CreatureRaces hidden
 	form[] function get()
-		int i = StorageUtil.FormListCount(Storage, Key("Creatures"))
-		form[] races = sslUtility.FormArray(i)
+		int i = FormListCount(Storage, Key("Creatures"))
+		form[] races = FormArray(i)
 		while i
 			i -= 1
-			races[i] = StorageUtil.FormListGet(Storage, Key("Creatures"), i)
+			races[i] = FormListGet(Storage, Key("Creatures"), i)
 		endWhile
 		return races
 	endFunction
@@ -84,7 +84,7 @@ string[] function FetchPosition(int position)
 		Log("Unknown position, '"+stage+"' given", "FetchPosition")
 		return none
 	endIf
-	string[] anims = sslUtility.StringArray(Stages)
+	string[] anims = StringArray(Stages)
 	int stage = 0
 	while stage <= Stages
 		anims[stage] = FetchPositionStage(position, (stage + 1))
@@ -102,7 +102,7 @@ string[] function FetchStage(int stage)
 		Log("Unknown stage, '"+stage+"' given", "FetchStage")
 		return none
 	endIf
-	string[] anims = sslUtility.StringArray(Actors)
+	string[] anims = StringArray(Actors)
 	int position = 0
 	while position < Actors
 		anims[position] = FetchPositionStage(position, stage)
@@ -115,37 +115,37 @@ endFunction
 ;|	Data Accessors                               |;
 ;\-----------------------------------------------/;
 
-int function DataIndex(int slots, int position, int stage, int slot)
-	return ( position * (Stages * slots) ) + ( (stage - 1) * slots ) + slot
+int function DataIndex(int Slots, int Position, int Stage, int Slot)
+	return ( Position * (Stages * Slots) ) + ( (Stage - 1) * Slots ) + Slot
 endFunction
 
-int function AccessFlag(int position, int stage, int slot)
-	return Flags[DataIndex(4, position, stage, slot)]
+int function AccessFlag(int Position, int Stage, int Slot)
+	return Flags[DataIndex(4, Position, Stage, Slot)]
 endFunction
 
-int function AccessPosition(int position, int slot)
-	return Positions[((position * 2) + slot)]
+int function AccessPosition(int Position, int Slot)
+	return Positions[((Position * 2) + Slot)]
 endFunction
 
-bool function HasTimer(int stage)
-	return stage > 0 && stage < Timers.Length ; && Timers[(stage - 1)] != 0.0
+bool function HasTimer(int Stage)
+	return Stage > 0 && Stage < Timers.Length ; && Timers[(Stage - 1)] != 0.0
 endFunction
 
-float function GetTimer(int stage)
-	if HasTimer(stage)
-		return Timers[(stage - 1)]
+float function GetTimer(int Stage)
+	if HasTimer(Stage)
+		return Timers[(Stage - 1)]
 	endIf
 	return 0.0 ; Stage has no timer
 endFunction
 
-int[] function GetPositionFlags(int position, int stage)
-	int i = DataIndex(4, position, stage, 0)
+int[] function GetPositionFlags(int Position, int Stage)
+	int i = DataIndex(4, Position, Stage, 0)
 	int[] Output = new int[5]
 	Output[0] = Flags[i]
 	Output[1] = Flags[(i + 1)]
 	Output[2] = Flags[(i + 2)]
 	Output[3] = Flags[(i + 3)]
-	Output[4] = GetGender(position)
+	Output[4] = GetGender(Position)
 	return Output
 endFunction
 
@@ -158,10 +158,10 @@ float[] function GetPositionOffsets(string AdjustKey, int Position, int Stage)
 	Output[2] = Offsets[(i + 2)] ; Up
 	Output[3] = Offsets[(i + 3)] ; Rot
 	; Apply adjustments
-	if StorageUtil.FloatListCount(Storage, AdjustKey) > i
-		Output[0] = Output[0] + StorageUtil.FloatListGet(Storage, AdjustKey, i)
-		Output[1] = Output[1] + StorageUtil.FloatListGet(Storage, AdjustKey, (i + 1))
-		Output[2] = Output[2] + StorageUtil.FloatListGet(Storage, AdjustKey, (i + 2))
+	if FloatListCount(Storage, AdjustKey) > i
+		Output[0] = Output[0] + FloatListGet(Storage, AdjustKey, i)
+		Output[1] = Output[1] + FloatListGet(Storage, AdjustKey, (i + 1))
+		Output[2] = Output[2] + FloatListGet(Storage, AdjustKey, (i + 2))
 	endIf
 	return Output
 endFunction
@@ -172,18 +172,18 @@ endFunction
 
 function SetAdjustment(string AdjustKey, int Position, int Stage, int Slot, float Adjustment)
 	; Init adjustments
-	if StorageUtil.FloatListCount(Storage, AdjustKey) < 1
+	if FloatListCount(Storage, AdjustKey) < 1
 		int i = Offsets.Length
-		while i > StorageUtil.FloatListCount(Storage, AdjustKey)
-			StorageUtil.FloatListAdd(Storage, AdjustKey, 0.0)
+		while i > FloatListCount(Storage, AdjustKey)
+			FloatListAdd(Storage, AdjustKey, 0.0)
 		endWhile
 	endIf
 	; Set adjustment at index
-	StorageUtil.FloatListSet(Storage, AdjustKey, DataIndex(4, Position, Stage, Slot), Adjustment)
+	FloatListSet(Storage, AdjustKey, DataIndex(4, Position, Stage, Slot), Adjustment)
 endFunction
 
 float function GetAdjustment(string AdjustKey, int Position, int Stage, int Slot)
-	return StorageUtil.FloatListGet(Storage, AdjustKey, DataIndex(4, Position, Stage, Slot))
+	return FloatListGet(Storage, AdjustKey, DataIndex(4, Position, Stage, Slot))
 endFunction
 
 function UpdateAdjustment(string AdjustKey, int Position, int Stage, int Slot, float AdjustBy)
@@ -223,27 +223,27 @@ function AdjustUpward(string AdjustKey, int Position, int Stage, float AdjustBy,
 endFunction
 
 function RestoreOffsets(string AdjustKey)
-	StorageUtil.FloatListClear(Storage, AdjustKey)
+	FloatListClear(Storage, AdjustKey)
 endFunction
 
 ;/-----------------------------------------------\;
 ;|	Animation Info                               |;
 ;\-----------------------------------------------/;
 
-bool function IsSilent(int position, int stage)
-	return AccessFlag(position, stage, 0) as bool
+bool function IsSilent(int Position, int Stage)
+	return AccessFlag(Position, Stage, 0) as bool
 endFunction
 
-bool function UseOpenMouth(int position, int stage)
-	return AccessFlag(position, stage, 1) as bool
+bool function UseOpenMouth(int Position, int Stage)
+	return AccessFlag(Position, Stage, 1) as bool
 endFunction
 
-bool function UseStrapon(int position, int stage)
-	return AccessFlag(position, stage, 2) as bool
+bool function UseStrapon(int Position, int Stage)
+	return AccessFlag(Position, Stage, 2) as bool
 endFunction
 
-int function GetSchlong(int position, int stage)
-	return AccessFlag(position, stage, 3)
+int function GetSchlong(int Position, int Stage)
+	return AccessFlag(Position, Stage, 3)
 endFunction
 
 int function ActorCount()
@@ -254,20 +254,20 @@ int function StageCount()
 	return Stages
 endFunction
 
-int function GetGender(int position)
-	return AccessPosition(position, 0)
+int function GetGender(int Position)
+	return AccessPosition(Position, 0)
 endFunction
 
-bool function MalePosition(int position)
-	return AccessPosition(position, 0) == 0
+bool function MalePosition(int Position)
+	return AccessPosition(Position, 0) == 0
 endFunction
 
-bool function FemalePosition(int position)
-	return AccessPosition(position, 0) == 1
+bool function FemalePosition(int Position)
+	return AccessPosition(Position, 0) == 1
 endFunction
 
-bool function CreaturePosition(int position)
-	return AccessPosition(position, 0) == 2
+bool function CreaturePosition(int Position)
+	return AccessPosition(Position, 0) == 2
 endFunction
 
 int function FemaleCount()
@@ -294,8 +294,8 @@ int function MaleCount()
 	return count
 endFunction
 
-int function GetCum(int position)
-	return AccessPosition(position, 1)
+int function GetCum(int Position)
+	return AccessPosition(Position, 1)
 endFunction
 
 bool function IsSexual()
@@ -319,14 +319,14 @@ endFunction
 ;\-----------------------------------------------/;
 
 bool function HasRace(Race CreatureRace)
-	return StorageUtil.FormListFind(Storage, Key("Creatures"), CreatureRace) != -1
+	return FormListFind(Storage, Key("Creatures"), CreatureRace) != -1
 endFunction
 
 function AddRace(Race CreatureRace)
-	StorageUtil.FormListAdd(Storage, Key("Creatures"), CreatureRace, false)
-	StorageUtil.SetIntValue(CreatureRace, "SexLab.HasCreature", 1)
+	FormListAdd(Storage, Key("Creatures"), CreatureRace, false)
+	SetIntValue(CreatureRace, "SexLab.HasCreature", 1)
 	if Enabled
-		StorageUtil.FormListAdd(none, "SexLab.CreatureRaces", CreatureRace, true)
+		FormListAdd(none, "SexLab.CreatureRaces", CreatureRace, true)
 	endIf
 endFunction
 
@@ -342,7 +342,7 @@ function SetStageTimer(int stage, float timer)
 	endIf
 	; Initialize timer array if needed
 	if Timers.Length != Stages
-		Timers = sslUtility.FloatArray(Stages)
+		Timers = FloatArray(Stages)
 	endIf
 	; Set timer
 	Timers[(stage - 1)] = timer
@@ -378,10 +378,10 @@ endFunction
 
 function Save(int id)
 	; Finalize config data
-	Flags      = sslUtility.TrimIntArray(Flags, sid)
-	Offsets    = sslUtility.TrimFloatArray(Offsets, sid)
-	Positions  = sslUtility.TrimIntArray(Positions, (Actors * 2))
-	Animations = sslUtility.TrimStringArray(Animations, aid)
+	Flags      = TrimIntArray(Flags, sid)
+	Offsets    = TrimFloatArray(Offsets, sid)
+	Positions  = TrimIntArray(Positions, (Actors * 2))
+	Animations = TrimStringArray(Animations, aid)
 	Stages     = Animations.Length / Actors
 	; Create and add gender tag
 	string Tag
@@ -399,7 +399,7 @@ function Save(int id)
 	endWhile
 	AddTag(Tag)
 	; Init forward offset list
-	CenterAdjust = sslUtility.FloatArray(Stages)
+	CenterAdjust = FloatArray(Stages)
 	if Actors > 1
 		int Stage = Stages
 		while Stage
@@ -436,28 +436,19 @@ endFunction
 ;\-----------------------------------------------/;
 
 function Initialize()
-	if Storage != none && Registered
-		StorageUtil.FormListClear(Storage, Key("Creatures"))
-	endIf
-
 	Actors  = 0
 	Stages  = 0
 	Content = 0
-
-	Pure   = 0.0
-	Impure = 0.0
-
+	sid     = 0
+	aid     = 0
 	Genders    = new int[3]
 	Positions  = new int[10]
 	Flags      = new int[128]
 	Offsets    = new float[128]
 	Animations = new string[128]
-	sid        = 0
-	aid        = 0
-
 	float[] floatDel1
 	Timers = floatDel1
-
+	FormListClear(Storage, Key("Creatures"))
 	parent.Initialize()
 endFunction
 
