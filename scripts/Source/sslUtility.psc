@@ -345,6 +345,18 @@ string function Trim(string var) global
 	return var
 endFunction
 
+string function RemoveString(string str, string toRemove, int startindex = 0) global
+	int i = StringUtil.Find(str, toRemove, startindex)
+	if i == -1
+		return str
+	elseIf i == 0
+		return StringUtil.SubString(str, StringUtil.GetLength(toRemove))
+	endIf
+	string part1 = StringUtil.SubString(str, 0, i)
+	string part2 = StringUtil.SubString(str, (i + StringUtil.GetLength(toRemove)))
+	return part1 + part2
+endFunction
+
 string[] function IncreaseString(int by, string[] array) global
 	int len = array.Length
 	if by < 1 || (len+by > 128)

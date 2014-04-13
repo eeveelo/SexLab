@@ -87,13 +87,13 @@ int function FindByName(string FindName)
 endFunction
 
 string[] function GetNames()
-	string[] output = sslUtility.StringArray(Slotted)
+	string[] Output = sslUtility.StringArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
-		output[i] = Slots[i].Name
+		Output[i] = Slots[i].Name
 	endWhile
-	return output
+	return Output
 endFunction
 
 ; ------------------------------------------------------- ;

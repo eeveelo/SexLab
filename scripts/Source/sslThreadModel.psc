@@ -793,24 +793,7 @@ function Action(string FireState)
 endfunction
 
 function UpdateAdjustKey()
-	AdjustKey = Animation.Key("Adjust")
-	if ActorCount > 1 && Config.bRaceAdjustments
-		int i
-		while i < ActorCount
-			ActorBase BaseRef = Positions[i].GetLeveledActorBase()
-			AdjustKey += "."+MiscUtil.GetRaceEditorID(BaseRef.GetRace())
-			if Genders[2] > 0 && PositionAlias(i).Gender == 2
-				; No gender preference for creatures
-			elseIf BaseRef.GetSex() == 1
-				AdjustKey += "F"
-			else
-				AdjustKey += "M"
-			endIf
-			i += 1
-		endWhile
-	else
-		AdjustKey += ".Global"
-	endIf
+	AdjustKey = Animation.MakeAdjustKey(Positions, Config.bRaceAdjustments)
 	MiscUtil.PrintConsole(AdjustKey)
 endFunction
 

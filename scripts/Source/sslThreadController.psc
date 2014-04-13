@@ -403,6 +403,7 @@ function EndAnimation(bool Quickly = false)
 	FastEnd = Quickly
 	Stage = StageCount
 	; Send end event
+	AnimSlots.Export()
 	RegisterForSingleUpdate(15.0)
 	GoToState("Ending")
 	AliasEvent("Reset")

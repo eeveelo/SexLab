@@ -22,6 +22,7 @@ int Stage
 
 ; Animation
 sslBaseAnimation Animation
+string AdjustKey
 
 ; Voice
 sslBaseVoice Voice
@@ -257,7 +258,8 @@ state Animating
 		Animation  = Thread.Animation
 		Stage      = Thread.Stage
 		Position   = Thread.Positions.Find(ActorRef)
-		Flags      = Animation.GetPositionFlags(Position, Stage)
+		AdjustKey  = Thread.AdjustKey
+		Flags      = Animation.GetPositionFlags(AdjustKey, Position, Stage)
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
 		; Creature skipped
 		if !IsCreature
@@ -293,7 +295,7 @@ state Animating
 	endFunction
 
 	function SyncLocation(bool Force = false)
-		Offsets = Animation.GetPositionOffsets(Thread.AdjustKey, Position, Stage)
+		Offsets = Animation.GetPositionOffsets(AdjustKey, Position, Stage)
 		float[] CenterLoc = Thread.CenterLocation
 		Loc[0] = CenterLoc[0] + ( Math.sin(CenterLoc[5]) * Offsets[0] ) + ( Math.cos(CenterLoc[5]) * Offsets[1] )
 		Loc[1] = CenterLoc[1] + ( Math.cos(CenterLoc[5]) * Offsets[0] ) + ( Math.sin(CenterLoc[5]) * Offsets[1] )

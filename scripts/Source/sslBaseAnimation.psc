@@ -138,13 +138,13 @@ float function GetTimer(int Stage)
 	return 0.0 ; Stage has no timer
 endFunction
 
-int[] function GetPositionFlags(int Position, int Stage)
+int[] function GetPositionFlags(string AdjustKey, int Position, int Stage)
 	int i = DataIndex(4, Position, Stage, 0)
 	int[] Output = new int[5]
 	Output[0] = Flags[i]
 	Output[1] = Flags[(i + 1)]
 	Output[2] = Flags[(i + 2)]
-	Output[3] = Flags[(i + 3)]
+	Output[3] = GetSchlong(AdjustKey, Position, Stage)
 	Output[4] = GetGender(Position)
 	return Output
 endFunction
@@ -157,12 +157,24 @@ float[] function GetPositionOffsets(string AdjustKey, int Position, int Stage)
 	Output[1] = Offsets[(i + 1)] ; Side
 	Output[2] = Offsets[(i + 2)] ; Up
 	Output[3] = Offsets[(i + 3)] ; Rot
-	; Apply adjustments
-	if FloatListCount(Storage, AdjustKey) > i
-		Output[0] = Output[0] + FloatListGet(Storage, AdjustKey, i)
-		Output[1] = Output[1] + FloatListGet(Storage, AdjustKey, (i + 1))
-		Output[2] = Output[2] + FloatListGet(Storage, AdjustKey, (i + 2))
+	; Use global adjustments if none for adjustkey
+	if FloatListCount(Storage, AdjustKey) < i
+		AdjustKey = Key("Adjust.Global")
 	endIf
+	; Apply adjustments
+	Output[0] = Output[0] + FloatListGet(Storage, AdjustKey, i)
+	Output[1] = Output[1] + FloatListGet(Storage, AdjustKey, (i + 1))
+	Output[2] = Output[2] + FloatListGet(Storage, AdjustKey, (i + 2))
+	return Output
+endFunction
+
+float[] function GetPositionAdjustments(string AdjustKey, int Position, int Stage)
+	int i = DataIndex(4, Position, Stage, 0)
+	float[] Output = new float[4]
+	Output[0] = FloatListGet(Storage, AdjustKey, i) ; Forward
+	Output[1] = FloatListGet(Storage, AdjustKey, (i + 1)) ; Side
+	Output[2] = FloatListGet(Storage, AdjustKey, (i + 2)) ; Up
+	Output[3] = FloatListGet(Storage, AdjustKey, (i + 3)) ; SOS
 	return Output
 endFunction
 
@@ -171,14 +183,6 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function SetAdjustment(string AdjustKey, int Position, int Stage, int Slot, float Adjustment)
-	; Init adjustments
-	if FloatListCount(Storage, AdjustKey) < 1
-		int i = Offsets.Length
-		while i > FloatListCount(Storage, AdjustKey)
-			FloatListAdd(Storage, AdjustKey, 0.0)
-		endWhile
-	endIf
-	; Set adjustment at index
 	FloatListSet(Storage, AdjustKey, DataIndex(4, Position, Stage, Slot), Adjustment)
 endFunction
 
@@ -187,10 +191,12 @@ float function GetAdjustment(string AdjustKey, int Position, int Stage, int Slot
 endFunction
 
 function UpdateAdjustment(string AdjustKey, int Position, int Stage, int Slot, float AdjustBy)
+	InitAdjustments(AdjustKey)
 	SetAdjustment(AdjustKey, Position, Stage, Slot, (GetAdjustment(AdjustKey, Position, Stage, Slot) + AdjustBy))
 endFunction
 
 function UpdateAdjustmentAll(string AdjustKey, int Position, int Slot, float AdjustBy)
+	InitAdjustments(AdjustKey)
 	int Stage = Stages
 	while Stage
 		SetAdjustment(AdjustKey, Position, Stage, Slot, (GetAdjustment(AdjustKey, Position, Stage, Slot) + AdjustBy))
@@ -226,6 +232,78 @@ function RestoreOffsets(string AdjustKey)
 	FloatListClear(Storage, AdjustKey)
 endFunction
 
+function InitAdjustments(string AdjustKey)
+	int i
+	; Init empty Global list - if needed
+	string AdjustGlobal = Key("Adjust.Global")
+	if FloatListCount(Storage, AdjustGlobal) < Offsets.Length
+		; Empty existing global as precaution and zero fill it
+		FloatListClear(Storage, AdjustGlobal)
+		i = Offsets.Length
+		while i
+			i -= 1
+			FloatListAdd(Storage, AdjustGlobal, 0.0)
+		endWhile
+		; Set global sos adjustments
+		int Stage = 1
+		while Stage <= Stages
+			int Position = Actors
+			while Position
+				Position -= 1
+				FloatListSet(Storage, AdjustGlobal, DataIndex(4, Position, Stage, 3), AccessFlag(Position, Stage, 3))
+				Log(Position+" / "+Stage+" -> "+DataIndex(4, Position, Stage, 3)+" == "+AccessFlag(Position, Stage, 3))
+			endWhile
+			Stage += 1
+		endWhile
+	endIf
+	; Init AdjustKey list - copied from global list
+	string KeyPart = sslUtility.RemoveString(AdjustKey, Key("Adjust."))
+	if KeyPart != "Global" && (StringListFind(Storage, Key("AdjustKeys"), KeyPart) == -1 || FloatListCount(Storage, AdjustKey) < FloatListCount(Storage, AdjustGlobal))
+		FloatListClear(Storage, AdjustKey)
+		StringListAdd(Storage, Key("AdjustKeys"), KeyPart, false)
+		i = 0
+		while i < FloatListCount(Storage, AdjustGlobal)
+			FloatListAdd(Storage, AdjustKey, FloatListGet(Storage, AdjustGlobal, i))
+			i += 1
+		endWhile
+		Log("Init Adjustments for: "+KeyPart, AdjustKey)
+	endIf
+	Log(AdjustKey+" Length: "+FloatListCount(Storage, AdjustKey), AdjustGlobal+" Length: "+FloatListCount(Storage, AdjustGlobal))
+endFunction
+
+string function MakeAdjustKey(Actor[] ACtorList, bool RaceKey = true)
+	if RaceKey == false || ActorList.Length != Actors
+		return Key("Adjust.Global")
+	endIf
+	string AdjustKey = Key("Adjust")
+	int i
+	while i < Actors
+		ActorBase BaseRef = ACtorList[i].GetLeveledActorBase()
+		Race RaceRef = BaseRef.GetRace()
+		AdjustKey += "."+MiscUtil.GetRaceEditorID(RaceRef)
+		if HasRace(RaceRef)
+			; No gender preference for creatures
+		elseIf BaseRef.GetSex() == 1
+			AdjustKey += "F"
+		else
+			AdjustKey += "M"
+		endIf
+		i += 1
+	endWhile
+	return AdjustKey
+endFunction
+
+string[] function GetAdjustKeys()
+	int i = StringListCount(Storage, Key("AdjustKeys"))
+	string[] Output = sslUtility.StringArray(i + 1)
+	Output[i] = "Global"
+	while i
+		i -= 1
+		Output[i] = StringListGet(Storage, Key("AdjustKeys"), i)
+	endWhile
+	return Output
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Animation Info                                  --- ;
 ; ------------------------------------------------------- ;
@@ -242,7 +320,13 @@ bool function UseStrapon(int Position, int Stage)
 	return AccessFlag(Position, Stage, 2) as bool
 endFunction
 
-int function GetSchlong(int Position, int Stage)
+int function GetSchlong(string AdjustKey, int Position, int Stage)
+	int i = DataIndex(4, Position, Stage, 3)
+	if i < FloatListCount(Storage, AdjustKey)
+		return FloatListGet(Storage, AdjustKey, i) as int
+	elseIf i < FloatListCount(Storage, Key("Adjust.Global"))
+		return FloatListGet(Storage, Key("Adjust.Global"), i) as int
+	endIf
 	return AccessFlag(Position, Stage, 3)
 endFunction
 

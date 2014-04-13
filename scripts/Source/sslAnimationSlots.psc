@@ -201,6 +201,16 @@ sslBaseAnimation[] function GetList(bool[] Valid)
 	return Output
 endFunction
 
+string[] function GetNames()
+	string[] Output = sslUtility.StringArray(Slotted)
+	int i = Slotted
+	while i
+		i -= 1
+		Output[i] = Slots[i].Name
+	endWhile
+	return Output
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- System Use Only                                 --- ;
 ; ------------------------------------------------------- ;
@@ -249,3 +259,10 @@ state Locked
 endState
 
 
+function Export()
+	int i = Slotted
+	while i
+		i -= 1
+		StorageUtil.ExportFile("SexLab/AnimationProfile1.json", Slots[i].Key("Adjust"), keyContains = true)
+	endWhile
+endFunction

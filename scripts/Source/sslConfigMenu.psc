@@ -105,9 +105,13 @@ sslExpressionSlots ExpressionSlots
 sslBaseExpression Expression
 int Phase
 
-string SubMenu
 string[] Moods
 string[] Phases
+
+sslBaseAnimation Animation
+string[] Genders
+string AdjustKey
+int Position
 
 ; OIDs
 int[] oidStageTimer
@@ -132,11 +136,19 @@ int[] oidFemaleModifiers
 int[] oidFemalePhonemes
 int[] oidMaleModifiers
 int[] oidMalePhonemes
+int[] oidAnimForward
+int[] oidAnimSideways
+int[] oidAnimUpward
+int[] oidAnimRotate
+int[] oidAnimSchlong
 
+Actor StatTarget
+string TargetName
+int TargetFlag
 
 bool function SetDefaults()
 	; MCM option pages
-	Pages     = new string[14]
+	Pages     = new string[15]
 	Pages[0]  = "$SSL_AnimationSettings"
 	Pages[1]  = "$SSL_SoundSettings"
 	Pages[2]  = "$SSL_PlayerHotkeys"
@@ -149,12 +161,13 @@ bool function SetDefaults()
 	Pages[9]  = "$SSL_CreatureAnimations"
 	Pages[10] = "$SSL_ExpressionSelection"
 	Pages[11] = "$SSL_ExpressionEditor"
+	Pages[12] = "$SSL_AnimationEditor"
 	if PlayerRef.GetLeveledActorBase().GetSex() == 1
-		Pages[12] = "$SSL_SexDiary"
+		Pages[13] = "$SSL_SexDiary"
 	else
-		Pages[12] = "$SSL_SexJournal"
+		Pages[13] = "$SSL_SexJournal"
 	endIf
-	Pages[13] = "$SSL_RebuildClean"
+	Pages[14] = "$SSL_RebuildClean"
 
 	Moods = new string[17]
 	Moods[0]  = "Dialogue Anger"
@@ -181,7 +194,6 @@ bool function SetDefaults()
 	Phases[2] = "Phase 3"
 	Phases[3] = "Phase 4"
 	Phases[4] = "Phase 5"
-
 
 	; OIDs
 	oidToggleVoice               = new int[125]
@@ -211,6 +223,16 @@ bool function SetDefaults()
 	oidMaleModifiers             = new int[14]
 	oidMalePhonemes              = new int[16]
 
+	oidAnimForward               = new int[125]
+	oidAnimSideways              = new int[125]
+	oidAnimUpward                = new int[125]
+	oidAnimSchlong               = new int[125]
+
+	Genders = new string[3]
+	Genders[0] = "$SSL_Male"
+	Genders[1] = "$SSL_Female"
+	Genders[2] = "$SSL_Creature"
+
 	; Check system install before we continue
 	if !Config.CheckSystem()
 		SexLab.GoToState("Disabled")
@@ -238,9 +260,7 @@ endFunction
 ; SetPage("", -1)
 ; SetPage("Toggle Animations", 2)
 ; OnPageReset("Information")
-string TargetName
-int TargetFlag
-Actor StatTarget
+
 event OnConfigOpen()
 	if TargetRef != none && TargetRef.Is3DLoaded()
 		TargetName = TargetRef.GetLeveledActorBase().GetName()
@@ -263,7 +283,72 @@ event OnPageReset(string page)
 	endIf
 	UnloadCustomContent()
 
-	if page == "$SSL_ExpressionEditor"
+	if page == "$SSL_AnimationEditor"
+		SetCursorFillMode(LEFT_TO_RIGHT)
+
+		if Animation == none
+			Animation = AnimSlots.GetBySlot(0)
+			AdjustKey = "Global"
+			Position  = 0
+			; Stage = 1
+		endIf
+
+		Animation.InitAdjustments(Animation.Key("Adjust."+AdjustKey))
+
+		SetTitleText(Animation.Name)
+		AddMenuOptionST("AnimationSelect", "$SSL_Animation", Animation.Name)
+		if Animation.PositionCount == 1 || (Animation.PositionCount == 2 && TargetRef != none)
+			AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere")
+		else
+			AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere", OPTION_FLAG_DISABLED)
+		endIf
+
+		if Animation.GetAdjustKeys().Length > 1
+			AddMenuOptionST("AnimationAdjustKey", "$SSL_AdjustmentProfile", AdjustKey)
+		else
+			AdjustKey = "Global"
+			AddMenuOption("Adjustment Profile", "Global")
+		endIf
+
+		AddMenuOptionST("AnimationPosition", "$SSL_Position", "$SSL_{"+Genders[Animation.GetGender(Position)]+"}Gender{"+(Position + 1)+"}Position")
+
+		AddEmptyOption()
+		AddEmptyOption()
+
+		string Profile
+		if AdjustKey != "Global"
+			string[] RaceIDs = sslUtility.ArgString(AdjustKey, ".")
+			string id = StringUtil.Substring(RaceIDs[Position], 0, (StringUtil.GetLength(RaceIDs[Position]) - 1))
+			Race RaceRef = Race.GetRace(id)
+			if RaceRef != none
+				id = RaceRef.GetName()
+			endIf
+			if StringUtil.GetNthChar(RaceIDs[Position], (StringUtil.GetLength(RaceIDs[Position]) - 1)) == "F"
+				Profile = "$SSL_{"+id+"}-{$SSL_Female}"
+			else
+				Profile = "$SSL_{"+id+"}-{$SSL_Male}"
+			endIf
+		else
+			Profile = "$SSL_{Global}-{"+Genders[Animation.GetGender(Position)]+"}"
+		endIf
+
+		int Stage = 1
+		while Stage <= Animation.StageCount
+
+			float[] Adjustments = Animation.GetPositionAdjustments(Animation.Key("Adjust."+AdjustKey), Position, Stage)
+			AddHeaderOption("$SSL_Stage{"+Stage+"}Adjustments")
+			AddHeaderOption(Profile)
+
+			oidAnimForward[Stage]  = AddSliderOption("$SSL_AdjustForwards", Adjustments[0], "{2}")
+			oidAnimSideways[Stage] = AddSliderOption("$SSL_AdjustSideways", Adjustments[1], "{2}")
+			oidAnimUpward[Stage]   = AddSliderOption("$SSL_AdjustUpwards",  Adjustments[2], "{2}")
+			oidAnimSchlong[Stage]  = AddSliderOption("$SSL_SchlongUpDown", Adjustments[3], "{0}")
+
+			Stage += 1
+		endWhile
+
+
+	elseIf page == "$SSL_ExpressionEditor"
 		SetCursorFillMode(LEFT_TO_RIGHT)
 
 		if Expression == none
@@ -721,6 +806,112 @@ event OnRaceSwitchComplete()
 	endIf
 endEvent
 
+state AnimationSelect
+	event OnMenuOpenST()
+		SetMenuDialogStartIndex(AnimSlots.Slots.Find(Animation))
+		SetMenuDialogDefaultIndex(0)
+		SetMenuDialogOptions(AnimSlots.GetNames())
+	endEvent
+	event OnMenuAcceptST(int i)
+		Animation = AnimSlots.GetBySlot(i)
+		AdjustKey = "Global"
+		SetMenuOptionValueST(Animation.Name)
+		ForcePageReset()
+	endEvent
+	event OnDefaultST()
+		Animation = AnimSlots.GetBySlot(0)
+		AdjustKey = "Global"
+		SetMenuOptionValueST(Animation.Name)
+		ForcePageReset()
+	endEvent
+endState
+
+state AnimationPosition
+	event OnMenuOpenST()
+		string[] Positions = sslUtility.StringArray(Animation.PositionCount)
+		int i = Positions.Length
+		while i
+			i -= 1
+			Positions[i] = "$SSL_{"+Genders[Animation.GetGender(i)]+"}Gender{"+(i + 1)+"}Position"
+		endWhile
+		SetMenuDialogStartIndex(Position)
+		SetMenuDialogDefaultIndex(0)
+		SetMenuDialogOptions(Positions)
+	endEvent
+	event OnMenuAcceptST(int i)
+		Position = i
+		SetMenuOptionValueST("$SSL_{"+Genders[Animation.GetGender(i)]+"}Gender{"+(i + 1)+"}Position")
+		ForcePageReset()
+	endEvent
+	event OnDefaultST()
+		Position = 0
+		SetMenuOptionValueST(Position)
+		ForcePageReset()
+	endEvent
+endState
+
+state AnimationAdjustKey
+	event OnMenuOpenST()
+		string[] AdjustKeys = Animation.GetAdjustKeys()
+		MiscUtil.PrintConsole("AdjustKeys["+AdjustKeys.Length+"]: "+AdjustKeys)
+		SetMenuDialogStartIndex(AdjustKeys.Find(AdjustKey))
+		SetMenuDialogDefaultIndex(AdjustKeys.Find("Global"))
+		SetMenuDialogOptions(AdjustKeys)
+	endEvent
+	event OnMenuAcceptST(int i)
+		string[] AdjustKeys = Animation.GetAdjustKeys()
+		AdjustKey  = AdjustKeys[i]
+		MiscUtil.PrintConsole("Set AdjustKey ["+i+"]: "+AdjustKey)
+		SetMenuOptionValueST(AdjustKeys[i])
+		ForcePageReset()
+	endEvent
+	event OnDefaultST()
+		AdjustKey = "Global"
+		SetMenuOptionValueST(AdjustKey)
+		ForcePageReset()
+	endEvent
+endState
+
+
+state AnimationTest
+	event OnSelectST()
+		if !ShowMessage("About to player test animation "+Animation.Name+" for preview purposes.\n\nDo you wish to continue?", true, "$Yes", "$No")
+			return
+		endIf
+		ShowMessage("Starting animation "+Animation.Name+".\n\nClose all menus and return to the game to continue...", false)
+		Utility.Wait(0.5)
+
+		sslThreadModel Thread = SexLab.NewThread()
+		if Thread != none
+			; Add single animation to thread
+			sslBaseAnimation[] Anims = new sslBaseAnimation[1]
+			Anims[0] = Animation
+			Thread.SetAnimations(Anims)
+			; Disable extra effects, this is a test - keep it simple
+			Thread.DisableBedUse(true)
+			Thread.DisableLeadIn(true)
+			; select a solo actor
+			if Animation.PositionCount == 1
+				if TargetRef != none && TargetRef.Is3DLoaded() && ShowMessage("Which actor would you like to play the solo animation \""+Animation.Name+"\" with?", true, TargetName, PlayerRef.GetLeveledActorBase().GetName())
+					Thread.AddActor(TargetRef)
+				else
+					Thread.AddActor(PlayerRef)
+				endIf
+			; Add player and target
+			elseIf Animation.PositionCount == 2 && TargetRef != none
+				Actor[] Positions = sslUtility.MakeActorArray(PlayerRef, TargetRef)
+				Positions = ThreadLib.SortActors(Positions)
+				Thread.AddActor(Positions[0])
+				Thread.AddActor(Positions[1])
+			endIf
+		endIf
+		if Thread == none || Thread.StartThread() == none
+			ShowMessage("Failed to start test animation.", false)
+		endIf
+	endEvent
+endState
+
+
 state ExpressionSelect
 	event OnMenuOpenST()
 		SetMenuDialogStartIndex(ExpressionSlots.Expressions.Find(Expression))
@@ -778,7 +969,7 @@ function TestApply(Actor ActorRef)
 	string ActorName = ActorRef.GetLeveledActorBase().GetName()
 	sslBaseExpression Exp = Expression
 	if ShowMessage("Expression will be applied to "+ActorName+" for preview purposes, after 30 seconds they will be reset to their default.\n\nDo you wish to continue?", true, "$Yes", "$No")
-		ShowMessage("Applying "+Exp.Name+" phase "+Phase+" on "+ActorName+"...\n NOTICE: Close all menus and return to the game in order to continue.")
+		ShowMessage("Applying "+Exp.Name+" phase "+Phase+" on "+ActorName+".\n\nClose all menus and return to the game to continue...", false)
 		Utility.Wait(0.1)
 		Game.ForceThirdPerson()
 		Exp.ApplyPhase(ActorRef, Phase, ActorRef.GetLeveledActorBase().GetSex())
@@ -888,11 +1079,63 @@ state MoodAmountMale
 endState
 
 
+int function AnimStage(int i)
+	int Stages = Animation.StageCount
+	int Actors = Animation.PositionCount
+	while Actors
+		Actors -= 1
+		if i > (Actors * Stages)
+			MiscUtil.PrintConsole("Stage: "+i+" -> "+(i - (Actors * Stages) + 1))
+			return (i - (Actors * Stages) + 1)
+		endIf
+	endWhile
+	return -1
+endFunction
+
+int function AnimPos(int i)
+	int Stages = Animation.StageCount
+	int Actors = Animation.PositionCount
+	while Actors
+		Actors -= 1
+		if i > (Actors * Stages)
+			MiscUtil.PrintConsole("Position: "+i+" -> "+Actors)
+			return Actors
+		endIf
+	endWhile
+	return -1
+endFunction
 
 event OnOptionSliderOpen(int option)
 	int i
 
-	if CurrentPage == "$SSL_ExpressionEditor"
+	if CurrentPage == "$SSL_AnimationEditor"
+		; Adjust SOS
+		if oidAnimSchlong.Find(option) != -1
+			SetSliderDialogStartValue(Animation.GetAdjustment(Animation.Key("Adjust."+AdjustKey), Position, oidAnimSchlong.Find(option), 3))
+			SetSliderDialogRange(-9.0, 9.0)
+			SetSliderDialogInterval(1.0)
+			SetSliderDialogDefaultValue(0.0)
+			return
+
+		; Adjust forward
+		elseIf oidAnimForward.Find(option) != -1
+			SetSliderDialogStartValue(Animation.GetAdjustment(Animation.Key("Adjust."+AdjustKey), Position, oidAnimForward.Find(option), 0))
+
+		; Adjust sidways
+		elseIf oidAnimSideways.Find(option) != -1
+			SetSliderDialogStartValue(Animation.GetAdjustment(Animation.Key("Adjust."+AdjustKey), Position, oidAnimSideways.Find(option), 1))
+
+		; Adjust upwards
+		elseIf oidAnimUpward.Find(option) != -1
+			SetSliderDialogStartValue(Animation.GetAdjustment(Animation.Key("Adjust."+AdjustKey), Position, oidAnimUpward.Find(option), 2))
+
+		endIf
+
+		SetSliderDialogRange(-100.0, 100.0)
+		SetSliderDialogInterval(0.50)
+		SetSliderDialogDefaultValue(0.0)
+		return
+	elseIf CurrentPage == "$SSL_ExpressionEditor"
 
 		; Female presets
 		if oidFemalePhonemes.Find(option) != -1
@@ -932,7 +1175,31 @@ endEvent
 event OnOptionSliderAccept(int option, float value)
 	int i
 
-	if CurrentPage == "$SSL_ExpressionEditor"
+	if CurrentPage == "$SSL_AnimationEditor"
+
+		; Adjust SOS
+		if oidAnimSchlong.Find(option) != -1
+			Animation.SetAdjustment(Animation.Key("Adjust."+AdjustKey), Position, oidAnimSchlong.Find(option), 3, value)
+			SetSliderOptionValue(option, value, "{0}")
+
+		; Adjust forward
+		elseIf oidAnimForward.Find(option) != -1
+			Animation.SetAdjustment(Animation.Key("Adjust."+AdjustKey), Position, oidAnimForward.Find(option), 0, value)
+			SetSliderOptionValue(option, value, "{2}")
+
+		; Adjust sidways
+		elseIf oidAnimSideways.Find(option) != -1
+			Animation.SetAdjustment(Animation.Key("Adjust."+AdjustKey), Position, oidAnimSideways.Find(option), 1, value)
+			SetSliderOptionValue(option, value, "{2}")
+
+		; Adjust upwards
+		elseIf oidAnimUpward.Find(option) != -1
+			Animation.SetAdjustment(Animation.Key("Adjust."+AdjustKey), Position, oidAnimUpward.Find(option), 2, value)
+			SetSliderOptionValue(option, value, "{2}")
+
+		endIf
+
+	elseIf CurrentPage == "$SSL_ExpressionEditor"
 		; Female presets
 		if oidFemalePhonemes.Find(option) != -1
 			Expression.SetIndex(Phase, Female, Phoneme, oidFemalePhonemes.Find(option), value as int)

@@ -5,6 +5,7 @@ import SexLabUtil
 import MiscUtil
 import ActorUtil
 import StorageUtil
+import sslUtility
 
 Actor Ref1
 Actor Ref2
@@ -19,14 +20,14 @@ event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
 	Utility.Wait(0.5)
 
-	int[] array = new int[64]
-	int i = 64
-	while i
-		i -= 1
-		array[i] = i
-	endWhile
+	sslBaseAnimation Animation = SexLab.AnimSlots.GetBySlot(Utility.RandomInt(0, 10))
 
-	Miscutil.PrintConsole(sslUtility.SliceIntArray(array, 32))
+	string str = Animation.MakeAdjustKey(SexLab.MakeActorArray(TargetRef, CasterRef), true)
+	Animation.AdjustForward(str, 0, 1, 30, false)
+
+
+	PrintConsole( RemoveString(str, Animation.Key("Adjust.")) )
+	PrintConsole( RemoveString(str, ".Adjust.") )
 
 	Utility.Wait(6.0)
 	Dispel()
