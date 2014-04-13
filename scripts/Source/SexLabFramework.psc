@@ -413,40 +413,33 @@ endFunction
 ;# BEGIN EXPRESSION FUNCTION #
 ;#---------------------------#
 
-; function ClearMFG(Actor ActorRef)
-; 	sslExpressionLibrary.ClearMFG(ActorRef)
-; endFunction
-
-; function ClearPhoneme(Actor ActorRef)
-; 	sslExpressionLibrary.ClearPhoneme(ActorRef)
-; endFunction
-
-; function OpenMouth(Actor ActorRef)
-; 	sslExpressionLibrary.OpenMouth(ActorRef)
-; endFunction
-
-; bool function IsMouthOpen(Actor ActorRef)
-; 	return sslExpressionLibrary.IsMouthOpen(ActorRef)
-; endFunction
-
-; sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none)
-; 	return ExpressionLib.PickExpression(ActorRef, VictimRef)
-; endFunction
-
-; sslBaseExpression function RandomExpressionByTag(string tag)
-; 	return ExpressionSlots.RandomByTag(tag)
-; endFunction
+sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none)
+	return ExpressionSlots.PickExpression(ActorRef, VictimRef)
+endFunction
 
 sslBaseExpression  function GetExpressionByName(string findName)
 	return ExpressionSlots.GetByName(findName)
+endFunction
+
+sslBaseExpression function GetExpressionBySlot(int slot)
+	return ExpressionSlots.GetBySlot(slot)
 endFunction
 
 int function FindExpressionByName(string findName)
 	return ExpressionSlots.FindByName(findName)
 endFunction
 
-sslBaseExpression function GetExpressionBySlot(int slot)
-	return ExpressionSlots.GetBySlot(slot)
+function OpenMouth(Actor ActorRef)
+	ActorRef.SetExpressionOverride(16, 100)
+endFunction
+
+bool function IsMouthOpen(Actor ActorRef)
+	return MfgConsoleFunc.GetExpressionID(ActorRef) == 16 && MfgConsoleFunc.GetExpressionValue(ActorRef) == 100
+endFunction
+
+function ClearMFG(Actor ActorRef)
+	ActorRef.ClearExpressionOverride()
+	MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
 endFunction
 
 ;#---------------------------#

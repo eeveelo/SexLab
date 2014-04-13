@@ -180,7 +180,7 @@ state Ready
 			endIf
 			; Pick an expression if needed
 			if Expression == none && Config.bUseExpressions
-				Expression = ExpressionSlots.PickExpression(((IsVictim as int) + (Thread.IsAggressive as int)))
+				Expression = ExpressionSlots.PickExpression(ActorRef, Thread.VictimRef)
 			endIf
 			; Always use players stats if present, so players stats mean something more for npcs
 			Actor SkilledActor = ActorRef

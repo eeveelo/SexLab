@@ -17,30 +17,28 @@ endProperty
 ; --- Expression Filtering                            --- ;
 ; ------------------------------------------------------- ;
 
-sslBaseExpression function PickExpression(int Flag = 0)
-	string Tag = "Consensual"
-	if Flag == 1
+sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none)
+	string Tag
+	if VictimRef == none
+		Tag = "Consensual"
+	elseIf VictimRef == ActorRef
 		Tag = "Victim"
-	elseIf Flag == 2
+	else
 		Tag = "Aggressor"
 	endIf
-	string Search = "PickExpression["+Utility.RandomFloat(1.0, 10.0)+"]"
+	bool IsFemale = ActorRef.GetLeveledActorBase().GetSex() == 1
+	bool[] Valid = sslUtility.BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
-		if Slots[i].Registered && Slots[i].HasTag(Tag) && Slots[i].PhasesMale > 0 && Slots[i].PhasesFemale > 0
-			IntListAdd(self, Search, i)
-		endIf
+		Valid[i] = Slots[i].Registered && Slots[i].HasTag(Tag) && ((IsFemale && Slots[i].PhasesFemale > 0) || (!IsFemale && Slots[i].PhasesMale > 0))
 	endWhile
-	sslBaseExpression Output
-	if IntListCount(self, Search) > 0
-		Output = GetBySlot(IntListGet(self, Search, Utility.RandomInt(0, IntListCount(self, Search))))
-		IntListClear(self, Search)
+	i = Utility.RandomInt(0, (Slotted - 1))
+	int Slot = Valid.Find(true, i)
+	if Slot == -1
+		Slot = Valid.RFind(true, i)
 	endIf
-	return Output
-endFunction
-
-sslBaseExpression function GetByTags(string Tags, string TagsSuppressed = "", bool RequireAll = true)
+	return GetbySlot(Slot)
 endFunction
 
 ; ------------------------------------------------------- ;
