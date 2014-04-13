@@ -11,7 +11,6 @@ bool IsFemale
 bool IsCreature
 bool IsVictim
 bool IsPlayer
-bool IsStraight
 string ActorName
 ActorBase BaseRef
 int BaseSex
@@ -183,10 +182,8 @@ state Ready
 			if Expression == none && Config.bUseExpressions
 				Expression = ExpressionSlots.PickExpression(((IsVictim as int) + (Thread.IsAggressive as int)))
 			endIf
-			; Check for heterosexual preference
-			IsStraight = IsStraight(ActorRef)
-			Actor SkilledActor = ActorRef
 			; Always use players stats if present, so players stats mean something more for npcs
+			Actor SkilledActor = ActorRef
 			if !IsPlayer && Thread.HasPlayer
 				SkilledActor = Thread.PlayerRef
 			; If a non-creature couple, base skills off partner
@@ -243,7 +240,7 @@ state Animating
 		endIf
 		; Moan if not silent
 		if !IsSilent
-			Voice.Moan(ActorRef, Enjoyment, IsVictim, Config.bUseLipSync)
+			Voice.Moan(ActorRef, Enjoyment, IsVictim)
 		endIf
 		; Loop
 		RegisterForSingleUpdate(VoiceDelay)
@@ -350,7 +347,7 @@ state Animating
 		endIf
 		; Moan if not silent
 		if !IsSilent
-			Voice.Moan(ActorRef, 100, IsVictim, Config.bUseLipSync)
+			Voice.Moan(ActorRef, 100, IsVictim)
 		endIf
 		; Shake camera for player
 		if IsPlayer && Game.GetCameraState() != 3
@@ -432,16 +429,6 @@ state Animating
 			TimeBonus   *= 0.8
 			StageBonus  *= 0.8
 		endIf
-
-		; Actor is outside sexuality comfort zone
-		; if IsStraight
-		; 	if (IsFemale && Thread.Females > 1) || (!IsFemale && Thread.Males > 1)
-		; 		GenderBonus -= 4.0
-		; 	elseIf (IsFemale && MalePosition) || (!IsFemale && !MalePosition)
-		; 		GenderBonus -= 2.5
-		; 	endIf
-		; endIf
-
 		; Set final enjoyment
 		Enjoyment = (SkillBonus + PurityBonus + StageBonus + TimeBonus) as int
 		; Log("Skill: "+SkillBonus+" PurityBonus: "+PurityBonus+" Stage: "+StageBonus+" Time: "+TimeBonus+" -- Enjoyment: "+Enjoyment, ActorName)

@@ -1,9 +1,10 @@
 scriptname sslBaseVoice extends sslBaseObject
 
-Topic LipSync
+sslSystemConfig Config
 FormList VoicesPlayer
 VoiceType SexLabVoiceM
 VoiceType SexLabVoiceF
+Topic LipSync
 
 Sound property Mild auto hidden
 Sound property Medium auto hidden
@@ -21,8 +22,8 @@ bool property Female hidden
 	endFunction
 endProperty
 
-function Moan(Actor ActorRef, int Strength = 30, bool IsVictim = false, bool UseLipSync = false)
-	if UseLipSync && Game.GetCameraState() != 3
+function Moan(Actor ActorRef, int Strength = 30, bool IsVictim = false)
+	if Config.bUseLipSync && Game.GetCameraState() != 3
 		ActorRef.Say(LipSync)
 	endIf
 	GetSound(Strength, IsVictim).PlayAndWait(ActorRef)
@@ -64,14 +65,14 @@ function Save(int id)
 endFunction
 
 function Initialize()
+	Config       = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
+	LipSync      = Config.LipSync
+	VoicesPlayer = Config.VoicesPlayer
+	SexLabVoiceM = Config.SexLabVoiceM
+	SexLabVoiceF = Config.SexLabVoiceF
 	Gender = -1
 	Mild = none
 	Medium = none
 	Hot = none
-	sslThreadLibrary Lib = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslThreadLibrary
-	LipSync = Lib.LipSync
-	VoicesPlayer = Lib.VoicesPlayer
-	SexLabVoiceM = Lib.SexLabVoiceM
-	SexLabVoiceF = Lib.SexLabVoiceF
 	parent.Initialize()
 endFunction
