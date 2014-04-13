@@ -75,9 +75,9 @@ form[] property CreatureRaces hidden
 	endFunction
 endProperty
 
-;/-----------------------------------------------\;
-;|	Animation Events                             |;
-;\-----------------------------------------------/;
+; ------------------------------------------------------- ;
+; --- Animation Events                                --- ;
+; ------------------------------------------------------- ;
 
 string[] function FetchPosition(int position)
 	if position > Actors || position < 0
@@ -111,9 +111,9 @@ string[] function FetchStage(int stage)
 	return anims
 endFunction
 
-;/-----------------------------------------------\;
-;|	Data Accessors                               |;
-;\-----------------------------------------------/;
+; ------------------------------------------------------- ;
+; --- Data Accessors                                  --- ;
+; ------------------------------------------------------- ;
 
 int function DataIndex(int Slots, int Position, int Stage, int Slot)
 	return ( Position * (Stages * Slots) ) + ( (Stage - 1) * Slots ) + Slot
@@ -166,9 +166,9 @@ float[] function GetPositionOffsets(string AdjustKey, int Position, int Stage)
 	return Output
 endFunction
 
-;/-----------------------------------------------\;
-;|	Update Offsets                               |;
-;\-----------------------------------------------/;
+; ------------------------------------------------------- ;
+; --- Update Offsets                                  --- ;
+; ------------------------------------------------------- ;
 
 function SetAdjustment(string AdjustKey, int Position, int Stage, int Slot, float Adjustment)
 	; Init adjustments
@@ -226,9 +226,9 @@ function RestoreOffsets(string AdjustKey)
 	FloatListClear(Storage, AdjustKey)
 endFunction
 
-;/-----------------------------------------------\;
-;|	Animation Info                               |;
-;\-----------------------------------------------/;
+; ------------------------------------------------------- ;
+; --- Animation Info                                  --- ;
+; ------------------------------------------------------- ;
 
 bool function IsSilent(int Position, int Stage)
 	return AccessFlag(Position, Stage, 0) as bool
@@ -306,17 +306,9 @@ function SetContent(int contentType)
 	content = contentType
 endFunction
 
-;/-----------------------------------------------\;
-;|	Animation Tags                               |;
-;\-----------------------------------------------/;
-
-string function GetGendersTag()
-	; return sslAnimationLibrary.GetGenderTag(Females, Males, Creatures)
-endFunction
-
-;/-----------------------------------------------\;
-;|	Creature Use                                 |;
-;\-----------------------------------------------/;
+; ------------------------------------------------------- ;
+; --- Creature Use                                    --- ;
+; ------------------------------------------------------- ;
 
 bool function HasRace(Race CreatureRace)
 	return FormListFind(Storage, Key("Creatures"), CreatureRace) != -1
@@ -330,9 +322,9 @@ function AddRace(Race CreatureRace)
 	endIf
 endFunction
 
-;/-----------------------------------------------\;
-;|	Animation Setup                              |;
-;\-----------------------------------------------/;
+; ------------------------------------------------------- ;
+; --- Animation Setup                                 --- ;
+; ------------------------------------------------------- ;
 
 function SetStageTimer(int stage, float timer)
 	; Validate stage
@@ -431,9 +423,9 @@ float function CalcCenterAdjuster(int Stage)
 	return Adjuster
 endFunction
 
-;/-----------------------------------------------\;
-;|	System Use                                   |;
-;\-----------------------------------------------/;
+; ------------------------------------------------------- ;
+; --- System Use                                      --- ;
+; ------------------------------------------------------- ;
 
 function Initialize()
 	Actors  = 0
