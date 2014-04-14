@@ -31,7 +31,7 @@ bool function CheckActor(Actor CheckRef, int CheckGender = -1)
 	return (CheckGender != 2 && IsGender != 2 && (CheckGender == -1 || IsGender == CheckGender) && ActorLib.IsValidActor(CheckRef))
 endFunction
 
-Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, actor IgnoreRef1 = none, actor IgnoreRef2 = none, actor IgnoreRef3 = none, actor IgnoreRef4 = none)
+Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none)
 	if CenterRef == none || FindGender > 2 || FindGender < -1 || Radius < 0.1
 		return none ; Invalid args
 	endIf

@@ -257,12 +257,3 @@ state Locked
 	function Setup()
 	endFunction
 endState
-
-
-function Export()
-	int i = Slotted
-	while i
-		i -= 1
-		StorageUtil.ExportFile("SexLab/AnimationProfile1.json", Slots[i].Key("Adjust"), keyContains = true)
-	endWhile
-endFunction
