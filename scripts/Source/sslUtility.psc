@@ -153,7 +153,7 @@ int[] function SliceIntArray(int[] array, int startindex = 0, int endindex = -1)
 		endindex -= 1
 	endWhile
 	return output
-endfunction
+endFunction
 
 int function AddValues(int[] array) global
 	int value
@@ -587,16 +587,6 @@ endFunction
 ;#  Below Array Functions Originally by Cmod  #
 ;##############################################
 
-int function ValidateSize(int size) global
-	if size < 1
-		return 1
-	elseIf size > 128
-		return 128
-	else
-		return size
-	endIf
-endFunction
-
 Actor[] function ActorArray(int size) global
 	if size == 1
 		return new Actor[1]
@@ -810,11 +800,66 @@ sslBaseAnimation[] function AnimationArray(int size) global
 		return new sslBaseAnimation[98]
 	elseIf size == 99
 		return new sslBaseAnimation[99]
-	else
+	elseIf size == 100
 		return new sslBaseAnimation[100]
+	elseIf size == 101
+		return new sslBaseAnimation[101]
+	elseIf size == 102
+		return new sslBaseAnimation[102]
+	elseIf size == 103
+		return new sslBaseAnimation[103]
+	elseIf size == 104
+		return new sslBaseAnimation[104]
+	elseIf size == 105
+		return new sslBaseAnimation[105]
+	elseIf size == 106
+		return new sslBaseAnimation[106]
+	elseIf size == 107
+		return new sslBaseAnimation[107]
+	elseIf size == 108
+		return new sslBaseAnimation[108]
+	elseIf size == 109
+		return new sslBaseAnimation[109]
+	elseIf size == 110
+		return new sslBaseAnimation[110]
+	elseIf size == 111
+		return new sslBaseAnimation[111]
+	elseIf size == 112
+		return new sslBaseAnimation[112]
+	elseIf size == 113
+		return new sslBaseAnimation[113]
+	elseIf size == 114
+		return new sslBaseAnimation[114]
+	elseIf size == 115
+		return new sslBaseAnimation[115]
+	elseIf size == 116
+		return new sslBaseAnimation[116]
+	elseIf size == 117
+		return new sslBaseAnimation[117]
+	elseIf size == 118
+		return new sslBaseAnimation[118]
+	elseIf size == 119
+		return new sslBaseAnimation[119]
+	elseIf size == 120
+		return new sslBaseAnimation[120]
+	elseIf size == 121
+		return new sslBaseAnimation[121]
+	elseIf size == 122
+		return new sslBaseAnimation[122]
+	elseIf size == 123
+		return new sslBaseAnimation[123]
+	elseIf size == 124
+		return new sslBaseAnimation[124]
+	elseIf size == 125
+		return new sslBaseAnimation[125]
+	elseIf size == 126
+		return new sslBaseAnimation[126]
+	elseIf size == 127
+		return new sslBaseAnimation[127]
+	else
+		return new sslBaseAnimation[128]
 	endIf
 endFunction
-
 sslBaseVoice[] function VoiceArray(int size) global
 	if size == 1
 		return new sslBaseVoice[1]
@@ -914,13 +959,167 @@ sslBaseVoice[] function VoiceArray(int size) global
 		return new sslBaseVoice[48]
 	elseIf size == 49
 		return new sslBaseVoice[49]
-	else
+	elseIf size == 50
 		return new sslBaseVoice[50]
+	elseIf size == 51
+		return new sslBaseVoice[51]
+	elseIf size == 52
+		return new sslBaseVoice[52]
+	elseIf size == 53
+		return new sslBaseVoice[53]
+	elseIf size == 54
+		return new sslBaseVoice[54]
+	elseIf size == 55
+		return new sslBaseVoice[55]
+	elseIf size == 56
+		return new sslBaseVoice[56]
+	elseIf size == 57
+		return new sslBaseVoice[57]
+	elseIf size == 58
+		return new sslBaseVoice[58]
+	elseIf size == 59
+		return new sslBaseVoice[59]
+	elseIf size == 60
+		return new sslBaseVoice[60]
+	elseIf size == 61
+		return new sslBaseVoice[61]
+	elseIf size == 62
+		return new sslBaseVoice[62]
+	elseIf size == 63
+		return new sslBaseVoice[63]
+	elseIf size == 64
+		return new sslBaseVoice[64]
+	elseIf size == 65
+		return new sslBaseVoice[65]
+	elseIf size == 66
+		return new sslBaseVoice[66]
+	elseIf size == 67
+		return new sslBaseVoice[67]
+	elseIf size == 68
+		return new sslBaseVoice[68]
+	elseIf size == 69
+		return new sslBaseVoice[69]
+	elseIf size == 70
+		return new sslBaseVoice[70]
+	elseIf size == 71
+		return new sslBaseVoice[71]
+	elseIf size == 72
+		return new sslBaseVoice[72]
+	elseIf size == 73
+		return new sslBaseVoice[73]
+	elseIf size == 74
+		return new sslBaseVoice[74]
+	elseIf size == 75
+		return new sslBaseVoice[75]
+	elseIf size == 76
+		return new sslBaseVoice[76]
+	elseIf size == 77
+		return new sslBaseVoice[77]
+	elseIf size == 78
+		return new sslBaseVoice[78]
+	elseIf size == 79
+		return new sslBaseVoice[79]
+	elseIf size == 80
+		return new sslBaseVoice[80]
+	elseIf size == 81
+		return new sslBaseVoice[81]
+	elseIf size == 82
+		return new sslBaseVoice[82]
+	elseIf size == 83
+		return new sslBaseVoice[83]
+	elseIf size == 84
+		return new sslBaseVoice[84]
+	elseIf size == 85
+		return new sslBaseVoice[85]
+	elseIf size == 86
+		return new sslBaseVoice[86]
+	elseIf size == 87
+		return new sslBaseVoice[87]
+	elseIf size == 88
+		return new sslBaseVoice[88]
+	elseIf size == 89
+		return new sslBaseVoice[89]
+	elseIf size == 90
+		return new sslBaseVoice[90]
+	elseIf size == 91
+		return new sslBaseVoice[91]
+	elseIf size == 92
+		return new sslBaseVoice[92]
+	elseIf size == 93
+		return new sslBaseVoice[93]
+	elseIf size == 94
+		return new sslBaseVoice[94]
+	elseIf size == 95
+		return new sslBaseVoice[95]
+	elseIf size == 96
+		return new sslBaseVoice[96]
+	elseIf size == 97
+		return new sslBaseVoice[97]
+	elseIf size == 98
+		return new sslBaseVoice[98]
+	elseIf size == 99
+		return new sslBaseVoice[99]
+	elseIf size == 100
+		return new sslBaseVoice[100]
+	elseIf size == 101
+		return new sslBaseVoice[101]
+	elseIf size == 102
+		return new sslBaseVoice[102]
+	elseIf size == 103
+		return new sslBaseVoice[103]
+	elseIf size == 104
+		return new sslBaseVoice[104]
+	elseIf size == 105
+		return new sslBaseVoice[105]
+	elseIf size == 106
+		return new sslBaseVoice[106]
+	elseIf size == 107
+		return new sslBaseVoice[107]
+	elseIf size == 108
+		return new sslBaseVoice[108]
+	elseIf size == 109
+		return new sslBaseVoice[109]
+	elseIf size == 110
+		return new sslBaseVoice[110]
+	elseIf size == 111
+		return new sslBaseVoice[111]
+	elseIf size == 112
+		return new sslBaseVoice[112]
+	elseIf size == 113
+		return new sslBaseVoice[113]
+	elseIf size == 114
+		return new sslBaseVoice[114]
+	elseIf size == 115
+		return new sslBaseVoice[115]
+	elseIf size == 116
+		return new sslBaseVoice[116]
+	elseIf size == 117
+		return new sslBaseVoice[117]
+	elseIf size == 118
+		return new sslBaseVoice[118]
+	elseIf size == 119
+		return new sslBaseVoice[119]
+	elseIf size == 120
+		return new sslBaseVoice[120]
+	elseIf size == 121
+		return new sslBaseVoice[121]
+	elseIf size == 122
+		return new sslBaseVoice[122]
+	elseIf size == 123
+		return new sslBaseVoice[123]
+	elseIf size == 124
+		return new sslBaseVoice[124]
+	elseIf size == 125
+		return new sslBaseVoice[125]
+	elseIf size == 126
+		return new sslBaseVoice[126]
+	elseIf size == 127
+		return new sslBaseVoice[127]
+	else
+		return new sslBaseVoice[128]
 	endIf
 endFunction
-
 form[] function FormArray(int size) global
-	size = ValidateSize(size)
 	if size == 1
 		return new form[1]
 	elseIf size == 2
@@ -1175,13 +1374,11 @@ form[] function FormArray(int size) global
 		return new form[126]
 	elseIf size == 127
 		return new form[127]
-	elseIf size == 128
+	else
 		return new form[128]
 	endIf
 endFunction
-
 float[] function FloatArray(int size) global
-	size = ValidateSize(size)
 	if size == 1
 		return new float[1]
 	elseIf size == 2
@@ -1436,12 +1633,11 @@ float[] function FloatArray(int size) global
 		return new float[126]
 	elseIf size == 127
 		return new float[127]
-	elseIf size == 128
+	else
 		return new float[128]
 	endIf
 endFunction
 int[] function IntArray(int size) global
-	size = ValidateSize(size)
 	if size == 1
 		return new int[1]
 	elseIf size == 2
@@ -1696,12 +1892,11 @@ int[] function IntArray(int size) global
 		return new int[126]
 	elseIf size == 127
 		return new int[127]
-	elseIf size == 128
+	else
 		return new int[128]
 	endIf
-Endfunction
+endFunction
 bool[] function BoolArray(int size) global
-	size = ValidateSize(size)
 	if size == 1
 		return new bool[1]
 	elseIf size == 2
@@ -1956,12 +2151,11 @@ bool[] function BoolArray(int size) global
 		return new bool[126]
 	elseIf size == 127
 		return new bool[127]
-	elseIf size == 128
+	else
 		return new bool[128]
 	endIf
 endFunction
 string[] function StringArray(int size) global
-	size = ValidateSize(size)
 	if size == 1
 		return new string[1]
 	elseIf size == 2
@@ -2216,7 +2410,7 @@ string[] function StringArray(int size) global
 		return new string[126]
 	elseIf size == 127
 		return new string[127]
-	elseIf size == 128
+	else
 		return new string[128]
 	endIf
-endfunction
+endFunction
