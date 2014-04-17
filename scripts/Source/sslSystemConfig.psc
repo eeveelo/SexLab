@@ -157,8 +157,8 @@ float function GetVoiceDelay(bool IsFemale = false, int Stage = 1, bool IsSilent
 	endIf
 	if Stage > 1
 		VoiceDelay -= (Stage * 0.8) + Utility.RandomFloat(-0.4, 0.4)
-		if VoiceDelay < 0.6
-			return Utility.RandomFloat(0.6, 1.3) ; Can't have delay shorter than animation update loop
+		if VoiceDelay < 0.8
+			return Utility.RandomFloat(0.8, 1.3) ; Can't have delay shorter than animation update loop
 		endIf
 	endIf
 	return VoiceDelay
@@ -448,8 +448,8 @@ function SetDefaults()
 
 	; Config
 	bDisablePlayer = false
-	fMaleVoiceDelay = 6.0
-	fFemaleVoiceDelay = 5.0
+	fMaleVoiceDelay = 5.0
+	fFemaleVoiceDelay = 4.0
 	fVoiceVolume = 1.0
 	bScaleActors = false
 	bUseCum = true
@@ -544,7 +544,7 @@ function SetDefaults()
 	bStripAggressor[26] = true
 
 	; Config
-	fSFXDelay = 4.0
+	fSFXDelay = 3.0
 	fSFXVolume = 1.0
 	bAutoAdvance = true
 	bForeplayStage = false

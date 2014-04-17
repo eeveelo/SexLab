@@ -2083,16 +2083,16 @@ endState
 state SFXDelay
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(Config.fSFXDelay)
-		SetSliderDialogDefaultValue(4.0)
-		SetSliderDialogRange(2.0, 30.0)
-		SetSliderDialogInterval(1.0)
+		SetSliderDialogDefaultValue(3.0)
+		SetSliderDialogRange(0.8, 30.0)
+		SetSliderDialogInterval(0.2)
 	endEvent
 	event OnSliderAcceptST(float value)
 		Config.fSFXDelay = value
 		SetSliderOptionValueST(Config.fSFXDelay, "$SSL_Seconds")
 	endEvent
 	event OnDefaultST()
-		Config.fSFXDelay = 4.0
+		Config.fSFXDelay = 3.0
 		SetSliderOptionValueST(Config.fSFXDelay, "$SSL_Seconds")
 	endEvent
 	event OnHighlightST()
@@ -2102,16 +2102,16 @@ endState
 state MaleVoiceDelay
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(Config.fMaleVoiceDelay)
-		SetSliderDialogDefaultValue(6.0)
-		SetSliderDialogRange(2.0, 45.0)
-		SetSliderDialogInterval(1.0)
+		SetSliderDialogDefaultValue(5.0)
+		SetSliderDialogRange(0.8, 45.0)
+		SetSliderDialogInterval(0.2)
 	endEvent
 	event OnSliderAcceptST(float value)
 		Config.fMaleVoiceDelay = value
 		SetSliderOptionValueST(Config.fMaleVoiceDelay, "$SSL_Seconds")
 	endEvent
 	event OnDefaultST()
-		Config.fMaleVoiceDelay = 6.0
+		Config.fMaleVoiceDelay = 5.0
 		SetSliderOptionValueST(Config.fMaleVoiceDelay, "$SSL_Seconds")
 	endEvent
 	event OnHighlightST()
@@ -2121,16 +2121,16 @@ endState
 state FemaleVoiceDelay
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(Config.fFemaleVoiceDelay)
-		SetSliderDialogDefaultValue(5.0)
-		SetSliderDialogRange(2.0, 45.0)
-		SetSliderDialogInterval(1.0)
+		SetSliderDialogDefaultValue(4.0)
+		SetSliderDialogRange(0.8, 45.0)
+		SetSliderDialogInterval(0.2)
 	endEvent
 	event OnSliderAcceptST(float value)
 		Config.fFemaleVoiceDelay = value
 		SetSliderOptionValueST(Config.fFemaleVoiceDelay, "$SSL_Seconds")
 	endEvent
 	event OnDefaultST()
-		Config.fFemaleVoiceDelay = 5.0
+		Config.fFemaleVoiceDelay = 4.0
 		SetSliderOptionValueST(Config.fFemaleVoiceDelay, "$SSL_Seconds")
 	endEvent
 	event OnHighlightST()
