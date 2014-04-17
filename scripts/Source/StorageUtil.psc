@@ -219,6 +219,25 @@ Form function GetFormValue(Form obj, string key, Form missing = none) global nat
 int function IntListAdd(Form obj, string key, int value, bool allowDuplicate = true) global native
 
 
+;/ Insert an int to a list on form or globally and return
+   if successful.
+
+   obj: form to add to. Set none to add global value.
+   key: name of value.
+   index: position in list to put the value. 0 is first entry in list.
+   value: value to add.
+/;
+bool function IntListInsert(Form obj, string key, int index, int value) global native
+
+
+;/ Sort an int list by values in ascending order.
+   
+   obj: form to sort on. Set none for global value.
+   key: name of value.
+/;
+function IntListSort(Form obj, string key) global native
+
+
 ;/ Remove a previously added int value from a list on form
    or globally and return how many instances of this value were removed.
 
@@ -299,6 +318,25 @@ int function IntListFind(Form obj, string key, int value) global native
                               already exists in the list.
 /;
 int function FloatListAdd(Form obj, string key, float value, bool allowDuplicate = true) global native
+
+
+;/ Insert a float to a list on form or globally and return
+   if successful.
+
+   obj: form to add to. Set none to add global value.
+   key: name of value.
+   index: position in list to put the value. 0 is first entry in list.
+   value: value to add.
+/;
+bool function FloatListInsert(Form obj, string key, int index, float value) global native
+
+
+;/ Sort a float list by values in ascending order.
+   
+   obj: form to sort on. Set none for global value.
+   key: name of value.
+/;
+function FloatListSort(Form obj, string key) global native
 
 
 ;/ Remove a previously added float value from a list on form
@@ -383,6 +421,25 @@ int function FloatListFind(Form obj, string key, float value) global native
 int function StringListAdd(Form obj, string key, string value, bool allowDuplicate = true) global native
 
 
+;/ Insert a string to a list on form or globally and return
+   if successful.
+
+   obj: form to add to. Set none to add global value.
+   key: name of value.
+   index: position in list to put the value. 0 is first entry in list.
+   value: value to add.
+/;
+bool function StringListInsert(Form obj, string key, int index, string value) global native
+
+
+;/ Sort a string list by values in ascending order.
+   
+   obj: form to sort on. Set none for global value.
+   key: name of value.
+/;
+function StringListSort(Form obj, string key) global native
+
+
 ;/ Remove a previously added string value from a list on form
    or globally and return how many instances of this value were removed.
 
@@ -463,6 +520,17 @@ int function StringListFind(Form obj, string key, string value) global native
                               already exists in the list.
 /;
 int function FormListAdd(Form obj, string key, Form value, bool allowDuplicate = true) global native
+
+
+;/ Insert a form to a list on form or globally and return
+   if successful.
+
+   obj: form to add to. Set none to add global value.
+   key: name of value.
+   index: position in list to put the value. 0 is first entry in list.
+   value: value to add.
+/;
+bool function FormListInsert(Form obj, string key, int index, Form value) global native
 
 
 ;/ Remove a previously added form value from a list on form
@@ -1114,3 +1182,9 @@ string function debug_FileGetStringListKey(int index) global native
    It is not necessary to use this function - this is done automatically.
 /;
 int function debug_Cleanup() global native
+
+;/ Enable storage debug mode. This will display size of storage util
+   data in save games when saving or loading in console. You may need
+   to manually open console first.
+/;
+function debug_SetDebugMode(bool enabled) global native
