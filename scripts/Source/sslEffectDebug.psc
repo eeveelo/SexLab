@@ -20,16 +20,14 @@ event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
 	Utility.Wait(0.5)
 
-	sslBaseAnimation Animation = SexLab.AnimSlots.GetBySlot(Utility.RandomInt(0, 10))
+	; SexLab.AnimSlots.GetBySlot(0).Export()
+	; SexLab.AnimSlots.GetBySlot(1).Export()
 
-	string str = Animation.MakeAdjustKey(SexLab.MakeActorArray(TargetRef, CasterRef), true)
-	Animation.AdjustForward(str, 0, 1, 30, false)
+	; sslBenchmark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
+	; Dev.LatencyTest()
+	; Utility.Wait(1.0)
+	; Dev.StartBenchmark(2)
 
-
-	PrintConsole( RemoveString(str, Animation.Key("Adjust.")) )
-	PrintConsole( RemoveString(str, ".Adjust.") )
-
-	Utility.Wait(6.0)
 	Dispel()
 endEvent
 
@@ -38,10 +36,6 @@ event OnUpdate()
 endEvent
 
 event OnEffectFinish(Actor TargetRef, Actor CasterRef)
-	Debug.Notification("End")
-	TargetRef.SetVehicle(none)
-	MarkerRef.Disable()
-	MarkerRef.Delete()
 	; Log("Debug effect spell expired("+TargetRef+", "+CasterRef+")")
 endEvent
 
@@ -52,8 +46,8 @@ endEvent
 ;\-----------------------------------------------/;
 
 function Log(string log)
-	Debug.TraceAndBox(ActorName+"\n"+log)
-	; Debug.Trace(log)
+	; Debug.TraceAndBox(ActorName+"\n"+log)
+	Debug.Trace(log)
 	; MiscUtil.PrintConsole(ActorName+"\n"+log)
 	MiscUtil.PrintConsole(log)
 endfunction

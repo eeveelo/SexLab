@@ -33,9 +33,9 @@ endEvent
 
 function SetupSystem()
 	; Wait until out of menus to setup resources
-	while Utility.IsInMenuMode() || !PlayerRef.Is3DLoaded()
-		Utility.Wait(1.0)
-	endWhile
+	; while Utility.IsInMenuMode() || !PlayerRef.Is3DLoaded()
+	; 	Utility.Wait(1.0)
+	; endWhile
 	Debug.Notification("Installing SexLab v"+GetStringVer())
 	; Init Defaults and check is sytem is able to install
 	if SetDefaults()
@@ -63,8 +63,6 @@ event OnGameReload()
 	Config = SexLabQuestFramework as sslSystemConfig
 	; Reload SexLab's voice/tfc config at load
 	if CurrentVersion > 0 && Config.CheckSystem()
-		TargetRef = none
-		RegisterForKey(Config.kTargetActor)
 		Config.ReloadConfig()
 	else
 		SexLab.GoToState("Disabled")
@@ -190,8 +188,8 @@ event OnSliderAcceptST(float value)
 	if Options[0] == "Adjust"
 		; Stage, Slot
 		Animation.SetAdjustment(Animation.Key("Adjust."+AdjustKey), Position, Options[1] as int, Options[2] as int, value)
+		Animation.SaveProfile(Config.AnimProfile)
 		SetSliderOptionValueST(value)
-
 	; Expression Editor
 	elseIf Options[0] == "Expression"
 		; Gender, Type, ID
@@ -294,7 +292,8 @@ function AnimationSettings()
 	AddSliderOptionST("CumEffectTimer","$SSL_CumEffectTimer", Config.fCumTimer, "$SSL_Seconds")
 
 	SetCursorPosition(1)
-	AddHeaderOption("$SSL_AnimationHandling")
+	; AddHeaderOption("$SSL_AnimationHandling")
+	AddMenuOptionST("AnimationProfile", "$SSL_AnimationProfile", Config.ProfileLabel(Config.AnimProfile))
 	AddToggleOptionST("AllowCreatures","$SSL_AllowCreatures", Config.bAllowCreatures)
 	AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", Config.bScaleActors)
 	AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", Config.bForeplayStage)
@@ -308,6 +307,33 @@ function AnimationSettings()
 	AddTextOptionST("NPCBed","$SSL_NPCsUseBeds", Config.sNPCBed)
 endFunction
 
+state AnimationProfile
+	event OnMenuOpenST()
+		string[] Profiles = new string[5]
+		Profiles[0] = Config.ProfileLabel(1)
+		Profiles[1] = Config.ProfileLabel(2)
+		Profiles[2] = Config.ProfileLabel(3)
+		Profiles[3] = Config.ProfileLabel(4)
+		Profiles[4] = Config.ProfileLabel(5)
+		SetMenuDialogStartIndex((Config.AnimProfile - 1))
+		SetMenuDialogDefaultIndex(0)
+		SetMenuDialogOptions(Profiles)
+	endEvent
+	event OnMenuAcceptST(int i)
+		i += 1
+		; Export/Set/Import profiles
+		Config.ExportProfile(Config.AnimProfile)
+		Config.AnimProfile = sslUtility.ClampInt(i, 1, 5)
+		Config.ImportProfile(Config.AnimProfile)
+		SetMenuOptionValueST(Config.ProfileLabel(Config.AnimProfile))
+	endEvent
+	event OnDefaultST()
+		OnMenuAcceptST(1)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoAnimationProfile")
+	endEvent
+endState
 
 ; ------------------------------------------------------- ;
 ; --- Player Hotkeys                                  --- ;
@@ -568,16 +594,16 @@ endState
 state TargetActor
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+			Config.UnregisterForKey(Config.kTargetActor)
 			Config.kTargetActor = newKeyCode
-			UnregisterForAllKeys()
-			RegisterForKey(Config.kTargetActor)
+			Config.RegisterForKey(Config.kTargetActor)
 			SetKeyMapOptionValueST(Config.kTargetActor)
 		endIf
 	endEvent
 	event OnDefaultST()
+		Config.UnregisterForKey(Config.kTargetActor)
 		Config.kTargetActor = 49
-		UnregisterForAllKeys()
-		RegisterForKey(Config.kTargetActor)
+		Config.RegisterForKey(Config.kTargetActor)
 		SetKeyMapOptionValueST(Config.kTargetActor)
 	endEvent
 	event OnHighlightST()
@@ -587,14 +613,16 @@ endState
 state ToggleFreeCamera
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+			Config.UnregisterForKey(Config.kToggleFreeCamera)
 			Config.kToggleFreeCamera = newKeyCode
-			Config.ReloadConfig()
+			Config.RegisterForKey(Config.kToggleFreeCamera)
 			SetKeyMapOptionValueST(Config.kToggleFreeCamera)
 		endIf
 	endEvent
 	event OnDefaultST()
+		Config.UnregisterForKey(Config.kToggleFreeCamera)
 		Config.kToggleFreeCamera = 81
-		Config.ReloadConfig()
+		Config.RegisterForKey(Config.kToggleFreeCamera)
 		SetKeyMapOptionValueST(Config.kToggleFreeCamera)
 	endEvent
 	event OnHighlightST()
@@ -1438,11 +1466,12 @@ function RebuildClean()
 	else
 		AddTextOptionST("ToggleSystem","$SSL_DisabledSystem", "$SSL_DoEnable")
 	endIf
-	AddTextOptionST("RestoreDefaultSettings","$SSL_RestoreDefaultSettings", "$SSL_ClickHere")
-	AddTextOptionST("StopCurrentAnimations","$SSL_StopCurrentAnimations", "$SSL_ClickHere")
+
 	AddTextOptionST("ResetAnimationRegistry","$SSL_ResetAnimationRegistry", "$SSL_ClickHere")
 	AddTextOptionST("ResetVoiceRegistry","$SSL_ResetVoiceRegistry", "$SSL_ClickHere")
 	AddTextOptionST("ResetPlayerSexStats","$SSL_ResetPlayerSexStats", "$SSL_ClickHere")
+	AddTextOptionST("RestoreDefaultSettings","$SSL_RestoreDefaultSettings", "$SSL_ClickHere")
+	AddTextOptionST("StopCurrentAnimations","$SSL_StopCurrentAnimations", "$SSL_ClickHere")
 	AddEmptyOption()
 	AddHeaderOption("$SSL_UpgradeUninstallReinstall")
 	AddTextOptionST("CleanSystem","$SSL_CleanSystem", "$SSL_ClickHere")
@@ -1520,8 +1549,8 @@ event OnConfigOpen()
 	if PlayerRef.GetLeveledActorBase().GetSex() == 0
 		Pages[7] = "$SSL_SexJournal"
 	endIf
-
 	; Target actor
+	TargetRef = Config.GetTargetedActor()
 	if TargetRef != none && TargetRef.Is3DLoaded()
 		TargetName = TargetRef.GetLeveledActorBase().GetName()
 		TargetFlag = OPTION_FLAG_NONE
@@ -1654,18 +1683,6 @@ event OnConfigClose()
 	TSModes   = new string[1]
 	TAModes   = new string[1]
 	Biped     = new string[1]
-endEvent
-
-event OnKeyDown(int keyCode)
-	If keyCode == Config.kTargetActor
-		Actor ClosestRef = Game.FindClosestActorFromRef(PlayerRef, 800.0)
-		if ClosestRef != none && PlayerRef.HasLOS(ClosestRef)
-			TargetRef = ClosestRef
-			; Stats.SeedActor(StatTarget)
-			Debug.Notification("SexLab Target Selected: "+TargetRef.GetLeveledActorBase().GetName())
-			MiscUtil.PrintConsole("SexLab Target Selected: "+TargetRef.GetLeveledActorBase().GetName())
-		endIf
-	endIf
 endEvent
 
 ; ------------------------------------------------------- ;

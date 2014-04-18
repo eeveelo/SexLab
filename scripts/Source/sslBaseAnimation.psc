@@ -528,3 +528,32 @@ function Initialize()
 	parent.Initialize()
 endFunction
 
+function SaveProfile(int SaveTo = 1)
+	if Registered
+		SaveTo = ClampInt(SaveTo, 1, 5)
+		if FloatListCount(Storage, Key("Adjust.Global")) > 0 || StringListCount(Storage, Key("AdjustKeys")) > 0
+			ExportFile("SexLab/AnimationProfile_"+SaveTo+".json", Key("AdjustKeys"), 64)
+			ExportFile("SexLab/AnimationProfile_"+SaveTo+".json", Key("Adjust."), 32, keyContains = true)
+		endIf
+	endIf
+endFunction
+
+function LoadProfile(int Profile = 1)
+	if Registered
+		Profile = ClampInt(Profile, 1, 5)
+		; Clear current global
+		if FloatListCount(Storage, Key("Adjust.Global")) > 0
+			FloatListClear(Storage, Key("Adjust.Global"))
+		endIf
+		; Clear current race/gender adjustments
+		int i = StringListCount(Storage, Key("AdjustKeys"))
+		while i
+			i -= 1
+			FloatListClear(Storage, Key("Adjust."+StringListGet(Storage, Key("AdjustKeys"), i)))
+		endwhile
+		FloatListClear(Storage, Key("AdjustKeys"))
+		; Load the profile
+		ImportFile("SexLab/AnimationProfile_"+Profile+".json", Key("AdjustKeys"), 64)
+		ImportFile("SexLab/AnimationProfile_"+Profile+".json", Key("Adjust."), 32, keyContains = true)
+	endIf
+endFunction

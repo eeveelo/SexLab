@@ -141,6 +141,10 @@ float[] property fStageTimer auto hidden
 float[] property fStageTimerLeadIn auto hidden
 float[] property fStageTimerAggr auto hidden
 
+int property AnimProfile auto hidden
+
+Actor TargetRef
+
 ; ------------------------------------------------------- ;
 ; --- Config Accessors                                --- ;
 ; ------------------------------------------------------- ;
@@ -206,14 +210,30 @@ function ToggleFreeCamera()
 	MiscUtil.ToggleFreeCamera()
 endFunction
 
+function FindTargetActor()
+	Actor ClosestRef = Game.FindClosestActorFromRef(PlayerRef, 800.0)
+	if ClosestRef != none && PlayerRef.HasLOS(ClosestRef) && ActorLib.IsValidActor(TargetRef)
+		; Set target
+		TargetRef = ClosestRef
+		Debug.Notification("SexLab Target Selected: "+TargetRef.GetLeveledActorBase().GetName())
+		; Seed their stats if they are an NPC
+		Stats.SeedActor(TargetRef)
+	endIf
+endfunction
+
+Actor function GetTargetedActor()
+	return TargetRef
+endFunction
+
 event OnKeyDown(int keyCode)
 	if !Utility.IsInMenuMode() && !UI.IsMenuOpen("Console") && !UI.IsMenuOpen("Loading Menu")
 		if keyCode == kToggleFreeCamera
 			ToggleFreeCamera()
+		elseIf keyCode == kTargetActor
+			FindTargetActor()
 		endIf
 	endIf
 endEvent
-
 
 bool function BackwardsPressed()
 	return Input.GetNumKeysPressed() > 1 && (Input.IsKeyPressed(kBackwards) || (kBackwards == 54 && Input.IsKeyPressed(42)) || (kBackwards == 42 && Input.IsKeyPressed(54)))
@@ -365,6 +385,55 @@ Armor function LoadStrapon(string esp, int id)
 endFunction
 
 ; ------------------------------------------------------- ;
+; --- Animation Profiles                              --- ;
+; ------------------------------------------------------- ;
+
+function ExportProfile(int Profile = 1)
+	; Save normal animation profiles
+	int i = AnimSlots.Slotted
+	while i
+		i -= 1
+		AnimSlots.Slots[i].SaveProfile(Profile)
+	endwhile
+	; Save creature animation profiles
+	i = CreatureSlots.Slotted
+	while i
+		i -= 1
+		CreatureSlots.Slots[i].SaveProfile(Profile)
+	endwhile
+	Log("AnimationProfile_"+Profile+".json", "Export")
+endFunction
+
+function ImportProfile(int Profile = 1)
+	; Load normal animation profiles
+	int i = AnimSlots.Slotted
+	while i
+		i -= 1
+		AnimSlots.Slots[i].LoadProfile(Profile)
+	endwhile
+	; Load creature animation profiles
+	i = CreatureSlots.Slotted
+	while i
+		i -= 1
+		CreatureSlots.Slots[i].LoadProfile(Profile)
+	endwhile
+	Log("AnimationProfile_"+Profile+".json", "Import")
+endfunction
+
+string function ProfileLabel(int Profile = 1)
+	string LabelKey = "AnimationProfile.Label."+Profile
+	string JSON = "SexLab/AnimationProfile_"+Profile+".json"
+	; Load existing label
+	ImportFile(JSON, LabelKey, 4, restrictGlobal = true)
+	; Set a default label if it didn't load
+	string Label = GetStringValue(none, LabelKey, "Profile #"+Profile+" (no label)")
+	SetStringValue(none, LabelKey, Label)
+	; Save label
+	ExportFile(JSON, LabelKey, 4, restrictGlobal = true)
+	return Label
+endFunction
+
+; ------------------------------------------------------- ;
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
 
@@ -394,9 +463,15 @@ function ReloadConfig()
 	; TFC Toggle key
 	UnregisterForAllKeys()
 	RegisterForKey(kToggleFreeCamera)
+	RegisterForKey(kTargetActor)
 	; Configure SFX & Voice volumes
 	AudioVoice.SetVolume(fVoiceVolume)
 	AudioSFX.SetVolume(fSFXVolume)
+	; Remove any targeted actors
+	TargetRef = none
+	; Load animation profile
+	AnimSlots.ImportProfile(AnimProfile)
+	CreatureSlots.ImportProfile(AnimProfile)
 endFunction
 
 function SetDebugMode(bool enabling)
@@ -551,6 +626,7 @@ function SetDefaults()
 	bOrgasmEffects = false
 	bRaceAdjustments = true
 	sNPCBed = "$SSL_Never"
+	AnimProfile = 1
 
 	; Timers
 	fStageTimer = new float[5]
@@ -574,7 +650,16 @@ function SetDefaults()
 	fStageTimerAggr[3] = 10.0
 	fStageTimerAggr[4] = 3.0
 
+	; Set animation profile labels
+	ProfileLabel(1)
+	ProfileLabel(2)
+	ProfileLabel(3)
+	ProfileLabel(4)
+	ProfileLabel(5)
+	ImportProfile(1)
+
 	; Config loaders
+	Setup()
 	FindStrapons()
 	ReloadConfig()
 endFunction
@@ -662,6 +747,8 @@ function ExportSettings()
 	ExportInt("kRotateScene", kRotateScene)
 	ExportInt("kToggleFreeCamera", kToggleFreeCamera)
 	ExportInt("kEndAnimation", kEndAnimation)
+	ExportInt("AnimProfile", AnimProfile)
+
 	ExportFloat("fCumTimer", fCumTimer)
 	ExportFloat("fAutoSUCSM", fAutoSUCSM)
 	ExportFloat("fMaleVoiceDelay", fMaleVoiceDelay)
@@ -725,6 +812,7 @@ function ImportSettings()
 	kRotateScene        = ImportInt("kRotateScene", kRotateScene)
 	kToggleFreeCamera   = ImportInt("kToggleFreeCamera", kToggleFreeCamera)
 	kEndAnimation       = ImportInt("kEndAnimation", kEndAnimation)
+	AnimProfile         = ImportInt("AnimProfile", AnimProfile)
 
 	fCumTimer           = ImportFloat("fCumTimer", fCumTimer)
 	fAutoSUCSM          = ImportFloat("fAutoSUCSM", fAutoSUCSM)
@@ -744,6 +832,8 @@ function ImportSettings()
 	fStageTimer         = ImportFloatList("fStageTimer", fStageTimer, 5)
 	fStageTimerLeadIn   = ImportFloatList("fStageTimerLeadIn", fStageTimerLeadIn, 5)
 	fStageTimerAggr     = ImportFloatList("fStageTimerAggr", fStageTimerAggr, 5)
+
+	ImportProfile(AnimProfile)
 endFunction
 
 
