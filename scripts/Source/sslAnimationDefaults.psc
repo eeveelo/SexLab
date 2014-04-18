@@ -6,6 +6,7 @@ function LoadAnimations()
 	RegisterAnimation("SexLabAggrMissionary")
 	RegisterAnimation("ArrokMissionary")
 	RegisterAnimation("ArrokLegUp")
+	RegisterAnimation("ZynMissionary")
 	RegisterAnimation("APBedMissionary")
 	RegisterAnimation("APHoldLegUp")
 	RegisterAnimation("APLegUp")
@@ -67,6 +68,8 @@ function LoadAnimations()
 	; 3P+
 	RegisterAnimation("ArrokDevilsThreeway")
 	RegisterAnimation("ArrokTricycle")
+	RegisterAnimation("ZynDoublePenetration")
+	RegisterAnimation("ZynFemdom")
 endFunction
 
 function ArrokBlowjob(int id)
@@ -884,10 +887,10 @@ function SexLabHuggingSex(int id)
 	Base.AddPositionStage(a1, "HuggingSex_A1_S4", 0)
 
 	int a2 = Base.AddPosition(Male) ; -99
-	Base.AddPositionStage(a2, "HuggingSex_A2_S1", -102, sos = 9)
-	Base.AddPositionStage(a2, "HuggingSex_A2_S2", -102, sos = 9)
-	Base.AddPositionStage(a2, "HuggingSex_A2_S3", -102, sos = 9)
-	Base.AddPositionStage(a2, "HuggingSex_A2_S4", -102, sos = 9)
+	Base.AddPositionStage(a2, "HuggingSex_A2_S1", -100, sos = 7)
+	Base.AddPositionStage(a2, "HuggingSex_A2_S2", -100, sos = 7)
+	Base.AddPositionStage(a2, "HuggingSex_A2_S3", -100, sos = 7)
+	Base.AddPositionStage(a2, "HuggingSex_A2_S4", -100, sos = 7)
 
 	Base.AddTag("Default")
 	Base.AddTag("Sex")
@@ -914,10 +917,10 @@ function SexLabMissionary(int id)
 	Base.AddPositionStage(a1, "Missionary_A1_S4", 0)
 
 	int a2 = Base.AddPosition(Male)
-	Base.AddPositionStage(a2, "Missionary_A2_S1", -104, sos = 4)
-	Base.AddPositionStage(a2, "Missionary_A2_S2", -104, sos = 4)
-	Base.AddPositionStage(a2, "Missionary_A2_S3", -104, sos = 4)
-	Base.AddPositionStage(a2, "Missionary_A2_S4", -104, sos = 4)
+	Base.AddPositionStage(a2, "Missionary_A2_S1", -100, sos = 2)
+	Base.AddPositionStage(a2, "Missionary_A2_S2", -100, sos = 2)
+	Base.AddPositionStage(a2, "Missionary_A2_S3", -100, sos = 2)
+	Base.AddPositionStage(a2, "Missionary_A2_S4", -100, sos = 2)
 
 	Base.AddTag("Default")
 	Base.AddTag("Sex")
@@ -1725,6 +1728,114 @@ function ZynLesbian(int id)
 	Base.AddTag("Vaginal")
 	Base.AddTag("Oral")
 	Base.AddTag("Kissing")
+
+	Base.Save(id)
+endFunction
+
+function ZynDoublePenetration(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = SexMix
+
+	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	Base.AddPositionStage(a1, "Zyn_DoublePenetration_A2_S1", 100)
+	Base.AddPositionStage(a1, "Zyn_DoublePenetration_A2_S2", 100)
+	Base.AddPositionStage(a1, "Zyn_DoublePenetration_A2_S3", 100)
+	Base.AddPositionStage(a1, "Zyn_DoublePenetration_A2_S4", 100)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Zyn_DoublePenetration_A1_S1", 0)
+	Base.AddPositionStage(a2, "Zyn_DoublePenetration_A1_S2", 0, sos = 9)
+	Base.AddPositionStage(a2, "Zyn_DoublePenetration_A1_S3", 0)
+	Base.AddPositionStage(a2, "Zyn_DoublePenetration_A1_S4", 0)
+
+	int a3 = Base.AddPosition(Male)
+	Base.AddPositionStage(a3, "Zyn_DoublePenetration_A3_S1", -100)
+	Base.AddPositionStage(a3, "Zyn_DoublePenetration_A3_S2", -100, sos = 9)
+	Base.AddPositionStage(a3, "Zyn_DoublePenetration_A3_S3", -100)
+	Base.AddPositionStage(a3, "Zyn_DoublePenetration_A3_S4", -100, sos = 9)
+
+	Base.AddTag("Sex")
+	Base.AddTag("Zyn")
+	Base.AddTag("BBP")
+	Base.AddTag("Dirty")
+	Base.AddTag("Orgy")
+	Base.AddTag("Vaginal")
+	Base.AddTag("Anal")
+	Base.AddTag("MMF")
+
+	Base.Save(id)
+endFunction
+
+function ZynFemdom(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Zyn FemDom"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = SexMix
+
+	int a1 = Base.AddPosition(Female)
+	Base.AddPositionStage(a1, "Zyn_Femdom_A1_S1", 0, strapon = true)
+	Base.AddPositionStage(a1, "Zyn_Femdom_A1_S2", 0, strapon = true)
+	Base.AddPositionStage(a1, "Zyn_Femdom_A1_S3", 0, strapon = true)
+	Base.AddPositionStage(a1, "Zyn_Femdom_A1_S4", 0, strapon = true)
+
+	int a2 = Base.AddPosition(Male, addCum=Vaginal)
+	Base.AddPositionStage(a2, "Zyn_Femdom_A2_S1", -100)
+	Base.AddPositionStage(a2, "Zyn_Femdom_A2_S2", -100)
+	Base.AddPositionStage(a2, "Zyn_Femdom_A2_S3", -100)
+	Base.AddPositionStage(a2, "Zyn_Femdom_A2_S4", -100)
+
+	int a3 = Base.AddPosition(Female)
+	Base.AddPositionStage(a3, "Zyn_Femdom_A3_S1", 108)
+	Base.AddPositionStage(a3, "Zyn_Femdom_A3_S2", 108, openMouth = true)
+	Base.AddPositionStage(a3, "Zyn_Femdom_A3_S3", 108)
+	Base.AddPositionStage(a3, "Zyn_Femdom_A3_S4", 108)
+
+	Base.AddTag("Sex")
+	Base.AddTag("Zyn")
+	Base.AddTag("BBP")
+	Base.AddTag("Orgy")
+	Base.AddTag("Dirty")
+	Base.AddTag("Vaginal")
+	Base.AddTag("Anal")
+	Base.AddTag("Oral")
+	Base.AddTag("MFF")
+
+	Base.Save(id)
+endFunction
+
+function ZynMissionary(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Zyn Missionary"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=VaginalOral)
+	Base.AddPositionStage(a1, "Zyn_Missionary_A1_S1", 0)
+	Base.AddPositionStage(a1, "Zyn_Missionary_A1_S2", 0)
+	Base.AddPositionStage(a1, "Zyn_Missionary_A1_S3", 0)
+	Base.AddPositionStage(a1, "Zyn_Missionary_A1_S4", 0)
+    Base.AddPositionstage(a1, "Zyn_Missionary_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Zyn_Missionary_A2_S1", -105)
+	Base.AddPositionStage(a2, "Zyn_Missionary_A2_S2", -105)
+	Base.AddPositionStage(a2, "Zyn_Missionary_A2_S3", -105, sos = 3)
+	Base.AddPositionStage(a2, "Zyn_Missionary_A2_S4", -105, sos = 7)
+    Base.AddPositionStage(a2, "Zyn_Missionary_A2_S5", -105, sos = 7)
+
+	Base.AddTag("Zyn")
+	Base.AddTag("BBP")
+	Base.AddTag("Sex")
+	Base.AddTag("Laying")
+	Base.AddTag("Missionary")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
 
 	Base.Save(id)
 endFunction

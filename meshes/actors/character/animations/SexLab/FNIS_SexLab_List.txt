@@ -482,6 +482,43 @@ s -a Zyn_RoughStanding_A2_S1 Zyn_RoughStanding_A2_S1.hkx
 + Zyn_RoughStanding_A2_S3 Zyn_RoughStanding_A2_S3.hkx
 + Zyn_RoughStanding_A2_S4 Zyn_RoughStanding_A2_S4.hkx
 
+s Zyn_DoublePenetration_A1_S1 Zyn_DoublePenetration_A1_S1.hkx
++ Zyn_DoublePenetration_A1_S2 Zyn_DoublePenetration_A1_S2.hkx
++ Zyn_DoublePenetration_A1_S3 Zyn_DoublePenetration_A1_S3.hkx
++ Zyn_DoublePenetration_A1_S4 Zyn_DoublePenetration_A1_S4.hkx
+s Zyn_DoublePenetration_A2_S1 Zyn_DoublePenetration_A2_S1.hkx
++ Zyn_DoublePenetration_A2_S2 Zyn_DoublePenetration_A2_S2.hkx
++ Zyn_DoublePenetration_A2_S3 Zyn_DoublePenetration_A2_S3.hkx
++ Zyn_DoublePenetration_A2_S4 Zyn_DoublePenetration_A2_S4.hkx
+s Zyn_DoublePenetration_A3_S1 Zyn_DoublePenetration_A3_S1.hkx
++ Zyn_DoublePenetration_A3_S2 Zyn_DoublePenetration_A3_S2.hkx
++ Zyn_DoublePenetration_A3_S3 Zyn_DoublePenetration_A3_S3.hkx
++ Zyn_DoublePenetration_A3_S4 Zyn_DoublePenetration_A3_S4.hkx
+
+s Zyn_Missionary_A1_S1 Zyn_Missionary_A1_S1.hkx
++ Zyn_Missionary_A1_S2 Zyn_Missionary_A1_S2.hkx
++ Zyn_Missionary_A1_S3 Zyn_Missionary_A1_S3.hkx
++ Zyn_Missionary_A1_S4 Zyn_Missionary_A1_S4.hkx
++ Zyn_Missionary_A1_S5 Zyn_Missionary_A1_S5.hkx
+s Zyn_Missionary_A2_S1 Zyn_Missionary_A2_S1.hkx
++ Zyn_Missionary_A2_S2 Zyn_Missionary_A2_S2.hkx
++ Zyn_Missionary_A2_S3 Zyn_Missionary_A2_S3.hkx
++ Zyn_Missionary_A2_S4 Zyn_Missionary_A2_S4.hkx
++ Zyn_Missionary_A2_S5 Zyn_Missionary_A2_S5.hkx
+
+s Zyn_Femdom_A1_S1 Zyn_Femdom_A1_S1.hkx
++ Zyn_Femdom_A1_S2 Zyn_Femdom_A1_S2.hkx
++ Zyn_Femdom_A1_S3 Zyn_Femdom_A1_S3.hkx
++ Zyn_Femdom_A1_S4 Zyn_Femdom_A1_S4.hkx
+s Zyn_Femdom_A2_S1 Zyn_Femdom_A2_S1.hkx
++ Zyn_Femdom_A2_S2 Zyn_Femdom_A2_S2.hkx
++ Zyn_Femdom_A2_S3 Zyn_Femdom_A2_S3.hkx
++ Zyn_Femdom_A2_S4 Zyn_Femdom_A2_S4.hkx
+s Zyn_Femdom_A3_S1 Zyn_Femdom_A3_S1.hkx
++ Zyn_Femdom_A3_S2 Zyn_Femdom_A3_S2.hkx
++ Zyn_Femdom_A3_S3 Zyn_Femdom_A3_S3.hkx
++ Zyn_Femdom_A3_S4 Zyn_Femdom_A3_S4.hkx
+
 '
 ' Bleagh Animation
 '
