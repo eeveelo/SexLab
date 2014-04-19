@@ -196,9 +196,9 @@ event OnSliderOpenST()
 	elseIf Options[0] == "Timers"
 		float[] Timers = GetTimers()
 		SetSliderDialogStartValue(Timers[(Options[2] as int)])
-		SetSliderDialogRange(3.0, 300.0)
-		SetSliderDialogInterval(1.0)
-		SetSliderDialogDefaultValue(15.0)
+		SetSliderDialogRange(3, 300)
+		SetSliderDialogInterval(1)
+		SetSliderDialogDefaultValue(15)
 
 	endIf
 
@@ -2119,9 +2119,9 @@ endState
 state SFXDelay
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(Config.fSFXDelay)
-		SetSliderDialogDefaultValue(3.0)
-		SetSliderDialogRange(0.8, 30.0)
-		SetSliderDialogInterval(0.2)
+		SetSliderDialogDefaultValue(3)
+		SetSliderDialogRange(1, 30)
+		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
 		Config.fSFXDelay = value
@@ -2138,9 +2138,9 @@ endState
 state MaleVoiceDelay
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(Config.fMaleVoiceDelay)
-		SetSliderDialogDefaultValue(5.0)
-		SetSliderDialogRange(0.8, 45.0)
-		SetSliderDialogInterval(0.2)
+		SetSliderDialogDefaultValue(5)
+		SetSliderDialogRange(1, 45)
+		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
 		Config.fMaleVoiceDelay = value
@@ -2157,9 +2157,9 @@ endState
 state FemaleVoiceDelay
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(Config.fFemaleVoiceDelay)
-		SetSliderDialogDefaultValue(4.0)
-		SetSliderDialogRange(0.8, 45.0)
-		SetSliderDialogInterval(0.2)
+		SetSliderDialogDefaultValue(4)
+		SetSliderDialogRange(1, 45)
+		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
 		Config.fFemaleVoiceDelay = value
@@ -2205,7 +2205,6 @@ state ResetAnimationRegistry
 			ThreadSlots.StopAll()
 			AnimSlots.Setup()
 			CreatureSlots.Setup()
-			SexLabUtil.Wait(30.0)
 			Debug.Notification("$SSL_RunRebuildAnimations")
 		endIf
 	endEvent
@@ -2214,7 +2213,6 @@ state ResetVoiceRegistry
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnRebuildVoices")
 			VoiceSlots.Setup()
-			SexLabUtil.Wait(10.0)
 			Debug.Notification("$SSL_RunRebuildVoices")
 		endIf
 	endEvent
