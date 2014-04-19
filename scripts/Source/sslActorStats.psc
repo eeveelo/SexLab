@@ -153,7 +153,6 @@ string function ZeroFill(string num)
 endFunction
 
 string function ParseTime(int time)
-	MiscUtil.PrintConsole("Time: "+time)
 	return ZeroFill(((time / 3600) as int))+":"+ZeroFill((((time / 60) % 60) as int))+":"+ZeroFill((time % 60 as int))
 endFunction
 
@@ -613,7 +612,7 @@ function ResetStats(Actor ActorRef)
 		endWhile
 	endIf
 	FormListClear(ActorRef, "SexPartners")
-	FormListRemove(Storage, "SeededActors", ActorRef, true)
+	; FormListRemove(Storage, "SeededActors", ActorRef, true)
 endFunction
 
 function Setup()
