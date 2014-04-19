@@ -1735,6 +1735,8 @@ endFunction
 function ZynDoublePenetration(int id)
 	sslBaseAnimation Base = Create(id)
 
+	Base.Name = "Zyn Double Penetration"
+
 	Base.SetContent(Sexual)
 	Base.SoundFX = SexMix
 
