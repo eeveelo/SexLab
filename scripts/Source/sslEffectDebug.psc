@@ -23,8 +23,8 @@ event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	; SexLab.AnimSlots.GetBySlot(0).Export()
 	; SexLab.AnimSlots.GetBySlot(1).Export()
 
-	; sslBenchmark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
-	; Dev.LatencyTest()
+	sslBenchmark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
+	Dev.LatencyTest()
 	; Utility.Wait(1.0)
 	; Dev.StartBenchmark(2)
 

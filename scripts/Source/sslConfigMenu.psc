@@ -342,17 +342,6 @@ endState
 function PlayerHotkeys()
 	SetCursorFillMode(TOP_TO_BOTTOM)
 
-	AddHeaderOption("$SSL_AlignmentAdjustments")
-	AddKeyMapOptionST("BackwardsModifier", "$SSL_ReverseDirectionModifier", Config.kBackwards)
-	AddKeyMapOptionST("AdjustStage","$SSL_AdjustStage", Config.kAdjustStage)
-	AddKeyMapOptionST("AdjustChange","$SSL_ChangeActorBeingMoved", Config.kAdjustChange)
-	AddKeyMapOptionST("AdjustForward","$SSL_MoveActorForwardBackward", Config.kAdjustForward)
-	AddKeyMapOptionST("AdjustUpward","$SSL_AdjustPositionUpwardDownward", Config.kAdjustUpward)
-	AddKeyMapOptionST("AdjustSideways","$SSL_MoveActorLeftRight", Config.kAdjustSideways)
-	AddKeyMapOptionST("RotateScene", "$SSL_RotateScene", Config.kRotateScene)
-	AddKeyMapOptionST("RestoreOffsets","$SSL_DeleteSavedAdjustments", Config.kRestoreOffsets)
-
-	SetCursorPosition(1)
 	AddHeaderOption("$SSL_GlobalHotkeys")
 	AddKeyMapOptionST("TargetActor", "$SSL_TargetActor", Config.kTargetActor)
 	AddKeyMapOptionST("ToggleFreeCamera", "$SSL_ToggleFreeCamera", Config.kToggleFreeCamera)
@@ -364,6 +353,17 @@ function PlayerHotkeys()
 	AddKeyMapOptionST("ChangeAnimation", "$SSL_ChangeAnimationSet", Config.kChangeAnimation)
 	AddKeyMapOptionST("ChangePositions", "$SSL_SwapActorPositions", Config.kChangePositions)
 	AddKeyMapOptionST("MoveSceneLocation", "$SSL_MoveSceneLocation", Config.kMoveScene)
+
+	SetCursorPosition(1)
+	AddHeaderOption("$SSL_AlignmentAdjustments")
+	AddKeyMapOptionST("BackwardsModifier", "$SSL_ReverseDirectionModifier", Config.kBackwards)
+	AddKeyMapOptionST("AdjustStage","$SSL_AdjustStage", Config.kAdjustStage)
+	AddKeyMapOptionST("AdjustChange","$SSL_ChangeActorBeingMoved", Config.kAdjustChange)
+	AddKeyMapOptionST("AdjustForward","$SSL_MoveActorForwardBackward", Config.kAdjustForward)
+	AddKeyMapOptionST("AdjustUpward","$SSL_AdjustPositionUpwardDownward", Config.kAdjustUpward)
+	AddKeyMapOptionST("AdjustSideways","$SSL_MoveActorLeftRight", Config.kAdjustSideways)
+	AddKeyMapOptionST("RotateScene", "$SSL_RotateScene", Config.kRotateScene)
+	AddKeyMapOptionST("RestoreOffsets","$SSL_DeleteSavedAdjustments", Config.kRestoreOffsets)
 endFunction
 
 bool function KeyConflict(int newKeyCode, string conflictControl, string conflictName)
@@ -1277,69 +1277,69 @@ endState
 ; --- Sex Diary/Journal Editor                        --- ;
 ; ------------------------------------------------------- ;
 
-Actor StatTarget
+Actor StatRef
 
 function SexDiary()
 	SetCursorFillMode(TOP_TO_BOTTOM)
 
-	if TargetRef != StatTarget
-		AddTextOptionST("SetStatTarget", "$SSL_Viewing{"+StatTarget.GetLeveledActorBase().GetName()+"}", "$SSL_View{"+TargetName+"}", TargetFlag)
+	if TargetRef != StatRef
+		AddTextOptionST("SetStatTarget", "$SSL_Viewing{"+StatRef.GetLeveledActorBase().GetName()+"}", "$SSL_View{"+TargetName+"}", TargetFlag)
 	else
 		AddTextOptionST("SetStatTarget", "$SSL_Viewing{"+TargetName+"}", "$SSL_View{"+PlayerRef.GetLeveledActorBase().GetName()+"}")
 	endIf
 
 	AddHeaderOption("$SSL_SexualExperience")
-	AddTextOption("$SSL_TimeSpentHavingSex", Stats.ParseTime(Stats.GetFloat(StatTarget, "TimeSpent") as int))
-	AddTextOption("$SSL_VaginalProficiency", Stats.GetSkillTitle(StatTarget, "Vaginal"))
-	AddTextOption("$SSL_AnalProficiency", Stats.GetSkillTitle(StatTarget, "Anal"))
-	AddTextOption("$SSL_OralProficiency", Stats.GetSkillTitle(StatTarget, "Oral"))
-	AddTextOption("$SSL_ForeplayProficiency", Stats.GetSkillTitle(StatTarget, "Foreplay"))
-	AddTextOption("$SSL_SexualPurity", Stats.GetPureTitle(StatTarget))
-	AddTextOption("$SSL_SexualPerversion", Stats.GetLewdTitle(StatTarget))
+	AddTextOption("$SSL_TimeSpentHavingSex", Stats.ParseTime(Stats.GetFloat(StatRef, "TimeSpent") as int))
+	AddTextOption("$SSL_VaginalProficiency", Stats.GetSkillTitle(StatRef, "Vaginal"))
+	AddTextOption("$SSL_AnalProficiency", Stats.GetSkillTitle(StatRef, "Anal"))
+	AddTextOption("$SSL_OralProficiency", Stats.GetSkillTitle(StatRef, "Oral"))
+	AddTextOption("$SSL_ForeplayProficiency", Stats.GetSkillTitle(StatRef, "Foreplay"))
+	AddTextOption("$SSL_SexualPurity", Stats.GetPureTitle(StatRef))
+	AddTextOption("$SSL_SexualPerversion", Stats.GetLewdTitle(StatRef))
 	AddEmptyOption()
 
 	SetCursorPosition(1)
 
-	AddTextOptionST("ResetTargetStats", "$SSL_Reset{"+StatTarget.GetLeveledActorBase().GetName()+"}Stats", "$SSL_ClickHere")
+	AddTextOptionST("ResetTargetStats", "$SSL_Reset{"+StatRef.GetLeveledActorBase().GetName()+"}Stats", "$SSL_ClickHere")
 
 	AddHeaderOption("$SSL_SexualStats")
-	AddTextOptionST("SetStatSexuality", "$SSL_Sexuality", Stats.GetSexualityTitle(StatTarget))
-	AddTextOption("$SSL_MaleSexualPartners", Stats.GetInt(StatTarget, "Males"))
-	AddTextOption("$SSL_FemaleSexualPartners", Stats.GetInt(StatTarget, "Females"))
-	AddTextOption("$SSL_CreatureSexualPartners", Stats.GetInt(StatTarget, "Creatures"))
-	AddTextOption("$SSL_TimesMasturbated", Stats.GetInt(StatTarget, "Masturbation"))
-	AddTextOption("$SSL_TimesAggressive", Stats.GetInt(StatTarget, "Aggressor"))
-	AddTextOption("$SSL_TimesVictim", Stats.GetInt(StatTarget, "Victim"))
+	AddTextOptionST("SetStatSexuality", "$SSL_Sexuality", Stats.GetSexualityTitle(StatRef))
+	AddTextOption("$SSL_MaleSexualPartners", Stats.GetInt(StatRef, "Males"))
+	AddTextOption("$SSL_FemaleSexualPartners", Stats.GetInt(StatRef, "Females"))
+	AddTextOption("$SSL_CreatureSexualPartners", Stats.GetInt(StatRef, "Creatures"))
+	AddTextOption("$SSL_TimesMasturbated", Stats.GetInt(StatRef, "Masturbation"))
+	AddTextOption("$SSL_TimesAggressive", Stats.GetInt(StatRef, "Aggressor"))
+	AddTextOption("$SSL_TimesVictim", Stats.GetInt(StatRef, "Victim"))
 	AddEmptyOption()
 endFunction
 
 state SetStatTarget
 	event OnSelectST()
-		if StatTarget == PlayerRef || TargetRef == none
-			StatTarget = TargetRef
+		if StatRef == PlayerRef && TargetRef != none
+			StatRef = TargetRef
 		else
-			StatTarget = PlayerRef
+			StatRef = PlayerRef
 		endIf
 		ForcePageReset()
 	endEvent
 endState
 state SetStatSexuality
 	event OnSelectST()
-		int Ratio = Stats.GetSexuality(StatTarget)
-		if Stats.IsStraight(StatTarget)
-			Stats.SetInt(StatTarget, "Sexuality", 50)
-		elseIf Stats.IsBisexual(StatTarget)
-			Stats.SetInt(StatTarget, "Sexuality", 0)
+		int Ratio = Stats.GetSexuality(StatRef)
+		if Stats.IsStraight(StatRef)
+			Stats.SetInt(StatRef, "Sexuality", 50)
+		elseIf Stats.IsBisexual(StatRef)
+			Stats.SetInt(StatRef, "Sexuality", 0)
 		else
-			Stats.SetInt(StatTarget, "Sexuality", 100)
+			Stats.SetInt(StatRef, "Sexuality", 100)
 		endIf
-		SetTextOptionValueST(Stats.GetSexualityTitle(StatTarget))
+		SetTextOptionValueST(Stats.GetSexualityTitle(StatRef))
 	endEvent
 endState
 state ResetTargetStats
 	event OnSelectST()
-		if ShowMessage("$SSL_WarnReset{"+StatTarget.GetLeveledActorBase().GetName()+"}Stats")
-			Stats.ResetStats(StatTarget)
+		if ShowMessage("$SSL_WarnReset{"+StatRef.GetLeveledActorBase().GetName()+"}Stats")
+			Stats.ResetStats(StatRef)
 			ForcePageReset()
 		endIf
 	endEvent
@@ -1549,8 +1549,10 @@ event OnConfigOpen()
 	if PlayerRef.GetLeveledActorBase().GetSex() == 0
 		Pages[7] = "$SSL_SexJournal"
 	endIf
+
 	; Target actor
-	TargetRef = Config.GetTargetedActor()
+	StatRef = PlayerRef
+	TargetRef = Config.TargetRef
 	if TargetRef != none && TargetRef.Is3DLoaded()
 		TargetName = TargetRef.GetLeveledActorBase().GetName()
 		TargetFlag = OPTION_FLAG_NONE
@@ -1558,8 +1560,8 @@ event OnConfigOpen()
 		TargetRef = none
 		TargetName = "$SSL_NoTarget"
 		TargetFlag = OPTION_FLAG_DISABLED
+		Config.TargetRef = none
 	endIf
-	StatTarget = PlayerRef
 
 	; Animation Editor
 

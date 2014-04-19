@@ -143,7 +143,8 @@ float[] property fStageTimerAggr auto hidden
 
 int property AnimProfile auto hidden
 
-Actor TargetRef
+Actor property TargetRef auto hidden
+Actor CrosshairRef
 
 ; ------------------------------------------------------- ;
 ; --- Config Accessors                                --- ;
@@ -203,6 +204,31 @@ endFunction
 ; --- Hotkeys                                         --- ;
 ; ------------------------------------------------------- ;
 
+event OnKeyDown(int keyCode)
+	if !Utility.IsInMenuMode() && !UI.IsMenuOpen("Console") && !UI.IsMenuOpen("Loading Menu")
+		if keyCode == kToggleFreeCamera
+			ToggleFreeCamera()
+		elseIf keyCode == kTargetActor
+			SetTargetActor()
+		endIf
+	endIf
+endEvent
+
+event OnCrosshairRefChange(ObjectReference ActorRef)
+	CrosshairRef = none
+	if ActorRef != none
+		CrosshairRef = ActorRef as Actor
+	endIf
+endEvent
+
+function SetTargetActor()
+	if CrosshairRef != none
+		TargetRef = CrosshairRef
+		Debug.Notification("SexLab Target Selected: "+TargetRef.GetLeveledActorBase().GetName())
+		Stats.SeedActor(TargetRef)
+	endif
+endFunction
+
 function ToggleFreeCamera()
 	if Game.GetCameraState() != 3
 		MiscUtil.SetFreeCameraSpeed(fAutoSUCSM)
@@ -210,30 +236,6 @@ function ToggleFreeCamera()
 	MiscUtil.ToggleFreeCamera()
 endFunction
 
-function FindTargetActor()
-	Actor ClosestRef = Game.FindClosestActorFromRef(PlayerRef, 800.0)
-	if ClosestRef != none && PlayerRef.HasLOS(ClosestRef) && ActorLib.IsValidActor(TargetRef)
-		; Set target
-		TargetRef = ClosestRef
-		Debug.Notification("SexLab Target Selected: "+TargetRef.GetLeveledActorBase().GetName())
-		; Seed their stats if they are an NPC
-		Stats.SeedActor(TargetRef)
-	endIf
-endfunction
-
-Actor function GetTargetedActor()
-	return TargetRef
-endFunction
-
-event OnKeyDown(int keyCode)
-	if !Utility.IsInMenuMode() && !UI.IsMenuOpen("Console") && !UI.IsMenuOpen("Loading Menu")
-		if keyCode == kToggleFreeCamera
-			ToggleFreeCamera()
-		elseIf keyCode == kTargetActor
-			FindTargetActor()
-		endIf
-	endIf
-endEvent
 
 bool function BackwardsPressed()
 	return Input.GetNumKeysPressed() > 1 && (Input.IsKeyPressed(kBackwards) || (kBackwards == 54 && Input.IsKeyPressed(42)) || (kBackwards == 42 && Input.IsKeyPressed(54)))
@@ -401,7 +403,7 @@ function ExportProfile(int Profile = 1)
 		i -= 1
 		CreatureSlots.Slots[i].SaveProfile(Profile)
 	endwhile
-	Log("AnimationProfile_"+Profile+".json", "Export")
+	; Log("AnimationProfile_"+Profile+".json", "Export")
 endFunction
 
 function ImportProfile(int Profile = 1)
@@ -417,7 +419,7 @@ function ImportProfile(int Profile = 1)
 		i -= 1
 		CreatureSlots.Slots[i].LoadProfile(Profile)
 	endwhile
-	Log("AnimationProfile_"+Profile+".json", "Import")
+	; Log("AnimationProfile_"+Profile+".json", "Import")
 endfunction
 
 string function ProfileLabel(int Profile = 1)
@@ -467,11 +469,12 @@ function ReloadConfig()
 	; Configure SFX & Voice volumes
 	AudioVoice.SetVolume(fVoiceVolume)
 	AudioSFX.SetVolume(fSFXVolume)
-	; Remove any targeted actors
-	TargetRef = none
 	; Load animation profile
-	AnimSlots.ImportProfile(AnimProfile)
-	CreatureSlots.ImportProfile(AnimProfile)
+	ImportProfile(AnimProfile)
+	; Remove any targeted actors
+	RegisterForCrosshairRef()
+	CrosshairRef = none
+	TargetRef = none
 endFunction
 
 function SetDebugMode(bool enabling)
