@@ -261,7 +261,6 @@ function ExportProfile(int profile = 1)
 			Slots[i].SaveProfile(profile)
 		endIf
 	endwhile
-	Config.Log("AnimationProfile_"+profile+".json", "Export")
 endfunction
 
 function ImportProfile(int profile = 1)
@@ -272,7 +271,6 @@ function ImportProfile(int profile = 1)
 			Slots[i].LoadProfile(profile)
 		endIf
 	endwhile
-	Config.Log("AnimationProfile_"+profile+".json", "Import")
 endfunction
 
 state Locked
