@@ -30,7 +30,28 @@ string TargetName
 ; ------------------------------------------------------- ;
 
 event OnVersionUpdate(int version)
-	SetupSystem()
+	string EventType
+	; Install System - Fresh install or pre v1.50
+	if CurrentVersion < 15000
+
+		SetupSystem()
+		Debug.Notification("SexLab Installed...")
+		EventType = "SexLabInstalled"
+
+	; Update System - v1.5x incremental updates
+	elseIf CurrentVersion < version
+
+		; v1.51 - I don't exists yet and am only here as a reference for future self.
+		if CurrentVersion < 15100
+			Debug.TraceAndBox("SexLab Error: Getting this error should be impossible, the hell did you do?")
+		endIf
+
+		EventType = "SexLabUpdated"
+	endIf
+	; Send update/install event
+	int eid = ModEvent.Create(EventType)
+	ModEvent.PushInt(eid, version)
+	ModEvent.Send(eid)
 endEvent
 
 function SetupSystem()
@@ -1508,16 +1529,13 @@ string function GetStringVer()
 endFunction
 
 bool function SetDefaults()
-
 	; Check system install before we continue
 	if !Config.CheckSystem()
 		SexLab.GoToState("Disabled")
 		return false
 	endIf
-
 	; Prepare base framework script
 	SexLab.Setup()
-
 	; Grab libraries to make sure they are all set properly
 	ActorLib        = SexLab.ActorLib
 	ThreadLib       = SexLab.ThreadLib
@@ -1527,10 +1545,8 @@ bool function SetDefaults()
 	CreatureSlots   = SexLab.CreatureSlots
 	VoiceSlots      = SexLab.VoiceSlots
 	ExpressionSlots = SexLab.ExpressionSlots
-
 	; Set config properties to their default
 	Config.SetDefaults()
-
 	return true
 endFunction
 
@@ -2217,6 +2233,7 @@ state CleanSystem
 			ShowMessage("$SSL_RunCleanSystem", false)
 			Utility.Wait(0.1)
 			SetupSystem()
+			ModEvent.Send(ModEvent.Create("SexLabReset"))
 			Config.CleanSystemFinish.Show()
 		endIf
 	endEvent
