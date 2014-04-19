@@ -4,7 +4,6 @@ function PreBenchmarkSetup()
 	Setup()
 endFunction
 
-
 state Test1
 	string function Label()
 		return ""

@@ -1,6 +1,8 @@
 scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
+import StorageUtil
+
 ; Framework
 Actor property PlayerRef auto
 SexLabFramework property SexLab auto
@@ -834,7 +836,6 @@ state AnimationTest
 		endIf
 	endEvent
 endState
-
 
 ; ------------------------------------------------------- ;
 ; --- Toggle Animations                               --- ;
@@ -2222,7 +2223,7 @@ state CleanSystem
 endState
 state RebuildStraponList
 	event OnSelectST()
-		Config.FindStrapons()
+		Config.LoadStrapons()
 		if Config.Strapons.Length > 0
 			ShowMessage("$SSL_FoundStrapon", false)
 		else
@@ -2234,8 +2235,8 @@ endState
 state ExportSettings
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnExportSettings")
-			Config.ExportSettings()
-			StorageUtil.FileSetIntValue("SexLabConfig.Exported", 1)
+			ExportSettings()
+			; StorageUtil.FileSetIntValue("SexLabConfig.Exported", 1)
 			ShowMessage("$SSL_RunExportSettings", false)
 		endIf
 	endEvent
@@ -2245,10 +2246,10 @@ state ExportSettings
 endState
 state ImportSettings
 	event OnSelectST()
-		if StorageUtil.FileGetIntValue("SexLabConfig.Exported") != 1
-			ShowMessage("$SSL_WarnImportSettingsEmpty", false)
-		elseif ShowMessage("$SSL_WarnImportSettings")
-			Config.ImportSettings()
+		; if StorageUtil.FileGetIntValue("SexLabConfig.Exported") != 1
+		; 	ShowMessage("$SSL_WarnImportSettingsEmpty", false)
+		if ShowMessage("$SSL_WarnImportSettings")
+			ImportSettings()
 			StorageUtil.FileUnsetIntValue("SexLabConfig.Exported")
 			ShowMessage("$SSL_RunImportSettings", false)
 		endIf
@@ -2257,3 +2258,356 @@ state ImportSettings
 		SetInfoText("$SSL_InfoImportSettings")
 	endEvent
 endState
+
+
+function ExportSettings()
+	; Set label of export
+	ExportString("ExportLabel", PlayerRef.GetLeveledActorBase().GetName()+" - "+Utility.GetCurrentRealTime() as int)
+
+	; Strings
+	ExportString("sNPCBed", Config.sNPCBed)
+
+	; Booleans
+	ExportBool("bRestrictAggressive", Config.bRestrictAggressive)
+	ExportBool("bAllowCreatures", Config.bAllowCreatures)
+	ExportBool("bNPCSaveVoice", Config.bNPCSaveVoice)
+	ExportBool("bUseStrapons", Config.bUseStrapons)
+	ExportBool("bReDressVictim", Config.bReDressVictim)
+	ExportBool("bRagdollEnd", Config.bRagdollEnd)
+	ExportBool("bUseMaleNudeSuit", Config.bUseMaleNudeSuit)
+	ExportBool("bUseFemaleNudeSuit", Config.bUseFemaleNudeSuit)
+	ExportBool("bUndressAnimation", Config.bUndressAnimation)
+	ExportBool("bUseLipSync", Config.bUseLipSync)
+	ExportBool("bUseExpressions", Config.bUseExpressions)
+	ExportBool("bScaleActors", Config.bScaleActors)
+	ExportBool("bUseCum", Config.bUseCum)
+	ExportBool("bAllowFFCum", Config.bAllowFFCum)
+	ExportBool("bDisablePlayer", Config.bDisablePlayer)
+	ExportBool("bAutoTFC", Config.bAutoTFC)
+	ExportBool("bAutoAdvance", Config.bAutoAdvance)
+	ExportBool("bForeplayStage", Config.bForeplayStage)
+	ExportBool("bOrgasmEffects", Config.bOrgasmEffects)
+	ExportBool("bRaceAdjustments", Config.bRaceAdjustments)
+
+	; Integers
+	ExportInt("kBackwards", Config.kBackwards)
+	ExportInt("kAdjustStage", Config.kAdjustStage)
+	ExportInt("kBackwardsAlt", Config.kBackwardsAlt)
+	ExportInt("kAdjustStageAlt", Config.kAdjustStageAlt)
+	ExportInt("kAdvanceAnimation", Config.kAdvanceAnimation)
+	ExportInt("kChangeAnimation", Config.kChangeAnimation)
+	ExportInt("kChangePositions", Config.kChangePositions)
+	ExportInt("kAdjustChange", Config.kAdjustChange)
+	ExportInt("kAdjustForward", Config.kAdjustForward)
+	ExportInt("kAdjustSideways", Config.kAdjustSideways)
+	ExportInt("kAdjustUpward", Config.kAdjustUpward)
+	ExportInt("kRealignActors", Config.kRealignActors)
+	ExportInt("kMoveScene", Config.kMoveScene)
+	ExportInt("kRestoreOffsets", Config.kRestoreOffsets)
+	ExportInt("kRotateScene", Config.kRotateScene)
+	ExportInt("kToggleFreeCamera", Config.kToggleFreeCamera)
+	ExportInt("kEndAnimation", Config.kEndAnimation)
+	ExportInt("AnimProfile", Config.AnimProfile)
+
+	; Floats
+	ExportFloat("fCumTimer", Config.fCumTimer)
+	ExportFloat("fAutoSUCSM", Config.fAutoSUCSM)
+	ExportFloat("fMaleVoiceDelay", Config.fMaleVoiceDelay)
+	ExportFloat("fFemaleVoiceDelay", Config.fFemaleVoiceDelay)
+	ExportFloat("fVoiceVolume", Config.fVoiceVolume)
+	ExportFloat("fSFXDelay", Config.fSFXDelay)
+	ExportFloat("fSFXVolume", Config.fSFXVolume)
+
+	; Boolean Arrays
+	ExportBoolList("bStripMale", Config.bStripMale, 33)
+	ExportBoolList("bStripFemale", Config.bStripFemale, 33)
+	ExportBoolList("bStripLeadInFemale", Config.bStripLeadInFemale, 33)
+	ExportBoolList("bStripLeadInMale", Config.bStripLeadInMale, 33)
+	ExportBoolList("bStripVictim", Config.bStripVictim, 33)
+	ExportBoolList("bStripAggressor", Config.bStripAggressor, 33)
+
+	; Float Array
+	ExportFloatList("fStageTimer", Config.fStageTimer, 5)
+	ExportFloatList("fStageTimerLeadIn", Config.fStageTimerLeadIn, 5)
+	ExportFloatList("fStageTimerAggr", Config.fStageTimerAggr, 5)
+
+	; Export object registry
+	ExportAnimations()
+	ExportCreatures()
+	ExportExpressions()
+	ExportVoices()
+
+	; Save to JSON file
+	ExportFile("SexLabConfig.json", restrictForm = self, append = false)
+endFunction
+
+function ImportSettings()
+	; Load JSON file
+	ImportFile("SexLabConfig.json")
+
+	; Strings
+	Config.sNPCBed             = ImportString("sNPCBed", Config.sNPCBed)
+
+	; Booleans
+	Config.bRestrictAggressive = ImportBool("bRestrictAggressive", Config.bRestrictAggressive)
+	Config.bAllowCreatures     = ImportBool("bAllowCreatures", Config.bAllowCreatures)
+	Config.bNPCSaveVoice       = ImportBool("bNPCSaveVoice", Config.bNPCSaveVoice)
+	Config.bUseStrapons        = ImportBool("bUseStrapons", Config.bUseStrapons)
+	Config.bReDressVictim      = ImportBool("bReDressVictim", Config.bReDressVictim)
+	Config.bRagdollEnd         = ImportBool("bRagdollEnd", Config.bRagdollEnd)
+	Config.bUseMaleNudeSuit    = ImportBool("bUseMaleNudeSuit", Config.bUseMaleNudeSuit)
+	Config.bUseFemaleNudeSuit  = ImportBool("bUseFemaleNudeSuit", Config.bUseFemaleNudeSuit)
+	Config.bUndressAnimation   = ImportBool("bUndressAnimation", Config.bUndressAnimation)
+	Config.bUseLipSync         = ImportBool("bUseLipSync", Config.bUseLipSync)
+	Config.bUseExpressions     = ImportBool("bUseExpressions", Config.bUseExpressions)
+	Config.bScaleActors        = ImportBool("bScaleActors", Config.bScaleActors)
+	Config.bUseCum             = ImportBool("bUseCum", Config.bUseCum)
+	Config.bAllowFFCum         = ImportBool("bAllowFFCum", Config.bAllowFFCum)
+	Config.bDisablePlayer      = ImportBool("bDisablePlayer", Config.bDisablePlayer)
+	Config.bAutoTFC            = ImportBool("bAutoTFC", Config.bAutoTFC)
+	Config.bAutoAdvance        = ImportBool("bAutoAdvance", Config.bAutoAdvance)
+	Config.bForeplayStage      = ImportBool("bForeplayStage", Config.bForeplayStage)
+	Config.bOrgasmEffects      = ImportBool("bOrgasmEffects", Config.bOrgasmEffects)
+	Config.bRaceAdjustments    = ImportBool("bRaceAdjustments", Config.bRaceAdjustments)
+
+	; Integers
+	Config.kBackwards          = ImportInt("kBackwards", Config.kBackwards)
+	Config.kAdjustStage        = ImportInt("kAdjustStage", Config.kAdjustStage)
+	Config.kBackwardsAlt       = ImportInt("kBackwardsAlt", Config.kBackwardsAlt)
+	Config.kAdjustStageAlt     = ImportInt("kAdjustStageAlt", Config.kAdjustStageAlt)
+	Config.kAdvanceAnimation   = ImportInt("kAdvanceAnimation", Config.kAdvanceAnimation)
+	Config.kChangeAnimation    = ImportInt("kChangeAnimation", Config.kChangeAnimation)
+	Config.kChangePositions    = ImportInt("kChangePositions", Config.kChangePositions)
+	Config.kAdjustChange       = ImportInt("kAdjustChange", Config.kAdjustChange)
+	Config.kAdjustForward      = ImportInt("kAdjustForward", Config.kAdjustForward)
+	Config.kAdjustSideways     = ImportInt("kAdjustSideways", Config.kAdjustSideways)
+	Config.kAdjustUpward       = ImportInt("kAdjustUpward", Config.kAdjustUpward)
+	Config.kRealignActors      = ImportInt("kRealignActors", Config.kRealignActors)
+	Config.kMoveScene          = ImportInt("kMoveScene", Config.kMoveScene)
+	Config.kRestoreOffsets     = ImportInt("kRestoreOffsets", Config.kRestoreOffsets)
+	Config.kRotateScene        = ImportInt("kRotateScene", Config.kRotateScene)
+	Config.kToggleFreeCamera   = ImportInt("kToggleFreeCamera", Config.kToggleFreeCamera)
+	Config.kEndAnimation       = ImportInt("kEndAnimation", Config.kEndAnimation)
+	Config.AnimProfile         = ImportInt("AnimProfile", Config.AnimProfile)
+
+	; Floats
+	Config.fCumTimer           = ImportFloat("fCumTimer", Config.fCumTimer)
+	Config.fAutoSUCSM          = ImportFloat("fAutoSUCSM", Config.fAutoSUCSM)
+	Config.fMaleVoiceDelay     = ImportFloat("fMaleVoiceDelay", Config.fMaleVoiceDelay)
+	Config.fFemaleVoiceDelay   = ImportFloat("fFemaleVoiceDelay", Config.fFemaleVoiceDelay)
+	Config.fVoiceVolume        = ImportFloat("fVoiceVolume", Config.fVoiceVolume)
+	Config.fSFXDelay           = ImportFloat("fSFXDelay", Config.fSFXDelay)
+	Config.fSFXVolume          = ImportFloat("fSFXVolume", Config.fSFXVolume)
+
+	; Boolean Arrays
+	Config.bStripMale          = ImportBoolList("bStripMale", Config.bStripMale, 33)
+	Config.bStripFemale        = ImportBoolList("bStripFemale", Config.bStripFemale, 33)
+	Config.bStripLeadInFemale  = ImportBoolList("bStripLeadInFemale", Config.bStripLeadInFemale, 33)
+	Config.bStripLeadInMale    = ImportBoolList("bStripLeadInMale", Config.bStripLeadInMale, 33)
+	Config.bStripVictim        = ImportBoolList("bStripVictim", Config.bStripVictim, 33)
+	Config.bStripAggressor     = ImportBoolList("bStripAggressor", Config.bStripAggressor, 33)
+
+	; Float Array
+	Config.fStageTimer         = ImportFloatList("fStageTimer", Config.fStageTimer, 5)
+	Config.fStageTimerLeadIn   = ImportFloatList("fStageTimerLeadIn", Config.fStageTimerLeadIn, 5)
+	Config.fStageTimerAggr     = ImportFloatList("fStageTimerAggr", Config.fStageTimerAggr, 5)
+
+	; Export object registry
+	ImportAnimations()
+	ImportCreatures()
+	ImportExpressions()
+	ImportVoices()
+
+	; Reload settings with imported values
+	Config.ReloadConfig()
+endFunction
+
+; Floats
+function ExportFloat(string Name, float Value)
+	SetFloatValue(self, Name, Value)
+endFunction
+float function ImportFloat(string Name, float Value)
+	Value = GetFloatValue(self, Name, Value)
+	UnsetFloatValue(self, Name)
+	return Value
+endFunction
+
+; Integers
+function ExportInt(string Name, int Value)
+	SetIntValue(self, Name, Value)
+endFunction
+int function ImportInt(string Name, int Value)
+	Value = GetIntValue(self, Name, Value)
+	UnsetIntValue(self, Name)
+	return Value
+endFunction
+
+; Booleans
+function ExportBool(string Name, bool Value)
+	SetIntValue(self, Name, Value as int)
+endFunction
+bool function ImportBool(string Name, bool Value)
+	Value = GetIntValue(self, Name, Value as int) as bool
+	UnsetIntValue(self, Name)
+	return Value
+endFunction
+
+; Strings
+function ExportString(string Name, string Value)
+	SetStringValue(self, Name, Value)
+endFunction
+string function ImportString(string Name, string Value)
+	Value = GetStringValue(self, Name, Value)
+	UnsetStringValue(self, Name)
+	return Value
+endFunction
+
+; Float Arrays
+function ExportFloatList(string Name, float[] Values, int len)
+	FloatListClear(self, Name)
+	int i
+	while i < len
+		FloatListAdd(self, Name, Values[i])
+		i += 1
+	endWhile
+endFunction
+float[] function ImportFloatList(string Name, float[] Values, int len)
+	if FloatListCount(self, Name) == len
+		int i
+		while i < len
+			Values[i] = FloatListGet(self, Name, i)
+			i += 1
+		endWhile
+	endIf
+	FloatListClear(self, Name)
+	return Values
+endFunction
+
+; Boolean Arrays
+function ExportBoolList(string Name, bool[] Values, int len)
+	IntListClear(self, Name)
+	int i
+	while i < len
+		IntListAdd(self, Name, Values[i] as int)
+		i += 1
+	endWhile
+endFunction
+bool[] function ImportBoolList(string Name, bool[] Values, int len)
+	if IntListCount(self, Name) == len
+		int i
+		while i < len
+			Values[i] = IntListGet(self, Name, i) as bool
+			i += 1
+		endWhile
+	endIf
+	IntListClear(self, Name)
+	return Values
+endFunction
+
+; Animations
+function ExportAnimations()
+	int i = AnimSlots.Slotted
+	sslBaseAnimation[] Anims = AnimSlots.Animations
+	StringListClear(self, "Animations")
+	while i
+		i -= 1
+		StringListAdd(self, "Animations", sslUtility.MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int, Anims[i].HasTag("Foreplay") as int, Anims[i].HasTag("Aggressive") as int))
+	endWhile
+endfunction
+
+function ImportAnimations()
+	int i = StringListCount(self, "Animations")
+	while i
+		i -= 1
+		; Registrar, Enabled, Foreplay, Aggressive
+		string[] args = sslUtility.ArgString(StringListGet(self, "Animations", i))
+		if args.Length == 4 && AnimSlots.FindByRegistrar(args[0]) != -1
+			sslBaseAnimation Slot = AnimSlots.GetbyRegistrar(args[0])
+			Slot.Enabled = (args[1] as int) as bool
+			Slot.AddTagConditional("Foreplay", (args[2] as int) as bool)
+			Slot.AddTagConditional("Aggressive", (args[3] as int) as bool)
+		endIf
+	endWhile
+	StringListClear(self, "Animations")
+endFunction
+
+; Creatures
+function ExportCreatures()
+	int i = CreatureSlots.Slotted
+	sslBaseAnimation[] Anims = CreatureSlots.Animations
+	StringListClear(self, "Creatures")
+	while i
+		i -= 1
+		StringListAdd(self, "Creatures", sslUtility.MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int))
+	endWhile
+endFunction
+
+function ImportCreatures()
+	int i = StringListCount(self, "Creatures")
+	while i
+		i -= 1
+		; Registrar, Enabled
+		string[] args = sslUtility.ArgString(StringListGet(self, "Creatures", i))
+		if args.Length == 2 && CreatureSlots.FindByRegistrar(args[0]) != -1
+			CreatureSlots.GetbyRegistrar(args[0]).Enabled = (args[1] as int) as bool
+		endIf
+	endWhile
+	StringListClear(self, "Creatures")
+endFunction
+
+; Expressions
+function ExportExpressions()
+	int i = ExpressionSlots.Slotted
+	sslBaseExpression[] Exprs = ExpressionSlots.Expressions
+	StringListClear(self, "Expressions")
+	while i
+		i -= 1
+		StringListAdd(self, "Expressions", sslUtility.MakeArgs(",", Exprs[i].Registry, Exprs[i].HasTag("Consensual") as int, Exprs[i].HasTag("Victim") as int, Exprs[i].HasTag("Aggressor") as int))
+	endWhile
+endfunction
+
+function ImportExpressions()
+	int i = StringListCount(self, "Expressions")
+	while i
+		i -= 1
+		; Registrar, Concensual, Victim, Aggressor
+		string[] args = sslUtility.ArgString(StringListGet(self, "Expressions", i))
+		if args.Length == 4 && ExpressionSlots.FindByRegistrar(args[0]) != -1
+			sslBaseExpression Slot = ExpressionSlots.GetbyRegistrar(args[0])
+			Slot.AddTagConditional("Consensual", (args[1] as int) as bool)
+			Slot.AddTagConditional("Victim", (args[2] as int) as bool)
+			Slot.AddTagConditional("Aggressor", (args[3] as int) as bool)
+		endIf
+	endWhile
+	StringListClear(self, "Expressions")
+endFunction
+
+; Voices
+function ExportVoices()
+	int i = VoiceSlots.Slotted
+	sslBaseVoice[] Voices = VoiceSlots.Voices
+	StringListClear(self, "Voices")
+	while i
+		i -= 1
+		StringListAdd(self, "Voices", sslUtility.MakeArgs(",", Voices[i].Registry, Voices[i].Enabled as int))
+	endWhile
+	; Player voice
+	ExportString("PlayerVoice", VoiceSlots.GetSavedName(PlayerRef))
+endfunction
+
+function ImportVoices()
+	int i = StringListCount(self, "Voices")
+	while i
+		i -= 1
+		; Registrar, Enabled
+		string[] args = sslUtility.ArgString(StringListGet(self, "Voices", i))
+		if args.Length == 2 && VoiceSlots.FindByRegistrar(args[0]) != -1
+			VoiceSlots.GetbyRegistrar(args[0]).Enabled = (args[1] as int) as bool
+		endIf
+	endWhile
+	StringListClear(self, "Voices")
+	; Player voice
+	VoiceSlots.ForgetVoice(PlayerRef)
+	VoiceSlots.SaveVoice(PlayerRef, VoiceSlots.GetByName(GetStringValue(self, "PlayerVoice", "$SSL_Random")))
+	UnsetStringValue(self, "PlayerVoice")
+endFunction

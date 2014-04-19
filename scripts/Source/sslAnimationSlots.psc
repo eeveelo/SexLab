@@ -174,6 +174,10 @@ int function FindByRegistrar(string Registrar)
 	return Registry.Find(Registrar)
 endFunction
 
+sslBaseAnimation function GetbyRegistrar(string Registrar)
+	return GetBySlot(FindByRegistrar(Registrar))
+endFunction
+
 bool function IsRegistered(string Registrar)
 	return FindByRegistrar(Registrar) != -1
 endFunction

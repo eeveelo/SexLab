@@ -1,7 +1,5 @@
 scriptname sslSystemConfig extends sslSystemLibrary
 
-import StorageUtil
-
 ; ------------------------------------------------------- ;
 ; --- System Resources                                --- ;
 ; ------------------------------------------------------- ;
@@ -103,7 +101,6 @@ bool[] property bStripAggressor auto hidden
 bool property bRestrictAggressive auto hidden
 bool property bAllowCreatures auto hidden
 
-string property sPlayerVoice auto hidden
 bool property bNPCSaveVoice auto hidden
 
 int property kBackwards auto hidden ; Right Shift
@@ -345,7 +342,7 @@ function UnequipStrapon(Actor ActorRef)
 	endWhile
 endFunction
 
-function FindStrapons()
+function LoadStrapons()
 	Strapons = new form[1]
 	Strapons[0] = CalypsStrapon
 	int i = Game.GetModCount()
@@ -424,14 +421,14 @@ endfunction
 
 string function ProfileLabel(int Profile = 1)
 	string LabelKey = "AnimationProfile.Label."+Profile
-	string JSON = "SexLab/AnimationProfile_"+Profile+".json"
+	string JSON = "AnimationProfile_"+Profile+".json"
 	; Load existing label
-	ImportFile(JSON, LabelKey, 4, restrictGlobal = true)
+	StorageUtil.ImportFile(JSON, LabelKey, 4, restrictGlobal = true)
 	; Set a default label if it didn't load
-	string Label = GetStringValue(none, LabelKey, "Profile #"+Profile+" (no label)")
-	SetStringValue(none, LabelKey, Label)
+	string Label = StorageUtil.GetStringValue(none, LabelKey, "Profile #"+Profile+" (no label)")
+	StorageUtil.SetStringValue(none, LabelKey, Label)
 	; Save label
-	ExportFile(JSON, LabelKey, 4, restrictGlobal = true)
+	StorageUtil.ExportFile(JSON, LabelKey, 4, restrictGlobal = true)
 	return Label
 endFunction
 
@@ -477,9 +474,9 @@ function ReloadConfig()
 	TargetRef = none
 endFunction
 
-function SetDebugMode(bool enabling)
-	bDebugMode = enabling
-	if enabling
+function SetDebugMode(bool enabled)
+	bDebugMode = enabled
+	if enabled
 		PlayerRef.AddSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
 		PlayerRef.AddSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
 	else
@@ -492,12 +489,17 @@ function SetDefaults()
 	SexLab = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework
 	PlayerRef = Game.GetPlayer()
 
-	SetIntValue(PlayerRef, "sslActorStats.Sexuality", 100)
+	StorageUtil.SetIntValue(PlayerRef, "sslActorStats.Sexuality", 100)
+
+	VoiceSlots.ForgetVoice(PlayerRef)
 
 	bDebugMode = true
 
-	sPlayerVoice = "$SSL_Random"
-	bNPCSaveVoice = false
+	sNPCBed = "$SSL_Never"
+
+	; Config
+	fSFXDelay = 3.0
+	fSFXVolume = 1.0
 
 	; Config Hotkeys
 	kBackwards = 54 ; Right Shift
@@ -518,21 +520,18 @@ function SetDefaults()
 	kTargetActor = 49 ; N
 
 	; TFC hotkey settings
-	bAutoTFC = false
 	fAutoSUCSM = 5.0
-
-	bRestrictAggressive = true
-	bAllowCreatures = true
-
-	; Config
-	bDisablePlayer = false
 	fMaleVoiceDelay = 5.0
 	fFemaleVoiceDelay = 4.0
 	fVoiceVolume = 1.0
+	fCumTimer = 120.0
+
+	; Config
+	bDisablePlayer = false
+
 	bScaleActors = false
 	bUseCum = true
 	bAllowFFCum = false
-	fCumTimer = 120.0
 	bUseStrapons = true
 	bReDressVictim = true
 	bRagdollEnd = false
@@ -541,6 +540,14 @@ function SetDefaults()
 	bUndressAnimation = false
 	bUseLipSync = false
 	bUseExpressions = false
+	bNPCSaveVoice = false
+	bAutoAdvance = true
+	bForeplayStage = false
+	bOrgasmEffects = false
+	bRaceAdjustments = true
+	bRestrictAggressive = true
+	bAllowCreatures = true
+	bAutoTFC = false
 
 	; Strip
 	bStripMale = new bool[33]
@@ -621,16 +628,6 @@ function SetDefaults()
 	bStripAggressor[24] = true
 	bStripAggressor[26] = true
 
-	; Config
-	fSFXDelay = 3.0
-	fSFXVolume = 1.0
-	bAutoAdvance = true
-	bForeplayStage = false
-	bOrgasmEffects = false
-	bRaceAdjustments = true
-	sNPCBed = "$SSL_Never"
-	AnimProfile = 1
-
 	; Timers
 	fStageTimer = new float[5]
 	fStageTimer[0] = 30.0
@@ -654,6 +651,7 @@ function SetDefaults()
 	fStageTimerAggr[4] = 3.0
 
 	; Set animation profile labels
+	AnimProfile = 1
 	ProfileLabel(1)
 	ProfileLabel(2)
 	ProfileLabel(3)
@@ -663,7 +661,7 @@ function SetDefaults()
 
 	; Config loaders
 	Setup()
-	FindStrapons()
+	LoadStrapons()
 	ReloadConfig()
 endFunction
 
@@ -709,218 +707,3 @@ function ReloadData()
 	; VoicesPlayer =            Game.GetFormFromFile(0x, "SexLab.esm")
 endFunction
 
-function ExportSettings()
-	ExportString("sPlayerVoice", sPlayerVoice)
-	ExportString("sNPCBed", sNPCBed)
-	ExportBool("bRestrictAggressive", bRestrictAggressive)
-	ExportBool("bAllowCreatures", bAllowCreatures)
-	ExportBool("bNPCSaveVoice", bNPCSaveVoice)
-	ExportBool("bUseStrapons", bUseStrapons)
-	ExportBool("bReDressVictim", bReDressVictim)
-	ExportBool("bRagdollEnd", bRagdollEnd)
-	ExportBool("bUseMaleNudeSuit", bUseMaleNudeSuit)
-	ExportBool("bUseFemaleNudeSuit", bUseFemaleNudeSuit)
-	ExportBool("bUndressAnimation", bUndressAnimation)
-	ExportBool("bUseLipSync", bUseLipSync)
-	ExportBool("bUseExpressions", bUseExpressions)
-	ExportBool("bScaleActors", bScaleActors)
-	ExportBool("bUseCum", bUseCum)
-	ExportBool("bAllowFFCum", bAllowFFCum)
-	ExportBool("bDisablePlayer", bDisablePlayer)
-	ExportBool("bAutoTFC", bAutoTFC)
-	ExportBool("bDebugMode", bDebugMode)
-	ExportBool("bAutoAdvance", bAutoAdvance)
-	ExportBool("bForeplayStage", bForeplayStage)
-	ExportBool("bOrgasmEffects", bOrgasmEffects)
-	ExportBool("bRaceAdjustments", bRaceAdjustments)
-	ExportInt("kBackwards", kBackwards)
-	ExportInt("kAdjustStage", kAdjustStage)
-	ExportInt("kBackwardsAlt", kBackwardsAlt)
-	ExportInt("kAdjustStageAlt", kAdjustStageAlt)
-	ExportInt("kAdvanceAnimation", kAdvanceAnimation)
-	ExportInt("kChangeAnimation", kChangeAnimation)
-	ExportInt("kChangePositions", kChangePositions)
-	ExportInt("kAdjustChange", kAdjustChange)
-	ExportInt("kAdjustForward", kAdjustForward)
-	ExportInt("kAdjustSideways", kAdjustSideways)
-	ExportInt("kAdjustUpward", kAdjustUpward)
-	ExportInt("kRealignActors", kRealignActors)
-	ExportInt("kMoveScene", kMoveScene)
-	ExportInt("kRestoreOffsets", kRestoreOffsets)
-	ExportInt("kRotateScene", kRotateScene)
-	ExportInt("kToggleFreeCamera", kToggleFreeCamera)
-	ExportInt("kEndAnimation", kEndAnimation)
-	ExportInt("AnimProfile", AnimProfile)
-
-	ExportFloat("fCumTimer", fCumTimer)
-	ExportFloat("fAutoSUCSM", fAutoSUCSM)
-	ExportFloat("fMaleVoiceDelay", fMaleVoiceDelay)
-	ExportFloat("fFemaleVoiceDelay", fFemaleVoiceDelay)
-	ExportFloat("fVoiceVolume", fVoiceVolume)
-	ExportFloat("fSFXDelay", fSFXDelay)
-	ExportFloat("fSFXVolume", fSFXVolume)
-
-	ExportBoolList("bStripMale", bStripMale, 33)
-	ExportBoolList("bStripFemale", bStripFemale, 33)
-	ExportBoolList("bStripLeadInFemale", bStripLeadInFemale, 33)
-	ExportBoolList("bStripLeadInMale", bStripLeadInMale, 33)
-	ExportBoolList("bStripVictim", bStripVictim, 33)
-	ExportBoolList("bStripAggressor", bStripAggressor, 33)
-
-	ExportFloatList("fStageTimer", fStageTimer, 5)
-	ExportFloatList("fStageTimerLeadIn", fStageTimerLeadIn, 5)
-	ExportFloatList("fStageTimerAggr", fStageTimerAggr, 5)
-endFunction
-
-function ImportSettings()
-	sPlayerVoice        = ImportString("sPlayerVoice", sPlayerVoice)
-	sNPCBed             = ImportString("sNPCBed", sNPCBed)
-
-	bRestrictAggressive = ImportBool("bRestrictAggressive", bRestrictAggressive)
-	bAllowCreatures     = ImportBool("bAllowCreatures", bAllowCreatures)
-	bNPCSaveVoice       = ImportBool("bNPCSaveVoice", bNPCSaveVoice)
-	bUseStrapons        = ImportBool("bUseStrapons", bUseStrapons)
-	bReDressVictim      = ImportBool("bReDressVictim", bReDressVictim)
-	bRagdollEnd         = ImportBool("bRagdollEnd", bRagdollEnd)
-	bUseMaleNudeSuit    = ImportBool("bUseMaleNudeSuit", bUseMaleNudeSuit)
-	bUseFemaleNudeSuit  = ImportBool("bUseFemaleNudeSuit", bUseFemaleNudeSuit)
-	bUndressAnimation   = ImportBool("bUndressAnimation", bUndressAnimation)
-	bUseLipSync         = ImportBool("bUseLipSync", bUseLipSync)
-	bUseExpressions     = ImportBool("bUseExpressions", bUseExpressions)
-	bScaleActors        = ImportBool("bScaleActors", bScaleActors)
-	bUseCum             = ImportBool("bUseCum", bUseCum)
-	bAllowFFCum         = ImportBool("bAllowFFCum", bAllowFFCum)
-	bDisablePlayer      = ImportBool("bDisablePlayer", bDisablePlayer)
-	bAutoTFC            = ImportBool("bAutoTFC", bAutoTFC)
-	bDebugMode          = ImportBool("bDebugMode", bDebugMode)
-	bAutoAdvance        = ImportBool("bAutoAdvance", bAutoAdvance)
-	bForeplayStage      = ImportBool("bForeplayStage", bForeplayStage)
-	bOrgasmEffects      = ImportBool("bOrgasmEffects", bOrgasmEffects)
-	bRaceAdjustments    = ImportBool("bRaceAdjustments", bRaceAdjustments)
-
-	kBackwards          = ImportInt("kBackwards", kBackwards)
-	kAdjustStage        = ImportInt("kAdjustStage", kAdjustStage)
-	kBackwardsAlt       = ImportInt("kBackwardsAlt", kBackwardsAlt)
-	kAdjustStageAlt     = ImportInt("kAdjustStageAlt", kAdjustStageAlt)
-	kAdvanceAnimation   = ImportInt("kAdvanceAnimation", kAdvanceAnimation)
-	kChangeAnimation    = ImportInt("kChangeAnimation", kChangeAnimation)
-	kChangePositions    = ImportInt("kChangePositions", kChangePositions)
-	kAdjustChange       = ImportInt("kAdjustChange", kAdjustChange)
-	kAdjustForward      = ImportInt("kAdjustForward", kAdjustForward)
-	kAdjustSideways     = ImportInt("kAdjustSideways", kAdjustSideways)
-	kAdjustUpward       = ImportInt("kAdjustUpward", kAdjustUpward)
-	kRealignActors      = ImportInt("kRealignActors", kRealignActors)
-	kMoveScene          = ImportInt("kMoveScene", kMoveScene)
-	kRestoreOffsets     = ImportInt("kRestoreOffsets", kRestoreOffsets)
-	kRotateScene        = ImportInt("kRotateScene", kRotateScene)
-	kToggleFreeCamera   = ImportInt("kToggleFreeCamera", kToggleFreeCamera)
-	kEndAnimation       = ImportInt("kEndAnimation", kEndAnimation)
-	AnimProfile         = ImportInt("AnimProfile", AnimProfile)
-
-	fCumTimer           = ImportFloat("fCumTimer", fCumTimer)
-	fAutoSUCSM          = ImportFloat("fAutoSUCSM", fAutoSUCSM)
-	fMaleVoiceDelay     = ImportFloat("fMaleVoiceDelay", fMaleVoiceDelay)
-	fFemaleVoiceDelay   = ImportFloat("fFemaleVoiceDelay", fFemaleVoiceDelay)
-	fVoiceVolume        = ImportFloat("fVoiceVolume", fVoiceVolume)
-	fSFXDelay           = ImportFloat("fSFXDelay", fSFXDelay)
-	fSFXVolume          = ImportFloat("fSFXVolume", fSFXVolume)
-
-	bStripMale          = ImportBoolList("bStripMale", bStripMale, 33)
-	bStripFemale        = ImportBoolList("bStripFemale", bStripFemale, 33)
-	bStripLeadInFemale  = ImportBoolList("bStripLeadInFemale", bStripLeadInFemale, 33)
-	bStripLeadInMale    = ImportBoolList("bStripLeadInMale", bStripLeadInMale, 33)
-	bStripVictim        = ImportBoolList("bStripVictim", bStripVictim, 33)
-	bStripAggressor     = ImportBoolList("bStripAggressor", bStripAggressor, 33)
-
-	fStageTimer         = ImportFloatList("fStageTimer", fStageTimer, 5)
-	fStageTimerLeadIn   = ImportFloatList("fStageTimerLeadIn", fStageTimerLeadIn, 5)
-	fStageTimerAggr     = ImportFloatList("fStageTimerAggr", fStageTimerAggr, 5)
-
-	ImportProfile(AnimProfile)
-endFunction
-
-
-
-function ExportFloat(string Name, float Value)
-	FileSetFloatValue("SexLabConfig."+Name, Value)
-endFunction
-float function ImportFloat(string Name, float Value)
-	Name = "SexLabConfig."+Name
-	Value = FileGetFloatValue(Name, Value)
-	FileUnsetFloatValue(Name)
-	return Value
-endFunction
-
-function ExportInt(string Name, int Value)
-	FileSetIntValue("SexLabConfig."+Name, Value)
-endFunction
-int function ImportInt(string Name, int Value)
-	Name = "SexLabConfig."+Name
-	Value = FileGetIntValue(Name, Value)
-	FileUnsetIntValue(Name)
-	return Value
-endFunction
-
-function ExportBool(string Name, bool Value)
-	FileSetIntValue("SexLabConfig."+Name, Value as int)
-endFunction
-bool function ImportBool(string Name, bool Value)
-	Name = "SexLabConfig."+Name
-	Value = FileGetIntValue(Name, Value as int) as bool
-	FileUnsetIntValue(Name)
-	return Value
-endFunction
-
-function ExportString(string Name, string Value)
-	FileSetStringValue("SexLabConfig."+Name, Value)
-endFunction
-string function ImportString(string Name, string Value)
-	Name = "SexLabConfig."+Name
-	Value = FileGetStringValue(Name, Value)
-	FileUnsetStringValue(Name)
-	return Value
-endFunction
-
-function ExportFloatList(string Name, float[] Values, int len)
-	Name = "SexLabConfig."+Name
-	FileFloatListClear(Name)
-	int i
-	while i < len
-		FileFloatListAdd(Name, Values[i])
-		i += 1
-	endWhile
-endFunction
-float[] function ImportFloatList(string Name, float[] Values, int len)
-	Name = "SexLabConfig."+Name
-	if FileFloatListCount(Name) == len
-		int i
-		while i < len
-			Values[i] = FileFloatListGet(Name, i)
-			i += 1
-		endWhile
-	endIf
-	FileFloatListClear(Name)
-	return Values
-endFunction
-
-function ExportBoolList(string Name, bool[] Values, int len)
-	Name = "SexLabConfig."+Name
-	FileIntListClear(Name)
-	int i
-	while i < len
-		FileIntListAdd(Name, Values[i] as int)
-		i += 1
-	endWhile
-endFunction
-bool[] function ImportBoolList(string Name, bool[] Values, int len)
-	Name = "SexLabConfig."+Name
-	if FileIntListCount(Name) == len
-		int i
-		while i < len
-			Values[i] = FileIntListGet(Name, i) as bool
-			i += 1
-		endWhile
-	endIf
-	FileIntListClear(Name)
-	return Values
-endFunction

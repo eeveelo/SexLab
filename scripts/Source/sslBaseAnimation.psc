@@ -532,8 +532,8 @@ function SaveProfile(int SaveTo = 1)
 	if Registered
 		SaveTo = ClampInt(SaveTo, 1, 5)
 		if FloatListCount(Storage, Key("Adjust.Global")) > 0 || StringListCount(Storage, Key("AdjustKeys")) > 0
-			ExportFile("SexLab/AnimationProfile_"+SaveTo+".json", Key("AdjustKeys"), 64)
-			ExportFile("SexLab/AnimationProfile_"+SaveTo+".json", Key("Adjust."), 32, keyContains = true)
+			ExportFile("AnimationProfile_"+SaveTo+".json", Key("AdjustKeys"), 64)
+			ExportFile("AnimationProfile_"+SaveTo+".json", Key("Adjust."), 32, keyContains = true)
 		endIf
 	endIf
 endFunction
@@ -553,7 +553,8 @@ function LoadProfile(int Profile = 1)
 		endwhile
 		FloatListClear(Storage, Key("AdjustKeys"))
 		; Load the profile
-		ImportFile("SexLab/AnimationProfile_"+Profile+".json", Key("AdjustKeys"), 64)
-		ImportFile("SexLab/AnimationProfile_"+Profile+".json", Key("Adjust."), 32, keyContains = true)
+		ImportFile("AnimationProfile_"+Profile+".json", Key("AdjustKeys"), 64)
+		ImportFile("AnimationProfile_"+Profile+".json", Key("Adjust."), 32, keyContains = true)
 	endIf
 endFunction
+
