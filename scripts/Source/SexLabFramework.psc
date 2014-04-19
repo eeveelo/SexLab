@@ -777,10 +777,15 @@ state Disabled
 		Log("QuestStart() - Failed to make new thread model; system is currently disabled or not installed", "FATAL")
 		return none
 	endFunction
+	event OnBeginState()
+		Log("SexLabFramework - Enabled")
+		ModEvent.Send(ModEvent.Create("SexLabDisabled"))
+	endEvent
 endState
 
-; state Enabled
-; 	event OnBeginState()
-; 		Log("SexLab Framework - Enabled")
-; 	endEvent
-; endState
+state Enabled
+	event OnBeginState()
+		Log("SexLabFramework - Enabled")
+		ModEvent.Send(ModEvent.Create("SexLabEnabled"))
+	endEvent
+endState
