@@ -46,6 +46,7 @@ function StopAll()
 		i -= 1
 		Slots[i].EndAnimation(true)
 	endWhile
+	ModEvent.Send(ModEvent.Create("SexLabStoppedActive"))
 endFunction
 
 ; ------------------------------------------------------- ;
