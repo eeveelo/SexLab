@@ -166,6 +166,8 @@ state Making
 			VictimRef = ActorRef
 			IsAggressive = true
 		endIf
+		; Send actor event Added
+		SendTrackedEvent(ActorRef, "Added", thread_id)
 		; Return position
 		return Positions.Find(ActorRef)
 	endFunction
@@ -725,6 +727,15 @@ function SetupThreadEvent(string HookEvent)
 		; Log("Thread Hook Sent: "+HookEvent)
 	endIf
 	SendModEvent(HookEvent, thread_id)
+endFunction
+
+function SendActorEvent(string ActorEvent)
+	; Actor tracking callback events
+	int i = ActorCount
+	while i
+		i -= 1
+		SendTrackedEvent(Positions[i], ActorEvent, thread_id)
+	endWhile
 endFunction
 
 int function GetXP(int i)

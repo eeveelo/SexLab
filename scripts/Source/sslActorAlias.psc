@@ -667,8 +667,9 @@ function Initialize()
 	UnregisterForUpdate()
 	UnregisterForAllModEvents()
 	GoToState("")
-	; Free actor for selection
+	; Clear actor
 	if ActorRef != none
+		; Remove from active
 		FormListRemove(none, "SexLabActors", ActorRef, true)
 	endIf
 	; Delete positioning marker

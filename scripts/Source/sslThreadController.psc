@@ -45,9 +45,11 @@ state Prepare
 		ActorAlias[2].StartAnimating()
 		ActorAlias[3].StartAnimating()
 		ActorAlias[4].StartAnimating()
-		; Send starter events
+		; Start time trackers
 		StartedAt = Utility.GetCurrentRealTime()
 		SkillTime = Utility.GetCurrentRealTime()
+		; Send starter events
+		SendActorEvent("Start")
 		SendThreadEvent("AnimationStart")
 		if LeadIn
 			SendThreadEvent("LeadInStart")
@@ -469,6 +471,7 @@ function DisableHotkeys()
 endFunction
 
 function Initialize()
+	SendActorEvent("End")
 	DisableHotkeys()
 	SkillTime   = 0.0
 	TimedStage  = false

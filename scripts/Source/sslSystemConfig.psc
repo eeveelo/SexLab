@@ -459,6 +459,7 @@ bool function CheckSystem()
 endFunction
 
 function Reload()
+	Setup()
 	; TFC Toggle key
 	UnregisterForAllKeys()
 	RegisterForKey(ToggleFreeCamera)
@@ -472,6 +473,9 @@ function Reload()
 	RegisterForCrosshairRef()
 	CrosshairRef = none
 	TargetRef = none
+	; Validate tracked factions
+	ThreadLib.ValidateTrackedActors()
+	ThreadLib.ValidateTrackedFactions()
 endFunction
 
 function SetDebugMode(bool enabled)

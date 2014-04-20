@@ -1,5 +1,7 @@
 scriptname sslThreadLibrary extends sslSystemLibrary
 
+import StorageUtil
+
 ; Data
 Sound property OrgasmFX auto hidden
 Sound property SquishingFX auto hidden
@@ -25,6 +27,11 @@ bool function CheckFNIS()
 	endIf
 	return true
 endFunction
+
+; ------------------------------------------------------- ;
+; --- Object Locators                                 --- ;
+; ------------------------------------------------------- ;
+
 
 bool function CheckActor(Actor CheckRef, int CheckGender = -1)
 	int IsGender = ActorLib.GetGender(CheckRef)
@@ -167,7 +174,6 @@ Actor[] function SortCreatures(actor[] Positions, sslBaseAnimation Animation)
 	return Positions
 endFunction
 
-
 bool function CheckBed(ObjectReference BedRef, bool IgnoreUsed = true)
 	return BedRef != none && BedRef.IsEnabled() && BedRef.Is3DLoaded() && (!IgnoreUsed || (IgnoreUsed && !BedRef.IsFurnitureInUse(true)))
 endFunction
@@ -197,6 +203,112 @@ ObjectReference function FindBed(ObjectReference CenterRef, float Radius = 1000.
 	endWhile
 	return none ; Nothing found in search loop
 endFunction
+
+; ------------------------------------------------------- ;
+; --- Actor Tracking                                  --- ;
+; ------------------------------------------------------- ;
+
+function TrackActor(Actor ActorRef, string Callback)
+	FormListAdd(none, "SexLab.TrackActors", ActorRef, false)
+	StringListAdd(ActorRef, "SexLab.Callbacks", Callback, false)
+endFunction
+
+function UntrackActor(Actor ActorRef, string Callback)
+	StringListRemove(ActorRef, "SexLab.Callbacks", Callback, true)
+	if StringListCount(ActorRef, "SexLab.Callbacks") < 1
+		FormListRemove(none, "SexLab.TrackActors", ActorRef, true)
+	endif
+endFunction
+
+function TrackFaction(Faction FactionRef, string Callback)
+	FormListAdd(none, "SexLab.TrackFactions", FactionRef, false)
+	StringListAdd(FactionRef, "SexLab.Callbacks", Callback, false)
+endFunction
+
+function UntrackFaction(Faction FactionRef, string Callback)
+	StringListRemove(FactionRef, "SexLab.Callbacks", Callback, true)
+	if StringListCount(FactionRef, "SexLab.Callbacks") < 1
+		FormListRemove(none, "SexLab.TrackFactions", FactionRef, true)
+	endif
+endFunction
+
+function SendTrackedEvent(Actor ActorRef, string Hook, int id = -1)
+	; Send generic player callback event
+	if ActorRef == PlayerRef
+		SetupActorEvent(PlayerRef, "PlayerTrack_"+Hook, id)
+	endIf
+	; Send actor callback events
+	int i = StringListCount(ActorRef, "SexLab.Callbacks")
+	while i
+		i -= 1
+		SetupActorEvent(ActorRef, StringListGet(ActorRef, "SexLab.Callbacks", i)+"_"+Hook, id)
+	endWhile
+	; Send faction callback events
+	i = FormListCount(none, "SexLab.TrackFactions")
+	while i
+		i -= 1
+		Faction FactionRef = FormListGet(none, "SexLab.TrackFactions", i) as Faction
+		if FactionRef != none && ActorRef.IsInFaction(FactionRef)
+			int n = StringListCount(FactionRef, "SexLab.Callbacks")
+			while n
+				n -= 1
+				SetupActorEvent(ActorRef, StringListGet(FactionRef, "SexLab.Callbacks", n)+"_"+Hook, id)
+			endwhile
+		endIf
+	endWhile
+endFunction
+
+function SetupActorEvent(Actor ActorRef, string Callback, int id = -1)
+	int eid = ModEvent.Create(Callback)
+	ModEvent.PushForm(eid, ActorRef)
+	ModEvent.PushInt(eid, id)
+	ModEvent.Send(eid)
+endFunction
+
+bool function IsActorTracked(Actor ActorRef)
+	; Check actor callbacks
+	if StringListCount(ActorRef, "SexLab.Callbacks") > 0
+		return true
+	endIf
+	; Check faction callsbacks
+	int i = FormListCount(none, "SexLab.TrackFactions")
+	while i
+		i -= 1
+		Faction FactionRef = FormListGet(none, "SexLab.TrackFactions", i) as Faction
+		if FactionRef != none && ActorRef.IsInFaction(FactionRef)
+			return true
+		endIf
+	endWhile
+	; No tracked events found
+	return false
+endFunction
+
+function ValidateTrackedActors()
+	int i = FormListCount(none, "SexLab.TrackActors")
+	while i
+		i -= 1
+		Actor ActorRef = FormListGet(none, "SexLab.TrackActors", i) as Actor
+		if ActorRef == none
+			FormListRemoveAt(none, "SexLab.TrackActors", i)
+		endIf
+	endWhile
+endFunction
+
+function ValidateTrackedFactions()
+	int i = FormListCount(none, "SexLab.TrackFactions")
+	while i
+		i -= 1
+		Faction FactionRef = FormListGet(none, "SexLab.TrackFactions", i) as Faction
+		if FactionRef == none
+			FormListRemoveAt(none, "SexLab.TrackFactions", i)
+		endIf
+	endWhile
+endFunction
+
+; ------------------------------------------------------- ;
+; --- System use only                                 --- ;
+; ------------------------------------------------------- ;
+
 
 function Setup()
 	parent.Setup()

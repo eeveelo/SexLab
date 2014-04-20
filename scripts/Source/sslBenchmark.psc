@@ -141,3 +141,12 @@ event OnUpdate()
 		Debug.Notification("Latency Test Result: "+Result+"ms")
 	endIf
 endEvent
+
+
+function Setup()
+	parent.Setup()
+endFunction
+
+event OnInit()
+	Setup()
+endEvent

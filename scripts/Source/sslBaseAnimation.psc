@@ -251,7 +251,6 @@ function InitAdjustments(string AdjustKey)
 			while Position
 				Position -= 1
 				FloatListSet(Storage, AdjustGlobal, DataIndex(4, Position, Stage, 3), AccessFlag(Position, Stage, 3))
-				Log(Position+" / "+Stage+" -> "+DataIndex(4, Position, Stage, 3)+" == "+AccessFlag(Position, Stage, 3))
 			endWhile
 			Stage += 1
 		endWhile
@@ -266,9 +265,7 @@ function InitAdjustments(string AdjustKey)
 			FloatListAdd(Storage, AdjustKey, FloatListGet(Storage, AdjustGlobal, i))
 			i += 1
 		endWhile
-		Log("Init Adjustments for: "+KeyPart, AdjustKey)
 	endIf
-	Log(AdjustKey+" Length: "+FloatListCount(Storage, AdjustKey), AdjustGlobal+" Length: "+FloatListCount(Storage, AdjustGlobal))
 endFunction
 
 string function MakeAdjustKey(Actor[] ACtorList, bool RaceKey = true)

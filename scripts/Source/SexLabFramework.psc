@@ -292,6 +292,30 @@ int function FindPlayerController()
 	return ThreadSlots.FindActorController(PlayerRef)
 endFunction
 
+function TrackActor(Actor ActorRef, string Callback)
+	ThreadLib.TrackActor(ActorRef, Callback)
+endFunction
+
+function UntrackActor(Actor ActorRef, string Callback)
+	ThreadLib.UntrackActor(ActorRef, Callback)
+endFunction
+
+function TrackFaction(Faction FactionRef, string Callback)
+	ThreadLib.TrackFaction(FactionRef, Callback)
+endFunction
+
+function UntrackFaction(Faction FactionRef, string Callback)
+	ThreadLib.UntrackFaction(FactionRef, Callback)
+endFunction
+
+function SendTrackedEvent(Actor ActorRef, string Hook, int id = -1)
+	ThreadLib.SendTrackedEvent(ActorRef, Hook, id)
+endFunction
+
+bool function IsActorTracked(Actor ActorRef)
+	return ThreadLib.IsActorTracked(ActorRef)
+endFunction
+
 ;#---------------------------#
 ;#   END THREAD FUNCTIONS    #
 ;#---------------------------#

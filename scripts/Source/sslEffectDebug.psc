@@ -24,6 +24,9 @@ event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	; SexLab.AnimSlots.GetBySlot(1).Export()
 
 	sslBenchmark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
+	Dev.Setup()
+
+
 	Dev.LatencyTest()
 	; Utility.Wait(1.0)
 	; Dev.StartBenchmark(2)
@@ -38,8 +41,6 @@ endEvent
 event OnEffectFinish(Actor TargetRef, Actor CasterRef)
 	; Log("Debug effect spell expired("+TargetRef+", "+CasterRef+")")
 endEvent
-
-
 
 ;/-----------------------------------------------\;
 ;|	Debug Utility Functions                      |;
