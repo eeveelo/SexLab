@@ -232,7 +232,11 @@ function UntrackFaction(Faction FactionRef, string Callback)
 	endif
 endFunction
 
-function SendTrackedEvent(Actor ActorRef, string Hook, int id = -1)
+function SendTrackedEvent(Actor ActorRef, string Hook = "", int id = -1)
+	; Append hook type, global if empty
+	if Hook != ""
+		Hook = "_"+Hook
+	endIf
 	; Send generic player callback event
 	if ActorRef == PlayerRef
 		SetupActorEvent(PlayerRef, "PlayerTrack_"+Hook, id)
@@ -241,7 +245,7 @@ function SendTrackedEvent(Actor ActorRef, string Hook, int id = -1)
 	int i = StringListCount(ActorRef, "SexLab.Callbacks")
 	while i
 		i -= 1
-		SetupActorEvent(ActorRef, StringListGet(ActorRef, "SexLab.Callbacks", i)+"_"+Hook, id)
+		SetupActorEvent(ActorRef, StringListGet(ActorRef, "SexLab.Callbacks", i)+Hook, id)
 	endWhile
 	; Send faction callback events
 	i = FormListCount(none, "SexLab.TrackFactions")
@@ -252,7 +256,7 @@ function SendTrackedEvent(Actor ActorRef, string Hook, int id = -1)
 			int n = StringListCount(FactionRef, "SexLab.Callbacks")
 			while n
 				n -= 1
-				SetupActorEvent(ActorRef, StringListGet(FactionRef, "SexLab.Callbacks", n)+"_"+Hook, id)
+				SetupActorEvent(ActorRef, StringListGet(FactionRef, "SexLab.Callbacks", n)+Hook, id)
 			endwhile
 		endIf
 	endWhile
