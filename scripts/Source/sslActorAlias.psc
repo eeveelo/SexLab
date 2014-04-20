@@ -161,7 +161,7 @@ state Ready
 		ActorScale = ( display / base )
 		AnimScale = ActorScale
 		ActorRef.SetScale(ActorScale)
-		if Thread.ActorCount > 1 && Config.bScaleActors
+		if Thread.ActorCount > 1 && Config.ScaleActors
 			AnimScale = (1.0 / base)
 		endIf
 		; Stop movement
@@ -169,7 +169,7 @@ state Ready
 		; Strip non creatures
 		if !IsCreature
 			; Pick a strapon on females to use
-			if IsFemale && Config.bUseStrapons && Config.Strapons.Length > 0
+			if IsFemale && Config.UseStrapons && Config.Strapons.Length > 0
 				Strapon = Config.GetStrapon()
 				ActorRef.AddItem(Strapon, 1, true)
 			endIf
@@ -180,7 +180,7 @@ state Ready
 				SetVoice(VoiceSlots.PickGender(BaseSex), IsForcedSilent)
 			endIf
 			; Pick an expression if needed
-			if Expression == none && Config.bUseExpressions
+			if Expression == none && Config.UseExpressions
 				Expression = ExpressionSlots.PickExpression(ActorRef, Thread.VictimRef)
 			endIf
 			; Always use players stats if present, so players stats mean something more for npcs
@@ -194,7 +194,7 @@ state Ready
 			Skills = GetSkillLevels(SkilledActor)
 			Thread.Log(SkilledActor.GetLeveledActorBase().GetName()+" Skills: "+Skills, ActorName)
 			; Start Auto TFC if enabled
-			if IsPlayer && Config.bAutoTFC && Game.GetCameraState() != 3
+			if IsPlayer && Config.AutoTFC && Game.GetCameraState() != 3
 				Config.ToggleFreeCamera()
 			endIf
 		endIf
@@ -344,7 +344,7 @@ state Animating
 	function OrgasmEffect()
 		; Apply cum
 		int CumID = Animation.GetCum(Position)
-		if CumID > 0 && Config.bUseCum && (Thread.Males > 0 || Config.bAllowFFCum || Thread.HasCreature)
+		if CumID > 0 && Config.UseCum && (Thread.Males > 0 || Config.AllowFFCum || Thread.HasCreature)
 			ApplyCum(ActorRef, CumID)
 		endIf
 		; Moan if not silent
@@ -375,7 +375,7 @@ state Animating
 		endIf
 		; Apply cum
 		int CumID = Animation.GetCum(Position)
-		if !Thread.FastEnd && CumID > 0 && Config.bUseCum && (Thread.Males > 0 || Config.bAllowFFCum || Thread.HasCreature)
+		if !Thread.FastEnd && CumID > 0 && Config.UseCum && (Thread.Males > 0 || Config.AllowFFCum || Thread.HasCreature)
 			ApplyCum(ActorRef, CumID)
 		endIf
 		; Restore actor to starting point
@@ -496,7 +496,7 @@ function LockActor()
 		Game.DisablePlayerControls(false, false, false, false, false, false, true, false, 0)
 		Game.SetPlayerAIDriven()
 		; Enable hotkeys, if needed
-		if !(IsVictim && Config.bDisablePlayer)
+		if !(IsVictim && Config.DisablePlayer)
 			Thread.EnableHotkeys()
 		endIf
 	else
@@ -639,7 +639,7 @@ bool property DoRagdoll hidden
 		if NoRagdoll
 			return false
 		endIf
-		return !NoRagdoll && Config.bRagDollEnd
+		return !NoRagdoll && Config.RagdollEnd
 	endFunction
 	function set(bool value)
 		NoRagdoll = !value
@@ -652,7 +652,7 @@ bool property DoUndress hidden
 		if NoUndress
 			return false
 		endIf
-		return Config.bUndressAnimation
+		return Config.UndressAnimation
 	endFunction
 	function set(bool value)
 		NoUndress = !value

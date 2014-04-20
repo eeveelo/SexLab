@@ -271,7 +271,7 @@ endFunction
 ; float function GetProficiencyLevel(Actor ActorRef, string Skill, float Increments = 21.0)
 	; return (GetSkill(actorRef, Skill) as float) / Increments
 ; endFunction
-;
+
 ; string function GetProficiencyTitle(Actor ActorRef, string Skill, float Increments = 21.0)
 	; return StatTitles[ClampInt((GetProficiencyLevel(ActorRef, Skill, Increments) as int), 0, 6)]
 ; endFunction

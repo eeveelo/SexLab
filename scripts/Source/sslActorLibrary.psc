@@ -123,7 +123,7 @@ form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 		Debug.SendAnimationEvent(ActorRef, "Arrok_Undress_G"+Gender)
 	endIf
 	; Get Nudesuit
-	bool UseNudeSuit = Strip[2] && AllowNudesuit && ((Gender == 0 && Config.bUseMaleNudeSuit) || (Gender == 1  && Config.bUseFemaleNudeSuit)) && !ActorRef.IsEquipped(NudeSuit)
+	bool UseNudeSuit = Strip[2] && AllowNudesuit && ((Gender == 0 && Config.UseMaleNudeSuit) || (Gender == 1  && Config.UseFemaleNudeSuit)) && !ActorRef.IsEquipped(NudeSuit)
 	if UseNudeSuit
 		ActorRef.AddItem(NudeSuit, 1, true)
 	endIf
@@ -177,7 +177,7 @@ function UnstripActor(Actor ActorRef, form[] Stripped, bool IsVictim = false)
 	if ActorRef.IsEquipped(NudeSuit)
 		ActorRef.UnequipItem(NudeSuit, true, true)
 		ActorRef.RemoveItem(NudeSuit, 1, true)
-	elseIf IsVictim && !Config.bReDressVictim
+	elseIf IsVictim && !Config.RedressVictim
 		return ; Actor is victim, don't redress
 	endIf
 	; Equip stripped

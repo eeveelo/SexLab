@@ -39,7 +39,7 @@ sslBaseAnimation[] function GetByType(int ActorCount, int Males = -1, int Female
 	int i = Slotted
 	while i
 		i -=1
-		Valid[i] = Slots[i].Enabled && ActorCount == Slots[i].PositionCount && (Aggressive == Slots[i].HasTag("Aggressive") || !Config.bRestrictAggressive) \
+		Valid[i] = Slots[i].Enabled && ActorCount == Slots[i].PositionCount && (Aggressive == Slots[i].HasTag("Aggressive") || !Config.RestrictAggressive) \
 		&& (Males == -1 || Males == Slots[i].Males) && (Females == -1 || Females == Slots[i].Females) && (StageCount == -1 || StageCount == Slots[i].StageCount) && Sexual == Slots[i].IsSexual
 	endWhile
 	return GetList(Valid)

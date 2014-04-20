@@ -23,7 +23,7 @@ bool property Female hidden
 endProperty
 
 function Moan(Actor ActorRef, int Strength = 30, bool IsVictim = false)
-	if Config.bUseLipSync && Game.GetCameraState() != 3
+	if Config.UseLipSync && Game.GetCameraState() != 3
 		ActorRef.Say(LipSync)
 	endIf
 	GetSound(Strength, IsVictim).PlayAndWait(ActorRef)

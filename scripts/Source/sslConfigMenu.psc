@@ -2,6 +2,7 @@ scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
 import StorageUtil
+import sslUtility
 
 ; Framework
 Actor property PlayerRef auto
@@ -86,7 +87,7 @@ event OnGameReload()
 	Config = SexLabQuestFramework as sslSystemConfig
 	; Reload SexLab's voice/tfc config at load
 	if CurrentVersion > 0 && Config.CheckSystem()
-		Config.ReloadConfig()
+		Config.Reload()
 	else
 		SexLab.GoToState("Disabled")
 	endIf
@@ -165,7 +166,7 @@ endEvent
 ; ------------------------------------------------------- ;
 
 string[] function MapOptions()
-	return sslUtility.ArgString(GetState(), "_")
+	return ArgString(GetState(), "_")
 endFunction
 
 event OnSliderOpenST()
@@ -280,7 +281,7 @@ event OnSelectST()
 		while n
 			n -= 1
 			if n != i
-				Output = sslUtility.PushForm(Strapons[n], Output)
+				Output = PushForm(Strapons[n], Output)
 			endIf
 		endWhile
 		Config.Strapons = Output
@@ -298,36 +299,38 @@ endEvent
 ; --- Animation Settings                              --- ;
 ; ------------------------------------------------------- ;
 
+string[] Chances
+
 function AnimationSettings()
 	SetCursorFillMode(TOP_TO_BOTTOM)
 	AddHeaderOption("$SSL_PlayerSettings")
-	AddToggleOptionST("AutoAdvance","$SSL_AutoAdvanceStages", Config.bAutoAdvance)
-	AddToggleOptionST("DisableVictim","$SSL_DisableVictimControls", Config.bDisablePlayer)
-	AddToggleOptionST("AutomaticTFC","$SSL_AutomaticTFC", Config.bAutoTFC)
-	AddSliderOptionST("AutomaticSUCSM","$SSL_AutomaticSUCSM", Config.fAutoSUCSM, "{0}")
+	AddToggleOptionST("AutoAdvance","$SSL_AutoAdvanceStages", Config.AutoAdvance)
+	AddToggleOptionST("DisableVictim","$SSL_DisableVictimControls", Config.DisablePlayer)
+	AddToggleOptionST("AutomaticTFC","$SSL_AutomaticTFC", Config.AutoTFC)
+	AddSliderOptionST("AutomaticSUCSM","$SSL_AutomaticSUCSM", Config.AutoSUCSM, "{0}")
 
 	AddHeaderOption("$SSL_ExtraEffects")
-	AddToggleOptionST("UseExpressions","$SSL_UseExpressions", Config.bUseExpressions)
-	AddToggleOptionST("UseLipSync", "$SSL_UseLipSync", Config.bUseLipSync)
-	AddToggleOptionST("OrgasmEffects","$SSL_OrgasmEffects", Config.bOrgasmEffects)
-	AddToggleOptionST("UseCum","$SSL_ApplyCumEffects", Config.bUseCum)
-	AddToggleOptionST("AllowFemaleFemaleCum","$SSL_AllowFemaleFemaleCum", Config.bAllowFFCum)
-	AddSliderOptionST("CumEffectTimer","$SSL_CumEffectTimer", Config.fCumTimer, "$SSL_Seconds")
+	AddToggleOptionST("UseExpressions","$SSL_UseExpressions", Config.UseExpressions)
+	AddToggleOptionST("UseLipSync", "$SSL_UseLipSync", Config.UseLipSync)
+	AddToggleOptionST("OrgasmEffects","$SSL_OrgasmEffects", Config.OrgasmEffects)
+	AddToggleOptionST("UseCum","$SSL_ApplyCumEffects", Config.UseCum)
+	AddToggleOptionST("AllowFemaleFemaleCum","$SSL_AllowFemaleFemaleCum", Config.AllowFFCum)
+	AddSliderOptionST("CumEffectTimer","$SSL_CumEffectTimer", Config.CumTimer, "$SSL_Seconds")
 
 	SetCursorPosition(1)
 	; AddHeaderOption("$SSL_AnimationHandling")
 	AddMenuOptionST("AnimationProfile", "$SSL_AnimationProfile", Config.ProfileLabel(Config.AnimProfile))
-	AddToggleOptionST("AllowCreatures","$SSL_AllowCreatures", Config.bAllowCreatures)
-	AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", Config.bScaleActors)
-	AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", Config.bForeplayStage)
-	AddToggleOptionST("RestrictAggressive","$SSL_RestrictAggressive", Config.bRestrictAggressive)
-	AddToggleOptionST("UndressAnimation","$SSL_UndressAnimation", Config.bUndressAnimation)
-	AddToggleOptionST("ReDressVictim","$SSL_VictimsRedress", Config.bReDressVictim)
-	AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", Config.bRagdollEnd)
-	AddToggleOptionST("StraponsFemale","$SSL_FemalesUseStrapons", Config.bUseStrapons)
-	AddToggleOptionST("NudeSuitMales","$SSL_UseNudeSuitMales", Config.bUseMaleNudeSuit)
-	AddToggleOptionST("NudeSuitFemales","$SSL_UseNudeSuitFemales", Config.bUseFemaleNudeSuit)
-	AddTextOptionST("NPCBed","$SSL_NPCsUseBeds", Config.sNPCBed)
+	AddToggleOptionST("AllowCreatures","$SSL_AllowCreatures", Config.AllowCreatures)
+	AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", Config.ScaleActors)
+	AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", Config.ForeplayStage)
+	AddToggleOptionST("RestrictAggressive","$SSL_RestrictAggressive", Config.RestrictAggressive)
+	AddToggleOptionST("UndressAnimation","$SSL_UndressAnimation", Config.UndressAnimation)
+	AddToggleOptionST("ReDressVictim","$SSL_VictimsRedress", Config.RedressVictim)
+	AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", Config.RagdollEnd)
+	AddToggleOptionST("StraponsFemale","$SSL_FemalesUseStrapons", Config.UseStrapons)
+	AddToggleOptionST("NudeSuitMales","$SSL_UseNudeSuitMales", Config.UseMaleNudeSuit)
+	AddToggleOptionST("NudeSuitFemales","$SSL_UseNudeSuitFemales", Config.UseFemaleNudeSuit)
+	AddTextOptionST("NPCBed","$SSL_NPCsUseBeds", Chances[ClampInt(Config.NPCBed, 0, 2)])
 endFunction
 
 state AnimationProfile
@@ -346,7 +349,7 @@ state AnimationProfile
 		i += 1
 		; Export/Set/Import profiles
 		Config.ExportProfile(Config.AnimProfile)
-		Config.AnimProfile = sslUtility.ClampInt(i, 1, 5)
+		Config.AnimProfile = ClampInt(i, 1, 5)
 		Config.ImportProfile(Config.AnimProfile)
 		SetMenuOptionValueST(Config.ProfileLabel(Config.AnimProfile))
 	endEvent
@@ -366,27 +369,27 @@ function PlayerHotkeys()
 	SetCursorFillMode(TOP_TO_BOTTOM)
 
 	AddHeaderOption("$SSL_GlobalHotkeys")
-	AddKeyMapOptionST("TargetActor", "$SSL_TargetActor", Config.kTargetActor)
-	AddKeyMapOptionST("ToggleFreeCamera", "$SSL_ToggleFreeCamera", Config.kToggleFreeCamera)
+	AddKeyMapOptionST("TargetActor", "$SSL_TargetActor", Config.TargetActor)
+	AddKeyMapOptionST("ToggleFreeCamera", "$SSL_ToggleFreeCamera", Config.ToggleFreeCamera)
 
 	AddHeaderOption("$SSL_SceneManipulation")
-	AddKeyMapOptionST("RealignActors","$SSL_RealignActors", Config.kRealignActors)
-	AddKeyMapOptionST("EndAnimation", "$SSL_EndAnimation", Config.kEndAnimation)
-	AddKeyMapOptionST("AdvanceAnimation", "$SSL_AdvanceAnimationStage", Config.kAdvanceAnimation)
-	AddKeyMapOptionST("ChangeAnimation", "$SSL_ChangeAnimationSet", Config.kChangeAnimation)
-	AddKeyMapOptionST("ChangePositions", "$SSL_SwapActorPositions", Config.kChangePositions)
-	AddKeyMapOptionST("MoveSceneLocation", "$SSL_MoveSceneLocation", Config.kMoveScene)
+	AddKeyMapOptionST("RealignActors","$SSL_RealignActors", Config.RealignActors)
+	AddKeyMapOptionST("EndAnimation", "$SSL_EndAnimation", Config.EndAnimation)
+	AddKeyMapOptionST("AdvanceAnimation", "$SSL_AdvanceAnimationStage", Config.AdvanceAnimation)
+	AddKeyMapOptionST("ChangeAnimation", "$SSL_ChangeAnimationSet", Config.ChangeAnimation)
+	AddKeyMapOptionST("ChangePositions", "$SSL_SwapActorPositions", Config.ChangePositions)
+	AddKeyMapOptionST("MoveSceneLocation", "$SSL_MoveSceneLocation", Config.MoveScene)
 
 	SetCursorPosition(1)
 	AddHeaderOption("$SSL_AlignmentAdjustments")
-	AddKeyMapOptionST("BackwardsModifier", "$SSL_ReverseDirectionModifier", Config.kBackwards)
-	AddKeyMapOptionST("AdjustStage","$SSL_AdjustStage", Config.kAdjustStage)
-	AddKeyMapOptionST("AdjustChange","$SSL_ChangeActorBeingMoved", Config.kAdjustChange)
-	AddKeyMapOptionST("AdjustForward","$SSL_MoveActorForwardBackward", Config.kAdjustForward)
-	AddKeyMapOptionST("AdjustUpward","$SSL_AdjustPositionUpwardDownward", Config.kAdjustUpward)
-	AddKeyMapOptionST("AdjustSideways","$SSL_MoveActorLeftRight", Config.kAdjustSideways)
-	AddKeyMapOptionST("RotateScene", "$SSL_RotateScene", Config.kRotateScene)
-	AddKeyMapOptionST("RestoreOffsets","$SSL_DeleteSavedAdjustments", Config.kRestoreOffsets)
+	AddKeyMapOptionST("BackwardsModifier", "$SSL_ReverseDirectionModifier", Config.Backwards)
+	AddKeyMapOptionST("AdjustStage","$SSL_AdjustStage", Config.AdjustStage)
+	AddKeyMapOptionST("AdjustChange","$SSL_ChangeActorBeingMoved", Config.AdjustChange)
+	AddKeyMapOptionST("AdjustForward","$SSL_MoveActorForwardBackward", Config.AdjustForward)
+	AddKeyMapOptionST("AdjustUpward","$SSL_AdjustPositionUpwardDownward", Config.AdjustUpward)
+	AddKeyMapOptionST("AdjustSideways","$SSL_MoveActorLeftRight", Config.AdjustSideways)
+	AddKeyMapOptionST("RotateScene", "$SSL_RotateScene", Config.RotateScene)
+	AddKeyMapOptionST("RestoreOffsets","$SSL_DeleteSavedAdjustments", Config.RestoreOffsets)
 endFunction
 
 bool function KeyConflict(int newKeyCode, string conflictControl, string conflictName)
@@ -406,13 +409,13 @@ endFunction
 state AdjustStage
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			Config.kAdjustStage = newKeyCode
-			SetKeyMapOptionValueST(Config.kAdjustStage)
+			Config.AdjustStage = newKeyCode
+			SetKeyMapOptionValueST(Config.AdjustStage)
 		endIf
 	endEvent
 	event OnDefaultST()
-		Config.kAdjustStage = 157
-		SetKeyMapOptionValueST(Config.kAdjustStage)
+		Config.AdjustStage = 157
+		SetKeyMapOptionValueST(Config.AdjustStage)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAdjustStage")
@@ -421,13 +424,13 @@ endState
 state AdjustChange
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			Config.kAdjustChange = newKeyCode
-			SetKeyMapOptionValueST(Config.kAdjustChange)
+			Config.AdjustChange = newKeyCode
+			SetKeyMapOptionValueST(Config.AdjustChange)
 		endIf
 	endEvent
 	event OnDefaultST()
-		Config.kAdjustChange = 37
-		SetKeyMapOptionValueST(Config.kAdjustChange)
+		Config.AdjustChange = 37
+		SetKeyMapOptionValueST(Config.AdjustChange)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAdjustChange")
@@ -436,13 +439,13 @@ endState
 state AdjustForward
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			Config.kAdjustForward = newKeyCode
-			SetKeyMapOptionValueST(Config.kAdjustForward)
+			Config.AdjustForward = newKeyCode
+			SetKeyMapOptionValueST(Config.AdjustForward)
 		endIf
 	endEvent
 	event OnDefaultST()
-		Config.kAdjustForward = 38
-		SetKeyMapOptionValueST(Config.kAdjustForward)
+		Config.AdjustForward = 38
+		SetKeyMapOptionValueST(Config.AdjustForward)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAdjustForward")
@@ -451,13 +454,13 @@ endState
 state AdjustUpward
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			Config.kAdjustUpward = newKeyCode
-			SetKeyMapOptionValueST(Config.kAdjustUpward)
+			Config.AdjustUpward = newKeyCode
+			SetKeyMapOptionValueST(Config.AdjustUpward)
 		endIf
 	endEvent
 	event OnDefaultST()
-		Config.kAdjustUpward = 39
-		SetKeyMapOptionValueST(Config.kAdjustUpward)
+		Config.AdjustUpward = 39
+		SetKeyMapOptionValueST(Config.AdjustUpward)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAdjustUpward")
@@ -466,13 +469,13 @@ endState
 state AdjustSideways
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			Config.kAdjustSideways = newKeyCode
-			SetKeyMapOptionValueST(Config.kAdjustSideways)
+			Config.AdjustSideways = newKeyCode
+			SetKeyMapOptionValueST(Config.AdjustSideways)
 		endIf
 	endEvent
 	event OnDefaultST()
-		Config.kAdjustSideways = 40
-		SetKeyMapOptionValueST(Config.kAdjustSideways)
+		Config.AdjustSideways = 40
+		SetKeyMapOptionValueST(Config.AdjustSideways)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAdjustSideways")
@@ -481,13 +484,13 @@ endState
 state RotateScene
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			Config.kRotateScene = newKeyCode
-			SetKeyMapOptionValueST(Config.kRotateScene)
+			Config.RotateScene = newKeyCode
+			SetKeyMapOptionValueST(Config.RotateScene)
 		endIf
 	endEvent
 	event OnDefaultST()
-		Config.kRotateScene = 22
-		SetKeyMapOptionValueST(Config.kRotateScene)
+		Config.RotateScene = 22
+		SetKeyMapOptionValueST(Config.RotateScene)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoRotateScene")
@@ -496,13 +499,13 @@ endState
 state RestoreOffsets
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			Config.kRestoreOffsets = newKeyCode
-			SetKeyMapOptionValueST(Config.kRestoreOffsets)
+			Config.RestoreOffsets = newKeyCode
+			SetKeyMapOptionValueST(Config.RestoreOffsets)
 		endIf
 	endEvent
 	event OnDefaultST()
-		Config.kRestoreOffsets = 12
-		SetKeyMapOptionValueST(Config.kRestoreOffsets)
+		Config.RestoreOffsets = 12
+		SetKeyMapOptionValueST(Config.RestoreOffsets)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoRestoreOffsets")
@@ -512,13 +515,13 @@ endState
 state RealignActors
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			Config.kRealignActors = newKeyCode
-			SetKeyMapOptionValueST(Config.kRealignActors)
+			Config.RealignActors = newKeyCode
+			SetKeyMapOptionValueST(Config.RealignActors)
 		endIf
 	endEvent
 	event OnDefaultST()
-		Config.kRealignActors = 26
-		SetKeyMapOptionValueST(Config.kRealignActors)
+		Config.RealignActors = 26
+		SetKeyMapOptionValueST(Config.RealignActors)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoRealignActors")
@@ -527,13 +530,13 @@ endState
 state AdvanceAnimation
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			Config.kAdvanceAnimation = newKeyCode
-			SetKeyMapOptionValueST(Config.kAdvanceAnimation)
+			Config.AdvanceAnimation = newKeyCode
+			SetKeyMapOptionValueST(Config.AdvanceAnimation)
 		endIf
 	endEvent
 	event OnDefaultST()
-		Config.kAdvanceAnimation = 57
-		SetKeyMapOptionValueST(Config.kAdvanceAnimation)
+		Config.AdvanceAnimation = 57
+		SetKeyMapOptionValueST(Config.AdvanceAnimation)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAdvanceAnimation")
@@ -542,13 +545,13 @@ endState
 state ChangeAnimation
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			Config.kChangeAnimation = newKeyCode
-			SetKeyMapOptionValueST(Config.kChangeAnimation)
+			Config.ChangeAnimation = newKeyCode
+			SetKeyMapOptionValueST(Config.ChangeAnimation)
 		endIf
 	endEvent
 	event OnDefaultST()
-		Config.kChangeAnimation = 24
-		SetKeyMapOptionValueST(Config.kChangeAnimation)
+		Config.ChangeAnimation = 24
+		SetKeyMapOptionValueST(Config.ChangeAnimation)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoChangeAnimation")
@@ -557,13 +560,13 @@ endState
 state ChangePositions
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			Config.kChangePositions = newKeyCode
-			SetKeyMapOptionValueST(Config.kChangePositions)
+			Config.ChangePositions = newKeyCode
+			SetKeyMapOptionValueST(Config.ChangePositions)
 		endIf
 	endEvent
 	event OnDefaultST()
-		Config.kChangePositions = 13
-		SetKeyMapOptionValueST(Config.kChangePositions)
+		Config.ChangePositions = 13
+		SetKeyMapOptionValueST(Config.ChangePositions)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoChangePositions")
@@ -572,13 +575,13 @@ endState
 state MoveSceneLocation
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			Config.kMoveScene = newKeyCode
-			SetKeyMapOptionValueST(Config.kMoveScene)
+			Config.MoveScene = newKeyCode
+			SetKeyMapOptionValueST(Config.MoveScene)
 		endIf
 	endEvent
 	event OnDefaultST()
-		Config.kMoveScene = 27
-		SetKeyMapOptionValueST(Config.kMoveScene)
+		Config.MoveScene = 27
+		SetKeyMapOptionValueST(Config.MoveScene)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoMoveScene")
@@ -587,13 +590,13 @@ endState
 state BackwardsModifier
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			Config.kBackwards = newKeyCode
-			SetKeyMapOptionValueST(Config.kBackwards)
+			Config.Backwards = newKeyCode
+			SetKeyMapOptionValueST(Config.Backwards)
 		endIf
 	endEvent
 	event OnDefaultST()
-		Config.kBackwards = 54
-		SetKeyMapOptionValueST(Config.kBackwards)
+		Config.Backwards = 54
+		SetKeyMapOptionValueST(Config.Backwards)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoBackwards")
@@ -602,13 +605,13 @@ endState
 state EndAnimation
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			Config.kEndAnimation = newKeyCode
-			SetKeyMapOptionValueST(Config.kEndAnimation)
+			Config.EndAnimation = newKeyCode
+			SetKeyMapOptionValueST(Config.EndAnimation)
 		endIf
 	endEvent
 	event OnDefaultST()
-		Config.kEndAnimation = 207
-		SetKeyMapOptionValueST(Config.kEndAnimation)
+		Config.EndAnimation = 207
+		SetKeyMapOptionValueST(Config.EndAnimation)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoEndAnimation")
@@ -617,17 +620,17 @@ endState
 state TargetActor
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			Config.UnregisterForKey(Config.kTargetActor)
-			Config.kTargetActor = newKeyCode
-			Config.RegisterForKey(Config.kTargetActor)
-			SetKeyMapOptionValueST(Config.kTargetActor)
+			Config.UnregisterForKey(Config.TargetActor)
+			Config.TargetActor = newKeyCode
+			Config.RegisterForKey(Config.TargetActor)
+			SetKeyMapOptionValueST(Config.TargetActor)
 		endIf
 	endEvent
 	event OnDefaultST()
-		Config.UnregisterForKey(Config.kTargetActor)
-		Config.kTargetActor = 49
-		Config.RegisterForKey(Config.kTargetActor)
-		SetKeyMapOptionValueST(Config.kTargetActor)
+		Config.UnregisterForKey(Config.TargetActor)
+		Config.TargetActor = 49
+		Config.RegisterForKey(Config.TargetActor)
+		SetKeyMapOptionValueST(Config.TargetActor)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoTargetActor")
@@ -636,17 +639,17 @@ endState
 state ToggleFreeCamera
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
 		if !KeyConflict(newKeyCode, conflictControl, conflictName)
-			Config.UnregisterForKey(Config.kToggleFreeCamera)
-			Config.kToggleFreeCamera = newKeyCode
-			Config.RegisterForKey(Config.kToggleFreeCamera)
-			SetKeyMapOptionValueST(Config.kToggleFreeCamera)
+			Config.UnregisterForKey(Config.ToggleFreeCamera)
+			Config.ToggleFreeCamera = newKeyCode
+			Config.RegisterForKey(Config.ToggleFreeCamera)
+			SetKeyMapOptionValueST(Config.ToggleFreeCamera)
 		endIf
 	endEvent
 	event OnDefaultST()
-		Config.UnregisterForKey(Config.kToggleFreeCamera)
-		Config.kToggleFreeCamera = 81
-		Config.RegisterForKey(Config.kToggleFreeCamera)
-		SetKeyMapOptionValueST(Config.kToggleFreeCamera)
+		Config.UnregisterForKey(Config.ToggleFreeCamera)
+		Config.ToggleFreeCamera = 81
+		Config.RegisterForKey(Config.ToggleFreeCamera)
+		SetKeyMapOptionValueST(Config.ToggleFreeCamera)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoToggleFreeCamera")
@@ -663,13 +666,13 @@ function SoundSettings()
 
 	; Voices & SFX
 	AddMenuOptionST("PlayerVoice","$SSL_PCVoice", VoiceSlots.GetSavedName(PlayerRef))
-	AddToggleOptionST("NPCSaveVoice","$SSL_NPCSaveVoice", Config.bNPCSaveVoice)
+	AddToggleOptionST("NPCSaveVoice","$SSL_NPCSaveVoice", Config.NPCSaveVoice)
 	AddMenuOptionST("TargetVoice","$SSL_Target{"+TargetName+"}Voice", VoiceSlots.GetSavedName(TargetRef), TargetFlag)
-	AddSliderOptionST("VoiceVolume","$SSL_VoiceVolume", (Config.fVoiceVolume * 100), "{0}%")
-	AddSliderOptionST("SFXVolume","$SSL_SFXVolume", (Config.fSFXVolume * 100), "{0}%")
-	AddSliderOptionST("MaleVoiceDelay","$SSL_MaleVoiceDelay", Config.fMaleVoiceDelay, "$SSL_Seconds")
-	AddSliderOptionST("SFXDelay","$SSL_SFXDelay", Config.fSFXDelay, "$SSL_Seconds")
-	AddSliderOptionST("FemaleVoiceDelay","$SSL_FemaleVoiceDelay", Config.fFemaleVoiceDelay, "$SSL_Seconds")
+	AddSliderOptionST("VoiceVolume","$SSL_VoiceVolume", (Config.VoiceVolume * 100), "{0}%")
+	AddSliderOptionST("SFXVolume","$SSL_SFXVolume", (Config.SFXVolume * 100), "{0}%")
+	AddSliderOptionST("MaleVoiceDelay","$SSL_MaleVoiceDelay", Config.MaleVoiceDelay, "$SSL_Seconds")
+	AddSliderOptionST("SFXDelay","$SSL_SFXDelay", Config.SFXDelay, "$SSL_Seconds")
+	AddSliderOptionST("FemaleVoiceDelay","$SSL_FemaleVoiceDelay", Config.FemaleVoiceDelay, "$SSL_Seconds")
 
 	; Toggle Voices
 	AddHeaderOption("$SSL_ToggleVoices")
@@ -716,7 +719,7 @@ function AnimationEditor()
 
 	string Profile
 	if AdjustKey != "Global"
-		string[] RaceIDs = sslUtility.ArgString(AdjustKey, ".")
+		string[] RaceIDs = ArgString(AdjustKey, ".")
 		string id = StringUtil.Substring(RaceIDs[Position], 0, (StringUtil.GetLength(RaceIDs[Position]) - 1))
 		Race RaceRef = Race.GetRace(id)
 		if RaceRef != none
@@ -778,7 +781,7 @@ endState
 
 state AnimationPosition
 	event OnMenuOpenST()
-		string[] Positions = sslUtility.StringArray(Animation.PositionCount)
+		string[] Positions = StringArray(Animation.PositionCount)
 		int i = Positions.Length
 		while i
 			i -= 1
@@ -846,7 +849,7 @@ state AnimationTest
 				endIf
 			; Add player and target
 			elseIf Animation.PositionCount == 2 && TargetRef != none
-				Actor[] Positions = sslUtility.MakeActorArray(PlayerRef, TargetRef)
+				Actor[] Positions = MakeActorArray(PlayerRef, TargetRef)
 				Positions = ThreadLib.SortActors(Positions)
 				Thread.AddActor(Positions[0])
 				Thread.AddActor(Positions[1])
@@ -936,9 +939,9 @@ function ToggleExpressions()
 	SetCursorFillMode(LEFT_TO_RIGHT)
 
 	int flag = 0x00
-	if !Config.bUseExpressions
+	if !Config.UseExpressions
 		AddHeaderOption("$SSL_ExpressionsDisabled")
-		AddToggleOptionST("UseExpressions","$SSL_UseExpressions", Config.bUseExpressions)
+		AddToggleOptionST("UseExpressions","$SSL_UseExpressions", Config.UseExpressions)
 		flag = OPTION_FLAG_DISABLED
 	endIf
 
@@ -1426,32 +1429,32 @@ endFunction
 
 float[] function GetTimers()
 	if ts == 1
-		return Config.fStageTimerLeadIn
+		return Config.StageTimerLeadIn
 	elseIf ts == 2
-		return Config.fStageTimerAggr
+		return Config.StageTimerAggr
 	else
-		return Config.fStageTimer
+		return Config.StageTimer
 	endIf
 endFunction
 
 bool[] function GetStripping(int type)
 	if ts == 1
 		if type == 1
-			return Config.bStripLeadInFemale
+			return Config.StripLeadInFemale
 		else
-			return Config.bStripLeadInMale
+			return Config.StripLeadInMale
 		endIf
 	elseIf ts == 2
 		if type == 1
-			return Config.bStripVictim
+			return Config.StripVictim
 		else
-			return Config.bStripAggressor
+			return Config.StripAggressor
 		endIf
 	else
 		if type == 1
-			return Config.bStripFemale
+			return Config.StripFemale
 		else
-			return Config.bStripMale
+			return Config.StripMale
 		endIf
 	endIf
 endFunction
@@ -1579,6 +1582,12 @@ event OnConfigOpen()
 		TargetFlag = OPTION_FLAG_DISABLED
 		Config.TargetRef = none
 	endIf
+
+	; Animation Settings
+	Chances = new string[3]
+	Chances[0] = "$SSL_Never"
+	Chances[1] = "$SSL_Sometimes"
+	Chances[2] = "$SSL_Always"
 
 	; Animation Editor
 
@@ -1710,12 +1719,12 @@ endEvent
 
 state AutoAdvance
 	event OnSelectST()
-		Config.bAutoAdvance = !Config.bAutoAdvance
-		SetToggleOptionValueST(Config.bAutoAdvance)
+		Config.AutoAdvance = !Config.AutoAdvance
+		SetToggleOptionValueST(Config.AutoAdvance)
 	endEvent
 	event OnDefaultST()
-		Config.bAutoAdvance = false
-		SetToggleOptionValueST(Config.bAutoAdvance)
+		Config.AutoAdvance = false
+		SetToggleOptionValueST(Config.AutoAdvance)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAutoAdvance")
@@ -1723,12 +1732,12 @@ state AutoAdvance
 endState
 state DisableVictim
 	event OnSelectST()
-		Config.bDisablePlayer = !Config.bDisablePlayer
-		SetToggleOptionValueST(Config.bDisablePlayer)
+		Config.DisablePlayer = !Config.DisablePlayer
+		SetToggleOptionValueST(Config.DisablePlayer)
 	endEvent
 	event OnDefaultST()
-		Config.bDisablePlayer = false
-		SetToggleOptionValueST(Config.bDisablePlayer)
+		Config.DisablePlayer = false
+		SetToggleOptionValueST(Config.DisablePlayer)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoDisablePlayer")
@@ -1736,12 +1745,12 @@ state DisableVictim
 endState
 state AutomaticTFC
 	event OnSelectST()
-		Config.bAutoTFC = !Config.bAutoTFC
-		SetToggleOptionValueST(Config.bAutoTFC)
+		Config.AutoTFC = !Config.AutoTFC
+		SetToggleOptionValueST(Config.AutoTFC)
 	endEvent
 	event OnDefaultST()
-		Config.bAutoTFC = false
-		SetToggleOptionValueST(Config.bAutoTFC)
+		Config.AutoTFC = false
+		SetToggleOptionValueST(Config.AutoTFC)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAutomaticTFC")
@@ -1749,18 +1758,18 @@ state AutomaticTFC
 endState
 state AutomaticSUCSM
 	event OnSliderOpenST()
-		SetSliderDialogStartValue(Config.fAutoSUCSM)
+		SetSliderDialogStartValue(Config.AutoSUCSM)
 		SetSliderDialogDefaultValue(3.0)
 		SetSliderDialogRange(1.0, 20.0)
 		SetSliderDialogInterval(1.0)
 	endEvent
 	event OnSliderAcceptST(float value)
-		Config.fAutoSUCSM = value
-		SetSliderOptionValueST(Config.fAutoSUCSM, "{0}")
+		Config.AutoSUCSM = value
+		SetSliderOptionValueST(Config.AutoSUCSM, "{0}")
 	endEvent
 	event OnDefaultST()
-		Config.fAutoSUCSM = 5.0
-		SetToggleOptionValueST(Config.fAutoSUCSM, "{0}")
+		Config.AutoSUCSM = 5.0
+		SetToggleOptionValueST(Config.AutoSUCSM, "{0}")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAutomaticSUCSM")
@@ -1769,12 +1778,12 @@ endState
 
 state UseExpressions
 	event OnSelectST()
-		Config.bUseExpressions = !Config.bUseExpressions
-		SetToggleOptionValueST(Config.bUseExpressions)
+		Config.UseExpressions = !Config.UseExpressions
+		SetToggleOptionValueST(Config.UseExpressions)
 	endEvent
 	event OnDefaultST()
-		Config.bUseExpressions = false
-		SetToggleOptionValueST(Config.bUseExpressions)
+		Config.UseExpressions = false
+		SetToggleOptionValueST(Config.UseExpressions)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoUseExpressions")
@@ -1782,12 +1791,12 @@ state UseExpressions
 endState
 state UseLipSync
 	event OnSelectST()
-		Config.bUseLipSync = !Config.bUseLipSync
-		SetToggleOptionValueST(Config.bUseLipSync)
+		Config.UseLipSync = !Config.UseLipSync
+		SetToggleOptionValueST(Config.UseLipSync)
 	endEvent
 	event OnDefaultST()
-		Config.bUseLipSync = false
-		SetToggleOptionValueST(Config.bUseLipSync)
+		Config.UseLipSync = false
+		SetToggleOptionValueST(Config.UseLipSync)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoUseLipSync")
@@ -1795,12 +1804,12 @@ state UseLipSync
 endState
 state ReDressVictim
 	event OnSelectST()
-		Config.bReDressVictim = !Config.bReDressVictim
-		SetToggleOptionValueST(Config.bReDressVictim)
+		Config.RedressVictim = !Config.RedressVictim
+		SetToggleOptionValueST(Config.RedressVictim)
 	endEvent
 	event OnDefaultST()
-		Config.bReDressVictim = true
-		SetToggleOptionValueST(Config.bReDressVictim)
+		Config.RedressVictim = true
+		SetToggleOptionValueST(Config.RedressVictim)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoReDressVictim")
@@ -1808,12 +1817,12 @@ state ReDressVictim
 endState
 state UseCum
 	event OnSelectST()
-		Config.bUseCum = !Config.bUseCum
-		SetToggleOptionValueST(Config.bUseCum)
+		Config.UseCum = !Config.UseCum
+		SetToggleOptionValueST(Config.UseCum)
 	endEvent
 	event OnDefaultST()
-		Config.bUseCum = true
-		SetToggleOptionValueST(Config.bUseCum)
+		Config.UseCum = true
+		SetToggleOptionValueST(Config.UseCum)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoUseCum")
@@ -1821,12 +1830,12 @@ state UseCum
 endState
 state AllowFemaleFemaleCum
 	event OnSelectST()
-		Config.bAllowFFCum = !Config.bAllowFFCum
-		SetToggleOptionValueST(Config.bAllowFFCum)
+		Config.AllowFFCum = !Config.AllowFFCum
+		SetToggleOptionValueST(Config.AllowFFCum)
 	endEvent
 	event OnDefaultST()
-		Config.bAllowFFCum = false
-		SetToggleOptionValueST(Config.bAllowFFCum)
+		Config.AllowFFCum = false
+		SetToggleOptionValueST(Config.AllowFFCum)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAllowFFCum")
@@ -1834,18 +1843,18 @@ state AllowFemaleFemaleCum
 endState
 state CumEffectTimer
 	event OnSliderOpenST()
-		SetSliderDialogStartValue(Config.fCumTimer)
+		SetSliderDialogStartValue(Config.CumTimer)
 		SetSliderDialogDefaultValue(120.0)
 		SetSliderDialogRange(5.0, 900.0)
 		SetSliderDialogInterval(5.0)
 	endEvent
 	event OnSliderAcceptST(float value)
-		Config.fCumTimer = value
-		SetSliderOptionValueST(Config.fCumTimer, "$SSL_Seconds")
+		Config.CumTimer = value
+		SetSliderOptionValueST(Config.CumTimer, "$SSL_Seconds")
 	endEvent
 	event OnDefaultST()
-		Config.fCumTimer = 120.0
-		SetToggleOptionValueST(Config.fCumTimer, "$SSL_Seconds")
+		Config.CumTimer = 120.0
+		SetToggleOptionValueST(Config.CumTimer, "$SSL_Seconds")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoCumTimer")
@@ -1853,12 +1862,12 @@ state CumEffectTimer
 endState
 state OrgasmEffects
 	event OnSelectST()
-		Config.bOrgasmEffects = !Config.bOrgasmEffects
-		SetToggleOptionValueST(Config.bOrgasmEffects)
+		Config.OrgasmEffects = !Config.OrgasmEffects
+		SetToggleOptionValueST(Config.OrgasmEffects)
 	endEvent
 	event OnDefaultST()
-		Config.bOrgasmEffects = true
-		SetToggleOptionValueST(Config.bOrgasmEffects)
+		Config.OrgasmEffects = true
+		SetToggleOptionValueST(Config.OrgasmEffects)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoOrgasmEffects")
@@ -1867,12 +1876,12 @@ endState
 
 state AllowCreatures
 	event OnSelectST()
-		Config.bAllowCreatures = !Config.bAllowCreatures
-		SetToggleOptionValueST(Config.bAllowCreatures)
+		Config.AllowCreatures = !Config.AllowCreatures
+		SetToggleOptionValueST(Config.AllowCreatures)
 	endEvent
 	event OnDefaultST()
-		Config.bAllowCreatures = false
-		SetToggleOptionValueST(Config.bAllowCreatures)
+		Config.AllowCreatures = false
+		SetToggleOptionValueST(Config.AllowCreatures)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAllowCreatures")
@@ -1880,12 +1889,12 @@ state AllowCreatures
 endState
 state RagdollEnd
 	event OnSelectST()
-		Config.bRagdollEnd = !Config.bRagdollEnd
-		SetToggleOptionValueST(Config.bRagdollEnd)
+		Config.RagdollEnd = !Config.RagdollEnd
+		SetToggleOptionValueST(Config.RagdollEnd)
 	endEvent
 	event OnDefaultST()
-		Config.bRagdollEnd = false
-		SetToggleOptionValueST(Config.bRagdollEnd)
+		Config.RagdollEnd = false
+		SetToggleOptionValueST(Config.RagdollEnd)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoRagdollEnd")
@@ -1893,12 +1902,12 @@ state RagdollEnd
 endState
 state ForeplayStage
 	event OnSelectST()
-		Config.bForeplayStage = !Config.bForeplayStage
-		SetToggleOptionValueST(Config.bForeplayStage)
+		Config.ForeplayStage = !Config.ForeplayStage
+		SetToggleOptionValueST(Config.ForeplayStage)
 	endEvent
 	event OnDefaultST()
-		Config.bForeplayStage = true
-		SetToggleOptionValueST(Config.bForeplayStage)
+		Config.ForeplayStage = true
+		SetToggleOptionValueST(Config.ForeplayStage)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoForeplayStage")
@@ -1906,12 +1915,12 @@ state ForeplayStage
 endState
 state ScaleActors
 	event OnSelectST()
-		Config.bScaleActors = !Config.bScaleActors
-		SetToggleOptionValueST(Config.bScaleActors)
+		Config.ScaleActors = !Config.ScaleActors
+		SetToggleOptionValueST(Config.ScaleActors)
 	endEvent
 	event OnDefaultST()
-		Config.bScaleActors = true
-		SetToggleOptionValueST(Config.bScaleActors)
+		Config.ScaleActors = true
+		SetToggleOptionValueST(Config.ScaleActors)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoScaleActors")
@@ -1919,12 +1928,12 @@ state ScaleActors
 endState
 state RestrictAggressive
 	event OnSelectST()
-		Config.bRestrictAggressive = !Config.bRestrictAggressive
-		SetToggleOptionValueST(Config.bRestrictAggressive)
+		Config.RestrictAggressive = !Config.RestrictAggressive
+		SetToggleOptionValueST(Config.RestrictAggressive)
 	endEvent
 	event OnDefaultST()
-		Config.bRestrictAggressive = true
-		SetToggleOptionValueST(Config.bRestrictAggressive)
+		Config.RestrictAggressive = true
+		SetToggleOptionValueST(Config.RestrictAggressive)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoRestrictAggressive")
@@ -1932,12 +1941,12 @@ state RestrictAggressive
 endState
 state UndressAnimation
 	event OnSelectST()
-		Config.bUndressAnimation = !Config.bUndressAnimation
-		SetToggleOptionValueST(Config.bUndressAnimation)
+		Config.UndressAnimation = !Config.UndressAnimation
+		SetToggleOptionValueST(Config.UndressAnimation)
 	endEvent
 	event OnDefaultST()
-		Config.bUndressAnimation = false
-		SetToggleOptionValueST(Config.bUndressAnimation)
+		Config.UndressAnimation = false
+		SetToggleOptionValueST(Config.UndressAnimation)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoUndressAnimation")
@@ -1945,12 +1954,12 @@ state UndressAnimation
 endState
 state StraponsFemale
 	event OnSelectST()
-		Config.bUseStrapons = !Config.bUseStrapons
-		SetToggleOptionValueST(Config.bUseStrapons)
+		Config.UseStrapons = !Config.UseStrapons
+		SetToggleOptionValueST(Config.UseStrapons)
 	endEvent
 	event OnDefaultST()
-		Config.bUseStrapons = true
-		SetToggleOptionValueST(Config.bUseStrapons)
+		Config.UseStrapons = true
+		SetToggleOptionValueST(Config.UseStrapons)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoUseStrapons")
@@ -1958,12 +1967,12 @@ state StraponsFemale
 endState
 state NudeSuitMales
 	event OnSelectST()
-		Config.bUseMaleNudeSuit = !Config.bUseMaleNudeSuit
-		SetToggleOptionValueST(Config.bUseMaleNudeSuit)
+		Config.UseMaleNudeSuit = !Config.UseMaleNudeSuit
+		SetToggleOptionValueST(Config.UseMaleNudeSuit)
 	endEvent
 	event OnDefaultST()
-		Config.bUseMaleNudeSuit = false
-		SetToggleOptionValueST(Config.bUseMaleNudeSuit)
+		Config.UseMaleNudeSuit = false
+		SetToggleOptionValueST(Config.UseMaleNudeSuit)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoMaleNudeSuit")
@@ -1971,12 +1980,12 @@ state NudeSuitMales
 endState
 state NudeSuitFemales
 	event OnSelectST()
-		Config.bUseFemaleNudeSuit = !Config.bUseFemaleNudeSuit
-		SetToggleOptionValueST(Config.bUseFemaleNudeSuit)
+		Config.UseFemaleNudeSuit = !Config.UseFemaleNudeSuit
+		SetToggleOptionValueST(Config.UseFemaleNudeSuit)
 	endEvent
 	event OnDefaultST()
-		Config.bUseFemaleNudeSuit = false
-		SetToggleOptionValueST(Config.bUseFemaleNudeSuit)
+		Config.UseFemaleNudeSuit = false
+		SetToggleOptionValueST(Config.UseFemaleNudeSuit)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoFemaleNudeSuit")
@@ -1984,18 +1993,12 @@ state NudeSuitFemales
 endState
 state NPCBed
 	event OnSelectST()
-		if Config.sNPCBed == "$SSL_Never"
-			Config.sNPCBed = "$SSL_Sometimes"
-		elseif Config.sNPCBed == "$SSL_Sometimes"
-			Config.sNPCBed = "$SSL_Always"
-		else
-			Config.sNPCBed = "$SSL_Never"
-		endIf
-		SetTextOptionValueST(Config.sNPCBed)
+		Config.NPCBed = IndexTravel(Config.NPCBed, 3)
+		SetTextOptionValueST(Chances[Config.NPCBed])
 	endEvent
 	event OnDefaultST()
-		Config.sNPCBed = "$SSL_Never"
-		SetTextOptionValueST(Config.sNPCBed)
+		Config.NPCBed = 0
+		SetTextOptionValueST(Chances[Config.NPCBed])
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoNPCBed")
@@ -2004,7 +2007,7 @@ endState
 state PlayerVoice
 	event OnMenuOpenST()
 		int i = VoiceSlots.Slotted
-		string[] VoiceNames = sslUtility.StringArray(i + 1)
+		string[] VoiceNames = StringArray(i + 1)
 		VoiceNames[0] = "$SSL_Random"
 		while i
 			i -= 1
@@ -2035,7 +2038,7 @@ endState
 state TargetVoice
 	event OnMenuOpenST()
 		int i = VoiceSlots.Slotted
-		string[] VoiceNames = sslUtility.StringArray(i + 1)
+		string[] VoiceNames = StringArray(i + 1)
 		VoiceNames[0] = "$SSL_Random"
 		while i
 			i -= 1
@@ -2065,12 +2068,12 @@ state TargetVoice
 endState
 state NPCSaveVoice
 	event OnSelectST()
-		Config.bNPCSaveVoice = !Config.bNPCSaveVoice
-		SetToggleOptionValueST(Config.bNPCSaveVoice)
+		Config.NPCSaveVoice = !Config.NPCSaveVoice
+		SetToggleOptionValueST(Config.NPCSaveVoice)
 	endEvent
 	event OnDefaultST()
-		Config.bNPCSaveVoice = false
-		SetToggleOptionValueST(Config.bNPCSaveVoice)
+		Config.NPCSaveVoice = false
+		SetToggleOptionValueST(Config.NPCSaveVoice)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoNPCSaveVoice")
@@ -2078,19 +2081,19 @@ state NPCSaveVoice
 endState
 state SFXVolume
 	event OnSliderOpenST()
-		SetSliderDialogStartValue((Config.fSFXVolume * 100))
+		SetSliderDialogStartValue((Config.SFXVolume * 100))
 		SetSliderDialogDefaultValue(100)
 		SetSliderDialogRange(1, 100)
 		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
-		Config.fSFXVolume = (value / 100.0)
-		Config.AudioSFX.SetVolume(Config.fSFXVolume)
+		Config.SFXVolume = (value / 100.0)
+		Config.AudioSFX.SetVolume(Config.SFXVolume)
 		SetSliderOptionValueST(value, "{0}%")
 	endEvent
 	event OnDefaultST()
-		Config.fSFXVolume = 1.0
-		SetSliderOptionValueST(Config.fSFXVolume, "{0}%")
+		Config.SFXVolume = 1.0
+		SetSliderOptionValueST(Config.SFXVolume, "{0}%")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoSFXVolume")
@@ -2098,19 +2101,19 @@ state SFXVolume
 endState
 state VoiceVolume
 	event OnSliderOpenST()
-		SetSliderDialogStartValue((Config.fVoiceVolume * 100))
+		SetSliderDialogStartValue((Config.VoiceVolume * 100))
 		SetSliderDialogDefaultValue(100)
 		SetSliderDialogRange(1, 100)
 		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
-		Config.fVoiceVolume = (value / 100.0)
-		Config.AudioVoice.SetVolume(Config.fVoiceVolume)
+		Config.VoiceVolume = (value / 100.0)
+		Config.AudioVoice.SetVolume(Config.VoiceVolume)
 		SetSliderOptionValueST(value, "{0}%")
 	endEvent
 	event OnDefaultST()
-		Config.fVoiceVolume = 1.0
-		SetSliderOptionValueST(Config.fVoiceVolume, "{0}%")
+		Config.VoiceVolume = 1.0
+		SetSliderOptionValueST(Config.VoiceVolume, "{0}%")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoVoiceVolume")
@@ -2118,18 +2121,18 @@ state VoiceVolume
 endState
 state SFXDelay
 	event OnSliderOpenST()
-		SetSliderDialogStartValue(Config.fSFXDelay)
+		SetSliderDialogStartValue(Config.SFXDelay)
 		SetSliderDialogDefaultValue(3)
 		SetSliderDialogRange(1, 30)
 		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
-		Config.fSFXDelay = value
-		SetSliderOptionValueST(Config.fSFXDelay, "$SSL_Seconds")
+		Config.SFXDelay = value
+		SetSliderOptionValueST(Config.SFXDelay, "$SSL_Seconds")
 	endEvent
 	event OnDefaultST()
-		Config.fSFXDelay = 3.0
-		SetSliderOptionValueST(Config.fSFXDelay, "$SSL_Seconds")
+		Config.SFXDelay = 3.0
+		SetSliderOptionValueST(Config.SFXDelay, "$SSL_Seconds")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoSFXDelay")
@@ -2137,18 +2140,18 @@ state SFXDelay
 endState
 state MaleVoiceDelay
 	event OnSliderOpenST()
-		SetSliderDialogStartValue(Config.fMaleVoiceDelay)
+		SetSliderDialogStartValue(Config.MaleVoiceDelay)
 		SetSliderDialogDefaultValue(5)
 		SetSliderDialogRange(1, 45)
 		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
-		Config.fMaleVoiceDelay = value
-		SetSliderOptionValueST(Config.fMaleVoiceDelay, "$SSL_Seconds")
+		Config.MaleVoiceDelay = value
+		SetSliderOptionValueST(Config.MaleVoiceDelay, "$SSL_Seconds")
 	endEvent
 	event OnDefaultST()
-		Config.fMaleVoiceDelay = 5.0
-		SetSliderOptionValueST(Config.fMaleVoiceDelay, "$SSL_Seconds")
+		Config.MaleVoiceDelay = 5.0
+		SetSliderOptionValueST(Config.MaleVoiceDelay, "$SSL_Seconds")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoMaleVoiceDelay")
@@ -2156,18 +2159,18 @@ state MaleVoiceDelay
 endState
 state FemaleVoiceDelay
 	event OnSliderOpenST()
-		SetSliderDialogStartValue(Config.fFemaleVoiceDelay)
+		SetSliderDialogStartValue(Config.FemaleVoiceDelay)
 		SetSliderDialogDefaultValue(4)
 		SetSliderDialogRange(1, 45)
 		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
-		Config.fFemaleVoiceDelay = value
-		SetSliderOptionValueST(Config.fFemaleVoiceDelay, "$SSL_Seconds")
+		Config.FemaleVoiceDelay = value
+		SetSliderOptionValueST(Config.FemaleVoiceDelay, "$SSL_Seconds")
 	endEvent
 	event OnDefaultST()
-		Config.fFemaleVoiceDelay = 4.0
-		SetSliderOptionValueST(Config.fFemaleVoiceDelay, "$SSL_Seconds")
+		Config.FemaleVoiceDelay = 4.0
+		SetSliderOptionValueST(Config.FemaleVoiceDelay, "$SSL_Seconds")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoFemaleVoiceDelay")
@@ -2277,74 +2280,75 @@ endState
 
 function ExportSettings()
 	; Set label of export
-	ExportString("ExportLabel", PlayerRef.GetLeveledActorBase().GetName()+" - "+Utility.GetCurrentRealTime() as int)
+	SetStringValue(self, "ExportLabel", PlayerRef.GetLeveledActorBase().GetName()+" - "+Utility.GetCurrentRealTime() as int)
 
-	; Strings
-	ExportString("sNPCBed", Config.sNPCBed)
+	; ; Strings
+	; ExportString("sNPCBed", Config.sNPCBed)
 
 	; Booleans
-	ExportBool("bRestrictAggressive", Config.bRestrictAggressive)
-	ExportBool("bAllowCreatures", Config.bAllowCreatures)
-	ExportBool("bNPCSaveVoice", Config.bNPCSaveVoice)
-	ExportBool("bUseStrapons", Config.bUseStrapons)
-	ExportBool("bReDressVictim", Config.bReDressVictim)
-	ExportBool("bRagdollEnd", Config.bRagdollEnd)
-	ExportBool("bUseMaleNudeSuit", Config.bUseMaleNudeSuit)
-	ExportBool("bUseFemaleNudeSuit", Config.bUseFemaleNudeSuit)
-	ExportBool("bUndressAnimation", Config.bUndressAnimation)
-	ExportBool("bUseLipSync", Config.bUseLipSync)
-	ExportBool("bUseExpressions", Config.bUseExpressions)
-	ExportBool("bScaleActors", Config.bScaleActors)
-	ExportBool("bUseCum", Config.bUseCum)
-	ExportBool("bAllowFFCum", Config.bAllowFFCum)
-	ExportBool("bDisablePlayer", Config.bDisablePlayer)
-	ExportBool("bAutoTFC", Config.bAutoTFC)
-	ExportBool("bAutoAdvance", Config.bAutoAdvance)
-	ExportBool("bForeplayStage", Config.bForeplayStage)
-	ExportBool("bOrgasmEffects", Config.bOrgasmEffects)
-	ExportBool("bRaceAdjustments", Config.bRaceAdjustments)
+	ExportBool("RestrictAggressive", Config.RestrictAggressive)
+	ExportBool("AllowCreatures", Config.AllowCreatures)
+	ExportBool("NPCSaveVoice", Config.NPCSaveVoice)
+	ExportBool("UseStrapons", Config.UseStrapons)
+	ExportBool("RedressVictim", Config.RedressVictim)
+	ExportBool("RagdollEnd", Config.RagdollEnd)
+	ExportBool("UseMaleNudeSuit", Config.UseMaleNudeSuit)
+	ExportBool("UseFemaleNudeSuit", Config.UseFemaleNudeSuit)
+	ExportBool("UndressAnimation", Config.UndressAnimation)
+	ExportBool("UseLipSync", Config.UseLipSync)
+	ExportBool("UseExpressions", Config.UseExpressions)
+	ExportBool("ScaleActors", Config.ScaleActors)
+	ExportBool("UseCum", Config.UseCum)
+	ExportBool("AllowFFCum", Config.AllowFFCum)
+	ExportBool("DisablePlayer", Config.DisablePlayer)
+	ExportBool("AutoTFC", Config.AutoTFC)
+	ExportBool("AutoAdvance", Config.AutoAdvance)
+	ExportBool("ForeplayStage", Config.ForeplayStage)
+	ExportBool("OrgasmEffects", Config.OrgasmEffects)
+	ExportBool("RaceAdjustments", Config.RaceAdjustments)
 
 	; Integers
-	ExportInt("kBackwards", Config.kBackwards)
-	ExportInt("kAdjustStage", Config.kAdjustStage)
-	ExportInt("kBackwardsAlt", Config.kBackwardsAlt)
-	ExportInt("kAdjustStageAlt", Config.kAdjustStageAlt)
-	ExportInt("kAdvanceAnimation", Config.kAdvanceAnimation)
-	ExportInt("kChangeAnimation", Config.kChangeAnimation)
-	ExportInt("kChangePositions", Config.kChangePositions)
-	ExportInt("kAdjustChange", Config.kAdjustChange)
-	ExportInt("kAdjustForward", Config.kAdjustForward)
-	ExportInt("kAdjustSideways", Config.kAdjustSideways)
-	ExportInt("kAdjustUpward", Config.kAdjustUpward)
-	ExportInt("kRealignActors", Config.kRealignActors)
-	ExportInt("kMoveScene", Config.kMoveScene)
-	ExportInt("kRestoreOffsets", Config.kRestoreOffsets)
-	ExportInt("kRotateScene", Config.kRotateScene)
-	ExportInt("kToggleFreeCamera", Config.kToggleFreeCamera)
-	ExportInt("kEndAnimation", Config.kEndAnimation)
-	ExportInt("AnimProfile", Config.AnimProfile)
+	Config.AnimProfile        = ImportInt("AnimProfile", Config.AnimProfile)
+	Config.NPCBed             = ImportInt("NPCBed", Config.NPCBed)
+
+	Config.Backwards          = ImportInt("Backwards", Config.Backwards)
+	Config.AdjustStage        = ImportInt("AdjustStage", Config.AdjustStage)
+	Config.AdvanceAnimation   = ImportInt("AdvanceAnimation", Config.AdvanceAnimation)
+	Config.ChangeAnimation    = ImportInt("ChangeAnimation", Config.ChangeAnimation)
+	Config.ChangePositions    = ImportInt("ChangePositions", Config.ChangePositions)
+	Config.AdjustChange       = ImportInt("AdjustChange", Config.AdjustChange)
+	Config.AdjustForward      = ImportInt("AdjustForward", Config.AdjustForward)
+	Config.AdjustSideways     = ImportInt("AdjustSideways", Config.AdjustSideways)
+	Config.AdjustUpward       = ImportInt("AdjustUpward", Config.AdjustUpward)
+	Config.RealignActors      = ImportInt("RealignActors", Config.RealignActors)
+	Config.MoveScene          = ImportInt("MoveScene", Config.MoveScene)
+	Config.RestoreOffsets     = ImportInt("RestoreOffsets", Config.RestoreOffsets)
+	Config.RotateScene        = ImportInt("RotateScene", Config.RotateScene)
+	Config.EndAnimation       = ImportInt("EndAnimation", Config.EndAnimation)
+	Config.ToggleFreeCamera   = ImportInt("ToggleFreeCamera", Config.ToggleFreeCamera)
+	Config.TargetActor        = ImportInt("TargetActor", Config.TargetActor)
 
 	; Floats
-	ExportFloat("fCumTimer", Config.fCumTimer)
-	ExportFloat("fAutoSUCSM", Config.fAutoSUCSM)
-	ExportFloat("fMaleVoiceDelay", Config.fMaleVoiceDelay)
-	ExportFloat("fFemaleVoiceDelay", Config.fFemaleVoiceDelay)
-	ExportFloat("fVoiceVolume", Config.fVoiceVolume)
-	ExportFloat("fSFXDelay", Config.fSFXDelay)
-	ExportFloat("fSFXVolume", Config.fSFXVolume)
+	ExportFloat("CumTimer", Config.CumTimer)
+	ExportFloat("AutoSUCSM", Config.AutoSUCSM)
+	ExportFloat("MaleVoiceDelay", Config.MaleVoiceDelay)
+	ExportFloat("FemaleVoiceDelay", Config.FemaleVoiceDelay)
+	ExportFloat("VoiceVolume", Config.VoiceVolume)
+	ExportFloat("SFXDelay", Config.SFXDelay)
+	ExportFloat("SFXVolume", Config.SFXVolume)
 
 	; Boolean Arrays
-	ExportBoolList("bStripMale", Config.bStripMale, 33)
-	ExportBoolList("bStripFemale", Config.bStripFemale, 33)
-	ExportBoolList("bStripLeadInFemale", Config.bStripLeadInFemale, 33)
-	ExportBoolList("bStripLeadInMale", Config.bStripLeadInMale, 33)
-	ExportBoolList("bStripVictim", Config.bStripVictim, 33)
-	ExportBoolList("bStripAggressor", Config.bStripAggressor, 33)
+	ExportBoolList("StripMale", Config.StripMale, 33)
+	ExportBoolList("StripFemale", Config.StripFemale, 33)
+	ExportBoolList("StripLeadInFemale", Config.StripLeadInFemale, 33)
+	ExportBoolList("StripLeadInMale", Config.StripLeadInMale, 33)
+	ExportBoolList("StripVictim", Config.StripVictim, 33)
+	ExportBoolList("StripAggressor", Config.StripAggressor, 33)
 
 	; Float Array
-	ExportFloatList("fStageTimer", Config.fStageTimer, 5)
-	ExportFloatList("fStageTimerLeadIn", Config.fStageTimerLeadIn, 5)
-	ExportFloatList("fStageTimerAggr", Config.fStageTimerAggr, 5)
+	ExportFloatList("StageTimer", Config.StageTimer, 5)
+	ExportFloatList("StageTimerLeadIn", Config.StageTimerLeadIn, 5)
+	ExportFloatList("StageTimerAggr", Config.StageTimerAggr, 5)
 
 	; Export object registry
 	ExportAnimations()
@@ -2360,72 +2364,70 @@ function ImportSettings()
 	; Load JSON file
 	ImportFile("SexLabConfig.json")
 
-	; Strings
-	Config.sNPCBed             = ImportString("sNPCBed", Config.sNPCBed)
-
 	; Booleans
-	Config.bRestrictAggressive = ImportBool("bRestrictAggressive", Config.bRestrictAggressive)
-	Config.bAllowCreatures     = ImportBool("bAllowCreatures", Config.bAllowCreatures)
-	Config.bNPCSaveVoice       = ImportBool("bNPCSaveVoice", Config.bNPCSaveVoice)
-	Config.bUseStrapons        = ImportBool("bUseStrapons", Config.bUseStrapons)
-	Config.bReDressVictim      = ImportBool("bReDressVictim", Config.bReDressVictim)
-	Config.bRagdollEnd         = ImportBool("bRagdollEnd", Config.bRagdollEnd)
-	Config.bUseMaleNudeSuit    = ImportBool("bUseMaleNudeSuit", Config.bUseMaleNudeSuit)
-	Config.bUseFemaleNudeSuit  = ImportBool("bUseFemaleNudeSuit", Config.bUseFemaleNudeSuit)
-	Config.bUndressAnimation   = ImportBool("bUndressAnimation", Config.bUndressAnimation)
-	Config.bUseLipSync         = ImportBool("bUseLipSync", Config.bUseLipSync)
-	Config.bUseExpressions     = ImportBool("bUseExpressions", Config.bUseExpressions)
-	Config.bScaleActors        = ImportBool("bScaleActors", Config.bScaleActors)
-	Config.bUseCum             = ImportBool("bUseCum", Config.bUseCum)
-	Config.bAllowFFCum         = ImportBool("bAllowFFCum", Config.bAllowFFCum)
-	Config.bDisablePlayer      = ImportBool("bDisablePlayer", Config.bDisablePlayer)
-	Config.bAutoTFC            = ImportBool("bAutoTFC", Config.bAutoTFC)
-	Config.bAutoAdvance        = ImportBool("bAutoAdvance", Config.bAutoAdvance)
-	Config.bForeplayStage      = ImportBool("bForeplayStage", Config.bForeplayStage)
-	Config.bOrgasmEffects      = ImportBool("bOrgasmEffects", Config.bOrgasmEffects)
-	Config.bRaceAdjustments    = ImportBool("bRaceAdjustments", Config.bRaceAdjustments)
+	Config.RestrictAggressive = ImportBool("RestrictAggressive", Config.RestrictAggressive)
+	Config.AllowCreatures     = ImportBool("AllowCreatures", Config.AllowCreatures)
+	Config.NPCSaveVoice       = ImportBool("NPCSaveVoice", Config.NPCSaveVoice)
+	Config.UseStrapons        = ImportBool("UseStrapons", Config.UseStrapons)
+	Config.RedressVictim      = ImportBool("RedressVictim", Config.RedressVictim)
+	Config.RagdollEnd         = ImportBool("RagdollEnd", Config.RagdollEnd)
+	Config.UseMaleNudeSuit    = ImportBool("UseMaleNudeSuit", Config.UseMaleNudeSuit)
+	Config.UseFemaleNudeSuit  = ImportBool("UseFemaleNudeSuit", Config.UseFemaleNudeSuit)
+	Config.UndressAnimation   = ImportBool("UndressAnimation", Config.UndressAnimation)
+	Config.UseLipSync         = ImportBool("UseLipSync", Config.UseLipSync)
+	Config.UseExpressions     = ImportBool("UseExpressions", Config.UseExpressions)
+	Config.ScaleActors        = ImportBool("ScaleActors", Config.ScaleActors)
+	Config.UseCum             = ImportBool("UseCum", Config.UseCum)
+	Config.AllowFFCum         = ImportBool("AllowFFCum", Config.AllowFFCum)
+	Config.DisablePlayer      = ImportBool("DisablePlayer", Config.DisablePlayer)
+	Config.AutoTFC            = ImportBool("AutoTFC", Config.AutoTFC)
+	Config.AutoAdvance        = ImportBool("AutoAdvance", Config.AutoAdvance)
+	Config.ForeplayStage      = ImportBool("ForeplayStage", Config.ForeplayStage)
+	Config.OrgasmEffects      = ImportBool("OrgasmEffects", Config.OrgasmEffects)
+	Config.RaceAdjustments    = ImportBool("RaceAdjustments", Config.RaceAdjustments)
 
 	; Integers
-	Config.kBackwards          = ImportInt("kBackwards", Config.kBackwards)
-	Config.kAdjustStage        = ImportInt("kAdjustStage", Config.kAdjustStage)
-	Config.kBackwardsAlt       = ImportInt("kBackwardsAlt", Config.kBackwardsAlt)
-	Config.kAdjustStageAlt     = ImportInt("kAdjustStageAlt", Config.kAdjustStageAlt)
-	Config.kAdvanceAnimation   = ImportInt("kAdvanceAnimation", Config.kAdvanceAnimation)
-	Config.kChangeAnimation    = ImportInt("kChangeAnimation", Config.kChangeAnimation)
-	Config.kChangePositions    = ImportInt("kChangePositions", Config.kChangePositions)
-	Config.kAdjustChange       = ImportInt("kAdjustChange", Config.kAdjustChange)
-	Config.kAdjustForward      = ImportInt("kAdjustForward", Config.kAdjustForward)
-	Config.kAdjustSideways     = ImportInt("kAdjustSideways", Config.kAdjustSideways)
-	Config.kAdjustUpward       = ImportInt("kAdjustUpward", Config.kAdjustUpward)
-	Config.kRealignActors      = ImportInt("kRealignActors", Config.kRealignActors)
-	Config.kMoveScene          = ImportInt("kMoveScene", Config.kMoveScene)
-	Config.kRestoreOffsets     = ImportInt("kRestoreOffsets", Config.kRestoreOffsets)
-	Config.kRotateScene        = ImportInt("kRotateScene", Config.kRotateScene)
-	Config.kToggleFreeCamera   = ImportInt("kToggleFreeCamera", Config.kToggleFreeCamera)
-	Config.kEndAnimation       = ImportInt("kEndAnimation", Config.kEndAnimation)
-	Config.AnimProfile         = ImportInt("AnimProfile", Config.AnimProfile)
+	Config.AnimProfile        = ImportInt("AnimProfile", Config.AnimProfile)
+	Config.NPCBed             = ImportInt("NPCBed", Config.NPCBed)
+
+	Config.Backwards          = ImportInt("Backwards", Config.Backwards)
+	Config.AdjustStage        = ImportInt("AdjustStage", Config.AdjustStage)
+	Config.AdvanceAnimation   = ImportInt("AdvanceAnimation", Config.AdvanceAnimation)
+	Config.ChangeAnimation    = ImportInt("ChangeAnimation", Config.ChangeAnimation)
+	Config.ChangePositions    = ImportInt("ChangePositions", Config.ChangePositions)
+	Config.AdjustChange       = ImportInt("AdjustChange", Config.AdjustChange)
+	Config.AdjustForward      = ImportInt("AdjustForward", Config.AdjustForward)
+	Config.AdjustSideways     = ImportInt("AdjustSideways", Config.AdjustSideways)
+	Config.AdjustUpward       = ImportInt("AdjustUpward", Config.AdjustUpward)
+	Config.RealignActors      = ImportInt("RealignActors", Config.RealignActors)
+	Config.MoveScene          = ImportInt("MoveScene", Config.MoveScene)
+	Config.RestoreOffsets     = ImportInt("RestoreOffsets", Config.RestoreOffsets)
+	Config.RotateScene        = ImportInt("RotateScene", Config.RotateScene)
+	Config.EndAnimation       = ImportInt("EndAnimation", Config.EndAnimation)
+	Config.ToggleFreeCamera   = ImportInt("ToggleFreeCamera", Config.ToggleFreeCamera)
+	Config.TargetActor        = ImportInt("TargetActor", Config.TargetActor)
 
 	; Floats
-	Config.fCumTimer           = ImportFloat("fCumTimer", Config.fCumTimer)
-	Config.fAutoSUCSM          = ImportFloat("fAutoSUCSM", Config.fAutoSUCSM)
-	Config.fMaleVoiceDelay     = ImportFloat("fMaleVoiceDelay", Config.fMaleVoiceDelay)
-	Config.fFemaleVoiceDelay   = ImportFloat("fFemaleVoiceDelay", Config.fFemaleVoiceDelay)
-	Config.fVoiceVolume        = ImportFloat("fVoiceVolume", Config.fVoiceVolume)
-	Config.fSFXDelay           = ImportFloat("fSFXDelay", Config.fSFXDelay)
-	Config.fSFXVolume          = ImportFloat("fSFXVolume", Config.fSFXVolume)
+	Config.CumTimer           = ImportFloat("CumTimer", Config.CumTimer)
+	Config.AutoSUCSM          = ImportFloat("AutoSUCSM", Config.AutoSUCSM)
+	Config.MaleVoiceDelay     = ImportFloat("MaleVoiceDelay", Config.MaleVoiceDelay)
+	Config.FemaleVoiceDelay   = ImportFloat("FemaleVoiceDelay", Config.FemaleVoiceDelay)
+	Config.VoiceVolume        = ImportFloat("VoiceVolume", Config.VoiceVolume)
+	Config.SFXDelay           = ImportFloat("SFXDelay", Config.SFXDelay)
+	Config.SFXVolume          = ImportFloat("SFXVolume", Config.SFXVolume)
 
 	; Boolean Arrays
-	Config.bStripMale          = ImportBoolList("bStripMale", Config.bStripMale, 33)
-	Config.bStripFemale        = ImportBoolList("bStripFemale", Config.bStripFemale, 33)
-	Config.bStripLeadInFemale  = ImportBoolList("bStripLeadInFemale", Config.bStripLeadInFemale, 33)
-	Config.bStripLeadInMale    = ImportBoolList("bStripLeadInMale", Config.bStripLeadInMale, 33)
-	Config.bStripVictim        = ImportBoolList("bStripVictim", Config.bStripVictim, 33)
-	Config.bStripAggressor     = ImportBoolList("bStripAggressor", Config.bStripAggressor, 33)
+	Config.StripMale          = ImportBoolList("StripMale", Config.StripMale, 33)
+	Config.StripFemale        = ImportBoolList("StripFemale", Config.StripFemale, 33)
+	Config.StripLeadInFemale  = ImportBoolList("StripLeadInFemale", Config.StripLeadInFemale, 33)
+	Config.StripLeadInMale    = ImportBoolList("StripLeadInMale", Config.StripLeadInMale, 33)
+	Config.StripVictim        = ImportBoolList("StripVictim", Config.StripVictim, 33)
+	Config.StripAggressor     = ImportBoolList("StripAggressor", Config.StripAggressor, 33)
 
 	; Float Array
-	Config.fStageTimer         = ImportFloatList("fStageTimer", Config.fStageTimer, 5)
-	Config.fStageTimerLeadIn   = ImportFloatList("fStageTimerLeadIn", Config.fStageTimerLeadIn, 5)
-	Config.fStageTimerAggr     = ImportFloatList("fStageTimerAggr", Config.fStageTimerAggr, 5)
+	Config.StageTimer         = ImportFloatList("StageTimer", Config.StageTimer, 5)
+	Config.StageTimerLeadIn   = ImportFloatList("StageTimerLeadIn", Config.StageTimerLeadIn, 5)
+	Config.StageTimerAggr     = ImportFloatList("StageTimerAggr", Config.StageTimerAggr, 5)
 
 	; Export object registry
 	ImportAnimations()
@@ -2434,7 +2436,7 @@ function ImportSettings()
 	ImportVoices()
 
 	; Reload settings with imported values
-	Config.ReloadConfig()
+	Config.Reload()
 endFunction
 
 ; Floats
@@ -2464,16 +2466,6 @@ endFunction
 bool function ImportBool(string Name, bool Value)
 	Value = GetIntValue(self, Name, Value as int) as bool
 	UnsetIntValue(self, Name)
-	return Value
-endFunction
-
-; Strings
-function ExportString(string Name, string Value)
-	SetStringValue(self, Name, Value)
-endFunction
-string function ImportString(string Name, string Value)
-	Value = GetStringValue(self, Name, Value)
-	UnsetStringValue(self, Name)
 	return Value
 endFunction
 
@@ -2526,7 +2518,7 @@ function ExportAnimations()
 	StringListClear(self, "Animations")
 	while i
 		i -= 1
-		StringListAdd(self, "Animations", sslUtility.MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int, Anims[i].HasTag("Foreplay") as int, Anims[i].HasTag("Aggressive") as int))
+		StringListAdd(self, "Animations", MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int, Anims[i].HasTag("Foreplay") as int, Anims[i].HasTag("Aggressive") as int))
 	endWhile
 endfunction
 
@@ -2535,7 +2527,7 @@ function ImportAnimations()
 	while i
 		i -= 1
 		; Registrar, Enabled, Foreplay, Aggressive
-		string[] args = sslUtility.ArgString(StringListGet(self, "Animations", i))
+		string[] args = ArgString(StringListGet(self, "Animations", i))
 		if args.Length == 4 && AnimSlots.FindByRegistrar(args[0]) != -1
 			sslBaseAnimation Slot = AnimSlots.GetbyRegistrar(args[0])
 			Slot.Enabled = (args[1] as int) as bool
@@ -2553,7 +2545,7 @@ function ExportCreatures()
 	StringListClear(self, "Creatures")
 	while i
 		i -= 1
-		StringListAdd(self, "Creatures", sslUtility.MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int))
+		StringListAdd(self, "Creatures", MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int))
 	endWhile
 endFunction
 
@@ -2562,7 +2554,7 @@ function ImportCreatures()
 	while i
 		i -= 1
 		; Registrar, Enabled
-		string[] args = sslUtility.ArgString(StringListGet(self, "Creatures", i))
+		string[] args = ArgString(StringListGet(self, "Creatures", i))
 		if args.Length == 2 && CreatureSlots.FindByRegistrar(args[0]) != -1
 			CreatureSlots.GetbyRegistrar(args[0]).Enabled = (args[1] as int) as bool
 		endIf
@@ -2577,7 +2569,7 @@ function ExportExpressions()
 	StringListClear(self, "Expressions")
 	while i
 		i -= 1
-		StringListAdd(self, "Expressions", sslUtility.MakeArgs(",", Exprs[i].Registry, Exprs[i].HasTag("Consensual") as int, Exprs[i].HasTag("Victim") as int, Exprs[i].HasTag("Aggressor") as int))
+		StringListAdd(self, "Expressions", MakeArgs(",", Exprs[i].Registry, Exprs[i].HasTag("Consensual") as int, Exprs[i].HasTag("Victim") as int, Exprs[i].HasTag("Aggressor") as int))
 	endWhile
 endfunction
 
@@ -2586,7 +2578,7 @@ function ImportExpressions()
 	while i
 		i -= 1
 		; Registrar, Concensual, Victim, Aggressor
-		string[] args = sslUtility.ArgString(StringListGet(self, "Expressions", i))
+		string[] args = ArgString(StringListGet(self, "Expressions", i))
 		if args.Length == 4 && ExpressionSlots.FindByRegistrar(args[0]) != -1
 			sslBaseExpression Slot = ExpressionSlots.GetbyRegistrar(args[0])
 			Slot.AddTagConditional("Consensual", (args[1] as int) as bool)
@@ -2604,10 +2596,10 @@ function ExportVoices()
 	StringListClear(self, "Voices")
 	while i
 		i -= 1
-		StringListAdd(self, "Voices", sslUtility.MakeArgs(",", Voices[i].Registry, Voices[i].Enabled as int))
+		StringListAdd(self, "Voices", MakeArgs(",", Voices[i].Registry, Voices[i].Enabled as int))
 	endWhile
 	; Player voice
-	ExportString("PlayerVoice", VoiceSlots.GetSavedName(PlayerRef))
+	SetStringValue(self, "PlayerVoice", VoiceSlots.GetSavedName(PlayerRef))
 endfunction
 
 function ImportVoices()
@@ -2615,7 +2607,7 @@ function ImportVoices()
 	while i
 		i -= 1
 		; Registrar, Enabled
-		string[] args = sslUtility.ArgString(StringListGet(self, "Voices", i))
+		string[] args = ArgString(StringListGet(self, "Voices", i))
 		if args.Length == 2 && VoiceSlots.FindByRegistrar(args[0]) != -1
 			VoiceSlots.GetbyRegistrar(args[0]).Enabled = (args[1] as int) as bool
 		endIf

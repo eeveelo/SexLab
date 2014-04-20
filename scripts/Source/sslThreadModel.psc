@@ -60,11 +60,11 @@ float[] property Timers hidden
 		if CustomTimers.Length != 0
 			return CustomTimers
 		elseif LeadIn
-			return Config.fStageTimerLeadIn
+			return Config.StageTimerLeadIn
 		elseif IsAggressive
-			return Config.fStageTimerAggr
+			return Config.StageTimerAggr
 		else
-			return Config.fStageTimer
+			return Config.StageTimer
 		endIf
 	endFunction
 endProperty
@@ -241,14 +241,14 @@ state Making
 			Positions = SortCreatures(Positions, PrimaryAnimations[0])
 		; Get default primary animations if none
 		elseIf PrimaryAnimations.Length == 0
-			SetAnimations(AnimSlots.GetByDefault(Males, Females, IsAggressive, (BedRef != none), Config.bRestrictAggressive))
+			SetAnimations(AnimSlots.GetByDefault(Males, Females, IsAggressive, (BedRef != none), Config.RestrictAggressive))
 			if PrimaryAnimations.Length == 0
 				Log("StartThread() - Unable to find valid default animations", "FATAL")
 				return none
 			endIf
 		endIf
 		; Get default foreplay if none and enabled
-		if !HasCreature && !IsAggressive && ActorCount == 2 && !NoLeadIn && LeadAnimations.Length == 0 && Config.bForeplayStage
+		if !HasCreature && !IsAggressive && ActorCount == 2 && !NoLeadIn && LeadAnimations.Length == 0 && Config.ForeplayStage
 			if BedRef != none
 				SetLeadAnimations(AnimSlots.GetByTags(2, "LeadIn", "Standing"))
 			else
@@ -499,7 +499,7 @@ endFunction
 		return false ; Beds forbidden by flag
 	elseIf HasPlayer
 		FoundBed = FindBed(PlayerRef, Radius) ; Check within radius of player
-	elseIf Config.sNPCBed == "$SSL_Always" || (Config.sNPCBed == "$SSL_Sometimes" && (Utility.RandomInt(0, 1) as bool))
+	elseIf Config.NPCBed == 2 || (Config.NPCBed == 1 && (Utility.RandomInt(0, 1) as bool))
 		FoundBed = FindBed(Positions[0], Radius) ; Check within radius of first position, if NPC beds are allowed
 	endIf
 	; Found a bed AND EITHER forced use OR don't care about players choice OR or player approved
@@ -793,7 +793,7 @@ function Action(string FireState)
 endfunction
 
 function UpdateAdjustKey()
-	AdjustKey = Animation.MakeAdjustKey(Positions, Config.bRaceAdjustments)
+	AdjustKey = Animation.MakeAdjustKey(Positions, Config.RaceAdjustments)
 	MiscUtil.PrintConsole(AdjustKey)
 endFunction
 

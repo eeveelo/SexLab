@@ -74,72 +74,72 @@ SoundCategory property AudioVoice auto
 ; --- Config Properties                               --- ;
 ; ------------------------------------------------------- ;
 
-bool property bDisablePlayer auto hidden
-float property fMaleVoiceDelay auto hidden
-float property fFemaleVoiceDelay auto hidden
-float property fVoiceVolume auto hidden
-bool property bScaleActors auto hidden
-bool property bUseCum auto hidden
-bool property bAllowFFCum auto hidden
-float property fCumTimer auto hidden
-bool property bUseStrapons auto hidden
-bool property bReDressVictim auto hidden
-bool property bRagdollEnd auto hidden
-bool property bUseMaleNudeSuit auto hidden
-bool property bUseFemaleNudeSuit auto hidden
-bool property bUndressAnimation auto hidden
-bool property bUseLipSync auto hidden
-bool property bUseExpressions auto hidden
+; Booleans
+bool property RestrictAggressive auto hidden
+bool property AllowCreatures auto hidden
+bool property NPCSaveVoice auto hidden
+bool property UseStrapons auto hidden
+bool property RedressVictim auto hidden
+bool property RagdollEnd auto hidden
+bool property UseMaleNudeSuit auto hidden
+bool property UseFemaleNudeSuit auto hidden
+bool property UndressAnimation auto hidden
+bool property UseLipSync auto hidden
+bool property UseExpressions auto hidden
+bool property ScaleActors auto hidden
+bool property UseCum auto hidden
+bool property AllowFFCum auto hidden
+bool property DisablePlayer auto hidden
+bool property AutoTFC auto hidden
+bool property AutoAdvance auto hidden
+bool property ForeplayStage auto hidden
+bool property OrgasmEffects auto hidden
+bool property RaceAdjustments auto hidden
 
-bool[] property bStripMale auto hidden
-bool[] property bStripFemale auto hidden
-bool[] property bStripLeadInFemale auto hidden
-bool[] property bStripLeadInMale auto hidden
-bool[] property bStripVictim auto hidden
-bool[] property bStripAggressor auto hidden
-
-bool property bRestrictAggressive auto hidden
-bool property bAllowCreatures auto hidden
-
-bool property bNPCSaveVoice auto hidden
-
-int property kBackwards auto hidden ; Right Shift
-int property kAdjustStage auto hidden; Right Ctrl
-
-int property kBackwardsAlt auto hidden ; Left Shift
-int property kAdjustStageAlt auto hidden; Left Ctrl
-
-int property kAdvanceAnimation auto hidden ; Space
-int property kChangeAnimation auto hidden ; O
-int property kChangePositions auto hidden ; =
-int property kAdjustChange auto hidden ; K
-int property kAdjustForward auto hidden ; L
-int property kAdjustSideways auto hidden ; '
-int property kAdjustUpward auto hidden ; ;
-int property kRealignActors auto hidden ; [
-int property kMoveScene auto hidden ; ]
-int property kRestoreOffsets auto hidden ; -
-int property kRotateScene auto hidden ; U
-int property kToggleFreeCamera auto hidden ; NUM 3
-int property kEndAnimation auto hidden ; End
-int property kTargetActor auto hidden ; N
-
-bool property bAutoTFC auto hidden
-float property fAutoSUCSM auto hidden
-
-float property fSFXDelay auto hidden
-float property fSFXVolume auto hidden
-bool property bAutoAdvance auto hidden
-bool property bForeplayStage auto hidden
-bool property bOrgasmEffects auto hidden
-bool property bRaceAdjustments auto hidden
-string property sNPCBed auto hidden
-float[] property fStageTimer auto hidden
-float[] property fStageTimerLeadIn auto hidden
-float[] property fStageTimerAggr auto hidden
-
+; Integers
 int property AnimProfile auto hidden
+int property NPCBed auto hidden
 
+int property Backwards auto hidden
+int property AdjustStage auto hidden
+int property AdvanceAnimation auto hidden
+int property ChangeAnimation auto hidden
+int property ChangePositions auto hidden
+int property AdjustChange auto hidden
+int property AdjustForward auto hidden
+int property AdjustSideways auto hidden
+int property AdjustUpward auto hidden
+int property RealignActors auto hidden
+int property MoveScene auto hidden
+int property RestoreOffsets auto hidden
+int property RotateScene auto hidden
+int property EndAnimation auto hidden
+int property ToggleFreeCamera auto hidden
+int property TargetActor auto hidden
+
+; Floats
+float property CumTimer auto hidden
+float property AutoSUCSM auto hidden
+float property MaleVoiceDelay auto hidden
+float property FemaleVoiceDelay auto hidden
+float property VoiceVolume auto hidden
+float property SFXDelay auto hidden
+float property SFXVolume auto hidden
+
+; Boolean Arrays
+bool[] property StripMale auto hidden
+bool[] property StripFemale auto hidden
+bool[] property StripLeadInFemale auto hidden
+bool[] property StripLeadInMale auto hidden
+bool[] property StripVictim auto hidden
+bool[] property StripAggressor auto hidden
+
+; Float Array
+float[] property StageTimer auto hidden
+float[] property StageTimerLeadIn auto hidden
+float[] property StageTimerAggr auto hidden
+
+; Data
 Actor property TargetRef auto hidden
 Actor CrosshairRef
 
@@ -153,9 +153,9 @@ float function GetVoiceDelay(bool IsFemale = false, int Stage = 1, bool IsSilent
 	endIf
 	float VoiceDelay
 	if IsFemale
-		VoiceDelay = fFemaleVoiceDelay
+		VoiceDelay = FemaleVoiceDelay
 	else
-		VoiceDelay = fMaleVoiceDelay
+		VoiceDelay = MaleVoiceDelay
 	endIf
 	if Stage > 1
 		VoiceDelay -= (Stage * 0.8) + Utility.RandomFloat(-0.4, 0.4)
@@ -169,25 +169,25 @@ endFunction
 bool[] function GetStrip(bool IsFemale, bool IsLeadIn = false, bool IsAggressive = false, bool IsVictim = false)
 	if IsLeadIn
 		if IsFemale
-			return bStripLeadInFemale
+			return StripLeadInFemale
 		else
-			return bStripLeadInMale
+			return StripLeadInMale
 		endIf
  	elseif IsAggressive
  		if IsVictim
- 			return bStripVictim
+ 			return StripVictim
  		else
- 			return bStripAggressor
+ 			return StripAggressor
  		endIf
  	elseIf IsFemale
- 		return bStripFemale
+ 		return StripFemale
  	else
- 		return bStripMale
+ 		return StripMale
  	endIf
 endFunction
 
 bool function UsesNudeSuit(bool IsFemale)
-	return ((!IsFemale && bUseMaleNudeSuit) || (IsFemale && bUseFemaleNudeSuit))
+	return ((!IsFemale && UseMaleNudeSuit) || (IsFemale && UseFemaleNudeSuit))
 endFunction
 
 Form function GetStrapon()
@@ -203,9 +203,9 @@ endFunction
 
 event OnKeyDown(int keyCode)
 	if !Utility.IsInMenuMode() && !UI.IsMenuOpen("Console") && !UI.IsMenuOpen("Loading Menu")
-		if keyCode == kToggleFreeCamera
+		if keyCode == ToggleFreeCamera
 			ToggleFreeCamera()
-		elseIf keyCode == kTargetActor
+		elseIf keyCode == TargetActor
 			SetTargetActor()
 		endIf
 	endIf
@@ -228,68 +228,68 @@ endFunction
 
 function ToggleFreeCamera()
 	if Game.GetCameraState() != 3
-		MiscUtil.SetFreeCameraSpeed(fAutoSUCSM)
+		MiscUtil.SetFreeCameraSpeed(AutoSUCSM)
 	endIf
 	MiscUtil.ToggleFreeCamera()
 endFunction
 
 
 bool function BackwardsPressed()
-	return Input.GetNumKeysPressed() > 1 && (Input.IsKeyPressed(kBackwards) || (kBackwards == 54 && Input.IsKeyPressed(42)) || (kBackwards == 42 && Input.IsKeyPressed(54)))
+	return Input.GetNumKeysPressed() > 1 && (Input.IsKeyPressed(Backwards) || (Backwards == 54 && Input.IsKeyPressed(42)) || (Backwards == 42 && Input.IsKeyPressed(54)))
 endFunction
 
 bool function AdjustStagePressed()
-	return Input.GetNumKeysPressed() > 1 && (Input.IsKeyPressed(kAdjustStage) || (kAdjustStage == 157 && Input.IsKeyPressed(29)) || (kAdjustStage == 29 && Input.IsKeyPressed(157)))
+	return Input.GetNumKeysPressed() > 1 && (Input.IsKeyPressed(AdjustStage) || (AdjustStage == 157 && Input.IsKeyPressed(29)) || (AdjustStage == 29 && Input.IsKeyPressed(157)))
 endFunction
 
 function HotkeyCallback(sslThreadController Thread, int keyCode)
 
 	; Advance Stage
-	if keyCode == kAdvanceAnimation
+	if keyCode == AdvanceAnimation
 		Thread.AdvanceStage(BackwardsPressed())
 
 	; Change Animation
-	elseIf keyCode == kChangeAnimation
+	elseIf keyCode == ChangeAnimation
 		Thread.ChangeAnimation(BackwardsPressed())
 
 	; Forward / Backward adjustments
-	elseIf keyCode == kAdjustForward
+	elseIf keyCode == AdjustForward
 		Thread.AdjustForward(BackwardsPressed(), AdjustStagePressed())
 
 	; Up / Down adjustments
-	elseIf keyCode == kAdjustUpward
+	elseIf keyCode == AdjustUpward
 		Thread.AdjustUpward(BackwardsPressed(), AdjustStagePressed())
 
 	; Left / Right adjustments
-	elseIf keyCode == kAdjustSideways
+	elseIf keyCode == AdjustSideways
 		Thread.AdjustSideways(BackwardsPressed(), AdjustStagePressed())
 
 	; Rotate Scene
-	elseIf keyCode == kRotateScene
+	elseIf keyCode == RotateScene
 		Thread.RotateScene(BackwardsPressed())
 
 	; Change Adjusted Actor
-	elseIf keyCode == kAdjustChange
+	elseIf keyCode == AdjustChange
 		Thread.AdjustChange(BackwardsPressed())
 
 	; RePosition Actors
-	elseIf keyCode == kRealignActors
+	elseIf keyCode == RealignActors
 		Thread.RealignActors()
 
 	; Change Positions
-	elseIf keyCode == kChangePositions
+	elseIf keyCode == ChangePositions
 		Thread.ChangePositions(BackwardsPressed())
 
 	; Restore animation offsets
-	elseIf keyCode == kRestoreOffsets
+	elseIf keyCode == RestoreOffsets
 		Thread.RestoreOffsets()
 
 	; Move Scene
-	elseIf keyCode == kMoveScene
+	elseIf keyCode == MoveScene
 		Thread.MoveScene()
 
 	; EndAnimation
-	elseIf keyCode == kEndAnimation
+	elseIf keyCode == EndAnimation
 		Thread.EndAnimation(true)
 
 	endIf
@@ -458,14 +458,14 @@ bool function CheckSystem()
 	return true
 endFunction
 
-function ReloadConfig()
+function Reload()
 	; TFC Toggle key
 	UnregisterForAllKeys()
-	RegisterForKey(kToggleFreeCamera)
-	RegisterForKey(kTargetActor)
+	RegisterForKey(ToggleFreeCamera)
+	RegisterForKey(TargetActor)
 	; Configure SFX & Voice volumes
-	AudioVoice.SetVolume(fVoiceVolume)
-	AudioSFX.SetVolume(fSFXVolume)
+	AudioVoice.SetVolume(VoiceVolume)
+	AudioSFX.SetVolume(SFXVolume)
 	; Load animation profile
 	ImportProfile(AnimProfile)
 	; Remove any targeted actors
@@ -495,163 +495,160 @@ function SetDefaults()
 
 	bDebugMode = true
 
-	sNPCBed = "$SSL_Never"
+	; Booleans
+	RestrictAggressive = true
+	AllowCreatures     = false
+	NPCSaveVoice       = false
+	UseStrapons        = true
+	RedressVictim      = true
+	RagdollEnd         = false
+	UseMaleNudeSuit    = false
+	UseFemaleNudeSuit  = false
+	UndressAnimation   = false
+	UseLipSync         = false
+	UseExpressions     = false
+	ScaleActors        = false
+	UseCum             = true
+	AllowFFCum         = false
+	DisablePlayer      = false
+	AutoTFC            = false
+	AutoAdvance        = true
+	ForeplayStage      = false
+	OrgasmEffects      = false
+	RaceAdjustments    = true
 
-	; Config
-	fSFXDelay = 3.0
-	fSFXVolume = 1.0
+	; Integers
+	AnimProfile        = 1
+	NPCBed             = 0
 
-	; Config Hotkeys
-	kBackwards = 54 ; Right Shift
-	kAdjustStage = 157; Right Ctrl
-	kAdvanceAnimation = 57 ; Space
-	kChangeAnimation =  24 ; O
-	kChangePositions = 13 ; =
-	kAdjustChange = 37 ; K
-	kAdjustForward = 38 ; L
-	kAdjustSideways = 40 ; '
-	kAdjustUpward = 39 ; ;
-	kRealignActors = 26 ; [
-	kMoveScene = 27 ; ]
-	kRestoreOffsets = 12 ; -
-	kRotateScene = 22 ; U
-	kToggleFreeCamera = 81 ; NUM 3
-	kEndAnimation = 207 ; End
-	kTargetActor = 49 ; N
+	Backwards          = 54 ; Right Shift
+	AdjustStage        = 157; Right Ctrl
+	AdvanceAnimation   = 57 ; Space
+	ChangeAnimation    = 24 ; O
+	ChangePositions    = 13 ; =
+	AdjustChange       = 37 ; K
+	AdjustForward      = 38 ; L
+	AdjustSideways     = 40 ; '
+	AdjustUpward       = 39 ; ;
+	RealignActors      = 26 ; [
+	MoveScene          = 27 ; ]
+	RestoreOffsets     = 12 ; -
+	RotateScene        = 22 ; U
+	ToggleFreeCamera   = 81 ; NUM 3
+	EndAnimation       = 207; End
+	TargetActor        = 49 ; N
 
-	; TFC hotkey settings
-	fAutoSUCSM = 5.0
-	fMaleVoiceDelay = 5.0
-	fFemaleVoiceDelay = 4.0
-	fVoiceVolume = 1.0
-	fCumTimer = 120.0
+	; Floats
+	CumTimer           = 120.0
+	AutoSUCSM          = 5.0
+	MaleVoiceDelay     = 5.0
+	FemaleVoiceDelay   = 4.0
+	VoiceVolume        = 1.0
+	SFXDelay           = 3.0
+	SFXVolume          = 1.0
 
-	; Config
-	bDisablePlayer = false
+	; Boolean strip arrays
+	StripMale = new bool[33]
+	StripMale[0] = true
+	StripMale[1] = true
+	StripMale[2] = true
+	StripMale[3] = true
+	StripMale[7] = true
+	StripMale[8] = true
+	StripMale[9] = true
+	StripMale[4] = true
+	StripMale[11] = true
+	StripMale[15] = true
+	StripMale[16] = true
+	StripMale[17] = true
+	StripMale[19] = true
+	StripMale[23] = true
+	StripMale[24] = true
+	StripMale[26] = true
+	StripMale[27] = true
+	StripMale[28] = true
+	StripMale[29] = true
+	StripMale[32] = true
 
-	bScaleActors = false
-	bUseCum = true
-	bAllowFFCum = false
-	bUseStrapons = true
-	bReDressVictim = true
-	bRagdollEnd = false
-	bUseMaleNudeSuit = false
-	bUseFemaleNudeSuit = false
-	bUndressAnimation = false
-	bUseLipSync = false
-	bUseExpressions = false
-	bNPCSaveVoice = false
-	bAutoAdvance = true
-	bForeplayStage = false
-	bOrgasmEffects = false
-	bRaceAdjustments = true
-	bRestrictAggressive = true
-	bAllowCreatures = true
-	bAutoTFC = false
+	StripFemale = new bool[33]
+	StripFemale[0] = true
+	StripFemale[1] = true
+	StripFemale[2] = true
+	StripFemale[3] = true
+	StripFemale[4] = true
+	StripFemale[7] = true
+	StripFemale[8] = true
+	StripFemale[9] = true
+	StripFemale[11] = true
+	StripFemale[15] = true
+	StripFemale[16] = true
+	StripFemale[17] = true
+	StripFemale[19] = true
+	StripFemale[23] = true
+	StripFemale[24] = true
+	StripFemale[26] = true
+	StripFemale[27] = true
+	StripFemale[28] = true
+	StripFemale[29] = true
+	StripFemale[32] = true
 
-	; Strip
-	bStripMale = new bool[33]
-	bStripMale[0] = true
-	bStripMale[1] = true
-	bStripMale[2] = true
-	bStripMale[3] = true
-	bStripMale[7] = true
-	bStripMale[8] = true
-	bStripMale[9] = true
-	bStripMale[4] = true
-	bStripMale[11] = true
-	bStripMale[15] = true
-	bStripMale[16] = true
-	bStripMale[17] = true
-	bStripMale[19] = true
-	bStripMale[23] = true
-	bStripMale[24] = true
-	bStripMale[26] = true
-	bStripMale[27] = true
-	bStripMale[28] = true
-	bStripMale[29] = true
-	bStripMale[32] = true
+	StripLeadInFemale = new bool[33]
+	StripLeadInFemale[0] = true
+	StripLeadInFemale[2] = true
+	StripLeadInFemale[9] = true
+	StripLeadInFemale[14] = true
+	StripLeadInFemale[32] = true
 
-	bStripFemale = new bool[33]
-	bStripFemale[0] = true
-	bStripFemale[1] = true
-	bStripFemale[2] = true
-	bStripFemale[3] = true
-	bStripFemale[4] = true
-	bStripFemale[7] = true
-	bStripFemale[8] = true
-	bStripFemale[9] = true
-	bStripFemale[11] = true
-	bStripFemale[15] = true
-	bStripFemale[16] = true
-	bStripFemale[17] = true
-	bStripFemale[19] = true
-	bStripFemale[23] = true
-	bStripFemale[24] = true
-	bStripFemale[26] = true
-	bStripFemale[27] = true
-	bStripFemale[28] = true
-	bStripFemale[29] = true
-	bStripFemale[32] = true
+	StripLeadInMale = new bool[33]
+	StripLeadInMale[0] = true
+	StripLeadInMale[2] = true
+	StripLeadInMale[9] = true
+	StripLeadInMale[14] = true
+	StripLeadInMale[32] = true
 
-	bStripLeadInFemale = new bool[33]
-	bStripLeadInFemale[0] = true
-	bStripLeadInFemale[2] = true
-	bStripLeadInFemale[9] = true
-	bStripLeadInFemale[14] = true
-	bStripLeadInFemale[32] = true
+	StripVictim = new bool[33]
+	StripVictim[1] = true
+	StripVictim[2] = true
+	StripVictim[4] = true
+	StripVictim[9] = true
+	StripVictim[11] = true
+	StripVictim[16] = true
+	StripVictim[24] = true
+	StripVictim[26] = true
+	StripVictim[28] = true
+	StripVictim[32] = true
 
-	bStripLeadInMale = new bool[33]
-	bStripLeadInMale[0] = true
-	bStripLeadInMale[2] = true
-	bStripLeadInMale[9] = true
-	bStripLeadInMale[14] = true
-	bStripLeadInMale[32] = true
+	StripAggressor = new bool[33]
+	StripAggressor[2] = true
+	StripAggressor[4] = true
+	StripAggressor[9] = true
+	StripAggressor[16] = true
+	StripAggressor[24] = true
+	StripAggressor[26] = true
 
-	bStripVictim = new bool[33]
-	bStripVictim[1] = true
-	bStripVictim[2] = true
-	bStripVictim[4] = true
-	bStripVictim[9] = true
-	bStripVictim[11] = true
-	bStripVictim[16] = true
-	bStripVictim[24] = true
-	bStripVictim[26] = true
-	bStripVictim[28] = true
-	bStripVictim[32] = true
+	; Float timer arrays
+	StageTimer = new float[5]
+	StageTimer[0] = 30.0
+	StageTimer[1] = 20.0
+	StageTimer[2] = 15.0
+	StageTimer[3] = 15.0
+	StageTimer[4] = 9.0
 
-	bStripAggressor = new bool[33]
-	bStripAggressor[2] = true
-	bStripAggressor[4] = true
-	bStripAggressor[9] = true
-	bStripAggressor[16] = true
-	bStripAggressor[24] = true
-	bStripAggressor[26] = true
+	StageTimerLeadIn = new float[5]
+	StageTimerLeadIn[0] = 10.0
+	StageTimerLeadIn[1] = 10.0
+	StageTimerLeadIn[2] = 10.0
+	StageTimerLeadIn[3] = 8.0
+	StageTimerLeadIn[4] = 8.0
 
-	; Timers
-	fStageTimer = new float[5]
-	fStageTimer[0] = 30.0
-	fStageTimer[1] = 20.0
-	fStageTimer[2] = 15.0
-	fStageTimer[3] = 15.0
-	fStageTimer[4] = 9.0
-
-	fStageTimerLeadIn = new float[5]
-	fStageTimerLeadIn[0] = 10.0
-	fStageTimerLeadIn[1] = 10.0
-	fStageTimerLeadIn[2] = 10.0
-	fStageTimerLeadIn[3] = 8.0
-	fStageTimerLeadIn[4] = 8.0
-
-	fStageTimerAggr = new float[5]
-	fStageTimerAggr[0] = 20.0
-	fStageTimerAggr[1] = 15.0
-	fStageTimerAggr[2] = 10.0
-	fStageTimerAggr[3] = 10.0
-	fStageTimerAggr[4] = 3.0
+	StageTimerAggr = new float[5]
+	StageTimerAggr[0] = 20.0
+	StageTimerAggr[1] = 15.0
+	StageTimerAggr[2] = 10.0
+	StageTimerAggr[3] = 10.0
+	StageTimerAggr[4] = 4.0
 
 	; Set animation profile labels
-	AnimProfile = 1
 	ProfileLabel(1)
 	ProfileLabel(2)
 	ProfileLabel(3)
@@ -662,7 +659,7 @@ function SetDefaults()
 	; Config loaders
 	Setup()
 	LoadStrapons()
-	ReloadConfig()
+	Reload()
 endFunction
 
 function ReloadData()

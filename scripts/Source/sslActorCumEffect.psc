@@ -3,7 +3,7 @@ scriptname sslActorCumEffect extends ActiveMagicEffect
 float Timer
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
-	Timer = (Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig).fCumTimer
+	Timer = (Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig).CumTimer
 	RegisterForSingleUpdate(1.0)
 endEvent
 event OnUpdate()

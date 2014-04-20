@@ -1,7 +1,7 @@
 scriptname sslSystemUpgrade extends Quest
 
 
-state 14400
+state v14400
 	function Upgrade()
 
 	endFunction

@@ -28,7 +28,7 @@ int Primed
 
 state Prepare
 	function FireAction()
-		AutoAdvance = (!HasPlayer || (VictimRef == PlayerRef && Config.bDisablePlayer) || Config.bAutoAdvance)
+		AutoAdvance = (!HasPlayer || (VictimRef == PlayerRef && Config.DisablePlayer) || Config.AutoAdvance)
 		SetAnimation()
 		RegisterForSingleUpdate(30.0)
 		AliasEvent("Prepare")
@@ -77,7 +77,7 @@ state Advancing
 			return
 		endIf
 		AnimEvents = Animation.FetchStage(Stage)
-		SFXDelay   = ClampFloat(Config.fSFXDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
+		SFXDelay   = ClampFloat(Config.SFXDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
 		RegisterForSingleUpdate(10.0)
 		AliasEvent("Sync")
 	endFunction
@@ -93,7 +93,7 @@ state Advancing
 		; Send events
 		if !LeadIn && Stage >= StageCount
 			SendThreadEvent("OrgasmStart")
-			if Config.bOrgasmEffects
+			if Config.OrgasmEffects
 				AliasEvent("Orgasm", false)
 			endIf
 		else
@@ -447,18 +447,18 @@ function EnableHotkeys()
 	if HasPlayer
 		; RegisterForKey(Config.kBackwards)
 		; RegisterForKey(Config.kAdjustStage)
-		RegisterForKey(Config.kAdvanceAnimation)
-		RegisterForKey(Config.kChangeAnimation)
-		RegisterForKey(Config.kChangePositions)
-		RegisterForKey(Config.kAdjustChange)
-		RegisterForKey(Config.kAdjustForward)
-		RegisterForKey(Config.kAdjustSideways)
-		RegisterForKey(Config.kAdjustUpward)
-		RegisterForKey(Config.kRealignActors)
-		RegisterForKey(Config.kRestoreOffsets)
-		RegisterForKey(Config.kMoveScene)
-		RegisterForKey(Config.kRotateScene)
-		RegisterForKey(Config.kEndAnimation)
+		RegisterForKey(Config.AdvanceAnimation)
+		RegisterForKey(Config.ChangeAnimation)
+		RegisterForKey(Config.ChangePositions)
+		RegisterForKey(Config.AdjustChange)
+		RegisterForKey(Config.AdjustForward)
+		RegisterForKey(Config.AdjustSideways)
+		RegisterForKey(Config.AdjustUpward)
+		RegisterForKey(Config.RealignActors)
+		RegisterForKey(Config.RestoreOffsets)
+		RegisterForKey(Config.MoveScene)
+		RegisterForKey(Config.RotateScene)
+		RegisterForKey(Config.EndAnimation)
 		hkReady = true
 	endIf
 endFunction

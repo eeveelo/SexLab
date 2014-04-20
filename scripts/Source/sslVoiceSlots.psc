@@ -52,13 +52,13 @@ sslBaseVoice function PickVoice(Actor ActorRef)
 	bool IsPlayer = ActorRef == PlayerRef
 	; Find if a saved voice exists and in what slot
 	sslBaseVoice Saved = GetSaved(ActorRef)
-	if Saved != none && (IsPlayer || Config.bNPCSaveVoice)
+	if Saved != none && (IsPlayer || Config.NPCSaveVoice)
 		return Saved ; Use saved voice
 	endIf
 	; Pick a random voice based on gender
 	sslBaseVoice Picked = PickGender(ActorRef.GetLeveledActorBase().GetSex())
 	; Save the voice to NPC for reuse, if enabled
-	if Picked != none && !IsPlayer && Config.bNPCSaveVoice
+	if Picked != none && !IsPlayer && Config.NPCSaveVoice
 		SaveVoice(ActorRef, Picked)
 	endIf
 	return Picked
