@@ -214,10 +214,12 @@ event OnSliderAcceptST(float value)
 		Animation.SetAdjustment(Animation.Key("Adjust."+AdjustKey), Position, Options[1] as int, Options[2] as int, value)
 		Animation.SaveProfile(Config.AnimProfile)
 		SetSliderOptionValueST(value)
+
 	; Expression Editor
 	elseIf Options[0] == "Expression"
 		; Gender, Type, ID
 		Expression.SetIndex(Phase, Options[1] as int, Options[2] as int, Options[3] as int, value as int)
+		Expression.SavePhase(Phase, Options[1] as int)
 		SetSliderOptionValueST(value as int)
 
 	; Timers & Stripping - Timers
@@ -303,30 +305,30 @@ string[] Chances
 
 function AnimationSettings()
 	SetCursorFillMode(TOP_TO_BOTTOM)
-	AddHeaderOption("$SSL_PlayerSettings")
+	; AddHeaderOption("$SSL_PlayerSettings")
 	AddToggleOptionST("AutoAdvance","$SSL_AutoAdvanceStages", Config.AutoAdvance)
 	AddToggleOptionST("DisableVictim","$SSL_DisableVictimControls", Config.DisablePlayer)
 	AddToggleOptionST("AutomaticTFC","$SSL_AutomaticTFC", Config.AutoTFC)
 	AddSliderOptionST("AutomaticSUCSM","$SSL_AutomaticSUCSM", Config.AutoSUCSM, "{0}")
-
-	AddHeaderOption("$SSL_ExtraEffects")
+	; AddHeaderOption("$SSL_ExtraEffects")
 	AddToggleOptionST("UseExpressions","$SSL_UseExpressions", Config.UseExpressions)
 	AddToggleOptionST("UseLipSync", "$SSL_UseLipSync", Config.UseLipSync)
 	AddToggleOptionST("OrgasmEffects","$SSL_OrgasmEffects", Config.OrgasmEffects)
 	AddToggleOptionST("UseCum","$SSL_ApplyCumEffects", Config.UseCum)
 	AddToggleOptionST("AllowFemaleFemaleCum","$SSL_AllowFemaleFemaleCum", Config.AllowFFCum)
 	AddSliderOptionST("CumEffectTimer","$SSL_CumEffectTimer", Config.CumTimer, "$SSL_Seconds")
+	AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", Config.RagdollEnd)
 
 	SetCursorPosition(1)
 	; AddHeaderOption("$SSL_AnimationHandling")
 	AddMenuOptionST("AnimationProfile", "$SSL_AnimationProfile", Config.ProfileLabel(Config.AnimProfile))
+	AddToggleOptionST("RaceAdjustments","$SSL_RaceAdjustments", Config.RaceAdjustments)
 	AddToggleOptionST("AllowCreatures","$SSL_AllowCreatures", Config.AllowCreatures)
 	AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", Config.ScaleActors)
 	AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", Config.ForeplayStage)
 	AddToggleOptionST("RestrictAggressive","$SSL_RestrictAggressive", Config.RestrictAggressive)
 	AddToggleOptionST("UndressAnimation","$SSL_UndressAnimation", Config.UndressAnimation)
-	AddToggleOptionST("ReDressVictim","$SSL_VictimsRedress", Config.RedressVictim)
-	AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", Config.RagdollEnd)
+	AddToggleOptionST("RedressVictim","$SSL_VictimsRedress", Config.RedressVictim)
 	AddToggleOptionST("StraponsFemale","$SSL_FemalesUseStrapons", Config.UseStrapons)
 	AddToggleOptionST("NudeSuitMales","$SSL_UseNudeSuitMales", Config.UseMaleNudeSuit)
 	AddToggleOptionST("NudeSuitFemales","$SSL_UseNudeSuitFemales", Config.UseFemaleNudeSuit)
@@ -358,6 +360,16 @@ state AnimationProfile
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAnimationProfile")
+	endEvent
+endState
+
+state RaceAdjustments
+	event OnSelectST()
+		Config.RaceAdjustments = !Config.RaceAdjustments
+		SetToggleOptionValueST(Config.RaceAdjustments)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoRaceAdjustments")
 	endEvent
 endState
 
@@ -1484,19 +1496,25 @@ endState
 function RebuildClean()
 	SetCursorFillMode(TOP_TO_BOTTOM)
 
+	; Get current export label
+	UnsetStringValue(self, "ExportLabel")
+	ImportFile("SexLabConfig.json", "ExportLabel", 4, self)
+
 	AddHeaderOption("SexLab v"+GetStringVer()+" by Ashal@LoversLab.com")
 	AddHeaderOption("$SSL_Maintenance")
+
 	if SexLab.Enabled
 		AddTextOptionST("ToggleSystem","$SSL_EnabledSystem", "$SSL_DoDisable")
 	else
 		AddTextOptionST("ToggleSystem","$SSL_DisabledSystem", "$SSL_DoEnable")
 	endIf
 
-	AddTextOptionST("ResetAnimationRegistry","$SSL_ResetAnimationRegistry", "$SSL_ClickHere")
-	AddTextOptionST("ResetVoiceRegistry","$SSL_ResetVoiceRegistry", "$SSL_ClickHere")
-	AddTextOptionST("ResetPlayerSexStats","$SSL_ResetPlayerSexStats", "$SSL_ClickHere")
 	AddTextOptionST("RestoreDefaultSettings","$SSL_RestoreDefaultSettings", "$SSL_ClickHere")
 	AddTextOptionST("StopCurrentAnimations","$SSL_StopCurrentAnimations", "$SSL_ClickHere")
+	AddTextOptionST("ResetAnimationRegistry","$SSL_ResetAnimationRegistry", "$SSL_ClickHere")
+	AddTextOptionST("ResetVoiceRegistry","$SSL_ResetVoiceRegistry", "$SSL_ClickHere")
+	AddTextOptionST("ResetExpressionRegistry","$SSL_ResetExpressionRegistry", "$SSL_ClickHere")
+
 	AddEmptyOption()
 	AddHeaderOption("$SSL_UpgradeUninstallReinstall")
 	AddTextOptionST("CleanSystem","$SSL_CleanSystem", "$SSL_ClickHere")
@@ -1504,6 +1522,7 @@ function RebuildClean()
 	SetCursorPosition(1)
 	AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
 	AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
+
 	AddHeaderOption("$SSL_AvailableStrapons")
 	AddTextOptionST("RebuildStraponList","$SSL_RebuildStraponList", "$SSL_ClickHere")
 	int i = Config.Strapons.Length
@@ -1556,18 +1575,18 @@ endFunction
 event OnConfigOpen()
 	; MCM option pages
 	Pages     = new string[9]
-	Pages[0]  = "$SSL_AnimationSettings"
-	Pages[1]  = "$SSL_SoundSettings"
-	Pages[2]  = "$SSL_TimersStripping"
-	Pages[3]  = "$SSL_PlayerHotkeys"
+	Pages[0]  = "$SSL_SexDiary"
+	Pages[1]  = "$SSL_AnimationSettings"
+	Pages[2]  = "$SSL_SoundSettings"
+	Pages[3]  = "$SSL_TimersStripping"
+	Pages[4]  = "$SSL_PlayerHotkeys"
 	; Pages[4]  = "$SSL_ExpressionSelection"
-	Pages[4]  = "$SSL_ExpressionEditor"
-	Pages[5]  = "$SSL_ToggleAnimations"
-	Pages[6]  = "$SSL_AnimationEditor"
-	Pages[7]  = "$SSL_SexDiary"
+	Pages[5]  = "$SSL_ExpressionEditor"
+	Pages[6]  = "$SSL_ToggleAnimations"
+	Pages[7]  = "$SSL_AnimationEditor"
 	Pages[8]  = "$SSL_RebuildClean"
 	if PlayerRef.GetLeveledActorBase().GetSex() == 0
-		Pages[7] = "$SSL_SexJournal"
+		Pages[0] = "$SSL_SexJournal"
 	endIf
 
 	; Target actor
@@ -1759,9 +1778,9 @@ endState
 state AutomaticSUCSM
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(Config.AutoSUCSM)
-		SetSliderDialogDefaultValue(3.0)
-		SetSliderDialogRange(1.0, 20.0)
-		SetSliderDialogInterval(1.0)
+		SetSliderDialogDefaultValue(3)
+		SetSliderDialogRange(1, 20)
+		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
 		Config.AutoSUCSM = value
@@ -1802,7 +1821,7 @@ state UseLipSync
 		SetInfoText("$SSL_InfoUseLipSync")
 	endEvent
 endState
-state ReDressVictim
+state RedressVictim
 	event OnSelectST()
 		Config.RedressVictim = !Config.RedressVictim
 		SetToggleOptionValueST(Config.RedressVictim)
@@ -1844,9 +1863,9 @@ endState
 state CumEffectTimer
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(Config.CumTimer)
-		SetSliderDialogDefaultValue(120.0)
-		SetSliderDialogRange(5.0, 900.0)
-		SetSliderDialogInterval(5.0)
+		SetSliderDialogDefaultValue(120)
+		SetSliderDialogRange(5, 900)
+		SetSliderDialogInterval(5)
 	endEvent
 	event OnSliderAcceptST(float value)
 		Config.CumTimer = value
@@ -2204,20 +2223,37 @@ state StopCurrentAnimations
 endState
 state ResetAnimationRegistry
 	event OnSelectST()
-		if ShowMessage("$SSL_WarnRebuildAnimations")
-			ThreadSlots.StopAll()
-			AnimSlots.Setup()
-			CreatureSlots.Setup()
-			Debug.Notification("$SSL_RunRebuildAnimations")
-		endIf
+		SetTextOptionValueST("$SSL_Resetting")
+		SetOptionFlagsST(OPTION_FLAG_DISABLED)
+		ThreadSlots.StopAll()
+		AnimSlots.Setup()
+		CreatureSlots.Setup()
+		ShowMessage("$SSL_RunRebuildAnimations", false)
+		Debug.Notification("$SSL_RunRebuildAnimations")
+		SetOptionFlagsST(OPTION_FLAG_NONE)
+		SetTextOptionValueST("$SSL_ClickHere")
 	endEvent
 endState
 state ResetVoiceRegistry
 	event OnSelectST()
-		if ShowMessage("$SSL_WarnRebuildVoices")
-			VoiceSlots.Setup()
-			Debug.Notification("$SSL_RunRebuildVoices")
-		endIf
+		SetTextOptionValueST("$SSL_Resetting")
+		SetOptionFlagsST(OPTION_FLAG_DISABLED)
+		VoiceSlots.Setup()
+		ShowMessage("$SSL_RunRebuildVoices", false)
+		Debug.Notification("$SSL_RunRebuildVoices")
+		SetOptionFlagsST(OPTION_FLAG_NONE)
+		SetTextOptionValueST("$SSL_ClickHere")
+	endEvent
+endState
+state ResetExpressionRegistry
+	event OnSelectST()
+		SetTextOptionValueST("$SSL_Resetting")
+		SetOptionFlagsST(OPTION_FLAG_DISABLED)
+		ExpressionSlots.Setup()
+		ShowMessage("$SSL_RunRebuildExpressions", false)
+		Debug.Notification("$SSL_RunRebuildExpressions")
+		SetOptionFlagsST(OPTION_FLAG_NONE)
+		SetTextOptionValueST("$SSL_ClickHere")
 	endEvent
 endState
 state ResetPlayerSexStats
@@ -2254,7 +2290,6 @@ state ExportSettings
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnExportSettings")
 			ExportSettings()
-			; StorageUtil.FileSetIntValue("SexLabConfig.Exported", 1)
 			ShowMessage("$SSL_RunExportSettings", false)
 		endIf
 	endEvent
@@ -2264,11 +2299,8 @@ state ExportSettings
 endState
 state ImportSettings
 	event OnSelectST()
-		; if StorageUtil.FileGetIntValue("SexLabConfig.Exported") != 1
-		; 	ShowMessage("$SSL_WarnImportSettingsEmpty", false)
 		if ShowMessage("$SSL_WarnImportSettings")
 			ImportSettings()
-			StorageUtil.FileUnsetIntValue("SexLabConfig.Exported")
 			ShowMessage("$SSL_RunImportSettings", false)
 		endIf
 	endEvent
@@ -2281,9 +2313,6 @@ endState
 function ExportSettings()
 	; Set label of export
 	SetStringValue(self, "ExportLabel", PlayerRef.GetLeveledActorBase().GetName()+" - "+Utility.GetCurrentRealTime() as int)
-
-	; ; Strings
-	; ExportString("sNPCBed", Config.sNPCBed)
 
 	; Booleans
 	ExportBool("RestrictAggressive", Config.RestrictAggressive)
