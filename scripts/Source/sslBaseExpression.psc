@@ -153,8 +153,9 @@ function SetPhoneme(int Phase, int Gender, int id, int value)
 endFunction
 
 function EmptyPhase(int Phase, int Gender)
-	int[] Preset = new int[32]
+	int[] Preset = new int[1]
 	SetPhase(Phase, Gender, Preset)
+	SavePhase(Phase, Gender)
 	Phases[Gender] = ClampInt((Phases[Gender] - 1), 0, 5)
 	CountPhases()
 	if Phases[0] == 0 && Phases[1] == 0
@@ -169,6 +170,7 @@ function AddPhase(int Phase, int Gender)
 		Preset[31] = 50
 	endIf
 	SetPhase(Phase, Gender, Preset)
+	SavePhase(Phase, Gender)
 	Phases[Gender] = ClampInt((Phases[Gender] + 1), 0, 5)
 	Enabled = true
 endFunction
@@ -178,30 +180,34 @@ endFunction
 ; ------------------------------------------------------- ;
 
 int[] function GetPhase(int Phase, int Gender)
+	int[] Preset
 	if Gender == Male
 		if Phase == 1
-			return Male1
+			Preset = Male1
 		elseIf Phase == 2
-			return Male2
+			Preset = Male2
 		elseIf Phase == 3
-			return Male3
+			Preset = Male3
 		elseIf Phase == 4
-			return Male4
+			Preset = Male4
 		elseIf Phase == 5
-			return Male5
+			Preset = Male5
 		endIf
 	else
 		if Phase == 1
-			return Female1
+			Preset = Female1
 		elseIf Phase == 2
-			return Female2
+			Preset = Female2
 		elseIf Phase == 3
-			return Female3
+			Preset = Female3
 		elseIf Phase == 4
-			return Female4
+			Preset = Female4
 		elseIf Phase == 5
-			return Female5
+			Preset = Female5
 		endIf
+	endIf
+	if Preset.Length == 32
+		return Preset
 	endIf
 	return new int[32]
 endFunction
@@ -261,7 +267,8 @@ function CountPhases()
 endFunction
 
 function Save(int id)
-	CountPhases()
+	LoadProfile()
+	SaveProfile()
 	Log(Name, "Expressions["+id+"]")
 endFunction
 
@@ -269,15 +276,74 @@ function Initialize()
 	; Gender phase counts
 	Phases = new int[2]
 	; Individual Phases
-	Male1   = new int[32]
-	Male2   = new int[32]
-	Male3   = new int[32]
-	Male4   = new int[32]
-	Male5   = new int[32]
-	Female1 = new int[32]
-	Female2 = new int[32]
-	Female3 = new int[32]
-	Female4 = new int[32]
-	Female5 = new int[32]
+	Male1   = new int[1]
+	Male2   = new int[1]
+	Male3   = new int[1]
+	Male4   = new int[1]
+	Male5   = new int[1]
+	Female1 = new int[1]
+	Female2 = new int[1]
+	Female3 = new int[1]
+	Female4 = new int[1]
+	Female5 = new int[1]
 	parent.Initialize()
+endFunction
+
+function SaveProfile()
+	SavePhase(1, 1)
+	SavePhase(2, 1)
+	SavePhase(3, 1)
+	SavePhase(4, 1)
+	SavePhase(5, 1)
+	SavePhase(1, 0)
+	SavePhase(2, 0)
+	SavePhase(3, 0)
+	SavePhase(4, 0)
+	SavePhase(5, 0)
+endFunction
+
+function LoadProfile()
+	StorageUtil.ImportFile("ExpressionProfile.json", Key(""), 16, Storage, keyContains = true)
+	LoadPhase(1, 1)
+	LoadPhase(2, 1)
+	LoadPhase(3, 1)
+	LoadPhase(4, 1)
+	LoadPhase(5, 1)
+	LoadPhase(1, 0)
+	LoadPhase(2, 0)
+	LoadPhase(3, 0)
+	LoadPhase(4, 0)
+	LoadPhase(5, 0)
+	CountPhases()
+endFunction
+
+function SavePhase(int Phase, int Gender)
+	string PhaseKey = Key(Gender+"."+Phase)
+	int[] Preset = GetPhase(Phase, Gender)
+	StorageUtil.IntListClear(Storage, PhaseKey)
+	if AddValues(Preset) > 0
+		int Count = Preset.Length
+		int i
+		while i < Count
+			StorageUtil.IntListAdd(Storage, PhaseKey, Preset[i])
+			i += 1
+		endWhile
+	endIf
+	StorageUtil.ExportFile("ExpressionProfile.json", PhaseKey, 16, Storage, keyContains = true)
+	StorageUtil.IntListClear(Storage, PhaseKey)
+endFunction
+
+function LoadPhase(int Phase, int Gender)
+	string PhaseKey = Key(Gender+"."+Phase)
+	int i = StorageUtil.IntListCount(Storage, PhaseKey)
+	if i != 32
+		SetPhase(Phase, Gender, new int[1])
+		return
+	endIf
+	int[] Preset = new int[32]
+	while i
+		i -= 1
+		Preset[i] = StorageUtil.IntListGet(Storage, PhaseKey, i)
+	endWhile
+	SetPhase(Phase, Gender, Preset)
 endFunction

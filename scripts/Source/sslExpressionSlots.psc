@@ -131,6 +131,26 @@ int function Register(string Registrar)
 	return -1
 endFunction
 
+function ExportProfile()
+	int i = Slotted
+	while i
+		i -= 1
+		if Slots[i].Registered
+			Slots[i].SaveProfile()
+		endIf
+	endwhile
+endfunction
+
+function ImportProfile()
+	int i = Slotted
+	while i
+		i -= 1
+		if Slots[i].Registered
+			Slots[i].LoadProfile()
+		endIf
+	endwhile
+endfunction
+
 state Locked
 	function Setup()
 	endFunction

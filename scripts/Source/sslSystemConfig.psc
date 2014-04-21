@@ -432,6 +432,22 @@ string function ProfileLabel(int Profile = 1)
 	return Label
 endFunction
 
+function ImportExpressions()
+	int i = ExpressionSlots.Slotted
+	while i
+		i -= 1
+		ExpressionSlots.Expressions[i].LoadProfile()
+	endWhile
+endFunction
+
+function ExportExpressions()
+	int i = ExpressionSlots.Slotted
+	while i
+		i -= 1
+		ExpressionSlots.Expressions[i].SaveProfile()
+	endWhile
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
@@ -467,8 +483,9 @@ function Reload()
 	; Configure SFX & Voice volumes
 	AudioVoice.SetVolume(VoiceVolume)
 	AudioSFX.SetVolume(SFXVolume)
-	; Load animation profile
+	; Load animation & expression profile
 	ImportProfile(AnimProfile)
+	ImportExpressions()
 	; Remove any targeted actors
 	RegisterForCrosshairRef()
 	CrosshairRef = none
