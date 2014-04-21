@@ -807,7 +807,7 @@ endfunction
 
 function UpdateAdjustKey()
 	AdjustKey = Animation.MakeAdjustKey(Positions, Config.RaceAdjustments)
-	MiscUtil.PrintConsole(AdjustKey)
+	Log(AdjustKey, "Adjustment Profile")
 endFunction
 
 
