@@ -802,7 +802,7 @@ state Disabled
 		return none
 	endFunction
 	event OnBeginState()
-		Log("SexLabFramework - Enabled")
+		Log("SexLabFramework - Disabled")
 		ModEvent.Send(ModEvent.Create("SexLabDisabled"))
 	endEvent
 endState
