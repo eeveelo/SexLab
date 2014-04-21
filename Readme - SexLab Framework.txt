@@ -31,9 +31,9 @@ Skryim SexLab Framework
      Mithos
      Blac945
      TDA
-     Zynsch
-     Bleagh
-     PanicForever
+     Zynsch - http://www.loverslab.com/topic/28322-zynisch
+     Bleagh - http://www.loverslab.com/topic/22484-bleagh
+     PanicForever - http://www.loverslab.com/topic/23426-panics
 
     Audio:
      Lovers with PK
