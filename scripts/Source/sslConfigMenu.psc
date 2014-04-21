@@ -74,8 +74,6 @@ function SetupSystem()
 		; Enable system for use
 		SexLab.GoToState("Enabled")
 		Debug.Notification("$SSL_SexLabUpdated")
-		; ALPHA DEBUG
-		Config.SetDebugMode(true)
 	endIf
 endFunction
 
@@ -1496,10 +1494,6 @@ endState
 function RebuildClean()
 	SetCursorFillMode(TOP_TO_BOTTOM)
 
-	; Get current export label
-	UnsetStringValue(self, "ExportLabel")
-	ImportFile("SexLabConfig.json", "ExportLabel", 4, self)
-
 	AddHeaderOption("SexLab v"+GetStringVer()+" by Ashal@LoversLab.com")
 	AddHeaderOption("$SSL_Maintenance")
 
@@ -1514,15 +1508,13 @@ function RebuildClean()
 	AddTextOptionST("ResetAnimationRegistry","$SSL_ResetAnimationRegistry", "$SSL_ClickHere")
 	AddTextOptionST("ResetVoiceRegistry","$SSL_ResetVoiceRegistry", "$SSL_ClickHere")
 	AddTextOptionST("ResetExpressionRegistry","$SSL_ResetExpressionRegistry", "$SSL_ClickHere")
-
-	AddEmptyOption()
+	AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
+	AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
 	AddHeaderOption("$SSL_UpgradeUninstallReinstall")
 	AddTextOptionST("CleanSystem","$SSL_CleanSystem", "$SSL_ClickHere")
 
 	SetCursorPosition(1)
-	AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
-	AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
-
+	AddToggleOptionST("DebugMode","$SSL_DebugMode", Config.DebugMode)
 	AddHeaderOption("$SSL_AvailableStrapons")
 	AddTextOptionST("RebuildStraponList","$SSL_RebuildStraponList", "$SSL_ClickHere")
 	int i = Config.Strapons.Length
@@ -2254,6 +2246,15 @@ state ResetExpressionRegistry
 		Debug.Notification("$SSL_RunRebuildExpressions")
 		SetOptionFlagsST(OPTION_FLAG_NONE)
 		SetTextOptionValueST("$SSL_ClickHere")
+	endEvent
+endState
+state DebugMode
+	event OnSelectST()
+		Config.DebugMode = !Config.DebugMode
+		SetToggleOptionValueST(Config.DebugMode)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoDebugMode")
 	endEvent
 endState
 state ResetPlayerSexStats

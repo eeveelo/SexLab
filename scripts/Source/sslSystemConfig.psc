@@ -11,6 +11,18 @@ bool property DebugMode hidden
 	bool function get()
 		return bDebugMode
 	endFunction
+	function set(bool value)
+		bDebugMode = value
+		if bDebugMode
+			MiscUtil.PrintConsole("SexLab Debug/Development Mode Activated")
+			PlayerRef.AddSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
+			PlayerRef.AddSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
+		else
+			MiscUtil.PrintConsole("SexLab Debug/Development Mode Deactivated")
+			PlayerRef.RemoveSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
+			PlayerRef.RemoveSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
+		endIf
+	endFunction
 endProperty
 
 bool property Enabled hidden
@@ -495,26 +507,12 @@ function Reload()
 	ThreadLib.ValidateTrackedFactions()
 endFunction
 
-function SetDebugMode(bool enabled)
-	bDebugMode = enabled
-	if enabled
-		PlayerRef.AddSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
-		PlayerRef.AddSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
-	else
-		PlayerRef.RemoveSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
-		PlayerRef.RemoveSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
-	endIf
-endFunction
-
 function SetDefaults()
 	SexLab = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework
 	PlayerRef = Game.GetPlayer()
 
 	StorageUtil.SetIntValue(PlayerRef, "sslActorStats.Sexuality", 100)
-
 	VoiceSlots.ForgetVoice(PlayerRef)
-
-	bDebugMode = true
 
 	; Booleans
 	RestrictAggressive = true
