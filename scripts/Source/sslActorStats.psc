@@ -153,7 +153,10 @@ string function ZeroFill(string num)
 endFunction
 
 string function ParseTime(int time)
-	return ZeroFill(((time / 3600) as int))+":"+ZeroFill((((time / 60) % 60) as int))+":"+ZeroFill((time % 60 as int))
+	if time > 0
+		return ZeroFill(((time / 3600) as int))+":"+ZeroFill((((time / 60) % 60) as int))+":"+ZeroFill((time % 60 as int))
+	endIf
+	return "--:--:--"
 endFunction
 
 ; ------------------------------------------------------- ;
