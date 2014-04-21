@@ -238,7 +238,7 @@ endFunction
 bool function CanAnimate(Actor ActorRef)
 	Race ActorRace = ActorRef.GetLeveledActorBase().GetRace()
 	string RaceName = ActorRace.GetName()+MiscUtil.GetRaceEditorID(ActorRace)
-	return !(ActorRef.IsInFaction(ForbiddenFaction) || ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Child") != -1  || StringUtil.Find(RaceName, "Little") != -1 || StringUtil.Find(RaceName, "117") != -1 || StringUtil.Find(RaceName, "Elin") != -1   || StringUtil.Find(RaceName, "Enfant") != -1 || (StringUtil.Find(RaceName, "Monli") != -1 && ActorRef.GetScale() < 0.93))
+	return !(ActorRef.IsInFaction(ForbiddenFaction) || ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Child") != -1  || StringUtil.Find(RaceName, "Little") != -1 || StringUtil.Find(RaceName, "117") != -1 || StringUtil.Find(RaceName, "Enfant") != -1 || (StringUtil.Find(RaceName, "Elin") != -1 && ActorRef.GetScale() < 0.94) ||  (StringUtil.Find(RaceName, "Monli") != -1 && ActorRef.GetScale() < 0.92))
 endFunction
 
 bool function IsValidActor(Actor ActorRef)

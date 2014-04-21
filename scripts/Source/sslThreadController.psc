@@ -388,7 +388,7 @@ function EndLeadIn()
 		LeadIn = false
 		SetAnimation()
 		; Add runtime to foreplay skill xp
-		AddXP(0, (TotalTime / 11.0))
+		AddXP(0, (TotalTime / 14.0))
 		; Restrip with new strip options
 		AliasEvent("Strip", false)
 		; Start primary animations at stage 1
@@ -435,7 +435,7 @@ endState
 ; ------------------------------------------------------- ;
 
 function RecordSkills()
-	float xp = ((Utility.GetCurrentRealTime() - SkillTime) / 15.0)
+	float xp = ((Utility.GetCurrentRealTime() - SkillTime) / 20.0)
 	AddXP(1, xp, IsVaginal)
 	AddXP(2, xp, IsAnal)
 	AddXP(3, xp, IsOral)

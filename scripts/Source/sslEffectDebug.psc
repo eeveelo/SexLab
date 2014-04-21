@@ -17,19 +17,11 @@ string ActorName
 ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
-
 	Utility.Wait(0.5)
-
-	; SexLab.AnimSlots.GetBySlot(0).Export()
-	; SexLab.AnimSlots.GetBySlot(1).Export()
 
 	sslBenchmark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
 	Dev.Setup()
-
-
 	Dev.LatencyTest()
-	; Utility.Wait(1.0)
-	; Dev.StartBenchmark(2)
 
 	Dispel()
 endEvent

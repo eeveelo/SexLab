@@ -148,7 +148,7 @@ state Ready
 	endFunction
 
 	function PrepareActor()
-		Thread.Log("Preparing", ActorName)
+		; Thread.Log("Preparing", ActorName)
 		; Remove any unwanted combat effects
 		ActorRef.StopCombat()
 		if ActorRef.IsWeaponDrawn()
@@ -192,7 +192,7 @@ state Ready
 				SkilledActor = Thread.Positions[IndexTravel(Thread.Positions.Find(ActorRef), Thread.ActorCount)]
 			endIf
 			Skills = GetSkillLevels(SkilledActor)
-			Thread.Log(SkilledActor.GetLeveledActorBase().GetName()+" Skills: "+Skills, ActorName)
+			; Thread.Log(SkilledActor.GetLeveledActorBase().GetName()+" Skills: "+Skills, ActorName)
 			; Start Auto TFC if enabled
 			if IsPlayer && Config.AutoTFC && Game.GetCameraState() != 3
 				Config.ToggleFreeCamera()
