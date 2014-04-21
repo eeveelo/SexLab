@@ -711,6 +711,7 @@ function SendThreadEvent(string HookEvent)
 		i -= 1
 		SetupThreadEvent(HookEvent+"_"+Hooks[i])
 	endWhile
+	; Legacy support for < v1.50 - To be removed eventually
 	if HasPlayer
 		SendModEvent("Player"+HookEvent, thread_id)
 	endIf
@@ -719,13 +720,14 @@ endFunction
 function SetupThreadEvent(string HookEvent)
 	int eid = ModEvent.Create(HookEvent)
 	if eid
-		ModEvent.PushString(eid, HookEvent)
+		; ModEvent.PushString(eid, HookEvent)
 		ModEvent.PushInt(eid, thread_id)
-		ModEvent.PushInt(eid, HasPlayer as int)
-		ModEvent.PushForm(eid, self)
+		ModEvent.PushBool(eid, HasPlayer)
+		; ModEvent.PushForm(eid, self)
 		ModEvent.Send(eid)
 		; Log("Thread Hook Sent: "+HookEvent)
 	endIf
+	; Legacy support for < v1.50 - To be removed eventually
 	SendModEvent(HookEvent, thread_id)
 endFunction
 
