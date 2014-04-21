@@ -719,10 +719,10 @@ endFunction
 function SetupThreadEvent(string HookEvent)
 	int eid = ModEvent.Create(HookEvent)
 	if eid
-		ModEvent.PushString(eid, HookEvent)
+		; ModEvent.PushString(eid, HookEvent)
 		ModEvent.PushInt(eid, thread_id)
-		ModEvent.PushInt(eid, HasPlayer as int)
-		ModEvent.PushForm(eid, self)
+		ModEvent.PushBool(eid, HasPlayer)
+		; ModEvent.PushForm(eid, self)
 		ModEvent.Send(eid)
 		; Log("Thread Hook Sent: "+HookEvent)
 	endIf
