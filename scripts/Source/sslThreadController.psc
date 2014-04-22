@@ -83,14 +83,17 @@ state Advancing
 		RegisterForSingleUpdate(10.0)
 		AliasEvent("Sync")
 	endFunction
-
 	function SyncDone()
-		; Log("Sync", "AliasDone")
-		RegisterForSingleUpdate(0.01)
+		Action("Animating")
 	endFunction
-
 	event OnUpdate()
-		GoToState("Animating")
+		Action("Animating")
+	endEvent
+endState
+
+state Animating
+
+	function FireAction()
 		PlayAnimation()
 		; Send events
 		if !LeadIn && Stage >= StageCount
@@ -105,10 +108,7 @@ state Advancing
 		Log("Starting Stage: "+Stage, "Advancing")
 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		RegisterForSingleUpdate(0.5)
-	endEvent
-endState
-
-state Animating
+	endFunction
 
 	event OnUpdate()
 		float CurrentTime = Utility.GetCurrentRealTime()
@@ -127,7 +127,7 @@ state Animating
 	endEvent
 
 	function EndAction()
-		if !LeadIn && Stage == StageCount
+		if !LeadIn && Stage > StageCount
 			SendThreadEvent("OrgasmEnd")
 		else
 			SendThreadEvent("StageEnd")

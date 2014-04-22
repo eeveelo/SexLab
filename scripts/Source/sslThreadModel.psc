@@ -763,7 +763,7 @@ function Log(string Log, string Type = "NOTICE")
 endFunction
 
 function SendThreadEvent(string HookEvent)
-	; Log(HookEvent, "Event Hook")
+	Log(HookEvent, "Event Hook")
 	SetupThreadEvent(HookEvent)
 	int i = Hooks.Length
 	while i
