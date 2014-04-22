@@ -285,3 +285,17 @@ function Initialize()
 	Female5 = new int[1]
 	parent.Initialize()
 endFunction
+
+function Update151()
+	string PhaseKey = Key("")
+	StorageUtil.IntListClear(Storage, PhaseKey+"0.1")
+	StorageUtil.IntListClear(Storage, PhaseKey+"0.2")
+	StorageUtil.IntListClear(Storage, PhaseKey+"0.3")
+	StorageUtil.IntListClear(Storage, PhaseKey+"0.4")
+	StorageUtil.IntListClear(Storage, PhaseKey+"0.5")
+	StorageUtil.IntListClear(Storage, PhaseKey+"1.1")
+	StorageUtil.IntListClear(Storage, PhaseKey+"1.2")
+	StorageUtil.IntListClear(Storage, PhaseKey+"1.3")
+	StorageUtil.IntListClear(Storage, PhaseKey+"1.4")
+	StorageUtil.IntListClear(Storage, PhaseKey+"1.5")
+endFunction

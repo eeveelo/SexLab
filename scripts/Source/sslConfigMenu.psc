@@ -42,9 +42,14 @@ event OnVersionUpdate(int version)
 	; Update System - v1.5x incremental updates
 	elseIf CurrentVersion < version
 
-		; v1.51 - I don't exists yet and am only here as a reference for future self.
+		; v1.51 - Fixed missing ChangeActors() and removed exprsionprofile.json support
 		if CurrentVersion < 15100
-			Debug.TraceAndBox("SexLab Error: Getting this error should be impossible, the hell did you do?")
+			int i = ExpressionSlots.Slotted
+			while i
+				i -= 1
+				ExpressionSlots.GetBySlot(i).Update151()
+			endWhile
+			Debug.Notification("SexLab 1.51 Updated")
 		endIf
 
 		EventType = "SexLabUpdated"
@@ -217,7 +222,7 @@ event OnSliderAcceptST(float value)
 	elseIf Options[0] == "Expression"
 		; Gender, Type, ID
 		Expression.SetIndex(Phase, Options[1] as int, Options[2] as int, Options[3] as int, value as int)
-		Expression.SavePhase(Phase, Options[1] as int)
+		; Expression.SavePhase(Phase, Options[1] as int)
 		SetSliderOptionValueST(value as int)
 
 	; Timers & Stripping - Timers
@@ -1046,10 +1051,24 @@ function ExpressionEditor()
 	AddMenuOptionST("ExpressionSelect", "$SSL_ModifyingExpression", Expression.Name)
 	AddToggleOptionST("ExpressionNormal", "$SSL_ExpressionsNormal", Expression.HasTag("Normal"), Flag)
 
-	AddTextOptionST("ExpressionTestPlayer", "$SSL_TestOnPlayer", "$SSL_Apply")
-	AddToggleOptionST("ExpressionVictim", "$SSL_ExpressionsVictim", Expression.HasTag("Victim"), Flag)
+	if PlayerRef.GetLeveledActorBase().GetSex() == 1
+		AddTextOptionST("ExpressionTestPlayer", "$SSL_TestOnPlayer", "$SSL_Apply", FlagF)
+	else
+		AddTextOptionST("ExpressionTestPlayer", "$SSL_TestOnPlayer", "$SSL_Apply", FlagM)
+	endIf
 
-	AddTextOptionST("ExpressionTestTarget", "$SSL_TestOn{"+TargetName+"}", "$SSL_Apply", TargetFlag)
+	AddToggleOptionST("ExpressionVictim", "$SSL_ExpressionsVictim", Expression.HasTag("Victim"), FlagF)
+
+	if TargetRef != none
+		if TargetRef.GetLeveledActorBase().GetSex() == 1
+			AddTextOptionST("ExpressionTestTarget", "$SSL_TestOn{"+TargetName+"}", "$SSL_Apply", FlagF)
+		else
+			AddTextOptionST("ExpressionTestTarget", "$SSL_TestOn{"+TargetName+"}", "$SSL_Apply", FlagM)
+		endIf
+	else
+		AddTextOptionST("ExpressionTestTarget", "$SSL_TestOn{"+TargetName+"}", "$SSL_Apply", TargetFlag)
+	endIf
+
 	AddToggleOptionST("ExpressionAggressor", "$SSL_ExpressionsAggressor", Expression.HasTag("Aggressor"), Flag)
 
 	AddMenuOptionST("ExpressionPhase", "$SSL_Modifying{"+Expression.Name+"}Phase", Phase)
