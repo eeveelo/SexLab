@@ -153,9 +153,8 @@ function SetPhoneme(int Phase, int Gender, int id, int value)
 endFunction
 
 function EmptyPhase(int Phase, int Gender)
-	int[] Preset = new int[1]
+	int[] Preset = new int[32]
 	SetPhase(Phase, Gender, Preset)
-	SavePhase(Phase, Gender)
 	Phases[Gender] = ClampInt((Phases[Gender] - 1), 0, 5)
 	CountPhases()
 	if Phases[0] == 0 && Phases[1] == 0
@@ -170,7 +169,6 @@ function AddPhase(int Phase, int Gender)
 		Preset[31] = 50
 	endIf
 	SetPhase(Phase, Gender, Preset)
-	SavePhase(Phase, Gender)
 	Phases[Gender] = ClampInt((Phases[Gender] + 1), 0, 5)
 	Enabled = true
 endFunction
@@ -206,10 +204,10 @@ int[] function GetPhase(int Phase, int Gender)
 			Preset = Female5
 		endIf
 	endIf
-	if Preset.Length == 32
-		return Preset
+	if Preset.Length != 32
+		return new int[32]
 	endIf
-	return new int[32]
+	return Preset
 endFunction
 
 function SetPhase(int Phase, int Gender, int[] Preset)
@@ -267,8 +265,7 @@ function CountPhases()
 endFunction
 
 function Save(int id)
-	LoadProfile()
-	SaveProfile()
+	CountPhases()
 	Log(Name, "Expressions["+id+"]")
 endFunction
 
@@ -287,63 +284,4 @@ function Initialize()
 	Female4 = new int[1]
 	Female5 = new int[1]
 	parent.Initialize()
-endFunction
-
-function SaveProfile()
-	SavePhase(1, 1)
-	SavePhase(2, 1)
-	SavePhase(3, 1)
-	SavePhase(4, 1)
-	SavePhase(5, 1)
-	SavePhase(1, 0)
-	SavePhase(2, 0)
-	SavePhase(3, 0)
-	SavePhase(4, 0)
-	SavePhase(5, 0)
-endFunction
-
-function LoadProfile()
-	StorageUtil.ImportFile("ExpressionProfile.json", Key(""), 16, Storage, keyContains = true)
-	LoadPhase(1, 1)
-	LoadPhase(2, 1)
-	LoadPhase(3, 1)
-	LoadPhase(4, 1)
-	LoadPhase(5, 1)
-	LoadPhase(1, 0)
-	LoadPhase(2, 0)
-	LoadPhase(3, 0)
-	LoadPhase(4, 0)
-	LoadPhase(5, 0)
-	CountPhases()
-endFunction
-
-function SavePhase(int Phase, int Gender)
-	string PhaseKey = Key(Gender+"."+Phase)
-	int[] Preset = GetPhase(Phase, Gender)
-	StorageUtil.IntListClear(Storage, PhaseKey)
-	if AddValues(Preset) > 0
-		int Count = Preset.Length
-		int i
-		while i < Count
-			StorageUtil.IntListAdd(Storage, PhaseKey, Preset[i])
-			i += 1
-		endWhile
-	endIf
-	StorageUtil.ExportFile("ExpressionProfile.json", PhaseKey, 16, Storage, keyContains = true)
-	StorageUtil.IntListClear(Storage, PhaseKey)
-endFunction
-
-function LoadPhase(int Phase, int Gender)
-	string PhaseKey = Key(Gender+"."+Phase)
-	int i = StorageUtil.IntListCount(Storage, PhaseKey)
-	if i != 32
-		SetPhase(Phase, Gender, new int[1])
-		return
-	endIf
-	int[] Preset = new int[32]
-	while i
-		i -= 1
-		Preset[i] = StorageUtil.IntListGet(Storage, PhaseKey, i)
-	endWhile
-	SetPhase(Phase, Gender, Preset)
 endFunction

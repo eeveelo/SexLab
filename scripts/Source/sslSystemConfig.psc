@@ -448,7 +448,7 @@ function ImportExpressions()
 	int i = ExpressionSlots.Slotted
 	while i
 		i -= 1
-		ExpressionSlots.Expressions[i].LoadProfile()
+		; ExpressionSlots.Expressions[i].LoadProfile()
 	endWhile
 endFunction
 
@@ -456,7 +456,7 @@ function ExportExpressions()
 	int i = ExpressionSlots.Slotted
 	while i
 		i -= 1
-		ExpressionSlots.Expressions[i].SaveProfile()
+		; ExpressionSlots.Expressions[i].SaveProfile()
 	endWhile
 endFunction
 
@@ -497,7 +497,7 @@ function Reload()
 	AudioSFX.SetVolume(SFXVolume)
 	; Load animation & expression profile
 	ImportProfile(AnimProfile)
-	ImportExpressions()
+	; ImportExpressions()
 	; Remove any targeted actors
 	RegisterForCrosshairRef()
 	CrosshairRef = none
