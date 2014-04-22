@@ -407,6 +407,65 @@ int function GetLowestPresentRelationshipRank(Actor ActorRef)
 	return Lowest
 endFunction
 
+function ChangeActors(Actor[] NewPositions)
+	int[] NewGenders = ActorLib.GenderCount(NewPositions)
+	if HasCreature || NewGenders[2] > 0 || AddValues(NewGenders) == 0
+		return
+	endIf
+	; Enter making state for alterations
+	SendThreadEvent("ActorChangeStart")
+	UnregisterforUpdate()
+	; Remove actors no longer present
+	int i = ActorCount
+	while i
+		i -= 1
+		if NewPositions.Find(Positions[i]) == -1
+			ActorAlias(Positions[i]).ClearAlias()
+			SendTrackedEvent(Positions[i], "End", thread_id)
+		else
+			ActorAlias(Positions[i]).StopAnimating(true)
+		endIf
+	endWhile
+	; Save new positions information
+	Genders    = NewGenders
+	Positions  = NewPositions
+	ActorCount = NewPositions.Length
+	; Select new animations for changed actor count
+	if PrimaryAnimations[0].PositionCount != ActorCount
+		SetAnimations(AnimSlots.GetByDefault(NewGenders[0], NewGenders[1], IsAggressive, (BedRef != none), Config.RestrictAggressive))
+		SetAnimation()
+	endIf
+	; End lead in if thread was in it and can't be now
+	if LeadIn && NewPositions.Length != 2
+		Stage  = 1
+		LeadIn = false
+		AliasEvent("Strip", false)
+		SendThreadEvent("LeadInEnd")
+	endIf
+	; Prepare actors who weren't present before
+	i = ActorCount
+	while i
+		i -= 1
+		if FindSlot(Positions[i]) == -1
+			; Slot into alias
+			sslActorAlias Slot = PickAlias(Positions[i])
+			if Slot == none || !Slot.SetupAlias(Positions[i])
+				Log("ChangeActors() - Failed to add actor '"+Positions[i].GetLeveledActorBase().GetName()+"' -- They were unable to fill an actor alias", "FATAL")
+				return
+			endIf
+			SendTrackedEvent(Positions[i], "Added", thread_id)
+			Slot.DoUndress = false
+			Slot.PrepareActor()
+			Slot.StartAnimating()
+			SendTrackedEvent(Positions[i], "Start", thread_id)
+		endIf
+	endWhile
+	; Reposition actors
+	RealignActors()
+	RegisterForSingleUpdate(0.1)
+	SendThreadEvent("ActorChangeEnd")
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Animation Setup                                 --- ;
 ; ------------------------------------------------------- ;
@@ -897,6 +956,8 @@ endFunction
 event OnKeyDown(int keyCode)
 endEvent
 function EnableHotkeys()
+endFunction
+function RealignActors()
 endFunction
 
 ; ------------------------------------------------------- ;

@@ -81,6 +81,10 @@ endProperty
 ; ------------------------------------------------------- ;
 
 function ClearAlias()
+	; Prevent anything from starting
+	UnregisterForUpdate()
+	UnregisterForAllModEvents()
+	GoToState("")
 	; Set libraries
 	Thread = GetOwningQuest() as sslThreadController
 	; Make sure actor is reset
@@ -102,7 +106,7 @@ function ClearAlias()
 endFunction
 
 bool function SetupAlias(Actor ProspectRef, bool Victimize = false, sslBaseVoice UseVoice = none, bool ForceSilent = false)
-	if ProspectRef == none || GetReference() != ProspectRef
+	if ProspectRef == none || GetReference() != ProspectRef || ValidateActor(ProspectRef) != 1
 		return false ; Failed to set prospective actor into alias
 	endIf
 	; Register actor as active
