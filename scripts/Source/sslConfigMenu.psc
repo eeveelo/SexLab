@@ -49,6 +49,7 @@ event OnVersionUpdate(int version)
 				i -= 1
 				ExpressionSlots.GetBySlot(i).Update151()
 			endWhile
+			ExpressionSlots.Setup()
 			Debug.Notification("SexLab 1.51 Updated")
 		endIf
 
