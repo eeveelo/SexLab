@@ -2336,6 +2336,7 @@ endState
 function ExportSettings()
 	; Clear any potentially lingering storage data
 	debug_DeleteValues(self)
+	Utility.WaitMenuMode(0.5)
 	; Set label of export
 	SetStringValue(self, "ExportLabel", PlayerRef.GetLeveledActorBase().GetName()+" - "+Utility.GetCurrentRealTime() as int)
 
@@ -2412,18 +2413,19 @@ function ExportSettings()
 
 	; Save to JSON file
 	ExportFile("SexLabConfig.json", restrictForm = self, append = false)
-	; Clear storageutil values from save after export
 	Utility.WaitMenuMode(0.5)
-	Config.Log("Config Pre Clear: "+StorageUtil.debug_GetIntKeysCount(self))
+	; Clear storageutil values from save after export
 	debug_DeleteValues(self)
-	Config.Log("Config Post Clear: "+StorageUtil.debug_GetIntKeysCount(self))
+	Utility.WaitMenuMode(0.5)
 endFunction
 
 function ImportSettings()
 	; Clear any potentially lingering storage data
 	debug_DeleteValues(self)
 	; Load JSON file
+	Utility.WaitMenuMode(0.5)
 	ImportFile("SexLabConfig.json")
+	Utility.WaitMenuMode(0.5)
 
 	; Booleans
 	Config.RestrictAggressive = ImportBool("RestrictAggressive", Config.RestrictAggressive)
@@ -2497,9 +2499,7 @@ function ImportSettings()
 	ImportVoices()
 
 	; Clear storageutil values from save after import
-	Config.Log("Config Pre Clear: "+StorageUtil.debug_GetIntKeysCount(self))
 	debug_DeleteValues(self)
-	Config.Log("Config Post Clear: "+StorageUtil.debug_GetIntKeysCount(self))
 
 	; Reload settings with imported values
 	Config.Reload()
