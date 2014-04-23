@@ -5,7 +5,7 @@ scriptname SexLabUtil hidden
 ; ------------------------------------------------------- ;
 
 int function GetVersion() global
-	return 15100
+	return 15200
 endFunction
 
 string function GetStringVer() global
@@ -58,6 +58,14 @@ endFunction
 
 bool function IsActorActive(Actor ActorRef) global
 	return StorageUtil.FormListFind(none, "SexLabActors", ActorRef) != -1
+endFunction
+
+bool function HasCreature(Actor ActorRef) global
+	return HasRace(ActorRef.GetLeveledActorBase().GetRace())
+endFunction
+
+bool function HasRace(Race RaceRef) global
+	return StorageUtil.StringListFind(none, "SexLabCreatures", MiscUtil.GetRaceEditorID(RaceRef)) != -1
 endFunction
 
 ; ------------------------------------------------------- ;
