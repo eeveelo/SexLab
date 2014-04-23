@@ -474,6 +474,9 @@ endFunction
 function AdjustSexuality(Actor ActorRef, int Males, int Females)
 	bool IsFemale = GetGender(ActorRef) == 1
 	int Ratio = GetSkill(ActorRef, "Sexuality")
+	if Ratio == 0
+		Ratio = 85
+	endIf
 	if IsFemale
 		Ratio += (Males - Females)
 	else
