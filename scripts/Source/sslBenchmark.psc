@@ -123,19 +123,19 @@ int function LatencyTest()
 	Count   = 0
 	Delay   = 0.0
 	Started = Utility.GetCurrentRealTime()
-	RegisterForSingleUpdate(0)
+	RegisterForSingleUpdate(0.1)
 	while Result == 0
-		Utility.Wait(0.01)
+		Utility.Wait(0.1)
 	endWhile
 	return Result
 endFunction
 
 event OnUpdate()
-	Delay += (Utility.GetCurrentRealTime() - Started)
+	Delay += ((Utility.GetCurrentRealTime() - Started) - 0.1)
 	Count += 1
 	if Count < 10
 		Started = Utility.GetCurrentRealTime()
-		RegisterForSingleUpdate(0)
+		RegisterForSingleUpdate(0.0)
 	else
 		Result = ((Delay / 10.0) * 1000.0) as int
 		Debug.Notification("Latency Test Result: "+Result+"ms")

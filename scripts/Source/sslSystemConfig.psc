@@ -400,49 +400,25 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function ExportProfile(int Profile = 1)
-	; Save normal animation profiles
-	int i = AnimSlots.Slotted
-	while i
-		i -= 1
-		AnimSlots.Slots[i].SaveProfile(Profile)
-	endwhile
-	; Save creature animation profiles
-	i = CreatureSlots.Slotted
-	while i
-		i -= 1
-		CreatureSlots.Slots[i].SaveProfile(Profile)
-	endwhile
-	; Log("AnimationProfile_"+Profile+".json", "Export")
+	StorageUtil.ExportFile("AnimationProfile_"+Profile+".json", ".Adjust", -1, AnimSlots, false, true, false)
+	Log("Animation Profile #"+AnimProfile+" exported with ("+StorageUtil.debug_GetFloatListKeysCount(AnimSlots)+") values...", "Export")
+endFunction
+
+function SwapToProfile(int Profile)
+	if Profile != AnimProfile
+		ExportProfile(AnimProfile)
+		Utility.WaitMenuMode(0.5)
+		StorageUtil.debug_DeleteValues(AnimSlots)
+		Utility.WaitMenuMode(0.5)
+		AnimProfile = Profile
+		ImportProfile(Profile)
+	endIf
 endFunction
 
 function ImportProfile(int Profile = 1)
-	; Load normal animation profiles
-	int i = AnimSlots.Slotted
-	while i
-		i -= 1
-		AnimSlots.Slots[i].LoadProfile(Profile)
-	endwhile
-	; Load creature animation profiles
-	i = CreatureSlots.Slotted
-	while i
-		i -= 1
-		CreatureSlots.Slots[i].LoadProfile(Profile)
-	endwhile
-	; Log("AnimationProfile_"+Profile+".json", "Import")
+	StorageUtil.ImportFile("AnimationProfile_"+Profile+".json")
+	Log("Animation Profile #"+AnimProfile+" imported with ("+StorageUtil.debug_GetFloatListKeysCount(AnimSlots)+") values...", "Import")
 endfunction
-
-string function ProfileLabel(int Profile = 1)
-	string LabelKey = "AnimationProfile.Label."+Profile
-	string JSON = "AnimationProfile_"+Profile+".json"
-	; Load existing label
-	StorageUtil.ImportFile(JSON, LabelKey, 4, restrictGlobal = true)
-	; Set a default label if it didn't load
-	string Label = StorageUtil.GetStringValue(none, LabelKey, "Profile #"+Profile+" (no label)")
-	StorageUtil.SetStringValue(none, LabelKey, Label)
-	; Save label
-	StorageUtil.ExportFile(JSON, LabelKey, 4, restrictGlobal = true)
-	return Label
-endFunction
 
 function ImportExpressions()
 	int i = ExpressionSlots.Slotted
@@ -497,12 +473,11 @@ function Reload()
 	AudioSFX.SetVolume(SFXVolume)
 	; Load animation & expression profile
 	ImportProfile(AnimProfile)
-	; ImportExpressions()
 	; Remove any targeted actors
 	RegisterForCrosshairRef()
 	CrosshairRef = none
 	TargetRef = none
-	; Validate tracked factions
+	; Validate tracked factions & actors
 	ThreadLib.ValidateTrackedActors()
 	ThreadLib.ValidateTrackedFactions()
 endFunction
@@ -667,16 +642,10 @@ function SetDefaults()
 	StageTimerAggr[3] = 10.0
 	StageTimerAggr[4] = 4.0
 
-	; Set animation profile labels
-	ProfileLabel(1)
-	ProfileLabel(2)
-	ProfileLabel(3)
-	ProfileLabel(4)
-	ProfileLabel(5)
-	ImportProfile(1)
+	; Set animation profile
+	SwapToProfile(1)
 
 	; Config loaders
-	Setup()
 	LoadStrapons()
 	Reload()
 endFunction

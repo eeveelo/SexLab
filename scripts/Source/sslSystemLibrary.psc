@@ -34,4 +34,9 @@ function Setup()
 	CreatureSlots   = SexLab.CreatureSlots
 	VoiceSlots      = SexLab.VoiceSlots
 	ExpressionSlots = SexLab.ExpressionSlots
+	; Clean script of events
+	GoToState("")
+	UnregisterForUpdate()
+	UnregisterForAllKeys()
+	UnregisterForAllModEvents()
 endFunction

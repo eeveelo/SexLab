@@ -164,11 +164,11 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function SeedActor(Actor ActorRef)
-	if ActorRef == PlayerRef || !ActorRef.HasKeyword(ActorTypeNPC) || FormListFind(Storage, "SeededActors", ActorRef) != -1
+	if ActorRef == PlayerRef || !ActorRef.HasKeyword(ActorTypeNPC) || FormListFind(none, "SexLab.SeededActors", ActorRef) != -1
 		return
 	endIf
 	; Added to seeded list so they skip this in future
-	FormListAdd(Storage, "SeededActors", ActorRef, false)
+	FormListAdd(none, "SexLab.SeededActors", ActorRef, false)
 
 	float Level       = ActorRef.GetLevel() as float
 	float Energy      = ActorRef.GetActorValue("Energy")
@@ -615,7 +615,7 @@ function ResetStats(Actor ActorRef)
 		endWhile
 	endIf
 	FormListClear(ActorRef, "SexPartners")
-	; FormListRemove(Storage, "SeededActors", ActorRef, true)
+	; FormListRemove(none, "SexLab.SeededActors", ActorRef, true)
 endFunction
 
 function Setup()

@@ -42,15 +42,18 @@ event OnVersionUpdate(int version)
 	; Update System - v1.5x incremental updates
 	elseIf CurrentVersion < version
 
+		Quest SexLabQuestFramework  = Game.GetFormFromFile(0xD62, "SexLab.esm") as Quest
+		Quest SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm") as Quest
+		Quest SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm") as Quest
+
 		; v1.51 - Fixed missing ChangeActors() and removed exprsionprofile.json support
-		if CurrentVersion < 15100
-			int i = ExpressionSlots.Slotted
-			while i
-				i -= 1
-				ExpressionSlots.GetBySlot(i).Update151()
-			endWhile
+		; v1.52 -
+		if CurrentVersion < 15200
+			debug_DeleteValues(SexLabQuestRegistry)
+			FormListClear(SexLabQuestFramework, "SeededActors")
 			ExpressionSlots.Setup()
-			Debug.Notification("SexLab 1.51 Updated")
+			CreatureSlots.Setup()
+			Debug.Notification("SexLab 1.52 Updated")
 		endIf
 
 		EventType = "SexLabUpdated"
@@ -91,6 +94,7 @@ event OnGameReload()
 	Config = SexLabQuestFramework as sslSystemConfig
 	; Reload SexLab's voice/tfc config at load
 	if CurrentVersion > 0 && Config.CheckSystem()
+		ThreadSlots.StopAll()
 		Config.Reload()
 	else
 		SexLab.GoToState("Disabled")
@@ -216,8 +220,8 @@ event OnSliderAcceptST(float value)
 	if Options[0] == "Adjust"
 		; Stage, Slot
 		Animation.SetAdjustment(Animation.Key("Adjust."+AdjustKey), Position, Options[1] as int, Options[2] as int, value)
-		Animation.SaveProfile(Config.AnimProfile)
-		SetSliderOptionValueST(value)
+		StorageUtil.ExportFile("AnimationProfile_"+Config.AnimProfile+".json", Animation.Key("Adjust."+AdjustKey))
+		SetSliderOptionValueST(value, "{2}")
 
 	; Expression Editor
 	elseIf Options[0] == "Expression"
@@ -325,7 +329,7 @@ function AnimationSettings()
 
 	SetCursorPosition(1)
 	; AddHeaderOption("$SSL_AnimationHandling")
-	AddMenuOptionST("AnimationProfile", "$SSL_AnimationProfile", Config.ProfileLabel(Config.AnimProfile))
+	AddMenuOptionST("AnimationProfile", "$SSL_AnimationProfile", "Profile #"+Config.AnimProfile)
 	AddToggleOptionST("RaceAdjustments","$SSL_RaceAdjustments", Config.RaceAdjustments)
 	AddToggleOptionST("AllowCreatures","$SSL_AllowCreatures", Config.AllowCreatures)
 	AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", Config.ScaleActors)
@@ -342,11 +346,11 @@ endFunction
 state AnimationProfile
 	event OnMenuOpenST()
 		string[] Profiles = new string[5]
-		Profiles[0] = Config.ProfileLabel(1)
-		Profiles[1] = Config.ProfileLabel(2)
-		Profiles[2] = Config.ProfileLabel(3)
-		Profiles[3] = Config.ProfileLabel(4)
-		Profiles[4] = Config.ProfileLabel(5)
+		Profiles[0] = "AnimationProfile_1.json"
+		Profiles[1] = "AnimationProfile_2.json"
+		Profiles[2] = "AnimationProfile_3.json"
+		Profiles[3] = "AnimationProfile_4.json"
+		Profiles[4] = "AnimationProfile_5.json"
 		SetMenuDialogStartIndex((Config.AnimProfile - 1))
 		SetMenuDialogDefaultIndex(0)
 		SetMenuDialogOptions(Profiles)
@@ -354,10 +358,8 @@ state AnimationProfile
 	event OnMenuAcceptST(int i)
 		i += 1
 		; Export/Set/Import profiles
-		Config.ExportProfile(Config.AnimProfile)
-		Config.AnimProfile = ClampInt(i, 1, 5)
-		Config.ImportProfile(Config.AnimProfile)
-		SetMenuOptionValueST(Config.ProfileLabel(Config.AnimProfile))
+		Config.SwapToProfile(ClampInt(i, 1, 5))
+		SetMenuOptionValueST("Profile #"+Config.AnimProfile)
 	endEvent
 	event OnDefaultST()
 		OnMenuAcceptST(1)
@@ -2332,6 +2334,8 @@ endState
 
 
 function ExportSettings()
+	; Clear any potentially lingering storage data
+	debug_DeleteValues(self)
 	; Set label of export
 	SetStringValue(self, "ExportLabel", PlayerRef.GetLeveledActorBase().GetName()+" - "+Utility.GetCurrentRealTime() as int)
 
@@ -2408,9 +2412,16 @@ function ExportSettings()
 
 	; Save to JSON file
 	ExportFile("SexLabConfig.json", restrictForm = self, append = false)
+	; Clear storageutil values from save after export
+	Utility.WaitMenuMode(0.5)
+	Config.Log("Config Pre Clear: "+StorageUtil.debug_GetIntKeysCount(self))
+	debug_DeleteValues(self)
+	Config.Log("Config Post Clear: "+StorageUtil.debug_GetIntKeysCount(self))
 endFunction
 
 function ImportSettings()
+	; Clear any potentially lingering storage data
+	debug_DeleteValues(self)
 	; Load JSON file
 	ImportFile("SexLabConfig.json")
 
@@ -2437,7 +2448,7 @@ function ImportSettings()
 	Config.RaceAdjustments    = ImportBool("RaceAdjustments", Config.RaceAdjustments)
 
 	; Integers
-	Config.AnimProfile        = ImportInt("AnimProfile", Config.AnimProfile)
+	Config.SwapToProfile(GetIntValue(self, "AnimProfile", Config.AnimProfile))
 	Config.NPCBed             = ImportInt("NPCBed", Config.NPCBed)
 
 	Config.Backwards          = ImportInt("Backwards", Config.Backwards)
@@ -2485,6 +2496,11 @@ function ImportSettings()
 	ImportExpressions()
 	ImportVoices()
 
+	; Clear storageutil values from save after import
+	Config.Log("Config Pre Clear: "+StorageUtil.debug_GetIntKeysCount(self))
+	debug_DeleteValues(self)
+	Config.Log("Config Post Clear: "+StorageUtil.debug_GetIntKeysCount(self))
+
 	; Reload settings with imported values
 	Config.Reload()
 endFunction
@@ -2495,7 +2511,6 @@ function ExportFloat(string Name, float Value)
 endFunction
 float function ImportFloat(string Name, float Value)
 	Value = GetFloatValue(self, Name, Value)
-	UnsetFloatValue(self, Name)
 	return Value
 endFunction
 
@@ -2505,7 +2520,6 @@ function ExportInt(string Name, int Value)
 endFunction
 int function ImportInt(string Name, int Value)
 	Value = GetIntValue(self, Name, Value)
-	UnsetIntValue(self, Name)
 	return Value
 endFunction
 
@@ -2515,13 +2529,11 @@ function ExportBool(string Name, bool Value)
 endFunction
 bool function ImportBool(string Name, bool Value)
 	Value = GetIntValue(self, Name, Value as int) as bool
-	UnsetIntValue(self, Name)
 	return Value
 endFunction
 
 ; Float Arrays
 function ExportFloatList(string Name, float[] Values, int len)
-	FloatListClear(self, Name)
 	int i
 	while i < len
 		FloatListAdd(self, Name, Values[i])
@@ -2536,13 +2548,11 @@ float[] function ImportFloatList(string Name, float[] Values, int len)
 			i += 1
 		endWhile
 	endIf
-	FloatListClear(self, Name)
 	return Values
 endFunction
 
 ; Boolean Arrays
 function ExportBoolList(string Name, bool[] Values, int len)
-	IntListClear(self, Name)
 	int i
 	while i < len
 		IntListAdd(self, Name, Values[i] as int)
@@ -2557,7 +2567,6 @@ bool[] function ImportBoolList(string Name, bool[] Values, int len)
 			i += 1
 		endWhile
 	endIf
-	IntListClear(self, Name)
 	return Values
 endFunction
 
@@ -2565,7 +2574,6 @@ endFunction
 function ExportAnimations()
 	int i = AnimSlots.Slotted
 	sslBaseAnimation[] Anims = AnimSlots.Animations
-	StringListClear(self, "Animations")
 	while i
 		i -= 1
 		StringListAdd(self, "Animations", MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int, Anims[i].HasTag("Foreplay") as int, Anims[i].HasTag("Aggressive") as int))
@@ -2585,14 +2593,12 @@ function ImportAnimations()
 			Slot.AddTagConditional("Aggressive", (args[3] as int) as bool)
 		endIf
 	endWhile
-	StringListClear(self, "Animations")
 endFunction
 
 ; Creatures
 function ExportCreatures()
 	int i = CreatureSlots.Slotted
 	sslBaseAnimation[] Anims = CreatureSlots.Animations
-	StringListClear(self, "Creatures")
 	while i
 		i -= 1
 		StringListAdd(self, "Creatures", MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int))
@@ -2609,14 +2615,12 @@ function ImportCreatures()
 			CreatureSlots.GetbyRegistrar(args[0]).Enabled = (args[1] as int) as bool
 		endIf
 	endWhile
-	StringListClear(self, "Creatures")
 endFunction
 
 ; Expressions
 function ExportExpressions()
 	int i = ExpressionSlots.Slotted
 	sslBaseExpression[] Exprs = ExpressionSlots.Expressions
-	StringListClear(self, "Expressions")
 	while i
 		i -= 1
 		StringListAdd(self, "Expressions", MakeArgs(",", Exprs[i].Registry, Exprs[i].HasTag("Consensual") as int, Exprs[i].HasTag("Victim") as int, Exprs[i].HasTag("Aggressor") as int))
@@ -2636,14 +2640,12 @@ function ImportExpressions()
 			Slot.AddTagConditional("Aggressor", (args[3] as int) as bool)
 		endIf
 	endWhile
-	StringListClear(self, "Expressions")
 endFunction
 
 ; Voices
 function ExportVoices()
 	int i = VoiceSlots.Slotted
 	sslBaseVoice[] Voices = VoiceSlots.Voices
-	StringListClear(self, "Voices")
 	while i
 		i -= 1
 		StringListAdd(self, "Voices", MakeArgs(",", Voices[i].Registry, Voices[i].Enabled as int))
@@ -2662,9 +2664,7 @@ function ImportVoices()
 			VoiceSlots.GetbyRegistrar(args[0]).Enabled = (args[1] as int) as bool
 		endIf
 	endWhile
-	StringListClear(self, "Voices")
 	; Player voice
 	VoiceSlots.ForgetVoice(PlayerRef)
 	VoiceSlots.SaveVoice(PlayerRef, VoiceSlots.GetByName(GetStringValue(self, "PlayerVoice", "$SSL_Random")))
-	UnsetStringValue(self, "PlayerVoice")
 endFunction

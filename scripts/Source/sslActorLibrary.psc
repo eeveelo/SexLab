@@ -277,11 +277,11 @@ int function GetGender(Actor ActorRef)
 	if ActorRef.IsInFaction(GenderFaction)
 		return ActorRef.GetFactionRank(GenderFaction)
 	endIf
-	ActorBase Base = ActorRef.GetLeveledActorBase()
-	if CreatureSlots.AllowedCreature(Base.GetRace())
+	ActorBase BaseRef = ActorRef.GetLeveledActorBase()
+	if SexLabUtil.HasRace(BaseRef.GetRace())
 		return 2 ; Creature
 	endIf
-	return Base.GetSex() ; Default
+	return BaseRef.GetSex() ; Default
 endFunction
 
 int[] function GenderCount(Actor[] Positions)

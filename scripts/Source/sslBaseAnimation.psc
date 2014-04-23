@@ -18,6 +18,7 @@ float[] Offsets ; = forward, side, up, rotate
 float[] Timers
 float[] CenterAdjust
 string[] Animations
+string[] RaceIDs
 int sid
 int aid
 
@@ -65,13 +66,13 @@ endProperty
 
 form[] property CreatureRaces hidden
 	form[] function get()
-		int i = FormListCount(Storage, Key("Creatures"))
-		form[] races = FormArray(i)
+		int i = RaceIDs.Length
+		form[] RaceRefs = FormArray(i)
 		while i
 			i -= 1
-			races[i] = FormListGet(Storage, Key("Creatures"), i)
+			RaceRefs[i] = Race.GetRace(RaceIDs[i])
 		endWhile
-		return races
+		return RaceRefs
 	endFunction
 endProperty
 
@@ -268,22 +269,21 @@ function InitAdjustments(string AdjustKey)
 	endIf
 endFunction
 
-string function MakeAdjustKey(Actor[] ACtorList, bool RaceKey = true)
+string function MakeAdjustKey(Actor[] ActorList, bool RaceKey = true)
 	if RaceKey == false || ActorList.Length != Actors
 		return Key("Adjust.Global")
 	endIf
 	string AdjustKey = Key("Adjust")
 	int i
 	while i < Actors
-		ActorBase BaseRef = ACtorList[i].GetLeveledActorBase()
-		Race RaceRef = BaseRef.GetRace()
-		AdjustKey += "."+MiscUtil.GetRaceEditorID(RaceRef)
-		if HasRace(RaceRef)
-			; No gender preference for creatures
+		ActorBase BaseRef = ActorList[i].GetLeveledActorBase()
+		string RaceID = MiscUtil.GetRaceEditorID(BaseRef.GetRace())
+		if IsCreature && GetGender(i) == 2
+			AdjustKey += "."+RaceID+"C"
 		elseIf BaseRef.GetSex() == 1
-			AdjustKey += "F"
+			AdjustKey += "."+RaceID+"F"
 		else
-			AdjustKey += "M"
+			AdjustKey += "."+RaceID+"M"
 		endIf
 		i += 1
 	endWhile
@@ -391,16 +391,35 @@ endFunction
 ; --- Creature Use                                    --- ;
 ; ------------------------------------------------------- ;
 
-bool function HasRace(Race CreatureRace)
-	return FormListFind(Storage, Key("Creatures"), CreatureRace) != -1
+bool function HasRace(Race RaceRef)
+	return HasRaceID(MiscUtil.GetRaceEditorID(RaceRef)) ; FormListFind(Storage, Key("Creatures"), RaceRef) != -1
 endFunction
 
-function AddRace(Race CreatureRace)
-	FormListAdd(Storage, Key("Creatures"), CreatureRace, false)
-	SetIntValue(CreatureRace, "SexLab.HasCreature", 1)
-	if Enabled
-		FormListAdd(none, "SexLab.CreatureRaces", CreatureRace, true)
+function AddRace(Race RaceRef)
+	AddRaceID(MiscUtil.GetRaceEditorID(RaceRef))
+endFunction
+
+bool function HasRaceID(string RaceID)
+	return RaceID != "" && RaceIDs.Find(RaceID) != -1
+endFunction
+
+function AddRaceID(string RaceID)
+	if HasRaceID(RaceID) || Race.GetRace(RaceID) == none
+		return ; Invalid race form or already added
 	endIf
+	; Init ID storage
+	if RaceIDs.Length < 1
+		RaceIDs = new string[5]
+	endIf
+	; Add to animation
+	int i = RaceIDs.Find("")
+	if i != -1
+		RaceIDs[i] = RaceID
+	else
+		RaceIDs = sslUtility.PushString(RaceID, RaceIDs)
+	endIf
+	; Add global
+	StringListAdd(none, "SexLabCreatures", RaceID, false)
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -482,7 +501,8 @@ function Save(int id)
 	endIf
 	; Log the new animation
 	if IsCreature
-		Log(Name, "Creatures["+id+"]")
+		RaceIDs = ClearEmpty(RaceIDs)
+		Log(Name+" - "+RaceIDs, "Creatures["+id+"]")
 	else
 		Log(Name, "Animations["+id+"]")
 	endIf
@@ -519,39 +539,9 @@ function Initialize()
 	Flags      = new int[128]
 	Offsets    = new float[128]
 	Animations = new string[128]
+	string[] stringDel1
+	RaceIDs = stringDel1
 	float[] floatDel1
 	Timers = floatDel1
-	FormListClear(Storage, Key("Creatures"))
 	parent.Initialize()
 endFunction
-
-function SaveProfile(int SaveTo = 1)
-	if Registered
-		SaveTo = ClampInt(SaveTo, 1, 5)
-		if FloatListCount(Storage, Key("Adjust.Global")) > 0 || StringListCount(Storage, Key("AdjustKeys")) > 0
-			ExportFile("AnimationProfile_"+SaveTo+".json", Key("AdjustKeys"), 64)
-			ExportFile("AnimationProfile_"+SaveTo+".json", Key("Adjust."), 32, keyContains = true)
-		endIf
-	endIf
-endFunction
-
-function LoadProfile(int Profile = 1)
-	if Registered
-		Profile = ClampInt(Profile, 1, 5)
-		; Clear current global
-		if FloatListCount(Storage, Key("Adjust.Global")) > 0
-			FloatListClear(Storage, Key("Adjust.Global"))
-		endIf
-		; Clear current race/gender adjustments
-		int i = StringListCount(Storage, Key("AdjustKeys"))
-		while i
-			i -= 1
-			FloatListClear(Storage, Key("Adjust."+StringListGet(Storage, Key("AdjustKeys"), i)))
-		endwhile
-		FloatListClear(Storage, Key("AdjustKeys"))
-		; Load the profile
-		ImportFile("AnimationProfile_"+Profile+".json", Key("AdjustKeys"), 64)
-		ImportFile("AnimationProfile_"+Profile+".json", Key("Adjust."), 32, keyContains = true)
-	endIf
-endFunction
-

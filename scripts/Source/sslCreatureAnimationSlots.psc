@@ -1,42 +1,40 @@
 scriptname sslCreatureAnimationSlots extends sslAnimationSlots
 
+import MiscUtil
+
 ; ------------------------------------------------------- ;
 ; --- Creature aniamtion support                      --- ;
 ; ------------------------------------------------------- ;
 
-sslBaseAnimation[] function GetByRace(int ActorCount, Race CreatureRace)
+sslBaseAnimation[] function GetByRace(int ActorCount, Race RaceRef)
+	string RaceID = GetRaceEditorID(RaceRef)
 	bool[] Valid = sslUtility.BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
-		Valid[i] = Slots[i].Enabled && ActorCount == Slots[i].PositionCount && Slots[i].HasRace(CreatureRace)
+		Valid[i] = Slots[i].Enabled && ActorCount == Slots[i].PositionCount && Slots[i].HasRaceID(RaceID)
 	endWhile
-	return GetList(valid)
+	return GetList(Valid)
 endFunction
 
 bool function HasCreature(Actor ActorRef)
-	return ActorRef != PlayerRef && HasRace(ActorRef.GetLeveledActorBase().GetRace())
+	return SexLabUtil.HasCreature(ActorRef)
 endFunction
 
-bool function HasRace(Race CreatureRace)
-	return StorageUtil.GetIntValue(CreatureRace, "SexLab.HasCreature") == 1
+bool function HasRace(Race RaceRef)
+	return SexLabUtil.HasRace(RaceRef)
 endFunction
 
-bool function AllowedCreature(Race CreatureRace)
-	return  Config.AllowCreatures && StorageUtil.FormListFind(none, "SexLab.CreatureRaces", CreatureRace) != -1 ;StorageUtil.GetIntValue(CreatureRace, "SexLab.HasCreature") == 1
+bool function AllowedCreature(Race RaceRef)
+	return Config.AllowCreatures && SexLabUtil.HasRace(RaceRef) ;StorageUtil.GetIntValue(RaceRef, "SexLab.HasCreature") == 1
 endFunction
 
-function AddRace(Race CreatureRace) global
-	StorageUtil.SetIntValue(CreatureRace, "SexLab.HasCreature", 1)
-	StorageUtil.FormListAdd(none, "SexLab.CreatureRaces", CreatureRace)
-endFunction
-
-bool function AllowedCreatureCombination(Race CreatureRace1, Race CreatureRace2)
-	if AllowedCreature(CreatureRace1) && AllowedCreature(CreatureRace2)
+bool function AllowedCreatureCombination(Race RaceRef1, Race RaceRef2)
+	if Config.AllowCreatures && SexLabUtil.HasRace(RaceRef1) && SexLabUtil.HasRace(RaceRef2)
 		int i = Slotted
 		while i
 			i -= 1
-			if Slots[i].Enabled && Slots[i].HasRace(CreatureRace1) && Slots[i].HasRace(CreatureRace2)
+			if Slots[i].Enabled && Slots[i].HasRace(RaceRef1) && Slots[i].HasRace(RaceRef2)
 				return true
 			endIf
 		endWhile
@@ -50,7 +48,7 @@ endFunction
 
 function RegisterSlots()
 	; Clear creature list
-	StorageUtil.FormListClear(none, "SexLab.CreatureRaces")
+	StorageUtil.StringListClear(none, "SexLabCreatures")
 	; Register default voices
 	sslCreatureAnimationDefaults Defaults = Quest.GetQuest("SexLabQuestRegistry") as sslCreatureAnimationDefaults
 	Defaults.Slots = self

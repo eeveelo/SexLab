@@ -418,12 +418,8 @@ state Ending
 	event OnUpdate()
 		SendThreadEvent("AnimationEnd")
 		; Export animations if adjusted
-		if Adjusted
-			if HasCreature
-				CreatureSlots.ExportProfile(Config.AnimProfile)
-			else
-				AnimSlots.ExportProfile(Config.AnimProfile)
-			endIf
+		if Adjusted && !HasCreature
+			Config.ExportProfile(Config.AnimProfile)
 		endIf
 		; Clear thread and make available for new animation
 		Initialize()

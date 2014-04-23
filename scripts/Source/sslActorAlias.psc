@@ -1,6 +1,6 @@
-scriptname sslActorAlias extends sslActorStats
+scriptname sslActorAlias extends sslActorLibrary
 
-import StorageUtil
+; import StorageUtil
 import sslUtility
 
 ; Actor Info
@@ -81,10 +81,11 @@ endProperty
 ; ------------------------------------------------------- ;
 
 function ClearAlias()
-	; Prevent anything from starting
-	UnregisterForUpdate()
-	UnregisterForAllModEvents()
+	; Clean script of events
 	GoToState("")
+	UnregisterForUpdate()
+	UnregisterForAllKeys()
+	UnregisterForAllModEvents()
 	; Set libraries
 	Thread = GetOwningQuest() as sslThreadController
 	; Make sure actor is reset
@@ -110,7 +111,7 @@ bool function SetupAlias(Actor ProspectRef, bool Victimize = false, sslBaseVoice
 		return false ; Failed to set prospective actor into alias
 	endIf
 	; Register actor as active
-	FormListAdd(none, "SexLabActors", ActorRef, false)
+	StorageUtil.FormListAdd(none, "SexLabActors", ActorRef, false)
 	; Init actor alias information
 	ActorRef   = ProspectRef
 	BaseRef    = ActorRef.GetLeveledActorBase()
@@ -123,10 +124,12 @@ bool function SetupAlias(Actor ProspectRef, bool Victimize = false, sslBaseVoice
 	IsPlayer   = ActorRef == PlayerRef
 	IsVictim   = Victimize
 	ActorVoice = ActorRef.GetVoiceType()
-	SetVoice(UseVoice, ForceSilent)
+	if !IsCreature
+		SetVoice(UseVoice, ForceSilent)
+	endIf
 	if !IsCreature && !IsPlayer
 		CacheStrippable(ActorRef)
-		SeedActor(ActorRef)
+		Stats.SeedActor(ActorRef)
 	endIf
 	; Get ready for mod events
 	string e = Thread.Key("")
@@ -168,6 +171,8 @@ state Ready
 		if Thread.ActorCount > 1 && Config.ScaleActors
 			AnimScale = (1.0 / base)
 		endIf
+		; Init coordinates array
+		Loc = new float[6]
 		; Stop movement
 		LockActor()
 		; Strip non creatures
@@ -195,7 +200,7 @@ state Ready
 			elseIf Thread.ActorCount == 2 && !Thread.HasCreature
 				SkilledActor = Thread.Positions[IndexTravel(Thread.Positions.Find(ActorRef), Thread.ActorCount)]
 			endIf
-			Skills = GetSkillLevels(SkilledActor)
+			Skills = Stats.GetSkillLevels(SkilledActor)
 			; Thread.Log(SkilledActor.GetLeveledActorBase().GetName()+" Skills: "+Skills, ActorName)
 			; Start Auto TFC if enabled
 			if IsPlayer && Config.AutoTFC && Game.GetCameraState() != 3
@@ -373,9 +378,9 @@ state Animating
 		if !IsCreature
 			int[] Genders = Thread.Genders
 			float[] SkillXP = Thread.SkillXP
-			AddSkillXP(ActorRef, SkillXP[0], SkillXP[1], SkillXP[2], SkillXP[3])
-			AddPurityXP(ActorRef, Skills[4], SkillXP[5], Thread.IsAggressive, IsVictim, Genders[2] > 0, Thread.ActorCount, Thread.GetHighestPresentRelationshipRank(ActorRef))
-			AddSex(ActorRef, Thread.TotalTime, Thread.HasPlayer, Thread.IsAggressive, Genders[0], Genders[1], Genders[2])
+			Stats.AddSkillXP(ActorRef, SkillXP[0], SkillXP[1], SkillXP[2], SkillXP[3])
+			Stats.AddPurityXP(ActorRef, Skills[4], SkillXP[5], Thread.IsAggressive, IsVictim, Genders[2] > 0, Thread.ActorCount, Thread.GetHighestPresentRelationshipRank(ActorRef))
+			Stats.AddSex(ActorRef, Thread.TotalTime, Thread.HasPlayer, Thread.IsAggressive, Genders[0], Genders[1], Genders[2])
 		endIf
 		; Apply cum
 		int CumID = Animation.GetCum(Position)
@@ -397,6 +402,10 @@ state Animating
 	endEvent
 
 	int function GetEnjoyment()
+		if IsCreature
+			Enjoyment = (ClampFloat(Thread.TotalTime / 6.0, 0.0, 40.0) + ((Stage as float / Animation.StageCount as float) * 60.0)) as int
+			return Enjoyment
+		endIf
 		; First actor pings thread to update skill xp
 		float[] XP = Thread.GetSkillBonus()
 		; Gender skill bonuses
@@ -550,22 +559,24 @@ function RestoreActorDefaults()
 	if ActorScale != 0.0
 		ActorRef.SetScale(ActorScale)
 	endIf
-	; Reset voice type
-	if ActorVoice != none
-		BaseRef.SetVoiceType(ActorVoice)
+	if !IsCreature
+		; Reset expression
+		ActorRef.ClearExpressionOverride()
+		MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
+		; Reset voice type
+		if ActorVoice != none
+			BaseRef.SetVoiceType(ActorVoice)
+		endIf
+		; Enable player controls
+		if ActorRef == PlayerRef
+			Thread.DisableHotkeys()
+		endIf
+		; Remove strapon
+		if Strapon != none
+			ActorRef.UnequipItem(Strapon, true, true)
+			ActorRef.RemoveItem(Strapon, 1, true)
+		endIf
 	endIf
-	; Enable player controls
-	if ActorRef == PlayerRef
-		Thread.DisableHotkeys()
-	endIf
-	; Remove strapon
-	if Strapon != none
-		ActorRef.UnequipItem(Strapon, true, true)
-		ActorRef.RemoveItem(Strapon, 1, true)
-	endIf
-	; Reset expression
-	ActorRef.ClearExpressionOverride()
-	MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
 	; Remove SOS erection
 	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
 endFunction
@@ -668,16 +679,17 @@ endProperty
 ; ------------------------------------------------------- ;
 
 function Initialize()
-	UnregisterForUpdate()
-	UnregisterForAllModEvents()
+	; Clean script of events
 	GoToState("")
-	; Clear actor
+	UnregisterForUpdate()
+	UnregisterForAllKeys()
+	UnregisterForAllModEvents()
+	; Remove from active
 	if ActorRef != none
-		; Remove from active
-		FormListRemove(none, "SexLabActors", ActorRef, true)
+		StorageUtil.FormListRemove(none, "SexLabActors", ActorRef, true)
 	endIf
 	; Delete positioning marker
-	if MarkerRef
+	if MarkerRef != none
 		MarkerRef.Disable()
 		MarkerRef.Delete()
 	endIf
@@ -700,9 +712,10 @@ function Initialize()
 	; Storage
 	bool[] bDel1
 	form[] fDel1
+	float[] flDel1
 	StripOverride  = bDel1
 	Equipment      = fDel1
-	Loc            = new float[6]
+	Loc            = flDel1
 endFunction
 
 function Setup()

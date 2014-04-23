@@ -409,6 +409,46 @@ string[] function TrimStringArray(string[] array, int len) global
 	return output
 endFunction
 
+int function CountEmpty(string[] array) global
+	int len = array.Length
+	if len < 1
+		return 0
+	endIf
+	int i = array.Find("")
+	int count
+	while i != -1
+		count += 1
+		i += 1
+		if i < len
+			i = array.Find("", i)
+		else
+			i = -1
+		endIf
+	endWhile
+	return count
+endFunction
+
+string[] function ClearEmpty(string[] array) global
+	int filled = (array.Length - CountEmpty(array))
+	if filled < 1
+		string[] empty
+		return empty
+	elseif filled == array.Length
+		return array
+	endIf
+	string[] output = StringArray(filled)
+	filled -= 1
+	int i = array.Length
+	while i
+		i -= 1
+		if array[i] != ""
+			output[filled] = array[i]
+			filled -= 1
+		endIf
+	endWhile
+	return output
+endFunction
+
 string[] function EmptyStringArray() global
 	string[] empty
 	return empty

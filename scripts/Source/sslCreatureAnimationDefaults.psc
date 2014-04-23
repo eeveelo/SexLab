@@ -1,116 +1,6 @@
 scriptname sslCreatureAnimationDefaults extends sslAnimationFactory
 
-; Vanilla Races
-Race BearBlackRace
-Race BearBrownRace
-Race BearSnowRace
-Race SabreCatRace
-Race SabreCatSnowyRace
-Race ChaurusRace
-Race ChaurusReaperRace
-Race DragonRace
-Race UndeadDragonRace
-Race DraugrRace
-Race DraugrMagicRace
-Race FalmerRace
-Race GiantRace
-Race HorseRace
-Race FrostbiteSpiderRace
-Race FrostbiteSpiderRaceGiant
-Race FrostbiteSpiderRaceLarge
-Race TrollRace
-Race TrollFrostRace
-Race WerewolfBeastRace
-
-Race WolfRace
-Race DogRace
-Race DogCompanionRace
-Race MG07DogRace
-Race DA03BarbasDogRace
-
-; Dawnguard only
-bool dawnguard
-Race DLC1HuskyArmoredCompanionRace
-Race DLC1DeathHoundCompanionRace
-Race DLC1DeathHoundRace
-Race SkeletonArmorRace
-Race DLC1SoulCairnKeeperRace
-Race DLC1SoulCairnSkeletonArmorRace
-Race DLC1VampireBeastRace
-Race DLC1GargoyleRace
-Race DLC1GargoyleVariantBossRace
-Race DLC1GargoyleVariantGreenRace
-
-; Dragonborn only
-bool dragonborn
-Race DLC2SeekerRace
-Race DLC2AshSpawnRace
-
-function LoadRaces()
-	BearBlackRace            = Game.GetForm(0x131E8) as Race
-	BearBrownRace            = Game.GetForm(0x131E7) as Race
-	BearSnowRace             = Game.GetForm(0x131E9) as Race
-	SabreCatRace             = Game.GetForm(0x13200) as Race
-	SabreCatSnowyRace        = Game.GetForm(0x13202) as Race
-	ChaurusRace              = Game.GetForm(0x131EB) as Race
-	ChaurusReaperRace        = Game.GetForm(0xA5601) as Race
-	DragonRace               = Game.GetForm(0x12E82) as Race
-	UndeadDragonRace         = Game.GetForm(0x1052A3) as Race
-	DraugrRace               = Game.GetForm(0x0D53) as Race
-	DraugrMagicRace          = Game.GetForm(0xF71DC) as Race
-	FalmerRace               = Game.GetForm(0x131F4) as Race
-	GiantRace                = Game.GetForm(0x131F9) as Race
-	HorseRace                = Game.GetForm(0x131FD) as Race
-	FrostbiteSpiderRace      = Game.GetForm(0x131F8) as Race
-	FrostbiteSpiderRaceGiant = Game.GetForm(0x4E507) as Race
-	FrostbiteSpiderRaceLarge = Game.GetForm(0x53477) as Race
-	TrollRace                = Game.GetForm(0x13205) as Race
-	TrollFrostRace           = Game.GetForm(0x105A3) as Race
-	WerewolfBeastRace        = Game.GetForm(0xCDD84) as Race
-	WolfRace                 = Game.GetForm(0x1320A) as Race
-	DogRace                  = Game.GetForm(0x131EE) as Race
-	DogCompanionRace         = Game.GetForm(0xF1AC4) as Race
-	MG07DogRace              = Game.GetForm(0xF905F) as Race
-	DA03BarbasDogRace        = Game.GetForm(0xCD657) as Race
-
-	dawnguard = false
-	dragonborn = false
-	int mods = Game.GetModCount()
-	int i
-	while i < mods
-		string modname = Game.GetModName(i)
-		if !dawnguard && modname == "Dawnguard.esm"
-			dawnguard = true
-			; Dogs
-			DLC1HuskyArmoredCompanionRace  = Game.GetFormFromFile(0x3D01, "Dawnguard.esm") as Race
-			DLC1DeathHoundCompanionRace    = Game.GetFormFromFile(0x3D02, "Dawnguard.esm") as Race
-			DLC1DeathHoundRace             = Game.GetFormFromFile(0xC5F0, "Dawnguard.esm") as Race
-			; Draugr
-			SkeletonArmorRace              = Game.GetFormFromFile(0x23E2, "Dawnguard.esm") as Race
-			DLC1SoulCairnKeeperRace        = Game.GetFormFromFile(0x7AF3, "Dawnguard.esm") as Race
-			DLC1SoulCairnSkeletonArmorRace = Game.GetFormFromFile(0x894D, "Dawnguard.esm") as Race
-			; Vampire Lord
-			DLC1VampireBeastRace           = Game.GetFormFromFile(0x283A, "Dawnguard.esm") as Race
-			; Gargoyle
-			DLC1GargoyleRace               = Game.GetFormFromFile(0xA2C6, "Dawnguard.esm") as Race
-			DLC1GargoyleVariantBossRace    = Game.GetFormFromFile(0x10D00, "Dawnguard.esm") as Race
-			DLC1GargoyleVariantGreenRace   = Game.GetFormFromFile(0x19D86, "Dawnguard.esm") as Race
-		elseif !dragonborn && modname == "Dragonborn.esm"
-			dragonborn = true
-			; Seeker
-			DLC2SeekerRace   = Game.GetFormFromFile(0x1DCB9, "Dragonborn.esm") as Race
-			; Draugr
-			DLC2AshSpawnRace = Game.GetFormFromFile(0x1B637, "Dragonborn.esm") as Race
-		elseif dawnguard && dragonborn
-			return
-		endIf
-		i += 1
-	endwhile
-endFunction
-
 function LoadCreatureAnimations()
-	; Loaded needed race forms
-	LoadRaces()
 	; Bear
 	RegisterAnimation("BearDoggystyle")
 	; Dog
@@ -163,18 +53,14 @@ function LoadCreatureAnimations()
 	RegisterAnimation("WolfDoggystyle2")
 	RegisterAnimation("WolfMissionary")
 	; Dawguard Gargoyle & Vampire Lord
-	if dawnguard
-		RegisterAnimation("GargoyleDoggystyle")
-		RegisterAnimation("GargoyleHolding")
-		RegisterAnimation("GargoyleMissionary")
-		RegisterAnimation("VampireLordDoggystyle")
-		RegisterAnimation("VampireLordHolding")
-		RegisterAnimation("VampireLordMissionary")
-	endIf
+	RegisterAnimation("GargoyleDoggystyle")
+	RegisterAnimation("GargoyleHolding")
+	RegisterAnimation("GargoyleMissionary")
+	RegisterAnimation("VampireLordDoggystyle")
+	RegisterAnimation("VampireLordHolding")
+	RegisterAnimation("VampireLordMissionary")
 	; Dragonborn Daedra Seeker
-	if dragonborn
-		RegisterAnimation("DaedraHugging")
-	endIf
+	RegisterAnimation("DaedraHugging")
 endFunction
 
 function BearDoggystyle(int id)
@@ -183,9 +69,9 @@ function BearDoggystyle(int id)
 	Base.Name = "(Bear) Doggystyle"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(BearBlackRace)
-	Base.AddRace(BearBrownRace)
-	Base.AddRace(BearSnowRace)
+	Base.AddRaceID("BearBlackRace")
+	Base.AddRaceID("BearBrownRace")
+	Base.AddRaceID("BearSnowRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Anal)
 	Base.AddPositionStage(a1, "Bear_Doggystyle_A1_S1")
@@ -215,8 +101,8 @@ function ChaurusForward(int id)
 	Base.Name = "(Chaurus) Forward"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(ChaurusRace)
-	Base.AddRace(ChaurusReaperRace)
+	Base.AddRaceID("ChaurusRace")
+	Base.AddRaceID("ChaurusReaperRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Anal)
 	Base.AddPositionStage(a1, "Chaurus_Forward_A1_S1")
@@ -246,8 +132,8 @@ function ChaurusReverse(int id)
 	Base.Name = "(Chaurus) Reverse"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(ChaurusRace)
-	Base.AddRace(ChaurusReaperRace)
+	Base.AddRaceID("ChaurusRace")
+	Base.AddRaceID("ChaurusReaperRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Vaginal)
 	Base.AddPositionStage(a1, "Chaurus_Reverse_A1_S1")
@@ -277,7 +163,7 @@ function DaedraHugging(int id)
 	Base.Name = "(Seeker) Hugging"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(DLC2SeekerRace)
+	Base.AddRaceID("DLC2SeekerRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Vaginal)
 	Base.AddPositionStage(a1, "Daedra_Hugging_A1_S1")
@@ -310,15 +196,13 @@ function CanineDoggystyle(int id)
 
 	Base.SoundFX = Squishing
 
-	Base.AddRace(DogRace)
-	Base.AddRace(DogCompanionRace)
-	Base.AddRace(MG07DogRace)
-	Base.AddRace(DA03BarbasDogRace)
-	if dawnguard
-		Base.AddRace(DLC1HuskyArmoredCompanionRace)
-		Base.AddRace(DLC1DeathHoundCompanionRace)
-		Base.AddRace(DLC1DeathHoundRace)
-	endIf
+	Base.AddRaceID("DogRace")
+	Base.AddRaceID("DogCompanionRace")
+	Base.AddRaceID("MG07DogRace")
+	Base.AddRaceID("DA03BarbasDogRace")
+	Base.AddRaceID("DLC1HuskyArmoredCompanionRace")
+	Base.AddRaceID("DLC1DeathHoundCompanionRace")
+	Base.AddRaceID("DLC1DeathHoundRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Anal)
 	Base.AddPositionStage(a1, "Canine_Doggystyle_A1_S1")
@@ -350,15 +234,13 @@ function CanineDoggystyle2(int id)
 
 	Base.SoundFX = Squishing
 
-	Base.AddRace(DogRace)
-	Base.AddRace(DogCompanionRace)
-	Base.AddRace(MG07DogRace)
-	Base.AddRace(DA03BarbasDogRace)
-	if dawnguard
-		Base.AddRace(DLC1HuskyArmoredCompanionRace)
-		Base.AddRace(DLC1DeathHoundCompanionRace)
-		Base.AddRace(DLC1DeathHoundRace)
-	endIf
+	Base.AddRaceID("DogRace")
+	Base.AddRaceID("DogCompanionRace")
+	Base.AddRaceID("MG07DogRace")
+	Base.AddRaceID("DA03BarbasDogRace")
+	Base.AddRaceID("DLC1HuskyArmoredCompanionRace")
+	Base.AddRaceID("DLC1DeathHoundCompanionRace")
+	Base.AddRaceID("DLC1DeathHoundRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Anal)
 	Base.AddPositionStage(a1, "Canine_Doggystyle2_A1_S1")
@@ -391,15 +273,13 @@ function CanineMissionary(int id)
 	Base.Name = "(Dog) Missionary"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(DogRace)
-	Base.AddRace(DogCompanionRace)
-	Base.AddRace(MG07DogRace)
-	Base.AddRace(DA03BarbasDogRace)
-	if dawnguard
-		Base.AddRace(DLC1HuskyArmoredCompanionRace)
-		Base.AddRace(DLC1DeathHoundCompanionRace)
-		Base.AddRace(DLC1DeathHoundRace)
-	endIf
+	Base.AddRaceID("DogRace")
+	Base.AddRaceID("DogCompanionRace")
+	Base.AddRaceID("MG07DogRace")
+	Base.AddRaceID("DA03BarbasDogRace")
+	Base.AddRaceID("DLC1HuskyArmoredCompanionRace")
+	Base.AddRaceID("DLC1DeathHoundCompanionRace")
+	Base.AddRaceID("DLC1DeathHoundRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Vaginal)
 	Base.AddPositionStage(a1, "Canine_Missionary_A1_S1")
@@ -431,8 +311,8 @@ function DragonPenetration(int id)
 	Base.Name = "(Dragon) Penetration"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(DragonRace)
-	Base.AddRace(UndeadDragonRace)
+	Base.AddRaceID("DragonRace")
+	Base.AddRaceID("UndeadDragonRace")
 
 	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
 	Base.AddPositionStage(a1, "Dragon_Penetration_A1_S1")
@@ -462,8 +342,8 @@ function DragonTongue(int id)
 	Base.Name = "(Dragon) Tongue"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(DragonRace)
-	Base.AddRace(UndeadDragonRace)
+	Base.AddRaceID("DragonRace")
+	Base.AddRaceID("UndeadDragonRace")
 
 	int a1 = Base.AddPosition(Female)
 	Base.AddPositionStage(a1, "Dragon_Tongue_A1_S1")
@@ -493,16 +373,12 @@ function DraugrDoggystyle(int id)
 	Base.Name = "(Draugr) Doggystyle"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(DraugrRace)
-	Base.AddRace(DraugrMagicRace)
-	if dawnguard
-		Base.AddRace(SkeletonArmorRace)
-		Base.AddRace(DLC1SoulCairnKeeperRace)
-		Base.AddRace(DLC1SoulCairnSkeletonArmorRace)
-	endIf
-	if dragonborn
-		Base.AddRace(DLC2AshSpawnRace)
-	endIf
+	Base.AddRaceID("DraugrRace")
+	Base.AddRaceID("DraugrMagicRace")
+	Base.AddRaceID("SkeletonArmorRace")
+	Base.AddRaceID("DLC1SoulCairnKeeperRace")
+	Base.AddRaceID("DLC1SoulCairnSkeletonArmorRace")
+	Base.AddRaceID("DLC2AshSpawnRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Anal)
 	Base.AddPositionStage(a1, "Draugr_Doggystyle_A1_S1")
@@ -532,16 +408,12 @@ function DraugrGangbang3P(int id)
 	Base.Name = "(Draugr) Gangbang 3P"
 
 	Base.SoundFX = SexMix
-	Base.AddRace(DraugrRace)
-	Base.AddRace(DraugrMagicRace)
-	if dawnguard
-		Base.AddRace(SkeletonArmorRace)
-		Base.AddRace(DLC1SoulCairnKeeperRace)
-		Base.AddRace(DLC1SoulCairnSkeletonArmorRace)
-	endIf
-	if dragonborn
-		Base.AddRace(DLC2AshSpawnRace)
-	endIf
+	Base.AddRaceID("DraugrRace")
+	Base.AddRaceID("DraugrMagicRace")
+	Base.AddRaceID("SkeletonArmorRace")
+	Base.AddRaceID("DLC1SoulCairnKeeperRace")
+	Base.AddRaceID("DLC1SoulCairnSkeletonArmorRace")
+	Base.AddRaceID("DLC2AshSpawnRace")
 
 	int a1 = Base.AddPosition(Female, addCum=VaginalOralAnal)
 	Base.AddPositionStage(a1, "Draugr_Gangbang_A1_S1", silent = true, openMouth = true)
@@ -577,16 +449,12 @@ function DraugrGangbang4P(int id)
 	Base.Name = "(Draugr) Gangbang 4P"
 
 	Base.SoundFX = SexMix
-	Base.AddRace(DraugrRace)
-	Base.AddRace(DraugrMagicRace)
-	if dawnguard
-		Base.AddRace(SkeletonArmorRace)
-		Base.AddRace(DLC1SoulCairnKeeperRace)
-		Base.AddRace(DLC1SoulCairnSkeletonArmorRace)
-	endIf
-	if dragonborn
-		Base.AddRace(DLC2AshSpawnRace)
-	endIf
+	Base.AddRaceID("DraugrRace")
+	Base.AddRaceID("DraugrMagicRace")
+	Base.AddRaceID("SkeletonArmorRace")
+	Base.AddRaceID("DLC1SoulCairnKeeperRace")
+	Base.AddRaceID("DLC1SoulCairnSkeletonArmorRace")
+	Base.AddRaceID("DLC2AshSpawnRace")
 
 	int a1 = Base.AddPosition(Female, addCum=VaginalOralAnal)
 	Base.AddPositionStage(a1, "Draugr_Gangbang_A1_S1", silent = true, openMouth = true)
@@ -628,16 +496,12 @@ function DraugrGangbang5P(int id)
 	Base.Name = "(Draugr) Gangbang 5P"
 
 	Base.SoundFX = SexMix
-	Base.AddRace(DraugrRace)
-	Base.AddRace(DraugrMagicRace)
-	if dawnguard
-		Base.AddRace(SkeletonArmorRace)
-		Base.AddRace(DLC1SoulCairnKeeperRace)
-		Base.AddRace(DLC1SoulCairnSkeletonArmorRace)
-	endIf
-	if dragonborn
-		Base.AddRace(DLC2AshSpawnRace)
-	endIf
+	Base.AddRaceID("DraugrRace")
+	Base.AddRaceID("DraugrMagicRace")
+	Base.AddRaceID("SkeletonArmorRace")
+	Base.AddRaceID("DLC1SoulCairnKeeperRace")
+	Base.AddRaceID("DLC1SoulCairnSkeletonArmorRace")
+	Base.AddRaceID("DLC2AshSpawnRace")
 
 	int a1 = Base.AddPosition(Female, addCum=VaginalOralAnal)
 	Base.AddPositionStage(a1, "Draugr_Gangbang_A1_S1", silent = true, openMouth = true)
@@ -685,16 +549,12 @@ function DraugrHolding(int id)
 	Base.Name = "(Draugr) Holding"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(DraugrRace)
-	Base.AddRace(DraugrMagicRace)
-	if dawnguard
-		Base.AddRace(SkeletonArmorRace)
-		Base.AddRace(DLC1SoulCairnKeeperRace)
-		Base.AddRace(DLC1SoulCairnSkeletonArmorRace)
-	endIf
-	if dragonborn
-		Base.AddRace(DLC2AshSpawnRace)
-	endIf
+	Base.AddRaceID("DraugrRace")
+	Base.AddRaceID("DraugrMagicRace")
+	Base.AddRaceID("SkeletonArmorRace")
+	Base.AddRaceID("DLC1SoulCairnKeeperRace")
+	Base.AddRaceID("DLC1SoulCairnSkeletonArmorRace")
+	Base.AddRaceID("DLC2AshSpawnRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Anal)
 	Base.AddPositionStage(a1, "Draugr_Holding_A1_S1")
@@ -724,16 +584,12 @@ function DraugrMissionary(int id)
 	Base.Name = "(Draugr) Missionary"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(DraugrRace)
-	Base.AddRace(DraugrMagicRace)
-	if dawnguard
-		Base.AddRace(SkeletonArmorRace)
-		Base.AddRace(DLC1SoulCairnKeeperRace)
-		Base.AddRace(DLC1SoulCairnSkeletonArmorRace)
-	endIf
-	if dragonborn
-		Base.AddRace(DLC2AshSpawnRace)
-	endIf
+	Base.AddRaceID("DraugrRace")
+	Base.AddRaceID("DraugrMagicRace")
+	Base.AddRaceID("SkeletonArmorRace")
+	Base.AddRaceID("DLC1SoulCairnKeeperRace")
+	Base.AddRaceID("DLC1SoulCairnSkeletonArmorRace")
+	Base.AddRaceID("DLC2AshSpawnRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Vaginal)
 	Base.AddPositionStage(a1, "Draugr_Missionary_A1_S1")
@@ -763,7 +619,7 @@ function FalmerDoggystyle(int id)
 	Base.Name = "(Falmer) Doggystyle"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(FalmerRace)
+	Base.AddRaceID("FalmerRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Anal)
 	Base.AddPositionStage(a1, "Falmer_Doggystyle_A1_S1")
@@ -793,7 +649,7 @@ function FalmerGangbang3P(int id)
 	Base.Name = "(Falmer) Gangbang 3P"
 
 	Base.SoundFX = SexMix
-	Base.AddRace(FalmerRace)
+	Base.AddRaceID("FalmerRace")
 
 	int a1 = Base.AddPosition(Female, addCum=VaginalOralAnal)
 	Base.AddPositionStage(a1, "Falmer_Gangbang_A1_S1", silent = true, openMouth = true)
@@ -829,7 +685,7 @@ function FalmerGangbang4P(int id)
 	Base.Name = "(Falmer) Gangbang 4P"
 
 	Base.SoundFX = SexMix
-	Base.AddRace(FalmerRace)
+	Base.AddRaceID("FalmerRace")
 
 	int a1 = Base.AddPosition(Female, addCum=VaginalOralAnal)
 	Base.AddPositionStage(a1, "Falmer_Gangbang_A1_S1", silent = true, openMouth = true)
@@ -871,7 +727,7 @@ function FalmerGangbang5P(int id)
 	Base.Name = "(Falmer) Gangbang 5P"
 
 	Base.SoundFX = SexMix
-	Base.AddRace(FalmerRace)
+	Base.AddRaceID("FalmerRace")
 
 	int a1 = Base.AddPosition(Female, addCum=VaginalOralAnal)
 	Base.AddPositionStage(a1, "Falmer_Gangbang_A1_S1", silent = true, openMouth = true)
@@ -919,7 +775,7 @@ function FalmerHolding(int id)
 	Base.Name = "(Falmer) Holding"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(FalmerRace)
+	Base.AddRaceID("FalmerRace")
 
 	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
 	Base.AddPositionStage(a1, "Falmer_Holding_A1_S1")
@@ -951,7 +807,7 @@ function FalmerMissionary(int id)
 	Base.Name = "(Falmer) Missionary"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(FalmerRace)
+	Base.AddRaceID("FalmerRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Vaginal)
 	Base.AddPositionStage(a1, "Falmer_Missionary_A1_S1")
@@ -983,9 +839,9 @@ function GargoyleDoggystyle(int id)
 	Base.Name = "(Gargoyle) Doggystyle"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(DLC1GargoyleRace)
-	Base.AddRace(DLC1GargoyleVariantBossRace)
-	Base.AddRace(DLC1GargoyleVariantGreenRace)
+	Base.AddRaceID("DLC1GargoyleRace")
+	Base.AddRaceID("DLC1GargoyleVariantBossRace")
+	Base.AddRaceID("DLC1GargoyleVariantGreenRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Anal)
 	Base.AddPositionStage(a1, "Gargoyle_Doggystyle_A1_S1")
@@ -1015,9 +871,9 @@ function GargoyleHolding(int id)
 	Base.Name = "(Gargoyle) Holding"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(DLC1GargoyleRace)
-	Base.AddRace(DLC1GargoyleVariantBossRace)
-	Base.AddRace(DLC1GargoyleVariantGreenRace)
+	Base.AddRaceID("DLC1GargoyleRace")
+	Base.AddRaceID("DLC1GargoyleVariantBossRace")
+	Base.AddRaceID("DLC1GargoyleVariantGreenRace")
 
 	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
 	Base.AddPositionStage(a1, "Gargoyle_Holding_A1_S1")
@@ -1047,9 +903,9 @@ function GargoyleMissionary(int id)
 	Base.Name = "(Gargoyle) Missionary"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(DLC1GargoyleRace)
-	Base.AddRace(DLC1GargoyleVariantBossRace)
-	Base.AddRace(DLC1GargoyleVariantGreenRace)
+	Base.AddRaceID("DLC1GargoyleRace")
+	Base.AddRaceID("DLC1GargoyleVariantBossRace")
+	Base.AddRaceID("DLC1GargoyleVariantGreenRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Vaginal)
 	Base.AddPositionStage(a1, "Gargoyle_Missionary_A1_S1")
@@ -1079,7 +935,7 @@ function GiantPenetration(int id)
 	Base.Name = "(Giant) Penetration"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(GiantRace)
+	Base.AddRaceID("GiantRace")
 
 	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
 	Base.AddPositionStage(a1, "Giant_Penetration_A1_S1")
@@ -1110,7 +966,7 @@ function HorseDoggystyle(int id)
 	Base.Name = "(Horse) Doggystyle"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(HorseRace)
+	Base.AddRaceID("HorseRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Anal)
 	Base.AddPositionStage(a1, "Horse_Doggystyle_A1_S1")
@@ -1140,8 +996,8 @@ function CatDoggystyle(int id)
 	Base.Name = "(Sabre Cat) Doggystyle"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(SabreCatRace)
-	Base.AddRace(SabreCatSnowyRace)
+	Base.AddRaceID("SabreCatRace")
+	Base.AddRaceID("SabreCatSnowyRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Anal)
 	Base.AddPositionStage(a1, "Cat_Doggystyle_A1_S1")
@@ -1171,7 +1027,7 @@ function SpiderDouble(int id)
 	Base.Name = "(Spider) Double"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(FrostbiteSpiderRace)
+	Base.AddRaceID("FrostbiteSpiderRace")
 
 	int a1 = Base.AddPosition(Female, addCum=VaginalOralAnal)
 	Base.AddPositionStage(a1, "Spider_Double_A1_S1")
@@ -1207,7 +1063,7 @@ function SpiderPenetration(int id)
 	Base.Name = "(Spider) Penetration"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(FrostbiteSpiderRace)
+	Base.AddRaceID("FrostbiteSpiderRace")
 
 	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
 	Base.AddPositionStage(a1, "Spider_Penetration_A1_S1")
@@ -1237,8 +1093,8 @@ function BigSpiderPenetration(int id)
 	Base.Name = "(Large Spider) Penetration"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(FrostbiteSpiderRaceLarge)
-	Base.AddRace(FrostbiteSpiderRaceGiant)
+	Base.AddRaceID("FrostbiteSpiderRaceLarge")
+	Base.AddRaceID("FrostbiteSpiderRaceGiant")
 
 	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
 	Base.AddPositionStage(a1, "BigSpider_Penetration_A1_S1")
@@ -1270,8 +1126,8 @@ function TrollDoggystyle(int id)
 	Base.Name = "(Troll) Doggystyle"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(TrollRace)
-	Base.AddRace(TrollFrostRace)
+	Base.AddRaceID("TrollRace")
+	Base.AddRaceID("TrollFrostRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Anal)
 	Base.AddPositionStage(a1, "Troll_Doggystyle_A1_S1")
@@ -1301,8 +1157,8 @@ function TrollHolding(int id)
 	Base.Name = "(Troll) Holding"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(TrollRace)
-	Base.AddRace(TrollFrostRace)
+	Base.AddRaceID("TrollRace")
+	Base.AddRaceID("TrollFrostRace")
 
 	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
 	Base.AddPositionStage(a1, "Troll_Holding_A1_S1")
@@ -1332,8 +1188,8 @@ function TrollMissionary(int id)
 	Base.Name = "(Troll) Missionary"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(TrollRace)
-	Base.AddRace(TrollFrostRace)
+	Base.AddRaceID("TrollRace")
+	Base.AddRaceID("TrollFrostRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Vaginal)
 	Base.AddPositionStage(a1, "Troll_Missionary_A1_S1")
@@ -1363,8 +1219,8 @@ function TrollDominate(int id)
 	Base.Name = "(Troll) Dominate"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(TrollRace)
-	Base.AddRace(TrollFrostRace)
+	Base.AddRaceID("TrollRace")
+	Base.AddRaceID("TrollFrostRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Vaginal)
 	Base.AddPositionStage(a1, "Troll_Dominate_A1_S1")
@@ -1392,8 +1248,8 @@ function TrollGrabbing(int id)
 	Base.Name = "(Troll) Grabbing"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(TrollRace)
-	Base.AddRace(TrollFrostRace)
+	Base.AddRaceID("TrollRace")
+	Base.AddRaceID("TrollFrostRace")
 
 	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
 	Base.AddPositionStage(a1, "Troll_Grabbing_A1_S1")
@@ -1421,7 +1277,7 @@ function VampireLordDoggystyle(int id)
 	Base.Name = "(Vampire Lord) Doggystyle"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(DLC1VampireBeastRace)
+	Base.AddRaceID("DLC1VampireBeastRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Anal)
 	Base.AddPositionStage(a1, "VampireLord_Doggystyle_A1_S1")
@@ -1451,7 +1307,7 @@ function VampireLordHolding(int id)
 	Base.Name = "(Vampire Lord) Holding"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(DLC1VampireBeastRace)
+	Base.AddRaceID("DLC1VampireBeastRace")
 
 	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
 	Base.AddPositionStage(a1, "VampireLord_Holding_A1_S1")
@@ -1481,7 +1337,7 @@ function VampireLordMissionary(int id)
 	Base.Name = "(Vampire Lord) Missionary"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(DLC1VampireBeastRace)
+	Base.AddRaceID("DLC1VampireBeastRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Vaginal)
 	Base.AddPositionStage(a1, "VampireLord_Missionary_A1_S1")
@@ -1511,7 +1367,7 @@ function WerewolfAggrDoggystyle(int id)
 	Base.Name = "(Werewolf) Rough Doggystyle"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(WerewolfBeastRace)
+	Base.AddRaceID("WerewolfBeastRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Anal)
 	Base.AddPositionStage(a1, "Werewolf_AggrDoggystyle_A1_S1")
@@ -1542,7 +1398,7 @@ function WerewolfDoggystyle(int id)
 	Base.Name = "(Werewolf) Doggystyle"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(WerewolfBeastRace)
+	Base.AddRaceID("WerewolfBeastRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Anal)
 	Base.AddPositionStage(a1, "Werewolf_Doggystyle_A1_S1")
@@ -1573,7 +1429,7 @@ function WerewolfHolding(int id)
 	Base.Name = "(Werewolf) Holding"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(WerewolfBeastRace)
+	Base.AddRaceID("WerewolfBeastRace")
 
 	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
 	Base.AddPositionStage(a1, "Werewolf_Holding_A1_S1")
@@ -1604,7 +1460,7 @@ function WerewolfMissionary(int id)
 	Base.Name = "(Werewolf) Missionary"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(WerewolfBeastRace)
+	Base.AddRaceID("WerewolfBeastRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Vaginal)
 	Base.AddPositionStage(a1, "Werewolf_Missionary_A1_S1")
@@ -1635,7 +1491,7 @@ function WolfDoggystyle(int id)
 	Base.Name = "(Wolf) Doggystyle"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(WolfRace)
+	Base.AddRaceID("WolfRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Anal)
 	Base.AddPositionStage(a1, "Canine_Doggystyle_A1_S1")
@@ -1665,7 +1521,7 @@ function WolfDoggystyle2(int id)
 	Base.Name = "(Wolf) Doggystyle 2"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(WolfRace)
+	Base.AddRaceID("WolfRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Anal)
 	Base.AddPositionStage(a1, "Canine_Doggystyle2_A1_S1")
@@ -1697,7 +1553,7 @@ function WolfMissionary(int id)
 	Base.Name = "(Wolf) Missionary"
 
 	Base.SoundFX = Squishing
-	Base.AddRace(WolfRace)
+	Base.AddRaceID("WolfRace")
 
 	int a1 = Base.AddPosition(Female, addCum=Vaginal)
 	Base.AddPositionStage(a1, "Canine_Missionary_A1_S1")
