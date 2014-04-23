@@ -2,7 +2,7 @@ scriptname sslThreadModel extends sslThreadLibrary hidden
 { Animation Thread Model: Runs storage and information about a thread. Access only through functions; NEVER create a property directly to this. }
 
 import sslUtility
-import StorageUtil
+; import StorageUtil
 
 bool property IsLocked hidden
 	bool function get()
@@ -777,12 +777,10 @@ function SendThreadEvent(string HookEvent)
 endFunction
 
 function SetupThreadEvent(string HookEvent)
-	int eid = ModEvent.Create(HookEvent)
+	int eid = ModEvent.Create("Hook"+HookEvent)
 	if eid
-		; ModEvent.PushString(eid, HookEvent)
 		ModEvent.PushInt(eid, thread_id)
 		ModEvent.PushBool(eid, HasPlayer)
-		; ModEvent.PushForm(eid, self)
 		ModEvent.Send(eid)
 		; Log("Thread Hook Sent: "+HookEvent)
 	endIf
