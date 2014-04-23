@@ -1386,7 +1386,7 @@ state SetStatSexuality
 		if Stats.IsStraight(StatRef)
 			Stats.SetInt(StatRef, "Sexuality", 50)
 		elseIf Stats.IsBisexual(StatRef)
-			Stats.SetInt(StatRef, "Sexuality", 0)
+			Stats.SetInt(StatRef, "Sexuality", 1)
 		else
 			Stats.SetInt(StatRef, "Sexuality", 100)
 		endIf
