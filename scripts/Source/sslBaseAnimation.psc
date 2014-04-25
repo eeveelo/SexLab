@@ -72,7 +72,7 @@ form[] property CreatureRaces hidden
 			i -= 1
 			RaceRefs[i] = Race.GetRace(RaceIDs[i])
 		endWhile
-		return RaceRefs
+		return ClearNone(RaceRefs)
 	endFunction
 endProperty
 
@@ -420,6 +420,17 @@ function AddRaceID(string RaceID)
 	endIf
 	; Add global
 	StringListAdd(none, "SexLabCreatures", RaceID, false)
+endFunction
+
+function SetRaceIDs(string[] RaceList)
+	int i
+	while i < RaceList.Length
+		if StringListFind(none, "SexLabCreatures", RaceList[i]) == -1
+			StringListAdd(none, "SexLabCreatures", RaceList[i], false)
+		endIf
+		i += 1
+	endWhile
+	RaceIDs = RaceList
 endFunction
 
 ; ------------------------------------------------------- ;
