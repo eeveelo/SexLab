@@ -119,13 +119,13 @@ int function StartSex(Actor[] Positions, sslBaseAnimation[] Anims, Actor Victim 
 	return -1
 endFunction
 
-sslThreadController function QuickStart(Actor Actor1, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none, Actor VictimRef = none, string Hook = "", string AnimationTags = "")
+sslThreadController function QuickStart(Actor Actor1, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none, Actor Victim = none, string Hook = "", string AnimationTags = "")
 	Actor[] Positions = sslUtility.MakeActorArray(Actor1, Actor2, Actor3, Actor4, Actor5)
 	sslBaseAnimation[] Anims
 	if AnimationTags != ""
 		Anims = AnimSlots.GetByTags(Positions.Length, AnimationTags)
 	endIf
-	return ThreadSlots.GetController(StartSex(Positions, Anims, VictimRef, none, true, Hook))
+	return ThreadSlots.GetController(StartSex(Positions, Anims, Victim, none, true, Hook))
 endFunction
 
 ;#------------------------------#

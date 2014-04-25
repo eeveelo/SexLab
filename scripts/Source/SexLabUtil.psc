@@ -5,7 +5,7 @@ scriptname SexLabUtil hidden
 ; ------------------------------------------------------- ;
 
 int function GetVersion() global
-	return 15200
+	return 15300
 endFunction
 
 string function GetStringVer() global
@@ -51,6 +51,10 @@ endFunction
 ; ------------------------------------------------------- ;
 ; --- Common Utilities                                --- ;
 ; ------------------------------------------------------- ;
+
+int function GetGender(Actor ActorRef) global
+	return (Game.GetFormFromFile(0xD62, "SexLab.esm") as sslActorLibrary).GetGender(ActorRef)
+endFunction
 
 bool function IsActorActive(Actor ActorRef) global
 	return StorageUtil.FormListFind(none, "SexLabActors", ActorRef) != -1
@@ -127,7 +131,7 @@ function DebugLog(string Log, string Type = "NOTICE", bool DebugMode = false) gl
 	if DebugMode
 		MiscUtil.PrintConsole(Log)
 	endIf
-	if Type == "FATAL" || Type == "ERROR"
+	if Type == "FATAL" || Type == "ERROR" || Type == "DEPRECATED"
 		Debug.TraceStack("-- SexLab -- "+Log)
 	else
 		Debug.Trace("-- SexLab -- "+Log)
