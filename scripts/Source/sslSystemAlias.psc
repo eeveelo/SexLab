@@ -6,36 +6,35 @@ Actor property PlayerRef auto hidden
 sslSystemConfig property Config auto hidden
 
 ; Function libraries
+sslActorLibrary property ActorLib auto hidden
+sslThreadLibrary property ThreadLib auto hidden
 sslActorStats property Stats auto hidden
 
 ; Object registeries
+sslThreadSlots property ThreadSlots auto hidden
 sslAnimationSlots property AnimSlots auto hidden
 sslCreatureAnimationSlots property CreatureSlots auto hidden
 sslVoiceSlots property VoiceSlots auto hidden
 sslExpressionSlots property ExpressionSlots auto hidden
-
-; StorageUtil form key
-Form property Storage auto hidden
 
 function Log(string Log, string Type = "NOTICE")
 	SexLabUtil.DebugLog(Log, Type, Config.DebugMode)
 endFunction
 
 function Setup()
-	Storage = Game.GetFormFromFile(0xD62, "SexLab.esm")
-	SexLabFramework SexLab = Storage as SexLabFramework
+	SexLabFramework SexLab = Game.GetFormFromFile(0xD62, "SexLab.esm") as SexLabFramework
 	; Sync resources across framework
 	PlayerRef       = SexLab.PlayerRef
 	Config          = SexLab.Config
+	ActorLib        = SexLab.ActorLib
+	ThreadLib       = SexLab.ThreadLib
 	Stats           = SexLab.Stats
 	AnimSlots       = SexLab.AnimSlots
 	CreatureSlots   = SexLab.CreatureSlots
 	VoiceSlots      = SexLab.VoiceSlots
 	ExpressionSlots = SexLab.ExpressionSlots
 	; Clean script of events
-	GoToState("")
-	UnregisterForUpdate()
-	UnregisterForAllKeys()
-	UnregisterForAllModEvents()
 	TryToClear()
+	UnregisterForUpdate()
+	GoToState("")
 endFunction
