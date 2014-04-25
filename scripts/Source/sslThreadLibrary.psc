@@ -3,35 +3,14 @@ scriptname sslThreadLibrary extends sslSystemLibrary
 import StorageUtil
 
 ; Data
-Sound property OrgasmFX auto hidden
-Sound property SquishingFX auto hidden
-Sound property SuckingFX auto hidden
-Sound property SexMixedFX auto hidden
-
 Static property LocationMarker auto hidden
 FormList property BedsList auto hidden
 FormList property BedRollsList auto hidden
-Message property CheckFNIS auto hidden
 Message property UseBed auto hidden
-
-Topic property LipSync auto hidden
-VoiceType property SexLabVoiceM auto hidden
-VoiceType property SexLabVoiceF auto hidden
-FormList property VoicesPlayer auto hidden
-
-bool function CheckFNIS()
-	Game.ForceThirdPerson()
-	if PlayerRef.GetAnimationVariableInt("SexLabVer") < 150 || PlayerRef.GetAnimationVariableInt("FNISmajor") < 5
-		CheckFNIS.Show(5.0)
-		return false
-	endIf
-	return true
-endFunction
 
 ; ------------------------------------------------------- ;
 ; --- Object Locators                                 --- ;
 ; ------------------------------------------------------- ;
-
 
 bool function CheckActor(Actor CheckRef, int CheckGender = -1)
 	int IsGender = ActorLib.GetGender(CheckRef)
@@ -309,8 +288,6 @@ function ValidateTrackedFactions()
 	endWhile
 endFunction
 
-
-
 ; ------------------------------------------------------- ;
 ; --- System use only                                 --- ;
 ; ------------------------------------------------------- ;
@@ -318,17 +295,8 @@ endFunction
 
 function Setup()
 	parent.Setup()
-	OrgasmFX       = Config.OrgasmFX
-	SquishingFX    = Config.SquishingFX
-	SuckingFX      = Config.SuckingFX
-	SexMixedFX     = Config.SexMixedFX
 	LocationMarker = Config.LocationMarker
 	BedsList       = Config.BedsList
 	BedRollsList   = Config.BedRollsList
-	CheckFNIS      = Config.CheckFNIS
 	UseBed         = Config.UseBed
-	LipSync        = Config.LipSync
-	SexLabVoiceM   = Config.SexLabVoiceM
-	SexLabVoiceF   = Config.SexLabVoiceF
-	VoicesPlayer   = Config.VoicesPlayer
 endFunction
