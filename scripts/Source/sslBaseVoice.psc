@@ -1,11 +1,5 @@
 scriptname sslBaseVoice extends sslBaseObject
 
-sslSystemConfig Config
-FormList VoicesPlayer
-VoiceType SexLabVoiceM
-VoiceType SexLabVoiceF
-Topic LipSync
-
 Sound property Mild auto hidden
 Sound property Medium auto hidden
 Sound property Hot auto hidden
@@ -24,18 +18,18 @@ endProperty
 
 function Moan(Actor ActorRef, int Strength = 30, bool IsVictim = false)
 	if Config.UseLipSync && Game.GetCameraState() != 3
-		ActorRef.Say(LipSync)
+		ActorRef.Say(Config.LipSync)
 	endIf
 	GetSound(Strength, IsVictim).PlayAndWait(ActorRef)
 endFunction
 
 function SetVoice(ActorBase BaseRef)
 	VoiceType Type = BaseRef.GetVoiceType()
-	if !VoicesPlayer.HasForm(Type) && Type != SexLabVoiceM && Type != SexLabVoiceF
+	if !Config.VoicesPlayer.HasForm(Type) && Type != Config.SexLabVoiceM && Type != Config.SexLabVoiceF ;; &&
 		if BaseRef.GetSex() == 1
-			BaseRef.SetVoiceType(SexLabVoiceF)
+			BaseRef.SetVoiceType(Config.SexLabVoiceF)
 		else
-			BaseRef.SetVoiceType(SexLabVoiceM)
+			BaseRef.SetVoiceType(Config.SexLabVoiceM)
 		endIf
 	endIf
 endFunction
@@ -65,11 +59,6 @@ function Save(int id)
 endFunction
 
 function Initialize()
-	Config       = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
-	LipSync      = Config.LipSync
-	VoicesPlayer = Config.VoicesPlayer
-	SexLabVoiceM = Config.SexLabVoiceM
-	SexLabVoiceF = Config.SexLabVoiceF
 	Gender = -1
 	Mild = none
 	Medium = none

@@ -123,7 +123,6 @@ bool function SetupAlias(Actor ProspectRef, bool Victimize = false, sslBaseVoice
 	IsCreature = Gender == 2
 	IsPlayer   = ActorRef == PlayerRef
 	IsVictim   = Victimize
-	ActorVoice = ActorRef.GetVoiceType()
 	if !IsCreature
 		SetVoice(UseVoice, ForceSilent)
 	endIf
@@ -186,7 +185,7 @@ state Ready
 			Strip()
 			; Pick a voice if needed
 			if Voice == none && !IsForcedSilent
-				SetVoice(VoiceSlots.PickGender(BaseSex), IsForcedSilent)
+				SetVoice(VoiceSlots.PickVoice(ActorRef), IsForcedSilent)
 			endIf
 			; Pick an expression if needed
 			if Expression == none && Config.UseExpressions
@@ -563,10 +562,6 @@ function RestoreActorDefaults()
 		; Reset expression
 		ActorRef.ClearExpressionOverride()
 		MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
-		; Reset voice type
-		if ActorVoice != none
-			BaseRef.SetVoiceType(ActorVoice)
-		endIf
 		; Enable player controls
 		if ActorRef == PlayerRef
 			Thread.DisableHotkeys()

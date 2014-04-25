@@ -545,3 +545,95 @@ function Initialize()
 	Timers = floatDel1
 	parent.Initialize()
 endFunction
+
+
+; JContainers testing
+
+;/int jc
+function InitJC()
+	; Create SexLab JContainer
+	if !JDB.HasPath(".SexLab")
+		JDB.SetObj("SexLab", JMap.Object())
+		Log("Creating SexLab")
+	endIf
+
+	; Create animations JContainer
+	int SexLab = JDB.SolveObj(".SexLab")
+	Log("SexLab: "+SexLab)
+	if !JMap.HasKey(SexLab, Registry)
+		JMap.SetObj(SexLab, Registry, JMap.Object())
+		Log("Creating "+Registry+" under "+jc, Registry)
+	endIf
+	jc = JMap.GetObj(SexLab, Registry)
+	Log("Got SexLab."+Registry+" under "+jc, Registry)
+endFunction
+
+function SetAdjustmentJC(int AdjustKey, int Position, int Stage, int Slot, float Adjustment)
+	JArray.SetFlt(AdjustKey, DataIndex(4, Position, Stage, Slot), Adjustment)
+endFunction
+
+float function GetAdjustmentJC(int AdjustKey, int Position, int Stage, int Slot)
+	return JArray.GetFlt(AdjustKey, DataIndex(4, Position, Stage, Slot))
+endFunction
+
+function UpdateAdjustmentJC(int AdjustKey, int Position, int Stage, int Slot, float AdjustBy)
+	SetAdjustmentJC(AdjustKey, Position, Stage, Slot, (GetAdjustmentJC(AdjustKey, Position, Stage, Slot) + AdjustBy))
+endFunction
+
+function AdjustForwardJC(int AdjustKey, int Position, int Stage, float AdjustBy, bool AdjustStage = false)
+	UpdateAdjustmentJC(AdjustKey, Position, Stage, 0, AdjustBy)
+endFunction
+
+float[] function GetPositionOffsetsJC(int AdjustKey, int Position, int Stage)
+	int i = DataIndex(4, Position, Stage, 0)
+	; Get default offsets
+	float[] Output = new float[4]
+	Output[0] = Offsets[i] + CenterAdjust[(Stage - 1)] ; Forward
+	Output[1] = Offsets[(i + 1)] ; Side
+	Output[2] = Offsets[(i + 2)] ; Up
+	Output[3] = Offsets[(i + 3)] ; Rot
+	; Apply adjustments
+	Output[0] = Output[0] + JArray.GetFlt(AdjustKey, i)
+	Output[1] = Output[1] + JArray.GetFlt(AdjustKey, i + 1)
+	Output[2] = Output[2] + JArray.GetFlt(AdjustKey, i + 2)
+	return Output
+endFunction
+
+string function MakeAdjustKeyJC(Actor[] ActorList, bool RaceKey = true)
+	if RaceKey == false || ActorList.Length != Actors
+		return "Global"
+	endIf
+	string AdjustKey = ""
+	int i
+	while i < Actors
+		ActorBase BaseRef = ActorList[i].GetLeveledActorBase()
+		string RaceID = MiscUtil.GetRaceEditorID(BaseRef.GetRace())
+		if IsCreature && GetGender(i) == 2
+			AdjustKey += RaceID+"C"
+		elseIf BaseRef.GetSex() == 1
+			AdjustKey += RaceID+"F"
+		else
+			AdjustKey += RaceID+"M"
+		endIf
+		i += 1
+		if i < Actors
+			AdjustKey += ";"
+		endIf
+	endWhile
+	return AdjustKey
+endFunction
+
+int function GetKey(string RaceKey)
+	if !JMap.HasKey(jc, RaceKey)
+		JMap.SetObj(jc, RaceKey, JArray.ObjectWithSize(Offsets.Length))
+		Log("Creating "+RaceKey+" under "+JMap.GetObj(jc, RaceKey), Name)
+	endIf
+	return JMap.GetObj(jc, RaceKey)
+	; string Path = "."+Registry+"."+RaceKey
+	; if !JDB.HasPath(Path)
+	; 	JDB.SetObj(Path, JArray.ObjectWithSize(Offsets.Length))
+	; 	Log("Creating "+RaceKey+" under "+JDB.SolveObj(Path), Name)
+	; endIf
+	; return JMap.GetObj(jc, RaceKey)
+endFunction/;
+

@@ -1,5 +1,6 @@
 scriptname sslVoiceSlots extends Quest
 
+import sslUtility
 import StorageUtil
 
 ; Voices storage
@@ -22,7 +23,7 @@ Actor PlayerRef
 ; ------------------------------------------------------- ;
 
 sslBaseVoice[] function GetAllGender(int Gender)
-	bool[] Valid = sslUtility.BoolArray(Slotted)
+	bool[] Valid = BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
@@ -33,7 +34,7 @@ endFunction
 
 sslBaseVoice function PickGender(int Gender = 1)
 	; Get list of valid voices
-	bool[] Valid = sslUtility.BoolArray(Slotted)
+	bool[] Valid = BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
@@ -65,12 +66,12 @@ sslBaseVoice function PickVoice(Actor ActorRef)
 endFunction
 
 sslBaseVoice function GetByTags(string Tags, string TagsSuppressed = "", bool RequireAll = true)
-	string[] Search = sslUtility.ArgString(Tags)
+	string[] Search = ArgString(Tags)
 	if Search.Length == 0
 		return none
 	endIf
-	string[] Suppress = sslUtility.ArgString(TagsSuppressed)
-	bool[] Valid = sslUtility.BoolArray(Slotted)
+	string[] Suppress = ArgString(TagsSuppressed)
+	bool[] Valid = BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
@@ -136,12 +137,12 @@ endFunction
 ; ------------------------------------------------------- ;
 
 sslBaseVoice[] function GetList(bool[] Valid)
-	int i = sslUtility.CountTrue(Valid)
+	int i = CountTrue(Valid)
 	if i == 0
 		return none ; OR empty array?
 	endIf
 	string Found
-	sslBaseVoice[] Output = sslUtility.VoiceArray(i)
+	sslBaseVoice[] Output = VoiceArray(i)
 	int pos = Valid.Find(true)
 	while pos != -1
 		i -= 1
