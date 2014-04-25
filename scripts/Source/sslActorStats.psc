@@ -15,41 +15,49 @@ string[] LewdTitlesFemale
 ; ------------------------------------------------------- ;
 
 int function FindStat(string Stat)
-	return StringListFind(Storage, "Custom", Stat)
+	return StringListFind(self, "Custom", Stat)
 endFunction
 
 int function RegisterStat(string Stat, string Value, string Prepend = "", string Append = "")
 	if FindStat(Stat) == -1
-		StringListAdd(Storage, "Custom", Stat, false)
-		SetStringValue(Storage, "Custom.Default."+Stat, Value)
-		SetStringValue(Storage, "Custom.Prepend."+Stat, Prepend)
-		SetStringValue(Storage, "Custom.Append."+Stat, Append)
+		StringListAdd(self, "Custom", Stat, false)
+		SetStringValue(self, "Custom.Default."+Stat, Value)
+		SetStringValue(self, "Custom.Prepend."+Stat, Prepend)
+		SetStringValue(self, "Custom.Append."+Stat, Append)
 		SetStat(PlayerRef, Stat, Value)
 	endIf
 	return FindStat(Stat)
+endFunction
+
+int function GetNumStats()
+	return StringListCount(self, "Custom")
+endFunction
+
+string function GetNthStat(int i)
+	return StringListGet(self, "Custom", i)
 endFunction
 
 function Alter(string Name, string NewName = "", string Value = "", string Prepend = "", string Append = "")
 	int i = FindStat(Name)
 	if i != -1
 		if NewName != ""
-			StringListSet(Storage, "Custom", i, NewName)
-			SetStringValue(Storage, "Custom.Default."+NewName, GetStringValue(Storage, "Custom.Default."+Name))
-			SetStringValue(Storage, "Custom.Prepend."+NewName, GetStringValue(Storage, "Custom.Prepend."+Name))
-			SetStringValue(Storage, "Custom.Append."+NewName, GetStringValue(Storage, "Custom.Append."+Name))
-			UnsetStringValue(Storage, "Custom.Default."+Name)
-			UnsetStringValue(Storage, "Custom.Prepend."+Name)
-			UnsetStringValue(Storage, "Custom.Append."+Name)
+			StringListSet(self, "Custom", i, NewName)
+			SetStringValue(self, "Custom.Default."+NewName, GetStringValue(self, "Custom.Default."+Name))
+			SetStringValue(self, "Custom.Prepend."+NewName, GetStringValue(self, "Custom.Prepend."+Name))
+			SetStringValue(self, "Custom.Append."+NewName, GetStringValue(self, "Custom.Append."+Name))
+			UnsetStringValue(self, "Custom.Default."+Name)
+			UnsetStringValue(self, "Custom.Prepend."+Name)
+			UnsetStringValue(self, "Custom.Append."+Name)
 			Name = NewName
 		endIf
 		if Value != ""
-			SetStringValue(Storage, "Custom.Default."+Name, Value)
+			SetStringValue(self, "Custom.Default."+Name, Value)
 		endIf
 		if Prepend != ""
-			SetStringValue(Storage, "Custom.Prepend."+Name, Prepend)
+			SetStringValue(self, "Custom.Prepend."+Name, Prepend)
 		endIf
 		if Append != ""
-			SetStringValue(Storage, "Custom.Append."+Name, Append)
+			SetStringValue(self, "Custom.Append."+Name, Append)
 		endIf
 	endIf
 endFunction
@@ -110,15 +118,15 @@ string function GetStatTitle(Actor ActorRef, string Stat, float Curve = 0.85)
 endFunction
 
 string function GetStatDefault(string Stat)
-	return GetStringValue(Storage, "Custom.Default."+Stat, "0")
+	return GetStringValue(self, "Custom.Default."+Stat, "0")
 endFunction
 
 string function GetStatPrepend(string Stat)
-	return GetStringValue(Storage, "Custom.Prepend."+Stat, "")
+	return GetStringValue(self, "Custom.Prepend."+Stat, "")
 endFunction
 
 string function GetStatAppend(string Stat)
-	return GetStringValue(Storage, "Custom.Append."+Stat, "")
+	return GetStringValue(self, "Custom.Append."+Stat, "")
 endFunction
 
 string function GetStatFull(Actor ActorRef, string Stat)
@@ -604,10 +612,10 @@ function ResetStats(Actor ActorRef)
 	ClearFloat(ActorRef, "TimeSpent")
 	ClearFloat(ActorRef, "Purity")
 	; Custom stats
-	int i = StringListCount(Storage, "Custom")
+	int i = StringListCount(self, "Custom")
 	while i
 		i -= 1
-		ClearStr(ActorRef, "Custom."+StringListGet(Storage, "Custom", i))
+		ClearStr(ActorRef, "Custom."+StringListGet(self, "Custom", i))
 	endWhile
 	; Clear Partners
 	if ActorRef == PlayerRef

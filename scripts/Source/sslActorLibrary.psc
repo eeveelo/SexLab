@@ -1,4 +1,4 @@
-scriptname sslActorLibrary extends sslSystemAlias
+scriptname sslActorLibrary extends sslSystemLibrary
 
 import StorageUtil
 
@@ -72,18 +72,18 @@ function CacheStrippable(Actor ActorRef)
 	int i = ActorRef.GetNumItems()
 	while i
 		i -= 1
-		form ItemRef = ActorRef.GetNthForm(i)
+		Form ItemRef = ActorRef.GetNthForm(i)
 		if ItemRef.GetType() == 26 && IsStrippable(ItemRef)
-			; Log(ItemRef.GetName()+" Is Strippable")
+			Log(ItemRef, "IsStrippable")
 		endIf
 	endWhile
 endFunction
 
-form[] function StripActor(Actor ActorRef, Actor VictimRef = none, bool DoAnimate = true, bool LeadIn = false)
+Form[] function StripActor(Actor ActorRef, Actor VictimRef = none, bool DoAnimate = true, bool LeadIn = false)
 	return StripSlots(ActorRef, Config.GetStrip((GetGender(ActorRef) == 1), LeadIn, (VictimRef != none), (VictimRef != none && ActorRef == VictimRef)), DoAnimate)
 endFunction
 
-bool function IsStrippable(form ItemRef)
+bool function IsStrippable(Form ItemRef)
 	; Check previous validations
 	if ItemRef != none && FormListFind(none, "StripList", ItemRef) != -1
 		return true
@@ -104,8 +104,8 @@ bool function IsStrippable(form ItemRef)
 	return true
 endFunction
 
-form function StripSlot(Actor ActorRef, int SlotMask)
-	form ItemRef = ActorRef.GetWornForm(SlotMask)
+Form function StripSlot(Actor ActorRef, int SlotMask)
+	Form ItemRef = ActorRef.GetWornForm(SlotMask)
 	if IsStrippable(ItemRef)
 		ActorRef.UnequipItem(ItemRef, false, true)
 		return ItemRef
@@ -113,7 +113,7 @@ form function StripSlot(Actor ActorRef, int SlotMask)
 	return none
 endFunction
 
-form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false, bool AllowNudesuit = true)
+Form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false, bool AllowNudesuit = true)
 	if Strip.Length != 33
 		return none
 	endIf
@@ -127,7 +127,7 @@ form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 	if UseNudeSuit
 		ActorRef.AddItem(NudeSuit, 1, true)
 	endIf
-	form[] Stripped = new form[34]
+	Form[] Stripped = new Form[34]
 	; Strip weapon
 	if Strip[32]
 		; Left hand
@@ -171,7 +171,7 @@ form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 	return sslUtility.ClearNone(Stripped)
 endFunction
 
-function UnstripActor(Actor ActorRef, form[] Stripped, bool IsVictim = false)
+function UnstripActor(Actor ActorRef, Form[] Stripped, bool IsVictim = false)
 	int i = Stripped.Length
 	; Remove nudesuits
 	if ActorRef.IsEquipped(NudeSuit)
@@ -210,7 +210,7 @@ int function ValidateActor(Actor ActorRef)
 	elseIf SexLabUtil.IsActorActive(ActorRef)
 		Log("ValidateActor() -- Failed to validate ("+BaseRef.GetName()+") -- They appear to already be animating")
 		return -10
-	elseIf FormListFind(Storage, "ValidActors", ActorRef) != -1
+	elseIf FormListFind(self, "ValidActors", ActorRef) != -1
 		return 1
 	elseIf !CanAnimate(ActorRef)
 		Log("ValidateActor() -- Failed to validate ("+BaseRef.GetName()+") -- They are forbidden from animating")
@@ -227,11 +227,11 @@ int function ValidateActor(Actor ActorRef)
 	elseIf ActorRef.IsFlying()
 		Log("ValidateActor() -- Failed to validate ("+BaseRef.GetName()+") -- They are flying.")
 		return -15
-	elseIf ActorRef != PlayerRef && !ActorRef.HasKeyword(ActorTypeNPC) && !CreatureSlots.AllowedCreature(BaseRef.GetRace())
+	elseIf ActorRef != PlayerRef && !ActorRef.HasKeyword(ActorTypeNPC) && !CreatureSlots.AllowedCreature(BaseRef.GetRace()) ; (!Config.AllowCreatures || (Config.AllowCreatures && !SexLabUtil.HasRace(BaseRef.GetRace())))
 		Log("ValidateActor() -- Failed to validate ("+BaseRef.GetName()+") -- They are a creature that is currently not supported ("+MiscUtil.GetRaceEditorID(BaseRef.GetRace())+")")
 		return -16
 	endIf
-	FormListAdd(Storage, "ValidActors", ActorRef, false)
+	FormListAdd(self, "ValidActors", ActorRef, false)
 	return 1
 endFunction
 
@@ -274,12 +274,11 @@ function ClearForcedGender(Actor ActorRef)
 endFunction
 
 int function GetGender(Actor ActorRef)
-	if ActorRef.IsInFaction(GenderFaction)
-		return ActorRef.GetFactionRank(GenderFaction)
-	endIf
 	ActorBase BaseRef = ActorRef.GetLeveledActorBase()
 	if SexLabUtil.HasRace(BaseRef.GetRace())
 		return 2 ; Creature
+	elseIf ActorRef.IsInFaction(GenderFaction)
+		return ActorRef.GetFactionRank(GenderFaction) ; Override
 	endIf
 	return BaseRef.GetSex() ; Default
 endFunction
@@ -312,40 +311,12 @@ int function CreatureCount(Actor[] Positions)
 endFunction
 
 string function MakeGenderTag(Actor[] Positions)
-	string Tag
-	int[] Genders = GenderCount(Positions)
-	while Genders[1]
-		Genders[1] = (Genders[1] - 1)
-		Tag += "F"
-	endWhile
-	while Genders[0]
-		Genders[0] = (Genders[0] - 1)
-		Tag += "M"
-	endWhile
-	while Genders[2]
-		Genders[2] = (Genders[2] - 1)
-		Tag += "C"
-	endWhile
-	return Tag
+	return SexLabUtil.MakeGenderTag(Positions)
 endFunction
 
 string function GetGenderTag(int Females = 0, int Males = 0, int Creatures = 0)
-	string Tag
-	while Females
-		Females -= 1
-		Tag += "F"
-	endWhile
-	while Males
-		Males -= 1
-		Tag += "M"
-	endWhile
-	while Creatures
-		Creatures -= 1
-		Tag += "C"
-	endWhile
-	return Tag
+	return SexLabUtil.GetGenderTag(Females, Males, Creatures)
 endFunction
-
 
 ; ------------------------------------------------------- ;
 ; --- System Use Only                                 --- ;
@@ -361,6 +332,7 @@ endFunction
 ; 	FormListClear(Storage, "NoStripList")
 ; 	FormListClear(Storage, "Registry")
 ; endFunction
+
 function Setup()
 	parent.Setup()
 	AnimatingFaction        = Config.AnimatingFaction
@@ -382,3 +354,108 @@ function Setup()
 	BaseMarker              = Config.BaseMarker
 	DoNothing               = Config.DoNothing
 endFunction
+
+; ------------------------------------------------------- ;
+; --- Pre 1.50 Config Accessors                       --- ;
+; ------------------------------------------------------- ;
+
+float property fMaleVoiceDelay hidden
+	float function get()
+		return Config.MaleVoiceDelay
+	endFunction
+endProperty
+float property fFemaleVoiceDelay hidden
+	float function get()
+		return Config.FemaleVoiceDelay
+	endFunction
+endProperty
+float property fVoiceVolume hidden
+	float function get()
+		return Config.VoiceVolume
+	endFunction
+endProperty
+float property fCumTimer hidden
+	float function get()
+		return Config.CumTimer
+	endFunction
+endProperty
+bool property bDisablePlayer hidden
+	bool function get()
+		return Config.DisablePlayer
+	endFunction
+endProperty
+bool property bScaleActors hidden
+	bool function get()
+		return Config.ScaleActors
+	endFunction
+endProperty
+bool property bUseCum hidden
+	bool function get()
+		return Config.UseCum
+	endFunction
+endProperty
+bool property bAllowFFCum hidden
+	bool function get()
+		return Config.AllowFFCum
+	endFunction
+endProperty
+bool property bUseStrapons hidden
+	bool function get()
+		return Config.UseStrapons
+	endFunction
+endProperty
+bool property bReDressVictim hidden
+	bool function get()
+		return Config.ReDressVictim
+	endFunction
+endProperty
+bool property bRagdollEnd hidden
+	bool function get()
+		return Config.RagdollEnd
+	endFunction
+endProperty
+bool property bUseMaleNudeSuit hidden
+	bool function get()
+		return Config.UseMaleNudeSuit
+	endFunction
+endProperty
+bool property bUseFemaleNudeSuit hidden
+	bool function get()
+		return Config.UseFemaleNudeSuit
+	endFunction
+endProperty
+bool property bUndressAnimation hidden
+	bool function get()
+		return Config.UndressAnimation
+	endFunction
+endProperty
+bool[] property bStripMale hidden
+	bool[] function get()
+		return Config.StripMale
+	endFunction
+endProperty
+bool[] property bStripFemale hidden
+	bool[] function get()
+		return Config.StripFemale
+	endFunction
+endProperty
+bool[] property bStripLeadInFemale hidden
+	bool[] function get()
+		return Config.StripLeadInFemale
+	endFunction
+endProperty
+bool[] property bStripLeadInMale hidden
+	bool[] function get()
+		return Config.StripLeadInMale
+	endFunction
+endProperty
+bool[] property bStripVictim hidden
+	bool[] function get()
+		return Config.StripVictim
+	endFunction
+endProperty
+bool[] property bStripAggressor hidden
+	bool[] function get()
+		return Config.StripAggressor
+	endFunction
+endProperty
