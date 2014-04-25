@@ -80,10 +80,10 @@ sslActorLibrary property ActorLib auto hidden
 sslThreadLibrary property ThreadLib auto hidden
 sslActorStats property Stats auto hidden
 
-; DEPRECATED LIBRARIES - DO NOT USE, will be removed eventually, provided only for backwards compatibility
-sslAnimationLibrary property AnimLib auto hidden
-sslExpressionLibrary property ExpressionLib auto hidden
-sslVoiceLibrary property VoiceLib auto hidden
+; DEPRECATED LIBRARIES - No longer used, their functions have all been moved to other scripts
+; sslAnimationLibrary property AnimLib auto hidden
+; sslExpressionLibrary property ExpressionLib auto hidden
+; sslVoiceLibrary property VoiceLib auto hidden
 
 ;#---------------------------#
 ;#                           #
@@ -463,16 +463,32 @@ int function FindExpressionByName(string findName)
 endFunction
 
 function OpenMouth(Actor ActorRef)
-	ActorRef.SetExpressionOverride(16, 100)
+	sslBaseExpression.OpenMouth(ActorRef)
+endFunction
+
+function CloseMouth(Actor ActorRef)
+	sslBaseExpression.CloseMouth(ActorRef)
 endFunction
 
 bool function IsMouthOpen(Actor ActorRef)
-	return MfgConsoleFunc.GetExpressionID(ActorRef) == 16 && MfgConsoleFunc.GetExpressionValue(ActorRef) == 100
+	return sslBaseExpression.IsMouthOpen(ActorRef)
 endFunction
 
 function ClearMFG(Actor ActorRef)
 	ActorRef.ClearExpressionOverride()
 	MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
+endFunction
+
+function ClearPhoneme(Actor ActorRef)
+	sslBaseExpression.ClearPhoneme(ActorRef)
+endFunction
+
+function ClearModifier(Actor ActorRef)
+	sslBaseExpression.ClearModifier(ActorRef)
+endFunction
+
+function ApplyPreset(Actor ActorRef, int[] Preset)
+	sslBaseExpression.ApplyPreset(ActorRef, Preset)
 endFunction
 
 ;#---------------------------#
@@ -771,11 +787,6 @@ function Setup()
 	SexLabQuestAnimations.Start()
 	SexLabQuestRegistry.Stop()
 	SexLabQuestRegistry.Start()
-	; Backwards compatibility support libraries
-	AnimLib       = (Game.GetFormFromFile(0x3CE6C, "SexLab.esm") as sslAnimationLibrary).Setup()
-	VoiceLib      = (Game.GetFormFromFile(0X3DE97, "SexLab.esm") as sslVoiceLibrary).Setup()
-	ExpressionLib = (Game.GetFormFromFile(0x4C63D, "SexLab.esm") as sslExpressionLibrary).Setup()
-	;;/ConfigMenu/;  (Game.GetFormFromFile(0X3E3FA, "SexLab.esm") as sslConfigDeprecated)
 	; Reset function Libraries - SexLabQuestFramework
 	Config          = SexLabQuestFramework as sslSystemConfig
 	ThreadLib       = SexLabQuestFramework as sslThreadLibrary
@@ -807,11 +818,11 @@ state Disabled
 		Log("NewThread() - Failed to make new thread model; system is currently disabled or not installed", "FATAL")
 		return none
 	endFunction
-	int function StartSex(Actor[] Positions, sslBaseAnimation[] Anims, Actor VictimRef = none, ObjectReference CenterOn = none, bool AllowBed = true, string Hook = "")
+	int function StartSex(Actor[] Positions, sslBaseAnimation[] Anims, Actor Victim = none, ObjectReference CenterOn = none, bool AllowBed = true, string Hook = "")
 		Log("StartSex() - Failed to make new thread model; system is currently disabled or not installed", "FATAL")
 		return -1
 	endFunction
-	sslThreadController function QuickStart(Actor Actor1, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none, Actor VictimRef = none, string AnimationTags = "", string Hook = "")
+	sslThreadController function QuickStart(Actor Actor1, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none, Actor Victim = none, string Hook = "", string AnimationTags = "")
 		Log("QuestStart() - Failed to make new thread model; system is currently disabled or not installed", "FATAL")
 		return none
 	endFunction
