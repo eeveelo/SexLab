@@ -18,26 +18,9 @@ ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	Utility.Wait(0.5)
-
-	sslBenchMark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
+	; sslBenchMark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
 	; Dev.LatencyTest()
 	; Dev.StartBenchmark(2)
-
-	; sslBaseAnimation Anim = SexLab.AnimSlots.GetBySlot(0)
-	; Anim.InitJC()
-	; string RaceKey = Anim.MakeAdjustKeyJC(MakeActorArray(CasterRef, TargetRef), true)
-	; Log("RaceKey = "+RaceKey)
-	; int AdjustKey = Anim.GetKey(RaceKey)
-	; Log("AdjustKey = "+AdjustKey)
-	; Log("Forward = "+Anim.GetAdjustmentJC(AdjustKey, 1, 2, 0))
-	; Anim.AdjustForwardJC(AdjustKey, 1, 2, 21.0)
-	; Log("Adjusted = "+Anim.GetAdjustmentJC(AdjustKey, 1, 2, 0))
-	; Log("Offsets = "+Anim.GetPositionOffsetsJC(AdjustKey, 1, 2))
-
-	; JValue.WriteToFile(JDB.SolveObj(".SexLab"), "sexlabprofile_1.txt")
-	; JValue.WriteToFile(JDB.SolveObj(".SexLab"), "sexlabprofile_test.json")
-	; JDB.WriteToFile("jcontainerstest.txt")
-
 	Dispel()
 endEvent
 

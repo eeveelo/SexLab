@@ -420,22 +420,6 @@ function ImportProfile(int Profile = 1)
 	Log("Animation Profile #"+AnimProfile+" imported with ("+StorageUtil.debug_GetFloatListKeysCount(AnimSlots)+") values...", "Import")
 endfunction
 
-function ImportExpressions()
-	int i = ExpressionSlots.Slotted
-	while i
-		i -= 1
-		; ExpressionSlots.Expressions[i].LoadProfile()
-	endWhile
-endFunction
-
-function ExportExpressions()
-	int i = ExpressionSlots.Slotted
-	while i
-		i -= 1
-		; ExpressionSlots.Expressions[i].SaveProfile()
-	endWhile
-endFunction
-
 ; ------------------------------------------------------- ;
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
@@ -454,11 +438,20 @@ bool function CheckSystem()
 		CheckSkyUI.Show(4.1)
 		return false
 	; Check PapyrusUtil install - depends on passing SKSE check passing
-	elseIf PapyrusUtil.GetVersion() < 19
-		CheckPapyrusUtil.Show(1.9)
+	elseIf PapyrusUtil.GetVersion() < 22
+		CheckPapyrusUtil.Show(2.2)
 		return false
 	endIf
 	; Return result
+	return true
+endFunction
+
+bool function CheckFNIS()
+	Game.ForceThirdPerson()
+	if PlayerRef.GetAnimationVariableInt("SexLabVer") < 150 || PlayerRef.GetAnimationVariableInt("FNISmajor") < 5
+		CheckFNIS.Show(5.0)
+		return false
+	endIf
 	return true
 endFunction
 

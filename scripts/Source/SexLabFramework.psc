@@ -28,6 +28,10 @@ bool property Enabled hidden
 	endFunction
 endProperty
 
+; Data
+Actor property PlayerRef auto
+Faction property AnimatingFaction auto
+
 ; Animation Threads
 sslThreadSlots property ThreadSlots auto hidden
 sslThreadController[] property Threads hidden
@@ -76,9 +80,10 @@ sslActorLibrary property ActorLib auto hidden
 sslThreadLibrary property ThreadLib auto hidden
 sslActorStats property Stats auto hidden
 
-; Data
-Actor property PlayerRef auto
-Faction property AnimatingFaction auto
+; DEPRECATED LIBRARIES - DO NOT USE, will be removed eventually, provided only for backwards compatibility
+sslAnimationLibrary property AnimLib auto hidden
+sslExpressionLibrary property ExpressionLib auto hidden
+sslVoiceLibrary property VoiceLib auto hidden
 
 ;#---------------------------#
 ;#                           #
@@ -91,14 +96,14 @@ sslThreadModel function NewThread(float TimeOut = 30.0)
 	return ThreadSlots.PickModel(TimeOut)
 endFunction
 
-int function StartSex(Actor[] Positions, sslBaseAnimation[] Anims, Actor VictimRef = none, ObjectReference CenterOn = none, bool AllowBed = true, string Hook = "")
+int function StartSex(Actor[] Positions, sslBaseAnimation[] Anims, Actor Victim = none, ObjectReference CenterOn = none, bool AllowBed = true, string Hook = "")
 	; Claim a thread
 	sslThreadModel Make = NewThread()
 	if Make == none
 		Log("StartSex() - Failed to claim an available thread")
 		return -1
 	; Add actors list to thread
-	elseIf !Make.AddActors(Positions, VictimRef)
+	elseIf !Make.AddActors(Positions, Victim)
 		Log("StartSex() - Failed to add some actors to thread")
 		return -1
 	endIf
@@ -766,12 +771,17 @@ function Setup()
 	SexLabQuestAnimations.Start()
 	SexLabQuestRegistry.Stop()
 	SexLabQuestRegistry.Start()
+	; Backwards compatibility support libraries
+	AnimLib       = (Game.GetFormFromFile(0x3CE6C, "SexLab.esm") as sslAnimationLibrary).Setup()
+	VoiceLib      = (Game.GetFormFromFile(0X3DE97, "SexLab.esm") as sslVoiceLibrary).Setup()
+	ExpressionLib = (Game.GetFormFromFile(0x4C63D, "SexLab.esm") as sslExpressionLibrary).Setup()
+	;;/ConfigMenu/;  (Game.GetFormFromFile(0X3E3FA, "SexLab.esm") as sslConfigDeprecated)
 	; Reset function Libraries - SexLabQuestFramework
 	Config          = SexLabQuestFramework as sslSystemConfig
 	ThreadLib       = SexLabQuestFramework as sslThreadLibrary
 	ThreadSlots     = SexLabQuestFramework as sslThreadSlots
-	ActorLib        = SexLabQuestFramework.GetAliasByName("SystemAlias") as sslActorLibrary
-	Stats           = SexLabQuestFramework.GetAliasByName("SystemAlias") as sslActorStats
+	ActorLib        = SexLabQuestFramework as sslActorLibrary
+	Stats           = SexLabQuestFramework as sslActorStats
 	; Reset animation registry - SexLabQuestAnimations
 	AnimSlots       = SexLabQuestAnimations as sslAnimationSlots
 	; Reset secondary object registry - SexLabQuestRegistry
@@ -817,3 +827,4 @@ state Enabled
 		ModEvent.Send(ModEvent.Create("SexLabEnabled"))
 	endEvent
 endState
+

@@ -1,54 +1,57 @@
-scriptname sslExpressionLibrary extends Quest
-{DEPRECATED: This script is no longer used in any sexlab systems, and is only provided as a means to provide backwards compatibility by redirecting all it's functions to their new iterations}
+scriptname sslVoiceLibrary extends Quest
+{DEPRECATED: This script is a proxy for the original sslConfigMenu script which has been replaced, and is only provided as a means to provide backwards compatibility by redirecting all it's functions to their new iterations}
 
-sslExpressionSlots property Slots hidden
-	sslExpressionSlots function get()
+sslVoiceSlots property Slots hidden
+	sslVoiceSlots function get()
 		DEPRECATED()
-		return SexLab.ExpressionSlots
+		return SexLabUtil.GetAPI().VoiceSlots
 	endFunction
 endProperty
-bool property Male = false autoreadonly hidden
-bool property Female = true autoreadonly hidden
-int property Phoneme = 0 autoreadonly hidden
-int property Modifier = 1 autoreadonly hidden
-int property Expression = 2 autoreadonly hidden
-function OpenMouth(Actor ActorRef) global
+VoiceType property SexLabVoiceM hidden
+	VoiceType function get()
+		DEPRECATED()
+		return SexLabUtil.GetAPI().Config.SexLabVoiceM
+	endFunction
+endProperty
+VoiceType property SexLabVoiceF hidden
+	VoiceType function get()
+		DEPRECATED()
+		return SexLabUtil.GetAPI().Config.SexLabVoiceF
+	endFunction
+endProperty
+FormList property VoicesPlayer hidden
+	FormList function get()
+		DEPRECATED()
+		return SexLabUtil.GetAPI().Config.VoicesPlayer
+	endFunction
+endProperty
+string property sPlayerVoice hidden
+	string function get()
+		DEPRECATED()
+		return SexLabUtil.GetAPI().VoiceSlots.GetSavedName(Game.GetPlayer())
+	endFunction
+endProperty
+bool property bNPCSaveVoice hidden
+	bool function get()
+		DEPRECATED()
+		return SexLabUtil.GetAPI().Config.NPCSaveVoice
+	endFunction
+endProperty
+sslBaseVoice function PickVoice(actor a)
 	DEPRECATED()
-	sslBaseExpression.OpenMouth(ActorRef)
+	return SexLabUtil.GetAPI().VoiceSlots.PickVoice(a)
 endFunction
-function CloseMouth(Actor ActorRef) global
+function SaveVoice(actor a, sslBaseVoice Voice)
 	DEPRECATED()
-	sslBaseExpression.CloseMouth(ActorRef)
+	SexLabUtil.GetAPI().VoiceSlots.SaveVoice(a, Voice)
 endFunction
-bool function IsMouthOpen(Actor ActorRef) global
+function ForgetVoice(actor a)
 	DEPRECATED()
-	return sslBaseExpression.IsMouthOpen(ActorRef)
+	SexLabUtil.GetAPI().VoiceSlots.ForgetVoice(a)
 endFunction
-function ClearMFG(Actor ActorRef) global
+sslBaseVoice function GetVoice(actor a)
 	DEPRECATED()
-	sslBaseExpression.ClearMFG(ActorRef)
-endFunction
-function ClearPhoneme(Actor ActorRef) global
-	DEPRECATED()
-	sslBaseExpression.ClearPhoneme(ActorRef)
-endFunction
-function ClearModifier(Actor ActorRef) global
-	DEPRECATED()
-	sslBaseExpression.ClearModifier(ActorRef)
-endFunction
-sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none)
-	DEPRECATED()
-	return Slots.PickExpression(ActorRef, VictimRef)
-endFunction
-function ApplyPreset(int[] Presets, Actor ActorRef, bool OpenMouth = false) global
-	DEPRECATED()
-	sslBaseExpression.ApplyPreset(ActorRef, Presets)
-	if OpenMouth
-		sslBaseExpression.OpenMouth(ActorRef)
-	endIf
-endFunction
-function MFG(Actor ActorRef, int mode, int id, int value) global
-	DEPRECATED()
+	return SexLabUtil.GetAPI().VoiceSlots.PickVoice(a)
 endFunction
 function _Defaults()
 	DEPRECATED()
@@ -59,8 +62,6 @@ endFunction
 function _Import()
 	DEPRECATED()
 endFunction
-
-; Libraries
 sslAnimationLibrary property AnimLib hidden
 	sslAnimationLibrary function get()
 		DEPRECATED()
@@ -135,14 +136,15 @@ sslActorStats property ActorStats hidden
 endProperty
 
 SexLabFramework SexLab
-sslExpressionLibrary function Setup()
+sslVoiceLibrary function Setup()
 	Stop()
 	Start()
 	SexLab = SexLabUtil.GetAPI()
 	return self
 endFunction
+
 function DEPRECATED() global
-	string log = "SexLab DEPRECATED -- sslExpressionLibrary.psc -- Use of this script has been deprecated, the mod that called this function should be updated as soon as possible. If you are not the author of this mod, notify them of this error if possible."
+	string log = "SexLab DEPRECATED -- sslVoiceLibrary.psc -- Use of this script has been deprecated, the mod that called this function should be updated as soon as possible. If you are not the author of this mod, notify them of this error if possible."
 	Debug.TraceStack(log)
 	if SexLabUtil.GetAPI().Config.DebugMode
 		MiscUtil.PrintConsole(log)

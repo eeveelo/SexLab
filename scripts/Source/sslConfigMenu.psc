@@ -47,13 +47,15 @@ event OnVersionUpdate(int version)
 		Quest SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm") as Quest
 
 		; v1.51 - Fixed missing ChangeActors() and removed exprsionprofile.json support
-		; v1.52 -
+		; v1.52 - Altered exporting
 		if CurrentVersion < 15200
 			debug_DeleteValues(SexLabQuestRegistry)
 			FormListClear(SexLabQuestFramework, "SeededActors")
-			ExpressionSlots.Setup()
-			CreatureSlots.Setup()
-			Debug.Notification("SexLab 1.52 Updated")
+		endIf
+		; v1.53 - Changed ActorAlias off of ActorLibrary and ActorLibrary back to sslSystemLibrary
+		if CurrentVersion < 15300
+			SetupSystem()
+			Debug.Notification("SexLab 1.53 Updated...")
 		endIf
 
 		EventType = "SexLabUpdated"
@@ -1367,7 +1369,15 @@ function SexDiary()
 	AddTextOption("$SSL_TimesMasturbated", Stats.GetInt(StatRef, "Masturbation"))
 	AddTextOption("$SSL_TimesAggressive", Stats.GetInt(StatRef, "Aggressor"))
 	AddTextOption("$SSL_TimesVictim", Stats.GetInt(StatRef, "Victim"))
+
 	AddEmptyOption()
+	SetCursorFillMode(LEFT_TO_RIGHT)
+	; Custom stats set by other mods
+	int i = Stats.GetNumStats()
+	while i
+		i -= 1
+		AddTextOption(Stats.GetNthStat(i), Stats.GetStatFull(StatRef, Stats.GetNthStat(i)))
+	endWhile
 endFunction
 
 state SetStatTarget
@@ -1570,6 +1580,7 @@ bool function SetDefaults()
 		SexLab.GoToState("Disabled")
 		return false
 	endIf
+	bool DebugMode = Config.DebugMode
 	; Prepare base framework script
 	SexLab.Setup()
 	; Grab libraries to make sure they are all set properly
@@ -1583,6 +1594,7 @@ bool function SetDefaults()
 	ExpressionSlots = SexLab.ExpressionSlots
 	; Set config properties to their default
 	Config.SetDefaults()
+	Config.DebugMode = DebugMode
 	return true
 endFunction
 

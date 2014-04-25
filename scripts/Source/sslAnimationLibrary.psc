@@ -1,54 +1,39 @@
-scriptname sslExpressionLibrary extends Quest
+scriptname sslAnimationLibrary extends Quest
 {DEPRECATED: This script is no longer used in any sexlab systems, and is only provided as a means to provide backwards compatibility by redirecting all it's functions to their new iterations}
 
-sslExpressionSlots property Slots hidden
-	sslExpressionSlots function get()
+sslAnimationSlots property Slots hidden
+	sslAnimationSlots function get()
 		DEPRECATED()
-		return SexLab.ExpressionSlots
+		return SexLab.AnimSlots
 	endFunction
 endProperty
-bool property Male = false autoreadonly hidden
-bool property Female = true autoreadonly hidden
-int property Phoneme = 0 autoreadonly hidden
-int property Modifier = 1 autoreadonly hidden
-int property Expression = 2 autoreadonly hidden
-function OpenMouth(Actor ActorRef) global
+bool property bRestrictAggressive hidden
+	bool function get()
+		DEPRECATED()
+		return SexLab.Config.RestrictAggressive
+	endFunction
+endProperty
+bool property bAllowCreatures hidden
+	bool function get()
+		DEPRECATED()
+		return SexLab.Config.AllowCreatures
+	endFunction
+endProperty
+string function MakeGenderTag(actor[] Positions)
 	DEPRECATED()
-	sslBaseExpression.OpenMouth(ActorRef)
+	return SexLabUtil.MakeGenderTag(Positions)
 endFunction
-function CloseMouth(Actor ActorRef) global
+string function GetGenderTag(int females = 0, int males = 0, int creatures = 0) global
 	DEPRECATED()
-	sslBaseExpression.CloseMouth(ActorRef)
+	return SexLabUtil.GetGenderTag(Females, Males, Creatures)
 endFunction
-bool function IsMouthOpen(Actor ActorRef) global
+bool function AllowedCreature(Race RaceRef)
 	DEPRECATED()
-	return sslBaseExpression.IsMouthOpen(ActorRef)
+	return SexLab.CreatureSlots.AllowedCreature(RaceRef)
 endFunction
-function ClearMFG(Actor ActorRef) global
+bool function AllowedCreatureCombination(Race RaceRef1, Race RaceRef2)
 	DEPRECATED()
-	sslBaseExpression.ClearMFG(ActorRef)
-endFunction
-function ClearPhoneme(Actor ActorRef) global
-	DEPRECATED()
-	sslBaseExpression.ClearPhoneme(ActorRef)
-endFunction
-function ClearModifier(Actor ActorRef) global
-	DEPRECATED()
-	sslBaseExpression.ClearModifier(ActorRef)
-endFunction
-sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none)
-	DEPRECATED()
-	return Slots.PickExpression(ActorRef, VictimRef)
-endFunction
-function ApplyPreset(int[] Presets, Actor ActorRef, bool OpenMouth = false) global
-	DEPRECATED()
-	sslBaseExpression.ApplyPreset(ActorRef, Presets)
-	if OpenMouth
-		sslBaseExpression.OpenMouth(ActorRef)
-	endIf
-endFunction
-function MFG(Actor ActorRef, int mode, int id, int value) global
-	DEPRECATED()
+	return SexLab.CreatureSlots.AllowedCreatureCombination(RaceRef1, RaceRef2)
 endFunction
 function _Defaults()
 	DEPRECATED()
@@ -59,8 +44,6 @@ endFunction
 function _Import()
 	DEPRECATED()
 endFunction
-
-; Libraries
 sslAnimationLibrary property AnimLib hidden
 	sslAnimationLibrary function get()
 		DEPRECATED()
@@ -135,16 +118,17 @@ sslActorStats property ActorStats hidden
 endProperty
 
 SexLabFramework SexLab
-sslExpressionLibrary function Setup()
+sslAnimationLibrary function Setup()
 	Stop()
 	Start()
 	SexLab = SexLabUtil.GetAPI()
 	return self
 endFunction
 function DEPRECATED() global
-	string log = "SexLab DEPRECATED -- sslExpressionLibrary.psc -- Use of this script has been deprecated, the mod that called this function should be updated as soon as possible. If you are not the author of this mod, notify them of this error if possible."
+	string log = "SexLab DEPRECATED -- sslAnimationLibrary.psc -- Use of this script has been deprecated, the mod that called this function should be updated as soon as possible. If you are not the author of this mod, notify them of this error if possible."
 	Debug.TraceStack(log)
 	if SexLabUtil.GetAPI().Config.DebugMode
 		MiscUtil.PrintConsole(log)
 	endIf
 endFunction
+

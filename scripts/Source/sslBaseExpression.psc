@@ -41,7 +41,7 @@ int[] Female5
 ; ------------------------------------------------------- ;
 
 function Apply(Actor ActorRef, int Strength, int Gender)
-	Log("Phase: "+PickPhase(Strength, Gender), Strength)
+	; Log("Phase: "+PickPhase(Strength, Gender), Strength)
 	ApplyPhase(ActorRef, PickPhase(Strength, Gender), Gender)
 endFunction
 

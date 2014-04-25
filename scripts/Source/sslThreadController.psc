@@ -404,8 +404,9 @@ function EndAnimation(bool Quickly = false)
 	; Set fast flag to skip slow ending functions
 	FastEnd = Quickly
 	Stage = StageCount
+	SendThreadEvent("AnimationEnding")
 	; Send end event
-	RegisterForSingleUpdate(15.0)
+	RegisterForSingleUpdate(30.0)
 	GoToState("Ending")
 	AliasEvent("Reset")
 endFunction
