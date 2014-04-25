@@ -17,11 +17,7 @@ bool function SexLabIsActive() global
 endFunction
 
 SexLabFramework function GetAPI() global
-	Quest API = Game.GetFormFromFile(0xD62, "SexLab.esm") as Quest
-	if API != none
-		return (API as SexLabFramework)
-	endIf
-	return none
+	return Game.GetFormFromFile(0xD62, "SexLab.esm") as SexLabFramework
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -66,6 +62,28 @@ endFunction
 
 bool function HasRace(Race RaceRef) global
 	return StorageUtil.StringListFind(none, "SexLabCreatures", MiscUtil.GetRaceEditorID(RaceRef)) != -1
+endFunction
+
+string function MakeGenderTag(Actor[] Positions) global
+	int[] Genders = GetAPI().ActorLib.GenderCount(Positions)
+	return GetGenderTag(Genders[1], Genders[0], Genders[2])
+endFunction
+
+string function GetGenderTag(int Females = 0, int Males = 0, int Creatures = 0) global
+	string Tag
+	while Females
+		Females -= 1
+		Tag += "F"
+	endWhile
+	while Males
+		Males -= 1
+		Tag += "M"
+	endWhile
+	while Creatures
+		Creatures -= 1
+		Tag += "C"
+	endWhile
+	return Tag
 endFunction
 
 ; ------------------------------------------------------- ;

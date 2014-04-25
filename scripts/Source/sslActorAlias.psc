@@ -285,8 +285,8 @@ state Animating
 			ActorRef.ClearExpressionOverride()
 			if OpenMouth
 				; Open mouth if needed
-				MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
 				ActorRef.SetExpressionOverride(16, 100)
+				MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 40)
 			elseIf Expression != none
 				; Apply expression otherwise - overrides open mouth
 				Expression.Apply(ActorRef, Enjoyment, BaseSex)

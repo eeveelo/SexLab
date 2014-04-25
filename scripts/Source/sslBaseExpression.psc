@@ -36,12 +36,66 @@ int[] Female3
 int[] Female4
 int[] Female5
 
+; ------------------------------------------------------- ;
+; --- Application Functions                           --- ;
+; ------------------------------------------------------- ;
+
+function Apply(Actor ActorRef, int Strength, int Gender)
+	Log("Phase: "+PickPhase(Strength, Gender), Strength)
+	ApplyPhase(ActorRef, PickPhase(Strength, Gender), Gender)
+endFunction
+
 function ApplyPhase(Actor ActorRef, int Phase, int Gender)
-	if Phase > Phases[Gender]
-		return
+	if Phase <= Phases[Gender]
+		ApplyPreset(ActorRef, GetPhase(Phase, Gender))
 	endIf
+endFunction
+
+int function PickPhase(int Strength, int Gender)
+	return ClampInt(((ClampInt(Strength, 1, 100) * Phases[Gender]) / 100), 1, Phases[Gender])
+endFunction
+
+; ------------------------------------------------------- ;
+; --- Global Utilities                                --- ;
+; ------------------------------------------------------- ;
+
+function OpenMouth(Actor ActorRef) global
+	ActorRef.SetExpressionOverride(16, 100)
+	SetPhonemeModifier(ActorRef, 0, 1, 40)
+endFunction
+
+function CloseMouth(Actor ActorRef) global
+	ActorRef.ClearExpressionOverride()
+	SetPhonemeModifier(ActorRef, 0, 1, 0)
+endFunction
+
+bool function IsMouthOpen(Actor ActorRef) global
+	return (GetExpressionID(ActorRef) == 16 && GetExpressionValue(ActorRef) == 100) || (GetPhonemeModifier(ActorRef, 0, 1) == 100)
+endFunction
+
+function ClearMFG(Actor ActorRef) global
+	ActorRef.ClearExpressionOverride()
+	ResetPhonemeModifier(ActorRef)
+endFunction
+
+function ClearPhoneme(Actor ActorRef) global
 	int i
-	int[] Preset = GetPhase(Phase, Gender)
+	while i <= 16
+		SetPhonemeModifier(ActorRef, 0, i, 0)
+		i += 1
+	endWhile
+endFunction
+
+function ClearModifier(Actor ActorRef) global
+	int i
+	while i <= 16
+		SetPhonemeModifier(ActorRef, 1, i, 0)
+		i += 1
+	endWhile
+endFunction
+
+function ApplyPreset(Actor ActorRef, int[] Preset) global
+	int i
 	; Set Phoneme
 	int p
 	while p <= 15
@@ -58,49 +112,6 @@ function ApplyPhase(Actor ActorRef, int Phase, int Gender)
 	endWhile
 	; Set expression
 	ActorRef.SetExpressionOverride(Preset[30], Preset[31])
-endFunction
-
-function Apply(Actor ActorRef, int Strength, int Gender)
-	Log("Phase: "+PickPhase(Strength, Gender), Strength)
-	ApplyPhase(ActorRef, PickPhase(Strength, Gender), Gender)
-endFunction
-
-int function PickPhase(int Strength, int Gender)
-	return ClampInt(((ClampInt(Strength, 1, 100) * Phases[Gender]) / 100), 1, Phases[Gender])
-endFunction
-
-int[] function GetPhonemes(int Phase, int Gender)
-	int[] Output = new int[16]
-	int[] Preset = GetPhase(Phase, Gender)
-	int i
-	while i < 16
-		Output[i] = Preset[Phoneme + i]
-		i += 1
-	endWhile
-	return Output
-endFunction
-
-int[] function GetModifiers(int Phase, int Gender)
-	int[] Output = new int[14]
-	int[] Preset = GetPhase(Phase, Gender)
-	int i
-	while i < 14
-		Output[i] = Preset[Modifier + i]
-		i += 1
-	endWhile
-	return Output
-endFunction
-
-int function GetMoodType(int Phase, int Gender)
-	return GetPhase(Phase, Gender)[30]
-endFunction
-
-int function GetMoodAmount(int Phase, int Gender)
-	return GetPhase(Phase, Gender)[31]
-endFunction
-
-int function GetIndex(int Phase, int Gender, int Mode, int id)
-	return GetPhase(Phase, Gender)[Mode + id]
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -238,6 +249,40 @@ function SetPhase(int Phase, int Gender, int[] Preset)
 	endIf
 endFunction
 
+int[] function GetPhonemes(int Phase, int Gender)
+	int[] Output = new int[16]
+	int[] Preset = GetPhase(Phase, Gender)
+	int i
+	while i < 16
+		Output[i] = Preset[Phoneme + i]
+		i += 1
+	endWhile
+	return Output
+endFunction
+
+int[] function GetModifiers(int Phase, int Gender)
+	int[] Output = new int[14]
+	int[] Preset = GetPhase(Phase, Gender)
+	int i
+	while i < 14
+		Output[i] = Preset[Modifier + i]
+		i += 1
+	endWhile
+	return Output
+endFunction
+
+int function GetMoodType(int Phase, int Gender)
+	return GetPhase(Phase, Gender)[30]
+endFunction
+
+int function GetMoodAmount(int Phase, int Gender)
+	return GetPhase(Phase, Gender)[31]
+endFunction
+
+int function GetIndex(int Phase, int Gender, int Mode, int id)
+	return GetPhase(Phase, Gender)[Mode + id]
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
@@ -286,3 +331,21 @@ function Initialize()
 	parent.Initialize()
 endFunction
 
+; ------------------------------------------------------- ;
+; --- DEPRECATED                                      --- ;
+; ------------------------------------------------------- ;
+
+function ApplyTo(Actor ActorRef, int Strength = 50, bool IsFemale = true, bool OpenMouth = false)
+	Apply(ActorRef, Strength, IsFemale as int)
+	if OpenMouth
+		OpenMouth(ActorRef)
+	endIf
+endFunction
+
+int[] function PickPreset(int Strength, bool IsFemale)
+	return GetPhase(CalcPhase(Strength, IsFemale), (IsFemale as int))
+endFunction
+
+int function CalcPhase(int Strength, bool IsFemale)
+	return PickPhase(Strength, (IsFemale as int))
+endFunction

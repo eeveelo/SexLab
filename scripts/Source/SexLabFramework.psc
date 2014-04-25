@@ -441,6 +441,10 @@ sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none
 	return ExpressionSlots.PickExpression(ActorRef, VictimRef)
 endFunction
 
+sslBaseExpression function RandomExpressionByTag(string Tag)
+	return ExpressionSlots.RandomByTag(Tag)
+endFunction
+
 sslBaseExpression  function GetExpressionByName(string findName)
 	return ExpressionSlots.GetByName(findName)
 endFunction

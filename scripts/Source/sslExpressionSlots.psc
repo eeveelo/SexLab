@@ -18,12 +18,10 @@ endProperty
 ; ------------------------------------------------------- ;
 
 sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none)
-	string Tag
-	if VictimRef == none
-		Tag = "Consensual"
-	elseIf VictimRef == ActorRef
+	string Tag = "Consensual"
+	if VictimRef != none && ActorRef == VictimRef
 		Tag = "Victim"
-	else
+	elseIf VictimRef != none && ActorRef != VictimRef
 		Tag = "Aggressor"
 	endIf
 	bool IsFemale = ActorRef.GetLeveledActorBase().GetSex() == 1
@@ -33,7 +31,21 @@ sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none
 		i -= 1
 		Valid[i] = Slots[i].Registered && Slots[i].HasTag(Tag) && ((IsFemale && Slots[i].PhasesFemale > 0) || (!IsFemale && Slots[i].PhasesMale > 0))
 	endWhile
-	i = Utility.RandomInt(0, (Slotted - 1))
+	return SelectRandom(Valid)
+endFunction
+
+sslBaseExpression function RandomByTag(string Tag)
+	bool[] Valid = sslUtility.BoolArray(Slotted)
+	int i = Slotted
+	while i
+		i -= 1
+		Valid[i] = Slots[i].Registered && Slots[i].HasTag(Tag)
+	endWhile
+	return SelectRandom(Valid)
+endFunction
+
+sslBaseExpression function SelectRandom(bool[] Valid)
+	int i = Utility.RandomInt(0, (Slotted - 1))
 	int Slot = Valid.Find(true, i)
 	if Slot == -1
 		Slot = Valid.RFind(true, i)
