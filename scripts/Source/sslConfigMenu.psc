@@ -1201,18 +1201,13 @@ function TestApply(Actor ActorRef)
 		Exp.ApplyPhase(ActorRef, Phase, ActorRef.GetLeveledActorBase().GetSex())
 		Debug.Notification(Exp.Name+" has been applied to "+ActorName)
 		Debug.Notification("Reverting expression in 15 seconds...")
-		RegisterForSingleUpdate(15)
+		Utility.WaitMenuMode(15.0)
+		PlayerRef.ClearExpressionOverride()
+		MfgConsoleFunc.ResetPhonemeModifier(PlayerRef)
+		TargetRef.ClearExpressionOverride()
+		MfgConsoleFunc.ResetPhonemeModifier(TargetRef)
 	endIf
 endFunction
-
-event OnUpdate()
-	Debug.Notification("Reverting expression...")
-	PlayerRef.ClearExpressionOverride()
-	MfgConsoleFunc.ResetPhonemeModifier(PlayerRef)
-	TargetRef.ClearExpressionOverride()
-	MfgConsoleFunc.ResetPhonemeModifier(TargetRef)
-endEvent
-
 
 state ExpressionNormal
 	event OnSelectST()
