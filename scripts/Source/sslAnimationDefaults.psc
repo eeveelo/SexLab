@@ -16,6 +16,7 @@ function LoadAnimations()
 	RegisterAnimation("SexLabAggrDoggyStyle")
 	RegisterAnimation("ArrokDoggyStyle")
 	RegisterAnimation("ArrokRape")
+	RegisterAnimation("ZynDoggystyle")
 	RegisterAnimation("APDoggyStyle")
 	; Cowgirl
 	RegisterAnimation("SexLabReverseCowgirl")
@@ -1836,6 +1837,39 @@ function ZynMissionary(int id)
 	Base.AddTag("Sex")
 	Base.AddTag("Laying")
 	Base.AddTag("Missionary")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function ZynDoggystyle(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Zyn DoggyStyle"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "Zyn_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "Zyn_Doggystyle_A1_S2", 0)
+	Base.AddPositionStage(a1, "Zyn_Doggystyle_A1_S3", 0)
+	Base.AddPositionStage(a1, "Zyn_Doggystyle_A1_S4", 0)
+    Base.AddPositionstage(a1, "Zyn_Doggystyle_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Zyn_Doggystyle_A2_S1", -104, sos = 4)
+	Base.AddPositionStage(a2, "Zyn_Doggystyle_A2_S2", -104, sos = 3)
+	Base.AddPositionStage(a2, "Zyn_Doggystyle_A2_S3", -104, sos = 3)
+	Base.AddPositionStage(a2, "Zyn_Doggystyle_A2_S4", -104, sos = 3)
+	Base.AddPositionStage(a2, "Zyn_Doggystyle_A2_S5", -104, sos = 3)
+
+	Base.AddTag("Zyn")
+	Base.AddTag("BBP")
+	Base.AddTag("Sex")
+	Base.AddTag("Dirty")
+	Base.AddTag("Doggystyle")
 	Base.AddTag("Vaginal")
 	Base.AddTag("MF")
 

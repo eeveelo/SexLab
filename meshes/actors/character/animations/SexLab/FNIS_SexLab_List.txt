@@ -1,4 +1,4 @@
-Version V1.54
+' Version V1.54
 AnimVar SexLabVer INT32 154
 
 '
@@ -105,8 +105,8 @@ s Tribadism_A2_S1 Tribadism_A2_S1.hkx
 '
 ' Arrok's Animations
 '
-b Arrok_Undress_G0 Arrok_MaleUndress.hkx
-b Arrok_Undress_G1 Arrok_FemaleUndress.hkx
+b -a Arrok_Undress_G0 Arrok_MaleUndress.hkx
+b -a Arrok_Undress_G1 Arrok_FemaleUndress.hkx
 
 s Arrok_Anal_A1_S1 Arrok_Anal_A1_S1.hkx
 + Arrok_Anal_A1_S2 Arrok_Anal_A1_S2.hkx
@@ -519,6 +519,25 @@ s Zyn_Femdom_A3_S1 Zyn_Femdom_A3_S1.hkx
 + Zyn_Femdom_A3_S2 Zyn_Femdom_A3_S2.hkx
 + Zyn_Femdom_A3_S3 Zyn_Femdom_A3_S3.hkx
 + Zyn_Femdom_A3_S4 Zyn_Femdom_A3_S4.hkx
+
+s Zyn_Doggystyle_A1_S1 Zyn_Doggystyle_A1_S1.hkx
++ -a Zyn_Doggystyle_A1_S2 Zyn_Doggystyle_A1_S2.hkx
++ Zyn_Doggystyle_A1_S2b Zyn_Doggystyle_A1_S2b.hkx
++ -a Zyn_Doggystyle_A1_S3 Zyn_Doggystyle_A1_S3.hkx
++ Zyn_Doggystyle_A1_S3b Zyn_Doggystyle_A1_S3b.hkx
++ -a Zyn_Doggystyle_A1_S4 Zyn_Doggystyle_A1_S4.hkx
++ Zyn_Doggystyle_A1_S4b Zyn_Doggystyle_A1_S4b.hkx
++ -a Zyn_Doggystyle_A1_S5 Zyn_Doggystyle_A1_S5.hkx
++ Zyn_Doggystyle_A1_S5b Zyn_Doggystyle_A1_S5b.hkx
+s Zyn_Doggystyle_A2_S1 Zyn_Doggystyle_A2_S1.hkx
++ -a Zyn_Doggystyle_A2_S2 Zyn_Doggystyle_A2_S2.hkx
++ Zyn_Doggystyle_A2_S2b Zyn_Doggystyle_A2_S2b.hkx
++ -a Zyn_Doggystyle_A2_S3 Zyn_Doggystyle_A2_S3.hkx
++ Zyn_Doggystyle_A2_S3b Zyn_Doggystyle_A2_S3b.hkx
++ -a Zyn_Doggystyle_A2_S4 Zyn_Doggystyle_A2_S4.hkx
++ Zyn_Doggystyle_A2_S4b Zyn_Doggystyle_A2_S4b.hkx
++ -a Zyn_Doggystyle_A2_S5 Zyn_Doggystyle_A2_S5.hkx
++ Zyn_Doggystyle_A2_S5b Zyn_Doggystyle_A2_S5b.hkx
 
 '
 ' Bleagh Animation
