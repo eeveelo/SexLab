@@ -479,9 +479,6 @@ function SetDefaults()
 	SexLab = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework
 	PlayerRef = Game.GetPlayer()
 
-	StorageUtil.SetIntValue(PlayerRef, "sslActorStats.Sexuality", 100)
-	VoiceSlots.ForgetVoice(PlayerRef)
-
 	; Booleans
 	RestrictAggressive = true
 	AllowCreatures     = false
@@ -641,6 +638,10 @@ function SetDefaults()
 	; Config loaders
 	LoadStrapons()
 	Reload()
+
+	; Rest some player configurations
+	StorageUtil.SetIntValue(PlayerRef, "sslActorStats.Sexuality", 100)
+	VoiceSlots.ForgetVoice(PlayerRef)
 endFunction
 
 function ReloadData()

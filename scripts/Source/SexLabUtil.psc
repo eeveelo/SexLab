@@ -20,6 +20,10 @@ SexLabFramework function GetAPI() global
 	return Game.GetFormFromFile(0xD62, "SexLab.esm") as SexLabFramework
 endFunction
 
+sslSystemConfig function GetConfig() global
+	return Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Animation Starters                              --- ;
 ; ------------------------------------------------------- ;

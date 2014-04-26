@@ -81,40 +81,6 @@ endProperty
 ; --- Load/Clear Alias For Use                        --- ;
 ; ------------------------------------------------------- ;
 
-function ClearAlias()
-	; Clean script of events
-	GoToState("")
-	UnregisterForUpdate()
-	string e = Thread.Key("")
-	UnregisterForModEvent(e+"Prepare")
-	UnregisterForModEvent(e+"Reset")
-	UnregisterForModEvent(e+"Sync")
-	UnregisterForModEvent(e+"Orgasm")
-	UnregisterForModEvent(e+"Strip")
-	; Set libraries
-	Thread = GetOwningQuest() as sslThreadController
-	; Make sure actor is reset
-	if GetReference() != none
-		Log(self+" had actor '"+GetReference()+"' during clear!", "FATAL")
-		; Init variables needed for reset
-		ActorRef   = GetReference() as Actor
-		BaseRef    = ActorRef.GetLeveledActorBase()
-		BaseSex    = BaseRef.GetSex()
-		Gender     = ActorLib.GetGender(ActorRef)
-		IsMale     = Gender == 0
-		IsFemale   = Gender == 1
-		IsCreature = Gender == 2
-		IsPlayer   = ActorRef == PlayerRef
-		; Reset actor back to default
-		RestoreActorDefaults()
-		StopAnimating(true)
-		UnlockActor()
-		Unstrip()
-	endIf
-	TryToClear()
-	Initialize()
-endFunction
-
 bool function SetupAlias(Actor ProspectRef, bool Victimize = false, sslBaseVoice UseVoice = none, bool ForceSilent = false)
 	if ProspectRef == none || GetReference() != ProspectRef ;|| ValidateActor(ProspectRef) != 1
 		return false ; Failed to set prospective actor into alias
@@ -152,6 +118,43 @@ bool function SetupAlias(Actor ProspectRef, bool Victimize = false, sslBaseVoice
 	Log("Slotted '"+ActorName+"'", self)
 	GoToState("Ready")
 	return true
+endFunction
+
+function ClearAlias()
+	; Set libraries
+	ClearEvents()
+	; Make sure actor is reset
+	if GetReference() != none
+		; Init variables needed for reset
+		ActorRef   = GetReference() as Actor
+		BaseRef    = ActorRef.GetLeveledActorBase()
+		ActorName  = BaseRef.GetName()
+		BaseSex    = BaseRef.GetSex()
+		Gender     = ActorLib.GetGender(ActorRef)
+		IsMale     = Gender == 0
+		IsFemale   = Gender == 1
+		IsCreature = Gender == 2
+		IsPlayer   = ActorRef == PlayerRef
+		Log("'"+ActorName+"' / '"+ActorRef+"' present during alias clear! This is usually harmless as the alias and actor will correct itself, but is usually a sign that a thread did not close cleanly.", self)
+		; Reset actor back to default
+		RestoreActorDefaults()
+		StopAnimating(true)
+		UnlockActor()
+		Unstrip()
+	endIf
+	TryToClear()
+	Initialize()
+endFunction
+
+function ClearEvents()
+	GoToState("")
+	UnregisterForUpdate()
+	string e = Thread.Key("")
+	UnregisterForModEvent(e+"Prepare")
+	UnregisterForModEvent(e+"Reset")
+	UnregisterForModEvent(e+"Sync")
+	UnregisterForModEvent(e+"Orgasm")
+	UnregisterForModEvent(e+"Strip")
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -759,14 +762,7 @@ endProperty
 
 function Initialize()
 	; Clean script of events
-	GoToState("")
-	UnregisterForUpdate()
-	string e = Thread.Key("")
-	UnregisterForModEvent(e+"Prepare")
-	UnregisterForModEvent(e+"Reset")
-	UnregisterForModEvent(e+"Sync")
-	UnregisterForModEvent(e+"Orgasm")
-	UnregisterForModEvent(e+"Strip")
+	ClearEvents()
 	; Remove from active
 	if ActorRef != none
 		FormListRemove(none, "SexLabActors", ActorRef, true)
@@ -805,6 +801,7 @@ endFunction
 
 function Setup()
 	parent.Setup()
+	Thread = GetOwningQuest() as sslThreadController
 	ClearAlias()
 endfunction
 
