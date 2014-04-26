@@ -85,6 +85,12 @@ function ClearAlias()
 	; Clean script of events
 	GoToState("")
 	UnregisterForUpdate()
+	string e = Thread.Key("")
+	UnregisterForModEvent(e+"Prepare")
+	UnregisterForModEvent(e+"Reset")
+	UnregisterForModEvent(e+"Sync")
+	UnregisterForModEvent(e+"Orgasm")
+	UnregisterForModEvent(e+"Strip")
 	; Set libraries
 	Thread = GetOwningQuest() as sslThreadController
 	; Make sure actor is reset
@@ -373,9 +379,14 @@ state Animating
 	endFunction
 
 	event ResetActor()
-		UnregisterForUpdate()
-		UnregisterForAllModEvents()
 		GoToState("")
+		UnregisterForUpdate()
+		string e = Thread.Key("")
+		UnregisterForModEvent(e+"Prepare")
+		UnregisterForModEvent(e+"Reset")
+		UnregisterForModEvent(e+"Sync")
+		UnregisterForModEvent(e+"Orgasm")
+		UnregisterForModEvent(e+"Strip")
 		; Update stats
 		if !IsCreature
 			int[] Genders = Thread.Genders
@@ -750,6 +761,12 @@ function Initialize()
 	; Clean script of events
 	GoToState("")
 	UnregisterForUpdate()
+	string e = Thread.Key("")
+	UnregisterForModEvent(e+"Prepare")
+	UnregisterForModEvent(e+"Reset")
+	UnregisterForModEvent(e+"Sync")
+	UnregisterForModEvent(e+"Orgasm")
+	UnregisterForModEvent(e+"Strip")
 	; Remove from active
 	if ActorRef != none
 		FormListRemove(none, "SexLabActors", ActorRef, true)
