@@ -1,4 +1,4 @@
-Version V1.54
+' Version V1.54
 AnimVar SexLabVer INT32 154
 
 s Bear_Doggystyle_A1_S1 Bear_Doggystyle_A1_S1.hkx
@@ -189,3 +189,20 @@ s Canine_Doggystyle2_A1_S1 Canine_Doggystyle2_A1_S1.hkx
 + Canine_Doggystyle2_A1_S3 Canine_Doggystyle2_A1_S3.hkx
 + Canine_Doggystyle2_A1_S4 Canine_Doggystyle2_A1_S4.hkx
 + Canine_Doggystyle2_A1_S5 Canine_Doggystyle2_A1_S5.hkx
+
+s Giant_Harrassment_A1_S1 Giant_Harrassment_A1_S1.hkx
++ Giant_Harrassment_A1_S2 Giant_Harrassment_A1_S2.hkx
++ Giant_Harrassment_A1_S3 Giant_Harrassment_A1_S3.hkx
++ Giant_Harrassment_A1_S4 Giant_Harrassment_A1_S4.hkx
+
+s Giant_Holding_A1_S1 Giant_Holding_A1_S1.hkx
++ Giant_Holding_A1_S2 Giant_Holding_A1_S2.hkx
++ Giant_Holding_A1_S3 Giant_Holding_A1_S3.hkx
+
+s Horse_Groping_A1_S1 Horse_Groping_A1_S1.hkx
++ Horse_Groping_A1_S2 Horse_Groping_A1_S2.hkx
++ Horse_Groping_A1_S3 Horse_Groping_A1_S3.hkx
++ Horse_Groping_A1_S4 Horse_Groping_A1_S4.hkx
++ Horse_Groping_A1_S5 Horse_Groping_A1_S5.hkx
++ Horse_Groping_A1_S6 Horse_Groping_A1_S6.hkx
++ Horse_Groping_A1_S7 Horse_Groping_A1_S7.hkx

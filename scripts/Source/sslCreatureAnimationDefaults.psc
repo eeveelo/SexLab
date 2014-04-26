@@ -182,12 +182,21 @@ function LoadCreatureAnimations()
 	RegisterAnimation("FalmerGangbang3P")
 	RegisterAnimation("FalmerGangbang4P")
 	RegisterAnimation("FalmerGangbang5P")
+	; Dawguard Gargoyle
+	RegisterAnimation("GargoyleDoggystyle")
+	RegisterAnimation("GargoyleHolding")
+	RegisterAnimation("GargoyleMissionary")
 	; Giant
 	RegisterAnimation("GiantPenetration")
+	RegisterAnimation("GiantHarrassment")
+	RegisterAnimation("GiantHolding")
 	; Horse
 	RegisterAnimation("HorseDoggystyle")
+	RegisterAnimation("HorseGroping")
 	; SabreCat
 	RegisterAnimation("CatDoggystyle")
+	; Dragonborn Daedra Seeker
+	RegisterAnimation("DaedraHugging")
 	; Spider
 	RegisterAnimation("SpiderDouble")
 	RegisterAnimation("SpiderPenetration")
@@ -207,15 +216,10 @@ function LoadCreatureAnimations()
 	RegisterAnimation("WolfDoggystyle")
 	RegisterAnimation("WolfDoggystyle2")
 	RegisterAnimation("WolfMissionary")
-	; Dawguard Gargoyle & Vampire Lord
-	RegisterAnimation("GargoyleDoggystyle")
-	RegisterAnimation("GargoyleHolding")
-	RegisterAnimation("GargoyleMissionary")
+	; Dawnguard Vampire Lord
 	RegisterAnimation("VampireLordDoggystyle")
 	RegisterAnimation("VampireLordHolding")
 	RegisterAnimation("VampireLordMissionary")
-	; Dragonborn Daedra Seeker
-	RegisterAnimation("DaedraHugging")
 endFunction
 
 function BearDoggystyle(int id)
@@ -374,7 +378,7 @@ endFunction
 function CanineDoggystyle2(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Name = "(Dog) Doggystyle 2"
+	Base.Name = "(Dog) Dominate"
 
 	Base.SoundFX = Squishing
 	Base.SetRaceIDs(Dogs)
@@ -1604,7 +1608,7 @@ endFunction
 function WolfDoggystyle2(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Name = "(Wolf) Doggystyle 2"
+	Base.Name = "(Wolf) Dominate"
 
 	Base.SoundFX = Squishing
 	Base.SetRaceIDs(Wolves)
@@ -1659,6 +1663,103 @@ function WolfMissionary(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Missionary")
 	Base.AddTag("Wolf")
+
+	Base.Save(id)
+endFunction
+
+function GiantHarrassment(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "(Giant) Harrassment"
+
+	Base.SoundFX = Squishing
+	Base.SetRaceIDs(Giants)
+
+	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	Base.AddPositionStage(a1, "Giant_Harrassment_A1_S1")
+	Base.AddPositionStage(a1, "Giant_Harrassment_A1_S2")
+	Base.AddPositionStage(a1, "Giant_Harrassment_A1_S3")
+	Base.AddPositionStage(a1, "Giant_Harrassment_A1_S4")
+
+	int a2 = Base.AddPosition(Creature)
+	Base.AddPositionStage(a2, "Giant_Harrassment_A2_S1")
+	Base.AddPositionStage(a2, "Giant_Harrassment_A2_S2")
+	Base.AddPositionStage(a2, "Giant_Harrassment_A2_S3")
+	Base.AddPositionStage(a2, "Giant_Harrassment_A2_S4")
+
+	Base.AddTag("Panicforever")
+	Base.AddTag("Creature")
+	Base.AddTag("Bestiality")
+	Base.AddTag("Dirty")
+	Base.AddTag("Holding")
+	Base.AddTag("Rough")
+	Base.AddTag("Giant")
+
+	Base.Save(id)
+endFunction
+
+function GiantHolding(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "(Giant) Holding"
+
+	Base.SoundFX = Squishing
+	Base.SetRaceIDs(Giants)
+
+	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	Base.AddPositionStage(a1, "Giant_Holding_A1_S1")
+	Base.AddPositionStage(a1, "Giant_Holding_A1_S2")
+	Base.AddPositionStage(a1, "Giant_Holding_A1_S3")
+
+	int a2 = Base.AddPosition(Creature)
+	Base.AddPositionStage(a2, "Giant_Holding_A2_S1")
+	Base.AddPositionStage(a2, "Giant_Holding_A2_S2")
+	Base.AddPositionStage(a2, "Giant_Holding_A2_S3")
+
+	Base.AddTag("Panicforever")
+	Base.AddTag("Creature")
+	Base.AddTag("Bestiality")
+	Base.AddTag("Dirty")
+	Base.AddTag("Holding")
+	Base.AddTag("Rough")
+	Base.AddTag("Giant")
+
+	Base.Save(id)
+endFunction
+
+
+function HorseGroping(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "(Horse) Groping"
+
+	Base.SoundFX = None
+	Base.SetRaceIDs(Horses)
+
+	int a1 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a1, "Horse_Groping_A1_S1")
+	Base.AddPositionStage(a1, "Horse_Groping_A1_S2")
+	Base.AddPositionStage(a1, "Horse_Groping_A1_S3")
+	Base.AddPositionStage(a1, "Horse_Groping_A1_S4")
+	Base.AddPositionStage(a1, "Horse_Groping_A1_S5")
+	Base.AddPositionStage(a1, "Horse_Groping_A1_S6")
+	Base.AddPositionStage(a1, "Horse_Groping_A1_S7")
+
+	int a2 = Base.AddPosition(Creature)
+	Base.AddPositionStage(a2, "Horse_Groping_A2_S1")
+	Base.AddPositionStage(a2, "Horse_Groping_A2_S2")
+	Base.AddPositionStage(a2, "Horse_Groping_A2_S3")
+	Base.AddPositionStage(a2, "Horse_Groping_A2_S4")
+	Base.AddPositionStage(a2, "Horse_Groping_A2_S5")
+	Base.AddPositionStage(a2, "Horse_Groping_A2_S6")
+	Base.AddPositionStage(a2, "Horse_Groping_A2_S7")
+
+	Base.AddTag("Panicforever")
+	Base.AddTag("Creature")
+	Base.AddTag("Bestiality")
+	Base.AddTag("Groping")
+	Base.AddTag("Fondling")
+	Base.AddTag("Horse")
 
 	Base.Save(id)
 endFunction
