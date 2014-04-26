@@ -41,11 +41,13 @@ sslThreadController function GetActorController(Actor ActorRef)
 endFunction
 
 function StopAll()
+	; End all threads
 	int i = Slots.Length
 	while i
 		i -= 1
 		Slots[i].EndAnimation(true)
 	endWhile
+	; Send event
 	ModEvent.Send(ModEvent.Create("SexLabStoppedActive"))
 endFunction
 

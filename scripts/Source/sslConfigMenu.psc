@@ -53,9 +53,10 @@ event OnVersionUpdate(int version)
 			FormListClear(SexLabQuestFramework, "SeededActors")
 		endIf
 		; v1.53 - Changed ActorAlias off of ActorLibrary and ActorLibrary back to sslSystemLibrary
-		if CurrentVersion < 15300
+		; v1.54 - Added legacy scripts
+		if CurrentVersion < 15400
 			SetupSystem()
-			Debug.Notification("SexLab 1.53 Updated...")
+			Debug.Notification("SexLab 1.54 Updated...")
 		endIf
 
 		EventType = "SexLabUpdated"
