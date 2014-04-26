@@ -123,7 +123,7 @@ state Animating
 			SFXTimer = CurrentTime + SFXDelay
 		endIf
 		; Loop
-		RegisterForSingleUpdate(0.2)
+		RegisterForSingleUpdate(0.4)
 	endEvent
 
 	function EndAction()
