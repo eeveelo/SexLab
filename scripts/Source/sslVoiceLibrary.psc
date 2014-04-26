@@ -6,7 +6,7 @@ scriptname sslVoiceLibrary extends Quest
 
 function DEPRECATED()
 	string log = "SexLab DEPRECATED -- sslVoiceLibrary.psc -- Use of this script has been deprecated, the mod that called this function should be updated as soon as possible. If you are not the author of this mod, notify them of this error if possible."
-	Debug.Trace(log)
+	Debug.TraceStack(log)
 	if SSL.Config.DebugMode
 		MiscUtil.PrintConsole(log)
 	endIf

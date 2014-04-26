@@ -455,13 +455,19 @@ bool function CheckSystem()
 endFunction
 
 bool function CheckFNIS()
-	Game.ForceThirdPerson()
-	if PlayerRef.GetAnimationVariableInt("SexLabVer") < 150 || PlayerRef.GetAnimationVariableInt("FNISmajor") < 5
+	if PlayerRef.Is3DLoaded() && PlayerRef.GetAnimationVariableInt("FNISmajor") < 5 && Game.GetCameraState() == 9 && !Utility.IsInMenuMode() ; || PlayerRef.GetAnimationVariableInt("SexLabVer") < 150
 		CheckFNIS.Show(5.0)
 		return false
 	endIf
 	return true
 endFunction
+
+event OnPlayerCameraState(int OldState, int NewState)
+	if NewState == 9
+		UnregisterForCameraState()
+		CheckFNIS()
+	endIf
+endEvent
 
 function Reload()
 	Setup()
@@ -481,6 +487,8 @@ function Reload()
 	; Validate tracked factions & actors
 	ThreadLib.ValidateTrackedActors()
 	ThreadLib.ValidateTrackedFactions()
+	; Init FNIS check when able (requires 3rd person mode)
+	RegisterForCameraState()
 endFunction
 
 function SetDefaults()
@@ -694,3 +702,78 @@ function ReloadData()
 	; VoicesPlayer =            Game.GetFormFromFile(0x, "SexLab.esm")
 endFunction
 
+
+; ------------------------------------------------------- ;
+; --- Pre 1.50 Config Accessors                       --- ;
+; ------------------------------------------------------- ;
+
+bool property bRestrictAggressive hidden
+	bool function get()
+		return RestrictAggressive
+	endFunction
+endProperty
+bool property bAllowCreatures hidden
+	bool function get()
+		return AllowCreatures
+	endFunction
+endProperty
+bool property bUseStrapons hidden
+	bool function get()
+		return UseStrapons
+	endFunction
+endProperty
+bool property bRedressVictim hidden
+	bool function get()
+		return RedressVictim
+	endFunction
+endProperty
+bool property bRagdollEnd hidden
+	bool function get()
+		return RagdollEnd
+	endFunction
+endProperty
+bool property bUndressAnimation hidden
+	bool function get()
+		return UndressAnimation
+	endFunction
+endProperty
+bool property bScaleActors hidden
+	bool function get()
+		return ScaleActors
+	endFunction
+endProperty
+bool property bUseCum hidden
+	bool function get()
+		return UseCum
+	endFunction
+endProperty
+bool property bAllowFFCum hidden
+	bool function get()
+		return AllowFFCum
+	endFunction
+endProperty
+bool property bDisablePlayer hidden
+	bool function get()
+		return DisablePlayer
+	endFunction
+endProperty
+bool property bAutoTFC hidden
+	bool function get()
+		return AutoTFC
+	endFunction
+endProperty
+bool property bAutoAdvance hidden
+	bool function get()
+		return AutoAdvance
+	endFunction
+endProperty
+bool property bForeplayStage hidden
+	bool function get()
+		return ForeplayStage
+	endFunction
+endProperty
+bool property bOrgasmEffects hidden
+	bool function get()
+		return OrgasmEffects
+	endFunction
+endProperty

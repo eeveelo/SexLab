@@ -6,7 +6,7 @@ scriptname sslExpressionLibrary extends Quest
 
 function DEPRECATED() global
 	string log = "SexLab DEPRECATED -- sslExpressionLibrary.psc -- Use of this script has been deprecated, the mod that called this function should be updated as soon as possible. If you are not the author of this mod, notify them of this error if possible."
-	Debug.Trace(log, 1)
+	Debug.TraceStack(log, 1)
 	if SexLabUtil.GetConfig().DebugMode
 		MiscUtil.PrintConsole(log)
 	endIf
