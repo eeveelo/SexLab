@@ -1,4 +1,5 @@
-AnimVar SexLabVer INT32 150
+Version V1.54
+AnimVar SexLabVer INT32 154
 
 '
 ' Unknown Animators Animations
