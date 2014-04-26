@@ -297,11 +297,13 @@ state Animating
 			ActorRef.ClearExpressionOverride()
 			if OpenMouth
 				; Open mouth if needed
-				ActorRef.SetExpressionOverride(16, 100)
-				MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 40)
+				sslBaseExpression.OpenMouth(ActorRef)
 			elseIf Expression != none
 				; Apply expression otherwise - overrides open mouth
 				Expression.Apply(ActorRef, Enjoyment, BaseSex)
+			else
+				; No expression to override but mouth might be open - close it
+				sslBaseExpression.CloseMouth(ActorRef)
 			endIf
 		endIf
 		; Send schlong offset

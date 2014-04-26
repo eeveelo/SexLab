@@ -70,7 +70,7 @@ function CloseMouth(Actor ActorRef) global
 endFunction
 
 bool function IsMouthOpen(Actor ActorRef) global
-	return (GetExpressionID(ActorRef) == 16 && GetExpressionValue(ActorRef) == 100) || (GetPhonemeModifier(ActorRef, 0, 1) == 100)
+	return (GetExpressionID(ActorRef) == 16 && GetExpressionValue(ActorRef) == 100) || (GetPhonemeModifier(ActorRef, 0, 1) >= 40)
 endFunction
 
 function ClearMFG(Actor ActorRef) global
