@@ -80,11 +80,6 @@ sslActorLibrary property ActorLib auto hidden
 sslThreadLibrary property ThreadLib auto hidden
 sslActorStats property Stats auto hidden
 
-; DEPRECATED LIBRARIES - No longer used, their functions have all been moved to other scripts
-; sslAnimationLibrary property AnimLib auto hidden
-; sslExpressionLibrary property ExpressionLib auto hidden
-; sslVoiceLibrary property VoiceLib auto hidden
-
 ;#---------------------------#
 ;#                           #
 ;#   API RELATED FUNCTIONS   #
@@ -839,3 +834,19 @@ state Enabled
 	endEvent
 endState
 
+; DEPRECATED LIBRARIES - No longer used, their functions have all been moved to other scripts
+sslAnimationLibrary property AnimLib hidden
+	sslAnimationLibrary function get()
+		return Game.GetFormFromFile(0x3CE6C, "SexLab.esm") as sslAnimationLibrary
+	endFunction
+endProperty
+sslExpressionLibrary property ExpressionLib hidden
+	sslExpressionLibrary function get()
+		return Game.GetFormFromFile(0x4C63D, "SexLab.esm") as sslExpressionLibrary
+	endFunction
+endProperty
+sslVoiceLibrary property VoiceLib hidden
+	sslVoiceLibrary function get()
+		return Game.GetFormFromFile(0X3DE97, "SexLab.esm") as sslVoiceLibrary
+	endFunction
+endProperty

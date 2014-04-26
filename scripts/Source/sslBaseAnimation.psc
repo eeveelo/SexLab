@@ -513,7 +513,7 @@ function Save(int id)
 	; Log the new animation
 	if IsCreature
 		RaceIDs = ClearEmpty(RaceIDs)
-		Log(Name+" - "+RaceIDs, "Creatures["+id+"]")
+		Log(Name, "Creatures["+id+"]")
 	else
 		Log(Name, "Animations["+id+"]")
 	endIf

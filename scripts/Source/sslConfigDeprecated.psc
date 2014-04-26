@@ -43,12 +43,20 @@ endIf
 
 function DEPRECATED()
 	string log = "SexLab DEPRECATED -- sslConfigMenu.psc (sslConfigDeprecated.psc) -- Use of this script has been deprecated, the mod that called this function should be updated as soon as possible. If you are not the author of this mod, notify them of this error if possible."
-	Debug.TraceStack(log, 1)
-	if SSL.Config.DebugMode
+	Debug.Trace(log, 1)
+	if SexLabUtil.GetConfig().DebugMode
 		MiscUtil.PrintConsole(log)
 	endIf
+	GoToState("Silence")
+	RegisterForSingleUpdate(3.0)
 endFunction
-
+state Silence
+	event OnUpdate()
+		GoToState("")
+	endEvent
+	function DEPRECATED()
+	endFunction
+endState
 SexLabFramework property SSL hidden
 	SexLabFramework function get()
 		return (Game.GetFormFromFile(0xD62, "SexLab.esm") as SexLabFramework)
@@ -74,11 +82,12 @@ sslAnimationSlots property AnimSlots hidden
 		return SSL.AnimSlots
 	endFunction
 endProperty
-; sslAnimationLibrary property AnimLib hidden
-; 	sslAnimationLibrary function get()
-; 		return SSL.AnimLib
-; 	endFunction
-; endProperty
+sslAnimationLibrary property AnimLib hidden
+	sslAnimationLibrary function get()
+		DEPRECATED()
+		return SSL.AnimLib
+	endFunction
+endProperty
 sslCreatureAnimationSlots property CreatureAnimSlots hidden
 	sslCreatureAnimationSlots function get()
 		DEPRECATED()
@@ -91,22 +100,24 @@ sslVoiceSlots property VoiceSlots hidden
 		return SSL.VoiceSlots
 	endFunction
 endProperty
-; sslVoiceLibrary property VoiceLib hidden
-; 	sslVoiceLibrary function get()
-; 		return SSL.VoiceLib
-; 	endFunction
-; endProperty
+sslVoiceLibrary property VoiceLib hidden
+	sslVoiceLibrary function get()
+		DEPRECATED()
+		return SSL.VoiceLib
+	endFunction
+endProperty
 sslExpressionSlots property ExpressionSlots hidden
 	sslExpressionSlots function get()
 		DEPRECATED()
 		return SSL.ExpressionSlots
 	endFunction
 endProperty
-; sslExpressionLibrary property ExpressionLib hidden
-; 	sslExpressionLibrary function get()
-; 		return SSL.ExpressionLib
-; 	endFunction
-; endProperty
+sslExpressionLibrary property ExpressionLib hidden
+	sslExpressionLibrary function get()
+		DEPRECATED()
+		return SSL.ExpressionLib
+	endFunction
+endProperty
 sslThreadSlots property ThreadSlots hidden
 	sslThreadSlots function get()
 		DEPRECATED()

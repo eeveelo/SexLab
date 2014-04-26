@@ -6,6 +6,14 @@ scriptname sslSystemConfig extends sslSystemLibrary
 
 SexLabFramework property SexLab auto
 
+int function GetVersion()
+	return SexLabUtil.GetVersion()
+endFunction
+
+string function GetStringVer()
+	return SexLabUtil.GetStringVer()
+endFunction
+
 bool bDebugMode
 bool property DebugMode hidden
 	bool function get()
@@ -14,11 +22,11 @@ bool property DebugMode hidden
 	function set(bool value)
 		bDebugMode = value
 		if bDebugMode
-			MiscUtil.PrintConsole("SexLab Debug/Development Mode Activated")
+			; MiscUtil.PrintConsole("SexLab Debug/Development Mode Activated")
 			PlayerRef.AddSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
 			PlayerRef.AddSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
 		else
-			MiscUtil.PrintConsole("SexLab Debug/Development Mode Deactivated")
+			; MiscUtil.PrintConsole("SexLab Debug/Development Mode Deactivated")
 			PlayerRef.RemoveSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
 			PlayerRef.RemoveSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
 		endIf
