@@ -98,6 +98,7 @@ bool function SetupAlias(Actor ProspectRef, bool Victimize = false, sslBaseVoice
 	IsCreature = Gender == 2
 	IsPlayer   = ActorRef == PlayerRef
 	IsVictim   = Victimize
+	ActorVoice = BaseRef.GetVoiceType()
 	Loc        = new float[6]
 	; Get ready for mod events
 	string e = Thread.Key("")
@@ -109,7 +110,6 @@ bool function SetupAlias(Actor ProspectRef, bool Victimize = false, sslBaseVoice
 	; Prepare extra info
 	if !IsCreature
 		SetVoice(UseVoice, ForceSilent)
-		ActorLib.CacheStrippable(ActorRef)
 		if !IsPlayer
 			Stats.SeedActor(ActorRef)
 		endIf
@@ -121,6 +121,11 @@ bool function SetupAlias(Actor ProspectRef, bool Victimize = false, sslBaseVoice
 endFunction
 
 function ClearAlias()
+	; Maybe got here prematurely, give it 10 seconds before forcing the clear
+	float Failsafe = Utility.GetCurrentRealTime() + 10.0
+	while GetState() == "Resetting" && Utility.GetCurrentRealTime() < Failsafe
+		Utility.Wait(0.2)
+	endWhile
 	; Set libraries
 	ClearEvents()
 	; Make sure actor is reset
@@ -384,7 +389,7 @@ state Animating
 	endFunction
 
 	event ResetActor()
-		GoToState("")
+		GoToState("Resetting")
 		UnregisterForUpdate()
 		string e = Thread.Key("")
 		UnregisterForModEvent(e+"Prepare")
@@ -476,6 +481,12 @@ state Animating
 		return (Pain * 0.5) as int
 	endFunction
 
+endState
+
+state Resetting
+	event OnUpdate()
+
+	endEvent
 endState
 
 ; ------------------------------------------------------- ;
@@ -570,9 +581,11 @@ function UnlockActor()
 endFunction
 
 function RestoreActorDefaults()
-	if ActorRef == none
+	if GetReference() == none && ActorRef == none
 		return
 	endIf
+	; Make sure we have actor, can't afford to miss this block
+	ActorRef = GetReference() as Actor
 	; Reset to starting scale
 	if ActorScale != 0.0
 		ActorRef.SetScale(ActorScale)
@@ -581,9 +594,8 @@ function RestoreActorDefaults()
 		; Reset expression
 		ActorRef.ClearExpressionOverride()
 		MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
-		; Enable player controls
-		if ActorRef == PlayerRef
-			Thread.DisableHotkeys()
+		if ActorVoice != none && ActorVoice != BaseRef.GetVoiceType()
+			BaseRef.SetVoiceType(ActorVoice)
 		endIf
 		; Remove strapon
 		if Strapon != none
@@ -603,7 +615,7 @@ function SetVoice(sslBaseVoice ToVoice = none, bool ForceSilence = false)
 	IsForcedSilent = ForceSilence
 	if ToVoice != none
 		Voice = ToVoice
-		; Voice.SetVoice(BaseRef)
+		Voice.SetVoice(BaseRef)
 	endIf
 endFunction
 
@@ -650,38 +662,37 @@ function Strip()
 		Debug.SendAnimationEvent(ActorRef, "Arrok_Undress_G"+BaseSex)
 		NoUndress = true
 	endIf
-	; Get Nudesuit
-	bool UseNudeSuit = Strip[2] && ((!IsFemale && Config.UseMaleNudeSuit) || (IsFemale  && Config.UseFemaleNudeSuit))
-	if UseNudeSuit
-		ActorRef.AddItem(Config.NudeSuit, 1, true)
-	endIf
+	; Select stripping array
 	bool[] Strip
 	if StripOverride.Length == 33
 		Strip = StripOverride
 	else
 		Strip = Config.GetStrip(IsFemale, Thread.LeadIn, Thread.IsAggressive, IsVictim)
 	endIf
+	; Get Nudesuit
+	bool UseNudeSuit = Strip[2] && ((Gender == 0 && Config.UseMaleNudeSuit) || (Gender == 1 && Config.UseFemaleNudeSuit))
+	if UseNudeSuit && ActorRef.GetItemCount(Config.NudeSuit) < 1
+		ActorRef.AddItem(Config.NudeSuit, 1, true)
+	endIf
 	; Stripped storage
 	Form[] Stripped = new Form[34]
+	Form ItemRef
 	; Strip Weapon
 	if Strip[32]
-		; Left hand
-		Stripped[32] = ActorRef.GetEquippedWeapon(false)
-		if IsStrippable(Stripped[32])
-			; Weapon DummyWeapon = Config.DummyWeapon
-			; ActorRef.AddItem(DummyWeapon, 1, true)
-			; ActorRef.EquipItem(DummyWeapon, false, true)
-			; ActorRef.UnEquipItem(DummyWeapon, false, true)
-			; ActorRef.RemoveItem(DummyWeapon, 1, true)
-			ActorRef.UnequipItem(Stripped[32], false, true)
-		endIf
 		; Right hand
-		Stripped[33] = ActorRef.GetEquippedWeapon(true)
-		if IsStrippable(Stripped[33])
-			ActorRef.UnequipItem(Stripped[33], false, true)
+		ItemRef = ActorRef.GetEquippedWeapon(false)
+		if IsStrippable(ItemRef)
+			ActorRef.UnequipItemEX(ItemRef, 1, false)
+			Stripped[33] = ItemRef
+		endIf
+		; Left hand
+		ItemRef = ActorRef.GetEquippedWeapon(true)
+		if IsStrippable(ItemRef)
+			ActorRef.UnequipItemEX(ItemRef, 2, false)
+			Stripped[32] = ItemRef
 		endIf
 	endIf
-	Form ItemRef
+	; Strip armor slots
 	int i = Strip.Find(true)
 	while i != -1
 		; Grab item in slot
@@ -698,16 +709,33 @@ function Strip()
 			i = -1
 		endIf
 	endWhile
-	; Apply Nudesuit
+	; Equip the nudesuit
 	if UseNudeSuit
-		ActorRef.EquipItem(Config.NudeSuit, false, true)
+		ActorRef.EquipItem(Config.NudeSuit, true, true)
 	endIf
 	; Store stripped items
 	Equipment = MergeFormArray(ClearNone(Stripped), Equipment)
 endFunction
 
 bool function IsStrippable(Form ItemRef)
-	return ItemRef != none && FormListFind(none, "NoStripList", ItemRef) == -1
+	; Check previous validations
+	if ItemRef != none && FormListFind(none, "StripList", ItemRef) != -1
+		return true
+	elseIf ItemRef == none || FormListFind(none, "NoStripList", ItemRef) != -1
+		return false
+	endIf
+	; Check keywords
+	int i = ItemRef.GetNumKeywords()
+	while i
+		i -= 1
+		string kw = ItemRef.GetNthKeyword(i).GetString()
+		if StringUtil.Find(kw, "NoStrip") != -1 || StringUtil.Find(kw, "Bound") != -1
+			FormListAdd(none, "NoStripList", ItemRef, true)
+			return false
+		endIf
+	endWhile
+	FormListAdd(none, "StripList", ItemRef, true)
+	return true
 endFunction
 
 function UnStrip()
@@ -715,20 +743,30 @@ function UnStrip()
  		return
  	endIf
  	; Remove nudesuits
- 	if ActorRef.IsEquipped(Config.NudeSuit)
- 		ActorRef.UnequipItem(Config.NudeSuit, true, true)
- 		ActorRef.RemoveItem(Config.NudeSuit, 1, true)
+ 	Armor NudeSuit = Config.NudeSuit
+ 	int n = ActorRef.GetItemCount(NudeSuit)
+ 	if n > 0
+ 		ActorRef.UnequipItem(NudeSuit, true, true)
+ 		ActorRef.RemoveItem(NudeSuit, n, true)
  	endIf
  	if IsVictim && !Config.RedressVictim
  		return ; Actor is victim, don't redress
  	endIf
  	; Equip Stripped
+ 	int hand = 1
  	int i = Equipment.Length
  	while i
  		i -= 1
  		if Equipment[i] != none
- 			ActorRef.EquipItem(Equipment[i], false, true)
- 		endIf
+ 			int type = Equipment[i].GetType()
+ 			if type == 22 || type == 82
+ 				ActorRef.EquipSpell((Equipment[i] as Spell), hand)
+ 			else
+ 				ActorRef.EquipItem(Equipment[i], false, true)
+ 			endIf
+ 			; Move to other hand if weapon, light, spell, or leveledspell
+ 			hand -= ((hand == 1 && (type == 41 || type == 31 || type == 22 || type == 82)) as int)
+  		endIf
  	endWhile
 endFunction
 

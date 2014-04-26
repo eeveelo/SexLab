@@ -123,30 +123,29 @@ Form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 		Debug.SendAnimationEvent(ActorRef, "Arrok_Undress_G"+Gender)
 	endIf
 	; Get Nudesuit
-	bool UseNudeSuit = Strip[2] && AllowNudesuit && ((Gender == 0 && Config.UseMaleNudeSuit) || (Gender == 1  && Config.UseFemaleNudeSuit)) && !ActorRef.IsEquipped(NudeSuit)
-	if UseNudeSuit
-		ActorRef.AddItem(NudeSuit, 1, true)
+	bool UseNudeSuit = Strip[2] && ((Gender == 0 && Config.UseMaleNudeSuit) || (Gender == 1 && Config.UseFemaleNudeSuit))
+	if UseNudeSuit && ActorRef.GetItemCount(Config.NudeSuit) < 1
+		ActorRef.AddItem(Config.NudeSuit, 1, true)
 	endIf
+	; Stripped storage
 	Form[] Stripped = new Form[34]
+	Form ItemRef
 	; Strip weapon
 	if Strip[32]
-		; Left hand
-		Stripped[32] = ActorRef.GetEquippedWeapon(false)
-		if IsStrippable(Stripped[32])
-			; ActorRef.AddItem(DummyWeapon, 1, true)
-			; ActorRef.EquipItem(DummyWeapon, false, true)
-			; ActorRef.UnEquipItem(DummyWeapon, false, true)
-			; ActorRef.RemoveItem(DummyWeapon, 1, true)
-			ActorRef.UnequipItem(Stripped[32], false, true)
-		endIf
 		; Right hand
-		Stripped[33] = ActorRef.GetEquippedWeapon(true)
-		if IsStrippable(Stripped[33])
-			ActorRef.UnequipItem(Stripped[33], false, true)
+		ItemRef = ActorRef.GetEquippedWeapon(false)
+		if IsStrippable(ItemRef)
+			ActorRef.UnequipItemEX(ItemRef, 1, false)
+			Stripped[33] = ItemRef
+		endIf
+		; Left hand
+		ItemRef = ActorRef.GetEquippedWeapon(true)
+		if IsStrippable(ItemRef)
+			ActorRef.UnequipItemEX(ItemRef, 2, false)
+			Stripped[32] = ItemRef
 		endIf
 	endIf
 	; Strip armors
-	Form ItemRef
 	int i = Strip.Find(true)
 	while i != -1
 		; Grab item in slot
@@ -165,7 +164,7 @@ Form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 	endWhile
 	; Apply Nudesuit
 	if UseNudeSuit
-		ActorRef.EquipItem(NudeSuit, false, true)
+		ActorRef.EquipItem(NudeSuit, true, true)
 	endIf
 	; output stripped items
 	return sslUtility.ClearNone(Stripped)
@@ -174,11 +173,14 @@ endFunction
 function UnstripActor(Actor ActorRef, Form[] Stripped, bool IsVictim = false)
 	int i = Stripped.Length
 	; Remove nudesuits
-	if ActorRef.IsEquipped(NudeSuit)
+	int n = ActorRef.GetItemCount(NudeSuit)
+	if n > 0
 		ActorRef.UnequipItem(NudeSuit, true, true)
-		ActorRef.RemoveItem(NudeSuit, 1, true)
-	elseIf IsVictim && !Config.RedressVictim
-		return ; Actor is victim, don't redress
+		ActorRef.RemoveItem(NudeSuit, n, true)
+	endIf
+	; Actor is victim, don't redress
+	if IsVictim && !Config.RedressVictim
+		return
 	endIf
 	; Equip stripped
 	int hand = 1
@@ -188,7 +190,6 @@ function UnstripActor(Actor ActorRef, Form[] Stripped, bool IsVictim = false)
 			int type = Stripped[i].GetType()
 			if type == 22 || type == 82
 				ActorRef.EquipSpell((Stripped[i] as Spell), hand)
-				; hand -= 1
 			else
 				ActorRef.EquipItem(Stripped[i], false, true)
 			endIf
