@@ -465,7 +465,7 @@ endFunction
 event OnPlayerCameraState(int OldState, int NewState)
 	if NewState == 9
 		UnregisterForCameraState()
-		CheckFNIS()
+		; CheckFNIS()
 	endIf
 endEvent
 
@@ -487,8 +487,6 @@ function Reload()
 	; Validate tracked factions & actors
 	ThreadLib.ValidateTrackedActors()
 	ThreadLib.ValidateTrackedFactions()
-	; Init FNIS check when able (requires 3rd person mode)
-	RegisterForCameraState()
 endFunction
 
 function SetDefaults()
