@@ -1,4 +1,4 @@
-scriptname sslConfigDeprecated extends sslConfigMenu
+scriptname sslConfigDeprecated extends Quest
 {DEPRECATED: This script is a proxy for the original sslConfigMenu script which has been replaced, and is only provided as a means to provide backwards compatibility by redirecting all it's functions to their new iterations}
 
 ;/
@@ -143,16 +143,16 @@ sslActorStats property Stats hidden
 	endFunction
 endProperty
 
-event OnVersionUpdate(int version)
-endEvent
-function SetupSystem()
-endFunction
-event OnGameReload()
-endEvent
-event OnPageReset(string page)
-endEvent
-event OnConfigInit()
-endEvent
-event OnInit()
-	Stop()
-endEvent
+; event OnVersionUpdate(int version)
+; endEvent
+; function SetupSystem()
+; endFunction
+; event OnGameReload()
+; endEvent
+; event OnPageReset(string page)
+; endEvent
+; event OnConfigInit()
+; endEvent
+; event OnInit()
+; 	Stop()
+; endEvent
