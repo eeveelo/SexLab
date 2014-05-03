@@ -54,7 +54,8 @@ event OnVersionUpdate(int version)
 		endIf
 		; v1.53 - Changed ActorAlias off of ActorLibrary and ActorLibrary back to sslSystemLibrary
 		; v1.54 - Added legacy scripts
-		if CurrentVersion < 15400
+		; v1.55 - Added ObjectFactory, moved MCM script back to original Form ID
+		if CurrentVersion < 15500
 			SetupSystem()
 			Debug.Notification("SexLab 1.54 Updated...")
 		endIf

@@ -488,6 +488,7 @@ function Reload()
 	ThreadLib.ValidateTrackedActors()
 	ThreadLib.ValidateTrackedFactions()
 	; Cleanup phantom slots with missing owners
+	; (Game.GetFormFromFile(0x78818, "SexLab.esm") as sslObjectFactory)
 	SexLab.Factory.Cleanup()
 endFunction
 
