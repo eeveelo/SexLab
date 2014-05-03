@@ -82,7 +82,7 @@ endProperty
 ; ------------------------------------------------------- ;
 
 bool function SetupAlias(Actor ProspectRef, bool Victimize = false, sslBaseVoice UseVoice = none, bool ForceSilent = false)
-	if ProspectRef == none || GetReference() != ProspectRef ;|| ValidateActor(ProspectRef) != 1
+	if ProspectRef == none || GetReference() != ProspectRef || ActorLib.ValidateActor(ProspectRef) != 1
 		return false ; Failed to set prospective actor into alias
 	endIf
 	; Register actor as active
@@ -742,15 +742,14 @@ function UnStrip()
  	if ActorRef == none || IsCreature || Equipment.Length == 0
  		return
  	endIf
- 	; Remove nudesuits
- 	Armor NudeSuit = Config.NudeSuit
- 	int n = ActorRef.GetItemCount(NudeSuit)
- 	if n > 0
- 		ActorRef.UnequipItem(NudeSuit, true, true)
- 		ActorRef.RemoveItem(NudeSuit, n, true)
- 	endIf
- 	if IsVictim && !Config.RedressVictim
- 		return ; Actor is victim, don't redress
+	; Remove nudesuit if present
+	if ActorRef.GetItemCount(Config.NudeSuit) > 0
+		ActorRef.UnequipItem(Config.NudeSuit, true, true)
+		ActorRef.RemoveItem(Config.NudeSuit, ActorRef.GetItemCount(Config.NudeSuit), true)
+	endIf
+	; Continue with undress, or am I disabled?
+ 	if !DoRedress
+ 		return ; Fuck clothes, bitch.
  	endIf
  	; Equip Stripped
  	int hand = 1
@@ -796,6 +795,19 @@ bool property DoUndress hidden
 	endFunction
 endProperty
 
+bool NoRedress
+bool property DoRedress hidden
+	bool function get()
+		if NoRedress || (IsVictim && !Config.RedressVictim)
+			return false
+		endIf
+		return !IsVictim || (IsVictim && Config.RedressVictim)
+	endFunction
+	function set(bool value)
+		NoRedress = !value
+	endFunction
+endProperty
+
 ; ------------------------------------------------------- ;
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
@@ -803,6 +815,12 @@ endProperty
 function Initialize()
 	; Clean script of events
 	ClearEvents()
+	; Remove nudesuit if present
+	ActorRef = GetReference() as Actor
+	if ActorRef.GetItemCount(Config.NudeSuit) > 0
+		ActorRef.UnequipItem(Config.NudeSuit, true, true)
+		ActorRef.RemoveItem(Config.NudeSuit, ActorRef.GetItemCount(Config.NudeSuit), true)
+	endIf
 	; Remove from active
 	if ActorRef != none
 		FormListRemove(none, "SexLabActors", ActorRef, true)

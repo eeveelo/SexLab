@@ -139,7 +139,7 @@ state Making
 		elseIf Positions.Find(ActorRef) != -1
 			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They have been already added to this thread", "FATAL")
 			return -1
-		elseIf !ActorLib.ValidateActor(ActorRef)
+		elseIf ActorLib.ValidateActor(ActorRef) < 0
 			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They are not a valid target for animation", "FATAL")
 			return -1
 		; elseIf ActorRef == PlayerRef && !CheckFNIS()
@@ -306,6 +306,10 @@ endFunction
 
 function DisableRagdollEnd(Actor ActorRef, bool disabling = true)
 	ActorAlias(ActorRef).DoRagdoll = !disabling
+endFunction
+
+function DisableRedress(Actor ActorRef, bool disabling = true)
+	ActorAlias(ActorRef).DoRedress = !disabling
 endFunction
 
 ; Voice
@@ -486,6 +490,14 @@ function SetLeadAnimations(sslBaseAnimation[] AnimationList)
 	if AnimationList.Length != 0
 		LeadIn = true
 		LeadAnimations = AnimationList
+	endIf
+endFunction
+
+function AddAnimation(sslBaseAnimation AddAnimation, bool ForceTo = false)
+	if AddAnimation != none
+		sslBaseAnimation[] Adding = new sslBaseAnimation[1]
+		Adding[0] = AddAnimation
+		PrimaryAnimations = AnimSlots.MergeLists(PrimaryAnimations, Adding)
 	endIf
 endFunction
 
