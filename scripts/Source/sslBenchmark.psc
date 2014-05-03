@@ -112,4 +112,3 @@ event OnUpdate()
 	; 	Debug.Notification("Latency Test Result: "+Result+"ms")
 	; endIf
 endEvent
-

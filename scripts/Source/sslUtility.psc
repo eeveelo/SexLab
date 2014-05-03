@@ -1159,6 +1159,137 @@ sslBaseVoice[] function VoiceArray(int size) global
 		return new sslBaseVoice[128]
 	endIf
 endFunction
+sslBaseExpression[] function ExpressionArray(int size) global
+	if size == 1
+		return new sslBaseExpression[1]
+	elseIf size == 2
+		return new sslBaseExpression[2]
+	elseIf size == 3
+		return new sslBaseExpression[3]
+	elseIf size == 4
+		return new sslBaseExpression[4]
+	elseIf size == 5
+		return new sslBaseExpression[5]
+	elseIf size == 6
+		return new sslBaseExpression[6]
+	elseIf size == 7
+		return new sslBaseExpression[7]
+	elseIf size == 8
+		return new sslBaseExpression[8]
+	elseIf size == 9
+		return new sslBaseExpression[9]
+	elseIf size == 10
+		return new sslBaseExpression[10]
+	elseIf size == 11
+		return new sslBaseExpression[11]
+	elseIf size == 12
+		return new sslBaseExpression[12]
+	elseIf size == 13
+		return new sslBaseExpression[13]
+	elseIf size == 14
+		return new sslBaseExpression[14]
+	elseIf size == 15
+		return new sslBaseExpression[15]
+	elseIf size == 16
+		return new sslBaseExpression[16]
+	elseIf size == 17
+		return new sslBaseExpression[17]
+	elseIf size == 18
+		return new sslBaseExpression[18]
+	elseIf size == 19
+		return new sslBaseExpression[19]
+	elseIf size == 20
+		return new sslBaseExpression[20]
+	elseIf size == 21
+		return new sslBaseExpression[21]
+	elseIf size == 22
+		return new sslBaseExpression[22]
+	elseIf size == 23
+		return new sslBaseExpression[23]
+	elseIf size == 24
+		return new sslBaseExpression[24]
+	elseIf size == 25
+		return new sslBaseExpression[25]
+	elseIf size == 26
+		return new sslBaseExpression[26]
+	elseIf size == 27
+		return new sslBaseExpression[27]
+	elseIf size == 28
+		return new sslBaseExpression[28]
+	elseIf size == 29
+		return new sslBaseExpression[29]
+	elseIf size == 30
+		return new sslBaseExpression[30]
+	elseIf size == 31
+		return new sslBaseExpression[31]
+	elseIf size == 32
+		return new sslBaseExpression[32]
+	elseIf size == 33
+		return new sslBaseExpression[33]
+	elseIf size == 34
+		return new sslBaseExpression[34]
+	elseIf size == 35
+		return new sslBaseExpression[35]
+	elseIf size == 36
+		return new sslBaseExpression[36]
+	elseIf size == 37
+		return new sslBaseExpression[37]
+	elseIf size == 38
+		return new sslBaseExpression[38]
+	elseIf size == 39
+		return new sslBaseExpression[39]
+	elseIf size == 40
+		return new sslBaseExpression[40]
+	elseIf size == 41
+		return new sslBaseExpression[41]
+	elseIf size == 42
+		return new sslBaseExpression[42]
+	elseIf size == 43
+		return new sslBaseExpression[43]
+	elseIf size == 44
+		return new sslBaseExpression[44]
+	elseIf size == 45
+		return new sslBaseExpression[45]
+	elseIf size == 46
+		return new sslBaseExpression[46]
+	elseIf size == 47
+		return new sslBaseExpression[47]
+	elseIf size == 48
+		return new sslBaseExpression[48]
+	elseIf size == 49
+		return new sslBaseExpression[49]
+	elseIf size == 50
+		return new sslBaseExpression[50]
+	elseIf size == 51
+		return new sslBaseExpression[51]
+	elseIf size == 52
+		return new sslBaseExpression[52]
+	elseIf size == 53
+		return new sslBaseExpression[53]
+	elseIf size == 54
+		return new sslBaseExpression[54]
+	elseIf size == 55
+		return new sslBaseExpression[55]
+	elseIf size == 56
+		return new sslBaseExpression[56]
+	elseIf size == 57
+		return new sslBaseExpression[57]
+	elseIf size == 58
+		return new sslBaseExpression[58]
+	elseIf size == 59
+		return new sslBaseExpression[59]
+	elseIf size == 60
+		return new sslBaseExpression[60]
+	elseIf size == 61
+		return new sslBaseExpression[61]
+	elseIf size == 62
+		return new sslBaseExpression[62]
+	elseIf size == 63
+		return new sslBaseExpression[63]
+	elseIf size == 64
+		return new sslBaseExpression[64]
+	endIf
+endFunction
 form[] function FormArray(int size) global
 	if size == 1
 		return new form[1]

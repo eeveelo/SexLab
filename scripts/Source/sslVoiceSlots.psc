@@ -196,6 +196,26 @@ int function FindByName(string FindName)
 	return -1
 endFunction
 
+sslBaseVoice function RegisterVoice(string Registrar, Form CallbackForm = none, ReferenceAlias CallbackAlias = none)
+	; Return existing Voice
+	if FindByRegistrar(Registrar) != -1
+		return GetbyRegistrar(Registrar)
+	endIf
+	; Get free Voice slot
+	int id = Register(Registrar)
+	if id != -1
+		; Get slot
+		sslBaseVoice Slot = GetNthAlias(id) as sslBaseVoice
+		Voices[id] = Slot
+		; Init Voice
+		Slot.Initialize()
+		Slot.Registry = Registrar
+		Slot.Enabled = true
+		; Send load event
+		sslObjectFactory.SendCallback(Registrar, id, CallbackForm, CallbackAlias)
+	endIf
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- System Use Only                                 --- ;
 ; ------------------------------------------------------- ;
@@ -217,9 +237,7 @@ endFunction
 
 function RegisterSlots()
 	; Register default voices
-	sslVoiceDefaults Defaults = Quest.GetQuest("SexLabQuestRegistry") as sslVoiceDefaults
-	Defaults.Slots = self
-	Defaults.LoadVoices()
+	(Quest.GetQuest("SexLabQuestRegistry") as sslVoiceDefaults).LoadVoices()
 	; Send mod event for 3rd party voices
 	ModEvent.Send(ModEvent.Create("SexLabSlotVoices"))
 	Debug.Notification("$SSL_NotifyVoiceInstall")

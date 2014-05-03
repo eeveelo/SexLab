@@ -14,7 +14,10 @@ endProperty
 sslSystemConfig property Config auto hidden
 
 ; Storage key
-Quest property Storage auto hidden
+Form property Storage auto hidden
+
+; Phantom slots claim/touch time
+bool property Ephemeral auto hidden
 
 ; Search tags
 string[] Tags
@@ -38,6 +41,14 @@ bool function AddTag(string Tag)
 		Tags[i] = Tag
 	endIf
 	return true
+endFunction
+
+function AddTags(string[] TagList)
+	int i = TagList.Length
+	while i
+		i -= 1
+		AddTag(TagList[i])
+	endWhile
 endFunction
 
 bool function RemoveTag(string Tag)
@@ -88,6 +99,15 @@ endFunction
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
 
+function MakeEphemeral(string Token, Form OwnerForm)
+	Initialize()
+	Ephemeral = true
+	Enabled   = true
+	Registry  = Token
+	Storage   = OwnerForm
+	Log("Created Non-Global Object '"+Token+"''", Storage)
+endFunction
+
 string function Key(string type = "")
 	return Registry+"."+type
 endFunction
@@ -97,108 +117,39 @@ function Log(string Log, string Type = "NOTICE")
 endFunction
 
 function Initialize()
-	Name = ""
-	Registry = ""
-	Enabled = false
-	Storage = GetOwningQuest()
-	Config = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
-	Tags = new string[5]
+	Name      = ""
+	Registry  = ""
+	Enabled   = false
+	Ephemeral = false
+	Storage   = GetOwningQuest()
+	Config    = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
+	Tags      = new string[5]
 endFunction
 
-;/
-function ExportFloat(string Var, float Value)
-	SetFloatValue(none, Var, Value)
-	ExportFile(Registry+".json", Var, 2, none, true, false, true)
-	UnsetFloatValue(none, Var)
-endFunction
-float function ImportFloat(string Var, float Value)
-	ImportFile(Registry+".json", Var, 2, none, true, false)
-	Value = GetFloatValue(none, Var, Value)
-	UnsetFloatValue(none, Var)
-	return Value
+function Save(int id)
 endFunction
 
-function ExportInt(string Var, int Value)
-	SetIntValue(none, Var, Value)
-	ExportFile(Registry+".json", Var, 1, none, true, false, true)
-	UnsetIntValue(none, Var)
-endFunction
-int function ImportInt(string Var, int Value)
-	ImportFile(Registry+".json", Var, 1, none, true, false)
-	Value = GetIntValue(none, Var, Value)
-	UnsetIntValue(none, Var)
-	return Value
-endFunction
+; function Finalize()
+; 	if Ephemeral
+; 		sslObjectFactory Factory = GetOwningQuest() as sslObjectFactory
+; 		if self as sslBaseAnimation != none
+; 			Save(Factory.FindAnimation(Registry))
+; 		elseIf self as sslBaseVoice != none
+; 			Save(Factory.FindVoice(Registry))
+; 		elseIf self as sslBaseExpression != none
+; 			Save(Factory.FindExpression(Registry))
+; 		endIf
+; 	else
+; 		Quest Owner = GetOwningQuest()
+; 		if self as sslBaseAnimation != none && (Owner as sslAnimationSlots) != none
+; 			Save((Owner as sslAnimationSlots).Animations.Find(self))
+; 		elseIf self as sslBaseAnimation != none && (Owner as sslCreatureAnimationSlots) != none
+; 			Save((Owner as sslCreatureAnimationSlots).Animations.Find(self))
+; 		elseIf self as sslBaseVoice != none
+; 			Save((Owner as sslVoiceSlots).Voices.Find(self))
+; 		elseIf self as sslBaseExpression != none
+; 			Save((Owner as sslExpressionSlots).Expressions.Find(self))
+; 		endIf
+; 	endIf
+; endFunction
 
-function ExportBool(string Var, bool Value)
-	SetIntValue(none, Var, Value as int)
-	ExportFile(Registry+".json", Var, 1, none, true, false, true)
-	UnsetIntValue(none, Var)
-endFunction
-bool function ImportBool(string Var, bool Value)
-	ImportFile(Registry+".json", Var, 1, none, true, false)
-	Value = GetIntValue(none, Var, Value as int) as bool
-	UnsetIntValue(none, Var)
-	return Value
-endFunction
-
-function ExportString(string Var, string Value)
-	SetStringValue(none, Var, Value as int)
-	ExportFile(Registry+".json", Var, 4, none, true, false, true)
-	UnsetStringValue(none, Var)
-endFunction
-string function ImportString(string Var, string Value)
-	ImportFile(Registry+".json", Var, 4, none, true, false)
-	Value = GetStringValue(none, Var, Value)
-	UnsetStringValue(none, Var)
-	return Value
-endFunction
-
-
-function ExportFloatList(string Var, float[] Values, int len)
-	FloatListClear(none, Var)
-	int i
-	while i < len
-		FloatListAdd(none, Var, Values[i])
-		i += 1
-	endWhile
-	ExportFile(Registry+".json", Var, 32, none, true, false, true)
-	FloatListClear(none, Var)
-endFunction
-float[] function ImportFloatList(string Var, float[] Values, int len)
-	ImportFile(Registry+".json", Var, 32, none, true, false)
-	if FloatListCount(none, Var) == len
-		int i
-		while i < len
-			Values[i] = FloatListGet(none, Var, i)
-			i += 1
-		endWhile
-	endIf
-	FloatListClear(none, Var)
-	return Values
-endFunction
-
-function ExportBoolList(string Var, bool[] Values, int len)
-	IntListClear(none, Var)
-	int i
-	while i < len
-		IntListAdd(none, Var, Values[i] as int)
-		i += 1
-	endWhile
-	ExportFile(Registry+".json", Var, 16, none, true, false, true)
-	IntListClear(none, Var)
-endFunction
-bool[] function ImportBoolList(string Var, bool[] Values, int len)
-	ImportFile(Registry+".json", Var, 32, none, true, false)
-	if IntListCount(none, Var) == len
-		int i
-		while i < len
-			Values[i] = IntListGet(none, Var, i) as bool
-			i += 1
-		endWhile
-	endIf
-	IntListClear(none, Var)
-	return Values
-endFunction
-
- /;

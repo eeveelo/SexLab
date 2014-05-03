@@ -13,6 +13,11 @@ int property Modifier = 16 autoreadonly
 int property Mood = 30 autoreadonly
 
 int[] Phases
+int[] property PhaseCounts hidden
+	int[] function get()
+		return Phases
+	endFunction
+endProperty
 int property PhasesMale hidden
 	int function get()
 		return Phases[Male]

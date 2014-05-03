@@ -72,6 +72,9 @@ sslBaseExpression[] property Expressions hidden
 	endFunction
 endProperty
 
+; Object Sets
+sslObjectFactory property Factory auto hidden
+
 ; Configuration Accessor
 sslSystemConfig property Config auto hidden
 
@@ -760,6 +763,116 @@ endFunction
 ;#---------------------------#
 
 
+;#---------------------------#
+;#  START FACTORY FUNCTIONS  #
+;#---------------------------#
+
+sslBaseAnimation function RegisterAnimation(string Registrar, Form CallbackForm = none, ReferenceAlias CallbackAlias = none)
+	return AnimSlots.RegisterAnimation(Registrar, CallbackForm, CallbackAlias)
+endFunction
+sslBaseAnimation function RegisterCreatureAnimation(string Registrar, Form CallbackForm = none, ReferenceAlias CallbackAlias = none)
+	return CreatureSlots.RegisterAnimation(Registrar, CallbackForm, CallbackAlias)
+endFunction
+sslBaseVoice function RegisterVoice(string Registrar, Form CallbackForm = none, ReferenceAlias CallbackAlias = none)
+	return VoiceSlots.RegisterVoice(Registrar, CallbackForm, CallbackAlias)
+endFunction
+sslBaseExpression function RegisterExpression(string Registrar, Form CallbackForm = none, ReferenceAlias CallbackAlias = none)
+	return ExpressionSlots.RegisterExpression(Registrar, CallbackForm, CallbackAlias)
+endFunction
+
+sslBaseAnimation function NewAnimationObject(string Token, Form Owner)
+	return Factory.NewAnimation(Token, Owner)
+endFunction
+sslBaseVoice function NewVoiceObject(string Token, Form Owner)
+	return Factory.NewVoice(Token, Owner)
+endFunction
+sslBaseExpression function NewExpressionObject(string Token, Form Owner)
+	return Factory.NewExpression(Token, Owner)
+endFunction
+
+sslBaseAnimation function GetSetAnimationObject(string Token, string Callback, Form Owner)
+	return Factory.GetSetAnimation(Token, Callback, Owner)
+endFunction
+sslBaseVoice function GetSetVoiceObject(string Token, string Callback, Form Owner)
+	return Factory.GetSetVoice(Token, Callback, Owner)
+endFunction
+sslBaseExpression function GetSetExpressionObject(string Token, string Callback, Form Owner)
+	return Factory.GetSetExpression(Token, Callback, Owner)
+endFunction
+
+sslBaseAnimation function NewAnimationObjectCopy(string Token, sslBaseAnimation CopyFrom, Form Owner)
+	return Factory.NewAnimationCopy(Token, CopyFrom, Owner)
+endFunction
+sslBaseVoice function NewVoiceObjectCopy(string Token, sslBaseVoice CopyFrom, Form Owner)
+	return Factory.NewVoiceCopy(Token, CopyFrom, Owner)
+endFunction
+sslBaseExpression function NewExpressionObjectCopy(string Token, sslBaseExpression CopyFrom, Form Owner)
+	return Factory.NewExpressionCopy(Token, CopyFrom, Owner)
+endFunction
+
+sslBaseAnimation function GetAnimationObject(string Token)
+	return Factory.GetAnimation(Token)
+endFunction
+sslBaseVoice function GetVoiceObject(string Token)
+	return Factory.GetVoice(Token)
+endFunction
+sslBaseExpression function GetExpressionObject(string Token)
+	return Factory.GetExpression(Token)
+endFunction
+
+sslBaseAnimation[] function GetOwnerAnimations(Form Owner)
+	return Factory.GetOwnerAnimations(Owner)
+endFunction
+sslBaseVoice[] function GetOwnerVoices(Form Owner)
+	return Factory.GetOwnerVoices(Owner)
+endFunction
+sslBaseExpression[] function GetOwnerExpressions(Form Owner)
+	return Factory.GetOwnerExpressions(Owner)
+endFunction
+
+bool function HasAnimationObject(string Token)
+	return Factory.HasAnimation(Token)
+endFunction
+bool function HasVoiceObject(string Token)
+	return Factory.HasVoice(Token)
+endFunction
+bool function HasExpressionObject(string Token)
+	return Factory.HasExpression(Token)
+endFunction
+
+bool function ReleaseAnimationObject(string Token)
+	Factory.ReleaseAnimation(Token)
+endFunction
+bool function ReleaseVoiceObject(string Token)
+	Factory.ReleaseVoice(Token)
+endFunction
+bool function ReleaseExpressionObject(string Token)
+	Factory.ReleaseExpression(Token)
+endFunction
+
+int function ReleaseOwnerAnimations(Form Owner)
+	return Factory.ReleaseOwnerAnimations(Owner)
+endFunction
+int function ReleaseOwnerVoices(Form Owner)
+	return Factory.ReleaseOwnerVoices(Owner)
+endFunction
+int function ReleaseOwnerExpressions(Form Owner)
+	return Factory.ReleaseOwnerExpressions(Owner)
+endFunction
+
+sslBaseAnimation function MakeAnimationRegistered(string Token)
+	return Factory.MakeAnimationRegistered(Token)
+endFunction
+sslBaseVoice function MakeVoiceRegistered(string Token)
+	return Factory.MakeVoiceRegistered(Token)
+endFunction
+sslBaseExpression function MakeExpressionRegistered(string Token)
+	return Factory.MakeExpressionRegistered(Token)
+endFunction
+
+;#---------------------------#
+;#   END FACTORY FUNCTIONS   #
+;#---------------------------#
 
 ;#---------------------------#
 ;#                           #
@@ -802,6 +915,9 @@ function Setup()
 	ActorLib.Setup()
 	ThreadLib.Setup()
 	Stats.Setup()
+	; Setup Phantom Slots
+	Factory = Game.GetFormFromFile(0x78818, "SexLab.esm") as sslObjectFactory
+	Factory.Setup()
 endFunction
 
 function Log(string Log, string Type = "NOTICE")

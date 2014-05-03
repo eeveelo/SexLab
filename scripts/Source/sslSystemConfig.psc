@@ -487,6 +487,8 @@ function Reload()
 	; Validate tracked factions & actors
 	ThreadLib.ValidateTrackedActors()
 	ThreadLib.ValidateTrackedFactions()
+	; Cleanup phantom slots with missing owners
+	SexLab.Factory.Cleanup()
 endFunction
 
 function SetDefaults()

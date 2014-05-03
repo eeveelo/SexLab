@@ -50,10 +50,7 @@ function RegisterSlots()
 	; Clear creature list
 	StorageUtil.StringListClear(none, "SexLabCreatures")
 	; Register default voices
-	sslCreatureAnimationDefaults Defaults = Quest.GetQuest("SexLabQuestRegistry") as sslCreatureAnimationDefaults
-	Defaults.Slots = self
-	Defaults.Initialize()
-	Defaults.LoadCreatureAnimations()
+	(Quest.GetQuest("SexLabQuestRegistry") as sslCreatureAnimationDefaults).LoadCreatureAnimations()
 	; Send mod event for 3rd party voices
 	ModEvent.Send(ModEvent.Create("SexLabSlotCreatureAnimations"))
 	Debug.Notification("$SSL_NotifyCreatureAnimationInstall")

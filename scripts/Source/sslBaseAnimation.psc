@@ -150,6 +150,16 @@ int[] function GetPositionFlags(string AdjustKey, int Position, int Stage)
 	return Output
 endFunction
 
+float[] function GetRawOffsets(int Position, int Stage)
+	int i = DataIndex(4, Position, Stage, 0)
+	float[] Output = new float[4]
+	Output[0] = Offsets[i] ; Forward
+	Output[1] = Offsets[(i + 1)] ; Side
+	Output[2] = Offsets[(i + 2)] ; Up
+	Output[3] = Offsets[(i + 3)] ; Rot
+	return Output
+endFunction
+
 float[] function GetPositionOffsets(string AdjustKey, int Position, int Stage)
 	int i = DataIndex(4, Position, Stage, 0)
 	; Get default offsets

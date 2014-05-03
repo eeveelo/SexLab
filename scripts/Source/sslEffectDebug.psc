@@ -19,7 +19,6 @@ ObjectReference MarkerRef
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	Utility.Wait(0.5)
 	; sslBenchMark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
-	; Dev.LatencyTest()
 	; Dev.StartBenchmark(2)
 	Dispel()
 endEvent

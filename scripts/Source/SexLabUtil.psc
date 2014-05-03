@@ -5,7 +5,7 @@ scriptname SexLabUtil hidden
 ; ------------------------------------------------------- ;
 
 int function GetVersion() global
-	return 15400
+	return 15500
 endFunction
 
 string function GetStringVer() global

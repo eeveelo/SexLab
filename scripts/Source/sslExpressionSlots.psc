@@ -108,6 +108,26 @@ string[] function GetNames()
 	return Output
 endFunction
 
+sslBaseExpression function RegisterExpression(string Registrar, Form CallbackForm = none, ReferenceAlias CallbackAlias = none)
+	; Return existing Expression
+	if FindByRegistrar(Registrar) != -1
+		return GetbyRegistrar(Registrar)
+	endIf
+	; Get free Expression slot
+	int id = Register(Registrar)
+	if id != -1
+		; Get slot
+		sslBaseExpression Slot = GetNthAlias(id) as sslBaseExpression
+		Expressions[id] = Slot
+		; Init Expression
+		Slot.Initialize()
+		Slot.Registry = Registrar
+		Slot.Enabled = true
+		; Send load event
+		sslObjectFactory.SendCallback(Registrar, id, CallbackForm, CallbackAlias)
+	endIf
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- System Use Only                                 --- ;
 ; ------------------------------------------------------- ;
@@ -125,9 +145,7 @@ endFunction
 
 function RegisterSlots()
 	; Register default Expressions
-	sslExpressionDefaults Defaults = Quest.GetQuest("SexLabQuestRegistry") as sslExpressionDefaults
-	Defaults.Slots = self
-	Defaults.LoadExpressions()
+	(Quest.GetQuest("SexLabQuestRegistry") as sslExpressionDefaults).LoadExpressions()
 	; Send mod event for 3rd party Expressions
 	ModEvent.Send(ModEvent.Create("SexLabSlotExpressions"))
 	Debug.Notification("$SSL_NotifyExpressionInstall")
