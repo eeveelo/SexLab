@@ -841,13 +841,13 @@ bool function HasExpressionObject(string Token)
 endFunction
 
 bool function ReleaseAnimationObject(string Token)
-	Factory.ReleaseAnimation(Token)
+	return Factory.ReleaseAnimation(Token)
 endFunction
 bool function ReleaseVoiceObject(string Token)
-	Factory.ReleaseVoice(Token)
+	return Factory.ReleaseVoice(Token)
 endFunction
 bool function ReleaseExpressionObject(string Token)
-	Factory.ReleaseExpression(Token)
+	return Factory.ReleaseExpression(Token)
 endFunction
 
 int function ReleaseOwnerAnimations(Form Owner)
