@@ -22,10 +22,29 @@ int property Foreplay = 2 autoreadonly hidden
 Sound property Squishing auto hidden
 Sound property Sucking auto hidden
 Sound property SexMix auto hidden
+Sound property Squirting auto hidden
 
 ; ------------------------------------------------------- ;
 ; --- Registering Animations                          --- ;
 ; ------------------------------------------------------- ;
+
+; Prepare the factory for use with the default animation slots
+function PrepareFactory()
+	Squishing = Game.GetFormFromFile(0x65A31, "SexLab.esm") as Sound
+	Sucking   = Game.GetFormFromFile(0x65A32, "SexLab.esm") as Sound
+	SexMix    = Game.GetFormFromFile(0x65A33, "SexLab.esm") as Sound
+	Squirting = Game.GetFormFromFile(0x65A34, "SexLab.esm") as Sound
+	Slots     = Game.GetFormFromFile(0x639DF, "SexLab.esm") as sslAnimationSlots
+endFunction
+
+; Prepare the factory for use with the default creature animation slots
+function PrepareFactoryCreatures()
+	Squishing = Game.GetFormFromFile(0x65A31, "SexLab.esm") as Sound
+	Sucking   = Game.GetFormFromFile(0x65A32, "SexLab.esm") as Sound
+	SexMix    = Game.GetFormFromFile(0x65A33, "SexLab.esm") as Sound
+	Squirting = Game.GetFormFromFile(0x65A34, "SexLab.esm") as Sound
+	Slots     = Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslCreatureAnimationSlots
+endFunction
 
 ; Send callback event to start registration
 function RegisterAnimation(string Registrar)
@@ -54,13 +73,6 @@ sslBaseAnimation function Create(int id)
 	return Slot
 endFunction
 
-; ------------------------------------------------------- ;
-; --- Callback Data Handling - SYSTEM USE ONLY        --- ;
-; ------------------------------------------------------- ;
-
 function Initialize()
-	sslSystemConfig Config = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
-	Squishing = Config.SquishingFX
-	Sucking   = Config.SuckingFX
-	SexMix    = Config.SexMixedFX
-endFunction
+	PrepareFactory()
+endfunction

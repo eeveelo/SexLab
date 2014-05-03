@@ -215,6 +215,26 @@ string[] function GetNames()
 	return Output
 endFunction
 
+sslBaseAnimation function RegisterAnimation(string Registrar, Form CallbackForm = none, ReferenceAlias CallbackAlias = none)
+	; Return existing Animation
+	if FindByRegistrar(Registrar) != -1
+		return GetbyRegistrar(Registrar)
+	endIf
+	; Get free Animation slot
+	int id = Register(Registrar)
+	if id != -1
+		; Get slot
+		sslBaseAnimation Slot = GetNthAlias(id) as sslBaseAnimation
+		Animations[id] = Slot
+		; Init Animation
+		Slot.Initialize()
+		Slot.Registry = Registrar
+		Slot.Enabled = true
+		; Send load event
+		sslObjectFactory.SendCallback(Registrar, id, CallbackForm, CallbackAlias)
+	endIf
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- System Use Only                                 --- ;
 ; ------------------------------------------------------- ;
@@ -238,10 +258,7 @@ endFunction
 
 function RegisterSlots()
 	; Register default animation
-	sslAnimationDefaults Defaults = Quest.GetQuest("SexLabQuestAnimations") as sslAnimationDefaults
-	Defaults.Slots = self
-	Defaults.Initialize()
-	Defaults.LoadAnimations()
+	(Quest.GetQuest("SexLabQuestAnimations") as sslAnimationDefaults).LoadAnimations()
 	; Send mod event for 3rd party animation
 	ModEvent.Send(ModEvent.Create("SexLabSlotAnimations"))
 	Debug.Notification("$SSL_NotifyAnimationInstall")

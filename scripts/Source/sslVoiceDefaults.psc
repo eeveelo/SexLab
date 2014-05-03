@@ -1,6 +1,8 @@
 scriptname sslVoiceDefaults extends sslVoiceFactory
 
 function LoadVoices()
+	; Prepare factory resources
+	PrepareFactory()
 	; Female voices
 	RegisterVoice("FemaleClassic")
 	RegisterVoice("FemaleBreathy")

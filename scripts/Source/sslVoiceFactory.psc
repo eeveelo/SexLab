@@ -11,6 +11,11 @@ int property MaleFemale = -1 autoreadonly hidden
 ; --- Registering Voices                              --- ;
 ; ------------------------------------------------------- ;
 
+; Prepare the factory for use
+function PrepareFactory()
+	Slots = Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslVoiceSlots
+endFunction
+
 ; Send callback event to start registration
 function RegisterVoice(string Registrar)
 	; Get free voice slot
@@ -37,3 +42,7 @@ sslBaseVoice function Create(int id)
 	UnregisterForModEvent(Slot.Registry)
 	return Slot
 endFunction
+
+function Initialize()
+	PrepareFactory()
+endfunction

@@ -1,6 +1,8 @@
 scriptname sslExpressionDefaults extends sslExpressionFactory
 
 function LoadExpressions()
+	; Prepare factory resources
+	PrepareFactory()
 	; Regsiter expressions
 	RegisterExpression("Pleasure")
 	RegisterExpression("Happy")

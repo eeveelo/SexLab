@@ -1,6 +1,8 @@
 scriptname sslAnimationDefaults extends sslAnimationFactory
 
 function LoadAnimations()
+	; Prepare factory resources (as non creature)
+	PrepareFactory()
 	; Missionary
 	RegisterAnimation("SexLabMissionary")
 	RegisterAnimation("SexLabAggrMissionary")

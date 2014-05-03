@@ -19,6 +19,8 @@ string[] Gargoyles
 string[] Seekers
 
 function LoadCreatureAnimations()
+	; Prepare factory resources (as creature)
+	PrepareFactoryCreatures()
 
 	Bears = new string[3]
 	Bears[0] = "BearBlackRace"

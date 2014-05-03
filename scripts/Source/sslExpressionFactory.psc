@@ -15,6 +15,11 @@ int property Expression = 30 autoreadonly hidden
 ; --- Registering Expressions                         --- ;
 ; ------------------------------------------------------- ;
 
+; Prepare the factory for use
+function PrepareFactory()
+	Slots = Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslExpressionSlots
+endFunction
+
 ; Send callback event to start registration
 function RegisterExpression(string Registrar)
 	; Get free Expression slot
@@ -41,3 +46,7 @@ sslBaseExpression function Create(int id)
 	UnregisterForModEvent(Slot.Registry)
 	return Slot
 endFunction
+
+function Initialize()
+	PrepareFactory()
+endfunction
