@@ -815,15 +815,15 @@ endProperty
 function Initialize()
 	; Clean script of events
 	ClearEvents()
-	; Remove nudesuit if present
-	ActorRef = GetReference() as Actor
-	if ActorRef.GetItemCount(Config.NudeSuit) > 0
-		ActorRef.UnequipItem(Config.NudeSuit, true, true)
-		ActorRef.RemoveItem(Config.NudeSuit, ActorRef.GetItemCount(Config.NudeSuit), true)
-	endIf
-	; Remove from active
+	; Clear actor
 	if ActorRef != none
+		; Remove from active
 		FormListRemove(none, "SexLabActors", ActorRef, true)
+		; Remove nudesuit if present
+		if ActorRef.GetItemCount(Config.NudeSuit) > 0
+			ActorRef.UnequipItem(Config.NudeSuit, true, true)
+			ActorRef.RemoveItem(Config.NudeSuit, ActorRef.GetItemCount(Config.NudeSuit), true)
+		endIf
 	endIf
 	; Delete positioning marker
 	if MarkerRef != none
