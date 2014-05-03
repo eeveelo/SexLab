@@ -2677,3 +2677,31 @@ function ImportVoices()
 	VoiceSlots.ForgetVoice(PlayerRef)
 	VoiceSlots.SaveVoice(PlayerRef, VoiceSlots.GetByName(GetStringValue(self, "PlayerVoice", "$SSL_Random")))
 endFunction
+
+
+
+function DEPRECATED()
+	string log = "SexLab DEPRECATED -- sslConfigMenu.psc -- Use of this property has been deprecated, the mod that called this function should be updated as soon as possible. If you are not the author of this mod, notify them of this error if possible."
+	Debug.TraceStack(log, 1)
+	if (Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig).DebugMode
+		MiscUtil.PrintConsole(log)
+	endIf
+endFunction
+sslAnimationLibrary property AnimLib hidden
+	sslAnimationLibrary function get()
+		DEPRECATED()
+		return (Game.GetFormFromFile(0xD62, "SexLab.esm") as SexLabFramework).AnimLib
+	endFunction
+endProperty
+sslVoiceLibrary property VoiceLib hidden
+	sslVoiceLibrary function get()
+		DEPRECATED()
+		return (Game.GetFormFromFile(0xD62, "SexLab.esm") as SexLabFramework).VoiceLib
+	endFunction
+endProperty
+sslExpressionLibrary property ExpressionLib hidden
+	sslExpressionLibrary function get()
+		DEPRECATED()
+		return (Game.GetFormFromFile(0xD62, "SexLab.esm") as SexLabFramework).ExpressionLib
+	endFunction
+endProperty
