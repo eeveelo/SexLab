@@ -250,6 +250,7 @@ function BearDoggystyle(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Doggystyle")
 	Base.AddTag("Bear")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -280,6 +281,7 @@ function ChaurusForward(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Holding")
 	Base.AddTag("Chaurus")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -310,6 +312,7 @@ function ChaurusReverse(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Holding")
 	Base.AddTag("Chaurus")
+	Base.AddTag("Anal")
 
 	Base.Save(id)
 endFunction
@@ -342,6 +345,8 @@ function DaedraHugging(int id)
 	Base.AddTag("Hugging")
 	Base.AddTag("Daedra")
 	Base.AddTag("Seeking")
+	Base.AddTag("Vaginal")
+	Base.AddTag("Anal")
 
 	Base.Save(id)
 endFunction
@@ -373,6 +378,7 @@ function CanineDoggystyle(int id)
 	Base.AddTag("Doggystyle")
 	Base.AddTag("Canine")
 	Base.AddTag("Dog")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -406,6 +412,7 @@ function CanineDoggystyle2(int id)
 	Base.AddTag("Doggystyle")
 	Base.AddTag("Canine")
 	Base.AddTag("Dog")
+	Base.AddTag("Anal")
 
 	Base.Save(id)
 endFunction
@@ -437,6 +444,7 @@ function CanineMissionary(int id)
 	Base.AddTag("Missionary")
 	Base.AddTag("Canine")
 	Base.AddTag("Dog")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -468,6 +476,7 @@ function DragonPenetration(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Missionary")
 	Base.AddTag("Dragon")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -498,6 +507,7 @@ function DragonTongue(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Oral")
 	Base.AddTag("Dragon")
+	Base.AddTag("Oral")
 
 	Base.Save(id)
 endFunction
@@ -528,6 +538,7 @@ function DraugrDoggystyle(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Doggystyle")
 	Base.AddTag("Draugr")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -564,6 +575,8 @@ function DraugrGangbang3P(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Gangbang")
 	Base.AddTag("Draugr")
+	Base.AddTag("Vaginal")
+	Base.AddTag("Oral")
 
 	Base.Save(id)
 endFunction
@@ -606,6 +619,9 @@ function DraugrGangbang4P(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Gangbang")
 	Base.AddTag("Draugr")
+	Base.AddTag("Vaginal")
+	Base.AddTag("Oral")
+	Base.AddTag("Anal")
 
 	Base.Save(id)
 endFunction
@@ -654,6 +670,9 @@ function DraugrGangbang5P(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Gangbang")
 	Base.AddTag("Draugr")
+	Base.AddTag("Vaginal")
+	Base.AddTag("Oral")
+	Base.AddTag("Anal")
 
 	Base.Save(id)
 endFunction
@@ -684,6 +703,7 @@ function DraugrHolding(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Holding")
 	Base.AddTag("Draugr")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -714,6 +734,7 @@ function DraugrMissionary(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Missionary")
 	Base.AddTag("Draugr")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -744,6 +765,7 @@ function FalmerDoggystyle(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Doggystyle")
 	Base.AddTag("Falmer")
+	Base.AddTag("Anal")
 
 	Base.Save(id)
 endFunction
@@ -780,6 +802,8 @@ function FalmerGangbang3P(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Gangbang")
 	Base.AddTag("Falmer")
+	Base.AddTag("Anal")
+	Base.AddTag("Oral")
 
 	Base.Save(id)
 endFunction
@@ -822,6 +846,9 @@ function FalmerGangbang4P(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Gangbang")
 	Base.AddTag("Falmer")
+	Base.AddTag("Anal")
+	Base.AddTag("Oral")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -870,6 +897,9 @@ function FalmerGangbang5P(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Gangbang")
 	Base.AddTag("Falmer")
+	Base.AddTag("Anal")
+	Base.AddTag("Oral")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -902,6 +932,7 @@ function FalmerHolding(int id)
 	Base.AddTag("Missionary")
 	Base.AddTag("Holding")
 	Base.AddTag("Gangbang")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -934,6 +965,7 @@ function FalmerMissionary(int id)
 	Base.AddTag("Missionary")
 	Base.AddTag("Holding")
 	Base.AddTag("Gangbang")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -964,6 +996,7 @@ function GargoyleDoggystyle(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Doggystyle")
 	Base.AddTag("Gargoyle")
+	Base.AddTag("Anal")
 
 	Base.Save(id)
 endFunction
@@ -994,6 +1027,7 @@ function GargoyleHolding(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Holding")
 	Base.AddTag("Gargoyle")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1024,6 +1058,7 @@ function GargoyleMissionary(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Missionary")
 	Base.AddTag("Gargoyle")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1055,6 +1090,7 @@ function GiantPenetration(int id)
 	Base.AddTag("Holding")
 	Base.AddTag("Rough")
 	Base.AddTag("Giant")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1085,6 +1121,7 @@ function HorseDoggystyle(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Doggystyle")
 	Base.AddTag("Horse")
+	Base.AddTag("Anal")
 
 	Base.Save(id)
 endFunction
@@ -1115,6 +1152,7 @@ function CatDoggystyle(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Doggystyle")
 	Base.AddTag("Cat")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1151,6 +1189,8 @@ function SpiderDouble(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Gangbang")
 	Base.AddTag("Spider")
+	Base.AddTag("Vaginal")
+	Base.AddTag("Oral")
 
 	Base.Save(id)
 endFunction
@@ -1181,6 +1221,7 @@ function SpiderPenetration(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Missionary")
 	Base.AddTag("Spider")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1212,6 +1253,7 @@ function BigSpiderPenetration(int id)
 	Base.AddTag("Rough")
 	Base.AddTag("Spider")
 	Base.AddTag("Big Spider")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1243,6 +1285,7 @@ function TrollDoggystyle(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Doggystyle")
 	Base.AddTag("Troll")
+	Base.AddTag("Anal")
 
 	Base.Save(id)
 endFunction
@@ -1273,6 +1316,7 @@ function TrollHolding(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Holding")
 	Base.AddTag("Troll")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1303,6 +1347,7 @@ function TrollMissionary(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Missionary")
 	Base.AddTag("Troll")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1315,7 +1360,7 @@ function TrollDominate(int id)
 	Base.SoundFX = Squishing
 	Base.SetRaceIDs(Trolls)
 
-	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
 	Base.AddPositionStage(a1, "Troll_Dominate_A1_S1")
 	Base.AddPositionStage(a1, "Troll_Dominate_A1_S2")
 	Base.AddPositionStage(a1, "Troll_Dominate_A1_S3")
@@ -1331,6 +1376,7 @@ function TrollDominate(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Missionary")
 	Base.AddTag("Troll")
+	Base.AddTag("Anal")
 
 	Base.Save(id)
 endFunction
@@ -1359,6 +1405,7 @@ function TrollGrabbing(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Doggystyle")
 	Base.AddTag("Troll")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1389,6 +1436,7 @@ function VampireLordDoggystyle(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Doggystyle")
 	Base.AddTag("Vampire Lord")
+	Base.AddTag("Anal")
 
 	Base.Save(id)
 endFunction
@@ -1419,6 +1467,7 @@ function VampireLordHolding(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Holding")
 	Base.AddTag("Vampire Lord")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1449,6 +1498,7 @@ function VampireLordMissionary(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Missionary")
 	Base.AddTag("Vampire Lord")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1480,6 +1530,7 @@ function WerewolfAggrDoggystyle(int id)
 	Base.AddTag("Doggystyle")
 	Base.AddTag("Rough")
 	Base.AddTag("Werewolf")
+	Base.AddTag("Anal")
 
 	Base.Save(id)
 endFunction
@@ -1511,6 +1562,7 @@ function WerewolfDoggystyle(int id)
 	Base.AddTag("Doggystyle")
 	Base.AddTag("Rough")
 	Base.AddTag("Werewolf")
+	Base.AddTag("Anal")
 
 	Base.Save(id)
 endFunction
@@ -1542,6 +1594,7 @@ function WerewolfHolding(int id)
 	Base.AddTag("Holding")
 	Base.AddTag("Rough")
 	Base.AddTag("Werewolf")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1573,6 +1626,7 @@ function WerewolfMissionary(int id)
 	Base.AddTag("Missionary")
 	Base.AddTag("Rough")
 	Base.AddTag("Werewolf")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1603,6 +1657,7 @@ function WolfDoggystyle(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Doggystyle")
 	Base.AddTag("Wolf")
+	Base.AddTag("Anal")
 
 	Base.Save(id)
 endFunction
@@ -1635,6 +1690,7 @@ function WolfDoggystyle2(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Doggystyle")
 	Base.AddTag("Wolf")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1665,6 +1721,7 @@ function WolfMissionary(int id)
 	Base.AddTag("Dirty")
 	Base.AddTag("Missionary")
 	Base.AddTag("Wolf")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1696,6 +1753,7 @@ function GiantHarrassment(int id)
 	Base.AddTag("Holding")
 	Base.AddTag("Rough")
 	Base.AddTag("Giant")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1725,6 +1783,7 @@ function GiantHolding(int id)
 	Base.AddTag("Holding")
 	Base.AddTag("Rough")
 	Base.AddTag("Giant")
+	Base.AddTag("Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1762,6 +1821,7 @@ function HorseGroping(int id)
 	Base.AddTag("Groping")
 	Base.AddTag("Fondling")
 	Base.AddTag("Horse")
+	Base.AddTag("Oral")
 
 	Base.Save(id)
 endFunction
