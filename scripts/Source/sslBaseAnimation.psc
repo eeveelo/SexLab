@@ -443,6 +443,10 @@ function SetRaceIDs(string[] RaceList)
 	RaceIDs = RaceList
 endFunction
 
+string[] function GetRaceIDs()
+	return RaceIDs
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Animation Setup                                 --- ;
 ; ------------------------------------------------------- ;

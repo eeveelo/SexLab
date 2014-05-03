@@ -595,6 +595,7 @@ sslBaseAnimation function CopyAnimation(sslBaseAnimation Copy, sslBaseAnimation 
 	Copy.SoundFX = Orig.SoundFX
 	Copy.SetContent(Orig.IsSexual as int)
 	Copy.AddTags(Orig.GetTags())
+	Copy.SetRaceIDs(Orig.GetRaceIDs())
 	; Loop positions
 	int Position
 	while Position < Orig.PositionCount
