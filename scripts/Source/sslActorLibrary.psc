@@ -85,22 +85,21 @@ endFunction
 
 bool function IsStrippable(Form ItemRef)
 	; Check previous validations
-	if ItemRef != none && FormListFind(none, "StripList", ItemRef) != -1
+	if ItemRef != none && FormListFind(Config, "StripList", ItemRef) != -1
 		return true
-	elseIf ItemRef == none || FormListFind(none, "NoStripList", ItemRef) != -1
+	elseIf ItemRef == none || FormListFind(Config, "NoStripList", ItemRef) != -1
 		return false
 	endIf
 	; Check keywords
 	int i = ItemRef.GetNumKeywords()
 	while i
 		i -= 1
-		string kw = ItemRef.GetNthKeyword(i).GetString()
-		if StringUtil.Find(kw, "NoStrip") != -1 || StringUtil.Find(kw, "Bound") != -1
-			FormListAdd(none, "NoStripList", ItemRef, true)
+		if StringUtil.Find(ItemRef.GetNthKeyword(i).GetString(), "NoStrip") != -1 ;|| StringUtil.Find(kw, "Bound") != -1
+			FormListAdd(Config, "NoStripList", ItemRef, true)
 			return false
 		endIf
 	endWhile
-	FormListAdd(none, "StripList", ItemRef, true)
+	FormListAdd(Config, "StripList", ItemRef, true)
 	return true
 endFunction
 
@@ -146,21 +145,15 @@ Form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 		endIf
 	endIf
 	; Strip armors
-	int i = Strip.Find(true)
-	while i != -1
+	int i = Strip.RFind(true, 32)
+	while i
 		; Grab item in slot
 		ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
 		if IsStrippable(ItemRef)
 			ActorRef.UnequipItem(ItemRef, false, true)
 			Stripped[i] = ItemRef
 		endIf
-		; Move to next slot
-		i += 1
-		if i < 32
-			i = Strip.Find(true, i)
-		else
-			i = -1
-		endIf
+		i -= 1
 	endWhile
 	; Apply Nudesuit
 	if UseNudeSuit
@@ -206,33 +199,38 @@ endFunction
 int function ValidateActor(Actor ActorRef)
 	ActorBase BaseRef = ActorRef.GetLeveledActorBase()
 	if !ActorRef
-		Log("ValidateActor() -- Failed to validate (NONE) -- Because they don't exist.")
+		Log("ValidateActor(NONE) -- FALSE -- Because they don't exist.")
 		return -1
-	elseIf SexLabUtil.IsActorActive(ActorRef)
-		Log("ValidateActor() -- Failed to validate ("+BaseRef.GetName()+") -- They appear to already be animating")
+	elseIf ActorRef.IsInFaction(AnimatingFaction)
+		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They appear to already be animating")
 		return -10
-	elseIf FormListFind(self, "ValidActors", ActorRef) != -1
+	elseIf FormListFind(Config, "ValidActors", ActorRef) != -1
+		Log("ValidateActor("+BaseRef.GetName()+") -- TRUE -- Cache HIT")
 		return 1
 	elseIf !CanAnimate(ActorRef)
-		Log("ValidateActor() -- Failed to validate ("+BaseRef.GetName()+") -- They are forbidden from animating")
+		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are forbidden from animating")
 		return -11
 	elseIf !ActorRef.Is3DLoaded()
-		Log("ValidateActor() -- Failed to validate ("+BaseRef.GetName()+") -- They are not loaded")
+		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are not loaded")
 		return -12
 	elseIf ActorRef.IsDead()
-		Log("ValidateActor() -- Failed to validate ("+BaseRef.GetName()+") -- He's dead Jim.")
+		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- He's dead Jim.")
 		return -13
 	elseIf ActorRef.IsDisabled()
-		Log("ValidateActor() -- Failed to validate ("+BaseRef.GetName()+") -- They are disabled")
+		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are disabled")
 		return -14
 	elseIf ActorRef.IsFlying()
-		Log("ValidateActor() -- Failed to validate ("+BaseRef.GetName()+") -- They are flying.")
+		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are flying.")
 		return -15
-	elseIf ActorRef != PlayerRef && !ActorRef.HasKeyword(ActorTypeNPC) && !CreatureSlots.AllowedCreature(BaseRef.GetRace()) ; (!Config.AllowCreatures || (Config.AllowCreatures && !SexLabUtil.HasRace(BaseRef.GetRace())))
-		Log("ValidateActor() -- Failed to validate ("+BaseRef.GetName()+") -- They are a creature that is currently not supported ("+MiscUtil.GetRaceEditorID(BaseRef.GetRace())+")")
+	elseIf ActorRef.IsOnMount()
+		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are currently mounted.")
 		return -16
+	elseIf ActorRef != PlayerRef && !ActorRef.HasKeyword(ActorTypeNPC) && !CreatureSlots.AllowedCreature(BaseRef.GetRace()) ; (!Config.AllowCreatures || (Config.AllowCreatures && !SexLabUtil.HasRace(BaseRef.GetRace())))
+		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are a creature that is currently not supported ("+MiscUtil.GetRaceEditorID(BaseRef.GetRace())+")")
+		return -17
 	endIf
-	FormListAdd(self, "ValidActors", ActorRef, false)
+	Log("ValidateActor("+BaseRef.GetName()+") -- TRUE -- Cache MISS")
+	FormListAdd(Config, "ValidActors", ActorRef, false)
 	return 1
 endFunction
 

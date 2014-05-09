@@ -82,11 +82,9 @@ endProperty
 ; ------------------------------------------------------- ;
 
 bool function SetupAlias(Actor ProspectRef, bool Victimize = false, sslBaseVoice UseVoice = none, bool ForceSilent = false)
-	if ProspectRef == none || GetReference() != ProspectRef || ActorLib.ValidateActor(ProspectRef) != 1
+	if ProspectRef == none || ProspectRef != GetReference()
 		return false ; Failed to set prospective actor into alias
 	endIf
-	; Register actor as active
-	FormListAdd(none, "SexLabActors", ActorRef, false)
 	; Init actor alias information
 	ActorRef   = ProspectRef
 	BaseRef    = ActorRef.GetLeveledActorBase()
@@ -126,7 +124,7 @@ function ClearAlias()
 	while GetState() == "Resetting" && Utility.GetCurrentRealTime() < Failsafe
 		Utility.Wait(0.2)
 	endWhile
-	; Set libraries
+	; Remove events
 	ClearEvents()
 	; Make sure actor is reset
 	if GetReference() != none
@@ -485,7 +483,6 @@ endState
 
 state Resetting
 	event OnUpdate()
-
 	endEvent
 endState
 
@@ -693,8 +690,9 @@ function Strip()
 		endIf
 	endIf
 	; Strip armor slots
-	int i = Strip.Find(true)
-	while i != -1
+	int i = Strip.RFind(true, 32)
+	log("strip start: "+i)
+	while i
 		; Grab item in slot
 		ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
 		if IsStrippable(ItemRef)
@@ -702,12 +700,7 @@ function Strip()
 			Stripped[i] = ItemRef
 		endIf
 		; Move to next slot
-		i += 1
-		if i < 32
-			i = Strip.Find(true, i)
-		else
-			i = -1
-		endIf
+		i -= 1
 	endWhile
 	; Equip the nudesuit
 	if UseNudeSuit
@@ -719,9 +712,9 @@ endFunction
 
 bool function IsStrippable(Form ItemRef)
 	; Check previous validations
-	if ItemRef != none && FormListFind(none, "StripList", ItemRef) != -1
+	if ItemRef != none && FormListFind(Config, "StripList", ItemRef) != -1
 		return true
-	elseIf ItemRef == none || FormListFind(none, "NoStripList", ItemRef) != -1
+	elseIf ItemRef == none || FormListFind(Config, "NoStripList", ItemRef) != -1
 		return false
 	endIf
 	; Check keywords
@@ -730,11 +723,11 @@ bool function IsStrippable(Form ItemRef)
 		i -= 1
 		string kw = ItemRef.GetNthKeyword(i).GetString()
 		if StringUtil.Find(kw, "NoStrip") != -1 || StringUtil.Find(kw, "Bound") != -1
-			FormListAdd(none, "NoStripList", ItemRef, true)
+			FormListAdd(Config, "NoStripList", ItemRef, true)
 			return false
 		endIf
 	endWhile
-	FormListAdd(none, "StripList", ItemRef, true)
+	FormListAdd(Config, "StripList", ItemRef, true)
 	return true
 endFunction
 
@@ -817,8 +810,6 @@ function Initialize()
 	ClearEvents()
 	; Clear actor
 	if ActorRef != none
-		; Remove from active
-		FormListRemove(none, "SexLabActors", ActorRef, true)
 		; Remove nudesuit if present
 		if ActorRef.GetItemCount(Config.NudeSuit) > 0
 			ActorRef.UnequipItem(Config.NudeSuit, true, true)
@@ -843,6 +834,7 @@ function Initialize()
 	; Flags
 	NoRagdoll      = false
 	NoUndress      = false
+	NoRedress      = false
 	; Floats
 	ActorScale     = 0.0
 	AnimScale      = 0.0
@@ -858,11 +850,14 @@ function Initialize()
 endFunction
 
 function Setup()
+	; init libraries
 	parent.Setup()
+	; init alias settings
+	Log("Installing alias...", self)
 	Thread = GetOwningQuest() as sslThreadController
-	ClearAlias()
-endfunction
-
+	Initialize()
+	GoToState("")
+endFunction
 ; ------------------------------------------------------- ;
 ; --- State Restricted                                --- ;
 ; ------------------------------------------------------- ;
