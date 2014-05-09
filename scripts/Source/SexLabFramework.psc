@@ -908,9 +908,10 @@ function Setup()
 	VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
 	ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
 	; Clear library caches
-	StorageUtil.FormListClear(self, "ValidActors")
-	StorageUtil.FormListClear(none, "StripList")
-	StorageUtil.FormListClear(none, "NoStripList")
+	StorageUtil.FormListClear(Config, "ValidActors")
+	StorageUtil.FormListClear(Config, "StripList")
+	StorageUtil.FormListClear(Config, "NoStripList")
+	StorageUtil.StringListClear(Config, "SexLabCreatures")
 	; Setup library resources
 	ActorLib.Setup()
 	ThreadLib.Setup()

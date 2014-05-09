@@ -48,7 +48,7 @@ endFunction
 
 function RegisterSlots()
 	; Clear creature list
-	StorageUtil.StringListClear(none, "SexLabCreatures")
+	StorageUtil.StringListClear(Config, "SexLabCreatures")
 	; Register default voices
 	(Quest.GetQuest("SexLabQuestRegistry") as sslCreatureAnimationDefaults).LoadCreatureAnimations()
 	; Send mod event for 3rd party voices

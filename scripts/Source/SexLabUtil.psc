@@ -57,11 +57,15 @@ endFunction
 ; ------------------------------------------------------- ;
 
 int function GetGender(Actor ActorRef) global
-	return (Game.GetFormFromFile(0xD62, "SexLab.esm") as sslActorLibrary).GetGender(ActorRef)
+	return GetAPI().ActorLib.GetGender(ActorRef)
 endFunction
 
 bool function IsActorActive(Actor ActorRef) global
-	return StorageUtil.FormListFind(none, "SexLabActors", ActorRef) != -1
+	return ActorRef.IsInFaction(GetConfig().AnimatingFaction)
+endFunction
+
+bool function IsValidActor(Actor ActorRef) global
+	return GetAPI().ActorLib.IsValidActor(ActorRef)
 endFunction
 
 bool function HasCreature(Actor ActorRef) global
@@ -69,7 +73,7 @@ bool function HasCreature(Actor ActorRef) global
 endFunction
 
 bool function HasRace(Race RaceRef) global
-	return StorageUtil.StringListFind(none, "SexLabCreatures", MiscUtil.GetRaceEditorID(RaceRef)) != -1
+	return StorageUtil.StringListFind(GetConfig(), "SexLabCreatures", MiscUtil.GetRaceEditorID(RaceRef)) != -1
 endFunction
 
 string function MakeGenderTag(Actor[] Positions) global

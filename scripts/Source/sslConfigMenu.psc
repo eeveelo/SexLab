@@ -35,7 +35,15 @@ event OnVersionUpdate(int version)
 	; Install System - Fresh install or pre v1.50
 	if CurrentVersion < 15000
 
+		; Pre 1.56 data cleanup
+		FormListClear(none, "NoStripList")
+		FormListClear(none, "StripList")
+		FormListClear(none, "SexLabActors")
+		StringListClear(none, "SexLabCreatures")
+
+		; Install system
 		SetupSystem()
+
 		Debug.Notification("SexLab Installed...")
 		EventType = "SexLabInstalled"
 
