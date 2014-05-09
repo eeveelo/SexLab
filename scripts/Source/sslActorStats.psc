@@ -187,7 +187,7 @@ function SeedActor(Actor ActorRef)
 	float Speechcraft = ActorRef.GetActorValue("Speechcraft")
 
 	int HighestRelation = ActorRef.GetHighestRelationshipRank()
-	int LowestRelation = ActorRef.GetLowestRelationshipRank()
+	int LowestRelation  = ActorRef.GetLowestRelationshipRank()
 
 	; Seed Sexuality
 	float Gay      = (Utility.RandomFloat(0.0, Level / 2.0) + Math.Abs(LowestRelation))  + Math.Sqrt(Energy * 0.5)
@@ -596,6 +596,7 @@ function ResetStats(Actor ActorRef)
 	; Native stats
 	ClearInt(ActorRef, "Males")
 	ClearInt(ActorRef, "Females")
+	ClearInt(ActorRef, "Masturbation")
 	ClearInt(ActorRef, "Sexuality")
 	ClearInt(ActorRef, "Creatures")
 	ClearInt(ActorRef, "Vaginal")
