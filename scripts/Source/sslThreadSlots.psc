@@ -45,7 +45,9 @@ function StopAll()
 	int i = Slots.Length
 	while i
 		i -= 1
-		Slots[i].EndAnimation(true)
+		if Slots[i].IsLocked
+			Slots[i].EndAnimation(true)
+		endIf
 	endWhile
 	; Send event
 	ModEvent.Send(ModEvent.Create("SexLabStoppedActive"))
@@ -59,18 +61,31 @@ function Setup()
 	GoToState("Locked")
 	; Init variables
 	Slots = new sslThreadController[15]
+	Slots[0]  = Game.GetFormFromFile(0x61EEF, "SexLab.esm") as sslThreadController
+	Slots[1]  = Game.GetFormFromFile(0x62452, "SexLab.esm") as sslThreadController
+	Slots[2]  = Game.GetFormFromFile(0x6C62C, "SexLab.esm") as sslThreadController
+	Slots[3]  = Game.GetFormFromFile(0x6C62D, "SexLab.esm") as sslThreadController
+	Slots[4]  = Game.GetFormFromFile(0x6C62E, "SexLab.esm") as sslThreadController
+	Slots[5]  = Game.GetFormFromFile(0x6C62F, "SexLab.esm") as sslThreadController
+	Slots[6]  = Game.GetFormFromFile(0x6C630, "SexLab.esm") as sslThreadController
+	Slots[7]  = Game.GetFormFromFile(0x6C631, "SexLab.esm") as sslThreadController
+	Slots[8]  = Game.GetFormFromFile(0x6C632, "SexLab.esm") as sslThreadController
+	Slots[9]  = Game.GetFormFromFile(0x6C633, "SexLab.esm") as sslThreadController
+	Slots[10] = Game.GetFormFromFile(0x6C634, "SexLab.esm") as sslThreadController
+	Slots[11] = Game.GetFormFromFile(0x6C635, "SexLab.esm") as sslThreadController
+	Slots[12] = Game.GetFormFromFile(0x6C636, "SexLab.esm") as sslThreadController
+	Slots[13] = Game.GetFormFromFile(0x6C637, "SexLab.esm") as sslThreadController
+	Slots[14] = Game.GetFormFromFile(0x6C638, "SexLab.esm") as sslThreadController
+
 	int i = Slots.Length
 	while i
 		i -= 1
-		if i > 9
-			Slots[i] = Quest.GetQuest("SexLabThread"+i) as sslThreadController
-		else
-			Slots[i] = Quest.GetQuest("SexLabThread0"+i) as sslThreadController
-		endIf
-		Slots[i].ThreadInit(i)
+		Slots[i].GoToState("Setup")
+		Slots[i].SetTID(i)
 	endWhile
+
+	StorageUtil.FormListClear(self, "ActiveActors")
 	Debug.Trace("SexLab Threads: "+Slots)
-	StorageUtil.FormListClear(none, "SexLabActors")
 	GoToState("")
 endFunction
 

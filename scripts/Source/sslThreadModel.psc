@@ -1,12 +1,12 @@
 scriptname sslThreadModel extends sslThreadLibrary hidden
 { Animation Thread Model: Runs storage and information about a thread. Access only through functions; NEVER create a property directly to this. }
 
-import sslUtility
+; import sslUtility
 ; import StorageUtil
 
 bool property IsLocked hidden
 	bool function get()
-		return GetState() != "Unlocked"
+		return !(GetState() == "Unlocked" || GetState() == "Setup")
 	endFunction
 endProperty
 
@@ -152,7 +152,7 @@ state Making
 			return -1
 		endIf
 		; Update thread info
-		Positions  = PushActor(ActorRef, Positions)
+		Positions  = sslUtility.PushActor(ActorRef, Positions)
 		ActorCount = Positions.Length
 		HasPlayer  = Positions.Find(PlayerRef) != -1
 		; Update gender count
@@ -370,7 +370,7 @@ int function GetHighestPresentRelationshipRank(Actor ActorRef)
 	if ActorCount == 1
 		return 0 ; No special relationship with yourself...
 	elseIf ActorCount == 2
-		return ActorRef.GetRelationshipRank(Positions[IndexTravel(Positions.Find(ActorRef), ActorCount)]) ; Get opposing actors relationship rank
+		return ActorRef.GetRelationshipRank(Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)]) ; Get opposing actors relationship rank
 	endIf
 	; int Highest
 	; int i = ActorCount
@@ -382,11 +382,11 @@ int function GetHighestPresentRelationshipRank(Actor ActorRef)
 	; endWhile
 	; return Highest
 	; Next position
-	Actor NextActor = Positions[IndexTravel(Positions.Find(ActorRef), ActorCount)]
+	Actor NextActor = Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)]
 	int Highest = ActorRef.GetRelationshipRank(NextActor)
 	; loop through each position until reaching ActorRef
 	while NextActor != ActorRef
-		NextActor = Positions[IndexTravel(Positions.Find(NextActor), ActorCount)]
+		NextActor = Positions[sslUtility.IndexTravel(Positions.Find(NextActor), ActorCount)]
 		if NextActor != ActorRef && ActorRef.GetRelationshipRank(NextActor) > Highest
 			Highest = ActorRef.GetRelationshipRank(NextActor)
 		endIf
@@ -399,11 +399,11 @@ int function GetLowestPresentRelationshipRank(Actor ActorRef)
 		return GetHighestPresentRelationshipRank(ActorRef) ; Results will be same for 1 and 2 actors
 	endIf
 	; Next position
-	Actor NextActor = Positions[IndexTravel(Positions.Find(ActorRef), ActorCount)]
+	Actor NextActor = Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)]
 	int Lowest = ActorRef.GetRelationshipRank(NextActor)
 	; loop through each position until reaching ActorRef
 	while NextActor != ActorRef
-		NextActor = Positions[IndexTravel(Positions.Find(NextActor), ActorCount)]
+		NextActor = Positions[sslUtility.IndexTravel(Positions.Find(NextActor), ActorCount)]
 		if NextActor != ActorRef && ActorRef.GetRelationshipRank(NextActor) < Lowest
 			Lowest = ActorRef.GetRelationshipRank(NextActor)
 		endIf
@@ -413,7 +413,7 @@ endFunction
 
 function ChangeActors(Actor[] NewPositions)
 	int[] NewGenders = ActorLib.GenderCount(NewPositions)
-	if HasCreature || NewGenders[2] > 0 || AddValues(NewGenders) == 0
+	if HasCreature || NewGenders[2] > 0 || sslUtility.AddValues(NewGenders) == 0
 		return
 	endIf
 	; Enter making state for alterations
@@ -588,13 +588,13 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function SetHook(string AddHooks)
-	string[] Setting = ArgString(AddHooks)
+	string[] Setting = sslUtility.ArgString(AddHooks)
 	int i = Setting.Length
 	while i
 		i -= 1
 		if Setting[i] != "" && Hooks.Find(Setting[i]) == -1
 			AddTag(Setting[i])
-			Hooks = PushString(Setting[i], Hooks)
+			Hooks = sslUtility.PushString(Setting[i], Hooks)
 		endIf
 	endWhile
 endFunction
@@ -608,7 +608,7 @@ string[] function GetHooks()
 endFunction
 
 function RemoveHook(string DelHooks)
-	string[] Removing = ArgString(DelHooks)
+	string[] Removing = sslUtility.ArgString(DelHooks)
 	string[] NewHooks
 	int i = Hooks.Length
 	while i
@@ -616,7 +616,7 @@ function RemoveHook(string DelHooks)
 		if Removing.Find(Hooks[i]) != -1
 			RemoveTag(Hooks[i])
 		else
-			NewHooks = PushString(Hooks[i], NewHooks)
+			NewHooks = sslUtility.PushString(Hooks[i], NewHooks)
 		endIf
 	endWhile
 	Hooks = NewHooks
@@ -636,7 +636,7 @@ bool function AddTag(string Tag)
 	endIf
 	int i = Tags.Find(Tag)
 	if i == -1
-		Tags = PushString(Tag, Tags)
+		Tags = sslUtility.PushString(Tag, Tags)
 	else
 		Tags[i] = Tag
 	endIf
@@ -879,33 +879,6 @@ function UpdateAdjustKey()
 	Log(AdjustKey, "Adjustment Profile")
 endFunction
 
-
-function ThreadInit(int value)
-	thread_id = value
-	ActorAlias = new sslActorAlias[5]
-	ActorAlias[0] = GetNthAlias(0) as sslActorAlias
-	ActorAlias[1] = GetNthAlias(1) as sslActorAlias
-	ActorAlias[2] = GetNthAlias(2) as sslActorAlias
-	ActorAlias[3] = GetNthAlias(3) as sslActorAlias
-	ActorAlias[4] = GetNthAlias(4) as sslActorAlias
-
-	ActorAlias[0].Setup()
-	ActorAlias[1].Setup()
-	ActorAlias[2].Setup()
-	ActorAlias[3].Setup()
-	ActorAlias[4].Setup()
-
-	EventTypes = new string[5]
-	EventTypes[0] = "Sync"
-	EventTypes[1] = "Prepare"
-	EventTypes[2] = "Reset"
-	EventTypes[3] = "Strip"
-	EventTypes[4] = "Orgasm"
-
-	Setup()
-	Initialize()
-endFunction
-
 int thread_id
 int property tid hidden
 	int function get()
@@ -917,7 +890,7 @@ endProperty
 ; --- State Restricted                                --- ;
 ; ------------------------------------------------------- ;
 
-auto state Unlocked
+state Unlocked
 	sslThreadModel function Make()
 		Initialize()
 		GoToState("Making")
@@ -928,6 +901,43 @@ auto state Unlocked
 	endFunction
 endState
 
+auto state Setup
+	sslThreadModel function Make()
+		Log("Installing thread...", "Thread["+thread_id+"]")
+		ActorAlias = new sslActorAlias[5]
+		ActorAlias[0] = GetNthAlias(0) as sslActorAlias
+		ActorAlias[1] = GetNthAlias(1) as sslActorAlias
+		ActorAlias[2] = GetNthAlias(2) as sslActorAlias
+		ActorAlias[3] = GetNthAlias(3) as sslActorAlias
+		ActorAlias[4] = GetNthAlias(4) as sslActorAlias
+
+		ActorAlias[0].Setup()
+		ActorAlias[1].Setup()
+		ActorAlias[2].Setup()
+		ActorAlias[3].Setup()
+		ActorAlias[4].Setup()
+
+		EventTypes = new string[5]
+		EventTypes[0] = "Sync"
+		EventTypes[1] = "Prepare"
+		EventTypes[2] = "Reset"
+		EventTypes[3] = "Strip"
+		EventTypes[4] = "Orgasm"
+
+		Setup()
+		GoToState("Unlocked")
+		return Make()
+	endFunction
+	function SetTID(int value)
+		thread_id = value
+	endFunction
+endstate
+
+
+
+; Setup
+function SetTID(int value)
+endFunction
 ; Making
 sslThreadModel function Make()
 	Log("Make() - Cannot enter make on a locked thread", "FATAL")
