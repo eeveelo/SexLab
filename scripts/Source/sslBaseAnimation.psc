@@ -429,14 +429,14 @@ function AddRaceID(string RaceID)
 		RaceIDs = sslUtility.PushString(RaceID, RaceIDs)
 	endIf
 	; Add global
-	StringListAdd(none, "SexLabCreatures", RaceID, false)
+	StringListAdd(Config, "SexLabCreatures", RaceID, false)
 endFunction
 
 function SetRaceIDs(string[] RaceList)
 	int i
 	while i < RaceList.Length
-		if StringListFind(none, "SexLabCreatures", RaceList[i]) == -1
-			StringListAdd(none, "SexLabCreatures", RaceList[i], false)
+		if StringListFind(Config, "SexLabCreatures", RaceList[i]) == -1
+			StringListAdd(Config, "SexLabCreatures", RaceList[i], false)
 		endIf
 		i += 1
 	endWhile
@@ -564,10 +564,8 @@ function Initialize()
 	Flags      = new int[128]
 	Offsets    = new float[128]
 	Animations = new string[128]
-	string[] stringDel1
-	RaceIDs = stringDel1
-	float[] floatDel1
-	Timers = floatDel1
+	RaceIDs = StringArray(0)
+	Timers  = FloatArray(0)
 	parent.Initialize()
 endFunction
 

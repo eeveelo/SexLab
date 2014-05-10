@@ -469,6 +469,36 @@ event OnPlayerCameraState(int OldState, int NewState)
 	endIf
 endEvent
 
+function ValidateTrackedActors()
+	int i = StorageUtil.FormListCount(self, "TrackedActors")
+	while i
+		i -= 1
+		Actor ActorRef = StorageUtil.FormListGet(self, "TrackedActors", i) as Actor
+		if ActorRef == none
+			StorageUtil.FormListRemoveAt(self, "TrackedActors", i)
+		endIf
+	endWhile
+endFunction
+
+function ValidateTrackedFactions()
+	int i = StorageUtil.FormListCount(self, "TrackedFactions")
+	while i
+		i -= 1
+		Faction FactionRef = StorageUtil.FormListGet(self, "TrackedFactions", i) as Faction
+		if FactionRef == none
+			StorageUtil.FormListRemoveAt(self, "TrackedFactions", i)
+		endIf
+	endWhile
+endFunction
+
+function Validate()
+	; Validate tracked factions & actors
+	ValidateTrackedActors()
+	ValidateTrackedFactions()
+	; Cleanup phantom slots with missing owners
+	SexLab.Factory.Cleanup()
+endFunction
+
 function Reload()
 	Setup()
 	; TFC Toggle key
@@ -484,13 +514,10 @@ function Reload()
 	RegisterForCrosshairRef()
 	CrosshairRef = none
 	TargetRef = none
-	; Validate tracked factions & actors
-	ThreadLib.ValidateTrackedActors()
-	ThreadLib.ValidateTrackedFactions()
-	; Cleanup phantom slots with missing owners
-	; (Game.GetFormFromFile(0x78818, "SexLab.esm") as sslObjectFactory)
-	SexLab.Factory.Cleanup()
+	Validate()
 endFunction
+
+
 
 function SetDefaults()
 	SexLab = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework

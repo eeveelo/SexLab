@@ -60,8 +60,8 @@ endFunction
 
 function Initialize()
 	Gender = -1
-	Mild = none
+	Mild   = none
 	Medium = none
-	Hot = none
+	Hot    = none
 	parent.Initialize()
 endFunction

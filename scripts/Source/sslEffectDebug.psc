@@ -18,6 +18,11 @@ ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	Utility.Wait(0.5)
+
+	SexLabUtil.QuickStart(TargetRef)
+	Utility.Wait(8.0)
+	SexLabUtil.QuickStart(TargetRef)
+
 	; sslBenchMark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
 	; Dev.StartBenchmark(2)
 	Dispel()
@@ -30,6 +35,11 @@ endEvent
 event OnEffectFinish(Actor TargetRef, Actor CasterRef)
 	; Log("Debug effect spell expired("+TargetRef+", "+CasterRef+")")
 endEvent
+
+
+function CheckActor(Actor ActorRef, string check)
+	Log(check+" -- "+ActorRef.GetLeveledActorBase().GetName()+" SexLabActors: "+FormListFind(none, "SexLabActors", ActorRef))
+endFunction
 
 ;/-----------------------------------------------\;
 ;|	Debug Utility Functions                      |;

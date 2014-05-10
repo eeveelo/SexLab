@@ -81,7 +81,7 @@ endProperty
 ; --- Load/Clear Alias For Use                        --- ;
 ; ------------------------------------------------------- ;
 
-bool function SetupAlias(Actor ProspectRef, bool Victimize = false, sslBaseVoice UseVoice = none, bool ForceSilent = false)
+bool function SetActor(Actor ProspectRef, bool Victimize = false, sslBaseVoice UseVoice = none, bool ForceSilent = false)
 	if ProspectRef == none || ProspectRef != GetReference()
 		return false ; Failed to set prospective actor into alias
 	endIf
@@ -94,10 +94,16 @@ bool function SetupAlias(Actor ProspectRef, bool Victimize = false, sslBaseVoice
 	IsMale     = Gender == 0
 	IsFemale   = Gender == 1
 	IsCreature = Gender == 2
-	IsPlayer   = ActorRef == PlayerRef
 	IsVictim   = Victimize
+	IsPlayer   = ActorRef == PlayerRef
 	ActorVoice = BaseRef.GetVoiceType()
 	Loc        = new float[6]
+	if !IsCreature
+		SetVoice(UseVoice, ForceSilent)
+		if !IsPlayer
+			Stats.SeedActor(ActorRef)
+		endIf
+	endIf
 	; Get ready for mod events
 	string e = Thread.Key("")
 	RegisterForModEvent(e+"Prepare", "PrepareActor")
@@ -105,13 +111,6 @@ bool function SetupAlias(Actor ProspectRef, bool Victimize = false, sslBaseVoice
 	RegisterForModEvent(e+"Sync", "SyncActor")
 	RegisterForModEvent(e+"Orgasm", "OrgasmEffect")
 	RegisterForModEvent(e+"Strip", "Strip")
-	; Prepare extra info
-	if !IsCreature
-		SetVoice(UseVoice, ForceSilent)
-		if !IsPlayer
-			Stats.SeedActor(ActorRef)
-		endIf
-	endIf
 	; Ready
 	Log("Slotted '"+ActorName+"'", self)
 	GoToState("Ready")
@@ -166,7 +165,7 @@ endFunction
 
 state Ready
 
-	bool function SetupAlias(Actor ProspectRef, bool MakeVictim = false, sslBaseVoice UseVoice = none, bool ForceSilent = false)
+	bool function SetActor(Actor ProspectRef, bool MakeVictim = false, sslBaseVoice UseVoice = none, bool ForceSilent = false)
 		return false
 	endFunction
 
@@ -403,6 +402,9 @@ state Animating
 			Stats.AddPurityXP(ActorRef, Skills[4], SkillXP[5], Thread.IsAggressive, IsVictim, Genders[2] > 0, Thread.ActorCount, Thread.GetHighestPresentRelationshipRank(ActorRef))
 			Stats.AddSex(ActorRef, Thread.TotalTime, Thread.HasPlayer, Thread.IsAggressive, Genders[0], Genders[1], Genders[2])
 		endIf
+		if IsPlayer && Game.GetCameraState() == 3
+			Config.ToggleFreeCamera()
+		endIf
 		; Apply cum
 		int CumID = Animation.GetCum(Position)
 		if !Thread.FastEnd && CumID > 0 && Config.UseCum && (Thread.Males > 0 || Config.AllowFFCum || Thread.HasCreature)
@@ -496,7 +498,7 @@ function StopAnimating(bool Quick = false)
 	endIf
 	; Disable free camera, if in it
 	if IsPlayer && Game.GetCameraState() == 3
-		MiscUtil.ToggleFreeCamera()
+		Config.ToggleFreeCamera()
 	endIf
 	if IsCreature
 		; Reset creature idle
@@ -570,7 +572,7 @@ function UnlockActor()
 		Game.SetPlayerAIDriven(false)
 		; Disable free camera, if in it
 		if Game.GetCameraState() == 3
-			MiscUtil.ToggleFreeCamera()
+			Config.ToggleFreeCamera()
 		endIf
 	else
 		ActorRef.SetDontMove(false)
@@ -839,12 +841,8 @@ function Initialize()
 	ActorScale     = 0.0
 	AnimScale      = 0.0
 	; Storage
-	bool[] bDel1
-	form[] fDel1
-	float[] flDel1
-	StripOverride  = bDel1
-	Equipment      = fDel1
-	Loc            = flDel1
+	StripOverride  = BoolArray(0)
+	Equipment      = FormArray(0)
 	; Make sure alias is emptied
 	TryToClear()
 endFunction
@@ -853,7 +851,6 @@ function Setup()
 	; init libraries
 	parent.Setup()
 	; init alias settings
-	Log("Installing alias...", self)
 	Thread = GetOwningQuest() as sslThreadController
 	Initialize()
 	GoToState("")

@@ -1,13 +1,11 @@
 scriptname sslCreatureAnimationSlots extends sslAnimationSlots
 
-import MiscUtil
-
 ; ------------------------------------------------------- ;
 ; --- Creature aniamtion support                      --- ;
 ; ------------------------------------------------------- ;
 
 sslBaseAnimation[] function GetByRace(int ActorCount, Race RaceRef)
-	string RaceID = GetRaceEditorID(RaceRef)
+	string RaceID = MiscUtil.GetRaceEditorID(RaceRef)
 	bool[] Valid = sslUtility.BoolArray(Slotted)
 	int i = Slotted
 	while i

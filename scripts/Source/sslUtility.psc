@@ -628,7 +628,10 @@ endFunction
 ;##############################################
 
 Actor[] function ActorArray(int size) global
-	if size == 1
+	if size == 0
+		Actor[] empty
+		return empty
+	elseIf size == 1
 		return new Actor[1]
 	elseIf size == 2
 		return new Actor[2]
@@ -642,7 +645,10 @@ Actor[] function ActorArray(int size) global
 endFunction
 
 sslBaseAnimation[] function AnimationArray(int size) global
-	if size == 1
+	if size == 0
+		sslBaseAnimation[] empty
+		return empty
+	elseIf size == 1
 		return new sslBaseAnimation[1]
 	elseIf size == 2
 		return new sslBaseAnimation[2]
@@ -901,7 +907,10 @@ sslBaseAnimation[] function AnimationArray(int size) global
 	endIf
 endFunction
 sslBaseVoice[] function VoiceArray(int size) global
-	if size == 1
+	if size == 0
+		sslBaseVoice[] empty
+		return empty
+	elseIf size == 1
 		return new sslBaseVoice[1]
 	elseIf size == 2
 		return new sslBaseVoice[2]
@@ -1160,7 +1169,10 @@ sslBaseVoice[] function VoiceArray(int size) global
 	endIf
 endFunction
 sslBaseExpression[] function ExpressionArray(int size) global
-	if size == 1
+	if size == 0
+		sslBaseExpression[] empty
+		return empty
+	elseIf size == 1
 		return new sslBaseExpression[1]
 	elseIf size == 2
 		return new sslBaseExpression[2]
@@ -1291,7 +1303,10 @@ sslBaseExpression[] function ExpressionArray(int size) global
 	endIf
 endFunction
 form[] function FormArray(int size) global
-	if size == 1
+	if size == 0
+		form[] empty
+		return empty
+	elseIf size == 1
 		return new form[1]
 	elseIf size == 2
 		return new form[2]
@@ -1550,7 +1565,10 @@ form[] function FormArray(int size) global
 	endIf
 endFunction
 float[] function FloatArray(int size) global
-	if size == 1
+	if size == 0
+		float[] empty
+		return empty
+	elseIf size == 1
 		return new float[1]
 	elseIf size == 2
 		return new float[2]
@@ -1809,7 +1827,10 @@ float[] function FloatArray(int size) global
 	endIf
 endFunction
 int[] function IntArray(int size) global
-	if size == 1
+	if size == 0
+		int[] empty
+		return empty
+	elseIf size == 1
 		return new int[1]
 	elseIf size == 2
 		return new int[2]
@@ -2068,7 +2089,10 @@ int[] function IntArray(int size) global
 	endIf
 endFunction
 bool[] function BoolArray(int size) global
-	if size == 1
+	if size == 0
+		bool[] empty
+		return empty
+	elseIf size == 1
 		return new bool[1]
 	elseIf size == 2
 		return new bool[2]
@@ -2327,7 +2351,10 @@ bool[] function BoolArray(int size) global
 	endIf
 endFunction
 string[] function StringArray(int size) global
-	if size == 1
+	if size == 0
+		string[] empty
+		return empty
+	elseIf size == 1
 		return new string[1]
 	elseIf size == 2
 		return new string[2]

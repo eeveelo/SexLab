@@ -131,24 +131,24 @@ state Making
 	int function AddActor(Actor ActorRef, bool IsVictim = false, sslBaseVoice Voice = none, bool ForceSilent = false)
 		; Ensure we have room for actor
 		if ActorRef == none
-			Log("AddActor() - Failed to add actor -- Actor is a figment of your imagination", "FATAL")
+			Log("AddActor(NONE) -- Failed to add actor -- Actor is a figment of your imagination", "FATAL")
 			return -1
 		elseIf ActorCount >= 5
-			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- Thread has reached actor limit", "FATAL")
+			Log("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- Thread has reached actor limit", "FATAL")
 			return -1
 		elseIf Positions.Find(ActorRef) != -1
-			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They have been already added to this thread", "FATAL")
+			Log("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- They have been already added to this thread", "FATAL")
 			return -1
 		elseIf ActorLib.ValidateActor(ActorRef) < 0
-			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They are not a valid target for animation", "FATAL")
+			Log("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- They are not a valid target for animation", "FATAL")
 			return -1
 		; elseIf ActorRef == PlayerRef && !CheckFNIS()
 		; 	Log("AddActor() - Failed to start animation -- Game was unable to verify that you have a properly installed and up to date version of FNIS", "FATAL")
 		; 	return -1
 		endIf
 		sslActorAlias Slot = PickAlias(ActorRef)
-		if Slot == none || !Slot.SetupAlias(ActorRef, IsVictim, Voice, ForceSilent)
-			Log("AddActor() - Failed to add actor '"+ActorRef.GetLeveledActorBase().GetName()+"' -- They were unable to fill an actor alias", "FATAL")
+		if Slot == none || !Slot.SetActor(ActorRef, IsVictim, Voice, ForceSilent)
+			Log("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- They were unable to fill an actor alias", "FATAL")
 			return -1
 		endIf
 		; Update thread info
@@ -434,6 +434,7 @@ function ChangeActors(Actor[] NewPositions)
 	Genders    = NewGenders
 	Positions  = NewPositions
 	ActorCount = NewPositions.Length
+	HasPlayer  = NewPositions.Find(PlayerRef)
 	; Select new animations for changed actor count
 	if PrimaryAnimations[0].PositionCount != ActorCount
 		SetAnimations(AnimSlots.GetByDefault(NewGenders[0], NewGenders[1], IsAggressive, (BedRef != none), Config.RestrictAggressive))
@@ -453,8 +454,8 @@ function ChangeActors(Actor[] NewPositions)
 		if FindSlot(Positions[i]) == -1
 			; Slot into alias
 			sslActorAlias Slot = PickAlias(Positions[i])
-			if Slot == none || !Slot.SetupAlias(Positions[i])
-				Log("ChangeActors() - Failed to add actor '"+Positions[i].GetLeveledActorBase().GetName()+"' -- They were unable to fill an actor alias", "FATAL")
+			if Slot == none || !Slot.SetActor(Positions[i])
+				Log("ChangeActors("+NewPositions+") -- Failed to add new actor '"+Positions[i].GetLeveledActorBase().GetName()+"' -- They were unable to fill an actor alias", "FATAL")
 				return
 			endIf
 			SendTrackedEvent(Positions[i], "Added", thread_id)
