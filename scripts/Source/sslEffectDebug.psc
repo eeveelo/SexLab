@@ -18,13 +18,8 @@ ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	Utility.Wait(0.5)
-
-	SexLabUtil.QuickStart(TargetRef)
-	Utility.Wait(8.0)
-	SexLabUtil.QuickStart(TargetRef)
-
 	; sslBenchMark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
-	; Dev.StartBenchmark(2)
+	; Dev.StartBenchmark(9)
 	Dispel()
 endEvent
 
