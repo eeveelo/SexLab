@@ -46,8 +46,9 @@ state Prepare
 		ActorAlias[3].StartAnimating()
 		ActorAlias[4].StartAnimating()
 		; Start time trackers
-		StartedAt = Utility.GetCurrentRealTime()
-		SkillTime = Utility.GetCurrentRealTime()
+		float CurrentTime = Utility.GetCurrentRealTime()
+		StartedAt = CurrentTime
+		SkillTime = CurrentTime
 		; Send starter events
 		SendActorEvent("Start")
 		SendThreadEvent("AnimationStart")
@@ -105,7 +106,7 @@ state Animating
 			SendThreadEvent("StageStart")
 		endIf
 		; Begin loop
-		Log("Starting Stage: "+Stage, "Advancing")
+		Log("Starting Stage: "+Stage, "Animating")
 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		RegisterForSingleUpdate(0.5)
 	endFunction
@@ -470,6 +471,7 @@ endFunction
 function Initialize()
 	SendActorEvent("End")
 	DisableHotkeys()
+	SFXTimer    = 0.0
 	SkillTime   = 0.0
 	TimedStage  = false
 	Adjusted    = false
