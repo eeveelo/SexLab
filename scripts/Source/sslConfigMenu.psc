@@ -33,7 +33,7 @@ string TargetName
 event OnVersionUpdate(int version)
 	string EventType
 	; Install System - Fresh install or pre v1.50
-	if CurrentVersion < 15000
+	if CurrentVersion < 15600
 
 		; Pre 1.56 data cleanup
 		FormListClear(none, "NoStripList")
@@ -44,7 +44,7 @@ event OnVersionUpdate(int version)
 		; Install system
 		SetupSystem()
 
-		Debug.Notification("SexLab Installed...")
+		Debug.Notification("SexLab "+SexLabUtil.GetStringVer()+" Installed...")
 		EventType = "SexLabInstalled"
 
 	; Update System - v1.5x incremental updates
@@ -65,7 +65,7 @@ event OnVersionUpdate(int version)
 		; v1.55 - Added ObjectFactory, moved MCM script back to original Form ID
 		if CurrentVersion < 15500
 			SetupSystem()
-			Debug.Notification("SexLab 1.54 Updated...")
+			Debug.Notification("SexLab "+SexLabUtil.GetStringVer()+" Updated...")
 		endIf
 
 		EventType = "SexLabUpdated"
@@ -94,7 +94,7 @@ function SetupSystem()
 		ThreadSlots.Setup()
 		; Enable system for use
 		SexLab.GoToState("Enabled")
-		Debug.Notification("$SSL_SexLabUpdated")
+		; Debug.Notification("$SSL_SexLabUpdated")
 	endIf
 endFunction
 
