@@ -23,17 +23,6 @@ function Moan(Actor ActorRef, int Strength = 30, bool IsVictim = false)
 	GetSound(Strength, IsVictim).PlayAndWait(ActorRef)
 endFunction
 
-function SetVoice(ActorBase BaseRef)
-	VoiceType Type = BaseRef.GetVoiceType()
-	if !Config.VoicesPlayer.HasForm(Type) && Type != Config.SexLabVoiceM && Type != Config.SexLabVoiceF ;; &&
-		if BaseRef.GetSex() == 1
-			BaseRef.SetVoiceType(Config.SexLabVoiceF)
-		else
-			BaseRef.SetVoiceType(Config.SexLabVoiceM)
-		endIf
-	endIf
-endFunction
-
 Sound function GetSound(int Strength, bool IsVictim = false)
 	if IsVictim
 		return Medium

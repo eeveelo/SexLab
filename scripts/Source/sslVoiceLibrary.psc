@@ -51,7 +51,7 @@ endProperty
 FormList property VoicesPlayer hidden
 	FormList function get()
 		DEPRECATED()
-		return SSL.Config.VoicesPlayer
+		return SSL.Config.SexLabVoices
 	endFunction
 endProperty
 string property sPlayerVoice hidden

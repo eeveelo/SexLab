@@ -86,7 +86,8 @@ Message property CheckSkyUI auto
 Topic property LipSync auto
 VoiceType property SexLabVoiceM auto
 VoiceType property SexLabVoiceF auto
-FormList property VoicesPlayer auto
+FormList property SexLabVoices auto
+; FormList property VoicesPlayer auto ; No longer used - v1.56
 SoundCategory property AudioSFX auto
 SoundCategory property AudioVoice auto
 
@@ -491,14 +492,6 @@ function ValidateTrackedFactions()
 	endWhile
 endFunction
 
-function Validate()
-	; Validate tracked factions & actors
-	ValidateTrackedActors()
-	ValidateTrackedFactions()
-	; Cleanup phantom slots with missing owners
-	SexLab.Factory.Cleanup()
-endFunction
-
 function Reload()
 	Setup()
 	; TFC Toggle key
@@ -514,10 +507,12 @@ function Reload()
 	RegisterForCrosshairRef()
 	CrosshairRef = none
 	TargetRef = none
-	Validate()
+	; Validate tracked factions & actors
+	ValidateTrackedActors()
+	ValidateTrackedFactions()
+	; Cleanup phantom slots with missing owners
+	SexLab.Factory.Cleanup()
 endFunction
-
-
 
 function SetDefaults()
 	SexLab = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework

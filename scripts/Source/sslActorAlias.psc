@@ -614,7 +614,14 @@ function SetVoice(sslBaseVoice ToVoice = none, bool ForceSilence = false)
 	IsForcedSilent = ForceSilence
 	if ToVoice != none
 		Voice = ToVoice
-		Voice.SetVoice(BaseRef)
+		; Set voicetype if unreconized
+		if Config.UseLipSync && !Config.SexLabVoices.HasForm(ActorVoice)
+			if BaseSex == 1
+				BaseRef.SetVoiceType(Config.SexLabVoiceF)
+			else
+				BaseRef.SetVoiceType(Config.SexLabVoiceM)
+			endIf
+		endIf
 	endIf
 endFunction
 
