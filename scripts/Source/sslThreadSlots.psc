@@ -45,9 +45,7 @@ function StopAll()
 	int i = Slots.Length
 	while i
 		i -= 1
-		if Slots[i].IsLocked
-			Slots[i].EndAnimation(true)
-		endIf
+		Slots[i].Initialize()
 	endWhile
 	; Send event
 	ModEvent.Send(ModEvent.Create("SexLabStoppedActive"))
@@ -59,6 +57,8 @@ endFunction
 
 function Setup()
 	GoToState("Locked")
+	StorageUtil.FormListClear(self, "ActiveActors")
+
 	; Init variables
 	Slots = new sslThreadController[15]
 	Slots[0]  = Game.GetFormFromFile(0x61EEF, "SexLab.esm") as sslThreadController
@@ -77,14 +77,23 @@ function Setup()
 	Slots[13] = Game.GetFormFromFile(0x6C637, "SexLab.esm") as sslThreadController
 	Slots[14] = Game.GetFormFromFile(0x6C638, "SexLab.esm") as sslThreadController
 
+	; Reset quests so they re-init scripts/variables
+	; Quests seem picky about being in menu mode during stop/start, so force menu wait between each
 	int i = Slots.Length
 	while i
 		i -= 1
-		Slots[i].GoToState("Setup")
+		Slots[i].Stop()
+		Utility.Wait(0.1)
+		Slots[i].Start()
+		Utility.Wait(0.1)
+	endWhile
+	; Setup threads + actoraliases
+	i = Slots.Length
+	while i
+		i -= 1
 		Slots[i].SetTID(i)
 	endWhile
 
-	StorageUtil.FormListClear(self, "ActiveActors")
 	Debug.Trace("SexLab Threads: "+Slots)
 	GoToState("")
 endFunction

@@ -1,12 +1,20 @@
-scriptname sslActorAlias extends sslSystemAlias
+scriptname sslActorAlias extends ReferenceAlias
 
 import sslUtility
-import sslActorLibrary
-import StorageUtil
+
+; Settings access
+sslSystemConfig Config
+
+; Framework access
+Actor PlayerRef
+sslActorStats Stats
+sslActorLibrary ActorLib
+sslVoiceSlots VoiceSlots
+sslExpressionSlots ExpressionSlots
 
 ; Actor Info
 Actor property ActorRef auto hidden
-int property Gender auto hidden
+int Gender
 bool IsMale
 bool IsFemale
 bool IsCreature
@@ -103,14 +111,13 @@ bool function SetActor(Actor ProspectRef, bool Victimize = false, sslBaseVoice U
 		if !IsPlayer
 			Stats.SeedActor(ActorRef)
 		endIf
+	else
+		Thread.CreatureRef = BaseRef.GetRace()
 	endIf
+	; Update threads gender
+	Thread.Genders[Gender] = Thread.Genders[Gender] + 1
 	; Get ready for mod events
-	string e = Thread.Key("")
-	RegisterForModEvent(e+"Prepare", "PrepareActor")
-	RegisterForModEvent(e+"Reset", "ResetActor")
-	RegisterForModEvent(e+"Sync", "SyncActor")
-	RegisterForModEvent(e+"Orgasm", "OrgasmEffect")
-	RegisterForModEvent(e+"Strip", "Strip")
+	RegisterEvents()
 	; Ready
 	Log("Slotted '"+ActorName+"'", self)
 	GoToState("Ready")
@@ -119,12 +126,12 @@ endFunction
 
 function ClearAlias()
 	; Maybe got here prematurely, give it 10 seconds before forcing the clear
-	float Failsafe = Utility.GetCurrentRealTime() + 10.0
-	while GetState() == "Resetting" && Utility.GetCurrentRealTime() < Failsafe
-		Utility.Wait(0.2)
-	endWhile
-	; Remove events
-	ClearEvents()
+	if GetState() == "Resetting"
+		float Failsafe = Utility.GetCurrentRealTime() + 10.0
+		while GetState() == "Resetting" && Utility.GetCurrentRealTime() < Failsafe
+			Utility.WaitMenuMode(0.2)
+		endWhile
+	endIf
 	; Make sure actor is reset
 	if GetReference() != none
 		; Init variables needed for reset
@@ -144,19 +151,7 @@ function ClearAlias()
 		UnlockActor()
 		Unstrip()
 	endIf
-	TryToClear()
 	Initialize()
-endFunction
-
-function ClearEvents()
-	GoToState("")
-	UnregisterForUpdate()
-	string e = Thread.Key("")
-	UnregisterForModEvent(e+"Prepare")
-	UnregisterForModEvent(e+"Reset")
-	UnregisterForModEvent(e+"Sync")
-	UnregisterForModEvent(e+"Orgasm")
-	UnregisterForModEvent(e+"Strip")
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -700,7 +695,6 @@ function Strip()
 	endIf
 	; Strip armor slots
 	int i = Strip.RFind(true, 31)
-	Log("strip start: "+i)
 	while i
 		if Strip[i]
 			; Grab item in slot
@@ -723,9 +717,9 @@ endFunction
 
 bool function IsStrippable(Form ItemRef)
 	; Check previous validations
-	if ItemRef != none && FormListFind(Config, "StripList", ItemRef) != -1
+	if ItemRef != none && StorageUtil.FormListFind(Config, "StripList", ItemRef) != -1
 		return true
-	elseIf ItemRef == none || FormListFind(Config, "NoStripList", ItemRef) != -1
+	elseIf ItemRef == none || StorageUtil.FormListFind(Config, "NoStripList", ItemRef) != -1
 		return false
 	endIf
 	; Check keywords
@@ -734,11 +728,11 @@ bool function IsStrippable(Form ItemRef)
 		i -= 1
 		string kw = ItemRef.GetNthKeyword(i).GetString()
 		if StringUtil.Find(kw, "NoStrip") != -1 || StringUtil.Find(kw, "Bound") != -1
-			FormListAdd(Config, "NoStripList", ItemRef, true)
+			StorageUtil.FormListAdd(Config, "NoStripList", ItemRef, true)
 			return false
 		endIf
 	endWhile
-	FormListAdd(Config, "StripList", ItemRef, true)
+	StorageUtil.FormListAdd(Config, "StripList", ItemRef, true)
 	return true
 endFunction
 
@@ -816,8 +810,28 @@ endProperty
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
 
+function RegisterEvents()
+	string e = Thread.Key("")
+	RegisterForModEvent(e+"Prepare", "PrepareActor")
+	RegisterForModEvent(e+"Reset", "ResetActor")
+	RegisterForModEvent(e+"Sync", "SyncActor")
+	RegisterForModEvent(e+"Orgasm", "OrgasmEffect")
+	RegisterForModEvent(e+"Strip", "Strip")
+endFunction
+
+function ClearEvents()
+	GoToState("")
+	UnregisterForUpdate()
+	string e = Thread.Key("")
+	UnregisterForModEvent(e+"Prepare")
+	UnregisterForModEvent(e+"Reset")
+	UnregisterForModEvent(e+"Sync")
+	UnregisterForModEvent(e+"Orgasm")
+	UnregisterForModEvent(e+"Strip")
+endFunction
+
 function Initialize()
-	; Clean script of events
+	; Stop events
 	ClearEvents()
 	; Clear actor
 	if ActorRef != none
@@ -858,12 +872,22 @@ endFunction
 
 function Setup()
 	; init libraries
-	parent.Setup()
+	SexLabFramework SexLab = Game.GetFormFromFile(0xD62, "SexLab.esm") as SexLabFramework
+	PlayerRef       = SexLab.PlayerRef
+	Config          = SexLab.Config
+	ActorLib        = SexLab.ActorLib
+	Stats           = SexLab.Stats
+	VoiceSlots      = SexLab.VoiceSlots
+	ExpressionSlots = SexLab.ExpressionSlots
 	; init alias settings
 	Thread = GetOwningQuest() as sslThreadController
 	Initialize()
-	GoToState("")
 endFunction
+
+function Log(string Log, string Type = "NOTICE")
+	SexLabUtil.DebugLog(Log, Type, Config.DebugMode)
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- State Restricted                                --- ;
 ; ------------------------------------------------------- ;

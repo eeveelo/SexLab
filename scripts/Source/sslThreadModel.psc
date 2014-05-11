@@ -6,7 +6,7 @@ scriptname sslThreadModel extends sslThreadLibrary hidden
 
 bool property IsLocked hidden
 	bool function get()
-		return !(GetState() == "Unlocked" || GetState() == "Setup")
+		return GetState() != "Unlocked"
 	endFunction
 endProperty
 
@@ -142,9 +142,6 @@ state Making
 		elseIf ActorLib.ValidateActor(ActorRef) < 0
 			Log("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- They are not a valid target for animation", "FATAL")
 			return -1
-		; elseIf ActorRef == PlayerRef && !CheckFNIS()
-		; 	Log("AddActor() - Failed to start animation -- Game was unable to verify that you have a properly installed and up to date version of FNIS", "FATAL")
-		; 	return -1
 		endIf
 		sslActorAlias Slot = PickAlias(ActorRef)
 		if Slot == none || !Slot.SetActor(ActorRef, IsVictim, Voice, ForceSilent)
@@ -155,12 +152,6 @@ state Making
 		Positions  = sslUtility.PushActor(ActorRef, Positions)
 		ActorCount = Positions.Length
 		HasPlayer  = Positions.Find(PlayerRef) != -1
-		; Update gender count
-		int g = Slot.Gender
-		Genders[g] = Genders[g] + 1
-		if g == 2
-			CreatureRef = ActorRef.GetLeveledActorBase().GetRace()
-		endIf
 		; Flag as victim
 		if IsVictim
 			VictimRef = ActorRef
@@ -745,24 +736,18 @@ function Initialize()
 	Stage          = 1
 	; Strings
 	AdjustKey      = ""
-	; Storage
-	Actor[] aDel
-	string[] sDel1
-	float[] fDel1
-	Positions      = aDel
-	Hooks          = sDel1
-	CustomTimers   = fDel1
+	; Storage Info
 	Genders        = new int[3]
 	AliasDone      = new int[5]
 	SkillXP        = new float[6]
 	Tags           = new string[5]
-	; Animations
-	sslBaseAnimation[] anDel1
-	sslBaseAnimation[] anDel2
-	sslBaseAnimation[] anDel3
-	CustomAnimations  = anDel1
-	PrimaryAnimations = anDel2
-	LeadAnimations    = anDel3
+	; Storage Data
+	Positions         = sslUtility.ActorArray(0)
+	Hooks             = sslUtility.StringArray(0)
+	CustomTimers      = sslUtility.FloatArray(0)
+	CustomAnimations  = sslUtility.AnimationArray(0)
+	PrimaryAnimations = sslUtility.AnimationArray(0)
+	LeadAnimations    = sslUtility.AnimationArray(0)
 	Animation         = none
 	; Enter thread selection pool
 	GoToState("Unlocked")
@@ -847,6 +832,7 @@ endFunction
 
 int[] AliasDone
 string[] EventTypes
+
 function AliasEvent(string Callback, bool AliasWait = true)
 	if AliasWait
 		int i = EventTypes.Find(Callback)
@@ -887,13 +873,40 @@ int property tid hidden
 	endFunction
 endProperty
 
+function SetTID(int value)
+	thread_id = value
+
+	ActorAlias = new sslActorAlias[5]
+	ActorAlias[0] = GetNthAlias(0) as sslActorAlias
+	ActorAlias[1] = GetNthAlias(1) as sslActorAlias
+	ActorAlias[2] = GetNthAlias(2) as sslActorAlias
+	ActorAlias[3] = GetNthAlias(3) as sslActorAlias
+	ActorAlias[4] = GetNthAlias(4) as sslActorAlias
+
+	ActorAlias[0].Setup()
+	ActorAlias[1].Setup()
+	ActorAlias[2].Setup()
+	ActorAlias[3].Setup()
+	ActorAlias[4].Setup()
+
+	EventTypes = new string[5]
+	EventTypes[0] = "Sync"
+	EventTypes[1] = "Prepare"
+	EventTypes[2] = "Reset"
+	EventTypes[3] = "Strip"
+	EventTypes[4] = "Orgasm"
+
+	Setup()
+	Initialize()
+	Log("Initialized", "Thread["+thread_id+"]")
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- State Restricted                                --- ;
 ; ------------------------------------------------------- ;
 
-state Unlocked
+auto state Unlocked
 	sslThreadModel function Make()
-		Initialize()
 		GoToState("Making")
 		RegisterForSingleUpdate(60.0)
 		return self
@@ -902,43 +915,6 @@ state Unlocked
 	endFunction
 endState
 
-auto state Setup
-	sslThreadModel function Make()
-		Log("Installing thread...", "Thread["+thread_id+"]")
-		ActorAlias = new sslActorAlias[5]
-		ActorAlias[0] = GetNthAlias(0) as sslActorAlias
-		ActorAlias[1] = GetNthAlias(1) as sslActorAlias
-		ActorAlias[2] = GetNthAlias(2) as sslActorAlias
-		ActorAlias[3] = GetNthAlias(3) as sslActorAlias
-		ActorAlias[4] = GetNthAlias(4) as sslActorAlias
-
-		ActorAlias[0].Setup()
-		ActorAlias[1].Setup()
-		ActorAlias[2].Setup()
-		ActorAlias[3].Setup()
-		ActorAlias[4].Setup()
-
-		EventTypes = new string[5]
-		EventTypes[0] = "Sync"
-		EventTypes[1] = "Prepare"
-		EventTypes[2] = "Reset"
-		EventTypes[3] = "Strip"
-		EventTypes[4] = "Orgasm"
-
-		Setup()
-		GoToState("Unlocked")
-		return Make()
-	endFunction
-	function SetTID(int value)
-		thread_id = value
-	endFunction
-endstate
-
-
-
-; Setup
-function SetTID(int value)
-endFunction
 ; Making
 sslThreadModel function Make()
 	Log("Make() - Cannot enter make on a locked thread", "FATAL")
