@@ -699,14 +699,16 @@ function Strip()
 		endIf
 	endIf
 	; Strip armor slots
-	int i = Strip.RFind(true, 32)
-	log("strip start: "+i)
+	int i = Strip.RFind(true, 31)
+	Log("strip start: "+i)
 	while i
-		; Grab item in slot
-		ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
-		if IsStrippable(ItemRef)
-			ActorRef.UnequipItem(ItemRef, false, true)
-			Stripped[i] = ItemRef
+		if Strip[i]
+			; Grab item in slot
+			ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
+			if IsStrippable(ItemRef)
+				ActorRef.UnequipItem(ItemRef, false, true)
+				Stripped[i] = ItemRef
+			endIf
 		endIf
 		; Move to next slot
 		i -= 1

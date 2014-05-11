@@ -145,13 +145,15 @@ Form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 		endIf
 	endIf
 	; Strip armors
-	int i = Strip.RFind(true, 32)
+	int i = Strip.RFind(true, 31)
 	while i
-		; Grab item in slot
-		ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
-		if IsStrippable(ItemRef)
-			ActorRef.UnequipItem(ItemRef, false, true)
-			Stripped[i] = ItemRef
+		if Strip[i]
+			; Grab item in slot
+			ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
+			if IsStrippable(ItemRef)
+				ActorRef.UnequipItem(ItemRef, false, true)
+				Stripped[i] = ItemRef
+			endIf
 		endIf
 		i -= 1
 	endWhile
