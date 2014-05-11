@@ -35,6 +35,13 @@ event OnVersionUpdate(int version)
 	; Install System - Fresh install or pre v1.50
 	if CurrentVersion < 15600
 
+		; v1.51 - Fixed missing ChangeActors() and removed exprsionprofile.json support
+		; v1.52 - Altered exporting
+		; v1.53 - Changed ActorAlias off of ActorLibrary and ActorLibrary back to sslSystemLibrary
+		; v1.54 - Added legacy scripts
+		; v1.55 - Added ObjectFactory, moved MCM script back to original Form ID
+		; v1.56 - New MCM menu quest; rendering all the previous upgrade stuff useless as it's going to start from scratch
+
 		; Pre 1.56 data cleanup
 		FormListClear(none, "NoStripList")
 		FormListClear(none, "StripList")
@@ -54,19 +61,16 @@ event OnVersionUpdate(int version)
 		Quest SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm") as Quest
 		Quest SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm") as Quest
 
-		; v1.51 - Fixed missing ChangeActors() and removed exprsionprofile.json support
-		; v1.52 - Altered exporting
-		if CurrentVersion < 15200
-			debug_DeleteValues(SexLabQuestRegistry)
-			FormListClear(SexLabQuestFramework, "SeededActors")
-		endIf
-		; v1.53 - Changed ActorAlias off of ActorLibrary and ActorLibrary back to sslSystemLibrary
-		; v1.54 - Added legacy scripts
-		; v1.55 - Added ObjectFactory, moved MCM script back to original Form ID
-		if CurrentVersion < 15500
-			SetupSystem()
+		SexLab.GoToState("Disabled")
+
+		; v.157 - Fixed actor stripping, expression tags being searched wrong, and refactored thread installs
+		if CurrentVersion < 15700
+			ExpressionSlots.Setup()
+			ThreadSlots.Setup()
 			Debug.Notification("SexLab "+SexLabUtil.GetStringVer()+" Updated...")
 		endIf
+
+		SexLab.GoToState("Enabled")
 
 		EventType = "SexLabUpdated"
 	endIf
