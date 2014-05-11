@@ -18,11 +18,13 @@ endProperty
 ; ------------------------------------------------------- ;
 
 sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none)
-	string Tag = "Consensual"
-	if VictimRef != none && ActorRef == VictimRef
+	string Tag
+	if ActorRef == VictimRef
 		Tag = "Victim"
 	elseIf VictimRef != none && ActorRef != VictimRef
 		Tag = "Aggressor"
+	else
+		Tag = "Normal"
 	endIf
 	bool IsFemale = ActorRef.GetLeveledActorBase().GetSex() == 1
 	bool[] Valid = sslUtility.BoolArray(Slotted)

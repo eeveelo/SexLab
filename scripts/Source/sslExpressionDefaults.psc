@@ -27,10 +27,10 @@ function Pleasure(int id)
 	Base.Name = "Pleasure"
 
 	Base.AddTag("Happy")
-	Base.AddTag("Normal")
+	Base.AddTag("Consensual")
 	Base.AddTag("Pleasure")
 
-	Base.AddTag("Consensual")
+	Base.AddTag("Normal")
 
 	; Female
 	Base.SetMood(1, Female, 2, 30)
@@ -110,12 +110,13 @@ function Shy(int id)
 
 	Base.Name = "Shy"
 
-	Base.AddTag("Normal")
+	Base.AddTag("Consensual")
 	Base.AddTag("Nervous")
 	Base.AddTag("Sad")
 	Base.AddTag("Shy")
 
-	Base.AddTag("Consensual")
+	Base.AddTag("Normal")
+
 
 	; Male + Female
 	Base.SetMood(1, MaleFemale, 4, 90)
@@ -283,9 +284,9 @@ function Happy(int id)
 	Base.Name = "Happy"
 
 	Base.AddTag("Happy")
-	Base.AddTag("Normal")
-
 	Base.AddTag("Consensual")
+
+	Base.AddTag("Normal")
 
 	; Male + Female
 	Base.SetMood(1, MaleFemale, 2, 50)
@@ -314,8 +315,8 @@ function Sad(int id)
 	Base.Name = "Sad"
 
 	Base.AddTag("Sad")
-	Base.AddTag("Normal")
 
+	Base.AddTag("Normal")
 	Base.AddTag("Victim")
 
 	; Male + Female
@@ -345,11 +346,11 @@ function Joy(int id)
 	Base.Name = "Joy"
 
 	Base.AddTag("Happy")
-	Base.AddTag("Normal")
 	Base.AddTag("Joy")
 	Base.AddTag("Pleasure")
-
 	Base.AddTag("Consensual")
+
+	Base.AddTag("Normal")
 
 	; Female
 	Base.SetMood(1, Female, 10, 45)
