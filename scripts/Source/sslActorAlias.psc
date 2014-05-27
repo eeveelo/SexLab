@@ -424,7 +424,9 @@ state Animating
 			Enjoyment = (ClampFloat(Thread.TotalTime / 6.0, 0.0, 40.0) + ((Stage as float / Animation.StageCount as float) * 60.0)) as int
 			return Enjoyment
 		endIf
-		; First actor pings thread to update skill xp
+		Enjoyment = CalcEnjoyment(Thread.GetSkillBonus(), Skills, Thread.LeadIn, IsFemale, Thread.TotalTime, Stage, Animation.StageCount)
+		return Enjoyment
+		;/; First actor pings thread to update skill xp
 		float[] XP = Thread.GetSkillBonus()
 		; Gender skill bonuses
 		if IsFemale
@@ -467,7 +469,7 @@ state Animating
 		if Thread.HasPlayer
 			Log("s "+SkillBonus+" p: "+PurityBonus+" -- Enjoyment: "+Enjoyment, ActorName)
 		endIf
-		return Enjoyment
+		return Enjoyment/;
 	endFunction
 
 	int function GetPain()
@@ -907,3 +909,6 @@ endFunction
 int function GetPain()
 	return 0
 endFunction
+
+
+int function CalcEnjoyment(float[] XP, float[] SkillsAmounts, bool IsLeadin, bool IsFemaleActor, float Timer, int OnStage, int MaxStage) global native

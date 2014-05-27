@@ -20,96 +20,30 @@ float function TestCos(float value) global native
 float function TestSin(float value) global native
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
-	; Loc[0] = CenterLoc[0] + ( Math.sin(CenterLoc[5]) * Offsets[0] ) + ( Math.cos(CenterLoc[5]) * Offsets[1] )
-	; Loc[1] = CenterLoc[1] + ( Math.cos(CenterLoc[5]) * Offsets[0] )
 
-	; float[] fArray = SexLabUtil.FloatArray(2)
-	; Log("Float Array: "+fArray)
+	float[] Skills = SexLab.Stats.GetSkillLevels(TargetRef)
+	float[] XP = new float[6]
+	XP[0] = 0.0
+	XP[1] = 0.0
+	XP[2] = 5.0
+	XP[3] = 0.0
+	XP[4] = 0.0
+	XP[5] = 0.0
 
-	; SexLabUtil.PrintConsole("Test Console")
+	Log(TargetRef.GetLeveledActorBase().GetName()+" ------ ")
+	Log("Skills: "+Skills)
+	Log("Female Stage 1/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, true, 10.0, 1, 5))
+	Log("Female Stage 3/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, true, 30.0, 3, 5))
+	Log("Female Stage 5/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, true, 50.0, 5, 5))
 
-	; Form[] Items = new Form[34]
-	; int i
-	; while i < 33
-	; 	Items[i] = TargetRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
-	; 	i += 1
-	; endWhile
-
-	; Log("CountNone: "+CountNone(Items))
-	; Log("CountNone2: "+CountNone2(Items))
-
-	; SexLabUtil.EnterFreeCamera()
-	; float[] Coords = GetCoords(TargetRef)
-	; Log("Starting Coords: "+Coords)
-	; Utility.Wait(4.0)
-	; LockActor(TargetRef)
-	; Log("New Coords: "+GetCoords(TargetRef))
-	; sslActorAlias.SetLocation(TargetRef, Coords)
-	; Log("Moved Coords (SKSE): "+GetCoords(TargetRef))
-	; UnlockActor(TargetRef)
-	; Utility.Wait(8.0)
-	; LockActor(TargetRef)
-	; Log("New Coords: "+GetCoords(TargetRef))
-	; TargetRef.SetPosition(Coords[0], Coords[1], Coords[2])
-	; TargetRef.SetAngle(Coords[3], Coords[4], Coords[5])
-	; Log("Moved Coords (Papyrus): "+GetCoords(TargetRef))
-	; UnlockActor(TargetRef)
-	; Utility.Wait(2.5)
-
-	; sslSystemConfig Config = GetConfig()
-	; form[] Test = new form[37]
-	; Test[3] = Config.GetStrapon()
-	; Test[5] = Config.GetStrapon()
-	; Test[6] = Config.GetStrapon()
-	; Test[7] = Config.GetStrapon()
-	; Test[13] = Config.GetStrapon()
-	; Test[15] = Config.GetStrapon()
-	; Test[16] = Config.GetStrapon()
-	; Test[17] = Config.GetStrapon()
-	; Test[23] = Config.GetStrapon()
-	; Test[25] = Config.GetStrapon()
-	; Test[26] = Config.GetStrapon()
-	; Test[36] = Config.GetStrapon()
+	Log("Male Stage 1/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, false, 10.0, 1, 5))
+	Log("Male Stage 3/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, false, 30.0, 3, 5))
+	Log("Male Stage 5/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, false, 50.0, 5, 5))
 
 
-	; float timer = Utility.GetCurrentRealTime()
-
-	; Log("---")
-
-
-	; form[] Cleared = sslUtility.ClearNone(Test)
-	; Log("Papyrus Output: "+Cleared.Length+" -- "+Cleared)
-	; Timer(timer, "-- total time")
-
-	; form[] Cleared2 = sslUtility.ClearNone2(Test)
-	; Log("SKSE Output: "+Cleared2.Length+" -- "+Cleared2)
-	; Timer(timer, "total time")
-
-	; form[] Copied = sslUtility.FormArray(Test.Length + 3)
-	; sslUtility.FormCopyTo(Test, Copied, true)
-	; Log("SKSE Copied + 3: "+Copied.Length+" -- "+Copied)
-	; Timer(timer, "total time")
-
-	; Log("---")
-
-
-	string[] Test = new string[30]
-	Test[4] = "sdfsd"
-	Test[6] = "sdfsd"
-	Test[12] = "sdfsd"
-	Test[16] = "sdfsd"
-	Test[23] = "sdfsd"
-	Test[25] = ""
-
-	Test = TrimStringArray(Test, 6)
-	Log("String ClearEmpty() "+Test.Length+" -- "+Test)
 
 	; sslBenchMark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
 	; Dev.StartBenchmark(2)
-
-
-
-
 	Dispel()
 endEvent
 
