@@ -1,16 +1,23 @@
 scriptname sslBenchmark extends sslSystemLibrary
 
+import SexLabUtil
+
+
+
 function PreBenchmarkSetup()
 	Setup()
+
 endFunction
 
+
+;/
 state Test1
 	string function Label()
-		return ""
+		return "SKSE"
 	endFunction
 
 	string function Proof()
-		return ""
+		return sslUtility.ClearNone2(Items).Length
 	endFunction
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
@@ -20,11 +27,37 @@ state Test1
 		while nth
 			nth -= 1
 			; START code to benchmark
+			sslUtility.ClearNone2(Items)
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline
 	endFunction
 endState
+
+
+state Test2
+	string function Label()
+		return "Papyrus"
+	endFunction
+
+	string function Proof()
+		return sslUtility.ClearNone(Items).Length
+	endFunction
+
+	float function RunTest(int nth = 5000, float baseline = 0.0)
+		; START any variable preparions needed
+		; END any variable preparions needed
+		baseline += Utility.GetCurrentRealTime()
+		while nth
+			nth -= 1
+			; START code to benchmark
+			sslUtility.ClearNone(Items)
+			; END code to benchmark
+		endWhile
+		return Utility.GetCurrentRealTime() - baseline
+	endFunction
+endState
+/;
 
 function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10)
 
@@ -112,3 +145,16 @@ event OnUpdate()
 	; 	Debug.Notification("Latency Test Result: "+Result+"ms")
 	; endIf
 endEvent
+
+
+
+bool function IsStrippable(form ItemRef)
+	int i = ItemRef.GetNumKeywords()
+	while i
+		i -= 1
+		if StringUtil.Find(ItemRef.GetNthKeyword(i).GetString(), "NoStrip") != -1 ;|| StringUtil.Find(kw, "Bound") != -1
+			return false
+		endIf
+	endWhile
+	return true
+endFunction

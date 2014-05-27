@@ -270,7 +270,6 @@ endFunction
 ; --- System use only                                 --- ;
 ; ------------------------------------------------------- ;
 
-
 function Setup()
 	parent.Setup()
 	LocationMarker = Config.LocationMarker

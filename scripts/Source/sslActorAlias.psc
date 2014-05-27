@@ -464,7 +464,9 @@ state Animating
 		endIf
 		; Set final enjoyment
 		Enjoyment = (SkillBonus + PurityBonus + StageBonus + TimeBonus) as int
-		; Log("Skill: "+SkillBonus+" PurityBonus: "+PurityBonus+" Stage: "+StageBonus+" Time: "+TimeBonus+" -- Enjoyment: "+Enjoyment, ActorName)
+		if Thread.HasPlayer
+			Log("s "+SkillBonus+" p: "+PurityBonus+" -- Enjoyment: "+Enjoyment, ActorName)
+		endIf
 		return Enjoyment
 	endFunction
 
@@ -524,12 +526,12 @@ function LockActor()
 	Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 	; Start DoNothing package
 	ActorRef.SetFactionRank(Config.AnimatingFaction, 1)
-	ActorUtil.AddPackageOverride(ActorRef, Config.DoNothing, 100, 1)
+	; ActorUtil.AddPackageOverride(ActorRef, Config.DoNothing, 100, 1)
 	ActorRef.EvaluatePackage()
 	; Disable movement
 	if IsPlayer
 		Game.ForceThirdPerson()
-		Game.DisablePlayerControls(false, false, false, false, false, false, true, false, 0)
+		; Game.DisablePlayerControls(false, false, false, false, false, false, true, false, 0)
 		Game.SetPlayerAIDriven()
 		; Enable hotkeys, if needed
 		if !(IsVictim && Config.DisablePlayer)
@@ -562,13 +564,13 @@ function UnlockActor()
 	ActorRef.EvaluatePackage()
 	; Enable movement
 	if IsPlayer
-		Thread.DisableHotkeys()
-		Game.EnablePlayerControls()
-		Game.SetPlayerAIDriven(false)
 		; Disable free camera, if in it
 		if Game.GetCameraState() == 3
 			Config.ToggleFreeCamera()
 		endIf
+		Thread.DisableHotkeys()
+		Game.EnablePlayerControls()
+		Game.SetPlayerAIDriven(false)
 	else
 		ActorRef.SetDontMove(false)
 	endIf
@@ -695,7 +697,7 @@ function Strip()
 	endIf
 	; Strip armor slots
 	int i = Strip.RFind(true, 31)
-	while i
+	while i >= 0
 		if Strip[i]
 			; Grab item in slot
 			ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
@@ -716,24 +718,7 @@ function Strip()
 endFunction
 
 bool function IsStrippable(Form ItemRef)
-	; Check previous validations
-	if ItemRef != none && StorageUtil.FormListFind(Config, "StripList", ItemRef) != -1
-		return true
-	elseIf ItemRef == none || StorageUtil.FormListFind(Config, "NoStripList", ItemRef) != -1
-		return false
-	endIf
-	; Check keywords
-	int i = ItemRef.GetNumKeywords()
-	while i
-		i -= 1
-		string kw = ItemRef.GetNthKeyword(i).GetString()
-		if StringUtil.Find(kw, "NoStrip") != -1 || StringUtil.Find(kw, "Bound") != -1
-			StorageUtil.FormListAdd(Config, "NoStripList", ItemRef, true)
-			return false
-		endIf
-	endWhile
-	StorageUtil.FormListAdd(Config, "StripList", ItemRef, true)
-	return true
+	return ItemRef!= none && !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")
 endFunction
 
 function UnStrip()

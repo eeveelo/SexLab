@@ -130,14 +130,14 @@ function Log(string msg, string source, string type = "NOTICE", string display =
 		Debug.TraceStack("-- SexLab "+type+"-- "+source+": "+msg)
 	endIf
 	if StringUtil.Find(display, "console") != -1
-		MiscUtil.PrintConsole(type+" SexLab "+source+": "+msg)
+		SexLabUtil.PrintConsole(type+" SexLab "+source+": "+msg)
 	endIf
 endFunction
 
 function DebugLog(string Log, string Type = "NOTICE", bool DebugMode = false) global
 	Log = Type+": "+Log
 	if DebugMode
-		MiscUtil.PrintConsole(Log)
+		SexLabUtil.PrintConsole(Log)
 	endIf
 	if Type == "FATAL" || Type == "ERROR" || Type == "DEPRECATED"
 		Debug.TraceStack("-- SexLab -- "+Log)
@@ -165,3 +165,9 @@ function EnableFreeCamera(bool Enabling = true, float sucsm = 5.0) global
 		MiscUtil.ToggleFreeCamera()
 	endIf
 endFunction
+
+bool function EnterFreeCamera() global native
+
+bool function HasKeywordSub(form ObjRef, string LookFor) global native
+
+function PrintConsole(string output) global native

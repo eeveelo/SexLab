@@ -4,56 +4,52 @@ scriptname sslUtility hidden
 ;|	Float Utility Functions                      |;
 ;\-----------------------------------------------/;
 
-float[] function IncreaseFloat(int by, float[] array) global
-	int len = array.Length
+function FloatCopyTo(float[] Array, float[] Output, int StartIndex = 0, int EndIndex = -1) global native
+
+float[] function IncreaseFloat(int by, float[] Array) global
+	int len = Array.Length
 	if by < 1 || (len+by > 128)
-		return array
+		return Array
 	elseIf len == 0
 		return FloatArray(by)
 	endIf
-	float[] output = FloatArray(len+by)
-	while len
-		len -= 1
-		output[len] = array[len]
-	endWhile
-	return output
+	float[] Output = FloatArray(len+by)
+	FloatCopyTo(Array, Output)
+	return Output
 endFunction
 
-float[] function PushFloat(float var, float[] array) global
-	int len = array.Length
+float[] function PushFloat(float var, float[] Array) global
+	int len = Array.Length
 	if len >= 128
-		return array
+		return Array
 	endIf
-	float[] output = IncreaseFloat(1, array)
-	output[len] = var
-	return output
+	float[] Output = IncreaseFloat(1, Array)
+	Output[len] = var
+	return Output
 endFunction
 
-float[] function MergeFloatArray(float[] push, float[] array) global
-	int pushing = push.Length
-	int have = array.length
+float[] function MergeFloatArray(float[] Push, float[] Array) global
+	int Pushing = Push.Length
+	int have = Array.length
 	if have == 0
-		return push
-	elseIf pushing == 0 || pushing+have > 128
-		return array
+		return Push
+	elseIf Pushing == 0 || Pushing+have > 128
+		return Array
 	endIf
-	float[] output = IncreaseFloat(pushing, array)
-	int len = output.Length
-	while pushing
+	float[] Output = IncreaseFloat(Pushing, Array)
+	int len = Output.Length
+	while Pushing
 		len -= 1
-		pushing -= 1
-		output[len] = push[pushing]
+		Pushing -= 1
+		Output[len] = Push[Pushing]
 	endWhile
-	return output
+	return Output
 endFunction
 
-float[] function TrimFloatArray(float[] array, int len) global
-	float[] output = FloatArray(len)
-	while len
-		len -= 1
-		output[len] = array[len]
-	endWhile
-	return output
+float[] function TrimFloatArray(float[] Array, int len) global
+	float[] Output = FloatArray(len)
+	FloatCopyTo(Array, Output, 0, len)
+	return Output
 endFunction
 
 float[] function EmptyFloatArray() global
@@ -81,56 +77,52 @@ endFunction
 ;|	Integer Utility Functions                    |;
 ;\-----------------------------------------------/;
 
-int[] function IncreaseInt(int by, int[] array) global
-	int len = array.Length
+function IntCopyTo(int[] Array, int[] Output, int StartIndex = 0, int EndIndex = -1) global native
+
+int[] function IncreaseInt(int by, int[] Array) global
+	int len = Array.Length
 	if by < 1 || (len+by > 128)
-		return array
+		return Array
 	elseIf len == 0
 		return IntArray(by)
 	endIf
-	int[] output = IntArray(len+by)
-	while len
-		len -= 1
-		output[len] = array[len]
-	endWhile
-	return output
+	int[] Output = IntArray(len+by)
+	IntCopyTo(Array, Output)
+	return Output
 endFunction
 
-int[] function PushInt(int var, int[] array) global
-	int len = array.Length
+int[] function PushInt(int var, int[] Array) global
+	int len = Array.Length
 	if len >= 128
-		return array
+		return Array
 	endIf
-	int[] output = IncreaseInt(1, array)
-	output[len] = var
-	return output
+	int[] Output = IncreaseInt(1, Array)
+	Output[len] = var
+	return Output
 endFunction
 
-int[] function MergeIntArray(int[] push, int[] array) global
-	int pushing = push.Length
-	int have = array.length
+int[] function MergeIntArray(int[] Push, int[] Array) global
+	int Pushing = Push.Length
+	int have = Array.length
 	if have == 0
-		return push
-	elseIf pushing == 0 || pushing+have > 128
-		return array
+		return Push
+	elseIf Pushing == 0 || Pushing+have > 128
+		return Array
 	endIf
-	int[] output = IncreaseInt(pushing, array)
-	int len = output.Length
-	while pushing
+	int[] Output = IncreaseInt(Pushing, Array)
+	int len = Output.Length
+	while Pushing
 		len -= 1
-		pushing -= 1
-		output[len] = push[pushing]
+		Pushing -= 1
+		Output[len] = Push[Pushing]
 	endWhile
-	return output
+	return Output
 endFunction
 
-int[] function TrimIntArray(int[] array, int len) global
-	int[] output = IntArray(len)
-	while len
-		len -= 1
-		output[len] = array[len]
-	endWhile
-	return output
+int[] function TrimIntArray(int[] Array, int len) global
+	int[] Output = IntArray(len)
+	IntCopyTo(Array, Output, 0, len)
+	return Output
 endFunction
 
 int[] function EmptyIntArray() global
@@ -138,29 +130,29 @@ int[] function EmptyIntArray() global
 	return empty
 endFunction
 
-int[] function SliceIntArray(int[] array, int startindex = 0, int endindex = -1) global
-	int len = array.Length
+int[] function SliceIntArray(int[] Array, int startindex = 0, int endindex = -1) global
+	int len = Array.Length
 	if startindex >= len || (startindex == 0 && endindex == -1) || (endindex <= startindex && endindex != -1)
-		return array
+		return Array
 	elseIf endindex >= len || endindex == -1
 		endindex = len - 1
 	endIf
-	int[] output = IntArray((endindex - startindex) + 1)
-	int i = output.Length
+	int[] Output = IntArray((endindex - startindex) + 1)
+	int i = Output.Length
 	while i
 		i -= 1
-		output[i] = array[endindex]
+		Output[i] = Array[endindex]
 		endindex -= 1
 	endWhile
-	return output
+	return Output
 endFunction
 
-int function AddValues(int[] array) global
+int function AddValues(int[] Array) global
 	int value
-	int i = array.Length
+	int i = Array.Length
 	while i
 		i -= 1
-		value += array[i]
+		value += Array[i]
 	endWhile
 	return value
 endFunction
@@ -182,6 +174,7 @@ int function WrapIndex(int index, int len) global
 	endIf
 	return index
 endFunction
+
 
 int function IndexTravel(int index, int len, bool backwards = false) global
 	; Direction of travel
@@ -210,57 +203,54 @@ endFunction
 ;|	Bool Utility Functions                       |;
 ;\-----------------------------------------------/;
 
-bool[] function IncreaseBool(int by, bool[] array) global
-	int len = array.Length
+int function CountTrue(bool[] Array) global native
+function BoolCopyTo(bool[] Array, bool[] Output, int StartIndex = 0, int EndIndex = -1) global native
+
+bool[] function IncreaseBool(int by, bool[] Array) global
+	int len = Array.Length
 	if by < 1 || (len+by > 128)
-		return array
+		return Array
 	elseIf len == 0
 		return BoolArray(by)
 	endIf
-	bool[] output = BoolArray(len+by)
-	while len
-		len -= 1
-		output[len] = array[len]
-	endWhile
-	return output
+	bool[] Output = BoolArray(len+by)
+	BoolCopyTo(Array, Output)
+	return Output
 endFunction
 
 
-bool[] function PushBool(bool var, bool[] array) global
-	int len = array.Length
+bool[] function PushBool(bool var, bool[] Array) global
+	int len = Array.Length
 	if len >= 128
-		return array
+		return Array
 	endIf
-	bool[] output = IncreaseBool(1, array)
-	output[len] = var
-	return output
+	bool[] Output = IncreaseBool(1, Array)
+	Output[len] = var
+	return Output
 endFunction
 
-bool[] function MergeBoolArray(bool[] push, bool[] array) global
-	int pushing = push.Length
-	int have = array.length
+bool[] function MergeBoolArray(bool[] Push, bool[] Array) global
+	int Pushing = Push.Length
+	int have = Array.length
 	if have == 0
-		return push
-	elseIf pushing == 0 || pushing+have > 128
-		return array
+		return Push
+	elseIf Pushing == 0 || Pushing+have > 128
+		return Array
 	endIf
-	bool[] output = IncreaseBool(pushing, array)
-	int len = output.Length
-	while pushing
+	bool[] Output = IncreaseBool(Pushing, Array)
+	int len = Output.Length
+	while Pushing
 		len -= 1
-		pushing -= 1
-		output[len] = push[pushing]
+		Pushing -= 1
+		Output[len] = Push[Pushing]
 	endWhile
-	return output
+	return Output
 endFunction
 
-bool[] function TrimBoolArray(bool[] array, int len) global
-	bool[] output = BoolArray(len)
-	while len
-		len -= 1
-		output[len] = array[len]
-	endWhile
-	return output
+bool[] function TrimBoolArray(bool[] Array, int len) global
+	bool[] Output = BoolArray(len)
+	BoolCopyTo(Array, Output, 0, len)
+	return Output
 endFunction
 
 bool[] function EmptyBoolArray() global
@@ -268,36 +258,88 @@ bool[] function EmptyBoolArray() global
 	return empty
 endFunction
 
-int function CountTrue(bool[] array) global
-	int len = array.Length
-	int i = array.Find(true)
-	int count
-	while i != -1
-		count += 1
-		i += 1
-		if i < len
-			i = array.Find(true, i)
-		else
-			i = -1
-		endIf
-	endWhile
-	return count
-endFunction
-
 ;/-----------------------------------------------\;
 ;|	String Utility Functions                     |;
 ;\-----------------------------------------------/;
 
+int function CountEmpty(string[] Array) global native
+function StringCopyTo(string[] Array, string[] Output, int StartIndex = 0, int EndIndex = -1, bool AllowEmpty = true) global native
+
+string[] function IncreaseString(int by, string[] Array) global
+	int len = Array.Length
+	if by < 1 || (len+by > 128)
+		return Array
+	elseIf len == 0
+		return StringArray(by)
+	endIf
+	string[] Output = StringArray(len+by)
+	StringCopyTo(Array, Output)
+	return Output
+endFunction
+
+string[] function PushString(string var, string[] Array) global
+	int len = Array.Length
+	if len >= 128
+		return Array
+	endIf
+	string[] Output = IncreaseString(1, Array)
+	Output[len] = var
+	return Output
+endFunction
+
+string[] function MergeStringArray(string[] Push, string[] Array) global
+	int Pushing = Push.Length
+	int have = Array.length
+	if have == 0
+		return Push
+	elseIf Pushing == 0 || Pushing+have > 128
+		return Array
+	endIf
+	string[] Output = IncreaseString(Pushing, Array)
+	int len = Output.Length
+	while Pushing
+		len -= 1
+		Pushing -= 1
+		Output[len] = Push[Pushing]
+	endWhile
+	return Output
+endFunction
+
+string[] function TrimStringArray(string[] Array, int len) global
+	string[] Output = StringArray(len)
+	StringCopyTo(Array, Output, 0, len)
+	return Output
+endFunction
+
+string[] function ClearEmpty(string[] Array) global
+	int Count = (array.Length - CountEmpty(array))
+	if Count < 1
+		string[] empty
+		return empty
+	elseif Count == Array.Length
+		return Array
+	endIf
+	string[] Output = StringArray(Count)
+	StringCopyTo(Array, Output, 0, -1, false)
+	return Output
+endFunction
+
+string[] function EmptyStringArray() global
+	string[] empty
+	return empty
+endFunction
+
+
 string[] function ArgString(string args, string delimiter = ",") global
-	string[] output
+	string[] Output
 	; Empty args
 	if args == ""
-		return output
+		return Output
 	endIf
 	; Has no delimiter present
 	int Next = StringUtil.Find(args, delimiter)
 	if Next == -1
-		return PushString(args, output)
+		return PushString(args, Output)
 	endIf
 	; Count occurences of delimiter
 	args += delimiter
@@ -309,17 +351,17 @@ string[] function ArgString(string args, string delimiter = ",") global
 	endWhile
 	; Parse the argurments out of string
 	int i
-	output = StringArray(Count)
+	Output = StringArray(Count)
 	int DelimLen = StringUtil.GetLength(delimiter)
 	int Prev
 	Next = StringUtil.Find(args, delimiter)
 	while Next != -1 && Next < Len
-		output[i] = Trim(StringUtil.SubString(args, Prev, (Next - Prev)))
+		Output[i] = Trim(StringUtil.SubString(args, Prev, (Next - Prev)))
 		Prev = Next + DelimLen
 		Next = StringUtil.Find(args, delimiter, Prev)
 		i += 1
 	endWhile
-	return output
+	return Output
 endFunction
 
 string function MakeArgs(string delimiter, string arg1, string arg2 = "", string arg3 = "", string arg4 = "", string arg5 = "") global
@@ -357,148 +399,65 @@ string function RemoveString(string str, string toRemove, int startindex = 0) gl
 	return part1 + part2
 endFunction
 
-string[] function IncreaseString(int by, string[] array) global
-	int len = array.Length
-	if by < 1 || (len+by > 128)
-		return array
-	elseIf len == 0
-		return StringArray(by)
-	endIf
-	string[] output = StringArray(len+by)
-	while len
-		len -= 1
-		output[len] = array[len]
-	endWhile
-	return output
-endFunction
-
-string[] function PushString(string var, string[] array) global
-	int len = array.Length
-	if len >= 128
-		return array
-	endIf
-	string[] output = IncreaseString(1, array)
-	output[len] = var
-	return output
-endFunction
-
-string[] function MergeStringArray(string[] push, string[] array) global
-	int pushing = push.Length
-	int have = array.length
-	if have == 0
-		return push
-	elseIf pushing == 0 || pushing+have > 128
-		return array
-	endIf
-	string[] output = IncreaseString(pushing, array)
-	int len = output.Length
-	while pushing
-		len -= 1
-		pushing -= 1
-		output[len] = push[pushing]
-	endWhile
-	return output
-endFunction
-
-string[] function TrimStringArray(string[] array, int len) global
-	string[] output = StringArray(len)
-	while len
-		len -= 1
-		output[len] = array[len]
-	endWhile
-	return output
-endFunction
-
-int function CountEmpty(string[] array) global
-	int len = array.Length
-	if len < 1
-		return 0
-	endIf
-	int i = array.Find("")
-	int count
-	while i != -1
-		count += 1
-		i += 1
-		if i < len
-			i = array.Find("", i)
-		else
-			i = -1
-		endIf
-	endWhile
-	return count
-endFunction
-
-string[] function ClearEmpty(string[] array) global
-	int filled = (array.Length - CountEmpty(array))
-	if filled < 1
-		string[] empty
-		return empty
-	elseif filled == array.Length
-		return array
-	endIf
-	string[] output = StringArray(filled)
-	filled -= 1
-	int i = array.Length
-	while i
-		i -= 1
-		if array[i] != ""
-			output[filled] = array[i]
-			filled -= 1
-		endIf
-	endWhile
-	return output
-endFunction
-
-string[] function EmptyStringArray() global
-	string[] empty
-	return empty
-endFunction
 
 ;/-----------------------------------------------\;
 ;|	Form Utility Functions                       |;
 ;\-----------------------------------------------/;
 
-form[] function IncreaseForm(int by, form[] array) global
-	int len = array.Length
+int function CountNone(form[] Array) global native
+function FormCopyTo(form[] Source, form[] Output, bool AllowNone) global native
+
+form[] function IncreaseForm(int by, form[] Array) global
+	int len = Array.Length
 	if by < 1 || (len+by > 128)
-		return array
+		return Array
 	elseIf len == 0
 		return FormArray(by)
 	endIf
-	form[] output = FormArray(len+by)
-	while len
-		len -= 1
-		output[len] = array[len]
-	endWhile
-	return output
+	form[] Output = FormArray(len+by)
+	FormCopyTo(Array, Output, true)
+	return Output
 endFunction
 
-form[] function PushForm(form var, form[] array) global
-	int len = array.Length
+form[] function PushForm(form var, form[] Array) global
+	int len = Array.Length
 	if len >= 128
-		return array
+		return Array
 	endIf
-	form[] output = IncreaseForm(1, array)
-	output[len] = var
-	return output
+	form[] Output = IncreaseForm(1, Array)
+	Output[len] = var
+	return Output
 endFunction
 
-form[] function MergeFormArray(form[] push, form[] array) global
-	int pushing = push.Length
-	int have = array.length
+form[] function MergeFormArray(form[] Push, form[] Array) global
+	int Pushing = Push.Length
+	int have = Array.length
 	if have == 0
-		return push
-	elseIf pushing == 0 || pushing+have > 128
-		return array
+		return Push
+	elseIf Pushing == 0 || Pushing+have > 128
+		return Array
 	endIf
-	form[] output = IncreaseForm(pushing, array)
-	int len = output.Length
-	while pushing
+	form[] Output = IncreaseForm(Pushing, Array)
+	int len = Output.Length
+	while Pushing
 		len -= 1
-		pushing -= 1
-		output[len] = push[pushing]
+		Pushing -= 1
+		Output[len] = Push[Pushing]
 	endWhile
-	return output
+	return Output
+endFunction
+
+form[] function ClearNone(form[] Array) global
+	int Count = (Array.Length - CountNone(Array))
+	if Count < 1
+		form[] empty
+		return empty
+	elseif Count == Array.Length
+		return Array
+	endIf
+	form[] Output = FormArray(Count)
+	FormCopyTo(Array, Output, false)
+	return Output
 endFunction
 
 form[] function EmptyFormArray() global
@@ -506,78 +465,41 @@ form[] function EmptyFormArray() global
 	return empty
 endFunction
 
-int function CountNone(form[] array) global
-	int len = array.Length
-	int i = array.Find(none)
-	int count
-	while i != -1
-		count += 1
-		i += 1
-		if i < len
-			i = array.Find(none, i)
-		else
-			i = -1
-		endIf
-	endWhile
-	return count
-endFunction
-
-form[] function ClearNone(form[] array) global
-	int filled = (array.Length - CountNone(array))
-	if filled < 1
-		form[] empty
-		return empty
-	elseif filled == array.Length
-		return array
-	endIf
-	form[] output = FormArray(filled)
-	filled -= 1
-	int i = array.Length
-	while i
-		i -= 1
-		if array[i] != none
-			output[filled] = array[i]
-			filled -= 1
-		endIf
-	endWhile
-	return output
-endFunction
-
 ;/-----------------------------------------------\;
 ;|	Other Utility Functions                      |;
 ;\-----------------------------------------------/;
 
-sslBaseAnimation[] function PushAnimation(sslBaseAnimation var, sslBaseAnimation[] array) global
-	int len = array.Length
+sslBaseAnimation[] function PushAnimation(sslBaseAnimation var, sslBaseAnimation[] Array) global
+	int len = Array.Length
 	if len >= 100
-		return array
+		return Array
 	elseIf len == 0
 		array = new sslBaseAnimation[1]
 		array[0] = var
-		return array
+		return Array
 	endIf
-	sslBaseAnimation[] pushed = AnimationArray(len+1)
+	sslBaseAnimation[] Pushed = AnimationArray(len+1)
 	pushed[len] = var
 	while len
 		len -=1
-		pushed[len] = array[len]
+		pushed[len] = Array[len]
 	endWhile
-	return pushed
+	return Pushed
 endFunction
 
-sslBaseAnimation[] function IncreaseAnimation(int by, sslBaseAnimation[] array) global
-	int len = array.Length
+sslBaseAnimation[] function IncreaseAnimation(int by, sslBaseAnimation[] Array) global
+	int len = Array.Length
 	if by < 1 || (len+by > 100)
-		return array
+		return Array
 	elseIf len == 0
 		return AnimationArray(by)
 	endIf
-	sslBaseAnimation[] output = AnimationArray(len+by)
+	sslBaseAnimation[] Output = AnimationArray(len+by)
 	while len
 		len -= 1
-		output[len] = array[len]
+		Output[len] = Array[len]
 	endWhile
-	return output
+	return Output
 endFunction
 
 sslBaseAnimation[] function EmptyAnimationArray() global
@@ -585,42 +507,42 @@ sslBaseAnimation[] function EmptyAnimationArray() global
 	return empty
 endFunction
 
-Actor[] function PushActor(Actor var, Actor[] array) global
-	int len = array.Length
+Actor[] function PushActor(Actor var, Actor[] Array) global
+	int len = Array.Length
 	if len >= 5
-		return array
+		return Array
 	elseIf len == 0
 		array = new Actor[1]
 		array[0] = var
-		return array
+		return Array
 	endIf
-	Actor[] pushed = ActorArray(len+1)
+	Actor[] Pushed = ActorArray(len+1)
 	pushed[len] = var
 	while len
 		len -=1
-		pushed[len] = array[len]
+		pushed[len] = Array[len]
 	endWhile
-	return pushed
+	return Pushed
 endFunction
 
 Actor[] function MakeActorArray(Actor Actor1 = none, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none) global
-	Actor[] output
+	Actor[] Output
 	if Actor1 != none
-		output = PushActor(Actor1, output)
+		Output = PushActor(Actor1, Output)
 	endIf
 	if Actor2 != none
-		output = PushActor(Actor2, output)
+		Output = PushActor(Actor2, Output)
 	endIf
 	if Actor3 != none
-		output = PushActor(Actor3, output)
+		Output = PushActor(Actor3, Output)
 	endIf
 	if Actor4 != none
-		output = PushActor(Actor4, output)
+		Output = PushActor(Actor4, Output)
 	endIf
 	if Actor5 != none
-		output = PushActor(Actor5, output)
+		Output = PushActor(Actor5, Output)
 	endIf
-	return output
+	return Output
 endFunction
 
 ;##############################################

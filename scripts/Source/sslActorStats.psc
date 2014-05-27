@@ -171,6 +171,8 @@ endFunction
 ; --- Sex Skills                                      --- ;
 ; ------------------------------------------------------- ;
 
+; function CalcStats(Actor ActorRef, float[] Stats) global native
+
 function SeedActor(Actor ActorRef)
 	if ActorRef == PlayerRef || !ActorRef.HasKeyword(ActorTypeNPC) || FormListFind(none, "SexLab.SeededActors", ActorRef) != -1
 		return

@@ -344,7 +344,7 @@ function SetAnimation(int aid = -1)
 	AnimEvents  = Animation.FetchStage(Stage)
 	; Inform player of animation being played now
 	if HasPlayer
-		MiscUtil.PrintConsole("Playing Animation: " + Animation.Name)
+		SexLabUtil.PrintConsole("Playing Animation: " + Animation.Name)
 	endIf
 	; Check for out of range stage
 	if Stage >= StageCount
