@@ -16,34 +16,46 @@ float scale2
 string ActorName
 ObjectReference MarkerRef
 
-float function TestCos(float value) global native
-float function TestSin(float value) global native
-
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	float[] Skills = SexLab.Stats.GetSkillLevels(TargetRef)
-	float[] XP = new float[6]
-	XP[0] = 0.0
-	XP[1] = 0.0
-	XP[2] = 5.0
-	XP[3] = 0.0
-	XP[4] = 0.0
-	XP[5] = 0.0
+	; float[] Skills = SexLab.Stats.GetSkillLevels(TargetRef)
+	; float[] XP = new float[6]
+	; XP[0] = 0.0
+	; XP[1] = 0.0
+	; XP[2] = 5.0
+	; XP[3] = 0.0
+	; XP[4] = 0.0
+	; XP[5] = 0.0
 
-	Log(TargetRef.GetLeveledActorBase().GetName()+" ------ ")
-	Log("Skills: "+Skills)
-	Log("Female Stage 1/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, true, 10.0, 1, 5))
-	Log("Female Stage 3/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, true, 30.0, 3, 5))
-	Log("Female Stage 5/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, true, 50.0, 5, 5))
+	; Log(TargetRef.GetLeveledActorBase().GetName()+" ------ ")
+	; Log("Skills: "+Skills)
+	; Log("Female Stage 1/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, true, 10.0, 1, 5))
+	; Log("Female Stage 3/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, true, 30.0, 3, 5))
+	; Log("Female Stage 5/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, true, 50.0, 5, 5))
 
-	Log("Male Stage 1/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, false, 10.0, 1, 5))
-	Log("Male Stage 3/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, false, 30.0, 3, 5))
-	Log("Male Stage 5/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, false, 50.0, 5, 5))
+	; Log("Male Stage 1/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, false, 10.0, 1, 5))
+	; Log("Male Stage 3/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, false, 30.0, 3, 5))
+	; Log("Male Stage 5/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, false, 50.0, 5, 5))
+
+	float[] Offsets = new float[4]
+	Offsets[0] = 100.0
+	Offsets[1] = 5.0
+	Offsets[2] = 5.0
+	Offsets[3] = 180.0
 
 
+	float[] Center = GetCoords(TargetRef)
+	float[] Coords = new float[6]
+	Log("Starter: "+Center)
+	Coords = OffsetCoords(Coords, Center, Offsets)
+	Log("Papyrus: "+Coords)
+	Coords = new float[6]
+	sslActorAlias.OffsetCoords(Coords, Center, Offsets)
+	Log("SKSE: "+Coords)
 
-	; sslBenchMark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
-	; Dev.StartBenchmark(2)
+	sslBenchMark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
+	Dev.StartBenchmark(2)
+
 	Dispel()
 endEvent
 
@@ -73,6 +85,21 @@ float[] function GetCoords(Actor ActorRef)
 	coords[4] = ActorRef.GetAngleY()
 	coords[5] = ActorRef.GetAngleZ()
 	return coords
+endFunction
+
+float[] function OffsetCoords(float[] Loc, float[] CenterLoc, float[] Offsets)
+	Loc[0] = CenterLoc[0] + ( Math.sin(CenterLoc[5]) * Offsets[0] ) + ( Math.cos(CenterLoc[5]) * Offsets[1] )
+	Loc[1] = CenterLoc[1] + ( Math.cos(CenterLoc[5]) * Offsets[0] ) + ( Math.sin(CenterLoc[5]) * Offsets[1] )
+	Loc[2] = CenterLoc[2] + Offsets[2]
+	Loc[3] = CenterLoc[3]
+	Loc[4] = CenterLoc[4]
+	Loc[5] = CenterLoc[5] + Offsets[3]
+	if Loc[5] >= 360.0
+		Loc[5] = Loc[5] - 360.0
+	elseIf Loc[5] < 0.0
+		Loc[5] = Loc[5] + 360.0
+	endIf
+	return Loc
 endFunction
 
 function Log(string log)

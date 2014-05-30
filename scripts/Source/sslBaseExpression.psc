@@ -295,17 +295,17 @@ endFunction
 function CountPhases()
 	Phases = new int[2]
 	; Male phases
-	Phases[0] = Phases[0] + ((AddValues(Male1) > 0) as int)
-	Phases[0] = Phases[0] + ((AddValues(Male2) > 0) as int)
-	Phases[0] = Phases[0] + ((AddValues(Male3) > 0) as int)
-	Phases[0] = Phases[0] + ((AddValues(Male4) > 0) as int)
-	Phases[0] = Phases[0] + ((AddValues(Male5) > 0) as int)
+	Phases[0] = Phases[0] + ((AddIntValues(Male1) > 0) as int)
+	Phases[0] = Phases[0] + ((AddIntValues(Male2) > 0) as int)
+	Phases[0] = Phases[0] + ((AddIntValues(Male3) > 0) as int)
+	Phases[0] = Phases[0] + ((AddIntValues(Male4) > 0) as int)
+	Phases[0] = Phases[0] + ((AddIntValues(Male5) > 0) as int)
 	; Female phases
-	Phases[1] = Phases[1] + ((AddValues(Female1) > 0) as int)
-	Phases[1] = Phases[1] + ((AddValues(Female2) > 0) as int)
-	Phases[1] = Phases[1] + ((AddValues(Female3) > 0) as int)
-	Phases[1] = Phases[1] + ((AddValues(Female4) > 0) as int)
-	Phases[1] = Phases[1] + ((AddValues(Female5) > 0) as int)
+	Phases[1] = Phases[1] + ((AddIntValues(Female1) > 0) as int)
+	Phases[1] = Phases[1] + ((AddIntValues(Female2) > 0) as int)
+	Phases[1] = Phases[1] + ((AddIntValues(Female3) > 0) as int)
+	Phases[1] = Phases[1] + ((AddIntValues(Female4) > 0) as int)
+	Phases[1] = Phases[1] + ((AddIntValues(Female5) > 0) as int)
 	; Enable it if phases are present
 	if Phases[0] > 0 || Phases[1] > 0
 		Enabled = true

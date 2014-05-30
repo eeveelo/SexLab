@@ -219,9 +219,11 @@ state Animating
 		endIf
 		; Find position to swap to
 		int MovedPos = IndexTravel(AdjustPos, ActorCount, backwards)
+		Actor MovedActor = PositionAlias(MovedPos).ActorRef
+		Actor ReplacedActor = AdjustAlias.ActorRef
 		; Shuffle actor positions
-		Positions[AdjustPos] = PositionAlias(MovedPos).ActorRef
-		Positions[MovedPos] = AdjustAlias.ActorRef
+		Positions[AdjustPos] = MovedActor
+		Positions[MovedPos] = ReplacedActor
 		; Sync new positions
 		AdjustPos = MovedPos
 		UpdateAdjustKey()

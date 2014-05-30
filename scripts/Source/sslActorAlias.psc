@@ -44,7 +44,7 @@ sslBaseExpression Expression
 
 ; Positioning
 ObjectReference MarkerRef
-float[] Offsets
+; float[] Offsets
 float[] Loc
 
 ; Storage
@@ -314,19 +314,9 @@ state Animating
 	endFunction
 
 	function SyncLocation(bool Force = false)
-		Offsets = Animation.GetPositionOffsets(AdjustKey, Position, Stage)
-		float[] CenterLoc = Thread.CenterLocation
-		Loc[0] = CenterLoc[0] + ( Math.sin(CenterLoc[5]) * Offsets[0] ) + ( Math.cos(CenterLoc[5]) * Offsets[1] )
-		Loc[1] = CenterLoc[1] + ( Math.cos(CenterLoc[5]) * Offsets[0] ) + ( Math.sin(CenterLoc[5]) * Offsets[1] )
-		Loc[2] = CenterLoc[2] + Offsets[2]
-		Loc[3] = CenterLoc[3]
-		Loc[4] = CenterLoc[4]
-		Loc[5] = CenterLoc[5] + Offsets[3]
-		if Loc[5] >= 360.0
-			Loc[5] = Loc[5] - 360.0
-		elseIf Loc[5] < 0.0
-			Loc[5] = Loc[5] + 360.0
-		endIf
+		; Set Loc Array to offset coordinates
+		OffsetCoords(Loc, Thread.CenterLocation, Animation.GetPositionOffsets(AdjustKey, Position, Stage))
+		; Set marker/actor to Loc
 		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		if Force
@@ -426,50 +416,6 @@ state Animating
 		endIf
 		Enjoyment = CalcEnjoyment(Thread.GetSkillBonus(), Skills, Thread.LeadIn, IsFemale, Thread.TotalTime, Stage, Animation.StageCount)
 		return Enjoyment
-		;/; First actor pings thread to update skill xp
-		float[] XP = Thread.GetSkillBonus()
-		; Gender skill bonuses
-		if IsFemale
-			XP[0] = ((XP[0] > 0.0) as int) * (XP[0] + (Skills[0] * 1.3)) ; Foreplay
-			XP[1] = ((XP[1] > 0.0) as int) * (XP[1] + (Skills[1] * 1.6)) ; Vaginal
-			XP[2] = ((XP[2] > 0.0) as int) * (XP[2] + (Skills[2] * 1.3)) ; Anal
-			XP[3] = ((XP[3] > 0.0) as int) * (XP[3] + (Skills[3] * 1.2)) ; Oral
-		else
-			XP[0] = ((XP[0] > 0.0) as int) * (XP[0] + (Skills[0] * 1.1)) ; Foreplay
-			XP[1] = ((XP[1] > 0.0) as int) * (XP[1] + (Skills[1] * 1.5)) ; Vaginal
-			XP[2] = ((XP[2] > 0.0) as int) * (XP[2] + (Skills[2] * 1.5)) ; Anal
-			XP[3] = ((XP[3] > 0.0) as int) * (XP[3] + (Skills[3] * 1.5)) ; Oral
-		endIf
-		; Purity Bonuses
-		XP[4] = XP[4] + (Skills[4] * 1.5)
-		XP[5] = XP[5] + (Skills[5] * 1.5)
-		; Get base totals
-		float SkillBonus  = ClampFloat((XP[0] + XP[1] + XP[2] + XP[3]), 0, 35.0)
-		float PurityBonus = ClampFloat((XP[4] + XP[5]), 0.0, 15.0)
-		float TimeBonus   = ClampFloat(Thread.TotalTime / 9.0, 0.0, 20.0)
-		float StageBonus  = (Stage as float / Animation.StageCount as float) * 45.0
-		; Actor is victim/agressor
-		if Thread.IsAggressive
-			if IsVictim
-				StageBonus = 0.0
-				SkillBonus *= 1.1
-			else
-				StageBonus *= 1.3
-				SkillBonus *= 0.5
-			endIf
-		endIf
-		; Keep leadin numbers lower
-		if Thread.LeadIn
-			SkillBonus  *= 0.5
-			TimeBonus   *= 0.8
-			StageBonus  *= 0.8
-		endIf
-		; Set final enjoyment
-		Enjoyment = (SkillBonus + PurityBonus + StageBonus + TimeBonus) as int
-		if Thread.HasPlayer
-			Log("s "+SkillBonus+" p: "+PurityBonus+" -- Enjoyment: "+Enjoyment, ActorName)
-		endIf
-		return Enjoyment/;
 	endFunction
 
 	int function GetPain()
@@ -912,3 +858,4 @@ endFunction
 
 
 int function CalcEnjoyment(float[] XP, float[] SkillsAmounts, bool IsLeadin, bool IsFemaleActor, float Timer, int OnStage, int MaxStage) global native
+function OffsetCoords(float[] Output, float[] CenterCoords, float[] OffsetBy) global native

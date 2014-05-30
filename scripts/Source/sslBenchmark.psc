@@ -2,22 +2,38 @@ scriptname sslBenchmark extends sslSystemLibrary
 
 import SexLabUtil
 
-
+float[] Loc
+float[] Offsets
+float[] CenterLoc
 
 function PreBenchmarkSetup()
 	Setup()
 
+	Loc = new float[6]
+	CenterLoc = new float[6]
+	CenterLoc[0] = PlayerRef.GetPositionX()
+	CenterLoc[1] = PlayerRef.GetPositionY()
+	CenterLoc[2] = PlayerRef.GetPositionZ()
+	CenterLoc[3] = PlayerRef.GetAngleX()
+	CenterLoc[4] = PlayerRef.GetAngleY()
+	CenterLoc[5] = PlayerRef.GetAngleZ()
+
+	Offsets = new float[4]
+	Offsets[0] = 111.0
+	Offsets[1] = 3.1
+	Offsets[2] = 4.2
+	Offsets[3] = 180.0
 endFunction
 
 
-;/
 state Test1
 	string function Label()
 		return "SKSE"
 	endFunction
 
 	string function Proof()
-		return sslUtility.ClearNone2(Items).Length
+		sslActorAlias.OffsetCoords(Loc, CenterLoc, Offsets)
+		return CenterLoc + "\n" + Loc
 	endFunction
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
@@ -27,13 +43,12 @@ state Test1
 		while nth
 			nth -= 1
 			; START code to benchmark
-			sslUtility.ClearNone2(Items)
+			sslActorAlias.OffsetCoords(Loc, CenterLoc, Offsets)
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline
 	endFunction
 endState
-
 
 state Test2
 	string function Label()
@@ -41,7 +56,18 @@ state Test2
 	endFunction
 
 	string function Proof()
-		return sslUtility.ClearNone(Items).Length
+		Loc[0] = CenterLoc[0] + ( Math.sin(CenterLoc[5]) * Offsets[0] ) + ( Math.cos(CenterLoc[5]) * Offsets[1] )
+		Loc[1] = CenterLoc[1] + ( Math.cos(CenterLoc[5]) * Offsets[0] ) + ( Math.sin(CenterLoc[5]) * Offsets[1] )
+		Loc[2] = CenterLoc[2] + Offsets[2]
+		Loc[3] = CenterLoc[3]
+		Loc[4] = CenterLoc[4]
+		Loc[5] = CenterLoc[5] + Offsets[3]
+		if Loc[5] >= 360.0
+			Loc[5] = Loc[5] - 360.0
+		elseIf Loc[5] < 0.0
+			Loc[5] = Loc[5] + 360.0
+		endIf
+		return CenterLoc + "\n" + Loc
 	endFunction
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
@@ -51,13 +77,23 @@ state Test2
 		while nth
 			nth -= 1
 			; START code to benchmark
-			sslUtility.ClearNone(Items)
+			Loc[0] = CenterLoc[0] + ( Math.sin(CenterLoc[5]) * Offsets[0] ) + ( Math.cos(CenterLoc[5]) * Offsets[1] )
+			Loc[1] = CenterLoc[1] + ( Math.cos(CenterLoc[5]) * Offsets[0] ) + ( Math.sin(CenterLoc[5]) * Offsets[1] )
+			Loc[2] = CenterLoc[2] + Offsets[2]
+			Loc[3] = CenterLoc[3]
+			Loc[4] = CenterLoc[4]
+			Loc[5] = CenterLoc[5] + Offsets[3]
+			if Loc[5] >= 360.0
+				Loc[5] = Loc[5] - 360.0
+			elseIf Loc[5] < 0.0
+				Loc[5] = Loc[5] + 360.0
+			endIf
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline
 	endFunction
 endState
-/;
+
 
 function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10)
 

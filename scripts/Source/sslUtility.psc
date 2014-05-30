@@ -5,6 +5,7 @@ scriptname sslUtility hidden
 ;\-----------------------------------------------/;
 
 function FloatCopyTo(float[] Array, float[] Output, int StartIndex = 0, int EndIndex = -1) global native
+float function AddFloatValues(float[] Array) global native
 
 float[] function IncreaseFloat(int by, float[] Array) global
 	int len = Array.Length
@@ -78,6 +79,7 @@ endFunction
 ;\-----------------------------------------------/;
 
 function IntCopyTo(int[] Array, int[] Output, int StartIndex = 0, int EndIndex = -1) global native
+int function AddIntValues(int[] Array) global native
 
 int[] function IncreaseInt(int by, int[] Array) global
 	int len = Array.Length
@@ -145,16 +147,6 @@ int[] function SliceIntArray(int[] Array, int startindex = 0, int endindex = -1)
 		endindex -= 1
 	endWhile
 	return Output
-endFunction
-
-int function AddValues(int[] Array) global
-	int value
-	int i = Array.Length
-	while i
-		i -= 1
-		value += Array[i]
-	endWhile
-	return value
 endFunction
 
 int function ClampInt(int value, int min, int max) global

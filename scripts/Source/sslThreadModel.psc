@@ -404,7 +404,7 @@ endFunction
 
 function ChangeActors(Actor[] NewPositions)
 	int[] NewGenders = ActorLib.GenderCount(NewPositions)
-	if HasCreature || NewGenders[2] > 0 || sslUtility.AddValues(NewGenders) == 0
+	if HasCreature || NewGenders[2] > 0 || sslUtility.AddIntValues(NewGenders) == 0
 		return
 	endIf
 	; Enter making state for alterations
