@@ -98,6 +98,10 @@ function Setup()
 	GoToState("")
 endFunction
 
+bool function TestSlots()
+	return Slots.Length == 15 && Slots.Find(none) == -1
+endFunction
+
 state Locked
 	function Setup()
 	endFunction

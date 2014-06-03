@@ -274,6 +274,10 @@ int function Register(string Registrar)
 	return -1
 endFunction
 
+bool function TestSlots()
+	return PlayerRef && Config && ActorLib && ThreadLib && Slotted > 0 && Registry.Length == 125 && Slots.Length == 125 && Slots.Find(none) > 0 && Registry.Find("") > 0
+endFunction
+
 state Locked
 	function Setup()
 	endFunction

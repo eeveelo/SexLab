@@ -38,3 +38,7 @@ function Setup()
 	GoToState("")
 	UnregisterForUpdate()
 endFunction
+
+bool function TestLibrary()
+	return PlayerRef && Config && ActorLib && ThreadLib && Stats && ThreadSlots && AnimSlots && CreatureSlots && VoiceSlots && ExpressionSlots
+endFunction

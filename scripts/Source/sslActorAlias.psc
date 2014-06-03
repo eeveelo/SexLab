@@ -821,6 +821,10 @@ function Log(string Log, string Type = "NOTICE")
 	SexLabUtil.DebugLog(Log, Type, Config.DebugMode)
 endFunction
 
+bool function TestAlias()
+	return PlayerRef && Config && ActorLib && Stats && VoiceSlots && ExpressionSlots && Thread
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- State Restricted                                --- ;
 ; ------------------------------------------------------- ;

@@ -163,6 +163,10 @@ int function Register(string Registrar)
 	return -1
 endFunction
 
+bool function TestSlots()
+	return Slotted > 0 && Registry.Length == 100 && Slots.Length == 100 && Slots.Find(none) > 0 && Registry.Find("") > 0
+endFunction
+
 state Locked
 	function Setup()
 	endFunction

@@ -177,6 +177,11 @@ event OnPageReset(string page)
 	elseIf page == "$SSL_SexDiary" || page == "$SSL_SexJournal"
 		SexDiary()
 
+		; Player Diary/Journal
+	elseIf page == "Troubleshoot"
+		Troubleshoot()
+
+
 	; System rebuild & clean
 	elseIf page == "$SSL_RebuildClean"
 		RebuildClean()
@@ -690,6 +695,21 @@ state ToggleFreeCamera
 	endEvent
 endState
 
+; ------------------------------------------------------- ;
+; --- Troubleshoot                                    --- ;
+; ------------------------------------------------------- ;
+
+function Troubleshoot()
+	AddTextOptionST("AnimationTrouble", "Animations Don't Play", "$SSL_ClickHere")
+endFunction
+
+state AnimationTrouble
+	event OnSelectST()
+		if ShowMessage("To perform this test, you will be transported to a safe location. Once the test has completed you will return to your current location.\n\nClose all menus to continue...", true, "$Yes", "$No")
+			Utility.Wait(0.1)
+		endIf
+	endEvent
+endState
 
 ; ------------------------------------------------------- ;
 ; --- Sound Settings                                  --- ;
@@ -1620,6 +1640,7 @@ event OnConfigOpen()
 	Pages[6]  = "$SSL_ToggleAnimations"
 	Pages[7]  = "$SSL_AnimationEditor"
 	Pages[8]  = "$SSL_RebuildClean"
+	; Pages[9]  = "Troubleshoot"
 	if PlayerRef.GetLeveledActorBase().GetSex() == 0
 		Pages[0] = "$SSL_SexJournal"
 	endIf
