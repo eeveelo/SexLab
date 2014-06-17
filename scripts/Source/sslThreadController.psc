@@ -30,8 +30,7 @@ state Prepare
 	function FireAction()
 		AutoAdvance = (!HasPlayer || (VictimRef == PlayerRef && Config.DisablePlayer) || Config.AutoAdvance)
 		SetAnimation()
-		RegisterForSingleUpdate(30.0)
-		AliasEvent("Prepare")
+		AliasEvent("Prepare", 30.0)
 	endFunction
 
 	function PrepareDone()
@@ -50,7 +49,6 @@ state Prepare
 		StartedAt = CurrentTime
 		SkillTime = CurrentTime
 		; Send starter events
-		SendActorEvent("Start")
 		SendThreadEvent("AnimationStart")
 		if LeadIn
 			SendThreadEvent("LeadInStart")
@@ -81,8 +79,7 @@ state Advancing
 		endIf
 		AnimEvents = Animation.FetchStage(Stage)
 		SFXDelay   = ClampFloat(Config.SFXDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
-		RegisterForSingleUpdate(10.0)
-		AliasEvent("Sync")
+		AliasEvent("Sync", 10.0)
 	endFunction
 	function SyncDone()
 		Action("Animating")
@@ -95,18 +92,19 @@ endState
 state Animating
 
 	function FireAction()
+		Log("Starting Stage: "+Stage, "Animating")
 		PlayAnimation()
 		; Send events
 		if !LeadIn && Stage >= StageCount
 			SendThreadEvent("OrgasmStart")
 			if Config.OrgasmEffects
-				AliasEvent("Orgasm", false)
+				TriggerOrgasm()
+				return
 			endIf
 		else
 			SendThreadEvent("StageStart")
 		endIf
 		; Begin loop
-		Log("Starting Stage: "+Stage, "Animating")
 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		RegisterForSingleUpdate(0.5)
 	endFunction
@@ -124,7 +122,7 @@ state Animating
 			SFXTimer = CurrentTime + SFXDelay
 		endIf
 		; Loop
-		RegisterForSingleUpdate(0.4)
+		RegisterForSingleUpdate(0.5)
 	endEvent
 
 	function EndAction()
@@ -170,20 +168,23 @@ state Animating
 	endFunction
 
 	function RealignActors()
+		UnregisterForUpdate()
 		ActorAlias[0].SyncThread()
 		ActorAlias[1].SyncThread()
 		ActorAlias[2].SyncThread()
 		ActorAlias[3].SyncThread()
 		ActorAlias[4].SyncThread()
-		ActorAlias[0].SyncLocation(true)
-		ActorAlias[1].SyncLocation(true)
-		ActorAlias[2].SyncLocation(true)
-		ActorAlias[3].SyncLocation(true)
-		ActorAlias[4].SyncLocation(true)
 		PlayAnimation()
+		ActorAlias[0].RefreshLoc()
+		ActorAlias[1].RefreshLoc()
+		ActorAlias[2].RefreshLoc()
+		ActorAlias[3].RefreshLoc()
+		ActorAlias[4].RefreshLoc()
+		RegisterForSingleUpdate(0.4)
 	endFunction
 
 	function MoveActors()
+		UnregisterForUpdate()
 		ActorAlias[0].SyncThread()
 		ActorAlias[1].SyncThread()
 		ActorAlias[2].SyncThread()
@@ -194,6 +195,7 @@ state Animating
 		ActorAlias[2].SyncLocation(false)
 		ActorAlias[3].SyncLocation(false)
 		ActorAlias[4].SyncLocation(false)
+		RegisterForSingleUpdate(0.4)
 	endFunction
 
 	; ------------------------------------------------------- ;
@@ -217,6 +219,8 @@ state Animating
 		if ActorCount < 2 || HasCreature
 			return ; Solo/Creature Animation, nobody to swap with
 		endIf
+		UnregisterforUpdate()
+		GoToState("")
 		; Find position to swap to
 		int MovedPos = IndexTravel(AdjustPos, ActorCount, backwards)
 		Actor MovedActor = PositionAlias(MovedPos).ActorRef
@@ -227,26 +231,41 @@ state Animating
 		; Sync new positions
 		AdjustPos = MovedPos
 		UpdateAdjustKey()
+		GoToState("Animating")
 		RealignActors()
+		MoveActors()
 		SendThreadEvent("PositionChange")
+		RegisterForSingleUpdate(0.4)
 	endFunction
 
 	function AdjustForward(bool backwards = false, bool adjustStage = false)
+		Adjusted = true
 		Animation.AdjustForward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
 		AdjustAlias.SyncLocation()
-		Adjusted = true
+		while Input.IsKeyPressed(Config.AdjustForward)
+			Animation.AdjustForward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
+			AdjustAlias.SyncLocation()
+		endWhile
 	endFunction
 
 	function AdjustSideways(bool backwards = false, bool adjustStage = false)
+		Adjusted = true
 		Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
 		AdjustAlias.SyncLocation()
-		Adjusted = true
+		while Input.IsKeyPressed(Config.AdjustSideways)
+			Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
+			AdjustAlias.SyncLocation()
+		endWhile
 	endFunction
 
 	function AdjustUpward(bool backwards = false, bool adjustStage = false)
+		Adjusted = true
 		Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
 		AdjustAlias.SyncLocation()
-		Adjusted = true
+		while Input.IsKeyPressed(Config.AdjustSideways)
+			Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
+			AdjustAlias.SyncLocation()
+		endWhile
 	endFunction
 
 	function RotateScene(bool backwards = false)
@@ -316,9 +335,27 @@ state Animating
 	event OnKeyDown(int KeyCode)
 		if hkReady && !Utility.IsInMenuMode() ; || UI.IsMenuOpen("Console") || UI.IsMenuOpen("Loading Menu")
 			hkReady = false
+			UnregisterForUpdate()
 			Config.HotkeyCallback(self, KeyCode)
+			RegisterForSingleUpdate(0.5)
 			hkReady = true
 		endIf
+	endEvent
+endState
+
+function TriggerOrgasm()
+	GoToState("Orgasm")
+	AliasEvent("Orgasm", 5.0)
+endFunction
+
+state Orgasm
+	function OrgasmDone()
+		GoToState("Animating")
+		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
+		RegisterForSingleUpdate(0.5)
+	endFunction
+	event OnUpdate()
+		OrgasmDone()
 	endEvent
 endState
 
@@ -380,10 +417,6 @@ function UpdateTimer(float AddSeconds = 0.0)
 	StageTimer += AddSeconds
 endFunction
 
-function TriggerOrgasm()
-	AliasEvent("Orgasm", false)
-endFunction
-
 function EndLeadIn()
 	if LeadIn
 		; Swap to non lead in animations
@@ -393,7 +426,7 @@ function EndLeadIn()
 		; Add runtime to foreplay skill xp
 		AddXP(0, (TotalTime / 14.0))
 		; Restrip with new strip options
-		AliasEvent("Strip", false)
+		AliasEvent("Strip")
 		; Start primary animations at stage 1
 		SendThreadEvent("LeadInEnd")
 		Action("Advancing")
@@ -409,9 +442,8 @@ function EndAnimation(bool Quickly = false)
 	Stage = StageCount
 	SendThreadEvent("AnimationEnding")
 	; Send end event
-	RegisterForSingleUpdate(30.0)
 	GoToState("Ending")
-	AliasEvent("Reset")
+	AliasEvent("Reset", 30.0)
 endFunction
 
 state Ending
@@ -471,7 +503,6 @@ function DisableHotkeys()
 endFunction
 
 function Initialize()
-	SendActorEvent("End")
 	DisableHotkeys()
 	SFXTimer    = 0.0
 	SkillTime   = 0.0
