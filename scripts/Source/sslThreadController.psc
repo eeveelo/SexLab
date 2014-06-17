@@ -328,7 +328,7 @@ state Animating
 			CenterOnObject(PlayerRef, true)
 		endIf
 		; Return to animation loop
-		StageTimer += 8.0
+		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		RegisterForSingleUpdate(0.05)
 	endFunction
 
@@ -381,6 +381,7 @@ function SetAnimation(int aid = -1)
 	IsDirty     = Tags.Find("Dirty") != -1
 	StageCount  = Animation.StageCount
 	AnimEvents  = Animation.FetchStage(Stage)
+	SetBonuses()
 	; Inform player of animation being played now
 	if HasPlayer
 		SexLabUtil.PrintConsole("Playing Animation: " + Animation.Name)
@@ -467,15 +468,41 @@ endState
 ; ------------------------------------------------------- ;
 
 function RecordSkills()
-	float xp = ((Utility.GetCurrentRealTime() - SkillTime) / 20.0)
+	float TimeNow = Utility.GetCurrentRealTime()
+	float xp = ((TimeNow - SkillTime) / 15.0)
 	AddXP(1, xp, IsVaginal)
 	AddXP(2, xp, IsAnal)
 	AddXP(3, xp, IsOral)
 	AddXP(4, xp, IsLoving)
 	AddXP(5, xp, IsDirty)
-	; Log("ADDING XP: "+xp+" -- Foreplay: "+GetXP(0)+" Vaginal: "+GetXP(1)+" Anal: "+GetXP(2)+" Oral: "+GetXP(3))
-	SkillTime = Utility.GetCurrentRealTime()
+	SkillTime = TimeNow
 endfunction
+
+function SetBonuses()
+	SkillBonus = new float[6]
+	SkillBonus[0] = SkillXP[0]
+	if IsVaginal
+		SkillBonus[1] = 1.0 + SkillXP[1]
+	endIf
+	if IsAnal
+		SkillBonus[2] = 1.0 + SkillXP[2]
+	endIf
+	if IsOral
+		SkillBonus[3] = 1.0 + SkillXP[3]
+	endIf
+	if IsLoving
+		SkillBonus[4] = 1.0 + SkillXP[4]
+	endIf
+	if IsDirty
+		SkillBonus[5] = 1.0 + SkillXP[5]
+	endIf
+endFunction
+
+function AddXP(int i, float Amount, bool Condition = true)
+	if Condition && Amount >= 0.375 && SkillXP[i] < 6.0
+		SkillXP[i] = SkillXP[i] + Amount
+	endIf
+endFunction
 
 function EnableHotkeys()
 	if HasPlayer

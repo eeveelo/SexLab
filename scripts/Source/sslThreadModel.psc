@@ -55,6 +55,7 @@ endProperty
 
 ; Stat Tracking Info
 float[] property SkillXP auto hidden ; [0] Foreplay, [1] Vaginal, [2] Anal, [3] Oral, [4] Pure, [5] Lewd
+float[] property SkillBonus auto hidden
 bool property IsVaginal auto hidden
 bool property IsAnal auto hidden
 bool property IsOral auto hidden
@@ -369,15 +370,6 @@ int function GetHighestPresentRelationshipRank(Actor ActorRef)
 	elseIf ActorCount == 2
 		return ActorRef.GetRelationshipRank(Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)]) ; Get opposing actors relationship rank
 	endIf
-	; int Highest
-	; int i = ActorCount
-	; while i
-	; 	i -= 1
-	; 	if Positions[i] != ActorRef && ActorRef.GetRelationshipRank(Positions[i]) > Highest
-	; 		Highest = ActorRef.GetRelationshipRank(Positions[i])
-	; 	endIf
-	; endWhile
-	; return Highest
 	; Next position
 	Actor NextActor = Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)]
 	int Highest = ActorRef.GetRelationshipRank(NextActor)
@@ -706,41 +698,6 @@ sslActorAlias function PositionAlias(int Position)
 endFunction
 
 ; ------------------------------------------------------- ;
-; --- Skill Storage                                   --- ;
-; ------------------------------------------------------- ;
-
-int function GetXP(int i)
-	return SkillXP[i] as int
-endFunction
-
-float[] function GetSkillBonus()
-	float[] Bonus = new float[6]
-	Bonus[0] = SkillXP[0] as float
-	if IsVaginal
-		Bonus[1] = 1.0 + SkillXP[1] as float
-	endIf
-	if IsAnal
-		Bonus[2] = 1.0 + SkillXP[2] as float
-	endIf
-	if IsOral
-		Bonus[3] = 1.0 + SkillXP[3] as float
-	endIf
-	if IsLoving
-		Bonus[4] = 1.0 + SkillXP[4] as float
-	endIf
-	if IsDirty
-		Bonus[5] = 1.0 + SkillXP[5] as float
-	endIf
-	return Bonus
-endFunction
-
-function AddXP(int i, float Amount, bool Condition = true)
-	if Condition && Amount >= 0.375 && SkillXP[i] < 5
-		SkillXP[i] = SkillXP[i] + Amount
-	endIf
-endFunction
-
-; ------------------------------------------------------- ;
 ; --- Thread Events - SYSTEM USE ONLY                 --- ;
 ; ------------------------------------------------------- ;
 
@@ -885,6 +842,7 @@ function Initialize()
 	Genders        = new int[3]
 	AliasDone      = new int[5]
 	SkillXP        = new float[6]
+	SkillBonus     = new float[6]
 	Tags           = new string[5]
 	; Storage Data
 	Positions         = sslUtility.ActorArray(0)

@@ -55,6 +55,7 @@ form[] Equipment
 float ActorScale
 float AnimScale
 form Strapon
+int HighestRelation
 ; Stats
 float[] Skills
 int Enjoyment
@@ -214,6 +215,8 @@ state Ready
 			endIf
 			Skills = Stats.GetSkillLevels(SkilledActor)
 			; Thread.Log(SkilledActor.GetLeveledActorBase().GetName()+" Skills: "+Skills, ActorName)
+			; Get highest relationship ahead of time
+			HighestRelation = Thread.GetHighestPresentRelationshipRank(ActorRef)
 			; Start Auto TFC if enabled
 			if IsPlayer && Config.AutoTFC && Game.GetCameraState() != 3
 				Config.ToggleFreeCamera()
@@ -257,6 +260,7 @@ state Animating
 		; Ping thread to update skill xp
 		if Position == 0
 			Thread.RecordSkills()
+			Thread.SetBonuses()
 		endIf
 		; Sync enjoyment level
 		GetEnjoyment()
@@ -383,18 +387,14 @@ state Animating
 		GoToState("Resetting")
 		UnregisterForUpdate()
 		ClearEvents()
-		; Tracked events
-		if IsTracked
-			Thread.SendTrackedEvent(ActorRef, "End", Thread.tid)
-		endif
 		; Update stats
 		if !IsCreature
-			int[] Genders = Thread.Genders
-			float[] SkillXP = Thread.SkillXP
-			Stats.AddSkillXP(ActorRef, SkillXP[0], SkillXP[1], SkillXP[2], SkillXP[3])
-			Stats.AddPurityXP(ActorRef, Skills[4], SkillXP[5], Thread.IsAggressive, IsVictim, Genders[2] > 0, Thread.ActorCount, Thread.GetHighestPresentRelationshipRank(ActorRef))
-			Stats.AddSex(ActorRef, Thread.TotalTime, Thread.HasPlayer, Thread.IsAggressive, Genders[0], Genders[1], Genders[2])
+			Stats.RecordThread(ActorRef, Thread.HasPlayer, Thread.ActorCount, HighestRelation, Thread.TotalTime, Thread.VictimRef, Thread.SkillXP, Thread.Genders)
+			; Stats.AddSkillXP(ActorRef, SkillXP[0], SkillXP[1], SkillXP[2], SkillXP[3])
+			; Stats.AddPurityXP(ActorRef, Skills[4], SkillXP[5], Thread.IsAggressive, IsVictim, Genders[2] > 0, Thread.ActorCount, Thread.GetHighestPresentRelationshipRank(ActorRef))
+			; Stats.AddSex(ActorRef, Thread.TotalTime, Thread.HasPlayer, Thread.IsAggressive, Genders[0], Genders[1], Genders[2])
 		endIf
+		; Clear TFC
 		if IsPlayer && Game.GetCameraState() == 3
 			Config.ToggleFreeCamera()
 		endIf
@@ -403,6 +403,10 @@ state Animating
 		if !Thread.FastEnd && CumID > 0 && Config.UseCum && (Thread.Males > 0 || Config.AllowFFCum || Thread.HasCreature)
 			ActorLib.ApplyCum(ActorRef, CumID)
 		endIf
+		; Tracked events
+		if IsTracked
+			Thread.SendTrackedEvent(ActorRef, "End", Thread.tid)
+		endif
 		; Restore actor to starting point
 		RestoreActorDefaults()
 		StopAnimating(Thread.FastEnd)
@@ -422,7 +426,7 @@ state Animating
 			Enjoyment = (ClampFloat(Thread.TotalTime / 6.0, 0.0, 40.0) + ((Stage as float / Animation.StageCount as float) * 60.0)) as int
 			return Enjoyment
 		endIf
-		Enjoyment = CalcEnjoyment(Thread.GetSkillBonus(), Skills, Thread.LeadIn, IsFemale, Thread.TotalTime, Stage, Animation.StageCount)
+		Enjoyment = CalcEnjoyment(Thread.SkillBonus, Skills, Thread.LeadIn, IsFemale, Thread.TotalTime, Stage, Animation.StageCount)
 		return Enjoyment
 	endFunction
 
