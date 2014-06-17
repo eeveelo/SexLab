@@ -279,6 +279,10 @@ bool function IsBedRoll(ObjectReference BedRef)
 	return ThreadLib.IsBedRoll(BedRef)
 endFunction
 
+bool function IsBedAvailable(ObjectReference BedRef)
+	return ThreadLib.IsBedAvailable(BedRef)
+endFunction
+
 sslThreadController function GetActorController(Actor ActorRef)
 	return ThreadSlots.GetActorController(ActorRef)
 endFunction

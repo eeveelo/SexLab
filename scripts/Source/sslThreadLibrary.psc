@@ -155,8 +155,25 @@ bool function IsBedRoll(ObjectReference BedRef)
 	return BedRollsList.HasForm(BedRef)
 endFunction
 
+bool function IsBedAvailable(ObjectReference BedRef)
+	; Check furniture use
+	if BedRef == none || BedRef.IsFurnitureInUse(true)
+		return false
+	endIf
+	; Check if used by a current thread
+	int i
+	while i < 15
+		if ThreadSlots.Threads[i].BedRef == BedRef
+			return false
+		endIf
+		i += 1
+	endwhile
+	; Bed is free for use
+	return true
+endFunction
+
 bool function CheckBed(ObjectReference BedRef, bool IgnoreUsed = true)
-	return BedRef != none && BedRef.IsEnabled() && BedRef.Is3DLoaded() && (!IgnoreUsed || (IgnoreUsed && !BedRef.IsFurnitureInUse(true)))
+	return BedRef != none && BedRef.IsEnabled() && BedRef.Is3DLoaded() && (!IgnoreUsed || (IgnoreUsed && IsBedAvailable(BedRef)))
 endFunction
 
 ObjectReference function FindBed(ObjectReference CenterRef, float Radius = 1000.0, bool IgnoreUsed = true, ObjectReference IgnoreRef1 = none, ObjectReference IgnoreRef2 = none)
@@ -165,7 +182,7 @@ ObjectReference function FindBed(ObjectReference CenterRef, float Radius = 1000.
 	endIf
 	; Search for a nearby bed first before looking for random
 	ObjectReference NearRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
-	if NearRef == none || (CheckBed(NearRef, IgnoreUsed) && NearRef != IgnoreRef1 && NearRef != IgnoreRef2)
+	if NearRef == none || (NearRef != IgnoreRef1 && NearRef != IgnoreRef2 && CheckBed(NearRef, IgnoreUsed))
 		return NearRef ; Use the nearby bed if found, if none than give up now and just return none
 	endIf
 	form[] Suppressed = new Form[10]
