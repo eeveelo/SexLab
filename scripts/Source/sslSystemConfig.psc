@@ -446,10 +446,17 @@ bool function CheckSystem()
 	elseIf Quest.GetQuest("SKI_ConfigManagerInstance") == none
 		CheckSkyUI.Show(4.1)
 		return false
+
 	; Check PapyrusUtil install - depends on passing SKSE check passing
-	elseIf PapyrusUtil.GetVersion() < 22
-		CheckPapyrusUtil.Show(2.2)
+	elseIf PapyrusUtil.GetVersion() < 23
+		CheckPapyrusUtil.Show(2.3)
 		return false
+
+	; Check FNIS generation
+	elseIf !FNIS.IsGenerated()
+		CheckFNIS.Show(5.1)
+		return false
+
 	endIf
 	; Return result
 	return true
