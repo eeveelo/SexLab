@@ -275,6 +275,10 @@ ObjectReference function FindBed(ObjectReference CenterRef, float Radius = 1000.
 	return ThreadLib.FindBed(CenterRef, Radius, IgnoreUsed, IgnoreRef1, IgnoreRef2)
 endFunction
 
+bool function IsBedRoll(ObjectReference BedRef)
+	return ThreadLib.IsBedRoll(BedRef)
+endFunction
+
 sslThreadController function GetActorController(Actor ActorRef)
 	return ThreadSlots.GetActorController(ActorRef)
 endFunction
