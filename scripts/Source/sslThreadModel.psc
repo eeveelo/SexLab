@@ -1,4 +1,4 @@
-scriptname sslThreadModel extends sslThreadLibrary hidden
+scriptname sslThreadModel extends Quest hidden
 { Animation Thread Model: Runs storage and information about a thread. Access only through functions; NEVER create a property directly to this. }
 
 ; import sslUtility
@@ -10,8 +10,16 @@ bool property IsLocked hidden
 	endFunction
 endProperty
 
+; Library & Data
+sslSystemConfig property Config auto hidden
+sslActorLibrary ActorLib
+sslThreadLibrary ThreadLib
+sslAnimationSlots AnimSlots
+sslCreatureAnimationSlots CreatureSlots
+
 ; Actor Storage
 Actor[] property Positions auto hidden
+Actor property PlayerRef auto hidden
 Actor property VictimRef auto hidden
 int property ActorCount auto hidden
 string property AdjustKey auto hidden
@@ -157,8 +165,6 @@ state Making
 			VictimRef = ActorRef
 			IsAggressive = true
 		endIf
-		; Send actor event Added
-		SendTrackedEvent(ActorRef, "Added", thread_id)
 		; Return position
 		return Positions.Find(ActorRef)
 	endFunction
@@ -199,9 +205,9 @@ state Making
 		; Search location marker near player or first position
 		if CenterRef == none
 			if HasPlayer
-				CenterOnObject(Game.FindClosestReferenceOfTypeFromRef(LocationMarker, PlayerRef, 750.0))
+				CenterOnObject(Game.FindClosestReferenceOfTypeFromRef(Config.LocationMarker, PlayerRef, 750.0))
 			else
-				CenterOnObject(Game.FindClosestReferenceOfTypeFromRef(LocationMarker, Positions[0], 750.0))
+				CenterOnObject(Game.FindClosestReferenceOfTypeFromRef(Config.LocationMarker, Positions[0], 750.0))
 			endIf
 		endIf
 		; Search for nearby bed
@@ -231,7 +237,7 @@ state Making
 				Log("StartThread() - Failed to find valid creature animations.", "FATAL")
 				return none
 			endIf
-			Positions = SortCreatures(Positions, PrimaryAnimations[0])
+			Positions = ThreadLib.SortCreatures(Positions, PrimaryAnimations[0])
 		; Get default primary animations if none
 		elseIf PrimaryAnimations.Length == 0
 			SetAnimations(AnimSlots.GetByDefault(Males, Females, IsAggressive, (BedRef != none), Config.RestrictAggressive))
@@ -416,7 +422,6 @@ function ChangeActors(Actor[] NewPositions)
 		i -= 1
 		if NewPositions.Find(Positions[i]) == -1
 			ActorAlias(Positions[i]).ClearAlias()
-			SendTrackedEvent(Positions[i], "End", thread_id)
 		else
 			ActorAlias(Positions[i]).StopAnimating(true)
 		endIf
@@ -435,7 +440,7 @@ function ChangeActors(Actor[] NewPositions)
 	if LeadIn && NewPositions.Length != 2
 		Stage  = 1
 		LeadIn = false
-		AliasEvent("Strip", false)
+		AliasEvent("Strip")
 		SendThreadEvent("LeadInEnd")
 	endIf
 	; Prepare actors who weren't present before
@@ -449,11 +454,9 @@ function ChangeActors(Actor[] NewPositions)
 				Log("ChangeActors("+NewPositions+") -- Failed to add new actor '"+Positions[i].GetLeveledActorBase().GetName()+"' -- They were unable to fill an actor alias", "FATAL")
 				return
 			endIf
-			SendTrackedEvent(Positions[i], "Added", thread_id)
 			Slot.DoUndress = false
 			Slot.PrepareActor()
 			Slot.StartAnimating()
-			SendTrackedEvent(Positions[i], "Start", thread_id)
 		endIf
 	endWhile
 	; Reposition actors
@@ -537,11 +540,11 @@ function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 	if CenterOn != none
 		CenterRef = CenterOn
 		CenterOnCoords(CenterOn.GetPositionX(), CenterOn.GetPositionY(), CenterOn.GetPositionZ(), CenterOn.GetAngleX(), CenterOn.GetAngleY(), CenterOn.GetAngleZ(), false)
-		if BedsList.HasForm(CenterOn.GetBaseObject())
+		if Config.BedsList.HasForm(CenterOn.GetBaseObject())
 			BedRef = CenterOn
 			CenterLocation[0] = CenterLocation[0] + (33.0 * Math.sin(CenterLocation[5]))
 			CenterLocation[1] = CenterLocation[1] + (33.0 * Math.cos(CenterLocation[5]))
-			if !BedRollsList.HasForm(CenterOn.GetBaseObject())
+			if !Config.BedRollsList.HasForm(CenterOn.GetBaseObject())
 				CenterLocation[2] = CenterLocation[2] + 37.0
 			endIf
 		endIf
@@ -563,12 +566,12 @@ endFunction
 	if BedFlag == -1
 		return false ; Beds forbidden by flag
 	elseIf HasPlayer
-		FoundBed = FindBed(PlayerRef, Radius) ; Check within radius of player
+		FoundBed = ThreadLib.FindBed(PlayerRef, Radius) ; Check within radius of player
 	elseIf Config.NPCBed == 2 || (Config.NPCBed == 1 && (Utility.RandomInt(0, 1) as bool))
-		FoundBed = FindBed(Positions[0], Radius) ; Check within radius of first position, if NPC beds are allowed
+		FoundBed = ThreadLib.FindBed(Positions[0], Radius) ; Check within radius of first position, if NPC beds are allowed
 	endIf
 	; Found a bed AND EITHER forced use OR don't care about players choice OR or player approved
-	if FoundBed != none && (BedFlag == 1 || (!AskPlayer || (AskPlayer && (UseBed.Show() as bool))))
+	if FoundBed != none && (BedFlag == 1 || (!AskPlayer || (AskPlayer && (Config.UseBed.Show() as bool))))
 		CenterOnObject(FoundBed)
 		return true ; Bed found and approved for use
 	endIf
@@ -703,7 +706,149 @@ sslActorAlias function PositionAlias(int Position)
 endFunction
 
 ; ------------------------------------------------------- ;
-; --- System Use Only                                 --- ;
+; --- Skill Storage                                   --- ;
+; ------------------------------------------------------- ;
+
+int function GetXP(int i)
+	return SkillXP[i] as int
+endFunction
+
+float[] function GetSkillBonus()
+	float[] Bonus = new float[6]
+	Bonus[0] = SkillXP[0] as float
+	if IsVaginal
+		Bonus[1] = 1.0 + SkillXP[1] as float
+	endIf
+	if IsAnal
+		Bonus[2] = 1.0 + SkillXP[2] as float
+	endIf
+	if IsOral
+		Bonus[3] = 1.0 + SkillXP[3] as float
+	endIf
+	if IsLoving
+		Bonus[4] = 1.0 + SkillXP[4] as float
+	endIf
+	if IsDirty
+		Bonus[5] = 1.0 + SkillXP[5] as float
+	endIf
+	return Bonus
+endFunction
+
+function AddXP(int i, float Amount, bool Condition = true)
+	if Condition && Amount >= 0.375 && SkillXP[i] < 5
+		SkillXP[i] = SkillXP[i] + Amount
+	endIf
+endFunction
+
+; ------------------------------------------------------- ;
+; --- Thread Events - SYSTEM USE ONLY                 --- ;
+; ------------------------------------------------------- ;
+
+function Action(string FireState)
+	UnregisterForUpdate()
+	EndAction()
+	GoToState(FireState)
+	FireAction()
+endfunction
+
+function SendThreadEvent(string HookEvent)
+	Log(HookEvent, "Event Hook")
+	SetupThreadEvent(HookEvent)
+	int i = Hooks.Length
+	while i
+		i -= 1
+		SetupThreadEvent(HookEvent+"_"+Hooks[i])
+	endWhile
+	; Legacy support for < v1.50 - To be removed eventually
+	if HasPlayer
+		SendModEvent("Player"+HookEvent, thread_id)
+	endIf
+endFunction
+
+function SetupThreadEvent(string HookEvent)
+	int eid = ModEvent.Create("Hook"+HookEvent)
+	if eid
+		ModEvent.PushInt(eid, thread_id)
+		ModEvent.PushBool(eid, HasPlayer)
+		ModEvent.Send(eid)
+		; Log("Thread Hook Sent: "+HookEvent)
+	endIf
+	; Legacy support for < v1.50 - To be removed eventually
+	SendModEvent(HookEvent, thread_id)
+endFunction
+
+; ------------------------------------------------------- ;
+; --- Alias Events - SYSTEM USE ONLY                  --- ;
+; ------------------------------------------------------- ;
+
+int[] AliasDone
+string[] EventTypes
+
+string function Key(string Callback)
+	return "SSL_"+thread_id+"_"+Callback
+endFunction
+
+function AliasEvent(string Callback, float WaitTime = 0.0)
+	if WaitTime > 0.0
+		int i = EventTypes.Find(Callback)
+		if AliasDone[i] != 0
+			Log(Callback+" attempting to start during previous event")
+			return
+		endIf
+		AliasDone[i] = 0
+		RegisterForSingleUpdate(WaitTime)
+	endIf
+	ModEvent.Send(ModEvent.Create(Key(Callback)))
+endFunction
+
+function AliasEventDone(string Callback = "Alias")
+	int i = EventTypes.Find(Callback)
+	AliasDone[i] = AliasDone[i] + 1
+	if AliasDone[i] >= ActorCount
+		AliasDone[i] = 0
+		ModEvent.Send(ModEvent.Create(Key(Callback+"Done")))
+	endIf
+endFunction
+
+function SendTrackedEvent(Actor ActorRef, string Hook = "", int id = -1)
+	; Append hook type, global if empty
+	if Hook != ""
+		Hook = "_"+Hook
+	endIf
+	; Send generic player callback event
+	if ActorRef == PlayerRef
+		SetupActorEvent(PlayerRef, "PlayerTrack_"+Hook, id)
+	endIf
+	; Send actor callback events
+	int i = StorageUtil.StringListCount(ActorRef, "SexLabEvents")
+	while i
+		i -= 1
+		SetupActorEvent(ActorRef, StorageUtil.StringListGet(ActorRef, "SexLabEvents", i)+Hook, id)
+	endWhile
+	; Send faction callback events
+	i = StorageUtil.FormListCount(Config, "TrackedFactions")
+	while i
+		i -= 1
+		Faction FactionRef = StorageUtil.FormListGet(Config, "TrackedFactions", i) as Faction
+		if FactionRef != none && ActorRef.IsInFaction(FactionRef)
+			int n = StorageUtil.StringListCount(FactionRef, "SexLabEvents")
+			while n
+				n -= 1
+				SetupActorEvent(ActorRef, StorageUtil.StringListGet(FactionRef, "SexLabEvents", n)+Hook, id)
+			endwhile
+		endIf
+	endWhile
+endFunction
+
+function SetupActorEvent(Actor ActorRef, string Callback, int id = -1)
+	int eid = ModEvent.Create(Callback)
+	ModEvent.PushForm(eid, ActorRef)
+	ModEvent.PushInt(eid, id)
+	ModEvent.Send(eid)
+endFunction
+
+; ------------------------------------------------------- ;
+; --- Thread Setup - SYSTEM USE ONLY                  --- ;
 ; ------------------------------------------------------- ;
 
 function Initialize()
@@ -760,118 +905,10 @@ function Log(string Log, string Type = "NOTICE")
 	endIf
 endFunction
 
-function SendThreadEvent(string HookEvent)
-	Log(HookEvent, "Event Hook")
-	SetupThreadEvent(HookEvent)
-	int i = Hooks.Length
-	while i
-		i -= 1
-		SetupThreadEvent(HookEvent+"_"+Hooks[i])
-	endWhile
-	; Legacy support for < v1.50 - To be removed eventually
-	if HasPlayer
-		SendModEvent("Player"+HookEvent, thread_id)
-	endIf
-endFunction
-
-function SetupThreadEvent(string HookEvent)
-	int eid = ModEvent.Create("Hook"+HookEvent)
-	if eid
-		ModEvent.PushInt(eid, thread_id)
-		ModEvent.PushBool(eid, HasPlayer)
-		ModEvent.Send(eid)
-		; Log("Thread Hook Sent: "+HookEvent)
-	endIf
-	; Legacy support for < v1.50 - To be removed eventually
-	SendModEvent(HookEvent, thread_id)
-endFunction
-
-function SendActorEvent(string ActorEvent)
-	; Actor tracking callback events
-	int i = ActorCount
-	while i
-		i -= 1
-		SendTrackedEvent(Positions[i], ActorEvent, thread_id)
-	endWhile
-endFunction
-
-int function GetXP(int i)
-	return SkillXP[i] as int
-endFunction
-
-float[] function GetSkillBonus()
-	float[] Bonus = new float[6]
-	Bonus[0] = SkillXP[0] as float
-	if IsVaginal
-		Bonus[1] = 1.0 + SkillXP[1] as float
-	endIf
-	if IsAnal
-		Bonus[2] = 1.0 + SkillXP[2] as float
-	endIf
-	if IsOral
-		Bonus[3] = 1.0 + SkillXP[3] as float
-	endIf
-	if IsLoving
-		Bonus[4] = 1.0 + SkillXP[4] as float
-	endIf
-	if IsDirty
-		Bonus[5] = 1.0 + SkillXP[5] as float
-	endIf
-	return Bonus
-endFunction
-
-function AddXP(int i, float Amount, bool Condition = true)
-	if Condition && Amount >= 0.375 && SkillXP[i] < 5
-		SkillXP[i] = SkillXP[i] + Amount
-	endIf
-endFunction
-
-string function Key(string Callback)
-	return "SSL_"+thread_id+"_"+Callback
-endFunction
-
-int[] AliasDone
-string[] EventTypes
-
-function AliasEvent(string Callback, bool AliasWait = true)
-	if AliasWait
-		int i = EventTypes.Find(Callback)
-		if AliasDone[i] != 0
-			Log(Callback+" attempting to start during previous event")
-			return
-		endIf
-		AliasDone[i] = 0
-	endIf
-	ModEvent.Send(ModEvent.Create(Key(Callback)))
-endFunction
-
-function AliasEventDone(string Callback = "Alias")
-	int i = EventTypes.Find(Callback)
-	AliasDone[i] = AliasDone[i] + 1
-	if AliasDone[i] >= ActorCount
-		AliasDone[i] = 0
-		ModEvent.Send(ModEvent.Create(Key(Callback+"Done")))
-	endIf
-endFunction
-
-function Action(string FireState)
-	UnregisterForUpdate()
-	EndAction()
-	GoToState(FireState)
-	FireAction()
-endfunction
-
 function UpdateAdjustKey()
 	AdjustKey = Animation.MakeAdjustKey(Positions, Config.RaceAdjustments)
 	Log(AdjustKey, "Adjustment Profile")
 endFunction
-
-int thread_id
-int property tid hidden
-	int function get()
-		return thread_id
-	endFunction
-endProperty
 
 function SetTID(int value)
 	thread_id = value
@@ -896,10 +933,23 @@ function SetTID(int value)
 	EventTypes[3] = "Strip"
 	EventTypes[4] = "Orgasm"
 
-	Setup()
+	Config        = SexLabUtil.GetConfig()
+	ActorLib      = Config.ActorLib
+	ThreadLib     = Config.ThreadLib
+	AnimSlots     = Config.AnimSlots
+	CreatureSlots = Config.CreatureSlots
+	PlayerRef     = Config.PlayerRef
+
 	Initialize()
 	Log("Initialized", "Thread["+thread_id+"]")
 endFunction
+
+int thread_id
+int property tid hidden
+	int function get()
+		return thread_id
+	endFunction
+endProperty
 
 ; ------------------------------------------------------- ;
 ; --- State Restricted                                --- ;
@@ -975,4 +1025,10 @@ float function GetTime()
 endfunction
 function SetBedding(int flag = 0)
 	SetBedFlag(flag)
+endFunction
+
+
+function _Repair()
+	GoToState("")
+	UnregisterForUpdate()
 endFunction

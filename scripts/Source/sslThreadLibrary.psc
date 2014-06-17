@@ -3,10 +3,8 @@ scriptname sslThreadLibrary extends sslSystemLibrary
 import StorageUtil
 
 ; Data
-Static property LocationMarker auto hidden
 FormList property BedsList auto hidden
 FormList property BedRollsList auto hidden
-Message property UseBed auto hidden
 
 ; ------------------------------------------------------- ;
 ; --- Object Locators                                 --- ;
@@ -153,6 +151,10 @@ Actor[] function SortCreatures(actor[] Positions, sslBaseAnimation Animation)
 	return Positions
 endFunction
 
+bool function IsBedRoll(ObjectReference BedRef)
+	return BedRollsList.HasForm(BedRef)
+endFunction
+
 bool function CheckBed(ObjectReference BedRef, bool IgnoreUsed = true)
 	return BedRef != none && BedRef.IsEnabled() && BedRef.Is3DLoaded() && (!IgnoreUsed || (IgnoreUsed && !BedRef.IsFurnitureInUse(true)))
 endFunction
@@ -212,11 +214,9 @@ function UntrackFaction(Faction FactionRef, string Callback)
 endFunction
 
 bool function IsActorTracked(Actor ActorRef)
-	; Check actor callbacks
-	if StringListCount(ActorRef, "SexLabEvents") > 0
+	if ActorRef == PlayerRef || StringListCount(ActorRef, "SexLabEvents") > 0
 		return true
 	endIf
-	; Check faction callsbacks
 	int i = FormListCount(Config, "TrackedFactions")
 	while i
 		i -= 1
@@ -225,7 +225,6 @@ bool function IsActorTracked(Actor ActorRef)
 			return true
 		endIf
 	endWhile
-	; No tracked events found
 	return false
 endFunction
 
@@ -272,8 +271,6 @@ endFunction
 
 function Setup()
 	parent.Setup()
-	LocationMarker = Config.LocationMarker
 	BedsList       = Config.BedsList
 	BedRollsList   = Config.BedRollsList
-	UseBed         = Config.UseBed
 endFunction

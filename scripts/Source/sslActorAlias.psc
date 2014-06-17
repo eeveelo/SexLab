@@ -14,15 +14,16 @@ sslExpressionSlots ExpressionSlots
 
 ; Actor Info
 Actor property ActorRef auto hidden
+ActorBase BaseRef
+string ActorName
+int BaseSex
 int Gender
 bool IsMale
 bool IsFemale
 bool IsCreature
 bool IsVictim
 bool IsPlayer
-string ActorName
-ActorBase BaseRef
-int BaseSex
+bool IsTracked
 
 ; Current Thread state
 sslThreadController Thread
@@ -104,8 +105,8 @@ bool function SetActor(Actor ProspectRef, bool Victimize = false, sslBaseVoice U
 	IsCreature = Gender == 2
 	IsVictim   = Victimize
 	IsPlayer   = ActorRef == PlayerRef
+	IsTracked  = Config.ThreadLib.IsActorTracked(ActorRef)
 	ActorVoice = BaseRef.GetVoiceType()
-	Loc        = new float[6]
 	if !IsCreature
 		SetVoice(UseVoice, ForceSilent)
 		if !IsPlayer
@@ -114,6 +115,9 @@ bool function SetActor(Actor ProspectRef, bool Victimize = false, sslBaseVoice U
 	else
 		Thread.CreatureRef = BaseRef.GetRace()
 	endIf
+	if IsTracked
+		Thread.SendTrackedEvent(ActorRef, "Added", Thread.tid)
+	endif
 	; Update threads gender
 	Thread.Genders[Gender] = Thread.Genders[Gender] + 1
 	; Get ready for mod events
@@ -188,7 +192,7 @@ state Ready
 			; Pick a strapon on females to use
 			if IsFemale && Config.UseStrapons && Config.Strapons.Length > 0
 				Strapon = Config.GetStrapon()
-				ActorRef.AddItem(Strapon, 1, true)
+				; ActorRef.AddItem(Strapon, 1, true)
 			endIf
 			; Strip actor
 			Strip()
@@ -236,13 +240,17 @@ state Animating
 		SyncLocation(true)
 		ActorRef.StopTranslation()
 		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 50000, 0)
+		if IsTracked
+			Thread.SendTrackedEvent(ActorRef, "Start", Thread.tid)
+		endif
 		; Start update loop
 		RegisterForSingleUpdate(Utility.RandomFloat(1.5, 3.0))
 	endFunction
 
 	event OnUpdate()
 		; Check if still amonst the living and able.
-		if ActorRef.IsDead() || ActorRef.IsDisabled()
+		if ActorRef.GetActorValue("Health") < 1.0 || ActorRef.IsDisabled() ;|| !ActorRef.Is3DLoaded()
+			Log("Actor is disabled or has no health, unable to continue animating", ActorName)
 			Thread.EndAnimation(true)
 			return
 		endIf
@@ -313,6 +321,10 @@ state Animating
 		SyncLocation(true)
 	endFunction
 
+	function RefreshLoc()
+		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 10000, 0)
+	endFunction
+
 	function SyncLocation(bool Force = false)
 		; Set Loc Array to offset coordinates
 		OffsetCoords(Loc, Thread.CenterLocation, Animation.GetPositionOffsets(AdjustKey, Position, Stage))
@@ -331,22 +343,21 @@ state Animating
 	function Snap()
 		; Quickly move into place and angle if actor is off by a lot
 		float distance = ActorRef.GetDistance(MarkerRef)
-		if distance > 9.0 || ((Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ())) > 0.50)
+		if distance > 50.0 || ((Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ())) > 1.0)
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			ActorRef.SetVehicle(MarkerRef)
 			ActorRef.SetScale(AnimScale)
-		elseIf distance > 0.8
+		elseIf distance > 0.3
 			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 50000, 0)
 			return ; OnTranslationComplete() will take over when in place
 		endIf
 		; Begin very slowly rotating a small amount to hold position
-		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.001, 1.0, 10000, 0.0001)
+		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.01, 1.0, 10000, 0.001)
 	endFunction
 
 	event OnTranslationComplete()
-		; Thread.Log(ActorName+" - Completed Translation")
-		Utility.Wait(0.50)
+		Utility.Wait(0.5)
 		Snap()
 	endEvent
 
@@ -356,29 +367,26 @@ state Animating
 		if CumID > 0 && Config.UseCum && (Thread.Males > 0 || Config.AllowFFCum || Thread.HasCreature)
 			ActorLib.ApplyCum(ActorRef, CumID)
 		endIf
-		; Moan if not silent
-		if !IsSilent
-			Voice.Moan(ActorRef, 100, IsVictim)
-		endIf
 		; Shake camera for player
 		if IsPlayer && Game.GetCameraState() != 3
 			Game.ShakeCamera(none, 0.75, 1.5)
 		endIf
-		; Play OrgasmSFX
+		; Play
 		Config.OrgasmFX.Play(ActorRef)
-		; Voice
 		VoiceDelay = 0.8
+		; Notify thread of finish
+		Thread.AliasEventDone("Orgasm")
+		RegisterForSingleUpdate(VoiceDelay)
 	endFunction
 
 	event ResetActor()
 		GoToState("Resetting")
 		UnregisterForUpdate()
-		string e = Thread.Key("")
-		UnregisterForModEvent(e+"Prepare")
-		UnregisterForModEvent(e+"Reset")
-		UnregisterForModEvent(e+"Sync")
-		UnregisterForModEvent(e+"Orgasm")
-		UnregisterForModEvent(e+"Strip")
+		ClearEvents()
+		; Tracked events
+		if IsTracked
+			Thread.SendTrackedEvent(ActorRef, "End", Thread.tid)
+		endif
 		; Update stats
 		if !IsCreature
 			int[] Genders = Thread.Genders
@@ -486,7 +494,6 @@ function LockActor()
 			Thread.EnableHotkeys()
 		endIf
 	else
-		; ActorRef.SetRestrained(true)
 		ActorRef.SetDontMove(true)
 	endIf
 	; Attach positioning marker
@@ -623,7 +630,7 @@ function Strip()
 	; Get Nudesuit
 	bool UseNudeSuit = Strip[2] && ((Gender == 0 && Config.UseMaleNudeSuit) || (Gender == 1 && Config.UseFemaleNudeSuit))
 	if UseNudeSuit && ActorRef.GetItemCount(Config.NudeSuit) < 1
-		ActorRef.AddItem(Config.NudeSuit, 1, true)
+		; ActorRef.AddItem(Config.NudeSuit, 1, true)
 	endIf
 	; Stripped storage
 	Form[] Stripped = new Form[34]
@@ -632,13 +639,13 @@ function Strip()
 	if Strip[32]
 		; Right hand
 		ItemRef = ActorRef.GetEquippedWeapon(false)
-		if IsStrippable(ItemRef)
+		if ItemRef && !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")
 			ActorRef.UnequipItemEX(ItemRef, 1, false)
 			Stripped[33] = ItemRef
 		endIf
 		; Left hand
 		ItemRef = ActorRef.GetEquippedWeapon(true)
-		if IsStrippable(ItemRef)
+		if ItemRef && !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")
 			ActorRef.UnequipItemEX(ItemRef, 2, false)
 			Stripped[32] = ItemRef
 		endIf
@@ -649,7 +656,7 @@ function Strip()
 		if Strip[i]
 			; Grab item in slot
 			ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
-			if IsStrippable(ItemRef)
+			if ItemRef && !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")
 				ActorRef.UnequipItem(ItemRef, false, true)
 				Stripped[i] = ItemRef
 			endIf
@@ -663,10 +670,6 @@ function Strip()
 	endIf
 	; Store stripped items
 	Equipment = MergeFormArray(ClearNone(Stripped), Equipment)
-endFunction
-
-bool function IsStrippable(Form ItemRef)
-	return ItemRef!= none && !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")
 endFunction
 
 function UnStrip()
@@ -799,6 +802,7 @@ function Initialize()
 	; Storage
 	StripOverride  = BoolArray(0)
 	Equipment      = FormArray(0)
+	Loc            = new float[6]
 	; Make sure alias is emptied
 	TryToClear()
 endFunction
@@ -842,6 +846,8 @@ endFunction
 function UpdateOffsets()
 endFunction
 function SyncLocation(bool Force = false)
+endFunction
+function RefreshLoc()
 endFunction
 function Snap()
 endFunction
