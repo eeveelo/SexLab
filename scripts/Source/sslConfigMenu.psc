@@ -66,10 +66,15 @@ event OnVersionUpdate(int version)
 		; v.157 - Fixed actor stripping, expression tags being searched wrong, and refactored thread installs
 		if CurrentVersion < 15700
 			ExpressionSlots.Setup()
-			ThreadSlots.Setup()
-			Debug.Notification("SexLab "+SexLabUtil.GetStringVer()+" Updated...")
 		endIf
 
+		; v.157 - Decoupled ThreadLib from ThreadModel, added Riekling animations
+		if CurrentVersion < 15800
+			CreatureSlots.Setup()
+			ThreadSlots.Setup()
+		endIf
+
+		Debug.Notification("SexLab "+SexLabUtil.GetStringVer()+" Updated...")
 		SexLab.GoToState("Enabled")
 
 		EventType = "SexLabUpdated"
@@ -701,12 +706,36 @@ endState
 
 function Troubleshoot()
 	AddTextOptionST("AnimationTrouble", "Animations Don't Play", "$SSL_ClickHere")
+	AddTextOptionST("VoiceTrouble", "Characters don't play any moans during animation", "$SSL_ClickHere")
+	AddTextOptionST("LipSyncTrouble", "Characters don't lipsync their moans", "$SSL_ClickHere")
 endFunction
 
 state AnimationTrouble
 	event OnSelectST()
-		if ShowMessage("To perform this test, you will be transported to a safe location. Once the test has completed you will return to your current location.\n\nClose all menus to continue...", true, "$Yes", "$No")
+		if ShowMessage("To perform this test, you will need to find a safe location to wait while the tests are performed. Are you in a safe location?", true, "$Yes", "$No")
+			ShowMessage("Close all menus to continue...", false)
 			Utility.Wait(0.1)
+			(Quest.GetQuest("SexLabTroubleshoot") as sslTroubleshoot).PerformTests("FNIS,ThreadSlots,AnimSlots")
+		endIf
+	endEvent
+endState
+
+state VoiceTrouble
+	event OnSelectST()
+		if ShowMessage("To perform this test, you will need to find a safe location to wait while the tests are performed. Are you in a safe location?", true, "$Yes", "$No")
+			ShowMessage("Close all menus to continue...", false)
+			Utility.Wait(0.1)
+			(Quest.GetQuest("SexLabTroubleshoot") as sslTroubleshoot).PerformTests("VoiceSlots,PlayVoice")
+		endIf
+	endEvent
+endState
+
+state LipSyncTrouble
+	event OnSelectST()
+		if ShowMessage("To perform this test, you will need to find a safe location to wait while the tests are performed. Are you in a safe location?", true, "$Yes", "$No")
+			ShowMessage("Close all menus to continue...", false)
+			Utility.Wait(0.1)
+			(Quest.GetQuest("SexLabTroubleshoot") as sslTroubleshoot).PerformTests("PlayVoice,LipSync")
 		endIf
 	endEvent
 endState
