@@ -462,21 +462,6 @@ bool function CheckSystem()
 	return true
 endFunction
 
-bool function CheckFNIS()
-	if PlayerRef.Is3DLoaded() && PlayerRef.GetAnimationVariableInt("FNISmajor") < 5 && Game.GetCameraState() == 9 && !Utility.IsInMenuMode() ; || PlayerRef.GetAnimationVariableInt("SexLabVer") < 150
-		CheckFNIS.Show(5.0)
-		return false
-	endIf
-	return true
-endFunction
-
-event OnPlayerCameraState(int OldState, int NewState)
-	if NewState == 9
-		UnregisterForCameraState()
-		; CheckFNIS()
-	endIf
-endEvent
-
 function ValidateTrackedActors()
 	int i = StorageUtil.FormListCount(self, "TrackedActors")
 	while i

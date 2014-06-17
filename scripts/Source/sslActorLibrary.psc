@@ -68,38 +68,11 @@ endFunction
 ;|	Equipment Functions                          |;
 ;\-----------------------------------------------/;
 
-; function CacheStrippable(Actor ActorRef)
-; 	int i = ActorRef.GetNumItems()
-; 	while i
-; 		i -= 1
-; 		Form ItemRef = ActorRef.GetNthForm(i)
-; 		if ItemRef.GetType() == 26 && IsStrippable(ItemRef)
-; 			Log(ItemRef, "IsStrippable")
-; 		endIf
-; 	endWhile
-; endFunction
-
 Form[] function StripActor(Actor ActorRef, Actor VictimRef = none, bool DoAnimate = true, bool LeadIn = false)
 	return StripSlots(ActorRef, Config.GetStrip((GetGender(ActorRef) == 1), LeadIn, (VictimRef != none), (VictimRef != none && ActorRef == VictimRef)), DoAnimate)
 endFunction
 
 bool function IsStrippable(Form ItemRef)
-	; ; Check previous validations
-	; if ItemRef != none && FormListFind(Config, "StripList", ItemRef) != -1
-	; 	return true
-	; elseIf ItemRef == none || FormListFind(Config, "NoStripList", ItemRef) != -1
-	; 	return false
-	; endIf
-	; ; Check keywords
-	; int i = ItemRef.GetNumKeywords()
-	; while i
-	; 	i -= 1
-	; 	if StringUtil.Find(ItemRef.GetNthKeyword(i).GetString(), "NoStrip") != -1 ;|| StringUtil.Find(kw, "Bound") != -1
-	; 		FormListAdd(Config, "NoStripList", ItemRef, true)
-	; 		return false
-	; 	endIf
-	; endWhile
-	; FormListAdd(Config, "StripList", ItemRef, true)
 	return ItemRef != none && !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")
 endFunction
 

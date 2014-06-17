@@ -242,9 +242,9 @@ endFunction
 function Setup()
 	GoToState("Locked")
 	; Init slots
-	Slotted = 0
+	Slotted  = 0
 	Registry = new string[125]
-	Slots = new sslBaseAnimation[125]
+	Slots    = new sslBaseAnimation[125]
 	; Init Libraries
 	SexLabFramework SexLab = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework
 	PlayerRef = SexLab.PlayerRef
