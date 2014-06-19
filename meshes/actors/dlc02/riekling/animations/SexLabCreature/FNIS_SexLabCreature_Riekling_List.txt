@@ -1,0 +1,10 @@
+s Riekling_ThreeWay_A2_S1 Riekling_ThreeWay_A2_S1.hkx
++ Riekling_ThreeWay_A2_S2 Riekling_ThreeWay_A2_S2.hkx
++ Riekling_ThreeWay_A2_S3 Riekling_ThreeWay_A2_S3.hkx
++ Riekling_ThreeWay_A2_S4 Riekling_ThreeWay_A2_S4.hkx
+
+s Riekling_ThreeWay_A3_S1 Riekling_ThreeWay_A3_S1.hkx
++ Riekling_ThreeWay_A3_S2 Riekling_ThreeWay_A3_S2.hkx
++ Riekling_ThreeWay_A3_S3 Riekling_ThreeWay_A3_S3.hkx
++ Riekling_ThreeWay_A3_S4 Riekling_ThreeWay_A3_S4.hkx
+

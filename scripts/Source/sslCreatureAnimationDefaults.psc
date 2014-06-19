@@ -16,6 +16,7 @@ string[] Wolves
 string[] Dogs
 string[] VampireLords
 string[] Gargoyles
+string[] Rieklings
 string[] Seekers
 
 function LoadCreatureAnimations()
@@ -155,6 +156,10 @@ function LoadCreatureAnimations()
 	Gargoyles[4] = "_00WrathBruteRace"
 	Gargoyles[5] = "_00DramanBruteRace"
 
+	Rieklings = new string[2]
+	Rieklings[0] = "DLC2RieklingRace"
+	Rieklings[1] = "DLC2ThirskRieklingRace"
+
 	Seekers = new string[1]
 	Seekers[0] = "DLC2SeekerRace"
 
@@ -194,7 +199,11 @@ function LoadCreatureAnimations()
 	RegisterAnimation("GiantHolding")
 	; Horse
 	RegisterAnimation("HorseDoggystyle")
+	RegisterAnimation("HorsePanicDoggystyle")
 	RegisterAnimation("HorseGroping")
+	; Rieklings
+	RegisterAnimation("RieklingMissionary")
+	RegisterAnimation("RieklingThreeWay")
 	; SabreCat
 	RegisterAnimation("CatDoggystyle")
 	; Dragonborn Daedra Seeker
@@ -1821,6 +1830,144 @@ function HorseGroping(int id)
 	Base.AddTag("Groping")
 	Base.AddTag("Fondling")
 	Base.AddTag("Horse")
+	Base.AddTag("Oral")
+
+	Base.Save(id)
+endFunction
+
+function HorsePanicDoggystyle(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "(Horse) Doggystyle Alt"
+
+	Base.SoundFX = Squishing
+	Base.SetRaceIDs(Horses)
+
+	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	Base.AddPositionStage(a1, "Horse_PanicDoggystyle_A1_S1")
+	Base.AddPositionStage(a1, "Horse_PanicDoggystyle_A1_S2")
+	Base.AddPositionStage(a1, "Horse_PanicDoggystyle_A1_S3")
+	Base.AddPositionStage(a1, "Horse_PanicDoggystyle_A1_S4")
+
+	int a2 = Base.AddPosition(Creature)
+	Base.AddPositionStage(a2, "Horse_PanicDoggystyle_A2_S1")
+	Base.AddPositionStage(a2, "Horse_PanicDoggystyle_A2_S2")
+	Base.AddPositionStage(a2, "Horse_PanicDoggystyle_A2_S3")
+	Base.AddPositionStage(a2, "Horse_PanicDoggystyle_A2_S4")
+
+	Base.AddTag("Panicforever")
+	Base.AddTag("Creature")
+	Base.AddTag("Bestiality")
+	Base.AddTag("Doggystyle")
+	Base.AddTag("Horse")
+	Base.AddTag("Vaginal")
+
+	Base.Save(id)
+endFunction
+
+function RieklingThreesome(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "(Riekling) Threesome"
+
+	Base.SoundFX = SexMix
+	Base.SetRaceIDs(Rieklings)
+
+	int a1 = Base.AddPosition(Female, addCum=VaginalOralAnal)
+	Base.AddPositionStage(a1, "Riekling_Threesome_A1_S1")
+	Base.AddPositionStage(a1, "Riekling_Threesome_A1_S2", silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "Riekling_Threesome_A1_S3", silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "Riekling_Threesome_A1_S4", silent = true, openMouth = true)
+
+	int a2 = Base.AddPosition(Creature)
+	Base.AddPositionStage(a2, "Riekling_Threesome_A2_S1")
+	Base.AddPositionStage(a2, "Riekling_Threesome_A2_S2")
+	Base.AddPositionStage(a2, "Riekling_Threesome_A2_S3")
+	Base.AddPositionStage(a2, "Riekling_Threesome_A2_S4")
+
+	int a3 = Base.AddPosition(Creature)
+	Base.AddPositionStage(a3, "Riekling_Threesome_A3_S1")
+	Base.AddPositionStage(a3, "Riekling_Threesome_A3_S2")
+	Base.AddPositionStage(a3, "Riekling_Threesome_A3_S3")
+	Base.AddPositionStage(a3, "Riekling_Threesome_A3_S4")
+
+	Base.AddTag("Panicforever")
+	Base.AddTag("Creature")
+	Base.AddTag("Bestiality")
+	Base.AddTag("Gangbang")
+	Base.AddTag("Riekling")
+	Base.AddTag("Dirty")
+	Base.AddTag("Vaginal")
+	Base.AddTag("Oral")
+
+	Base.Save(id)
+endFunction
+
+
+function RieklingMissionary(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "(Riekling) Missionary"
+
+	Base.SoundFX = Squishing
+	Base.SetRaceIDs(Rieklings)
+
+	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	Base.AddPositionStage(a1, "Riekling_Missionary_A1_S1")
+	Base.AddPositionStage(a1, "Riekling_Missionary_A1_S2")
+	Base.AddPositionStage(a1, "Riekling_Missionary_A1_S3")
+	Base.AddPositionStage(a1, "Riekling_Missionary_A1_S4")
+
+	int a2 = Base.AddPosition(Creature)
+	Base.AddPositionStage(a2, "Riekling_Threeway_A2_S1")
+	Base.AddPositionStage(a2, "Riekling_Threeway_A2_S2")
+	Base.AddPositionStage(a2, "Riekling_Threeway_A2_S3")
+	Base.AddPositionStage(a2, "Riekling_Threeway_A2_S4")
+
+	Base.AddTag("Panicforever")
+	Base.AddTag("Creature")
+	Base.AddTag("Bestiality")
+	Base.AddTag("Riekling")
+	Base.AddTag("Dirty")
+	Base.AddTag("Vaginal")
+
+	Base.Save(id)
+endFunction
+
+function RieklingThreeWay(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "(Riekling) Three-Way"
+
+	Base.SoundFX = SexMix
+	Base.SetRaceIDs(Rieklings)
+
+	int a1 = Base.AddPosition(Female, addCum=VaginalOralAnal)
+	Base.AddPositionStage(a1, "Riekling_ThreeWay_A1_S1")
+	Base.AddPositionStage(a1, "Riekling_ThreeWay_A1_S2")
+	Base.AddPositionStage(a1, "Riekling_ThreeWay_A1_S3")
+	Base.AddPositionStage(a1, "Riekling_ThreeWay_A1_S4")
+
+	int a2 = Base.AddPosition(Creature)
+	Base.AddPositionStage(a2, "Riekling_ThreeWay_A2_S1")
+	Base.AddPositionStage(a2, "Riekling_ThreeWay_A2_S2")
+	Base.AddPositionStage(a2, "Riekling_ThreeWay_A2_S3")
+	Base.AddPositionStage(a2, "Riekling_ThreeWay_A2_S4")
+
+	int a3 = Base.AddPosition(Creature)
+	Base.AddPositionStage(a3, "Riekling_ThreeWay_A3_S1")
+	Base.AddPositionStage(a3, "Riekling_ThreeWay_A3_S2")
+	Base.AddPositionStage(a3, "Riekling_ThreeWay_A3_S3")
+	Base.AddPositionStage(a3, "Riekling_ThreeWay_A3_S4")
+
+	Base.AddTag("Panicforever")
+	Base.AddTag("Creature")
+	Base.AddTag("Bestiality")
+	Base.AddTag("Gangbang")
+	Base.AddTag("3P")
+	Base.AddTag("Riekling")
+	Base.AddTag("Dirty")
+	Base.AddTag("Vaginal")
 	Base.AddTag("Oral")
 
 	Base.Save(id)

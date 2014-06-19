@@ -207,3 +207,18 @@ s Horse_Groping_A1_S1 Horse_Groping_A1_S1.hkx
 + Horse_Groping_A1_S5 Horse_Groping_A1_S5.hkx
 + Horse_Groping_A1_S6 Horse_Groping_A1_S6.hkx
 + Horse_Groping_A1_S7 Horse_Groping_A1_S7.hkx
+
+s Riekling_ThreeWay_A1_S1 Riekling_ThreeWay_A1_S1.hkx
++ Riekling_ThreeWay_A1_S2 Riekling_ThreeWay_A1_S2.hkx
++ Riekling_ThreeWay_A1_S3 Riekling_ThreeWay_A1_S3.hkx
++ Riekling_ThreeWay_A1_S4 Riekling_ThreeWay_A1_S4.hkx
+
+s Riekling_Missionary_A1_S1 Riekling_ThreeWay_A1_S1.hkx
++ Riekling_Missionary_A1_S2 Riekling_ThreeWay_A1_S2.hkx
++ Riekling_Missionary_A1_S3 Riekling_Missionary_A1_S3.hkx
++ Riekling_Missionary_A1_S4 Riekling_Missionary_A1_S4.hkx
+
+s Horse_PanicDoggystyle_A1_S1 Horse_PanicDoggystyle_A1_S1.hkx
++ Horse_PanicDoggystyle_A1_S2 Horse_PanicDoggystyle_A1_S2.hkx
++ Horse_PanicDoggystyle_A1_S3 Horse_PanicDoggystyle_A1_S3.hkx
++ Horse_PanicDoggystyle_A1_S4 Horse_PanicDoggystyle_A1_S4.hkx
