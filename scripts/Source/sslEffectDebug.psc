@@ -18,43 +18,9 @@ ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	; float[] Skills = SexLab.Stats.GetSkillLevels(TargetRef)
-	; float[] XP = new float[6]
-	; XP[0] = 0.0
-	; XP[1] = 0.0
-	; XP[2] = 5.0
-	; XP[3] = 0.0
-	; XP[4] = 0.0
-	; XP[5] = 0.0
-
-	; Log(TargetRef.GetLeveledActorBase().GetName()+" ------ ")
-	; Log("Skills: "+Skills)
-	; Log("Female Stage 1/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, true, 10.0, 1, 5))
-	; Log("Female Stage 3/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, true, 30.0, 3, 5))
-	; Log("Female Stage 5/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, true, 50.0, 5, 5))
-
-	; Log("Male Stage 1/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, false, 10.0, 1, 5))
-	; Log("Male Stage 3/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, false, 30.0, 3, 5))
-	; Log("Male Stage 5/5: "+sslActorAlias.CalcEnjoyment(XP, Skills, false, false, 50.0, 5, 5))
-
-	float[] Offsets = new float[4]
-	Offsets[0] = 100.0
-	Offsets[1] = 5.0
-	Offsets[2] = 5.0
-	Offsets[3] = 180.0
-
-
-	float[] Center = GetCoords(TargetRef)
-	float[] Coords = new float[6]
-	Log("Starter: "+Center)
-	Coords = OffsetCoords(Coords, Center, Offsets)
-	Log("Papyrus: "+Coords)
-	Coords = new float[6]
-	sslActorAlias.OffsetCoords(Coords, Center, Offsets)
-	Log("SKSE: "+Coords)
-
-	sslBenchMark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
-	Dev.StartBenchmark(2)
+	sslBenchmark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
+	Dev.RegisterForModEvent("HookAnimationChange_DevTest", "Hook")
+	SexLab.QuickStart(CasterRef, TargetRef, Hook = "DevTest")
 
 	Dispel()
 endEvent
@@ -103,8 +69,8 @@ float[] function OffsetCoords(float[] Loc, float[] CenterLoc, float[] Offsets)
 endFunction
 
 function Log(string log)
-	; Debug.TraceAndBox(ActorName+"\n"+log)
-	Debug.Trace(log)
+	Debug.Notification(log)
+	; Debug.Trace(log)
 	; MiscUtil.PrintConsole(ActorName+"\n"+log)
 	SexLabUtil.PrintConsole(log)
 endfunction
