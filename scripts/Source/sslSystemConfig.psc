@@ -222,12 +222,21 @@ endFunction
 ; --- Hotkeys                                         --- ;
 ; ------------------------------------------------------- ;
 
+sslThreadController Control
+
 event OnKeyDown(int keyCode)
 	if !Utility.IsInMenuMode() && !UI.IsMenuOpen("Console") && !UI.IsMenuOpen("Loading Menu")
 		if keyCode == ToggleFreeCamera
 			ToggleFreeCamera()
+
 		elseIf keyCode == TargetActor
-			SetTargetActor()
+
+			if Control != none
+				DisableThreadControl(Control)
+			else
+				SetTargetActor()
+			endIf
+
 		endIf
 	endIf
 endEvent
@@ -243,9 +252,39 @@ function SetTargetActor()
 	if CrosshairRef != none
 		TargetRef = CrosshairRef
 		Debug.Notification("SexLab Target Selected: "+TargetRef.GetLeveledActorBase().GetName())
+		; Attempt to grab control of their animation?
+		; sslThreadController TargetThread = ThreadSlots.GetActorController(TargetRef)
+		; if TargetThread != none && !TargetThread.HasPlayer && (Game.GetFormFromFile(0x7C358, "SexLab.esm") as Message).Show()
+		; 	GetThreadControl(TargetThread)
+		; endIf
+		; Give them stats if they need it
 		Stats.SeedActor(TargetRef)
 	endif
 endFunction
+
+function GetThreadControl(sslThreadController TargetThread)
+	if Control != none || !(TargetThread.GetState() == "Animating" || TargetThread.GetState() == "Advancing")
+		Log("Failed to control thread "+TargetThread)
+		return ; Already controlling a thread
+	endIf
+	Control = TargetThread
+	PlayerRef.SetFactionRank(AnimatingFaction, 1)
+	ActorUtil.AddPackageOverride(PlayerRef, DoNothing, 100, 1)
+	PlayerRef.EvaluatePackage()
+	Game.SetPlayerAIDriven()
+	Control.EnableHotkeys()
+endFunction
+
+function DisableThreadControl(sslThreadController TargetThread)
+	if Control != none && TargetThread == Control
+		Control.DisableHotkeys()
+		PlayerRef.RemoveFromFaction(AnimatingFaction)
+		ActorUtil.RemovePackageOverride(PlayerRef, DoNothing)
+		PlayerRef.EvaluatePackage()
+		Game.EnablePlayerControls()
+		Game.SetPlayerAIDriven(false)
+	endIf
+endfunction
 
 function ToggleFreeCamera()
 	if Game.GetCameraState() != 3
@@ -340,7 +379,7 @@ form function PickStrapon(Actor ActorRef)
 	if Strapon != none
 		return Strapon
 	endIf
-	return Config.Strapons[Utility.RandomInt(0, Config.Strapons.Length - 1)]
+	return Strapons[Utility.RandomInt(0, Strapons.Length - 1)]
 endFunction
 
 form function EquipStrapon(Actor ActorRef)
@@ -502,6 +541,8 @@ function Reload()
 	; Validate tracked factions & actors
 	ValidateTrackedActors()
 	ValidateTrackedFactions()
+	; Remove any NPC thread control player has
+	DisableThreadControl(Control)
 	; Cleanup phantom slots with missing owners
 	SexLab.Factory.Cleanup()
 endFunction
