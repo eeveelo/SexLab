@@ -295,7 +295,7 @@ state Animating
 
 	function SyncActor()
 		SyncThread()
-		SyncLocation(true)
+		SyncLocation(false)
 		Thread.AliasEventDone("Sync")
 	endFunction
 
@@ -304,11 +304,15 @@ state Animating
 		Animation  = Thread.Animation
 		AdjustKey  = Thread.AdjustKey
 		Stage      = Thread.Stage
+		Position   = Thread.Positions.Find(ActorRef)
 		Flags      = Animation.GetPositionFlags(AdjustKey, Position, Stage)
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
-		; Creature skipped
-		if IsCreature
-			return
+		; Actor has been removed from current thread somehow
+		if Position < 0
+			ResetActor()
+			return ; Actor is resetting
+		elseIf IsCreature
+			return ; Creature skipped
 		endIf
 		; Sync enjoyment level
 		GetEnjoyment()
@@ -347,7 +351,10 @@ state Animating
 		OffsetCoords(Loc, Thread.CenterLocation, Animation.GetPositionOffsets(AdjustKey, Position, Stage))
 		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
-		if Force
+		; Avoid forcibly setting on player coords if avoidable - causes annoying graphical flickering
+		if Force && IsPlayer && ActorRef.GetDistance(MarkerRef) < 20.0 && Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ()) < 0.1
+			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 10000, 0)
+		elseIf Force
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		endIf
@@ -359,16 +366,13 @@ state Animating
 	function Snap()
 		; Quickly move into place and angle if actor is off by a lot
 		float distance = ActorRef.GetDistance(MarkerRef)
-		Log("Distance: "+distance+" Rotation: "+(Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ())), ActorName)
-		if distance > 30.0 || ((Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ())) > 1.0)
-			Log("Force Snapping", ActorName)
+		if distance > 20.0 || (Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ()) > 0.5)
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			ActorRef.SetVehicle(MarkerRef)
 			ActorRef.SetScale(AnimScale)
-		elseIf distance > 0.3
-			Log("Soft Snapping", ActorName)
-			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 1000, 0)
+		elseIf distance > 0.2
+			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 5000, 0)
 			return ; OnTranslationComplete() will take over when in place
 		endIf
 		; Begin very slowly rotating a small amount to hold position
@@ -584,10 +588,6 @@ endFunction
 
 string function GetActorKey()
 	return ActorKey
-endFunction
-
-function UpdatePos()
-	Position = Thread.Positions.Find(ActorRef)
 endFunction
 
 function SetFlags(int[] ToFlags)
