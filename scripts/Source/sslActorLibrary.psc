@@ -188,7 +188,7 @@ int function ValidateActor(Actor ActorRef)
 	elseIf !ActorRef.Is3DLoaded()
 		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are not loaded")
 		return -12
-	elseIf ActorRef.IsDead()
+	elseIf ActorRef.IsDead() && ActorRef.GetActorValue("Health") < 1.0
 		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- He's dead Jim.")
 		return -13
 	elseIf ActorRef.IsDisabled()
