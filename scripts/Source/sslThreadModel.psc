@@ -864,7 +864,17 @@ function Log(string Log, string Type = "NOTICE")
 endFunction
 
 function UpdateAdjustKey()
-	AdjustKey = Animation.MakeAdjustKey(Positions, Config.RaceAdjustments)
+	string NewKey = Animation.Key("Adjust")
+	if !Config.RaceAdjustments
+		NewKey += ".Global"
+	else
+		int i
+		while i < ActorCount
+			NewKey += "."+PositionAlias(i).GetActorKey()
+			i += 1
+		endWhile
+	endIf
+	AdjustKey = NewKey
 	Log(AdjustKey, "Adjustment Profile")
 endFunction
 
@@ -983,10 +993,4 @@ float function GetTime()
 endfunction
 function SetBedding(int flag = 0)
 	SetBedFlag(flag)
-endFunction
-
-
-function _Repair()
-	GoToState("")
-	UnregisterForUpdate()
 endFunction

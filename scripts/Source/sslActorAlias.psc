@@ -9,8 +9,6 @@ sslSystemConfig Config
 Actor PlayerRef
 sslActorStats Stats
 sslActorLibrary ActorLib
-sslVoiceSlots VoiceSlots
-sslExpressionSlots ExpressionSlots
 
 ; Actor Info
 Actor property ActorRef auto hidden
@@ -33,6 +31,7 @@ int Stage
 ; Animation
 sslBaseAnimation Animation
 string AdjustKey
+string ActorKey
 
 ; Voice
 sslBaseVoice Voice
@@ -68,7 +67,7 @@ bool property OpenMouth hidden
 endProperty
 bool property IsSilent hidden
 	bool function get()
-		return Voice == none || IsForcedSilent || IsCreature || Flags[0] == 1 || Flags[1] == 1
+		return Voice == none || IsForcedSilent || Flags[0] == 1 || Flags[1] == 1
 	endFunction
 endProperty
 bool property UseStrapon hidden
@@ -176,16 +175,31 @@ state Ready
 		if ActorRef.IsWeaponDrawn()
 			ActorRef.SheatheWeapon()
 		endIf
+		; Starting Information
+		Animation = Thread.Animation
+		Position  = Thread.Positions.Find(ActorRef)
 		; Calculate scales
 		float display = ActorRef.GetScale()
 		ActorRef.SetScale(1.0)
 		float base = ActorRef.GetScale()
 		ActorScale = ( display / base )
-		AnimScale = ActorScale
+		AnimScale  = ActorScale
 		ActorRef.SetScale(ActorScale)
 		if Thread.ActorCount > 1 && Config.ScaleActors
 			AnimScale = (1.0 / base)
 		endIf
+		; Actor's Adjustment Key
+		if Config.RaceAdjustments
+			ActorKey = MiscUtil.GetRaceEditorID(BaseRef.GetRace())
+			if IsCreature
+				ActorKey += "C"
+			elseIf BaseSex == 1
+				ActorKey += "F"
+			else
+				ActorKey += "M"
+			endIf
+		endIf
+		Log("ActorKey: "+ActorKey, ActorName)
 		; Stop movement
 		LockActor()
 		; Strip non creatures
@@ -199,11 +213,11 @@ state Ready
 			Strip()
 			; Pick a voice if needed
 			if Voice == none && !IsForcedSilent
-				SetVoice(VoiceSlots.PickVoice(ActorRef), IsForcedSilent)
+				SetVoice(Config.VoiceSlots.PickVoice(ActorRef), IsForcedSilent)
 			endIf
 			; Pick an expression if needed
 			if Expression == none && Config.UseExpressions
-				Expression = ExpressionSlots.PickExpression(ActorRef, Thread.VictimRef)
+				Expression = Config.ExpressionSlots.PickExpression(ActorRef, Thread.VictimRef)
 			endIf
 			; Always use players stats if present, so players stats mean something more for npcs
 			Actor SkilledActor = ActorRef
@@ -211,10 +225,9 @@ state Ready
 				SkilledActor = PlayerRef
 			; If a non-creature couple, base skills off partner
 			elseIf Thread.ActorCount == 2 && !Thread.HasCreature
-				SkilledActor = Thread.Positions[IndexTravel(Thread.Positions.Find(ActorRef), Thread.ActorCount)]
+				SkilledActor = Thread.Positions[IndexTravel(Position, Thread.ActorCount)]
 			endIf
 			Skills = Stats.GetSkillLevels(SkilledActor)
-			; Thread.Log(SkilledActor.GetLeveledActorBase().GetName()+" Skills: "+Skills, ActorName)
 			; Get highest relationship ahead of time
 			HighestRelation = Thread.GetHighestPresentRelationshipRank(ActorRef)
 			; Start Auto TFC if enabled
@@ -225,6 +238,7 @@ state Ready
 		; Enter animatable state - rest is non vital and can finish as queued
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 		Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
+		Utility.Wait(0.2) ; Give erection time to rise to the occasion
 		GoToState("Animating")
 		Thread.AliasEventDone("Prepare")
 	endFunction
@@ -238,11 +252,15 @@ state Animating
 
 	function StartAnimating()
 		; Position / fix SOS side bend
-		Utility.Wait(0.2)
 		SyncThread()
 		SyncLocation(true)
 		ActorRef.StopTranslation()
 		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 50000, 0)
+		; Disable autoadvance if disabled for player
+		if IsPlayer && ((IsVictim && Config.DisablePlayer) || !Config.AutoAdvance)
+			Thread.AutoAdvance = false
+		endIf
+		; Actor tracking
 		if IsTracked
 			Thread.SendTrackedEvent(ActorRef, "Start", Thread.tid)
 		endif
@@ -251,8 +269,8 @@ state Animating
 	endFunction
 
 	event OnUpdate()
-		; Check if still amonst the living and able.
-		if ActorRef.GetActorValue("Health") < 1.0 || ActorRef.IsDisabled() ;|| !ActorRef.Is3DLoaded()
+		; Check if still among the living and able.
+		if ActorRef.IsDisabled() || (ActorRef.IsDead() && ActorRef.GetActorValue("Health") < 1.0) ;|| !ActorRef.Is3DLoaded() ActorRef.GetActorValue("Health") < 1.0
 			Log("Actor is disabled or has no health, unable to continue animating", ActorName)
 			Thread.EndAnimation(true)
 			return
@@ -278,16 +296,13 @@ state Animating
 
 	function SyncActor()
 		SyncThread()
-		SyncLocation(false)
+		SyncLocation(true)
 		Thread.AliasEventDone("Sync")
 	endFunction
 
 	function SyncThread()
-		; Sync thread information
-		Animation  = Thread.Animation
+		; Sync information
 		Stage      = Thread.Stage
-		Position   = Thread.Positions.Find(ActorRef)
-		AdjustKey  = Thread.AdjustKey
 		Flags      = Animation.GetPositionFlags(AdjustKey, Position, Stage)
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
 		; Creature skipped
@@ -332,7 +347,6 @@ state Animating
 	function SyncLocation(bool Force = false)
 		; Set Loc Array to offset coordinates
 		OffsetCoords(Loc, Thread.CenterLocation, Animation.GetPositionOffsets(AdjustKey, Position, Stage))
-		; Set marker/actor to Loc
 		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		if Force
@@ -347,17 +361,17 @@ state Animating
 	function Snap()
 		; Quickly move into place and angle if actor is off by a lot
 		float distance = ActorRef.GetDistance(MarkerRef)
-		if distance > 50.0 || ((Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ())) > 1.0)
+		if distance > 30.0 || ((Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ())) > 1.0)
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			ActorRef.SetVehicle(MarkerRef)
 			ActorRef.SetScale(AnimScale)
 		elseIf distance > 0.3
-			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 50000, 0)
+			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 1000, 0)
 			return ; OnTranslationComplete() will take over when in place
 		endIf
 		; Begin very slowly rotating a small amount to hold position
-		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.01, 1.0, 10000, 0.001)
+		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.01, 1.0, 500, 0.001)
 	endFunction
 
 	event OnTranslationComplete()
@@ -486,7 +500,7 @@ function LockActor()
 	Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 	; Start DoNothing package
 	ActorRef.SetFactionRank(Config.AnimatingFaction, 1)
-	; ActorUtil.AddPackageOverride(ActorRef, Config.DoNothing, 100, 1)
+	ActorUtil.AddPackageOverride(ActorRef, Config.DoNothing, 100, 1)
 	ActorRef.EvaluatePackage()
 	; Disable movement
 	if IsPlayer
@@ -539,7 +553,7 @@ function RestoreActorDefaults()
 	if GetReference() == none && ActorRef == none
 		return
 	endIf
-	; Make sure we have actor, can't afford to miss this block
+	; Make sure  have actor, can't afford to miss this block
 	ActorRef = GetReference() as Actor
 	; Reset to starting scale
 	if ActorScale != 0.0
@@ -554,7 +568,6 @@ function RestoreActorDefaults()
 		endIf
 		; Remove strapon
 		if Strapon != none
-			ActorRef.UnequipItem(Strapon, true, true)
 			ActorRef.RemoveItem(Strapon, 1, true)
 		endIf
 	endIf
@@ -565,6 +578,10 @@ endFunction
 ; ------------------------------------------------------- ;
 ; --- Data Accessors                                  --- ;
 ; ------------------------------------------------------- ;
+
+string function GetActorKey()
+	return ActorKey
+endFunction
 
 function SetVoice(sslBaseVoice ToVoice = none, bool ForceSilence = false)
 	IsForcedSilent = ForceSilence
@@ -631,11 +648,6 @@ function Strip()
 	else
 		Strip = Config.GetStrip(IsFemale, Thread.LeadIn, Thread.IsAggressive, IsVictim)
 	endIf
-	; Get Nudesuit
-	bool UseNudeSuit = Strip[2] && ((Gender == 0 && Config.UseMaleNudeSuit) || (Gender == 1 && Config.UseFemaleNudeSuit))
-	if UseNudeSuit && ActorRef.GetItemCount(Config.NudeSuit) < 1
-		; ActorRef.AddItem(Config.NudeSuit, 1, true)
-	endIf
 	; Stripped storage
 	Form[] Stripped = new Form[34]
 	Form ItemRef
@@ -669,7 +681,7 @@ function Strip()
 		i -= 1
 	endWhile
 	; Equip the nudesuit
-	if UseNudeSuit
+	if Strip[2] && ((Gender == 0 && Config.UseMaleNudeSuit) || (Gender == 1 && Config.UseFemaleNudeSuit))
 		ActorRef.EquipItem(Config.NudeSuit, true, true)
 	endIf
 	; Store stripped items
@@ -682,7 +694,6 @@ function UnStrip()
  	endIf
 	; Remove nudesuit if present
 	if ActorRef.GetItemCount(Config.NudeSuit) > 0
-		ActorRef.UnequipItem(Config.NudeSuit, true, true)
 		ActorRef.RemoveItem(Config.NudeSuit, ActorRef.GetItemCount(Config.NudeSuit), true)
 	endIf
 	; Continue with undress, or am I disabled?
@@ -777,7 +788,6 @@ function Initialize()
 	if ActorRef != none
 		; Remove nudesuit if present
 		if ActorRef.GetItemCount(Config.NudeSuit) > 0
-			ActorRef.UnequipItem(Config.NudeSuit, true, true)
 			ActorRef.RemoveItem(Config.NudeSuit, ActorRef.GetItemCount(Config.NudeSuit), true)
 		endIf
 	endIf
@@ -803,6 +813,8 @@ function Initialize()
 	; Floats
 	ActorScale     = 0.0
 	AnimScale      = 0.0
+	; Strings
+	ActorKey       = ""
 	; Storage
 	StripOverride  = BoolArray(0)
 	Equipment      = FormArray(0)
@@ -818,8 +830,6 @@ function Setup()
 	Config          = SexLab.Config
 	ActorLib        = SexLab.ActorLib
 	Stats           = SexLab.Stats
-	VoiceSlots      = SexLab.VoiceSlots
-	ExpressionSlots = SexLab.ExpressionSlots
 	; init alias settings
 	Thread = GetOwningQuest() as sslThreadController
 	Initialize()
@@ -830,7 +840,7 @@ function Log(string Log, string Type = "NOTICE")
 endFunction
 
 bool function TestAlias()
-	return PlayerRef && Config && ActorLib && Stats && VoiceSlots && ExpressionSlots && Thread
+	return PlayerRef && Config && ActorLib && Stats; && VoiceSlots && ExpressionSlots && Thread
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -869,7 +879,6 @@ endFunction
 int function GetPain()
 	return 0
 endFunction
-
 
 int function CalcEnjoyment(float[] XP, float[] SkillsAmounts, bool IsLeadin, bool IsFemaleActor, float Timer, int OnStage, int MaxStage) global native
 function OffsetCoords(float[] Output, float[] CenterCoords, float[] OffsetBy) global native

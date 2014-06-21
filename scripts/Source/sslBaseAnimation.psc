@@ -280,7 +280,7 @@ function InitAdjustments(string AdjustKey)
 endFunction
 
 string function MakeAdjustKey(Actor[] ActorList, bool RaceKey = true)
-	if RaceKey == false || ActorList.Length != Actors
+	if !RaceKey || ActorList.Length != Actors
 		return Key("Adjust.Global")
 	endIf
 	string AdjustKey = Key("Adjust")
