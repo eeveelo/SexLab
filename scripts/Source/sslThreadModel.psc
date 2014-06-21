@@ -37,6 +37,7 @@ Race property CreatureRef auto hidden
 
 ; Animation Info
 int property Stage auto hidden
+Sound property SoundFX auto hidden
 sslBaseAnimation property Animation auto hidden
 sslBaseAnimation[] CustomAnimations
 sslBaseAnimation[] PrimaryAnimations
@@ -319,6 +320,27 @@ sslBaseVoice function GetVoice(Actor ActorRef)
 	return ActorAlias(ActorRef).GetVoice()
 endFunction
 
+; Actor Strapons
+bool function IsUsingStrapon(Actor ActorRef)
+	return ActorAlias(ActorRef).IsUsingStrapon()
+endFunction
+
+function EquipStrapon(Actor ActorRef)
+	ActorAlias(ActorRef).EquipStrapon()
+endFunction
+
+function UnequipStrapon(Actor ActorRef)
+	ActorAlias(ActorRef).UnequipStrapon()
+endFunction
+
+function SetStrapon(Actor ActorRef, Form ToStrapon)
+	ActorAlias(ActorRef).SetStrapon(ToStrapon)
+endfunction
+
+Form function GetStrapon(Actor ActorRef)
+	ActorAlias(ActorRef).GetStrapon()
+endfunction
+
 ; Expressions
 function SetExpression(Actor ActorRef, sslBaseExpression Expression)
 	ActorAlias(ActorRef).SetExpression(Expression)
@@ -462,9 +484,7 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function SetForcedAnimations(sslBaseAnimation[] AnimationList)
-	if AnimationList.Length != 0
-		CustomAnimations = AnimationList
-	endIf
+	CustomAnimations = AnimationList
 endFunction
 
 function SetAnimations(sslBaseAnimation[] AnimationList)
@@ -819,6 +839,7 @@ function Initialize()
 	; Forms
 	VictimRef      = none
 	CenterRef      = none
+	SoundFX        = none
 	BedRef         = none
 	; Boolean
 	AutoAdvance    = true

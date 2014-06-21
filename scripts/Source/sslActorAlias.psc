@@ -176,8 +176,9 @@ state Ready
 			ActorRef.SheatheWeapon()
 		endIf
 		; Starting Information
-		Animation = Thread.Animation
 		Position  = Thread.Positions.Find(ActorRef)
+		Animation = Thread.Animation
+		Stage     = Thread.Stage
 		; Calculate scales
 		float display = ActorRef.GetScale()
 		ActorRef.SetScale(1.0)
@@ -199,15 +200,13 @@ state Ready
 				ActorKey += "M"
 			endIf
 		endIf
-		Log("ActorKey: "+ActorKey, ActorName)
 		; Stop movement
 		LockActor()
 		; Strip non creatures
 		if !IsCreature
 			; Pick a strapon on females to use
-			if IsFemale && Config.UseStrapons && Config.Strapons.Length > 0
+			if IsFemale && Config.UseStrapons && Strapon == none
 				Strapon = Config.GetStrapon()
-				; ActorRef.AddItem(Strapon, 1, true)
 			endIf
 			; Strip actor
 			Strip()
@@ -221,7 +220,7 @@ state Ready
 			endIf
 			; Always use players stats if present, so players stats mean something more for npcs
 			Actor SkilledActor = ActorRef
-			if !IsPlayer && Thread.HasPlayer
+			if Thread.HasPlayer
 				SkilledActor = PlayerRef
 			; If a non-creature couple, base skills off partner
 			elseIf Thread.ActorCount == 2 && !Thread.HasCreature
@@ -302,42 +301,41 @@ state Animating
 
 	function SyncThread()
 		; Sync information
+		Animation  = Thread.Animation
+		AdjustKey  = Thread.AdjustKey
 		Stage      = Thread.Stage
 		Flags      = Animation.GetPositionFlags(AdjustKey, Position, Stage)
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
 		; Creature skipped
-		if !IsCreature
-			; Sync enjoyment level
-			GetEnjoyment()
-			; Equip Strapon if needed and enabled
-			if Strapon != none
-				if UseStrapon && !ActorRef.IsEquipped(Strapon)
-					ActorRef.EquipItem(Strapon, true, true)
-				elseif !UseStrapon && ActorRef.IsEquipped(Strapon)
-					ActorRef.UnequipItem(Strapon, true, true)
-				endIf
+		if IsCreature
+			return
+		endIf
+		; Sync enjoyment level
+		GetEnjoyment()
+		; Equip Strapon if needed and enabled
+		if Strapon != none
+			if UseStrapon && !ActorRef.IsEquipped(Strapon)
+				ActorRef.EquipItem(Strapon, true, true)
+			elseif !UseStrapon && ActorRef.IsEquipped(Strapon)
+				ActorRef.UnequipItem(Strapon, true, true)
 			endIf
-			; Clear any existing expression as a default - to remove open mouth
-			ActorRef.ClearExpressionOverride()
-			if OpenMouth
-				; Open mouth if needed
-				sslBaseExpression.OpenMouth(ActorRef)
-			elseIf Expression != none
-				; Apply expression otherwise - overrides open mouth
-				Expression.Apply(ActorRef, Enjoyment, BaseSex)
-			else
-				; No expression to override but mouth might be open - close it
-				sslBaseExpression.CloseMouth(ActorRef)
-			endIf
+		endIf
+		; Clear any existing expression as a default - to remove open mouth
+		; ActorRef.ClearExpressionOverride()
+		if OpenMouth
+			; Open mouth if needed
+			sslBaseExpression.OpenMouth(ActorRef)
+		elseIf Expression != none
+			; Apply expression otherwise - overrides open mouth
+			Expression.Apply(ActorRef, Enjoyment, BaseSex)
+		else
+			; No expression to override but mouth might be open - close it
+			sslBaseExpression.CloseMouth(ActorRef)
 		endIf
 		; Send schlong offset
 		if MalePosition
 			Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
 		endIf
-	endFunction
-
-	function UpdateOffsets()
-		SyncLocation(true)
 	endFunction
 
 	function RefreshLoc()
@@ -361,12 +359,15 @@ state Animating
 	function Snap()
 		; Quickly move into place and angle if actor is off by a lot
 		float distance = ActorRef.GetDistance(MarkerRef)
+		Log("Distance: "+distance+" Rotation: "+(Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ())), ActorName)
 		if distance > 30.0 || ((Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ())) > 1.0)
+			Log("Force Snapping", ActorName)
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			ActorRef.SetVehicle(MarkerRef)
 			ActorRef.SetScale(AnimScale)
 		elseIf distance > 0.3
+			Log("Soft Snapping", ActorName)
 			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 1000, 0)
 			return ; OnTranslationComplete() will take over when in place
 		endIf
@@ -404,9 +405,6 @@ state Animating
 		; Update stats
 		if !IsCreature
 			Stats.RecordThread(ActorRef, Thread.HasPlayer, Thread.ActorCount, HighestRelation, Thread.TotalTime, Thread.VictimRef, Thread.SkillXP, Thread.Genders)
-			; Stats.AddSkillXP(ActorRef, SkillXP[0], SkillXP[1], SkillXP[2], SkillXP[3])
-			; Stats.AddPurityXP(ActorRef, Skills[4], SkillXP[5], Thread.IsAggressive, IsVictim, Genders[2] > 0, Thread.ActorCount, Thread.GetHighestPresentRelationshipRank(ActorRef))
-			; Stats.AddSex(ActorRef, Thread.TotalTime, Thread.HasPlayer, Thread.IsAggressive, Genders[0], Genders[1], Genders[2])
 		endIf
 		; Clear TFC
 		if IsPlayer && Game.GetCameraState() == 3
@@ -447,9 +445,13 @@ state Animating
 	int function GetPain()
 		float Pain = Math.Abs(100.0 - ClampFloat(GetEnjoyment() as float, 1.0, 99.0))
 		if IsVictim
-			return (Pain * 1.5) as int
+			Pain *= 1.5
+		elseIf Animation.HasTag("Aggressive") || Animation.HasTag("Rough")
+			Pain *= 0.8
+		else
+			Pain *= 0.3
 		endIf
-		return (Pain * 0.5) as int
+		return ClampInt(Pain as int, 0, 100)
 	endFunction
 
 endState
@@ -478,15 +480,14 @@ function StopAnimating(bool Quick = false)
 		Debug.SendAnimationEvent(ActorRef, "FNISDefault")
 		Debug.SendAnimationEvent(ActorRef, "IdleReturnToDefault")
 		Debug.SendAnimationEvent(ActorRef, "ForceFurnExit")
+		ActorRef.Moveto(ActorRef)
 		ActorRef.PushActorAway(ActorRef, 0.75)
 	else
 		; Reset NPC/PC Idle Quickly
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 		; Ragdoll NPC/PC if enabled and not in TFC
 		if !Quick && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
-			ActorRef.StopTranslation()
-			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
-			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
+			ActorRef.Moveto(ActorRef)
 			ActorRef.PushActorAway(ActorRef, 0.1)
 		endIf
 	endIf
@@ -512,6 +513,7 @@ function LockActor()
 			Thread.EnableHotkeys()
 		endIf
 	else
+		ActorRef.SetRestrained(true)
 		ActorRef.SetDontMove(true)
 	endIf
 	; Attach positioning marker
@@ -545,6 +547,7 @@ function UnlockActor()
 		Game.EnablePlayerControls()
 		Game.SetPlayerAIDriven(false)
 	else
+		ActorRef.SetRestrained(false)
 		ActorRef.SetDontMove(false)
 	endIf
 endFunction
@@ -583,6 +586,13 @@ string function GetActorKey()
 	return ActorKey
 endFunction
 
+function UpdatePos()
+	Position = Thread.Positions.Find(ActorRef)
+endFunction
+
+function SetFlags(int[] ToFlags)
+endFunction
+
 function SetVoice(sslBaseVoice ToVoice = none, bool ForceSilence = false)
 	IsForcedSilent = ForceSilence
 	if ToVoice != none
@@ -612,16 +622,34 @@ sslBaseExpression function GetExpression()
 	return Expression
 endFunction
 
+bool function IsUsingStrapon()
+	return Strapon != none && ActorRef.IsEquipped(Strapon)
+endFunction
+
 function EquipStrapon()
-	if Strapon != none && !ActorRef.IsEquipped(Strapon)
+	if IsUsingStrapon()
 		ActorRef.EquipItem(Strapon, true, true)
 	endIf
 endFunction
 
 function UnequipStrapon()
-	if Strapon != none && ActorRef.IsEquipped(Strapon)
+	if IsUsingStrapon()
 		ActorRef.UnequipItem(Strapon, true, true)
 	endIf
+endFunction
+
+function SetStrapon(Form ToStrapon)
+	if Strapon != none
+		ActorRef.RemoveItem(Strapon, 1, true)
+	endIf
+	Strapon = ToStrapon
+	if GetState() == "Animating"
+		SyncThread()
+	endIf
+endFunction
+
+Form function GetStrapon()
+	return Strapon
 endFunction
 
 function OverrideStrip(bool[] SetStrip)
@@ -856,8 +884,6 @@ endFunction
 function SyncActor()
 endFunction
 function SyncThread()
-endFunction
-function UpdateOffsets()
 endFunction
 function SyncLocation(bool Force = false)
 endFunction
