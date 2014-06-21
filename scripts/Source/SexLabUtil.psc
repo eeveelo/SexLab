@@ -9,7 +9,7 @@ int function GetVersion() global
 endFunction
 
 string function GetStringVer() global
-	return "1.58"
+	return "1.58 Beta 2"
 endFunction
 
 bool function SexLabIsActive() global

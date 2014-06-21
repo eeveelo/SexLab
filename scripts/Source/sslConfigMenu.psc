@@ -68,7 +68,7 @@ event OnVersionUpdate(int version)
 			ExpressionSlots.Setup()
 		endIf
 
-		; v.157 - Decoupled ThreadLib from ThreadModel, added Riekling animations
+		; v.158 - Decoupled ThreadLib from ThreadModel, added Riekling animations
 		if CurrentVersion < 15800
 			CreatureSlots.Setup()
 			ThreadSlots.Setup()
