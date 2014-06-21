@@ -43,6 +43,12 @@ state Prepare
 		ActorAlias[2].StartAnimating()
 		ActorAlias[3].StartAnimating()
 		ActorAlias[4].StartAnimating()
+		; Set starting adjusted actor
+		AdjustPos = 0
+		if ActorCount > 1
+			AdjustPos = 1
+		endIf
+		AdjustAlias = PositionAlias(AdjustPos)
 		; Send starter events
 		SendThreadEvent("AnimationStart")
 		if LeadIn
@@ -56,6 +62,8 @@ state Prepare
 	endEvent
 
 	function RecordSkills()
+	endFunction
+	function SetBonuses()
 	endFunction
 endState
 
@@ -75,7 +83,6 @@ state Advancing
 			endIf
 			return
 		endIf
-		SFXDelay   = ClampFloat(Config.SFXDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
 		AliasEvent("Sync", 10.0)
 	endFunction
 	function SyncDone()
@@ -90,6 +97,9 @@ state Animating
 
 	function FireAction()
 		Log("Stage: "+Stage, "Animating")
+		; Prepare loop
+		SFXDelay   = ClampFloat(Config.SFXDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
+		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		PlayAnimation()
 		; Send events
 		if !LeadIn && Stage >= StageCount
@@ -102,7 +112,6 @@ state Animating
 			SendThreadEvent("StageStart")
 		endIf
 		; Begin loop
-		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		RegisterForSingleUpdate(0.5)
 	endFunction
 
@@ -114,8 +123,8 @@ state Animating
 			return
 		endIf
 		; Play SFX
-		if SFXTimer < CurrentTime && Animation.SoundFX != none
-			Animation.SoundFX.Play(CenterRef)
+		if SFXTimer < CurrentTime && SoundFX != none
+			SoundFX.Play(CenterRef)
 			SFXTimer = CurrentTime + SFXDelay
 		endIf
 		; Loop
@@ -225,11 +234,11 @@ state Animating
 		UnregisterforUpdate()
 		GoToState("")
 		; Find position to swap to
-		int NewPos = IndexTravel(Positions.Find(AdjustAlias.ActorRef), ActorCount, backwards)
-		Actor MovedActor = PositionAlias(NewPos).ActorRef
-		Actor AdjustActor = AdjustAlias.ActorRef
+		int NewPos = IndexTravel(AdjustPos, ActorCount, backwards)
+		Actor AdjustActor = Positions[AdjustPos]
+		Actor MovedActor  = Positions[NewPos]
 		if MovedActor == AdjustActor
-			Log("Critical error in ChangePositions, MovedActor["+NewPos+"] ("+MovedActor+") == AdjustActor["+AdjustPos+"] ("+AdjustActor+")")
+			Log("MovedActor["+NewPos+"] == AdjustActor["+AdjustPos+"] -- "+Positions, "ChangePositions() Errror")
 			RegisterForSingleUpdate(0.4)
 			return
 		endIf
@@ -238,7 +247,6 @@ state Animating
 		Positions[NewPos] = AdjustActor
 		; Sync new positions
 		AdjustPos = NewPos
-		AdjustAlias = ActorAlias(Positions[AdjustPos])
 		UpdateAdjustKey()
 		GoToState("Animating")
 		RealignActors()
@@ -276,7 +284,7 @@ state Animating
 		Adjusted = true
 		Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
 		AdjustAlias.SyncLocation()
-		while Input.IsKeyPressed(Config.AdjustSideways)
+		while Input.IsKeyPressed(Config.AdjustUpward)
 			Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
 			AdjustAlias.SyncLocation()
 		endWhile
@@ -370,7 +378,11 @@ endFunction
 
 state Orgasm
 	function OrgasmDone()
+		UnregisterforUpdate()
 		GoToState("Animating")
+		if SoundFX != none
+			SoundFX.Play(CenterRef)
+		endIf
 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		RegisterForSingleUpdate(0.5)
 	endFunction
@@ -400,6 +412,7 @@ function SetAnimation(int aid = -1)
 	IsLoving    = Tags.Find("Loving") != -1
 	IsDirty     = Tags.Find("Dirty") != -1
 	StageCount  = Animation.StageCount
+	SoundFX     = Animation.SoundFX
 	SetBonuses()
 	; Inform player of animation being played now
 	if HasPlayer
@@ -410,7 +423,7 @@ function SetAnimation(int aid = -1)
 		GoToStage((StageCount - 1))
 	else
 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
-		MoveActors()
+		RealignActors()
 		PlayAnimation()
 	endIf
 endFunction
@@ -559,6 +572,7 @@ function Initialize()
 	SkillTime   = 0.0
 	TimedStage  = false
 	Adjusted    = false
+	AdjustPos   = 0
 	AdjustAlias = ActorAlias[0]
 	parent.Initialize()
 endFunction
