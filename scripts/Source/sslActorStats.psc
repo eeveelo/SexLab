@@ -260,6 +260,8 @@ function SeedActor(Actor ActorRef)
 
 	SetInt(ActorRef, "Pure", Pure as int)
 	SetInt(ActorRef, "Lewd", Lewd as int)
+
+	Log("Foreplay["+GetSkill(ActorRef, "Foreplay")+"] Vaginal["+GetSkill(ActorRef, "Vaginal")+"] Anal["+GetSkill(ActorRef, "Anal")+"] Oral["+GetSkill(ActorRef, "Oral")+"] Pure["+GetPure(ActorRef)+"] Lewd["+GetLewd(ActorRef)+"]", ActorRef.GetLeveledActorBase().GetName()+" Stats Seed")
 endFunction
 
 int function GetSkill(Actor ActorRef, string Skill)
