@@ -567,6 +567,7 @@ function DisableHotkeys()
 endFunction
 
 function Initialize()
+	Config.DisableThreadControl(self)
 	DisableHotkeys()
 	SFXTimer    = 0.0
 	SkillTime   = 0.0

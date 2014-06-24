@@ -82,6 +82,7 @@ Message property CheckFNIS auto
 Message property CheckSkyrim auto
 Message property CheckPapyrusUtil auto
 Message property CheckSkyUI auto
+Message property TakeThreadControl auto
 
 Topic property LipSync auto
 VoiceType property SexLabVoiceM auto
@@ -229,15 +230,12 @@ event OnKeyDown(int keyCode)
 	if !Utility.IsInMenuMode() && !UI.IsMenuOpen("Console") && !UI.IsMenuOpen("Loading Menu")
 		if keyCode == ToggleFreeCamera
 			ToggleFreeCamera()
-
 		elseIf keyCode == TargetActor
-
 			if Control != none
 				DisableThreadControl(Control)
 			else
 				SetTargetActor()
 			endIf
-
 		endIf
 	endIf
 endEvent
@@ -253,37 +251,53 @@ function SetTargetActor()
 	if CrosshairRef != none
 		TargetRef = CrosshairRef
 		Debug.Notification("SexLab Target Selected: "+TargetRef.GetLeveledActorBase().GetName())
-		; Attempt to grab control of their animation?
-		; sslThreadController TargetThread = ThreadSlots.GetActorController(TargetRef)
-		; if TargetThread != none && !TargetThread.HasPlayer && (Game.GetFormFromFile(0x7C358, "SexLab.esm") as Message).Show()
-		; 	GetThreadControl(TargetThread)
-		; endIf
 		; Give them stats if they need it
 		Stats.SeedActor(TargetRef)
+		; Attempt to grab control of their animation?
+		sslThreadController TargetThread = ThreadSlots.GetActorController(TargetRef)
+		if TargetThread != none && !TargetThread.HasPlayer && ThreadSlots.GetActorController(PlayerRef) == none && TakeThreadControl.Show()
+			GetThreadControl(TargetThread)
+		endIf
 	endif
 endFunction
 
 function GetThreadControl(sslThreadController TargetThread)
 	if Control != none || !(TargetThread.GetState() == "Animating" || TargetThread.GetState() == "Advancing")
 		Log("Failed to control thread "+TargetThread)
-		return ; Already controlling a thread
+		return ; Control not available
 	endIf
+	; Set active controlled thread
 	Control = TargetThread
+	; Lock players movement
+	PlayerRef.StopCombat()
+	if PlayerRef.IsWeaponDrawn()
+		PlayerRef.SheatheWeapon()
+	endIf
 	PlayerRef.SetFactionRank(AnimatingFaction, 1)
 	ActorUtil.AddPackageOverride(PlayerRef, DoNothing, 100, 1)
 	PlayerRef.EvaluatePackage()
 	Game.SetPlayerAIDriven()
+	; Give player control
+	Control.AutoAdvance = false
+	Control.HasPlayer   = true
 	Control.EnableHotkeys()
+	Control.HasPlayer   = false
+	Log("Player has taken control of thread "+Control)
 endFunction
 
 function DisableThreadControl(sslThreadController TargetThread)
 	if Control != none && TargetThread == Control
+		; Release players thread control
 		Control.DisableHotkeys()
+		Control.AutoAdvance = true
+		; Unlock players movement
 		PlayerRef.RemoveFromFaction(AnimatingFaction)
 		ActorUtil.RemovePackageOverride(PlayerRef, DoNothing)
 		PlayerRef.EvaluatePackage()
 		Game.EnablePlayerControls()
 		Game.SetPlayerAIDriven(false)
+		; Release the active thread
+		Control = none
 	endIf
 endfunction
 
