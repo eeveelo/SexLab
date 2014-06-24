@@ -116,6 +116,7 @@ bool property AutoAdvance auto hidden
 bool property ForeplayStage auto hidden
 bool property OrgasmEffects auto hidden
 bool property RaceAdjustments auto hidden
+bool property BedRemoveStanding auto hidden
 
 ; Integers
 int property AnimProfile auto hidden
@@ -487,8 +488,8 @@ bool function CheckSystem()
 		return false
 
 	; Check PapyrusUtil install - depends on passing SKSE check passing
-	elseIf PapyrusUtil.GetVersion() < 23
-		CheckPapyrusUtil.Show(2.3)
+	elseIf PapyrusUtil.GetVersion() < 21
+		CheckPapyrusUtil.Show(2.1)
 		return false
 
 	; Check FNIS generation
@@ -572,6 +573,7 @@ function SetDefaults()
 	ForeplayStage      = false
 	OrgasmEffects      = false
 	RaceAdjustments    = true
+	BedRemoveStanding  = true
 
 	; Integers
 	AnimProfile        = 1

@@ -18,9 +18,16 @@ ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	sslBenchmark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
-	Dev.RegisterForModEvent("HookAnimationChange_DevTest", "Hook")
-	SexLab.QuickStart(CasterRef, TargetRef, Hook = "DevTest")
+	; sslBenchmark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
+	; Dev.RegisterForModEvent("HookAnimationChange_DevTest", "Hook")
+	; SexLab.QuickStart(CasterRef, TargetRef, Hook = "DevTest")
+
+	; sslBaseAnimation[] Standing = SexLab.GetAnimationsByTags(2, "Cowgirl,Standing", RequireAll = false)
+	; Log("With Standing("+Standing.Length+"): "+Standing)
+
+	; sslBaseAnimation[] Cleaned = SexLab.AnimSlots.RemoveTagged(Standing, "Standing")
+	; Log("Standing Removed("+Cleaned.Length+") - Removed ("+SexLab.AnimSlots.CountTag(Standing, "Standing")+"): "+Cleaned)
+
 
 	Dispel()
 endEvent

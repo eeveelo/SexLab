@@ -22,13 +22,14 @@ sslThreadLibrary property ThreadLib auto hidden
 ; ------------------------------------------------------- ;
 
 sslBaseAnimation[] function GetByTags(int ActorCount, string Tags, string TagsSuppressed = "", bool RequireAll = true)
-	string[] Search = sslUtility.ArgString(Tags)
 	string[] Suppress = sslUtility.ArgString(TagsSuppressed)
-	bool[] Valid = sslUtility.BoolArray(Slotted)
+	string[] Search   = sslUtility.ArgString(Tags)
+	bool[] Valid      = sslUtility.BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
-		Valid[i] = Slots[i].Enabled && ActorCount == Slots[i].PositionCount && (TagsSuppressed == "" || Slots[i].CheckTags(Suppress, false, true)) && Slots[i].CheckTags(Search, RequireAll)
+		Valid[i] = Slots[i].Enabled && ActorCount == Slots[i].PositionCount && Slots[i].CheckTags(Search, RequireAll) && (TagsSuppressed == "" || !Slots[i].HasOneTag(Suppress))
+		; Valid[i] = Slots[i].Enabled && ActorCount == Slots[i].PositionCount && (TagsSuppressed == "" || Slots[i].CheckTags(Suppress, false, true)) && Slots[i].CheckTags(Search, RequireAll)
 	endWhile
 	return GetList(valid)
 endFunction
@@ -117,6 +118,25 @@ sslBaseAnimation[] function MergeLists(sslBaseAnimation[] List1, sslBaseAnimatio
 	return Output
 endFunction
 
+sslBaseAnimation[] function RemoveTagged(sslBaseAnimation[] Anims, string Tags)
+	bool[] Valid  = FindTagged(Anims, Tags)
+	int found = sslUtility.CountTrue(Valid)
+	if found == 0
+		return Anims
+	endIf
+	int i = Valid.Length
+	int n = (i - found)
+	sslBaseAnimation[] Output = sslUtility.AnimationArray(n)
+	while i && n
+		i -= 1
+		if !Valid[i]
+			n -= 1
+			Output[n] = Anims[i]
+		endIf
+	endwhile
+	return Output
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Find single animation object                    --- ;
 ; ------------------------------------------------------- ;
@@ -153,6 +173,34 @@ endFunction
 ; ------------------------------------------------------- ;
 ; --- Misc API functions                              --- ;
 ; ------------------------------------------------------- ;
+
+int function CountTag(sslBaseAnimation[] Anims, string Tags)
+	string[] Checking = sslUtility.ArgString(Tags)
+	if Tags == "" || Checking.Length == 0
+		return 0
+	endIf
+	int count
+	int i = Anims.Length
+	while i
+		i -= 1
+		count += Anims[i].HasOneTag(Checking) as int
+	endWhile
+	return count
+endFunction
+
+bool[] function FindTagged(sslBaseAnimation[] Anims, string Tags)
+	if Anims.Length < 1 || Tags == ""
+		return sslUtility.BoolArray(0)
+	endIf
+	int i = Anims.Length
+	bool[] Output = sslUtility.BoolArray(i)
+	string[] Checking = sslUtility.ArgString(Tags)
+	while i
+		i -= 1
+		Output[i] = Anims[i].HasOneTag(Checking)
+	endWhile
+	return Output
+endFunction
 
 int function GetCount(bool IgnoreDisabled = true)
 	if !IgnoreDisabled

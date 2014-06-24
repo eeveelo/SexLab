@@ -257,6 +257,24 @@ state Making
 			endIf
 		endIf
 
+		; If a bed is present, remove any standing animations
+		if Config.BedRemoveStanding && BedRef != none
+			; Remove standing animations from primary
+			sslBaseAnimation[] NoStandingPrimary = AnimSlots.RemoveTagged(PrimaryAnimations, "Standing")
+			if NoStandingPrimary.Length > 0
+				Log("Suppressed "+(PrimaryAnimations.Length - NoStandingPrimary.Length)+" primary standing animations")
+				PrimaryAnimations = NoStandingPrimary
+			endIf
+			; Remove standing from lead in
+			if LeadAnimations.Length > 0
+				sslBaseAnimation[] NoStandingLead = AnimSlots.RemoveTagged(LeadAnimations, "Standing")
+				if NoStandingLead.Length > 0
+					Log("Suppressed "+(LeadAnimations.Length - NoStandingLead.Length)+" lead in standing animations")
+					LeadAnimations = NoStandingLead
+				endIf
+			endIf
+		endIf
+
 		; ------------------------- ;
 		; --  Prepare Events     -- ;
 		; ------------------------- ;

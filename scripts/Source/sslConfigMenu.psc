@@ -351,7 +351,8 @@ function AnimationSettings()
 	AddToggleOptionST("UseCum","$SSL_ApplyCumEffects", Config.UseCum)
 	AddToggleOptionST("AllowFemaleFemaleCum","$SSL_AllowFemaleFemaleCum", Config.AllowFFCum)
 	AddSliderOptionST("CumEffectTimer","$SSL_CumEffectTimer", Config.CumTimer, "$SSL_Seconds")
-	AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", Config.RagdollEnd)
+	AddTextOptionST("NPCBed","$SSL_NPCsUseBeds", Chances[ClampInt(Config.NPCBed, 0, 2)])
+	AddToggleOptionST("BedRemoveStanding","$SSL_BedRemoveStanding", Config.BedRemoveStanding)
 
 	SetCursorPosition(1)
 	; AddHeaderOption("$SSL_AnimationHandling")
@@ -363,10 +364,10 @@ function AnimationSettings()
 	AddToggleOptionST("RestrictAggressive","$SSL_RestrictAggressive", Config.RestrictAggressive)
 	AddToggleOptionST("UndressAnimation","$SSL_UndressAnimation", Config.UndressAnimation)
 	AddToggleOptionST("RedressVictim","$SSL_VictimsRedress", Config.RedressVictim)
+	AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", Config.RagdollEnd)
 	AddToggleOptionST("StraponsFemale","$SSL_FemalesUseStrapons", Config.UseStrapons)
 	AddToggleOptionST("NudeSuitMales","$SSL_UseNudeSuitMales", Config.UseMaleNudeSuit)
 	AddToggleOptionST("NudeSuitFemales","$SSL_UseNudeSuitFemales", Config.UseFemaleNudeSuit)
-	AddTextOptionST("NPCBed","$SSL_NPCsUseBeds", Chances[ClampInt(Config.NPCBed, 0, 2)])
 endFunction
 
 state AnimationProfile
@@ -1991,17 +1992,30 @@ state AllowCreatures
 		SetInfoText("$SSL_InfoAllowCreatures")
 	endEvent
 endState
-state RagdollEnd
+state NPCBed
 	event OnSelectST()
-		Config.RagdollEnd = !Config.RagdollEnd
-		SetToggleOptionValueST(Config.RagdollEnd)
+		Config.NPCBed = IndexTravel(Config.NPCBed, 3)
+		SetTextOptionValueST(Chances[Config.NPCBed])
 	endEvent
 	event OnDefaultST()
-		Config.RagdollEnd = false
-		SetToggleOptionValueST(Config.RagdollEnd)
+		Config.NPCBed = 0
+		SetTextOptionValueST(Chances[Config.NPCBed])
 	endEvent
 	event OnHighlightST()
-		SetInfoText("$SSL_InfoRagdollEnd")
+		SetInfoText("$SSL_InfoNPCBed")
+	endEvent
+endState
+state BedRemoveStanding
+	event OnSelectST()
+		Config.BedRemoveStanding = !Config.BedRemoveStanding
+		SetToggleOptionValueST(Config.BedRemoveStanding)
+	endEvent
+	event OnDefaultST()
+		Config.BedRemoveStanding = true
+		SetToggleOptionValueST(Config.BedRemoveStanding)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoBedRemoveStanding")
 	endEvent
 endState
 state ForeplayStage
@@ -2056,6 +2070,19 @@ state UndressAnimation
 		SetInfoText("$SSL_InfoUndressAnimation")
 	endEvent
 endState
+state RagdollEnd
+	event OnSelectST()
+		Config.RagdollEnd = !Config.RagdollEnd
+		SetToggleOptionValueST(Config.RagdollEnd)
+	endEvent
+	event OnDefaultST()
+		Config.RagdollEnd = false
+		SetToggleOptionValueST(Config.RagdollEnd)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoRagdollEnd")
+	endEvent
+endState
 state StraponsFemale
 	event OnSelectST()
 		Config.UseStrapons = !Config.UseStrapons
@@ -2093,19 +2120,6 @@ state NudeSuitFemales
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoFemaleNudeSuit")
-	endEvent
-endState
-state NPCBed
-	event OnSelectST()
-		Config.NPCBed = IndexTravel(Config.NPCBed, 3)
-		SetTextOptionValueST(Chances[Config.NPCBed])
-	endEvent
-	event OnDefaultST()
-		Config.NPCBed = 0
-		SetTextOptionValueST(Chances[Config.NPCBed])
-	endEvent
-	event OnHighlightST()
-		SetInfoText("$SSL_InfoNPCBed")
 	endEvent
 endState
 state PlayerVoice
@@ -2432,6 +2446,7 @@ function ExportSettings()
 	ExportBool("ForeplayStage", Config.ForeplayStage)
 	ExportBool("OrgasmEffects", Config.OrgasmEffects)
 	ExportBool("RaceAdjustments", Config.RaceAdjustments)
+	ExportBool("BedRemoveStanding", Config.BedRemoveStanding)
 
 	; Integers
 	Config.AnimProfile        = ImportInt("AnimProfile", Config.AnimProfile)
@@ -2519,6 +2534,7 @@ function ImportSettings()
 	Config.ForeplayStage      = ImportBool("ForeplayStage", Config.ForeplayStage)
 	Config.OrgasmEffects      = ImportBool("OrgasmEffects", Config.OrgasmEffects)
 	Config.RaceAdjustments    = ImportBool("RaceAdjustments", Config.RaceAdjustments)
+	Config.BedRemoveStanding    = ImportBool("BedRemoveStanding", Config.BedRemoveStanding)
 
 	; Integers
 	Config.SwapToProfile(GetIntValue(self, "AnimProfile", Config.AnimProfile))

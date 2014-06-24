@@ -75,19 +75,37 @@ bool function AddTagConditional(string Tag, bool AddTag)
 endFunction
 
 bool function CheckTags(string[] CheckTags, bool RequireAll = true, bool Suppress = false)
-	int i = CheckTags.Length
+	bool Valid = ParseTags(CheckTags, RequireAll)
+	return (Valid && !Suppress) || (!Valid && Suppress)
+endFunction
+
+bool function ParseTags(string[] TagList, bool RequireAll = true)
+	if RequireAll
+		return HasAllTag(TagList)
+	else
+		return HasOneTag(TagList)
+	endIf
+endFunction
+
+bool function HasOneTag(string[] TagList)
+	int i = TagList.Length
 	while i
 		i -= 1
-		if CheckTags[i] != ""
-			bool Check = Tags.Find(CheckTags[i]) != -1
-			if (Suppress && Check) || (!Suppress && RequireAll && !Check)
-				return false ; Stop if we need all and don't have it, or are supressing the found tag
-			elseif !Suppress && !RequireAll && Check
-				return true ; Stop if we don't need all and have one
-			endIf
+		if HasTag(TagList[i])
+			return true
 		endIf
 	endWhile
-	; If still here than we require all and had all
+	return false
+endFunction
+
+bool function HasAllTag(string[] TagList)
+	int i = TagList.Length
+	while i
+		i -= 1
+		if !HasTag(TagList[i])
+			return false
+		endIf
+	endWhile
 	return true
 endFunction
 
