@@ -359,8 +359,16 @@ sslBaseAnimation[] function MergeAnimationLists(sslBaseAnimation[] List1, sslBas
 	return AnimSlots.MergeLists(List1, List2)
 endFunction
 
+sslBaseAnimation[] function RemoveTagged(sslBaseAnimation[] Anims, string Tags)
+	return AnimSlots.RemoveTagged(Anims, Tags)
+endFunction
+
 sslBaseAnimation function GetAnimationByName(string FindName)
 	return AnimSlots.GetByName(FindName)
+endFunction
+
+int function CountTag(sslBaseAnimation[] Anims, string Tags)
+	return AnimSlots.CountTag(Anims, Tags)
 endFunction
 
 int function FindAnimationByName(string FindName)
