@@ -231,15 +231,43 @@ state Making
 		; -- Validate Animations -- ;
 		; ------------------------- ;
 
-		; Get creature animations
+		; Validate and grab creature animations
 		if HasCreature
-			LeadIn = false
-			PrimaryAnimations = CreatureSlots.GetByRace(ActorCount, CreatureRef)
+			; primary creature animations
+			int i = PrimaryAnimations.Length
+			while i
+				i -= 1
+				if !PrimaryAnimations[i].HasRace(CreatureRef) || PrimaryAnimations[i].PositionCount != ActorCount
+					Log("Invalid creture animation added - "+PrimaryAnimations[i].Name)
+					PrimaryAnimations = sslUtility.AnimationArray(0)
+					i = 0
+				endIf
+			endWhile
+			; leadin creature animations
+			i = LeadAnimations.Length
+			while i
+				i -= 1
+				if !LeadAnimations[i].HasRace(CreatureRef) || LeadAnimations[i].PositionCount != ActorCount
+					Log("Invalid creture lead in animation added - "+PrimaryAnimations[i].Name)
+
+					LeadAnimations = sslUtility.AnimationArray(0)
+					LeadIn = false
+					i = 0
+				endIf
+			endWhile
+			; Pick default creature animations if currently empty (none or failed above check)
 			if PrimaryAnimations.Length == 0
-				Log("StartThread() - Failed to find valid creature animations.", "FATAL")
-				return none
+				Log("Selecting new creature animations - "+PrimaryAnimations)
+
+				SetAnimations(CreatureSlots.GetByRace(ActorCount, CreatureRef))
+				if PrimaryAnimations.Length == 0
+					Log("StartThread() - Failed to find valid creature animations.", "FATAL")
+					return none
+				endIf
 			endIf
+			; Sort the actors to creature order
 			Positions = ThreadLib.SortCreatures(Positions, PrimaryAnimations[0])
+
 		; Get default primary animations if none
 		elseIf PrimaryAnimations.Length == 0
 			SetAnimations(AnimSlots.GetByDefault(Males, Females, IsAggressive, (BedRef != none), Config.RestrictAggressive))
@@ -248,6 +276,7 @@ state Making
 				return none
 			endIf
 		endIf
+
 		; Get default foreplay if none and enabled
 		if !HasCreature && !IsAggressive && ActorCount == 2 && !NoLeadIn && LeadAnimations.Length == 0 && Config.ForeplayStage
 			if BedRef != none
@@ -262,14 +291,12 @@ state Making
 			; Remove standing animations from primary
 			sslBaseAnimation[] NoStandingPrimary = AnimSlots.RemoveTagged(PrimaryAnimations, "Standing")
 			if NoStandingPrimary.Length > 0
-				Log("Suppressed "+(PrimaryAnimations.Length - NoStandingPrimary.Length)+" primary standing animations")
 				PrimaryAnimations = NoStandingPrimary
 			endIf
 			; Remove standing from lead in
 			if LeadAnimations.Length > 0
 				sslBaseAnimation[] NoStandingLead = AnimSlots.RemoveTagged(LeadAnimations, "Standing")
 				if NoStandingLead.Length > 0
-					Log("Suppressed "+(LeadAnimations.Length - NoStandingLead.Length)+" lead in standing animations")
 					LeadAnimations = NoStandingLead
 				endIf
 			endIf
