@@ -118,6 +118,17 @@ bool function SetActor(Actor ProspectRef, bool Victimize = false, sslBaseVoice U
 	if IsTracked
 		Thread.SendTrackedEvent(ActorRef, "Added", Thread.tid)
 	endif
+	; Actor's Adjustment Key
+	if Config.RaceAdjustments
+		ActorKey = MiscUtil.GetRaceEditorID(BaseRef.GetRace())
+		if IsCreature
+			ActorKey += "C"
+		elseIf BaseSex == 1
+			ActorKey += "F"
+		else
+			ActorKey += "M"
+		endIf
+	endIf
 	; Update threads gender
 	Thread.Genders[Gender] = Thread.Genders[Gender] + 1
 	; Get ready for mod events
@@ -188,17 +199,6 @@ state Ready
 		ActorRef.SetScale(ActorScale)
 		if Thread.ActorCount > 1 && Config.ScaleActors
 			AnimScale = (1.0 / base)
-		endIf
-		; Actor's Adjustment Key
-		if Config.RaceAdjustments
-			ActorKey = MiscUtil.GetRaceEditorID(BaseRef.GetRace())
-			if IsCreature
-				ActorKey += "C"
-			elseIf BaseSex == 1
-				ActorKey += "F"
-			else
-				ActorKey += "M"
-			endIf
 		endIf
 		; Stop movement
 		LockActor()
