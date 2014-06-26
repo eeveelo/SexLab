@@ -28,6 +28,7 @@ bool hkReady
 
 state Prepare
 	function FireAction()
+		SkillBonus = new float[6]
 		SetAnimation()
 		AliasEvent("Prepare", 30.0)
 	endFunction
@@ -152,6 +153,7 @@ state Animating
 	function PlayAnimation()
 		UnregisterForUpdate()
 		string[] AnimEvents = Animation.FetchStage(Stage)
+		; Log("Playing Animation Events: "+AnimEvents, "Stage: "+Stage+" Animation: "+Animation.Name)
 		; Send with as little overhead as possible to improve syncing
 		if ActorCount == 1
 			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
@@ -516,7 +518,6 @@ function RecordSkills()
 endfunction
 
 function SetBonuses()
-	SkillBonus = new float[6]
 	SkillBonus[0] = SkillXP[0]
 	if IsVaginal
 		SkillBonus[1] = 1.0 + SkillXP[1]

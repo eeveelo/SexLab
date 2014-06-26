@@ -51,6 +51,7 @@ float[] Loc
 int[] Flags
 bool[] StripOverride
 form[] Equipment
+float StartedAt
 float ActorScale
 float AnimScale
 form Strapon
@@ -149,8 +150,14 @@ function ClearAlias()
 	endIf
 	; Make sure actor is reset
 	if GetReference() != none
-		; Init variables needed for reset
+		; Get actor incase variable initialized
 		ActorRef   = GetReference() as Actor
+		; Remove any unwanted combat effects
+		ActorRef.StopCombat()
+		if ActorRef.IsWeaponDrawn()
+			ActorRef.SheatheWeapon()
+		endIf
+		; Init variables needed for reset
 		BaseRef    = ActorRef.GetLeveledActorBase()
 		ActorName  = BaseRef.GetName()
 		BaseSex    = BaseRef.GetSex()
@@ -250,11 +257,18 @@ endState
 state Animating
 
 	function StartAnimating()
+		; Begin timer
+		StartedAt = Utility.GetCurrentRealTime()
 		; Position / fix SOS side bend
 		SyncThread()
+		OffsetCoords(Loc, Thread.CenterLocation, Animation.GetPositionOffsets(AdjustKey, Position, Stage))
+		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
+		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
+		ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
+		ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
+		ActorRef.SetVehicle(MarkerRef)
+		ActorRef.SetScale(AnimScale)
 		SyncLocation(true)
-		ActorRef.StopTranslation()
-		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 50000, 0)
 		; Disable autoadvance if disabled for player
 		if IsPlayer && ((IsVictim && Config.DisablePlayer) || !Config.AutoAdvance)
 			Thread.AutoAdvance = false
@@ -352,7 +366,7 @@ state Animating
 		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		; Avoid forcibly setting on player coords if avoidable - causes annoying graphical flickering
-		if Force && IsPlayer && ActorRef.GetDistance(MarkerRef) < 20.0 && Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ()) < 0.1
+		if Force && IsPlayer && IsInPosition(ActorRef, MarkerRef, 30.0)
 			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 10000, 0)
 		elseIf Force
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
@@ -365,13 +379,12 @@ state Animating
 
 	function Snap()
 		; Quickly move into place and angle if actor is off by a lot
-		float distance = ActorRef.GetDistance(MarkerRef)
-		if distance > 20.0 || (Math.Abs(ActorRef.GetAngleZ() - MarkerRef.GetAngleZ()) > 0.5)
+		if !IsInPosition(ActorRef, MarkerRef, 30.0)
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			ActorRef.SetVehicle(MarkerRef)
 			ActorRef.SetScale(AnimScale)
-		elseIf distance > 0.2
+		elseIf ActorRef.GetDistance(MarkerRef) > 0.2
 			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 5000, 0)
 			return ; OnTranslationComplete() will take over when in place
 		endIf
@@ -408,7 +421,7 @@ state Animating
 		ClearEvents()
 		; Update stats
 		if !IsCreature
-			Stats.RecordThread(ActorRef, Thread.HasPlayer, Thread.ActorCount, HighestRelation, Thread.TotalTime, Thread.VictimRef, Thread.SkillXP, Thread.Genders)
+			Stats.RecordThread(ActorRef, Thread.HasPlayer, Thread.ActorCount, HighestRelation, (Utility.GetCurrentRealTime() - StartedAt), Thread.VictimRef, Thread.SkillXP, Thread.Genders)
 		endIf
 		; Clear TFC
 		if IsPlayer && Game.GetCameraState() == 3
@@ -439,10 +452,10 @@ state Animating
 
 	int function GetEnjoyment()
 		if IsCreature
-			Enjoyment = (ClampFloat(Thread.TotalTime / 6.0, 0.0, 40.0) + ((Stage as float / Animation.StageCount as float) * 60.0)) as int
+			Enjoyment = (ClampFloat((Utility.GetCurrentRealTime() - StartedAt) / 6.0, 0.0, 40.0) + ((Stage as float / Animation.StageCount as float) * 60.0)) as int
 			return Enjoyment
 		endIf
-		Enjoyment = CalcEnjoyment(Thread.SkillBonus, Skills, Thread.LeadIn, IsFemale, Thread.TotalTime, Stage, Animation.StageCount)
+		Enjoyment = CalcEnjoyment(Thread.SkillBonus, Skills, Thread.LeadIn, IsFemale, (Utility.GetCurrentRealTime() - StartedAt), Stage, Animation.StageCount)
 		return Enjoyment
 	endFunction
 
@@ -908,3 +921,4 @@ endFunction
 
 int function CalcEnjoyment(float[] XP, float[] SkillsAmounts, bool IsLeadin, bool IsFemaleActor, float Timer, int OnStage, int MaxStage) global native
 function OffsetCoords(float[] Output, float[] CenterCoords, float[] OffsetBy) global native
+bool function IsInPosition(Actor CheckActor, ObjectReference CheckMarker, float maxdistance = 30.0) global native

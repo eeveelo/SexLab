@@ -287,7 +287,7 @@ state Making
 		endIf
 
 		; If a bed is present, remove any standing animations
-		if Config.BedRemoveStanding && BedRef != none
+		if BedRef != none && Config.BedRemoveStanding
 			; Remove standing animations from primary
 			sslBaseAnimation[] NoStandingPrimary = AnimSlots.RemoveTagged(PrimaryAnimations, "Standing")
 			if NoStandingPrimary.Length > 0

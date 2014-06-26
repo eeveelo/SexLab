@@ -9,7 +9,7 @@ int function GetVersion() global
 endFunction
 
 string function GetStringVer() global
-	return "1.58 Beta 2"
+	return "1.58 Beta 3"
 endFunction
 
 bool function SexLabIsActive() global
@@ -166,8 +166,7 @@ function EnableFreeCamera(bool Enabling = true, float sucsm = 5.0) global
 	endIf
 endFunction
 
-bool function EnterFreeCamera() global native
+; bool function EnterFreeCamera() global native
 
 bool function HasKeywordSub(form ObjRef, string LookFor) global native
-
 function PrintConsole(string output) global native
