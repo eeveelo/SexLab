@@ -20,73 +20,22 @@ ObjectReference MarkerRef
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
 	; sslBenchmark Dev = Quest.GetQuest("SexLabDev") as sslBenchmark
+	; Dev.StartBenchmark(2, 10, 5)
+	float t
+
+	sslActorStats Stats = SexLabUtil.GetAPI().Stats
+	FormListRemove(none, "SexLab.SeededActors", TargetRef, true)
+
+	t = Utility.GetCurrentRealTime()
+	Stats.SeedActor(TargetRef)
+	t = Utility.GetCurrentRealTime() - t
+	Log("SeedActor: "+t)
+
+	FormListRemove(none, "SexLab.SeededActors", TargetRef, true)
+
+
 	; Dev.RegisterForModEvent("HookAnimationChange_DevTest", "Hook")
 	; SexLab.QuickStart(CasterRef, TargetRef, Hook = "DevTest")
-
-	; sslBaseAnimation[] Standing = SexLab.GetAnimationsByTags(2, "Cowgirl,Standing", RequireAll = false)
-	; Log("With Standing("+Standing.Length+"): "+Standing)
-
-	; sslBaseAnimation[] Cleaned = SexLab.AnimSlots.RemoveTagged(Standing, "Standing")
-	; Log("Standing Removed("+Cleaned.Length+") - Removed ("+SexLab.AnimSlots.CountTag(Standing, "Standing")+"): "+Cleaned)
-
-	; Actor ActorRef = TargetRef
-
-	; ; Calculate scales
-	; float display = ActorRef.GetScale()
-	; Log("display "+ display)
-
-	; ActorRef.SetScale(1.0)
-	; float base = ActorRef.GetScale()
-	; Log("base "+ base)
-
-	; float ActorScale = ( display / base )
-	; Log("ActorScale "+ ActorScale)
-
-	; ActorRef.SetScale(ActorScale)
-
-	; Log("current scale "+ActorRef.GetScale())
-
-	; Log("skeleton.nif " +NetImmerse.GetNodeScale(ActorRef, "skeleton.nif", false))
-	; Log("NPC " +NetImmerse.GetNodeScale(ActorRef, "NPC", false))
-	; Log("NPC Root [Root] " +NetImmerse.GetNodeScale(ActorRef, "NPC Root [Root]", false))
-	; Log("NPC COM [COM ] " +NetImmerse.GetNodeScale(ActorRef, "NPC COM [COM ]", false))
-
-	; Log("------------")
-
-	; float AnimScale = (1.0 / base)
-	; ActorRef.SetScale(AnimScale)
-	; Log("AnimScale "+ AnimScale)
-
-	; Log("skeleton.nif " +NetImmerse.GetNodeScale(ActorRef, "skeleton.nif", false))
-	; Log("NPC " +NetImmerse.GetNodeScale(ActorRef, "NPC", false))
-	; Log("NPC Root [Root] " +NetImmerse.GetNodeScale(ActorRef, "NPC Root [Root]", false))
-	; Log("NPC COM [COM ] " +NetImmerse.GetNodeScale(ActorRef, "NPC COM [COM ]", false))
-
-	; ActorRef.SetScale(ActorScale)
-	; Log("end scale "+ActorRef.GetScale())
-
-	; float com = NetImmerse.GetNodeScale(ActorRef, "NPC COM [COM ]", false)
-
-
-	; NetImmerse.SetNodeScale(ActorRef, "NPC COM [COM ]", 1.0, false)
-	; Log("NPC COM [COM ] ALTERED " +NetImmerse.GetNodeScale(ActorRef, "NPC COM [COM ]", false))
-
-	; Utility.Wait(10.0)
-
-	; float display2 = ActorRef.GetScale()
-	; Log("ALT display "+ display2)
-
-	; ActorRef.SetScale(1.0)
-	; float base2 = ActorRef.GetScale()
-	; Log("ALT base "+ base)
-
-	; Log("ALT ActorScale "+ ( display2 / base2 ))
-
-
-
-
-	; NetImmerse.SetNodeScale(ActorRef, "NPC COM [COM ]", com, false)
-	; Log("NPC COM [COM ] returned " +NetImmerse.GetNodeScale(ActorRef, "NPC COM [COM ]", false))
 
 
 

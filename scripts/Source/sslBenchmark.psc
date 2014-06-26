@@ -22,14 +22,11 @@ state Test1
 		while nth
 			nth -= 1
 			; START code to benchmark
-
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline
 	endFunction
 endState
-
-
 
 
 function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10)

@@ -2,6 +2,8 @@ scriptname sslActorStats extends sslActorLibrary
 
 import StorageUtil
 import sslUtility
+import Utility
+import Math
 
 ; Titles
 string[] StatTitles
@@ -171,7 +173,62 @@ endFunction
 ; --- Sex Skills                                      --- ;
 ; ------------------------------------------------------- ;
 
-; function CalcStats(Actor ActorRef, float[] Stats) global native
+;/
+##
+## Minimal performance gain over papyrus version, not worth the increased difficulty when dealing with it
+## commented out to maybe play with more in the future.
+##
+
+; 0 = Straight
+; 1 = Gay
+; 2 = TimeSpent
+; 3 = Vaginal
+; 4 = Anal
+; 5 = Oral
+; 6 = Foreplay
+; 7 = Pure
+; 8 = Lewd
+function CalcStats(float[] Output, float[] AIData, bool IsFemale) global native
+
+function TestSeed(Actor ActorRef)
+	if ActorRef == PlayerRef || !ActorRef.HasKeyword(ActorTypeNPC) || FormListFind(none, "SexLab.SeededActors", ActorRef) != -1
+		return
+	endIf
+	; Added to seeded list so they skip this in future
+	FormListAdd(none, "SexLab.SeededActors", ActorRef, false)
+
+	bool IsFemale = GetGender(ActorRef) == 1
+	float[] Output = new float[9]
+	float[] AIData  = new float[9]
+	AIData[0] = ActorRef.GetLevel() as float
+	AIData[1] = ActorRef.GetActorValue("Energy")
+	AIData[2] = ActorRef.GetActorValue("Assistance")
+	AIData[3] = ActorRef.GetActorValue("Aggression")
+	AIData[4] = ActorRef.GetActorValue("Confidence")
+	AIData[5] = ActorRef.GetActorValue("Morality")
+	AIData[6] = ActorRef.GetActorValue("Speechcraft")
+	AIData[7] = ActorRef.GetHighestRelationshipRank() as float
+	AIData[8] = ActorRef.GetLowestRelationshipRank() as float
+
+	CalcStats(Output, AIData, IsFemale)
+
+	if IsFemale
+		SetInt(ActorRef, "Sexuality", 60)
+		AddSex(ActorRef, Output[2], false, false, Output[0] as int, Output[1] as int, 0)
+	else
+		SetInt(ActorRef, "Sexuality", 80)
+		AddSex(ActorRef, Output[2], false, false, Output[1] as int, Output[0] as int, 0)
+	endIf
+
+	SetInt(ActorRef, "Vaginal", Output[3] as int)
+	SetInt(ActorRef, "Anal", Output[4] as int)
+	SetInt(ActorRef, "Oral", Output[5] as int)
+	SetInt(ActorRef, "Foreplay", Output[6] as int)
+	SetInt(ActorRef, "Pure", Output[7] as int)
+	SetInt(ActorRef, "Lewd", Output[8] as int)
+
+	Log("Sexuality["+GetSexuality(ActorRef)+"] Foreplay["+GetSkill(ActorRef, "Foreplay")+"] Vaginal["+GetSkill(ActorRef, "Vaginal")+"] Anal["+GetSkill(ActorRef, "Anal")+"] Oral["+GetSkill(ActorRef, "Oral")+"] Pure["+GetPure(ActorRef)+"] Lewd["+GetLewd(ActorRef)+"]", ActorRef.GetLeveledActorBase().GetName()+" Stats Seed")
+endFunction/;
 
 function SeedActor(Actor ActorRef)
 	if ActorRef == PlayerRef || !ActorRef.HasKeyword(ActorTypeNPC) || FormListFind(none, "SexLab.SeededActors", ActorRef) != -1
@@ -180,37 +237,36 @@ function SeedActor(Actor ActorRef)
 	; Added to seeded list so they skip this in future
 	FormListAdd(none, "SexLab.SeededActors", ActorRef, false)
 
-	float Level       = ActorRef.GetLevel() as float
+	float Level       = ActorRef.GetLevel() as float + (ActorRef.GetActorValue("Speechcraft") * 0.1)
 	float Energy      = ActorRef.GetActorValue("Energy")
 	float Assistance  = ActorRef.GetActorValue("Assistance")
 	float Aggression  = ActorRef.GetActorValue("Aggression")
 	float Confidence  = ActorRef.GetActorValue("Confidence")
 	float Morality    = ActorRef.GetActorValue("Morality")
-	float Speechcraft = ActorRef.GetActorValue("Speechcraft")
-
 	int HighestRelation = ActorRef.GetHighestRelationshipRank()
 	int LowestRelation  = ActorRef.GetLowestRelationshipRank()
+	bool IsFemale = GetGender(ActorRef) == 1
 
 	; Seed Sexuality
-	float Gay      = (Utility.RandomFloat(0.0, Level / 2.0) + Math.Abs(LowestRelation))  + Math.Sqrt(Energy * 0.5)
-	float Straight = (Utility.RandomFloat(0.0, Level / 2.0) + Math.Abs(HighestRelation)) + Math.Sqrt(Energy * 0.5) + (Assistance * 1.5)
+	float Straight = RandomFloat(Level * 0.2, Level * 0.66) + Abs(HighestRelation) + Sqrt(Energy * 0.5) + (Assistance * 1.5)
+	float Gay      = RandomFloat(Level * 0.2, Level * 0.66) + Abs(LowestRelation)  + Sqrt(Energy * 0.5)
 	; Very aggressive / frenzied - make more likely to have had more
 	if Aggression > 1.0
-		Gay      *= Utility.RandomFloat(1.10, 1.45)
-		Straight *= Utility.RandomFloat(1.10, 1.45)
+		Straight *= RandomFloat(1.13, 1.45)
+		Gay      *= RandomFloat(1.13, 1.45)
 	endIf
 	; Cowardly - less likely to have had partners
 	if Confidence == 0.0
-		Gay      *= Utility.RandomFloat(0.4, 0.7)
-		Straight *= Utility.RandomFloat(0.4, 0.7)
+		Straight *= RandomFloat(0.4, 0.7)
+		Gay      *= RandomFloat(0.4, 0.7)
 	endIf
 	; Chance for never having had a certain type
-	Gay      *= ((Utility.RandomInt(1, 5) != 1) as float)
-	Straight *= ((Utility.RandomInt(1, 10) != 1) as float)
+	Straight *= ((RandomInt(1, 10) != 1) as float)
+	Gay      *= ((RandomInt(1, 4) != 1) as float)
 
 	; Seed time spent
-	float TimeSpent = ((Straight + Gay) * Utility.RandomFloat(20.0, 45.0))
-	if GetGender(ActorRef) == 1
+	float TimeSpent = (Straight + Gay) * RandomFloat(7.0, 13.0)
+	if IsFemale
 		SetInt(ActorRef, "Sexuality", 60)
 		AddSex(ActorRef, TimeSpent, false, false, Straight as int, Gay as int, 0)
 	else
@@ -219,49 +275,67 @@ function SeedActor(Actor ActorRef)
 	endIf
 
 	; Sex Skills
-	int Vaginal  = ((TimeSpent + Utility.RandomFloat(0.25, Level * 1.5)) / Utility.RandomFloat(8.0, 15.0)) as int
-	int Anal     = ((TimeSpent + Utility.RandomFloat(0.25, Level * 1.3)) / Utility.RandomFloat(8.0, 15.0)) as int
-	int Oral     = ((TimeSpent + Utility.RandomFloat(0.25, Level * 1.4)) / Utility.RandomFloat(8.0, 15.0)) as int
-	int Foreplay = ((TimeSpent + Utility.RandomFloat(0.25, Level * 1.1)) / Utility.RandomFloat(8.0, 15.0)) as int
+	float Vaginal  = 1.3 * (((TimeSpent * 0.6) + RandomFloat(1.0, Level)) / RandomFloat(4.0, 13.69))
+	float Anal     = 1.1 * (((TimeSpent * 0.6) + RandomFloat(1.0, Level)) / RandomFloat(4.0, 13.69))
+	float Oral     = 1.2 * (((TimeSpent * 0.6) + RandomFloat(1.0, Level)) / RandomFloat(4.0, 13.69))
+	float Foreplay = 0.9 * (((TimeSpent * 0.6) + RandomFloat(1.0, Level)) / RandomFloat(4.0, 13.69))
 
-	SetInt(ActorRef, "Vaginal", Vaginal)
-	SetInt(ActorRef, "Anal", Anal)
-	SetInt(ActorRef, "Oral", Oral)
-	SetInt(ActorRef, "Foreplay", Foreplay)
+	; float Vaginal  =  1.5 * ((TimeSpent * 0.69) + RandomFloat(0.1, Level * Level)) / RandomFloat(4.0, 13.6)
+	; float Anal     =  1.3 * ((TimeSpent * 0.69) + RandomFloat(0.1, Level)) / RandomFloat(4.0, 13.6)
+	; float Oral     =  1.4 * ((TimeSpent * 0.69) + RandomFloat(0.1, Level)) / RandomFloat(4.0, 13.6)
+	; float Foreplay =  1.1 * ((TimeSpent * 0.69) + RandomFloat(0.1, Level)) / RandomFloat(4.0, 13.6)
+
+	; Alter by sexuality
+	if Gay > Straight
+		if IsFemale
+			Vaginal *= 1.5
+			Anal    *= 0.5
+			Oral    *= 1.1
+		else
+			Vaginal *= 0.4
+			Anal    *= 1.5
+			Oral    *= 1.1
+		endIf
+	endIf
+
+	SetInt(ActorRef, "Vaginal", Vaginal as int)
+	SetInt(ActorRef, "Anal", Anal as int)
+	SetInt(ActorRef, "Oral", Oral as int)
+	SetInt(ActorRef, "Foreplay", Foreplay as int)
 
 	; Seed Pure
-	float Pure = (Morality * 1.25) - (Aggression * 0.5)
-	Pure +=  1.0 * Math.Abs(HighestRelation)
+	float Pure = (Morality * 1.25) - (Aggression * 0.75)
+	Pure +=  1.0 * Abs(HighestRelation)
 	Pure += -1.5 * ((Morality == 0.0) as float)
-	Pure +=  3.0 * ((Morality == 3.0) as float)
+	Pure +=  3.1 * ((Morality == 3.0) as float)
 	Pure +=  2.5 * ((Aggression == 0 && Morality != 0) as float)
 	Pure += -1.5 * ((Assistance == 0.0) as float)
-	Pure +=  2.0 * ((Assistance == 2.0) as float)
+	Pure +=  3.0 * ((Assistance == 2.0) as float)
 	Pure +=  1.2 * ((Assistance == 2.0 && Morality == 0.0) as float)
 	if Pure < 0.0
-		Pure = Utility.RandomFloat(0.0, Math.Abs(Pure))
+		Pure = RandomFloat(0.0, Abs(Pure))
 	endIf
 	; Seed Lewd
-	float Lewd = (Aggression * 2.0)
-	Lewd +=  1.0 * Math.Abs(LowestRelation)
-	Lewd +=  1.8 * ((LowestRelation < 0) as float)
-	Lewd +=  2.0 * ((Morality == 0.0) as float)
+	float Lewd = (Aggression * 1.5)
+	Lewd +=  1.0 * Abs(LowestRelation)
+	Lewd +=  2.2 * ((LowestRelation < 0) as float)
+	Lewd +=  2.5 * ((Morality == 0.0) as float)
 	Lewd += -1.5 * ((Morality == 3.0) as float)
-	Lewd +=  2.2 * ((Assistance == 0.0) as float)
+	Lewd +=  2.3 * ((Assistance == 0.0) as float)
 	Lewd += -1.5 * ((Assistance == 2.0) as float)
-	Lewd +=  3.0 * ((Morality == 0.0 && Aggression > 1.0) as float)
+	Lewd +=  3.1 * ((Morality == 0.0 && Aggression > 1.0) as float)
 	if Lewd < 0.0
-		Lewd = Utility.RandomFloat(0.0, Math.Abs(Lewd))
+		Lewd = RandomFloat(0.0, Abs(Lewd))
 	endIf
 	; Curved increase with actor level and slight randomness
-	float Curve = Math.Abs(Math.Sqrt(((Math.Pow(Level, 2.0)) / 2.0 ) * (8.5 + Utility.RandomFloat(-1.0, 1.8))))
-	Pure = Math.Abs(Pure * Curve)
-	Lewd = Math.Abs(Lewd * Curve)
+	float Curve = Abs(Sqrt(((Level * Level) / 2.3 ) * (5.0 + RandomFloat(-1.0, 1.8))))
+	Pure = Abs(Pure * Curve)
+	Lewd = Abs(Lewd * Curve)
 
 	SetInt(ActorRef, "Pure", Pure as int)
 	SetInt(ActorRef, "Lewd", Lewd as int)
 
-	Log("Foreplay["+GetSkill(ActorRef, "Foreplay")+"] Vaginal["+GetSkill(ActorRef, "Vaginal")+"] Anal["+GetSkill(ActorRef, "Anal")+"] Oral["+GetSkill(ActorRef, "Oral")+"] Pure["+GetPure(ActorRef)+"] Lewd["+GetLewd(ActorRef)+"]", ActorRef.GetLeveledActorBase().GetName()+" Stats Seed")
+	Log("Sexuality["+GetSexuality(ActorRef)+"] Foreplay["+GetSkill(ActorRef, "Foreplay")+"] Vaginal["+GetSkill(ActorRef, "Vaginal")+"] Anal["+GetSkill(ActorRef, "Anal")+"] Oral["+GetSkill(ActorRef, "Oral")+"] Pure["+GetPure(ActorRef)+"] Lewd["+GetLewd(ActorRef)+"]", ActorRef.GetLeveledActorBase().GetName()+" Stats Seed")
 endFunction
 
 int function GetSkill(Actor ActorRef, string Skill)
@@ -333,7 +407,7 @@ int function GetPure(Actor ActorRef)
 endFunction
 
 int function GetPureLevel(Actor ActorRef)
-	return CalcLevel(GetPure(ActorRef), 0.4)
+	return CalcLevel(GetPure(ActorRef), 0.3)
 endFunction
 
 string function GetPureTitle(Actor ActorRef)
@@ -349,7 +423,7 @@ int function GetLewd(Actor ActorRef)
 endFunction
 
 int function GetLewdLevel(Actor ActorRef)
-	return CalcLevel(GetLewd(ActorRef), 0.4)
+	return CalcLevel(GetLewd(ActorRef), 0.3)
 endFunction
 
 string function GetLewdTitle(Actor ActorRef)
@@ -390,7 +464,7 @@ string function GetPurityTitle(Actor ActorRef)
 endFunction
 
 int function GetPurityLevel(Actor ActorRef)
-	return CalcLevel(Math.Abs(GetPurity(ActorRef)), 0.4)
+	return CalcLevel(Math.Abs(GetPurity(ActorRef)), 0.3)
 endFunction
 
 function AddPurityXP(Actor ActorRef, float Pure, float Lewd, bool IsAggressive, bool IsVictim, bool WithCreature, int ActorCount, int HadRelation)
