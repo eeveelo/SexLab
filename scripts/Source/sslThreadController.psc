@@ -21,14 +21,12 @@ int AdjustPos
 bool Adjusted
 bool hkReady
 
-
 ; ------------------------------------------------------- ;
 ; --- Thread Starter                                  --- ;
 ; ------------------------------------------------------- ;
 
 state Prepare
 	function FireAction()
-		SkillBonus = new float[6]
 		SetAnimation()
 		AliasEvent("Prepare", 30.0)
 	endFunction
@@ -197,16 +195,11 @@ state Animating
 
 	function MoveActors()
 		UnregisterForUpdate()
-		ActorAlias[0].SyncThread()
-		ActorAlias[1].SyncThread()
-		ActorAlias[2].SyncThread()
-		ActorAlias[3].SyncThread()
-		ActorAlias[4].SyncThread()
-		ActorAlias[0].SyncLocation(false)
-		ActorAlias[1].SyncLocation(false)
-		ActorAlias[2].SyncLocation(false)
-		ActorAlias[3].SyncLocation(false)
-		ActorAlias[4].SyncLocation(false)
+		ActorAlias[0].RefreshLoc()
+		ActorAlias[1].RefreshLoc()
+		ActorAlias[2].RefreshLoc()
+		ActorAlias[3].RefreshLoc()
+		ActorAlias[4].RefreshLoc()
 		RegisterForSingleUpdate(0.4)
 	endFunction
 
@@ -261,10 +254,10 @@ state Animating
 		UnregisterforUpdate()
 		Adjusted = true
 		Animation.AdjustForward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
-		AdjustAlias.SyncLocation()
+		AdjustAlias.RefreshLoc()
 		while Input.IsKeyPressed(Config.AdjustForward)
 			Animation.AdjustForward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
-			AdjustAlias.SyncLocation()
+			AdjustAlias.RefreshLoc()
 		endWhile
 		RegisterForSingleUpdate(0.4)
 	endFunction
@@ -273,10 +266,10 @@ state Animating
 		UnregisterforUpdate()
 		Adjusted = true
 		Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
-		AdjustAlias.SyncLocation()
+		AdjustAlias.RefreshLoc()
 		while Input.IsKeyPressed(Config.AdjustSideways)
 			Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
-			AdjustAlias.SyncLocation()
+			AdjustAlias.RefreshLoc()
 		endWhile
 		RegisterForSingleUpdate(0.4)
 	endFunction
@@ -285,10 +278,10 @@ state Animating
 		UnregisterforUpdate()
 		Adjusted = true
 		Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
-		AdjustAlias.SyncLocation()
+		AdjustAlias.RefreshLoc()
 		while Input.IsKeyPressed(Config.AdjustUpward)
 			Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
-			AdjustAlias.SyncLocation()
+			AdjustAlias.RefreshLoc()
 		endWhile
 		RegisterForSingleUpdate(0.4)
 	endFunction
@@ -301,7 +294,11 @@ state Animating
 		elseIf CenterLocation[5] < 0.0
 			CenterLocation[5] = CenterLocation[5] + 360.0
 		endIf
-		RealignActors()
+		ActorAlias[0].RefreshLoc()
+		ActorAlias[1].RefreshLoc()
+		ActorAlias[2].RefreshLoc()
+		ActorAlias[3].RefreshLoc()
+		ActorAlias[4].RefreshLoc()
 		RegisterForSingleUpdate(0.4)
 	endFunction
 
