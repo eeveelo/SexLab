@@ -44,7 +44,7 @@ sslBaseExpression Expression
 
 ; Positioning
 ObjectReference MarkerRef
-; float[] Offsets
+float[] Offsets
 float[] Loc
 
 ; Storage
@@ -153,10 +153,7 @@ function ClearAlias()
 		; Get actor incase variable initialized
 		ActorRef   = GetReference() as Actor
 		; Remove any unwanted combat effects
-		ActorRef.StopCombat()
-		if ActorRef.IsWeaponDrawn()
-			ActorRef.SheatheWeapon()
-		endIf
+		ClearEffects()
 		; Init variables needed for reset
 		BaseRef    = ActorRef.GetLeveledActorBase()
 		ActorName  = BaseRef.GetName()
@@ -187,16 +184,14 @@ state Ready
 	endFunction
 
 	function PrepareActor()
-		; Thread.Log("Preparing", ActorName)
 		; Remove any unwanted combat effects
-		ActorRef.StopCombat()
-		if ActorRef.IsWeaponDrawn()
-			ActorRef.SheatheWeapon()
-		endIf
+		ClearEffects()
 		; Starting Information
-		Position  = Thread.Positions.Find(ActorRef)
-		Animation = Thread.Animation
-		Stage     = Thread.Stage
+		Animation  = Thread.Animation
+		AdjustKey  = Thread.AdjustKey
+		Stage      = Thread.Stage
+		Position   = Thread.Positions.Find(ActorRef)
+		Flags      = Animation.GetPositionFlags(AdjustKey, Position, Stage)
 		; Calculate scales
 		float display = ActorRef.GetScale()
 		ActorRef.SetScale(1.0)
@@ -217,6 +212,7 @@ state Ready
 			endIf
 			; Strip actor
 			Strip()
+			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 			; Pick a voice if needed
 			if Voice == none && !IsForcedSilent
 				SetVoice(Config.VoiceSlots.PickVoice(ActorRef), IsForcedSilent)
@@ -242,9 +238,13 @@ state Ready
 			endIf
 		endIf
 		; Enter animatable state - rest is non vital and can finish as queued
-		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
-		Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
-		Utility.Wait(0.2) ; Give erection time to rise to the occasion
+		Offsets = Animation.GetPositionOffsets(AdjustKey, Position, Stage)
+		OffsetCoords(Loc, Thread.CenterLocation, Offsets)
+		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
+		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
+		ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
+		ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
+		Attach()
 		GoToState("Animating")
 		Thread.AliasEventDone("Prepare")
 	endFunction
@@ -259,15 +259,7 @@ state Animating
 	function StartAnimating()
 		; Begin timer
 		StartedAt = Utility.GetCurrentRealTime()
-		; Position / fix SOS side bend
 		SyncThread()
-		OffsetCoords(Loc, Thread.CenterLocation, Animation.GetPositionOffsets(AdjustKey, Position, Stage))
-		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
-		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
-		ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
-		ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
-		ActorRef.SetVehicle(MarkerRef)
-		ActorRef.SetScale(AnimScale)
 		SyncLocation(true)
 		; Disable autoadvance if disabled for player
 		if IsPlayer && ((IsVictim && Config.DisablePlayer) || !Config.AutoAdvance)
@@ -309,17 +301,17 @@ state Animating
 
 	function SyncActor()
 		SyncThread()
-		SyncLocation(false)
+		SyncLocation(true)
 		Thread.AliasEventDone("Sync")
 	endFunction
 
 	function SyncThread()
-		; Sync information
 		Animation  = Thread.Animation
 		AdjustKey  = Thread.AdjustKey
 		Stage      = Thread.Stage
 		Position   = Thread.Positions.Find(ActorRef)
 		Flags      = Animation.GetPositionFlags(AdjustKey, Position, Stage)
+		Offsets    = Animation.GetPositionOffsets(AdjustKey, Position, Stage)
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
 		; Actor has been removed from current thread somehow
 		if Position < 0
@@ -341,13 +333,10 @@ state Animating
 		; Clear any existing expression as a default - to remove open mouth
 		; ActorRef.ClearExpressionOverride()
 		if OpenMouth
-			; Open mouth if needed
 			sslBaseExpression.OpenMouth(ActorRef)
 		elseIf Expression != none
-			; Apply expression otherwise - overrides open mouth
 			Expression.Apply(ActorRef, Enjoyment, BaseSex)
 		else
-			; No expression to override but mouth might be open - close it
 			sslBaseExpression.CloseMouth(ActorRef)
 		endIf
 		; Send schlong offset
@@ -357,12 +346,13 @@ state Animating
 	endFunction
 
 	function RefreshLoc()
-		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 10000, 0)
+		Offsets = Animation.GetPositionOffsets(AdjustKey, Position, Stage)
+		SyncLocation(false)
 	endFunction
 
 	function SyncLocation(bool Force = false)
 		; Set Loc Array to offset coordinates
-		OffsetCoords(Loc, Thread.CenterLocation, Animation.GetPositionOffsets(AdjustKey, Position, Stage))
+		OffsetCoords(Loc, Thread.CenterLocation, Offsets)
 		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		; Avoid forcibly setting on player coords if avoidable - causes annoying graphical flickering
@@ -372,8 +362,7 @@ state Animating
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		endIf
-		ActorRef.SetVehicle(MarkerRef)
-		ActorRef.SetScale(AnimScale)
+		Attach()
 		Snap()
 	endFunction
 
@@ -382,8 +371,7 @@ state Animating
 		if !IsInPosition(ActorRef, MarkerRef, 30.0)
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
-			ActorRef.SetVehicle(MarkerRef)
-			ActorRef.SetScale(AnimScale)
+			Attach()
 		elseIf ActorRef.GetDistance(MarkerRef) > 0.2
 			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 5000, 0)
 			return ; OnTranslationComplete() will take over when in place
@@ -514,6 +502,8 @@ function LockActor()
 	if ActorRef == none
 		return
 	endIf
+	; Remove any unwanted combat effects
+	ClearEffects()
 	; Stop whatever they are doing
 	Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 	; Start DoNothing package
@@ -540,7 +530,7 @@ function LockActor()
 	MarkerRef.Enable()
 	MarkerRef.MoveTo(ActorRef)
 	ActorRef.StopTranslation()
-	ActorRef.SetVehicle(MarkerRef)
+	Attach()
 endFunction
 
 function UnlockActor()
@@ -601,9 +591,6 @@ endFunction
 
 string function GetActorKey()
 	return ActorKey
-endFunction
-
-function SetFlags(int[] ToFlags)
 endFunction
 
 function SetVoice(sslBaseVoice ToVoice = none, bool ForceSilence = false)
@@ -802,6 +789,25 @@ endProperty
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
 
+function Attach()
+	ActorRef.SetVehicle(MarkerRef)
+	if AnimScale != 1.0
+		ActorRef.SetScale(AnimScale)
+	endIf
+endFunction
+
+function ClearEffects()
+	if ActorRef.IsInCombat()
+		ActorRef.StopCombat()
+	endIf
+	if ActorRef.IsWeaponDrawn()
+		ActorRef.SheatheWeapon()
+	endIf
+	if ActorRef.IsSneaking()
+		ActorRef.StartSneaking()
+	endIf
+endFunction
+
 function RegisterEvents()
 	string e = Thread.Key("")
 	RegisterForModEvent(e+"Prepare", "PrepareActor")
@@ -866,11 +872,10 @@ endFunction
 
 function Setup()
 	; init libraries
-	SexLabFramework SexLab = Game.GetFormFromFile(0xD62, "SexLab.esm") as SexLabFramework
-	PlayerRef       = SexLab.PlayerRef
-	Config          = SexLab.Config
-	ActorLib        = SexLab.ActorLib
-	Stats           = SexLab.Stats
+	Config          = SexLabUtil.GetConfig()
+	PlayerRef       = Config.PlayerRef
+	ActorLib        = Config.ActorLib
+	Stats           = Config.Stats
 	; init alias settings
 	Thread = GetOwningQuest() as sslThreadController
 	Initialize()
