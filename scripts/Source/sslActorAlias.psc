@@ -192,6 +192,7 @@ state Ready
 		Stage      = Thread.Stage
 		Position   = Thread.Positions.Find(ActorRef)
 		Flags      = Animation.GetPositionFlags(AdjustKey, Position, Stage)
+		Offsets    = Animation.GetPositionOffsets(AdjustKey, Position, Stage)
 		; Calculate scales
 		float display = ActorRef.GetScale()
 		ActorRef.SetScale(1.0)
@@ -204,7 +205,14 @@ state Ready
 		endIf
 		; Stop movement
 		LockActor()
-		; Strip non creatures
+		; Starting position
+		OffsetCoords(Loc, Thread.CenterLocation, Offsets)
+		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
+		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
+		ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
+		ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
+		Attach()
+		; Extras for non creatures
 		if !IsCreature
 			; Pick a strapon on females to use
 			if IsFemale && Config.UseStrapons && Strapon == none
@@ -237,15 +245,8 @@ state Ready
 				Config.ToggleFreeCamera()
 			endIf
 		endIf
-		; Enter animatable state - rest is non vital and can finish as queued
-		Offsets = Animation.GetPositionOffsets(AdjustKey, Position, Stage)
-		OffsetCoords(Loc, Thread.CenterLocation, Offsets)
-		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
-		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
-		ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
-		ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
-		Attach()
 		GoToState("Animating")
+		; Enter animatable state - rest is non vital and can finish as queued
 		Thread.AliasEventDone("Prepare")
 	endFunction
 endState
@@ -257,10 +258,6 @@ endState
 state Animating
 
 	function StartAnimating()
-		; Begin timer
-		StartedAt = Utility.GetCurrentRealTime()
-		SyncThread()
-		SyncLocation(true)
 		; Disable autoadvance if disabled for player
 		if IsPlayer && ((IsVictim && Config.DisablePlayer) || !Config.AutoAdvance)
 			Thread.AutoAdvance = false
@@ -270,12 +267,13 @@ state Animating
 			Thread.SendTrackedEvent(ActorRef, "Start", Thread.tid)
 		endif
 		; Start update loop
+		StartedAt = Utility.GetCurrentRealTime()
 		RegisterForSingleUpdate(Utility.RandomFloat(1.5, 3.0))
 	endFunction
 
 	event OnUpdate()
 		; Check if still among the living and able.
-		if ActorRef.IsDisabled() || (ActorRef.IsDead() && ActorRef.GetActorValue("Health") < 1.0) ;|| !ActorRef.Is3DLoaded() ActorRef.GetActorValue("Health") < 1.0
+		if ActorRef.IsDisabled() || (ActorRef.IsDead() && ActorRef.GetActorValue("Health") < 1.0)
 			Log("Actor is disabled or has no health, unable to continue animating", ActorName)
 			Thread.EndAnimation(true)
 			return
@@ -301,7 +299,7 @@ state Animating
 
 	function SyncActor()
 		SyncThread()
-		SyncLocation(true)
+		SyncLocation(false)
 		Thread.AliasEventDone("Sync")
 	endFunction
 
@@ -356,7 +354,7 @@ state Animating
 		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		; Avoid forcibly setting on player coords if avoidable - causes annoying graphical flickering
-		if Force && IsPlayer && IsInPosition(ActorRef, MarkerRef, 30.0)
+		if Force && IsPlayer && IsInPosition(ActorRef, MarkerRef, 40.0)
 			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 10000, 0)
 		elseIf Force
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
@@ -368,7 +366,7 @@ state Animating
 
 	function Snap()
 		; Quickly move into place and angle if actor is off by a lot
-		if !IsInPosition(ActorRef, MarkerRef, 30.0)
+		if !IsInPosition(ActorRef, MarkerRef, 50.0)
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			Attach()
