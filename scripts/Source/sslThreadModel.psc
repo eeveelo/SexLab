@@ -518,6 +518,9 @@ function ChangeActors(Actor[] NewPositions)
 			Slot.StartAnimating()
 		endIf
 	endWhile
+	; New adjustment profile
+	UpdateAdjustKey()
+	Log(AdjustKey, "Adjustment Profile")
 	; Reposition actors
 	RealignActors()
 	RegisterForSingleUpdate(0.1)
@@ -941,7 +944,6 @@ function UpdateAdjustKey()
 		endWhile
 	endIf
 	AdjustKey = NewKey
-	Log(AdjustKey, "Adjustment Profile")
 endFunction
 
 function SetTID(int value)

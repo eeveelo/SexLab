@@ -28,6 +28,7 @@ bool hkReady
 state Prepare
 	function FireAction()
 		SetAnimation()
+		Log(AdjustKey, "Adjustment Profile")
 		AliasEvent("Prepare", 30.0)
 	endFunction
 
@@ -240,9 +241,11 @@ state Animating
 		; Shuffle actor positions
 		Positions[AdjustPos] = MovedActor
 		Positions[NewPos] = AdjustActor
+		; New adjustment profile
+		UpdateAdjustKey()
+		Log(AdjustKey, "Adjustment Profile")
 		; Sync new positions
 		AdjustPos = NewPos
-		UpdateAdjustKey()
 		GoToState("Animating")
 		RealignActors()
 		MoveActors()
