@@ -484,13 +484,13 @@ function CloseMouth(Actor ActorRef)
 	sslBaseExpression.CloseMouth(ActorRef)
 endFunction
 
+; No longer useable due to removal of MfgConsoleFunc
 bool function IsMouthOpen(Actor ActorRef)
-	return sslBaseExpression.IsMouthOpen(ActorRef)
+	return false
 endFunction
 
 function ClearMFG(Actor ActorRef)
-	ActorRef.ClearExpressionOverride()
-	MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
+	ActorRef.ResetExpressionOverrides()
 endFunction
 
 function ClearPhoneme(Actor ActorRef)

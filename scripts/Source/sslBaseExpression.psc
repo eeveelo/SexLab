@@ -1,7 +1,6 @@
 scriptname sslBaseExpression extends sslBaseObject
 
 import sslUtility
-import MfgConsoleFunc
 
 ; Gender Types
 int property Male = 0 autoreadonly
@@ -66,35 +65,35 @@ endFunction
 
 function OpenMouth(Actor ActorRef) global
 	ActorRef.SetExpressionOverride(16, 100)
-	SetPhonemeModifier(ActorRef, 0, 1, 40)
+	ActorRef.SetExpressionPhoneme(1, 20)
 endFunction
 
 function CloseMouth(Actor ActorRef) global
 	ActorRef.ClearExpressionOverride()
-	SetPhonemeModifier(ActorRef, 0, 1, 0)
+	ActorRef.SetExpressionPhoneme(1, 0)
 endFunction
 
+; No longer used due to removal of MFGConsoleFunc plugin
 bool function IsMouthOpen(Actor ActorRef) global
-	return (GetExpressionID(ActorRef) == 16 && GetExpressionValue(ActorRef) == 100) || (GetPhonemeModifier(ActorRef, 0, 1) >= 40)
+	return false
 endFunction
 
 function ClearMFG(Actor ActorRef) global
-	ActorRef.ClearExpressionOverride()
-	ResetPhonemeModifier(ActorRef)
+	ActorRef.ResetExpressionOverrides()
 endFunction
 
 function ClearPhoneme(Actor ActorRef) global
 	int i
-	while i <= 16
-		SetPhonemeModifier(ActorRef, 0, i, 0)
+	while i <= 15
+		ActorRef.SetExpressionPhoneme(i, 0)
 		i += 1
 	endWhile
 endFunction
 
 function ClearModifier(Actor ActorRef) global
 	int i
-	while i <= 16
-		SetPhonemeModifier(ActorRef, 1, i, 0)
+	while i <= 13
+		ActorRef.SetExpressionModifier(i, 0)
 		i += 1
 	endWhile
 endFunction
@@ -104,14 +103,14 @@ function ApplyPreset(Actor ActorRef, int[] Preset) global
 	; Set Phoneme
 	int p
 	while p <= 15
-		SetPhonemeModifier(ActorRef, 0, p, Preset[i])
+		ActorRef.SetExpressionPhoneme(p, Preset[i])
 		i += 1
 		p += 1
 	endWhile
 	; Set Modifers
 	int m
 	while m <= 13
-		SetPhonemeModifier(ActorRef, 1, m, Preset[i])
+		ActorRef.SetExpressionModifier(m, Preset[i])
 		i += 1
 		m += 1
 	endWhile
