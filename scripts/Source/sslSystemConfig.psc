@@ -493,20 +493,20 @@ bool function CheckSystem()
 		CheckSkyrim.Show()
 		return false
 	; Check SKSE install
-	elseIf SKSE.GetScriptVersionRelease() < 45
-		CheckSKSE.Show(1.7)
+	elseIf SKSE.GetScriptVersionRelease() < 46
+		CheckSKSE.Show(1.71)
 		return false
 	; Check SkyUI install - depends on passing SKSE check passing
 	elseIf Quest.GetQuest("SKI_ConfigManagerInstance") == none
 		CheckSkyUI.Show(4.1)
 		return false
 	; Check PapyrusUtil install - depends on passing SKSE check passing
-	elseIf PapyrusUtil.GetVersion() < 21
-		CheckPapyrusUtil.Show(2.1)
+	elseIf PapyrusUtil.GetVersion() < 24
+		CheckPapyrusUtil.Show(2.4)
 		return false
 	; Check FNIS generation - soft fail
 	elseIf !FNIS.IsGenerated()
-		CheckFNIS.Show(5.1)
+		CheckFNIS.Show(5.11)
 	endIf
 	; Return result
 	return true
