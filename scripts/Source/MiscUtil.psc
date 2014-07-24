@@ -10,6 +10,8 @@ function ToggleFreeCamera(bool stopTime = false) global native
 ; Set freefly cam speed.
 function SetFreeCameraSpeed(float speed) global native
 
+; Set current freefly cam state.
+function SetFreeCameraState(bool enable, float speed = 10.0) global native
 
 
 ;/
@@ -42,3 +44,6 @@ bool function WriteToFile(string fileName, string text, bool append = true, bool
 
 ; Get race's editor ID.
 string function GetRaceEditorID(Race raceForm) global native
+
+; Get race's editor ID.
+string function GetActorRaceEditorID(Actor actorRef) global native
