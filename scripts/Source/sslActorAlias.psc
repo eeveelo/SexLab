@@ -22,6 +22,7 @@ bool IsCreature
 bool IsVictim
 bool IsPlayer
 bool IsTracked
+bool IsGagged
 
 ; Current Thread state
 sslThreadController Thread
@@ -68,7 +69,7 @@ bool property OpenMouth hidden
 endProperty
 bool property IsSilent hidden
 	bool function get()
-		return Voice == none || IsForcedSilent || Flags[0] == 1 || Flags[1] == 1
+		return Voice == none || IsForcedSilent || IsGagged || Flags[0] == 1 || Flags[1] == 1
 	endFunction
 endProperty
 bool property UseStrapon hidden
@@ -211,7 +212,8 @@ state Ready
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
-		Attach()
+		ActorRef.SetVehicle(MarkerRef)
+		ActorRef.SetScale(AnimScale)
 		; Extras for non creatures
 		if !IsCreature
 			; Pick a strapon on females to use
@@ -330,7 +332,7 @@ state Animating
 		endIf
 		; Clear any existing expression as a default - to remove open mouth
 		; ActorRef.ClearExpressionOverride()
-		if OpenMouth
+		if OpenMouth && !IsGagged
 			sslBaseExpression.OpenMouth(ActorRef)
 		elseIf Expression != none
 			Expression.Apply(ActorRef, Enjoyment, BaseSex)
@@ -360,7 +362,8 @@ state Animating
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		endIf
-		Attach()
+		ActorRef.SetVehicle(MarkerRef)
+		ActorRef.SetScale(AnimScale)
 		Snap()
 	endFunction
 
@@ -369,7 +372,8 @@ state Animating
 		if !IsInPosition(ActorRef, MarkerRef, 50.0)
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
-			Attach()
+			ActorRef.SetVehicle(MarkerRef)
+			ActorRef.SetScale(AnimScale)
 		elseIf ActorRef.GetDistance(MarkerRef) > 0.2
 			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 5000, 0)
 			return ; OnTranslationComplete() will take over when in place
@@ -528,7 +532,8 @@ function LockActor()
 	MarkerRef.Enable()
 	MarkerRef.MoveTo(ActorRef)
 	ActorRef.StopTranslation()
-	Attach()
+	ActorRef.SetVehicle(MarkerRef)
+	ActorRef.SetScale(AnimScale)
 endFunction
 
 function UnlockActor()
@@ -569,8 +574,8 @@ function RestoreActorDefaults()
 	endIf
 	if !IsCreature
 		; Reset expression
-		ActorRef.ClearExpressionOverride()
-		MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
+		ActorRef.ResetExpressionOverrides()
+		; Reset voicetype
 		if ActorVoice != none && ActorVoice != BaseRef.GetVoiceType()
 			BaseRef.SetVoiceType(ActorVoice)
 		endIf
@@ -701,6 +706,9 @@ function Strip()
 			if ItemRef && !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")
 				ActorRef.UnequipItem(ItemRef, false, true)
 				Stripped[i] = ItemRef
+			; Item wasn't stripped, but has gag keyword
+			elseIf ItemRef && SexLabUtil.HasKeywordSub(ItemRef, "Gag")
+				IsGagged = true
 			endIf
 		endIf
 		; Move to next slot
@@ -787,13 +795,6 @@ endProperty
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
 
-function Attach()
-	ActorRef.SetVehicle(MarkerRef)
-	if AnimScale != 1.0
-		ActorRef.SetScale(AnimScale)
-	endIf
-endFunction
-
 function ClearEffects()
 	if ActorRef.IsInCombat()
 		ActorRef.StopCombat()
@@ -855,6 +856,7 @@ function Initialize()
 	NoRagdoll      = false
 	NoUndress      = false
 	NoRedress      = false
+	IsGagged       = false
 	; Floats
 	ActorScale     = 0.0
 	AnimScale      = 0.0
