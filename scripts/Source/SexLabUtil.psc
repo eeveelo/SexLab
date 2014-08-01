@@ -69,11 +69,11 @@ bool function IsValidActor(Actor ActorRef) global
 endFunction
 
 bool function HasCreature(Actor ActorRef) global
-	return HasRace(ActorRef.GetLeveledActorBase().GetRace())
+	return StorageUtil.StringListHas(GetConfig(), "SexLabCreatures", MiscUtil.GetActorRaceEditorID(ActorRef))
 endFunction
 
 bool function HasRace(Race RaceRef) global
-	return StorageUtil.StringListFind(GetConfig(), "SexLabCreatures", MiscUtil.GetRaceEditorID(RaceRef)) != -1
+	return StorageUtil.StringListHas(GetConfig(), "SexLabCreatures", MiscUtil.GetRaceEditorID(RaceRef))
 endFunction
 
 string function MakeGenderTag(Actor[] Positions) global

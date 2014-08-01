@@ -463,24 +463,19 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function ExportProfile(int Profile = 1)
-	StorageUtil.ExportFile("AnimationProfile_"+Profile+".json", ".Adjust", -1, AnimSlots, false, true, false)
-	Log("Animation Profile #"+AnimProfile+" exported with ("+StorageUtil.debug_GetFloatListKeysCount(AnimSlots)+") values...", "Export")
+	JsonUtil.Save("AdjustmentProfile_"+Profile+".json", DebugMode)
 endFunction
 
 function SwapToProfile(int Profile)
 	if Profile != AnimProfile
-		ExportProfile(AnimProfile)
-		Utility.WaitMenuMode(0.5)
-		StorageUtil.debug_DeleteValues(AnimSlots)
-		Utility.WaitMenuMode(0.5)
 		AnimProfile = Profile
-		ImportProfile(Profile)
+		JsonUtil.Load("AdjustmentProfile_"+Profile+".json")
 	endIf
 endFunction
 
 function ImportProfile(int Profile = 1)
-	StorageUtil.ImportFile("AnimationProfile_"+Profile+".json")
-	Log("Animation Profile #"+AnimProfile+" imported with ("+StorageUtil.debug_GetFloatListKeysCount(AnimSlots)+") values...", "Import")
+	JsonUtil.Load("AdjustmentProfile_"+Profile+".json")
+	; Log("Animation Profile #"+AnimProfile+" imported with ("+StorageUtil.debug_GetFloatListKeysCount(AnimSlots)+") values...", "Import")
 endfunction
 
 ; ------------------------------------------------------- ;
@@ -501,8 +496,8 @@ bool function CheckSystem()
 		CheckSkyUI.Show(4.1)
 		return false
 	; Check PapyrusUtil install - depends on passing SKSE check passing
-	elseIf PapyrusUtil.GetVersion() < 24
-		CheckPapyrusUtil.Show(2.4)
+	elseIf PapyrusUtil.GetVersion() < 25
+		CheckPapyrusUtil.Show(2.5)
 		return false
 	; Check FNIS generation - soft fail
 	elseIf !FNIS.IsGenerated()
@@ -543,8 +538,6 @@ function Reload()
 	; Configure SFX & Voice volumes
 	AudioVoice.SetVolume(VoiceVolume)
 	AudioSFX.SetVolume(SFXVolume)
-	; Load animation & expression profile
-	ImportProfile(AnimProfile)
 	; Remove any targeted actors
 	RegisterForCrosshairRef()
 	CrosshairRef = none
@@ -717,7 +710,7 @@ function SetDefaults()
 	StageTimerAggr[4] = 4.0
 
 	; Set animation profile
-	SwapToProfile(1)
+	; SwapToProfile(1)
 
 	; Config loaders
 	LoadStrapons()

@@ -24,7 +24,7 @@ bool function HasRace(Race RaceRef)
 endFunction
 
 bool function AllowedCreature(Race RaceRef)
-	return Config.AllowCreatures && SexLabUtil.HasRace(RaceRef) ;StorageUtil.GetIntValue(RaceRef, "SexLab.HasCreature") == 1
+	return Config.AllowCreatures && SexLabUtil.HasRace(RaceRef)
 endFunction
 
 bool function AllowedCreatureCombination(Race RaceRef1, Race RaceRef2)

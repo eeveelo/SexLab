@@ -1,7 +1,6 @@
 scriptname sslBaseAnimation extends sslBaseObject
 
 import sslUtility
-import StorageUtil
 
 ; Config
 ; int property SFX auto hidden
@@ -73,6 +72,12 @@ form[] property CreatureRaces hidden
 			RaceRefs[i] = Race.GetRace(RaceIDs[i])
 		endWhile
 		return ClearNone(RaceRefs)
+	endFunction
+endProperty
+
+string property Profile hidden
+	string function get()
+		return "AdjustmentProfile_"+Config.AnimProfile+".json"
 	endFunction
 endProperty
 
@@ -162,30 +167,25 @@ endFunction
 
 float[] function GetPositionOffsets(string AdjustKey, int Position, int Stage)
 	int i = DataIndex(4, Position, Stage, 0)
-	; Get default offsets
 	float[] Output = new float[4]
-	Output[0] = Offsets[i] + CenterAdjust[(Stage - 1)] ; Forward
-	Output[1] = Offsets[(i + 1)] ; Side
-	Output[2] = Offsets[(i + 2)] ; Up
-	Output[3] = Offsets[(i + 3)] ; Rot
 	; Use global adjustments if none for adjustkey
-	if FloatListCount(Storage, AdjustKey) < i
+	if JsonUtil.FloatListCount(Profile, AdjustKey) < i
 		AdjustKey = Key("Adjust.Global")
 	endIf
-	; Apply adjustments
-	Output[0] = Output[0] + FloatListGet(Storage, AdjustKey, i)
-	Output[1] = Output[1] + FloatListGet(Storage, AdjustKey, (i + 1))
-	Output[2] = Output[2] + FloatListGet(Storage, AdjustKey, (i + 2))
+	; Get adjustments
+	JsonUtil.FloatListSlice(Profile, AdjustKey, Output, i)
+	; Add default offsets ontop.
+	Output[0] = Output[0] + Offsets[i] + CenterAdjust[(Stage - 1)] ; Forward
+	Output[1] = Output[1] + Offsets[(i + 1)] ; Side
+	Output[2] = Output[2] + Offsets[(i + 2)] ; Up
+	Output[3] = Offsets[(i + 3)] ; Rot - no offset
 	return Output
 endFunction
 
 float[] function GetPositionAdjustments(string AdjustKey, int Position, int Stage)
 	int i = DataIndex(4, Position, Stage, 0)
 	float[] Output = new float[4]
-	Output[0] = FloatListGet(Storage, AdjustKey, i) ; Forward
-	Output[1] = FloatListGet(Storage, AdjustKey, (i + 1)) ; Side
-	Output[2] = FloatListGet(Storage, AdjustKey, (i + 2)) ; Up
-	Output[3] = FloatListGet(Storage, AdjustKey, (i + 3)) ; SOS
+	JsonUtil.FloatListSlice(Profile, AdjustKey, Output, i)
 	return Output
 endFunction
 
@@ -194,11 +194,11 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function SetAdjustment(string AdjustKey, int Position, int Stage, int Slot, float Adjustment)
-	FloatListSet(Storage, AdjustKey, DataIndex(4, Position, Stage, Slot), Adjustment)
+	JsonUtil.FloatListSet(Profile, AdjustKey, DataIndex(4, Position, Stage, Slot), Adjustment)
 endFunction
 
 float function GetAdjustment(string AdjustKey, int Position, int Stage, int Slot)
-	return FloatListGet(Storage, AdjustKey, DataIndex(4, Position, Stage, Slot))
+	return JsonUtil.FloatListGet(Profile, AdjustKey, DataIndex(4, Position, Stage, Slot))
 endFunction
 
 function UpdateAdjustment(string AdjustKey, int Position, int Stage, int Slot, float AdjustBy)
@@ -240,42 +240,35 @@ function AdjustUpward(string AdjustKey, int Position, int Stage, float AdjustBy,
 endFunction
 
 function RestoreOffsets(string AdjustKey)
-	FloatListClear(Storage, AdjustKey)
+	JsonUtil.FloatListClear(Profile, AdjustKey)
 endFunction
 
 function InitAdjustments(string AdjustKey)
 	int i
 	; Init empty Global list - if needed
 	string AdjustGlobal = Key("Adjust.Global")
-	if FloatListCount(Storage, AdjustGlobal) < Offsets.Length
-		; Empty existing global as precaution and zero fill it
-		FloatListClear(Storage, AdjustGlobal)
-		i = Offsets.Length
-		while i
-			i -= 1
-			FloatListAdd(Storage, AdjustGlobal, 0.0)
-		endWhile
+	; Empty sized list for slicing/copying to profile
+	float[] Globals = sslUtility.FloatArray(Offsets.Length)
+	if JsonUtil.FloatListCount(Profile, AdjustGlobal) < Offsets.Length
 		; Set global sos adjustments
 		int Stage = 1
 		while Stage <= Stages
 			int Position = Actors
 			while Position
 				Position -= 1
-				FloatListSet(Storage, AdjustGlobal, DataIndex(4, Position, Stage, 3), AccessFlag(Position, Stage, 3))
+				Globals[DataIndex(4, Position, Stage, 3)] = AccessFlag(Position, Stage, 3)
 			endWhile
 			Stage += 1
 		endWhile
+		; Copy to list
+		JsonUtil.FloatListCopy(Profile, AdjustGlobal, Globals)
 	endIf
 	; Init AdjustKey list - copied from global list
 	string KeyPart = sslUtility.RemoveString(AdjustKey, Key("Adjust."))
-	if KeyPart != "Global" && (StringListFind(Storage, Key("AdjustKeys"), KeyPart) == -1 || FloatListCount(Storage, AdjustKey) < FloatListCount(Storage, AdjustGlobal))
-		FloatListClear(Storage, AdjustKey)
-		StringListAdd(Storage, Key("AdjustKeys"), KeyPart, false)
-		i = 0
-		while i < FloatListCount(Storage, AdjustGlobal)
-			FloatListAdd(Storage, AdjustKey, FloatListGet(Storage, AdjustGlobal, i))
-			i += 1
-		endWhile
+	if KeyPart != "Global" && (JsonUtil.StringListFind(Profile, Key("AdjustKeys"), KeyPart) == -1 || JsonUtil.FloatListCount(Profile, AdjustKey) < JsonUtil.FloatListCount(Profile, AdjustGlobal))
+		JsonUtil.StringListAdd(Profile, Key("AdjustKeys"), KeyPart, false)
+		JsonUtil.FloatListSlice(Profile, AdjustGlobal, Globals)
+		JsonUtil.FloatListCopy(Profile, AdjustKey, Globals)
 	endIf
 endFunction
 
@@ -301,12 +294,12 @@ string function MakeAdjustKey(Actor[] ActorList, bool RaceKey = true)
 endFunction
 
 string[] function GetAdjustKeys()
-	int i = StringListCount(Storage, Key("AdjustKeys"))
+	int i = JsonUtil.StringListCount(Profile, Key("AdjustKeys"))
 	string[] Output = sslUtility.StringArray(i + 1)
 	Output[i] = "Global"
 	while i
 		i -= 1
-		Output[i] = StringListGet(Storage, Key("AdjustKeys"), i)
+		Output[i] = JsonUtil.StringListGet(Profile, Key("AdjustKeys"), i)
 	endWhile
 	return Output
 endFunction
@@ -329,10 +322,10 @@ endFunction
 
 int function GetSchlong(string AdjustKey, int Position, int Stage)
 	int i = DataIndex(4, Position, Stage, 3)
-	if i < FloatListCount(Storage, AdjustKey)
-		return FloatListGet(Storage, AdjustKey, i) as int
-	elseIf i < FloatListCount(Storage, Key("Adjust.Global"))
-		return FloatListGet(Storage, Key("Adjust.Global"), i) as int
+	if i < JsonUtil.FloatListCount(Profile, AdjustKey)
+		return JsonUtil.FloatListGet(Profile, AdjustKey, i) as int
+	elseIf i < JsonUtil.FloatListCount(Profile, Key("Adjust.Global"))
+		return JsonUtil.FloatListGet(Profile, Key("Adjust.Global"), i) as int
 	endIf
 	return AccessFlag(Position, Stage, 3)
 endFunction
@@ -402,7 +395,7 @@ endFunction
 ; ------------------------------------------------------- ;
 
 bool function HasRace(Race RaceRef)
-	return HasRaceID(MiscUtil.GetRaceEditorID(RaceRef)) ; FormListFind(Storage, Key("Creatures"), RaceRef) != -1
+	return HasRaceID(MiscUtil.GetRaceEditorID(RaceRef)) ; FormListFind(Profile, Key("Creatures"), RaceRef) != -1
 endFunction
 
 function AddRace(Race RaceRef)
@@ -429,14 +422,14 @@ function AddRaceID(string RaceID)
 		RaceIDs = sslUtility.PushString(RaceID, RaceIDs)
 	endIf
 	; Add global
-	StringListAdd(Config, "SexLabCreatures", RaceID, false)
+	StorageUtil.StringListAdd(Config, "SexLabCreatures", RaceID, false)
 endFunction
 
 function SetRaceIDs(string[] RaceList)
 	int i
 	while i < RaceList.Length
-		if StringListFind(Config, "SexLabCreatures", RaceList[i]) == -1
-			StringListAdd(Config, "SexLabCreatures", RaceList[i], false)
+		if StorageUtil.StringListFind(Config, "SexLabCreatures", RaceList[i]) == -1
+			StorageUtil.StringListAdd(Config, "SexLabCreatures", RaceList[i], false)
 		endIf
 		i += 1
 	endWhile

@@ -1,7 +1,6 @@
 scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
-import StorageUtil
 import sslUtility
 
 ; Framework
@@ -43,10 +42,10 @@ event OnVersionUpdate(int version)
 		; v1.56 - New MCM menu quest; rendering all the previous upgrade stuff useless as it's going to start from scratch
 
 		; Pre 1.56 data cleanup
-		FormListClear(none, "NoStripList")
-		FormListClear(none, "StripList")
-		FormListClear(none, "SexLabActors")
-		StringListClear(none, "SexLabCreatures")
+		StorageUtil.FormListClear(none, "NoStripList")
+		StorageUtil.FormListClear(none, "StripList")
+		StorageUtil.FormListClear(none, "SexLabActors")
+		StorageUtil.StringListClear(none, "SexLabCreatures")
 
 		; Install system
 		SetupSystem()
@@ -1266,10 +1265,8 @@ function TestApply(Actor ActorRef)
 		Debug.Notification(Exp.Name+" has been applied to "+ActorName)
 		Debug.Notification("Reverting expression in 15 seconds...")
 		Utility.WaitMenuMode(15.0)
+		PlayerRef.ResetExpressionOverrides()
 		PlayerRef.ClearExpressionOverride()
-		MfgConsoleFunc.ResetPhonemeModifier(PlayerRef)
-		TargetRef.ClearExpressionOverride()
-		MfgConsoleFunc.ResetPhonemeModifier(TargetRef)
 	endIf
 endFunction
 
@@ -2419,11 +2416,8 @@ endState
 
 
 function ExportSettings()
-	; Clear any potentially lingering storage data
-	debug_DeleteValues(self)
-	Utility.WaitMenuMode(0.5)
 	; Set label of export
-	SetStringValue(self, "ExportLabel", PlayerRef.GetLeveledActorBase().GetName()+" - "+Utility.GetCurrentRealTime() as int)
+	JsonUtil.SetStringValue("SexlabConfig.json", "ExportLabel", PlayerRef.GetLeveledActorBase().GetName()+" - "+Utility.GetCurrentRealTime() as int)
 
 	; Booleans
 	ExportBool("RestrictAggressive", Config.RestrictAggressive)
@@ -2498,21 +2492,10 @@ function ExportSettings()
 	ExportVoices()
 
 	; Save to JSON file
-	ExportFile("SexLabConfig.json", restrictForm = self, append = false)
-	Utility.WaitMenuMode(0.5)
-	; Clear storageutil values from save after export
-	debug_DeleteValues(self)
-	Utility.WaitMenuMode(0.5)
+	JsonUtil.Save("SexLabConfig.json", false)
 endFunction
 
 function ImportSettings()
-	; Clear any potentially lingering storage data
-	debug_DeleteValues(self)
-	; Load JSON file
-	Utility.WaitMenuMode(0.5)
-	ImportFile("SexLabConfig.json")
-	Utility.WaitMenuMode(0.5)
-
 	; Booleans
 	Config.RestrictAggressive = ImportBool("RestrictAggressive", Config.RestrictAggressive)
 	Config.AllowCreatures     = ImportBool("AllowCreatures", Config.AllowCreatures)
@@ -2537,7 +2520,7 @@ function ImportSettings()
 	Config.BedRemoveStanding    = ImportBool("BedRemoveStanding", Config.BedRemoveStanding)
 
 	; Integers
-	Config.SwapToProfile(GetIntValue(self, "AnimProfile", Config.AnimProfile))
+	Config.SwapToProfile(JsonUtil.GetIntValue("SexlabConfig.json", "AnimProfile", Config.AnimProfile))
 	Config.NPCBed             = ImportInt("NPCBed", Config.NPCBed)
 
 	Config.Backwards          = ImportInt("Backwards", Config.Backwards)
@@ -2585,53 +2568,46 @@ function ImportSettings()
 	ImportExpressions()
 	ImportVoices()
 
-	; Clear storageutil values from save after import
-	debug_DeleteValues(self)
-
 	; Reload settings with imported values
 	Config.Reload()
 endFunction
 
 ; Floats
 function ExportFloat(string Name, float Value)
-	SetFloatValue(self, Name, Value)
+	JsonUtil.SetFloatValue("SexlabConfig.json", Name, Value)
 endFunction
 float function ImportFloat(string Name, float Value)
-	Value = GetFloatValue(self, Name, Value)
+	Value = JsonUtil.GetFloatValue("SexlabConfig.json", Name, Value)
 	return Value
 endFunction
 
 ; Integers
 function ExportInt(string Name, int Value)
-	SetIntValue(self, Name, Value)
+	JsonUtil.SetIntValue("SexlabConfig.json", Name, Value)
 endFunction
 int function ImportInt(string Name, int Value)
-	Value = GetIntValue(self, Name, Value)
+	Value = JsonUtil.GetIntValue("SexlabConfig.json", Name, Value)
 	return Value
 endFunction
 
 ; Booleans
 function ExportBool(string Name, bool Value)
-	SetIntValue(self, Name, Value as int)
+	JsonUtil.SetIntValue("SexlabConfig.json", Name, Value as int)
 endFunction
 bool function ImportBool(string Name, bool Value)
-	Value = GetIntValue(self, Name, Value as int) as bool
+	Value = JsonUtil.GetIntValue("SexlabConfig.json", Name, Value as int) as bool
 	return Value
 endFunction
 
 ; Float Arrays
 function ExportFloatList(string Name, float[] Values, int len)
-	int i
-	while i < len
-		FloatListAdd(self, Name, Values[i])
-		i += 1
-	endWhile
+	JsonUtil.FloatListCopy("SexLabConfig.json", Name, Values)
 endFunction
 float[] function ImportFloatList(string Name, float[] Values, int len)
-	if FloatListCount(self, Name) == len
+	if JsonUtil.FloatListCount("SexlabConfig.json", Name) == len
 		int i
 		while i < len
-			Values[i] = FloatListGet(self, Name, i)
+			Values[i] = JsonUtil.FloatListGet("SexlabConfig.json", Name, i)
 			i += 1
 		endWhile
 	endIf
@@ -2640,17 +2616,18 @@ endFunction
 
 ; Boolean Arrays
 function ExportBoolList(string Name, bool[] Values, int len)
+	JsonUtil.IntListClear("SexLabConfig.json", Name)
 	int i
 	while i < len
-		IntListAdd(self, Name, Values[i] as int)
+		JsonUtil.IntListAdd("SexlabConfig.json", Name, Values[i] as int)
 		i += 1
 	endWhile
 endFunction
 bool[] function ImportBoolList(string Name, bool[] Values, int len)
-	if IntListCount(self, Name) == len
+	if JsonUtil.IntListCount("SexlabConfig.json", Name) == len
 		int i
 		while i < len
-			Values[i] = IntListGet(self, Name, i) as bool
+			Values[i] = JsonUtil.IntListGet("SexlabConfig.json", Name, i) as bool
 			i += 1
 		endWhile
 	endIf
@@ -2659,20 +2636,21 @@ endFunction
 
 ; Animations
 function ExportAnimations()
+	JsonUtil.StringListClear("SexlabConfig.json", "Animations")
 	int i = AnimSlots.Slotted
 	sslBaseAnimation[] Anims = AnimSlots.Animations
 	while i
 		i -= 1
-		StringListAdd(self, "Animations", MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int, Anims[i].HasTag("Foreplay") as int, Anims[i].HasTag("Aggressive") as int))
+		JsonUtil.StringListAdd("SexlabConfig.json", "Animations", MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int, Anims[i].HasTag("Foreplay") as int, Anims[i].HasTag("Aggressive") as int))
 	endWhile
 endfunction
 
 function ImportAnimations()
-	int i = StringListCount(self, "Animations")
+	int i = JsonUtil.StringListCount("SexlabConfig.json", "Animations")
 	while i
 		i -= 1
 		; Registrar, Enabled, Foreplay, Aggressive
-		string[] args = ArgString(StringListGet(self, "Animations", i))
+		string[] args = ArgString(JsonUtil.StringListGet("SexlabConfig.json", "Animations", i))
 		if args.Length == 4 && AnimSlots.FindByRegistrar(args[0]) != -1
 			sslBaseAnimation Slot = AnimSlots.GetbyRegistrar(args[0])
 			Slot.Enabled = (args[1] as int) as bool
@@ -2684,20 +2662,21 @@ endFunction
 
 ; Creatures
 function ExportCreatures()
+	JsonUtil.StringListClear("SexlabConfig.json", "Creatures")
 	int i = CreatureSlots.Slotted
 	sslBaseAnimation[] Anims = CreatureSlots.Animations
 	while i
 		i -= 1
-		StringListAdd(self, "Creatures", MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int))
+		JsonUtil.StringListAdd("SexlabConfig.json", "Creatures", MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int))
 	endWhile
 endFunction
 
 function ImportCreatures()
-	int i = StringListCount(self, "Creatures")
+	int i = JsonUtil.StringListCount("SexlabConfig.json", "Creatures")
 	while i
 		i -= 1
 		; Registrar, Enabled
-		string[] args = ArgString(StringListGet(self, "Creatures", i))
+		string[] args = ArgString(JsonUtil.StringListGet("SexlabConfig.json", "Creatures", i))
 		if args.Length == 2 && CreatureSlots.FindByRegistrar(args[0]) != -1
 			CreatureSlots.GetbyRegistrar(args[0]).Enabled = (args[1] as int) as bool
 		endIf
@@ -2706,20 +2685,21 @@ endFunction
 
 ; Expressions
 function ExportExpressions()
+	JsonUtil.StringListClear("SexlabConfig.json", "Expressions")
 	int i = ExpressionSlots.Slotted
 	sslBaseExpression[] Exprs = ExpressionSlots.Expressions
 	while i
 		i -= 1
-		StringListAdd(self, "Expressions", MakeArgs(",", Exprs[i].Registry, Exprs[i].HasTag("Consensual") as int, Exprs[i].HasTag("Victim") as int, Exprs[i].HasTag("Aggressor") as int))
+		JsonUtil.StringListAdd("SexlabConfig.json", "Expressions", MakeArgs(",", Exprs[i].Registry, Exprs[i].HasTag("Consensual") as int, Exprs[i].HasTag("Victim") as int, Exprs[i].HasTag("Aggressor") as int))
 	endWhile
 endfunction
 
 function ImportExpressions()
-	int i = StringListCount(self, "Expressions")
+	int i = JsonUtil.StringListCount("SexlabConfig.json", "Expressions")
 	while i
 		i -= 1
 		; Registrar, Concensual, Victim, Aggressor
-		string[] args = ArgString(StringListGet(self, "Expressions", i))
+		string[] args = ArgString(JsonUtil.StringListGet("SexlabConfig.json", "Expressions", i))
 		if args.Length == 4 && ExpressionSlots.FindByRegistrar(args[0]) != -1
 			sslBaseExpression Slot = ExpressionSlots.GetbyRegistrar(args[0])
 			Slot.AddTagConditional("Consensual", (args[1] as int) as bool)
@@ -2731,29 +2711,30 @@ endFunction
 
 ; Voices
 function ExportVoices()
+	JsonUtil.StringListClear("SexlabConfig.json", "Voices")
 	int i = VoiceSlots.Slotted
 	sslBaseVoice[] Voices = VoiceSlots.Voices
 	while i
 		i -= 1
-		StringListAdd(self, "Voices", MakeArgs(",", Voices[i].Registry, Voices[i].Enabled as int))
+		JsonUtil.StringListAdd("SexlabConfig.json", "Voices", MakeArgs(",", Voices[i].Registry, Voices[i].Enabled as int))
 	endWhile
 	; Player voice
-	SetStringValue(self, "PlayerVoice", VoiceSlots.GetSavedName(PlayerRef))
+	JsonUtil.SetStringValue("SexlabConfig.json", "PlayerVoice", VoiceSlots.GetSavedName(PlayerRef))
 endfunction
 
 function ImportVoices()
-	int i = StringListCount(self, "Voices")
+	int i = JsonUtil.StringListCount("SexlabConfig.json", "Voices")
 	while i
 		i -= 1
 		; Registrar, Enabled
-		string[] args = ArgString(StringListGet(self, "Voices", i))
+		string[] args = ArgString(JsonUtil.StringListGet("SexlabConfig.json", "Voices", i))
 		if args.Length == 2 && VoiceSlots.FindByRegistrar(args[0]) != -1
 			VoiceSlots.GetbyRegistrar(args[0]).Enabled = (args[1] as int) as bool
 		endIf
 	endWhile
 	; Player voice
 	VoiceSlots.ForgetVoice(PlayerRef)
-	VoiceSlots.SaveVoice(PlayerRef, VoiceSlots.GetByName(GetStringValue(self, "PlayerVoice", "$SSL_Random")))
+	VoiceSlots.SaveVoice(PlayerRef, VoiceSlots.GetByName(JsonUtil.GetStringValue("SexlabConfig.json", "PlayerVoice", "$SSL_Random")))
 endFunction
 
 
