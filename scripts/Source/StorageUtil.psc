@@ -168,16 +168,6 @@ bool function StringListInsert(Form obj, string key, int index, string value) gl
 bool function FormListInsert(Form obj, string key, int index, Form value) global native
 
 
-;/ Sort an int/float/string/Form list by values in ascending order.
-
-   obj: form to sort on. Set none for global value.
-   key: name of value.
-/;
-function IntListSort(Form obj, string key) global native
-function FloatListSort(Form obj, string key) global native
-function StringListSort(Form obj, string key) global native
-function FormListSort(Form obj, string key) global native
-
 ;/ Remove a previously added int/float/string/Form value from a list on form
    or globally and return how many instances of this value were removed.
 
@@ -249,6 +239,16 @@ bool function FloatListHas(Form obj, string key, float value) global native
 bool function StringListHas(Form obj, string key, string value) global native
 bool function FormListHas(Form obj, string key, Form value) global native
 
+;/ Sort an int/float/string/Form list by values in ascending order.
+
+   obj: form to sort on. Set none for global value.
+   key: name of value.
+/;
+function IntListSort(Form obj, string key) global native
+function FloatListSort(Form obj, string key) global native
+function StringListSort(Form obj, string key) global native
+function FormListSort(Form obj, string key) global native
+
 
 ;/ Fills the given input array with the values of the list on form or globally,
    will fill the array until either the array or list runs out of valid indexes
@@ -258,11 +258,21 @@ bool function FormListHas(Form obj, string key, Form value) global native
    slice: an initialized array set to the slice size you want, i.e. int[] slice = new int[10]
    [optional] startIndex: the starting list index you want to start filling your slice array with
 /;
+
 function IntListSlice(Form obj, string key, int[] slice, int startIndex = 0) global native
 function FloatListSlice(Form obj, string key, float[] slice, int startIndex = 0) global native
 function StringListSlice(Form obj, string key, string[] slice, int startIndex = 0) global native
 function FormListSlice(Form obj, string key, Form[] slice, int startIndex = 0) global native
 
+int function IntListResize(Form obj, string key, int toLength, int filler = 0) global native
+int function FloatListResize(Form obj, string key, int toLength, float filler = 0.0) global native
+int function StringListResize(Form obj, string key, int toLength, string filler = "") global native
+int function FormListResize(Form obj, string key, int toLength, Form filler = none) global native
+
+bool function IntListCopy(Form obj, string key, int[] copy) global native
+bool function FloatListCopy(Form obj, string key, float[] copy) global native
+bool function StringListCopy(Form obj, string key, string[] copy) global native
+bool function FormListCopy(Form obj, string key, Form[] copy) global native
 
 ;/
 	Storage functions - separate file. These are shared in all save games. Values are loaded and saved
@@ -386,6 +396,19 @@ bool function FileStringListRemoveAt(string key, int index) global native
 bool function FileFormListRemoveAt(string key, int index) global native
 
 
+;/ Insert an int/float/string/Form to a list globally and return
+   if successful.
+
+   key: name of value.
+   index: position in list to put the value. 0 is first entry in list.
+   value: value to add.
+/;
+bool function FileIntListInsert(string key, int index, int value) global native
+bool function FileFloatListInsert(string key, int index, float value) global native
+bool function FileStringListInsert(string key, int index, string value) global native
+bool function FileFormListInsert(string key, int index, Form value) global native
+
+
 ;/ Get size of a list globally.
 
    key: name of list.
@@ -416,35 +439,30 @@ bool function FileFloatListHas(string key, float value) global native
 bool function FileStringListHas(string key, string value) global native
 bool function FileFormListHas(string key, Form value) global native
 
-;/
-   Export / import specific data to and from file.
-/;
+;/ Fills the given input array with the values of the list from global external file,
+   will fill the array until either the array or list runs out of valid indexes
 
-;/ Import data from a separate JSON formated file.
-
-   fileName: what file to import data from. This file is located in "Data/SKSE/Plugins/StorageUtilData/x.txt" where x is fileName.
-   restrictKey: only import data with this name, for example "myValue" would only import variables with this name.
-   restrictType: mask of which data to import. Set -1 to import all types of data.
-      1 - int
-      2 - float
-      4 - string
-      8 - form
-      16 - intlist
-      32 - floatlist
-      64 - stringlist
-      128 - formlist
-   restrictForm: only import data saved on this form.
-   restrictGlobal: only import globally saved data. restrictForm is ignored if this is set to true.
-   keyContains: normally values will be imported if restrictKey is empty or equals the name of saved value. If this is true
-                then saved value must contain restrictKey instead of equal. example "myvalue_a", "myvalue_b", "myvalue_c" will
-             all be imported if keyContains is true and restrictKey is "myvalue_"
+   key: name of list.
+   slice: an initialized array set to the slice size you want, i.e. int[] slice = new int[10]
+   [optional] startIndex: the starting list index you want to start filling your slice array with
 /;
-bool function ImportFile(string fileName, string restrictKey = "", int restrictType = -1, Form restrictForm = none, bool restrictGlobal = false, bool keyContains = false) global
-   return false ; TODO
-endFunction
-bool function ExportFile(string fileName, string restrictKey = "", int restrictType = -1, Form restrictForm = none, bool restrictGlobal = false, bool keyContains = false, bool append = true) global
-   return false ; TODO
-endFunction
+function FileIntListSlice(string key, int[] slice, int startIndex = 0) global native
+function FileFloatListSlice(string key, float[] slice, int startIndex = 0) global native
+function FileStringListSlice(string key, string[] slice, int startIndex = 0) global native
+function FileFormListSlice(string key, Form[] slice, int startIndex = 0) global native
+
+
+int function FileIntListResize(string key, int toLength, int filler = 0) global native
+int function FileFloatListResize(string key, int toLength, float filler = 0.0) global native
+int function FileStringListResize(string key, int toLength, string filler = "") global native
+int function FileFormListResize(string key, int toLength, Form filler = none) global native
+
+
+bool function FileIntListCopy(string key, int[] copy) global native
+bool function FileFloatListCopy(string key, float[] copy) global native
+bool function FileStringListCopy(string key, string[] copy) global native
+bool function FileFormListCopy(string key, Form[] copy) global native
+
 
 ;/
 	Debug functions - can be helpful to find problems or for development.
@@ -454,98 +472,48 @@ function debug_SaveFile() global native
 function debug_DeleteValues(Form obj) global native
 function debug_DeleteAllValues() global native
 
-int function debug_GetIntKeysCount(Form obj) global native
-int function debug_GetFloatKeysCount(Form obj) global native
-int function debug_GetStringKeysCount(Form obj) global native
-int function debug_GetFormKeysCount(Form obj) global native
+int function debug_Cleanup() global native
 
-int function debug_GetIntListKeysCount(Form obj) global native
-int function debug_GetFloatListKeysCount(Form obj) global native
-int function debug_GetStringListKeysCount(Form obj) global native
-int function debug_GetFormListKeysCount(Form obj) global native
 
 int function debug_GetIntObjectCount() global native
 int function debug_GetFloatObjectCount() global native
 int function debug_GetStringObjectCount() global native
 int function debug_GetFormObjectCount() global native
-
 int function debug_GetIntListObjectCount() global native
 int function debug_GetFloatListObjectCount() global native
 int function debug_GetStringListObjectCount() global native
 int function debug_GetFormListObjectCount() global native
 
-int function debug_Cleanup() global native
+int function debug_GetIntKeysCount(Form obj) global native
+int function debug_GetFloatKeysCount(Form obj) global native
+int function debug_GetStringKeysCount(Form obj) global native
+int function debug_GetFormKeysCount(Form obj) global native
+int function debug_GetIntListKeysCount(Form obj) global native
+int function debug_GetFloatListKeysCount(Form obj) global native
+int function debug_GetStringListKeysCount(Form obj) global native
+int function debug_GetFormListKeysCount(Form obj) global native
+
+string function debug_GetIntKey(Form obj, int index) global native
+string function debug_GetFloatKey(Form obj, int index) global native
+string function debug_GetStringKey(Form obj, int index) global native
+string function debug_GetFormKey(Form obj, int index) global native
+string function debug_GetIntListKey(Form obj, int index) global native
+string function debug_GetFloatListKey(Form obj, int index) global native
+string function debug_GetStringListKey(Form obj, int index) global native
+string function debug_GetFormListKey(Form obj, int index) global native
 
 
+Form function debug_GetIntObject(int index) global native
+Form function debug_GetFloatObject(int index) global native
+Form function debug_GetStringObject(int index) global native
+Form function debug_GetFormObject(int index) global native
+Form function debug_GetIntListObject(int index) global native
+Form function debug_GetFloatListObject(int index) global native
+Form function debug_GetStringListObject(int index) global native
+Form function debug_GetFormListObject(int index) global native
 
-; Currently not implemented in version 2.4
-function debug_FileDeleteAllValues() global
-endFunction
 
-string function debug_GetIntKey(Form obj, int index) global
-   return ""
-endFunction
-
-string function debug_GetFloatKey(Form obj, int index) global
-   return ""
-endFunction
-
-string function debug_GetStringKey(Form obj, int index) global
-   return ""
-endFunction
-
-string function debug_GetFormKey(Form obj, int index) global
-   return ""
-endFunction
-
-string function debug_GetIntListKey(Form obj, int index) global
-   return ""
-endFunction
-
-string function debug_GetFloatListKey(Form obj, int index) global
-   return ""
-endFunction
-
-string function debug_GetStringListKey(Form obj, int index) global
-   return ""
-endFunction
-
-string function debug_GetFormListKey(Form obj, int index) global
-   return ""
-endFunction
-
-Form function debug_GetIntObject(int index) global
-   return none
-endFunction
-
-Form function debug_GetFloatObject(int index) global
-   return none
-endFunction
-
-Form function debug_GetStringObject(int index) global
-   return none
-endFunction
-
-Form function debug_GetFormObject(int index) global
-   return none
-endFunction
-
-Form function debug_GetIntListObject(int index) global
-   return none
-endFunction
-
-Form function debug_GetFloatListObject(int index) global
-   return none
-endFunction
-
-Form function debug_GetStringListObject(int index) global
-   return none
-endFunction
-
-Form function debug_GetFormListObject(int index) global
-   return none
-endFunction
-
+; Currently no longer implemented
 int function debug_FileGetIntKeysCount() global
    return 0
 endFunction
@@ -594,6 +562,15 @@ string function debug_FileGetStringListKey(int index) global
    return ""
 endFunction
 
+function debug_FileDeleteAllValues() global
+endFunction
+
 function debug_SetDebugMode(bool enabled) global
 endFunction
 
+bool function ImportFile(string fileName, string restrictKey = "", int restrictType = -1, Form restrictForm = none, bool restrictGlobal = false, bool keyContains = false) global
+   return false
+endFunction
+bool function ExportFile(string fileName, string restrictKey = "", int restrictType = -1, Form restrictForm = none, bool restrictGlobal = false, bool keyContains = false, bool append = true) global
+   return false
+endFunction

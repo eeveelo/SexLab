@@ -3,25 +3,25 @@ scriptname JsonUtil Hidden
 bool function Load(string FileName) global native
 bool function Save(string FileName, bool StyledWrite = false) global native
 
-int function SetInt(string FileName, string skey, int value) global native
-int function GetInt(string FileName, string skey, int missing = 0) global native
-bool function UnsetInt(string FileName, string skey) global native
-bool function HasInt(string FileName, string skey) global native
+int function SetIntValue(string FileName, string skey, int value) global native
+int function GetIntValue(string FileName, string skey, int missing = 0) global native
+bool function UnsetIntValue(string FileName, string skey) global native
+bool function HasIntValue(string FileName, string skey) global native
 
-float function SetFloat(string FileName, string skey, float value) global native
-float function GetFloat(string FileName, string skey, float missing = 0.0) global native
-bool function UnsetFloat(string FileName, string skey) global native
-bool function HasFloat(string FileName, string skey) global native
+float function SetFloatValue(string FileName, string skey, float value) global native
+float function GetFloatValue(string FileName, string skey, float missing = 0.0) global native
+bool function UnsetFloatValue(string FileName, string skey) global native
+bool function HasFloatValue(string FileName, string skey) global native
 
-string function SetString(string FileName, string skey, string value) global native
-string function GetString(string FileName, string skey, string missing = "") global native
-bool function UnsetString(string FileName, string skey) global native
-bool function HasString(string FileName, string skey) global native
+string function SetStringValue(string FileName, string skey, string value) global native
+string function GetStringValue(string FileName, string skey, string missing = "") global native
+bool function UnsetStringValue(string FileName, string skey) global native
+bool function HasStringValue(string FileName, string skey) global native
 
-form function SetForm(string FileName, string skey, form value) global native
-form function GetForm(string FileName, string skey, form missing = none) global native
-bool function UnsetForm(string FileName, string skey) global native
-bool function HasForm(string FileName, string skey) global native
+form function SetFormValue(string FileName, string skey, form value) global native
+form function GetFormValue(string FileName, string skey, form missing = none) global native
+bool function UnsetFormValue(string FileName, string skey) global native
+bool function HasFormValue(string FileName, string skey) global native
 
 int function IntListAdd(string FileName, string skey, Int value, bool allowDuplicate = true) global native
 Int function IntListGet(string FileName, string skey, int index) global native
@@ -66,3 +66,18 @@ int function FormListClear(string FileName, string skey) global native
 int function FormListCount(string FileName, string skey) global native
 int function FormListFind(string FileName, string skey, Form value) global native
 bool function FormListHas(string FileName, string skey, Form value) global native
+
+function IntListSlice(string FileName, string skey, int[] slice, int startIndex = 0) global native
+function FloatListSlice(string FileName, string skey, float[] slice, int startIndex = 0) global native
+function StringListSlice(string FileName, string skey, string[] slice, int startIndex = 0) global native
+function FormListSlice(string FileName, string skey, Form[] slice, int startIndex = 0) global native
+
+int function IntListResize(string FileName, string key, int toLength, int filler = 0) global native
+int function FloatListResize(string FileName, string key, int toLength, float filler = 0.0) global native
+int function StringListResize(string FileName, string key, int toLength, string filler = "") global native
+int function FormListResize(string FileName, string key, int toLength, Form filler = none) global native
+
+bool function IntListCopy(string FileName, string key, int[] copy) global native
+bool function FloatListCopy(string FileName, string key, float[] copy) global native
+bool function StringListCopy(string FileName, string key, string[] copy) global native
+bool function FormListCopy(string FileName, string key, Form[] copy) global native
