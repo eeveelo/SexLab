@@ -440,12 +440,14 @@ int function GetHighestPresentRelationshipRank(Actor ActorRef)
 	; Next position
 	Actor NextActor = Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)]
 	int Highest = ActorRef.GetRelationshipRank(NextActor)
+	int exit = 5
 	; loop through each position until reaching ActorRef
-	while NextActor != ActorRef
+	while NextActor != ActorRef && exit > 0
 		NextActor = Positions[sslUtility.IndexTravel(Positions.Find(NextActor), ActorCount)]
 		if NextActor != ActorRef && ActorRef.GetRelationshipRank(NextActor) > Highest
 			Highest = ActorRef.GetRelationshipRank(NextActor)
 		endIf
+		exit -= 1;
 	endWhile
 	return Highest
 endFunction
