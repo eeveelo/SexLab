@@ -2305,9 +2305,17 @@ endState
 state RestoreDefaultSettings
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnRestoreDefaults")
-			SetDefaults()
+			SetTextOptionValueST("$SSL_Resetting")
+			SetOptionFlagsST(OPTION_FLAG_DISABLED)
+
+			bool DebugMode = Config.DebugMode
+			Config.SetDefaults()
+			Config.DebugMode = DebugMode
 			ShowMessage("$SSL_RunRestoreDefaults", false)
-			ForcePageReset()
+
+			SetOptionFlagsST(OPTION_FLAG_NONE)
+			SetTextOptionValueST("$SSL_ClickHere")
+			; ForcePageReset()
 		endIf
 	endEvent
 endState
@@ -2415,9 +2423,10 @@ state ImportSettings
 endState
 
 
+string ConfigFile = "SexLab/SexlabConfig.json"
 function ExportSettings()
 	; Set label of export
-	JsonUtil.SetStringValue("SexlabConfig.json", "ExportLabel", PlayerRef.GetLeveledActorBase().GetName()+" - "+Utility.GetCurrentRealTime() as int)
+	JsonUtil.SetStringValue(ConfigFile, "ExportLabel", PlayerRef.GetLeveledActorBase().GetName()+" - "+Utility.GetCurrentRealTime() as int)
 
 	; Booleans
 	ExportBool("RestrictAggressive", Config.RestrictAggressive)
@@ -2443,25 +2452,25 @@ function ExportSettings()
 	ExportBool("BedRemoveStanding", Config.BedRemoveStanding)
 
 	; Integers
-	Config.AnimProfile        = ImportInt("AnimProfile", Config.AnimProfile)
-	Config.NPCBed             = ImportInt("NPCBed", Config.NPCBed)
+	ExportInt("AnimProfile", Config.AnimProfile)
+	ExportInt("NPCBed", Config.NPCBed)
 
-	Config.Backwards          = ImportInt("Backwards", Config.Backwards)
-	Config.AdjustStage        = ImportInt("AdjustStage", Config.AdjustStage)
-	Config.AdvanceAnimation   = ImportInt("AdvanceAnimation", Config.AdvanceAnimation)
-	Config.ChangeAnimation    = ImportInt("ChangeAnimation", Config.ChangeAnimation)
-	Config.ChangePositions    = ImportInt("ChangePositions", Config.ChangePositions)
-	Config.AdjustChange       = ImportInt("AdjustChange", Config.AdjustChange)
-	Config.AdjustForward      = ImportInt("AdjustForward", Config.AdjustForward)
-	Config.AdjustSideways     = ImportInt("AdjustSideways", Config.AdjustSideways)
-	Config.AdjustUpward       = ImportInt("AdjustUpward", Config.AdjustUpward)
-	Config.RealignActors      = ImportInt("RealignActors", Config.RealignActors)
-	Config.MoveScene          = ImportInt("MoveScene", Config.MoveScene)
-	Config.RestoreOffsets     = ImportInt("RestoreOffsets", Config.RestoreOffsets)
-	Config.RotateScene        = ImportInt("RotateScene", Config.RotateScene)
-	Config.EndAnimation       = ImportInt("EndAnimation", Config.EndAnimation)
-	Config.ToggleFreeCamera   = ImportInt("ToggleFreeCamera", Config.ToggleFreeCamera)
-	Config.TargetActor        = ImportInt("TargetActor", Config.TargetActor)
+	ExportInt("Backwards", Config.Backwards)
+	ExportInt("AdjustStage", Config.AdjustStage)
+	ExportInt("AdvanceAnimation", Config.AdvanceAnimation)
+	ExportInt("ChangeAnimation", Config.ChangeAnimation)
+	ExportInt("ChangePositions", Config.ChangePositions)
+	ExportInt("AdjustChange", Config.AdjustChange)
+	ExportInt("AdjustForward", Config.AdjustForward)
+	ExportInt("AdjustSideways", Config.AdjustSideways)
+	ExportInt("AdjustUpward", Config.AdjustUpward)
+	ExportInt("RealignActors", Config.RealignActors)
+	ExportInt("MoveScene", Config.MoveScene)
+	ExportInt("RestoreOffsets", Config.RestoreOffsets)
+	ExportInt("RotateScene", Config.RotateScene)
+	ExportInt("EndAnimation", Config.EndAnimation)
+	ExportInt("ToggleFreeCamera", Config.ToggleFreeCamera)
+	ExportInt("TargetActor", Config.TargetActor)
 
 	; Floats
 	ExportFloat("CumTimer", Config.CumTimer)
@@ -2492,7 +2501,7 @@ function ExportSettings()
 	ExportVoices()
 
 	; Save to JSON file
-	JsonUtil.Save("SexLabConfig.json", false)
+	JsonUtil.Save(ConfigFile, false)
 endFunction
 
 function ImportSettings()
@@ -2517,10 +2526,10 @@ function ImportSettings()
 	Config.ForeplayStage      = ImportBool("ForeplayStage", Config.ForeplayStage)
 	Config.OrgasmEffects      = ImportBool("OrgasmEffects", Config.OrgasmEffects)
 	Config.RaceAdjustments    = ImportBool("RaceAdjustments", Config.RaceAdjustments)
-	Config.BedRemoveStanding    = ImportBool("BedRemoveStanding", Config.BedRemoveStanding)
+	Config.BedRemoveStanding  = ImportBool("BedRemoveStanding", Config.BedRemoveStanding)
 
 	; Integers
-	Config.SwapToProfile(JsonUtil.GetIntValue("SexlabConfig.json", "AnimProfile", Config.AnimProfile))
+	Config.AnimProfile        = ImportInt("AnimProfile", Config.AnimProfile)
 	Config.NPCBed             = ImportInt("NPCBed", Config.NPCBed)
 
 	Config.Backwards          = ImportInt("Backwards", Config.Backwards)
@@ -2572,42 +2581,41 @@ function ImportSettings()
 	Config.Reload()
 endFunction
 
-; Floats
-function ExportFloat(string Name, float Value)
-	JsonUtil.SetFloatValue("SexlabConfig.json", Name, Value)
-endFunction
-float function ImportFloat(string Name, float Value)
-	Value = JsonUtil.GetFloatValue("SexlabConfig.json", Name, Value)
-	return Value
-endFunction
 
 ; Integers
 function ExportInt(string Name, int Value)
-	JsonUtil.SetIntValue("SexlabConfig.json", Name, Value)
+	JsonUtil.SetIntValue(ConfigFile, Name, Value)
 endFunction
 int function ImportInt(string Name, int Value)
-	Value = JsonUtil.GetIntValue("SexlabConfig.json", Name, Value)
-	return Value
+	return JsonUtil.GetIntValue(ConfigFile, Name, Value)
 endFunction
 
 ; Booleans
 function ExportBool(string Name, bool Value)
-	JsonUtil.SetIntValue("SexlabConfig.json", Name, Value as int)
+	JsonUtil.SetIntValue(ConfigFile, Name, Value as int)
 endFunction
 bool function ImportBool(string Name, bool Value)
-	Value = JsonUtil.GetIntValue("SexlabConfig.json", Name, Value as int) as bool
-	return Value
+	return JsonUtil.GetIntValue(ConfigFile, Name, Value as int) as bool
+endFunction
+
+; Floats
+function ExportFloat(string Name, float Value)
+	JsonUtil.SetFloatValue(ConfigFile, Name, Value)
+endFunction
+float function ImportFloat(string Name, float Value)
+	return JsonUtil.GetFloatValue(ConfigFile, Name, Value)
 endFunction
 
 ; Float Arrays
 function ExportFloatList(string Name, float[] Values, int len)
-	JsonUtil.FloatListCopy("SexLabConfig.json", Name, Values)
+	JsonUtil.FloatListClear(ConfigFile, Name)
+	JsonUtil.FloatListCopy(ConfigFile, Name, Values)
 endFunction
 float[] function ImportFloatList(string Name, float[] Values, int len)
-	if JsonUtil.FloatListCount("SexlabConfig.json", Name) == len
+	if JsonUtil.FloatListCount(ConfigFile, Name) == len
 		int i
 		while i < len
-			Values[i] = JsonUtil.FloatListGet("SexlabConfig.json", Name, i)
+			Values[i] = JsonUtil.FloatListGet(ConfigFile, Name, i)
 			i += 1
 		endWhile
 	endIf
@@ -2616,18 +2624,18 @@ endFunction
 
 ; Boolean Arrays
 function ExportBoolList(string Name, bool[] Values, int len)
-	JsonUtil.IntListClear("SexLabConfig.json", Name)
+	JsonUtil.IntListClear(ConfigFile, Name)
 	int i
 	while i < len
-		JsonUtil.IntListAdd("SexlabConfig.json", Name, Values[i] as int)
+		JsonUtil.IntListAdd(ConfigFile, Name, Values[i] as int)
 		i += 1
 	endWhile
 endFunction
 bool[] function ImportBoolList(string Name, bool[] Values, int len)
-	if JsonUtil.IntListCount("SexlabConfig.json", Name) == len
+	if JsonUtil.IntListCount(ConfigFile, Name) == len
 		int i
 		while i < len
-			Values[i] = JsonUtil.IntListGet("SexlabConfig.json", Name, i) as bool
+			Values[i] = JsonUtil.IntListGet(ConfigFile, Name, i) as bool
 			i += 1
 		endWhile
 	endIf
@@ -2636,21 +2644,21 @@ endFunction
 
 ; Animations
 function ExportAnimations()
-	JsonUtil.StringListClear("SexlabConfig.json", "Animations")
+	JsonUtil.StringListClear(ConfigFile, "Animations")
 	int i = AnimSlots.Slotted
 	sslBaseAnimation[] Anims = AnimSlots.Animations
 	while i
 		i -= 1
-		JsonUtil.StringListAdd("SexlabConfig.json", "Animations", MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int, Anims[i].HasTag("Foreplay") as int, Anims[i].HasTag("Aggressive") as int))
+		JsonUtil.StringListAdd(ConfigFile, "Animations", MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int, Anims[i].HasTag("Foreplay") as int, Anims[i].HasTag("Aggressive") as int))
 	endWhile
 endfunction
 
 function ImportAnimations()
-	int i = JsonUtil.StringListCount("SexlabConfig.json", "Animations")
+	int i = JsonUtil.StringListCount(ConfigFile, "Animations")
 	while i
 		i -= 1
 		; Registrar, Enabled, Foreplay, Aggressive
-		string[] args = ArgString(JsonUtil.StringListGet("SexlabConfig.json", "Animations", i))
+		string[] args = ArgString(JsonUtil.StringListGet(ConfigFile, "Animations", i))
 		if args.Length == 4 && AnimSlots.FindByRegistrar(args[0]) != -1
 			sslBaseAnimation Slot = AnimSlots.GetbyRegistrar(args[0])
 			Slot.Enabled = (args[1] as int) as bool
@@ -2662,21 +2670,21 @@ endFunction
 
 ; Creatures
 function ExportCreatures()
-	JsonUtil.StringListClear("SexlabConfig.json", "Creatures")
+	JsonUtil.StringListClear(ConfigFile, "Creatures")
 	int i = CreatureSlots.Slotted
 	sslBaseAnimation[] Anims = CreatureSlots.Animations
 	while i
 		i -= 1
-		JsonUtil.StringListAdd("SexlabConfig.json", "Creatures", MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int))
+		JsonUtil.StringListAdd(ConfigFile, "Creatures", MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int))
 	endWhile
 endFunction
 
 function ImportCreatures()
-	int i = JsonUtil.StringListCount("SexlabConfig.json", "Creatures")
+	int i = JsonUtil.StringListCount(ConfigFile, "Creatures")
 	while i
 		i -= 1
 		; Registrar, Enabled
-		string[] args = ArgString(JsonUtil.StringListGet("SexlabConfig.json", "Creatures", i))
+		string[] args = ArgString(JsonUtil.StringListGet(ConfigFile, "Creatures", i))
 		if args.Length == 2 && CreatureSlots.FindByRegistrar(args[0]) != -1
 			CreatureSlots.GetbyRegistrar(args[0]).Enabled = (args[1] as int) as bool
 		endIf
@@ -2685,21 +2693,21 @@ endFunction
 
 ; Expressions
 function ExportExpressions()
-	JsonUtil.StringListClear("SexlabConfig.json", "Expressions")
+	JsonUtil.StringListClear(ConfigFile, "Expressions")
 	int i = ExpressionSlots.Slotted
 	sslBaseExpression[] Exprs = ExpressionSlots.Expressions
 	while i
 		i -= 1
-		JsonUtil.StringListAdd("SexlabConfig.json", "Expressions", MakeArgs(",", Exprs[i].Registry, Exprs[i].HasTag("Consensual") as int, Exprs[i].HasTag("Victim") as int, Exprs[i].HasTag("Aggressor") as int))
+		JsonUtil.StringListAdd(ConfigFile, "Expressions", MakeArgs(",", Exprs[i].Registry, Exprs[i].HasTag("Consensual") as int, Exprs[i].HasTag("Victim") as int, Exprs[i].HasTag("Aggressor") as int))
 	endWhile
 endfunction
 
 function ImportExpressions()
-	int i = JsonUtil.StringListCount("SexlabConfig.json", "Expressions")
+	int i = JsonUtil.StringListCount(ConfigFile, "Expressions")
 	while i
 		i -= 1
 		; Registrar, Concensual, Victim, Aggressor
-		string[] args = ArgString(JsonUtil.StringListGet("SexlabConfig.json", "Expressions", i))
+		string[] args = ArgString(JsonUtil.StringListGet(ConfigFile, "Expressions", i))
 		if args.Length == 4 && ExpressionSlots.FindByRegistrar(args[0]) != -1
 			sslBaseExpression Slot = ExpressionSlots.GetbyRegistrar(args[0])
 			Slot.AddTagConditional("Consensual", (args[1] as int) as bool)
@@ -2711,30 +2719,30 @@ endFunction
 
 ; Voices
 function ExportVoices()
-	JsonUtil.StringListClear("SexlabConfig.json", "Voices")
+	JsonUtil.StringListClear(ConfigFile, "Voices")
 	int i = VoiceSlots.Slotted
 	sslBaseVoice[] Voices = VoiceSlots.Voices
 	while i
 		i -= 1
-		JsonUtil.StringListAdd("SexlabConfig.json", "Voices", MakeArgs(",", Voices[i].Registry, Voices[i].Enabled as int))
+		JsonUtil.StringListAdd(ConfigFile, "Voices", MakeArgs(",", Voices[i].Registry, Voices[i].Enabled as int))
 	endWhile
 	; Player voice
-	JsonUtil.SetStringValue("SexlabConfig.json", "PlayerVoice", VoiceSlots.GetSavedName(PlayerRef))
+	JsonUtil.SetStringValue(ConfigFile, "PlayerVoice", VoiceSlots.GetSavedName(PlayerRef))
 endfunction
 
 function ImportVoices()
-	int i = JsonUtil.StringListCount("SexlabConfig.json", "Voices")
+	int i = JsonUtil.StringListCount(ConfigFile, "Voices")
 	while i
 		i -= 1
 		; Registrar, Enabled
-		string[] args = ArgString(JsonUtil.StringListGet("SexlabConfig.json", "Voices", i))
+		string[] args = ArgString(JsonUtil.StringListGet(ConfigFile, "Voices", i))
 		if args.Length == 2 && VoiceSlots.FindByRegistrar(args[0]) != -1
 			VoiceSlots.GetbyRegistrar(args[0]).Enabled = (args[1] as int) as bool
 		endIf
 	endWhile
 	; Player voice
 	VoiceSlots.ForgetVoice(PlayerRef)
-	VoiceSlots.SaveVoice(PlayerRef, VoiceSlots.GetByName(JsonUtil.GetStringValue("SexlabConfig.json", "PlayerVoice", "$SSL_Random")))
+	VoiceSlots.SaveVoice(PlayerRef, VoiceSlots.GetByName(JsonUtil.GetStringValue(ConfigFile, "PlayerVoice", "$SSL_Random")))
 endFunction
 
 

@@ -463,7 +463,7 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function ExportProfile(int Profile = 1)
-	JsonUtil.Save("AdjustmentProfile_"+Profile+".json", DebugMode)
+	JsonUtil.Save("AdjustmentProfile_"+Profile+".json", false) ; DebugMode
 endFunction
 
 function SwapToProfile(int Profile)

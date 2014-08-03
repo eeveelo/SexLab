@@ -906,17 +906,12 @@ function Setup()
 	Quest SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm") as Quest
 	Quest SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm") as Quest
 	SexLabQuestFramework.Stop()
-	Utility.Wait(0.1)
-	SexLabQuestFramework.Start()
-	Utility.Wait(0.1)
 	SexLabQuestAnimations.Stop()
-	Utility.Wait(0.1)
-	SexLabQuestAnimations.Start()
-	Utility.Wait(0.1)
 	SexLabQuestRegistry.Stop()
-	Utility.Wait(0.1)
+	Utility.WaitMenuMode(0.2)
+	SexLabQuestFramework.Start()
+	SexLabQuestAnimations.Start()
 	SexLabQuestRegistry.Start()
-	Utility.Wait(0.1)
 	; Reset function Libraries - SexLabQuestFramework
 	Config          = SexLabQuestFramework as sslSystemConfig
 	ThreadLib       = SexLabQuestFramework as sslThreadLibrary
