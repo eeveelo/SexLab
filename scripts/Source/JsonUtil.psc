@@ -2,6 +2,7 @@ scriptname JsonUtil Hidden
 
 bool function Load(string FileName) global native
 bool function Save(string FileName, bool StyledWrite = false) global native
+function ClearAll(string FileName) global native
 
 int function SetIntValue(string FileName, string skey, int value) global native
 int function GetIntValue(string FileName, string skey, int missing = 0) global native

@@ -335,6 +335,107 @@ function Initialize()
 	parent.Initialize()
 endFunction
 
+
+
+string property File hidden
+	string function get()
+		return "SexLab/Expression_"+Registry+".json"
+	endFunction
+endProperty
+
+bool function ExportJson()
+	JsonUtil.ClearAll(File)
+
+	JsonUtil.SetStringValue(File, "Name", Name)
+	JsonUtil.SetIntValue(File, "Enabled", Enabled as int)
+
+	JsonUtil.SetIntValue(File, "Normal", HasTag("Normal") as int)
+	JsonUtil.SetIntValue(File, "Victim", HasTag("Victim") as int)
+	JsonUtil.SetIntValue(File, "Aggressor", HasTag("Aggressor") as int)
+
+	JsonUtil.IntListCopy(File, "Female1", Female1)
+	JsonUtil.IntListCopy(File, "Female2", Female2)
+	JsonUtil.IntListCopy(File, "Female3", Female3)
+	JsonUtil.IntListCopy(File, "Female4", Female4)
+	JsonUtil.IntListCopy(File, "Female5", Female5)
+	JsonUtil.IntListCopy(File, "Male1", Male1)
+	JsonUtil.IntListCopy(File, "Male2", Male2)
+	JsonUtil.IntListCopy(File, "Male3", Male3)
+	JsonUtil.IntListCopy(File, "Male4", Male4)
+	JsonUtil.IntListCopy(File, "Male5", Male5)
+
+	return JsonUtil.Save(File, true)
+endFunction
+
+bool function ImportJson()
+	if JsonUtil.GetStringValue(File, "Name") == "" || (JsonUtil.IntListCount(File, "Female1") != 32 && JsonUtil.IntListCount(File, "Male1") != 32)
+		return false
+	endIf
+
+	Name = JsonUtil.GetStringValue(File, "Name", Name)
+	Enabled = JsonUtil.GetIntValue(File, "Enabled", Enabled as int) as bool
+
+	AddTagConditional("Normal", JsonUtil.GetIntValue(File, "Normal", HasTag("Normal") as int) as bool)
+	AddTagConditional("Victim", JsonUtil.GetIntValue(File, "Victim", HasTag("Victim") as int) as bool)
+	AddTagConditional("Aggressor", JsonUtil.GetIntValue(File, "Aggressor", HasTag("Aggressor") as int) as bool)
+
+	Female1 = new int[1]
+	if JsonUtil.IntListCount(File, "Female1") == 32
+		Female1 = new int[32]
+		JsonUtil.IntListSlice(File, "Female1", Female1)
+	endIf
+	Female2 = new int[1]
+	if JsonUtil.IntListCount(File, "Female2") == 32
+		Female2 = new int[32]
+		JsonUtil.IntListSlice(File, "Female2", Female2)
+	endIf
+	Female3 = new int[1]
+	if JsonUtil.IntListCount(File, "Female3") == 32
+		Female3 = new int[32]
+		JsonUtil.IntListSlice(File, "Female3", Female3)
+	endIf
+	Female4 = new int[1]
+	if JsonUtil.IntListCount(File, "Female4") == 32
+		Female4 = new int[32]
+		JsonUtil.IntListSlice(File, "Female4", Female4)
+	endIf
+	Female5 = new int[1]
+	if JsonUtil.IntListCount(File, "Female5") == 32
+		Female5 = new int[32]
+		JsonUtil.IntListSlice(File, "Female5", Female5)
+	endIf
+
+	Male1 = new int[1]
+	if JsonUtil.IntListCount(File, "Male1") == 32
+		Male1 = new int[32]
+		JsonUtil.IntListSlice(File, "Male1", Male1)
+	endIf
+	Male2 = new int[1]
+	if JsonUtil.IntListCount(File, "Male2") == 32
+		Male2 = new int[32]
+		JsonUtil.IntListSlice(File, "Male2", Male2)
+	endIf
+	Male3 = new int[1]
+	if JsonUtil.IntListCount(File, "Male3") == 32
+		Male3 = new int[32]
+		JsonUtil.IntListSlice(File, "Male3", Male3)
+	endIf
+	Male4 = new int[1]
+	if JsonUtil.IntListCount(File, "Male4") == 32
+		Male4 = new int[32]
+		JsonUtil.IntListSlice(File, "Male4", Male4)
+	endIf
+	Male5 = new int[1]
+	if JsonUtil.IntListCount(File, "Male5") == 32
+		Male5 = new int[32]
+		JsonUtil.IntListSlice(File, "Male5", Male5)
+	endIf
+
+	CountPhases()
+
+	return true
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- DEPRECATED                                      --- ;
 ; ------------------------------------------------------- ;

@@ -1117,7 +1117,13 @@ function ExpressionEditor()
 
 	SetTitleText(Expression.Name)
 	AddMenuOptionST("ExpressionSelect", "$SSL_ModifyingExpression", Expression.Name)
+
+	AddHeaderOption("")
+	AddTextOptionST("ExportExpression", "$SSL_ExportExpression", "$SSL_ClickHere")
+	AddTextOptionST("ImportExpression", "$SSL_ImportExpression", "$SSL_ClickHere")
+
 	AddToggleOptionST("ExpressionNormal", "$SSL_ExpressionsNormal", Expression.HasTag("Normal"), Flag)
+
 
 	if PlayerRef.GetLeveledActorBase().GetSex() == 1
 		AddTextOptionST("ExpressionTestPlayer", "$SSL_TestOnPlayer", "$SSL_Apply", FlagF)
@@ -1235,6 +1241,39 @@ state ExpressionPhase
 		Phase = 1
 		SetMenuOptionValueST(Phase)
 		ForcePageReset()
+	endEvent
+endState
+
+state ExportExpression
+	event OnSelectST()
+		if ShowMessage("Are you sure you wish to export the expression \""+Expression.Name+"\" to external file?\nThe resulting external file can be shared and/or edited and will overwrite any file currently existing at\n/Skyrim/Data/SKSE/Plugins/StorageUtilData/SexLab/Expression"+Expression.Registry+".json", true, "$Yes", "$No")
+			if Expression.ImportJson()
+				ShowMessage("Expression has been successfully saved to an external file!")
+			else
+				ShowMessage("Failed to save external expression file!")
+			endIf
+		endIf
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoExportExpression")
+	endEvent
+endState
+
+state ImportExpression
+	event OnSelectST()
+		if ShowMessage("Attempt the overwrite the \""+Expression.Name+"\" expression with the exported/customized file /Skyrim/Data/SKSE/Plugins/StorageUtilData/SexLab/Expression"+Expression.Registry+".json?", true, "$Yes", "$No")
+			if Expression.ImportJson()
+				ShowMessage("Expression has been successfully loaded from the external file!")
+			else
+				ShowMessage("Failed to load external expression file at '/Skyrim/Data/SKSE/Plugins/StorageUtilData/SexLab/Expression"+Expression.Registry+".json'")
+			endIf
+			Phase = 1
+			SetMenuOptionValueST(Expression.Name)
+			ForcePageReset()
+		endIf
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoImportExpression")
 	endEvent
 endState
 
