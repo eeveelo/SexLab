@@ -973,7 +973,6 @@ function FalmerMissionary(int id)
 	Base.AddTag("Doggystyle")
 	Base.AddTag("Missionary")
 	Base.AddTag("Holding")
-	Base.AddTag("Gangbang")
 	Base.AddTag("Vaginal")
 
 	Base.Save(id)
