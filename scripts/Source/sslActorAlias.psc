@@ -22,7 +22,6 @@ bool IsCreature
 bool IsVictim
 bool IsPlayer
 bool IsTracked
-bool IsGagged
 
 ; Current Thread state
 sslThreadController Thread
@@ -69,7 +68,7 @@ bool property OpenMouth hidden
 endProperty
 bool property IsSilent hidden
 	bool function get()
-		return Voice == none || IsForcedSilent || IsGagged || Flags[0] == 1 || Flags[1] == 1
+		return Voice == none || IsForcedSilent || Flags[0] == 1 || Flags[1] == 1
 	endFunction
 endProperty
 bool property UseStrapon hidden
@@ -332,7 +331,7 @@ state Animating
 		endIf
 		; Clear any existing expression as a default - to remove open mouth
 		; ActorRef.ClearExpressionOverride()
-		if OpenMouth && !IsGagged
+		if OpenMouth
 			sslBaseExpression.OpenMouth(ActorRef)
 		elseIf Expression != none
 			Expression.Apply(ActorRef, Enjoyment, BaseSex)
@@ -706,9 +705,6 @@ function Strip()
 			if ItemRef && !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")
 				ActorRef.UnequipItem(ItemRef, false, true)
 				Stripped[i] = ItemRef
-			; Item wasn't stripped, but has gag keyword
-			elseIf ItemRef && SexLabUtil.HasKeywordSub(ItemRef, "Gag")
-				IsGagged = true
 			endIf
 		endIf
 		; Move to next slot
@@ -856,7 +852,6 @@ function Initialize()
 	NoRagdoll      = false
 	NoUndress      = false
 	NoRedress      = false
-	IsGagged       = false
 	; Floats
 	ActorScale     = 0.0
 	AnimScale      = 0.0
