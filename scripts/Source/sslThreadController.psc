@@ -98,6 +98,8 @@ state Animating
 	function FireAction()
 		Log("Stage: "+Stage, "Animating")
 		; Prepare loop
+		SoundFX    = Animation.GetSoundFX(Stage)
+		Log("Using SoundFX: "+SoundFX)
 		SFXDelay   = ClampFloat(Config.SFXDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		PlayAnimation()
@@ -414,7 +416,7 @@ function SetAnimation(int aid = -1)
 	IsLoving    = Tags.Find("Loving") != -1
 	IsDirty     = Tags.Find("Dirty") != -1
 	StageCount  = Animation.StageCount
-	SoundFX     = Animation.SoundFX
+	SoundFX     = Animation.GetSoundFX(Stage)
 	SetBonuses()
 	; Inform player of animation being played now
 	if HasPlayer
@@ -433,6 +435,7 @@ endFunction
 float function GetTimer()
 	; Custom acyclic stage timer
 	if Animation.HasTimer(Stage)
+		Log("Stage has timer: "+Animation.GetTimer(Stage))
 		TimedStage = true
 		return Animation.GetTimer(Stage)
 	endIf

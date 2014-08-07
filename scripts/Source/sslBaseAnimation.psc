@@ -5,6 +5,7 @@ import sslUtility
 ; Config
 ; int property SFX auto hidden
 Sound property SoundFX auto hidden
+Form[] StageSoundFX
 
 int Actors
 int Stages
@@ -134,14 +135,21 @@ int function AccessPosition(int Position, int Slot)
 endFunction
 
 bool function HasTimer(int Stage)
-	return Stage > 0 && Stage < Timers.Length ; && Timers[(Stage - 1)] != 0.0
+	return Stage > 0 && Stage <= Timers.Length && Timers[(Stage - 1)] != 0.0
 endFunction
 
 float function GetTimer(int Stage)
-	if HasTimer(Stage)
-		return Timers[(Stage - 1)]
+	if !HasTimer(Stage)
+		return 0.0 ; Stage has no timer
 	endIf
-	return 0.0 ; Stage has no timer
+	return Timers[(Stage - 1)]
+endFunction
+
+Sound function GetSoundFX(int Stage)
+	if Stage < 1 || Stage > StageSoundFX.Length
+		return SoundFX
+	endIf
+	return StageSoundFX[(Stage - 1)] as Sound
 endFunction
 
 int[] function GetPositionFlags(string AdjustKey, int Position, int Stage)
@@ -444,6 +452,25 @@ endFunction
 ; --- Animation Setup                                 --- ;
 ; ------------------------------------------------------- ;
 
+function SetStageSoundFX(int stage, Sound stageFX)
+	; Validate stage
+	if stage > Stages || stage < 1
+		Log("Unknown animation stage, '"+stage+"' given.", "SetStageSound")
+		return
+	endIf
+	; Initialize fx array if needed
+	if StageSoundFX.Length != Stages
+		StageSoundFX = FormArray(Stages)
+		int i = StageSoundFX.Length
+		while i
+			i -= 1
+			StageSoundFX[i] = SoundFX
+		endWhile
+	endIf
+	; Set stage's fx
+	StageSoundFX[(stage - 1)] = stageFX
+endFunction
+
 function SetStageTimer(int stage, float timer)
 	; Validate stage
 	if stage > Stages || stage < 1
@@ -473,6 +500,10 @@ function AddPositionStage(int Position, string AnimationEvent, float forward = 0
 	Animations[aid] = AnimationEvent
 	aid += 1
 
+	if Position == 0
+		Stages += 1
+	endIf
+
 	Offsets[sid + 0] = forward
 	Offsets[sid + 1] = side
 	Offsets[sid + 2] = up
@@ -492,7 +523,6 @@ function Save(int id)
 	Offsets    = TrimFloatArray(Offsets, sid)
 	Positions  = TrimIntArray(Positions, (Actors * 2))
 	Animations = TrimStringArray(Animations, aid)
-	Stages     = Animations.Length / Actors
 	; Create and add gender tag
 	string Tag
 	int i
@@ -547,18 +577,21 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function Initialize()
-	Actors  = 0
-	Stages  = 0
-	Content = 0
-	sid     = 0
-	aid     = 0
-	Genders    = new int[3]
-	Positions  = new int[10]
-	Flags      = new int[128]
-	Offsets    = new float[128]
-	Animations = new string[128]
-	RaceIDs = StringArray(0)
-	Timers  = FloatArray(0)
+	Actors       = 0
+	Stages       = 0
+	Content      = 0
+	sid          = 0
+	aid          = 0
+	SoundFX      = none
+	StageSoundFX = FormArray(0)
+	RaceIDs      = StringArray(0)
+	Timers       = FloatArray(0)
+	Genders      = new int[3]
+	Positions    = new int[10]
+	Flags        = new int[128]
+	Offsets      = new float[128]
+	Animations   = new string[128]
+
 	parent.Initialize()
 endFunction
 
