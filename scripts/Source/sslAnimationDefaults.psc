@@ -19,6 +19,7 @@ function LoadAnimations()
 	RegisterAnimation("ArrokDoggyStyle")
 	RegisterAnimation("ArrokRape")
 	RegisterAnimation("ZynDoggystyle")
+	RegisterAnimation("DarkInvestigationsDoggystyle")
 	RegisterAnimation("APDoggyStyle")
 	; Cowgirl
 	RegisterAnimation("SexLabReverseCowgirl")
@@ -43,6 +44,7 @@ function LoadAnimations()
 	; Oral
 	RegisterAnimation("ArrokBlowjob")
 	RegisterAnimation("ArrokOral")
+	RegisterAnimation("DarkInvestigationsBlowjob")
 	RegisterAnimation("APBlowjob")
 	RegisterAnimation("APKneelBlowjob")
 	RegisterAnimation("APStandBlowjob")
@@ -73,6 +75,7 @@ function LoadAnimations()
 	RegisterAnimation("ArrokTricycle")
 	RegisterAnimation("ZynDoublePenetration")
 	RegisterAnimation("ZynFemdom")
+	RegisterAnimation("DarkInvestigationsThreesome")
 endFunction
 
 function ArrokBlowjob(int id)
@@ -1874,6 +1877,116 @@ function ZynDoggystyle(int id)
 	Base.AddTag("Doggystyle")
 	Base.AddTag("Vaginal")
 	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+
+
+function DarkInvestigationsThreesome(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "DI Forced Threesome"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = SexMix
+
+	int a1 = Base.AddPosition(Female, addCum=VaginalOralAnal)
+	Base.AddPositionStage(a1, "zdi2_Threesome_A1_S1", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "zdi2_Threesome_A1_S2", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "zdi2_Threesome_A1_S3", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "zdi2_Threesome_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Threesome_A2_S1", -82, sos = 0)
+	Base.AddPositionStage(a2, "zdi2_Threesome_A2_S2", -82, sos = 0)
+	Base.AddPositionStage(a2, "zdi2_Threesome_A2_S3", -82, sos = 0)
+	Base.AddPositionStage(a2, "zdi2_Threesome_A2_S4", -82, sos = 0)
+
+	int a3 = Base.AddPosition(Male)
+	Base.AddPositionStage(a3, "zdi2_Threesome_A3_S1", 82, rotate = 180.0, sos = 0)
+	Base.AddPositionStage(a3, "zdi2_Threesome_A3_S2", 82, rotate = 180.0, sos = 0)
+	Base.AddPositionStage(a3, "zdi2_Threesome_A3_S3", 82, rotate = 180.0, sos = 0)
+	Base.AddPositionStage(a3, "zdi2_Threesome_A3_S4", 82, rotate = 180.0, sos = 0)
+
+	Base.AddTag("Sex")
+	Base.AddTag("Dark Investigations")
+	Base.AddTag("zDI")
+	Base.AddTag("Athstai")
+	Base.AddTag("MMF")
+	Base.AddTag("Doggy")
+	Base.AddTag("Blowjob")
+	Base.AddTag("Oral")
+	Base.AddTag("Orgy")
+	Base.AddTag("Vaginal")
+	Base.AddTag("Dirty")
+	Base.AddTag("Forced")
+
+	Base.Save(id)
+endFunction
+
+function DarkInvestigationsDoggystyle(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "DI Doggystyle"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S3", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82, sos = 0)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82, sos = 0)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S3", -82, sos = 0)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S4", -82, sos = 0)
+
+	Base.AddTag("Sex")
+	Base.AddTag("Dark Investigations")
+	Base.AddTag("zDI")
+	Base.AddTag("Athstai")
+	Base.AddTag("MF")
+	Base.AddTag("Doggy")
+	Base.AddTag("Oral")
+	Base.AddTag("Dirty")
+
+	Base.Save(id)
+endFunction
+
+
+function DarkInvestigationsBlowjob(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "DI Blowjob"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Sucking
+
+	int a1 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a1, "zdi2_Blowjob_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Blowjob_A1_S2", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "zdi2_Blowjob_A1_S3", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "zdi2_Blowjob_A1_S4", 0, openMouth = true)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Blowjob_A2_S1", 50, rotate = 180.0, sos = 0)
+	Base.AddPositionStage(a2, "zdi2_Blowjob_A2_S2", 50, rotate = 180.0, sos = 0)
+	Base.AddPositionStage(a2, "zdi2_Blowjob_A2_S3", 50, rotate = 180.0, sos = 0)
+	Base.AddPositionStage(a2, "zdi2_Blowjob_A2_S4", 50, rotate = 180.0, sos = 0)
+
+	Base.AddTag("Sex")
+	Base.AddTag("Dark Investigations")
+	Base.AddTag("zDI")
+	Base.AddTag("Athstai")
+	Base.AddTag("MF")
+	Base.AddTag("Handjob")
+	Base.AddTag("Blowjob")
+	Base.AddTag("Oral")
+	Base.AddTag("Dirty")
 
 	Base.Save(id)
 endFunction

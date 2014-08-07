@@ -1,4 +1,4 @@
-Version V1.58
+Version V1.59
 
 b SexLab_Test_15800 AggrMissionary_A1_S3.hkx
 
@@ -559,3 +559,64 @@ s Bleagh_FootJob_A2_S1 Bleagh_FootJob_A2_S1.hkx
 + Bleagh_FootJob_A2_S3 Bleagh_FootJob_A2_S3.hkx
 + Bleagh_FootJob_A2_S4 Bleagh_FootJob_A2_S4.hkx
 + Bleagh_FootJob_A2_S5 Bleagh_FootJob_A2_S5.hkx
+
+'
+' zdi2 - Dark Investigations
+'
+
+s zdi2_Threesome_A1_S1  zdi2_Threesome_A1_S1.hkx
++ -a zdi2_Threesome_A1_S2 zdi2_Threesome_A1_S2.hkx
++ zdi2_Threesome_A1_S2b zdi2_Threesome_A1_S2b.hkx
++ -a zdi2_Threesome_A1_S3 zdi2_Threesome_A1_S3.hkx
++ zdi2_Threesome_A1_S3b zdi2_Threesome_A1_S3b.hkx
++ -a zdi2_Threesome_A1_S4 zdi2_Threesome_A1_S4.hkx
++ zdi2_Threesome_A1_S4b zdi2_Threesome_A1_S4b.hkx
+
+s zdi2_Threesome_A2_S1  zdi2_Threesome_A2_S1.hkx
++ -a zdi2_Threesome_A2_S2 zdi2_Threesome_A2_S2.hkx
++ zdi2_Threesome_A2_S2b zdi2_Threesome_A2_S2b.hkx
++ -a zdi2_Threesome_A2_S3 zdi2_Threesome_A2_S3.hkx
++ zdi2_Threesome_A2_S3b zdi2_Threesome_A2_S3b.hkx
++ -a zdi2_Threesome_A2_S4 zdi2_Threesome_A2_S4.hkx
++ zdi2_Threesome_A2_S4b zdi2_Threesome_A2_S4b.hkx
+
+s zdi2_Threesome_A3_S1  zdi2_Threesome_A3_S1.hkx
++ -a zdi2_Threesome_A3_S2 zdi2_Threesome_A3_S2.hkx
++ zdi2_Threesome_A3_S2b zdi2_Threesome_A3_S2b.hkx
++ -a zdi2_Threesome_A3_S3 zdi2_Threesome_A3_S3.hkx
++ zdi2_Threesome_A3_S3b zdi2_Threesome_A3_S3b.hkx
++ -a zdi2_Threesome_A3_S4 zdi2_Threesome_A3_S4.hkx
++ zdi2_Threesome_A3_S4b zdi2_Threesome_A3_S4b.hkx
+
+
+s zdi2_Blowjob_A1_S1  zdi2_Blowjob_A1_S1.hkx
++ -a zdi2_Blowjob_A1_S2 zdi2_Blowjob_A1_S2.hkx
++ zdi2_Blowjob_A1_S2b zdi2_Blowjob_A1_S2b.hkx
++ -a zdi2_Blowjob_A1_S3 zdi2_Blowjob_A1_S3.hkx
++ zdi2_Blowjob_A1_S3b zdi2_Blowjob_A1_S3b.hkx
++ -a zdi2_Blowjob_A1_S4 zdi2_Blowjob_A1_S4.hkx
+
+s zdi2_Blowjob_A2_S1  zdi2_Blowjob_A2_S1.hkx
++ -a zdi2_Blowjob_A2_S2 zdi2_Blowjob_A2_S2.hkx
++ zdi2_Blowjob_A2_S2b zdi2_Blowjob_A2_S2b.hkx
++ -a zdi2_Blowjob_A2_S3 zdi2_Blowjob_A2_S3.hkx
++ zdi2_Blowjob_A2_S3b zdi2_Blowjob_A2_S3b.hkx
++ -a zdi2_Blowjob_A2_S4 zdi2_Blowjob_A2_S4.hkx
+
+
+s zdi2_Doggystyle_A1_S1  zdi2_Doggystyle_A1_S1.hkx
++ -a zdi2_Doggystyle_A1_S2 zdi2_Doggystyle_A1_S2.hkx
++ zdi2_Doggystyle_A1_S2b zdi2_Doggystyle_A1_S2b.hkx
++ -a zdi2_Doggystyle_A1_S3 zdi2_Threesome_A1_S3.hkx
++ zdi2_Doggystyle_A1_S3b zdi2_Doggystyle_A1_S3b.hkx
++ -a zdi2_Doggystyle_A1_S4 zdi2_Threesome_A1_S4.hkx
++ zdi2_Doggystyle_A1_S4b zdi2_Doggystyle_A1_S4b.hkx
+
+s zdi2_Doggystyle_A2_S1  zdi2_Threesome_A2_S1.hkx
++ -a zdi2_Doggystyle_A2_S2 zdi2_Threesome_A2_S2.hkx
++ zdi2_Doggystyle_A2_S2b zdi2_Threesome_A2_S2b.hkx
++ -a zdi2_Doggystyle_A2_S3 zdi2_Threesome_A2_S3.hkx
++ zdi2_Doggystyle_A2_S3b zdi2_Threesome_A2_S3b.hkx
++ -a zdi2_Doggystyle_A2_S4 zdi2_Threesome_A2_S4.hkx
++ zdi2_Doggystyle_A2_S4b zdi2_Doggystyle_A2_S4b.hkx
+
