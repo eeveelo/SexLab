@@ -65,12 +65,12 @@ endFunction
 
 function OpenMouth(Actor ActorRef) global
 	ActorRef.SetExpressionOverride(16, 100)
-	ActorRef.SetExpressionPhoneme(1, 20)
+	; ActorRef.SetExpressionPhoneme(1, 20)
 endFunction
 
 function CloseMouth(Actor ActorRef) global
 	ActorRef.ClearExpressionOverride()
-	ActorRef.SetExpressionPhoneme(1, 0)
+	; ActorRef.SetExpressionPhoneme(1, 0)
 endFunction
 
 ; No longer used due to removal of MFGConsoleFunc plugin
