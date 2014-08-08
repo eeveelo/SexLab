@@ -78,7 +78,7 @@ endProperty
 
 string property Profile hidden
 	string function get()
-		return "AdjustmentProfile_"+Config.AnimProfile+".json"
+		return "SexLab/AnimationProfile_"+Config.AnimProfile+".json"
 	endFunction
 endProperty
 

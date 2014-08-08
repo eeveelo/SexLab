@@ -1093,60 +1093,55 @@ string[] Modifiers
 function ExpressionEditor()
 	SetCursorFillMode(LEFT_TO_RIGHT)
 
-	int i
 	if Expression == none
 		Expression = ExpressionSlots.GetBySlot(0)
 		Phase = 1
 	endIf
 
-	int Flag  = OPTION_FLAG_NONE
 	int FlagF = OPTION_FLAG_NONE
 	int FlagM = OPTION_FLAG_NONE
-	if Phase > Expression.PhasesFemale && Phase > Expression.PhasesMale
-		Flag  = OPTION_FLAG_DISABLED
+	if Phase > Expression.PhasesFemale
 		FlagF = OPTION_FLAG_DISABLED
+	endIf
+	if Phase > Expression.PhasesMale
 		FlagM = OPTION_FLAG_DISABLED
-	else
-		if Phase > Expression.PhasesFemale
-			FlagF = OPTION_FLAG_DISABLED
-		endIf
-		if Phase > Expression.PhasesMale
-			FlagM = OPTION_FLAG_DISABLED
-		endIf
 	endIf
 
 	SetTitleText(Expression.Name)
-	AddMenuOptionST("ExpressionSelect", "$SSL_ModifyingExpression", Expression.Name)
 
+	; Left
+	; 1. Name
+	; 2. Normal Tag
+	; 3. Victim Tag
+	; 4. Aggressor Tag
+	; 5. Phase Select
+
+	; Right
+	; 1. <empty>
+	; 2. Export Expression
+	; 3. Import Expression
+	; 4. Player Test
+	; 5. Target Test
+
+	; 1
+	AddMenuOptionST("ExpressionSelect", "$SSL_ModifyingExpression", Expression.Name)
 	AddHeaderOption("")
+
+	; 2
+	AddToggleOptionST("ExpressionNormal", "$SSL_ExpressionsNormal", Expression.HasTag("Normal"))
 	AddTextOptionST("ExportExpression", "$SSL_ExportExpression", "$SSL_ClickHere")
+
+	; 3
+	AddToggleOptionST("ExpressionVictim", "$SSL_ExpressionsVictim", Expression.HasTag("Victim"))
 	AddTextOptionST("ImportExpression", "$SSL_ImportExpression", "$SSL_ClickHere")
 
-	AddToggleOptionST("ExpressionNormal", "$SSL_ExpressionsNormal", Expression.HasTag("Normal"), Flag)
+	; 4
+	AddToggleOptionST("ExpressionAggressor", "$SSL_ExpressionsAggressor", Expression.HasTag("Aggressor"))
+	AddTextOptionST("ExpressionTestPlayer", "$SSL_TestOnPlayer", "$SSL_Apply", Math.LogicalAnd(OPTION_FLAG_NONE, (!Expression.HasPhase(Phase, PlayerRef)) as int))
 
-
-	if PlayerRef.GetLeveledActorBase().GetSex() == 1
-		AddTextOptionST("ExpressionTestPlayer", "$SSL_TestOnPlayer", "$SSL_Apply", FlagF)
-	else
-		AddTextOptionST("ExpressionTestPlayer", "$SSL_TestOnPlayer", "$SSL_Apply", FlagM)
-	endIf
-
-	AddToggleOptionST("ExpressionVictim", "$SSL_ExpressionsVictim", Expression.HasTag("Victim"), FlagF)
-
-	if TargetRef != none
-		if TargetRef.GetLeveledActorBase().GetSex() == 1
-			AddTextOptionST("ExpressionTestTarget", "$SSL_TestOn{"+TargetName+"}", "$SSL_Apply", FlagF)
-		else
-			AddTextOptionST("ExpressionTestTarget", "$SSL_TestOn{"+TargetName+"}", "$SSL_Apply", FlagM)
-		endIf
-	else
-		AddTextOptionST("ExpressionTestTarget", "$SSL_TestOn{"+TargetName+"}", "$SSL_Apply", TargetFlag)
-	endIf
-
-	AddToggleOptionST("ExpressionAggressor", "$SSL_ExpressionsAggressor", Expression.HasTag("Aggressor"), Flag)
-
+	; 5
 	AddMenuOptionST("ExpressionPhase", "$SSL_Modifying{"+Expression.Name+"}Phase", Phase)
-	AddHeaderOption("")
+	AddTextOptionST("ExpressionTestTarget", "$SSL_TestOn{"+TargetName+"}", "$SSL_Apply", Math.LogicalAnd(OPTION_FLAG_NONE, (TargetRef == none || !Expression.HasPhase(Phase, TargetRef)) as int))
 
 	; Show expression customization options
 	int[] FemaleModifiers = Expression.GetModifiers(Phase, Female)
@@ -1167,6 +1162,7 @@ function ExpressionEditor()
 	else
 		AddEmptyOption()
 	endIf
+
 	; Add/Remove Male Phase
 	if Phase == (Expression.PhasesMale + 1)
 		AddTextOptionST("ExpressionAddPhaseMale", "$SSL_AddMalePhase", "$SSL_ClickHere")
@@ -1180,6 +1176,7 @@ function ExpressionEditor()
 		AddEmptyOption()
 	endIf
 
+	; Expression/Mood settings
 	AddHeaderOption("$SSL_{$SSL_Female}-{$SSL_Mood}", FlagF)
 	AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Mood}", FlagM)
 
@@ -1189,18 +1186,22 @@ function ExpressionEditor()
 	AddSliderOptionST("MoodAmountFemale", "$SSL_MoodStrength", Expression.GetMoodAmount(Phase, Female), "{0}", FlagF)
 	AddSliderOptionST("MoodAmountMale", "$SSL_MoodStrength", Expression.GetMoodAmount(Phase, Male), "{0}", FlagM)
 
+	; Modifier settings
 	AddHeaderOption("$SSL_{$SSL_Female}-{$SSL_Modifier}", FlagF)
 	AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Modifier}", FlagM)
-	i = 0
-	while i < 14
+
+	int i = 0
+	while i <= 13
 		AddSliderOptionST("Expression_1_"+Modifier+"_"+i, Modifiers[i], FemaleModifiers[i], "{0}", FlagF)
 		AddSliderOptionST("Expression_0_"+Modifier+"_"+i, Modifiers[i], MaleModifiers[i], "{0}", FlagM)
 		i += 1
 	endWhile
+
+	; Phoneme settings
 	AddHeaderOption("$SSL_{$SSL_Female}-{$SSL_Phoneme}", FlagF)
 	AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Phoneme}", FlagM)
 	i = 0
-	while i < 16
+	while i <= 15
 		AddSliderOptionST("Expression_1_"+Phoneme+"_"+i, Phonemes[i], FemalePhonemes[i], "{0}", FlagF)
 		AddSliderOptionST("Expression_0_"+Phoneme+"_"+i, Phonemes[i], MalePhonemes[i], "{0}", FlagM)
 		i += 1
@@ -1246,34 +1247,33 @@ endState
 
 state ExportExpression
 	event OnSelectST()
-		if ShowMessage("Are you sure you wish to export the expression \""+Expression.Name+"\" to external file?\nThe resulting external file can be shared and/or edited and will overwrite any file currently existing at\n/Skyrim/Data/SKSE/Plugins/StorageUtilData/SexLab/Expression"+Expression.Registry+".json", true, "$Yes", "$No")
-			if Expression.ImportJson()
-				ShowMessage("Expression has been successfully saved to an external file!")
+		if ShowMessage("$SSL_WarnExportExpression{"+Expression.Name+"}", true, "$Yes", "$No")
+			if Expression.ExportJson()
+				ShowMessage("$SSL_SuccessExportExpression")
 			else
-				ShowMessage("Failed to save external expression file!")
+				ShowMessage("$SSL_ErrorExportExpression")
 			endIf
 		endIf
 	endEvent
 	event OnHighlightST()
-		SetInfoText("$SSL_InfoExportExpression")
+		SetInfoText("$SSL_InfoExportExpression{"+Expression.Registry+"}")
 	endEvent
 endState
 
 state ImportExpression
 	event OnSelectST()
-		if ShowMessage("Attempt the overwrite the \""+Expression.Name+"\" expression with the exported/customized file /Skyrim/Data/SKSE/Plugins/StorageUtilData/SexLab/Expression"+Expression.Registry+".json?", true, "$Yes", "$No")
+		if ShowMessage("$SSL_WarnExportExpression{"+Expression.Name+"}", true, "$Yes", "$No")
 			if Expression.ImportJson()
-				ShowMessage("Expression has been successfully loaded from the external file!")
+				ShowMessage("$SSL_SuccessExportExpression")
+				Phase = 1
+				ForcePageReset()
 			else
-				ShowMessage("Failed to load external expression file at '/Skyrim/Data/SKSE/Plugins/StorageUtilData/SexLab/Expression"+Expression.Registry+".json'")
+				ShowMessage("$SSL_ErrorImportExpression")
 			endIf
-			Phase = 1
-			SetMenuOptionValueST(Expression.Name)
-			ForcePageReset()
 		endIf
 	endEvent
 	event OnHighlightST()
-		SetInfoText("$SSL_InfoImportExpression")
+		SetInfoText("$SSL_InfoImportExpression{"+Expression.Registry+"}")
 	endEvent
 endState
 
@@ -1296,13 +1296,12 @@ endState
 function TestApply(Actor ActorRef)
 	string ActorName = ActorRef.GetLeveledActorBase().GetName()
 	sslBaseExpression Exp = Expression
-	if ShowMessage("Expression will be applied to "+ActorName+" for preview purposes, after 30 seconds they will be reset to their default.\n\nDo you wish to continue?", true, "$Yes", "$No")
-		ShowMessage("Applying "+Exp.Name+" phase "+Phase+" on "+ActorName+".\n\nClose all menus and return to the game to continue...", false)
+	if ShowMessage("$SSL_WarnTestExpression{"+ActorName+"}", true, "$Yes", "$No")
+		ShowMessage("$SSL_StartTestExpression{"+Exp.Name+"}_{"+phase+"}", false)
 		Utility.Wait(0.1)
 		Game.ForceThirdPerson()
 		Exp.ApplyPhase(ActorRef, Phase, ActorRef.GetLeveledActorBase().GetSex())
-		Debug.Notification(Exp.Name+" has been applied to "+ActorName)
-		Debug.Notification("Reverting expression in 15 seconds...")
+		Debug.Notification("$SSL_AppliedTestExpression")
 		Utility.WaitMenuMode(15.0)
 		PlayerRef.ResetExpressionOverrides()
 		PlayerRef.ClearExpressionOverride()

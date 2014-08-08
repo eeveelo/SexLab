@@ -12,6 +12,12 @@ int property Phoneme = 0 autoreadonly
 int property Modifier = 16 autoreadonly
 int property Mood = 30 autoreadonly
 
+string property File hidden
+	string function get()
+		return "SexLab/Expression_"+Registry+".json"
+	endFunction
+endProperty
+
 int[] Phases
 int[] property PhaseCounts hidden
 	int[] function get()
@@ -194,6 +200,14 @@ endFunction
 ; --- Phase Accessors                                 --- ;
 ; ------------------------------------------------------- ;
 
+bool function HasPhase(int Phase, Actor ActorRef)
+	if ActorRef == none || Phase < 1
+		return false
+	endIf
+	int gender = ActorRef.GetLeveledActorBase().GetSex()
+	return (gender == 1 && Phase <= PhasesFemale) || (gender == 0 && Phase <= PhasesMale)
+endFunction
+
 int[] function GetPhase(int Phase, int Gender)
 	int[] Preset
 	if Gender == Male
@@ -337,14 +351,6 @@ function Initialize()
 	parent.Initialize()
 endFunction
 
-
-
-string property File hidden
-	string function get()
-		return "SexLab/Expression_"+Registry+".json"
-	endFunction
-endProperty
-
 bool function ExportJson()
 	JsonUtil.ClearAll(File)
 
@@ -371,6 +377,7 @@ endFunction
 
 bool function ImportJson()
 	if JsonUtil.GetStringValue(File, "Name") == "" || (JsonUtil.IntListCount(File, "Female1") != 32 && JsonUtil.IntListCount(File, "Male1") != 32)
+		Log("Failed to import "+File)
 		return false
 	endIf
 
