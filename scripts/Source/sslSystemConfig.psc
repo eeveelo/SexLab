@@ -80,6 +80,7 @@ Message property CleanSystemFinish auto
 Message property CheckSKSE auto
 Message property CheckFNIS auto
 Message property CheckSkyrim auto
+Message property CheckSexLabUtil auto
 Message property CheckPapyrusUtil auto
 Message property CheckSkyUI auto
 Message property TakeThreadControl auto
@@ -494,6 +495,10 @@ bool function CheckSystem()
 	; Check SkyUI install - depends on passing SKSE check passing
 	elseIf Quest.GetQuest("SKI_ConfigManagerInstance") == none
 		CheckSkyUI.Show(4.1)
+		return false
+	; Check SexLabUtil install - this should never happen if they have properly updated
+	elseIf SexLabUtil.GetPluginVersion() < 15900
+		CheckSexLabUtil.Show()
 		return false
 	; Check PapyrusUtil install - depends on passing SKSE check passing
 	elseIf PapyrusUtil.GetVersion() < 25
