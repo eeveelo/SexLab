@@ -1,6 +1,7 @@
 scriptname sslBaseExpression extends sslBaseObject
 
 import sslUtility
+import MfgConsoleFunc
 
 ; Gender Types
 int property Male = 0 autoreadonly
@@ -70,16 +71,17 @@ endFunction
 
 function CloseMouth(Actor ActorRef) global
 	ActorRef.ClearExpressionOverride()
-	; ActorRef.SetExpressionPhoneme(1, 0)
+	ActorRef.SetExpressionPhoneme(1, 0)
 endFunction
 
-; No longer used due to removal of MFGConsoleFunc plugin
 bool function IsMouthOpen(Actor ActorRef) global
-	return false
+	return (GetExpressionID(ActorRef) == 16 && GetExpressionValue(ActorRef) == 100) || (GetPhonemeModifier(ActorRef, 0, 1) >= 30)
 endFunction
 
 function ClearMFG(Actor ActorRef) global
 	ActorRef.ResetExpressionOverrides()
+	ActorRef.ClearExpressionOverride()
+	ResetPhonemeModifier(ActorRef)
 endFunction
 
 function ClearPhoneme(Actor ActorRef) global
