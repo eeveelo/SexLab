@@ -506,7 +506,7 @@ function LockActor()
 	; Remove any unwanted combat effects
 	ClearEffects()
 	; Stop whatever they are doing
-	Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
+	; Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 	; Start DoNothing package
 	ActorRef.SetFactionRank(Config.AnimatingFaction, 1)
 	ActorUtil.AddPackageOverride(ActorRef, Config.DoNothing, 100, 1)
@@ -574,6 +574,8 @@ function RestoreActorDefaults()
 	if !IsCreature
 		; Reset expression
 		ActorRef.ResetExpressionOverrides()
+		ActorRef.ClearExpressionOverride()
+		MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
 		; Reset voicetype
 		if ActorVoice != none && ActorVoice != BaseRef.GetVoiceType()
 			BaseRef.SetVoiceType(ActorVoice)
