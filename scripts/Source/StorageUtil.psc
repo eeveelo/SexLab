@@ -288,7 +288,7 @@ bool function FormListCopy(Form obj, string key, Form[] copy) global native
 int function FileSetIntValue(string key, int value) global native
 float function FileSetFloatValue(string key, float value) global native
 string function FileSetStringValue(string key, string value) global native
-string function FileSetFormValue(string key, Form value) global native
+form function FileSetFormValue(string key, Form value) global native
 
 
 ;/ Remove a previously set int value globally and return if successful. This
@@ -372,7 +372,7 @@ Form function FileFormListGet(string key, int index) global native
 int function FileIntListSet(string key, int index, int value) global native
 float function FileFloatListSet(string key, int index, float value) global native
 string function FileStringListSet(string key, int index, string value) global native
-string function FileFormListSet(string key, int index, Form value) global native
+Form function FileFormListSet(string key, int index, Form value) global native
 
 ;/ Clear a list of values (unset) globally and return the previous size of list.
 

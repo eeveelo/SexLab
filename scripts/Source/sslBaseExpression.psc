@@ -14,7 +14,7 @@ int property Mood = 30 autoreadonly
 
 string property File hidden
 	string function get()
-		return "SexLab/Expression_"+Registry+".json"
+		return "../SexLab/Expression_"+Registry+".json"
 	endFunction
 endProperty
 

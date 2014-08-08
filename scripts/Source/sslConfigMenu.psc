@@ -2461,10 +2461,12 @@ state ImportSettings
 endState
 
 
-string ConfigFile = "SexLab/SexlabConfig.json"
+string File
 function ExportSettings()
+	File = "../SexLab/SexlabConfig.json"
+
 	; Set label of export
-	JsonUtil.SetStringValue(ConfigFile, "ExportLabel", PlayerRef.GetLeveledActorBase().GetName()+" - "+Utility.GetCurrentRealTime() as int)
+	JsonUtil.SetStringValue(File, "ExportLabel", PlayerRef.GetLeveledActorBase().GetName()+" - "+Utility.GetCurrentRealTime() as int)
 
 	; Booleans
 	ExportBool("RestrictAggressive", Config.RestrictAggressive)
@@ -2539,10 +2541,12 @@ function ExportSettings()
 	ExportVoices()
 
 	; Save to JSON file
-	JsonUtil.Save(ConfigFile, false)
+	JsonUtil.Save(File, false)
 endFunction
 
 function ImportSettings()
+	File = "../SexLab/SexlabConfig.json"
+
 	; Booleans
 	Config.RestrictAggressive = ImportBool("RestrictAggressive", Config.RestrictAggressive)
 	Config.AllowCreatures     = ImportBool("AllowCreatures", Config.AllowCreatures)
@@ -2622,38 +2626,38 @@ endFunction
 
 ; Integers
 function ExportInt(string Name, int Value)
-	JsonUtil.SetIntValue(ConfigFile, Name, Value)
+	JsonUtil.SetIntValue(File, Name, Value)
 endFunction
 int function ImportInt(string Name, int Value)
-	return JsonUtil.GetIntValue(ConfigFile, Name, Value)
+	return JsonUtil.GetIntValue(File, Name, Value)
 endFunction
 
 ; Booleans
 function ExportBool(string Name, bool Value)
-	JsonUtil.SetIntValue(ConfigFile, Name, Value as int)
+	JsonUtil.SetIntValue(File, Name, Value as int)
 endFunction
 bool function ImportBool(string Name, bool Value)
-	return JsonUtil.GetIntValue(ConfigFile, Name, Value as int) as bool
+	return JsonUtil.GetIntValue(File, Name, Value as int) as bool
 endFunction
 
 ; Floats
 function ExportFloat(string Name, float Value)
-	JsonUtil.SetFloatValue(ConfigFile, Name, Value)
+	JsonUtil.SetFloatValue(File, Name, Value)
 endFunction
 float function ImportFloat(string Name, float Value)
-	return JsonUtil.GetFloatValue(ConfigFile, Name, Value)
+	return JsonUtil.GetFloatValue(File, Name, Value)
 endFunction
 
 ; Float Arrays
 function ExportFloatList(string Name, float[] Values, int len)
-	JsonUtil.FloatListClear(ConfigFile, Name)
-	JsonUtil.FloatListCopy(ConfigFile, Name, Values)
+	JsonUtil.FloatListClear(File, Name)
+	JsonUtil.FloatListCopy(File, Name, Values)
 endFunction
 float[] function ImportFloatList(string Name, float[] Values, int len)
-	if JsonUtil.FloatListCount(ConfigFile, Name) == len
+	if JsonUtil.FloatListCount(File, Name) == len
 		int i
 		while i < len
-			Values[i] = JsonUtil.FloatListGet(ConfigFile, Name, i)
+			Values[i] = JsonUtil.FloatListGet(File, Name, i)
 			i += 1
 		endWhile
 	endIf
@@ -2662,18 +2666,18 @@ endFunction
 
 ; Boolean Arrays
 function ExportBoolList(string Name, bool[] Values, int len)
-	JsonUtil.IntListClear(ConfigFile, Name)
+	JsonUtil.IntListClear(File, Name)
 	int i
 	while i < len
-		JsonUtil.IntListAdd(ConfigFile, Name, Values[i] as int)
+		JsonUtil.IntListAdd(File, Name, Values[i] as int)
 		i += 1
 	endWhile
 endFunction
 bool[] function ImportBoolList(string Name, bool[] Values, int len)
-	if JsonUtil.IntListCount(ConfigFile, Name) == len
+	if JsonUtil.IntListCount(File, Name) == len
 		int i
 		while i < len
-			Values[i] = JsonUtil.IntListGet(ConfigFile, Name, i) as bool
+			Values[i] = JsonUtil.IntListGet(File, Name, i) as bool
 			i += 1
 		endWhile
 	endIf
@@ -2682,21 +2686,21 @@ endFunction
 
 ; Animations
 function ExportAnimations()
-	JsonUtil.StringListClear(ConfigFile, "Animations")
+	JsonUtil.StringListClear(File, "Animations")
 	int i = AnimSlots.Slotted
 	sslBaseAnimation[] Anims = AnimSlots.Animations
 	while i
 		i -= 1
-		JsonUtil.StringListAdd(ConfigFile, "Animations", MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int, Anims[i].HasTag("Foreplay") as int, Anims[i].HasTag("Aggressive") as int))
+		JsonUtil.StringListAdd(File, "Animations", MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int, Anims[i].HasTag("Foreplay") as int, Anims[i].HasTag("Aggressive") as int))
 	endWhile
 endfunction
 
 function ImportAnimations()
-	int i = JsonUtil.StringListCount(ConfigFile, "Animations")
+	int i = JsonUtil.StringListCount(File, "Animations")
 	while i
 		i -= 1
 		; Registrar, Enabled, Foreplay, Aggressive
-		string[] args = ArgString(JsonUtil.StringListGet(ConfigFile, "Animations", i))
+		string[] args = ArgString(JsonUtil.StringListGet(File, "Animations", i))
 		if args.Length == 4 && AnimSlots.FindByRegistrar(args[0]) != -1
 			sslBaseAnimation Slot = AnimSlots.GetbyRegistrar(args[0])
 			Slot.Enabled = (args[1] as int) as bool
@@ -2708,21 +2712,21 @@ endFunction
 
 ; Creatures
 function ExportCreatures()
-	JsonUtil.StringListClear(ConfigFile, "Creatures")
+	JsonUtil.StringListClear(File, "Creatures")
 	int i = CreatureSlots.Slotted
 	sslBaseAnimation[] Anims = CreatureSlots.Animations
 	while i
 		i -= 1
-		JsonUtil.StringListAdd(ConfigFile, "Creatures", MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int))
+		JsonUtil.StringListAdd(File, "Creatures", MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int))
 	endWhile
 endFunction
 
 function ImportCreatures()
-	int i = JsonUtil.StringListCount(ConfigFile, "Creatures")
+	int i = JsonUtil.StringListCount(File, "Creatures")
 	while i
 		i -= 1
 		; Registrar, Enabled
-		string[] args = ArgString(JsonUtil.StringListGet(ConfigFile, "Creatures", i))
+		string[] args = ArgString(JsonUtil.StringListGet(File, "Creatures", i))
 		if args.Length == 2 && CreatureSlots.FindByRegistrar(args[0]) != -1
 			CreatureSlots.GetbyRegistrar(args[0]).Enabled = (args[1] as int) as bool
 		endIf
@@ -2731,21 +2735,21 @@ endFunction
 
 ; Expressions
 function ExportExpressions()
-	JsonUtil.StringListClear(ConfigFile, "Expressions")
+	JsonUtil.StringListClear(File, "Expressions")
 	int i = ExpressionSlots.Slotted
 	sslBaseExpression[] Exprs = ExpressionSlots.Expressions
 	while i
 		i -= 1
-		JsonUtil.StringListAdd(ConfigFile, "Expressions", MakeArgs(",", Exprs[i].Registry, Exprs[i].HasTag("Consensual") as int, Exprs[i].HasTag("Victim") as int, Exprs[i].HasTag("Aggressor") as int))
+		JsonUtil.StringListAdd(File, "Expressions", MakeArgs(",", Exprs[i].Registry, Exprs[i].HasTag("Consensual") as int, Exprs[i].HasTag("Victim") as int, Exprs[i].HasTag("Aggressor") as int))
 	endWhile
 endfunction
 
 function ImportExpressions()
-	int i = JsonUtil.StringListCount(ConfigFile, "Expressions")
+	int i = JsonUtil.StringListCount(File, "Expressions")
 	while i
 		i -= 1
 		; Registrar, Concensual, Victim, Aggressor
-		string[] args = ArgString(JsonUtil.StringListGet(ConfigFile, "Expressions", i))
+		string[] args = ArgString(JsonUtil.StringListGet(File, "Expressions", i))
 		if args.Length == 4 && ExpressionSlots.FindByRegistrar(args[0]) != -1
 			sslBaseExpression Slot = ExpressionSlots.GetbyRegistrar(args[0])
 			Slot.AddTagConditional("Consensual", (args[1] as int) as bool)
@@ -2757,30 +2761,30 @@ endFunction
 
 ; Voices
 function ExportVoices()
-	JsonUtil.StringListClear(ConfigFile, "Voices")
+	JsonUtil.StringListClear(File, "Voices")
 	int i = VoiceSlots.Slotted
 	sslBaseVoice[] Voices = VoiceSlots.Voices
 	while i
 		i -= 1
-		JsonUtil.StringListAdd(ConfigFile, "Voices", MakeArgs(",", Voices[i].Registry, Voices[i].Enabled as int))
+		JsonUtil.StringListAdd(File, "Voices", MakeArgs(",", Voices[i].Registry, Voices[i].Enabled as int))
 	endWhile
 	; Player voice
-	JsonUtil.SetStringValue(ConfigFile, "PlayerVoice", VoiceSlots.GetSavedName(PlayerRef))
+	JsonUtil.SetStringValue(File, "PlayerVoice", VoiceSlots.GetSavedName(PlayerRef))
 endfunction
 
 function ImportVoices()
-	int i = JsonUtil.StringListCount(ConfigFile, "Voices")
+	int i = JsonUtil.StringListCount(File, "Voices")
 	while i
 		i -= 1
 		; Registrar, Enabled
-		string[] args = ArgString(JsonUtil.StringListGet(ConfigFile, "Voices", i))
+		string[] args = ArgString(JsonUtil.StringListGet(File, "Voices", i))
 		if args.Length == 2 && VoiceSlots.FindByRegistrar(args[0]) != -1
 			VoiceSlots.GetbyRegistrar(args[0]).Enabled = (args[1] as int) as bool
 		endIf
 	endWhile
 	; Player voice
 	VoiceSlots.ForgetVoice(PlayerRef)
-	VoiceSlots.SaveVoice(PlayerRef, VoiceSlots.GetByName(JsonUtil.GetStringValue(ConfigFile, "PlayerVoice", "$SSL_Random")))
+	VoiceSlots.SaveVoice(PlayerRef, VoiceSlots.GetByName(JsonUtil.GetStringValue(File, "PlayerVoice", "$SSL_Random")))
 endFunction
 
 

@@ -78,7 +78,7 @@ endProperty
 
 string property Profile hidden
 	string function get()
-		return "SexLab/AnimationProfile_"+Config.AnimProfile+".json"
+		return "../SexLab/AnimationProfile_"+Config.AnimProfile+".json"
 	endFunction
 endProperty
 
@@ -523,6 +523,7 @@ function Save(int id)
 	Offsets    = TrimFloatArray(Offsets, sid)
 	Positions  = TrimIntArray(Positions, (Actors * 2))
 	Animations = TrimStringArray(Animations, aid)
+	RaceIDs    = ClearEmpty(RaceIDs)
 	; Create and add gender tag
 	string Tag
 	int i
@@ -549,7 +550,6 @@ function Save(int id)
 	endIf
 	; Log the new animation
 	if IsCreature
-		RaceIDs = ClearEmpty(RaceIDs)
 		Log(Name, "Creatures["+id+"]")
 	else
 		Log(Name, "Animations["+id+"]")
