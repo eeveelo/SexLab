@@ -255,20 +255,41 @@ function FormListSort(Form obj, string key) global native
 
    obj: form to find value on. Set none to find global list value.
    key: name of list.
-   slice: an initialized array set to the slice size you want, i.e. int[] slice = new int[10]
+   slice[]: an initialized array set to the slice size you want, i.e. int[] slice = new int[10]
    [optional] startIndex: the starting list index you want to start filling your slice array with
 /;
-
 function IntListSlice(Form obj, string key, int[] slice, int startIndex = 0) global native
 function FloatListSlice(Form obj, string key, float[] slice, int startIndex = 0) global native
 function StringListSlice(Form obj, string key, string[] slice, int startIndex = 0) global native
 function FormListSlice(Form obj, string key, Form[] slice, int startIndex = 0) global native
 
+
+;/ Sizes the given list to a set number of elements. If the list exists already it will be truncated
+   when given fewer elements, or resized to the appropiate length with the filler argument being used as
+   the default values
+
+   Returns the number of elements truncated (signed) or added (unsigned) onto the list.
+
+   obj: form to find value on. Set none to find global list value.
+   key: name of list.
+   toLength: The size you want to change the list to. Max length when using this function is 500.
+   [optional] filler: When adding empty elements to the list this will be used as the default value
+/;
 int function IntListResize(Form obj, string key, int toLength, int filler = 0) global native
 int function FloatListResize(Form obj, string key, int toLength, float filler = 0.0) global native
 int function StringListResize(Form obj, string key, int toLength, string filler = "") global native
 int function FormListResize(Form obj, string key, int toLength, Form filler = none) global native
 
+;/ Creates a copy of array on the given storage list at the given object+key,
+   overwriting any list that might already exists.
+
+   Returns true on success.
+
+   obj: form to find value on. Set none to find global list value.
+   key: name of list.
+   copy[]: The papyrus array with the content you wish to copy over into StorageUtil
+   [optional] filler: When adding empty elements to the list this will be used as the default value
+/;
 bool function IntListCopy(Form obj, string key, int[] copy) global native
 bool function FloatListCopy(Form obj, string key, float[] copy) global native
 bool function StringListCopy(Form obj, string key, string[] copy) global native
@@ -451,13 +472,31 @@ function FileFloatListSlice(string key, float[] slice, int startIndex = 0) globa
 function FileStringListSlice(string key, string[] slice, int startIndex = 0) global native
 function FileFormListSlice(string key, Form[] slice, int startIndex = 0) global native
 
+;/ Sizes the given list to a set number of elements. If the list exists already it will be truncated
+   when given fewer elements, or resized to the appropiate length with the filler argument being used as
+   the default values.
 
+   Returns the number of elements truncated (signed) or added (unsigned) onto the list.
+
+   key: name of list.
+   toLength: The size you want to change the list to. Max length when using this function is 500.
+   [optional] filler: When adding empty elements to the list this will be used as the default value
+/;
 int function FileIntListResize(string key, int toLength, int filler = 0) global native
 int function FileFloatListResize(string key, int toLength, float filler = 0.0) global native
 int function FileStringListResize(string key, int toLength, string filler = "") global native
 int function FileFormListResize(string key, int toLength, Form filler = none) global native
 
 
+;/ Creates a copy of array on the given storage list at the given object+key,
+   overwriting any list that might already exists.
+
+   Returns true on success.
+
+   key: name of list.
+   copy[]: The papyrus array with the content you wish to copy over into StorageUtil
+   [optional] filler: When adding empty elements to the list this will be used as the default value
+/;
 bool function FileIntListCopy(string key, int[] copy) global native
 bool function FileFloatListCopy(string key, float[] copy) global native
 bool function FileStringListCopy(string key, string[] copy) global native
