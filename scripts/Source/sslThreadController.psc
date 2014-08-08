@@ -99,7 +99,6 @@ state Animating
 		Log("Stage: "+Stage, "Animating")
 		; Prepare loop
 		SoundFX    = Animation.GetSoundFX(Stage)
-		Log("Using SoundFX: "+SoundFX)
 		SFXDelay   = ClampFloat(Config.SFXDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		PlayAnimation()
@@ -483,7 +482,7 @@ function EndAnimation(bool Quickly = false)
 	FastEnd = Quickly
 	; Send end event
 	SendThreadEvent("AnimationEnding")
-	AliasEvent("Reset", 30.0)
+	AliasEvent("Reset", 45.0)
 endFunction
 
 state Ending
@@ -494,7 +493,7 @@ state Ending
 	event OnUpdate()
 		SendThreadEvent("AnimationEnd")
 		; Export animations if adjusted
-		if Adjusted && !HasCreature
+		if Adjusted
 			Config.ExportProfile(Config.AnimProfile)
 		endIf
 		; Clear thread and make available for new animation
