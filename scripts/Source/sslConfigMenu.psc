@@ -781,6 +781,19 @@ int Position
 function AnimationEditor()
 	SetCursorFillMode(LEFT_TO_RIGHT)
 
+	; Auto select players animation if they are animating right now
+	if PlayerRef.IsInFaction(Config.AnimatingFaction) && ThreadSlots.FindActorController(PlayerRef) != -1
+		sslThreadController Thread = ThreadSlots.GetActorController(PlayerRef)
+		if Thread.GetState() == "Animating"
+			Animation = Thread.Animation
+			AdjustKey = RemoveString(Thread.AdjustKey, Animation.Key("Adjust."))
+			if Position >= Animation.PositionCount
+				Position = 0
+			endIf
+		endIf
+	endIf
+
+	; Pick a default animation
 	if Animation == none
 		Animation = AnimSlots.GetBySlot(0)
 		AdjustKey = "Global"
