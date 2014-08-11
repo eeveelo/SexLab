@@ -409,7 +409,7 @@ function SetAnimation(int aid = -1)
 	RecordSkills()
 	; Update animation info
 	string[] Tags = Animation.GetTags()
-	IsVaginal   = Tags.Find("Vaginal") != -1 && Females > 0
+	IsVaginal   = Females > 0 && Tags.Find("Vaginal") != -1
 	IsAnal      = Tags.Find("Anal") != -1 || (Females == 0 && Tags.Find("Vaginal") != -1)
 	IsOral      = Tags.Find("Oral") != -1
 	IsLoving    = Tags.Find("Loving") != -1
@@ -462,7 +462,7 @@ function EndLeadIn()
 		LeadIn = false
 		SetAnimation()
 		; Add runtime to foreplay skill xp
-		AddXP(0, (TotalTime / 14.0))
+		SkillXP[0] = SkillXP[0] + (TotalTime / 14.0)
 		; Restrip with new strip options
 		AliasEvent("Strip")
 		; Start primary animations at stage 1
@@ -511,36 +511,42 @@ endState
 function RecordSkills()
 	float TimeNow = Utility.GetCurrentRealTime()
 	float xp = ((TimeNow - SkillTime) / 15.0)
-	AddXP(1, xp, IsVaginal)
-	AddXP(2, xp, IsAnal)
-	AddXP(3, xp, IsOral)
-	AddXP(4, xp, IsLoving)
-	AddXP(5, xp, IsDirty)
+	if xp >= 0.375
+		if IsVaginal
+			SkillXP[1] = SkillXP[1] + xp
+		endIf
+		if IsAnal
+			SkillXP[2] = SkillXP[2] + xp
+		endIf
+		if IsOral
+			SkillXP[3] = SkillXP[3] + xp
+		endIf
+		if IsLoving
+			SkillXP[4] = SkillXP[4] + xp
+		endIf
+		if IsDirty
+			SkillXP[5] = SkillXP[5] + xp
+		endIf
+	endIf
 	SkillTime = TimeNow
 endfunction
 
 function SetBonuses()
 	SkillBonus[0] = SkillXP[0]
 	if IsVaginal
-		SkillBonus[1] = 1.0 + SkillXP[1]
+		SkillBonus[1] = SkillXP[1] + 1.0
 	endIf
 	if IsAnal
-		SkillBonus[2] = 1.0 + SkillXP[2]
+		SkillBonus[2] = SkillXP[2] + 1.0
 	endIf
 	if IsOral
-		SkillBonus[3] = 1.0 + SkillXP[3]
+		SkillBonus[3] = SkillXP[3] + 1.0
 	endIf
 	if IsLoving
-		SkillBonus[4] = 1.0 + SkillXP[4]
+		SkillBonus[4] = SkillXP[4] + 1.0
 	endIf
 	if IsDirty
-		SkillBonus[5] = 1.0 + SkillXP[5]
-	endIf
-endFunction
-
-function AddXP(int i, float Amount, bool Condition = true)
-	if Condition && Amount >= 0.375 && SkillXP[i] < 6.0
-		SkillXP[i] = SkillXP[i] + Amount
+		SkillBonus[5] = SkillXP[5] + 1.0
 	endIf
 endFunction
 
