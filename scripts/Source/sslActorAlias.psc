@@ -562,11 +562,13 @@ function UnlockActor()
 endFunction
 
 function RestoreActorDefaults()
-	if GetReference() == none && ActorRef == none
-		return
-	endIf
 	; Make sure  have actor, can't afford to miss this block
-	ActorRef = GetReference() as Actor
+	if ActorRef == none
+		ActorRef = GetReference() as Actor
+		if ActorRef == none
+			return ; No actor, reset prematurely or bad call to alias
+		endIf
+	endIf
 	; Reset to starting scale
 	if ActorScale != 0.0
 		ActorRef.SetScale(ActorScale)
