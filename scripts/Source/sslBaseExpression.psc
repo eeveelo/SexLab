@@ -329,7 +329,7 @@ function CountPhases()
 	endIf
 endFunction
 
-function Save(int id)
+function Save(int id = -1)
 	CountPhases()
 	Log(Name, "Expressions["+id+"]")
 endFunction

@@ -144,7 +144,7 @@ function Initialize()
 	Tags      = new string[3]
 endFunction
 
-function Save(int id)
+function Save(int id = -1)
 endFunction
 
 ; function Finalize()

@@ -36,7 +36,7 @@ bool function CheckGender(int CheckGender)
 	return Gender == CheckGender || (Gender == -1 && (CheckGender == 1 || CheckGender == 0))
 endFunction
 
-function Save(int id)
+function Save(int id = -1)
 	; Make sure we have a gender tag
 	if Gender == 0 || Gender == -1
 		AddTag("Male")
