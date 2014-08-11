@@ -501,8 +501,8 @@ bool function CheckSystem()
 		CheckSexLabUtil.Show()
 		return false
 	; Check PapyrusUtil install - depends on passing SKSE check passing
-	elseIf PapyrusUtil.GetVersion() < 25
-		CheckPapyrusUtil.Show(2.5)
+	elseIf PapyrusUtil.GetVersion() < 26
+		CheckPapyrusUtil.Show(2.6)
 		return false
 	; Check FNIS generation - soft fail
 	elseIf !FNIS.IsGenerated()
