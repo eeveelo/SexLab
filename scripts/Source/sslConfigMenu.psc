@@ -1282,9 +1282,9 @@ endState
 
 state ImportExpression
 	event OnSelectST()
-		if ShowMessage("$SSL_WarnExportExpression{"+Expression.Name+"}", true, "$Yes", "$No")
+		if ShowMessage("$SSL_WarnImportExpression{"+Expression.Name+"}", true, "$Yes", "$No")
 			if Expression.ImportJson()
-				ShowMessage("$SSL_SuccessExportExpression")
+				ShowMessage("$SSL_SuccessImportExpression")
 				Phase = 1
 				ForcePageReset()
 			else
