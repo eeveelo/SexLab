@@ -5,11 +5,11 @@ scriptname SexLabUtil hidden
 ; ------------------------------------------------------- ;
 
 int function GetVersion() global
-	return 15800
+	return 15900
 endFunction
 
 string function GetStringVer() global
-	return "1.59 beta 2"
+	return "1.59"
 endFunction
 
 bool function SexLabIsActive() global
@@ -167,7 +167,6 @@ function EnableFreeCamera(bool Enabling = true, float sucsm = 5.0) global
 endFunction
 
 ; bool function EnterFreeCamera() global native
-
 int function GetPluginVersion() global native
 bool function HasKeywordSub(form ObjRef, string LookFor) global native
 function PrintConsole(string output) global native

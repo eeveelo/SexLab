@@ -3,7 +3,7 @@
 Skryim SexLab Framework
   By Ashal of Loverslab.com
 
-    Version 1.58b, released 2014/07/01
+    Version 1.59, released 2014/08/11
 
 -- Description --------------------------------------------------------------
 
@@ -34,6 +34,7 @@ Skryim SexLab Framework
      Zynsch - http://www.loverslab.com/topic/28322-zynisch
      Bleagh - http://www.loverslab.com/topic/22484-bleagh
      PanicForever - http://www.loverslab.com/topic/23426-panics
+     Athstai - http://dark-investigations.blogspot.com
 
     Audio:
      Lovers with PK
@@ -48,6 +49,7 @@ Skryim SexLab Framework
     SKSE Plugins:
      h38fh2mf
      kapaer
+     Ashal
 
     Scripting:
      Ashal

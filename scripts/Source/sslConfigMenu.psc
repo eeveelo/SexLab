@@ -62,15 +62,22 @@ event OnVersionUpdate(int version)
 
 		SexLab.GoToState("Disabled")
 
-		; v.157 - Fixed actor stripping, expression tags being searched wrong, and refactored thread installs
+		; v1.57 - Fixed actor stripping, expression tags being searched wrong, and refactored thread installs
 		if CurrentVersion < 15700
 			ExpressionSlots.Setup()
 		endIf
 
-		; v.158 - Decoupled ThreadLib from ThreadModel, added Riekling animations
+		; v1.58 - Decoupled ThreadLib from ThreadModel, added Riekling animations
 		if CurrentVersion < 15800
 			CreatureSlots.Setup()
 			ThreadSlots.Setup()
+		endIf
+
+		; v1.59 - Converted animation adjustments from internal storageutil to jsonutil
+		if CurrentVersion < 15900
+			StorageUtil.debug_DeleteValues(SexLabQuestAnimations)
+			CreatureSlots.Setup()
+			AnimSlots.Setup()
 		endIf
 
 		Debug.Notification("SexLab "+SexLabUtil.GetStringVer()+" Updated...")
