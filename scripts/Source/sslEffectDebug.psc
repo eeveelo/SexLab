@@ -14,42 +14,47 @@ ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	Log("---- START ----")
-	int i
 
-	string[] copy = new string[10]
-	copy[0] = "string-"+Utility.RandomInt()
-	copy[1] = "string-"+Utility.RandomInt()
-	copy[2] = "string-"+Utility.RandomInt()
-	copy[3] = "string-"+Utility.RandomInt()
-	copy[4] = "string-"+Utility.RandomInt()
-	copy[5] = "string-"+Utility.RandomInt()
-	copy[6] = "string-"+Utility.RandomInt()
-	copy[7] = "string-"+Utility.RandomInt()
-	copy[8] = "string-"+Utility.RandomInt()
-	copy[9] = "string-"+Utility.RandomInt()
-	Log("Copy: "+JsonUtil.StringListCopy("TestCopy.json", "CopyTest", copy))
-	Log("Size: "+JsonUtil.StringListCount("TestCopy.json", "CopyTest"))
+	; JsonUtil.SetIntValue("SexLab/TestDir/TestDir2/Test.json", "TestValue", Utility.RandomInt(1,100))
+	; Log("Test: "+JsonUtil.GetIntValue("SexLab/TestDir/TestDir2/Test.json", "TestValue"))
+	; Log("Save: "+JsonUtil.Save("SexLab/TestDir/TestDir2/Test.json", true))
 
-	i = 0
-	while i < 10
-		Log(copy[i]+" => "+JsonUtil.StringListGet("TestCopy.json", "CopyTest", i)+" = " + (copy[i] == JsonUtil.StringListGet("TestCopy.json", "CopyTest", i)))
-		i += 1
-	endWHile
+	; int i
 
-	Log("Change: "+JsonUtil.StringListResize("TestCopy.json", "CopyTest", 5, "NULL"))
+	; string[] copy = new string[10]
+	; copy[0] = "string-"+Utility.RandomInt()
+	; copy[1] = "string-"+Utility.RandomInt()
+	; copy[2] = "string-"+Utility.RandomInt()
+	; copy[3] = "string-"+Utility.RandomInt()
+	; copy[4] = "string-"+Utility.RandomInt()
+	; copy[5] = "string-"+Utility.RandomInt()
+	; copy[6] = "string-"+Utility.RandomInt()
+	; copy[7] = "string-"+Utility.RandomInt()
+	; copy[8] = "string-"+Utility.RandomInt()
+	; copy[9] = "string-"+Utility.RandomInt()
+	; Log("Copy: "+JsonUtil.StringListCopy("TestCopy.json", "CopyTest", copy))
+	; Log("Size: "+JsonUtil.StringListCount("TestCopy.json", "CopyTest"))
 
-	i = 0
-	while i < 10
-		Log(copy[i]+" => "+JsonUtil.StringListGet("TestCopy.json", "CopyTest", i)+" = " + (copy[i] == JsonUtil.StringListGet("TestCopy.json", "CopyTest", i)))
-		i += 1
-	endWHile
+	; i = 0
+	; while i < 10
+	; 	Log(copy[i]+" => "+JsonUtil.StringListGet("TestCopy.json", "CopyTest", i)+" = " + (copy[i] == JsonUtil.StringListGet("TestCopy.json", "CopyTest", i)))
+	; 	i += 1
+	; endWHile
 
-	Log("Change: "+JsonUtil.StringListResize("TestCopy.json", "CopyTest", 10, "NULL"))
-	i = 0
-	while i < 10
-		Log(copy[i]+" => "+JsonUtil.StringListGet("TestCopy.json", "CopyTest", i)+" = " + (copy[i] == JsonUtil.StringListGet("TestCopy.json", "CopyTest", i)))
-		i += 1
-	endWHile
+	; Log("Change: "+JsonUtil.StringListResize("TestCopy.json", "CopyTest", 5, "NULL"))
+
+	; i = 0
+	; while i < 10
+	; 	Log(copy[i]+" => "+JsonUtil.StringListGet("TestCopy.json", "CopyTest", i)+" = " + (copy[i] == JsonUtil.StringListGet("TestCopy.json", "CopyTest", i)))
+	; 	i += 1
+	; endWHile
+
+	; Log("Change: "+JsonUtil.StringListResize("TestCopy.json", "CopyTest", 10, "NULL"))
+	; i = 0
+	; while i < 10
+	; 	Log(copy[i]+" => "+JsonUtil.StringListGet("TestCopy.json", "CopyTest", i)+" = " + (copy[i] == JsonUtil.StringListGet("TestCopy.json", "CopyTest", i)))
+	; 	i += 1
+	; endWHile
 
 	; Log("Cleared: "+StorageUtil.FormListClear(SexLab.PlayerRef, "Slice Test"))
 	; i = 0
