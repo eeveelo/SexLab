@@ -113,6 +113,17 @@ float function GetFloatValue(Form obj, string key, float missing = 0.0) global n
 string function GetStringValue(Form obj, string key, string missing = "") global native
 Form function GetFormValue(Form obj, string key, Form missing = none) global native
 
+;/ Get previously saved int/float/string/Form value on form or globally.
+
+   obj: form to get from. Set none to get global value.
+   key: name of value.
+   amount: +/- the amount to adjust the current value by
+
+   given keys will be initialized to given amount if it does not exist
+/;
+int function AdjustIntValue(Form obj, string key, int amount) global native
+float function AdjustFloatValue(Form obj, string key, float amount) global native
+
 
 ;/ Add an int/float/string/Form to a list on form or globally and return
    the value's new index. Index can be -1 if we were unable to add
@@ -121,8 +132,7 @@ Form function GetFormValue(Form obj, string key, Form missing = none) global nat
    obj: form to add to. Set none to add global value.
    key: name of value.
    value: value to add.
-   [optional] allowDuplicate: allow adding value to list if this value
-                              already exists in the list.
+   [optional] allowDuplicate: allow adding value to list if this value already exists in the list.
 /;
 int function IntListAdd(Form obj, string key, int value, bool allowDuplicate = true) global native
 int function FloatListAdd(Form obj, string key, float value, bool allowDuplicate = true) global native
@@ -153,6 +163,18 @@ int function IntListSet(Form obj, string key, int index, int value) global nativ
 float function FloatListSet(Form obj, string key, int index, float value) global native
 string function StringListSet(Form obj, string key, int index, string value) global native
 Form function FormListSet(Form obj, string key, int index, Form value) global native
+
+;/ Adjust the existing value of a list by the given amount.
+
+   obj: form to set value on. Set none to set global list value.
+   key: name of list.
+   index: index of value in the list.
+   amount: +/- the amount to adjust the lists current index value by.
+
+   returns 0 if index does not exists
+/;
+int function IntListAdjust(Form obj, string key, int index, int amount) global native
+float function FloatListAdjust(Form obj, string key, int index, float amount) global native
 
 ;/ Insert an int/float/string/Form to a list on form or globally and return
    if successful.
@@ -311,6 +333,15 @@ float function FileSetFloatValue(string key, float value) global native
 string function FileSetStringValue(string key, string value) global native
 form function FileSetFormValue(string key, Form value) global native
 
+;/ Adjust any value at key by the given amount.
+
+   key: name of value.
+   amount: +/- the amount to adjust the current value by
+
+   given keys will be initialized to given amount if it does not exist
+/;
+int function FileAdjustIntValue(string key, int amount) global native
+float function FileAdjustFloatValue(string key, float amount) global native
 
 ;/ Remove a previously set int value globally and return if successful. This
    will return false if value didn't exist.
@@ -357,6 +388,16 @@ int function FileFloatListAdd(string key, float value, bool allowDuplicate = tru
 int function FileStringListAdd(string key, string value, bool allowDuplicate = true) global native
 int function FileFormListAdd(string key, Form value, bool allowDuplicate = true) global native
 
+;/ Adjust the existing index value of a list by the given amount.
+
+   key: name of list.
+   index: index of value in the list.
+   amount: +/- the amount to adjust the lists current index value by.
+
+   returns 0 if index does not exists
+/;
+int function FileIntListAdjust(string key, int index, int amount) global native
+float function FileFloatListAdjust(string key, int index, float amount) global native
 
 ;/ Remove a previously added value from a list globally and return how many
    instances of this value were removed.

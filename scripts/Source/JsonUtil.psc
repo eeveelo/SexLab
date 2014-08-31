@@ -39,11 +39,13 @@ function ClearAll(string FileName) global native
 
 int function SetIntValue(string FileName, string key, int value) global native
 int function GetIntValue(string FileName, string key, int missing = 0) global native
+int function AdjustIntValue(string FileName, string key, int amount) global native
 bool function UnsetIntValue(string FileName, string key) global native
 bool function HasIntValue(string FileName, string key) global native
 
 float function SetFloatValue(string FileName, string key, float value) global native
 float function GetFloatValue(string FileName, string key, float missing = 0.0) global native
+float function AdjustFloatValue(string FileName, string key, float amount) global native
 bool function UnsetFloatValue(string FileName, string key) global native
 bool function HasFloatValue(string FileName, string key) global native
 
@@ -60,6 +62,7 @@ bool function HasFormValue(string FileName, string key) global native
 int function IntListAdd(string FileName, string key, Int value, bool allowDuplicate = true) global native
 Int function IntListGet(string FileName, string key, int index) global native
 Int function IntListSet(string FileName, string key, int index, Int value) global native
+Int function IntListAdjust(string FileName, string key, int index, Int amount) global native
 int function IntListRemove(string FileName, string key, Int value, bool allInstances = true) global native
 bool function IntListInsertAt(string FileName, string key, int index, Int value) global native
 bool function IntListRemoveAt(string FileName, string key, int index) global native
@@ -71,6 +74,7 @@ bool function IntListHas(string FileName, string key, Int value) global native
 int function FloatListAdd(string FileName, string key, Float value, bool allowDuplicate = true) global native
 Float function FloatListGet(string FileName, string key, int index) global native
 Float function FloatListSet(string FileName, string key, int index, Float value) global native
+float function FloatListAdjust(string FileName, string key, int index, float amount) global native
 int function FloatListRemove(string FileName, string key, Float value, bool allInstances = true) global native
 bool function FloatListInsertAt(string FileName, string key, int index, Float value) global native
 bool function FloatListRemoveAt(string FileName, string key, int index) global native
