@@ -474,14 +474,15 @@ endFunction
 function EndAnimation(bool Quickly = false)
 	UnregisterForUpdate()
 	GoToState("Ending")
-	Config.DisableThreadControl(self)
 	DisableHotkeys()
+	Config.DisableThreadControl(self)
 	RecordSkills()
 	; Set fast flag to skip slow ending functions
 	Stage   = StageCount
 	FastEnd = Quickly
 	; Send end event
 	SendThreadEvent("AnimationEnding")
+	Utility.WaitMenuMode(0.5)
 	AliasEvent("Reset", 45.0)
 endFunction
 
@@ -587,14 +588,14 @@ function Initialize()
 	parent.Initialize()
 endFunction
 
+; ------------------------------------------------------- ;
+; --- State Restricted                                --- ;
+; ------------------------------------------------------- ;
+
 auto state Unlocked
 	function EndAnimation(bool Quickly = false)
 	endFunction
 endState
-
-; ------------------------------------------------------- ;
-; --- State Restricted                                --- ;
-; ------------------------------------------------------- ;
 
 ; State Animating
 function PlayAnimation()

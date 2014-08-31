@@ -287,17 +287,16 @@ function GetThreadControl(sslThreadController TargetThread)
 endFunction
 
 function DisableThreadControl(sslThreadController TargetThread)
-	if Control != none && TargetThread == Control
-		; Release players thread control
-		Control.DisableHotkeys()
-		Control.AutoAdvance = true
+	if Control != none && Control == TargetThread
 		; Unlock players movement
 		PlayerRef.RemoveFromFaction(AnimatingFaction)
 		ActorUtil.RemovePackageOverride(PlayerRef, DoNothing)
 		PlayerRef.EvaluatePackage()
 		Game.EnablePlayerControls()
 		Game.SetPlayerAIDriven(false)
-		; Release the active thread
+		; Release players thread control
+		Control.DisableHotkeys()
+		Control.AutoAdvance = true
 		Control = none
 	endIf
 endfunction

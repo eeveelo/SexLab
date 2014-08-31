@@ -106,8 +106,9 @@ bool function SetActor(Actor ProspectRef, bool Victimize = false, sslBaseVoice U
 	IsCreature = Gender == 2
 	IsVictim   = Victimize
 	IsPlayer   = ActorRef == PlayerRef
-	IsTracked  = Config.ThreadLib.IsActorTracked(ActorRef)
 	ActorVoice = BaseRef.GetVoiceType()
+	IsTracked  = Config.ThreadLib.IsActorTracked(ActorRef)
+	TrackedEvent("Added")
 	if !IsCreature
 		SetVoice(UseVoice, ForceSilent)
 		if !IsPlayer
@@ -116,9 +117,6 @@ bool function SetActor(Actor ProspectRef, bool Victimize = false, sslBaseVoice U
 	else
 		Thread.CreatureRef = BaseRef.GetRace()
 	endIf
-	if IsTracked
-		Thread.SendTrackedEvent(ActorRef, "Added", Thread.tid)
-	endif
 	; Actor's Adjustment Key
 	if Config.RaceAdjustments
 		ActorKey = MiscUtil.GetRaceEditorID(BaseRef.GetRace())
@@ -215,9 +213,13 @@ state Ready
 		ActorRef.SetScale(AnimScale)
 		; Extras for non creatures
 		if !IsCreature
-			; Pick a strapon on females to use
-			if IsFemale && Config.UseStrapons && Strapon == none
-				Strapon = Config.GetStrapon()
+
+			; Decide on strapon for female, default to worn, otherwise pick random.
+			if IsFemale && Config.UseStrapons
+				Strapon = Config.WornStrapon(ActorRef)
+				if Strapon == none
+					Strapon = Config.GetStrapon()
+				endIf
 			endIf
 			; Strip actor
 			Strip()
@@ -241,10 +243,6 @@ state Ready
 			Skills = Stats.GetSkillLevels(SkilledActor)
 			; Get highest relationship ahead of time
 			HighestRelation = Thread.GetHighestPresentRelationshipRank(ActorRef)
-			; Start Auto TFC if enabled
-			if IsPlayer && Config.AutoTFC && Game.GetCameraState() != 3
-				Config.ToggleFreeCamera()
-			endIf
 		endIf
 		GoToState("Animating")
 		; Enter animatable state - rest is non vital and can finish as queued
@@ -259,14 +257,11 @@ endState
 state Animating
 
 	function StartAnimating()
+		TrackedEvent("Start")
 		; Disable autoadvance if disabled for player
 		if IsPlayer && ((IsVictim && Config.DisablePlayer) || !Config.AutoAdvance)
 			Thread.AutoAdvance = false
 		endIf
-		; Actor tracking
-		if IsTracked
-			Thread.SendTrackedEvent(ActorRef, "Start", Thread.tid)
-		endif
 		; Start update loop
 		StartedAt = Utility.GetCurrentRealTime()
 		RegisterForSingleUpdate(Utility.RandomFloat(1.5, 3.0))
@@ -312,35 +307,27 @@ state Animating
 		Flags      = Animation.GetPositionFlags(AdjustKey, Position, Stage)
 		Offsets    = Animation.GetPositionOffsets(AdjustKey, Position, Stage)
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
-		; Actor has been removed from current thread somehow
-		if Position < 0
-			ResetActor()
-			return ; Actor is resetting
-		elseIf IsCreature
-			return ; Creature skipped
-		endIf
 		; Sync enjoyment level
 		GetEnjoyment()
-		; Equip Strapon if needed and enabled
-		if Strapon != none
-			if UseStrapon && !ActorRef.IsEquipped(Strapon)
-				ActorRef.EquipItem(Strapon, true, true)
-			elseif !UseStrapon && ActorRef.IsEquipped(Strapon)
-				ActorRef.UnequipItem(Strapon, true, true)
+		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
+		if !IsCreature
+			; Equip Strapon if needed and enabled
+			if Strapon != none
+				if UseStrapon && !ActorRef.IsEquipped(Strapon)
+					ActorRef.EquipItem(Strapon, true, true)
+				elseif !UseStrapon && ActorRef.IsEquipped(Strapon)
+					ActorRef.UnequipItem(Strapon, true, true)
+				endIf
 			endIf
-		endIf
-		; Clear any existing expression as a default - to remove open mouth
-		; ActorRef.ClearExpressionOverride()
-		if OpenMouth
-			sslBaseExpression.OpenMouth(ActorRef)
-		elseIf Expression != none
-			Expression.Apply(ActorRef, Enjoyment, BaseSex)
-		else
-			sslBaseExpression.CloseMouth(ActorRef)
-		endIf
-		; Send schlong offset
-		if MalePosition
-			Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
+			; Clear any existing expression as a default - to remove open mouth
+			; ActorRef.ClearExpressionOverride()
+			if OpenMouth
+				sslBaseExpression.OpenMouth(ActorRef)
+			elseIf Expression != none
+				Expression.Apply(ActorRef, Enjoyment, BaseSex)
+			else
+				sslBaseExpression.CloseMouth(ActorRef)
+			endIf
 		endIf
 	endFunction
 
@@ -405,66 +392,46 @@ state Animating
 	endFunction
 
 	event ResetActor()
-		GoToState("Resetting")
-		UnregisterForUpdate()
 		ClearEvents()
+		GoToState("Resetting")
+		Log("-- Resetting! -- ", ActorName)
 		; Update stats
 		if !IsCreature
 			Stats.RecordThread(ActorRef, Thread.HasPlayer, Thread.ActorCount, HighestRelation, (Utility.GetCurrentRealTime() - StartedAt), Thread.VictimRef, Thread.SkillXP, Thread.Genders)
 		endIf
-		; Clear TFC
-		if IsPlayer && Game.GetCameraState() == 3
-			Config.ToggleFreeCamera()
-		endIf
 		; Apply cum
 		int CumID = Animation.GetCum(Position)
-		if !Thread.FastEnd && CumID > 0 && Config.UseCum && (Thread.Males > 0 || Config.AllowFFCum || Thread.HasCreature)
+		if CumID > 0 && !Thread.FastEnd && Config.UseCum && (Thread.Males > 0 || Config.AllowFFCum || Thread.HasCreature)
 			ActorLib.ApplyCum(ActorRef, CumID)
 		endIf
+		; Clear TFC
+		if IsPlayer && Game.GetCameraState() == 3
+			MiscUtil.ToggleFreeCamera()
+		endIf
 		; Tracked events
-		if IsTracked
-			Thread.SendTrackedEvent(ActorRef, "End", Thread.tid)
-		endif
-		; Restore actor to starting point
-		RestoreActorDefaults()
+		TrackedEvent("End")
 		StopAnimating(Thread.FastEnd)
+		RestoreActorDefaults()
 		UnlockActor()
 		; Unstrip items in storage, if any
 		if !ActorRef.IsDead()
 			Unstrip()
 		endIf
-		; Reset alias
-		TryToClear()
-		Initialize()
+		; Free alias slot
+		Clear()
+		GoToState("")
 		Thread.AliasEventDone("Reset")
+		Initialize()
 	endEvent
-
-	int function GetEnjoyment()
-		if IsCreature
-			Enjoyment = (ClampFloat((Utility.GetCurrentRealTime() - StartedAt) / 6.0, 0.0, 40.0) + ((Stage as float / Animation.StageCount as float) * 60.0)) as int
-			return Enjoyment
-		endIf
-		Enjoyment = CalcEnjoyment(Thread.SkillBonus, Skills, Thread.LeadIn, IsFemale, (Utility.GetCurrentRealTime() - StartedAt), Stage, Animation.StageCount)
-		return Enjoyment
-	endFunction
-
-	int function GetPain()
-		float Pain = Math.Abs(100.0 - ClampFloat(GetEnjoyment() as float, 1.0, 99.0))
-		if IsVictim
-			Pain *= 1.5
-		elseIf Animation.HasTag("Aggressive") || Animation.HasTag("Rough")
-			Pain *= 0.8
-		else
-			Pain *= 0.3
-		endIf
-		return ClampInt(Pain as int, 0, 100)
-	endFunction
-
 endState
 
 state Resetting
+	function ClearAlias()
+	endFunction
 	event OnUpdate()
 	endEvent
+	function Initialize()
+	endFunction
 endState
 
 ; ------------------------------------------------------- ;
@@ -522,7 +489,7 @@ function LockActor()
 		endIf
 	else
 		ActorRef.SetRestrained(true)
-		ActorRef.SetDontMove(true)
+		; ActorRef.SetDontMove(true)
 	endIf
 	; Attach positioning marker
 	if !MarkerRef
@@ -557,7 +524,7 @@ function UnlockActor()
 		Game.SetPlayerAIDriven(false)
 	else
 		ActorRef.SetRestrained(false)
-		ActorRef.SetDontMove(false)
+		; ActorRef.SetDontMove(false)
 	endIf
 endFunction
 
@@ -574,10 +541,6 @@ function RestoreActorDefaults()
 		ActorRef.SetScale(ActorScale)
 	endIf
 	if !IsCreature
-		; Reset expression
-		ActorRef.ResetExpressionOverrides()
-		ActorRef.ClearExpressionOverride()
-		MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
 		; Reset voicetype
 		if ActorVoice != none && ActorVoice != BaseRef.GetVoiceType()
 			BaseRef.SetVoiceType(ActorVoice)
@@ -586,6 +549,20 @@ function RestoreActorDefaults()
 		if Strapon != none
 			ActorRef.RemoveItem(Strapon, 1, true)
 		endIf
+		; Reset expression
+		ActorRef.ResetExpressionOverrides()
+		ActorRef.ClearExpressionOverride()
+		MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
+		int i
+		while i <= 15
+			ActorRef.SetExpressionPhoneme(i, 0)
+			i += 1
+		endWhile
+		i = 0
+		while i <= 13
+			ActorRef.SetExpressionModifier(i, 0)
+			i += 1
+		endWhile
 	endIf
 	; Remove SOS erection
 	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
@@ -597,6 +574,32 @@ endFunction
 
 string function GetActorKey()
 	return ActorKey
+endFunction
+
+int function GetEnjoyment()
+	if ActorRef == none
+		Enjoyment = 0
+	elseif IsCreature
+		Enjoyment = (ClampFloat((Utility.GetCurrentRealTime() - StartedAt) / 6.0, 0.0, 40.0) + ((Stage as float / Animation.StageCount as float) * 60.0)) as int
+	else
+		Enjoyment = CalcEnjoyment(Thread.SkillBonus, Skills, Thread.LeadIn, IsFemale, (Utility.GetCurrentRealTime() - StartedAt), Stage, Animation.StageCount)
+	endIf
+	return Enjoyment
+endFunction
+
+int function GetPain()
+	if ActorRef == none
+		return 0
+	endIf
+	float Pain = Math.Abs(100.0 - ClampFloat(GetEnjoyment() as float, 1.0, 99.0))
+	if IsVictim
+		Pain *= 1.5
+	elseIf Animation.HasTag("Aggressive") || Animation.HasTag("Rough")
+		Pain *= 0.8
+	else
+		Pain *= 0.3
+	endIf
+	return ClampInt(Pain as int, 0, 100)
 endFunction
 
 function SetVoice(sslBaseVoice ToVoice = none, bool ForceSilence = false)
@@ -795,6 +798,12 @@ endProperty
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
 
+function TrackedEvent(string eventName)
+	if IsTracked
+		Thread.SendTrackedEvent(ActorRef, eventName, Thread.tid)
+	endif
+endFunction
+
 function ClearEffects()
 	if ActorRef.IsInCombat()
 		ActorRef.StopCombat()
@@ -916,12 +925,6 @@ event ResetActor()
 endEvent
 event OnOrgasm()
 endEvent
-int function GetEnjoyment()
-	return 0
-endFunction
-int function GetPain()
-	return 0
-endFunction
 
 int function CalcEnjoyment(float[] XP, float[] SkillsAmounts, bool IsLeadin, bool IsFemaleActor, float Timer, int OnStage, int MaxStage) global native
 function OffsetCoords(float[] Output, float[] CenterCoords, float[] OffsetBy) global native

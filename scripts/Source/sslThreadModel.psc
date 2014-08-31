@@ -190,6 +190,7 @@ state Making
 	sslThreadController function StartThread()
 		GoToState("Starting")
 		UnregisterForUpdate()
+		int i
 
 		; ------------------------- ;
 		; --   Validate Thread   -- ;
@@ -234,7 +235,7 @@ state Making
 		; Validate and grab creature animations
 		if HasCreature
 			; primary creature animations
-			int i = PrimaryAnimations.Length
+			i = PrimaryAnimations.Length
 			while i
 				i -= 1
 				if !PrimaryAnimations[i].HasRace(CreatureRef) || PrimaryAnimations[i].PositionCount != ActorCount
@@ -881,6 +882,11 @@ endFunction
 function Initialize()
 	UnregisterForUpdate()
 	; Clear aliases
+	ActorAlias[0].GoToState("")
+	ActorAlias[1].GoToState("")
+	ActorAlias[2].GoToState("")
+	ActorAlias[3].GoToState("")
+	ActorAlias[4].GoToState("")
 	ActorAlias[0].ClearAlias()
 	ActorAlias[1].ClearAlias()
 	ActorAlias[2].ClearAlias()
