@@ -12,6 +12,8 @@ string[] PureTitlesFemale
 string[] LewdTitlesMale
 string[] LewdTitlesFemale
 
+string[] SkillNames
+
 ; ------------------------------------------------------- ;
 ; --- Manipulate Custom Stats                         --- ;
 ; ------------------------------------------------------- ;
@@ -695,6 +697,7 @@ function ResetStats(Actor ActorRef)
 	ClearFloat(ActorRef, "LastSex.GameTime")
 	ClearFloat(ActorRef, "TimeSpent")
 	ClearFloat(ActorRef, "Purity")
+
 	; Custom stats
 	int i = StringListCount(self, "Custom")
 	while i
@@ -715,6 +718,24 @@ endFunction
 
 function Setup()
 	parent.Setup()
+
+	SkillNames = new string[16]
+	SkillNames[0] = "Foreplay"
+	SkillNames[1] = "Vaginal"
+	SkillNames[2] = "Anal"
+	SkillNames[3] = "Oral"
+	SkillNames[4] = "Pure"
+	SkillNames[5] = "Lewd"
+	SkillNames[6] = "Males"
+	SkillNames[7] = "Females"
+	SkillNames[8] = "Creatures"
+	SkillNames[9] = "Masturbation"
+	SkillNames[10] = "SexCount"
+	SkillNames[11] = "PlayerSex"
+	SkillNames[12] = "Sexuality"
+	SkillNames[13] = "TimeSpent"
+	SkillNames[14] = "LastSex.RealTime"
+	SkillNames[15] = "LastSex.GameTime"
 
 	StatTitles = new string[7]
 	StatTitles[0] = "$SSL_Unskilled"
@@ -813,3 +834,14 @@ function AdjustFloat(Actor ActorRef, string Stat, float Amount)
 	endIf
 endFunction
 
+
+; function InitSkills(Actor ActorRef)
+; 	int i = SkillNames.Length
+; 	if FloatListCount() <
+; endFunction
+
+; function SetSkill(Actor ActorRef, string Skill)
+; 	int i = SkillNames.Find(Skill)
+; 	if i != -1
+; 	endIf
+; endFunction
