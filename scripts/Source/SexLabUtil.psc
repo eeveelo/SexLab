@@ -140,9 +140,9 @@ function DebugLog(string Log, string Type = "NOTICE", bool DebugMode = false) gl
 		SexLabUtil.PrintConsole(Log)
 	endIf
 	if Type == "FATAL" || Type == "ERROR" || Type == "DEPRECATED"
-		Debug.TraceStack("-- SexLab -- "+Log)
+		Debug.TraceStack("SEXLAB -- "+Log)
 	else
-		Debug.Trace("-- SexLab -- "+Log)
+		Debug.Trace("SEXLAB -- "+Log)
 	endIf
 endFunction
 
