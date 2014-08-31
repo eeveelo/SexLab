@@ -180,7 +180,7 @@ int function ValidateActor(Actor ActorRef)
 		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They appear to already be animating")
 		return -10
 	elseIf FormListFind(Config, "ValidActors", ActorRef) != -1
-		Log("ValidateActor("+BaseRef.GetName()+") -- TRUE -- Cache HIT")
+		; Log("ValidateActor("+BaseRef.GetName()+") -- TRUE -- Cache HIT")
 		return 1
 	elseIf !CanAnimate(ActorRef)
 		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are forbidden from animating")
