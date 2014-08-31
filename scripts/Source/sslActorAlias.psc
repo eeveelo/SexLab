@@ -211,9 +211,16 @@ state Ready
 		ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		ActorRef.SetVehicle(MarkerRef)
 		ActorRef.SetScale(AnimScale)
+		; Disable autoadvance if disabled for player
+		if IsPlayer
+			if IsVictim && Config.DisablePlayer
+				Thread.AutoAdvance = true
+			elseIf !Config.AutoAdvance
+				Thread.AutoAdvance = false
+			endIf
+		endIf
 		; Extras for non creatures
 		if !IsCreature
-
 			; Decide on strapon for female, default to worn, otherwise pick random.
 			if IsFemale && Config.UseStrapons
 				Strapon = Config.WornStrapon(ActorRef)
@@ -258,10 +265,6 @@ state Animating
 
 	function StartAnimating()
 		TrackedEvent("Start")
-		; Disable autoadvance if disabled for player
-		if IsPlayer && ((IsVictim && Config.DisablePlayer) || !Config.AutoAdvance)
-			Thread.AutoAdvance = false
-		endIf
 		; Start update loop
 		StartedAt = Utility.GetCurrentRealTime()
 		RegisterForSingleUpdate(Utility.RandomFloat(1.5, 3.0))
