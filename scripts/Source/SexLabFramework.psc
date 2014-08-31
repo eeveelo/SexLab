@@ -745,8 +745,7 @@ endFunction
 
 ; Player shortcuts
 float function AdjustPlayerPurity(float amount)
-	Stats.AdjustFloat(PlayerRef, "Purity", amount)
-	return Stats.GetPurity(PlayerRef)
+	return Stats.AdjustPurity(PlayerRef, amount)
 endFunction
 
 int function GetPlayerPurityLevel()

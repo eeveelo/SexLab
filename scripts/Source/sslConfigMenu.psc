@@ -80,6 +80,11 @@ event OnVersionUpdate(int version)
 			AnimSlots.Setup()
 		endIf
 
+		; v1.59b - Converted stats to use float lists instead of individual values
+		if CurrentVersion < 15901
+			Stats.Setup()
+		endIf
+
 		Debug.Notification("SexLab "+SexLabUtil.GetStringVer()+" Updated...")
 		SexLab.GoToState("Enabled")
 
@@ -123,6 +128,7 @@ event OnGameReload()
 	if CurrentVersion > 0 && Config.CheckSystem()
 		ThreadSlots.StopAll()
 		Config.Reload()
+		Stats.Setup() ; TODO DEV TEMP - Reload stats without running verison update
 	else
 		SexLab.GoToState("Disabled")
 	endIf
@@ -1462,7 +1468,7 @@ function SexDiary()
 	endIf
 
 	AddHeaderOption("$SSL_SexualExperience")
-	AddTextOption("$SSL_TimeSpentHavingSex", Stats.ParseTime(Stats.GetFloat(StatRef, "TimeSpent") as int))
+	AddTextOption("$SSL_TimeSpentHavingSex", Stats.ParseTime(Stats.GetSkill(StatRef, "TimeSpent") as int))
 	AddTextOption("$SSL_VaginalProficiency", Stats.GetSkillTitle(StatRef, "Vaginal"))
 	AddTextOption("$SSL_AnalProficiency", Stats.GetSkillTitle(StatRef, "Anal"))
 	AddTextOption("$SSL_OralProficiency", Stats.GetSkillTitle(StatRef, "Oral"))
@@ -1477,12 +1483,12 @@ function SexDiary()
 
 	AddHeaderOption("$SSL_SexualStats")
 	AddTextOptionST("SetStatSexuality", "$SSL_Sexuality", Stats.GetSexualityTitle(StatRef))
-	AddTextOption("$SSL_MaleSexualPartners", Stats.GetInt(StatRef, "Males"))
-	AddTextOption("$SSL_FemaleSexualPartners", Stats.GetInt(StatRef, "Females"))
-	AddTextOption("$SSL_CreatureSexualPartners", Stats.GetInt(StatRef, "Creatures"))
-	AddTextOption("$SSL_TimesMasturbated", Stats.GetInt(StatRef, "Masturbation"))
-	AddTextOption("$SSL_TimesAggressive", Stats.GetInt(StatRef, "Aggressor"))
-	AddTextOption("$SSL_TimesVictim", Stats.GetInt(StatRef, "Victim"))
+	AddTextOption("$SSL_MaleSexualPartners", Stats.GetSkill(StatRef, "Males"))
+	AddTextOption("$SSL_FemaleSexualPartners", Stats.GetSkill(StatRef, "Females"))
+	AddTextOption("$SSL_CreatureSexualPartners", Stats.GetSkill(StatRef, "Creatures"))
+	AddTextOption("$SSL_TimesMasturbated", Stats.GetSkill(StatRef, "Masturbation"))
+	AddTextOption("$SSL_TimesAggressive", Stats.GetSkill(StatRef, "Aggressor"))
+	AddTextOption("$SSL_TimesVictim", Stats.GetSkill(StatRef, "Victim"))
 
 	AddEmptyOption()
 	SetCursorFillMode(LEFT_TO_RIGHT)
@@ -1508,11 +1514,11 @@ state SetStatSexuality
 	event OnSelectST()
 		int Ratio = Stats.GetSexuality(StatRef)
 		if Stats.IsStraight(StatRef)
-			Stats.SetInt(StatRef, "Sexuality", 50)
+			Stats.SetSkill(StatRef, "Sexuality", 50)
 		elseIf Stats.IsBisexual(StatRef)
-			Stats.SetInt(StatRef, "Sexuality", 1)
+			Stats.SetSkill(StatRef, "Sexuality", 1)
 		else
-			Stats.SetInt(StatRef, "Sexuality", 100)
+			Stats.SetSkill(StatRef, "Sexuality", 100)
 		endIf
 		SetTextOptionValueST(Stats.GetSexualityTitle(StatRef))
 	endEvent
@@ -2441,6 +2447,7 @@ state CleanSystem
 			ShowMessage("$SSL_RunCleanSystem", false)
 			Utility.Wait(0.1)
 			SetupSystem()
+			Stats.CleanDeadStats()
 			ModEvent.Send(ModEvent.Create("SexLabReset"))
 			Config.CleanSystemFinish.Show()
 		endIf
