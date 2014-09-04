@@ -93,6 +93,12 @@ FormList property SexLabVoices auto
 SoundCategory property AudioSFX auto
 SoundCategory property AudioVoice auto
 
+GlobalVariable property DebugVar1 auto
+GlobalVariable property DebugVar2 auto
+GlobalVariable property DebugVar3 auto
+GlobalVariable property DebugVar4 auto
+GlobalVariable property DebugVar5 auto
+
 ; ------------------------------------------------------- ;
 ; --- Config Properties                               --- ;
 ; ------------------------------------------------------- ;
@@ -140,6 +146,7 @@ int property RotateScene auto hidden
 int property EndAnimation auto hidden
 int property ToggleFreeCamera auto hidden
 int property TargetActor auto hidden
+int property AutoAlign auto hidden
 
 ; Floats
 float property CumTimer auto hidden
@@ -350,6 +357,10 @@ function HotkeyCallback(sslThreadController Thread, int keyCode)
 	; RePosition Actors
 	elseIf keyCode == RealignActors
 		Thread.RealignActors()
+
+	; EndAnimation
+	elseIf keyCode == AutoAlign
+		Thread.AutoAlign()
 
 	; Change Positions
 	elseIf keyCode == ChangePositions
@@ -602,6 +613,7 @@ function SetDefaults()
 	ToggleFreeCamera   = 81 ; NUM 3
 	EndAnimation       = 207; End
 	TargetActor        = 49 ; N
+	AutoAlign          = 83 ; NUM .
 
 	; Floats
 	CumTimer           = 120.0
