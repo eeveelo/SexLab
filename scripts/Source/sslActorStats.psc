@@ -339,18 +339,16 @@ function SetSkillFloat(Actor ActorRef, string Skill, float Amount)
 endFunction
 
 function AdjustSkill(Actor ActorRef, string Skill, int Amount)
-	int i = SkillNames.Find(Skill)
-	if Amount != 0 && i != -1 && ActorRef != none && Skill != ""
+	if Amount != 0 && ActorRef != none && Skill != ""
 		InitSkills(ActorRef)
-		FloatListSet(ActorRef, "SexLabSkills", i, (FloatListGet(ActorRef, "SexLabSkills", i) + (Amount as float)))
+		FloatListAdjust(ActorRef, "SexLabSkills", SkillNames.Find(Skill), Amount as float)
 	endIf
 endfunction
 
 function AdjustSkillFloat(Actor ActorRef, string Skill, float Amount)
-	int i = SkillNames.Find(Skill)
-	if Amount != 0.0 && i != -1 && ActorRef != none && Skill != ""
+	if Amount != 0.0 && ActorRef != none && Skill != ""
 		InitSkills(ActorRef)
-		FloatListSet(ActorRef, "SexLabSkills", i, (FloatListGet(ActorRef, "SexLabSkills", i) + Amount))
+		FloatListAdjust(ActorRef, "SexLabSkills", SkillNames.Find(Skill), Amount)
 	endIf
 endFunction
 
@@ -444,7 +442,7 @@ float function AdjustPurity(Actor ActorRef, float Adjust)
 	if Adjust < 0.0
 		type = "Lewd"
 	endIf
-	AdjustSkillFloat(ActorRef, type, Math.Abs(Adjust) as int)
+	AdjustSkillFloat(ActorRef, type, Math.Abs(Adjust))
 	return GetSkillFloat(ActorRef, type)
 endFunction
 
@@ -492,8 +490,8 @@ function AddPurityXP(Actor ActorRef, float Pure, float Lewd, bool IsAggressive, 
 		Lewd += 2.0
 	endIf
 	; Save adjustments
-	AdjustSkill(ActorRef, "Pure", ClampInt(Pure as int, 0, 20))
-	AdjustSkill(ActorRef, "Lewd", ClampInt(Lewd as int, 0, 20))
+	AdjustSkillFloat(ActorRef, "Pure", ClampFloat(Pure, 0.0, 20.0))
+	AdjustSkillFloat(ActorRef, "Lewd", ClampFloat(Lewd, 0.0, 20.0))
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -924,7 +922,7 @@ function AdjustInt(Actor ActorRef, string Stat, int Amount)
 		if SkillNames.Find(stat) != -1
 			AdjustSkill(ActorRef, Stat, Amount)
 		else
-			SetIntValue(ActorRef, "sslActorStats."+Stat, (GetIntValue(ActorRef, "sslActorStats."+Stat) + Amount))
+			AdjustIntValue(ActorRef, "sslActorStats."+Stat, Amount)
 		endIf
 	endIf
 endfunction
@@ -933,7 +931,7 @@ function AdjustFloat(Actor ActorRef, string Stat, float Amount)
 		if SkillNames.Find(stat) != -1
 			AdjustSkillFloat(ActorRef, Stat, Amount)
 		else
-			SetFloatValue(ActorRef, "sslActorStats."+Stat, (GetFloatValue(ActorRef, "sslActorStats."+Stat) + Amount))
+			AdjustFloatValue(ActorRef, "sslActorStats."+Stat, Amount)
 		endIf
 	endIf
 endfunction

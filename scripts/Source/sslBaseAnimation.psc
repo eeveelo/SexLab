@@ -211,14 +211,14 @@ endFunction
 
 function UpdateAdjustment(string AdjustKey, int Position, int Stage, int Slot, float AdjustBy)
 	InitAdjustments(AdjustKey)
-	SetAdjustment(AdjustKey, Position, Stage, Slot, (GetAdjustment(AdjustKey, Position, Stage, Slot) + AdjustBy))
+	JsonUtil.FloatListAdjust(Profile, AdjustKey, DataIndex(4, Position, Stage, Slot), AdjustBy)
 endFunction
 
 function UpdateAdjustmentAll(string AdjustKey, int Position, int Slot, float AdjustBy)
 	InitAdjustments(AdjustKey)
 	int Stage = Stages
 	while Stage
-		SetAdjustment(AdjustKey, Position, Stage, Slot, (GetAdjustment(AdjustKey, Position, Stage, Slot) + AdjustBy))
+		JsonUtil.FloatListAdjust(Profile, AdjustKey, DataIndex(4, Position, Stage, Slot), AdjustBy)
 		Stage -= 1
 	endWhile
 endFunction
@@ -436,9 +436,7 @@ endFunction
 function SetRaceIDs(string[] RaceList)
 	int i
 	while i < RaceList.Length
-		if StorageUtil.StringListFind(Config, "SexLabCreatures", RaceList[i]) == -1
-			StorageUtil.StringListAdd(Config, "SexLabCreatures", RaceList[i], false)
-		endIf
+		StorageUtil.StringListAdd(Config, "SexLabCreatures", RaceList[i], false)
 		i += 1
 	endWhile
 	RaceIDs = RaceList
