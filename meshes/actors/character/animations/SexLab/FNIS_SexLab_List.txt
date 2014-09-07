@@ -230,10 +230,16 @@ s -a Arrok_Cowgirl_A1_S1 Arrok_Cowgirl_A1_S1.hkx
 + Arrok_Cowgirl_A1_S4 Arrok_Cowgirl_A1_S4.hkx
 + Arrok_Cowgirl_A1_S5 Arrok_Cowgirl_A1_S5.hkx
 + Arrok_Cowgirl_A1_S6 Arrok_Cowgirl_A1_S6.hkx
++ Arrok_Cowgirl_A1_S7 Arrok_Cowgirl_A1_S7.hkx
++ Arrok_Cowgirl_A1_S8 Arrok_Cowgirl_A1_S8.hkx
 s -a Arrok_Cowgirl_A2_S1 Arrok_Cowgirl_A2_S1.hkx
 + Arrok_Cowgirl_A2_S2 Arrok_Cowgirl_A2_S2.hkx
 + Arrok_Cowgirl_A2_S3 Arrok_Cowgirl_A2_S3.hkx
 + Arrok_Cowgirl_A2_S4 Arrok_Cowgirl_A2_S4.hkx
++ Arrok_Cowgirl_A2_S5 Arrok_Cowgirl_A2_S5.hkx
++ Arrok_Cowgirl_A2_S6 Arrok_Cowgirl_A2_S6.hkx
++ Arrok_Cowgirl_A2_S7 Arrok_Cowgirl_A2_S7.hkx
++ Arrok_Cowgirl_A2_S8 Arrok_Cowgirl_A2_S8.hkx
 
 s -a,Tn Arrok_ReverseCowgirl_A1_S1 Arrok_ReverseCowgirl_A1_S1.hkx
 + Arrok_ReverseCowgirl_A1_S2 Arrok_ReverseCowgirl_A1_S2.hkx
