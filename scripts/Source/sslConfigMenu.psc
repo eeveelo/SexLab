@@ -83,6 +83,8 @@ event OnVersionUpdate(int version)
 		; v1.59b - Converted stats to use float lists instead of individual values
 		if CurrentVersion < 15901
 			Stats.Setup()
+			CreatureSlots.Setup()
+			AnimSlots.Setup()
 		endIf
 
 		Debug.Notification("SexLab "+SexLabUtil.GetStringVer()+" Updated...")
@@ -197,7 +199,6 @@ event OnPageReset(string page)
 		; Player Diary/Journal
 	elseIf page == "Troubleshoot"
 		Troubleshoot()
-
 
 	; System rebuild & clean
 	elseIf page == "$SSL_RebuildClean"
@@ -787,6 +788,8 @@ endFunction
 ; ------------------------------------------------------- ;
 
 ; Current edit target
+bool PreventOverwrite
+bool IsCreatureEditor
 sslBaseAnimation Animation
 string AdjustKey
 int Position
@@ -795,29 +798,34 @@ function AnimationEditor()
 	SetCursorFillMode(LEFT_TO_RIGHT)
 
 	; Auto select players animation if they are animating right now
-	if PlayerRef.IsInFaction(Config.AnimatingFaction) && ThreadSlots.FindActorController(PlayerRef) != -1
+	if !PreventOverwrite && PlayerRef.IsInFaction(Config.AnimatingFaction) && ThreadSlots.FindActorController(PlayerRef) != -1
 		sslThreadController Thread = ThreadSlots.GetActorController(PlayerRef)
 		if Thread.GetState() == "Animating"
+			PreventOverwrite = true
 			Animation = Thread.Animation
+			Position  = Thread.GetAdjustPos()
 			AdjustKey = RemoveString(Thread.AdjustKey, Animation.Key("Adjust."))
-			if Position >= Animation.PositionCount
-				Position = 0
-			endIf
+
 		endIf
 	endIf
 
 	; Pick a default animation
 	if Animation == none
+		IsCreatureEditor = false
 		Animation = AnimSlots.GetBySlot(0)
 		AdjustKey = "Global"
 		Position  = 0
 	endIf
 
+	; Check if editing a creature animation
+	IsCreatureEditor = Animation.IsCreature
+
+	; Prepare the animation for editing
 	Animation.InitAdjustments(Animation.Key("Adjust."+AdjustKey))
 
 	SetTitleText(Animation.Name)
 	AddMenuOptionST("AnimationSelect", "$SSL_Animation", Animation.Name)
-	if Animation.PositionCount == 1 || (Animation.PositionCount == 2 && TargetRef != none)
+	if Animation.PositionCount == 1 || (Animation.PositionCount == 2 && TargetRef != none && (!IsCreatureEditor || (IsCreatureEditor && Animation.HasActorRace(TargetRef))))
 		AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere")
 	else
 		AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere", OPTION_FLAG_DISABLED)
@@ -868,19 +876,46 @@ endFunction
 
 state AnimationSelect
 	event OnMenuOpenST()
-		SetMenuDialogStartIndex(AnimSlots.Slots.Find(Animation))
+		string[] Switch = new string[1]
+		if IsCreatureEditor
+			Switch[0] = "$SSL_SwitchNormalAnimationEditor"
+			SetMenuDialogOptions(MergeStringArray(Switch, CreatureSlots.GetNames()))
+			SetMenuDialogStartIndex(CreatureSlots.Slots.Find(Animation))
+		else
+			Switch[0] = "$SSL_SwitchCreatureAnimationEditor"
+			SetMenuDialogOptions(MergeStringArray(Switch, AnimSlots.GetNames()))
+			SetMenuDialogStartIndex(AnimSlots.Slots.Find(Animation))
+		endIf
 		SetMenuDialogDefaultIndex(0)
-		SetMenuDialogOptions(AnimSlots.GetNames())
 	endEvent
 	event OnMenuAcceptST(int i)
-		Animation = AnimSlots.GetBySlot(i)
 		AdjustKey = "Global"
 		Position  = 0
+		if IsCreatureEditor
+			if i >= CreatureSlots.Slotted ; Switch to normal animations
+				IsCreatureEditor = false
+				Animation = AnimSlots.GetBySlot(0)
+			else ; Get selected creature animation
+				Animation = CreatureSlots.GetBySlot(i)
+			endIf
+		else
+			if i >= AnimSlots.Slotted ; Switch to creature animations
+				IsCreatureEditor = true
+				Animation = CreatureSlots.GetBySlot(0)
+			else ; Get selected actor animation
+				Animation = AnimSlots.GetBySlot(i)
+			endIf
+		endIf
+
 		SetMenuOptionValueST(Animation.Name)
 		ForcePageReset()
 	endEvent
 	event OnDefaultST()
-		Animation = AnimSlots.GetBySlot(0)
+		if IsCreatureEditor
+			Animation = CreatureSlots.GetBySlot(0)
+		else
+			Animation = AnimSlots.GetBySlot(0)
+		endIf
 		AdjustKey = "Global"
 		Position  = 0
 		SetMenuOptionValueST(Animation.Name)
@@ -1748,6 +1783,9 @@ event OnConfigOpen()
 		TargetFlag = OPTION_FLAG_DISABLED
 		Config.TargetRef = none
 	endIf
+
+	; Reset animation editor auto selector
+	PreventOverwrite = false
 
 	; Animation Settings
 	Chances = new string[3]

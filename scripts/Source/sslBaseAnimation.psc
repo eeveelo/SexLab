@@ -402,6 +402,10 @@ endFunction
 ; --- Creature Use                                    --- ;
 ; ------------------------------------------------------- ;
 
+bool function HasActorRace(Actor ActorRef)
+	return HasRaceID(MiscUtil.GetActorRaceEditorID(ActorRef))
+endFunction
+
 bool function HasRace(Race RaceRef)
 	return HasRaceID(MiscUtil.GetRaceEditorID(RaceRef)) ; FormListFind(Profile, Key("Creatures"), RaceRef) != -1
 endFunction

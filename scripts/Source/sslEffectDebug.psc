@@ -15,16 +15,7 @@ event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	Log("---- START ----")
 	; (Quest.GetQuest("SexLabDev") as sslBenchmark).StartBenchmark(2, 500)
 
-	Log("Load tester/blah/Stuff: "+JsonUtil.Load("tester/blah/Stuff.json"))
-	JsonUtil.SetIntValue("tester/blah/Stuff", "set", Utility.RandomInt())
-	JsonUtil.SetIntValue("tester/blah/Stuff.json", "set.json", Utility.RandomInt())
-	Log("Save tester/blah/Stuff: "+JsonUtil.Save("tester/blah/Stuff.json"))
-
-
-
-	JsonUtil.SetIntValue("../../json_test/blah/Stuff", "set", Utility.RandomInt())
-	JsonUtil.SetFloatValue("../../json_test/blah/Stuff", "set", Utility.RandomFloat())
-	Log("Save ../../json_test/blah/Stuff: "+JsonUtil.Save("../../json_test/blah/Stuff"))
+	sslThreadController.GetNodeDistanceZ(0.0, CasterRef, "Skirt", TargetRef, "Skirt")
 
 	Log("---- FINISHED ----")
 	Dispel()

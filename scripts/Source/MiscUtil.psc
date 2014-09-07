@@ -10,7 +10,7 @@ function ToggleFreeCamera(bool stopTime = false) global native
 ; Set freefly cam speed.
 function SetFreeCameraSpeed(float speed) global native
 
-; Set current freefly cam state.
+; Set current freefly cam state & set the speed if enabling
 function SetFreeCameraState(bool enable, float speed = 10.0) global native
 
 

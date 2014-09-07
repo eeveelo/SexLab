@@ -257,10 +257,10 @@ state Animating
 	function AdjustForward(bool backwards = false, bool adjustStage = false)
 		UnregisterforUpdate()
 		Adjusted = true
-		Animation.AdjustForward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
+		Animation.AdjustForward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
 		AdjustAlias.RefreshLoc()
 		while Input.IsKeyPressed(Config.AdjustForward)
-			Animation.AdjustForward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
+			Animation.AdjustForward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
 			AdjustAlias.RefreshLoc()
 		endWhile
 		RegisterForSingleUpdate(0.4)
@@ -269,10 +269,10 @@ state Animating
 	function AdjustSideways(bool backwards = false, bool adjustStage = false)
 		UnregisterforUpdate()
 		Adjusted = true
-		Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
+		Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
 		AdjustAlias.RefreshLoc()
 		while Input.IsKeyPressed(Config.AdjustSideways)
-			Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
+			Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
 			AdjustAlias.RefreshLoc()
 		endWhile
 		RegisterForSingleUpdate(0.4)
@@ -281,10 +281,10 @@ state Animating
 	function AdjustUpward(bool backwards = false, bool adjustStage = false)
 		UnregisterforUpdate()
 		Adjusted = true
-		Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
+		Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
 		AdjustAlias.RefreshLoc()
 		while Input.IsKeyPressed(Config.AdjustUpward)
-			Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.75), adjustStage)
+			Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
 			AdjustAlias.RefreshLoc()
 		endWhile
 		RegisterForSingleUpdate(0.4)
@@ -567,6 +567,7 @@ function EnableHotkeys()
 		RegisterForKey(Config.MoveScene)
 		RegisterForKey(Config.RotateScene)
 		RegisterForKey(Config.EndAnimation)
+		; RegisterForKey(Config.AutoAlign)
 		hkReady = true
 	endIf
 endFunction
@@ -586,6 +587,10 @@ function Initialize()
 	AdjustPos   = 0
 	AdjustAlias = ActorAlias[0]
 	parent.Initialize()
+endFunction
+
+int function GetAdjustPos()
+	return AdjustPos
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -626,3 +631,78 @@ function MoveActors()
 endFunction
 function GoToStage(int ToStage)
 endFunction
+
+;/ float function GetNodeDistanceZ(float Tolerance, Actor ActorRef1, String Node1, Actor ActorRef2, String Node2) global native
+float function GetNodeDistanceX(float Tolerance, Actor ActorRef1, String Node1, Actor ActorRef2, String Node2) global native
+
+function AutoAlign(bool DoMove)
+	UnregisterForUpdate()
+	; Animation.RestoreOffsets(AdjustKey)
+	RealignActors()
+
+	float z
+	float x
+
+	string Node0 = "Skirt"
+	string Node1 = "Skirt"
+
+	if IsOral
+		Node0 = "NPC Head [Head]"
+	endIf
+
+	float t1 = 0.0
+	float t2 = 0.0
+
+	if DoMove
+		t1 = Config.DebugVar1.Getvalue()
+		t2 = Config.DebugVar2.Getvalue()
+	endIf
+
+	int i = 40
+	while i
+		i -= 1
+		z += GetNodeDistanceZ(t2, Positions[0], Node0, Positions[1], Node1)
+		Utility.Wait(0.05)
+	endWhile
+	z = z / 40
+	Log(z, Animation.Registry+": Z")
+	if DoMove
+		Animation.AdjustUpward(AdjustKey,  1, Stage, z, true)
+		PositionAlias(1).RefreshLoc()
+	endif
+
+	i = 40
+	while i
+		i -= 1
+		x += GetNodeDistanceX(t1, Positions[0], Node0, Positions[1], Node1)
+		Utility.Wait(0.05)
+	endWhile
+	x = x / 40
+	Log(x, Animation.Registry+": X")
+	if DoMove
+		Animation.AdjustForward(AdjustKey, 1, Stage, x, true)
+		PositionAlias(1).RefreshLoc()
+		Log(GetNodeDistanceX(0.0, Positions[0], Node0, Positions[1], Node1)+" > "+(t1 * 1.5), "Forward")
+		if GetNodeDistanceX(0.0, Positions[0], Node0, Positions[1], Node1) > (t1 * 1.5)
+			Animation.AdjustForward(AdjustKey, 1, Stage, (x * -2), true)
+			PositionAlias(1).RefreshLoc()
+			Log((x * -2)+" -> "+GetNodeDistanceX(0.0, Positions[0], Node0, Positions[1], Node1), "Reversed")
+		endIf
+	endif
+
+	Debug.Notification("Forward: "+x+" - UpDown: "+z)
+
+	; if DoMove
+	; 	; Animation.AdjustForward(AdjustKey, 0, Stage, x *  0.50, true)
+	; 	; Animation.AdjustUpward(AdjustKey,  0, Stage, z *  0.50, true)
+
+	; 	Animation.AdjustForward(AdjustKey, 1, Stage, x, true)
+	; 	Animation.AdjustUpward(AdjustKey,  1, Stage, z, true)
+
+	; 	; PositionAlias(0).RefreshLoc()
+	; 	PositionAlias(1).RefreshLoc()
+	; endIf
+
+	RegisterForSingleUpdate(0.4)
+endFunction
+ /;
