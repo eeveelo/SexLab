@@ -358,7 +358,7 @@ state Animating
 
 	function Snap()
 		; Quickly move into place and angle if actor is off by a lot
-		if !IsInPosition(ActorRef, MarkerRef, 50.0)
+		if !IsInPosition(ActorRef, MarkerRef, 40.0)
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			ActorRef.SetVehicle(MarkerRef)
