@@ -146,7 +146,7 @@ int property RotateScene auto hidden
 int property EndAnimation auto hidden
 int property ToggleFreeCamera auto hidden
 int property TargetActor auto hidden
-int property AutoAlign auto hidden
+; int property AutoAlign auto hidden
 
 ; Floats
 float property CumTimer auto hidden
@@ -315,7 +315,6 @@ function ToggleFreeCamera()
 	MiscUtil.ToggleFreeCamera()
 endFunction
 
-
 bool function BackwardsPressed()
 	return Input.GetNumKeysPressed() > 1 && (Input.IsKeyPressed(Backwards) || (Backwards == 54 && Input.IsKeyPressed(42)) || (Backwards == 42 && Input.IsKeyPressed(54)))
 endFunction
@@ -358,9 +357,9 @@ function HotkeyCallback(sslThreadController Thread, int keyCode)
 	elseIf keyCode == RealignActors
 		Thread.RealignActors()
 
-	; EndAnimation
-	elseIf keyCode == AutoAlign
-		Thread.AutoAlign()
+	; Auto adjust alignments
+	; elseIf keyCode == AutoAlign
+	; 	Thread.AutoAlign(BackwardsPressed())
 
 	; Change Positions
 	elseIf keyCode == ChangePositions
@@ -564,6 +563,50 @@ function Reload()
 	DisableThreadControl(Control)
 	; Cleanup phantom slots with missing owners
 	SexLab.Factory.Cleanup()
+	; Cleanup NPCS in lists
+	int count = StorageUtil.FormListCount(self, "ValidActors")
+	int i = StorageUtil.FormListCount(self, "ValidActors")
+	while i > 0
+		i -= 1
+
+		Form FormRef = StorageUtil.FormListGet(self, "ValidActors", i)
+		if FormRef == none
+			StorageUtil.FormListRemoveAt(self, "ValidActors", i)
+			; Log("Is None", "Removing")
+		else
+			Actor ActorRef = FormRef as Actor
+			if ActorRef == none
+				StorageUtil.FormListRemoveAt(self, "ValidActors", i)
+				; Log(FormRef+" - Not Actor", "Removing")
+			elseIf ActorRef.IsDead() || ActorRef.IsDisabled()
+				StorageUtil.FormListRemoveAt(self, "ValidActors", i)
+				StorageUtil.FormListRemove(none, "SexLab.SkilledActors", ActorRef, true)
+				StorageUtil.FloatListClear(ActorRef, "SexLabSkills")
+				Stats.ClearCustomStats(ActorRef)
+				; Log(FormRef + " - "+ BaseRef.GetName()+" - IsDead: " + ActorRef.IsDead() + " IsDisabled: " + ActorRef.IsDisabled(), "Removing")
+			endIf
+		endIf
+
+		;/		ActorBase BaseRef = ActorRef.GetLeveledActorBase()
+				if BaseRef == none
+					StorageUtil.FormListRemoveAt(self, "ValidActors", i)
+					; Log(FormRef + " - Unknown", "Removing")
+				elseIf ActorRef.IsDead() || ActorRef.IsDisabled()
+					StorageUtil.FormListRemoveAt(self, "ValidActors", i)
+					StorageUtil.FormListRemove(none, "SexLab.SkilledActors", ActorRef, true)
+					StorageUtil.FloatListClear(ActorRef, "SexLabSkills")
+					Stats.ClearCustomStats(ActorRef)
+					; StorageUtil.debug_DeleteValues(FormRef)
+					; Log(FormRef + " - "+ BaseRef.GetName()+" - IsDead: " + ActorRef.IsDead() + " IsDisabled: " + ActorRef.IsDisabled(), "Removing")
+				elseIf !(BaseRef.IsUnique() || BaseRef.IsEssential() || BaseRef.IsInvulnerable() || BaseRef.IsProtected())
+					StorageUtil.FormListRemoveAt(self, "ValidActors", i)
+					; Log(FormRef + " - "+BaseRef.GetName() +" - Unimportant", "Removing")
+				endIf
+			endIf
+		endIf/;
+
+	endWhile
+	Log((count - StorageUtil.FormListCount(self, "ValidActors")), "Actor Cleanup")
 endFunction
 
 function SetDefaults()
@@ -613,7 +656,7 @@ function SetDefaults()
 	ToggleFreeCamera   = 81 ; NUM 3
 	EndAnimation       = 207; End
 	TargetActor        = 49 ; N
-	AutoAlign          = 83 ; NUM .
+	; AutoAlign          = 83 ; NUM .
 
 	; Floats
 	CumTimer           = 120.0
@@ -733,7 +776,7 @@ function SetDefaults()
 	Reload()
 
 	; Rest some player configurations
-	StorageUtil.SetIntValue(PlayerRef, "sslActorStats.Sexuality", 100)
+	Stats.SetSkill(PlayerRef, "Sexuality", 100)
 	VoiceSlots.ForgetVoice(PlayerRef)
 endFunction
 
