@@ -221,12 +221,101 @@ bool function UsesNudeSuit(bool IsFemale)
 	return ((!IsFemale && UseMaleNudeSuit) || (IsFemale && UseFemaleNudeSuit))
 endFunction
 
-Form function GetStrapon()
+; ------------------------------------------------------- ;
+; --- Strapon Functions                               --- ;
+; ------------------------------------------------------- ;
+
+form function GetStrapon()
 	if Strapons.Length > 0
 		return Strapons[Utility.RandomInt(0, (Strapons.Length - 1))]
 	endIf
 	return none
 endFunction
+
+form function WornStrapon(Actor ActorRef)
+	int i = Strapons.Length
+	while i
+		i -= 1
+		if ActorRef.IsEquipped(Strapons[i])
+			return Strapons[i]
+		endIf
+	endWhile
+	return none
+endFunction
+
+bool function HasStrapon(Actor ActorRef)
+	return WornStrapon(ActorRef) != none
+endFunction
+
+form function PickStrapon(Actor ActorRef)
+	form Strapon = WornStrapon(ActorRef)
+	if Strapon != none
+		return Strapon
+	endIf
+	return Strapons[Utility.RandomInt(0, Strapons.Length - 1)]
+endFunction
+
+form function EquipStrapon(Actor ActorRef)
+	form Strapon = PickStrapon(ActorRef)
+	if Strapon != none
+		ActorRef.AddItem(Strapon, 1, true)
+		ActorRef.EquipItem(Strapon, false, true)
+	endIf
+	return Strapon
+endFunction
+
+function UnequipStrapon(Actor ActorRef)
+	int i = Strapons.Length
+	while i
+		i -= 1
+		if ActorRef.IsEquipped(Strapons[i])
+			ActorRef.UnequipItem(Strapons[i], false, true)
+			ActorRef.RemoveItem(Strapons[i], 1, true)
+		endIf
+	endWhile
+endFunction
+
+function LoadStrapons()
+	Strapons = new form[1]
+	Strapons[0] = CalypsStrapon
+	int i = Game.GetModCount()
+	while i
+		i -= 1
+		string Name = Game.GetModName(i)
+		if Name == "StrapOnbyaeonv1.1.esp"
+			LoadStrapon("StrapOnbyaeonv1.1.esp", 0x0D65)
+		elseif Name == "TG.esp"
+			LoadStrapon("TG.esp", 0x0182B)
+		elseif Name == "Futa equippable.esp"
+			LoadStrapon("Futa equippable.esp", 0x0D66)
+			LoadStrapon("Futa equippable.esp", 0x0D67)
+			LoadStrapon("Futa equippable.esp", 0x01D96)
+			LoadStrapon("Futa equippable.esp", 0x022FB)
+			LoadStrapon("Futa equippable.esp", 0x022FC)
+			LoadStrapon("Futa equippable.esp", 0x022FD)
+		elseif Name == "Skyrim_Strap_Ons.esp"
+			LoadStrapon("Skyrim_Strap_Ons.esp", 0x00D65)
+			LoadStrapon("Skyrim_Strap_Ons.esp", 0x02859)
+			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285A)
+			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285B)
+			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285C)
+			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285D)
+			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285E)
+			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285F)
+		elseif Name == "SOS Equipable Schlong.esp"
+			LoadStrapon("SOS Equipable Schlong.esp", 0x0D62)
+		endif
+	endWhile
+endFunction
+
+Armor function LoadStrapon(string esp, int id)
+	Armor Strapon = Game.GetFormFromFile(id, esp) as Armor
+	if Strapon != none
+		Strapons = sslUtility.PushForm(Strapon, Strapons)
+	endif
+	return Strapon
+endFunction
+
 
 ; ------------------------------------------------------- ;
 ; --- Hotkeys                                         --- ;
@@ -381,94 +470,6 @@ function HotkeyCallback(sslThreadController Thread, int keyCode)
 endFunction
 
 ; ------------------------------------------------------- ;
-; --- Strapon Functions                               --- ;
-; ------------------------------------------------------- ;
-
-form function WornStrapon(Actor ActorRef)
-	int i = Strapons.Length
-	while i
-		i -= 1
-		if ActorRef.IsEquipped(Strapons[i])
-			return Strapons[i]
-		endIf
-	endWhile
-	return none
-endFunction
-
-bool function HasStrapon(Actor ActorRef)
-	return WornStrapon(ActorRef) != none
-endFunction
-
-form function PickStrapon(Actor ActorRef)
-	form Strapon = WornStrapon(ActorRef)
-	if Strapon != none
-		return Strapon
-	endIf
-	return Strapons[Utility.RandomInt(0, Strapons.Length - 1)]
-endFunction
-
-form function EquipStrapon(Actor ActorRef)
-	form Strapon = PickStrapon(ActorRef)
-	if Strapon != none
-		ActorRef.AddItem(Strapon, 1, true)
-		ActorRef.EquipItem(Strapon, false, true)
-	endIf
-	return Strapon
-endFunction
-
-function UnequipStrapon(Actor ActorRef)
-	int i = Strapons.Length
-	while i
-		i -= 1
-		if ActorRef.IsEquipped(Strapons[i])
-			ActorRef.UnequipItem(Strapons[i], false, true)
-			ActorRef.RemoveItem(Strapons[i], 1, true)
-		endIf
-	endWhile
-endFunction
-
-function LoadStrapons()
-	Strapons = new form[1]
-	Strapons[0] = CalypsStrapon
-	int i = Game.GetModCount()
-	while i
-		i -= 1
-		string Name = Game.GetModName(i)
-		if Name == "StrapOnbyaeonv1.1.esp"
-			LoadStrapon("StrapOnbyaeonv1.1.esp", 0x0D65)
-		elseif Name == "TG.esp"
-			LoadStrapon("TG.esp", 0x0182B)
-		elseif Name == "Futa equippable.esp"
-			LoadStrapon("Futa equippable.esp", 0x0D66)
-			LoadStrapon("Futa equippable.esp", 0x0D67)
-			LoadStrapon("Futa equippable.esp", 0x01D96)
-			LoadStrapon("Futa equippable.esp", 0x022FB)
-			LoadStrapon("Futa equippable.esp", 0x022FC)
-			LoadStrapon("Futa equippable.esp", 0x022FD)
-		elseif Name == "Skyrim_Strap_Ons.esp"
-			LoadStrapon("Skyrim_Strap_Ons.esp", 0x00D65)
-			LoadStrapon("Skyrim_Strap_Ons.esp", 0x02859)
-			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285A)
-			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285B)
-			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285C)
-			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285D)
-			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285E)
-			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285F)
-		elseif Name == "SOS Equipable Schlong.esp"
-			LoadStrapon("SOS Equipable Schlong.esp", 0x0D62)
-		endif
-	endWhile
-endFunction
-
-Armor function LoadStrapon(string esp, int id)
-	Armor Strapon = Game.GetFormFromFile(id, esp) as Armor
-	if Strapon != none
-		Strapons = sslUtility.PushForm(Strapon, Strapons)
-	endif
-	return Strapon
-endFunction
-
-; ------------------------------------------------------- ;
 ; --- Animation Profiles                              --- ;
 ; ------------------------------------------------------- ;
 
@@ -543,6 +544,35 @@ function ValidateTrackedFactions()
 	endWhile
 endFunction
 
+function CleanLists()
+	int count = StorageUtil.FormListCount(self, "ValidActors")
+	Log("Total Actors: "+count, "CleanLists")
+	int i = StorageUtil.FormListCount(self, "ValidActors")
+	while i > 0
+		i -= 1
+		Form FormRef = StorageUtil.FormListGet(self, "ValidActors", i)
+		if FormRef == none
+			StorageUtil.FormListRemoveAt(self, "ValidActors", i)
+			; Log("Is None", "Removing")
+		else
+			Actor ActorRef = FormRef as Actor
+			if ActorRef == none
+				StorageUtil.FormListRemoveAt(self, "ValidActors", i)
+				; Log(FormRef+" - Not Actor", "Removing")
+			elseIf ActorRef.IsDead() || ActorRef.IsDisabled()
+				StorageUtil.FormListRemoveAt(self, "ValidActors", i)
+				StorageUtil.FormListRemove(none, "SexLab.SkilledActors", ActorRef, true)
+				StorageUtil.FormListRemove(self, "TrackedActors", ActorRef, true)
+				StorageUtil.FloatListClear(ActorRef, "SexLabSkills")
+				Stats.ClearCustomStats(ActorRef)
+				; Log(FormRef + " - "+ BaseRef.GetName()+" - IsDead: " + ActorRef.IsDead() + " IsDisabled: " + ActorRef.IsDisabled(), "Removing")
+			endIf
+		endIf
+	endWhile
+	Log("Actors Removed: "+(count - StorageUtil.FormListCount(self, "ValidActors")), "CleanLists")
+endFunction
+
+
 function Reload()
 	Setup()
 	; TFC Toggle key
@@ -556,57 +586,15 @@ function Reload()
 	RegisterForCrosshairRef()
 	CrosshairRef = none
 	TargetRef = none
+	; Remove any NPC thread control player has
+	DisableThreadControl(Control)
+	; Cleanup dead NPCS in lists
+	CleanLists()
 	; Validate tracked factions & actors
 	ValidateTrackedActors()
 	ValidateTrackedFactions()
-	; Remove any NPC thread control player has
-	DisableThreadControl(Control)
 	; Cleanup phantom slots with missing owners
 	SexLab.Factory.Cleanup()
-	; Cleanup NPCS in lists
-	int count = StorageUtil.FormListCount(self, "ValidActors")
-	int i = StorageUtil.FormListCount(self, "ValidActors")
-	while i > 0
-		i -= 1
-
-		Form FormRef = StorageUtil.FormListGet(self, "ValidActors", i)
-		if FormRef == none
-			StorageUtil.FormListRemoveAt(self, "ValidActors", i)
-			; Log("Is None", "Removing")
-		else
-			Actor ActorRef = FormRef as Actor
-			if ActorRef == none
-				StorageUtil.FormListRemoveAt(self, "ValidActors", i)
-				; Log(FormRef+" - Not Actor", "Removing")
-			elseIf ActorRef.IsDead() || ActorRef.IsDisabled()
-				StorageUtil.FormListRemoveAt(self, "ValidActors", i)
-				StorageUtil.FormListRemove(none, "SexLab.SkilledActors", ActorRef, true)
-				StorageUtil.FloatListClear(ActorRef, "SexLabSkills")
-				Stats.ClearCustomStats(ActorRef)
-				; Log(FormRef + " - "+ BaseRef.GetName()+" - IsDead: " + ActorRef.IsDead() + " IsDisabled: " + ActorRef.IsDisabled(), "Removing")
-			endIf
-		endIf
-
-		;/		ActorBase BaseRef = ActorRef.GetLeveledActorBase()
-				if BaseRef == none
-					StorageUtil.FormListRemoveAt(self, "ValidActors", i)
-					; Log(FormRef + " - Unknown", "Removing")
-				elseIf ActorRef.IsDead() || ActorRef.IsDisabled()
-					StorageUtil.FormListRemoveAt(self, "ValidActors", i)
-					StorageUtil.FormListRemove(none, "SexLab.SkilledActors", ActorRef, true)
-					StorageUtil.FloatListClear(ActorRef, "SexLabSkills")
-					Stats.ClearCustomStats(ActorRef)
-					; StorageUtil.debug_DeleteValues(FormRef)
-					; Log(FormRef + " - "+ BaseRef.GetName()+" - IsDead: " + ActorRef.IsDead() + " IsDisabled: " + ActorRef.IsDisabled(), "Removing")
-				elseIf !(BaseRef.IsUnique() || BaseRef.IsEssential() || BaseRef.IsInvulnerable() || BaseRef.IsProtected())
-					StorageUtil.FormListRemoveAt(self, "ValidActors", i)
-					; Log(FormRef + " - "+BaseRef.GetName() +" - Unimportant", "Removing")
-				endIf
-			endIf
-		endIf/;
-
-	endWhile
-	Log((count - StorageUtil.FormListCount(self, "ValidActors")), "Actor Cleanup")
 endFunction
 
 function SetDefaults()
@@ -767,9 +755,6 @@ function SetDefaults()
 	StageTimerAggr[2] = 10.0
 	StageTimerAggr[3] = 10.0
 	StageTimerAggr[4] = 4.0
-
-	; Set animation profile
-	; SwapToProfile(1)
 
 	; Config loaders
 	LoadStrapons()
