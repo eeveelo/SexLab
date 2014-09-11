@@ -130,7 +130,6 @@ event OnGameReload()
 	if CurrentVersion > 0 && Config.CheckSystem()
 		ThreadSlots.StopAll()
 		Config.Reload()
-		Stats.Setup() ; TODO DEV TEMP - Reload stats without running verison update
 	else
 		SexLab.GoToState("Disabled")
 	endIf
