@@ -66,22 +66,27 @@ int function PickPhase(int Strength, int Gender)
 	return ClampInt(((ClampInt(Strength, 1, 100) * Phases[Gender]) / 100), 1, Phases[Gender])
 endFunction
 
+int[] function SelectPhase(int Strength, int Gender)
+	return GetPhase(PickPhase(Strength, Gender), Gender)
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Global Utilities                                --- ;
 ; ------------------------------------------------------- ;
 
 function OpenMouth(Actor ActorRef) global
-	ActorRef.SetExpressionOverride(16, 100)
-	; ActorRef.SetExpressionPhoneme(1, 20)
+	ClearPhoneme(ActorRef)
+	ActorRef.SetExpressionOverride(16, 1)
+	ActorRef.SetExpressionPhoneme(1, 0.4)
 endFunction
 
 function CloseMouth(Actor ActorRef) global
 	ActorRef.ClearExpressionOverride()
-	ActorRef.SetExpressionPhoneme(1, 0)
+	ActorRef.SetExpressionPhoneme(1, 0.0)
 endFunction
 
 bool function IsMouthOpen(Actor ActorRef) global
-	return (GetExpressionID(ActorRef) == 16 && GetExpressionValue(ActorRef) == 100) || (GetPhonemeModifier(ActorRef, 0, 1) >= 30)
+	return (GetExpressionID(ActorRef) == 16 && GetExpressionValue(ActorRef) == 100) || (GetPhonemeModifier(ActorRef, 0, 1) >= 40)
 endFunction
 
 function ClearMFG(Actor ActorRef) global
@@ -93,7 +98,7 @@ endFunction
 function ClearPhoneme(Actor ActorRef) global
 	int i
 	while i <= 15
-		ActorRef.SetExpressionPhoneme(i, 0)
+		ActorRef.SetExpressionPhoneme(i, 0.0)
 		i += 1
 	endWhile
 endFunction
@@ -101,7 +106,7 @@ endFunction
 function ClearModifier(Actor ActorRef) global
 	int i
 	while i <= 13
-		ActorRef.SetExpressionModifier(i, 0)
+		ActorRef.SetExpressionModifier(i, 0.0)
 		i += 1
 	endWhile
 endFunction
@@ -111,14 +116,14 @@ function ApplyPreset(Actor ActorRef, int[] Preset) global
 	; Set Phoneme
 	int p
 	while p <= 15
-		ActorRef.SetExpressionPhoneme(p, Preset[i])
+		ActorRef.SetExpressionPhoneme(p, Preset[i] / 100)
 		i += 1
 		p += 1
 	endWhile
 	; Set Modifers
 	int m
 	while m <= 13
-		ActorRef.SetExpressionModifier(m, Preset[i])
+		ActorRef.SetExpressionModifier(m, Preset[i] / 100)
 		i += 1
 		m += 1
 	endWhile

@@ -285,8 +285,8 @@ state Animating
 		; Sync enjoyment level
 		GetEnjoyment()
 		; Apply Expression / sync enjoyment
-		if !IsCreature && Expression != none && !OpenMouth
-			Expression.Apply(ActorRef, Enjoyment, BaseSex)
+		if !OpenMouth
+			RefreshExpression()
 		endIf
 		; Moan if not silent
 		if !IsSilent
@@ -325,11 +325,11 @@ state Animating
 			; Clear any existing expression as a default - to remove open mouth
 			; ActorRef.ClearExpressionOverride()
 			if OpenMouth
-				sslBaseExpression.OpenMouth(ActorRef)
+				OpenMouth()
 			elseIf Expression != none
-				Expression.Apply(ActorRef, Enjoyment, BaseSex)
-			else
-				sslBaseExpression.CloseMouth(ActorRef)
+				RefreshExpression()
+			elseIf IsMouthOpen()
+				CloseMouth()
 			endIf
 		endIf
 	endFunction
@@ -553,19 +553,7 @@ function RestoreActorDefaults()
 			ActorRef.RemoveItem(Strapon, 1, true)
 		endIf
 		; Reset expression
-		ActorRef.ResetExpressionOverrides()
-		ActorRef.ClearExpressionOverride()
-		MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
-		int i
-		while i <= 15
-			ActorRef.SetExpressionPhoneme(i, 0)
-			i += 1
-		endWhile
-		i = 0
-		while i <= 13
-			ActorRef.SetExpressionModifier(i, 0)
-			i += 1
-		endWhile
+		ClearMFG()
 	endIf
 	; Remove SOS erection
 	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
@@ -796,6 +784,96 @@ bool property DoRedress hidden
 		NoRedress = !value
 	endFunction
 endProperty
+
+; ------------------------------------------------------- ;
+; --- Expression handling                             --- ;
+; ---    Mirrored from sslBaseExpression to avoid     --- ;
+; ---    problems with thread locking                 --- ;
+; ------------------------------------------------------- ;
+
+function ClearPhoneme()
+	; A bit quicker than a loop
+	ActorRef.SetExpressionPhoneme(0, 0.0)
+	ActorRef.SetExpressionPhoneme(1, 0.0)
+	ActorRef.SetExpressionPhoneme(2, 0.0)
+	ActorRef.SetExpressionPhoneme(3, 0.0)
+	ActorRef.SetExpressionPhoneme(4, 0.0)
+	ActorRef.SetExpressionPhoneme(5, 0.0)
+	ActorRef.SetExpressionPhoneme(6, 0.0)
+	ActorRef.SetExpressionPhoneme(7, 0.0)
+	ActorRef.SetExpressionPhoneme(8, 0.0)
+	ActorRef.SetExpressionPhoneme(9, 0.0)
+	ActorRef.SetExpressionPhoneme(10, 0.0)
+	ActorRef.SetExpressionPhoneme(11, 0.0)
+	ActorRef.SetExpressionPhoneme(12, 0.0)
+	ActorRef.SetExpressionPhoneme(13, 0.0)
+	ActorRef.SetExpressionPhoneme(14, 0.0)
+	ActorRef.SetExpressionPhoneme(15, 0.0)
+endFunction
+
+function ClearModifier()
+	ActorRef.SetExpressionModifier(0, 0.0)
+	ActorRef.SetExpressionModifier(1, 0.0)
+	ActorRef.SetExpressionModifier(2, 0.0)
+	ActorRef.SetExpressionModifier(3, 0.0)
+	ActorRef.SetExpressionModifier(4, 0.0)
+	ActorRef.SetExpressionModifier(5, 0.0)
+	ActorRef.SetExpressionModifier(6, 0.0)
+	ActorRef.SetExpressionModifier(7, 0.0)
+	ActorRef.SetExpressionModifier(8, 0.0)
+	ActorRef.SetExpressionModifier(9, 0.0)
+	ActorRef.SetExpressionModifier(10, 0.0)
+	ActorRef.SetExpressionModifier(11, 0.0)
+	ActorRef.SetExpressionModifier(12, 0.0)
+	ActorRef.SetExpressionModifier(13, 0.0)
+endFunction
+
+function ClearMFG()
+	ActorRef.ResetExpressionOverrides()
+	ActorRef.ClearExpressionOverride()
+	MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
+	ClearModifier()
+	ClearPhoneme()
+endFunction
+
+function OpenMouth()
+	ClearPhoneme()
+	ActorRef.SetExpressionOverride(16, 100)
+	ActorRef.SetExpressionPhoneme(1, 0.4)
+endFunction
+
+function CloseMouth()
+	ActorRef.ClearExpressionOverride()
+	ActorRef.SetExpressionPhoneme(1, 0)
+endFunction
+
+bool function IsMouthOpen()
+	return (MfgConsoleFunc.GetExpressionID(ActorRef) == 16 && MfgConsoleFunc.GetExpressionValue(ActorRef) == 100) || (MfgConsoleFunc.GetPhonemeModifier(ActorRef, 0, 1) >= 40)
+endFunction
+
+function RefreshExpression()
+	if Expression == none || IsCreature || ActorRef == none
+		return
+	endIf
+	int[] Preset = Expression.GetPhase(Expression.PickPhase(Enjoyment, BaseSex), BaseSex)
+	int i
+	; Set Phoneme
+	int p
+	while p <= 15
+		ActorRef.SetExpressionPhoneme(p, Preset[i] / 100)
+		i += 1
+		p += 1
+	endWhile
+	; Set Modifers
+	int m
+	while m <= 13
+		ActorRef.SetExpressionModifier(m, Preset[i] / 100)
+		i += 1
+		m += 1
+	endWhile
+	; Set expression
+	ActorRef.SetExpressionOverride(Preset[30], Preset[31])
+endFunction
 
 ; ------------------------------------------------------- ;
 ; --- System Use                                      --- ;
