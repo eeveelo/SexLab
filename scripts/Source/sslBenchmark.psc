@@ -4,36 +4,114 @@ import SexLabUtil
 
 function PreBenchmarkSetup()
 	Setup()
-	Stats.Setup()
+	Expression = SexLabUtil.GetAPI().Expressions[0]
+	Presets = Expression.SelectPhase(100, 1)
+	Log(Presets)
 endFunction
 
-state Test1
+sslBaseExpression Expression
+int[] Presets
+function ApplyPreset(Actor ActorRef, int[] Preset)
+endFunction
+function ClearMFG()
+	PlayerRef.ResetExpressionOverrides()
+	PlayerRef.ClearExpressionOverride()
+	MfgConsoleFunc.ResetPhonemeModifier(PlayerRef)
+endFunction
+
+state Test2
 	string function Label()
-		return "Values"
+		return "SKSE"
 	endFunction
 
 	string function Proof()
-		return "Vaginal: "+Stats.GetSkill(PlayerRef, "Vaginal")+" Lewd: "+Stats.GetLewd(PlayerRef)+" List: "+Stats.GetSkills(PlayerRef)
+		ClearMFG()
+		ApplyPreset(PlayerRef, Presets)
+		Utility.Wait(4.0)
+		return "End 1"
 	endFunction
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
 		; START any variable preparions needed
-		int i
+		ClearMFG()
 		; END any variable preparions needed
 		baseline += Utility.GetCurrentRealTime()
 		while nth
 			nth -= 1
 			; START code to benchmark
-			i = 100
-			while i
-				i -= 1
-				Stats.GetSkill(PlayerRef, "Vaginal")
-				Stats.GetLewd(PlayerRef)
-				Stats.GetSkills(PlayerRef)
-			endWhile
+			ApplyPreset(PlayerRef, Presets)
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline
+	endFunction
+
+
+	function ApplyPreset(Actor ActorRef, int[] Preset)
+		int i
+		; Set Phoneme
+		int p
+		while p <= 15
+			ActorRef.SetExpressionPhoneme(p, (Preset[i] / 100))
+			i += 1
+			p += 1
+		endWhile
+		; Set Modifers
+		int m
+		while m <= 13
+			ActorRef.SetExpressionModifier(m, (Preset[i] / 100))
+			i += 1
+			m += 1
+		endWhile
+		; Set expression
+		ActorRef.SetExpressionOverride(Preset[30], Preset[31])
+	endFunction
+endState
+
+state Test1
+	string function Label()
+		return "MfgConsoleFunc"
+	endFunction
+
+	string function Proof()
+		ClearMFG()
+		ApplyPreset(PlayerRef, Presets)
+		Utility.Wait(4.0)
+		return "End 2"
+	endFunction
+
+	float function RunTest(int nth = 5000, float baseline = 0.0)
+		; START any variable preparions needed
+		ClearMFG()
+		; END any variable preparions needed
+		baseline += Utility.GetCurrentRealTime()
+		while nth
+			nth -= 1
+			; START code to benchmark
+			ApplyPreset(PlayerRef, Presets)
+			; END code to benchmark
+		endWhile
+		return Utility.GetCurrentRealTime() - baseline
+	endFunction
+
+
+	function ApplyPreset(Actor ActorRef, int[] Preset)
+		int i
+		; Set Phoneme
+		int p
+		while p <= 15
+			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, Preset[i])
+			i += 1
+			p += 1
+		endWhile
+		; Set Modifers
+		int m
+		while m <= 13
+			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 1, m, Preset[i])
+			i += 1
+			m += 1
+		endWhile
+		; Set expression
+		ActorRef.SetExpressionOverride(Preset[30], Preset[31])
 	endFunction
 endState
 

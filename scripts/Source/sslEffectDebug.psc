@@ -13,9 +13,8 @@ ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	Log("---- START ----")
-	; (Quest.GetQuest("SexLabDev") as sslBenchmark).StartBenchmark(2, 500)
+	(Quest.GetQuest("SexLabDev") as sslBenchmark).StartBenchmark(2, 20, 5)
 
-	sslThreadController.GetNodeDistanceZ(0.0, CasterRef, "Skirt", TargetRef, "Skirt")
 
 	Log("---- FINISHED ----")
 	Dispel()
