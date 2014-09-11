@@ -856,18 +856,19 @@ function RefreshExpression()
 		return
 	endIf
 	int[] Preset = Expression.GetPhase(Expression.PickPhase(Enjoyment, BaseSex), BaseSex)
+	Log(Preset, "Expression "+ActorName)
 	int i
 	; Set Phoneme
 	int p
 	while p <= 15
-		ActorRef.SetExpressionPhoneme(p, Preset[i] / 100)
+		ActorRef.SetExpressionPhoneme(p, Preset[i] as float / 100.0)
 		i += 1
 		p += 1
 	endWhile
 	; Set Modifers
 	int m
 	while m <= 13
-		ActorRef.SetExpressionModifier(m, Preset[i] / 100)
+		ActorRef.SetExpressionModifier(m, Preset[i] as float / 100.0)
 		i += 1
 		m += 1
 	endWhile
