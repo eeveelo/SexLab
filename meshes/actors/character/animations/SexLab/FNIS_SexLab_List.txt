@@ -546,6 +546,23 @@ s Zyn_Doggystyle_A2_S1 Zyn_Doggystyle_A2_S1.hkx
 + -a Zyn_Doggystyle_A2_S5 Zyn_Doggystyle_A2_S5.hkx
 + Zyn_Doggystyle_A2_S5b Zyn_Doggystyle_A2_S5b.hkx
 
+s Zyn_4Way_A1_S1 Zyn_4Way_A1_S1.hkx
++ Zyn_4Way_A1_S2 Zyn_4Way_A1_S2.hkx
++ Zyn_4Way_A1_S3 Zyn_4Way_A1_S3.hkx
++ Zyn_4Way_A1_S4 Zyn_4Way_A1_S4.hkx
+s Zyn_4Way_A2_S1 Zyn_4Way_A2_S1.hkx
++ Zyn_4Way_A2_S2 Zyn_4Way_A2_S2.hkx
++ Zyn_4Way_A2_S3 Zyn_4Way_A2_S3.hkx
++ Zyn_4Way_A2_S4 Zyn_4Way_A2_S4.hkx
+s Zyn_4Way_A3_S1 Zyn_4Way_A3_S1.hkx
++ Zyn_4Way_A3_S2 Zyn_4Way_A3_S2.hkx
++ Zyn_4Way_A3_S3 Zyn_4Way_A3_S3.hkx
++ Zyn_4Way_A3_S4 Zyn_4Way_A3_S4.hkx
+s Zyn_4Way_A4_S1 Zyn_4Way_A4_S1.hkx
++ Zyn_4Way_A4_S2 Zyn_4Way_A4_S2.hkx
++ Zyn_4Way_A4_S3 Zyn_4Way_A4_S3.hkx
++ Zyn_4Way_A4_S4 Zyn_4Way_A4_S4.hkx
+
 '
 ' Bleagh Animation
 '
