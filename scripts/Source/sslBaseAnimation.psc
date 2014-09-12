@@ -398,6 +398,40 @@ function SetContent(int contentType)
 	content = contentType
 endFunction
 
+
+float function GetTimersRunTime(float[] StageTimers)
+	if StageTimers.Length < 2
+		return -1.0
+	endIf
+	float seconds  = 0.0
+	int LastTimer  = (StageTimers.Length - 1)
+	int LastStage  = (StageCount - 1)
+	int Stage = StageCount
+	while Stage > 0
+ 		Stage -= 1
+ 		if HasTimer(Stage)
+ 			seconds += GetTimer(Stage)
+ 		elseIf Stage < LastStage
+ 			seconds += StageTimers[sslUtility.ClampInt(Stage, 0, (LastTimer - 1))]
+ 		elseIf Stage >= LastStage
+ 			seconds += StageTimers[LastTimer]
+ 		endIf
+	endWhile
+	return seconds
+endFunction
+
+float function GetRunTime()
+	return GetTimersRunTime(Config.StageTimer)
+endFunction
+
+float function GetRunTimeLeadIn()
+	return GetTimersRunTime(Config.StageTimerLeadIn)
+endFunction
+
+float function GetRunTimeAggressive()
+	return GetTimersRunTime(Config.StageTimerAggr)
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Creature Use                                    --- ;
 ; ------------------------------------------------------- ;

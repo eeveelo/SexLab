@@ -449,6 +449,10 @@ float function GetTimer()
 	return Timers[(last - 1)]
 endFunction
 
+float function GetAnimationRunTime()
+	return Animation.GetTimersRunTime(Timers)
+endFunction
+
 function UpdateTimer(float AddSeconds = 0.0)
 	TimedStage = true
 	StageTimer += AddSeconds
