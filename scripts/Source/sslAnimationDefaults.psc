@@ -1820,51 +1820,6 @@ function ZynFemdom(int id)
 	Base.Save(id)
 endFunction
 
-function ZynFourWay(int id)
-	sslBaseAnimation Base = Create(id)
-
-	Base.Name = "Zyn Gay Fourway"
-
-	Base.SetContent(Sexual)
-	Base.SoundFX = SexMix
-
-	int a1 = Base.AddPosition(Female, addCum=VaginalOralAnal)
-	Base.AddPositionStage(a1, "Zyn_4Way_A2_S1", 101, openMouth = true, strapon = true)
-	Base.AddPositionStage(a1, "Zyn_4Way_A2_S2", 101, strapon = true)
-	Base.AddPositionStage(a1, "Zyn_4Way_A2_S3", 101, openMouth = true, strapon = true, sos = 2)
-	Base.AddPositionStage(a1, "Zyn_4Way_A2_S4", 101, openMouth = true, strapon = true, sos = 2)
-
-	int a2 = Base.AddPosition(Male, addCum=VaginalAnal)
-	Base.AddPositionStage(a2, "Zyn_4Way_A1_S1", 0, openMouth = true)
-	Base.AddPositionStage(a2, "Zyn_4Way_A1_S2", 0)
-	Base.AddPositionStage(a2, "Zyn_4Way_A1_S3", 0)
-	Base.AddPositionStage(a2, "Zyn_4Way_A1_S4", 0)
-
-	int a3 = Base.AddPosition(Male, addCum=VaginalOral)
-	Base.AddPositionStage(a3, "Zyn_4Way_A3_S1", 48)
-	Base.AddPositionStage(a3, "Zyn_4Way_A3_S2", 48, sos = 2)
-	Base.AddPositionStage(a3, "Zyn_4Way_A3_S3", 48, openMouth = true)
-	Base.AddPositionStage(a3, "Zyn_4Way_A3_S4", 48)
-
-	int a4 = Base.AddPosition(Male, addCum=VaginalAnal)
-	Base.AddPositionStage(a4, "Zyn_4Way_A4_S1", -108)
-	Base.AddPositionStage(a4, "Zyn_4Way_A4_S2", -108)
-	Base.AddPositionStage(a4, "Zyn_4Way_A4_S3", -108)
-	Base.AddPositionStage(a4, "Zyn_4Way_A4_S4", -108)
-
-	Base.AddTag("Sex")
-	Base.AddTag("Zyn")
-	Base.AddTag("Orgy")
-	Base.AddTag("Dirty")
-	Base.AddTag("Vaginal")
-	Base.AddTag("Anal")
-	Base.AddTag("Oral")
-	Base.AddTag("MMMM")
-	Base.AddTag("MMMF")
-
-	Base.Save(id)
-endFunction
-
 function ZynMissionary(int id)
 	sslBaseAnimation Base = Create(id)
 
@@ -1931,7 +1886,51 @@ function ZynDoggystyle(int id)
 	Base.Save(id)
 endFunction
 
+function ZynFourWay(int id)
+	sslBaseAnimation Base = Create(id)
 
+	Base.Name = "Zyn Gay Fourway"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = SexMix
+
+	; A2's animations better conform to a female role and female positions need to be listed first
+	int a1 = Base.AddPosition(Female, addCum=VaginalOralAnal)
+	Base.AddPositionStage(a1, "Zyn_4Way_A2_S1", 101, openMouth = true, strapon = true)
+	Base.AddPositionStage(a1, "Zyn_4Way_A2_S2", 101, strapon = true)
+	Base.AddPositionStage(a1, "Zyn_4Way_A2_S3", 101, openMouth = true, strapon = true, sos = 2)
+	Base.AddPositionStage(a1, "Zyn_4Way_A2_S4", 101, openMouth = true, strapon = true, sos = 2)
+
+	int a2 = Base.AddPosition(Male, addCum=VaginalAnal)
+	Base.AddPositionStage(a2, "Zyn_4Way_A1_S1", 0, openMouth = true)
+	Base.AddPositionStage(a2, "Zyn_4Way_A1_S2", 0)
+	Base.AddPositionStage(a2, "Zyn_4Way_A1_S3", 0)
+	Base.AddPositionStage(a2, "Zyn_4Way_A1_S4", 0)
+
+	int a3 = Base.AddPosition(Male, addCum=VaginalOral)
+	Base.AddPositionStage(a3, "Zyn_4Way_A3_S1", 48)
+	Base.AddPositionStage(a3, "Zyn_4Way_A3_S2", 48, sos = 2)
+	Base.AddPositionStage(a3, "Zyn_4Way_A3_S3", 48, openMouth = true)
+	Base.AddPositionStage(a3, "Zyn_4Way_A3_S4", 48)
+
+	int a4 = Base.AddPosition(Male, addCum=VaginalAnal)
+	Base.AddPositionStage(a4, "Zyn_4Way_A4_S1", -108)
+	Base.AddPositionStage(a4, "Zyn_4Way_A4_S2", -108)
+	Base.AddPositionStage(a4, "Zyn_4Way_A4_S3", -108)
+	Base.AddPositionStage(a4, "Zyn_4Way_A4_S4", -108)
+
+	Base.AddTag("Sex")
+	Base.AddTag("Zyn")
+	Base.AddTag("Orgy")
+	Base.AddTag("Dirty")
+	Base.AddTag("Vaginal")
+	Base.AddTag("Anal")
+	Base.AddTag("Oral")
+	Base.AddTag("MMMM")
+	Base.AddTag("MMMF")
+
+	Base.Save(id)
+endFunction
 
 function DarkInvestigationsThreesome(int id)
 	sslBaseAnimation Base = Create(id)
