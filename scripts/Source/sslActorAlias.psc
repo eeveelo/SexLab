@@ -856,7 +856,6 @@ function RefreshExpression()
 		return
 	endIf
 	int[] Preset = Expression.GetPhase(Expression.PickPhase(Enjoyment, BaseSex), BaseSex)
-	Log(Preset, "Expression "+ActorName)
 	int i
 	; Set Phoneme
 	int p
