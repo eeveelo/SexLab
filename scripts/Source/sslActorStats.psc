@@ -837,9 +837,9 @@ function CleanDeadStats()
 		i -= 1
 		if FormListGet(none, "SexLab.SkilledActors", i) != none
 			Actor ActorRef = FormListGet(none, "SexLab.SkilledActors", i) as Actor
-			if ActorRef != PlayerRef && ActorRef.IsDead()
+			if ActorRef != none && ActorRef != PlayerRef && ActorRef.IsDead()
 				ResetStats(ActorRef)
-				FormListRemoveAt(none, "SexLab.SkilledActors", i)
+				FormListRemove(none, "SexLab.SkilledActors", ActorRef)
 				Log("Skills Removed", ActorRef.GetLeveledActorBase().GetName())
 			endIf
 		else

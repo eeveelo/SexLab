@@ -553,19 +553,19 @@ function CleanLists()
 		Form FormRef = StorageUtil.FormListGet(self, "ValidActors", i)
 		if FormRef == none
 			StorageUtil.FormListRemoveAt(self, "ValidActors", i)
-			; Log("Is None", "Removing")
+			Log("Is None", "Removing")
 		else
 			Actor ActorRef = FormRef as Actor
 			if ActorRef == none
 				StorageUtil.FormListRemoveAt(self, "ValidActors", i)
-				; Log(FormRef+" - Not Actor", "Removing")
+				Log(FormRef+" - Not Actor", "Removing")
 			elseIf ActorRef.IsDead() || ActorRef.IsDisabled()
-				StorageUtil.FormListRemoveAt(self, "ValidActors", i)
+				StorageUtil.FormListRemove(self, "ValidActors", ActorRef)
 				StorageUtil.FormListRemove(none, "SexLab.SkilledActors", ActorRef, true)
 				StorageUtil.FormListRemove(self, "TrackedActors", ActorRef, true)
 				StorageUtil.FloatListClear(ActorRef, "SexLabSkills")
 				Stats.ClearCustomStats(ActorRef)
-				; Log(FormRef + " - "+ BaseRef.GetName()+" - IsDead: " + ActorRef.IsDead() + " IsDisabled: " + ActorRef.IsDisabled(), "Removing")
+				Log(FormRef + " - "+ ActorRef.GetLeveledActorBase().GetName()+" - IsDead: " + ActorRef.IsDead() + " IsDisabled: " + ActorRef.IsDisabled(), "Removing")
 			endIf
 		endIf
 	endWhile
@@ -588,8 +588,6 @@ function Reload()
 	TargetRef = none
 	; Remove any NPC thread control player has
 	DisableThreadControl(Control)
-	; Cleanup dead NPCS in lists
-	CleanLists()
 	; Validate tracked factions & actors
 	ValidateTrackedActors()
 	ValidateTrackedFactions()
@@ -759,6 +757,9 @@ function SetDefaults()
 	; Config loaders
 	LoadStrapons()
 	Reload()
+
+	; Cleanup dead NPCS in lists
+	CleanLists()
 
 	; Rest some player configurations
 	Stats.SetSkill(PlayerRef, "Sexuality", 100)
