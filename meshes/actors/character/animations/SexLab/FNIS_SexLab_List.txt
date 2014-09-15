@@ -563,6 +563,22 @@ s Zyn_4Way_A4_S1 Zyn_4Way_A4_S1.hkx
 + Zyn_4Way_A4_S3 Zyn_4Way_A4_S3.hkx
 + Zyn_4Way_A4_S4 Zyn_4Way_A4_S4.hkx
 
+s Zyn_Licking_A1_S1 Zyn_Licking_A1_S1.hkx
++ -a Zyn_Licking_A1_S2 Zyn_Licking_A1_S2.hkx
++ Zyn_Licking_A1_S2b Zyn_Licking_A1_S2b.hkx
++ -a Zyn_Licking_A1_S3 Zyn_Licking_A1_S3.hkx
++ Zyn_Licking_A1_S3b Zyn_Licking_A1_S3b.hkx
++ -a Zyn_Licking_A1_S4 Zyn_Licking_A1_S4.hkx
++ Zyn_Licking_A1_S4b Zyn_Licking_A1_S4b.hkx
+s Zyn_Licking_A2_S1 Zyn_Licking_A2_S1.hkx
++ -a Zyn_Licking_A2_S2 Zyn_Licking_A2_S2.hkx
++ Zyn_Licking_A2_S2b Zyn_Licking_A2_S2b.hkx
++ -a Zyn_Licking_A2_S3 Zyn_Licking_A2_S3.hkx
++ Zyn_Licking_A2_S3b Zyn_Licking_A2_S3b.hkx
++ -a Zyn_Licking_A2_S4 Zyn_Licking_A2_S4.hkx
++ Zyn_Licking_A2_S4b Zyn_Licking_A2_S4b.hkx
+
+
 '
 ' Bleagh Animation
 '

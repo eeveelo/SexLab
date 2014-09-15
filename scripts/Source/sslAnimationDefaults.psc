@@ -68,6 +68,7 @@ function LoadAnimations()
 	RegisterAnimation("SexLabTribadism")
 	RegisterAnimation("ArrokLesbian")
 	RegisterAnimation("ZynLesbian")
+	RegisterAnimation("ZynLicking")
 	; Misc
 	RegisterAnimation("APFisting")
 	; 3P+
@@ -375,7 +376,7 @@ function ArrokOral(int id)
 	Base.Name = "Arrok 69"
 
 	Base.SetContent(Sexual)
-	Base.SoundFX = Sucking
+	Base.SoundFX = SexMix
 
 	int a1 = Base.AddPosition(Female, addCum=Oral)
 	Base.AddPositionStage(a1, "Arrok_Oral_A1_S1", 0)
@@ -385,11 +386,11 @@ function ArrokOral(int id)
 	Base.AddPositionStage(a1, "Arrok_Oral_A1_S4", 0)
 
 	int a2 = Base.AddPosition(Male)
-	Base.AddPositionStage(a2, "Arrok_Oral_A2_S1", 46, rotate = 180, silent = true, openMouth = true)
-	Base.AddPositionStage(a2, "Arrok_Oral_A2_S1", 46, rotate = 180, silent = true, openMouth = true)
-	Base.AddPositionStage(a2, "Arrok_Oral_A2_S2", 46, rotate = 180, silent = true, openMouth = true)
-	Base.AddPositionStage(a2, "Arrok_Oral_A2_S3", 46, rotate = 180, silent = true, openMouth = true)
-	Base.AddPositionStage(a2, "Arrok_Oral_A2_S3", 46, rotate = 180, silent = true, openMouth = true)
+	Base.AddPositionStage(a2, "Arrok_Oral_A2_S1", 46, rotate = 180, silent = true)
+	Base.AddPositionStage(a2, "Arrok_Oral_A2_S1", 46, rotate = 180, silent = true)
+	Base.AddPositionStage(a2, "Arrok_Oral_A2_S2", 46, rotate = 180, silent = true)
+	Base.AddPositionStage(a2, "Arrok_Oral_A2_S3", 46, rotate = 180, silent = true)
+	Base.AddPositionStage(a2, "Arrok_Oral_A2_S3", 46, rotate = 180, silent = true)
 
 	Base.AddTag("Arrok")
 	Base.AddTag("BBP")
@@ -1739,6 +1740,38 @@ function ZynLesbian(int id)
 	Base.AddTag("Vaginal")
 	Base.AddTag("Oral")
 	Base.AddTag("Kissing")
+
+	Base.Save(id)
+endFunction
+
+function ZynLicking(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Zyn Licking"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = SexMix
+
+	int a1 = Base.AddPosition(Female)
+	Base.AddPositionStage(a1, "Zyn_Licking_A1_S1", 0)
+	Base.AddPositionStage(a1, "Zyn_Licking_A1_S2", 0)
+	Base.AddPositionStage(a1, "Zyn_Licking_A1_S3", 0)
+	Base.AddPositionStage(a1, "Zyn_Licking_A1_S4", 0)
+
+	int a2 = Base.AddPosition(Female)
+	Base.AddPositionStage(a2, "Zyn_Licking_A2_S1", -96, silent = true)
+	Base.AddPositionStage(a2, "Zyn_Licking_A2_S2", -96, silent = true)
+	Base.AddPositionStage(a2, "Zyn_Licking_A2_S3", -96, silent = true)
+	Base.AddPositionStage(a2, "Zyn_Licking_A2_S4", -96, silent = true)
+
+	Base.AddTag("Zyn")
+	Base.AddTag("Sex")
+	Base.AddTag("Lesbian")
+	Base.AddTag("Dirty")
+	Base.AddTag("Oral")
+	Base.AddTag("Cunnilingus")
+	Base.AddTag("Licking")
+	Base.AddTag("MF")
 
 	Base.Save(id)
 endFunction
