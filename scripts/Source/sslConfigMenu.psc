@@ -80,11 +80,12 @@ event OnVersionUpdate(int version)
 			AnimSlots.Setup()
 		endIf
 
-		; v1.59b - Converted stats to use float lists instead of individual values
+		; v1.59b - Converted stats to use float lists instead of individual values, new animations, various thread changes
 		if CurrentVersion < 15901
 			Stats.Setup()
 			CreatureSlots.Setup()
 			AnimSlots.Setup()
+			ThreadSlots.Setup()
 		endIf
 
 		Debug.Notification("SexLab "+SexLabUtil.GetStringVer()+" Updated...")

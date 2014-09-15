@@ -553,19 +553,19 @@ function CleanLists()
 		Form FormRef = StorageUtil.FormListGet(self, "ValidActors", i)
 		if !FormRef
 			StorageUtil.FormListRemoveAt(self, "ValidActors", i)
-			Log("Is None", "Removing")
+			; Log("Is None", "Removing")
 		else
 			Actor ActorRef = FormRef as Actor
 			if !ActorRef
 				StorageUtil.FormListRemoveAt(self, "ValidActors", i)
-				Log(FormRef+" - Not Actor", "Removing")
+				; Log(FormRef+" - Not Actor", "Removing")
 			elseIf ActorRef.IsDead() || ActorRef.IsDisabled()
 				StorageUtil.FormListRemove(self, "ValidActors", ActorRef)
 				StorageUtil.FormListRemove(none, "SexLab.SkilledActors", ActorRef, true)
 				StorageUtil.FormListRemove(self, "TrackedActors", ActorRef, true)
 				StorageUtil.FloatListClear(ActorRef, "SexLabSkills")
 				Stats.ClearCustomStats(ActorRef)
-				Log(FormRef + " - "+ ActorRef.GetLeveledActorBase().GetName()+" - IsDead: " + ActorRef.IsDead() + " IsDisabled: " + ActorRef.IsDisabled(), "Removing")
+				; Log(FormRef + " - "+ ActorRef.GetLeveledActorBase().GetName()+" - IsDead: " + ActorRef.IsDead() + " IsDisabled: " + ActorRef.IsDisabled(), "Removing")
 			endIf
 		endIf
 	endWhile

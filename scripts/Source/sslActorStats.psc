@@ -745,7 +745,7 @@ function Setup()
 	UpgradeLegacyStats(PlayerRef)
 	int i = FormListCount(none, "SexLab.SeededActors")
 	if i > 0
-		Log(i, "SeededActors")
+		; Log(i, "SeededActors")
 		while i
 			i -= 1
 			if FormListGet(none, "SexLab.SeededActors", i) != none
