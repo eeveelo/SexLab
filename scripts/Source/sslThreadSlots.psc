@@ -45,7 +45,14 @@ function StopAll()
 	int i = Slots.Length
 	while i
 		i -= 1
-		Slots[i].Initialize()
+		string SlotState = Slots[i].GetState()
+		if SlotState == "Making"
+			SexLabUtil.DebugLog("Making during StopAll - Initializing.", "Slot["+i+"]", true)
+			Slots[i].Initialize()
+		elseIf SlotState != "Unlocked"
+			SexLabUtil.DebugLog(SlotState+" during StopAll - EndAnimation.", "Slot["+i+"]", true)
+			Slots[i].EndAnimation(true)
+		endIf
 	endWhile
 	; Send event
 	ModEvent.Send(ModEvent.Create("SexLabStoppedActive"))
