@@ -36,6 +36,33 @@ bool property IsCreature hidden
 		return Genders[2] != 0
 	endFunction
 endProperty
+
+bool property IsVaginal hidden
+	bool function get()
+		return HasTag("Vaginal")
+	endFunction
+endProperty
+bool property IsAnal hidden
+	bool function get()
+		return HasTag("Anal")
+	endFunction
+endProperty
+bool property IsOral hidden
+	bool function get()
+		return HasTag("Oral")
+	endFunction
+endProperty
+bool property IsDirty hidden
+	bool function get()
+		return HasTag("Dirty")
+	endFunction
+endProperty
+bool property IsLoving hidden
+	bool function get()
+		return HasTag("Loving")
+	endFunction
+endProperty
+
 int property StageCount hidden
 	int function get()
 		return Stages
@@ -153,19 +180,72 @@ Sound function GetSoundFX(int Stage)
 endFunction
 
 int[] function GetPositionFlags(string AdjustKey, int Position, int Stage)
-	int i = DataIndex(4, Position, Stage, 0)
 	int[] Output = new int[5]
+	return PositionFlags(Output, AdjustKey, Position, Stage)
+endFunction
+
+float[] function GetPositionOffsets(string AdjustKey, int Position, int Stage)
+	int i = DataIndex(4, Position, Stage, 0)
+	; Use global adjustments if none for adjustkey
+	if JsonUtil.FloatListCount(Profile, AdjustKey) < i
+		AdjustKey = Key("Adjust.Global")
+	endIf
+	; Get adjustments
+	float[] Output = new float[4]
+	JsonUtil.FloatListSlice(Profile, AdjustKey, Output, i)
+	Output[0] = Output[0] + Offsets[i] + CenterAdjust[(Stage - 1)] ; Forward
+	Output[1] = Output[1] + Offsets[(i + 1)] ; Side
+	Output[2] = Output[2] + Offsets[(i + 2)] ; Up
+	Output[3] = Offsets[(i + 3)] ; Rot - no offset
+	return Output
+	; float[] Output = new float[4]
+	; return PositionOffsets(Output, AdjustKey, Position, Stage)
+endFunction
+
+float[] function GetRawOffsets(int Position, int Stage)
+	float[] Output = new float[4]
+	return RawOffsets(Output, Position, Stage)
+endFunction
+
+float[] function GetPositionAdjustments(string AdjustKey, int Position, int Stage)
+	float[] Output = new float[4]
+	return PositionAdjustments(Output, AdjustKey, Position, Stage)
+endFunction
+
+; ------------------------------------------------------- ;
+; --- Data Copy To                                    --- ;
+; ------------------------------------------------------- ;
+
+function PositionFlags(int[] Output, string AdjustKey, int Position, int Stage)
+	int i = DataIndex(4, Position, Stage, 0)
 	Output[0] = Flags[i]
 	Output[1] = Flags[(i + 1)]
 	Output[2] = Flags[(i + 2)]
 	Output[3] = GetSchlong(AdjustKey, Position, Stage)
 	Output[4] = GetGender(Position)
-	return Output
 endFunction
 
-float[] function GetRawOffsets(int Position, int Stage)
+function PositionOffsets(float[] Output, string AdjustKey, int Position, int Stage)
 	int i = DataIndex(4, Position, Stage, 0)
-	float[] Output = new float[4]
+	; Use global adjustments if none for adjustkey
+	if JsonUtil.FloatListCount(Profile, AdjustKey) < i
+		AdjustKey = Key("Adjust.Global")
+	endIf
+	; Reset the array
+	Output[0] = 0.0
+	Output[1] = 0.0
+	Output[2] = 0.0
+	Output[3] = 0.0
+	; Get adjustments
+	JsonUtil.FloatListSlice(Profile, AdjustKey, Output, i)
+	Output[0] = Output[0] + Offsets[i] + CenterAdjust[(Stage - 1)] ; Forward
+	Output[1] = Output[1] + Offsets[(i + 1)] ; Side
+	Output[2] = Output[2] + Offsets[(i + 2)] ; Up
+	Output[3] = Offsets[(i + 3)] ; Rot - no offset
+endFunction
+
+float[] function RawOffsets(float[] Output, int Position, int Stage)
+	int i = DataIndex(4, Position, Stage, 0)
 	Output[0] = Offsets[i] ; Forward
 	Output[1] = Offsets[(i + 1)] ; Side
 	Output[2] = Offsets[(i + 2)] ; Up
@@ -173,27 +253,8 @@ float[] function GetRawOffsets(int Position, int Stage)
 	return Output
 endFunction
 
-float[] function GetPositionOffsets(string AdjustKey, int Position, int Stage)
-	int i = DataIndex(4, Position, Stage, 0)
-	float[] Output = new float[4]
-	; Use global adjustments if none for adjustkey
-	if JsonUtil.FloatListCount(Profile, AdjustKey) < i
-		AdjustKey = Key("Adjust.Global")
-	endIf
-	; Get adjustments
-	JsonUtil.FloatListSlice(Profile, AdjustKey, Output, i)
-	; Add default offsets ontop.
-	Output[0] = Output[0] + Offsets[i] + CenterAdjust[(Stage - 1)] ; Forward
-	Output[1] = Output[1] + Offsets[(i + 1)] ; Side
-	Output[2] = Output[2] + Offsets[(i + 2)] ; Up
-	Output[3] = Offsets[(i + 3)] ; Rot - no offset
-	return Output
-endFunction
-
-float[] function GetPositionAdjustments(string AdjustKey, int Position, int Stage)
-	int i = DataIndex(4, Position, Stage, 0)
-	float[] Output = new float[4]
-	JsonUtil.FloatListSlice(Profile, AdjustKey, Output, i)
+float[] function PositionAdjustments(float[] Output, string AdjustKey, int Position, int Stage)
+	JsonUtil.FloatListSlice(Profile, AdjustKey, Output, DataIndex(4, Position, Stage, 0))
 	return Output
 endFunction
 
