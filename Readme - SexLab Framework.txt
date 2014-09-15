@@ -3,7 +3,7 @@
 Skryim SexLab Framework
   By Ashal of Loverslab.com
 
-    Version 1.59, released 2014/08/11
+    Version 1.59b, released 2014/09/15
 
 -- Description --------------------------------------------------------------
 
@@ -31,7 +31,7 @@ Skryim SexLab Framework
      Mithos
      Blac945
      TDA
-     Zynsch - http://www.loverslab.com/topic/28322-zynisch
+     Zynisch - http://www.loverslab.com/topic/28322-zynisch
      Bleagh - http://www.loverslab.com/topic/22484-bleagh
      PanicForever - http://www.loverslab.com/topic/23426-panics
      Athstai - http://dark-investigations.blogspot.com
