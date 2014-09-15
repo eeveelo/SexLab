@@ -51,6 +51,7 @@ float[] Loc
 int[] Flags
 bool[] StripOverride
 form[] Equipment
+float[] SkillBonus
 float StartedAt
 float ActorScale
 float AnimScale
@@ -189,8 +190,13 @@ state Ready
 		AdjustKey  = Thread.AdjustKey
 		Stage      = Thread.Stage
 		Position   = Thread.Positions.Find(ActorRef)
-		Flags      = Animation.GetPositionFlags(AdjustKey, Position, Stage)
-		Offsets    = Animation.GetPositionOffsets(AdjustKey, Position, Stage)
+		SkillBonus = Thread.SkillBonus
+		; Init arrays
+		Flags      = new int[5]
+		Offsets    = new float[4]
+		Loc        = new float[6]
+		Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
+		Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage)
 		; Calculate scales
 		float display = ActorRef.GetScale()
 		ActorRef.SetScale(1.0)
@@ -264,8 +270,8 @@ endState
 state Animating
 
 	function StartAnimating()
-		TrackedEvent("Start")
 		; Start update loop
+		TrackedEvent("Start")
 		StartedAt = Utility.GetCurrentRealTime()
 		RegisterForSingleUpdate(Utility.RandomFloat(1.5, 3.0))
 	endFunction
@@ -296,21 +302,16 @@ state Animating
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent
 
-	function SyncActor()
-		SyncThread()
-		SyncLocation(false)
-		Thread.AliasEventDone("Sync")
-	endFunction
-
 	function SyncThread()
+		; Sync with thread info
 		Animation  = Thread.Animation
 		AdjustKey  = Thread.AdjustKey
 		Stage      = Thread.Stage
 		Position   = Thread.Positions.Find(ActorRef)
-		Flags      = Animation.GetPositionFlags(AdjustKey, Position, Stage)
-		Offsets    = Animation.GetPositionOffsets(AdjustKey, Position, Stage)
+		; Update alias info
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
-		; Sync enjoyment level
+		Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
+		Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage)
 		GetEnjoyment()
 		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
 		if !IsCreature
@@ -334,8 +335,14 @@ state Animating
 		endIf
 	endFunction
 
+	function SyncActor()
+		SyncThread()
+		SyncLocation(false)
+		Thread.AliasEventDone("Sync")
+	endFunction
+
 	function RefreshLoc()
-		Offsets = Animation.GetPositionOffsets(AdjustKey, Position, Stage)
+		Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage)
 		SyncLocation(false)
 	endFunction
 
@@ -400,7 +407,7 @@ state Animating
 		Log("-- Resetting! -- ", ActorName)
 		; Update stats
 		if !IsCreature
-			Stats.RecordThread(ActorRef, Thread.HasPlayer, Thread.ActorCount, HighestRelation, (Utility.GetCurrentRealTime() - StartedAt), Thread.VictimRef, Thread.SkillXP, Thread.Genders)
+			Stats.RecordThread(ActorRef, (IsPlayer || Thread.HasPlayer), Thread.ActorCount, HighestRelation, (Utility.GetCurrentRealTime() - StartedAt), Thread.VictimRef, Thread.SkillXP, Thread.Genders)
 		endIf
 		; Apply cum
 		int CumID = Animation.GetCum(Position)
@@ -483,16 +490,19 @@ function LockActor()
 	ActorRef.EvaluatePackage()
 	; Disable movement
 	if IsPlayer
-		Game.ForceThirdPerson()
-		; Game.DisablePlayerControls(false, false, false, false, false, false, true, false, 0)
-		Game.SetPlayerAIDriven()
+		if Game.GetCameraState() == 0
+			Game.ForceThirdPerson()
+		endIf
+		; abMovement = true, abFighting = true, abCamSwitch = false, abLooking = false, abSneaking = false, abMenu = true, abActivate = true, abJournalTabs = false, aiDisablePOVType = 0
+		Game.DisablePlayerControls(true, true, false, false, false, false, false, false, 0)
+		; Game.SetPlayerAIDriven()
 		; Enable hotkeys, if needed
 		if !(IsVictim && Config.DisablePlayer)
 			Thread.EnableHotkeys()
 		endIf
 	else
 		ActorRef.SetRestrained(true)
-		; ActorRef.SetDontMove(true)
+		ActorRef.SetDontMove(true)
 	endIf
 	; Attach positioning marker
 	if !MarkerRef
@@ -523,11 +533,11 @@ function UnlockActor()
 			Config.ToggleFreeCamera()
 		endIf
 		Thread.DisableHotkeys()
-		Game.EnablePlayerControls()
-		Game.SetPlayerAIDriven(false)
+		Game.EnablePlayerControls(true, true, false, false, false, false, false, false, 0)
+		; Game.SetPlayerAIDriven(false)
 	else
 		ActorRef.SetRestrained(false)
-		; ActorRef.SetDontMove(false)
+		ActorRef.SetDontMove(false)
 	endIf
 endFunction
 
@@ -573,7 +583,7 @@ int function GetEnjoyment()
 	elseif IsCreature
 		Enjoyment = (ClampFloat((Utility.GetCurrentRealTime() - StartedAt) / 6.0, 0.0, 40.0) + ((Stage as float / Animation.StageCount as float) * 60.0)) as int
 	else
-		Enjoyment = CalcEnjoyment(Thread.SkillBonus, Skills, Thread.LeadIn, IsFemale, (Utility.GetCurrentRealTime() - StartedAt), Stage, Animation.StageCount)
+		Enjoyment = CalcEnjoyment(SkillBonus, Skills, Thread.LeadIn, IsFemale, (Utility.GetCurrentRealTime() - StartedAt), Stage, Animation.StageCount)
 	endIf
 	return Enjoyment
 endFunction
@@ -954,7 +964,6 @@ function Initialize()
 	; Storage
 	StripOverride  = BoolArray(0)
 	Equipment      = FormArray(0)
-	Loc            = new float[6]
 	; Make sure alias is emptied
 	TryToClear()
 endFunction
@@ -966,7 +975,7 @@ function Setup()
 	ActorLib        = Config.ActorLib
 	Stats           = Config.Stats
 	; init alias settings
-	Thread = GetOwningQuest() as sslThreadController
+	Thread          = GetOwningQuest() as sslThreadController
 	Initialize()
 endFunction
 
