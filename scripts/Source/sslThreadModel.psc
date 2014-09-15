@@ -839,7 +839,7 @@ function AliasEventDone(string Callback = "Alias")
 	if AliasDone[i] >= ActorCount
 		; Notify of failsafe trigger - likely due to lag
 		float timer = Utility.GetCurrentRealTime() - AliasLag[i]
-		Log("Alias Completion Lag: " + timer, Callback)
+		Log(Callback+" Timer: " + timer, "AliasEventDone")
 		if timer > 0 && Config.DebugMode
 			Debug.Notification(Callback+" Alias Completion Lag: "+timer)
 		endIf
