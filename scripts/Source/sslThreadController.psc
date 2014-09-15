@@ -27,6 +27,7 @@ bool hkReady
 
 state Prepare
 	function FireAction()
+		UpdateActorKey()
 		SetAnimation()
 		Log(AdjustKey, "Adjustment Profile")
 		AliasEvent("Prepare", 30.0)
@@ -44,10 +45,7 @@ state Prepare
 		ActorAlias[3].StartAnimating()
 		ActorAlias[4].StartAnimating()
 		; Set starting adjusted actor
-		AdjustPos = 0
-		if ActorCount > 1
-			AdjustPos = 1
-		endIf
+		AdjustPos = (ActorCount > 1) as int
 		AdjustAlias = PositionAlias(AdjustPos)
 		; Send starter events
 		SendThreadEvent("AnimationStart")
@@ -113,7 +111,7 @@ state Animating
 			SendThreadEvent("StageStart")
 		endIf
 		; Begin loop
-		RegisterForSingleUpdate(0.5)
+		RegisterForSingleUpdate(0.2)
 	endFunction
 
 	event OnUpdate()
@@ -152,9 +150,8 @@ state Animating
 
 	function PlayAnimation()
 		UnregisterForUpdate()
-		string[] AnimEvents = Animation.FetchStage(Stage)
-		; Log("Playing Animation Events: "+AnimEvents, "Stage: "+Stage+" Animation: "+Animation.Name)
 		; Send with as little overhead as possible to improve syncing
+		string[] AnimEvents = Animation.FetchStage(Stage)
 		if ActorCount == 1
 			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
 		elseIf ActorCount == 2
@@ -176,23 +173,65 @@ state Animating
 			Debug.SendAnimationEvent(Positions[3], AnimEvents[3])
 			Debug.SendAnimationEvent(Positions[4], AnimEvents[4])
 		endIf
-		RegisterForSingleUpdate(0.4)
+		RegisterForSingleUpdate(0.2)
 	endFunction
 
 	function RealignActors()
 		UnregisterForUpdate()
-		ActorAlias[0].SyncThread()
-		ActorAlias[1].SyncThread()
-		ActorAlias[2].SyncThread()
-		ActorAlias[3].SyncThread()
-		ActorAlias[4].SyncThread()
-		ActorAlias[0].SyncLocation(true)
-		ActorAlias[1].SyncLocation(true)
-		ActorAlias[2].SyncLocation(true)
-		ActorAlias[3].SyncLocation(true)
-		ActorAlias[4].SyncLocation(true)
-		PlayAnimation()
-		RegisterForSingleUpdate(0.4)
+		string[] AnimEvents = Animation.FetchStage(Stage)
+		if ActorCount == 1
+			ActorAlias[0].SyncThread()
+			ActorAlias[0].SyncLocation(true)
+			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
+		elseIf ActorCount == 2
+			ActorAlias[0].SyncThread()
+			ActorAlias[1].SyncThread()
+			ActorAlias[0].SyncLocation(true)
+			ActorAlias[1].SyncLocation(true)
+			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
+			Debug.SendAnimationEvent(Positions[1], AnimEvents[1])
+		elseIf ActorCount == 3
+			ActorAlias[0].SyncThread()
+			ActorAlias[1].SyncThread()
+			ActorAlias[2].SyncThread()
+			ActorAlias[0].SyncLocation(true)
+			ActorAlias[1].SyncLocation(true)
+			ActorAlias[2].SyncLocation(true)
+			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
+			Debug.SendAnimationEvent(Positions[1], AnimEvents[1])
+			Debug.SendAnimationEvent(Positions[2], AnimEvents[2])
+		elseIf ActorCount == 4
+			ActorAlias[0].SyncThread()
+			ActorAlias[1].SyncThread()
+			ActorAlias[2].SyncThread()
+			ActorAlias[3].SyncThread()
+			ActorAlias[0].SyncLocation(true)
+			ActorAlias[1].SyncLocation(true)
+			ActorAlias[2].SyncLocation(true)
+			ActorAlias[3].SyncLocation(true)
+			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
+			Debug.SendAnimationEvent(Positions[1], AnimEvents[1])
+			Debug.SendAnimationEvent(Positions[2], AnimEvents[2])
+			Debug.SendAnimationEvent(Positions[3], AnimEvents[3])
+		elseIf ActorCount == 5
+			ActorAlias[0].SyncThread()
+			ActorAlias[1].SyncThread()
+			ActorAlias[2].SyncThread()
+			ActorAlias[3].SyncThread()
+			ActorAlias[4].SyncThread()
+			ActorAlias[0].SyncLocation(true)
+			ActorAlias[1].SyncLocation(true)
+			ActorAlias[2].SyncLocation(true)
+			ActorAlias[3].SyncLocation(true)
+			ActorAlias[4].SyncLocation(true)
+			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
+			Debug.SendAnimationEvent(Positions[1], AnimEvents[1])
+			Debug.SendAnimationEvent(Positions[2], AnimEvents[2])
+			Debug.SendAnimationEvent(Positions[3], AnimEvents[3])
+			Debug.SendAnimationEvent(Positions[4], AnimEvents[4])
+		endIf
+		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
+		RegisterForSingleUpdate(0.2)
 	endFunction
 
 	function MoveActors()
@@ -202,7 +241,7 @@ state Animating
 		ActorAlias[2].RefreshLoc()
 		ActorAlias[3].RefreshLoc()
 		ActorAlias[4].RefreshLoc()
-		RegisterForSingleUpdate(0.4)
+		RegisterForSingleUpdate(0.2)
 	endFunction
 
 	; ------------------------------------------------------- ;
@@ -221,7 +260,7 @@ state Animating
 		UnregisterForUpdate()
 		SetAnimation(IndexTravel(Animations.Find(Animation), Animations.Length, backwards))
 		SendThreadEvent("AnimationChange")
-		RegisterForSingleUpdate(0.4)
+		RegisterForSingleUpdate(0.2)
 	endFunction
 
 	function ChangePositions(bool backwards = false)
@@ -236,13 +275,14 @@ state Animating
 		Actor MovedActor  = Positions[NewPos]
 		if MovedActor == AdjustActor
 			Log("MovedActor["+NewPos+"] == AdjustActor["+AdjustPos+"] -- "+Positions, "ChangePositions() Errror")
-			RegisterForSingleUpdate(0.4)
+			RegisterForSingleUpdate(0.2)
 			return
 		endIf
 		; Shuffle actor positions
 		Positions[AdjustPos] = MovedActor
 		Positions[NewPos] = AdjustActor
 		; New adjustment profile
+		UpdateActorKey()
 		UpdateAdjustKey()
 		Log(AdjustKey, "Adjustment Profile")
 		; Sync new positions
@@ -251,7 +291,7 @@ state Animating
 		RealignActors()
 		MoveActors()
 		SendThreadEvent("PositionChange")
-		RegisterForSingleUpdate(0.4)
+		RegisterForSingleUpdate(0.2)
 	endFunction
 
 	function AdjustForward(bool backwards = false, bool adjustStage = false)
@@ -263,7 +303,7 @@ state Animating
 			Animation.AdjustForward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
 			AdjustAlias.RefreshLoc()
 		endWhile
-		RegisterForSingleUpdate(0.4)
+		RegisterForSingleUpdate(0.2)
 	endFunction
 
 	function AdjustSideways(bool backwards = false, bool adjustStage = false)
@@ -275,7 +315,7 @@ state Animating
 			Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
 			AdjustAlias.RefreshLoc()
 		endWhile
-		RegisterForSingleUpdate(0.4)
+		RegisterForSingleUpdate(0.2)
 	endFunction
 
 	function AdjustUpward(bool backwards = false, bool adjustStage = false)
@@ -287,7 +327,7 @@ state Animating
 			Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
 			AdjustAlias.RefreshLoc()
 		endWhile
-		RegisterForSingleUpdate(0.4)
+		RegisterForSingleUpdate(0.2)
 	endFunction
 
 	function RotateScene(bool backwards = false)
@@ -303,7 +343,7 @@ state Animating
 		ActorAlias[2].RefreshLoc()
 		ActorAlias[3].RefreshLoc()
 		ActorAlias[4].RefreshLoc()
-		RegisterForSingleUpdate(0.4)
+		RegisterForSingleUpdate(0.2)
 	endFunction
 
 	function AdjustChange(bool backwards = false)
@@ -313,14 +353,14 @@ state Animating
 			AdjustAlias = ActorAlias(Positions[AdjustPos])
 			Debug.Notification("Adjusting Position For: "+AdjustAlias.ActorRef.GetLeveledActorBase().GetName())
 		endIf
-		RegisterForSingleUpdate(0.4)
+		RegisterForSingleUpdate(0.2)
 	endFunction
 
 	function RestoreOffsets()
 		UnregisterForUpdate()
 		Animation.RestoreOffsets(AdjustKey)
 		RealignActors()
-		RegisterForSingleUpdate(0.4)
+		RegisterForSingleUpdate(0.2)
 	endFunction
 
 	function CenterOnObject(ObjectReference CenterOn, bool resync = true)
@@ -410,10 +450,10 @@ function SetAnimation(int aid = -1)
 	; Update animation info
 	string[] Tags = Animation.GetTags()
 	IsVaginal   = Females > 0 && Tags.Find("Vaginal") != -1
-	IsAnal      = Tags.Find("Anal") != -1 || (Females == 0 && Tags.Find("Vaginal") != -1)
-	IsOral      = Tags.Find("Oral") != -1
+	IsAnal      = Tags.Find("Anal")   != -1 || (Females == 0 && Tags.Find("Vaginal") != -1)
+	IsOral      = Tags.Find("Oral")   != -1
 	IsLoving    = Tags.Find("Loving") != -1
-	IsDirty     = Tags.Find("Dirty") != -1
+	IsDirty     = Tags.Find("Dirty")  != -1
 	StageCount  = Animation.StageCount
 	SoundFX     = Animation.GetSoundFX(Stage)
 	SetBonuses()
@@ -425,9 +465,7 @@ function SetAnimation(int aid = -1)
 	if Stage >= StageCount
 		GoToStage((StageCount - 1))
 	else
-		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		RealignActors()
-		PlayAnimation()
 	endIf
 endFunction
 
@@ -462,7 +500,7 @@ function EndLeadIn()
 	if LeadIn
 		UnregisterForUpdate()
 		; Swap to non lead in animations
-		Stage = 1
+		Stage  = 1
 		LeadIn = false
 		SetAnimation()
 		; Add runtime to foreplay skill xp
@@ -707,6 +745,6 @@ function AutoAlign(bool DoMove)
 	; 	PositionAlias(1).RefreshLoc()
 	; endIf
 
-	RegisterForSingleUpdate(0.4)
+	RegisterForSingleUpdate(0.2)
 endFunction
  /;

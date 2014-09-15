@@ -118,6 +118,7 @@ int BedFlag ; 0 = allow, 1 = force, -1 = forbid
 bool NoLeadIn
 string[] Hooks
 string[] Tags
+string ActorKeys
 
 ; Debug testing
 float property t auto hidden
@@ -522,6 +523,7 @@ function ChangeActors(Actor[] NewPositions)
 		endIf
 	endWhile
 	; New adjustment profile
+	UpdateActorKey()
 	UpdateAdjustKey()
 	Log(AdjustKey, "Adjustment Profile")
 	; Reposition actors
@@ -811,6 +813,7 @@ endFunction
 
 int[] AliasDone
 string[] EventTypes
+float[] AliasLag
 
 string function Key(string Callback)
 	return "SSL_"+thread_id+"_"+Callback
@@ -824,6 +827,7 @@ function AliasEvent(string Callback, float WaitTime = 0.0)
 			return
 		endIf
 		AliasDone[i] = 0
+		AliasLag[i] = Utility.GetCurrentRealTime() + WaitTime
 		RegisterForSingleUpdate(WaitTime)
 	endIf
 	ModEvent.Send(ModEvent.Create(Key(Callback)))
@@ -833,7 +837,16 @@ function AliasEventDone(string Callback = "Alias")
 	int i = EventTypes.Find(Callback)
 	AliasDone[i] = AliasDone[i] + 1
 	if AliasDone[i] >= ActorCount
+		; Notify of failsafe trigger - likely due to lag
+		float timer = Utility.GetCurrentRealTime() - AliasLag[i]
+		Log("Alias Completion Lag: " + timer, Callback)
+		if timer > 0 && Config.DebugMode
+			Debug.Notification(Callback+" Alias Completion Lag: "+timer)
+		endIf
+		; Reset event checks
 		AliasDone[i] = 0
+		AliasLag[i] = 0.0
+		; Send done event
 		ModEvent.Send(ModEvent.Create(Key(Callback+"Done")))
 	endIf
 endFunction
@@ -918,12 +931,13 @@ function Initialize()
 	; Storage Info
 	Genders        = new int[3]
 	AliasDone      = new int[5]
+	AliasLag       = new float[5]
 	SkillXP        = new float[6]
 	SkillBonus     = new float[6]
-	Tags           = new string[5]
 	; Storage Data
 	Positions         = sslUtility.ActorArray(0)
 	Hooks             = sslUtility.StringArray(0)
+	Tags              = sslUtility.StringArray(0)
 	CustomTimers      = sslUtility.FloatArray(0)
 	CustomAnimations  = sslUtility.AnimationArray(0)
 	PrimaryAnimations = sslUtility.AnimationArray(0)
@@ -940,8 +954,8 @@ function Log(string Log, string Type = "NOTICE")
 	endIf
 endFunction
 
-function UpdateAdjustKey()
-	string NewKey = Animation.Key("Adjust")
+function UpdateActorKey()
+	string NewKey = ".Adjust"
 	if !Config.RaceAdjustments
 		NewKey += ".Global"
 	else
@@ -951,7 +965,11 @@ function UpdateAdjustKey()
 			i += 1
 		endWhile
 	endIf
-	AdjustKey = NewKey
+	ActorKeys = NewKey
+endFunction
+
+function UpdateAdjustKey()
+	AdjustKey = Animation.Registry+ActorKeys
 endFunction
 
 function SetTID(int value)
