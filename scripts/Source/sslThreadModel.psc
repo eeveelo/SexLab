@@ -141,7 +141,7 @@ endFunction
 state Making
 	int function AddActor(Actor ActorRef, bool IsVictim = false, sslBaseVoice Voice = none, bool ForceSilent = false)
 		; Ensure we have room for actor
-		if ActorRef == none
+		if !ActorRef
 			Log("AddActor(NONE) -- Failed to add actor -- Actor is a figment of your imagination", "FATAL")
 			return -1
 		elseIf ActorCount >= 5
@@ -155,7 +155,7 @@ state Making
 			return -1
 		endIf
 		sslActorAlias Slot = PickAlias(ActorRef)
-		if Slot == none || !Slot.SetActor(ActorRef, IsVictim, Voice, ForceSilent)
+		if !Slot || !Slot.SetActor(ActorRef, IsVictim, Voice, ForceSilent)
 			Log("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- They were unable to fill an actor alias", "FATAL")
 			return -1
 		endIf
@@ -207,7 +207,7 @@ state Making
 		; ------------------------- ;
 
 		; Search location marker near player or first position
-		if CenterRef == none
+		if !CenterRef
 			if HasPlayer
 				CenterOnObject(Game.FindClosestReferenceOfTypeFromRef(Config.LocationMarker, PlayerRef, 750.0))
 			else
@@ -215,11 +215,11 @@ state Making
 			endIf
 		endIf
 		; Search for nearby bed
-		if CenterRef == none && BedFlag != -1
+		if !CenterRef && BedFlag != -1
 			CenterOnBed(HasPlayer, 750.0)
 		endIf
 		; Center on fallback choices
-		if CenterRef == none
+		if !CenterRef
 			if IsAggressive
 				CenterOnObject(VictimRef)
 			elseIf HasPlayer
@@ -281,7 +281,7 @@ state Making
 
 		; Get default foreplay if none and enabled
 		if !HasCreature && !IsAggressive && ActorCount == 2 && !NoLeadIn && LeadAnimations.Length == 0 && Config.ForeplayStage
-			if BedRef != none
+			if BedRef
 				SetLeadAnimations(AnimSlots.GetByTags(2, "LeadIn", "Standing"))
 			else
 				SetLeadAnimations(AnimSlots.GetByTags(2, "LeadIn"))
@@ -289,7 +289,7 @@ state Making
 		endIf
 
 		; If a bed is present, remove any standing animations
-		if BedRef != none && Config.BedRemoveStanding
+		if BedRef && Config.BedRemoveStanding
 			; Remove standing animations from primary
 			sslBaseAnimation[] NoStandingPrimary = AnimSlots.RemoveTagged(PrimaryAnimations, "Standing")
 			if NoStandingPrimary.Length > 0
@@ -430,7 +430,7 @@ bool function IsVictim(Actor ActorRef)
 endFunction
 
 bool function IsAggressor(Actor ActorRef)
-	return VictimRef != none && VictimRef != ActorRef
+	return VictimRef && VictimRef != ActorRef
 endFunction
 
 int function GetHighestPresentRelationshipRank(Actor ActorRef)
@@ -513,7 +513,7 @@ function ChangeActors(Actor[] NewPositions)
 		if FindSlot(Positions[i]) == -1
 			; Slot into alias
 			sslActorAlias Slot = PickAlias(Positions[i])
-			if Slot == none || !Slot.SetActor(Positions[i])
+			if !Slot || !Slot.SetActor(Positions[i])
 				Log("ChangeActors("+NewPositions+") -- Failed to add new actor '"+Positions[i].GetLeveledActorBase().GetName()+"' -- They were unable to fill an actor alias", "FATAL")
 				return
 			endIf
@@ -554,7 +554,7 @@ function SetLeadAnimations(sslBaseAnimation[] AnimationList)
 endFunction
 
 function AddAnimation(sslBaseAnimation AddAnimation, bool ForceTo = false)
-	if AddAnimation != none
+	if AddAnimation
 		sslBaseAnimation[] Adding = new sslBaseAnimation[1]
 		Adding[0] = AddAnimation
 		PrimaryAnimations = AnimSlots.MergeLists(PrimaryAnimations, Adding)
@@ -602,7 +602,7 @@ float function GetStageTimer(int maxstage)
 endfunction
 
 function CenterOnObject(ObjectReference CenterOn, bool resync = true)
-	if CenterOn != none
+	if CenterOn
 		CenterRef = CenterOn
 		CenterOnCoords(CenterOn.GetPositionX(), CenterOn.GetPositionY(), CenterOn.GetPositionZ(), CenterOn.GetAngleX(), CenterOn.GetAngleY(), CenterOn.GetAngleZ(), false)
 		if Config.BedsList.HasForm(CenterOn.GetBaseObject())
@@ -636,7 +636,7 @@ endFunction
 		FoundBed = ThreadLib.FindBed(Positions[0], Radius) ; Check within radius of first position, if NPC beds are allowed
 	endIf
 	; Found a bed AND EITHER forced use OR don't care about players choice OR or player approved
-	if FoundBed != none && (BedFlag == 1 || (!AskPlayer || (AskPlayer && (Config.UseBed.Show() as bool))))
+	if FoundBed && (BedFlag == 1 || (!AskPlayer || (AskPlayer && (Config.UseBed.Show() as bool))))
 		CenterOnObject(FoundBed)
 		return true ; Bed found and approved for use
 	endIf
@@ -871,7 +871,7 @@ function SendTrackedEvent(Actor ActorRef, string Hook = "", int id = -1)
 	while i
 		i -= 1
 		Faction FactionRef = StorageUtil.FormListGet(Config, "TrackedFactions", i) as Faction
-		if FactionRef != none && ActorRef.IsInFaction(FactionRef)
+		if FactionRef && ActorRef.IsInFaction(FactionRef)
 			int n = StorageUtil.StringListCount(FactionRef, "SexLabEvents")
 			while n
 				n -= 1

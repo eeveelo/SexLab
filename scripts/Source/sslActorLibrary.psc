@@ -73,7 +73,7 @@ Form[] function StripActor(Actor ActorRef, Actor VictimRef = none, bool DoAnimat
 endFunction
 
 bool function IsStrippable(Form ItemRef)
-	return ItemRef != none && !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")
+	return ItemRef && !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")
 endFunction
 
 Form function StripSlot(Actor ActorRef, int SlotMask)

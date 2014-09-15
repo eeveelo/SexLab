@@ -16,7 +16,7 @@ bool function CheckActor(Actor CheckRef, int CheckGender = -1)
 endFunction
 
 Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none)
-	if CenterRef == none || FindGender > 2 || FindGender < -1 || Radius < 0.1
+	if !CenterRef || FindGender > 2 || FindGender < -1 || Radius < 0.1
 		return none ; Invalid args
 	endIf
 	; Create supression list
@@ -31,7 +31,7 @@ Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000
 	while i
 		i -= 1
 		Actor FoundRef = Game.FindRandomActorFromRef(CenterRef, Radius)
-		if FoundRef == none || (Suppressed.Find(FoundRef) == -1 && CheckActor(FoundRef, FindGender))
+		if !FoundRef || (Suppressed.Find(FoundRef) == -1 && CheckActor(FoundRef, FindGender))
 			return FoundRef ; None means no actor in radius, give up now
 		endIf
 		Suppressed[i] = FoundRef
@@ -73,7 +73,7 @@ Actor[] function FindAvailablePartners(actor[] Positions, int total, int males =
 			FoundRef = FindAvailableActor(Positions[0], radius, findGender)
 		endIf
 		; Validate/Add them
-		if FoundRef == none
+		if !FoundRef
 			return Positions ; None means no actor in radius, give up now
 		elseIf Positions.Find(FoundRef) == -1
 			; Add actor
@@ -157,7 +157,7 @@ endFunction
 
 bool function IsBedAvailable(ObjectReference BedRef)
 	; Check furniture use
-	if BedRef == none || BedRef.IsFurnitureInUse(true)
+	if !BedRef || BedRef.IsFurnitureInUse(true)
 		return false
 	endIf
 	; Check if used by a current thread
@@ -173,16 +173,16 @@ bool function IsBedAvailable(ObjectReference BedRef)
 endFunction
 
 bool function CheckBed(ObjectReference BedRef, bool IgnoreUsed = true)
-	return BedRef != none && BedRef.IsEnabled() && BedRef.Is3DLoaded() && (!IgnoreUsed || (IgnoreUsed && IsBedAvailable(BedRef)))
+	return BedRef && BedRef.IsEnabled() && BedRef.Is3DLoaded() && (!IgnoreUsed || (IgnoreUsed && IsBedAvailable(BedRef)))
 endFunction
 
 ObjectReference function FindBed(ObjectReference CenterRef, float Radius = 1000.0, bool IgnoreUsed = true, ObjectReference IgnoreRef1 = none, ObjectReference IgnoreRef2 = none)
-	if CenterRef == none || Radius < 1.0
+	if !CenterRef || Radius < 1.0
 		return none ; Invalid args
 	endIf
 	; Search for a nearby bed first before looking for random
 	ObjectReference NearRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
-	if NearRef == none || (NearRef != IgnoreRef1 && NearRef != IgnoreRef2 && CheckBed(NearRef, IgnoreUsed))
+	if !NearRef || (NearRef != IgnoreRef1 && NearRef != IgnoreRef2 && CheckBed(NearRef, IgnoreUsed))
 		return NearRef ; Use the nearby bed if found, if none than give up now and just return none
 	endIf
 	form[] Suppressed = new Form[10]
@@ -193,7 +193,7 @@ ObjectReference function FindBed(ObjectReference CenterRef, float Radius = 1000.
 	while i
 		i -= 1
 		ObjectReference BedRef = Game.FindRandomReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
-		if BedRef == none || (Suppressed.Find(BedRef) == -1 && CheckBed(BedRef, IgnoreUsed))
+		if !BedRef || (Suppressed.Find(BedRef) == -1 && CheckBed(BedRef, IgnoreUsed))
 			return BedRef ; Found valid bed or none nearby and we should give up
 		else
 			Suppressed[i] = BedRef ; Add to suppression list
@@ -238,7 +238,7 @@ bool function IsActorTracked(Actor ActorRef)
 	while i
 		i -= 1
 		Faction FactionRef = FormListGet(Config, "TrackedFactions", i) as Faction
-		if FactionRef != none && ActorRef.IsInFaction(FactionRef)
+		if FactionRef && ActorRef.IsInFaction(FactionRef)
 			return true
 		endIf
 	endWhile
@@ -265,7 +265,7 @@ function SendTrackedEvent(Actor ActorRef, string Hook = "", int id = -1)
 	while i
 		i -= 1
 		Faction FactionRef = FormListGet(Config, "TrackedFactions", i) as Faction
-		if FactionRef != none && ActorRef.IsInFaction(FactionRef)
+		if FactionRef && ActorRef.IsInFaction(FactionRef)
 			int n = StringListCount(FactionRef, "SexLabEvents")
 			while n
 				n -= 1

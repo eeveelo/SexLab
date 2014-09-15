@@ -30,7 +30,7 @@ endFunction
 
 int function StartSex(actor[] sexActors, sslBaseAnimation[] anims, actor victim = none, ObjectReference centerOn = none, bool allowBed = true, string hook = "") global
 	SexLabFramework SexLab = GetAPI()
-	if SexLab == none
+	if !SexLab
 		return -1
 	endIf
 	return SexLab.StartSex(sexActors, anims, victim, centerOn, allowBed, hook)
@@ -38,7 +38,7 @@ endFunction
 
 sslThreadModel function NewThread(float timeout = 30.0) global
 	SexLabFramework SexLab = GetAPI()
-	if SexLab == none
+	if !SexLab
 		return none
 	endIf
 	return SexLab.NewThread(timeout)
@@ -46,7 +46,7 @@ endFunction
 
 sslThreadController function QuickStart(actor a1, actor a2 = none, actor a3 = none, actor a4 = none, actor a5 = none, actor victim = none, string hook = "", string animationTags = "") global
 	SexLabFramework SexLab = GetAPI()
-	if SexLab == none
+	if !SexLab
 		return none
 	endIf
 	return SexLab.QuickStart(a1, a2, a3, a4, a5, victim, hook, animationTags)

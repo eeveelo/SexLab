@@ -82,7 +82,7 @@ sslBaseAnimation[] function GetOwnerAnimations(Form Owner)
 	int i = Animations.Length
 	while i
 		i -= 1
-		Valid[i] = Animations[i] != none && Animations[i].Registered && Animations[i].Storage == Owner
+		Valid[i] = Animations[i] && Animations[i].Registered && Animations[i].Storage == Owner
 	endWhile
 	; Get list of valid Animations
 	i = sslUtility.CountTrue(Valid)
@@ -105,7 +105,7 @@ sslBaseAnimation[] function GetOwnerAnimations(Form Owner)
 endFunction
 
 sslBaseAnimation function NewAnimation(string Token, Form Owner)
-	if Token == "" || FindAnimation(Token) != -1 || Owner == none
+	if !Owner || Token == "" || FindAnimation(Token) != -1
 		Log("NewAnimation("+Token+") - Failed to create animation - Invalid arguments given - Token given already exists ("+FindAnimation(Token)+") or was empty", "ERROR")
 		return none
 	endIf
@@ -122,13 +122,13 @@ endFunction
 
 sslBaseAnimation function GetSetAnimation(string Token, string Callback, Form Owner)
 	sslBaseAnimation Slot = GetAnimation(Token)
-	if Slot != none || Callback == ""
+	if Slot || Callback == ""
 		Log("GET", "GetSetAnimation("+Token+")")
 		return Slot
 	endIf
 	; Create new animation and send callback
 	Slot = NewAnimation(Token, Owner)
-	if Slot != none
+	if Slot
 		Log("SET", "GetSetAnimation("+Token+")")
 		SendCallback(Callback, Animations.Find(Slot), Owner)
 	endIf
@@ -137,7 +137,7 @@ endFunction
 
 sslBaseAnimation function NewAnimationCopy(string Token, sslBaseAnimation CopyFrom, Form Owner)
 	sslBaseAnimation Slot = NewAnimation(Token, Owner)
-	if Slot != none
+	if Slot
 		Slot = CopyAnimation(Slot, CopyFrom)
 		Slot.Save(Animations.Find(Slot))
 	endIf
@@ -173,11 +173,11 @@ endFunction
 
 int function ReleaseOwnerAnimations(Form Owner)
 	int Count
-	if Owner != none
+	if Owner
 		int i = Animations.Length
 		while i
 			i -= 1
-			if Animations[i] != none && Animations[i].Storage == Owner
+			if Animations[i] && Animations[i].Storage == Owner
 				Count += 1
 				ReleaseAnimation(i)
 			endIf
@@ -214,7 +214,7 @@ sslBaseAnimation function MakeAnimationRegistered(string Token)
 		Anim = AnimSlots.GetBySlot(id)
 	endIf
 	; Failed to register
-	if Anim == none
+	if !Anim
 		Log("MakeAnimationRegistered("+Token+") - Failed to create global animation - was unable to claim a slot with the global registry", "ERROR")
 		return none
 	endIf
@@ -239,7 +239,7 @@ sslBaseVoice[] function GetOwnerVoices(Form Owner)
 	int i = Voices.Length
 	while i
 		i -= 1
-		Valid[i] = Voices[i] != none && Voices[i].Registered && Voices[i].Storage == Owner
+		Valid[i] = Voices[i] && Voices[i].Registered && Voices[i].Storage == Owner
 	endWhile
 	; Get list of valid voices
 	i = sslUtility.CountTrue(Valid)
@@ -262,7 +262,7 @@ sslBaseVoice[] function GetOwnerVoices(Form Owner)
 endFunction
 
 sslBaseVoice function NewVoice(string Token, Form Owner)
-	if Token == "" || FindVoice(Token) != -1 || Owner == none
+	if !Owner || Token == "" || FindVoice(Token) != -1
 		Log("NewVoice("+Token+") - Failed to create voice - Invalid arguments given - Token given already exists ("+FindVoice(Token)+") or was empty", "ERROR")
 		return none
 	endIf
@@ -279,13 +279,13 @@ endFunction
 
 sslBaseVoice function GetSetVoice(string Token, string Callback, Form Owner)
 	sslBaseVoice Slot = GetVoice(Token)
-	if Slot != none || Callback == ""
+	if Slot || Callback == ""
 		Log("GET", "GetSetVoice("+Token+")")
 		return Slot
 	endIf
 	; Create new voice and send callback
 	Slot = NewVoice(Token, Owner)
-	if Slot != none
+	if Slot
 		Log("SET", "GetSetVoice("+Token+")")
 		SendCallback(Callback, Voices.Find(Slot), Owner)
 	endIf
@@ -294,7 +294,7 @@ endFunction
 
 sslBaseVoice function NewVoiceCopy(string Token, sslBaseVoice CopyFrom, Form Owner)
 	sslBaseVoice Slot = NewVoice(Token, Owner)
-	if Slot != none
+	if Slot
 		Slot = CopyVoice(Slot, CopyFrom)
 		Slot.Save(Voices.Find(Slot))
 	endIf
@@ -330,11 +330,11 @@ endFunction
 
 int function ReleaseOwnerVoices(Form Owner)
 	int Count
-	if Owner != none
+	if Owner
 		int i = Voices.Length
 		while i
 			i -= 1
-			if Voices[i] != none && Voices[i].Storage == Owner
+			if Voices[i] && Voices[i].Storage == Owner
 				Count += 1
 				ReleaseVoice(i)
 			endIf
@@ -364,7 +364,7 @@ sslBaseVoice function MakeVoiceRegistered(string Token)
 	int id = VoiceSlots.Register(Token)
 	sslBaseVoice Voice = VoiceSlots.GetBySlot(id)
 	; Failed to register
-	if Voice == none
+	if !Voice
 		Log("MakeVoiceRegistered("+Token+") - Failed to create global Voice - was unable to claim a slot with the global registry", "ERROR")
 		return none
 	endIf
@@ -390,7 +390,7 @@ sslBaseExpression[] function GetOwnerExpressions(Form Owner)
 	int i = Expressions.Length
 	while i
 		i -= 1
-		Valid[i] = Expressions[i] != none && Expressions[i].Registered && Expressions[i].Storage == Owner
+		Valid[i] = Expressions[i] && Expressions[i].Registered && Expressions[i].Storage == Owner
 	endWhile
 	; Get list of valid Expressions
 	i = sslUtility.CountTrue(Valid)
@@ -412,7 +412,7 @@ sslBaseExpression[] function GetOwnerExpressions(Form Owner)
 	return Output
 endFunction
 sslBaseExpression function NewExpression(string Token, Form Owner)
-	if Token == "" || FindExpression(Token) != -1 || Owner == none
+	if !Owner || Token == "" || FindExpression(Token) != -1
 		Log("NewExpression("+Token+") - Failed to create Expression - Invalid arguments given - Token given already exists ("+FindExpression(Token)+") or was empty", "ERROR")
 		return none
 	endIf
@@ -429,13 +429,13 @@ endFunction
 
 sslBaseExpression function GetSetExpression(string Token, string Callback, Form Owner)
 	sslBaseExpression Slot = GetExpression(Token)
-	if Slot != none || Callback == ""
+	if Slot || Callback == ""
 		Log("GET", "GetSetExpression("+Token+")")
 		return Slot
 	endIf
 	; Create new Expression and send callback
 	Slot = NewExpression(Token, Owner)
-	if Slot != none
+	if Slot
 		Log("SET", "GetSetExpression("+Token+")")
 		SendCallback(Callback, Expressions.Find(Slot), Owner)
 	endIf
@@ -444,7 +444,7 @@ endFunction
 
 sslBaseExpression function NewExpressionCopy(string Token, sslBaseExpression CopyFrom, Form Owner)
 	sslBaseExpression Slot = NewExpression(Token, Owner)
-	if Slot != none
+	if Slot
 		Slot = CopyExpression(Slot, CopyFrom)
 		Slot.Save(Expressions.Find(Slot))
 	endIf
@@ -480,11 +480,11 @@ endFunction
 
 int function ReleaseOwnerExpressions(Form Owner)
 	int Count
-	if Owner != none
+	if Owner
 		int i = Expressions.Length
 		while i
 			i -= 1
-			if Expressions[i] != none && Expressions[i].Storage == Owner
+			if Expressions[i] && Expressions[i].Storage == Owner
 				Count += 1
 				ReleaseExpression(i)
 			endIf
@@ -514,7 +514,7 @@ sslBaseExpression function MakeExpressionRegistered(string Token)
 	int id = ExpressionSlots.Register(Token)
 	sslBaseExpression Expression = ExpressionSlots.GetBySlot(id)
 	; Failed to register
-	if Expression == none
+	if !Expression
 		Log("MakeExpressionRegistered("+Token+") - Failed to create global expression - was unable to claim a slot with the global registry", "ERROR")
 		return none
 	endIf
@@ -532,20 +532,20 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function SendCallback(string Token, int Slot, Form CallbackForm = none, ReferenceAlias CallbackAlias = none) global
-	if CallbackForm != none
+	if CallbackForm
 		CallbackForm.RegisterForModEvent(Token, Token)
 	endIf
-	if CallbackAlias != none
+	if CallbackAlias
 		CallbackAlias.RegisterForModEvent(Token, Token)
 	endIf
 	int e = ModEvent.Create(Token)
 	ModEvent.PushInt(e, Slot)
 	ModEvent.Send(e)
 	Utility.WaitMenuMode(0.2)
-	if CallbackForm != none
+	if CallbackForm
 		CallbackForm.UnregisterForModEvent(Token)
 	endIf
-	if CallbackAlias != none
+	if CallbackAlias
 		CallbackAlias.UnregisterForModEvent(Token)
 	endIf
 endFunction
@@ -568,19 +568,19 @@ function Cleanup()
 	int i = Animations.Length
 	while i
 		i -= 1
-		if Animations[i] != none && Animations[i].Registered && Animations[i].Storage == none
+		if Animations[i] && Animations[i].Registered && !Animations[i].Storage
 			Log("Clearing phantom animation ["+i+"] '"+aids[i]+"'")
 			Animations[i].Initialize()
 			Animations[i] = none
 			aids[i] = ""
 		endIf
-		if Voices[i] != none && Voices[i].Registered && Voices[i].Storage == none
+		if Voices[i] && Voices[i].Registered && !Voices[i].Storage
 			Log("Clearing phantom voice ["+i+"] '"+vids[i]+"'")
 			Voices[i].Initialize()
 			Voices[i] = none
 			vids[i] = ""
 		endIf
-		if Expressions[i] != none && Expressions[i].Registered && Expressions[i].Storage == none
+		if Expressions[i] && Expressions[i].Registered && !Expressions[i].Storage
 			Log("Clearing phantom expression["+i+"] '"+eids[i]+"'")
 			Expressions[i].Initialize()
 			Expressions[i] = none

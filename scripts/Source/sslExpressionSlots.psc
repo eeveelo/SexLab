@@ -21,7 +21,7 @@ sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none
 	string Tag
 	if ActorRef == VictimRef
 		Tag = "Victim"
-	elseIf VictimRef != none && ActorRef != VictimRef
+	elseIf VictimRef && ActorRef != VictimRef
 		Tag = "Aggressor"
 	else
 		Tag = "Normal"

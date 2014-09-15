@@ -206,7 +206,7 @@ endFunction
 ; ------------------------------------------------------- ;
 
 bool function HasPhase(int Phase, Actor ActorRef)
-	if ActorRef == none || Phase < 1
+	if !ActorRef || Phase < 1
 		return false
 	endIf
 	int gender = ActorRef.GetLeveledActorBase().GetSex()

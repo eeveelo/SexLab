@@ -69,7 +69,7 @@ bool property OpenMouth hidden
 endProperty
 bool property IsSilent hidden
 	bool function get()
-		return Voice == none || IsForcedSilent || Flags[0] == 1 || Flags[1] == 1
+		return !Voice || IsForcedSilent || Flags[0] == 1 || Flags[1] == 1
 	endFunction
 endProperty
 bool property UseStrapon hidden
@@ -93,7 +93,7 @@ endProperty
 ; ------------------------------------------------------- ;
 
 bool function SetActor(Actor ProspectRef, bool Victimize = false, sslBaseVoice UseVoice = none, bool ForceSilent = false)
-	if ProspectRef == none || ProspectRef != GetReference()
+	if !ProspectRef || ProspectRef != GetReference()
 		return false ; Failed to set prospective actor into alias
 	endIf
 	; Init actor alias information
@@ -148,7 +148,7 @@ function ClearAlias()
 		endWhile
 	endIf
 	; Make sure actor is reset
-	if GetReference() != none
+	if GetReference()
 		; Get actor incase variable initialized
 		ActorRef   = GetReference() as Actor
 		; Remove any unwanted combat effects
@@ -230,7 +230,7 @@ state Ready
 			; Decide on strapon for female, default to worn, otherwise pick random.
 			if IsFemale && Config.UseStrapons
 				Strapon = Config.WornStrapon(ActorRef)
-				if Strapon == none
+				if !Strapon
 					Strapon = Config.GetStrapon()
 				endIf
 			endIf
@@ -238,11 +238,11 @@ state Ready
 			Strip()
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 			; Pick a voice if needed
-			if Voice == none && !IsForcedSilent
+			if !Voice && !IsForcedSilent
 				SetVoice(Config.VoiceSlots.PickVoice(ActorRef), IsForcedSilent)
 			endIf
 			; Pick an expression if needed
-			if Expression == none && Config.UseExpressions
+			if !Expression && Config.UseExpressions
 				Expression = Config.ExpressionSlots.PickExpression(ActorRef, Thread.VictimRef)
 			endIf
 			; Always use players stats if present, so players stats mean something more for npcs
@@ -316,7 +316,7 @@ state Animating
 		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
 		if !IsCreature
 			; Equip Strapon if needed and enabled
-			if Strapon != none
+			if Strapon
 				if UseStrapon && !ActorRef.IsEquipped(Strapon)
 					ActorRef.EquipItem(Strapon, true, true)
 				elseif !UseStrapon && ActorRef.IsEquipped(Strapon)
@@ -327,7 +327,7 @@ state Animating
 			; ActorRef.ClearExpressionOverride()
 			if OpenMouth
 				OpenMouth()
-			elseIf Expression != none
+			elseIf Expression
 				RefreshExpression()
 			elseIf IsMouthOpen()
 				CloseMouth()
@@ -449,7 +449,7 @@ endState
 ; ------------------------------------------------------- ;
 
 function StopAnimating(bool Quick = false)
-	if ActorRef == none
+	if !ActorRef
 		return
 	endIf
 	; Disable free camera, if in it
@@ -477,7 +477,7 @@ function StopAnimating(bool Quick = false)
 endFunction
 
 function LockActor()
-	if ActorRef == none
+	if !ActorRef
 		return
 	endIf
 	; Remove any unwanted combat effects
@@ -516,7 +516,7 @@ function LockActor()
 endFunction
 
 function UnlockActor()
-	if ActorRef == none
+	if !ActorRef
 		return
 	endIf
 	; Detach positioning marker
@@ -543,9 +543,9 @@ endFunction
 
 function RestoreActorDefaults()
 	; Make sure  have actor, can't afford to miss this block
-	if ActorRef == none
+	if !ActorRef
 		ActorRef = GetReference() as Actor
-		if ActorRef == none
+		if !ActorRef
 			return ; No actor, reset prematurely or bad call to alias
 		endIf
 	endIf
@@ -555,11 +555,11 @@ function RestoreActorDefaults()
 	endIf
 	if !IsCreature
 		; Reset voicetype
-		if ActorVoice != none && ActorVoice != BaseRef.GetVoiceType()
+		if ActorVoice && ActorVoice != BaseRef.GetVoiceType()
 			BaseRef.SetVoiceType(ActorVoice)
 		endIf
 		; Remove strapon
-		if Strapon != none
+		if Strapon
 			ActorRef.RemoveItem(Strapon, 1, true)
 		endIf
 		; Reset expression
@@ -578,7 +578,7 @@ string function GetActorKey()
 endFunction
 
 int function GetEnjoyment()
-	if ActorRef == none
+	if !ActorRef
 		Enjoyment = 0
 	elseif IsCreature
 		Enjoyment = (ClampFloat((Utility.GetCurrentRealTime() - StartedAt) / 6.0, 0.0, 40.0) + ((Stage as float / Animation.StageCount as float) * 60.0)) as int
@@ -589,7 +589,7 @@ int function GetEnjoyment()
 endFunction
 
 int function GetPain()
-	if ActorRef == none
+	if !ActorRef
 		return 0
 	endIf
 	float Pain = Math.Abs(100.0 - ClampFloat(GetEnjoyment() as float, 1.0, 99.0))
@@ -605,7 +605,7 @@ endFunction
 
 function SetVoice(sslBaseVoice ToVoice = none, bool ForceSilence = false)
 	IsForcedSilent = ForceSilence
-	if ToVoice != none
+	if ToVoice
 		Voice = ToVoice
 		; Set voicetype if unreconized
 		if Config.UseLipSync && !Config.SexLabVoices.HasForm(ActorVoice)
@@ -623,7 +623,7 @@ sslBaseVoice function GetVoice()
 endFunction
 
 function SetExpression(sslBaseExpression ToExpression)
-	if ToExpression != none
+	if ToExpression
 		Expression = ToExpression
 	endIf
 endFunction
@@ -633,7 +633,7 @@ sslBaseExpression function GetExpression()
 endFunction
 
 bool function IsUsingStrapon()
-	return Strapon != none && ActorRef.IsEquipped(Strapon)
+	return Strapon && ActorRef.IsEquipped(Strapon)
 endFunction
 
 function EquipStrapon()
@@ -649,7 +649,7 @@ function UnequipStrapon()
 endFunction
 
 function SetStrapon(Form ToStrapon)
-	if Strapon != none
+	if Strapon
 		ActorRef.RemoveItem(Strapon, 1, true)
 	endIf
 	Strapon = ToStrapon
@@ -671,7 +671,7 @@ function OverrideStrip(bool[] SetStrip)
 endFunction
 
 function Strip()
-	if ActorRef == none || IsCreature
+	if !ActorRef || IsCreature
 		return
 	endIf
 	; Start stripping animation
@@ -727,7 +727,7 @@ function Strip()
 endFunction
 
 function UnStrip()
- 	if ActorRef == none || IsCreature || Equipment.Length == 0
+ 	if !ActorRef || IsCreature || Equipment.Length == 0
  		return
  	endIf
 	; Remove nudesuit if present
@@ -743,7 +743,7 @@ function UnStrip()
  	int i = Equipment.Length
  	while i
  		i -= 1
- 		if Equipment[i] != none
+ 		if Equipment[i]
  			int type = Equipment[i].GetType()
  			if type == 22 || type == 82
  				ActorRef.EquipSpell((Equipment[i] as Spell), hand)
@@ -862,7 +862,7 @@ bool function IsMouthOpen()
 endFunction
 
 function RefreshExpression()
-	if Expression == none || IsCreature || ActorRef == none
+	if !Expression || IsCreature || !ActorRef
 		return
 	endIf
 	int[] Preset = Expression.GetPhase(Expression.PickPhase(Enjoyment, BaseSex), BaseSex)
@@ -931,14 +931,14 @@ function Initialize()
 	; Stop events
 	ClearEvents()
 	; Clear actor
-	if ActorRef != none
+	if ActorRef
 		; Remove nudesuit if present
 		if ActorRef.GetItemCount(Config.NudeSuit) > 0
 			ActorRef.RemoveItem(Config.NudeSuit, ActorRef.GetItemCount(Config.NudeSuit), true)
 		endIf
 	endIf
 	; Delete positioning marker
-	if MarkerRef != none
+	if MarkerRef
 		MarkerRef.Disable()
 		MarkerRef.Delete()
 	endIf

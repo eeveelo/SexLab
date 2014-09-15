@@ -519,19 +519,19 @@ endFunction
 
 Actor[] function MakeActorArray(Actor Actor1 = none, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none) global
 	Actor[] Output
-	if Actor1 != none
+	if Actor1
 		Output = PushActor(Actor1, Output)
 	endIf
-	if Actor2 != none
+	if Actor2
 		Output = PushActor(Actor2, Output)
 	endIf
-	if Actor3 != none
+	if Actor3
 		Output = PushActor(Actor3, Output)
 	endIf
-	if Actor4 != none
+	if Actor4
 		Output = PushActor(Actor4, Output)
 	endIf
-	if Actor5 != none
+	if Actor5
 		Output = PushActor(Actor5, Output)
 	endIf
 	return Output

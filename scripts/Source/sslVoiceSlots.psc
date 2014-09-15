@@ -53,13 +53,13 @@ sslBaseVoice function PickVoice(Actor ActorRef)
 	bool IsPlayer = ActorRef == PlayerRef
 	; Find if a saved voice exists and in what slot
 	sslBaseVoice Saved = GetSaved(ActorRef)
-	if Saved != none && (IsPlayer || Config.NPCSaveVoice)
+	if Saved && (IsPlayer || Config.NPCSaveVoice)
 		return Saved ; Use saved voice
 	endIf
 	; Pick a random voice based on gender
 	sslBaseVoice Picked = PickGender(ActorRef.GetLeveledActorBase().GetSex())
 	; Save the voice to NPC for reuse, if enabled
-	if Picked != none && !IsPlayer && Config.NPCSaveVoice
+	if Picked && !IsPlayer && Config.NPCSaveVoice
 		SaveVoice(ActorRef, Picked)
 	endIf
 	return Picked
@@ -90,7 +90,7 @@ sslBaseVoice function GetSaved(Actor ActorRef)
 	if HasCustomVoice(ActorRef)
 		form QuestForm = GetFormValue(ActorRef, "SexLab.CustomVoiceQuest")
 		string AliasName = GetStringValue(ActorRef, "SexLab.CustomVoiceAlias")
-		if QuestForm != none && AliasName != ""
+		if QuestForm && AliasName != ""
 			return (QuestForm as Quest).GetAliasByName(AliasName) as sslBaseVoice
 		endIf
 	endIf
@@ -98,11 +98,11 @@ sslBaseVoice function GetSaved(Actor ActorRef)
 endFunction
 
 string function GetSavedName(Actor ActorRef)
-	if ActorRef == none
+	if !ActorRef
 		return "$SSL_Random"
 	endIf
 	sslBaseVoice Voice = GetSaved(ActorRef)
-	if Voice == none
+	if !Voice
 		return "$SSL_Random"
 	endIf
 	return Voice.Name

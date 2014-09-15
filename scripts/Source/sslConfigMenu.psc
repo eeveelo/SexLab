@@ -809,7 +809,7 @@ function AnimationEditor()
 	endIf
 
 	; Pick a default animation
-	if Animation == none
+	if !Animation
 		IsCreatureEditor = false
 		Animation = AnimSlots.GetBySlot(0)
 		AdjustKey = "Global"
@@ -824,7 +824,7 @@ function AnimationEditor()
 
 	SetTitleText(Animation.Name)
 	AddMenuOptionST("AnimationSelect", "$SSL_Animation", Animation.Name)
-	if Animation.PositionCount == 1 || (Animation.PositionCount == 2 && TargetRef != none && (!IsCreatureEditor || (IsCreatureEditor && Animation.HasActorRace(TargetRef))))
+	if Animation.PositionCount == 1 || (TargetRef && Animation.PositionCount == 2 && (!IsCreatureEditor || (IsCreatureEditor && Animation.HasActorRace(TargetRef))))
 		AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere")
 	else
 		AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere", OPTION_FLAG_DISABLED)
@@ -838,7 +838,7 @@ function AnimationEditor()
 		string[] RaceIDs = ArgString(AdjustKey, ".")
 		string id = StringUtil.Substring(RaceIDs[Position], 0, (StringUtil.GetLength(RaceIDs[Position]) - 1))
 		Race RaceRef = Race.GetRace(id)
-		if RaceRef != none
+		if RaceRef
 			id = RaceRef.GetName()
 		endIf
 		Profile = "$SSL_{"+id+"}-{"+GenderLabel(StringUtil.GetNthChar(RaceIDs[Position], (StringUtil.GetLength(RaceIDs[Position]) - 1)))+"}"
@@ -975,7 +975,7 @@ state AnimationTest
 		Utility.Wait(0.5)
 
 		sslThreadModel Thread = SexLab.NewThread()
-		if Thread != none
+		if Thread
 			; Add single animation to thread
 			sslBaseAnimation[] Anims = new sslBaseAnimation[1]
 			Anims[0] = Animation
@@ -985,20 +985,20 @@ state AnimationTest
 			Thread.DisableLeadIn(true)
 			; select a solo actor
 			if Animation.PositionCount == 1
-				if TargetRef != none && TargetRef.Is3DLoaded() && ShowMessage("Which actor would you like to play the solo animation \""+Animation.Name+"\" with?", true, TargetName, PlayerRef.GetLeveledActorBase().GetName())
+				if TargetRef && TargetRef.Is3DLoaded() && ShowMessage("Which actor would you like to play the solo animation \""+Animation.Name+"\" with?", true, TargetName, PlayerRef.GetLeveledActorBase().GetName())
 					Thread.AddActor(TargetRef)
 				else
 					Thread.AddActor(PlayerRef)
 				endIf
 			; Add player and target
-			elseIf Animation.PositionCount == 2 && TargetRef != none
+			elseIf Animation.PositionCount == 2 && TargetRef
 				Actor[] Positions = MakeActorArray(PlayerRef, TargetRef)
 				Positions = ThreadLib.SortActors(Positions)
 				Thread.AddActor(Positions[0])
 				Thread.AddActor(Positions[1])
 			endIf
 		endIf
-		if Thread == none || Thread.StartThread() == none
+		if !Thread || !Thread.StartThread()
 			ShowMessage("Failed to start test animation.", false)
 		endIf
 	endEvent
@@ -1153,7 +1153,7 @@ string[] Modifiers
 function ExpressionEditor()
 	SetCursorFillMode(LEFT_TO_RIGHT)
 
-	if Expression == none
+	if !Expression
 		Expression = ExpressionSlots.GetBySlot(0)
 		Phase = 1
 	endIf
@@ -1347,7 +1347,7 @@ endState
 
 state ExpressionTestTarget
 	event OnSelectST()
-		if TargetRef != none && TargetRef.Is3DLoaded()
+		if TargetRef && TargetRef.Is3DLoaded()
 			TestApply(TargetRef)
 		endIf
 	endEvent
@@ -1536,7 +1536,7 @@ endFunction
 
 state SetStatTarget
 	event OnSelectST()
-		if StatRef == PlayerRef && TargetRef != none
+		if StatRef == PlayerRef && TargetRef
 			StatRef = TargetRef
 		else
 			StatRef = PlayerRef
@@ -1706,7 +1706,7 @@ function RebuildClean()
 	int i = Config.Strapons.Length
 	while i
 		i -= 1
-		if Config.Strapons[i] != none
+		if Config.Strapons[i]
 			string Name = Config.Strapons[i].GetName()
 			if Name == "strapon"
 				Name = "Aeon/Horker"
@@ -1773,7 +1773,7 @@ event OnConfigOpen()
 	; Target actor
 	StatRef = PlayerRef
 	TargetRef = Config.TargetRef
-	if TargetRef != none && TargetRef.Is3DLoaded()
+	if TargetRef && TargetRef.Is3DLoaded()
 		TargetName = TargetRef.GetLeveledActorBase().GetName()
 		TargetFlag = OPTION_FLAG_NONE
 	else

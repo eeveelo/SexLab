@@ -309,7 +309,7 @@ function SeedActor(Actor ActorRef)
 endFunction
 
 function InitSkills(Actor ActorRef, bool InitList = true)
-	if ActorRef == none
+	if !ActorRef
 		return
 	elseIf InitList && FloatListCount(ActorRef, "SexLabSkills") != SkillNames.Length
 		float[] Skills = FloatArray(SkillNames.Length)
@@ -339,14 +339,14 @@ function SetSkillFloat(Actor ActorRef, string Skill, float Amount)
 endFunction
 
 function AdjustSkill(Actor ActorRef, string Skill, int Amount)
-	if Amount != 0 && ActorRef != none && Skill != ""
+	if Amount != 0 && ActorRef && Skill != ""
 		InitSkills(ActorRef)
 		FloatListAdjust(ActorRef, "SexLabSkills", SkillNames.Find(Skill), Amount as float)
 	endIf
 endfunction
 
 function AdjustSkillFloat(Actor ActorRef, string Skill, float Amount)
-	if Amount != 0.0 && ActorRef != none && Skill != ""
+	if Amount != 0.0 && ActorRef && Skill != ""
 		InitSkills(ActorRef)
 		FloatListAdjust(ActorRef, "SexLabSkills", SkillNames.Find(Skill), Amount)
 	endIf
@@ -765,7 +765,7 @@ function ClearCustomStats(Actor ActorRef)
 endFunction
 
 bool function IsImportant(Actor ActorRef)
-	if ActorRef == none || ActorRef.IsDead() || ActorRef.IsDisabled()
+	if !ActorRef || ActorRef.IsDead() || ActorRef.IsDisabled()
 		return false
 	endIf
 	ActorBase BaseRef = ActorRef.GetLeveledActorBase()
@@ -773,14 +773,14 @@ bool function IsImportant(Actor ActorRef)
 endFunction
 
 function UpgradeLegacyStats(Actor ActorRef)
-	if ActorRef == none
+	if !ActorRef
 		return
 	elseIf !IsImportant(ActorRef)
 		ClearLegacyStats(ActorRef)
 		ClearCustomStats(ActorRef)
 		FloatListClear(ActorRef, "SexLabSkills")
 		Log("Skills Removed", ActorRef.GetLeveledActorBase().GetName())
-	elseIf ActorRef != none && FloatListCount(ActorRef, "SexLabSkills") != SkillNames.Length
+	elseIf ActorRef && FloatListCount(ActorRef, "SexLabSkills") != SkillNames.Length
 		FloatListClear(ActorRef, "SexLabSkills")
 		FloatListAdd(ActorRef, "SexLabSkills", GetIntValue(ActorRef, "sslActorStats."+SkillNames[0]) as float)
 		FloatListAdd(ActorRef, "SexLabSkills", GetIntValue(ActorRef, "sslActorStats."+SkillNames[1]) as float)
@@ -837,7 +837,7 @@ function CleanDeadStats()
 		i -= 1
 		if FormListGet(none, "SexLab.SkilledActors", i) != none
 			Actor ActorRef = FormListGet(none, "SexLab.SkilledActors", i) as Actor
-			if ActorRef != none && ActorRef != PlayerRef && ActorRef.IsDead()
+			if ActorRef && ActorRef != PlayerRef && ActorRef.IsDead()
 				ResetStats(ActorRef)
 				FormListRemove(none, "SexLab.SkilledActors", ActorRef)
 				Log("Skills Removed", ActorRef.GetLeveledActorBase().GetName())
@@ -918,7 +918,7 @@ function ClearStr(Actor ActorRef, string Stat)
 endFunction
 
 function AdjustInt(Actor ActorRef, string Stat, int Amount)
-	if Amount != 0 && ActorRef != none && Stat != ""
+	if Amount != 0 && ActorRef && Stat != ""
 		if SkillNames.Find(stat) != -1
 			AdjustSkill(ActorRef, Stat, Amount)
 		else
@@ -927,7 +927,7 @@ function AdjustInt(Actor ActorRef, string Stat, int Amount)
 	endIf
 endfunction
 function AdjustFloat(Actor ActorRef, string Stat, float Amount)
-	if Amount != 0.0 && ActorRef != none && Stat != ""
+	if Amount != 0.0 && ActorRef && Stat != ""
 		if SkillNames.Find(stat) != -1
 			AdjustSkillFloat(ActorRef, Stat, Amount)
 		else

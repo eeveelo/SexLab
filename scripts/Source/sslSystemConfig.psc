@@ -249,7 +249,7 @@ endFunction
 
 form function PickStrapon(Actor ActorRef)
 	form Strapon = WornStrapon(ActorRef)
-	if Strapon != none
+	if Strapon
 		return Strapon
 	endIf
 	return Strapons[Utility.RandomInt(0, Strapons.Length - 1)]
@@ -257,7 +257,7 @@ endFunction
 
 form function EquipStrapon(Actor ActorRef)
 	form Strapon = PickStrapon(ActorRef)
-	if Strapon != none
+	if Strapon
 		ActorRef.AddItem(Strapon, 1, true)
 		ActorRef.EquipItem(Strapon, false, true)
 	endIf
@@ -310,7 +310,7 @@ endFunction
 
 Armor function LoadStrapon(string esp, int id)
 	Armor Strapon = Game.GetFormFromFile(id, esp) as Armor
-	if Strapon != none
+	if Strapon
 		Strapons = sslUtility.PushForm(Strapon, Strapons)
 	endif
 	return Strapon
@@ -328,7 +328,7 @@ event OnKeyDown(int keyCode)
 		if keyCode == ToggleFreeCamera
 			ToggleFreeCamera()
 		elseIf keyCode == TargetActor
-			if Control != none
+			if Control
 				DisableThreadControl(Control)
 			else
 				SetTargetActor()
@@ -339,27 +339,27 @@ endEvent
 
 event OnCrosshairRefChange(ObjectReference ActorRef)
 	CrosshairRef = none
-	if ActorRef != none
+	if ActorRef
 		CrosshairRef = ActorRef as Actor
 	endIf
 endEvent
 
 function SetTargetActor()
-	if CrosshairRef != none
+	if CrosshairRef
 		TargetRef = CrosshairRef
 		Debug.Notification("SexLab Target Selected: "+TargetRef.GetLeveledActorBase().GetName())
 		; Give them stats if they need it
 		Stats.SeedActor(TargetRef)
 		; Attempt to grab control of their animation?
 		sslThreadController TargetThread = ThreadSlots.GetActorController(TargetRef)
-		if TargetThread != none && !TargetThread.HasPlayer && ThreadSlots.GetActorController(PlayerRef) == none && TakeThreadControl.Show()
+		if TargetThread && !TargetThread.HasPlayer && !ThreadSlots.GetActorController(PlayerRef) && TakeThreadControl.Show()
 			GetThreadControl(TargetThread)
 		endIf
 	endif
 endFunction
 
 function GetThreadControl(sslThreadController TargetThread)
-	if Control != none || !(TargetThread.GetState() == "Animating" || TargetThread.GetState() == "Advancing")
+	if Control || !(TargetThread.GetState() == "Animating" || TargetThread.GetState() == "Advancing")
 		Log("Failed to control thread "+TargetThread)
 		return ; Control not available
 	endIf
@@ -383,7 +383,7 @@ function GetThreadControl(sslThreadController TargetThread)
 endFunction
 
 function DisableThreadControl(sslThreadController TargetThread)
-	if Control != none && Control == TargetThread
+	if Control && Control == TargetThread
 		; Unlock players movement
 		PlayerRef.RemoveFromFaction(AnimatingFaction)
 		ActorUtil.RemovePackageOverride(PlayerRef, DoNothing)
@@ -527,7 +527,7 @@ function ValidateTrackedActors()
 	while i
 		i -= 1
 		Actor ActorRef = StorageUtil.FormListGet(self, "TrackedActors", i) as Actor
-		if ActorRef == none
+		if !ActorRef
 			StorageUtil.FormListRemoveAt(self, "TrackedActors", i)
 		endIf
 	endWhile
@@ -538,7 +538,7 @@ function ValidateTrackedFactions()
 	while i
 		i -= 1
 		Faction FactionRef = StorageUtil.FormListGet(self, "TrackedFactions", i) as Faction
-		if FactionRef == none
+		if !FactionRef
 			StorageUtil.FormListRemoveAt(self, "TrackedFactions", i)
 		endIf
 	endWhile
@@ -551,12 +551,12 @@ function CleanLists()
 	while i > 0
 		i -= 1
 		Form FormRef = StorageUtil.FormListGet(self, "ValidActors", i)
-		if FormRef == none
+		if !FormRef
 			StorageUtil.FormListRemoveAt(self, "ValidActors", i)
 			Log("Is None", "Removing")
 		else
 			Actor ActorRef = FormRef as Actor
-			if ActorRef == none
+			if !ActorRef
 				StorageUtil.FormListRemoveAt(self, "ValidActors", i)
 				Log(FormRef+" - Not Actor", "Removing")
 			elseIf ActorRef.IsDead() || ActorRef.IsDisabled()

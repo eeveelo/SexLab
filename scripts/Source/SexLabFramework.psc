@@ -97,7 +97,7 @@ endFunction
 int function StartSex(Actor[] Positions, sslBaseAnimation[] Anims, Actor Victim = none, ObjectReference CenterOn = none, bool AllowBed = true, string Hook = "")
 	; Claim a thread
 	sslThreadModel Make = NewThread()
-	if Make == none
+	if !Make
 		Log("StartSex() - Failed to claim an available thread")
 		return -1
 	; Add actors list to thread

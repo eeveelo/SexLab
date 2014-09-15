@@ -13,7 +13,7 @@ ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	Log("---- START ----")
-	; (Quest.GetQuest("SexLabDev") as sslBenchmark).StartBenchmark(2, 20, 5)
+	(Quest.GetQuest("SexLabDev") as sslBenchmark).StartBenchmark(2, 20000, 10)
 
 	Log("---- FINISHED ----")
 	Dispel()

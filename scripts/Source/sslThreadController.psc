@@ -122,7 +122,7 @@ state Animating
 			return
 		endIf
 		; Play SFX
-		if SFXTimer < CurrentTime && SoundFX != none
+		if SoundFX && SFXTimer < CurrentTime
 			SoundFX.Play(CenterRef)
 			SFXTimer = CurrentTime + SFXDelay
 		endIf
@@ -423,7 +423,7 @@ state Orgasm
 	function OrgasmDone()
 		UnregisterforUpdate()
 		GoToState("Animating")
-		if SoundFX != none
+		if SoundFX
 			SoundFX.Play(CenterRef)
 		endIf
 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
