@@ -270,6 +270,10 @@ endState
 state Animating
 
 	function StartAnimating()
+		; If enabled, start Auto TFC for player
+		if IsPlayer && Config.AutoTFC
+			SexLabUtil.EnableFreeCamera(true, Config.AutoSUCSM)
+		endIf
 		; Start update loop
 		TrackedEvent("Start")
 		StartedAt = Utility.GetCurrentRealTime()
