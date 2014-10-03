@@ -955,7 +955,7 @@ function Log(string Log, string Type = "NOTICE")
 endFunction
 
 function UpdateActorKey()
-	string NewKey = ".Adjust"
+	string NewKey
 	if !Config.RaceAdjustments
 		NewKey += ".Global"
 	else

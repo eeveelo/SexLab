@@ -49,16 +49,15 @@ float[] Loc
 
 ; Storage
 int[] Flags
-bool[] StripOverride
 form[] Equipment
+float[] Skills
 float[] SkillBonus
+bool[] StripOverride
 float StartedAt
 float ActorScale
 float AnimScale
 form Strapon
 int HighestRelation
-; Stats
-float[] Skills
 int Enjoyment
 
 ; Animation Position/Stage flags
@@ -186,17 +185,16 @@ state Ready
 		; Remove any unwanted combat effects
 		ClearEffects()
 		; Starting Information
-		Animation  = Thread.Animation
-		AdjustKey  = Thread.AdjustKey
-		Stage      = Thread.Stage
-		Position   = Thread.Positions.Find(ActorRef)
-		SkillBonus = Thread.SkillBonus
-		; Init arrays
 		Flags      = new int[5]
 		Offsets    = new float[4]
 		Loc        = new float[6]
-		Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
-		Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage)
+		SkillBonus = Thread.SkillBonus
+		Stage      = Thread.Stage
+		Animation  = Thread.Animation
+		AdjustKey  = Thread.AdjustKey
+		Position   = Thread.Positions.Find(ActorRef)
+		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
+		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage)
 		; Calculate scales
 		float display = ActorRef.GetScale()
 		ActorRef.SetScale(1.0)
@@ -312,10 +310,10 @@ state Animating
 		AdjustKey  = Thread.AdjustKey
 		Stage      = Thread.Stage
 		Position   = Thread.Positions.Find(ActorRef)
-		; Update alias info
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
-		Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
-		Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage)
+		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
+		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage)
+		; Update alias info
 		GetEnjoyment()
 		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
 		if !IsCreature
@@ -346,7 +344,7 @@ state Animating
 	endFunction
 
 	function RefreshLoc()
-		Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage)
+		Offsets = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage)
 		SyncLocation(false)
 	endFunction
 
@@ -1020,6 +1018,6 @@ endEvent
 event OnOrgasm()
 endEvent
 
-int function CalcEnjoyment(float[] XP, float[] SkillsAmounts, bool IsLeadin, bool IsFemaleActor, float Timer, int OnStage, int MaxStage) global native
 function OffsetCoords(float[] Output, float[] CenterCoords, float[] OffsetBy) global native
 bool function IsInPosition(Actor CheckActor, ObjectReference CheckMarker, float maxdistance = 30.0) global native
+int function CalcEnjoyment(float[] XP, float[] SkillsAmounts, bool IsLeadin, bool IsFemaleActor, float Timer, int OnStage, int MaxStage) global native
