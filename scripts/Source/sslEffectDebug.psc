@@ -12,8 +12,133 @@ string ActorName
 ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
+	; Benchmark().StartBenchmark(2, 5000, 10)
 	Log("---- START ----")
-	(Quest.GetQuest("SexLabDev") as sslBenchmark).StartBenchmark(2, 20000, 10)
+
+	SexLab.ClearCum(TargetRef)
+	SexLab.ApplyCum(TargetRef, 1)
+	Utility.Wait(3.0)
+	SexLab.ClearCum(TargetRef)
+	SexLab.ApplyCum(TargetRef, 2)
+	Utility.Wait(3.0)
+	SexLab.ClearCum(TargetRef)
+	SexLab.ApplyCum(TargetRef, 3)
+	Utility.Wait(3.0)
+	SexLab.ClearCum(TargetRef)
+	SexLab.ApplyCum(TargetRef, 4)
+	Utility.Wait(3.0)
+	SexLab.ClearCum(TargetRef)
+	SexLab.ApplyCum(TargetRef, 5)
+	Utility.Wait(3.0)
+	SexLab.ClearCum(TargetRef)
+	SexLab.ApplyCum(TargetRef, 6)
+	Utility.Wait(3.0)
+	SexLab.ClearCum(TargetRef)
+	SexLab.ApplyCum(TargetRef, 7)
+
+
+	; int i = SexLab.Animations.Length
+	; while i
+	; 	i -= 1
+	; 	if SexLab.Animations[i].Registered
+	; 		SexLab.Animations[i].Update_159c()
+	; 	endIf
+	; endWhile
+	; JsonUtil.Save("../SexLab/AnimationProfile_"+SexLab.Config.AnimProfile+".json")
+
+	; Log("---- INT ----")
+
+	; JsonUtil.IntListAdd("AdjustTest.json", "test1", 1)
+	; JsonUtil.IntListAdd("AdjustTest.json", "test1", 1)
+	; Log("1+3 adjust: "+JsonUtil.IntListAdjust("AdjustTest.json", "test1", 1, 3))
+	; int[] test1 = sslUtility.IntArray(JsonUtil.IntListCount("AdjustTest.json", "test1"))
+	; JsonUtil.IntListSlice("AdjustTest.json", "test1", test1)
+	; Log("test1: "+test1)
+
+	; Log("---- Float ----")
+
+	; JsonUtil.FloatListAdd("AdjustTest.json", "test2", 1)
+	; JsonUtil.FloatListAdd("AdjustTest.json", "test2", 1)
+	; Log("1+3 adjust: "+JsonUtil.FloatListAdjust("AdjustTest.json", "test2", 1, 3))
+	; float[] test2 = sslUtility.FloatArray(JsonUtil.FloatListCount("AdjustTest.json", "test2"))
+	; JsonUtil.FloatListSlice("AdjustTest.json", "test2", test2)
+	; Log("test2: "+test2)
+
+	; JsonUtil.Save("ArchiveTest.json")
+
+
+	; Log(JsonUtil.GetIntValue("ArchiveTest.json", "test1"))
+	; Log(JsonUtil.GetIntValue("ArchiveTest.json", "test2"))
+	; Log(JsonUtil.GetFloatValue("ArchiveTest.json", "test2"))
+	; Log(JsonUtil.GetFormValue("ArchiveTest.json", "TEST2"))
+	; Log("strtest"+JsonUtil.GetStringValue("ArchiveTest.json", "strtest"))
+	; Log("empty: "+JsonUtil.GetStringValue("ArchiveTest.json", "dfdf"))
+	; Log("AdjustInt: "+JsonUtil.AdjustIntValue("ArchiveTest.json", "AdjustInt", -1))
+	; Log("Adjustfloat: "+JsonUtil.AdjustFloatValue("ArchiveTest.json", "Adjustfloat", 1.5))
+
+
+	; Log("CLEAR # "+JsonUtil.FloatListClear("ArchiveTest.json", "floatdeltest"))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
+	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
+
+	; Log("floatdeltest[3]: "+JsonUtil.FloatListGet("ArchiveTest.json", "floatdeltest", 3))
+	; Log("floatdeltest[3] adjust: "+JsonUtil.FloatListAdjust("ArchiveTest.json", "floatdeltest", 3, 1.33))
+	; Log("floatdeltest[3]: "+JsonUtil.FloatListGet("ArchiveTest.json", "floatdeltest", 3))
+	; Log("floatdeltest[3] find: "+JsonUtil.FloatListFind("ArchiveTest.json", "floatdeltest", JsonUtil.FloatListGet("ArchiveTest.json", "floatdeltest", 3)))
+
+	; float[] stringdeltest1 = sslUtility.FloatArray(JsonUtil.FloatListCount("ArchiveTest.json", "floatdeltest"))
+	; JsonUtil.FloatListSlice("ArchiveTest.json", "floatdeltest", stringdeltest1)
+	; Log("Pre Delete: "+stringdeltest1)
+
+	; Log("Deleted Single # "+JsonUtil.FloatListRemove("ArchiveTest.json", "floatdeltest", 13.37, false))
+	; Log("Deleted All    # "+JsonUtil.FloatListRemove("ArchiveTest.json", "floatdeltest", 13.37, true))
+
+	; float[] stringdeltest2 = sslUtility.FloatArray(JsonUtil.FloatListCount("ArchiveTest.json", "floatdeltest"))
+	; JsonUtil.FloatListSlice("ArchiveTest.json", "floatdeltest", stringdeltest2)
+	; Log("Post Delete: "+stringdeltest2)
+
+	; JsonUtil.Save("ArchiveTest.json")
+
+	; SexLabUtil.QuickStart(TargetRef)
+
+	; sslBaseAnimation Anim1 = SexLab.Animations[0]
+	; Log("Anim1: "+Anim1.Name)
+	; Log("AddTag2(test): "+Anim1.AddTag2("test"))
+	; Log("HasTag2(test): "+Anim1.HasTag2("test"))
+	; Log("HasTag2(testsdf): "+Anim1.HasTag2("testsdf"))
+	; Log("RemoveTag2(testsdf): "+Anim1.RemoveTag2("testsdf"))
+	; Log("AddTag2(testsdf): "+Anim1.AddTag2("testsdf"))
+	; Log("HasTag2(testsdf): "+Anim1.HasTag2("testsdf"))
+	; Log("RemoveTag2(testsdf): "+Anim1.RemoveTag2("testsdf"))
+
+	; sslBaseAnimation Anim2 = SexLab.Animations[1]
+	; Log("Anim2: "+Anim2.Name)
+	; Log("AddTag2(test): "+Anim2.AddTag2("test"))
+	; Log("HasTag2(test): "+Anim2.HasTag2("test"))
+	; Log("HasTag2(testsdf): "+Anim2.HasTag2("testsdf"))
+	; Log("RemoveTag2(testsdf): "+Anim2.RemoveTag2("testsdf"))
+	; Log("AddTag2(testsdf): "+Anim2.AddTag2("testsdf"))
+	; Log("HasTag2(testsdf): "+Anim2.HasTag2("testsdf"))
+	; Log("RemoveTag2(testsdf): "+Anim2.RemoveTag2("testsdf"))
 
 	Log("---- FINISHED ----")
 	Dispel()
@@ -124,4 +249,8 @@ bool function IsStrippable(form ItemRef)
 		endIf
 	endWhile
 	return true
+endFunction
+
+sslBenchmark function Benchmark()
+	return Quest.GetQuest("SexLabDev") as sslBenchmark
 endFunction

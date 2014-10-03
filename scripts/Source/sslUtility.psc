@@ -48,6 +48,9 @@ float[] function MergeFloatArray(float[] Push, float[] Array) global
 endFunction
 
 float[] function TrimFloatArray(float[] Array, int len) global
+	if Array.Length < 1 || Array.Length == len
+		return Array
+	endIf
 	float[] Output = FloatArray(len)
 	FloatCopyTo(Array, Output, 0, len)
 	return Output
@@ -122,6 +125,9 @@ int[] function MergeIntArray(int[] Push, int[] Array) global
 endFunction
 
 int[] function TrimIntArray(int[] Array, int len) global
+	if Array.Length < 1 || Array.Length == len
+		return Array
+	endIf
 	int[] Output = IntArray(len)
 	IntCopyTo(Array, Output, 0, len)
 	return Output
@@ -240,6 +246,9 @@ bool[] function MergeBoolArray(bool[] Push, bool[] Array) global
 endFunction
 
 bool[] function TrimBoolArray(bool[] Array, int len) global
+	if Array.Length < 1 || Array.Length == len
+		return Array
+	endIf
 	bool[] Output = BoolArray(len)
 	BoolCopyTo(Array, Output, 0, len)
 	return Output
@@ -298,6 +307,9 @@ string[] function MergeStringArray(string[] Push, string[] Array) global
 endFunction
 
 string[] function TrimStringArray(string[] Array, int len) global
+	if Array.Length < 1 || Array.Length == len
+		return Array
+	endIf
 	string[] Output = StringArray(len)
 	StringCopyTo(Array, Output, 0, len)
 	return Output

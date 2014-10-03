@@ -7,18 +7,14 @@ function PreBenchmarkSetup()
 endFunction
 
 
+
 state Test1
 	string function Label()
-		if PlayerRef != none
-			return "true"
-		else
-			return "false"
-		endIf
-		return ""
+		return "SKSE"
 	endFunction
 
 	string function Proof()
-		return (PlayerRef != none) == true
+		; return "["+Anim.HasTag("Vaginal")+", "+Anim.AddTag("Vaginal")+", "+Anim.HasTag("BenchmarkTest")+", "+Anim.AddTag("BenchmarkTest")+", "+Anim.HasTag("BenchmarkTest")+", "+Anim.RemoveTag("BenchmarkTest")+", "+Anim.RemoveTag("BenchmarkTest")+", "+Anim.RemoveTag("BenchmarkTestNONE")+"]"
 	endFunction
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
@@ -29,49 +25,22 @@ state Test1
 		while nth
 			nth -= 1
 			; START code to benchmark
-			if PlayerRef != none
-				; yay?
-			else
-				; boo!
-			endIf
+
+			; Anim.HasTag("Vaginal")
+			; Anim.AddTag("Vaginal")
+			; Anim.HasTag("BenchmarkTest")
+			; Anim.AddTag("BenchmarkTest")
+			; Anim.HasTag("BenchmarkTest")
+			; Anim.RemoveTag("BenchmarkTest")
+			; Anim.RemoveTag("BenchmarkTest")
+			; Anim.RemoveTag("BenchmarkTestNONE")
+
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline
 	endFunction
 endState
 
-state Test2
-	string function Label()
-		return "if form"
-	endFunction
-
-	string function Proof()
-		if PlayerRef
-			return "true"
-		else
-			return "false"
-		endIf
-		return ""
-	endFunction
-
-	float function RunTest(int nth = 5000, float baseline = 0.0)
-		; START any variable preparions needed
-
-		; END any variable preparions needed
-		baseline += Utility.GetCurrentRealTime()
-		while nth
-			nth -= 1
-			; START code to benchmark
-			if PlayerRef
-				; yay?
-			else
-				; boo
-			endIf
-			; END code to benchmark
-		endWhile
-		return Utility.GetCurrentRealTime() - baseline
-	endFunction
-endState
 
 function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10)
 
