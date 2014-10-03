@@ -31,7 +31,7 @@ scriptname JsonUtil Hidden
 
 
 bool function Load(string FileName) global native
-bool function Save(string FileName, bool StyledWrite = false) global native
+bool function Save(string FileName, bool minify = false) global native
 function ClearAll(string FileName) global native
 
 
