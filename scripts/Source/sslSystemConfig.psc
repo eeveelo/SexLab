@@ -474,11 +474,14 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function ExportProfile(int Profile = 1)
-	JsonUtil.Save("../SexLab/AnimationProfile_"+Profile+".json", false) ; DebugMode
+	JsonUtil.Save("../SexLab/AnimationProfile_"+Profile+".json", DebugMode)
 endFunction
 
 function ImportProfile(int Profile = 1)
-	JsonUtil.Load("../SexLab/AnimationProfile_"+Profile+".json")
+	string ProfilePath = "../SexLab/AnimationProfile_"+Profile+".json"
+	if !JsonUtil.Load(ProfilePath)
+		JsonUtil.Save(ProfilePath)
+	endIf
 endfunction
 
 function SwapToProfile(int Profile)
@@ -486,7 +489,30 @@ function SwapToProfile(int Profile)
 		ExportProfile(AnimProfile)
 		ImportProfile(Profile)
 		AnimProfile = Profile
+		UpdateProfile(Profile)
 	endIf
+endFunction
+
+;v1.59c - altered animation profile structure
+function UpdateProfile(int Profile)
+	string ProfilePath = "../SexLab/AnimationProfile_"+Profile+".json"
+	int i = AnimSlots.Slotted
+	while i
+		i -= 1
+		sslBaseAnimation Anim = AnimSlots.GetBySlot(i)
+		if Anim
+			Anim._Update_Profile_159c(ProfilePath)
+		endIf
+	endWhile
+	i = CreatureSlots.Slotted
+	while i
+		i -= 1
+		sslBaseAnimation Anim = CreatureSlots.GetBySlot(i)
+		if Anim
+			Anim._Update_Profile_159c(ProfilePath)
+		endIf
+	endWhile
+	JsonUtil.Save(ProfilePath)
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -507,7 +533,7 @@ bool function CheckSystem()
 		CheckSkyUI.Show(4.1)
 		return false
 	; Check SexLabUtil install - this should never happen if they have properly updated
-	elseIf SexLabUtil.GetPluginVersion() < 15900
+	elseIf SexLabUtil.GetPluginVersion() < 15903
 		CheckSexLabUtil.Show()
 		return false
 	; Check PapyrusUtil install - depends on passing SKSE check passing
@@ -516,7 +542,7 @@ bool function CheckSystem()
 		return false
 	; Check FNIS generation - soft fail
 	elseIf !FNIS.IsGenerated()
-		CheckFNIS.Show(5.11)
+		CheckFNIS.Show()
 	endIf
 	; Return result
 	return true

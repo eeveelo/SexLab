@@ -88,6 +88,15 @@ event OnVersionUpdate(int version)
 			ThreadSlots.Setup()
 		endIf
 
+		; v1.59c - Converted stats to use float lists instead of individual values, new animations, various thread changes
+		if CurrentVersion < 15903
+			Config.UpdateProfile(1)
+			Config.UpdateProfile(2)
+			Config.UpdateProfile(3)
+			Config.UpdateProfile(4)
+			Config.UpdateProfile(5)
+		endIf
+
 		Debug.Notification("SexLab "+SexLabUtil.GetStringVer()+" Updated...")
 		SexLab.GoToState("Enabled")
 
@@ -222,12 +231,13 @@ event OnSliderOpenST()
 	; Animation Editor
 	if Options[0] == "Adjust"
 		; Stage, Slot
-		SetSliderDialogStartValue(Animation.GetAdjustment(Animation.Key("Adjust."+AdjustKey), Position, Options[1] as int, Options[2] as int))
 		if Options[2] == "3" ; SOS
+			SetSliderDialogStartValue(Animation.GetSchlong(Animation.Key(AdjustKey), Position, Options[1] as int))
 			SetSliderDialogRange(-9, 9)
 			SetSliderDialogInterval(1)
 			SetSliderDialogDefaultValue(0)
 		else ; Alignments
+			SetSliderDialogStartValue(Animation.GetAdjustment(Animation.Key(AdjustKey), Position, Options[1] as int, Options[2] as int))
 			SetSliderDialogRange(-100.0, 100.0)
 			SetSliderDialogInterval(0.50)
 			SetSliderDialogDefaultValue(0.0)
@@ -258,9 +268,13 @@ event OnSliderAcceptST(float value)
 	; Animation Editor
 	if Options[0] == "Adjust"
 		; Stage, Slot
-		Animation.SetAdjustment(Animation.Key("Adjust."+AdjustKey), Position, Options[1] as int, Options[2] as int, value)
-		StorageUtil.ExportFile("AnimationProfile_"+Config.AnimProfile+".json", Animation.Key("Adjust."+AdjustKey))
-		SetSliderOptionValueST(value, "{2}")
+		Animation.SetAdjustment(Animation.Key(AdjustKey), Position, Options[1] as int, Options[2] as int, value)
+		Config.ExportProfile(Config.AnimProfile)
+		if Options[2] == "3" ; SOS
+			SetSliderOptionValueST(value, "{0}")
+		else
+			SetSliderOptionValueST(value, "{2}")
+		endIf
 
 	; Expression Editor
 	elseIf Options[0] == "Expression"
@@ -804,8 +818,7 @@ function AnimationEditor()
 			PreventOverwrite = true
 			Animation = Thread.Animation
 			Position  = Thread.GetAdjustPos()
-			AdjustKey = RemoveString(Thread.AdjustKey, Animation.Key("Adjust."))
-
+			AdjustKey = RemoveString(Thread.AdjustKey, Animation.Key(""))
 		endIf
 	endIf
 
@@ -821,7 +834,9 @@ function AnimationEditor()
 	IsCreatureEditor = Animation.IsCreature
 
 	; Prepare the animation for editing
-	Animation.InitAdjustments(Animation.Key("Adjust."+AdjustKey))
+	if AdjustKey == "Global"
+		Animation.InitAdjustments(Animation.Key("Global"))
+	endIf
 
 	SetTitleText(Animation.Name)
 	AddMenuOptionST("AnimationSelect", "$SSL_Animation", Animation.Name)
@@ -850,7 +865,7 @@ function AnimationEditor()
 	int Stage = 1
 	while Stage <= Animation.StageCount
 
-		float[] Adjustments = Animation.GetPositionAdjustments(Animation.Key("Adjust."+AdjustKey), Position, Stage)
+		float[] Adjustments = Animation.GetPositionAdjustments(Animation.Key(AdjustKey), Position, Stage)
 		AddHeaderOption("$SSL_Stage{"+Stage+"}Adjustments")
 		AddHeaderOption(Profile)
 
