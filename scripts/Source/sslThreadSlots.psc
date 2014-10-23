@@ -40,6 +40,17 @@ sslThreadController function GetActorController(Actor ActorRef)
 	return GetController(FindActorController(ActorRef))
 endFunction
 
+bool function IsRunning()
+	int i
+	while i < Slots.Length
+		if Slots[i].IsLocked
+			return true
+		endIf
+		i += 1
+	endwhile
+	return false
+endfunction
+
 function StopAll()
 	; End all threads
 	int i = Slots.Length

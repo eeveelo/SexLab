@@ -28,6 +28,12 @@ bool property Enabled hidden
 	endFunction
 endProperty
 
+bool property IsRunning hidden
+	bool function get()
+		return ThreadSlots.IsRunning()
+	endFunction
+endProperty
+
 ; Data
 Actor property PlayerRef auto
 Faction property AnimatingFaction auto
