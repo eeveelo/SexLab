@@ -899,38 +899,45 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function Setup()
-	; Reset quests
-	Quest SexLabQuestFramework  = Game.GetFormFromFile(0xD62, "SexLab.esm") as Quest
-	Quest SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm") as Quest
-	Quest SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm") as Quest
-	SexLabQuestFramework.Stop()
-	SexLabQuestAnimations.Stop()
-	SexLabQuestRegistry.Stop()
-	Utility.WaitMenuMode(0.2)
-	SexLabQuestFramework.Start()
-	SexLabQuestAnimations.Start()
-	SexLabQuestRegistry.Start()
 	; Reset function Libraries - SexLabQuestFramework
-	Config          = SexLabQuestFramework as sslSystemConfig
-	ThreadLib       = SexLabQuestFramework as sslThreadLibrary
-	ThreadSlots     = SexLabQuestFramework as sslThreadSlots
-	ActorLib        = SexLabQuestFramework as sslActorLibrary
-	Stats           = SexLabQuestFramework as sslActorStats
+	Quest SexLabQuestFramework  = Game.GetFormFromFile(0xD62, "SexLab.esm") as Quest
+	if SexLabQuestFramework
+		SexLabQuestFramework.Stop()
+		Utility.WaitMenuMode(0.2)
+		SexLabQuestFramework.Start()
+		Config      = SexLabQuestFramework as sslSystemConfig
+		ThreadLib   = SexLabQuestFramework as sslThreadLibrary
+		ThreadSlots = SexLabQuestFramework as sslThreadSlots
+		ActorLib    = SexLabQuestFramework as sslActorLibrary
+		Stats       = SexLabQuestFramework as sslActorStats
+	endIf
 	; Reset animation registry - SexLabQuestAnimations
-	AnimSlots       = SexLabQuestAnimations as sslAnimationSlots
+	Quest SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm") as Quest
+	if SexLabQuestAnimations
+		SexLabQuestAnimations.Stop()
+		Utility.WaitMenuMode(0.2)
+		SexLabQuestAnimations.Start()
+		AnimSlots = SexLabQuestAnimations as sslAnimationSlots
+	endIf
 	; Reset secondary object registry - SexLabQuestRegistry
-	CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
-	VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
-	ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
+	Quest SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm") as Quest
+	if SexLabQuestRegistry
+		SexLabQuestRegistry.Stop()
+		Utility.WaitMenuMode(0.2)
+		SexLabQuestRegistry.Start()
+		CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
+		VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
+		ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
+	endIf
+	; Setup library resources
+	ActorLib.Setup()
+	ThreadLib.Setup()
+	Stats.Setup()
 	; Clear library caches
 	StorageUtil.FormListClear(Config, "ValidActors")
 	StorageUtil.FormListClear(Config, "StripList")
 	StorageUtil.FormListClear(Config, "NoStripList")
 	StorageUtil.StringListClear(Config, "SexLabCreatures")
-	; Setup library resources
-	ActorLib.Setup()
-	ThreadLib.Setup()
-	Stats.Setup()
 	; Setup Phantom Slots
 	Factory = Game.GetFormFromFile(0x78818, "SexLab.esm") as sslObjectFactory
 	Factory.Setup()
