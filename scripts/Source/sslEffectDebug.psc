@@ -2,6 +2,8 @@ Scriptname sslEffectDebug extends ActiveMagicEffect
 
 SexLabFramework property SexLab Auto
 
+import PapyrusUtil
+
 Actor Ref1
 Actor Ref2
 
@@ -12,133 +14,45 @@ string ActorName
 ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
-	; Benchmark().StartBenchmark(2, 5000, 10)
-	Log("---- START ----")
 
-	SexLab.ClearCum(TargetRef)
-	SexLab.ApplyCum(TargetRef, 1)
-	Utility.Wait(3.0)
-	SexLab.ClearCum(TargetRef)
-	SexLab.ApplyCum(TargetRef, 2)
-	Utility.Wait(3.0)
-	SexLab.ClearCum(TargetRef)
-	SexLab.ApplyCum(TargetRef, 3)
-	Utility.Wait(3.0)
-	SexLab.ClearCum(TargetRef)
-	SexLab.ApplyCum(TargetRef, 4)
-	Utility.Wait(3.0)
-	SexLab.ClearCum(TargetRef)
-	SexLab.ApplyCum(TargetRef, 5)
-	Utility.Wait(3.0)
-	SexLab.ClearCum(TargetRef)
-	SexLab.ApplyCum(TargetRef, 6)
-	Utility.Wait(3.0)
-	SexLab.ClearCum(TargetRef)
-	SexLab.ApplyCum(TargetRef, 7)
+	Package DoNothing = SexLab.Config.DoNothing
 
+	if(TargetRef == SexLab.PlayerRef)
+		Log("Removed Packges: "+ActorUtil.RemoveAllPackageOverride(DoNothing))
 
-	; int i = SexLab.Animations.Length
-	; while i
-	; 	i -= 1
-	; 	if SexLab.Animations[i].Registered
-	; 		SexLab.Animations[i].Update_159c()
-	; 	endIf
-	; endWhile
-	; JsonUtil.Save("../SexLab/AnimationProfile_"+SexLab.Config.AnimProfile+".json")
+		int i = SexLab.TestActors.Length
+		while i
+			i -= 1
+			Log("Extra Removed: "+ActorUtil.ClearPackageOverride(SexLab.TestActors[i]))
+			SexLab.TestActors[i].RemoveFromFaction(SexLab.AnimatingFaction)
+			SexLab.TestActors[i].EvaluatePackage()
+		endWhile
 
-	; Log("---- INT ----")
+	else
 
-	; JsonUtil.IntListAdd("AdjustTest.json", "test1", 1)
-	; JsonUtil.IntListAdd("AdjustTest.json", "test1", 1)
-	; Log("1+3 adjust: "+JsonUtil.IntListAdjust("AdjustTest.json", "test1", 1, 3))
-	; int[] test1 = sslUtility.IntArray(JsonUtil.IntListCount("AdjustTest.json", "test1"))
-	; JsonUtil.IntListSlice("AdjustTest.json", "test1", test1)
-	; Log("test1: "+test1)
+		if SexLab.TestActors.find(TargetRef) == -1
+			PushActor(SexLab.TestActors, TargetRef)
+		endIf
+		TargetRef.StopCombat()
+		Log(TargetRef.GetLeveledActorBase().GetName()+" Packages["+ActorUtil.CountPackageOverride(TargetRef)+"] BEFORE")
 
-	; Log("---- Float ----")
+		int Priority = Utility.RandomInt(95, 100)
 
-	; JsonUtil.FloatListAdd("AdjustTest.json", "test2", 1)
-	; JsonUtil.FloatListAdd("AdjustTest.json", "test2", 1)
-	; Log("1+3 adjust: "+JsonUtil.FloatListAdjust("AdjustTest.json", "test2", 1, 3))
-	; float[] test2 = sslUtility.FloatArray(JsonUtil.FloatListCount("AdjustTest.json", "test2"))
-	; JsonUtil.FloatListSlice("AdjustTest.json", "test2", test2)
-	; Log("test2: "+test2)
+		; if Utility.RandomInt(0, 1) == 1
+			ActorUtil.AddPackageOverride(TargetRef, DoNothing, Priority)
+			Log("Added["+Priority+"] - "+DoNothing)
+		; else
+		; 	Form TempClone = DoNothing.TempClone() as Package
+		; 	ActorUtil.AddPackageOverride(TargetRef, DoNothing, Priority)
+		; 	Log("Added["+Priority+"] - "+TempClone)
+		; endif
+		TargetRef.SetFactionRank(SexLab.AnimatingFaction, 1)
+		TargetRef.EvaluatePackage()
 
-	; JsonUtil.Save("ArchiveTest.json")
+		Log(TargetRef.GetLeveledActorBase().GetName()+" Packages["+ActorUtil.CountPackageOverride(TargetRef)+"]")
 
+	endIf
 
-	; Log(JsonUtil.GetIntValue("ArchiveTest.json", "test1"))
-	; Log(JsonUtil.GetIntValue("ArchiveTest.json", "test2"))
-	; Log(JsonUtil.GetFloatValue("ArchiveTest.json", "test2"))
-	; Log(JsonUtil.GetFormValue("ArchiveTest.json", "TEST2"))
-	; Log("strtest"+JsonUtil.GetStringValue("ArchiveTest.json", "strtest"))
-	; Log("empty: "+JsonUtil.GetStringValue("ArchiveTest.json", "dfdf"))
-	; Log("AdjustInt: "+JsonUtil.AdjustIntValue("ArchiveTest.json", "AdjustInt", -1))
-	; Log("Adjustfloat: "+JsonUtil.AdjustFloatValue("ArchiveTest.json", "Adjustfloat", 1.5))
-
-
-	; Log("CLEAR # "+JsonUtil.FloatListClear("ArchiveTest.json", "floatdeltest"))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 8008.5))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
-	; Log("# "+JsonUtil.FloatListAdd("ArchiveTest.json", "floatdeltest", 13.37))
-
-	; Log("floatdeltest[3]: "+JsonUtil.FloatListGet("ArchiveTest.json", "floatdeltest", 3))
-	; Log("floatdeltest[3] adjust: "+JsonUtil.FloatListAdjust("ArchiveTest.json", "floatdeltest", 3, 1.33))
-	; Log("floatdeltest[3]: "+JsonUtil.FloatListGet("ArchiveTest.json", "floatdeltest", 3))
-	; Log("floatdeltest[3] find: "+JsonUtil.FloatListFind("ArchiveTest.json", "floatdeltest", JsonUtil.FloatListGet("ArchiveTest.json", "floatdeltest", 3)))
-
-	; float[] stringdeltest1 = sslUtility.FloatArray(JsonUtil.FloatListCount("ArchiveTest.json", "floatdeltest"))
-	; JsonUtil.FloatListSlice("ArchiveTest.json", "floatdeltest", stringdeltest1)
-	; Log("Pre Delete: "+stringdeltest1)
-
-	; Log("Deleted Single # "+JsonUtil.FloatListRemove("ArchiveTest.json", "floatdeltest", 13.37, false))
-	; Log("Deleted All    # "+JsonUtil.FloatListRemove("ArchiveTest.json", "floatdeltest", 13.37, true))
-
-	; float[] stringdeltest2 = sslUtility.FloatArray(JsonUtil.FloatListCount("ArchiveTest.json", "floatdeltest"))
-	; JsonUtil.FloatListSlice("ArchiveTest.json", "floatdeltest", stringdeltest2)
-	; Log("Post Delete: "+stringdeltest2)
-
-	; JsonUtil.Save("ArchiveTest.json")
-
-	; SexLabUtil.QuickStart(TargetRef)
-
-	; sslBaseAnimation Anim1 = SexLab.Animations[0]
-	; Log("Anim1: "+Anim1.Name)
-	; Log("AddTag2(test): "+Anim1.AddTag2("test"))
-	; Log("HasTag2(test): "+Anim1.HasTag2("test"))
-	; Log("HasTag2(testsdf): "+Anim1.HasTag2("testsdf"))
-	; Log("RemoveTag2(testsdf): "+Anim1.RemoveTag2("testsdf"))
-	; Log("AddTag2(testsdf): "+Anim1.AddTag2("testsdf"))
-	; Log("HasTag2(testsdf): "+Anim1.HasTag2("testsdf"))
-	; Log("RemoveTag2(testsdf): "+Anim1.RemoveTag2("testsdf"))
-
-	; sslBaseAnimation Anim2 = SexLab.Animations[1]
-	; Log("Anim2: "+Anim2.Name)
-	; Log("AddTag2(test): "+Anim2.AddTag2("test"))
-	; Log("HasTag2(test): "+Anim2.HasTag2("test"))
-	; Log("HasTag2(testsdf): "+Anim2.HasTag2("testsdf"))
-	; Log("RemoveTag2(testsdf): "+Anim2.RemoveTag2("testsdf"))
-	; Log("AddTag2(testsdf): "+Anim2.AddTag2("testsdf"))
-	; Log("HasTag2(testsdf): "+Anim2.HasTag2("testsdf"))
-	; Log("RemoveTag2(testsdf): "+Anim2.RemoveTag2("testsdf"))
 
 	Log("---- FINISHED ----")
 	Dispel()
@@ -151,7 +65,6 @@ endEvent
 event OnEffectFinish(Actor TargetRef, Actor CasterRef)
 	; Log("Debug effect spell expired("+TargetRef+", "+CasterRef+")")
 endEvent
-
 
 function CheckActor(Actor ActorRef, string check)
 	Log(check+" -- "+ActorRef.GetLeveledActorBase().GetName()+" SexLabActors: "+StorageUtil.FormListFind(none, "SexLabActors", ActorRef))

@@ -85,7 +85,7 @@ sslBaseAnimation[] function GetOwnerAnimations(Form Owner)
 		Valid[i] = Animations[i] && Animations[i].Registered && Animations[i].Storage == Owner
 	endWhile
 	; Get list of valid Animations
-	i = sslUtility.CountTrue(Valid)
+	i = PapyrusUtil.CountBool(Valid, true)
 	if i == 0
 		return none ; OR empty array?
 	endIf
@@ -242,7 +242,7 @@ sslBaseVoice[] function GetOwnerVoices(Form Owner)
 		Valid[i] = Voices[i] && Voices[i].Registered && Voices[i].Storage == Owner
 	endWhile
 	; Get list of valid voices
-	i = sslUtility.CountTrue(Valid)
+	i = PapyrusUtil.CountBool(Valid, true)
 	if i == 0
 		return none ; OR empty array?
 	endIf
@@ -393,7 +393,7 @@ sslBaseExpression[] function GetOwnerExpressions(Form Owner)
 		Valid[i] = Expressions[i] && Expressions[i].Registered && Expressions[i].Storage == Owner
 	endWhile
 	; Get list of valid Expressions
-	i = sslUtility.CountTrue(Valid)
+	i = PapyrusUtil.CountBool(Valid, true)
 	if i == 0
 		return none ; OR empty array?
 	endIf

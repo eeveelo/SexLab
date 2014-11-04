@@ -1,7 +1,7 @@
 scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
-import sslUtility
+import PapyrusUtil
 
 ; Framework
 Actor property PlayerRef auto
@@ -55,11 +55,7 @@ event OnVersionUpdate(int version)
 
 	; Update System - v1.5x incremental updates
 	elseIf CurrentVersion < version
-
-		Quest SexLabQuestFramework  = Game.GetFormFromFile(0xD62, "SexLab.esm") as Quest
-		Quest SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm") as Quest
-		Quest SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm") as Quest
-
+		LoadLibs()
 		SexLab.GoToState("Disabled")
 
 		; v1.57 - Fixed actor stripping, expression tags being searched wrong, and refactored thread installs
@@ -75,7 +71,7 @@ event OnVersionUpdate(int version)
 
 		; v1.59 - Converted animation adjustments from internal storageutil to jsonutil
 		if CurrentVersion < 15900
-			StorageUtil.debug_DeleteValues(SexLabQuestAnimations)
+			StorageUtil.debug_DeleteValues(SexLab)
 			CreatureSlots.Setup()
 			AnimSlots.Setup()
 		endIf
@@ -109,53 +105,92 @@ event OnVersionUpdate(int version)
 endEvent
 
 function SetupSystem()
-	; Wait until out of menus to setup resources
-	; while Utility.IsInMenuMode() || !PlayerRef.Is3DLoaded()
-	; 	Utility.Wait(1.0)
-	; endWhile
 	Debug.Notification("Installing SexLab v"+GetStringVer())
-	; Init Defaults and check is sytem is able to install
-	if SetDefaults()
-		; Disable system from being used during setup
-		SexLab.GoToState("Disabled")
+	; Make sure we have all the needed libraries
+	LoadLibs()
+	; Disable system from being used during setup
+	SexLab.GoToState("Disabled")
+	SexLab.Setup()
+	; Check if system is able to install and init defaults
+	if SexLab && Config && Config.CheckSystem()
 		; Setup object slots
+		Config.SetDefaults()
 		VoiceSlots.Setup()
 		ExpressionSlots.Setup()
 		CreatureSlots.Setup()
 		AnimSlots.Setup()
 		ThreadSlots.Setup()
+		; Clear library caches
+		StorageUtil.FormListClear(Config, "ValidActors")
+		StorageUtil.FormListClear(Config, "StripList")
+		StorageUtil.FormListClear(Config, "NoStripList")
+		StorageUtil.StringListClear(Config, "SexLabCreatures")
 		; Enable system for use
 		SexLab.GoToState("Enabled")
-		; Debug.Notification("$SSL_SexLabUpdated")
+	else
+		Debug.TraceStack("SexLab - FATAL - Failed setup checks - ["+SexLab+", "+Config+", "+ActorLib+", "+ThreadLib+", "+Stats+", "+ThreadSlots+", "+AnimSlots+", "+CreatureSlots+", "+VoiceSlots+", "+ExpressionSlots+"]")
 	endIf
 endFunction
 
 event OnGameReload()
+	Debug.Trace("SexLab Loading...")
 	parent.OnGameReload()
-	; Ensure we have the important varables
-	Quest SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm") as Quest
-	SexLab = SexLabQuestFramework as SexLabFramework
-	Config = SexLabQuestFramework as sslSystemConfig
-	; Reload SexLab's voice/tfc config at load
-	if CurrentVersion > 0 && Config.CheckSystem()
-		ThreadSlots.StopAll()
-		Config.Reload()
-	else
-		SexLab.GoToState("Disabled")
+	; Ensure we have the important startup variables
+	Debug.Trace("SexLab Loading Quests...")
+	if !SexLab || !Config
+		Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
+		if SexLabQuestFramework
+			SexLab = SexLabQuestFramework as SexLabFramework
+			Config = SexLabQuestFramework as sslSystemConfig
+		endIf
 	endIf
+	Debug.Trace("Disabling SexLab for startup")
+	SexLab.GoToState("Disabled")
+	; Reload SexLab's voice/tfc config at load
+	Debug.Trace("SexLab Loading CheckSystem...")
+	if CurrentVersion > 0 && Config.CheckSystem()
+		Debug.Trace("SexLab Loading Reload...")
+		Config.Reload()
+		Debug.Trace("SexLab Loading Reload DONE...")
+	endIf
+	SexLab.GoToState("Enabled")
 	Debug.Trace("SexLab Loaded CurrentVerison: "+CurrentVersion)
 endEvent
 
-; event OnRaceSwitchComplete()
-; 	StorageUtil.FormListClear(SexLab, "ValidActors")
-; 	if Pages.Length > 0
-; 		if PlayerRef.GetLeveledActorBase().GetSex() == 1
-; 			Pages[11] = "$SSL_SexDiary"
-; 		else
-; 			Pages[11] = "$SSL_SexJournal"
-; 		endIf
-; 	endIf
-; endEvent
+function LoadLibs()
+	; Sync Player
+	if !PlayerRef
+		PlayerRef = Game.GetPlayer()
+	endIf
+	; Sync function Libraries - SexLabQuestFramework
+	if !Config || !ThreadLib || !ThreadSlots || !ActorLib || !Stats
+		Form SexLabQuestFramework  = Game.GetFormFromFile(0xD62, "SexLab.esm")
+		if SexLabQuestFramework
+			SexLab      = SexLabQuestFramework as SexLabFramework
+			Config      = SexLabQuestFramework as sslSystemConfig
+			ThreadLib   = SexLabQuestFramework as sslThreadLibrary
+			ThreadSlots = SexLabQuestFramework as sslThreadSlots
+			ActorLib    = SexLabQuestFramework as sslActorLibrary
+			Stats       = SexLabQuestFramework as sslActorStats
+		endIf
+	endIf
+	; Sync animation registry - SexLabQuestAnimations
+	if !AnimSlots
+		Form SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm")
+		if SexLabQuestAnimations
+			AnimSlots = SexLabQuestAnimations as sslAnimationSlots
+		endIf
+	endIf
+	; Sync secondary object registry - SexLabQuestRegistry
+	if !CreatureSlots || !VoiceSlots || !ExpressionSlots
+		Form SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm")
+		if SexLabQuestRegistry
+			CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
+			VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
+			ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
+		endIf
+	endIf
+endFunction
 
 ; ------------------------------------------------------- ;
 ; --- Create MCM Pages                                --- ;
@@ -344,7 +379,7 @@ event OnSelectST()
 		while n
 			n -= 1
 			if n != i
-				Output = PushForm(Strapons[n], Output)
+				Output = PushForm(Output, Strapons[n])
 			endIf
 		endWhile
 		Config.Strapons = Output
@@ -818,7 +853,7 @@ function AnimationEditor()
 			PreventOverwrite = true
 			Animation = Thread.Animation
 			Position  = Thread.GetAdjustPos()
-			AdjustKey = RemoveString(Thread.AdjustKey, Animation.Key(""))
+			AdjustKey = sslUtility.RemoveString(Thread.AdjustKey, Animation.Key(""))
 		endIf
 	endIf
 
@@ -832,11 +867,6 @@ function AnimationEditor()
 
 	; Check if editing a creature animation
 	IsCreatureEditor = Animation.IsCreature
-
-	; Prepare the animation for editing
-	if AdjustKey == "Global"
-		Animation.InitAdjustments(Animation.Key("Global"))
-	endIf
 
 	SetTitleText(Animation.Name)
 	AddMenuOptionST("AnimationSelect", "$SSL_Animation", Animation.Name)
@@ -1008,7 +1038,7 @@ state AnimationTest
 				endIf
 			; Add player and target
 			elseIf Animation.PositionCount == 2 && TargetRef
-				Actor[] Positions = MakeActorArray(PlayerRef, TargetRef)
+				Actor[] Positions = sslUtility.MakeActorArray(PlayerRef, TargetRef)
 				Positions = ThreadLib.SortActors(Positions)
 				Thread.AddActor(Positions[0])
 				Thread.AddActor(Positions[1])
@@ -1744,31 +1774,9 @@ string function GetStringVer()
 	return SexLabUtil.GetStringVer()
 endFunction
 
-bool function SetDefaults()
-	; Check system install before we continue
-	if !Config.CheckSystem()
-		SexLab.GoToState("Disabled")
-		return false
-	endIf
-	bool DebugMode = Config.DebugMode
-	; Prepare base framework script
-	SexLab.Setup()
-	; Grab libraries to make sure they are all set properly
-	ActorLib        = SexLab.ActorLib
-	ThreadLib       = SexLab.ThreadLib
-	Stats           = SexLab.Stats
-	ThreadSlots     = SexLab.ThreadSlots
-	AnimSlots       = SexLab.AnimSlots
-	CreatureSlots   = SexLab.CreatureSlots
-	VoiceSlots      = SexLab.VoiceSlots
-	ExpressionSlots = SexLab.ExpressionSlots
-	; Set config properties to their default
-	Config.SetDefaults()
-	Config.DebugMode = DebugMode
-	return true
-endFunction
-
 event OnConfigOpen()
+	; Make sure we have all the needed libraries
+	LoadLibs()
 	; MCM option pages
 	Pages     = new string[9]
 	Pages[0]  = "$SSL_SexDiary"
@@ -1785,7 +1793,6 @@ event OnConfigOpen()
 	if PlayerRef.GetLeveledActorBase().GetSex() == 0
 		Pages[0] = "$SSL_SexJournal"
 	endIf
-
 	; Target actor
 	StatRef = PlayerRef
 	TargetRef = Config.TargetRef
@@ -2424,12 +2431,8 @@ state RestoreDefaultSettings
 		if ShowMessage("$SSL_WarnRestoreDefaults")
 			SetTextOptionValueST("$SSL_Resetting")
 			SetOptionFlagsST(OPTION_FLAG_DISABLED)
-
-			bool DebugMode = Config.DebugMode
 			Config.SetDefaults()
-			Config.DebugMode = DebugMode
 			ShowMessage("$SSL_RunRestoreDefaults", false)
-
 			SetOptionFlagsST(OPTION_FLAG_NONE)
 			SetTextOptionValueST("$SSL_ClickHere")
 			; ForcePageReset()
@@ -2499,8 +2502,32 @@ state CleanSystem
 		if ShowMessage("$SSL_WarnCleanSystem")
 			ShowMessage("$SSL_RunCleanSystem", false)
 			Utility.Wait(0.1)
+
+			; Reset relevant quests
+			Quest SexLabQuestFramework  = Game.GetFormFromFile(0xD62, "SexLab.esm") as Quest
+			SexLabQuestFramework.Stop()
+			Utility.Wait(0.2)
+			SexLabQuestFramework.Start()
+
+			Quest SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm") as Quest
+			SexLabQuestAnimations.Stop()
+			Utility.Wait(0.2)
+			SexLabQuestAnimations.Start()
+
+			Quest SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm") as Quest
+			SexLabQuestRegistry.Stop()
+			Utility.Wait(0.2)
+			SexLabQuestRegistry.Start()
+
+			Quest SexLabObjectFactory = Game.GetFormFromFile(0x78818, "SexLab.esm") as Quest
+			SexLabObjectFactory.Stop()
+			Utility.Wait(0.2)
+			SexLabObjectFactory.Start()
+
+			; Setup & clean system
 			SetupSystem()
 			Stats.CleanDeadStats()
+
 			ModEvent.Send(ModEvent.Create("SexLabReset"))
 			Config.CleanSystemFinish.Show()
 		endIf

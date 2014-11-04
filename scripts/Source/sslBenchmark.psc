@@ -4,17 +4,19 @@ import SexLabUtil
 
 function PreBenchmarkSetup()
 	Setup()
+	ActorStats = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslActorStats
 endFunction
 
+sslActorStats ActorStats
 
 
 state Test1
 	string function Label()
-		return "SKSE"
+		return ""
 	endFunction
 
 	string function Proof()
-		; return "["+Anim.HasTag("Vaginal")+", "+Anim.AddTag("Vaginal")+", "+Anim.HasTag("BenchmarkTest")+", "+Anim.AddTag("BenchmarkTest")+", "+Anim.HasTag("BenchmarkTest")+", "+Anim.RemoveTag("BenchmarkTest")+", "+Anim.RemoveTag("BenchmarkTest")+", "+Anim.RemoveTag("BenchmarkTestNONE")+"]"
+		return ""
 	endFunction
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
@@ -26,21 +28,11 @@ state Test1
 			nth -= 1
 			; START code to benchmark
 
-			; Anim.HasTag("Vaginal")
-			; Anim.AddTag("Vaginal")
-			; Anim.HasTag("BenchmarkTest")
-			; Anim.AddTag("BenchmarkTest")
-			; Anim.HasTag("BenchmarkTest")
-			; Anim.RemoveTag("BenchmarkTest")
-			; Anim.RemoveTag("BenchmarkTest")
-			; Anim.RemoveTag("BenchmarkTestNONE")
-
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline
 	endFunction
 endState
-
 
 function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10)
 

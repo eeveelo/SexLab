@@ -6,7 +6,7 @@ scriptname sslCreatureAnimationSlots extends sslAnimationSlots
 
 sslBaseAnimation[] function GetByRace(int ActorCount, Race RaceRef)
 	string RaceID = MiscUtil.GetRaceEditorID(RaceRef)
-	bool[] Valid = sslUtility.BoolArray(Slotted)
+	bool[] Valid = PapyrusUtil.BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1

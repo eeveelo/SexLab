@@ -1,7 +1,5 @@
 scriptname sslActorAlias extends ReferenceAlias
 
-import sslUtility
-
 ; Settings access
 sslSystemConfig Config
 
@@ -249,7 +247,7 @@ state Ready
 				SkilledActor = PlayerRef
 			; If a non-creature couple, base skills off partner
 			elseIf Thread.ActorCount == 2 && !Thread.HasCreature
-				SkilledActor = Thread.Positions[IndexTravel(Position, Thread.ActorCount)]
+				SkilledActor = Thread.Positions[PapyrusUtil.IndexTravel(Position, Thread.ActorCount)]
 			endIf
 			Skills = Stats.GetSkillLevels(SkilledActor)
 			; Get highest relationship ahead of time
@@ -409,7 +407,12 @@ state Animating
 		Log("-- Resetting! -- ", ActorName)
 		; Update stats
 		if !IsCreature
-			Stats.RecordThread(ActorRef, (IsPlayer || Thread.HasPlayer), Thread.ActorCount, HighestRelation, (Utility.GetCurrentRealTime() - StartedAt), Thread.VictimRef, Thread.SkillXP, Thread.Genders)
+			Log(ActorName+" -- BEFORE: "+sslActorStats.GetSkills(ActorRef))
+			sslActorStats._SetSkill(ActorRef, Stats.kLastRealTime, Utility.GetCurrentRealTime())
+			sslActorStats._SetSkill(ActorRef, Stats.kLastGameTime, Utility.GetCurrentGameTime())
+			sslActorStats.RecordThread(ActorRef, Gender, HighestRelation, (Utility.GetCurrentRealTime() - StartedAt), Thread.HasPlayer, Thread.VictimRef, Thread.Genders, Thread.SkillXP)
+			Log(ActorName+" -- AFTER: "+sslActorStats.GetSkills(ActorRef))
+			; Stats.RecordThread(ActorRef, (IsPlayer || Thread.HasPlayer), Thread.ActorCount, HighestRelation, (Utility.GetCurrentRealTime() - StartedAt), Thread.VictimRef, Thread.SkillXP, Thread.Genders)
 		endIf
 		; Apply cum
 		int CumID = Animation.GetCum(Position)
@@ -583,7 +586,7 @@ int function GetEnjoyment()
 	if !ActorRef
 		Enjoyment = 0
 	elseif IsCreature
-		Enjoyment = (ClampFloat((Utility.GetCurrentRealTime() - StartedAt) / 6.0, 0.0, 40.0) + ((Stage as float / Animation.StageCount as float) * 60.0)) as int
+		Enjoyment = (PapyrusUtil.ClampFloat((Utility.GetCurrentRealTime() - StartedAt) / 6.0, 0.0, 40.0) + ((Stage as float / Animation.StageCount as float) * 60.0)) as int
 	else
 		Enjoyment = CalcEnjoyment(SkillBonus, Skills, Thread.LeadIn, IsFemale, (Utility.GetCurrentRealTime() - StartedAt), Stage, Animation.StageCount)
 	endIf
@@ -594,7 +597,7 @@ int function GetPain()
 	if !ActorRef
 		return 0
 	endIf
-	float Pain = Math.Abs(100.0 - ClampFloat(GetEnjoyment() as float, 1.0, 99.0))
+	float Pain = Math.Abs(100.0 - PapyrusUtil.ClampFloat(GetEnjoyment() as float, 1.0, 99.0))
 	if IsVictim
 		Pain *= 1.5
 	elseIf Animation.HasTag("Aggressive") || Animation.HasTag("Rough")
@@ -602,7 +605,7 @@ int function GetPain()
 	else
 		Pain *= 0.3
 	endIf
-	return ClampInt(Pain as int, 0, 100)
+	return PapyrusUtil.ClampInt(Pain as int, 0, 100)
 endFunction
 
 function SetVoice(sslBaseVoice ToVoice = none, bool ForceSilence = false)
@@ -725,7 +728,7 @@ function Strip()
 		ActorRef.EquipItem(Config.NudeSuit, true, true)
 	endIf
 	; Store stripped items
-	Equipment = MergeFormArray(ClearNone(Stripped), Equipment)
+	Equipment = PapyrusUtil.MergeFormArray(Equipment, PapyrusUtil.ClearNone(Stripped))
 endFunction
 
 function UnStrip()
@@ -740,7 +743,7 @@ function UnStrip()
  	if !DoRedress
  		return ; Fuck clothes, bitch.
  	endIf
- 	; Equip Stripped
+ 	; Equip Strippedb
  	int hand = 1
  	int i = Equipment.Length
  	while i
@@ -964,20 +967,31 @@ function Initialize()
 	; Strings
 	ActorKey       = ""
 	; Storage
-	StripOverride  = BoolArray(0)
-	Equipment      = FormArray(0)
+	StripOverride  = PapyrusUtil.BoolArray(0)
+	Equipment      = PapyrusUtil.FormArray(0)
 	; Make sure alias is emptied
 	TryToClear()
 endFunction
 
 function Setup()
-	; init libraries
-	Config          = SexLabUtil.GetConfig()
-	PlayerRef       = Config.PlayerRef
-	ActorLib        = Config.ActorLib
-	Stats           = Config.Stats
+	; Sync Player
+	if !PlayerRef
+		PlayerRef = Game.GetPlayer()
+	endIf
+	; Sync function Libraries - SexLabQuestFramework
+	if !Config || ActorLib || !Stats
+		Quest SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm") as Quest
+		if SexLabQuestFramework
+			Config   = SexLabQuestFramework as sslSystemConfig
+			ActorLib = SexLabQuestFramework as sslActorLibrary
+			Stats    = SexLabQuestFramework as sslActorStats
+		endIf
+	endIf
+	; Sync thread owner
+	if !Thread
+		Thread = GetOwningQuest() as sslThreadController
+	endIf
 	; init alias settings
-	Thread          = GetOwningQuest() as sslThreadController
 	Initialize()
 endFunction
 
@@ -1021,3 +1035,6 @@ endEvent
 function OffsetCoords(float[] Output, float[] CenterCoords, float[] OffsetBy) global native
 bool function IsInPosition(Actor CheckActor, ObjectReference CheckMarker, float maxdistance = 30.0) global native
 int function CalcEnjoyment(float[] XP, float[] SkillsAmounts, bool IsLeadin, bool IsFemaleActor, float Timer, int OnStage, int MaxStage) global native
+
+bool function _SetActor(Actor ProspectRef) native
+function _ApplyExpression(Actor ProspectRef, int[] Presets) global native

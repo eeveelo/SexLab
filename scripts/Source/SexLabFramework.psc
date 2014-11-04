@@ -906,11 +906,8 @@ endFunction
 
 function Setup()
 	; Reset function Libraries - SexLabQuestFramework
-	Quest SexLabQuestFramework  = Game.GetFormFromFile(0xD62, "SexLab.esm") as Quest
+	Form SexLabQuestFramework  = Game.GetFormFromFile(0xD62, "SexLab.esm")
 	if SexLabQuestFramework
-		SexLabQuestFramework.Stop()
-		Utility.WaitMenuMode(0.2)
-		SexLabQuestFramework.Start()
 		Config      = SexLabQuestFramework as sslSystemConfig
 		ThreadLib   = SexLabQuestFramework as sslThreadLibrary
 		ThreadSlots = SexLabQuestFramework as sslThreadSlots
@@ -918,34 +915,26 @@ function Setup()
 		Stats       = SexLabQuestFramework as sslActorStats
 	endIf
 	; Reset animation registry - SexLabQuestAnimations
-	Quest SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm") as Quest
+	Form SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm")
 	if SexLabQuestAnimations
-		SexLabQuestAnimations.Stop()
-		Utility.WaitMenuMode(0.2)
-		SexLabQuestAnimations.Start()
 		AnimSlots = SexLabQuestAnimations as sslAnimationSlots
 	endIf
 	; Reset secondary object registry - SexLabQuestRegistry
-	Quest SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm") as Quest
+	Form SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm")
 	if SexLabQuestRegistry
-		SexLabQuestRegistry.Stop()
-		Utility.WaitMenuMode(0.2)
-		SexLabQuestRegistry.Start()
 		CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
 		VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
 		ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
+	endIf
+	; Reset phantom object registry - SexLabQuestRegistry
+	Form SexLabObjectFactory   = Game.GetFormFromFile(0x78818, "SexLab.esm")
+	if SexLabObjectFactory
+		Factory         = SexLabObjectFactory as sslObjectFactory
 	endIf
 	; Setup library resources
 	ActorLib.Setup()
 	ThreadLib.Setup()
 	Stats.Setup()
-	; Clear library caches
-	StorageUtil.FormListClear(Config, "ValidActors")
-	StorageUtil.FormListClear(Config, "StripList")
-	StorageUtil.FormListClear(Config, "NoStripList")
-	StorageUtil.StringListClear(Config, "SexLabCreatures")
-	; Setup Phantom Slots
-	Factory = Game.GetFormFromFile(0x78818, "SexLab.esm") as sslObjectFactory
 	Factory.Setup()
 endFunction
 
@@ -995,3 +984,13 @@ sslVoiceLibrary property VoiceLib hidden
 		return Game.GetFormFromFile(0X3DE97, "SexLab.esm") as sslVoiceLibrary
 	endFunction
 endProperty
+
+
+function TestHook(int tid, bool HasPlayer = false)
+	Debug.TraceAndBox("TestHook!\n"+tid+" - "+HasPlayer)
+	Log("TestHook!")
+	Log("tid["+tid+"]: "+GetController(tid))
+	Log("HasPlayer["+HasPlayer+"]")
+endFunction
+
+Actor[] property TestActors auto hidden

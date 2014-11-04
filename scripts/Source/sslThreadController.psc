@@ -1,8 +1,6 @@
 scriptname sslThreadController extends sslThreadModel
 { Animation Thread Controller: Runs manipulation logic of thread based on information from model. Access only through functions; NEVER create a property directly to this. }
 
-import sslUtility
-
 ; Animation
 float SkillTime
 
@@ -97,7 +95,7 @@ state Animating
 		Log("Stage: "+Stage, "Animating")
 		; Prepare loop
 		SoundFX    = Animation.GetSoundFX(Stage)
-		SFXDelay   = ClampFloat(Config.SFXDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
+		SFXDelay   = PapyrusUtil.ClampFloat(Config.SFXDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		PlayAnimation()
 		; Send events
@@ -258,7 +256,7 @@ state Animating
 
 	function ChangeAnimation(bool backwards = false)
 		UnregisterForUpdate()
-		SetAnimation(IndexTravel(Animations.Find(Animation), Animations.Length, backwards))
+		SetAnimation(PapyrusUtil.IndexTravel(Animations.Find(Animation), Animations.Length, backwards))
 		SendThreadEvent("AnimationChange")
 		RegisterForSingleUpdate(0.2)
 	endFunction
@@ -270,7 +268,7 @@ state Animating
 		UnregisterforUpdate()
 		GoToState("")
 		; Find position to swap to
-		int NewPos = IndexTravel(AdjustPos, ActorCount, backwards)
+		int NewPos = PapyrusUtil.IndexTravel(AdjustPos, ActorCount, backwards)
 		Actor AdjustActor = Positions[AdjustPos]
 		Actor MovedActor  = Positions[NewPos]
 		if MovedActor == AdjustActor
@@ -297,10 +295,10 @@ state Animating
 	function AdjustForward(bool backwards = false, bool adjustStage = false)
 		UnregisterforUpdate()
 		Adjusted = true
-		Animation.AdjustForward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
+		Animation.AdjustForward(AdjustKey, AdjustPos, Stage, PapyrusUtil.SignFloat(backwards, 0.50), adjustStage)
 		AdjustAlias.RefreshLoc()
 		while Input.IsKeyPressed(Config.AdjustForward)
-			Animation.AdjustForward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
+			Animation.AdjustForward(AdjustKey, AdjustPos, Stage, PapyrusUtil.SignFloat(backwards, 0.50), adjustStage)
 			AdjustAlias.RefreshLoc()
 		endWhile
 		RegisterForSingleUpdate(0.2)
@@ -309,10 +307,10 @@ state Animating
 	function AdjustSideways(bool backwards = false, bool adjustStage = false)
 		UnregisterforUpdate()
 		Adjusted = true
-		Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
+		Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, PapyrusUtil.SignFloat(backwards, 0.50), adjustStage)
 		AdjustAlias.RefreshLoc()
 		while Input.IsKeyPressed(Config.AdjustSideways)
-			Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
+			Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, PapyrusUtil.SignFloat(backwards, 0.50), adjustStage)
 			AdjustAlias.RefreshLoc()
 		endWhile
 		RegisterForSingleUpdate(0.2)
@@ -321,10 +319,10 @@ state Animating
 	function AdjustUpward(bool backwards = false, bool adjustStage = false)
 		UnregisterforUpdate()
 		Adjusted = true
-		Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
+		Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, PapyrusUtil.SignFloat(backwards, 0.50), adjustStage)
 		AdjustAlias.RefreshLoc()
 		while Input.IsKeyPressed(Config.AdjustUpward)
-			Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
+			Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, PapyrusUtil.SignFloat(backwards, 0.50), adjustStage)
 			AdjustAlias.RefreshLoc()
 		endWhile
 		RegisterForSingleUpdate(0.2)
@@ -332,7 +330,7 @@ state Animating
 
 	function RotateScene(bool backwards = false)
 		UnregisterForUpdate()
-		CenterLocation[5] = CenterLocation[5] + SignFloat(backwards, 45.0)
+		CenterLocation[5] = CenterLocation[5] + PapyrusUtil.SignFloat(backwards, 45.0)
 		if CenterLocation[5] >= 360.0
 			CenterLocation[5] = CenterLocation[5] - 360.0
 		elseIf CenterLocation[5] < 0.0
@@ -349,7 +347,7 @@ state Animating
 	function AdjustChange(bool backwards = false)
 		UnregisterForUpdate()
 		if ActorCount > 1
-			AdjustPos = IndexTravel(Positions.Find(AdjustAlias.ActorRef), ActorCount, backwards)
+			AdjustPos = PapyrusUtil.IndexTravel(Positions.Find(AdjustAlias.ActorRef), ActorCount, backwards)
 			AdjustAlias = ActorAlias(Positions[AdjustPos])
 			Debug.Notification("Adjusting Position For: "+AdjustAlias.ActorRef.GetLeveledActorBase().GetName())
 		endIf

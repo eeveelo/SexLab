@@ -27,7 +27,7 @@ sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none
 		Tag = "Normal"
 	endIf
 	bool IsFemale = ActorRef.GetLeveledActorBase().GetSex() == 1
-	bool[] Valid = sslUtility.BoolArray(Slotted)
+	bool[] Valid = PapyrusUtil.BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
@@ -37,7 +37,7 @@ sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none
 endFunction
 
 sslBaseExpression function RandomByTag(string Tag)
-	bool[] Valid = sslUtility.BoolArray(Slotted)
+	bool[] Valid = PapyrusUtil.BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
@@ -101,7 +101,7 @@ int function FindByName(string FindName)
 endFunction
 
 string[] function GetNames()
-	string[] Output = sslUtility.StringArray(Slotted)
+	string[] Output = PapyrusUtil.StringArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1

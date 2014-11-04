@@ -135,7 +135,7 @@ Form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 		ActorRef.EquipItem(NudeSuit, true, true)
 	endIf
 	; output stripped items
-	return sslUtility.ClearNone(Stripped)
+	return PapyrusUtil.ClearNone(Stripped)
 endFunction
 
 function UnstripActor(Actor ActorRef, Form[] Stripped, bool IsVictim = false)

@@ -1,7 +1,8 @@
-scriptname sslActorStats extends sslActorLibrary
+scriptname sslActorStats extends sslSystemLibrary
+
 
 import StorageUtil
-import sslUtility
+import PapyrusUtil
 import Utility
 import Math
 
@@ -13,6 +14,12 @@ string[] LewdTitlesMale
 string[] LewdTitlesFemale
 
 string[] SkillNames
+
+bool function IsSkilled(Actor ActorRef) global native
+float function _GetSkill(Actor ActorRef, int Stat) global native
+float function _AdjustSkill(Actor ActorRef, int Stat, float By) global native
+function _SetSkill(Actor ActorRef, int Stat, float Value) global native
+function GetAllArray(Actor ActorRef, float[] Output) global native
 
 ; ------------------------------------------------------- ;
 ; --- Manipulate Custom Stats                         --- ;
@@ -179,177 +186,43 @@ endFunction
 ; --- Sex Skills                                      --- ;
 ; ------------------------------------------------------- ;
 
-function SetSeed(float[] Skills, string Skill, float Amount)
-	int i = SkillNames.Find(Skill)
-	if i != -1
-		Skills[i] = Amount
-	endIf
-endFunction
 
-; I'm no math-wizard, this is mostly just throwing random shit at the walls in attempt to generate somewhat consistent skills based on info about the actor.
-; If anybody who doesn't suck at math like I do wants to help me improve this - feel free to contact me. - Ashal
+function _SeedActor(Actor ActorRef, float RealTime, float GameTime) global native
 function SeedActor(Actor ActorRef)
-	if ActorRef == PlayerRef || !ActorRef.HasKeyword(ActorTypeNPC) || FormListFind(none, "SexLab.SkilledActors", ActorRef) != -1
-		return
+	if ActorRef != PlayerRef && !IsSkilled(ActorRef) && ActorRef.HasKeyword(Config.ActorTypeNPC)
+		_SeedActor(ActorRef, Utility.GetCurrentRealTime(), Utility.GetCurrentGameTime())
+		Log(ActorRef.GetLeveledActorBase().GetName()+" Seeded: "+GetSkills(ActorRef))
 	endIf
-	; Added to seeded list so they skip this in future
-	; FormListAdd(none, "SexLab.SeededActors", ActorRef, false)
-	FormListAdd(none, "SexLab.SkilledActors", ActorRef, false) ; v1.59b - changed storage method; use new list
-	float[] Skills = FloatArray(SkillNames.Length)
-
-	float Level       = ActorRef.GetLevel() as float + (ActorRef.GetActorValue("Speechcraft") * 0.1)
-	float Energy      = ActorRef.GetActorValue("Energy")
-	float Assistance  = ActorRef.GetActorValue("Assistance")
-	float Aggression  = ActorRef.GetActorValue("Aggression")
-	float Confidence  = ActorRef.GetActorValue("Confidence")
-	float Morality    = ActorRef.GetActorValue("Morality")
-	int HighestRelation = ActorRef.GetHighestRelationshipRank()
-	int LowestRelation  = ActorRef.GetLowestRelationshipRank()
-	bool IsFemale = GetGender(ActorRef) == 1
-
-	; Seed Sexuality
-	float Straight = RandomFloat(Level * 0.1, Level * 0.5) + Abs(HighestRelation) + Sqrt(Energy * Utility.RandomFloat(0.3, 0.6)) + (Assistance * 1.5)
-	float Gay      = RandomFloat(Level * 0.1, Level * 0.5) + Abs(LowestRelation)  + Sqrt(Energy * Utility.RandomFloat(0.1, 0.5)) + (Assistance * 1.5)
-	; Very aggressive / frenzied - make more likely to have had more
-	if Aggression > 1.0
-		Straight *= RandomFloat(1.13, 1.45)
-		Gay      *= RandomFloat(1.13, 1.45)
-	endIf
-	; Cowardly - less likely to have had partners
-	if Confidence == 0.0
-		Straight *= RandomFloat(0.3, 0.7)
-		Gay      *= RandomFloat(0.3, 0.7)
-	endIf
-	; Chance for never having had a certain type
-	Straight *= ((RandomInt(1, 10) != 1) as float)
-	Gay      *= ((RandomInt(1, 3) != 1) as float)
-
-	; Seed time spent
-	float TimeSpent = ((Straight + Gay) * RandomFloat(6.0, 13.0))
-	SetSeed(Skills, "TimeSpent", TimeSpent)
-	SetSeed(Skills, "LastSex.GameTime", Utility.GetCurrentGameTime())
-	SetSeed(Skills, "LastSex.RealTime", Utility.GetCurrentRealTime())
-	if IsFemale
-		SetSeed(Skills, "Sexuality", 60.0)
-		SetSeed(Skills, "Males", (Straight as int) as float)
-		SetSeed(Skills, "Females", (Gay as int) as float)
-		SetSeed(Skills, "SexCount", ((Straight as int) + (Gay as int)) as float)
-	else
-		SetSeed(Skills, "Sexuality", 80.0)
-		SetSeed(Skills, "Sexuality", 60.0)
-		SetSeed(Skills, "Females", (Straight as int) as float)
-		SetSeed(Skills, "Males", (Gay as int) as float)
-		SetSeed(Skills, "SexCount", ((Straight as int) + (Gay as int)) as float)
-	endIf
-
-	; Sex Skills
-	float Vaginal  = 1.3 * (((TimeSpent * 0.6) + RandomFloat(1.0, Level)) / RandomFloat(4.0, 13.69))
-	float Anal     = 1.1 * (((TimeSpent * 0.6) + RandomFloat(1.0, Level)) / RandomFloat(4.0, 13.69))
-	float Oral     = 1.2 * (((TimeSpent * 0.6) + RandomFloat(1.0, Level)) / RandomFloat(4.0, 13.69))
-	float Foreplay = 0.9 * (((TimeSpent * 0.6) + RandomFloat(1.0, Level)) / RandomFloat(4.0, 13.69))
-
-	; float Vaginal  =  1.5 * ((TimeSpent * 0.69) + RandomFloat(0.1, Level * Level)) / RandomFloat(4.0, 13.6)
-	; float Anal     =  1.3 * ((TimeSpent * 0.69) + RandomFloat(0.1, Level)) / RandomFloat(4.0, 13.6)
-	; float Oral     =  1.4 * ((TimeSpent * 0.69) + RandomFloat(0.1, Level)) / RandomFloat(4.0, 13.6)
-	; float Foreplay =  1.1 * ((TimeSpent * 0.69) + RandomFloat(0.1, Level)) / RandomFloat(4.0, 13.6)
-
-	; Alter by sexuality
-	if Gay > Straight
-		if IsFemale
-			Vaginal *= 1.5
-			Anal    *= 0.5
-			Oral    *= 1.1
-		else
-			Vaginal *= 0.4
-			Anal    *= 1.5
-			Oral    *= 1.1
-		endIf
-	endIf
-
-	SetSeed(Skills, "Vaginal", Vaginal)
-	SetSeed(Skills, "Anal", Anal)
-	SetSeed(Skills, "Oral", Oral)
-	SetSeed(Skills, "Foreplay", Foreplay)
-
-	; Seed Pure
-	float Pure = (Morality * 1.25) - (Aggression * 0.75)
-	Pure +=  1.0 * Abs(HighestRelation)
-	Pure += -1.5 * ((Morality == 0.0) as float)
-	Pure +=  3.1 * ((Morality == 3.0) as float)
-	Pure +=  2.5 * ((Aggression == 0 && Morality != 0) as float)
-	Pure += -1.5 * ((Assistance == 0.0) as float)
-	Pure +=  3.0 * ((Assistance == 2.0) as float)
-	Pure +=  1.2 * ((Assistance == 2.0 && Morality == 0.0) as float)
-	if Pure < 0.0
-		Pure = RandomFloat(0.0, Abs(Pure) * 0.6)
-	endIf
-	; Seed Lewd
-	float Lewd = (Aggression * 1.5)
-	Lewd +=  1.0 * Abs(LowestRelation)
-	Lewd +=  2.2 * ((LowestRelation < 0) as float)
-	Lewd +=  2.5 * ((Morality == 0.0) as float)
-	Lewd += -1.5 * ((Morality == 3.0) as float)
-	Lewd +=  2.3 * ((Assistance == 0.0) as float)
-	Lewd += -1.5 * ((Assistance == 2.0) as float)
-	Lewd +=  3.1 * ((Morality == 0.0 && Aggression > 1.0) as float)
-	if Lewd < 0.0
-		Lewd = RandomFloat(0.0, Abs(Lewd) * 0.6)
-	endIf
-
-	; Curved increase with actor level and slight randomness
-	float Curve = Abs(Sqrt(((Level * Level) / 2.3 ) * (5.0 + RandomFloat(-1.0, 1.8))))
-	Pure = Abs(Pure * Curve)
-	Lewd = Abs(Lewd * Curve)
-
-	SetSeed(Skills, "Pure", Pure)
-	SetSeed(Skills, "Lewd", Lewd)
-
-	FloatListCopy(ActorRef, "SexLabSkills", Skills)
-	Log("Sexuality["+GetSexuality(ActorRef)+"] Foreplay["+GetSkill(ActorRef, "Foreplay")+"] Vaginal["+GetSkill(ActorRef, "Vaginal")+"] Anal["+GetSkill(ActorRef, "Anal")+"] Oral["+GetSkill(ActorRef, "Oral")+"] Pure["+GetPure(ActorRef)+"] Lewd["+GetLewd(ActorRef)+"]", ActorRef.GetLeveledActorBase().GetName()+" Stats Seed")
-endFunction
-
-function InitSkills(Actor ActorRef, bool InitList = true)
-	if !ActorRef
-		return
-	elseIf InitList && FloatListCount(ActorRef, "SexLabSkills") != SkillNames.Length
-		float[] Skills = FloatArray(SkillNames.Length)
-		FloatListCopy(ActorRef, "SexLabSkills", Skills)
-	endIf
-	SeedActor(ActorRef)
 endFunction
 
 int function GetSkill(Actor ActorRef, string Skill)
-	InitSkills(ActorRef, false)
-	return FloatListGet(ActorRef, "SexLabSkills", SkillNames.Find(Skill)) as int
+	SeedActor(ActorRef)
+	return _GetSkill(ActorRef, SkillNames.Find(Skill)) as int
 endFunction
 
 float function GetSkillFloat(Actor ActorRef, string Skill)
-	InitSkills(ActorRef, false)
-	return FloatListGet(ActorRef, "SexLabSkills", SkillNames.Find(Skill))
+	SeedActor(ActorRef)
+	return _GetSkill(ActorRef, SkillNames.Find(Skill))
 endFunction
 
 function SetSkill(Actor ActorRef, string Skill, int Amount)
-	InitSkills(ActorRef)
-	FloatListSet(ActorRef, "SexLabSkills", SkillNames.Find(Skill), Amount as float)
+	SeedActor(ActorRef)
+	_SetSkill(ActorRef, SkillNames.Find(Skill), Amount as float)
 endFunction
 
 function SetSkillFloat(Actor ActorRef, string Skill, float Amount)
-	InitSkills(ActorRef)
-	FloatListSet(ActorRef, "SexLabSkills", SkillNames.Find(Skill), Amount)
+	SeedActor(ActorRef)
+	_SetSkill(ActorRef, SkillNames.Find(Skill), Amount)
 endFunction
 
 function AdjustSkill(Actor ActorRef, string Skill, int Amount)
-	if Amount != 0 && ActorRef && Skill != ""
-		InitSkills(ActorRef)
-		FloatListAdjust(ActorRef, "SexLabSkills", SkillNames.Find(Skill), Amount as float)
-	endIf
+	SeedActor(ActorRef)
+	_AdjustSkill(ActorRef, SkillNames.Find(Skill), Amount as float)
 endfunction
 
 function AdjustSkillFloat(Actor ActorRef, string Skill, float Amount)
-	if Amount != 0.0 && ActorRef && Skill != ""
-		InitSkills(ActorRef)
-		FloatListAdjust(ActorRef, "SexLabSkills", SkillNames.Find(Skill), Amount)
-	endIf
+	SeedActor(ActorRef)
+	_AdjustSkill(ActorRef, SkillNames.Find(Skill), Amount)
 endFunction
 
 int function GetSkillLevel(Actor ActorRef, string Skill, float Curve = 0.85)
@@ -364,9 +237,9 @@ string function GetTitle(int Level)
 	return StatTitles[ClampInt(Level, 0, 6)]
 endFunction
 
-float[] function GetSkills(Actor ActorRef)
-	float[] Output = new float[6]
-	FloatListSlice(ActorRef, "SexLabSkills", Output)
+float[] function GetSkills(Actor ActorRef) global
+	float[] Output = FloatArray(18)
+	GetAllArray(ActorRef, Output)
 	return Output
 endFunction
 
@@ -383,10 +256,10 @@ float[] function GetSkillLevels(Actor ActorRef)
 endFunction
 
 function AddSkillXP(Actor ActorRef, float Foreplay = 0.0, float Vaginal = 0.0, float Anal = 0.0, float Oral = 0.0)
-	AdjustSkill(ActorRef, "Foreplay", Foreplay as int)
-	AdjustSkill(ActorRef, "Vaginal", Vaginal as int)
-	AdjustSkill(ActorRef, "Anal", Anal as int)
-	AdjustSkill(ActorRef, "Oral", Oral as int)
+	_AdjustSkill(ActorRef, kForeplay, Foreplay)
+	_AdjustSkill(ActorRef, kVaginal, Vaginal)
+	_AdjustSkill(ActorRef, kAnal, Anal)
+	_AdjustSkill(ActorRef, kOral, Oral)
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -394,7 +267,7 @@ endFunction
 ; ------------------------------------------------------- ;
 
 int function GetPure(Actor ActorRef)
-	return GetSkill(ActorRef, "Pure")
+	return _GetSkill(ActorRef, kPure) as int
 endFunction
 
 int function GetPureLevel(Actor ActorRef)
@@ -410,7 +283,7 @@ string function GetPureTitle(Actor ActorRef)
 endFunction
 
 int function GetLewd(Actor ActorRef)
-	return GetSkill(ActorRef, "Lewd")
+	return _GetSkill(ActorRef, kLewd) as int
 endFunction
 
 int function GetLewdLevel(Actor ActorRef)
@@ -461,11 +334,11 @@ endFunction
 function AddPurityXP(Actor ActorRef, float Pure, float Lewd, bool IsAggressive, bool IsVictim, bool WithCreature, int ActorCount, int HadRelation)
 	; Aggressive modifier for victim/aggressor
 	if IsAggressive && IsVictim
-		AdjustSkill(ActorRef, "Victim", 1)
+		_AdjustSkill(ActorRef, kVictim, 1)
 		Pure -= 1.0
 		Lewd += 1.0
 	elseIf IsAggressive
-		AdjustSkill(ActorRef, "Aggressor", 1)
+		_AdjustSkill(ActorRef, kAggressor, 1)
 		Pure -= 2.0
 		Lewd += 2.0
 	endIf
@@ -490,8 +363,8 @@ function AddPurityXP(Actor ActorRef, float Pure, float Lewd, bool IsAggressive, 
 		Lewd += 2.0
 	endIf
 	; Save adjustments
-	AdjustSkillFloat(ActorRef, "Pure", ClampFloat(Pure, 0.0, 20.0))
-	AdjustSkillFloat(ActorRef, "Lewd", ClampFloat(Lewd, 0.0, 20.0))
+	_AdjustSkill(ActorRef, kPure, Pure)
+	_AdjustSkill(ActorRef, kLewd, Lewd)
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -499,19 +372,19 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function AddSex(Actor ActorRef, float TimeSpent = 0.0, bool WithPlayer = false, bool IsAggressive = false, int Males = 0, int Females = 0, int Creatures = 0)
-	AdjustSkillFloat(ActorRef, "TimeSpent", TimeSpent)
-	SetSkillFloat(ActorRef, "LastSex.GameTime", Utility.GetCurrentGameTime())
-	SetSkillFloat(ActorRef, "LastSex.RealTime", Utility.GetCurrentRealTime())
+	_AdjustSkill(ActorRef, kTimeSpent, TimeSpent)
+	_SetSkill(ActorRef, kLastGameTime, Utility.GetCurrentGameTime())
+	_SetSkill(ActorRef, kLastRealTime, Utility.GetCurrentRealTime())
 
 	int ActorCount = (Males + Females + Creatures)
 	if ActorCount > 1
 		int Gender = GetGender(ActorRef)
 		Males -= (Gender == 0) as int
 		Females -= (Gender == 1) as int
-		AdjustSkill(ActorRef, "Males", Males)
-		AdjustSkill(ActorRef, "Females", Females)
-		AdjustSkill(ActorRef, "Creatures", Creatures)
-		AdjustSkill(ActorRef, "SexCount", 1)
+		_AdjustSkill(ActorRef, kMales, Males)
+		_AdjustSkill(ActorRef, kFemales, Females)
+		_AdjustSkill(ActorRef, kCreatures, Creatures)
+		_AdjustSkill(ActorRef, kSexCount, 1)
 		if ActorRef != PlayerRef
 			if !IsAggressive
 				AdjustSexuality(ActorRef, Males * 2, Females * 2)
@@ -520,28 +393,28 @@ function AddSex(Actor ActorRef, float TimeSpent = 0.0, bool WithPlayer = false, 
 			endIf
 		endIf
 	else
-		AdjustSkill(ActorRef, "Masturbation", 1)
+		_AdjustSkill(ActorRef, kMasturbation, 1)
 	endIf
 	if WithPlayer && ActorRef != PlayerRef
-		AdjustSkill(ActorRef, "PlayerSex", 1)
-		FormListAdd(PlayerRef, "SexPartners", ActorRef, false)
+		_AdjustSkill(ActorRef, kPlayerSex, 1)
+		; FormListAdd(PlayerRef, "SexPartners", ActorRef, false)
 	endIf
 endFunction
 
 int function SexCount(Actor ActorRef)
-	return GetSkill(ActorRef, "SexCount")
+	return _GetSkill(ActorRef, kSexCount) as int
 endFunction
 
 bool function HadSex(Actor ActorRef)
-	return GetSkillFloat(ActorRef, "SexCount") >= 1.0
+	return _GetSkill(ActorRef, kSexCount) >= 1.0
 endFunction
 
 int function PlayerSexCount(Actor ActorRef)
-	return GetSkill(ActorRef, "PlayerSex")
+	return _GetSkill(ActorRef, kPlayerSex) as int
 endFunction
 
 bool function HadPlayerSex(Actor ActorRef)
-	return GetSkillFloat(ActorRef, "PlayerSex") >= 1.0
+	return _GetSkill(ActorRef, kPlayerSex) >= 1.0
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -550,33 +423,33 @@ endFunction
 
 function AdjustSexuality(Actor ActorRef, int Males, int Females)
 	bool IsFemale = GetGender(ActorRef) == 1
-	int Ratio = GetSkill(ActorRef, "Sexuality")
-	if Ratio == 0
-		Ratio = 85
+	float Ratio = _GetSkill(ActorRef, kSexuality)
+	if Ratio == 0.0
+		Ratio = 80.0
 	endIf
 	if IsFemale
 		Ratio += (Males - Females)
 	else
 		Ratio += (Females - Males)
 	endIf
-	SetSkill(ActorRef, "Sexuality", ClampInt(Ratio, 1, 100))
+	_SetSkill(ActorRef, kSexuality, ClampFloat(Ratio, 1.0, 100.0) as float)
 endFunction
 
 int function GetSexuality(Actor ActorRef)
-	int Ratio = GetSkill(ActorRef, "Sexuality")
-	if Ratio > 0
-		return Ratio
+	float Ratio = _GetSkill(ActorRef, kSexuality)
+	if Ratio > 0.0
+		return Ratio as int
 	else
 		return 100
 	endIf
 endFunction
 
 string function GetSexualityTitle(Actor ActorRef)
-	int ratio = GetSkill(ActorRef, "Sexuality")
+	float ratio = _GetSkill(ActorRef, kSexuality)
 	; Return sexuality title
-	if ratio >= 65 || ratio == 0
+	if ratio >= 65.0 || ratio == 0.0
 		return "$SSL_Heterosexual"
-	elseif ratio < 65 && ratio > 35
+	elseif ratio < 65.0 && ratio > 35.0
 		return "$SSL_Bisexual"
 	elseif GetGender(ActorRef) == 1
 		return "$SSL_Lesbian"
@@ -586,16 +459,16 @@ string function GetSexualityTitle(Actor ActorRef)
 endFunction
 
 bool function IsStraight(Actor ActorRef)
-	return GetSkill(ActorRef, "Sexuality") >= 65
+	return _GetSkill(ActorRef, kSexuality) >= 65.0
 endFunction
 
 bool function IsBisexual(Actor ActorRef)
-	int ratio = GetSkill(ActorRef, "Sexuality")
-	return ratio < 65 && ratio > 35
+	float ratio = _GetSkill(ActorRef, kSexuality)
+	return ratio < 65.0 && ratio > 35.0
 endFunction
 
 bool function IsGay(Actor ActorRef)
-	return GetSkill(ActorRef, "Sexuality") <= 35
+	return _GetSkill(ActorRef, kSexuality) <= 35.0
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -604,7 +477,7 @@ endFunction
 
 ; Last sex - Game time1 - float days
 float function LastSexGameTime(Actor ActorRef)
-	return GetSkillFloat(ActorRef, "LastSex.GameTime")
+	return _GetSkill(ActorRef, kLastGameTime)
 endFunction
 
 float function DaysSinceLastSex(Actor ActorRef)
@@ -629,7 +502,7 @@ endFunction
 
 ; Last sex - Real Time - float seconds
 float function LastSexRealTime(Actor ActorRef)
-	return GetSkillFloat(ActorRef, "LastSex.RealTime")
+	return _GetSkill(ActorRef, kLastRealTime)
 endFunction
 
 float function SecondsSinceLastSexRealTime(Actor ActorRef)
@@ -660,11 +533,13 @@ endFunction
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
 
-function RecordThread(Actor ActorRef, bool HasPlayer, int Positions, int HighestRelation, float TotalTime, Actor VictimRef, float[] SkillXP, int[] Genders)
+
+function RecordThread(Actor ActorRef, int Gender, int HadRelation, float TimeSpent, bool WithPlayer, Actor VictimRef, int[] Genders, float[] SkillXP) global native
+;/ function RecordThread(Actor ActorRef, bool HasPlayer, int Positions, int HighestRelation, float TotalTime, Actor VictimRef, float[] SkillXP, int[] Genders)
 	AddSkillXP(ActorRef, SkillXP[0], SkillXP[1], SkillXP[2], SkillXP[3])
 	AddPurityXP(ActorRef, SkillXP[4], SkillXP[5], VictimRef != none, VictimRef == ActorRef, Genders[2] > 0, Positions, HighestRelation)
 	AddSex(ActorRef, TotalTime, HasPlayer, VictimRef != none, Genders[0], Genders[1], Genders[2])
-endFunction
+endFunction /;
 
 function ResetStats(Actor ActorRef)
 	FloatListClear(ActorRef, "SexLabSkills")
@@ -848,6 +723,150 @@ function CleanDeadStats()
 	endWhile
 endFunction
 
+
+function ConvertStats()
+	CleanDeadStats()
+
+	int i = FormListCount(none, "SexLab.SkilledActors")
+	while i
+		i -= 1
+		if FormListGet(none, "SexLab.SkilledActors", i) != none
+			Actor ActorRef = FormListGet(none, "SexLab.SkilledActors", i) as Actor
+			_SetSkill(ActorRef, 0, FloatListGet(ActorRef, "SexLabSkills", 0))
+			_SetSkill(ActorRef, 1, FloatListGet(ActorRef, "SexLabSkills", 1))
+			_SetSkill(ActorRef, 2, FloatListGet(ActorRef, "SexLabSkills", 2))
+			_SetSkill(ActorRef, 3, FloatListGet(ActorRef, "SexLabSkills", 3))
+			_SetSkill(ActorRef, 4, FloatListGet(ActorRef, "SexLabSkills", 4))
+			_SetSkill(ActorRef, 5, FloatListGet(ActorRef, "SexLabSkills", 5))
+			_SetSkill(ActorRef, 6, FloatListGet(ActorRef, "SexLabSkills", 6))
+			_SetSkill(ActorRef, 7, FloatListGet(ActorRef, "SexLabSkills", 7))
+			_SetSkill(ActorRef, 8, FloatListGet(ActorRef, "SexLabSkills", 8))
+			_SetSkill(ActorRef, 9, FloatListGet(ActorRef, "SexLabSkills", 9))
+			_SetSkill(ActorRef, 10, FloatListGet(ActorRef, "SexLabSkills", 10))
+			_SetSkill(ActorRef, 11, FloatListGet(ActorRef, "SexLabSkills", 11))
+			_SetSkill(ActorRef, 12, FloatListGet(ActorRef, "SexLabSkills", 12))
+			_SetSkill(ActorRef, 13, FloatListGet(ActorRef, "SexLabSkills", 13))
+			_SetSkill(ActorRef, 14, FloatListGet(ActorRef, "SexLabSkills", 14))
+			_SetSkill(ActorRef, 15, FloatListGet(ActorRef, "SexLabSkills", 15))
+			_SetSkill(ActorRef, 16, FloatListGet(ActorRef, "SexLabSkills", 16))
+			_SetSkill(ActorRef, 17, FloatListGet(ActorRef, "SexLabSkills", 17))
+			FloatListClear(ActorRef, "SexLabSkills")
+			Log("Convert: ", ActorRef.GetLeveledActorBase().GetName()+" - "+GetSkills(ActorRef))
+		endif
+		FormListRemoveAt(none, "SexLab.SkilledActors", i)
+	endwhile
+endFunction
+
+int function GetGender(Actor ActorRef)
+	ActorBase BaseRef = ActorRef.GetLeveledActorBase()
+	if SexLabUtil.HasRace(BaseRef.GetRace())
+		return 2 ; Creature
+	elseIf ActorRef.IsInFaction(config.GenderFaction)
+		return ActorRef.GetFactionRank(config.GenderFaction) ; Override
+	endIf
+	return BaseRef.GetSex() ; Default
+endFunction
+
+
+; ------------------------------------------------------- ;
+; --- Skill Type IDs
+; ------------------------------------------------------- ;
+
+int function StatID(string Name)
+	return SkillNames.Find(Name)
+endFunction
+int property kForeplay hidden
+	int function get()
+		return 0
+	endFunction
+endProperty
+int property kVaginal hidden
+	int function get()
+		return 1
+	endFunction
+endProperty
+int property kAnal hidden
+	int function get()
+		return 2
+	endFunction
+endProperty
+int property kOral hidden
+	int function get()
+		return 3
+	endFunction
+endProperty
+int property kPure hidden
+	int function get()
+		return 4
+	endFunction
+endProperty
+int property kLewd hidden
+	int function get()
+		return 5
+	endFunction
+endProperty
+int property kMales hidden
+	int function get()
+		return 6
+	endFunction
+endProperty
+int property kFemales hidden
+	int function get()
+		return 7
+	endFunction
+endProperty
+int property kCreatures hidden
+	int function get()
+		return 8
+	endFunction
+endProperty
+int property kMasturbation hidden
+	int function get()
+		return 9
+	endFunction
+endProperty
+int property kAggressor hidden
+	int function get()
+		return 10
+	endFunction
+endProperty
+int property kVictim hidden
+	int function get()
+		return 11
+	endFunction
+endProperty
+int property kSexCount hidden
+	int function get()
+		return 12
+	endFunction
+endProperty
+int property kPlayerSex hidden
+	int function get()
+		return 13
+	endFunction
+endProperty
+int property kSexuality hidden
+	int function get()
+		return 14
+	endFunction
+endProperty
+int property kTimeSpent hidden
+	int function get()
+		return 15
+	endFunction
+endProperty
+int property kLastRealTime hidden
+	int function get()
+		return 16
+	endFunction
+endProperty
+int property kLastGameTime hidden
+	int function get()
+		return 17
+	endFunction
+endProperty
+
+
 ; ------------------------------------------------------- ;
 ; --- DEPRECATED - DO NOT USE                         --- ;
 ; ------------------------------------------------------- ;
@@ -862,10 +881,10 @@ endFunction
 ; are not used for native skills they will resort to old functionality
 
 bool function HasInt(Actor ActorRef, string Stat)
-	return HasIntValue(ActorRef, "sslActorStats."+Stat) || FloatListGet(ActorRef, "SexLabSkills", SkillNames.Find(Stat)) > 0.0
+	return HasIntValue(ActorRef, "sslActorStats."+Stat) || (IsSkilled(ActorRef) && _GetSkill(ActorRef, SkillNames.Find(Stat)) != 0.0)
 endFunction
 bool function HasFloat(Actor ActorRef, string Stat)
-	return HasFloatValue(ActorRef, "sslActorStats."+Stat) || FloatListGet(ActorRef, "SexLabSkills", SkillNames.Find(Stat)) > 0.0
+	return HasFloatValue(ActorRef, "sslActorStats."+Stat) || (IsSkilled(ActorRef) && _GetSkill(ActorRef, SkillNames.Find(Stat)) != 0.0)
 endFunction
 bool function HasStr(Actor ActorRef, string Stat)
 	return HasStringValue(ActorRef, "sslActorStats."+Stat)
@@ -889,14 +908,14 @@ endFunction
 
 function SetInt(Actor ActorRef, string Stat, int Value)
 	if SkillNames.Find(Stat) != -1
-		SetSkill(ActorRef, Stat, Value)
+		_SetSkill(ActorRef, SkillNames.Find(Stat), value as int)
 	else
 		SetIntValue(ActorRef, "sslActorStats."+Stat, Value)
 	endIf
 endFunction
 function SetFloat(Actor ActorRef, string Stat, float Value)
 	if SkillNames.Find(Stat) != -1
-		SetSkillFloat(ActorRef, Stat, Value)
+		_SetSkill(ActorRef, SkillNames.Find(Stat), 0.0)
 	else
 		SetFloatValue(ActorRef, "sslActorStats."+Stat, Value)
 	endIf
@@ -906,11 +925,11 @@ function SetStr(Actor ActorRef, string Stat, string Value)
 endFunction
 
 function ClearInt(Actor ActorRef, string Stat)
-	FloatListSet(ActorRef, "SexLabSkills", SkillNames.Find(Stat), 0.0)
+	_SetSkill(ActorRef, SkillNames.Find(Stat), 0.0)
 	UnsetIntValue(ActorRef, "sslActorStats."+Stat)
 endFunction
 function ClearFloat(Actor ActorRef, string Stat)
-	FloatListSet(ActorRef, "SexLabSkills", SkillNames.Find(Stat), 0.0)
+	_SetSkill(ActorRef, SkillNames.Find(Stat), 0.0)
 	UnsetFloatValue(ActorRef, "sslActorStats."+Stat)
 endFunction
 function ClearStr(Actor ActorRef, string Stat)
@@ -935,3 +954,4 @@ function AdjustFloat(Actor ActorRef, string Stat, float Amount)
 		endIf
 	endIf
 endfunction
+

@@ -1,6 +1,6 @@
 scriptname sslBaseAnimation extends sslBaseObject
 
-import sslUtility
+; import sslUtility
 
 ; Config
 ; int property SFX auto hidden
@@ -99,12 +99,12 @@ endProperty
 form[] property CreatureRaces hidden
 	form[] function get()
 		int i = RaceIDs.Length
-		form[] RaceRefs = FormArray(i)
+		form[] RaceRefs = PapyrusUtil.FormArray(i)
 		while i
 			i -= 1
 			RaceRefs[i] = Race.GetRace(RaceIDs[i])
 		endWhile
-		return ClearNone(RaceRefs)
+		return PapyrusUtil.ClearNone(RaceRefs)
 	endFunction
 endProperty
 
@@ -123,7 +123,7 @@ string[] function FetchPosition(int position)
 		Log("Unknown position, '"+stage+"' given", "FetchPosition")
 		return none
 	endIf
-	string[] anims = StringArray(Stages)
+	string[] anims = PapyrusUtil.StringArray(Stages)
 	int stage = 0
 	while stage <= Stages
 		anims[stage] = FetchPositionStage(position, (stage + 1))
@@ -141,7 +141,7 @@ string[] function FetchStage(int stage)
 		Log("Unknown stage, '"+stage+"' given", "FetchStage")
 		return none
 	endIf
-	string[] anims = StringArray(Actors)
+	string[] anims = PapyrusUtil.StringArray(Actors)
 	int position = 0
 	while position < Actors
 		anims[position] = FetchPositionStage(position, stage)
@@ -209,7 +209,7 @@ float[] function GetPositionAdjustments(string AdjustKey, int Position, int Stag
 endFunction
 
 float[] function GetAllAdjustments(string AdjustKey)
-	float[] Output = FloatArray((Stages * 4))
+	float[] Output = PapyrusUtil.FloatArray((Stages * 4))
 	JsonUtil.FloatListSlice(Profile, AdjustKey, Output)
 	return Output
 endFunction
@@ -234,7 +234,6 @@ float[] function PositionOffsets(float[] Output, string AdjustKey, int Position,
 	int n = AdjIndex(Stage)
 	; Check if we have any offsets
 	AdjustKey += "."+Position
-	Log(JsonUtil.FloatListCount(Profile, AdjustKey)+" < "+n+" == "+(JsonUtil.FloatListCount(Profile, AdjustKey) < n), AdjustKey)
 	if JsonUtil.FloatListCount(Profile, AdjustKey) < n
 		AdjustKey = StorageUtil.GetStringValue(Storage, Key("LastKey"), Key("Global"))+"."+Position
 	endIf
@@ -245,7 +244,6 @@ float[] function PositionOffsets(float[] Output, string AdjustKey, int Position,
 	Output[3] = 0.0
 	; Get adjustkey's adjustments
 	JsonUtil.FloatListSlice(Profile, AdjustKey, Output, n)
-	Log("Adjusts: "+Output)
 	Output[0] = Output[0] + Offsets[i] + CenterAdjust[(Stage - 1)] ; Forward
 	Output[1] = Output[1] + Offsets[(i + 1)] ; Side
 	Output[2] = Output[2] + Offsets[(i + 2)] ; Up
@@ -286,7 +284,7 @@ endFunction
 
 function UpdateAdjustment(string AdjustKey, int Position, int Stage, int Slot, float AdjustBy)
 	InitAdjustments(AdjustKey, Position)
-	Log("Adjusting["+AdjIndex(Stage, Slot)+"] - "+JsonUtil.FloatListAdjust(Profile, AdjustKey+"."+Position, AdjIndex(Stage, Slot), AdjustBy), AdjustKey)
+	JsonUtil.FloatListAdjust(Profile, AdjustKey+"."+Position, AdjIndex(Stage, Slot), AdjustBy)
 endFunction
 
 function UpdateAdjustmentAll(string AdjustKey, int Position, int Slot, float AdjustBy)
@@ -336,15 +334,13 @@ function InitAdjustments(string AdjustKey, int Position)
 	endIf
 	int i = AdjIndex(Stages, 3)
 	if JsonUtil.FloatListCount(Profile, AdjustKey+"."+Position) <= i
-		float[] Adjusts = FloatArray((Stages * 4))
+		float[] Adjusts = PapyrusUtil.FloatArray((Stages * 4))
 
 		string CopyKey = StorageUtil.GetStringValue(Storage, Key("LastKey"), Key("Global"))
-		; Log("CopyKey: "+CopyKey+" Count: "+JsonUtil.FloatListCount(Profile, CopyKey+"."+Position)+" Adjusts: "+Adjusts.Length, AdjustKey)
 		if JsonUtil.FloatListCount(Profile, CopyKey+"."+Position) == Adjusts.Length; && JsonUtil.StringListCount(Profile, Registry) > 0
 			Log("CopyKey ["+CopyKey+"] -> ["+AdjustKey+"]")
 			JsonUtil.FloatListSlice(Profile, CopyKey+"."+Position, Adjusts)
 		else
-			Log("Initialize Empty Key ["+AdjustKey+"]")
 			int n = Stages
 			while n > 0
 				Adjusts[AdjIndex(n, 3)] = AccessFlag(Position, n, 3)
@@ -352,7 +348,7 @@ function InitAdjustments(string AdjustKey, int Position)
 			endWhile
 		endIf
 		; Save initialized array.
-		string KeyPart = RemoveString(AdjustKey, Key(""))
+		string KeyPart = sslUtility.RemoveString(AdjustKey, Key(""))
 		JsonUtil.FloatListCopy(Profile, AdjustKey+"."+Position, Adjusts)
 		if KeyPart != "Global" && !JsonUtil.StringListHas(Profile, Registry, KeyPart)
 			JsonUtil.StringListAdd(Profile, "Adjusted", Registry, false)
@@ -385,7 +381,7 @@ endFunction
 
 string[] function GetAdjustKeys()
 	int i = JsonUtil.StringListCount(Profile, Registry)
-	string[] Output = sslUtility.StringArray(i + 1)
+	string[] Output = PapyrusUtil.StringArray(i + 1)
 	Output[i] = "Global"
 	while i
 		i -= 1
@@ -492,7 +488,7 @@ float function GetTimersRunTime(float[] StageTimers)
  		if HasTimer(Stage)
  			seconds += GetTimer(Stage)
  		elseIf Stage < LastStage
- 			seconds += StageTimers[sslUtility.ClampInt(Stage, 0, (LastTimer - 1))]
+ 			seconds += StageTimers[PapyrusUtil.ClampInt(Stage, 0, (LastTimer - 1))]
  		elseIf Stage >= LastStage
  			seconds += StageTimers[LastTimer]
  		endIf
@@ -545,7 +541,7 @@ function AddRaceID(string RaceID)
 	if i != -1
 		RaceIDs[i] = RaceID
 	else
-		RaceIDs = sslUtility.PushString(RaceID, RaceIDs)
+		RaceIDs = PapyrusUtil.PushString(RaceIDs, RaceID)
 	endIf
 	; Add global
 	StorageUtil.StringListAdd(Config, "SexLabCreatures", RaceID, false)
@@ -576,7 +572,7 @@ function SetStageSoundFX(int stage, Sound stageFX)
 	endIf
 	; Initialize fx array if needed
 	if StageSoundFX.Length != Stages
-		StageSoundFX = FormArray(Stages)
+		StageSoundFX = PapyrusUtil.FormArray(Stages)
 		int i = StageSoundFX.Length
 		while i
 			i -= 1
@@ -595,7 +591,7 @@ function SetStageTimer(int stage, float timer)
 	endIf
 	; Initialize timer array if needed
 	if Timers.Length != Stages
-		Timers = FloatArray(Stages)
+		Timers = PapyrusUtil.FloatArray(Stages)
 	endIf
 	; Set timer
 	Timers[(stage - 1)] = timer
@@ -630,11 +626,11 @@ endFunction
 
 function Save(int id = -1)
 	; Finalize config data
-	Flags      = TrimIntArray(Flags, sid)
-	Offsets    = TrimFloatArray(Offsets, sid)
-	Positions  = TrimIntArray(Positions, (Actors * 2))
-	Animations = TrimStringArray(Animations, aid)
-	RaceIDs    = ClearEmpty(RaceIDs)
+	Flags      = PapyrusUtil.ResizeIntArray(Flags, sid)
+	Offsets    = PapyrusUtil.ResizeFloatArray(Offsets, sid)
+	Positions  = PapyrusUtil.ResizeIntArray(Positions, (Actors * 2))
+	Animations = PapyrusUtil.ResizeStringArray(Animations, aid)
+	RaceIDs    = PapyrusUtil.ClearEmpty(RaceIDs)
 	; Create and add gender tag
 	string Tag
 	int i
@@ -651,7 +647,7 @@ function Save(int id = -1)
 	endWhile
 	AddTag(Tag)
 	; Init forward offset list
-	CenterAdjust = FloatArray(Stages)
+	CenterAdjust = PapyrusUtil.FloatArray(Stages)
 	if Actors > 1
 		int Stage = Stages
 		while Stage
@@ -698,9 +694,9 @@ function Initialize()
 	Flags        = new int[120]
 	Offsets      = new float[120]
 	Animations   = new string[30]
-	RaceIDs      = StringArray(0)
-	StageSoundFX = FormArray(0)
-	Timers       = FloatArray(0)
+	RaceIDs      = PapyrusUtil.StringArray(0)
+	StageSoundFX = PapyrusUtil.FormArray(0)
+	Timers       = PapyrusUtil.FloatArray(0)
 	parent.Initialize()
 endFunction
 
@@ -733,7 +729,7 @@ bool function _Update_AdjustKey_159c(string ProfilePath, string AdjustKey)
 		int Position
 		while Position < Actors
 			bool HasAdjustments = false
-			float[] Adjustments = sslUtility.FloatArray((Stages*4))
+			float[] Adjustments = PapyrusUtil.FloatArray((Stages*4))
 			int Stage = 0
 			while Stage < Stages
 				Stage += 1

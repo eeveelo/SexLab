@@ -1,6 +1,6 @@
 scriptname sslBaseExpression extends sslBaseObject
 
-import sslUtility
+import PapyrusUtil
 import MfgConsoleFunc
 
 ; Gender Types

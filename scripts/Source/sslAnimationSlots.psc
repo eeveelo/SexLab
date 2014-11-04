@@ -1,5 +1,6 @@
 scriptname sslAnimationSlots extends Quest
 
+import PapyrusUtil
 
 ; Animation storage
 string[] Registry
@@ -22,9 +23,9 @@ sslThreadLibrary property ThreadLib auto hidden
 ; ------------------------------------------------------- ;
 
 sslBaseAnimation[] function GetByTags(int ActorCount, string Tags, string TagsSuppressed = "", bool RequireAll = true)
-	string[] Suppress = sslUtility.ArgString(TagsSuppressed)
-	string[] Search   = sslUtility.ArgString(Tags)
-	bool[] Valid      = sslUtility.BoolArray(Slotted)
+	string[] Suppress = ArgString(TagsSuppressed)
+	string[] Search   = ArgString(Tags)
+	bool[] Valid      = BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
@@ -36,7 +37,7 @@ endFunction
 
 sslBaseAnimation[] function GetByType(int ActorCount, int Males = -1, int Females = -1, int StageCount = -1, bool Aggressive = false, bool Sexual = true)
 	; Search
-	bool[] Valid = sslUtility.BoolArray(Slotted)
+	bool[] Valid = BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -=1
@@ -78,7 +79,7 @@ sslBaseAnimation[] function GetByDefault(int Males, int Females, bool IsAggressi
 	bool SameSex = (Females == 2 && Males == 0) || (Males == 2 && Females == 0)
 
 	; Search
-	bool[] Valid = sslUtility.BoolArray(Slotted)
+	bool[] Valid = BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
@@ -120,7 +121,7 @@ endFunction
 
 sslBaseAnimation[] function RemoveTagged(sslBaseAnimation[] Anims, string Tags)
 	bool[] Valid  = FindTagged(Anims, Tags)
-	int found = sslUtility.CountTrue(Valid)
+	int found = CountBool(Valid, true)
 	if found == 0
 		return Anims
 	endIf
@@ -175,7 +176,7 @@ endFunction
 ; ------------------------------------------------------- ;
 
 int function CountTag(sslBaseAnimation[] Anims, string Tags)
-	string[] Checking = sslUtility.ArgString(Tags)
+	string[] Checking = PapyrusUtil.ArgString(Tags)
 	if Tags == "" || Checking.Length == 0
 		return 0
 	endIf
@@ -190,11 +191,11 @@ endFunction
 
 bool[] function FindTagged(sslBaseAnimation[] Anims, string Tags)
 	if Anims.Length < 1 || Tags == ""
-		return sslUtility.BoolArray(0)
+		return BoolArray(0)
 	endIf
 	int i = Anims.Length
-	bool[] Output = sslUtility.BoolArray(i)
-	string[] Checking = sslUtility.ArgString(Tags)
+	bool[] Output = BoolArray(i)
+	string[] Checking = PapyrusUtil.ArgString(Tags)
 	while i
 		i -= 1
 		Output[i] = Anims[i].HasOneTag(Checking)
@@ -231,30 +232,39 @@ bool function IsRegistered(string Registrar)
 endFunction
 
 sslBaseAnimation[] function GetList(bool[] Valid)
-	int i = sslUtility.CountTrue(Valid)
-	if i == 0
+	if !Valid || Valid.Length < 1 || Valid.Find(true) == -1
 		return none ; OR empty array?
 	endIf
-	string Anims
+	int i = CountBool(Valid, true)
+	int n = Valid.Find(true)
 	sslBaseAnimation[] Output = sslUtility.AnimationArray(i)
-	int pos = Valid.Find(true)
-	while pos != -1
+	; Load out array with valid animation slots
+	while n != -1
 		i -= 1
-		Output[i] = Slots[pos]
-		pos += 1
-		if pos < Slotted
-			pos = Valid.Find(true, pos)
+		Output[i] = Slots[n]
+		n += 1
+		if n < Slotted
+			n = Valid.Find(true, n)
 		else
-			pos = -1
+			n = -1
 		endIf
-		Anims += Output[i].Name+", "
 	endWhile
-	ThreadLib.Log("Found Animations("+Output.Length+"): "+Anims)
+	; Only bother with logging the selected animations if debug mode enabled.
+	if Config.DebugMode
+		string List = "SEXLAB - Found Animations - "
+		i = Output.Length
+		while i
+			i -= 1
+			List += "["+Output[i].Name+"] "
+		endWhile
+		Debug.Trace(List)
+		MiscUtil.PrintConsole(List)
+	endIf
 	return Output
 endFunction
 
 string[] function GetNames()
-	string[] Output = sslUtility.StringArray(Slotted)
+	string[] Output = StringArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1

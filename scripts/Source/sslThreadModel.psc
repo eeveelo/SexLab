@@ -160,7 +160,7 @@ state Making
 			return -1
 		endIf
 		; Update thread info
-		Positions  = sslUtility.PushActor(ActorRef, Positions)
+		Positions  = PapyrusUtil.PushActor(Positions, ActorRef)
 		ActorCount = Positions.Length
 		HasPlayer  = Positions.Find(PlayerRef) != -1
 		; Flag as victim
@@ -437,15 +437,15 @@ int function GetHighestPresentRelationshipRank(Actor ActorRef)
 	if ActorCount == 1
 		return 0 ; No special relationship with yourself...
 	elseIf ActorCount == 2
-		return ActorRef.GetRelationshipRank(Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)]) ; Get opposing actors relationship rank
+		return ActorRef.GetRelationshipRank(Positions[PapyrusUtil.IndexTravel(Positions.Find(ActorRef), ActorCount)]) ; Get opposing actors relationship rank
 	endIf
 	; Next position
-	Actor NextActor = Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)]
+	Actor NextActor = Positions[PapyrusUtil.IndexTravel(Positions.Find(ActorRef), ActorCount)]
 	int Highest = ActorRef.GetRelationshipRank(NextActor)
 	int exit = 5
 	; loop through each position until reaching ActorRef
 	while NextActor != ActorRef && exit > 0
-		NextActor = Positions[sslUtility.IndexTravel(Positions.Find(NextActor), ActorCount)]
+		NextActor = Positions[PapyrusUtil.IndexTravel(Positions.Find(NextActor), ActorCount)]
 		if NextActor != ActorRef && ActorRef.GetRelationshipRank(NextActor) > Highest
 			Highest = ActorRef.GetRelationshipRank(NextActor)
 		endIf
@@ -459,11 +459,11 @@ int function GetLowestPresentRelationshipRank(Actor ActorRef)
 		return GetHighestPresentRelationshipRank(ActorRef) ; Results will be same for 1 and 2 actors
 	endIf
 	; Next position
-	Actor NextActor = Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)]
+	Actor NextActor = Positions[PapyrusUtil.IndexTravel(Positions.Find(ActorRef), ActorCount)]
 	int Lowest = ActorRef.GetRelationshipRank(NextActor)
 	; loop through each position until reaching ActorRef
 	while NextActor != ActorRef
-		NextActor = Positions[sslUtility.IndexTravel(Positions.Find(NextActor), ActorCount)]
+		NextActor = Positions[PapyrusUtil.IndexTravel(Positions.Find(NextActor), ActorCount)]
 		if NextActor != ActorRef && ActorRef.GetRelationshipRank(NextActor) < Lowest
 			Lowest = ActorRef.GetRelationshipRank(NextActor)
 		endIf
@@ -473,7 +473,7 @@ endFunction
 
 function ChangeActors(Actor[] NewPositions)
 	int[] NewGenders = ActorLib.GenderCount(NewPositions)
-	if HasCreature || NewGenders[2] > 0 || sslUtility.AddIntValues(NewGenders) == 0
+	if HasCreature || NewGenders[2] > 0 || PapyrusUtil.AddIntValues(NewGenders) == 0
 		return
 	endIf
 	; Enter making state for alterations
@@ -648,13 +648,13 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function SetHook(string AddHooks)
-	string[] Setting = sslUtility.ArgString(AddHooks)
+	string[] Setting = PapyrusUtil.ArgString(AddHooks)
 	int i = Setting.Length
 	while i
 		i -= 1
 		if Setting[i] != "" && Hooks.Find(Setting[i]) == -1
 			AddTag(Setting[i])
-			Hooks = sslUtility.PushString(Setting[i], Hooks)
+			Hooks = PapyrusUtil.PushString(Hooks, Setting[i])
 		endIf
 	endWhile
 endFunction
@@ -668,7 +668,7 @@ string[] function GetHooks()
 endFunction
 
 function RemoveHook(string DelHooks)
-	string[] Removing = sslUtility.ArgString(DelHooks)
+	string[] Removing = PapyrusUtil.ArgString(DelHooks)
 	string[] NewHooks
 	int i = Hooks.Length
 	while i
@@ -676,7 +676,7 @@ function RemoveHook(string DelHooks)
 		if Removing.Find(Hooks[i]) != -1
 			RemoveTag(Hooks[i])
 		else
-			NewHooks = sslUtility.PushString(Hooks[i], NewHooks)
+			NewHooks = PapyrusUtil.PushString(NewHooks, Hooks[i])
 		endIf
 	endWhile
 	Hooks = NewHooks
@@ -696,7 +696,7 @@ bool function AddTag(string Tag)
 	endIf
 	int i = Tags.Find(Tag)
 	if i == -1
-		Tags = sslUtility.PushString(Tag, Tags)
+		Tags = PapyrusUtil.PushString(Tags, Tag)
 	else
 		Tags[i] = Tag
 	endIf
@@ -935,10 +935,10 @@ function Initialize()
 	SkillXP        = new float[6]
 	SkillBonus     = new float[6]
 	; Storage Data
-	Positions         = sslUtility.ActorArray(0)
-	Hooks             = sslUtility.StringArray(0)
-	Tags              = sslUtility.StringArray(0)
-	CustomTimers      = sslUtility.FloatArray(0)
+	Positions         = PapyrusUtil.ActorArray(0)
+	Hooks             = PapyrusUtil.StringArray(0)
+	Tags              = PapyrusUtil.StringArray(0)
+	CustomTimers      = PapyrusUtil.FloatArray(0)
 	CustomAnimations  = sslUtility.AnimationArray(0)
 	PrimaryAnimations = sslUtility.AnimationArray(0)
 	LeadAnimations    = sslUtility.AnimationArray(0)
@@ -975,6 +975,13 @@ endFunction
 function SetTID(int value)
 	thread_id = value
 
+	EventTypes = new string[5]
+	EventTypes[0] = "Sync"
+	EventTypes[1] = "Prepare"
+	EventTypes[2] = "Reset"
+	EventTypes[3] = "Strip"
+	EventTypes[4] = "Orgasm"
+
 	ActorAlias = new sslActorAlias[5]
 	ActorAlias[0] = GetNthAlias(0) as sslActorAlias
 	ActorAlias[1] = GetNthAlias(1) as sslActorAlias
@@ -988,19 +995,33 @@ function SetTID(int value)
 	ActorAlias[3].Setup()
 	ActorAlias[4].Setup()
 
-	EventTypes = new string[5]
-	EventTypes[0] = "Sync"
-	EventTypes[1] = "Prepare"
-	EventTypes[2] = "Reset"
-	EventTypes[3] = "Strip"
-	EventTypes[4] = "Orgasm"
-
-	Config        = SexLabUtil.GetConfig()
-	ActorLib      = Config.ActorLib
-	ThreadLib     = Config.ThreadLib
-	AnimSlots     = Config.AnimSlots
-	CreatureSlots = Config.CreatureSlots
-	PlayerRef     = Config.PlayerRef
+	; Sync Player
+	if !PlayerRef
+		PlayerRef = Game.GetPlayer()
+	endIf
+	; Sync function Libraries - SexLabQuestFramework
+	if !Config || !ThreadLib || !ActorLib
+		Form SexLabQuestFramework  = Game.GetFormFromFile(0xD62, "SexLab.esm")
+		if SexLabQuestFramework
+			Config      = SexLabQuestFramework as sslSystemConfig
+			ThreadLib   = SexLabQuestFramework as sslThreadLibrary
+			ActorLib    = SexLabQuestFramework as sslActorLibrary
+		endIf
+	endIf
+	; Sync animation registry - SexLabQuestAnimations
+	if !AnimSlots
+		Form SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm")
+		if SexLabQuestAnimations
+			AnimSlots = SexLabQuestAnimations as sslAnimationSlots
+		endIf
+	endIf
+	; Sync secondary object registry - SexLabQuestRegistry
+	if !CreatureSlots
+		Form SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm")
+		if SexLabQuestRegistry
+			CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
+		endIf
+	endIf
 
 	Initialize()
 	Log("Initialized", "Thread["+thread_id+"]")
@@ -1088,3 +1109,12 @@ endfunction
 function SetBedding(int flag = 0)
 	SetBedFlag(flag)
 endFunction
+
+function TestEvent(string eventName, bool withPlayer = false) global
+	sslThreadController Thread = SexLabUtil.GetAPI().Threads[2]
+	Thread._SetupID(Thread.tid)
+	Thread._SendThreadEvent(eventName, withPlayer)
+endFunction
+
+bool function _SendThreadEvent(string eventName, bool withPlayer) native
+function _SetupID(int threadID) native

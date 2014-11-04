@@ -1,6 +1,6 @@
 scriptname sslVoiceSlots extends Quest
 
-import sslUtility
+import PapyrusUtil
 import StorageUtil
 
 ; Voices storage
@@ -142,7 +142,7 @@ sslBaseVoice[] function GetList(bool[] Valid)
 		return none ; OR empty array?
 	endIf
 	string Found
-	sslBaseVoice[] Output = VoiceArray(i)
+	sslBaseVoice[] Output = sslUtility.VoiceArray(i)
 	int pos = Valid.Find(true)
 	while pos != -1
 		i -= 1

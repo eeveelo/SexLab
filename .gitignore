@@ -2,3 +2,6 @@ SexLab.esp
 meta.ini
 *.zip
 *.7z
+*sla*psc
+*sla*pex
+*.esp

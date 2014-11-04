@@ -311,7 +311,7 @@ endFunction
 Armor function LoadStrapon(string esp, int id)
 	Armor Strapon = Game.GetFormFromFile(id, esp) as Armor
 	if Strapon
-		Strapons = sslUtility.PushForm(Strapon, Strapons)
+		Strapons = PapyrusUtil.PushForm(Strapons, Strapon)
 	endif
 	return Strapon
 endFunction
@@ -520,6 +520,7 @@ endFunction
 ; ------------------------------------------------------- ;
 
 bool function CheckSystem()
+	return true
 	; Check Skyrim Version
 	if (StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float) < 1.9
 		CheckSkyrim.Show()
@@ -529,20 +530,20 @@ bool function CheckSystem()
 		CheckSKSE.Show(1.71)
 		return false
 	; Check SkyUI install - depends on passing SKSE check passing
-	elseIf Quest.GetQuest("SKI_ConfigManagerInstance") == none
-		CheckSkyUI.Show(4.1)
-		return false
+	; elseIf Quest.GetQuest("SKI_ConfigManagerInstance") == none
+		; CheckSkyUI.Show(4.1)
+		; return false
 	; Check SexLabUtil install - this should never happen if they have properly updated
-	elseIf SexLabUtil.GetPluginVersion() < 15903
-		CheckSexLabUtil.Show()
-		return false
+	; elseIf SexLabUtil.GetPluginVersion() < 15903
+		; CheckSexLabUtil.Show()
+		; return false
 	; Check PapyrusUtil install - depends on passing SKSE check passing
-	elseIf PapyrusUtil.GetVersion() < 28
-		CheckPapyrusUtil.Show(2.8)
-		return false
+	; elseIf PapyrusUtil.GetVersion() < 28
+		; CheckPapyrusUtil.Show(2.8)
+		; return false
 	; Check FNIS generation - soft fail
-	elseIf !FNIS.IsGenerated()
-		CheckFNIS.Show()
+	; elseIf !FNIS.IsGenerated()
+		; CheckFNIS.Show()
 	endIf
 	; Return result
 	return true
@@ -600,30 +601,37 @@ endFunction
 
 
 function Reload()
+	Debug.Trace("Reload - Setup")
 	Setup()
-	; TFC Toggle key
-	UnregisterForAllKeys()
-	RegisterForKey(ToggleFreeCamera)
-	RegisterForKey(TargetActor)
+	Debug.Trace("Reload - Volume")
 	; Configure SFX & Voice volumes
 	AudioVoice.SetVolume(VoiceVolume)
 	AudioSFX.SetVolume(SFXVolume)
 	; Remove any targeted actors
+	Debug.Trace("Reload - ChrosshairRef")
 	RegisterForCrosshairRef()
 	CrosshairRef = none
-	TargetRef = none
+	TargetRef    = none
+	Debug.Trace("Reload - TFC Key")
+
+	; TFC Toggle key
+	UnregisterForAllKeys()
+	RegisterForKey(ToggleFreeCamera)
+	RegisterForKey(TargetActor)
+	Debug.Trace("Reload - Player Control")
 	; Remove any NPC thread control player has
 	DisableThreadControl(Control)
 	; Validate tracked factions & actors
-	ValidateTrackedActors()
-	ValidateTrackedFactions()
+	; ValidateTrackedActors()
+	; ValidateTrackedFactions()
 	; Cleanup phantom slots with missing owners
-	SexLab.Factory.Cleanup()
+	; SexLab.Factory.Cleanup()
+	Debug.Trace("Reload - Finished")
 endFunction
 
 function SetDefaults()
-	SexLab = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework
 	PlayerRef = Game.GetPlayer()
+	SexLab    = Game.GetFormFromFile(0xD62, "SexLab.esm") as SexLabFramework
 
 	; Booleans
 	RestrictAggressive = true

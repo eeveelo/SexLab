@@ -77,7 +77,7 @@ Actor[] function FindAvailablePartners(actor[] Positions, int total, int males =
 			return Positions ; None means no actor in radius, give up now
 		elseIf Positions.Find(FoundRef) == -1
 			; Add actor
-			Positions = sslUtility.PushActor(FoundRef, Positions)
+			Positions = PapyrusUtil.PushActor(Positions, FoundRef)
 			; Update search counts
 			int gender = ActorLib.GetGender(FoundRef)
 			males -= (gender == 0) as int
@@ -96,7 +96,7 @@ Actor[] function SortActors(Actor[] Positions, bool FemaleFirst = true)
 		return Positions ; Why reorder a single actor?
 	endIf
 	int PriorityGender = (FemaleFirst as int)
-	Actor[] Sorted = sslUtility.ActorArray(ActorCount)
+	Actor[] Sorted = PapyrusUtil.ActorArray(ActorCount)
 	int i
 	while i < ActorCount
 		; Fill actor into sorted array

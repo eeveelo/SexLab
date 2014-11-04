@@ -36,7 +36,7 @@ bool function AddTag(string Tag)
 	endIf
 	int i = Tags.Find(Tag)
 	if i == -1
-		Tags = sslUtility.PushString(Tag, Tags)
+		Tags = PapyrusUtil.PushString(Tags, Tag)
 	else
 		Tags[i] = Tag
 	endIf
