@@ -15,35 +15,51 @@ function SetFreeCameraState(bool enable, float speed = 10.0) global native
 
 
 ;/
-	Animation functions
-/;
-
-; Get node rotation
-float function GetNodeRotation(ObjectReference obj, string nodeName, bool firstPerson, int rotationIndex) global native
-
-
-
-;/
 	Misc
 /;
 
 ; Print text to console.
 function PrintConsole(string text) global native
 
-; Set HUD on / off
-function SetMenus(bool enabled) global native
-
-; Bat console command.
-function ExecuteBat(string fileName) global native
-
-; Read string from file. Do not read large files!
-string function ReadFromFile(string fileName) global native
-
-; Write string to file.
-bool function WriteToFile(string fileName, string text, bool append = true, bool timestamp = false) global native
-
 ; Get race's editor ID.
 string function GetRaceEditorID(Race raceForm) global native
 
 ; Get race's editor ID.
 string function GetActorRaceEditorID(Actor actorRef) global native
+
+; Set HUD on / off
+function SetMenus(bool enabled) global native
+
+
+; Get node rotation
+; REMOVED v2.9: Useless, only does a part of the job.
+; float function GetNodeRotation(ObjectReference obj, string nodeName, bool firstPerson, int rotationIndex) global native
+
+; Bat console command.
+; REMOVED v2.9: Unused.
+; function ExecuteBat(string fileName) global native
+
+; Read string from file. Do not read large files!
+; REMOVED v2.9: Unused.
+; string function ReadFromFile(string fileName) global native
+
+; Write string to file.
+; REMOVED v2.9: Unused.
+; bool function WriteToFile(string fileName, string text, bool append = true, bool timestamp = false) global native
+
+
+float function GetNodeRotation(ObjectReference obj, string nodeName, bool firstPerson, int rotationIndex) global
+	Debug.TraceStack("MiscUtil.GetNodeRotation("+obj+", "+nodeName+") - REMOVED FUNCTION")
+	return 0.0
+endFunction
+bool function WriteToFile(string fileName, string text, bool append = true, bool timestamp = false) global
+	Debug.TraceStack("MiscUtil.WriteToFile("+fileName+") - REMOVED FUNCTION")
+	return false
+endFunction
+string function ReadFromFile(string fileName) global
+	Debug.TraceStack("MiscUtil.ReadFromFile("+fileName+") - REMOVED FUNCTION")
+	return ""
+endFunction
+function ExecuteBat(string fileName) global
+	Debug.TraceStack("MiscUtil.ExecuteBat("+fileName+") - REMOVED FUNCTION")
+endFunction

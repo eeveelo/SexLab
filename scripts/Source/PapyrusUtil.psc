@@ -3,6 +3,433 @@ scriptname PapyrusUtil Hidden
 ; Get version of papyrus library. For version 2.8 will be returned 28.
 int function GetVersion() global native
 
+;/-----------------------------------------------\;
+;|	Float Utility Functions
+;\-----------------------------------------------/;
+
+
+function FloatCopyTo(float[] SourceArray, float[] ToArray, int StartIndex = 0, int EndIndex = -1, bool SkipEmpty = false) global native
+int function CountFloat(float[] Values, float EqualTo = 0.0) global native
+float function AddFloatValues(float[] Values) global native
+float function SignFloat(bool doSign, float value) global native
+float function ClampFloat(float value, float min, float max) global native
+float function WrapFloat(float value, float end, float start = 0.0) global native
+
+float[] function ResizeFloatArray(float[] Array, int ToSize) global
+	if ToSize == Array.Length
+		return Array
+	elseIf ToSize < 1
+		return FloatArray(0)
+	elseIf ToSize > 128
+		ToSize = 128
+	endIf
+	float[] Output = FloatArray(ToSize)
+	FloatCopyTo(Array, Output)
+	return Output
+endFunction
+
+float[] function PushFloat(float[] Array, float var) global
+	int end = Array.Length
+	if end >= 128
+		return Array
+	endIf
+	float[] Output = FloatArray(end+1)
+	FloatCopyTo(Array, Output)
+	Output[end] = var
+	return Output
+endFunction
+
+float[] function MergeFloatArray(float[] Output, float[] Append) global
+	int OutputLength = Output.length
+	int AppendLength = Append.Length
+	if OutputLength == 0 && AppendLength == 0
+		return FloatArray(0)
+	elseIf OutputLength == 0 && AppendLength > 0
+		return Append
+	elseIf AppendLength == 0 && OutputLength > 0
+		return Output
+	endIf
+	Output = ResizeFloatArray(Output, (OutputLength+AppendLength))
+	FloatCopyTo(Append, Output, OutputLength)
+	return Output
+endFunction
+
+
+;/-----------------------------------------------\;
+;|	Integer Utility Functions
+;\-----------------------------------------------/;
+
+function IntCopyTo(int[] SourceArray, int[] ToArray, int StartIndex = 0, int EndIndex = -1, bool SkipEmpty = false) global native
+int function CountInt(int[] Values, int EqualTo = 0) global native
+int function AddIntValues(int[] Values) global native
+int function SignInt(bool doSign, int value) global native
+int function ClampInt(int value, int min, int max) global native
+int function WrapInt(int value, int end, int start = 0) global native
+
+int[] function ResizeIntArray(int[] Array, int ToSize) global
+	if ToSize == Array.Length
+		return Array
+	elseIf ToSize < 1
+		return IntArray(0)
+	elseIf ToSize > 128
+		ToSize = 128
+	endIf
+	int[] Output = IntArray(ToSize)
+	IntCopyTo(Array, Output)
+	return Output
+endFunction
+
+int[] function PushInt(int[] Array, int var) global
+	int end = Array.Length
+	if end >= 128
+		return Array
+	endIf
+	int[] Output = IntArray(end+1)
+	IntCopyTo(Array, Output)
+	Output[end] = var
+	return Output
+endFunction
+
+int[] function MergeIntArray(int[] Output, int[] Append) global
+	int OutputLength = Output.length
+	int AppendLength = Append.Length
+	if OutputLength == 0 && AppendLength == 0
+		return IntArray(0)
+	elseIf OutputLength == 0 && AppendLength > 0
+		return Append
+	elseIf AppendLength == 0 && OutputLength > 0
+		return Output
+	endIf
+	Output = ResizeIntArray(Output, (OutputLength+AppendLength))
+	IntCopyTo(Append, Output, OutputLength)
+	return Output
+endFunction
+
+int[] function SliceIntArray(int[] Array, int StartIndex = 0, int EndIndex = -1) global
+	int len = Array.Length
+	if StartIndex >= len || (StartIndex == 0 && EndIndex == -1) || (EndIndex <= StartIndex && EndIndex != -1)
+		return Array
+	elseIf EndIndex >= len || EndIndex == -1
+		EndIndex = len - 1
+	endIf
+	int[] Output = IntArray((EndIndex - StartIndex) + 1)
+	; IntCopyTo(Array, Output, StartIndex, EndIndex)
+	int i = Output.Length
+	while i
+		i -= 1
+		Output[i] = Array[EndIndex]
+		EndIndex -= 1
+	endWhile
+	return Output
+endFunction
+
+int function IndexTravel(int CurrentIndex, int ArrayLength, bool Reverse = false) global
+	if Reverse
+		CurrentIndex -= 1
+	else
+		CurrentIndex += 1
+	endIf
+	if CurrentIndex >= ArrayLength
+		return 0
+	elseif CurrentIndex < 0
+		return ArrayLength - 1
+	endIf
+	return CurrentIndex
+endFunction
+
+;/-----------------------------------------------\;
+;|	Boolean Utility Functions
+;\-----------------------------------------------/;
+
+function BoolCopyTo(bool[] SourceArray, bool[] ToArray, int StartIndex = 0, int EndIndex = -1, bool SkipEmpty = false) global native
+int function CountBool(bool[] Values, bool EqualTo = false) global native
+
+int function CountFalse(bool[] Values) global
+	return CountBool(Values, false)
+endFunction
+int function CountTrue(bool[] Values) global
+	return CountBool(Values, true)
+endFunction
+
+bool[] function ResizeBoolArray(bool[] Array, int ToSize) global
+	if ToSize == Array.Length
+		return Array
+	elseIf ToSize < 1
+		return BoolArray(0)
+	elseIf ToSize > 128
+		ToSize = 128
+	endIf
+	bool[] Output = BoolArray(ToSize)
+	BoolCopyTo(Array, Output)
+	return Output
+endFunction
+
+bool[] function PushBool(bool[] Array, bool var) global
+	int end = Array.Length
+	if end >= 128
+		return Array
+	endIf
+	bool[] Output = BoolArray(end+1)
+	BoolCopyTo(Array, Output)
+	Output[end] = var
+	return Output
+endFunction
+
+bool[] function MergeBoolArray(bool[] Output, bool[] Append) global
+	int OutputLength = Output.length
+	int AppendLength = Append.Length
+	if OutputLength == 0 && AppendLength == 0
+		return BoolArray(0)
+	elseIf OutputLength == 0 && AppendLength > 0
+		return Append
+	elseIf AppendLength == 0 && OutputLength > 0
+		return Output
+	endIf
+	Output = ResizeBoolArray(Output, (OutputLength+AppendLength))
+	BoolCopyTo(Append, Output, OutputLength)
+	return Output
+endFunction
+
+;/-----------------------------------------------\;
+;|	String Utility Functions
+;\-----------------------------------------------/;
+
+function StringCopyTo(string[] SourceArray, string[] ToArray, int StartIndex = 0, int EndIndex = -1, bool SkipEmpty = false) global native
+int function CountString(string[] Values, string EqualTo = "") global native
+int function ArgStringCount(string ArgString, string Delimiter = ",") global native
+string function ArgStringNth(int Nth, string ArgString, string Delimiter = ",") global native
+function ArgStringLoad(string[] Output, string ArgString, string Delimiter = ",") global native
+
+string[] function ResizeStringArray(string[] Array, int ToSize) global
+	if ToSize == Array.Length
+		return Array
+	elseIf ToSize < 1
+		return StringArray(0)
+	elseIf ToSize > 128
+		ToSize = 128
+	endIf
+	string[] Output = StringArray(ToSize)
+	StringCopyTo(Array, Output)
+	return Output
+endFunction
+
+string[] function PushString(string[] Array, string var) global
+	int end = Array.Length
+	if end >= 128
+		return Array
+	endIf
+	string[] Output = StringArray(end+1)
+	StringCopyTo(Array, Output)
+	Output[end] = var
+	return Output
+endFunction
+
+string[] function MergeStringArray(string[] Output, string[] Append) global
+	int OutputLength = Output.length
+	int AppendLength = Append.Length
+	if OutputLength == 0 && AppendLength == 0
+		return StringArray(0)
+	elseIf OutputLength == 0 && AppendLength > 0
+		return Append
+	elseIf AppendLength == 0 && OutputLength > 0
+		return Output
+	endIf
+	Output = ResizeStringArray(Output, (OutputLength+AppendLength))
+	StringCopyTo(Append, Output, OutputLength)
+	return Output
+endFunction
+
+string[] function ClearEmpty(string[] Array) global
+	int Count = (Array.Length - CountString(Array, ""))
+	if Count < 1
+		return StringArray(0)
+	elseif Count == Array.Length
+		return Array
+	endIf
+	string[] Output = StringArray(Count)
+	StringCopyTo(Array, Output, 0, -1, true)
+	return Output
+endFunction
+
+string[] function ArgString(string ArgString, string Delimiter = ",") global
+	; Empty args
+	if ArgString == "" || Delimiter == "" || ArgString == Delimiter
+		return StringArray(0)
+	endIf
+	string[] Output = StringArray(ArgStringCount(ArgString, Delimiter))
+	ArgStringLoad(Output, ArgString, Delimiter)
+	return Output
+endFunction
+
+string function MakeArgs(string delimiter, string arg1, string arg2 = "", string arg3 = "", string arg4 = "", string arg5 = "") global
+	if arg2 != ""
+		arg1 += delimiter+arg2
+	endIf
+	if arg3 != ""
+		arg1 += delimiter+arg3
+	endIf
+	if arg4 != ""
+		arg1 += delimiter+arg4
+	endIf
+	if arg5 != ""
+		arg1 += delimiter+arg5
+	endIf
+	return arg1
+endFunction
+
+;/-----------------------------------------------\;
+;|	Form Utility Functions
+;\-----------------------------------------------/;
+
+function FormCopyTo(Form[] SourceArray, Form[] ToArray, int StartIndex = 0, int EndIndex = -1, bool SkipEmpty = false) global native
+int function CountForm(Form[] Values, Form EqualTo = none) global native
+
+Form[] function ResizeFormArray(Form[] Array, int ToSize) global
+	if ToSize == Array.Length
+		return Array
+	elseIf ToSize < 1
+		return FormArray(0)
+	elseIf ToSize > 128
+		ToSize = 128
+	endIf
+	Form[] Output = FormArray(ToSize)
+	FormCopyTo(Array, Output)
+	return Output
+endFunction
+
+Form[] function PushForm(Form[] Array, Form var) global
+	int end = Array.Length
+	if end >= 128
+		return Array
+	endIf
+	Form[] Output = FormArray(end+1)
+	FormCopyTo(Array, Output)
+	Output[end] = var
+	return Output
+endFunction
+
+Form[] function MergeFormArray(Form[] Output, Form[] Append) global
+	int OutputLength = Output.length
+	int AppendLength = Append.Length
+	if OutputLength == 0 && AppendLength == 0
+		return FormArray(0)
+	elseIf OutputLength == 0 && AppendLength > 0
+		return Append
+	elseIf AppendLength == 0 && OutputLength > 0
+		return Output
+	endIf
+	Output = ResizeFormArray(Output, (OutputLength+AppendLength))
+	FormCopyTo(Append, Output, OutputLength)
+	return Output
+endFunction
+
+Form[] function ClearNone(Form[] Array) global
+	int Count = (Array.Length - CountForm(Array, none))
+	if Count < 1
+		return FormArray(0)
+	elseif Count == Array.Length
+		return Array
+	endIf
+	form[] Output = FormArray(Count)
+	FormCopyTo(Array, Output, 0, -1, true)
+	return Output
+endFunction
+
+;/-----------------------------------------------\;
+;|	Actor Utility Functions
+;\-----------------------------------------------/;
+
+function ActorCopyTo(Actor[] SourceArray, Actor[] ToArray, int StartIndex = 0, int EndIndex = -1, bool SkipEmpty = false) global native
+int function CountActor(Actor[] Values, Actor EqualTo = none) global native
+
+Actor[] function ResizeActorArray(Actor[] Array, int ToSize) global
+	if ToSize == Array.Length
+		return Array
+	elseIf ToSize < 1
+		return ActorArray(0)
+	elseIf ToSize > 128
+		ToSize = 128
+	endIf
+	Actor[] Output = ActorArray(ToSize)
+	ActorCopyTo(Array, Output)
+	return Output
+endFunction
+
+Actor[] function PushActor(Actor[] Array, Actor var) global
+	int end = Array.Length
+	if end >= 128
+		return Array
+	endIf
+	Actor[] Output = ActorArray(end+1)
+	ActorCopyTo(Array, Output)
+	Output[end] = var
+	return Output
+endFunction
+
+Actor[] function MergeActorArray(Actor[] Output, Actor[] Append) global
+	int OutputLength = Output.length
+	int AppendLength = Append.Length
+	if OutputLength == 0 && AppendLength == 0
+		return ActorArray(0)
+	elseIf OutputLength == 0 && AppendLength > 0
+		return Append
+	elseIf AppendLength == 0 && OutputLength > 0
+		return Output
+	endIf
+	Output = ResizeActorArray(Output, (OutputLength+AppendLength))
+	ActorCopyTo(Append, Output, OutputLength)
+	return Output
+endFunction
+
+;/-----------------------------------------------\;
+;|	ObjectReference Utility Functions
+;\-----------------------------------------------/;
+
+function ObjectReferenceCopyTo(ObjectReference[] SourceArray, ObjectReference[] ToArray, int StartIndex = 0, int EndIndex = -1, bool SkipEmpty = false) global native
+int function CountObjectReference(ObjectReference[] Values, ObjectReference EqualTo = none) global native
+
+ObjectReference[] function ResizeObjectReferenceArray(ObjectReference[] Array, int ToSize) global
+	if ToSize == Array.Length
+		return Array
+	elseIf ToSize < 1
+		return ObjectReferenceArray(0)
+	elseIf ToSize > 128
+		ToSize = 128
+	endIf
+	ObjectReference[] Output = ObjectReferenceArray(ToSize)
+	ObjectReferenceCopyTo(Array, Output)
+	return Output
+endFunction
+
+ObjectReference[] function PushObjectReference(ObjectReference[] Array, ObjectReference var) global
+	int end = Array.Length
+	if end >= 128
+		return Array
+	endIf
+	ObjectReference[] Output = ObjectReferenceArray(end+1)
+	ObjectReferenceCopyTo(Array, Output)
+	Output[end] = var
+	return Output
+endFunction
+
+ObjectReference[] function MergeObjectReferenceArray(ObjectReference[] Output, ObjectReference[] Append) global
+	int OutputLength = Output.length
+	int AppendLength = Append.Length
+	if OutputLength == 0 && AppendLength == 0
+		return ObjectReferenceArray(0)
+	elseIf OutputLength == 0 && AppendLength > 0
+		return Append
+	elseIf AppendLength == 0 && OutputLength > 0
+		return Output
+	endIf
+	Output = ResizeObjectReferenceArray(Output, (OutputLength+AppendLength))
+	ObjectReferenceCopyTo(Append, Output, OutputLength)
+	return Output
+endFunction
+
+
+
+
 
 ; ##
 ; ## Variable sized arrays:
@@ -24,7 +451,7 @@ int function GetVersion() global native
 
 float[] function FloatArray(int size) global
 	if size < 8
-		if size == 0
+		if size <= 0
 			float[] Empty
 			return Empty
 		elseIf size == 1
@@ -318,7 +745,7 @@ float[] function FloatArray(int size) global
 endFunction
 int[] function IntArray(int size) global
 	if size < 8
-		if size == 0
+		if size <= 0
 			int[] Empty
 			return Empty
 		elseIf size == 1
@@ -612,7 +1039,7 @@ int[] function IntArray(int size) global
 endFunction
 bool[] function BoolArray(int size) global
 	if size < 8
-		if size == 0
+		if size <= 0
 			bool[] Empty
 			return Empty
 		elseIf size == 1
@@ -906,7 +1333,7 @@ bool[] function BoolArray(int size) global
 endFunction
 string[] function StringArray(int size) global
 	if size < 8
-		if size == 0
+		if size <= 0
 			string[] Empty
 			return Empty
 		elseIf size == 1
@@ -1203,7 +1630,7 @@ endFunction
 
 Form[] function FormArray(int size) global
 	if size < 8
-		if size == 0
+		if size <= 0
 			Form[] Empty
 			return Empty
 		elseIf size == 1
@@ -1497,7 +1924,7 @@ Form[] function FormArray(int size) global
 endFunction
 ObjectReference[] function ObjectReferenceArray(int size) global
 	if size < 8
-		if size == 0
+		if size <= 0
 			ObjectReference[] Empty
 			return Empty
 		elseIf size == 1
@@ -1791,7 +2218,7 @@ ObjectReference[] function ObjectReferenceArray(int size) global
 endFunction
 Actor[] function ActorArray(int size) global
 	if size < 8
-		if size == 0
+		if size <= 0
 			Actor[] Empty
 			return Empty
 		elseIf size == 1
