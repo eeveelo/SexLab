@@ -182,14 +182,12 @@ float function GetVoiceDelay(bool IsFemale = false, int Stage = 1, bool IsSilent
 	if IsSilent
 		return 3.0 ; Return basic delay for loop
 	endIf
-	float VoiceDelay
+	float VoiceDelay = MaleVoiceDelay
 	if IsFemale
 		VoiceDelay = FemaleVoiceDelay
-	else
-		VoiceDelay = MaleVoiceDelay
 	endIf
 	if Stage > 1
-		VoiceDelay -= (Stage * 0.8) + Utility.RandomFloat(-0.4, 0.4)
+		VoiceDelay -= (Stage * 0.8) + Utility.RandomFloat(-0.2, 0.4)
 		if VoiceDelay < 0.8
 			return Utility.RandomFloat(0.8, 1.3) ; Can't have delay shorter than animation update loop
 		endIf
@@ -278,44 +276,43 @@ endFunction
 function LoadStrapons()
 	Strapons = new form[1]
 	Strapons[0] = CalypsStrapon
-	int i = Game.GetModCount()
-	while i
-		i -= 1
-		string Name = Game.GetModName(i)
-		if Name == "StrapOnbyaeonv1.1.esp"
-			LoadStrapon("StrapOnbyaeonv1.1.esp", 0x0D65)
-		elseif Name == "TG.esp"
-			LoadStrapon("TG.esp", 0x0182B)
-		elseif Name == "Futa equippable.esp"
-			LoadStrapon("Futa equippable.esp", 0x0D66)
-			LoadStrapon("Futa equippable.esp", 0x0D67)
-			LoadStrapon("Futa equippable.esp", 0x01D96)
-			LoadStrapon("Futa equippable.esp", 0x022FB)
-			LoadStrapon("Futa equippable.esp", 0x022FC)
-			LoadStrapon("Futa equippable.esp", 0x022FD)
-		elseif Name == "Skyrim_Strap_Ons.esp"
-			LoadStrapon("Skyrim_Strap_Ons.esp", 0x00D65)
-			LoadStrapon("Skyrim_Strap_Ons.esp", 0x02859)
-			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285A)
-			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285B)
-			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285C)
-			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285D)
-			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285E)
-			LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285F)
-		elseif Name == "SOS Equipable Schlong.esp"
-			LoadStrapon("SOS Equipable Schlong.esp", 0x0D62)
-		endif
-	endWhile
+
+	if Game.GetModByName("StrapOnbyaeonv1.1.esp") != 255
+		LoadStrapon("StrapOnbyaeonv1.1.esp", 0x0D65)
+	endIf
+	if Game.GetModByName("TG.esp") != 255
+		LoadStrapon("TG.esp", 0x0182B)
+	endIf
+	if Game.GetModByName("Futa equippable.esp") != 255
+		LoadStrapon("Futa equippable.esp", 0x0D66)
+		LoadStrapon("Futa equippable.esp", 0x0D67)
+		LoadStrapon("Futa equippable.esp", 0x01D96)
+		LoadStrapon("Futa equippable.esp", 0x022FB)
+		LoadStrapon("Futa equippable.esp", 0x022FC)
+		LoadStrapon("Futa equippable.esp", 0x022FD)
+	endIf
+	if Game.GetModByName("Skyrim_Strap_Ons.esp") != 255
+		LoadStrapon("Skyrim_Strap_Ons.esp", 0x00D65)
+		LoadStrapon("Skyrim_Strap_Ons.esp", 0x02859)
+		LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285A)
+		LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285B)
+		LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285C)
+		LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285D)
+		LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285E)
+		LoadStrapon("Skyrim_Strap_Ons.esp", 0x0285F)
+	endIf
+	if Game.GetModByName("SOS Equipable Schlong.esp") != 255
+		LoadStrapon("SOS Equipable Schlong.esp", 0x0D62)
+	endIf
 endFunction
 
 Armor function LoadStrapon(string esp, int id)
-	Armor Strapon = Game.GetFormFromFile(id, esp) as Armor
-	if Strapon
+	Form Strapon = Game.GetFormFromFile(id, esp)
+	if Strapon && (Strapon as Armor)
 		Strapons = PapyrusUtil.PushForm(Strapons, Strapon)
 	endif
-	return Strapon
+	return Strapon as Armor
 endFunction
-
 
 ; ------------------------------------------------------- ;
 ; --- Hotkeys                                         --- ;
