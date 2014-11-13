@@ -16,16 +16,16 @@ string[] Animations
 string[] RaceIDs
 float[] Timers
 float[] CenterAdjust
-float[] Offsets ; = forward, side, up, rotate
-int[] Positions ; = gender, cum
-int[] Flags     ; = silent (bool), openmouth (bool), strapon (bool), schlong offset (int)
+float[] Offsets   ; = forward, side, up, rotate
+float[] BedOffset ; = forward, side, up, rotate
+int[] Positions   ; = gender, cum
+int[] Flags       ; = silent (bool), openmouth (bool), strapon (bool), schlong offset (int)
 
 int[] Flags0
 int[] Flags1
 int[] Flags2
 int[] Flags3
 int[] Flags4
-
 
 int sid
 int aid
@@ -65,6 +65,13 @@ endProperty
 bool property IsLoving hidden
 	bool function get()
 		return HasTag("Loving")
+	endFunction
+endProperty
+
+; Animation handling tags
+bool property IsBedOnly hidden
+	bool function get()
+		return HasTag("BedOnly")
 	endFunction
 endProperty
 
@@ -474,7 +481,6 @@ function SetContent(int contentType)
 	content = contentType
 endFunction
 
-
 float function GetTimersRunTime(float[] StageTimers)
 	if StageTimers.Length < 2
 		return -1.0
@@ -506,6 +512,18 @@ endFunction
 
 float function GetRunTimeAggressive()
 	return GetTimersRunTime(Config.StageTimerAggr)
+endFunction
+
+function SetBedOffsets(float forward, float sideward, float upward, float rotate)
+	BedOffset = new float[4]
+	BedOffset[0] = forward
+	BedOffset[1] = sideward
+	BedOffset[2] = upward
+	BedOffset[3] = rotate
+endFunction
+
+float[] function GetBedOffsets()
+	return BedOffset
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -692,11 +710,17 @@ function Initialize()
 	Genders      = new int[3]
 	Positions    = new int[10]
 	Flags        = new int[120]
-	Offsets      = new float[120]
 	Animations   = new string[30]
+	Offsets      = new float[120]
+
+	BedOffset    = new float[4]
+	BedOffset[0] = 33.0
+	BedOffset[2] = 37.0
+
 	RaceIDs      = PapyrusUtil.StringArray(0)
 	StageSoundFX = PapyrusUtil.FormArray(0)
 	Timers       = PapyrusUtil.FloatArray(0)
+
 	parent.Initialize()
 endFunction
 

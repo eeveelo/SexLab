@@ -174,8 +174,38 @@ state Animating
 		RegisterForSingleUpdate(0.2)
 	endFunction
 
+	function ClearIdles()
+		if ActorCount == 1
+			Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
+		elseIf ActorCount == 2
+			Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
+			Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
+		elseIf ActorCount == 3
+			Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
+			Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
+			Debug.SendAnimationEvent(Positions[2], "IdleForceDefaultState")
+		elseIf ActorCount == 4
+			Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
+			Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
+			Debug.SendAnimationEvent(Positions[2], "IdleForceDefaultState")
+			Debug.SendAnimationEvent(Positions[3], "IdleForceDefaultState")
+		elseIf ActorCount == 5
+			Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
+			Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
+			Debug.SendAnimationEvent(Positions[2], "IdleForceDefaultState")
+			Debug.SendAnimationEvent(Positions[3], "IdleForceDefaultState")
+			Debug.SendAnimationEvent(Positions[4], "IdleForceDefaultState")
+		endIf
+	endFunction
+
 	function RealignActors()
 		UnregisterForUpdate()
+
+		if Config.BackwardsPressed()
+			ClearIdles()
+			Utility.Wait(0.5)
+		endIf
+
 		string[] AnimEvents = Animation.FetchStage(Stage)
 		if ActorCount == 1
 			ActorAlias[0].SyncThread()
@@ -664,6 +694,8 @@ endFunction
 function RestoreOffsets()
 endFunction
 function MoveScene()
+endFunction
+function ClearIdles()
 endFunction
 function RealignActors()
 endFunction

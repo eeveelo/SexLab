@@ -1,7 +1,7 @@
 scriptname sslExpressionLibrary extends Quest
 {DEPRECATED: This script is no longer used in any sexlab systems, and is only provided as a means to provide backwards compatibility by redirecting all it's functions to their new iterations}
 
-
+;/
 
 
 function DEPRECATED() global
@@ -153,3 +153,4 @@ sslActorStats property ActorStats hidden
 		return SSL.Stats
 	endFunction
 endProperty
+ /;

@@ -309,6 +309,11 @@ endFunction
 
 function Setup()
 	parent.Setup()
+	; Clear library caches
+	StorageUtil.FormListClear(Config, "ValidActors")
+	StorageUtil.FormListClear(Config, "StripList")
+	StorageUtil.FormListClear(Config, "NoStripList")
+	; Load object data
 	AnimatingFaction        = Config.AnimatingFaction
 	GenderFaction           = Config.GenderFaction
 	ForbiddenFaction        = Config.ForbiddenFaction

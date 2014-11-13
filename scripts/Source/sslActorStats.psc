@@ -534,7 +534,7 @@ endFunction
 ; ------------------------------------------------------- ;
 
 
-function RecordThread(Actor ActorRef, int Gender, int HadRelation, float TimeSpent, bool WithPlayer, Actor VictimRef, int[] Genders, float[] SkillXP) global native
+function RecordThread(Actor ActorRef, int Gender, int HadRelation, float StartedAt, float RealTime, float GameTime, bool WithPlayer, Actor VictimRef, int[] Genders, float[] SkillXP) global native
 ;/ function RecordThread(Actor ActorRef, bool HasPlayer, int Positions, int HighestRelation, float TotalTime, Actor VictimRef, float[] SkillXP, int[] Genders)
 	AddSkillXP(ActorRef, SkillXP[0], SkillXP[1], SkillXP[2], SkillXP[3])
 	AddPurityXP(ActorRef, SkillXP[4], SkillXP[5], VictimRef != none, VictimRef == ActorRef, Genders[2] > 0, Positions, HighestRelation)

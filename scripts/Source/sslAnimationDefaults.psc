@@ -44,6 +44,7 @@ function LoadAnimations()
 	; Oral
 	RegisterAnimation("ArrokBlowjob")
 	RegisterAnimation("ArrokOral")
+	RegisterAnimation("ArrokLedgeBlowjob")
 	RegisterAnimation("DarkInvestigationsBlowjob")
 	RegisterAnimation("APBlowjob")
 	RegisterAnimation("APKneelBlowjob")
@@ -725,6 +726,42 @@ function ArrokRape(int id)
 	Base.AddTAg("AggressiveDefault")
 	Base.AddTag("Dirty")
 	Base.AddTag("Behind")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function ArrokLedgeBlowjob(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Arrok Bed Blowjob"
+
+	Base.SetContent(Sexual)
+	Base.SoundFX = Sucking
+
+	int a1 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a1, "Arrok_LedgeBlowjob_A1_S1", 0)
+	Base.AddPositionStage(a1, "Arrok_LedgeBlowjob_A1_S2", 0)
+	Base.AddPositionStage(a1, "Arrok_LedgeBlowjob_A1_S3", 0)
+	Base.AddPositionStage(a1, "Arrok_LedgeBlowjob_A1_S4", 0)
+	Base.AddPositionStage(a1, "Arrok_LedgeBlowjob_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Arrok_LedgeBlowjob_A2_S1", 0, sos = 0)
+	Base.AddPositionStage(a2, "Arrok_LedgeBlowjob_A2_S2", 0, sos = 0)
+	Base.AddPositionStage(a2, "Arrok_LedgeBlowjob_A2_S3", 0, sos = 0)
+	Base.AddPositionStage(a2, "Arrok_LedgeBlowjob_A2_S4", 0, sos = 0)
+	Base.AddPositionStage(a2, "Arrok_LedgeBlowjob_A2_S5", 0, sos = 0)
+
+	Base.SetBedOffsets(0, 0, 0, 0)
+
+	Base.AddTag("Arrok")
+	Base.AddTag("TBBP")
+	Base.AddTag("Sex")
+	Base.AddTag("Blowjob")
+	Base.AddTag("Dirty")
+	Base.AddTag("Oral")
+	Base.AddTag("BedOnly")
 	Base.AddTag("MF")
 
 	Base.Save(id)

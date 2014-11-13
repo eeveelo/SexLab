@@ -117,7 +117,6 @@ function Shy(int id)
 
 	Base.AddTag("Normal")
 
-
 	; Male + Female
 	Base.SetMood(1, MaleFemale, 4, 90)
 	Base.SetModifier(1, MaleFemale, 11, 20)

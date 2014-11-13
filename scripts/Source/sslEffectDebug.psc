@@ -15,43 +15,59 @@ ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	Package DoNothing = SexLab.Config.DoNothing
 
-	if(TargetRef == SexLab.PlayerRef)
-		Log("Removed Packges: "+ActorUtil.RemoveAllPackageOverride(DoNothing))
+	Benchmark().StartBenchmark(4, 20000, 10, false)
+	Benchmark().StartBenchmark(4, 20000, 10, true)
 
-		int i = SexLab.TestActors.Length
-		while i
-			i -= 1
-			Log("Extra Removed: "+ActorUtil.ClearPackageOverride(SexLab.TestActors[i]))
-			SexLab.TestActors[i].RemoveFromFaction(SexLab.AnimatingFaction)
-			SexLab.TestActors[i].EvaluatePackage()
-		endWhile
 
-	else
+	; SexLab.RegisterForModEvent("BoobsAreKewl", "TestHook")
+	; sslThreadController Thread = SexLab.GetController(2)
+	; if !Thread
+	; 	Debug.TraceAndBox("Failed to get thread..."+Thread)
+	; else
+	; 	Log("Testing with thread["+Thread.tid+"]: "+Thread)
+	; 	Thread._SetupID(Thread.tid)
+	; 	Thread._SendThreadEvent("BoobsAreKewl", true)
+	; endIf
 
-		if SexLab.TestActors.find(TargetRef) == -1
-			PushActor(SexLab.TestActors, TargetRef)
-		endIf
-		TargetRef.StopCombat()
-		Log(TargetRef.GetLeveledActorBase().GetName()+" Packages["+ActorUtil.CountPackageOverride(TargetRef)+"] BEFORE")
 
-		int Priority = Utility.RandomInt(95, 100)
+	; Package DoNothing = SexLab.Config.DoNothing
 
-		; if Utility.RandomInt(0, 1) == 1
-			ActorUtil.AddPackageOverride(TargetRef, DoNothing, Priority)
-			Log("Added["+Priority+"] - "+DoNothing)
-		; else
-		; 	Form TempClone = DoNothing.TempClone() as Package
-		; 	ActorUtil.AddPackageOverride(TargetRef, DoNothing, Priority)
-		; 	Log("Added["+Priority+"] - "+TempClone)
-		; endif
-		TargetRef.SetFactionRank(SexLab.AnimatingFaction, 1)
-		TargetRef.EvaluatePackage()
+	; if(TargetRef == SexLab.PlayerRef)
+	; 	Log("Removed Packges: "+ActorUtil.RemoveAllPackageOverride(DoNothing))
 
-		Log(TargetRef.GetLeveledActorBase().GetName()+" Packages["+ActorUtil.CountPackageOverride(TargetRef)+"]")
+	; 	int i = SexLab.TestActors.Length
+	; 	while i
+	; 		i -= 1
+	; 		Log("Extra Removed: "+ActorUtil.ClearPackageOverride(SexLab.TestActors[i]))
+	; 		SexLab.TestActors[i].RemoveFromFaction(SexLab.AnimatingFaction)
+	; 		SexLab.TestActors[i].EvaluatePackage()
+	; 	endWhile
 
-	endIf
+	; else
+
+	; 	if SexLab.TestActors.find(TargetRef) == -1
+	; 		PushActor(SexLab.TestActors, TargetRef)
+	; 	endIf
+	; 	TargetRef.StopCombat()
+	; 	Log(TargetRef.GetLeveledActorBase().GetName()+" Packages["+ActorUtil.CountPackageOverride(TargetRef)+"] BEFORE")
+
+	; 	int Priority = Utility.RandomInt(95, 100)
+
+	; 	; if Utility.RandomInt(0, 1) == 1
+	; 		ActorUtil.AddPackageOverride(TargetRef, DoNothing, Priority)
+	; 		Log("Added["+Priority+"] - "+DoNothing)
+	; 	; else
+	; 	; 	Form TempClone = DoNothing.TempClone() as Package
+	; 	; 	ActorUtil.AddPackageOverride(TargetRef, DoNothing, Priority)
+	; 	; 	Log("Added["+Priority+"] - "+TempClone)
+	; 	; endif
+	; 	TargetRef.SetFactionRank(SexLab.AnimatingFaction, 1)
+	; 	TargetRef.EvaluatePackage()
+
+	; 	Log(TargetRef.GetLeveledActorBase().GetName()+" Packages["+ActorUtil.CountPackageOverride(TargetRef)+"]")
+
+	; endIf
 
 
 	Log("---- FINISHED ----")

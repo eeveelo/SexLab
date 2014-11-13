@@ -4,6 +4,14 @@ scriptname sslThreadModel extends Quest hidden
 ; import sslUtility
 ; import StorageUtil
 
+
+int thread_id
+int property tid hidden
+	int function get()
+		return thread_id
+	endFunction
+endProperty
+
 bool property IsLocked hidden
 	bool function get()
 		return GetState() != "Unlocked"
@@ -11,11 +19,11 @@ bool property IsLocked hidden
 endProperty
 
 ; Library & Data
-sslSystemConfig property Config auto hidden
-sslActorLibrary ActorLib
-sslThreadLibrary ThreadLib
-sslAnimationSlots AnimSlots
-sslCreatureAnimationSlots CreatureSlots
+sslSystemConfig property Config auto
+sslActorLibrary property ActorLib auto
+sslThreadLibrary property ThreadLib auto
+sslAnimationSlots property AnimSlots auto
+sslCreatureAnimationSlots property CreatureSlots auto
 
 ; Actor Storage
 Actor[] property Positions auto hidden
@@ -126,17 +134,6 @@ float property t auto hidden
 ; ------------------------------------------------------- ;
 ; --- Thread Making API                               --- ;
 ; ------------------------------------------------------- ;
-
-sslActorAlias function PickAlias(Actor ActorRef)
-	int i
-	while i < 5
-		if ActorAlias[i].ForceRefIfEmpty(ActorRef)
-			return ActorAlias[i]
-		endIf
-		i += 1
-	endWhile
-	return none
-endFunction
 
 state Making
 	int function AddActor(Actor ActorRef, bool IsVictim = false, sslBaseVoice Voice = none, bool ForceSilent = false)
@@ -434,22 +431,13 @@ bool function IsAggressor(Actor ActorRef)
 endFunction
 
 int function GetHighestPresentRelationshipRank(Actor ActorRef)
-	if ActorCount == 1
-		return 0 ; No special relationship with yourself...
-	elseIf ActorCount == 2
-		return ActorRef.GetRelationshipRank(Positions[PapyrusUtil.IndexTravel(Positions.Find(ActorRef), ActorCount)]) ; Get opposing actors relationship rank
-	endIf
-	; Next position
-	Actor NextActor = Positions[PapyrusUtil.IndexTravel(Positions.Find(ActorRef), ActorCount)]
-	int Highest = ActorRef.GetRelationshipRank(NextActor)
-	int exit = 5
-	; loop through each position until reaching ActorRef
-	while NextActor != ActorRef && exit > 0
-		NextActor = Positions[PapyrusUtil.IndexTravel(Positions.Find(NextActor), ActorCount)]
-		if NextActor != ActorRef && ActorRef.GetRelationshipRank(NextActor) > Highest
-			Highest = ActorRef.GetRelationshipRank(NextActor)
+	int Highest
+	int i = ActorCount
+	while i > 0
+		i -= 1
+		if ActorRef != Positions[i] && ActorRef.GetRelationshipRank(Positions[i]) > Highest
+			Highest = ActorRef.GetRelationshipRank(Positions[i])
 		endIf
-		exit -= 1;
 	endWhile
 	return Highest
 endFunction
@@ -458,14 +446,14 @@ int function GetLowestPresentRelationshipRank(Actor ActorRef)
 	if ActorCount < 3
 		return GetHighestPresentRelationshipRank(ActorRef) ; Results will be same for 1 and 2 actors
 	endIf
-	; Next position
-	Actor NextActor = Positions[PapyrusUtil.IndexTravel(Positions.Find(ActorRef), ActorCount)]
-	int Lowest = ActorRef.GetRelationshipRank(NextActor)
-	; loop through each position until reaching ActorRef
-	while NextActor != ActorRef
-		NextActor = Positions[PapyrusUtil.IndexTravel(Positions.Find(NextActor), ActorCount)]
-		if NextActor != ActorRef && ActorRef.GetRelationshipRank(NextActor) < Lowest
-			Lowest = ActorRef.GetRelationshipRank(NextActor)
+	; Init to next position
+	int Lowest = ActorRef.GetRelationshipRank(Positions[PapyrusUtil.IndexTravel(Positions.Find(ActorRef), ActorCount)])
+	; Loop through all actors
+	int i = ActorCount
+	while i > 0
+		i -= 1
+		if ActorRef != Positions[i] && ActorRef.GetRelationshipRank(Positions[i]) < Lowest
+			Lowest = ActorRef.GetRelationshipRank(Positions[i])
 		endIf
 	endWhile
 	return Lowest
@@ -606,11 +594,12 @@ function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 		CenterRef = CenterOn
 		CenterOnCoords(CenterOn.GetPositionX(), CenterOn.GetPositionY(), CenterOn.GetPositionZ(), CenterOn.GetAngleX(), CenterOn.GetAngleY(), CenterOn.GetAngleZ(), false)
 		if Config.BedsList.HasForm(CenterOn.GetBaseObject())
-			BedRef = CenterOn
-			CenterLocation[0] = CenterLocation[0] + (33.0 * Math.sin(CenterLocation[5]))
-			CenterLocation[1] = CenterLocation[1] + (33.0 * Math.cos(CenterLocation[5]))
-			if !Config.BedRollsList.HasForm(CenterOn.GetBaseObject())
-				CenterLocation[2] = CenterLocation[2] + 37.0
+			if Config.BedRollsList.HasForm(CenterOn.GetBaseObject())
+				CenterLocation[0] = CenterLocation[0] + (33.0 * Math.sin(CenterLocation[5]))
+				CenterLocation[1] = CenterLocation[1] + (33.0 * Math.cos(CenterLocation[5]))
+				CenterLocation[2] = CenterLocation[2] +  3.0
+			else
+				BedRef = CenterOn
 			endIf
 		endIf
 	endIf
@@ -811,9 +800,9 @@ endFunction
 ; --- Alias Events - SYSTEM USE ONLY                  --- ;
 ; ------------------------------------------------------- ;
 
-int[] AliasDone
 string[] EventTypes
 float[] AliasLag
+int[] AliasDone
 
 string function Key(string Callback)
 	return "SSL_"+thread_id+"_"+Callback
@@ -972,7 +961,52 @@ function UpdateAdjustKey()
 	AdjustKey = Animation.Registry+ActorKeys
 endFunction
 
+sslActorAlias function PickAlias(Actor ActorRef)
+	int i
+	while i < 5
+		if ActorAlias[i].ForceRefIfEmpty(ActorRef)
+			return ActorAlias[i]
+		endIf
+		i += 1
+	endWhile
+	return none
+endFunction
+
+function LoadLibs()
+	; Reset function Libraries - SexLabQuestFramework
+	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
+	if SexLabQuestFramework
+		if Config != SexLabQuestFramework
+			Config = SexLabQuestFramework as sslSystemConfig
+		endIf
+		if ThreadLib != SexLabQuestFramework
+			ThreadLib = SexLabQuestFramework as sslThreadLibrary
+		endIf
+		if ActorLib != SexLabQuestFramework
+			ActorLib = SexLabQuestFramework as sslActorLibrary
+		endIf
+	endIf
+	; Reset secondary object registry - SexLabQuestRegistry
+	Form SexLabQuestRegistry = Game.GetFormFromFile(0x664FB, "SexLab.esm")
+	if SexLabQuestRegistry
+		if CreatureSlots != SexLabQuestRegistry
+			CreatureSlots = SexLabQuestRegistry as sslCreatureAnimationSlots
+		endIf
+	endIf
+	; Reset animation registry - SexLabQuestAnimations
+	Form SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm")
+	if SexLabQuestAnimations && AnimSlots != SexLabQuestAnimations
+		AnimSlots = SexLabQuestAnimations as sslAnimationSlots
+	endIf
+	; Sync Player
+	if !PlayerRef
+		PlayerRef = Game.GetPlayer()
+	endIf
+endfunction
+
 function SetTID(int value)
+	LoadLibs()
+
 	thread_id = value
 
 	EventTypes = new string[5]
@@ -995,44 +1029,9 @@ function SetTID(int value)
 	ActorAlias[3].Setup()
 	ActorAlias[4].Setup()
 
-	; Sync Player
-	if !PlayerRef
-		PlayerRef = Game.GetPlayer()
-	endIf
-	; Sync function Libraries - SexLabQuestFramework
-	if !Config || !ThreadLib || !ActorLib
-		Form SexLabQuestFramework  = Game.GetFormFromFile(0xD62, "SexLab.esm")
-		if SexLabQuestFramework
-			Config      = SexLabQuestFramework as sslSystemConfig
-			ThreadLib   = SexLabQuestFramework as sslThreadLibrary
-			ActorLib    = SexLabQuestFramework as sslActorLibrary
-		endIf
-	endIf
-	; Sync animation registry - SexLabQuestAnimations
-	if !AnimSlots
-		Form SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm")
-		if SexLabQuestAnimations
-			AnimSlots = SexLabQuestAnimations as sslAnimationSlots
-		endIf
-	endIf
-	; Sync secondary object registry - SexLabQuestRegistry
-	if !CreatureSlots
-		Form SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm")
-		if SexLabQuestRegistry
-			CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
-		endIf
-	endIf
-
 	Initialize()
 	Log("Initialized", "Thread["+thread_id+"]")
 endFunction
-
-int thread_id
-int property tid hidden
-	int function get()
-		return thread_id
-	endFunction
-endProperty
 
 ; ------------------------------------------------------- ;
 ; --- State Restricted                                --- ;
@@ -1110,11 +1109,11 @@ function SetBedding(int flag = 0)
 	SetBedFlag(flag)
 endFunction
 
-function TestEvent(string eventName, bool withPlayer = false) global
-	sslThreadController Thread = SexLabUtil.GetAPI().Threads[2]
-	Thread._SetupID(Thread.tid)
-	Thread._SendThreadEvent(eventName, withPlayer)
-endFunction
-
-bool function _SendThreadEvent(string eventName, bool withPlayer) native
 function _SetupID(int threadID) native
+
+; bool function _SendThreadEvent(string eventName, bool withPlayer) native
+; function TestEvent(string eventName, bool withPlayer = false) global
+	; sslThreadController Thread = SexLabUtil.GetAPI().Threads[2]
+	; Thread._SetupID(Thread.tid)
+	; Thread._SendThreadEvent(eventName, withPlayer)
+; endFunction

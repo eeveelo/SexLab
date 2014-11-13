@@ -13,10 +13,10 @@ sslBaseAnimation[] property Animations hidden
 endProperty
 
 ; Properties for creature script access
-Actor property PlayerRef auto hidden
-sslSystemConfig property Config auto hidden
-sslActorLibrary property ActorLib auto hidden
-sslThreadLibrary property ThreadLib auto hidden
+sslSystemConfig property Config auto
+sslActorLibrary property ActorLib auto
+sslThreadLibrary property ThreadLib auto
+Actor property PlayerRef auto
 
 ; ------------------------------------------------------- ;
 ; --- Animation Filtering                             --- ;
@@ -304,11 +304,19 @@ function Setup()
 	Registry = new string[125]
 	Slots    = new sslBaseAnimation[125]
 	; Init Libraries
-	SexLabFramework SexLab = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework
-	PlayerRef = SexLab.PlayerRef
-	Config    = SexLab.Config
-	ActorLib  = SexLab.ActorLib
-	ThreadLib = SexLab.ThreadLib
+	PlayerRef = Game.GetPlayer()
+	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
+	if SexLabQuestFramework
+		if Config != SexLabQuestFramework
+			Config = SexLabQuestFramework as sslSystemConfig
+		endIf
+		if ThreadLib != SexLabQuestFramework
+			ThreadLib = SexLabQuestFramework as sslThreadLibrary
+		endIf
+		if ActorLib != SexLabQuestFramework
+			ActorLib = SexLabQuestFramework as sslActorLibrary
+		endIf
+	endIf
 	; Init defaults
 	RegisterSlots()
 	GoToState("")
@@ -316,7 +324,7 @@ endFunction
 
 function RegisterSlots()
 	; Register default animation
-	(Quest.GetQuest("SexLabQuestAnimations") as sslAnimationDefaults).LoadAnimations()
+	(Game.GetFormFromFile(0x639DF, "SexLab.esm") as sslAnimationDefaults).LoadAnimations()
 	; Send mod event for 3rd party animation
 	ModEvent.Send(ModEvent.Create("SexLabSlotAnimations"))
 	Debug.Notification("$SSL_NotifyAnimationInstall")

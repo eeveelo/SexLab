@@ -137,9 +137,9 @@ endFunction
 function Setup()
 	GoToState("Locked")
 	; Init slots
-	Slotted = 0
+	Slotted  = 0
 	Registry = new string[40]
-	Slots = new sslBaseExpression[40]
+	Slots    = new sslBaseExpression[40]
 	; Init defaults
 	RegisterSlots()
 	GoToState("")
@@ -147,7 +147,7 @@ endFunction
 
 function RegisterSlots()
 	; Register default Expressions
-	(Quest.GetQuest("SexLabQuestRegistry") as sslExpressionDefaults).LoadExpressions()
+	(Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslExpressionDefaults).LoadExpressions()
 	; Send mod event for 3rd party Expressions
 	ModEvent.Send(ModEvent.Create("SexLabSlotExpressions"))
 	Debug.Notification("$SSL_NotifyExpressionInstall")

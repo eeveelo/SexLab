@@ -166,10 +166,10 @@ state ThreadSlots
 					Error(153, "Actor Alias ("+n+") is not empty, attempting to correct this error now...")
 					ActorAlias.ClearAlias()
 				endIf
-				if ActorAlias.TestAlias()
-					Error(154, "Actor Alias ("+n+") failed to load a resource, something may be wrong with your SexLab.esm or you may have missing scripts. Attempting to correct this error now...")
-					ActorAlias.Setup()
-				endIf
+				; if ActorAlias.TestAlias()
+				; 	Error(154, "Actor Alias ("+n+") failed to load a resource, something may be wrong with your SexLab.esm or you may have missing scripts. Attempting to correct this error now...")
+				; 	ActorAlias.Setup()
+				; endIf
 				n += 1
 			endWhile
 			i += 1

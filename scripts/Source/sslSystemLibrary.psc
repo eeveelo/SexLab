@@ -1,63 +1,69 @@
 scriptname sslSystemLibrary extends Quest
 
-Actor property PlayerRef auto hidden
-
 ; Settings access
-sslSystemConfig property Config auto hidden
+sslSystemConfig property Config auto
 
 ; Function libraries
-sslActorLibrary property ActorLib auto hidden
-sslThreadLibrary property ThreadLib auto hidden
-sslActorStats property Stats auto hidden
+sslActorLibrary property ActorLib auto
+sslThreadLibrary property ThreadLib auto
+sslActorStats property Stats auto
 
 ; Object registeries
-sslThreadSlots property ThreadSlots auto hidden
-sslAnimationSlots property AnimSlots auto hidden
-sslCreatureAnimationSlots property CreatureSlots auto hidden
-sslVoiceSlots property VoiceSlots auto hidden
-sslExpressionSlots property ExpressionSlots auto hidden
+sslThreadSlots property ThreadSlots auto
+sslAnimationSlots property AnimSlots auto
+sslCreatureAnimationSlots property CreatureSlots auto
+sslVoiceSlots property VoiceSlots auto
+sslExpressionSlots property ExpressionSlots auto
 
-function Log(string Log, string Type = "NOTICE")
-	SexLabUtil.DebugLog(Log, Type, Config.DebugMode)
-endFunction
+; Data
+Actor property PlayerRef auto
 
 function Setup()
-	; Clean script of events
 	UnregisterForUpdate()
 	GoToState("")
+	LoadLibs()
+endFunction
+
+bool function CheckLibs()
+	return Config && ActorLib && ThreadLib && Stats && ThreadSlots && AnimSlots && CreatureSlots && VoiceSlots && ExpressionSlots && PlayerRef
+endFunction
+
+function LoadLibs()
+	; Reset function Libraries - SexLabQuestFramework
+	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
+	if SexLabQuestFramework
+		Config      = SexLabQuestFramework as sslSystemConfig
+		ThreadLib   = SexLabQuestFramework as sslThreadLibrary
+		ThreadSlots = SexLabQuestFramework as sslThreadSlots
+		ActorLib    = SexLabQuestFramework as sslActorLibrary
+		Stats       = SexLabQuestFramework as sslActorStats
+	endIf
+	; Reset secondary object registry - SexLabQuestRegistry
+	Form SexLabQuestRegistry = Game.GetFormFromFile(0x664FB, "SexLab.esm")
+	if SexLabQuestRegistry
+		CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
+		ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
+		VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
+	endIf
+	; Reset animation registry - SexLabQuestAnimations
+	Form SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm")
+	if SexLabQuestAnimations
+		AnimSlots = SexLabQuestAnimations as sslAnimationSlots
+	endIf
 	; Sync Player
 	if !PlayerRef
 		PlayerRef = Game.GetPlayer()
 	endIf
-	; Sync function Libraries - SexLabQuestFramework
-	if !Config || !ThreadLib || !ThreadSlots || !ActorLib || !Stats
-		Form SexLabQuestFramework  = Game.GetFormFromFile(0xD62, "SexLab.esm")
-		if SexLabQuestFramework
-			Config      = SexLabQuestFramework as sslSystemConfig
-			ThreadLib   = SexLabQuestFramework as sslThreadLibrary
-			ThreadSlots = SexLabQuestFramework as sslThreadSlots
-			ActorLib    = SexLabQuestFramework as sslActorLibrary
-			Stats       = SexLabQuestFramework as sslActorStats
-		endIf
-	endIf
-	; Sync animation registry - SexLabQuestAnimations
-	if !AnimSlots
-		Form SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm")
-		if SexLabQuestAnimations
-			AnimSlots = SexLabQuestAnimations as sslAnimationSlots
-		endIf
-	endIf
-	; Sync secondary object registry - SexLabQuestRegistry
-	if !CreatureSlots || !VoiceSlots || !ExpressionSlots
-		Form SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm")
-		if SexLabQuestRegistry
-			CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
-			VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
-			ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
-		endIf
-	endIf
 endFunction
 
-bool function TestLibrary()
-	return PlayerRef && Config && ActorLib && ThreadLib && Stats && ThreadSlots && AnimSlots && CreatureSlots && VoiceSlots && ExpressionSlots
+function Log(string Log, string Type = "NOTICE")
+	Log = Type+": "+Log
+	if Config.DebugMode
+		SexLabUtil.PrintConsole(Log)
+	endIf
+	if Type == "FATAL"
+		Debug.TraceStack("SEXLAB - "+Log)
+	else
+		Debug.Trace("SEXLAB - "+Log)
+	endIf
 endFunction

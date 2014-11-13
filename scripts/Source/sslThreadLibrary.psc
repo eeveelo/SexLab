@@ -3,8 +3,8 @@ scriptname sslThreadLibrary extends sslSystemLibrary
 import StorageUtil
 
 ; Data
-FormList property BedsList auto hidden
 FormList property BedRollsList auto hidden
+FormList property BedsList auto hidden
 
 ; ------------------------------------------------------- ;
 ; --- Object Locators                                 --- ;
@@ -288,6 +288,6 @@ endFunction
 
 function Setup()
 	parent.Setup()
-	BedsList       = Config.BedsList
-	BedRollsList   = Config.BedRollsList
+	BedRollsList = Config.BedRollsList
+	BedsList     = Config.BedsList
 endFunction

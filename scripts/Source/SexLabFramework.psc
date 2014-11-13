@@ -34,60 +34,9 @@ bool property IsRunning hidden
 	endFunction
 endProperty
 
-; Data
-Actor property PlayerRef auto
-Faction property AnimatingFaction auto
+; Settings access
+sslSystemConfig property Config auto
 
-; Animation Threads
-sslThreadSlots property ThreadSlots auto hidden
-sslThreadController[] property Threads hidden
-	sslThreadController[] function get()
-		return ThreadSlots.Threads
-	endFunction
-endProperty
-
-; Animation Sets
-sslAnimationSlots property AnimSlots auto hidden
-sslBaseAnimation[] property Animations hidden
-	sslBaseAnimation[] function get()
-		return AnimSlots.Animations
-	endFunction
-endProperty
-
-; Creature animations
-sslCreatureAnimationSlots property CreatureSlots auto hidden
-sslBaseAnimation[] property CreatureAnimations hidden
-	sslBaseAnimation[] function get()
-		return CreatureSlots.Animations
-	endFunction
-endProperty
-
-; Voice Sets
-sslVoiceSlots property VoiceSlots auto hidden
-sslBaseVoice[] property Voices hidden
-	sslBaseVoice[] function get()
-		return VoiceSlots.Voices
-	endFunction
-endProperty
-
-; Expression Sets
-sslExpressionSlots property ExpressionSlots auto hidden
-sslBaseExpression[] property Expressions hidden
-	sslBaseExpression[] function get()
-		return ExpressionSlots.Expressions
-	endFunction
-endProperty
-
-; Object Sets
-sslObjectFactory property Factory auto hidden
-
-; Configuration Accessor
-sslSystemConfig property Config auto hidden
-
-; API Library
-sslActorLibrary property ActorLib auto hidden
-sslThreadLibrary property ThreadLib auto hidden
-sslActorStats property Stats auto hidden
 
 ;#---------------------------#
 ;#                           #
@@ -506,6 +455,12 @@ function ClearModifier(Actor ActorRef)
 	sslBaseExpression.ClearModifier(ActorRef)
 endFunction
 
+function ApplyPresetFloats(Actor ActorRef, float[] Preset)
+	sslBaseExpression.ApplyPresetFloats(ActorRef, Preset)
+endfunction
+
+; DEPRECATED - Expression presets have migrated to float arrays of 0.0-1.0 instead of 0-100
+; in order to be directly compatible with SKSE's native MFG functions.
 function ApplyPreset(Actor ActorRef, int[] Preset)
 	sslBaseExpression.ApplyPreset(ActorRef, Preset)
 endFunction
@@ -900,13 +855,17 @@ endFunction
 ;#                           #
 ;#---------------------------#
 
+
+
+
+
 ; ------------------------------------------------------- ;
 ; --- Intended for system use only - DO NOT USE       --- ;
 ; ------------------------------------------------------- ;
 
-function Setup()
+function LoadLibs()
 	; Reset function Libraries - SexLabQuestFramework
-	Form SexLabQuestFramework  = Game.GetFormFromFile(0xD62, "SexLab.esm")
+	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
 	if SexLabQuestFramework
 		Config      = SexLabQuestFramework as sslSystemConfig
 		ThreadLib   = SexLabQuestFramework as sslThreadLibrary
@@ -914,33 +873,125 @@ function Setup()
 		ActorLib    = SexLabQuestFramework as sslActorLibrary
 		Stats       = SexLabQuestFramework as sslActorStats
 	endIf
+	; Reset secondary object registry - SexLabQuestRegistry
+	Form SexLabQuestRegistry = Game.GetFormFromFile(0x664FB, "SexLab.esm")
+	if SexLabQuestRegistry
+		CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
+		ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
+		VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
+	endIf
 	; Reset animation registry - SexLabQuestAnimations
 	Form SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm")
 	if SexLabQuestAnimations
 		AnimSlots = SexLabQuestAnimations as sslAnimationSlots
 	endIf
-	; Reset secondary object registry - SexLabQuestRegistry
-	Form SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm")
-	if SexLabQuestRegistry
-		CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
-		VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
-		ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
-	endIf
 	; Reset phantom object registry - SexLabQuestRegistry
-	Form SexLabObjectFactory   = Game.GetFormFromFile(0x78818, "SexLab.esm")
+	Form SexLabObjectFactory = Game.GetFormFromFile(0x78818, "SexLab.esm")
 	if SexLabObjectFactory
-		Factory         = SexLabObjectFactory as sslObjectFactory
+		Factory = SexLabObjectFactory as sslObjectFactory
 	endIf
-	; Setup library resources
-	ActorLib.Setup()
+	; Sync Data
+	if !PlayerRef
+		PlayerRef = Game.GetPlayer()
+	endIf
+	if !AnimatingFaction
+		AnimatingFaction = Config.AnimatingFaction
+	endIf
+endFunction
+
+function Setup()
+	; Check & Load Libraries
+	LoadLibs()
+	; Cascade setup call to primary libraries
+	Config.Setup()
 	ThreadLib.Setup()
+	ActorLib.Setup()
 	Stats.Setup()
 	Factory.Setup()
 endFunction
 
 function Log(string Log, string Type = "NOTICE")
-	SexLabUtil.DebugLog(Log, Type, Config.DebugMode)
+	Log = Type+": "+Log
+	if Config.DebugMode
+		SexLabUtil.PrintConsole(Log)
+	endIf
+	if Type == "FATAL"
+		Debug.TraceStack("SEXLAB - "+Log)
+	else
+		Debug.Trace("SEXLAB - "+Log)
+	endIf
 endFunction
+
+; Function libraries
+sslActorLibrary property ActorLib auto
+sslThreadLibrary property ThreadLib auto
+sslActorStats property Stats auto
+
+; Object registeries
+sslThreadSlots property ThreadSlots auto
+sslAnimationSlots property AnimSlots auto
+sslCreatureAnimationSlots property CreatureSlots auto
+sslVoiceSlots property VoiceSlots auto
+sslExpressionSlots property ExpressionSlots auto
+sslObjectFactory property Factory auto
+
+Actor property PlayerRef auto
+Faction property AnimatingFaction auto hidden
+
+; Animation Threads
+sslThreadController[] property Threads hidden
+	sslThreadController[] function get()
+		return ThreadSlots.Threads
+	endFunction
+endProperty
+
+; Animation Sets
+sslBaseAnimation[] property Animations hidden
+	sslBaseAnimation[] function get()
+		return AnimSlots.Animations
+	endFunction
+endProperty
+
+; Creature animations
+sslBaseAnimation[] property CreatureAnimations hidden
+	sslBaseAnimation[] function get()
+		return CreatureSlots.Animations
+	endFunction
+endProperty
+
+; Voice Sets
+sslBaseVoice[] property Voices hidden
+	sslBaseVoice[] function get()
+		return VoiceSlots.Voices
+	endFunction
+endProperty
+
+; Expression Sets
+sslBaseExpression[] property Expressions hidden
+	sslBaseExpression[] function get()
+		return ExpressionSlots.Expressions
+	endFunction
+endProperty
+
+
+; DEPRECATED LIBRARIES - No longer used, their functions have all been moved to other scripts
+sslAnimationLibrary property AnimLib hidden
+	sslAnimationLibrary function get()
+		return Game.GetFormFromFile(0x3CE6C, "SexLab.esm") as sslAnimationLibrary
+	endFunction
+endProperty
+sslExpressionLibrary property ExpressionLib hidden
+	sslExpressionLibrary function get()
+		return Game.GetFormFromFile(0x4C63D, "SexLab.esm") as sslExpressionLibrary
+	endFunction
+endProperty
+sslVoiceLibrary property VoiceLib hidden
+	sslVoiceLibrary function get()
+		return Game.GetFormFromFile(0X3DE97, "SexLab.esm") as sslVoiceLibrary
+	endFunction
+endProperty
+
+
 
 state Disabled
 	sslThreadModel function NewThread(float TimeOut = 30.0)
@@ -967,23 +1018,6 @@ state Enabled
 		ModEvent.Send(ModEvent.Create("SexLabEnabled"))
 	endEvent
 endState
-
-; DEPRECATED LIBRARIES - No longer used, their functions have all been moved to other scripts
-sslAnimationLibrary property AnimLib hidden
-	sslAnimationLibrary function get()
-		return Game.GetFormFromFile(0x3CE6C, "SexLab.esm") as sslAnimationLibrary
-	endFunction
-endProperty
-sslExpressionLibrary property ExpressionLib hidden
-	sslExpressionLibrary function get()
-		return Game.GetFormFromFile(0x4C63D, "SexLab.esm") as sslExpressionLibrary
-	endFunction
-endProperty
-sslVoiceLibrary property VoiceLib hidden
-	sslVoiceLibrary function get()
-		return Game.GetFormFromFile(0X3DE97, "SexLab.esm") as sslVoiceLibrary
-	endFunction
-endProperty
 
 
 function TestHook(int tid, bool HasPlayer = false)

@@ -4,13 +4,17 @@ import PapyrusUtil
 import MfgConsoleFunc
 
 ; Gender Types
-int property Male = 0 autoreadonly
-int property Female = 1 autoreadonly
+int property Male       = 0 autoreadonly
+int property Female     = 1 autoreadonly
 int property MaleFemale = -1 autoreadonly
 ; MFG Types
-int property Phoneme = 0 autoreadonly
+int property Phoneme  = 0 autoreadonly
 int property Modifier = 16 autoreadonly
-int property Mood = 30 autoreadonly
+int property Mood     = 30 autoreadonly
+; ID loop ranges
+int property PhonemeIDs  = 15 autoreadonly
+int property ModifierIDs = 13 autoreadonly
+int property MoodIDs     = 16 autoreadonly
 
 string property File hidden
 	string function get()
@@ -35,17 +39,17 @@ int property PhasesFemale hidden
 	endFunction
 endProperty
 
-int[] Male1
-int[] Male2
-int[] Male3
-int[] Male4
-int[] Male5
+float[] Male1
+float[] Male2
+float[] Male3
+float[] Male4
+float[] Male5
 
-int[] Female1
-int[] Female2
-int[] Female3
-int[] Female4
-int[] Female5
+float[] Female1
+float[] Female2
+float[] Female3
+float[] Female4
+float[] Female5
 
 ; ------------------------------------------------------- ;
 ; --- Application Functions                           --- ;
@@ -58,7 +62,7 @@ endFunction
 
 function ApplyPhase(Actor ActorRef, int Phase, int Gender)
 	if Phase <= Phases[Gender]
-		ApplyPreset(ActorRef, GetPhase(Phase, Gender))
+		ApplyPresetFloats(ActorRef, GetPhase(Phase, Gender))
 	endIf
 endFunction
 
@@ -66,7 +70,7 @@ int function PickPhase(int Strength, int Gender)
 	return ClampInt(((ClampInt(Strength, 1, 100) * Phases[Gender]) / 100), 1, Phases[Gender])
 endFunction
 
-int[] function SelectPhase(int Strength, int Gender)
+float[] function SelectPhase(int Strength, int Gender)
 	return GetPhase(PickPhase(Strength, Gender), Gender)
 endFunction
 
@@ -76,7 +80,7 @@ endFunction
 
 function OpenMouth(Actor ActorRef) global
 	ClearPhoneme(ActorRef)
-	ActorRef.SetExpressionOverride(16, 1)
+	ActorRef.SetExpressionOverride(16, 100)
 	ActorRef.SetExpressionPhoneme(1, 0.4)
 endFunction
 
@@ -90,25 +94,70 @@ bool function IsMouthOpen(Actor ActorRef) global
 endFunction
 
 function ClearMFG(Actor ActorRef) global
+	ClearPhoneme(ActorRef)
+	ClearModifier(ActorRef)
+	ResetPhonemeModifier(ActorRef)
 	ActorRef.ResetExpressionOverrides()
 	ActorRef.ClearExpressionOverride()
-	ResetPhonemeModifier(ActorRef)
 endFunction
 
 function ClearPhoneme(Actor ActorRef) global
-	int i
-	while i <= 15
-		ActorRef.SetExpressionPhoneme(i, 0.0)
-		i += 1
-	endWhile
+	; A bit quicker than a loop
+	ActorRef.SetExpressionPhoneme(0, 0.0)
+	ActorRef.SetExpressionPhoneme(1, 0.0)
+	ActorRef.SetExpressionPhoneme(2, 0.0)
+	ActorRef.SetExpressionPhoneme(3, 0.0)
+	ActorRef.SetExpressionPhoneme(4, 0.0)
+	ActorRef.SetExpressionPhoneme(5, 0.0)
+	ActorRef.SetExpressionPhoneme(6, 0.0)
+	ActorRef.SetExpressionPhoneme(7, 0.0)
+	ActorRef.SetExpressionPhoneme(8, 0.0)
+	ActorRef.SetExpressionPhoneme(9, 0.0)
+	ActorRef.SetExpressionPhoneme(10, 0.0)
+	ActorRef.SetExpressionPhoneme(11, 0.0)
+	ActorRef.SetExpressionPhoneme(12, 0.0)
+	ActorRef.SetExpressionPhoneme(13, 0.0)
+	ActorRef.SetExpressionPhoneme(14, 0.0)
+	ActorRef.SetExpressionPhoneme(15, 0.0)
 endFunction
 
 function ClearModifier(Actor ActorRef) global
+	ActorRef.SetExpressionModifier(0, 0.0)
+	ActorRef.SetExpressionModifier(1, 0.0)
+	ActorRef.SetExpressionModifier(2, 0.0)
+	ActorRef.SetExpressionModifier(3, 0.0)
+	ActorRef.SetExpressionModifier(4, 0.0)
+	ActorRef.SetExpressionModifier(5, 0.0)
+	ActorRef.SetExpressionModifier(6, 0.0)
+	ActorRef.SetExpressionModifier(7, 0.0)
+	ActorRef.SetExpressionModifier(8, 0.0)
+	ActorRef.SetExpressionModifier(9, 0.0)
+	ActorRef.SetExpressionModifier(10, 0.0)
+	ActorRef.SetExpressionModifier(11, 0.0)
+	ActorRef.SetExpressionModifier(12, 0.0)
+	ActorRef.SetExpressionModifier(13, 0.0)
+endFunction
+
+function ApplyPresetFloats(Actor ActorRef, float[] Preset) global
+	Debug.Trace(ActorRef.GetLeveledActorBase().GetName()+" -- "+Preset)
+	MiscUtil.PrintConsole(ActorRef.GetLeveledActorBase().GetName()+" -- "+Preset)
 	int i
-	while i <= 13
-		ActorRef.SetExpressionModifier(i, 0.0)
+	; Set Phoneme
+	int p
+	while p <= 15
+		ActorRef.SetExpressionPhoneme(p, Preset[i])
 		i += 1
+		p += 1
 	endWhile
+	; Set Modifers
+	int m
+	while m <= 13
+		ActorRef.SetExpressionModifier(m, Preset[i])
+		i += 1
+		m += 1
+	endWhile
+	; Set expression
+	ActorRef.SetExpressionOverride(Preset[30] as int, Preset[31] as int)
 endFunction
 
 function ApplyPreset(Actor ActorRef, int[] Preset) global
@@ -136,8 +185,12 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function SetIndex(int Phase, int Gender, int Mode, int id, int value)
-	int[] Preset = GetPhase(Phase, Gender)
-	Preset[(Mode + id)] = value
+	float[] Preset = GetPhase(Phase, Gender)
+	int i = Mode+id
+	Preset[i] = ClampInt(value, 0, 100) as float
+	if i < 30
+		Preset[i] = Preset[i] / 100.0
+	endIf
 	SetPhase(Phase, Gender, Preset)
 endFunction
 
@@ -181,7 +234,7 @@ function SetPhoneme(int Phase, int Gender, int id, int value)
 endFunction
 
 function EmptyPhase(int Phase, int Gender)
-	int[] Preset = new int[32]
+	float[] Preset = new float[32]
 	SetPhase(Phase, Gender, Preset)
 	Phases[Gender] = ClampInt((Phases[Gender] - 1), 0, 5)
 	CountPhases()
@@ -191,10 +244,10 @@ function EmptyPhase(int Phase, int Gender)
 endFunction
 
 function AddPhase(int Phase, int Gender)
-	int[] Preset = GetPhase(Phase, Gender)
-	if Preset[30] == 0 || Preset[31] == 0
-		Preset[30] = 7
-		Preset[31] = 50
+	float[] Preset = GetPhase(Phase, Gender)
+	if Preset[30] == 0.0 || Preset[31] == 0.0
+		Preset[30] = 7.0
+		Preset[31] = 0.5
 	endIf
 	SetPhase(Phase, Gender, Preset)
 	Phases[Gender] = ClampInt((Phases[Gender] + 1), 0, 5)
@@ -209,12 +262,12 @@ bool function HasPhase(int Phase, Actor ActorRef)
 	if !ActorRef || Phase < 1
 		return false
 	endIf
-	int gender = ActorRef.GetLeveledActorBase().GetSex()
-	return (gender == 1 && Phase <= PhasesFemale) || (gender == 0 && Phase <= PhasesMale)
+	int Gender = ActorRef.GetLeveledActorBase().GetSex()
+	return (Gender == 1 && Phase <= PhasesFemale) || (Gender == 0 && Phase <= PhasesMale)
 endFunction
 
-int[] function GetPhase(int Phase, int Gender)
-	int[] Preset
+float[] function GetPhase(int Phase, int Gender)
+	float[] Preset
 	if Gender == Male
 		if Phase == 1
 			Preset = Male1
@@ -241,12 +294,12 @@ int[] function GetPhase(int Phase, int Gender)
 		endIf
 	endIf
 	if Preset.Length != 32
-		return new int[32]
+		return new float[32]
 	endIf
 	return Preset
 endFunction
 
-function SetPhase(int Phase, int Gender, int[] Preset)
+function SetPhase(int Phase, int Gender, float[] Preset)
 	if Gender == Male
 		if Phase == 1
 			Male1 = Preset
@@ -274,9 +327,9 @@ function SetPhase(int Phase, int Gender, int[] Preset)
 	endIf
 endFunction
 
-int[] function GetPhonemes(int Phase, int Gender)
-	int[] Output = new int[16]
-	int[] Preset = GetPhase(Phase, Gender)
+float[] function GetPhonemes(int Phase, int Gender)
+	float[] Output = new float[16]
+	float[] Preset = GetPhase(Phase, Gender)
 	int i
 	while i < 16
 		Output[i] = Preset[Phoneme + i]
@@ -285,9 +338,9 @@ int[] function GetPhonemes(int Phase, int Gender)
 	return Output
 endFunction
 
-int[] function GetModifiers(int Phase, int Gender)
-	int[] Output = new int[14]
-	int[] Preset = GetPhase(Phase, Gender)
+float[] function GetModifiers(int Phase, int Gender)
+	float[] Output = new float[14]
+	float[] Preset = GetPhase(Phase, Gender)
 	int i
 	while i < 14
 		Output[i] = Preset[Modifier + i]
@@ -297,15 +350,15 @@ int[] function GetModifiers(int Phase, int Gender)
 endFunction
 
 int function GetMoodType(int Phase, int Gender)
-	return GetPhase(Phase, Gender)[30]
+	return (GetPhase(Phase, Gender)[30] * 100.0) as int
 endFunction
 
 int function GetMoodAmount(int Phase, int Gender)
-	return GetPhase(Phase, Gender)[31]
+	return (GetPhase(Phase, Gender)[31] * 100.0) as int
 endFunction
 
 int function GetIndex(int Phase, int Gender, int Mode, int id)
-	return GetPhase(Phase, Gender)[Mode + id]
+	return (GetPhase(Phase, Gender)[Mode + id]) as int
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -315,17 +368,17 @@ endFunction
 function CountPhases()
 	Phases = new int[2]
 	; Male phases
-	Phases[0] = Phases[0] + ((AddIntValues(Male1) > 0) as int)
-	Phases[0] = Phases[0] + ((AddIntValues(Male2) > 0) as int)
-	Phases[0] = Phases[0] + ((AddIntValues(Male3) > 0) as int)
-	Phases[0] = Phases[0] + ((AddIntValues(Male4) > 0) as int)
-	Phases[0] = Phases[0] + ((AddIntValues(Male5) > 0) as int)
+	Phases[0] = Phases[0] + ((AddFloatValues(Male1) > 0) as int)
+	Phases[0] = Phases[0] + ((AddFloatValues(Male2) > 0) as int)
+	Phases[0] = Phases[0] + ((AddFloatValues(Male3) > 0) as int)
+	Phases[0] = Phases[0] + ((AddFloatValues(Male4) > 0) as int)
+	Phases[0] = Phases[0] + ((AddFloatValues(Male5) > 0) as int)
 	; Female phases
-	Phases[1] = Phases[1] + ((AddIntValues(Female1) > 0) as int)
-	Phases[1] = Phases[1] + ((AddIntValues(Female2) > 0) as int)
-	Phases[1] = Phases[1] + ((AddIntValues(Female3) > 0) as int)
-	Phases[1] = Phases[1] + ((AddIntValues(Female4) > 0) as int)
-	Phases[1] = Phases[1] + ((AddIntValues(Female5) > 0) as int)
+	Phases[1] = Phases[1] + ((AddFloatValues(Female1) > 0) as int)
+	Phases[1] = Phases[1] + ((AddFloatValues(Female2) > 0) as int)
+	Phases[1] = Phases[1] + ((AddFloatValues(Female3) > 0) as int)
+	Phases[1] = Phases[1] + ((AddFloatValues(Female4) > 0) as int)
+	Phases[1] = Phases[1] + ((AddFloatValues(Female5) > 0) as int)
 	; Enable it if phases are present
 	if Phases[0] > 0 || Phases[1] > 0
 		Enabled = true
@@ -340,20 +393,20 @@ function Save(int id = -1)
 endFunction
 
 function Initialize()
+	parent.Initialize()
 	; Gender phase counts
 	Phases = new int[2]
 	; Individual Phases
-	Male1   = new int[1]
-	Male2   = new int[1]
-	Male3   = new int[1]
-	Male4   = new int[1]
-	Male5   = new int[1]
-	Female1 = new int[1]
-	Female2 = new int[1]
-	Female3 = new int[1]
-	Female4 = new int[1]
-	Female5 = new int[1]
-	parent.Initialize()
+	Male1   = FloatArray(0)
+	Male2   = FloatArray(0)
+	Male3   = FloatArray(0)
+	Male4   = FloatArray(0)
+	Male5   = FloatArray(0)
+	Female1 = FloatArray(0)
+	Female2 = FloatArray(0)
+	Female3 = FloatArray(0)
+	Female4 = FloatArray(0)
+	Female5 = FloatArray(0)
 endFunction
 
 bool function ExportJson()
@@ -366,22 +419,22 @@ bool function ExportJson()
 	JsonUtil.SetIntValue(File, "Victim", HasTag("Victim") as int)
 	JsonUtil.SetIntValue(File, "Aggressor", HasTag("Aggressor") as int)
 
-	JsonUtil.IntListCopy(File, "Female1", Female1)
-	JsonUtil.IntListCopy(File, "Female2", Female2)
-	JsonUtil.IntListCopy(File, "Female3", Female3)
-	JsonUtil.IntListCopy(File, "Female4", Female4)
-	JsonUtil.IntListCopy(File, "Female5", Female5)
-	JsonUtil.IntListCopy(File, "Male1", Male1)
-	JsonUtil.IntListCopy(File, "Male2", Male2)
-	JsonUtil.IntListCopy(File, "Male3", Male3)
-	JsonUtil.IntListCopy(File, "Male4", Male4)
-	JsonUtil.IntListCopy(File, "Male5", Male5)
+	JsonUtil.FloatListCopy(File, "Male1", Male1)
+	JsonUtil.FloatListCopy(File, "Male2", Male2)
+	JsonUtil.FloatListCopy(File, "Male3", Male3)
+	JsonUtil.FloatListCopy(File, "Male4", Male4)
+	JsonUtil.FloatListCopy(File, "Male5", Male5)
+	JsonUtil.FloatListCopy(File, "Female1", Female1)
+	JsonUtil.FloatListCopy(File, "Female2", Female2)
+	JsonUtil.FloatListCopy(File, "Female3", Female3)
+	JsonUtil.FloatListCopy(File, "Female4", Female4)
+	JsonUtil.FloatListCopy(File, "Female5", Female5)
 
 	return JsonUtil.Save(File, true)
 endFunction
 
 bool function ImportJson()
-	if JsonUtil.GetStringValue(File, "Name") == "" || (JsonUtil.IntListCount(File, "Female1") != 32 && JsonUtil.IntListCount(File, "Male1") != 32)
+	if JsonUtil.GetStringValue(File, "Name") == "" || (JsonUtil.FloatListCount(File, "Female1") != 32 && JsonUtil.FloatListCount(File, "Male1") != 32)
 		Log("Failed to import "+File)
 		return false
 	endIf
@@ -393,62 +446,62 @@ bool function ImportJson()
 	AddTagConditional("Victim", JsonUtil.GetIntValue(File, "Victim", HasTag("Victim") as int) as bool)
 	AddTagConditional("Aggressor", JsonUtil.GetIntValue(File, "Aggressor", HasTag("Aggressor") as int) as bool)
 
-	Female1 = new int[1]
-	if JsonUtil.IntListCount(File, "Female1") == 32
-		Female1 = new int[32]
-		JsonUtil.IntListSlice(File, "Female1", Female1)
+	if JsonUtil.FloatListCount(File, "Male1") == 32
+		Male1 = new float[32]
+		JsonUtil.FloatListSlice(File, "Male1", Male1)
 	endIf
-	Female2 = new int[1]
-	if JsonUtil.IntListCount(File, "Female2") == 32
-		Female2 = new int[32]
-		JsonUtil.IntListSlice(File, "Female2", Female2)
+	if JsonUtil.FloatListCount(File, "Male2") == 32
+		Male2 = new float[32]
+		JsonUtil.FloatListSlice(File, "Male2", Male2)
 	endIf
-	Female3 = new int[1]
-	if JsonUtil.IntListCount(File, "Female3") == 32
-		Female3 = new int[32]
-		JsonUtil.IntListSlice(File, "Female3", Female3)
+	if JsonUtil.FloatListCount(File, "Male3") == 32
+		Male3 = new float[32]
+		JsonUtil.FloatListSlice(File, "Male3", Male3)
 	endIf
-	Female4 = new int[1]
-	if JsonUtil.IntListCount(File, "Female4") == 32
-		Female4 = new int[32]
-		JsonUtil.IntListSlice(File, "Female4", Female4)
+	if JsonUtil.FloatListCount(File, "Male4") == 32
+		Male4 = new float[32]
+		JsonUtil.FloatListSlice(File, "Male4", Male4)
 	endIf
-	Female5 = new int[1]
-	if JsonUtil.IntListCount(File, "Female5") == 32
-		Female5 = new int[32]
-		JsonUtil.IntListSlice(File, "Female5", Female5)
+	if JsonUtil.FloatListCount(File, "Male5") == 32
+		Male5 = new float[32]
+		JsonUtil.FloatListSlice(File, "Male5", Male5)
 	endIf
 
-	Male1 = new int[1]
-	if JsonUtil.IntListCount(File, "Male1") == 32
-		Male1 = new int[32]
-		JsonUtil.IntListSlice(File, "Male1", Male1)
+	if JsonUtil.FloatListCount(File, "Female1") == 32
+		Female1 = new float[32]
+		JsonUtil.FloatListSlice(File, "Female1", Female1)
 	endIf
-	Male2 = new int[1]
-	if JsonUtil.IntListCount(File, "Male2") == 32
-		Male2 = new int[32]
-		JsonUtil.IntListSlice(File, "Male2", Male2)
+	if JsonUtil.FloatListCount(File, "Female2") == 32
+		Female2 = new float[32]
+		JsonUtil.FloatListSlice(File, "Female2", Female2)
 	endIf
-	Male3 = new int[1]
-	if JsonUtil.IntListCount(File, "Male3") == 32
-		Male3 = new int[32]
-		JsonUtil.IntListSlice(File, "Male3", Male3)
+	if JsonUtil.FloatListCount(File, "Female3") == 32
+		Female3 = new float[32]
+		JsonUtil.FloatListSlice(File, "Female3", Female3)
 	endIf
-	Male4 = new int[1]
-	if JsonUtil.IntListCount(File, "Male4") == 32
-		Male4 = new int[32]
-		JsonUtil.IntListSlice(File, "Male4", Male4)
+	if JsonUtil.FloatListCount(File, "Female4") == 32
+		Female4 = new float[32]
+		JsonUtil.FloatListSlice(File, "Female4", Female4)
 	endIf
-	Male5 = new int[1]
-	if JsonUtil.IntListCount(File, "Male5") == 32
-		Male5 = new int[32]
-		JsonUtil.IntListSlice(File, "Male5", Male5)
+	if JsonUtil.FloatListCount(File, "Female5") == 32
+		Female5 = new float[32]
+		JsonUtil.FloatListSlice(File, "Female5", Female5)
 	endIf
 
 	CountPhases()
 
 	return true
 endFunction
+
+
+; ------------------------------------------------------- ;
+; --- REFACTOR DEPRECATION                            --- ;
+; ------------------------------------------------------- ;
+
+; int[] function GetPhase(int Phase, int Gender)
+; endFunction
+; function SetPhase(int Phase, int Gender, int[] Preset)
+; endFunction
 
 ; ------------------------------------------------------- ;
 ; --- DEPRECATED                                      --- ;
@@ -461,15 +514,13 @@ function ApplyTo(Actor ActorRef, int Strength = 50, bool IsFemale = true, bool O
 	endIf
 endFunction
 
-int[] function PickPreset(int Strength, bool IsFemale)
+float[] function PickPreset(int Strength, bool IsFemale)
 	return GetPhase(CalcPhase(Strength, IsFemale), (IsFemale as int))
 endFunction
 
 int function CalcPhase(int Strength, bool IsFemale)
 	return PickPhase(Strength, (IsFemale as int))
 endFunction
-
-
 
 ; ------------------------------------------------------- ;
 ; --- Tagging System                                  --- ;

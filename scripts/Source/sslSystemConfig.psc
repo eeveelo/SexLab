@@ -14,6 +14,12 @@ string function GetStringVer()
 	return SexLabUtil.GetStringVer()
 endFunction
 
+bool property Enabled hidden
+	bool function get()
+		return SexLab.Enabled
+	endFunction
+endProperty
+
 bool bDebugMode
 bool property DebugMode hidden
 	bool function get()
@@ -30,12 +36,6 @@ bool property DebugMode hidden
 			PlayerRef.RemoveSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
 			PlayerRef.RemoveSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
 		endIf
-	endFunction
-endProperty
-
-bool property Enabled hidden
-	bool function get()
-		return SexLab.Enabled
 	endFunction
 endProperty
 
@@ -381,16 +381,16 @@ endFunction
 
 function DisableThreadControl(sslThreadController TargetThread)
 	if Control && Control == TargetThread
+		; Release players thread control
+		Control.DisableHotkeys()
+		Control.AutoAdvance = true
+		Control = none
 		; Unlock players movement
 		PlayerRef.RemoveFromFaction(AnimatingFaction)
 		ActorUtil.RemovePackageOverride(PlayerRef, DoNothing)
 		PlayerRef.EvaluatePackage()
 		Game.EnablePlayerControls()
 		Game.SetPlayerAIDriven(false)
-		; Release players thread control
-		Control.DisableHotkeys()
-		Control.AutoAdvance = true
-		Control = none
 	endIf
 endfunction
 
@@ -596,40 +596,39 @@ function CleanLists()
 	Log("Actors Removed: "+(count - StorageUtil.FormListCount(self, "ValidActors")), "CleanLists")
 endFunction
 
+function Setup()
+	parent.Setup()
+	SexLab = SexLabUtil.GetAPI()
+	SetDefaults()
+endFunction
 
 function Reload()
-	Debug.Trace("Reload - Setup")
-	Setup()
-	Debug.Trace("Reload - Volume")
 	; Configure SFX & Voice volumes
 	AudioVoice.SetVolume(VoiceVolume)
 	AudioSFX.SetVolume(SFXVolume)
+
 	; Remove any targeted actors
-	Debug.Trace("Reload - ChrosshairRef")
 	RegisterForCrosshairRef()
 	CrosshairRef = none
 	TargetRef    = none
-	Debug.Trace("Reload - TFC Key")
 
-	; TFC Toggle key
+	; TFC Toggle keyp
 	UnregisterForAllKeys()
 	RegisterForKey(ToggleFreeCamera)
 	RegisterForKey(TargetActor)
-	Debug.Trace("Reload - Player Control")
+
 	; Remove any NPC thread control player has
 	DisableThreadControl(Control)
 	; Validate tracked factions & actors
 	; ValidateTrackedActors()
 	; ValidateTrackedFactions()
 	; Cleanup phantom slots with missing owners
-	; SexLab.Factory.Cleanup()
-	Debug.Trace("Reload - Finished")
+	; Factory.Cleanup()
+	; Reload strapon list
+	LoadStrapons()
 endFunction
 
 function SetDefaults()
-	PlayerRef = Game.GetPlayer()
-	SexLab    = Game.GetFormFromFile(0xD62, "SexLab.esm") as SexLabFramework
-
 	; Booleans
 	RestrictAggressive = true
 	AllowCreatures     = false
@@ -785,15 +784,11 @@ function SetDefaults()
 	StageTimerAggr[3] = 10.0
 	StageTimerAggr[4] = 4.0
 
-	; Config loaders
-	LoadStrapons()
+	; Reload config
 	Reload()
 
-	; Cleanup dead NPCS in lists
-	CleanLists()
-
 	; Rest some player configurations
-	Stats.SetSkill(PlayerRef, "Sexuality", 100)
+	Stats.SetSkill(PlayerRef, "Sexuality", 75)
 	VoiceSlots.ForgetVoice(PlayerRef)
 endFunction
 

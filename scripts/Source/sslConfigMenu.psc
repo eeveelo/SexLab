@@ -4,23 +4,23 @@ scriptname sslConfigMenu extends SKI_ConfigBase
 import PapyrusUtil
 
 ; Framework
-Actor property PlayerRef auto
 SexLabFramework property SexLab auto
 sslSystemConfig property Config auto
 
 ; Function libraries
-sslActorLibrary ActorLib
-sslThreadLibrary ThreadLib
-sslActorStats Stats
+sslActorLibrary property ActorLib auto
+sslThreadLibrary property ThreadLib auto
+sslActorStats property Stats auto
 
 ; Object registeries
-sslThreadSlots ThreadSlots
-sslAnimationSlots AnimSlots
-sslCreatureAnimationSlots CreatureSlots
-sslVoiceSlots VoiceSlots
-sslExpressionSlots ExpressionSlots
+sslThreadSlots property ThreadSlots auto
+sslAnimationSlots property AnimSlots auto
+sslCreatureAnimationSlots property CreatureSlots auto
+sslExpressionSlots property ExpressionSlots auto
+sslVoiceSlots property VoiceSlots auto
 
 ; Common Data
+Actor property PlayerRef auto
 Actor TargetRef
 int TargetFlag
 string TargetName
@@ -32,7 +32,7 @@ string TargetName
 event OnVersionUpdate(int version)
 	string EventType
 	; Install System - Fresh install or pre v1.50
-	if CurrentVersion < 15600
+	if CurrentVersion < 15910
 
 		; v1.51 - Fixed missing ChangeActors() and removed exprsionprofile.json support
 		; v1.52 - Altered exporting
@@ -47,6 +47,12 @@ event OnVersionUpdate(int version)
 		StorageUtil.FormListClear(none, "SexLabActors")
 		StorageUtil.StringListClear(none, "SexLabCreatures")
 
+		; v1.57 - Fixed actor stripping, expression tags being searched wrong, and refactored thread installs
+		; v1.58 - Decoupled ThreadLib from ThreadModel, added Riekling animations
+		; v1.59 - Converted animation adjustments from internal storageutil to jsonutil
+		; v1.59b - Converted stats to use float lists instead of individual values, new animations, various thread changes
+		; v1.59c - Converted stats to use float lists instead of individual values, new animations, various thread changes
+
 		; Install system
 		SetupSystem()
 
@@ -55,42 +61,10 @@ event OnVersionUpdate(int version)
 
 	; Update System - v1.5x incremental updates
 	elseIf CurrentVersion < version
-		LoadLibs()
-		SexLab.GoToState("Disabled")
 
-		; v1.57 - Fixed actor stripping, expression tags being searched wrong, and refactored thread installs
-		if CurrentVersion < 15700
-			ExpressionSlots.Setup()
-		endIf
-
-		; v1.58 - Decoupled ThreadLib from ThreadModel, added Riekling animations
-		if CurrentVersion < 15800
-			CreatureSlots.Setup()
-			ThreadSlots.Setup()
-		endIf
-
-		; v1.59 - Converted animation adjustments from internal storageutil to jsonutil
-		if CurrentVersion < 15900
-			StorageUtil.debug_DeleteValues(SexLab)
-			CreatureSlots.Setup()
-			AnimSlots.Setup()
-		endIf
-
-		; v1.59b - Converted stats to use float lists instead of individual values, new animations, various thread changes
-		if CurrentVersion < 15901
-			Stats.Setup()
-			CreatureSlots.Setup()
-			AnimSlots.Setup()
-			ThreadSlots.Setup()
-		endIf
-
-		; v1.59c - Converted stats to use float lists instead of individual values, new animations, various thread changes
-		if CurrentVersion < 15903
-			Config.UpdateProfile(1)
-			Config.UpdateProfile(2)
-			Config.UpdateProfile(3)
-			Config.UpdateProfile(4)
-			Config.UpdateProfile(5)
+		; v1.60 dev
+		if CurrentVersion < 16000
+			SetupSystem()
 		endIf
 
 		Debug.Notification("SexLab "+SexLabUtil.GetStringVer()+" Updated...")
@@ -105,26 +79,20 @@ event OnVersionUpdate(int version)
 endEvent
 
 function SetupSystem()
-	Debug.Notification("Installing SexLab v"+GetStringVer())
 	; Make sure we have all the needed libraries
 	LoadLibs()
 	; Disable system from being used during setup
 	SexLab.GoToState("Disabled")
+	Debug.Notification("Installing SexLab v"+GetStringVer())
 	SexLab.Setup()
 	; Check if system is able to install and init defaults
-	if SexLab && Config && Config.CheckSystem()
+	if SexLab && Config.CheckSystem()
 		; Setup object slots
-		Config.SetDefaults()
 		VoiceSlots.Setup()
 		ExpressionSlots.Setup()
 		CreatureSlots.Setup()
 		AnimSlots.Setup()
 		ThreadSlots.Setup()
-		; Clear library caches
-		StorageUtil.FormListClear(Config, "ValidActors")
-		StorageUtil.FormListClear(Config, "StripList")
-		StorageUtil.FormListClear(Config, "NoStripList")
-		StorageUtil.StringListClear(Config, "SexLabCreatures")
 		; Enable system for use
 		SexLab.GoToState("Enabled")
 	else
@@ -132,38 +100,9 @@ function SetupSystem()
 	endIf
 endFunction
 
-event OnGameReload()
-	Debug.Trace("SexLab Loading...")
-	parent.OnGameReload()
-	; Ensure we have the important startup variables
-	Debug.Trace("SexLab Loading Quests...")
-	if !SexLab || !Config
-		Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
-		if SexLabQuestFramework
-			SexLab = SexLabQuestFramework as SexLabFramework
-			Config = SexLabQuestFramework as sslSystemConfig
-		endIf
-	endIf
-	Debug.Trace("Disabling SexLab for startup")
-	SexLab.GoToState("Disabled")
-	; Reload SexLab's voice/tfc config at load
-	Debug.Trace("SexLab Loading CheckSystem...")
-	if CurrentVersion > 0 && Config.CheckSystem()
-		Debug.Trace("SexLab Loading Reload...")
-		Config.Reload()
-		Debug.Trace("SexLab Loading Reload DONE...")
-	endIf
-	SexLab.GoToState("Enabled")
-	Debug.Trace("SexLab Loaded CurrentVerison: "+CurrentVersion)
-endEvent
-
 function LoadLibs()
-	; Sync Player
-	if !PlayerRef
-		PlayerRef = Game.GetPlayer()
-	endIf
 	; Sync function Libraries - SexLabQuestFramework
-	if !Config || !ThreadLib || !ThreadSlots || !ActorLib || !Stats
+	if !SexLab || !Config || !ThreadLib || !ThreadSlots || !ActorLib || !Stats
 		Form SexLabQuestFramework  = Game.GetFormFromFile(0xD62, "SexLab.esm")
 		if SexLabQuestFramework
 			SexLab      = SexLabQuestFramework as SexLabFramework
@@ -186,10 +125,12 @@ function LoadLibs()
 		Form SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm")
 		if SexLabQuestRegistry
 			CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
-			VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
 			ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
+			VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
 		endIf
 	endIf
+	; Sync Player
+	PlayerRef = Game.GetPlayer()
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -1250,11 +1191,11 @@ function ExpressionEditor()
 	AddTextOptionST("ExpressionTestTarget", "$SSL_TestOn{"+TargetName+"}", "$SSL_Apply", Math.LogicalAnd(OPTION_FLAG_NONE, (TargetRef == none || !Expression.HasPhase(Phase, TargetRef)) as int))
 
 	; Show expression customization options
-	int[] FemaleModifiers = Expression.GetModifiers(Phase, Female)
-	int[] FemalePhonemes  = Expression.GetPhonemes(Phase, Female)
+	float[] FemaleModifiers = Expression.GetModifiers(Phase, Female)
+	float[] FemalePhonemes  = Expression.GetPhonemes(Phase, Female)
 
-	int[] MaleModifiers   = Expression.GetModifiers(Phase, Male)
-	int[] MalePhonemes    = Expression.GetPhonemes(Phase, Male)
+	float[] MaleModifiers   = Expression.GetModifiers(Phase, Male)
+	float[] MalePhonemes    = Expression.GetPhonemes(Phase, Male)
 
 	; Add/Remove Female Phase
 	if Phase == (Expression.PhasesFemale + 1)
@@ -1298,8 +1239,8 @@ function ExpressionEditor()
 
 	int i = 0
 	while i <= 13
-		AddSliderOptionST("Expression_1_"+Modifier+"_"+i, Modifiers[i], FemaleModifiers[i], "{0}", FlagF)
-		AddSliderOptionST("Expression_0_"+Modifier+"_"+i, Modifiers[i], MaleModifiers[i], "{0}", FlagM)
+		AddSliderOptionST("Expression_1_"+Modifier+"_"+i, Modifiers[i], FemaleModifiers[i] * 100.0, "{0}", FlagF)
+		AddSliderOptionST("Expression_0_"+Modifier+"_"+i, Modifiers[i], MaleModifiers[i] * 100.0, "{0}", FlagM)
 		i += 1
 	endWhile
 
@@ -1308,8 +1249,8 @@ function ExpressionEditor()
 	AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Phoneme}", FlagM)
 	i = 0
 	while i <= 15
-		AddSliderOptionST("Expression_1_"+Phoneme+"_"+i, Phonemes[i], FemalePhonemes[i], "{0}", FlagF)
-		AddSliderOptionST("Expression_0_"+Phoneme+"_"+i, Phonemes[i], MalePhonemes[i], "{0}", FlagM)
+		AddSliderOptionST("Expression_1_"+Phoneme+"_"+i, Phonemes[i], FemalePhonemes[i] * 100.0, "{0}", FlagF)
+		AddSliderOptionST("Expression_0_"+Phoneme+"_"+i, Phonemes[i], MalePhonemes[i] * 100.0, "{0}", FlagM)
 		i += 1
 	endWhile
 endFunction
@@ -2431,7 +2372,7 @@ state RestoreDefaultSettings
 		if ShowMessage("$SSL_WarnRestoreDefaults")
 			SetTextOptionValueST("$SSL_Resetting")
 			SetOptionFlagsST(OPTION_FLAG_DISABLED)
-			Config.SetDefaults()
+			Config.Setup()
 			ShowMessage("$SSL_RunRestoreDefaults", false)
 			SetOptionFlagsST(OPTION_FLAG_NONE)
 			SetTextOptionValueST("$SSL_ClickHere")

@@ -141,32 +141,8 @@ function Initialize()
 	Ephemeral = false
 	Storage   = GetOwningQuest()
 	Config    = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
-	Tags      = new string[3]
+	Tags      = new string[1]
 endFunction
 
 function Save(int id = -1)
 endFunction
-
-; function Finalize()
-; 	if Ephemeral
-; 		sslObjectFactory Factory = GetOwningQuest() as sslObjectFactory
-; 		if self as sslBaseAnimation != none
-; 			Save(Factory.FindAnimation(Registry))
-; 		elseIf self as sslBaseVoice != none
-; 			Save(Factory.FindVoice(Registry))
-; 		elseIf self as sslBaseExpression != none
-; 			Save(Factory.FindExpression(Registry))
-; 		endIf
-; 	else
-; 		Quest Owner = GetOwningQuest()
-; 		if self as sslBaseAnimation != none && (Owner as sslAnimationSlots) != none
-; 			Save((Owner as sslAnimationSlots).Animations.Find(self))
-; 		elseIf self as sslBaseAnimation != none && (Owner as sslCreatureAnimationSlots) != none
-; 			Save((Owner as sslCreatureAnimationSlots).Animations.Find(self))
-; 		elseIf self as sslBaseVoice != none
-; 			Save((Owner as sslVoiceSlots).Voices.Find(self))
-; 		elseIf self as sslBaseExpression != none
-; 			Save((Owner as sslExpressionSlots).Expressions.Find(self))
-; 		endIf
-; 	endIf
-; endFunction

@@ -1,276 +1,16 @@
 scriptname sslUtility hidden
 
-
-; ;/-----------------------------------------------\;
-; ;|	Animation Utility Functions
-; ;\-----------------------------------------------/;
-
-; function AnimationCopyTo(sslBaseAnimation[] SourceArray, sslBaseAnimation[] ToArray, int StartIndex = 0, int EndIndex = -1, bool SkipEmpty = false) global native
-; int function CountAnimation(sslBaseAnimation[] Values, sslBaseAnimation EqualTo = none) global native
-
-; sslBaseAnimation[] function ResizeAnimationArray(sslBaseAnimation[] Array, int ToSize) global
-; 	if ToSize == Array.Length
-; 		return Array
-; 	elseIf ToSize < 1
-; 		return AnimationArray(0)
-; 	elseIf ToSize > 128
-; 		ToSize = 128
-; 	endIf
-; 	sslBaseAnimation[] Output = AnimationArray(ToSize)
-; 	AnimationCopyTo(Array, Output)
-; 	return Output
-; endFunction
-
-; sslBaseAnimation[] function PushAnimation(sslBaseAnimation[] Array, sslBaseAnimation var) global
-; 	int end = Array.Length
-; 	if end >= 128
-; 		return Array
-; 	endIf
-; 	sslBaseAnimation[] Output = AnimationArray(end+1)
-; 	AnimationCopyTo(Array, Output)
-; 	Output[end] = var
-; 	return Output
-; endFunction
-
-; sslBaseAnimation[] function MergeAnimationArray(sslBaseAnimation[] Output, sslBaseAnimation[] Append) global
-; 	int OutputLength = Output.length
-; 	int AppendLength = Append.Length
-; 	if OutputLength == 0 && AppendLength == 0
-; 		return AnimationArray(0)
-; 	elseIf OutputLength == 0 && AppendLength > 0
-; 		return Append
-; 	elseIf AppendLength == 0 && OutputLength > 0
-; 		return Output
-; 	endIf
-; 	Output = ResizeAnimationArray(Output, (OutputLength+AppendLength))
-; 	AnimationCopyTo(Append, Output, OutputLength)
-; 	return Output
-; endFunction
-
-; sslBaseAnimation[] function ClearNoneAnimation(sslBaseAnimation[] Array) global
-; 	int Count = (Array.Length - CountAnimation(Array, none))
-; 	if Count < 1
-; 		return AnimationArray(0)
-; 	elseif Count == Array.Length
-; 		return Array
-; 	endIf
-; 	sslBaseAnimation[] Output = AnimationArray(Count)
-; 	AnimationCopyTo(Array, Output, 0, -1, true)
-; 	return Output
-; endFunction
-
-; sslBaseAnimation[] function IncreaseAnimation(int by, sslBaseAnimation[] Array) global
-; 	return ResizeAnimationArray(Array, (Array.Length + by))
-; endFunction
-
-; sslBaseAnimation[] function EmptyAnimationArray() global
-; 	return AnimationArray(0)
-; endFunction
-
-
-; ;/-----------------------------------------------\;
-; ;|	Expression Utility Functions
-; ;\-----------------------------------------------/;
-
-; function ExpressionCopyTo(sslBaseExpression[] SourceArray, sslBaseExpression[] ToArray, int StartIndex = 0, int EndIndex = -1, bool SkipEmpty = false) global native
-; int function CountExpression(sslBaseExpression[] Values, sslBaseExpression EqualTo = none) global native
-
-; sslBaseExpression[] function ResizeExpressionArray(sslBaseExpression[] Array, int ToSize) global
-; 	if ToSize == Array.Length
-; 		return Array
-; 	elseIf ToSize < 1
-; 		return ExpressionArray(0)
-; 	elseIf ToSize > 128
-; 		ToSize = 128
-; 	endIf
-; 	sslBaseExpression[] Output = ExpressionArray(ToSize)
-; 	ExpressionCopyTo(Array, Output)
-; 	return Output
-; endFunction
-
-; sslBaseExpression[] function PushExpression(sslBaseExpression[] Array, sslBaseExpression var) global
-; 	int end = Array.Length
-; 	if end >= 128
-; 		return Array
-; 	endIf
-; 	sslBaseExpression[] Output = ExpressionArray(end+1)
-; 	ExpressionCopyTo(Array, Output)
-; 	Output[end] = var
-; 	return Output
-; endFunction
-
-; sslBaseExpression[] function MergeExpressionArray(sslBaseExpression[] Output, sslBaseExpression[] Append) global
-; 	int OutputLength = Output.length
-; 	int AppendLength = Append.Length
-; 	if OutputLength == 0 && AppendLength == 0
-; 		return ExpressionArray(0)
-; 	elseIf OutputLength == 0 && AppendLength > 0
-; 		return Append
-; 	elseIf AppendLength == 0 && OutputLength > 0
-; 		return Output
-; 	endIf
-; 	Output = ResizeExpressionArray(Output, (OutputLength+AppendLength))
-; 	ExpressionCopyTo(Append, Output, OutputLength)
-; 	return Output
-; endFunction
-
-; sslBaseExpression[] function ClearNoneExpression(sslBaseExpression[] Array) global
-; 	int Count = (Array.Length - CountExpression(Array, none))
-; 	if Count < 1
-; 		return ExpressionArray(0)
-; 	elseif Count == Array.Length
-; 		return Array
-; 	endIf
-; 	sslBaseExpression[] Output = ExpressionArray(Count)
-; 	ExpressionCopyTo(Array, Output, 0, -1, true)
-; 	return Output
-; endFunction
-
-; sslBaseExpression[] function IncreaseExpression(sslBaseExpression[] Array, int by) global
-; 	return ResizeExpressionArray(Array, (Array.Length + by))
-; endFunction
-
-; sslBaseExpression[] function EmptyExpressionArray() global
-; 	return ExpressionArray(0)
-; endFunction
-
-; ;/-----------------------------------------------\;
-; ;|	Voice Utility Functions
-; ;\-----------------------------------------------/;
-
-; function VoiceCopyTo(sslBaseVoice[] SourceArray, sslBaseVoice[] ToArray, int StartIndex = 0, int EndIndex = -1, bool SkipEmpty = false) global native
-; int function CountVoice(sslBaseVoice[] Values, sslBaseVoice EqualTo = none) global native
-
-; sslBaseVoice[] function ResizeVoiceArray(sslBaseVoice[] Array, int ToSize) global
-; 	if ToSize == Array.Length
-; 		return Array
-; 	elseIf ToSize < 1
-; 		return VoiceArray(0)
-; 	elseIf ToSize > 128
-; 		ToSize = 128
-; 	endIf
-; 	sslBaseVoice[] Output = VoiceArray(ToSize)
-; 	VoiceCopyTo(Array, Output)
-; 	return Output
-; endFunction
-
-; sslBaseVoice[] function PushVoice(sslBaseVoice[] Array, sslBaseVoice var) global
-; 	int end = Array.Length
-; 	if end >= 128
-; 		return Array
-; 	endIf
-; 	sslBaseVoice[] Output = VoiceArray(end+1)
-; 	VoiceCopyTo(Array, Output)
-; 	Output[end] = var
-; 	return Output
-; endFunction
-
-; sslBaseVoice[] function MergeVoiceArray(sslBaseVoice[] Output, sslBaseVoice[] Append) global
-; 	int OutputLength = Output.length
-; 	int AppendLength = Append.Length
-; 	if OutputLength == 0 && AppendLength == 0
-; 		return VoiceArray(0)
-; 	elseIf OutputLength == 0 && AppendLength > 0
-; 		return Append
-; 	elseIf AppendLength == 0 && OutputLength > 0
-; 		return Output
-; 	endIf
-; 	Output = ResizeVoiceArray(Output, (OutputLength+AppendLength))
-; 	VoiceCopyTo(Append, Output, OutputLength)
-; 	return Output
-; endFunction
-
-; sslBaseVoice[] function ClearNoneVoice(sslBaseVoice[] Array) global
-; 	int Count = (Array.Length - CountVoice(Array, none))
-; 	if Count < 1
-; 		return VoiceArray(0)
-; 	elseif Count == Array.Length
-; 		return Array
-; 	endIf
-; 	sslBaseVoice[] Output = VoiceArray(Count)
-; 	VoiceCopyTo(Array, Output, 0, -1, true)
-; 	return Output
-; endFunction
-
-; sslBaseVoice[] function IncreaseVoice(sslBaseVoice[] Array, int by) global
-; 	return ResizeVoiceArray(Array, (Array.Length + by))
-; endFunction
-
-; sslBaseVoice[] function EmptyVoiceArray() global
-; 	return VoiceArray(0)
-; endFunction
-
-; ;/-----------------------------------------------\;
-; ;|	Voice Utility Functions
-; ;\-----------------------------------------------/;
-
-; function BaseObjectCopyTo(sslBaseObject[] SourceArray, sslBaseObject[] ToArray, int StartIndex = 0, int EndIndex = -1, bool SkipEmpty = false) global native
-; int function CountBaseObject(sslBaseObject[] Values, sslBaseObject EqualTo = none) global native
-
-; sslBaseObject[] function ResizeBaseObject(sslBaseObject[] Array, int ToSize) global
-; 	if ToSize == Array.Length
-; 		return Array
-; 	elseIf ToSize < 1
-; 		return BaseObjectArray(0)
-; 	elseIf ToSize > 128
-; 		ToSize = 128
-; 	endIf
-; 	sslBaseObject[] Output = BaseObjectArray(ToSize)
-; 	BaseObjectCopyTo(Array, Output)
-; 	return Output
-; endFunction
-
-; sslBaseObject[] function PushBaseObject(sslBaseObject[] Array, sslBaseObject var) global
-; 	int end = Array.Length
-; 	if end >= 128
-; 		return Array
-; 	endIf
-; 	sslBaseObject[] Output = BaseObjectArray(end+1)
-; 	BaseObjectCopyTo(Array, Output)
-; 	Output[end] = var
-; 	return Output
-; endFunction
-
-; sslBaseObject[] function MergeBaseObject(sslBaseObject[] Output, sslBaseObject[] Append) global
-; 	int OutputLength = Output.length
-; 	int AppendLength = Append.Length
-; 	if OutputLength == 0 && AppendLength == 0
-; 		return BaseObjectArray(0)
-; 	elseIf OutputLength == 0 && AppendLength > 0
-; 		return Append
-; 	elseIf AppendLength == 0 && OutputLength > 0
-; 		return Output
-; 	endIf
-; 	Output = ResizeBaseObject(Output, (OutputLength+AppendLength))
-; 	BaseObjectCopyTo(Append, Output, OutputLength)
-; 	return Output
-; endFunction
-
-; sslBaseObject[] function ClearNoneBaseObject(sslBaseObject[] Array) global
-; 	int Count = (Array.Length - CountBaseObject(Array, none))
-; 	if Count < 1
-; 		return BaseObjectArray(0)
-; 	elseif Count == Array.Length
-; 		return Array
-; 	endIf
-; 	sslBaseObject[] Output = BaseObjectArray(Count)
-; 	BaseObjectCopyTo(Array, Output, 0, -1, true)
-; 	return Output
-; endFunction
-
-; sslBaseObject[] function IncreaseBaseObject(sslBaseObject[] Array, int by) global
-; 	return ResizeBaseObject(Array, (Array.Length + by))
-; endFunction
-
-; sslBaseObject[] function EmptyBaseObject() global
-; 	return BaseObjectArray(0)
-; endFunction
-
+float function FloatIfElse(bool isTrue, float returnTrue, float returnFalse = 0.0) global native
+int function IntIfElse(bool isTrue, int returnTrue, int returnFalse = 0) global native
+string function StringIfElse(bool isTrue, string returnTrue, string returnFalse = "") global native
+Form function FormIfElse(bool isTrue, Form returnTrue, Form returnFalse = none) global native
+Actor function ActorIfElse(bool isTrue, Actor returnTrue, Actor returnFalse = none) global native
+ObjectReference function ObjectIfElse(bool isTrue, ObjectReference returnTrue, ObjectReference returnFalse = none) global native
+ReferenceAlias function AliasIfElse(bool isTrue, ReferenceAlias returnTrue, ReferenceAlias returnFalse = none) global native
 
 ;/-----------------------------------------------\;
 ;|	Misc Utility Functions
 ;\-----------------------------------------------/;
-
 
 sslBaseAnimation[] function PushAnimation(sslBaseAnimation var, sslBaseAnimation[] Array) global
 	int len = Array.Length
@@ -309,52 +49,6 @@ sslBaseAnimation[] function EmptyAnimationArray() global
 	sslBaseAnimation[] empty
 	return empty
 endFunction
-
-function AliasCopyTo(ReferenceAlias[] SourceArray, ReferenceAlias[] ToArray, int StartIndex = 0, int EndIndex = -1, bool SkipEmpty = false) global native
-function AnimationCopyTo(sslBaseAnimation[] SourceArray, sslBaseAnimation[] ToArray, int StartIndex = 0, int EndIndex = -1, bool SkipEmpty = false) global native
-
-ReferenceAlias[] function AnimationToAlias(sslBaseAnimation[] Array) global
-	int i = Array.Length
-	ReferenceAlias[] Output = ReferenceAliasArray(i)
-	while i
-		i -= 1
-		Output[i] = Array[i] as ReferenceAlias
-	endWhile
-	return Output
-endFunction
-
-sslBaseAnimation[] function AliasToAnimation(ReferenceAlias[] Array) global
-	int i = Array.Length
-	sslBaseAnimation[] Output = AnimationArray(i)
-	while i
-		i -= 1
-		Output[i] = Array[i] as sslBaseAnimation
-	endWhile
-	return Output
-endFunction
-
-; sslBaseAnimation[] function PushAnimation2(sslBaseAnimation var, sslBaseAnimation[] Array) global
-; 	int end = Array.Length
-; 	if end >= 128
-; 		return Array
-; 	endIf
-; 	ReferenceAlias[] Output = ReferenceAliasArray(end+1)
-; 	AliasCopyTo(AnimationToAlias(Array), Output)
-; 	Output[end] = var
-; 	return AliasToAnimation(Output)
-; endFunction
-
-sslBaseAnimation[] function PushAnimation2(sslBaseAnimation var, sslBaseAnimation[] Array) global
-	int end = Array.Length
-	if end >= 128
-		return Array
-	endIf
-	sslBaseAnimation[] Output = AnimationArray(end+1)
-	AnimationCopyTo(Array, Output)
-	Output[end] = var
-	return Output
-endFunction
-
 
 ;/-----------------------------------------------\;
 ;|	Integer Utility Functions
@@ -430,43 +124,43 @@ endFunction
 
 
 bool[] function BoolArray(int size) global
-	Debug.Trace("SEXLAB -- sslUtility.BoolArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.BoolArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.BoolArray(size)
 endFunction
 float[] function FloatArray(int size) global
-	Debug.Trace("SEXLAB -- sslUtility.FloatArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.FloatArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.FloatArray(size)
 endFunction
 int[] function IntArray(int size) global
-	Debug.Trace("-- sslUtility.IntArray SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.IntArray SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.IntArray(size)
 endFunction
 string[] function StringArray(int size) global
-	Debug.Trace("SEXLAB -- sslUtility.StringArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.StringArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.StringArray(size)
 endFunction
 Form[] function FormArray(int size) global
-	Debug.Trace("SEXLAB -- sslUtility.FormArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.FormArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.FormArray(size)
 endFunction
 Actor[] function ActorArray(int size) global
-	Debug.Trace("SEXLAB -- sslUtility.ActorArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.ActorArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ActorArray(size)
 endFunction
 
 
 int function IndexTravel(int index, int len, bool backwards = false) global
-	Debug.Trace("-- sslUtility.IndexTravel SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.IndexTravel SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.IndexTravel(index, len, backwards)
 endFunction
 
 string function MakeArgs(string delimiter, string arg1, string arg2 = "", string arg3 = "", string arg4 = "", string arg5 = "") global
-	Debug.Trace("SEXLAB -- sslUtility.MakeArgs -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.MakeArgs -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.MakeArgs(delimiter, arg1, arg2, arg3, arg4, arg5)
 endFunction
 
 string[] function ArgString(string args, string delimiter = ",") global
-	Debug.Trace("SEXLAB -- sslUtility.ArgString -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.ArgString -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ArgString(args, delimiter)
 endFunction
 
@@ -475,195 +169,195 @@ Actor[] function PushActor(Actor var, Actor[] Array) global
 endFunction
 
 int function CountNone(form[] Array) global
-	Debug.Trace("-- sslUtility.CountNone SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.CountNone SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.CountForm(Array, none)
 endFunction
 int function CountTrue(bool[] Array) global
-	Debug.Trace("-- sslUtility.CountTrue SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.CountTrue SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.CountBool(Array, true)
 endFunction
 int function CountEmpty(string[] Array) global
-	Debug.Trace("-- sslUtility.CountEmpty SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.CountEmpty SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.CountString(Array, "")
 endFunction
 
 function FormCopyTo(form[] Array, form[] Output, bool AllowNone) global
-	Debug.Trace("-- sslUtility.FormCopyTo SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.FormCopyTo SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	PapyrusUtil.FormCopyTo(Array, Output, 0, -1, !AllowNone)
 endFunction
 function BoolCopyTo(bool[] Array, bool[] Output, int StartIndex = 0, int EndIndex = -1) global
-	Debug.Trace("-- sslUtility.BoolCopyTo SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.BoolCopyTo SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	PapyrusUtil.BoolCopyTo(Array, Output, StartIndex, Endindex)
 endFunction
 function StringCopyTo(string[] Array, string[] Output, int StartIndex = 0, int EndIndex = -1, bool AllowEmpty = true) global
-	Debug.Trace("-- sslUtility.StringCopyTo SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.StringCopyTo SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	PapyrusUtil.StringCopyTo(Array, Output, StartIndex, Endindex, !AllowEmpty)
 endFunction
 function FloatCopyTo(float[] Array, float[] Output, int StartIndex = 0, int EndIndex = -1) global
-	Debug.Trace("-- sslUtility.FloatCopyTo SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.FloatCopyTo SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	PapyrusUtil.FloatCopyTo(Array, Output, StartIndex, Endindex)
 endFunction
 function IntCopyTo(int[] Array, int[] Output, int StartIndex = 0, int EndIndex = -1) global
-	Debug.Trace("SEXLAB -- sslUtility.IntCopyTo -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.IntCopyTo -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	PapyrusUtil.IntCopyTo(Array, Output, StartIndex, Endindex)
 endFunction
 
 float function AddFloatValues(float[] Array) global
-	Debug.Trace("-- sslUtility.AddFloatValues SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.AddFloatValues SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.AddFloatValues(Array)
 endFunction
 int function AddIntValues(int[] Array) global
-	Debug.Trace("-- sslUtility.AddIntValues SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.AddIntValues SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.AddIntValues(Array)
 endFunction
 
 int[] function IncreaseInt(int by, int[] Array) global
-	Debug.Trace("-- sslUtility.IncreaseInt SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.IncreaseInt SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ResizeIntArray(Array, (Array.Length + by))
 endFunction
 
 int[] function TrimIntArray(int[] Array, int len) global
-	Debug.Trace("-- sslUtility.TrimIntArray SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.TrimIntArray SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ResizeIntArray(Array, len)
 endFunction
 
 int[] function PushInt(int var, int[] Array) global
-	Debug.Trace("-- sslUtility.PushInt SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.PushInt SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.PushInt(Array, var)
 endFunction
 
 int[] function MergeIntArray(int[] Push, int[] Array) global
-	Debug.Trace("-- sslUtility.MergeIntArray SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.MergeIntArray SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.MergeIntArray(Array, Push)
 endFunction
 
 int function ClampInt(int value, int min, int max) global
-	Debug.Trace("-- sslUtility.ClampInt SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.ClampInt SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ClampInt(value, min, max)
 endFunction
 
 int function SignInt(bool sign, int value) global
-	Debug.Trace("-- sslUtility.ignInt SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.ignInt SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.SignInt(sign, value)
 endFunction
 
 int[] function EmptyIntArray() global
-	Debug.Trace("-- sslUtility.EmptyIntArray SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.EmptyIntArray SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.IntArray(0)
 endFunction
 
 int function WrapIndex(int index, int len) global
-	Debug.Trace("-- sslUtility.WrapIndex SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.WrapIndex SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.WrapInt(index, len, 0)
 endFunction
 
 float[] function IncreaseFloat(int by, float[] Array) global
-	Debug.Trace("SEXLAB -- sslUtility.IncreaseFloat -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.IncreaseFloat -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ResizeFloatArray(Array, (Array.Length + by))
 endFunction
 
 float[] function TrimFloatArray(float[] Array, int len) global
-	Debug.Trace("SEXLAB -- sslUtility.TrimFloatArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.TrimFloatArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ResizeFloatArray(Array, len)
 endFunction
 
 float[] function PushFloat(float var, float[] Array) global
-	Debug.Trace("SEXLAB -- sslUtility.PushFloat -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.PushFloat -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.PushFloat(Array, var)
 endFunction
 
 float[] function MergeFloatArray(float[] Push, float[] Array) global
-	Debug.Trace("SEXLAB -- sslUtility.MergeFloatArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.MergeFloatArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.MergeFloatArray(Array, Push)
 endFunction
 
 float function ClampFloat(float value, float min, float max) global
-	Debug.Trace("-- sslUtility.ClampFloat SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.ClampFloat SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ClampFloat(value, min, max)
 endFunction
 
 float function SignFloat(bool sign, float value) global
-	Debug.Trace("-- sslUtility.SignFloat SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.SignFloat SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.SignFloat(sign, value)
 endFunction
 
 float[] function EmptyFloatArray() global
-	Debug.Trace("SEXLAB -- sslUtility.EmptyFloatArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.EmptyFloatArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.FloatArray(0)
 endFunction
 
 string[] function IncreaseString(int by, string[] Array) global
-	Debug.Trace("SEXLAB -- sslUtility.IncreaseString -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.IncreaseString -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ResizeStringArray(Array, (Array.Length + by))
 endFunction
 string[] function TrimStringArray(string[] Array, int len) global
-	Debug.Trace("SEXLAB -- sslUtility.TrimStringArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.TrimStringArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ResizeStringArray(Array, len)
 endFunction
 string[] function PushString(string var, string[] Array) global
-	Debug.Trace("SEXLAB -- sslUtility.PushString -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.PushString -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.PushString(Array, var)
 endFunction
 string[] function MergeStringArray(string[] Push, string[] Array) global
 	return PapyrusUtil.MergeStringArray(Array, Push)
-	Debug.Trace("-- sslUtility.PapyrusUtil SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("-- sslUtility.PapyrusUtil SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 endFunction
 string[] function ClearEmpty(string[] Array) global
-	Debug.Trace("SEXLAB -- sslUtility.ClearEmpty -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.ClearEmpty -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ClearEmpty(Array)
 endFunction
 string[] function EmptyStringArray() global
-	Debug.Trace("SEXLAB -- sslUtility.EmptyStringArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.EmptyStringArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.StringArray(0)
 endFunction
 
 bool[] function IncreaseBool(int by, bool[] Array) global
-	Debug.Trace("SEXLAB -- sslUtility.IncreaseBool -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.IncreaseBool -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ResizeBoolArray(Array, (Array.Length + by))
 endFunction
 
 bool[] function TrimBoolArray(bool[] Array, int len) global
-	Debug.Trace("SEXLAB -- sslUtility.TrimBoolArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.TrimBoolArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ResizeBoolArray(Array, len)
 endFunction
 
 bool[] function PushBool(bool var, bool[] Array) global
-	Debug.Trace("SEXLAB -- sslUtility.PushBool -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.PushBool -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.PushBool(Array, var)
 endFunction
 
 bool[] function MergeBoolArray(bool[] Push, bool[] Array) global
-	Debug.Trace("SEXLAB -- sslUtility.MergeBoolArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.MergeBoolArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.MergeBoolArray(Array, Push)
 endFunction
 
 bool[] function EmptyBoolArray() global
-	Debug.Trace("SEXLAB -- sslUtility.EmptyBoolArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.EmptyBoolArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.BoolArray(0)
 endFunction
 
 form[] function IncreaseForm(int by, form[] Array) global
-	Debug.Trace("SEXLAB -- sslUtility.IncreaseForm -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.IncreaseForm -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ResizeFormArray(Array, (Array.Length + by))
 endFunction
 
 form[] function PushForm(form var, form[] Array) global
-	Debug.Trace("SEXLAB -- sslUtility.PushForm -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.PushForm -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.PushForm(Array, var)
 endFunction
 
 form[] function MergeFormArray(form[] Push, form[] Array) global
-	Debug.Trace("SEXLAB -- sslUtility.MergeFormArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.MergeFormArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.MergeFormArray(Array, Push)
 endFunction
 
 Form[] function ClearNone(Form[] Array) global
-	Debug.Trace("SEXLAB -- sslUtility.ClearNone -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.ClearNone -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ClearNone(Array)
 endFunction
 
 form[] function EmptyFormArray() global
-	Debug.Trace("SEXLAB -- sslUtility.EmptyFormArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.EmptyFormArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.FormArray(0)
 endFunction
 
@@ -1849,297 +1543,267 @@ sslBaseObject[] function BaseObjectArray(int size) global
 endFunction
 
 
-ReferenceAlias[] function ReferenceAliasArray(int size) global
-	if size < 8
-		if size <= 0
-			ReferenceAlias[] Empty
-			return Empty
-		elseIf size == 1
-			return new ReferenceAlias[1]
-		elseIf size == 2
-			return new ReferenceAlias[2]
-		elseIf size == 3
-			return new ReferenceAlias[3]
-		elseIf size == 4
-			return new ReferenceAlias[4]
-		elseIf size == 5
-			return new ReferenceAlias[5]
-		elseIf size == 6
-			return new ReferenceAlias[6]
-		else
-			return new ReferenceAlias[7]
-		endIf
-	elseIf size < 16
-		if size == 8
-			return new ReferenceAlias[8]
-		elseIf size == 9
-			return new ReferenceAlias[9]
-		elseIf size == 10
-			return new ReferenceAlias[10]
-		elseIf size == 11
-			return new ReferenceAlias[11]
-		elseIf size == 12
-			return new ReferenceAlias[12]
-		elseIf size == 13
-			return new ReferenceAlias[13]
-		elseIf size == 14
-			return new ReferenceAlias[14]
-		else
-			return new ReferenceAlias[15]
-		endIf
-	elseIf size < 24
-		if size == 16
-			return new ReferenceAlias[16]
-		elseIf size == 17
-			return new ReferenceAlias[17]
-		elseIf size == 18
-			return new ReferenceAlias[18]
-		elseIf size == 19
-			return new ReferenceAlias[19]
-		elseIf size == 20
-			return new ReferenceAlias[20]
-		elseIf size == 21
-			return new ReferenceAlias[21]
-		elseIf size == 22
-			return new ReferenceAlias[22]
-		else
-			return new ReferenceAlias[23]
-		endIf
-	elseIf size < 32
-		if size == 24
-			return new ReferenceAlias[24]
-		elseIf size == 25
-			return new ReferenceAlias[25]
-		elseIf size == 26
-			return new ReferenceAlias[26]
-		elseIf size == 27
-			return new ReferenceAlias[27]
-		elseIf size == 28
-			return new ReferenceAlias[28]
-		elseIf size == 29
-			return new ReferenceAlias[29]
-		elseIf size == 30
-			return new ReferenceAlias[30]
-		else
-			return new ReferenceAlias[31]
-		endIf
-	elseIf size < 40
-		if size == 32
-			return new ReferenceAlias[32]
-		elseIf size == 33
-			return new ReferenceAlias[33]
-		elseIf size == 34
-			return new ReferenceAlias[34]
-		elseIf size == 35
-			return new ReferenceAlias[35]
-		elseIf size == 36
-			return new ReferenceAlias[36]
-		elseIf size == 37
-			return new ReferenceAlias[37]
-		elseIf size == 38
-			return new ReferenceAlias[38]
-		else
-			return new ReferenceAlias[39]
-		endIf
-	elseIf size < 48
-		if size == 40
-			return new ReferenceAlias[40]
-		elseIf size == 41
-			return new ReferenceAlias[41]
-		elseIf size == 42
-			return new ReferenceAlias[42]
-		elseIf size == 43
-			return new ReferenceAlias[43]
-		elseIf size == 44
-			return new ReferenceAlias[44]
-		elseIf size == 45
-			return new ReferenceAlias[45]
-		elseIf size == 46
-			return new ReferenceAlias[46]
-		else
-			return new ReferenceAlias[47]
-		endIf
-	elseIf size < 56
-		if size == 48
-			return new ReferenceAlias[48]
-		elseIf size == 49
-			return new ReferenceAlias[49]
-		elseIf size == 50
-			return new ReferenceAlias[50]
-		elseIf size == 51
-			return new ReferenceAlias[51]
-		elseIf size == 52
-			return new ReferenceAlias[52]
-		elseIf size == 53
-			return new ReferenceAlias[53]
-		elseIf size == 54
-			return new ReferenceAlias[54]
-		else
-			return new ReferenceAlias[55]
-		endif
-	elseIf size < 64
-		if size == 56
-			return new ReferenceAlias[56]
-		elseIf size == 57
-			return new ReferenceAlias[57]
-		elseIf size == 58
-			return new ReferenceAlias[58]
-		elseIf size == 59
-			return new ReferenceAlias[59]
-		elseIf size == 60
-			return new ReferenceAlias[60]
-		elseIf size == 61
-			return new ReferenceAlias[61]
-		elseIf size == 62
-			return new ReferenceAlias[62]
-		else
-			return new ReferenceAlias[63]
-		endIf
-	elseIf size < 72
-		if size == 64
-			return new ReferenceAlias[64]
-		elseIf size == 65
-			return new ReferenceAlias[65]
-		elseIf size == 66
-			return new ReferenceAlias[66]
-		elseIf size == 67
-			return new ReferenceAlias[67]
-		elseIf size == 68
-			return new ReferenceAlias[68]
-		elseIf size == 69
-			return new ReferenceAlias[69]
-		elseIf size == 70
-			return new ReferenceAlias[70]
-		else
-			return new ReferenceAlias[71]
-		endif
-	elseIf size < 80
-		if size == 72
-			return new ReferenceAlias[72]
-		elseIf size == 73
-			return new ReferenceAlias[73]
-		elseIf size == 74
-			return new ReferenceAlias[74]
-		elseIf size == 75
-			return new ReferenceAlias[75]
-		elseIf size == 76
-			return new ReferenceAlias[76]
-		elseIf size == 77
-			return new ReferenceAlias[77]
-		elseIf size == 78
-			return new ReferenceAlias[78]
-		else
-			return new ReferenceAlias[79]
-		endIf
-	elseIf size < 88
-		if size == 80
-			return new ReferenceAlias[80]
-		elseIf size == 81
-			return new ReferenceAlias[81]
-		elseIf size == 82
-			return new ReferenceAlias[82]
-		elseIf size == 83
-			return new ReferenceAlias[83]
-		elseIf size == 84
-			return new ReferenceAlias[84]
-		elseIf size == 85
-			return new ReferenceAlias[85]
-		elseIf size == 86
-			return new ReferenceAlias[86]
-		else
-			return new ReferenceAlias[87]
-		endif
-	elseIf size < 96
-		if size == 88
-			return new ReferenceAlias[88]
-		elseIf size == 89
-			return new ReferenceAlias[89]
-		elseIf size == 90
-			return new ReferenceAlias[90]
-		elseIf size == 91
-			return new ReferenceAlias[91]
-		elseIf size == 92
-			return new ReferenceAlias[92]
-		elseIf size == 93
-			return new ReferenceAlias[93]
-		elseIf size == 94
-			return new ReferenceAlias[94]
-		else
-			return new ReferenceAlias[95]
-		endIf
-	elseIf size < 104
-		if size == 96
-			return new ReferenceAlias[96]
-		elseIf size == 97
-			return new ReferenceAlias[97]
-		elseIf size == 98
-			return new ReferenceAlias[98]
-		elseIf size == 99
-			return new ReferenceAlias[99]
-		elseIf size == 100
-			return new ReferenceAlias[100]
-		elseIf size == 101
-			return new ReferenceAlias[101]
-		elseIf size == 102
-			return new ReferenceAlias[102]
-		else
-			return new ReferenceAlias[103]
-		endif
-	elseIf size < 112
-		if size == 104
-			return new ReferenceAlias[104]
-		elseIf size == 105
-			return new ReferenceAlias[105]
-		elseIf size == 106
-			return new ReferenceAlias[106]
-		elseIf size == 107
-			return new ReferenceAlias[107]
-		elseIf size == 108
-			return new ReferenceAlias[108]
-		elseIf size == 109
-			return new ReferenceAlias[109]
-		elseIf size == 110
-			return new ReferenceAlias[110]
-		else
-			return new ReferenceAlias[111]
-		endif
-	elseIf size < 120
-		if size == 112
-			return new ReferenceAlias[112]
-		elseIf size == 113
-			return new ReferenceAlias[113]
-		elseIf size == 114
-			return new ReferenceAlias[114]
-		elseIf size == 115
-			return new ReferenceAlias[115]
-		elseIf size == 116
-			return new ReferenceAlias[116]
-		elseIf size == 117
-			return new ReferenceAlias[117]
-		elseIf size == 118
-			return new ReferenceAlias[118]
-		else
-			return new ReferenceAlias[119]
-		endif
-	else
-		if size == 120
-			return new ReferenceAlias[120]
-		elseIf size == 121
-			return new ReferenceAlias[121]
-		elseIf size == 122
-			return new ReferenceAlias[122]
-		elseIf size == 123
-			return new ReferenceAlias[123]
-		elseIf size == 124
-			return new ReferenceAlias[124]
-		elseIf size == 125
-			return new ReferenceAlias[125]
-		elseIf size == 126
-			return new ReferenceAlias[126]
-		elseIf size == 127
-			return new ReferenceAlias[127]
-		else
-			return new ReferenceAlias[128]
-		endIf
-	endIf
-endFunction
+; ;/-----------------------------------------------\;
+; ;|	Animation Utility Functions
+; ;\-----------------------------------------------/;
+
+; function AnimationCopyTo(sslBaseAnimation[] SourceArray, sslBaseAnimation[] ToArray, int StartIndex = 0, int EndIndex = -1, bool SkipEmpty = false) global native
+; int function CountAnimation(sslBaseAnimation[] Values, sslBaseAnimation EqualTo = none) global native
+
+; sslBaseAnimation[] function ResizeAnimationArray(sslBaseAnimation[] Array, int ToSize) global
+; 	if ToSize == Array.Length
+; 		return Array
+; 	elseIf ToSize < 1
+; 		return AnimationArray(0)
+; 	elseIf ToSize > 128
+; 		ToSize = 128
+; 	endIf
+; 	sslBaseAnimation[] Output = AnimationArray(ToSize)
+; 	AnimationCopyTo(Array, Output)
+; 	return Output
+; endFunction
+
+; sslBaseAnimation[] function PushAnimation(sslBaseAnimation[] Array, sslBaseAnimation var) global
+; 	int end = Array.Length
+; 	if end >= 128
+; 		return Array
+; 	endIf
+; 	sslBaseAnimation[] Output = AnimationArray(end+1)
+; 	AnimationCopyTo(Array, Output)
+; 	Output[end] = var
+; 	return Output
+; endFunction
+
+; sslBaseAnimation[] function MergeAnimationArray(sslBaseAnimation[] Output, sslBaseAnimation[] Append) global
+; 	int OutputLength = Output.length
+; 	int AppendLength = Append.Length
+; 	if OutputLength == 0 && AppendLength == 0
+; 		return AnimationArray(0)
+; 	elseIf OutputLength == 0 && AppendLength > 0
+; 		return Append
+; 	elseIf AppendLength == 0 && OutputLength > 0
+; 		return Output
+; 	endIf
+; 	Output = ResizeAnimationArray(Output, (OutputLength+AppendLength))
+; 	AnimationCopyTo(Append, Output, OutputLength)
+; 	return Output
+; endFunction
+
+; sslBaseAnimation[] function ClearNoneAnimation(sslBaseAnimation[] Array) global
+; 	int Count = (Array.Length - CountAnimation(Array, none))
+; 	if Count < 1
+; 		return AnimationArray(0)
+; 	elseif Count == Array.Length
+; 		return Array
+; 	endIf
+; 	sslBaseAnimation[] Output = AnimationArray(Count)
+; 	AnimationCopyTo(Array, Output, 0, -1, true)
+; 	return Output
+; endFunction
+
+; sslBaseAnimation[] function IncreaseAnimation(int by, sslBaseAnimation[] Array) global
+; 	return ResizeAnimationArray(Array, (Array.Length + by))
+; endFunction
+
+; sslBaseAnimation[] function EmptyAnimationArray() global
+; 	return AnimationArray(0)
+; endFunction
+
+
+; ;/-----------------------------------------------\;
+; ;|	Expression Utility Functions
+; ;\-----------------------------------------------/;
+
+; function ExpressionCopyTo(sslBaseExpression[] SourceArray, sslBaseExpression[] ToArray, int StartIndex = 0, int EndIndex = -1, bool SkipEmpty = false) global native
+; int function CountExpression(sslBaseExpression[] Values, sslBaseExpression EqualTo = none) global native
+
+; sslBaseExpression[] function ResizeExpressionArray(sslBaseExpression[] Array, int ToSize) global
+; 	if ToSize == Array.Length
+; 		return Array
+; 	elseIf ToSize < 1
+; 		return ExpressionArray(0)
+; 	elseIf ToSize > 128
+; 		ToSize = 128
+; 	endIf
+; 	sslBaseExpression[] Output = ExpressionArray(ToSize)
+; 	ExpressionCopyTo(Array, Output)
+; 	return Output
+; endFunction
+
+; sslBaseExpression[] function PushExpression(sslBaseExpression[] Array, sslBaseExpression var) global
+; 	int end = Array.Length
+; 	if end >= 128
+; 		return Array
+; 	endIf
+; 	sslBaseExpression[] Output = ExpressionArray(end+1)
+; 	ExpressionCopyTo(Array, Output)
+; 	Output[end] = var
+; 	return Output
+; endFunction
+
+; sslBaseExpression[] function MergeExpressionArray(sslBaseExpression[] Output, sslBaseExpression[] Append) global
+; 	int OutputLength = Output.length
+; 	int AppendLength = Append.Length
+; 	if OutputLength == 0 && AppendLength == 0
+; 		return ExpressionArray(0)
+; 	elseIf OutputLength == 0 && AppendLength > 0
+; 		return Append
+; 	elseIf AppendLength == 0 && OutputLength > 0
+; 		return Output
+; 	endIf
+; 	Output = ResizeExpressionArray(Output, (OutputLength+AppendLength))
+; 	ExpressionCopyTo(Append, Output, OutputLength)
+; 	return Output
+; endFunction
+
+; sslBaseExpression[] function ClearNoneExpression(sslBaseExpression[] Array) global
+; 	int Count = (Array.Length - CountExpression(Array, none))
+; 	if Count < 1
+; 		return ExpressionArray(0)
+; 	elseif Count == Array.Length
+; 		return Array
+; 	endIf
+; 	sslBaseExpression[] Output = ExpressionArray(Count)
+; 	ExpressionCopyTo(Array, Output, 0, -1, true)
+; 	return Output
+; endFunction
+
+; sslBaseExpression[] function IncreaseExpression(sslBaseExpression[] Array, int by) global
+; 	return ResizeExpressionArray(Array, (Array.Length + by))
+; endFunction
+
+; sslBaseExpression[] function EmptyExpressionArray() global
+; 	return ExpressionArray(0)
+; endFunction
+
+; ;/-----------------------------------------------\;
+; ;|	Voice Utility Functions
+; ;\-----------------------------------------------/;
+
+; function VoiceCopyTo(sslBaseVoice[] SourceArray, sslBaseVoice[] ToArray, int StartIndex = 0, int EndIndex = -1, bool SkipEmpty = false) global native
+; int function CountVoice(sslBaseVoice[] Values, sslBaseVoice EqualTo = none) global native
+
+; sslBaseVoice[] function ResizeVoiceArray(sslBaseVoice[] Array, int ToSize) global
+; 	if ToSize == Array.Length
+; 		return Array
+; 	elseIf ToSize < 1
+; 		return VoiceArray(0)
+; 	elseIf ToSize > 128
+; 		ToSize = 128
+; 	endIf
+; 	sslBaseVoice[] Output = VoiceArray(ToSize)
+; 	VoiceCopyTo(Array, Output)
+; 	return Output
+; endFunction
+
+; sslBaseVoice[] function PushVoice(sslBaseVoice[] Array, sslBaseVoice var) global
+; 	int end = Array.Length
+; 	if end >= 128
+; 		return Array
+; 	endIf
+; 	sslBaseVoice[] Output = VoiceArray(end+1)
+; 	VoiceCopyTo(Array, Output)
+; 	Output[end] = var
+; 	return Output
+; endFunction
+
+; sslBaseVoice[] function MergeVoiceArray(sslBaseVoice[] Output, sslBaseVoice[] Append) global
+; 	int OutputLength = Output.length
+; 	int AppendLength = Append.Length
+; 	if OutputLength == 0 && AppendLength == 0
+; 		return VoiceArray(0)
+; 	elseIf OutputLength == 0 && AppendLength > 0
+; 		return Append
+; 	elseIf AppendLength == 0 && OutputLength > 0
+; 		return Output
+; 	endIf
+; 	Output = ResizeVoiceArray(Output, (OutputLength+AppendLength))
+; 	VoiceCopyTo(Append, Output, OutputLength)
+; 	return Output
+; endFunction
+
+; sslBaseVoice[] function ClearNoneVoice(sslBaseVoice[] Array) global
+; 	int Count = (Array.Length - CountVoice(Array, none))
+; 	if Count < 1
+; 		return VoiceArray(0)
+; 	elseif Count == Array.Length
+; 		return Array
+; 	endIf
+; 	sslBaseVoice[] Output = VoiceArray(Count)
+; 	VoiceCopyTo(Array, Output, 0, -1, true)
+; 	return Output
+; endFunction
+
+; sslBaseVoice[] function IncreaseVoice(sslBaseVoice[] Array, int by) global
+; 	return ResizeVoiceArray(Array, (Array.Length + by))
+; endFunction
+
+; sslBaseVoice[] function EmptyVoiceArray() global
+; 	return VoiceArray(0)
+; endFunction
+
+; ;/-----------------------------------------------\;
+; ;|	Voice Utility Functions
+; ;\-----------------------------------------------/;
+
+; function BaseObjectCopyTo(sslBaseObject[] SourceArray, sslBaseObject[] ToArray, int StartIndex = 0, int EndIndex = -1, bool SkipEmpty = false) global native
+; int function CountBaseObject(sslBaseObject[] Values, sslBaseObject EqualTo = none) global native
+
+; sslBaseObject[] function ResizeBaseObject(sslBaseObject[] Array, int ToSize) global
+; 	if ToSize == Array.Length
+; 		return Array
+; 	elseIf ToSize < 1
+; 		return BaseObjectArray(0)
+; 	elseIf ToSize > 128
+; 		ToSize = 128
+; 	endIf
+; 	sslBaseObject[] Output = BaseObjectArray(ToSize)
+; 	BaseObjectCopyTo(Array, Output)
+; 	return Output
+; endFunction
+
+; sslBaseObject[] function PushBaseObject(sslBaseObject[] Array, sslBaseObject var) global
+; 	int end = Array.Length
+; 	if end >= 128
+; 		return Array
+; 	endIf
+; 	sslBaseObject[] Output = BaseObjectArray(end+1)
+; 	BaseObjectCopyTo(Array, Output)
+; 	Output[end] = var
+; 	return Output
+; endFunction
+
+; sslBaseObject[] function MergeBaseObject(sslBaseObject[] Output, sslBaseObject[] Append) global
+; 	int OutputLength = Output.length
+; 	int AppendLength = Append.Length
+; 	if OutputLength == 0 && AppendLength == 0
+; 		return BaseObjectArray(0)
+; 	elseIf OutputLength == 0 && AppendLength > 0
+; 		return Append
+; 	elseIf AppendLength == 0 && OutputLength > 0
+; 		return Output
+; 	endIf
+; 	Output = ResizeBaseObject(Output, (OutputLength+AppendLength))
+; 	BaseObjectCopyTo(Append, Output, OutputLength)
+; 	return Output
+; endFunction
+
+; sslBaseObject[] function ClearNoneBaseObject(sslBaseObject[] Array) global
+; 	int Count = (Array.Length - CountBaseObject(Array, none))
+; 	if Count < 1
+; 		return BaseObjectArray(0)
+; 	elseif Count == Array.Length
+; 		return Array
+; 	endIf
+; 	sslBaseObject[] Output = BaseObjectArray(Count)
+; 	BaseObjectCopyTo(Array, Output, 0, -1, true)
+; 	return Output
+; endFunction
+
+; sslBaseObject[] function IncreaseBaseObject(sslBaseObject[] Array, int by) global
+; 	return ResizeBaseObject(Array, (Array.Length + by))
+; endFunction
+
+; sslBaseObject[] function EmptyBaseObject() global
+; 	return BaseObjectArray(0)
+; endFunction

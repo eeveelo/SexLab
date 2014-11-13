@@ -125,3 +125,5 @@ state Locked
 	endFunction
 endState
 
+
+Int Property NewProperty  Auto  

@@ -15,8 +15,8 @@ sslBaseVoice[] property Voices hidden
 endProperty
 
 ; Libraries
-sslSystemConfig Config
-Actor PlayerRef
+sslSystemConfig property Config auto
+Actor property PlayerRef auto
 
 ; ------------------------------------------------------- ;
 ; --- Voice Filtering                                 --- ;
@@ -223,13 +223,15 @@ endFunction
 function Setup()
 	GoToState("Locked")
 	; Init slots
-	Slotted = 0
+	Slotted  = 0
 	Registry = new string[100]
-	Slots = new sslBaseVoice[100]
+	Slots    = new sslBaseVoice[100]
 	; Init Libraries
-	SexLabFramework SexLab = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework
-	PlayerRef = SexLab.PlayerRef
-	Config    = SexLab.Config
+	PlayerRef = Game.GetPlayer()
+	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
+	if SexLabQuestFramework && Config != SexLabQuestFramework
+		Config = SexLabQuestFramework as sslSystemConfig
+	endIf
 	; Init defaults
 	RegisterSlots()
 	; RegisterCreatureVoices()
@@ -238,7 +240,7 @@ endFunction
 
 function RegisterSlots()
 	; Register default voices
-	(Quest.GetQuest("SexLabQuestRegistry") as sslVoiceDefaults).LoadVoices()
+	(Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslVoiceDefaults).LoadVoices()
 	; Send mod event for 3rd party voices
 	ModEvent.Send(ModEvent.Create("SexLabSlotVoices"))
 	Debug.Notification("$SSL_NotifyVoiceInstall")

@@ -1,12 +1,10 @@
 scriptname sslActorAlias extends ReferenceAlias
 
-; Settings access
-sslSystemConfig Config
-
 ; Framework access
-Actor PlayerRef
-sslActorStats Stats
-sslActorLibrary ActorLib
+sslSystemConfig property Config auto hidden
+sslActorLibrary property ActorLib auto hidden
+sslActorStats property Stats auto hidden
+Actor property PlayerRef auto hidden
 
 ; Actor Info
 Actor property ActorRef auto hidden
@@ -348,7 +346,23 @@ state Animating
 
 	function SyncLocation(bool Force = false)
 		; Set Loc Array to offset coordinates
-		OffsetCoords(Loc, Thread.CenterLocation, Offsets)
+		float[] CenterLocation = Thread.CenterLocation
+		OffsetCoords(Loc, CenterLocation, Offsets)
+		; Adjust by bed if needed
+		if Thread.BedRef
+			float[] BedOffset = Animation.GetBedOffsets()
+			OffsetBed(Loc, BedOffset, CenterLocation[5])
+			;/ float[] BedOffset = Animation.GetBedOffsets()
+			Loc[0] = Loc[0] + (BedOffset[0] * Math.sin(CenterLocation[5])) + (BedOffset[1] * Math.cos(CenterLocation[5]))
+			Loc[1] = Loc[1] + (BedOffset[0] * Math.cos(CenterLocation[5])) + (BedOffset[1] * Math.sin(CenterLocation[5]))
+			Loc[2] = Loc[2] + BedOffset[2]
+			Loc[5] = Loc[5] + BedOffset[3]
+			if Loc[5] >= 360.0
+				Loc[5] = Loc[5] - 360.0
+			elseIf Loc[5] < 0
+				Loc[5] = Loc[5] + 360.0
+			endIf /;
+		endIf
 		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		; Avoid forcibly setting on player coords if avoidable - causes annoying graphical flickering
@@ -408,9 +422,7 @@ state Animating
 		; Update stats
 		if !IsCreature
 			Log(ActorName+" -- BEFORE: "+sslActorStats.GetSkills(ActorRef))
-			sslActorStats._SetSkill(ActorRef, Stats.kLastRealTime, Utility.GetCurrentRealTime())
-			sslActorStats._SetSkill(ActorRef, Stats.kLastGameTime, Utility.GetCurrentGameTime())
-			sslActorStats.RecordThread(ActorRef, Gender, HighestRelation, (Utility.GetCurrentRealTime() - StartedAt), Thread.HasPlayer, Thread.VictimRef, Thread.Genders, Thread.SkillXP)
+			sslActorStats.RecordThread(ActorRef, Gender, HighestRelation, StartedAt, Utility.GetCurrentRealTime(), Utility.GetCurrentGameTime(), Thread.HasPlayer, Thread.VictimRef, Thread.Genders, Thread.SkillXP)
 			Log(ActorName+" -- AFTER: "+sslActorStats.GetSkills(ActorRef))
 			; Stats.RecordThread(ActorRef, (IsPlayer || Thread.HasPlayer), Thread.ActorCount, HighestRelation, (Utility.GetCurrentRealTime() - StartedAt), Thread.VictimRef, Thread.SkillXP, Thread.Genders)
 		endIf
@@ -568,7 +580,7 @@ function RestoreActorDefaults()
 			ActorRef.RemoveItem(Strapon, 1, true)
 		endIf
 		; Reset expression
-		ClearMFG()
+		sslBaseExpression.ClearMFG(ActorRef)
 	endIf
 	; Remove SOS erection
 	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
@@ -800,66 +812,15 @@ bool property DoRedress hidden
 	endFunction
 endProperty
 
-; ------------------------------------------------------- ;
-; --- Expression handling                             --- ;
-; ---    Mirrored from sslBaseExpression to avoid     --- ;
-; ---    problems with thread locking                 --- ;
-; ------------------------------------------------------- ;
-
-function ClearPhoneme()
-	; A bit quicker than a loop
-	ActorRef.SetExpressionPhoneme(0, 0.0)
-	ActorRef.SetExpressionPhoneme(1, 0.0)
-	ActorRef.SetExpressionPhoneme(2, 0.0)
-	ActorRef.SetExpressionPhoneme(3, 0.0)
-	ActorRef.SetExpressionPhoneme(4, 0.0)
-	ActorRef.SetExpressionPhoneme(5, 0.0)
-	ActorRef.SetExpressionPhoneme(6, 0.0)
-	ActorRef.SetExpressionPhoneme(7, 0.0)
-	ActorRef.SetExpressionPhoneme(8, 0.0)
-	ActorRef.SetExpressionPhoneme(9, 0.0)
-	ActorRef.SetExpressionPhoneme(10, 0.0)
-	ActorRef.SetExpressionPhoneme(11, 0.0)
-	ActorRef.SetExpressionPhoneme(12, 0.0)
-	ActorRef.SetExpressionPhoneme(13, 0.0)
-	ActorRef.SetExpressionPhoneme(14, 0.0)
-	ActorRef.SetExpressionPhoneme(15, 0.0)
-endFunction
-
-function ClearModifier()
-	ActorRef.SetExpressionModifier(0, 0.0)
-	ActorRef.SetExpressionModifier(1, 0.0)
-	ActorRef.SetExpressionModifier(2, 0.0)
-	ActorRef.SetExpressionModifier(3, 0.0)
-	ActorRef.SetExpressionModifier(4, 0.0)
-	ActorRef.SetExpressionModifier(5, 0.0)
-	ActorRef.SetExpressionModifier(6, 0.0)
-	ActorRef.SetExpressionModifier(7, 0.0)
-	ActorRef.SetExpressionModifier(8, 0.0)
-	ActorRef.SetExpressionModifier(9, 0.0)
-	ActorRef.SetExpressionModifier(10, 0.0)
-	ActorRef.SetExpressionModifier(11, 0.0)
-	ActorRef.SetExpressionModifier(12, 0.0)
-	ActorRef.SetExpressionModifier(13, 0.0)
-endFunction
-
-function ClearMFG()
-	ActorRef.ResetExpressionOverrides()
-	ActorRef.ClearExpressionOverride()
-	MfgConsoleFunc.ResetPhonemeModifier(ActorRef)
-	ClearModifier()
-	ClearPhoneme()
-endFunction
-
 function OpenMouth()
-	ClearPhoneme()
+	; sslBaseExpression.ClearPhoneme(ActorRef)
 	ActorRef.SetExpressionOverride(16, 100)
 	ActorRef.SetExpressionPhoneme(1, 0.4)
 endFunction
 
 function CloseMouth()
 	ActorRef.ClearExpressionOverride()
-	ActorRef.SetExpressionPhoneme(1, 0)
+	ActorRef.SetExpressionPhoneme(1, 0.0)
 endFunction
 
 bool function IsMouthOpen()
@@ -867,27 +828,9 @@ bool function IsMouthOpen()
 endFunction
 
 function RefreshExpression()
-	if !Expression || IsCreature || !ActorRef
-		return
+	if ActorRef && Expression && !IsCreature
+		Expression.Apply(ActorRef, Enjoyment, BaseSex)
 	endIf
-	int[] Preset = Expression.GetPhase(Expression.PickPhase(Enjoyment, BaseSex), BaseSex)
-	int i
-	; Set Phoneme
-	int p
-	while p <= 15
-		ActorRef.SetExpressionPhoneme(p, Preset[i] as float / 100.0)
-		i += 1
-		p += 1
-	endWhile
-	; Set Modifers
-	int m
-	while m <= 13
-		ActorRef.SetExpressionModifier(m, Preset[i] as float / 100.0)
-		i += 1
-		m += 1
-	endWhile
-	; Set expression
-	ActorRef.SetExpressionOverride(Preset[30], Preset[31])
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -974,33 +917,30 @@ function Initialize()
 endFunction
 
 function Setup()
-	; Sync Player
-	if !PlayerRef
-		PlayerRef = Game.GetPlayer()
-	endIf
-	; Sync function Libraries - SexLabQuestFramework
-	if !Config || ActorLib || !Stats
-		Quest SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm") as Quest
-		if SexLabQuestFramework
-			Config   = SexLabQuestFramework as sslSystemConfig
-			ActorLib = SexLabQuestFramework as sslActorLibrary
-			Stats    = SexLabQuestFramework as sslActorStats
-		endIf
-	endIf
-	; Sync thread owner
-	if !Thread
-		Thread = GetOwningQuest() as sslThreadController
+	; Sync data
+	PlayerRef = Game.GetPlayer()
+	Thread    = GetOwningQuest() as sslThreadController
+	; Reset function Libraries - SexLabQuestFramework
+	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
+	if SexLabQuestFramework
+		Config   = SexLabQuestFramework as sslSystemConfig
+		ActorLib = SexLabQuestFramework as sslActorLibrary
+		Stats    = SexLabQuestFramework as sslActorStats
 	endIf
 	; init alias settings
 	Initialize()
 endFunction
 
 function Log(string Log, string Type = "NOTICE")
-	SexLabUtil.DebugLog(Log, Type, Config.DebugMode)
-endFunction
-
-bool function TestAlias()
-	return PlayerRef && Config && ActorLib && Stats; && VoiceSlots && ExpressionSlots && Thread
+	Log = Type+": "+Log
+	if Config.DebugMode
+		SexLabUtil.PrintConsole(Log)
+	endIf
+	if Type == "FATAL"
+		Debug.TraceStack("SEXLAB - "+Log)
+	else
+		Debug.Trace("SEXLAB - "+Log)
+	endIf
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -1033,6 +973,7 @@ event OnOrgasm()
 endEvent
 
 function OffsetCoords(float[] Output, float[] CenterCoords, float[] OffsetBy) global native
+function OffsetBed(float[] Output, float[] BedOffsets, float CenterRot) global native
 bool function IsInPosition(Actor CheckActor, ObjectReference CheckMarker, float maxdistance = 30.0) global native
 int function CalcEnjoyment(float[] XP, float[] SkillsAmounts, bool IsLeadin, bool IsFemaleActor, float Timer, int OnStage, int MaxStage) global native
 
