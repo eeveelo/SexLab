@@ -19,38 +19,36 @@ sslExpressionSlots property ExpressionSlots auto
 Actor property PlayerRef auto
 
 function Setup()
+	; Clean script of events
 	UnregisterForUpdate()
 	GoToState("")
-	LoadLibs()
-endFunction
-
-bool function CheckLibs()
-	return Config && ActorLib && ThreadLib && Stats && ThreadSlots && AnimSlots && CreatureSlots && VoiceSlots && ExpressionSlots && PlayerRef
-endFunction
-
-function LoadLibs()
-	; Reset function Libraries - SexLabQuestFramework
-	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
-	if SexLabQuestFramework
-		Config      = SexLabQuestFramework as sslSystemConfig
-		ThreadLib   = SexLabQuestFramework as sslThreadLibrary
-		ThreadSlots = SexLabQuestFramework as sslThreadSlots
-		ActorLib    = SexLabQuestFramework as sslActorLibrary
-		Stats       = SexLabQuestFramework as sslActorStats
+	; Sync function Libraries - SexLabQuestFramework
+	if !Config || !ThreadLib || !ThreadSlots || !ActorLib || !Stats
+		Form SexLabQuestFramework  = Game.GetFormFromFile(0xD62, "SexLab.esm")
+		if SexLabQuestFramework
+			Config      = SexLabQuestFramework as sslSystemConfig
+			ThreadLib   = SexLabQuestFramework as sslThreadLibrary
+			ThreadSlots = SexLabQuestFramework as sslThreadSlots
+			ActorLib    = SexLabQuestFramework as sslActorLibrary
+			Stats       = SexLabQuestFramework as sslActorStats
+		endIf
 	endIf
-	; Reset secondary object registry - SexLabQuestRegistry
-	Form SexLabQuestRegistry = Game.GetFormFromFile(0x664FB, "SexLab.esm")
-	if SexLabQuestRegistry
-		CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
-		ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
-		VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
+	; Sync animation registry - SexLabQuestAnimations
+	if !AnimSlots
+		Form SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm")
+		if SexLabQuestAnimations
+			AnimSlots = SexLabQuestAnimations as sslAnimationSlots
+		endIf
 	endIf
-	; Reset animation registry - SexLabQuestAnimations
-	Form SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm")
-	if SexLabQuestAnimations
-		AnimSlots = SexLabQuestAnimations as sslAnimationSlots
+	; Sync secondary object registry - SexLabQuestRegistry
+	if !CreatureSlots || !VoiceSlots || !ExpressionSlots
+		Form SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm")
+		if SexLabQuestRegistry
+			CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
+			VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
+			ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
+		endIf
 	endIf
-	; Sync Player
 	if !PlayerRef
 		PlayerRef = Game.GetPlayer()
 	endIf

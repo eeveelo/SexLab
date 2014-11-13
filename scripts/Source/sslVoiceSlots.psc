@@ -223,15 +223,12 @@ endFunction
 function Setup()
 	GoToState("Locked")
 	; Init slots
-	Slotted  = 0
-	Registry = new string[100]
-	Slots    = new sslBaseVoice[100]
+	Slotted   = 0
+	Registry  = new string[100]
+	Slots     = new sslBaseVoice[100]
 	; Init Libraries
 	PlayerRef = Game.GetPlayer()
-	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
-	if SexLabQuestFramework && Config != SexLabQuestFramework
-		Config = SexLabQuestFramework as sslSystemConfig
-	endIf
+	Config    = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
 	; Init defaults
 	RegisterSlots()
 	; RegisterCreatureVoices()

@@ -307,15 +307,9 @@ function Setup()
 	PlayerRef = Game.GetPlayer()
 	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
 	if SexLabQuestFramework
-		if Config != SexLabQuestFramework
-			Config = SexLabQuestFramework as sslSystemConfig
-		endIf
-		if ThreadLib != SexLabQuestFramework
-			ThreadLib = SexLabQuestFramework as sslThreadLibrary
-		endIf
-		if ActorLib != SexLabQuestFramework
-			ActorLib = SexLabQuestFramework as sslActorLibrary
-		endIf
+		Config    = SexLabQuestFramework as sslSystemConfig
+		ThreadLib = SexLabQuestFramework as sslThreadLibrary
+		ActorLib  = SexLabQuestFramework as sslActorLibrary
 	endIf
 	; Init defaults
 	RegisterSlots()

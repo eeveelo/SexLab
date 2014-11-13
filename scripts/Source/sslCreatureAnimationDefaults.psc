@@ -1971,3 +1971,5 @@ function RieklingThreeWay(int id)
 
 	Base.Save(id)
 endFunction
+
+Int Property NewProperty  Auto  

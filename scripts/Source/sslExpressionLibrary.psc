@@ -1,9 +1,6 @@
 scriptname sslExpressionLibrary extends Quest
 {DEPRECATED: This script is no longer used in any sexlab systems, and is only provided as a means to provide backwards compatibility by redirecting all it's functions to their new iterations}
 
-;/
-
-
 function DEPRECATED() global
 	string log = "SexLab DEPRECATED -- sslExpressionLibrary.psc -- Use of this script has been deprecated, the mod that called this function should be updated as soon as possible. If you are not the author of this mod, notify them of this error if possible."
 	Debug.TraceStack(log, 1)
@@ -153,4 +150,3 @@ sslActorStats property ActorStats hidden
 		return SSL.Stats
 	endFunction
 endProperty
- /;

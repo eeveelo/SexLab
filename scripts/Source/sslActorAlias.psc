@@ -1,10 +1,10 @@
 scriptname sslActorAlias extends ReferenceAlias
 
 ; Framework access
-sslSystemConfig property Config auto hidden
-sslActorLibrary property ActorLib auto hidden
-sslActorStats property Stats auto hidden
-Actor property PlayerRef auto hidden
+sslSystemConfig Config
+sslActorLibrary ActorLib
+sslActorStats Stats
+Actor PlayerRef
 
 ; Actor Info
 Actor property ActorRef auto hidden

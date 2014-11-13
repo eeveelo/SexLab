@@ -124,6 +124,3 @@ state Locked
 	function Setup()
 	endFunction
 endState
-
-
-Int Property NewProperty  Auto  

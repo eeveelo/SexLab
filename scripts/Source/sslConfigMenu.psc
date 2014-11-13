@@ -4,23 +4,23 @@ scriptname sslConfigMenu extends SKI_ConfigBase
 import PapyrusUtil
 
 ; Framework
+Actor property PlayerRef auto
 SexLabFramework property SexLab auto
 sslSystemConfig property Config auto
 
 ; Function libraries
-sslActorLibrary property ActorLib auto
-sslThreadLibrary property ThreadLib auto
-sslActorStats property Stats auto
+sslActorLibrary ActorLib
+sslThreadLibrary ThreadLib
+sslActorStats Stats
 
 ; Object registeries
-sslThreadSlots property ThreadSlots auto
-sslAnimationSlots property AnimSlots auto
-sslCreatureAnimationSlots property CreatureSlots auto
-sslExpressionSlots property ExpressionSlots auto
-sslVoiceSlots property VoiceSlots auto
+sslThreadSlots ThreadSlots
+sslAnimationSlots AnimSlots
+sslCreatureAnimationSlots CreatureSlots
+sslVoiceSlots VoiceSlots
+sslExpressionSlots ExpressionSlots
 
 ; Common Data
-Actor property PlayerRef auto
 Actor TargetRef
 int TargetFlag
 string TargetName
@@ -79,14 +79,14 @@ event OnVersionUpdate(int version)
 endEvent
 
 function SetupSystem()
+	Debug.Notification("Installing SexLab v"+GetStringVer())
 	; Make sure we have all the needed libraries
 	LoadLibs()
 	; Disable system from being used during setup
 	SexLab.GoToState("Disabled")
-	Debug.Notification("Installing SexLab v"+GetStringVer())
 	SexLab.Setup()
 	; Check if system is able to install and init defaults
-	if SexLab && Config.CheckSystem()
+	if SexLab && Config && Config.CheckSystem()
 		; Setup object slots
 		VoiceSlots.Setup()
 		ExpressionSlots.Setup()
@@ -99,6 +99,31 @@ function SetupSystem()
 		Debug.TraceStack("SexLab - FATAL - Failed setup checks - ["+SexLab+", "+Config+", "+ActorLib+", "+ThreadLib+", "+Stats+", "+ThreadSlots+", "+AnimSlots+", "+CreatureSlots+", "+VoiceSlots+", "+ExpressionSlots+"]")
 	endIf
 endFunction
+
+event OnGameReload()
+	Debug.Trace("SexLab Loading...")
+	parent.OnGameReload()
+	; Ensure we have the important startup variables
+	Debug.Trace("SexLab Loading Quests...")
+	if !SexLab || !Config
+		Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
+		if SexLabQuestFramework
+			SexLab = SexLabQuestFramework as SexLabFramework
+			Config = SexLabQuestFramework as sslSystemConfig
+		endIf
+	endIf
+	Debug.Trace("Disabling SexLab for startup")
+	SexLab.GoToState("Disabled")
+	; Reload SexLab's voice/tfc config at load
+	Debug.Trace("SexLab Loading CheckSystem...")
+	if CurrentVersion > 0 && Config.CheckSystem()
+		Debug.Trace("SexLab Loading Reload...")
+		Config.Reload()
+		Debug.Trace("SexLab Loading Reload DONE...")
+	endIf
+	SexLab.GoToState("Enabled")
+	Debug.Trace("SexLab Loaded CurrentVerison: "+CurrentVersion)
+endEvent
 
 function LoadLibs()
 	; Sync function Libraries - SexLabQuestFramework
@@ -130,7 +155,9 @@ function LoadLibs()
 		endIf
 	endIf
 	; Sync Player
-	PlayerRef = Game.GetPlayer()
+	if !PlayerRef
+		PlayerRef = Game.GetPlayer()
+	endIf
 endFunction
 
 ; ------------------------------------------------------- ;

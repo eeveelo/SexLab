@@ -975,30 +975,22 @@ endFunction
 function LoadLibs()
 	; Reset function Libraries - SexLabQuestFramework
 	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
-	if SexLabQuestFramework
-		if Config != SexLabQuestFramework
-			Config = SexLabQuestFramework as sslSystemConfig
-		endIf
-		if ThreadLib != SexLabQuestFramework
-			ThreadLib = SexLabQuestFramework as sslThreadLibrary
-		endIf
-		if ActorLib != SexLabQuestFramework
-			ActorLib = SexLabQuestFramework as sslActorLibrary
-		endIf
+	if SexLabQuestFramework && (Config != SexLabQuestFramework || ThreadLib != SexLabQuestFramework  || ActorLib != SexLabQuestFramework)
+		Config    = SexLabQuestFramework as sslSystemConfig
+		ThreadLib = SexLabQuestFramework as sslThreadLibrary
+		ActorLib  = SexLabQuestFramework as sslActorLibrary
 	endIf
 	; Reset secondary object registry - SexLabQuestRegistry
 	Form SexLabQuestRegistry = Game.GetFormFromFile(0x664FB, "SexLab.esm")
-	if SexLabQuestRegistry
-		if CreatureSlots != SexLabQuestRegistry
-			CreatureSlots = SexLabQuestRegistry as sslCreatureAnimationSlots
-		endIf
+	if SexLabQuestRegistry && CreatureSlots != SexLabQuestRegistry
+		CreatureSlots = SexLabQuestRegistry as sslCreatureAnimationSlots
 	endIf
 	; Reset animation registry - SexLabQuestAnimations
 	Form SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm")
 	if SexLabQuestAnimations && AnimSlots != SexLabQuestAnimations
 		AnimSlots = SexLabQuestAnimations as sslAnimationSlots
 	endIf
-	; Sync Player
+	; Reset data
 	if !PlayerRef
 		PlayerRef = Game.GetPlayer()
 	endIf

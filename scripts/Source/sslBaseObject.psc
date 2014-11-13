@@ -141,7 +141,7 @@ function Initialize()
 	Ephemeral = false
 	Storage   = GetOwningQuest()
 	Config    = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
-	Tags      = new string[1]
+	Tags      = new string[3]
 endFunction
 
 function Save(int id = -1)

@@ -787,6 +787,9 @@ function SetDefaults()
 	; Reload config
 	Reload()
 
+	; Cleanup dead NPCS in lists
+	CleanLists()
+
 	; Rest some player configurations
 	Stats.SetSkill(PlayerRef, "Sexuality", 75)
 	VoiceSlots.ForgetVoice(PlayerRef)
