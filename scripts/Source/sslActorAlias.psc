@@ -972,10 +972,10 @@ endEvent
 event OnOrgasm()
 endEvent
 
+int function CalcEnjoyment(float[] XP, float[] SkillsAmounts, bool IsLeadin, bool IsFemaleActor, float Timer, int OnStage, int MaxStage) global native
 function OffsetCoords(float[] Output, float[] CenterCoords, float[] OffsetBy) global native
 function OffsetBed(float[] Output, float[] BedOffsets, float CenterRot) global native
 bool function IsInPosition(Actor CheckActor, ObjectReference CheckMarker, float maxdistance = 30.0) global native
-int function CalcEnjoyment(float[] XP, float[] SkillsAmounts, bool IsLeadin, bool IsFemaleActor, float Timer, int OnStage, int MaxStage) global native
 
-bool function _SetActor(Actor ProspectRef) native
-function _ApplyExpression(Actor ProspectRef, int[] Presets) global native
+; bool function _SetActor(Actor ProspectRef) native
+; function _ApplyExpression(Actor ProspectRef, int[] Presets) global native

@@ -861,80 +861,22 @@ endFunction
 ; --- Intended for system use only - DO NOT USE       --- ;
 ; ------------------------------------------------------- ;
 
-function LoadLibs()
-	; Reset function Libraries - SexLabQuestFramework
-	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
-	if SexLabQuestFramework
-		Config      = SexLabQuestFramework as sslSystemConfig
-		ThreadLib   = SexLabQuestFramework as sslThreadLibrary
-		ThreadSlots = SexLabQuestFramework as sslThreadSlots
-		ActorLib    = SexLabQuestFramework as sslActorLibrary
-		Stats       = SexLabQuestFramework as sslActorStats
-	endIf
-	; Reset secondary object registry - SexLabQuestRegistry
-	Form SexLabQuestRegistry = Game.GetFormFromFile(0x664FB, "SexLab.esm")
-	if SexLabQuestRegistry
-		CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
-		ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
-		VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
-	endIf
-	; Reset animation registry - SexLabQuestAnimations
-	Form SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm")
-	if SexLabQuestAnimations
-		AnimSlots = SexLabQuestAnimations as sslAnimationSlots
-	endIf
-	; Reset phantom object registry - SexLabQuestRegistry
-	Form SexLabObjectFactory = Game.GetFormFromFile(0x78818, "SexLab.esm")
-	if SexLabObjectFactory
-		Factory = SexLabObjectFactory as sslObjectFactory
-	endIf
-	; Sync Data
-	if !PlayerRef
-		PlayerRef = Game.GetPlayer()
-	endIf
-	if !AnimatingFaction
-		AnimatingFaction = Config.AnimatingFaction
-	endIf
-endFunction
-
-function Setup()
-	; Check & Load Libraries
-	LoadLibs()
-	; Cascade setup call to primary libraries
-	Config.Setup()
-	ThreadLib.Setup()
-	ActorLib.Setup()
-	Stats.Setup()
-	Factory.Setup()
-endFunction
-
-function Log(string Log, string Type = "NOTICE")
-	Log = Type+": "+Log
-	if Config.DebugMode
-		SexLabUtil.PrintConsole(Log)
-	endIf
-	if Type == "FATAL"
-		Debug.TraceStack("SEXLAB - "+Log)
-	else
-		Debug.Trace("SEXLAB - "+Log)
-	endIf
-endFunction
-
-; Function libraries
-sslActorLibrary property ActorLib auto
-sslThreadLibrary property ThreadLib auto
-sslActorStats property Stats auto
-
-; Object registeries
-sslThreadSlots property ThreadSlots auto
-sslAnimationSlots property AnimSlots auto
-sslCreatureAnimationSlots property CreatureSlots auto
-sslVoiceSlots property VoiceSlots auto
-sslExpressionSlots property ExpressionSlots auto
-sslObjectFactory property Factory auto
-
+; Data
 Actor property PlayerRef auto
 Faction property AnimatingFaction auto hidden
+
+; Function libraries
+sslActorLibrary property ActorLib auto hidden
+sslThreadLibrary property ThreadLib auto hidden
+sslActorStats property Stats auto hidden
+
+; Object registeries
+sslThreadSlots property ThreadSlots auto hidden
+sslAnimationSlots property AnimSlots auto hidden
+sslCreatureAnimationSlots property CreatureSlots auto hidden
+sslVoiceSlots property VoiceSlots auto hidden
+sslExpressionSlots property ExpressionSlots auto hidden
+sslObjectFactory property Factory auto hidden
 
 ; Animation Threads
 sslThreadController[] property Threads hidden
@@ -971,23 +913,56 @@ sslBaseExpression[] property Expressions hidden
 	endFunction
 endProperty
 
+function Setup()
+	; Reset function Libraries - SexLabQuestFramework
+	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
+	if SexLabQuestFramework
+		Config      = SexLabQuestFramework as sslSystemConfig
+		ThreadLib   = SexLabQuestFramework as sslThreadLibrary
+		ThreadSlots = SexLabQuestFramework as sslThreadSlots
+		ActorLib    = SexLabQuestFramework as sslActorLibrary
+		Stats       = SexLabQuestFramework as sslActorStats
+	endIf
+	; Reset secondary object registry - SexLabQuestRegistry
+	Form SexLabQuestRegistry = Game.GetFormFromFile(0x664FB, "SexLab.esm")
+	if SexLabQuestRegistry
+		CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
+		ExpressionSlots = SexLabQuestRegistry as sslExpressionSlots
+		VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
+	endIf
+	; Reset animation registry - SexLabQuestAnimations
+	Form SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm")
+	if SexLabQuestAnimations
+		AnimSlots = SexLabQuestAnimations as sslAnimationSlots
+	endIf
+	; Reset phantom object registry - SexLabQuestRegistry
+	Form SexLabObjectFactory = Game.GetFormFromFile(0x78818, "SexLab.esm")
+	if SexLabObjectFactory
+		Factory = SexLabObjectFactory as sslObjectFactory
+	endIf
+	; Sync Data
+	PlayerRef        = Game.GetPlayer()
+	AnimatingFaction = Config.AnimatingFaction
+	; Cascade setup call to primary libraries
+	Config.Setup()
+	ThreadLib.Setup()
+	ActorLib.Setup()
+	Factory.Setup()
+	Stats.Setup()
+endFunction
 
-; DEPRECATED LIBRARIES - No longer used, their functions have all been moved to other scripts
-sslAnimationLibrary property AnimLib hidden
-	sslAnimationLibrary function get()
-		return Game.GetFormFromFile(0x3CE6C, "SexLab.esm") as sslAnimationLibrary
-	endFunction
-endProperty
-sslExpressionLibrary property ExpressionLib hidden
-	sslExpressionLibrary function get()
-		return Game.GetFormFromFile(0x4C63D, "SexLab.esm") as sslExpressionLibrary
-	endFunction
-endProperty
-sslVoiceLibrary property VoiceLib hidden
-	sslVoiceLibrary function get()
-		return Game.GetFormFromFile(0X3DE97, "SexLab.esm") as sslVoiceLibrary
-	endFunction
-endProperty
+function Log(string Log, string Type = "NOTICE")
+	Log = Type+": "+Log
+	if Config.DebugMode
+		SexLabUtil.PrintConsole(Log)
+	endIf
+	if Type == "FATAL"
+		Debug.TraceStack("SEXLAB - "+Log)
+	else
+		Debug.Trace("SEXLAB - "+Log)
+	endIf
+endFunction
+
 
 auto state Disabled
 	sslThreadModel function NewThread(float TimeOut = 30.0)
@@ -1025,6 +1000,28 @@ endFunction
 
 Actor[] property TestActors auto hidden
 
-event OnInit()
-	SexLabUtil.GetConfig().DebugMode = true
-endEvent
+; ------------------------------------------------------- ;
+; --- DEPRECATED LIBRARIES                            --- ;
+; ---  No longer used, moved to other scripts         --- ;
+; ------------------------------------------------------- ;
+
+
+sslAnimationLibrary property AnimLib hidden
+	sslAnimationLibrary function get()
+		Debug.TraceStack("SEXLAB -- SexLabFramework.AnimLib -- LIBRARY DEPRECATION - WILL BE REMOVED IN 1.60 RELEASE")
+		return Game.GetFormFromFile(0x3CE6C, "SexLab.esm") as sslAnimationLibrary
+	endFunction
+endProperty
+sslExpressionLibrary property ExpressionLib hidden
+	sslExpressionLibrary function get()
+		Debug.TraceStack("SEXLAB -- SexLabFramework.ExpressionLib -- LIBRARY DEPRECATION - WILL BE REMOVED IN 1.60 RELEASE")
+		return Game.GetFormFromFile(0x4C63D, "SexLab.esm") as sslExpressionLibrary
+	endFunction
+endProperty
+sslVoiceLibrary property VoiceLib hidden
+	sslVoiceLibrary function get()
+		Debug.TraceStack("SEXLAB -- SexLabFramework.VoiceLib -- LIBRARY DEPRECATION - WILL BE REMOVED IN 1.60 RELEASE")
+		return Game.GetFormFromFile(0X3DE97, "SexLab.esm") as sslVoiceLibrary
+	endFunction
+endProperty
+

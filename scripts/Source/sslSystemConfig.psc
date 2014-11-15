@@ -517,7 +517,6 @@ endFunction
 ; ------------------------------------------------------- ;
 
 bool function CheckSystem()
-	return true
 	; Check Skyrim Version
 	if (StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float) < 1.9
 		CheckSkyrim.Show()
@@ -527,82 +526,31 @@ bool function CheckSystem()
 		CheckSKSE.Show(1.71)
 		return false
 	; Check SkyUI install - depends on passing SKSE check passing
-	; elseIf Quest.GetQuest("SKI_ConfigManagerInstance") == none
-		; CheckSkyUI.Show(4.1)
-		; return false
+	elseIf Quest.GetQuest("SKI_ConfigManagerInstance") == none
+		CheckSkyUI.Show(4.1)
+		return false
 	; Check SexLabUtil install - this should never happen if they have properly updated
-	; elseIf SexLabUtil.GetPluginVersion() < 15903
-		; CheckSexLabUtil.Show()
-		; return false
+	elseIf SexLabUtil.GetPluginVersion() < 15903
+		CheckSexLabUtil.Show()
+		return false
 	; Check PapyrusUtil install - depends on passing SKSE check passing
-	; elseIf PapyrusUtil.GetVersion() < 28
-		; CheckPapyrusUtil.Show(2.8)
-		; return false
+	elseIf PapyrusUtil.GetVersion() < 28
+		CheckPapyrusUtil.Show(2.8)
+		return false
 	; Check FNIS generation - soft fail
-	; elseIf !FNIS.IsGenerated()
-		; CheckFNIS.Show()
+	elseIf !FNIS.IsGenerated()
+		CheckFNIS.Show()
 	endIf
 	; Return result
 	return true
 endFunction
 
-function ValidateTrackedActors()
-	int i = StorageUtil.FormListCount(self, "TrackedActors")
-	while i
-		i -= 1
-		Actor ActorRef = StorageUtil.FormListGet(self, "TrackedActors", i) as Actor
-		if !ActorRef
-			StorageUtil.FormListRemoveAt(self, "TrackedActors", i)
-		endIf
-	endWhile
-endFunction
-
-function ValidateTrackedFactions()
-	int i = StorageUtil.FormListCount(self, "TrackedFactions")
-	while i
-		i -= 1
-		Faction FactionRef = StorageUtil.FormListGet(self, "TrackedFactions", i) as Faction
-		if !FactionRef
-			StorageUtil.FormListRemoveAt(self, "TrackedFactions", i)
-		endIf
-	endWhile
-endFunction
-
-function CleanLists()
-	int count = StorageUtil.FormListCount(self, "ValidActors")
-	Log("Total Actors: "+count, "CleanLists")
-	int i = StorageUtil.FormListCount(self, "ValidActors")
-	while i > 0
-		i -= 1
-		Form FormRef = StorageUtil.FormListGet(self, "ValidActors", i)
-		if !FormRef
-			StorageUtil.FormListRemoveAt(self, "ValidActors", i)
-			; Log("Is None", "Removing")
-		else
-			Actor ActorRef = FormRef as Actor
-			if !ActorRef
-				StorageUtil.FormListRemoveAt(self, "ValidActors", i)
-				; Log(FormRef+" - Not Actor", "Removing")
-			elseIf ActorRef.IsDead() || ActorRef.IsDisabled()
-				StorageUtil.FormListRemove(self, "ValidActors", ActorRef)
-				StorageUtil.FormListRemove(none, "SexLab.SkilledActors", ActorRef, true)
-				StorageUtil.FormListRemove(self, "TrackedActors", ActorRef, true)
-				StorageUtil.FloatListClear(ActorRef, "SexLabSkills")
-				Stats.ClearCustomStats(ActorRef)
-				; Log(FormRef + " - "+ ActorRef.GetLeveledActorBase().GetName()+" - IsDead: " + ActorRef.IsDead() + " IsDisabled: " + ActorRef.IsDisabled(), "Removing")
-			endIf
-		endIf
-	endWhile
-	Log("Actors Removed: "+(count - StorageUtil.FormListCount(self, "ValidActors")), "CleanLists")
-endFunction
-
-function Setup()
-	parent.Setup()
-	SexLab = SexLabUtil.GetAPI()
-	SetDefaults()
-endFunction
-
 function Reload()
+	DebugMode = true
+
+	LoadLibs(false)
+	SexLab = SexLabUtil.GetAPI()
+
 	; Configure SFX & Voice volumes
 	AudioVoice.SetVolume(VoiceVolume)
 	AudioSFX.SetVolume(SFXVolume)
@@ -612,20 +560,18 @@ function Reload()
 	CrosshairRef = none
 	TargetRef    = none
 
-	; TFC Toggle keyp
+	; TFC Toggle key
 	UnregisterForAllKeys()
 	RegisterForKey(ToggleFreeCamera)
 	RegisterForKey(TargetActor)
 
 	; Remove any NPC thread control player has
-	DisableThreadControl(Control)
+	; DisableThreadControl(Control)
 	; Validate tracked factions & actors
 	; ValidateTrackedActors()
 	; ValidateTrackedFactions()
 	; Cleanup phantom slots with missing owners
 	; Factory.Cleanup()
-	; Reload strapon list
-	LoadStrapons()
 endFunction
 
 function SetDefaults()
@@ -787,8 +733,8 @@ function SetDefaults()
 	; Reload config
 	Reload()
 
-	; Cleanup dead NPCS in lists
-	CleanLists()
+	; Reset data
+	LoadStrapons()
 
 	; Rest some player configurations
 	Stats.SetSkill(PlayerRef, "Sexuality", 75)

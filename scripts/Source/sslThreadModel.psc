@@ -972,34 +972,29 @@ sslActorAlias function PickAlias(Actor ActorRef)
 	return none
 endFunction
 
-function LoadLibs()
+function SetTID(int value)
+
 	; Reset function Libraries - SexLabQuestFramework
 	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
-	if SexLabQuestFramework && (Config != SexLabQuestFramework || ThreadLib != SexLabQuestFramework  || ActorLib != SexLabQuestFramework)
+	if SexLabQuestFramework
 		Config    = SexLabQuestFramework as sslSystemConfig
 		ThreadLib = SexLabQuestFramework as sslThreadLibrary
 		ActorLib  = SexLabQuestFramework as sslActorLibrary
 	endIf
 	; Reset secondary object registry - SexLabQuestRegistry
 	Form SexLabQuestRegistry = Game.GetFormFromFile(0x664FB, "SexLab.esm")
-	if SexLabQuestRegistry && CreatureSlots != SexLabQuestRegistry
+	if SexLabQuestRegistry
 		CreatureSlots = SexLabQuestRegistry as sslCreatureAnimationSlots
 	endIf
 	; Reset animation registry - SexLabQuestAnimations
 	Form SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm")
-	if SexLabQuestAnimations && AnimSlots != SexLabQuestAnimations
+	if SexLabQuestAnimations
 		AnimSlots = SexLabQuestAnimations as sslAnimationSlots
 	endIf
+
 	; Reset data
-	if !PlayerRef
-		PlayerRef = Game.GetPlayer()
-	endIf
-endfunction
-
-function SetTID(int value)
-	LoadLibs()
-
 	thread_id = value
+	PlayerRef = Game.GetPlayer()
 
 	EventTypes = new string[5]
 	EventTypes[0] = "Sync"

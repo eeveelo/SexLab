@@ -33,6 +33,7 @@ event OnVersionUpdate(int version)
 	string EventType
 	; Install System - Fresh install or pre v1.50
 	if CurrentVersion < 15910
+		Debug.Trace("--SEXLAB INSTALL--")
 
 		; v1.51 - Fixed missing ChangeActors() and removed exprsionprofile.json support
 		; v1.52 - Altered exporting
@@ -61,6 +62,8 @@ event OnVersionUpdate(int version)
 
 	; Update System - v1.5x incremental updates
 	elseIf CurrentVersion < version
+		Debug.Trace("--SEXLAB UPDATE--")
+		SexLab.GoToState("Disabled")
 
 		; v1.60 dev
 		if CurrentVersion < 16000
@@ -79,15 +82,18 @@ event OnVersionUpdate(int version)
 endEvent
 
 function SetupSystem()
+	Debug.Trace("Installing SexLab v"+GetStringVer())
 	Debug.Notification("Installing SexLab v"+GetStringVer())
 	; Make sure we have all the needed libraries
-	LoadLibs()
+	LoadLibs(true)
+	Config.DebugMode = true
 	; Disable system from being used during setup
 	SexLab.GoToState("Disabled")
 	SexLab.Setup()
 	; Check if system is able to install and init defaults
 	if SexLab && Config && Config.CheckSystem()
 		; Setup object slots
+		Config.SetDefaults()
 		VoiceSlots.Setup()
 		ExpressionSlots.Setup()
 		CreatureSlots.Setup()
@@ -101,33 +107,14 @@ function SetupSystem()
 endFunction
 
 event OnGameReload()
-	Debug.Trace("SexLab Loading...")
+	Debug.Trace("SexLab MCM Loaded CurrentVerison: "+CurrentVersion)
+	MiscUtil.PrintConsole("SexLab MCM Loaded CurrentVerison: "+CurrentVersion)
 	parent.OnGameReload()
-	; Ensure we have the important startup variables
-	Debug.Trace("SexLab Loading Quests...")
-	if !SexLab || !Config
-		Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
-		if SexLabQuestFramework
-			SexLab = SexLabQuestFramework as SexLabFramework
-			Config = SexLabQuestFramework as sslSystemConfig
-		endIf
-	endIf
-	Debug.Trace("Disabling SexLab for startup")
-	SexLab.GoToState("Disabled")
-	; Reload SexLab's voice/tfc config at load
-	Debug.Trace("SexLab Loading CheckSystem...")
-	if CurrentVersion > 0 && Config.CheckSystem()
-		Debug.Trace("SexLab Loading Reload...")
-		Config.Reload()
-		Debug.Trace("SexLab Loading Reload DONE...")
-	endIf
-	SexLab.GoToState("Enabled")
-	Debug.Trace("SexLab Loaded CurrentVerison: "+CurrentVersion)
 endEvent
 
-function LoadLibs()
+function LoadLibs(bool Forced = false)
 	; Sync function Libraries - SexLabQuestFramework
-	if !SexLab || !Config || !ThreadLib || !ThreadSlots || !ActorLib || !Stats
+	if Forced || !SexLab || !Config || !ThreadLib || !ThreadSlots || !ActorLib || !Stats
 		Form SexLabQuestFramework  = Game.GetFormFromFile(0xD62, "SexLab.esm")
 		if SexLabQuestFramework
 			SexLab      = SexLabQuestFramework as SexLabFramework
@@ -139,14 +126,14 @@ function LoadLibs()
 		endIf
 	endIf
 	; Sync animation registry - SexLabQuestAnimations
-	if !AnimSlots
+	if Forced || !AnimSlots
 		Form SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm")
 		if SexLabQuestAnimations
 			AnimSlots = SexLabQuestAnimations as sslAnimationSlots
 		endIf
 	endIf
 	; Sync secondary object registry - SexLabQuestRegistry
-	if !CreatureSlots || !VoiceSlots || !ExpressionSlots
+	if Forced || !CreatureSlots || !VoiceSlots || !ExpressionSlots
 		Form SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm")
 		if SexLabQuestRegistry
 			CreatureSlots   = SexLabQuestRegistry as sslCreatureAnimationSlots
@@ -154,8 +141,8 @@ function LoadLibs()
 			VoiceSlots      = SexLabQuestRegistry as sslVoiceSlots
 		endIf
 	endIf
-	; Sync Player
-	if !PlayerRef
+	; Sync data
+	if Forced || !PlayerRef
 		PlayerRef = Game.GetPlayer()
 	endIf
 endFunction
@@ -2399,7 +2386,7 @@ state RestoreDefaultSettings
 		if ShowMessage("$SSL_WarnRestoreDefaults")
 			SetTextOptionValueST("$SSL_Resetting")
 			SetOptionFlagsST(OPTION_FLAG_DISABLED)
-			Config.Setup()
+			Config.SetDefaults()
 			ShowMessage("$SSL_RunRestoreDefaults", false)
 			SetOptionFlagsST(OPTION_FLAG_NONE)
 			SetTextOptionValueST("$SSL_ClickHere")
@@ -2863,6 +2850,17 @@ function ImportVoices()
 endFunction
 
 
+function Log(string Log, string Type = "NOTICE")
+	Log = Type+": "+Log
+	if Config && Config.DebugMode
+		SexLabUtil.PrintConsole(Log)
+	endIf
+	if Type == "FATAL"
+		Debug.TraceStack("SEXLAB - "+Log)
+	else
+		Debug.Trace("SEXLAB - "+Log)
+	endIf
+endFunction
 
 function DEPRECATED()
 	string log = "SexLab DEPRECATED -- sslConfigMenu.psc -- Use of this property has been deprecated, the mod that called this function should be updated as soon as possible. If you are not the author of this mod, notify them of this error if possible."
