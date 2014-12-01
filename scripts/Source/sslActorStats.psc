@@ -15,12 +15,6 @@ string[] LewdTitlesFemale
 
 string[] SkillNames
 
-bool function IsSkilled(Actor ActorRef) global native
-float function _GetSkill(Actor ActorRef, int Stat) global native
-float function _AdjustSkill(Actor ActorRef, int Stat, float By) global native
-function _SetSkill(Actor ActorRef, int Stat, float Value) global native
-function GetAllArray(Actor ActorRef, float[] Output) global native
-
 ; ------------------------------------------------------- ;
 ; --- Manipulate Custom Stats                         --- ;
 ; ------------------------------------------------------- ;
@@ -186,6 +180,7 @@ endFunction
 ; --- Sex Skills                                      --- ;
 ; ------------------------------------------------------- ;
 
+bool function IsSkilled(Actor ActorRef) global native
 
 function _SeedActor(Actor ActorRef, float RealTime, float GameTime) global native
 function SeedActor(Actor ActorRef)
@@ -195,31 +190,31 @@ function SeedActor(Actor ActorRef)
 	endIf
 endFunction
 
+float function _GetSkill(Actor ActorRef, int Stat) global native
 int function GetSkill(Actor ActorRef, string Skill)
 	SeedActor(ActorRef)
 	return _GetSkill(ActorRef, SkillNames.Find(Skill)) as int
 endFunction
-
 float function GetSkillFloat(Actor ActorRef, string Skill)
 	SeedActor(ActorRef)
 	return _GetSkill(ActorRef, SkillNames.Find(Skill))
 endFunction
 
+function _SetSkill(Actor ActorRef, int Stat, float Value) global native
 function SetSkill(Actor ActorRef, string Skill, int Amount)
 	SeedActor(ActorRef)
 	_SetSkill(ActorRef, SkillNames.Find(Skill), Amount as float)
 endFunction
-
 function SetSkillFloat(Actor ActorRef, string Skill, float Amount)
 	SeedActor(ActorRef)
 	_SetSkill(ActorRef, SkillNames.Find(Skill), Amount)
 endFunction
 
+float function _AdjustSkill(Actor ActorRef, int Stat, float By) global native
 function AdjustSkill(Actor ActorRef, string Skill, int Amount)
 	SeedActor(ActorRef)
 	_AdjustSkill(ActorRef, SkillNames.Find(Skill), Amount as float)
 endfunction
-
 function AdjustSkillFloat(Actor ActorRef, string Skill, float Amount)
 	SeedActor(ActorRef)
 	_AdjustSkill(ActorRef, SkillNames.Find(Skill), Amount)
@@ -237,9 +232,10 @@ string function GetTitle(int Level)
 	return StatTitles[ClampInt(Level, 0, 6)]
 endFunction
 
+function _GetSkills(Actor ActorRef, float[] Output) global native
 float[] function GetSkills(Actor ActorRef) global
 	float[] Output = FloatArray(18)
-	GetAllArray(ActorRef, Output)
+	_GetSkills(ActorRef, Output)
 	return Output
 endFunction
 
@@ -955,3 +951,29 @@ function AdjustFloat(Actor ActorRef, string Stat, float Amount)
 	endIf
 endfunction
 
+
+
+bool locked = false
+state Testing
+	event OnUpdate()
+		Tester()
+	endEvent
+	function Tester()
+		while locked
+			utility.wait(0.5)
+			Log("ActorStats Locked...")
+		endWhile
+		locked = true
+
+		int i = 500
+		while i
+			i -= 1
+			Debug.Trace("ACTORSTATSb Lock Spin: "+i)
+			Utility.WaitMenuMode(0.5)
+		endWhile
+
+		locked = false
+	endFunction
+endState
+function Tester()
+endFunction

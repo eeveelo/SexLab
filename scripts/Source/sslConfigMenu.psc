@@ -7,6 +7,7 @@ import PapyrusUtil
 Actor property PlayerRef auto
 SexLabFramework property SexLab auto
 sslSystemConfig property Config auto
+sslSystemAlias property SystemAlias auto
 
 ; Function libraries
 sslActorLibrary ActorLib
@@ -30,81 +31,41 @@ string TargetName
 ; ------------------------------------------------------- ;
 
 event OnVersionUpdate(int version)
-	string EventType
-	; Install System - Fresh install or pre v1.50
-	if CurrentVersion < 15910
-		Debug.Trace("--SEXLAB INSTALL--")
-
-		; v1.51 - Fixed missing ChangeActors() and removed exprsionprofile.json support
-		; v1.52 - Altered exporting
-		; v1.53 - Changed ActorAlias off of ActorLibrary and ActorLibrary back to sslSystemLibrary
-		; v1.54 - Added legacy scripts
-		; v1.55 - Added ObjectFactory, moved MCM script back to original Form ID
-		; v1.56 - New MCM menu quest; rendering all the previous upgrade stuff useless as it's going to start from scratch
-
-		; Pre 1.56 data cleanup
-		StorageUtil.FormListClear(none, "NoStripList")
-		StorageUtil.FormListClear(none, "StripList")
-		StorageUtil.FormListClear(none, "SexLabActors")
-		StorageUtil.StringListClear(none, "SexLabCreatures")
-
-		; v1.57 - Fixed actor stripping, expression tags being searched wrong, and refactored thread installs
-		; v1.58 - Decoupled ThreadLib from ThreadModel, added Riekling animations
-		; v1.59 - Converted animation adjustments from internal storageutil to jsonutil
-		; v1.59b - Converted stats to use float lists instead of individual values, new animations, various thread changes
-		; v1.59c - Converted stats to use float lists instead of individual values, new animations, various thread changes
-
-		; Install system
-		SetupSystem()
-
-		Debug.Notification("SexLab "+SexLabUtil.GetStringVer()+" Installed...")
-		EventType = "SexLabInstalled"
-
-	; Update System - v1.5x incremental updates
-	elseIf CurrentVersion < version
-		Debug.Trace("--SEXLAB UPDATE--")
-		SexLab.GoToState("Disabled")
-
-		; v1.60 dev
-		if CurrentVersion < 16000
-			SetupSystem()
-		endIf
-
-		Debug.Notification("SexLab "+SexLabUtil.GetStringVer()+" Updated...")
-		SexLab.GoToState("Enabled")
-
-		EventType = "SexLabUpdated"
-	endIf
+	LoadLibs(true)
+	; Start first time install
+	if CurrentVersion < 15990
+		SystemAlias.InstallSystem()
+	endif
 	; Send update/install event
-	int eid = ModEvent.Create(EventType)
+	int eid = ModEvent.Create(sslUtility.StringIfElse(CurrentVersion <= 0, "SexLabInstalled", "SexLabUpdated"))
 	ModEvent.PushInt(eid, version)
 	ModEvent.Send(eid)
 endEvent
 
-function SetupSystem()
-	Debug.Trace("Installing SexLab v"+GetStringVer())
-	Debug.Notification("Installing SexLab v"+GetStringVer())
-	; Make sure we have all the needed libraries
-	LoadLibs(true)
-	Config.DebugMode = true
-	; Disable system from being used during setup
-	SexLab.GoToState("Disabled")
-	SexLab.Setup()
-	; Check if system is able to install and init defaults
-	if SexLab && Config && Config.CheckSystem()
-		; Setup object slots
-		Config.SetDefaults()
-		VoiceSlots.Setup()
-		ExpressionSlots.Setup()
-		CreatureSlots.Setup()
-		AnimSlots.Setup()
-		ThreadSlots.Setup()
-		; Enable system for use
-		SexLab.GoToState("Enabled")
-	else
-		Debug.TraceStack("SexLab - FATAL - Failed setup checks - ["+SexLab+", "+Config+", "+ActorLib+", "+ThreadLib+", "+Stats+", "+ThreadSlots+", "+AnimSlots+", "+CreatureSlots+", "+VoiceSlots+", "+ExpressionSlots+"]")
-	endIf
-endFunction
+; function SetupSystem()
+; 	Debug.Trace("Installing SexLab v"+GetStringVer())
+; 	Debug.Notification("Installing SexLab v"+GetStringVer())
+; 	; Make sure we have all the needed libraries
+; 	LoadLibs(true)
+; 	Config.DebugMode = true
+; 	; Disable system from being used during setup
+; 	SexLab.GoToState("Disabled")
+; 	SexLab.Setup()
+; 	; Check if system is able to install and init defaults
+; 	if SexLab && Config && Config.CheckSystem()
+; 		; Setup object slots
+; 		Config.SetDefaults()
+; 		VoiceSlots.Setup()
+; 		ExpressionSlots.Setup()
+; 		CreatureSlots.Setup()
+; 		AnimSlots.Setup()
+; 		ThreadSlots.Setup()
+; 		; Enable system for use
+; 		SexLab.GoToState("Enabled")
+; 	else
+; 		Debug.TraceStack("SexLab - FATAL - Failed setup checks - ["+SexLab+", "+Config+", "+ActorLib+", "+ThreadLib+", "+Stats+", "+ThreadSlots+", "+AnimSlots+", "+CreatureSlots+", "+VoiceSlots+", "+ExpressionSlots+"]")
+; 	endIf
+; endFunction
 
 event OnGameReload()
 	Debug.Trace("SexLab MCM Loaded CurrentVerison: "+CurrentVersion)
@@ -114,7 +75,7 @@ endEvent
 
 function LoadLibs(bool Forced = false)
 	; Sync function Libraries - SexLabQuestFramework
-	if Forced || !SexLab || !Config || !ThreadLib || !ThreadSlots || !ActorLib || !Stats
+	if Forced || !SexLab || !Config || !ThreadLib || !ThreadSlots || !ActorLib || !Stats || !SystemAlias
 		Form SexLabQuestFramework  = Game.GetFormFromFile(0xD62, "SexLab.esm")
 		if SexLabQuestFramework
 			SexLab      = SexLabQuestFramework as SexLabFramework
@@ -123,6 +84,7 @@ function LoadLibs(bool Forced = false)
 			ThreadSlots = SexLabQuestFramework as sslThreadSlots
 			ActorLib    = SexLabQuestFramework as sslActorLibrary
 			Stats       = SexLabQuestFramework as sslActorStats
+			SystemAlias = SexLab.GetNthAlias(0) as sslSystemAlias
 		endIf
 	endIf
 	; Sync animation registry - SexLabQuestAnimations
@@ -154,7 +116,14 @@ endFunction
 event OnPageReset(string page)
 	; Logo
 	if page == ""
-		LoadCustomContent("SexLab/logo.dds", 184, 31)
+		int Installed = SystemAlias.CurrentVersion
+		if Installed < SexLabUtil.GetVersion()
+			SetCursorFillMode(LEFT_TO_RIGHT)
+			AddHeaderOption("SexLab is current installing or updating...")
+			AddHeaderOption("Close this menu and wait for it to complete")
+		else
+			LoadCustomContent("SexLab/logo.dds", 184, 31)
+		endIf
 		return
 	endIf
 	UnloadCustomContent()
@@ -2480,7 +2449,7 @@ state CleanSystem
 			SexLabObjectFactory.Start()
 
 			; Setup & clean system
-			SetupSystem()
+			SystemAlias.SetupSystem()
 			Stats.CleanDeadStats()
 
 			ModEvent.Send(ModEvent.Create("SexLabReset"))

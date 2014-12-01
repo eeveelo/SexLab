@@ -741,6 +741,12 @@ function SetDefaults()
 	VoiceSlots.ForgetVoice(PlayerRef)
 endFunction
 
+event OnInit()
+	parent.OnInit()
+	SetDefaults()
+	; DebugMode = true
+endEvent
+
 function ReloadData()
 	; ActorTypeNPC =            Game.GetForm(0x13794)
 	; AnimatingFaction =        Game.GetFormFromFile(0xE50F, "SexLab.esm")

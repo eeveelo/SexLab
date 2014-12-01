@@ -943,12 +943,6 @@ function Setup()
 	; Sync Data
 	PlayerRef        = Game.GetPlayer()
 	AnimatingFaction = Config.AnimatingFaction
-	; Cascade setup call to primary libraries
-	Config.Setup()
-	ThreadLib.Setup()
-	ActorLib.Setup()
-	Factory.Setup()
-	Stats.Setup()
 endFunction
 
 function Log(string Log, string Type = "NOTICE")
