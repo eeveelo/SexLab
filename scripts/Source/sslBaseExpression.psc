@@ -1,7 +1,6 @@
 scriptname sslBaseExpression extends sslBaseObject
 
 import PapyrusUtil
-import MfgConsoleFunc
 
 ; Gender Types
 int property Male       = 0 autoreadonly
@@ -56,7 +55,6 @@ float[] Female5
 ; ------------------------------------------------------- ;
 
 function Apply(Actor ActorRef, int Strength, int Gender)
-	; Log("Phase: "+PickPhase(Strength, Gender), Strength)
 	ApplyPhase(ActorRef, PickPhase(Strength, Gender), Gender)
 endFunction
 
@@ -90,74 +88,22 @@ function CloseMouth(Actor ActorRef) global
 endFunction
 
 bool function IsMouthOpen(Actor ActorRef) global
-	return (GetExpressionID(ActorRef) == 16 && GetExpressionValue(ActorRef) == 100) || (GetPhonemeModifier(ActorRef, 0, 1) >= 40)
+	return GetPhoneme(ActorRef, 1) >= 40
 endFunction
 
 function ClearMFG(Actor ActorRef) global
 	ClearPhoneme(ActorRef)
 	ClearModifier(ActorRef)
-	ResetPhonemeModifier(ActorRef)
 	ActorRef.ResetExpressionOverrides()
 	ActorRef.ClearExpressionOverride()
 endFunction
 
-function ClearPhoneme(Actor ActorRef) global
-	; A bit quicker than a loop
-	ActorRef.SetExpressionPhoneme(0, 0.0)
-	ActorRef.SetExpressionPhoneme(1, 0.0)
-	ActorRef.SetExpressionPhoneme(2, 0.0)
-	ActorRef.SetExpressionPhoneme(3, 0.0)
-	ActorRef.SetExpressionPhoneme(4, 0.0)
-	ActorRef.SetExpressionPhoneme(5, 0.0)
-	ActorRef.SetExpressionPhoneme(6, 0.0)
-	ActorRef.SetExpressionPhoneme(7, 0.0)
-	ActorRef.SetExpressionPhoneme(8, 0.0)
-	ActorRef.SetExpressionPhoneme(9, 0.0)
-	ActorRef.SetExpressionPhoneme(10, 0.0)
-	ActorRef.SetExpressionPhoneme(11, 0.0)
-	ActorRef.SetExpressionPhoneme(12, 0.0)
-	ActorRef.SetExpressionPhoneme(13, 0.0)
-	ActorRef.SetExpressionPhoneme(14, 0.0)
-	ActorRef.SetExpressionPhoneme(15, 0.0)
-endFunction
-
-function ClearModifier(Actor ActorRef) global
-	ActorRef.SetExpressionModifier(0, 0.0)
-	ActorRef.SetExpressionModifier(1, 0.0)
-	ActorRef.SetExpressionModifier(2, 0.0)
-	ActorRef.SetExpressionModifier(3, 0.0)
-	ActorRef.SetExpressionModifier(4, 0.0)
-	ActorRef.SetExpressionModifier(5, 0.0)
-	ActorRef.SetExpressionModifier(6, 0.0)
-	ActorRef.SetExpressionModifier(7, 0.0)
-	ActorRef.SetExpressionModifier(8, 0.0)
-	ActorRef.SetExpressionModifier(9, 0.0)
-	ActorRef.SetExpressionModifier(10, 0.0)
-	ActorRef.SetExpressionModifier(11, 0.0)
-	ActorRef.SetExpressionModifier(12, 0.0)
-	ActorRef.SetExpressionModifier(13, 0.0)
-endFunction
+function ClearPhoneme(Actor ActorRef) global native
+function ClearModifier(Actor ActorRef) global native
 
 function ApplyPresetFloats(Actor ActorRef, float[] Preset) global
-	Debug.Trace(ActorRef.GetLeveledActorBase().GetName()+" -- "+Preset)
-	MiscUtil.PrintConsole(ActorRef.GetLeveledActorBase().GetName()+" -- "+Preset)
-	int i
-	; Set Phoneme
-	int p
-	while p <= 15
-		ActorRef.SetExpressionPhoneme(p, Preset[i])
-		i += 1
-		p += 1
-	endWhile
-	; Set Modifers
-	int m
-	while m <= 13
-		ActorRef.SetExpressionModifier(m, Preset[i])
-		i += 1
-		m += 1
-	endWhile
-	; Set expression
-	ActorRef.SetExpressionOverride(Preset[30] as int, Preset[31] as int)
+	ApplyPresetArray(ActorRef, Preset)
+	; ActorRef.SetExpressionOverride(Preset[30] as int, Preset[31] as int)
 endFunction
 
 function ApplyPreset(Actor ActorRef, int[] Preset) global
@@ -562,3 +508,6 @@ endFunction
 
 ; function RevertTags() native
 
+float function GetModifier(Actor ActorRef, int id) global native
+float function GetPhoneme(Actor ActorRef, int id) global native
+function ApplyPresetArray(Actor ActorRef, float[] Preset) global native

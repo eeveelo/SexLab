@@ -4,158 +4,26 @@ import SexLabUtil
 
 function PreBenchmarkSetup()
 	Setup()
-	FormOne = Game.GetFormFromFile(0xD62, "SexLab.esm")
-	FormTwo = Game.GetFormFromFile(0x639DF, "SexLab.esm")
 endFunction
-
-Form FormOne
-Form FormTwo
-
-float function IfElse(bool isTrue, float returnTrue, float returnFalse = 0.0)
-	if isTrue
-		return returnTrue
-	else
-		return returnFalse
-	endIf
-endFunction
-
 
 state Test1
 	string function Label()
-		return "Local"
+		return ""
 	endFunction
 
 	string function Proof()
-		float TrueVar  = 0.0
-		float FalseVar = 0.0
-		if FormOne != FormTwo
-			TrueVar = 5.0
-		else
-			TrueVar = 1.0
-		endIf
-		if FormOne == FormTwo
-			FalseVar = 5.0
-		else
-			FalseVar = 1.0
-		endIf
-
-		string Output
-		Output += "True: "+TrueVar+"=="+5.0+" = "+(TrueVar == 5.0)
-		Output += " -- "
-		Output += "False: "+FalseVar+"=="+1.0+" = "+(FalseVar == 1.0)
-		return Output
+		return ""
 	endFunction
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
 		; START any variable preparions needed
-		float TrueVar  = 0.0
-		float FalseVar = 0.0
+
 		; END any variable preparions needed
 		baseline += Utility.GetCurrentRealTime()
 		while nth
 			nth -= 1
 			; START code to benchmark
-			if FormOne != FormTwo
-				TrueVar = 5.0
-			else
-				TrueVar = 1.0
-			endIf
-			if FormOne == FormTwo
-				FalseVar = 5.0
-			else
-				FalseVar = 1.0
-			endIf
-			; END code to benchmark
-		endWhile
-		return Utility.GetCurrentRealTime() - baseline
-	endFunction
-endState
 
-
-state Test2
-	string function Label()
-		return "IfElse"
-	endFunction
-
-	string function Proof()
-		string Output
-		Output += "True: "+IfElse(FormOne != FormTwo, 5.0, 1.0)+"=="+5.0+" = "+(IfElse(FormOne != FormTwo, 5.0, 1.0) == 5.0)
-		Output += " -- "
-		Output += "False: "+IfElse(FormOne == FormTwo, 5.0, 1.0)+"=="+1.0+" = "+(IfElse(FormOne == FormTwo, 5.0, 1.0) == 1.0)
-		return Output
-	endFunction
-
-	float function RunTest(int nth = 5000, float baseline = 0.0)
-		; START any variable preparions needed
-		float TrueVar  = 0.0
-		float FalseVar = 0.0
-		; END any variable preparions needed
-		baseline += Utility.GetCurrentRealTime()
-		while nth
-			nth -= 1
-			; START code to benchmark
-			TrueVar   = IfElse(FormOne != FormTwo, 5.0, 1.0)
-			FalseVar  = IfElse(FormOne == FormTwo, 5.0, 1.0)
-			; END code to benchmark
-		endWhile
-		return Utility.GetCurrentRealTime() - baseline
-	endFunction
-endState
-
-state Test3
-	string function Label()
-		return "sslUtility"
-	endFunction
-
-	string function Proof()
-		string Output
-		Output += "True: "+sslUtility.FloatIfElse(FormOne != FormTwo, 5.0, 1.0)+"=="+5.0+" = "+(sslUtility.FloatIfElse(FormOne != FormTwo, 5.0, 1.0) == 5.0)
-		Output += " -- "
-		Output += "False: "+sslUtility.FloatIfElse(FormOne == FormTwo, 5.0, 1.0)+"=="+1.0+" = "+(sslUtility.FloatIfElse(FormOne == FormTwo, 5.0, 1.0) == 1.0)
-		return Output
-	endFunction
-
-	float function RunTest(int nth = 5000, float baseline = 0.0)
-		; START any variable preparions needed
-		float TrueVar  = 0.0
-		float FalseVar = 0.0
-		; END any variable preparions needed
-		baseline += Utility.GetCurrentRealTime()
-		while nth
-			nth -= 1
-			; START code to benchmark
-			TrueVar   = sslUtility.FloatIfElse(FormOne != FormTwo, 5.0, 1.0)
-			FalseVar  = sslUtility.FloatIfElse(FormOne == FormTwo, 5.0, 1.0)
-			; END code to benchmark
-		endWhile
-		return Utility.GetCurrentRealTime() - baseline
-	endFunction
-endState
-
-state Test4
-	string function Label()
-		return "sslSystemLibrary"
-	endFunction
-
-	string function Proof()
-		string Output
-		Output += "True: "+FloatIfElse(FormOne != FormTwo, 5.0, 1.0)+"=="+5.0+" = "+(FloatIfElse(FormOne != FormTwo, 5.0, 1.0) == 5.0)
-		Output += " -- "
-		Output += "False: "+FloatIfElse(FormOne == FormTwo, 5.0, 1.0)+"=="+1.0+" = "+(FloatIfElse(FormOne == FormTwo, 5.0, 1.0) == 1.0)
-		return Output
-	endFunction
-
-	float function RunTest(int nth = 5000, float baseline = 0.0)
-		; START any variable preparions needed
-		float TrueVar  = 0.0
-		float FalseVar = 0.0
-		; END any variable preparions needed
-		baseline += Utility.GetCurrentRealTime()
-		while nth
-			nth -= 1
-			; START code to benchmark
-			TrueVar   = FloatIfElse(FormOne != FormTwo, 5.0, 1.0)
-			FalseVar  = FloatIfElse(FormOne == FormTwo, 5.0, 1.0)
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline
@@ -167,7 +35,6 @@ endState
 
 
 function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10, bool UseBaseLoop = false)
-
 	PreBenchmarkSetup()
 
 	Debug.Notification("Starting benchmark...")
@@ -191,13 +58,11 @@ function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10, bo
 		int n = 1
 		while n <= Loops
 			Utility.WaitMenuMode(0.5)
-
 			if UseBaseLoop
 				GoToState("")
 				Base = RunTest(Iterations)
 				GoToState("Test"+Benchmark)
 			endIf
-
 			float Time = RunTest(Iterations, Base)
 			Total += Time
 			if UseBaseLoop
