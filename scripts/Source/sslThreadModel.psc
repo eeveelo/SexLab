@@ -4,7 +4,6 @@ scriptname sslThreadModel extends Quest hidden
 ; import sslUtility
 ; import StorageUtil
 
-
 int thread_id
 int property tid hidden
 	int function get()
@@ -25,13 +24,11 @@ sslThreadLibrary property ThreadLib auto
 sslAnimationSlots property AnimSlots auto
 sslCreatureAnimationSlots property CreatureSlots auto
 
-; Actor Storage
-Actor[] property Positions auto hidden
-Actor property PlayerRef auto hidden
-Actor property VictimRef auto hidden
-int property ActorCount auto hidden
-string property AdjustKey auto hidden
+; Actor Info
 sslActorAlias[] property ActorAlias auto hidden
+Actor[] property Positions auto hidden
+Actor property VictimRef auto hidden
+Actor property PlayerRef auto hidden
 
 ; Thread status
 bool property HasPlayer auto hidden
@@ -45,6 +42,8 @@ Race property CreatureRef auto hidden
 
 ; Animation Info
 int property Stage auto hidden
+int property ActorCount auto hidden
+string property AdjustKey auto hidden
 Sound property SoundFX auto hidden
 sslBaseAnimation property Animation auto hidden
 sslBaseAnimation[] CustomAnimations
@@ -140,20 +139,25 @@ state Making
 		; Ensure we have room for actor
 		if !ActorRef
 			Log("AddActor(NONE) -- Failed to add actor -- Actor is a figment of your imagination", "FATAL")
+			Initialize()
 			return -1
 		elseIf ActorCount >= 5
 			Log("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- Thread has reached actor limit", "FATAL")
+			Initialize()
 			return -1
 		elseIf Positions.Find(ActorRef) != -1
 			Log("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- They have been already added to this thread", "FATAL")
+			Initialize()
 			return -1
 		elseIf ActorLib.ValidateActor(ActorRef) < 0
 			Log("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- They are not a valid target for animation", "FATAL")
+			Initialize()
 			return -1
 		endIf
 		sslActorAlias Slot = PickAlias(ActorRef)
 		if !Slot || !Slot.SetActor(ActorRef, IsVictim, Voice, ForceSilent)
 			Log("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- They were unable to fill an actor alias", "FATAL")
+			Initialize()
 			return -1
 		endIf
 		; Update thread info
@@ -173,6 +177,7 @@ state Making
 		int Count = ActorList.Length
 		if Count < 1 || ((Positions.Length + Count) > 5) || ActorList.Find(none) != -1
 			Log("AddActors() - Failed to add actor list as it either contains to many actors placing the thread over it's limit, none at all, or an invalid 'None' entry -- "+ActorList, "FATAL")
+			Initialize()
 			return false
 		endIf
 		int i
@@ -196,6 +201,7 @@ state Making
 
 		if ActorCount < 1 || Positions.Length == 0
 			Log("StartThread() - No valid actors available for animation", "FATAL")
+			Initialize()
 			return none
 		endIf
 
@@ -261,6 +267,7 @@ state Making
 				SetAnimations(CreatureSlots.GetByRace(ActorCount, CreatureRef))
 				if PrimaryAnimations.Length == 0
 					Log("StartThread() - Failed to find valid creature animations.", "FATAL")
+					Initialize()
 					return none
 				endIf
 			endIf
@@ -272,6 +279,7 @@ state Making
 			SetAnimations(AnimSlots.GetByDefault(Males, Females, IsAggressive, (BedRef != none), Config.RestrictAggressive))
 			if PrimaryAnimations.Length == 0
 				Log("StartThread() - Unable to find valid default animations", "FATAL")
+				Initialize()
 				return none
 			endIf
 		endIf
@@ -939,7 +947,7 @@ endFunction
 function Log(string Log, string Type = "NOTICE")
 	SexLabUtil.DebugLog(Log, "Thread["+thread_id+"] "+Type, Config.DebugMode)
 	if Type == "FATAL"
-		Initialize()
+		Debug.TraceStack("Thread["+thread_id+"] "+Log)
 	endIf
 endFunction
 
@@ -972,8 +980,7 @@ sslActorAlias function PickAlias(Actor ActorRef)
 	return none
 endFunction
 
-function SetTID(int value)
-
+function SetTID(int id)
 	; Reset function Libraries - SexLabQuestFramework
 	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
 	if SexLabQuestFramework
@@ -992,45 +999,53 @@ function SetTID(int value)
 		AnimSlots = SexLabQuestAnimations as sslAnimationSlots
 	endIf
 
-	; Reset data
-	thread_id = value
-	PlayerRef = Game.GetPlayer()
+	; Reset script status
+	if Start()
+		thread_id = id
+		PlayerRef = Game.GetPlayer()
+		Log("Start...", "Setup")
 
-	EventTypes = new string[5]
-	EventTypes[0] = "Sync"
-	EventTypes[1] = "Prepare"
-	EventTypes[2] = "Reset"
-	EventTypes[3] = "Strip"
-	EventTypes[4] = "Orgasm"
+		Debug.Trace("DEBUG TMP - Config: "+Config)
+		Debug.Trace("DEBUG TMP - CreatureSlots: "+CreatureSlots)
+		Debug.Trace("DEBUG TMP - AnimSlots: "+AnimSlots)
 
-	ActorAlias = new sslActorAlias[5]
-	ActorAlias[0] = GetNthAlias(0) as sslActorAlias
-	ActorAlias[1] = GetNthAlias(1) as sslActorAlias
-	ActorAlias[2] = GetNthAlias(2) as sslActorAlias
-	ActorAlias[3] = GetNthAlias(3) as sslActorAlias
-	ActorAlias[4] = GetNthAlias(4) as sslActorAlias
+		; Init thread info
+		EventTypes = new string[5]
+		EventTypes[0] = "Sync"
+		EventTypes[1] = "Prepare"
+		EventTypes[2] = "Reset"
+		EventTypes[3] = "Strip"
+		EventTypes[4] = "Orgasm"
 
-	ActorAlias[0].Setup()
-	ActorAlias[1].Setup()
-	ActorAlias[2].Setup()
-	ActorAlias[3].Setup()
-	ActorAlias[4].Setup()
+		ActorAlias = new sslActorAlias[5]
+		ActorAlias[0] = GetNthAlias(0) as sslActorAlias
+		ActorAlias[1] = GetNthAlias(1) as sslActorAlias
+		ActorAlias[2] = GetNthAlias(2) as sslActorAlias
+		ActorAlias[3] = GetNthAlias(3) as sslActorAlias
+		ActorAlias[4] = GetNthAlias(4) as sslActorAlias
 
-	Initialize()
-	Log("Initialized", "Thread["+thread_id+"]")
+		ActorAlias[0].Setup()
+		ActorAlias[1].Setup()
+		ActorAlias[2].Setup()
+		ActorAlias[3].Setup()
+		ActorAlias[4].Setup()
+
+		Initialize()
+		Log("DONE!", "Setup")
+	else
+		Log("QUEST START FAILED!", "FATAL")
+	endIf
 endFunction
 
 ; ------------------------------------------------------- ;
 ; --- State Restricted                                --- ;
 ; ------------------------------------------------------- ;
 
-auto state Unlocked
+state Unlocked
 	sslThreadModel function Make()
 		GoToState("Making")
 		RegisterForSingleUpdate(60.0)
 		return self
-	endFunction
-	function EnableHotkeys()
 	endFunction
 endState
 

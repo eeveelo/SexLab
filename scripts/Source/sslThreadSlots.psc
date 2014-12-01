@@ -1,5 +1,9 @@
 scriptname sslThreadSlots extends Quest
 
+; Libs
+sslSystemConfig property Config auto
+
+; Slots
 sslThreadController[] Slots
 sslThreadController[] property Threads hidden
 	sslThreadController[] function get()
@@ -58,10 +62,10 @@ function StopAll()
 		i -= 1
 		string SlotState = Slots[i].GetState()
 		if SlotState == "Making"
-			SexLabUtil.DebugLog("Making during StopAll - Initializing.", "Slot["+i+"]", true)
+			SexLabUtil.DebugLog("Making during StopAll - Initializing.", "Slots["+i+"]", true)
 			Slots[i].Initialize()
 		elseIf SlotState != "Unlocked"
-			SexLabUtil.DebugLog(SlotState+" during StopAll - EndAnimation.", "Slot["+i+"]", true)
+			SexLabUtil.DebugLog(SlotState+" during StopAll - EndAnimation.", "Slots["+i+"]", true)
 			Slots[i].EndAnimation(true)
 		endIf
 	endWhile
@@ -76,40 +80,61 @@ endFunction
 function Setup()
 	GoToState("Locked")
 	StorageUtil.FormListClear(self, "ActiveActors")
+	Config = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
 
-	; Init variables
+
+	; Slot Form IDs
+	int[] SlotFormID = new int[15]
+	SlotFormID[0]  = 0x61EEF
+	SlotFormID[1]  = 0x62452
+	SlotFormID[2]  = 0x6C62C
+	SlotFormID[3]  = 0x6C62D
+	SlotFormID[4]  = 0x6C62E
+	SlotFormID[5]  = 0x6C62F
+	SlotFormID[6]  = 0x6C630
+	SlotFormID[7]  = 0x6C631
+	SlotFormID[8]  = 0x6C632
+	SlotFormID[9]  = 0x6C633
+	SlotFormID[10] = 0x6C634
+	SlotFormID[11] = 0x6C635
+	SlotFormID[12] = 0x6C636
+	SlotFormID[13] = 0x6C637
+	SlotFormID[14] = 0x6C638
+
+	; Get and stop all thread quest slots
 	Slots = new sslThreadController[15]
-	Slots[0]  = Game.GetFormFromFile(0x61EEF, "SexLab.esm") as sslThreadController
-	Slots[1]  = Game.GetFormFromFile(0x62452, "SexLab.esm") as sslThreadController
-	Slots[2]  = Game.GetFormFromFile(0x6C62C, "SexLab.esm") as sslThreadController
-	Slots[3]  = Game.GetFormFromFile(0x6C62D, "SexLab.esm") as sslThreadController
-	Slots[4]  = Game.GetFormFromFile(0x6C62E, "SexLab.esm") as sslThreadController
-	Slots[5]  = Game.GetFormFromFile(0x6C62F, "SexLab.esm") as sslThreadController
-	Slots[6]  = Game.GetFormFromFile(0x6C630, "SexLab.esm") as sslThreadController
-	Slots[7]  = Game.GetFormFromFile(0x6C631, "SexLab.esm") as sslThreadController
-	Slots[8]  = Game.GetFormFromFile(0x6C632, "SexLab.esm") as sslThreadController
-	Slots[9]  = Game.GetFormFromFile(0x6C633, "SexLab.esm") as sslThreadController
-	Slots[10] = Game.GetFormFromFile(0x6C634, "SexLab.esm") as sslThreadController
-	Slots[11] = Game.GetFormFromFile(0x6C635, "SexLab.esm") as sslThreadController
-	Slots[12] = Game.GetFormFromFile(0x6C636, "SexLab.esm") as sslThreadController
-	Slots[13] = Game.GetFormFromFile(0x6C637, "SexLab.esm") as sslThreadController
-	Slots[14] = Game.GetFormFromFile(0x6C638, "SexLab.esm") as sslThreadController
-
-	; Reset quests so they re-init scripts/variables
-	; Quests seem picky about being in menu mode during stop/start, so force menu wait between each
 	int i = Slots.Length
 	while i
 		i -= 1
-		Slots[i].Stop()
-		Utility.Wait(0.1)
-		Slots[i].Start()
-		Utility.Wait(0.1)
+		Slots[i] = Game.GetFormFromFile(SlotFormID[i], "SexLab.esm") as sslThreadController
+		if Slots[i]
+			while Slots[i].IsStarting()
+				Log("Slots["+i+"] - "+Slots[i], "IsStarting()")
+				Utility.Wait(0.1)
+			endWhile
+			Slots[i].Stop()
+		else
+			Log("Slots["+i+"] - Failed to get form - "+SlotFormID[i]+" - "+Game.GetFormFromFile(SlotFormID[i], "SexLab.esm"), "FATAL")
+		endIf
 	endWhile
-	; Setup threads + actoraliases
+
+	; Start and setup threads + actoraliases
 	i = Slots.Length
 	while i
 		i -= 1
-		Slots[i].SetTID(i)
+		if Slots[i]
+			; Ensure quest isn't still stopping
+			while Slots[i].IsStopping()
+				Log("Slots["+i+"] - "+Slots[i], "IsStopping()")
+				Utility.Wait(0.1)
+			endWhile
+			; Setup thread once quest has started up
+			if Slots[i].Start()
+				Slots[i].SetTID(i)
+			else
+				Log("Slots["+i+"] - Failed to start thread - "+Slots[i], "FATAL")
+			endIf
+		endIf
 	endWhile
 
 	Debug.Trace("SexLab Threads: "+Slots)
@@ -124,3 +149,15 @@ state Locked
 	function Setup()
 	endFunction
 endState
+
+function Log(string Log, string Type = "NOTICE")
+	Log = Type+": "+Log
+	if Config.DebugMode
+		SexLabUtil.PrintConsole(Log)
+	endIf
+	if Type == "FATAL"
+		Debug.TraceStack("SEXLAB - "+Log)
+	else
+		Debug.Trace("SEXLAB - "+Log)
+	endIf
+endFunction
