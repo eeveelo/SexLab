@@ -999,29 +999,3 @@ function TestHook(int tid, bool HasPlayer = false)
 endFunction
 
 Actor[] property TestActors auto hidden
-
-; ------------------------------------------------------- ;
-; --- DEPRECATED LIBRARIES                            --- ;
-; ---  No longer used, moved to other scripts         --- ;
-; ------------------------------------------------------- ;
-
-
-sslAnimationLibrary property AnimLib hidden
-	sslAnimationLibrary function get()
-		Debug.TraceStack("SEXLAB -- SexLabFramework.AnimLib -- LIBRARY DEPRECATION - WILL BE REMOVED IN 1.60 RELEASE")
-		return Game.GetFormFromFile(0x3CE6C, "SexLab.esm") as sslAnimationLibrary
-	endFunction
-endProperty
-sslExpressionLibrary property ExpressionLib hidden
-	sslExpressionLibrary function get()
-		Debug.TraceStack("SEXLAB -- SexLabFramework.ExpressionLib -- LIBRARY DEPRECATION - WILL BE REMOVED IN 1.60 RELEASE")
-		return Game.GetFormFromFile(0x4C63D, "SexLab.esm") as sslExpressionLibrary
-	endFunction
-endProperty
-sslVoiceLibrary property VoiceLib hidden
-	sslVoiceLibrary function get()
-		Debug.TraceStack("SEXLAB -- SexLabFramework.VoiceLib -- LIBRARY DEPRECATION - WILL BE REMOVED IN 1.60 RELEASE")
-		return Game.GetFormFromFile(0X3DE97, "SexLab.esm") as sslVoiceLibrary
-	endFunction
-endProperty
-

@@ -2869,21 +2869,3 @@ function DEPRECATED()
 		MiscUtil.PrintConsole(log)
 	endIf
 endFunction
-sslAnimationLibrary property AnimLib hidden
-	sslAnimationLibrary function get()
-		DEPRECATED()
-		return (Game.GetFormFromFile(0xD62, "SexLab.esm") as SexLabFramework).AnimLib
-	endFunction
-endProperty
-sslVoiceLibrary property VoiceLib hidden
-	sslVoiceLibrary function get()
-		DEPRECATED()
-		return (Game.GetFormFromFile(0xD62, "SexLab.esm") as SexLabFramework).VoiceLib
-	endFunction
-endProperty
-sslExpressionLibrary property ExpressionLib hidden
-	sslExpressionLibrary function get()
-		DEPRECATED()
-		return (Game.GetFormFromFile(0xD62, "SexLab.esm") as SexLabFramework).ExpressionLib
-	endFunction
-endProperty
