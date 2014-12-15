@@ -245,7 +245,7 @@ state Ready
 				SkilledActor = PlayerRef
 			; If a non-creature couple, base skills off partner
 			elseIf Thread.ActorCount == 2 && !Thread.HasCreature
-				SkilledActor = Thread.Positions[PapyrusUtil.IndexTravel(Position, Thread.ActorCount)]
+				SkilledActor = Thread.Positions[sslUtility.IndexTravel(Position, Thread.ActorCount)]
 			endIf
 			Skills = Stats.GetSkillLevels(SkilledActor)
 			; Get highest relationship ahead of time

@@ -286,7 +286,7 @@ state Animating
 
 	function ChangeAnimation(bool backwards = false)
 		UnregisterForUpdate()
-		SetAnimation(PapyrusUtil.IndexTravel(Animations.Find(Animation), Animations.Length, backwards))
+		SetAnimation(sslUtility.IndexTravel(Animations.Find(Animation), Animations.Length, backwards))
 		SendThreadEvent("AnimationChange")
 		RegisterForSingleUpdate(0.2)
 	endFunction
@@ -298,7 +298,7 @@ state Animating
 		UnregisterforUpdate()
 		GoToState("")
 		; Find position to swap to
-		int NewPos = PapyrusUtil.IndexTravel(AdjustPos, ActorCount, backwards)
+		int NewPos = sslUtility.IndexTravel(AdjustPos, ActorCount, backwards)
 		Actor AdjustActor = Positions[AdjustPos]
 		Actor MovedActor  = Positions[NewPos]
 		if MovedActor == AdjustActor
@@ -377,7 +377,7 @@ state Animating
 	function AdjustChange(bool backwards = false)
 		UnregisterForUpdate()
 		if ActorCount > 1
-			AdjustPos = PapyrusUtil.IndexTravel(Positions.Find(AdjustAlias.ActorRef), ActorCount, backwards)
+			AdjustPos = sslUtility.IndexTravel(Positions.Find(AdjustAlias.ActorRef), ActorCount, backwards)
 			AdjustAlias = ActorAlias(Positions[AdjustPos])
 			Debug.Notification("Adjusting Position For: "+AdjustAlias.ActorRef.GetLeveledActorBase().GetName())
 		endIf

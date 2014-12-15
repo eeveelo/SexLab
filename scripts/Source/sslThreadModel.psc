@@ -455,7 +455,7 @@ int function GetLowestPresentRelationshipRank(Actor ActorRef)
 		return GetHighestPresentRelationshipRank(ActorRef) ; Results will be same for 1 and 2 actors
 	endIf
 	; Init to next position
-	int Lowest = ActorRef.GetRelationshipRank(Positions[PapyrusUtil.IndexTravel(Positions.Find(ActorRef), ActorCount)])
+	int Lowest = ActorRef.GetRelationshipRank(Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)])
 	; Loop through all actors
 	int i = ActorCount
 	while i > 0
@@ -645,7 +645,7 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function SetHook(string AddHooks)
-	string[] Setting = PapyrusUtil.ArgString(AddHooks)
+	string[] Setting = PapyrusUtil.StringSplit(AddHooks)
 	int i = Setting.Length
 	while i
 		i -= 1
@@ -665,7 +665,7 @@ string[] function GetHooks()
 endFunction
 
 function RemoveHook(string DelHooks)
-	string[] Removing = PapyrusUtil.ArgString(DelHooks)
+	string[] Removing = PapyrusUtil.StringSplit(DelHooks)
 	string[] NewHooks
 	int i = Hooks.Length
 	while i

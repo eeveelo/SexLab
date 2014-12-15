@@ -66,11 +66,11 @@ sslBaseVoice function PickVoice(Actor ActorRef)
 endFunction
 
 sslBaseVoice function GetByTags(string Tags, string TagsSuppressed = "", bool RequireAll = true)
-	string[] Search = ArgString(Tags)
+	string[] Search = StringSplit(Tags)
 	if Search.Length == 0
 		return none
 	endIf
-	string[] Suppress = ArgString(TagsSuppressed)
+	string[] Suppress = StringSplit(TagsSuppressed)
 	bool[] Valid = BoolArray(Slotted)
 	int i = Slotted
 	while i

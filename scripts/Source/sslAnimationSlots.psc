@@ -23,8 +23,8 @@ Actor property PlayerRef auto
 ; ------------------------------------------------------- ;
 
 sslBaseAnimation[] function GetByTags(int ActorCount, string Tags, string TagsSuppressed = "", bool RequireAll = true)
-	string[] Suppress = ArgString(TagsSuppressed)
-	string[] Search   = ArgString(Tags)
+	string[] Suppress = StringSplit(TagsSuppressed)
+	string[] Search   = StringSplit(Tags)
 	bool[] Valid      = BoolArray(Slotted)
 	int i = Slotted
 	while i
@@ -176,7 +176,7 @@ endFunction
 ; ------------------------------------------------------- ;
 
 int function CountTag(sslBaseAnimation[] Anims, string Tags)
-	string[] Checking = PapyrusUtil.ArgString(Tags)
+	string[] Checking = PapyrusUtil.StringSplit(Tags)
 	if Tags == "" || Checking.Length == 0
 		return 0
 	endIf
@@ -195,7 +195,7 @@ bool[] function FindTagged(sslBaseAnimation[] Anims, string Tags)
 	endIf
 	int i = Anims.Length
 	bool[] Output = BoolArray(i)
-	string[] Checking = PapyrusUtil.ArgString(Tags)
+	string[] Checking = PapyrusUtil.StringSplit(Tags)
 	while i
 		i -= 1
 		Output[i] = Anims[i].HasOneTag(Checking)

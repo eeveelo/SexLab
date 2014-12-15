@@ -51,29 +51,22 @@ sslBaseAnimation[] function EmptyAnimationArray() global
 endFunction
 
 ;/-----------------------------------------------\;
-;|	Integer Utility Functions
+;|	Utility Functions
 ;\-----------------------------------------------/;
 
-int[] function SliceIntArray(int[] Array, int startindex = 0, int endindex = -1) global
-	int len = Array.Length
-	if startindex >= len || (startindex == 0 && endindex == -1) || (endindex <= startindex && endindex != -1)
-		return Array
-	elseIf endindex >= len || endindex == -1
-		endindex = len - 1
+int function IndexTravel(int CurrentIndex, int ArrayLength, bool Reverse = false) global
+	if Reverse
+		CurrentIndex -= 1
+	else
+		CurrentIndex += 1
 	endIf
-	int[] Output = PapyrusUtil.IntArray((endindex - startindex) + 1)
-	int i = Output.Length
-	while i
-		i -= 1
-		Output[i] = Array[endindex]
-		endindex -= 1
-	endWhile
-	return Output
+	if CurrentIndex >= ArrayLength
+		return 0
+	elseif CurrentIndex < 0
+		return ArrayLength - 1
+	endIf
+	return CurrentIndex
 endFunction
-
-;/-----------------------------------------------\;
-;|	String Utility Functions
-;\-----------------------------------------------/;
 
 string function Trim(string var) global
 	if StringUtil.GetNthChar(var, 0) == " "
@@ -95,6 +88,22 @@ string function RemoveString(string str, string toRemove, int startindex = 0) gl
 	string part1 = StringUtil.SubString(str, 0, i)
 	string part2 = StringUtil.SubString(str, (i + StringUtil.GetLength(toRemove)))
 	return part1 + part2
+endFunction
+
+string function MakeArgs(string delimiter, string arg1, string arg2 = "", string arg3 = "", string arg4 = "", string arg5 = "") global
+	if arg2 != ""
+		arg1 += delimiter+arg2
+	endIf
+	if arg3 != ""
+		arg1 += delimiter+arg3
+	endIf
+	if arg4 != ""
+		arg1 += delimiter+arg4
+	endIf
+	if arg5 != ""
+		arg1 += delimiter+arg5
+	endIf
+	return arg1
 endFunction
 
 Actor[] function MakeActorArray(Actor Actor1 = none, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none) global
@@ -149,19 +158,14 @@ Actor[] function ActorArray(int size) global
 endFunction
 
 
-int function IndexTravel(int index, int len, bool backwards = false) global
-	; Debug.Trace("-- sslUtility.IndexTravel SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
-	return PapyrusUtil.IndexTravel(index, len, backwards)
-endFunction
-
-string function MakeArgs(string delimiter, string arg1, string arg2 = "", string arg3 = "", string arg4 = "", string arg5 = "") global
-	; Debug.Trace("SEXLAB -- sslUtility.MakeArgs -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
-	return PapyrusUtil.MakeArgs(delimiter, arg1, arg2, arg3, arg4, arg5)
-endFunction
+; string function MakeArgs(string delimiter, string arg1, string arg2 = "", string arg3 = "", string arg4 = "", string arg5 = "") global
+; 	; Debug.Trace("SEXLAB -- sslUtility.MakeArgs -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+; 	return PapyrusUtil.MakeArgs(delimiter, arg1, arg2, arg3, arg4, arg5)
+; endFunction
 
 string[] function ArgString(string args, string delimiter = ",") global
 	; Debug.Trace("SEXLAB -- sslUtility.ArgString -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
-	return PapyrusUtil.ArgString(args, delimiter)
+	return PapyrusUtil.StringSplit(args, delimiter)
 endFunction
 
 Actor[] function PushActor(Actor var, Actor[] Array) global
@@ -181,25 +185,30 @@ int function CountEmpty(string[] Array) global
 	return PapyrusUtil.CountString(Array, "")
 endFunction
 
-function FormCopyTo(form[] Array, form[] Output, bool AllowNone) global
-	; Debug.Trace("-- sslUtility.FormCopyTo SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
-	PapyrusUtil.FormCopyTo(Array, Output, 0, -1, !AllowNone)
-endFunction
-function BoolCopyTo(bool[] Array, bool[] Output, int StartIndex = 0, int EndIndex = -1) global
-	; Debug.Trace("-- sslUtility.BoolCopyTo SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
-	PapyrusUtil.BoolCopyTo(Array, Output, StartIndex, Endindex)
-endFunction
-function StringCopyTo(string[] Array, string[] Output, int StartIndex = 0, int EndIndex = -1, bool AllowEmpty = true) global
-	; Debug.Trace("-- sslUtility.StringCopyTo SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
-	PapyrusUtil.StringCopyTo(Array, Output, StartIndex, Endindex, !AllowEmpty)
-endFunction
-function FloatCopyTo(float[] Array, float[] Output, int StartIndex = 0, int EndIndex = -1) global
-	; Debug.Trace("-- sslUtility.FloatCopyTo SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
-	PapyrusUtil.FloatCopyTo(Array, Output, StartIndex, Endindex)
-endFunction
-function IntCopyTo(int[] Array, int[] Output, int StartIndex = 0, int EndIndex = -1) global
-	; Debug.Trace("SEXLAB -- sslUtility.IntCopyTo -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
-	PapyrusUtil.IntCopyTo(Array, Output, StartIndex, Endindex)
+; function FormCopyTo(form[] Array, form[] Output, bool AllowNone) global
+; 	; Debug.Trace("-- sslUtility.FormCopyTo SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+; 	PapyrusUtil.FormCopyTo(Array, Output, 0, -1, !AllowNone)
+; endFunction
+; function BoolCopyTo(bool[] Array, bool[] Output, int StartIndex = 0, int EndIndex = -1) global
+; 	; Debug.Trace("-- sslUtility.BoolCopyTo SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+; 	PapyrusUtil.BoolCopyTo(Array, Output, StartIndex, Endindex)
+; endFunction
+; function StringCopyTo(string[] Array, string[] Output, int StartIndex = 0, int EndIndex = -1, bool AllowEmpty = true) global
+; 	; Debug.Trace("-- sslUtility.StringCopyTo SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+; 	PapyrusUtil.StringCopyTo(Array, Output, StartIndex, Endindex, !AllowEmpty)
+; endFunction
+; function FloatCopyTo(float[] Array, float[] Output, int StartIndex = 0, int EndIndex = -1) global
+; 	; Debug.Trace("-- sslUtility.FloatCopyTo SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+; 	PapyrusUtil.FloatCopyTo(Array, Output, StartIndex, Endindex)
+; endFunction
+; function IntCopyTo(int[] Array, int[] Output, int StartIndex = 0, int EndIndex = -1) global
+; 	; Debug.Trace("SEXLAB -- sslUtility.IntCopyTo -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+; 	PapyrusUtil.IntCopyTo(Array, Output, StartIndex, Endindex)
+; endFunction
+
+int[] function SliceIntArray(int[] Array, int startindex = 0, int endindex = -1) global
+	; Debug.Trace("SEXLAB -- sslUtility.SliceIntArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	return PapyrusUtil.SliceIntArray(Array, startindex, endindex)
 endFunction
 
 float function AddFloatValues(float[] Array) global
@@ -236,10 +245,10 @@ int function ClampInt(int value, int min, int max) global
 	return PapyrusUtil.ClampInt(value, min, max)
 endFunction
 
-int function SignInt(bool sign, int value) global
-	; Debug.Trace("-- sslUtility.ignInt SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
-	return PapyrusUtil.SignInt(sign, value)
-endFunction
+; int function SignInt(bool sign, int value) global
+; 	; Debug.Trace("-- sslUtility.ignInt SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+; 	return PapyrusUtil.SignInt(sign, value)
+; endFunction
 
 int[] function EmptyIntArray() global
 	; Debug.Trace("-- sslUtility.EmptyIntArray SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
@@ -276,10 +285,10 @@ float function ClampFloat(float value, float min, float max) global
 	return PapyrusUtil.ClampFloat(value, min, max)
 endFunction
 
-float function SignFloat(bool sign, float value) global
-	; Debug.Trace("-- sslUtility.SignFloat SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
-	return PapyrusUtil.SignFloat(sign, value)
-endFunction
+; float function SignFloat(bool sign, float value) global
+; 	; Debug.Trace("-- sslUtility.SignFloat SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+; 	return PapyrusUtil.SignFloat(sign, value)
+; endFunction
 
 float[] function EmptyFloatArray() global
 	; Debug.Trace("SEXLAB -- sslUtility.EmptyFloatArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
@@ -304,7 +313,7 @@ string[] function MergeStringArray(string[] Push, string[] Array) global
 endFunction
 string[] function ClearEmpty(string[] Array) global
 	; Debug.Trace("SEXLAB -- sslUtility.ClearEmpty -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
-	return PapyrusUtil.ClearEmpty(Array)
+	return PapyrusUtil.RemoveString(Array, "")
 endFunction
 string[] function EmptyStringArray() global
 	; Debug.Trace("SEXLAB -- sslUtility.EmptyStringArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
@@ -353,7 +362,7 @@ endFunction
 
 Form[] function ClearNone(Form[] Array) global
 	; Debug.Trace("SEXLAB -- sslUtility.ClearNone -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
-	return PapyrusUtil.ClearNone(Array)
+	return PapyrusUtil.RemoveForm(Array, none)
 endFunction
 
 form[] function EmptyFormArray() global

@@ -293,7 +293,7 @@ sslBaseAnimation[] function GetAnimationsByTags(int ActorCount, string Tags, str
 endFunction
 
 sslBaseAnimation[] function GetAnimationsByTag(int ActorCount, string Tag1, string Tag2 = "", string Tag3 = "", string TagSuppress = "", bool RequireAll = true)
-	return AnimSlots.GetByTags(ActorCount, PapyrusUtil.MakeArgs(",", Tag1, Tag2, Tag3), TagSuppress, RequireAll)
+	return AnimSlots.GetByTags(ActorCount, sslUtility.MakeArgs(",", Tag1, Tag2, Tag3), TagSuppress, RequireAll)
 endFunction
 
 sslBaseAnimation[] function GetAnimationsByType(int ActorCount, int Males = -1, int Females = -1, int StageCount = -1, bool Aggressive = false, bool Sexual = true)
@@ -394,7 +394,7 @@ sslBaseVoice function GetVoiceByTags(string Tags, string TagSuppress = "", bool 
 endFunction
 
 sslBaseVoice function GetVoiceByTag(string Tag1, string Tag2 = "", string TagSuppress = "", bool RequireAll = true)
-	return VoiceSlots.GetByTags(PapyrusUtil.MakeArgs(",", Tag1, Tag2), TagSuppress, RequireAll)
+	return VoiceSlots.GetByTags(sslUtility.MakeArgs(",", Tag1, Tag2), TagSuppress, RequireAll)
 endFunction
 
 bool function HasCustomVoice(Actor ActorRef)

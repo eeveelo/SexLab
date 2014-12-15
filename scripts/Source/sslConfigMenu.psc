@@ -181,7 +181,7 @@ endEvent
 ; ------------------------------------------------------- ;
 
 string[] function MapOptions()
-	return ArgString(GetState(), "_")
+	return StringSplit(GetState(), "_")
 endFunction
 
 event OnSliderOpenST()
@@ -805,7 +805,7 @@ function AnimationEditor()
 
 	string Profile
 	if AdjustKey != "Global"
-		string[] RaceIDs = ArgString(AdjustKey, ".")
+		string[] RaceIDs = StringSplit(AdjustKey, ".")
 		string id = StringUtil.Substring(RaceIDs[Position], 0, (StringUtil.GetLength(RaceIDs[Position]) - 1))
 		Race RaceRef = Race.GetRace(id)
 		if RaceRef
@@ -2039,7 +2039,7 @@ state AllowCreatures
 endState
 state NPCBed
 	event OnSelectST()
-		Config.NPCBed = IndexTravel(Config.NPCBed, 3)
+		Config.NPCBed = sslUtility.IndexTravel(Config.NPCBed, 3)
 		SetTextOptionValueST(Chances[Config.NPCBed])
 	endEvent
 	event OnDefaultST()
@@ -2722,7 +2722,7 @@ function ExportAnimations()
 	sslBaseAnimation[] Anims = AnimSlots.Animations
 	while i
 		i -= 1
-		JsonUtil.StringListAdd(File, "Animations", MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int, Anims[i].HasTag("Foreplay") as int, Anims[i].HasTag("Aggressive") as int))
+		JsonUtil.StringListAdd(File, "Animations", sslUtility.MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int, Anims[i].HasTag("Foreplay") as int, Anims[i].HasTag("Aggressive") as int))
 	endWhile
 endfunction
 
@@ -2731,7 +2731,7 @@ function ImportAnimations()
 	while i
 		i -= 1
 		; Registrar, Enabled, Foreplay, Aggressive
-		string[] args = ArgString(JsonUtil.StringListGet(File, "Animations", i))
+		string[] args = StringSplit(JsonUtil.StringListGet(File, "Animations", i))
 		if args.Length == 4 && AnimSlots.FindByRegistrar(args[0]) != -1
 			sslBaseAnimation Slot = AnimSlots.GetbyRegistrar(args[0])
 			Slot.Enabled = (args[1] as int) as bool
@@ -2748,7 +2748,7 @@ function ExportCreatures()
 	sslBaseAnimation[] Anims = CreatureSlots.Animations
 	while i
 		i -= 1
-		JsonUtil.StringListAdd(File, "Creatures", MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int))
+		JsonUtil.StringListAdd(File, "Creatures", sslUtility.MakeArgs(",", Anims[i].Registry, Anims[i].Enabled as int))
 	endWhile
 endFunction
 
@@ -2757,7 +2757,7 @@ function ImportCreatures()
 	while i
 		i -= 1
 		; Registrar, Enabled
-		string[] args = ArgString(JsonUtil.StringListGet(File, "Creatures", i))
+		string[] args = StringSplit(JsonUtil.StringListGet(File, "Creatures", i))
 		if args.Length == 2 && CreatureSlots.FindByRegistrar(args[0]) != -1
 			CreatureSlots.GetbyRegistrar(args[0]).Enabled = (args[1] as int) as bool
 		endIf
@@ -2771,7 +2771,7 @@ function ExportExpressions()
 	sslBaseExpression[] Exprs = ExpressionSlots.Expressions
 	while i
 		i -= 1
-		JsonUtil.StringListAdd(File, "Expressions", MakeArgs(",", Exprs[i].Registry, Exprs[i].HasTag("Consensual") as int, Exprs[i].HasTag("Victim") as int, Exprs[i].HasTag("Aggressor") as int))
+		JsonUtil.StringListAdd(File, "Expressions", sslUtility.MakeArgs(",", Exprs[i].Registry, Exprs[i].HasTag("Consensual") as int, Exprs[i].HasTag("Victim") as int, Exprs[i].HasTag("Aggressor") as int))
 	endWhile
 endfunction
 
@@ -2780,7 +2780,7 @@ function ImportExpressions()
 	while i
 		i -= 1
 		; Registrar, Concensual, Victim, Aggressor
-		string[] args = ArgString(JsonUtil.StringListGet(File, "Expressions", i))
+		string[] args = StringSplit(JsonUtil.StringListGet(File, "Expressions", i))
 		if args.Length == 4 && ExpressionSlots.FindByRegistrar(args[0]) != -1
 			sslBaseExpression Slot = ExpressionSlots.GetbyRegistrar(args[0])
 			Slot.AddTagConditional("Consensual", (args[1] as int) as bool)
@@ -2797,7 +2797,7 @@ function ExportVoices()
 	sslBaseVoice[] Voices = VoiceSlots.Voices
 	while i
 		i -= 1
-		JsonUtil.StringListAdd(File, "Voices", MakeArgs(",", Voices[i].Registry, Voices[i].Enabled as int))
+		JsonUtil.StringListAdd(File, "Voices", sslUtility.MakeArgs(",", Voices[i].Registry, Voices[i].Enabled as int))
 	endWhile
 	; Player voice
 	JsonUtil.SetStringValue(File, "PlayerVoice", VoiceSlots.GetSavedName(PlayerRef))
@@ -2808,7 +2808,7 @@ function ImportVoices()
 	while i
 		i -= 1
 		; Registrar, Enabled
-		string[] args = ArgString(JsonUtil.StringListGet(File, "Voices", i))
+		string[] args = StringSplit(JsonUtil.StringListGet(File, "Voices", i))
 		if args.Length == 2 && VoiceSlots.FindByRegistrar(args[0]) != -1
 			VoiceSlots.GetbyRegistrar(args[0]).Enabled = (args[1] as int) as bool
 		endIf

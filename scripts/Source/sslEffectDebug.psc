@@ -1,5 +1,7 @@
 Scriptname sslEffectDebug extends ActiveMagicEffect
 
+import PapyrusUtil
+
 SexLabFramework property SexLab Auto
 
 Actor Ref1
@@ -13,10 +15,211 @@ ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	; JsonUtil.Load("StringTest")
 
 
-	SexLab.Expressions[0].Apply(TargetRef, 100, TargetRef.GetLeveledActorBase().GetSex())
+	string[] args = StringArray(10, "arg")
+	Log("Join(,): "+StringJoin(args))
+	Log("Join(-): "+StringJoin(args, "-"))
+	Log("Join(-D-): "+StringJoin(args, "-D-"))
+
+	string argstring = StringJoin(args)
+	args = StringSplit(argstring)
+	Log("Split(,): "+args.Length+" - "+args)
+
+	argstring = StringJoin(args, "-D-")
+	args = StringSplit(argstring, "-D-")
+	Log("Split(-D-): "+args.Length+" - "+args)
+
+
+	int[] TestArray = IntArray(30, 7)
+	Log("TestArray: "+TestArray)
+
+	int i = TestArray.Length
+	while i
+		i -= 1
+		TestArray[i] = i
+	endWhile
+
+
+	Log("Indexed: "+TestArray)
+
+	int[] SlicedArray = SliceIntArray(TestArray, 5, 10)
+	Log("Slice 5-10: "+SlicedArray)
+
+	SlicedArray = SliceIntArray(TestArray, 0, 10)
+	Log("Slice 0-10: "+SlicedArray)
+
+	SlicedArray = SliceIntArray(TestArray, 15)
+	Log("Slice 15+: "+SlicedArray)
+
+	SlicedArray = SliceIntArray(TestArray, 15, 40)
+	Log("Slice 15-40: "+SlicedArray)
+
+	SlicedArray = SliceIntArray(TestArray, 28)
+	Log("Slice 28+: "+SlicedArray)
+
+	SlicedArray = SliceIntArray(TestArray, 29)
+	Log("Slice 29+: "+SlicedArray)
+
+	SlicedArray = SliceIntArray(TestArray, 30)
+	Log("Slice 30+: "+SlicedArray)
+
+	SlicedArray = SliceIntArray(TestArray, 31)
+	Log("Slice 31+: "+SlicedArray)
+
+	SlicedArray = SliceIntArray(TestArray, 40, 20)
+	Log("Slice 40-20: "+SlicedArray)
+
+
+	Log("Count 5: "+CountInt(TestArray, 5))
+
+	TestArray = PushInt(TestArray, 5)
+	Log("Pushed/Count 5: "+CountInt(TestArray, 5))
+
+	TestArray = RemoveInt(TestArray, 5)
+	Log("Remove/Count 5: "+CountInt(TestArray, 5)+" -- "+TestArray)
+
+
+	int[] TestArray2 = IntArray(30, 5)
+	Log("TestArray: "+TestArray)
+	Log("TestArray2: "+TestArray)
+
+	int[] MergeArray = MergeIntArray(TestArray, TestArray2)
+	Log("MergeArray(dupes): "+MergeArray)
+
+	MergeArray = MergeIntArray(TestArray, TestArray2, true)
+	Log("MergeArray(remove): "+MergeArray)
+
+	; float[] Arr = PapyrusUtil._FloatArray(6, 6.666)
+	; Log(Arr.Length + " - "+Arr)
+	; Arr = PapyrusUtil._PushFloat(Arr, 80085.0)
+	; Log("Pushed: "+ Arr.Length + " - "+Arr)
+	; Arr = PapyrusUtil._ResizeFloatArray(Arr, 10)
+	; Log("Resized(10): "+ Arr.Length + " - "+Arr)
+	; Arr = PapyrusUtil._ResizeFloatArray(Arr, 2)
+	; Log("Resized(2): "+ Arr.Length + " - "+Arr)
+	; Arr = PapyrusUtil._ResizeFloatArray(Arr, 200, 13.37)
+	; Log("Resized(200): "+ Arr.Length + " - "+Arr)
+
+	; string   str
+	; string[] args
+
+	; Log(" --- ")
+	; str  = "test,te;st2,TEST3,test4;test5"
+	; Log("string: "+str)
+	; args = PapyrusUtil.StringExplode(str)
+	; Log(" array: "+args)
+	; Log(" count: "+args.Length)
+
+
+	; Log(" --- ")
+	; str  = "test,te;st2,TEST3,test4;test5"
+	; Log("string: "+str)
+	; args = PapyrusUtil.StringExplode(str, ";")
+	; Log(" array: "+args)
+	; Log(" count: "+args.Length)
+
+	; Log(" --- ")
+	; str  = "test,te;st2,TEST3,test4;test5"
+	; Log("string: "+str)
+	; args = PapyrusUtil.StringExplode(str, "TEST3")
+	; Log(" array: "+args)
+	; Log(" count: "+args.Length)
+
+
+	; Log(" --- ")
+	; str  = "test,te;st2,TEST3,test4;test5"
+	; Log("string: "+str)
+	; args = PapyrusUtil.StringExplode(str, ",test3,")
+	; Log(" array: "+args)
+	; Log(" count: "+args.Length)
+
+
+	; Log(" --- ")
+	; str  = "test,te;st2,TEST3,test4;test5"
+	; Log("string: "+str)
+	; args = PapyrusUtil.StringExplode(str, "------")
+	; Log(" array: "+args)
+	; Log(" count: "+args.Length)
+
+	; Benchmark().StartBenchmark(3, 7500)
+
+	; ; JsonUtil.Load("StringTest")
+	; int i
+	; string tags
+
+	; sslBaseAnimation Anim1 = SexLab.Animations[0]
+
+	; Log(" -- "+Anim1.Registry+" / "+Anim1.name+" -- ")
+
+	; Anim1._Init(Anim1.Registry)
+	; Anim1._SetInfo("name", Anim1.name)
+
+	; Anim1._AddTag("Anim1TestTag_boob")
+	; Anim1._AddTag("Anim1TestTag_BOOB")
+	; Anim1._AddTag("Anim1TestTag_penis")
+	; Anim1._AddTag("Anim1TestTag_ass")
+
+	; Log("HasTag(Anim1TestTag_ass) == "+Anim1._HasTag("Anim1TestTag_ass")+" | "+Anim1._FindTag("Anim1TestTag_ass"))
+	; Log("HasTag(Anim1TestTag_boob) == "+Anim1._HasTag("Anim1TestTag_boob")+" | "+Anim1._FindTag("Anim1TestTag_boob"))
+	; Log("HasTag(Anim1TestTag_penis) == "+Anim1._HasTag("Anim1TestTag_penis")+" | "+Anim1._FindTag("Anim1TestTag_penis"))
+	; Log("HasTag(Anim1TestTag_shit) == "+Anim1._HasTag("Anim1TestTag_shit")+" | "+Anim1._FindTag("Anim1TestTag_shit"))
+
+	; Log("GetInfo(name) == "+Anim1._GetInfo("name"))
+	; Log("GetInfo(fuck) == "+Anim1._GetInfo("fuck"))
+
+
+	; Log("Anim1 SaveFile() == "+sslBaseAnimation._SaveFile())
+
+
+	; sslBaseAnimation Anim2 = SexLab.Animations[1]
+
+	; Log(" -- "+Anim2.Registry+" / "+Anim2.name+" -- ")
+
+	; Anim2._Init(Anim2.Registry)
+	; Anim2._SetInfo("name", Anim2.name)
+
+	; Anim2._AddTag("Anim2TestTag_boob")
+	; Anim2._AddTag("Anim2TestTag_BOOB")
+	; Anim2._AddTag("Anim2TestTag_penis")
+	; Anim2._AddTag("Anim2TestTag_ass")
+
+	; Log("HasTag(Anim2TestTag_ass) == "+Anim2._HasTag("Anim2TestTag_ass")+" | "+Anim2._FindTag("Anim2TestTag_ass"))
+	; Log("HasTag(Anim2TestTag_boob) == "+Anim2._HasTag("Anim2TestTag_boob")+" | "+Anim2._FindTag("Anim2TestTag_boob"))
+	; Log("HasTag(Anim2TestTag_penis) == "+Anim2._HasTag("Anim2TestTag_penis")+" | "+Anim2._FindTag("Anim2TestTag_penis"))
+	; Log("HasTag(Anim2TestTag_shit) == "+Anim2._HasTag("Anim2TestTag_shit")+" | "+Anim2._FindTag("Anim2TestTag_shit"))
+
+	; Log("GetInfo(name) == "+Anim2._GetInfo("name"))
+	; Log("GetInfo(fuck) == "+Anim2._GetInfo("fuck"))
+
+
+	; Log("Anim2 SaveFile() == "+sslBaseAnimation._SaveFile())
+
+
+
+
+	; sslBaseAnimation Anim3 = SexLab.Animations[2]
+
+	; Log(" -- "+Anim3.Registry+" / "+Anim3.name+" -- ")
+
+	; Anim3._Init(Anim3.Registry)
+	; Anim3._SetInfo("name", Anim3.name)
+
+	; Anim3._AddTag("Anim3TestTag_boob")
+	; Anim3._AddTag("Anim3TestTag_BOOB")
+	; Anim3._AddTag("Anim3TestTag_penis")
+	; Anim3._AddTag("Anim3TestTag_ass")
+
+	; Log("HasTag(Anim3TestTag_ass) == "+Anim3._HasTag("Anim3TestTag_ass")+" | "+Anim3._FindTag("Anim3TestTag_ass"))
+	; Log("HasTag(Anim3TestTag_boob) == "+Anim3._HasTag("Anim3TestTag_boob")+" | "+Anim3._FindTag("Anim3TestTag_boob"))
+	; Log("HasTag(Anim3TestTag_penis) == "+Anim3._HasTag("Anim3TestTag_penis")+" | "+Anim3._FindTag("Anim3TestTag_penis"))
+	; Log("HasTag(Anim3TestTag_shit) == "+Anim3._HasTag("Anim3TestTag_shit")+" | "+Anim3._FindTag("Anim3TestTag_shit"))
+
+	; Log("GetInfo(name) == "+Anim3._GetInfo("name"))
+	; Log("GetInfo(fuck) == "+Anim3._GetInfo("fuck"))
+
+
+	; Log("Anim3 SaveFile() == "+sslBaseAnimation._SaveFile())
 
 
 	; Log("Count: "+JsonUtil.StringListCount("StringTest", "StringKey"))
