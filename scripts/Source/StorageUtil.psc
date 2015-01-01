@@ -67,223 +67,223 @@ scriptname StorageUtil Hidden
 
 
 ;/ Set int/float/string/Form value globally or on any form by name and return
-   previous value.
+   the value passed, or as uninitialized variable if invalid keys given.
 
-   obj: form to save on. Set none to save globally.
-   key: name of value.
-   value: value itself.
+   ObjKey: form to save on. Set none to save globally.
+   KeyName: name of value.
+   value: value to set to the given keys. If zero, empty, or none are given, the key will be unset.
 /;
-int function SetIntValue(Form obj, string key, int value) global native
-float function SetFloatValue(Form obj, string key, float value) global native
-string function SetStringValue(Form obj, string key, string value) global native
-Form function SetFormValue(Form obj, string key, Form value) global native
+int function SetIntValue(Form ObjKey, string KeyName, int value) global native
+float function SetFloatValue(Form ObjKey, string KeyName, float value) global native
+string function SetStringValue(Form ObjKey, string KeyName, string value) global native
+Form function SetFormValue(Form ObjKey, string KeyName, Form value) global native
 
 
 ;/ Remove a previously set int/float/string/Form value on an form or globally and
    return if successful. This will return false if value didn't exist.
 
-   obj: form to remove from. Set none to remove global value.
-   key: name of value.
+   ObjKey: form to remove from. Set none to remove global value.
+   KeyName: name of value.
 /;
-bool function UnsetIntValue(Form obj, string key) global native;
-bool function UnsetFloatValue(Form obj, string key) global native
-bool function UnsetStringValue(Form obj, string key) global native
-bool function UnsetFormValue(Form obj, string key) global native
+bool function UnsetIntValue(Form ObjKey, string KeyName) global native;
+bool function UnsetFloatValue(Form ObjKey, string KeyName) global native
+bool function UnsetStringValue(Form ObjKey, string KeyName) global native
+bool function UnsetFormValue(Form ObjKey, string KeyName) global native
 
 
 ;/ Check if int/float/string/Form value has been set on form or globally.
 
-   obj: form to check on. Set none to check global value.
-   key: name of value.
+   ObjKey: form to check on. Set none to check global value.
+   KeyName: name of value.
 /;
-bool function HasIntValue(Form obj, string key) global native
-bool function HasFloatValue(Form obj, string key) global native
-bool function HasStringValue(Form obj, string key) global native
-bool function HasFormValue(Form obj, string key) global native
+bool function HasIntValue(Form ObjKey, string KeyName) global native
+bool function HasFloatValue(Form ObjKey, string KeyName) global native
+bool function HasStringValue(Form ObjKey, string KeyName) global native
+bool function HasFormValue(Form ObjKey, string KeyName) global native
 
 
 ;/ Get previously saved int/float/string/Form value on form or globally.
 
-   obj: form to get from. Set none to get global value.
-   key: name of value.
+   ObjKey: form to get from. Set none to get global value.
+   KeyName: name of value.
    [optional] missing: if value has not been set, return this value instead.
 /;
-int function GetIntValue(Form obj, string key, int missing = 0) global native
-float function GetFloatValue(Form obj, string key, float missing = 0.0) global native
-string function GetStringValue(Form obj, string key, string missing = "") global native
-Form function GetFormValue(Form obj, string key, Form missing = none) global native
+int function GetIntValue(Form ObjKey, string KeyName, int missing = 0) global native
+float function GetFloatValue(Form ObjKey, string KeyName, float missing = 0.0) global native
+string function GetStringValue(Form ObjKey, string KeyName, string missing = "") global native
+Form function GetFormValue(Form ObjKey, string KeyName, Form missing = none) global native
 
 ;/ Get previously saved int/float/string/Form value on form or globally.
 
-   obj: form to get from. Set none to get global value.
-   key: name of value.
+   ObjKey: form to get from. Set none to get global value.
+   KeyName: name of value.
    amount: +/- the amount to adjust the current value by
 
    given keys will be initialized to given amount if it does not exist
 /;
-int function AdjustIntValue(Form obj, string key, int amount) global native
-float function AdjustFloatValue(Form obj, string key, float amount) global native
+int function AdjustIntValue(Form ObjKey, string KeyName, int amount) global native
+float function AdjustFloatValue(Form ObjKey, string KeyName, float amount) global native
 
 
 ;/ Add an int/float/string/Form to a list on form or globally and return
    the value's new index. Index can be -1 if we were unable to add
    the value.
 
-   obj: form to add to. Set none to add global value.
-   key: name of value.
+   ObjKey: form to add to. Set none to add global value.
+   KeyName: name of value.
    value: value to add.
    [optional] allowDuplicate: allow adding value to list if this value already exists in the list.
 /;
-int function IntListAdd(Form obj, string key, int value, bool allowDuplicate = true) global native
-int function FloatListAdd(Form obj, string key, float value, bool allowDuplicate = true) global native
-int function StringListAdd(Form obj, string key, string value, bool allowDuplicate = true) global native
-int function FormListAdd(Form obj, string key, Form value, bool allowDuplicate = true) global native
+int function IntListAdd(Form ObjKey, string KeyName, int value, bool allowDuplicate = true) global native
+int function FloatListAdd(Form ObjKey, string KeyName, float value, bool allowDuplicate = true) global native
+int function StringListAdd(Form ObjKey, string KeyName, string value, bool allowDuplicate = true) global native
+int function FormListAdd(Form ObjKey, string KeyName, Form value, bool allowDuplicate = true) global native
 
 ;/ Get a value from list by index on form or globally.
    This will return 0 as value if there was a problem.
 
-   obj: form to get value on. Set none to get global list value.
-   key: name of list.
+   ObjKey: form to get value on. Set none to get global list value.
+   KeyName: name of list.
    index: index of value in the list.
 /;
-int function IntListGet(Form obj, string key, int index) global native
-float function FloatListGet(Form obj, string key, int index) global native
-string function StringListGet(Form obj, string key, int index) global native
-Form function FormListGet(Form obj, string key, int index) global native
+int function IntListGet(Form ObjKey, string KeyName, int index) global native
+float function FloatListGet(Form ObjKey, string KeyName, int index) global native
+string function StringListGet(Form ObjKey, string KeyName, int index) global native
+Form function FormListGet(Form ObjKey, string KeyName, int index) global native
 
 ;/ Set a value in list by index on form or globally.
    This will return the previous value or 0 if there was a problem.
 
-   obj: form to set value on. Set none to set global list value.
-   key: name of list.
+   ObjKey: form to set value on. Set none to set global list value.
+   KeyName: name of list.
    index: index of value in the list.
    value: value to set to.
 /;
-int function IntListSet(Form obj, string key, int index, int value) global native
-float function FloatListSet(Form obj, string key, int index, float value) global native
-string function StringListSet(Form obj, string key, int index, string value) global native
-Form function FormListSet(Form obj, string key, int index, Form value) global native
+int function IntListSet(Form ObjKey, string KeyName, int index, int value) global native
+float function FloatListSet(Form ObjKey, string KeyName, int index, float value) global native
+string function StringListSet(Form ObjKey, string KeyName, int index, string value) global native
+Form function FormListSet(Form ObjKey, string KeyName, int index, Form value) global native
 
 ;/ Adjust the existing value of a list by the given amount.
 
-   obj: form to set value on. Set none to set global list value.
-   key: name of list.
+   ObjKey: form to set value on. Set none to set global list value.
+   KeyName: name of list.
    index: index of value in the list.
    amount: +/- the amount to adjust the lists current index value by.
 
    returns 0 if index does not exists
 /;
-int function IntListAdjust(Form obj, string key, int index, int amount) global native
-float function FloatListAdjust(Form obj, string key, int index, float amount) global native
+int function IntListAdjust(Form ObjKey, string KeyName, int index, int amount) global native
+float function FloatListAdjust(Form ObjKey, string KeyName, int index, float amount) global native
 
 ;/ Insert an int/float/string/Form to a list on form or globally and return
    if successful.
 
-   obj: form to add to. Set none to add global value.
-   key: name of value.
+   ObjKey: form to add to. Set none to add global value.
+   KeyName: name of value.
    index: position in list to put the value. 0 is first entry in list.
    value: value to add.
 /;
-bool function IntListInsert(Form obj, string key, int index, int value) global native
-bool function FloatListInsert(Form obj, string key, int index, float value) global native
-bool function StringListInsert(Form obj, string key, int index, string value) global native
-bool function FormListInsert(Form obj, string key, int index, Form value) global native
+bool function IntListInsert(Form ObjKey, string KeyName, int index, int value) global native
+bool function FloatListInsert(Form ObjKey, string KeyName, int index, float value) global native
+bool function StringListInsert(Form ObjKey, string KeyName, int index, string value) global native
+bool function FormListInsert(Form ObjKey, string KeyName, int index, Form value) global native
 
 
 ;/ Remove a previously added int/float/string/Form value from a list on form
    or globally and return how many instances of this value were removed.
 
-   obj: form to remove from. Set none to remove global value.
-   key: name of value.
+   ObjKey: form to remove from. Set none to remove global value.
+   KeyName: name of value.
    value: value to remove.
    [optional] allowInstances: remove all instances of this value in a list.
 /;
-int function IntListRemove(Form obj, string key, int value, bool allInstances = false) global native
-int function FloatListRemove(Form obj, string key, float value, bool allInstances = false) global native
-int function StringListRemove(Form obj, string key, string value, bool allInstances = false) global native
-int function FormListRemove(Form obj, string key, Form value, bool allInstances = false) global native
+int function IntListRemove(Form ObjKey, string KeyName, int value, bool allInstances = false) global native
+int function FloatListRemove(Form ObjKey, string KeyName, float value, bool allInstances = false) global native
+int function StringListRemove(Form ObjKey, string KeyName, string value, bool allInstances = false) global native
+int function FormListRemove(Form ObjKey, string KeyName, Form value, bool allInstances = false) global native
 
 
 ;/ Clear a list of values (unset) on an form or globally and
    return the previous size of list.
 
-   obj: form to clear on. Set none to clear global list.
-   key: name of list.
+   ObjKey: form to clear on. Set none to clear global list.
+   KeyName: name of list.
 /;
-int function IntListClear(Form obj, string key) global native
-int function FloatListClear(Form obj, string key) global native
-int function StringListClear(Form obj, string key) global native
-int function FormListClear(Form obj, string key) global native
+int function IntListClear(Form ObjKey, string KeyName) global native
+int function FloatListClear(Form ObjKey, string KeyName) global native
+int function StringListClear(Form ObjKey, string KeyName) global native
+int function FormListClear(Form ObjKey, string KeyName) global native
 
 ;/ Remove a value from list by index on form or globally and
    return if we were successful in doing so.
 
-   obj: form to remove from. Set none to remove global value.
-   key: name of list.
+   ObjKey: form to remove from. Set none to remove global value.
+   KeyName: name of list.
    index: index of value in the list.
 /;
-bool function IntListRemoveAt(Form obj, string key, int index) global native
-bool function FloatListRemoveAt(Form obj, string key, int index) global native
-bool function StringListRemoveAt(Form obj, string key, int index) global native
-bool function FormListRemoveAt(Form obj, string key, int index) global native
+bool function IntListRemoveAt(Form ObjKey, string KeyName, int index) global native
+bool function FloatListRemoveAt(Form ObjKey, string KeyName, int index) global native
+bool function StringListRemoveAt(Form ObjKey, string KeyName, int index) global native
+bool function FormListRemoveAt(Form ObjKey, string KeyName, int index) global native
 
 ;/ Get size of a list on form or globally.
 
-   obj: form to check on. Set none to check global list.
-   key: name of list.
+   ObjKey: form to check on. Set none to check global list.
+   KeyName: name of list.
 /;
-int function IntListCount(Form obj, string key) global native
-int function FloatListCount(Form obj, string key) global native
-int function StringListCount(Form obj, string key) global native
-int function FormListCount(Form obj, string key) global native
+int function IntListCount(Form ObjKey, string KeyName) global native
+int function FloatListCount(Form ObjKey, string KeyName) global native
+int function StringListCount(Form ObjKey, string KeyName) global native
+int function FormListCount(Form ObjKey, string KeyName) global native
 
 ;/ Find a value in list on form or globally and return its
    index or -1 if value was not found.
 
-   obj: form to find value on. Set none to find global list value.
-   key: name of list.
+   ObjKey: form to find value on. Set none to find global list value.
+   KeyName: name of list.
    value: value to search.
 /;
-int function IntListFind(Form obj, string key, int value) global native
-int function FloatListFind(Form obj, string key, float value) global native
-int function StringListFind(Form obj, string key, string value) global native
-int function FormListFind(Form obj, string key, Form value) global native
+int function IntListFind(Form ObjKey, string KeyName, int value) global native
+int function FloatListFind(Form ObjKey, string KeyName, float value) global native
+int function StringListFind(Form ObjKey, string KeyName, string value) global native
+int function FormListFind(Form ObjKey, string KeyName, Form value) global native
 
 ;/ Find if a value in list on form or globally exists, true if it exists,
    false if it doesn't.
 
-   obj: form to find value on. Set none to find global list value.
-   key: name of list.
+   ObjKey: form to find value on. Set none to find global list value.
+   KeyName: name of list.
    value: value to search.
 /;
-bool function IntListHas(Form obj, string key, int value) global native
-bool function FloatListHas(Form obj, string key, float value) global native
-bool function StringListHas(Form obj, string key, string value) global native
-bool function FormListHas(Form obj, string key, Form value) global native
+bool function IntListHas(Form ObjKey, string KeyName, int value) global native
+bool function FloatListHas(Form ObjKey, string KeyName, float value) global native
+bool function StringListHas(Form ObjKey, string KeyName, string value) global native
+bool function FormListHas(Form ObjKey, string KeyName, Form value) global native
 
 ;/ Sort an int/float/string/Form list by values in ascending order.
 
-   obj: form to sort on. Set none for global value.
-   key: name of value.
+   ObjKey: form to sort on. Set none for global value.
+   KeyName: name of value.
 /;
-function IntListSort(Form obj, string key) global native
-function FloatListSort(Form obj, string key) global native
-function StringListSort(Form obj, string key) global native
-function FormListSort(Form obj, string key) global native
+function IntListSort(Form ObjKey, string KeyName) global native
+function FloatListSort(Form ObjKey, string KeyName) global native
+function StringListSort(Form ObjKey, string KeyName) global native
+function FormListSort(Form ObjKey, string KeyName) global native
 
 
 ;/ Fills the given input array with the values of the list on form or globally,
    will fill the array until either the array or list runs out of valid indexes
 
-   obj: form to find value on. Set none to find global list value.
-   key: name of list.
+   ObjKey: form to find value on. Set none to find global list value.
+   KeyName: name of list.
    slice[]: an initialized array set to the slice size you want, i.e. int[] slice = new int[10]
    [optional] startIndex: the starting list index you want to start filling your slice array with
 /;
-function IntListSlice(Form obj, string key, int[] slice, int startIndex = 0) global native
-function FloatListSlice(Form obj, string key, float[] slice, int startIndex = 0) global native
-function StringListSlice(Form obj, string key, string[] slice, int startIndex = 0) global native
-function FormListSlice(Form obj, string key, Form[] slice, int startIndex = 0) global native
+function IntListSlice(Form ObjKey, string KeyName, int[] slice, int startIndex = 0) global native
+function FloatListSlice(Form ObjKey, string KeyName, float[] slice, int startIndex = 0) global native
+function StringListSlice(Form ObjKey, string KeyName, string[] slice, int startIndex = 0) global native
+function FormListSlice(Form ObjKey, string KeyName, Form[] slice, int startIndex = 0) global native
 
 
 ;/ Sizes the given list to a set number of elements. If the list exists already it will be truncated
@@ -292,268 +292,51 @@ function FormListSlice(Form obj, string key, Form[] slice, int startIndex = 0) g
 
    Returns the number of elements truncated (signed) or added (unsigned) onto the list.
 
-   obj: form to find value on. Set none to find global list value.
-   key: name of list.
+   ObjKey: form to find value on. Set none to find global list value.
+   KeyName: name of list.
    toLength: The size you want to change the list to. Max length when using this function is 500.
    [optional] filler: When adding empty elements to the list this will be used as the default value
 /;
-int function IntListResize(Form obj, string key, int toLength, int filler = 0) global native
-int function FloatListResize(Form obj, string key, int toLength, float filler = 0.0) global native
-int function StringListResize(Form obj, string key, int toLength, string filler = "") global native
-int function FormListResize(Form obj, string key, int toLength, Form filler = none) global native
+int function IntListResize(Form ObjKey, string KeyName, int toLength, int filler = 0) global native
+int function FloatListResize(Form ObjKey, string KeyName, int toLength, float filler = 0.0) global native
+int function StringListResize(Form ObjKey, string KeyName, int toLength, string filler = "") global native
+int function FormListResize(Form ObjKey, string KeyName, int toLength, Form filler = none) global native
 
 ;/ Creates a copy of array on the given storage list at the given object+key,
    overwriting any list that might already exists.
 
    Returns true on success.
 
-   obj: form to find value on. Set none to find global list value.
-   key: name of list.
+   ObjKey: form to find value on. Set none to find global list value.
+   KeyName: name of list.
    copy[]: The papyrus array with the content you wish to copy over into StorageUtil
    [optional] filler: When adding empty elements to the list this will be used as the default value
 /;
-bool function IntListCopy(Form obj, string key, int[] copy) global native
-bool function FloatListCopy(Form obj, string key, float[] copy) global native
-bool function StringListCopy(Form obj, string key, string[] copy) global native
-bool function FormListCopy(Form obj, string key, Form[] copy) global native
+bool function IntListCopy(Form ObjKey, string KeyName, int[] copy) global native
+bool function FloatListCopy(Form ObjKey, string KeyName, float[] copy) global native
+bool function StringListCopy(Form ObjKey, string KeyName, string[] copy) global native
+bool function FormListCopy(Form ObjKey, string KeyName, Form[] copy) global native
 
-;/
-	Storage functions - separate file. These are shared in all save games. Values are loaded and saved
-	when savegame is loaded or saved.
+;/ Outputs the values currently stored by the given object+key.
+
+   Returns a new array containing the values.
+
+   ObjKey: form to find value on. Set none to find global list value.
+   KeyName: name of list.
 /;
-
-
-;/ Set int value globally by name and return previous value.
-
-   key: name of value.
-   value: value itself.
-/;
-int function FileSetIntValue(string key, int value) global native
-float function FileSetFloatValue(string key, float value) global native
-string function FileSetStringValue(string key, string value) global native
-form function FileSetFormValue(string key, Form value) global native
-
-;/ Adjust any value at key by the given amount.
-
-   key: name of value.
-   amount: +/- the amount to adjust the current value by
-
-   given keys will be initialized to given amount if it does not exist
-/;
-int function FileAdjustIntValue(string key, int amount) global native
-float function FileAdjustFloatValue(string key, float amount) global native
-
-;/ Remove a previously set int value globally and return if successful. This
-   will return false if value didn't exist.
-
-   key: name of value.
-/;
-bool function FileUnsetIntValue(string key) global native
-bool function FileUnsetFloatValue(string key) global native
-bool function FileUnsetStringValue(string key) global native
-bool function FileUnsetFormValue(string key) global native
-
-
-;/ Check if value has been set globally.
-
-   key: name of value.
-/;
-bool function FileHasIntValue(string key) global native
-bool function FileHasFloatValue(string key) global native
-bool function FileHasStringValue(string key) global native
-bool function FileHasFormValue(string key) global native
-
-
-;/ Get previously saved int value globally.
-
-   key: name of value.
-   [optional] missing: if value has not been set, return this value instead.
-/;
-int function FileGetIntValue(string key, int missing = 0) global native
-float function FileGetFloatValue(string key, float missing = 0.0) global native
-string function FileGetStringValue(string key, string missing = "") global native
-Form function FileGetFormValue(string key, Form missing = none) global native
-
-
-;/ Add an int to a list globally and return the value's new index. Index can be
-   -1 if we were unable to add the value.
-
-   key: name of value.
-   value: value to add.
-   [optional] allowDuplicate: allow adding value to list if this value
-                              already exists in the list.
-/;
-int function FileIntListAdd(string key, int value, bool allowDuplicate = true) global native
-int function FileFloatListAdd(string key, float value, bool allowDuplicate = true) global native
-int function FileStringListAdd(string key, string value, bool allowDuplicate = true) global native
-int function FileFormListAdd(string key, Form value, bool allowDuplicate = true) global native
-
-;/ Adjust the existing index value of a list by the given amount.
-
-   key: name of list.
-   index: index of value in the list.
-   amount: +/- the amount to adjust the lists current index value by.
-
-   returns 0 if index does not exists
-/;
-int function FileIntListAdjust(string key, int index, int amount) global native
-float function FileFloatListAdjust(string key, int index, float amount) global native
-
-;/ Remove a previously added value from a list globally and return how many
-   instances of this value were removed.
-
-   key: name of value.
-   value: value to remove.
-   [optional] allowInstances: remove all instances of this value in a list.
-/;
-int function FileIntListRemove(string key, int value, bool allInstances = false) global native
-int function FileFloatListRemove(string key, float value, bool allInstances = false) global native
-int function FileStringListRemove(string key, string value, bool allInstances = false) global native
-int function FileFormListRemove(string key, Form value, bool allInstances = false) global native
-
-
-;/ Get a value from list by index globally. This will return 0
-   as value if there was a problem.
-
-   key: name of list.
-   index: index of value in the list.
-/;
-int function FileIntListGet(string key, int index) global native
-float function FileFloatListGet(string key, int index) global native
-string function FileStringListGet(string key, int index) global native
-Form function FileFormListGet(string key, int index) global native
-
-
-;/ Set a value in list by index globally. This will return the previous
-   value or 0 if there was a problem.
-
-   key: name of list.
-   index: index of value in the list.
-   value: value to set to.
-/;
-int function FileIntListSet(string key, int index, int value) global native
-float function FileFloatListSet(string key, int index, float value) global native
-string function FileStringListSet(string key, int index, string value) global native
-Form function FileFormListSet(string key, int index, Form value) global native
-
-;/ Clear a list of values (unset) globally and return the previous size of list.
-
-   key: name of list.
-/;
-int function FileIntListClear(string key) global native
-int function FileFloatListClear(string key) global native
-int function FileStringListClear(string key) global native
-int function FileFormListClear(string key) global native
-
-
-;/ Remove a value from list by index globally and return if we were successful
-   in doing so.
-
-   key: name of list.
-   index: index of value in the list.
-/;
-bool function FileIntListRemoveAt(string key, int index) global native
-bool function FileFloatListRemoveAt(string key, int index) global native
-bool function FileStringListRemoveAt(string key, int index) global native
-bool function FileFormListRemoveAt(string key, int index) global native
-
-
-;/ Insert an int/float/string/Form to a list globally and return
-   if successful.
-
-   key: name of value.
-   index: position in list to put the value. 0 is first entry in list.
-   value: value to add.
-/;
-bool function FileIntListInsert(string key, int index, int value) global native
-bool function FileFloatListInsert(string key, int index, float value) global native
-bool function FileStringListInsert(string key, int index, string value) global native
-bool function FileFormListInsert(string key, int index, Form value) global native
-
-
-;/ Get size of a list globally.
-
-   key: name of list.
-/;
-int function FileIntListCount(string key) global native
-int function FileFloatListCount(string key) global native
-int function FileStringListCount(string key) global native
-int function FileFormListCount(string key) global native
-
-
-;/ Find a value in list globally and return its index or -1 if value was not found.
-
-   key: name of list.
-   value: value to search.
-/;
-int function FileIntListFind(string key, int value) global native
-int function FileFloatListFind(string key, float value) global native
-int function FileStringListFind(string key, string value) global native
-int function FileFormListFind(string key, Form value) global native
-
-;/ Find if a value in list exists globally and return true if it does.
-
-   key: name of list.
-   value: value to search.
-/;
-bool function FileIntListHas(string key, int value) global native
-bool function FileFloatListHas(string key, float value) global native
-bool function FileStringListHas(string key, string value) global native
-bool function FileFormListHas(string key, Form value) global native
-
-;/ Fills the given input array with the values of the list from global external file,
-   will fill the array until either the array or list runs out of valid indexes
-
-   key: name of list.
-   slice: an initialized array set to the slice size you want, i.e. int[] slice = new int[10]
-   [optional] startIndex: the starting list index you want to start filling your slice array with
-/;
-function FileIntListSlice(string key, int[] slice, int startIndex = 0) global native
-function FileFloatListSlice(string key, float[] slice, int startIndex = 0) global native
-function FileStringListSlice(string key, string[] slice, int startIndex = 0) global native
-function FileFormListSlice(string key, Form[] slice, int startIndex = 0) global native
-
-;/ Sizes the given list to a set number of elements. If the list exists already it will be truncated
-   when given fewer elements, or resized to the appropiate length with the filler argument being used as
-   the default values.
-
-   Returns the number of elements truncated (signed) or added (unsigned) onto the list.
-
-   key: name of list.
-   toLength: The size you want to change the list to. Max length when using this function is 500.
-   [optional] filler: When adding empty elements to the list this will be used as the default value
-/;
-int function FileIntListResize(string key, int toLength, int filler = 0) global native
-int function FileFloatListResize(string key, int toLength, float filler = 0.0) global native
-int function FileStringListResize(string key, int toLength, string filler = "") global native
-int function FileFormListResize(string key, int toLength, Form filler = none) global native
-
-
-;/ Creates a copy of array on the given storage list at the given object+key,
-   overwriting any list that might already exists.
-
-   Returns true on success.
-
-   key: name of list.
-   copy[]: The papyrus array with the content you wish to copy over into StorageUtil
-   [optional] filler: When adding empty elements to the list this will be used as the default value
-/;
-bool function FileIntListCopy(string key, int[] copy) global native
-bool function FileFloatListCopy(string key, float[] copy) global native
-bool function FileStringListCopy(string key, string[] copy) global native
-bool function FileFormListCopy(string key, Form[] copy) global native
-
+int[] function IntListToArray(Form ObjKey, string KeyName) global native
+float[] function FloatListToArray(Form ObjKey, string KeyName) global native
+string[] function StringListToArray(Form ObjKey, string KeyName) global native
+Form[] function FormListToArray(Form ObjKey, string KeyName) global native
 
 ;/
 	Debug functions - can be helpful to find problems or for development.
 /;
 
-function debug_SaveFile() global native
-function debug_DeleteValues(Form obj) global native
+function debug_DeleteValues(Form ObjKey) global native
 function debug_DeleteAllValues() global native
 
 int function debug_Cleanup() global native
-
 
 int function debug_GetIntObjectCount() global native
 int function debug_GetFloatObjectCount() global native
@@ -564,23 +347,23 @@ int function debug_GetFloatListObjectCount() global native
 int function debug_GetStringListObjectCount() global native
 int function debug_GetFormListObjectCount() global native
 
-int function debug_GetIntKeysCount(Form obj) global native
-int function debug_GetFloatKeysCount(Form obj) global native
-int function debug_GetStringKeysCount(Form obj) global native
-int function debug_GetFormKeysCount(Form obj) global native
-int function debug_GetIntListKeysCount(Form obj) global native
-int function debug_GetFloatListKeysCount(Form obj) global native
-int function debug_GetStringListKeysCount(Form obj) global native
-int function debug_GetFormListKeysCount(Form obj) global native
+int function debug_GetIntKeysCount(Form ObjKey) global native
+int function debug_GetFloatKeysCount(Form ObjKey) global native
+int function debug_GetStringKeysCount(Form ObjKey) global native
+int function debug_GetFormKeysCount(Form ObjKey) global native
+int function debug_GetIntListKeysCount(Form ObjKey) global native
+int function debug_GetFloatListKeysCount(Form ObjKey) global native
+int function debug_GetStringListKeysCount(Form ObjKey) global native
+int function debug_GetFormListKeysCount(Form ObjKey) global native
 
-string function debug_GetIntKey(Form obj, int index) global native
-string function debug_GetFloatKey(Form obj, int index) global native
-string function debug_GetStringKey(Form obj, int index) global native
-string function debug_GetFormKey(Form obj, int index) global native
-string function debug_GetIntListKey(Form obj, int index) global native
-string function debug_GetFloatListKey(Form obj, int index) global native
-string function debug_GetStringListKey(Form obj, int index) global native
-string function debug_GetFormListKey(Form obj, int index) global native
+string function debug_GetIntKey(Form ObjKey, int index) global native
+string function debug_GetFloatKey(Form ObjKey, int index) global native
+string function debug_GetStringKey(Form ObjKey, int index) global native
+string function debug_GetFormKey(Form ObjKey, int index) global native
+string function debug_GetIntListKey(Form ObjKey, int index) global native
+string function debug_GetFloatListKey(Form ObjKey, int index) global native
+string function debug_GetStringListKey(Form ObjKey, int index) global native
+string function debug_GetFormListKey(Form ObjKey, int index) global native
 
 
 Form function debug_GetIntObject(int index) global native
@@ -593,7 +376,258 @@ Form function debug_GetStringListObject(int index) global native
 Form function debug_GetFormListObject(int index) global native
 
 
-; Currently no longer implemented
+;/
+   Storage functions - separate file. These are shared in all save games. Values are loaded and saved
+   when savegame is loaded or saved.
+
+   DEPRECATED v2.9: Replaced by JsonUtil functions. Existing functions here have been proxied to a shared
+   json file to maintain compatibility.
+/;
+
+int function FileSetIntValue(string KeyName, int value) global
+   return JsonUtil.SetIntValue("../StorageUtil.json", KeyName, value)
+endFunction
+float function FileSetFloatValue(string KeyName, float value) global
+   return JsonUtil.SetFloatValue("../StorageUtil.json", KeyName, value)
+endFunction
+string function FileSetStringValue(string KeyName, string value) global
+   return JsonUtil.SetStringValue("../StorageUtil.json", KeyName, value)
+endFunction
+form function FileSetFormValue(string KeyName, Form value) global
+   return JsonUtil.SetFormValue("../StorageUtil.json", KeyName, value)
+endFunction
+
+int function FileAdjustIntValue(string KeyName, int amount) global
+   return JsonUtil.AdjustIntValue("../StorageUtil.json", KeyName, amount)
+endFunction
+float function FileAdjustFloatValue(string KeyName, float amount) global
+   return JsonUtil.AdjustFloatValue("../StorageUtil.json", KeyName, amount)
+endFunction
+
+bool function FileUnsetIntValue(string KeyName) global
+   return JsonUtil.UnsetIntValue("../StorageUtil.json", KeyName)
+endFunction
+bool function FileUnsetFloatValue(string KeyName) global
+   return JsonUtil.UnsetFloatValue("../StorageUtil.json", KeyName)
+endFunction
+bool function FileUnsetStringValue(string KeyName) global
+   return JsonUtil.UnsetStringValue("../StorageUtil.json", KeyName)
+endFunction
+bool function FileUnsetFormValue(string KeyName) global
+   return JsonUtil.UnsetFormValue("../StorageUtil.json", KeyName)
+endFunction
+
+bool function FileHasIntValue(string KeyName) global
+   return JsonUtil.HasIntValue("../StorageUtil.json", KeyName)
+endFunction
+bool function FileHasFloatValue(string KeyName) global
+   return JsonUtil.HasFloatValue("../StorageUtil.json", KeyName)
+endFunction
+bool function FileHasStringValue(string KeyName) global
+   return JsonUtil.HasStringValue("../StorageUtil.json", KeyName)
+endFunction
+bool function FileHasFormValue(string KeyName) global
+   return JsonUtil.HasFormValue("../StorageUtil.json", KeyName)
+endFunction
+
+int function FileGetIntValue(string KeyName, int missing = 0) global
+   return JsonUtil.GetIntValue("../StorageUtil.json", KeyName, missing)
+endFunction
+float function FileGetFloatValue(string KeyName, float missing = 0.0) global
+   return JsonUtil.GetFloatValue("../StorageUtil.json", KeyName, missing)
+endFunction
+string function FileGetStringValue(string KeyName, string missing = "") global
+   return JsonUtil.GetStringValue("../StorageUtil.json", KeyName, missing)
+endFunction
+Form function FileGetFormValue(string KeyName, Form missing = none) global
+   return JsonUtil.GetFormValue("../StorageUtil.json", KeyName, missing)
+endFunction
+
+int function FileIntListAdd(string KeyName, int value, bool allowDuplicate = true) global
+   return JsonUtil.IntListAdd("../StorageUtil.json", KeyName, value, allowDuplicate)
+endFunction
+int function FileFloatListAdd(string KeyName, float value, bool allowDuplicate = true) global
+   return JsonUtil.FloatListAdd("../StorageUtil.json", KeyName, value, allowDuplicate)
+endFunction
+int function FileStringListAdd(string KeyName, string value, bool allowDuplicate = true) global
+   return JsonUtil.StringListAdd("../StorageUtil.json", KeyName, value, allowDuplicate)
+endFunction
+int function FileFormListAdd(string KeyName, Form value, bool allowDuplicate = true) global
+   return JsonUtil.FormListAdd("../StorageUtil.json", KeyName, value, allowDuplicate)
+endFunction
+
+int function FileIntListAdjust(string KeyName, int index, int amount) global
+   return JsonUtil.IntListAdjust("../StorageUtil.json", KeyName, index, amount)
+endFunction
+float function FileFloatListAdjust(string KeyName, int index, float amount) global
+   return JsonUtil.FloatListAdjust("../StorageUtil.json", KeyName, index, amount)
+endFunction
+
+int function FileIntListRemove(string KeyName, int value, bool allInstances = false) global
+   return JsonUtil.IntListRemove("../StorageUtil.json", KeyName, value, allInstances)
+endFunction
+int function FileFloatListRemove(string KeyName, float value, bool allInstances = false) global
+   return JsonUtil.FloatListRemove("../StorageUtil.json", KeyName, value, allInstances)
+endFunction
+int function FileStringListRemove(string KeyName, string value, bool allInstances = false) global
+   return JsonUtil.StringListRemove("../StorageUtil.json", KeyName, value, allInstances)
+endFunction
+int function FileFormListRemove(string KeyName, Form value, bool allInstances = false) global
+   return JsonUtil.FormListRemove("../StorageUtil.json", KeyName, value, allInstances)
+endFunction
+
+int function FileIntListGet(string KeyName, int index) global
+   return JsonUtil.IntListGet("../StorageUtil.json", KeyName, index)
+endFunction
+float function FileFloatListGet(string KeyName, int index) global
+   return JsonUtil.FloatListGet("../StorageUtil.json", KeyName, index)
+endFunction
+string function FileStringListGet(string KeyName, int index) global
+   return JsonUtil.StringListGet("../StorageUtil.json", KeyName, index)
+endFunction
+Form function FileFormListGet(string KeyName, int index) global
+   return JsonUtil.FormListGet("../StorageUtil.json", KeyName, index)
+endFunction
+
+int function FileIntListSet(string KeyName, int index, int value) global
+   return JsonUtil.IntListSet("../StorageUtil.json", KeyName, index, value)
+endFunction
+float function FileFloatListSet(string KeyName, int index, float value) global
+   return JsonUtil.FloatListSet("../StorageUtil.json", KeyName, index, value)
+endFunction
+string function FileStringListSet(string KeyName, int index, string value) global
+   return JsonUtil.StringListSet("../StorageUtil.json", KeyName, index, value)
+endFunction
+Form function FileFormListSet(string KeyName, int index, Form value) global
+   return JsonUtil.FormListSet("../StorageUtil.json", KeyName, index, value)
+endFunction
+
+int function FileIntListClear(string KeyName) global
+   return JsonUtil.IntListClear("../StorageUtil.json", KeyName)
+endFunction
+int function FileFloatListClear(string KeyName) global
+   return JsonUtil.FloatListClear("../StorageUtil.json", KeyName)
+endFunction
+int function FileStringListClear(string KeyName) global
+   return JsonUtil.StringListClear("../StorageUtil.json", KeyName)
+endFunction
+int function FileFormListClear(string KeyName) global
+   return JsonUtil.FormListClear("../StorageUtil.json", KeyName)
+endFunction
+
+bool function FileIntListRemoveAt(string KeyName, int index) global
+   return JsonUtil.IntListRemoveAt("../StorageUtil.json", KeyName, index)
+endFunction
+bool function FileFloatListRemoveAt(string KeyName, int index) global
+   return JsonUtil.FloatListRemoveAt("../StorageUtil.json", KeyName, index)
+endFunction
+bool function FileStringListRemoveAt(string KeyName, int index) global
+   return JsonUtil.StringListRemoveAt("../StorageUtil.json", KeyName, index)
+endFunction
+bool function FileFormListRemoveAt(string KeyName, int index) global
+   return JsonUtil.FormListRemoveAt("../StorageUtil.json", KeyName, index)
+endFunction
+
+bool function FileIntListInsert(string KeyName, int index, int value) global
+   return JsonUtil.IntListInsertAt("../StorageUtil.json", KeyName, index, value)
+endFunction
+bool function FileFloatListInsert(string KeyName, int index, float value) global
+   return JsonUtil.FloatListInsertAt("../StorageUtil.json", KeyName, index, value)
+endFunction
+bool function FileStringListInsert(string KeyName, int index, string value) global
+   return JsonUtil.StringListInsertAt("../StorageUtil.json", KeyName, index, value)
+endFunction
+bool function FileFormListInsert(string KeyName, int index, Form value) global
+   return JsonUtil.FormListInsertAt("../StorageUtil.json", KeyName, index, value)
+endFunction
+
+int function FileIntListCount(string KeyName) global
+   return JsonUtil.IntListCount("../StorageUtil.json", KeyName)
+endFunction
+int function FileFloatListCount(string KeyName) global
+   return JsonUtil.FloatListCount("../StorageUtil.json", KeyName)
+endFunction
+int function FileStringListCount(string KeyName) global
+   return JsonUtil.StringListCount("../StorageUtil.json", KeyName)
+endFunction
+int function FileFormListCount(string KeyName) global
+   return JsonUtil.FormListCount("../StorageUtil.json", KeyName)
+endFunction
+
+int function FileIntListFind(string KeyName, int value) global
+   return JsonUtil.IntListFind("../StorageUtil.json", KeyName, value)
+endFunction
+int function FileFloatListFind(string KeyName, float value) global
+   return JsonUtil.FloatListFind("../StorageUtil.json", KeyName, value)
+endFunction
+int function FileStringListFind(string KeyName, string value) global
+   return JsonUtil.StringListFind("../StorageUtil.json", KeyName, value)
+endFunction
+int function FileFormListFind(string KeyName, Form value) global
+   return JsonUtil.FormListFind("../StorageUtil.json", KeyName, value)
+endFunction
+
+bool function FileIntListHas(string KeyName, int value) global
+   return JsonUtil.IntListHas("../StorageUtil.json", KeyName, value)
+endFunction
+bool function FileFloatListHas(string KeyName, float value) global
+   return JsonUtil.FloatListHas("../StorageUtil.json", KeyName, value)
+endFunction
+bool function FileStringListHas(string KeyName, string value) global
+   return JsonUtil.StringListHas("../StorageUtil.json", KeyName, value)
+endFunction
+bool function FileFormListHas(string KeyName, Form value) global
+   return JsonUtil.FormListHas("../StorageUtil.json", KeyName, value)
+endFunction
+
+function FileIntListSlice(string KeyName, int[] slice, int startIndex = 0) global
+   return JsonUtil.IntListSlice("../StorageUtil.json", KeyName, slice, startIndex)
+endFunction
+function FileFloatListSlice(string KeyName, float[] slice, int startIndex = 0) global
+   return JsonUtil.FloatListSlice("../StorageUtil.json", KeyName, slice, startIndex)
+endFunction
+function FileStringListSlice(string KeyName, string[] slice, int startIndex = 0) global
+   return JsonUtil.StringListSlice("../StorageUtil.json", KeyName, slice, startIndex)
+endFunction
+function FileFormListSlice(string KeyName, Form[] slice, int startIndex = 0) global
+   return JsonUtil.FormListSlice("../StorageUtil.json", KeyName, slice, startIndex)
+endFunction
+
+int function FileIntListResize(string KeyName, int toLength, int filler = 0) global
+   return JsonUtil.IntListResize("../StorageUtil.json", KeyName, toLength, filler)
+endFunction
+int function FileFloatListResize(string KeyName, int toLength, float filler = 0.0) global
+   return JsonUtil.FloatListResize("../StorageUtil.json", KeyName, toLength, filler)
+endFunction
+int function FileStringListResize(string KeyName, int toLength, string filler = "") global
+   return JsonUtil.StringListResize("../StorageUtil.json", KeyName, toLength, filler)
+endFunction
+int function FileFormListResize(string KeyName, int toLength, Form filler = none) global
+   return JsonUtil.FormListResize("../StorageUtil.json", KeyName, toLength, filler)
+endFunction
+
+
+bool function FileIntListCopy(string KeyName, int[] copy) global
+   return JsonUtil.IntListCopy("../StorageUtil.json", KeyName, copy)
+endFunction
+bool function FileFloatListCopy(string KeyName, float[] copy) global
+   return JsonUtil.FloatListCopy("../StorageUtil.json", KeyName, copy)
+endFunction
+bool function FileStringListCopy(string KeyName, string[] copy) global
+   return JsonUtil.StringListCopy("../StorageUtil.json", KeyName, copy)
+endFunction
+bool function FileFormListCopy(string KeyName, Form[] copy) global
+   return JsonUtil.FormListCopy("../StorageUtil.json", KeyName, copy)
+endFunction
+
+function debug_SaveFile() global
+   JsonUtil.Save("../StorageUtil.json")
+endFunction
+
+
+;/
+   Currently no longer implemented, unknown if/when they will return.
+/;
 int function debug_FileGetIntKeysCount() global
    return 0
 endFunction
