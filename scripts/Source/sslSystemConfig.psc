@@ -522,8 +522,8 @@ bool function CheckSystem()
 		CheckSkyrim.Show()
 		return false
 	; Check SKSE install
-	elseIf SKSE.GetScriptVersionRelease() < 46
-		CheckSKSE.Show(1.71)
+	elseIf SKSE.GetScriptVersionRelease() < 47
+		CheckSKSE.Show(1.72)
 		return false
 	; Check SkyUI install - depends on passing SKSE check passing
 	elseIf Quest.GetQuest("SKI_ConfigManagerInstance") == none
