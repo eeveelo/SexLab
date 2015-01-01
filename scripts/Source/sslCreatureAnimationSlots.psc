@@ -6,11 +6,12 @@ scriptname sslCreatureAnimationSlots extends sslAnimationSlots
 
 sslBaseAnimation[] function GetByRace(int ActorCount, Race RaceRef)
 	string RaceID = MiscUtil.GetRaceEditorID(RaceRef)
-	bool[] Valid = PapyrusUtil.BoolArray(Slotted)
+	bool[] Valid  = Utility.CreateBoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
-		Valid[i] = Slots[i].Enabled && ActorCount == Slots[i].PositionCount && Slots[i].HasRaceID(RaceID)
+		sslBaseAnimation Slot = GetBySlot(i)
+		Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount && Slot.HasRaceID(RaceID)
 	endWhile
 	return GetList(Valid)
 endFunction
@@ -32,7 +33,8 @@ bool function AllowedCreatureCombination(Race RaceRef1, Race RaceRef2)
 		int i = Slotted
 		while i
 			i -= 1
-			if Slots[i].Enabled && Slots[i].HasRace(RaceRef1) && Slots[i].HasRace(RaceRef2)
+			sslBaseAnimation Slot = GetBySlot(i)
+			if Slot.Enabled && Slot.HasRace(RaceRef1) && Slot.HasRace(RaceRef2)
 				return true
 			endIf
 		endWhile

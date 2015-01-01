@@ -207,10 +207,10 @@ sslBaseAnimation function MakeAnimationRegistered(string Token)
 	int id
 	sslBaseAnimation Anim
 	if Slot.IsCreature
-		id = CreatureSlots.Register(Token)
+		id   = CreatureSlots.Register(Token)
 		Anim = CreatureSlots.GetBySlot(id)
 	else
-		id = AnimSlots.Register(Token)
+		id   = AnimSlots.Register(Token)
 		Anim = AnimSlots.GetBySlot(id)
 	endIf
 	; Failed to register
@@ -221,6 +221,7 @@ sslBaseAnimation function MakeAnimationRegistered(string Token)
 	; Copy phantom slot onto global slot
 	Anim.Initialize()
 	Anim.Registry = Token
+	Anim.Enabled  = true
 	Anim = CopyAnimation(Anim, Slot)
 	Anim.Save(id)
 	ReleaseAnimation(Token)

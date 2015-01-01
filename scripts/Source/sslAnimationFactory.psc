@@ -6,6 +6,8 @@ sslAnimationSlots property Slots auto hidden
 int property Male = 0 autoreadonly hidden
 int property Female = 1 autoreadonly hidden
 int property Creature = 2 autoreadonly hidden
+int property CreatureMale = 2 autoreadonly hidden
+int property CreatureFemale = 3 autoreadonly hidden
 ; Cum Types
 int property Vaginal = 1 autoreadonly hidden
 int property Oral = 2 autoreadonly hidden
@@ -51,18 +53,15 @@ function RegisterAnimation(string Registrar)
 	; Get free Animation slot
 	int id = Slots.Register(Registrar)
 	if id != -1
-		; Get slot
-		sslBaseAnimation Slot = Slots.GetNthAlias(id) as sslBaseAnimation
-		Slots.Animations[id] = Slot
-		; Init Animation
+		; Send load event
+		sslBaseAnimation Slot = Slots.GetBySlot(id)
 		Slot.Initialize()
 		Slot.Registry = Registrar
-		Slot.Enabled = true
-		; Send load event
+		Slot.Enabled  = true
 		RegisterForModEvent(Registrar, Registrar)
-		int handle = ModEvent.Create(Registrar)
-		ModEvent.PushInt(handle, id)
-		ModEvent.Send(handle)
+		int eid = ModEvent.Create(Registrar)
+		ModEvent.PushInt(eid, id)
+		ModEvent.Send(eid)
 	endIf
 endFunction
 

@@ -5,7 +5,9 @@ import PapyrusUtil
 ; Animation storage
 string[] Registry
 int property Slotted auto hidden
-sslBaseAnimation[] property Slots auto hidden
+sslBaseAnimation[] Slots
+sslBaseAnimation[] Slots2
+sslBaseAnimation[] Slots3
 sslBaseAnimation[] property Animations hidden
 	sslBaseAnimation[] function get()
 		return Slots
@@ -23,13 +25,14 @@ Actor property PlayerRef auto
 ; ------------------------------------------------------- ;
 
 sslBaseAnimation[] function GetByTags(int ActorCount, string Tags, string TagsSuppressed = "", bool RequireAll = true)
+	bool[] Valid      = Utility.CreateBoolArray(Slotted)
 	string[] Suppress = StringSplit(TagsSuppressed)
 	string[] Search   = StringSplit(Tags)
-	bool[] Valid      = BoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
-		Valid[i] = Slots[i].Enabled && ActorCount == Slots[i].PositionCount && Slots[i].CheckTags(Search, RequireAll) && (TagsSuppressed == "" || !Slots[i].HasOneTag(Suppress))
+		sslBaseAnimation Slot = GetBySlot(i)
+		Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount && Slot.CheckTags(Search, RequireAll) && (TagsSuppressed == "" || !Slot.HasOneTag(Suppress))
 		; Valid[i] = Slots[i].Enabled && ActorCount == Slots[i].PositionCount && (TagsSuppressed == "" || Slots[i].CheckTags(Suppress, false, true)) && Slots[i].CheckTags(Search, RequireAll)
 	endWhile
 	return GetList(valid)
@@ -37,12 +40,13 @@ endFunction
 
 sslBaseAnimation[] function GetByType(int ActorCount, int Males = -1, int Females = -1, int StageCount = -1, bool Aggressive = false, bool Sexual = true)
 	; Search
-	bool[] Valid = BoolArray(Slotted)
+	bool[] Valid = Utility.CreateBoolArray(Slotted)
 	int i = Slotted
 	while i
-		i -=1
-		Valid[i] = Slots[i].Enabled && ActorCount == Slots[i].PositionCount && (Aggressive == Slots[i].HasTag("Aggressive") || !Config.RestrictAggressive) \
-		&& (Males == -1 || Males == Slots[i].Males) && (Females == -1 || Females == Slots[i].Females) && (StageCount == -1 || StageCount == Slots[i].StageCount) && Sexual == Slots[i].IsSexual
+		i -= 1
+		sslBaseAnimation Slot = GetBySlot(i)
+		Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount && (Aggressive == Slot.HasTag("Aggressive") || !Config.RestrictAggressive) \
+		&& (Males == -1 || Males == Slot.Males) && (Females == -1 || Females == Slot.Females) && (StageCount == -1 || StageCount == Slot.StageCount)
 	endWhile
 	return GetList(Valid)
 endFunction
@@ -79,22 +83,23 @@ sslBaseAnimation[] function GetByDefault(int Males, int Females, bool IsAggressi
 	bool SameSex = (Females == 2 && Males == 0) || (Males == 2 && Females == 0)
 
 	; Search
-	bool[] Valid = BoolArray(Slotted)
+	bool[] Valid = Utility.CreateBoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
+		sslBaseAnimation Slot = GetBySlot(i)
 		; Check for appropiate enabled aniamtion
-		Valid[i] = Slots[i].Enabled && ActorCount == Slots[i].PositionCount
+		Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount
 		; Suppress standing animations if on a bed
-		Valid[i] = Valid[i] && (!UsingBed || (UsingBed && !Slots[i].HasTag("Standing")))
+		Valid[i] = Valid[i] && (!UsingBed || (UsingBed && !Slot.HasTag("Standing")))
 		; Suppress or ignore aggressive animation tags
-		Valid[i] = Valid[i] && (!RestrictAggressive || IsAggressive == Slots[i].HasTag("Aggressive"))
+		Valid[i] = Valid[i] && (!RestrictAggressive || IsAggressive == Slot.HasTag("Aggressive"))
 		; Get SameSex + Non-SameSex
 		if SameSex
-			Valid[i] = Valid[i] && (Slots[i].HasTag("FM") || (Males == Slots[i].Males && Females == Slots[i].Females))
+			Valid[i] = Valid[i] && (Slot.HasTag("FM") || (Males == Slot.Males && Females == Slot.Females))
 		; Ignore genders for 3P+
 		elseIf ActorCount < 3
-			Valid[i] = Valid[i] && Males == Slots[i].Males && Females == Slots[i].Females
+			Valid[i] = Valid[i] && Males == Slot.Males && Females == Slot.Females
 		endIf
 	endWhile
 	return GetList(Valid)
@@ -142,11 +147,38 @@ endFunction
 ; --- Find single animation object                    --- ;
 ; ------------------------------------------------------- ;
 
+int property PageCount hidden
+	int function get()
+		if Slotted < 125
+			return 1
+		elseIf Slotted < 250
+			return 2
+		elseIf Slotted < 375
+			return 3
+		endIf
+		return 1
+	endFunction
+endProperty
+
+int function FindPage(string Registrar)
+	int i = Registry.Find(Registrar)
+	if i < 0
+		return -1
+	elseIf i < 125
+		return 1
+	elseIf i < 250
+		return 2
+	elseIf i < 375
+		return 3
+	endIf
+	return -1
+endFunction
+
 int function FindByName(string FindName)
 	int i = Slotted
 	while i
 		i -= 1
-		if Slots[i].Name == FindName
+		if GetBySlot(i).Name == FindName
 			return i
 		endIf
 	endWhile
@@ -160,23 +192,28 @@ endFunction
 sslBaseAnimation function GetBySlot(int index)
 	if index < 0 || index >= Slotted
 		return none
+	elseif index < 125
+		return Slots[index]
+	elseif index < 250
+		return Slots2[(index - 125)]
+	elseif index < 375
+		return Slots3[(index - 250)]
 	endIf
-	return Slots[index]
 endFunction
 
-sslBaseAnimation function GetEmpty()
-	if Slotted < Slots.Length
-		return Slots[Slotted]
-	endIf
-	return none
-endFunction
+; sslBaseAnimation function GetEmpty()
+; 	if Slotted < Slots.Length
+; 		return Slots[Slotted]
+; 	endIf
+; 	return none
+; endFunction
 
 ; ------------------------------------------------------- ;
 ; --- Misc API functions                              --- ;
 ; ------------------------------------------------------- ;
 
 int function CountTag(sslBaseAnimation[] Anims, string Tags)
-	string[] Checking = PapyrusUtil.StringSplit(Tags)
+	string[] Checking = StringSplit(Tags)
 	if Tags == "" || Checking.Length == 0
 		return 0
 	endIf
@@ -191,11 +228,11 @@ endFunction
 
 bool[] function FindTagged(sslBaseAnimation[] Anims, string Tags)
 	if Anims.Length < 1 || Tags == ""
-		return BoolArray(0)
+		return Utility.CreateBoolArray(0)
 	endIf
+	bool[] Output     = Utility.CreateBoolArray(i)
+	string[] Checking = StringSplit(Tags)
 	int i = Anims.Length
-	bool[] Output = BoolArray(i)
-	string[] Checking = PapyrusUtil.StringSplit(Tags)
 	while i
 		i -= 1
 		Output[i] = Anims[i].HasOneTag(Checking)
@@ -211,16 +248,16 @@ int function GetCount(bool IgnoreDisabled = true)
 	int i = Slotted
 	while i < Slotted
 		i -= 1
-		Count += (Slots[i].Enabled as int)
+		Count += (GetBySlot(i).Enabled as int)
 	endWhile
 	return Count
 endFunction
 
 int function FindByRegistrar(string Registrar)
-	if Registrar == ""
-		return -1
+	if Registrar != ""
+		return Registry.Find(Registrar)
 	endIf
-	return Registry.Find(Registrar)
+	return -1
 endFunction
 
 sslBaseAnimation function GetbyRegistrar(string Registrar)
@@ -232,45 +269,58 @@ bool function IsRegistered(string Registrar)
 endFunction
 
 sslBaseAnimation[] function GetList(bool[] Valid)
-	if !Valid || Valid.Length < 1 || Valid.Find(true) == -1
-		return none ; OR empty array?
-	endIf
-	int i = CountBool(Valid, true)
-	int n = Valid.Find(true)
-	sslBaseAnimation[] Output = sslUtility.AnimationArray(i)
-	; Load out array with valid animation slots
-	while n != -1
-		i -= 1
-		Output[i] = Slots[n]
-		n += 1
-		if n < Slotted
-			n = Valid.Find(true, n)
-		else
-			n = -1
-		endIf
-	endWhile
-	; Only bother with logging the selected animations if debug mode enabled.
-	if Config.DebugMode
-		string List = "SEXLAB - Found Animations - "
-		i = Output.Length
-		while i
+	sslBaseAnimation[] Output
+	if Valid.Length > 0 && Valid.Find(true) != -1
+		int n = Valid.Find(true)
+		int i = CountBool(Valid, true)
+		Output = sslUtility.AnimationArray(i)
+		while n != -1
 			i -= 1
-			List += "["+Output[i].Name+"] "
+			Output[i] = GetBySlot(n)
+			n += 1
+			if n < Slotted
+				n = Valid.Find(true, n)
+			else
+				n = -1
+			endIf
 		endWhile
-		Debug.Trace(List)
-		MiscUtil.PrintConsole(List)
+		; Only bother with logging the selected animations if debug mode enabled.
+		if Config.DebugMode
+			string List = "SEXLAB - Found Animations - "
+			i = Output.Length
+			while i
+				i -= 1
+				List += "["+Output[i].Name+"] "
+			endWhile
+			Debug.Trace(List)
+			MiscUtil.PrintConsole(List)
+		endIf
 	endIf
 	return Output
 endFunction
 
-string[] function GetNames()
-	string[] Output = StringArray(Slotted)
-	int i = Slotted
+string[] function GetSlotNames(int SlotsPage)
+	if SlotsPage == 2
+		return GetNames(Slots2)
+	elseIf SlotsPage == 3
+		return GetNames(Slots3)
+	endIf
+	return GetNames(Slots)
+endfunction
+
+string[] function GetNames(sslBaseAnimation[] SlotList)
+	int i = SlotList.Length
+	string[] Names = Utility.CreateStringArray(i)
 	while i
 		i -= 1
-		Output[i] = Slots[i].Name
+		if SlotList[i]
+			Names[i] = SlotList[i].Name
+		endIf
 	endWhile
-	return Output
+	if Names.Find("") != -1
+		Names = PapyrusUtil.RemoveString(Names, "")
+	endIf
+	return Names
 endFunction
 
 sslBaseAnimation function RegisterAnimation(string Registrar, Form CallbackForm = none, ReferenceAlias CallbackAlias = none)
@@ -280,17 +330,14 @@ sslBaseAnimation function RegisterAnimation(string Registrar, Form CallbackForm 
 	endIf
 	; Get free Animation slot
 	int id = Register(Registrar)
-	if id != -1
-		; Get slot
-		sslBaseAnimation Slot = GetNthAlias(id) as sslBaseAnimation
-		Animations[id] = Slot
-		; Init Animation
+	sslBaseAnimation Slot = GetBySlot(id)
+	if id != -1 && Slot != none
 		Slot.Initialize()
 		Slot.Registry = Registrar
-		Slot.Enabled = true
-		; Send load event
+		Slot.Enabled  = true
 		sslObjectFactory.SendCallback(Registrar, id, CallbackForm, CallbackAlias)
 	endIf
+	return Slot
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -300,9 +347,11 @@ endFunction
 function Setup()
 	GoToState("Locked")
 	; Init slots
-	Slotted  = 0
-	Registry = new string[125]
-	Slots    = new sslBaseAnimation[125]
+	Slotted   = 0
+	Registry  = Utility.CreateStringArray(350)
+	Slots     = new sslBaseAnimation[125]
+	Slots2    = new sslBaseAnimation[1]
+	Slots3    = new sslBaseAnimation[1]
 	; Init Libraries
 	PlayerRef = Game.GetPlayer()
 	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
@@ -311,7 +360,7 @@ function Setup()
 		ThreadLib = SexLabQuestFramework as sslThreadLibrary
 		ActorLib  = SexLabQuestFramework as sslActorLibrary
 	endIf
-	; Init defaults
+	; Init sslAnimationDefaults
 	RegisterSlots()
 	GoToState("")
 endFunction
@@ -326,13 +375,41 @@ endFunction
 
 int function Register(string Registrar)
 	int i = Registry.Find("")
-	if Registry.Find(Registrar) == -1 && i != -1
+	if i != -1 && Registry.Find(Registrar) == -1
 		Registry[i] = Registrar
 		Slotted = i + 1
+		if i < 125
+			Slots[i]  = GetNthAlias(i) as sslBaseAnimation
+		elseIf i < 250
+			if Slots2.Length != 125
+				Slots2 = new sslBaseAnimation[125]
+			endIf
+			Slots2[(i - 125)] = GetNthAlias(i) as sslBaseAnimation
+		elseIf i < 375
+			if Slots3.Length != 125
+				Slots3 = new sslBaseAnimation[125]
+			endIf
+			Slots3[(i - 250)] = GetNthAlias(i) as sslBaseAnimation
+		endIf
 		return i
 	endIf
 	return -1
 endFunction
+
+;/int function Register(string Registrar)
+	int Slot = -1
+	if Slotted < 384 && Registry.Find(Registrar) == -1
+		Registry = PushString(Registry, Registrar)
+		Slot     = Registry.Find(Registrar)
+		Slotted  = Registry.Length
+		Objects  = PushAlias(Objects, GetNthAlias(Slot))
+		if Slot < 128
+			Slots[Slot] = Objects[Slot] as sslBaseAnimation
+		endIf
+		GetBySlot(Slot).Prepare(Registrar)
+	endIf
+	return Slot
+endFunction /;
 
 bool function TestSlots()
 	return PlayerRef && Config && ActorLib && ThreadLib && Slotted > 0 && Registry.Length == 125 && Slots.Length == 125 && Slots.Find(none) > 0 && Registry.Find("") > 0

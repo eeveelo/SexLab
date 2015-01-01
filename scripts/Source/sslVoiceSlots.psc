@@ -4,10 +4,11 @@ import PapyrusUtil
 import StorageUtil
 
 ; Voices storage
-int property Slotted auto hidden
 string[] Registry
-
+int property Slotted auto hidden
 sslBaseVoice[] Slots
+sslBaseVoice[] Slots2
+sslBaseVoice[] Slots3
 sslBaseVoice[] property Voices hidden
 	sslBaseVoice[] function get()
 		return Slots
@@ -23,22 +24,24 @@ Actor property PlayerRef auto
 ; ------------------------------------------------------- ;
 
 sslBaseVoice[] function GetAllGender(int Gender)
-	bool[] Valid = BoolArray(Slotted)
+	bool[] Valid = Utility.CreateBoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
-		Valid[i] = Slots[i].Enabled && (Gender == Slots[i].Gender || Slots[i].Gender == -1)
+		sslBaseVoice Slot = GetBySlot(i)
+		Valid[i] = Slot.Enabled && (Gender == Slot.Gender || Slot.Gender == -1)
 	endwhile
 	return GetList(Valid)
 endFunction
 
 sslBaseVoice function PickGender(int Gender = 1)
 	; Get list of valid voices
-	bool[] Valid = BoolArray(Slotted)
+	bool[] Valid = Utility.CreateBoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
-		Valid[i] = Slots[i].Enabled && (Gender == Slots[i].Gender || Slots[i].Gender == -1)
+		sslBaseVoice Slot = GetBySlot(i)
+		Valid[i] = Slot.Enabled && (Gender == Slot.Gender || Slot.Gender == -1)
 	endwhile
 	; Select a random true in the list
 	i = Utility.RandomInt(0, (Slotted - 1))
@@ -71,11 +74,12 @@ sslBaseVoice function GetByTags(string Tags, string TagsSuppressed = "", bool Re
 		return none
 	endIf
 	string[] Suppress = StringSplit(TagsSuppressed)
-	bool[] Valid = BoolArray(Slotted)
+	bool[] Valid = Utility.CreateBoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
-		Valid[i] = Slots[i].Enabled && (TagsSuppressed == "" || Slots[i].CheckTags(Suppress, false, true)) && Slots[i].CheckTags(Search, RequireAll)
+		sslBaseVoice Slot = GetBySlot(i)
+		Valid[i] = Slot.Enabled && (TagsSuppressed == "" || Slot.CheckTags(Suppress, false, true)) && Slot.CheckTags(Search, RequireAll)
 	endWhile
 	sslBaseVoice[] Found = GetList(Valid)
 	int r = Utility.RandomInt(0, (Found.Length - 1))
@@ -137,25 +141,22 @@ endFunction
 ; ------------------------------------------------------- ;
 
 sslBaseVoice[] function GetList(bool[] Valid)
-	int i = CountTrue(Valid)
-	if i == 0
-		return none ; OR empty array?
+	sslBaseVoice[] Output
+	if Valid.Length > 0 && Valid.Find(true) != -1
+		int n = Valid.Find(true)
+		int i = CountBool(Valid, true)
+		Output = sslUtility.VoiceArray(i)
+		while n != -1
+			i -= 1
+			Output[i] = GetBySlot(n)
+			n += 1
+			if n < Slotted
+				n = Valid.Find(true, n)
+			else
+				n = -1
+			endIf
+		endWhile
 	endIf
-	string Found
-	sslBaseVoice[] Output = sslUtility.VoiceArray(i)
-	int pos = Valid.Find(true)
-	while pos != -1
-		i -= 1
-		Output[i] = Slots[pos]
-		pos += 1
-		if pos < Slotted
-			pos = Valid.Find(true, pos)
-		else
-			pos = -1
-		endIf
-		Found += Output[i].Name+", "
-	endWhile
-	SexLabUtil.DebugLog("Found Voices("+Output.Length+"): "+Found, "", Config.DebugMode)
 	return Output
 endFunction
 
@@ -170,30 +171,86 @@ endFunction
 sslBaseVoice function GetBySlot(int index)
 	if index < 0 || index >= Slotted
 		return none
+	elseif index < 125
+		return Slots[index]
+	elseif index < 250
+		return Slots2[(index - 125)]
+	elseif index < 375
+		return Slots3[(index - 250)]
 	endIf
-	return Slots[index]
 endFunction
 
 int function FindByRegistrar(string Registrar)
-	if Registrar == ""
-		return -1
+	if Registrar != ""
+		return Registry.Find(Registrar)
 	endIf
-	return Registry.Find(Registrar)
+	return -1
 endFunction
 
 bool function IsRegistered(string Registrar)
 	return FindByRegistrar(Registrar) != -1
 endFunction
 
+int property PageCount hidden
+	int function get()
+		if Slotted < 125
+			return 1
+		elseIf Slotted < 250
+			return 2
+		elseIf Slotted < 375
+			return 3
+		endIf
+		return 1
+	endFunction
+endProperty
+
+int function FindPage(string Registrar)
+	int i = Registry.Find(Registrar)
+	if i < 0
+		return -1
+	elseIf i < 125
+		return 1
+	elseIf i < 250
+		return 2
+	elseIf i < 375
+		return 3
+	endIf
+	return -1
+endFunction
+
 int function FindByName(string FindName)
 	int i = Slotted
 	while i
 		i -= 1
-		if Slots[i].Name == FindName
+		if GetBySlot(i).Name == FindName
 			return i
 		endIf
 	endWhile
 	return -1
+endFunction
+
+string[] function GetSlotNames(int SlotsPage)
+	if SlotsPage == 2
+		return GetNames(Slots2)
+	elseIf SlotsPage == 3
+		return GetNames(Slots3)
+	endIf
+	return GetNames(Slots)
+endfunction
+
+string[] function GetNames(sslBaseVoice[] SlotList)
+	int i = SlotList.Length
+	string[] Names = Utility.CreateStringArray(i)
+	while i
+		i -= 1
+		if SlotList[i]
+			Names[i] = SlotList[i].Name
+		endIf
+	endWhile
+	if Names.Find("") != -1
+		Names = PapyrusUtil.RemoveString(Names, "")
+	endIf
+	return Names
 endFunction
 
 sslBaseVoice function RegisterVoice(string Registrar, Form CallbackForm = none, ReferenceAlias CallbackAlias = none)
@@ -203,17 +260,14 @@ sslBaseVoice function RegisterVoice(string Registrar, Form CallbackForm = none, 
 	endIf
 	; Get free Voice slot
 	int id = Register(Registrar)
-	if id != -1
-		; Get slot
-		sslBaseVoice Slot = GetNthAlias(id) as sslBaseVoice
-		Voices[id] = Slot
-		; Init Voice
+	sslBaseVoice Slot = GetBySlot(id)
+	if id != -1 && Slot != none
 		Slot.Initialize()
 		Slot.Registry = Registrar
-		Slot.Enabled = true
-		; Send load event
+		Slot.Enabled  = true
 		sslObjectFactory.SendCallback(Registrar, id, CallbackForm, CallbackAlias)
 	endIf
+	return Slot
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -224,8 +278,10 @@ function Setup()
 	GoToState("Locked")
 	; Init slots
 	Slotted   = 0
-	Registry  = new string[100]
-	Slots     = new sslBaseVoice[100]
+	Registry  = Utility.CreateStringArray(350)
+	Slots     = new sslBaseVoice[125]
+	Slots2    = new sslBaseVoice[1]
+	Slots3    = new sslBaseVoice[1]
 	; Init Libraries
 	PlayerRef = Game.GetPlayer()
 	Config    = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
@@ -245,9 +301,22 @@ endFunction
 
 int function Register(string Registrar)
 	int i = Registry.Find("")
-	if Registry.Find(Registrar) == -1 && i != -1
+	if i != -1 && Registry.Find(Registrar) == -1
 		Registry[i] = Registrar
 		Slotted = i + 1
+		if i < 125
+			Slots[i]  = GetNthAlias(i) as sslBaseVoice
+		elseIf i < 250
+			if Slots2.Length != 125
+				Slots2 = new sslBaseVoice[125]
+			endIf
+			Slots2[(i - 125)] = GetNthAlias(i) as sslBaseVoice
+		elseIf i < 375
+			if Slots3.Length != 125
+				Slots3 = new sslBaseVoice[125]
+			endIf
+			Slots3[(i - 250)] = GetNthAlias(i) as sslBaseVoice
+		endIf
 		return i
 	endIf
 	return -1
