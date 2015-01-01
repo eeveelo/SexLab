@@ -76,6 +76,9 @@ endFunction
 ; --- Global Utilities                                --- ;
 ; ------------------------------------------------------- ;
 
+function ClearPhoneme(Actor ActorRef) global native
+function ClearModifier(Actor ActorRef) global native
+
 function OpenMouth(Actor ActorRef) global
 	ClearPhoneme(ActorRef)
 	ActorRef.SetExpressionOverride(16, 100)
@@ -97,9 +100,6 @@ function ClearMFG(Actor ActorRef) global
 	ActorRef.ResetExpressionOverrides()
 	ActorRef.ClearExpressionOverride()
 endFunction
-
-function ClearPhoneme(Actor ActorRef) global native
-function ClearModifier(Actor ActorRef) global native
 
 function ApplyPresetFloats(Actor ActorRef, float[] Preset) global
 	ApplyPresetArray(ActorRef, Preset)
@@ -133,7 +133,12 @@ endFunction
 function SetIndex(int Phase, int Gender, int Mode, int id, int value)
 	float[] Preset = GetPhase(Phase, Gender)
 	int i = Mode+id
-	Preset[i] = ClampInt(value, 0, 100) as float
+	if value > 100
+		value = 100
+	elseIf value < 0
+		value = 0
+	endIf
+	Preset[i] = value as float
 	if i < 30
 		Preset[i] = Preset[i] / 100.0
 	endIf
@@ -296,11 +301,11 @@ float[] function GetModifiers(int Phase, int Gender)
 endFunction
 
 int function GetMoodType(int Phase, int Gender)
-	return (GetPhase(Phase, Gender)[30] * 100.0) as int
+	return GetPhase(Phase, Gender)[30] as int
 endFunction
 
 int function GetMoodAmount(int Phase, int Gender)
-	return (GetPhase(Phase, Gender)[31] * 100.0) as int
+	return GetPhase(Phase, Gender)[31] as int
 endFunction
 
 int function GetIndex(int Phase, int Gender, int Mode, int id)
@@ -335,6 +340,7 @@ endFunction
 
 function Save(int id = -1)
 	CountPhases()
+	SlotID = id
 	Log(Name, "Expressions["+id+"]")
 endFunction
 
@@ -343,16 +349,16 @@ function Initialize()
 	; Gender phase counts
 	Phases = new int[2]
 	; Individual Phases
-	Male1   = FloatArray(0)
-	Male2   = FloatArray(0)
-	Male3   = FloatArray(0)
-	Male4   = FloatArray(0)
-	Male5   = FloatArray(0)
-	Female1 = FloatArray(0)
-	Female2 = FloatArray(0)
-	Female3 = FloatArray(0)
-	Female4 = FloatArray(0)
-	Female5 = FloatArray(0)
+	Male1   = Utility.CreateFloatArray(0)
+	Male2   = Utility.CreateFloatArray(0)
+	Male3   = Utility.CreateFloatArray(0)
+	Male4   = Utility.CreateFloatArray(0)
+	Male5   = Utility.CreateFloatArray(0)
+	Female1 = Utility.CreateFloatArray(0)
+	Female2 = Utility.CreateFloatArray(0)
+	Female3 = Utility.CreateFloatArray(0)
+	Female4 = Utility.CreateFloatArray(0)
+	Female5 = Utility.CreateFloatArray(0)
 endFunction
 
 bool function ExportJson()

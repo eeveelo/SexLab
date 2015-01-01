@@ -910,25 +910,24 @@ function Initialize()
 	; Strings
 	ActorKey       = ""
 	; Storage
-	StripOverride  = PapyrusUtil.BoolArray(0)
-	Equipment      = PapyrusUtil.FormArray(0)
+	StripOverride  = Utility.CreateBoolArray(0)
+	Equipment      = Utility.CreateFormArray(0)
 	; Make sure alias is emptied
 	TryToClear()
 endFunction
 
 function Setup()
-	; Sync data
+	; Reset function Libraries - SexLabQuestFramework
+	if !Config || !ActorLib || !Stats
+		Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
+		if SexLabQuestFramework
+			Config   = SexLabQuestFramework as sslSystemConfig
+			ActorLib = SexLabQuestFramework as sslActorLibrary
+			Stats    = SexLabQuestFramework as sslActorStats
+		endIf
+	endIf
 	PlayerRef = Game.GetPlayer()
 	Thread    = GetOwningQuest() as sslThreadController
-	; Reset function Libraries - SexLabQuestFramework
-	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
-	if SexLabQuestFramework
-		Config   = SexLabQuestFramework as sslSystemConfig
-		ActorLib = SexLabQuestFramework as sslActorLibrary
-		Stats    = SexLabQuestFramework as sslActorStats
-	endIf
-	; init alias settings
-	Initialize()
 endFunction
 
 function Log(string Log, string Type = "NOTICE")

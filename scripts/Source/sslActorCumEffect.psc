@@ -1,15 +1,17 @@
 scriptname sslActorCumEffect extends ActiveMagicEffect
 
+Actor ActorRef
 float Timer
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
-	Timer = (Quest.GetQuest("SexLabQuestFramework") as sslSystemConfig).CumTimer
+	ActorRef = TargetRef
+	Timer    = (Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig).CumTimer
 	RegisterForSingleUpdate(1.0)
 endEvent
 event OnUpdate()
-	if GetTargetActor().IsSwimming() || GetTimeElapsed() > Timer
+	if ActorRef.IsSwimming() || GetTimeElapsed() > Timer
 		Dispel()
-		return
+	else
+		RegisterForSingleUpdate(5.0)
 	endIf
-	RegisterForSingleUpdate(5.0)
 endEvent

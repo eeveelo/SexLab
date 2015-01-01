@@ -44,6 +44,7 @@ function Save(int id = -1)
 		AddTag("Female")
 	endIf
 	; Log
+	SlotID = id
 	Log(Name, "Voices["+id+"]")
 endFunction
 

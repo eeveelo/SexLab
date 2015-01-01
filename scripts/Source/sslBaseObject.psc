@@ -2,6 +2,7 @@ scriptname sslBaseObject extends ReferenceAlias hidden
 
 bool property Enabled auto hidden
 
+int property SlotID auto hidden
 string property Name auto hidden
 string property Registry auto hidden
 bool property Registered hidden
@@ -31,16 +32,19 @@ bool function HasTag(string Tag)
 endFunction
 
 bool function AddTag(string Tag)
-	if HasTag(Tag) || Tag == ""
-		return false
-	endIf
-	int i = Tags.Find(Tag)
-	if i == -1
+	if Tag != "" && Tags.Find(Tag) == -1
 		Tags = PapyrusUtil.PushString(Tags, Tag)
-	else
-		Tags[i] = Tag
+		return true
 	endIf
-	return true
+	return false
+endFunction
+
+bool function RemoveTag(string Tag)
+	if Tag != "" && Tags.Find(Tag) != -1
+		Tags = PapyrusUtil.RemoveString(Tags, Tag)
+		return true
+	endIf
+	return false
 endFunction
 
 function AddTags(string[] TagList)
@@ -49,14 +53,6 @@ function AddTags(string[] TagList)
 		i -= 1
 		AddTag(TagList[i])
 	endWhile
-endFunction
-
-bool function RemoveTag(string Tag)
-	if !HasTag(Tag) || Tag == ""
-		return false
-	endIf
-	Tags[Tags.Find(Tag)] = ""
-	return true
 endFunction
 
 bool function ToggleTag(string Tag)
@@ -131,17 +127,28 @@ string function Key(string type = "")
 endFunction
 
 function Log(string Log, string Type = "NOTICE")
-	SexLabUtil.DebugLog(Log, Type, Config.DebugMode)
+	Log = Type+": "+Log
+	if Config.DebugMode
+		SexLabUtil.PrintConsole(Log)
+	endIf
+	if Type == "FATAL"
+		Debug.TraceStack("SEXLAB - "+Log)
+	else
+		Debug.Trace("SEXLAB - "+Log)
+	endIf
 endFunction
 
 function Initialize()
+	SlotID    = -1
 	Name      = ""
 	Registry  = ""
 	Enabled   = false
 	Ephemeral = false
 	Storage   = GetOwningQuest()
-	Config    = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
-	Tags      = new string[3]
+	Tags      = Utility.CreateStringArray(0)
+	if !Config
+		Config = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
+	endIf
 endFunction
 
 function Save(int id = -1)

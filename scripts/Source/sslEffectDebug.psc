@@ -16,79 +16,171 @@ ObjectReference MarkerRef
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
 
+	string Tag = "Tag1"
+	Log("String Test: "+Tag)
+	String[] Tags = Utility.CreateStringArray(5)
+	Log("Array Init: "+Tags)
+	Tags[0] = Tag
+	Tags[1] = "Tag2"
+	Tags[2] = "Tag3"
+	Log("Array Set: "+Tags)
 
-	string[] args = StringArray(10, "arg")
-	Log("Join(,): "+StringJoin(args))
-	Log("Join(-): "+StringJoin(args, "-"))
-	Log("Join(-D-): "+StringJoin(args, "-D-"))
-
-	string argstring = StringJoin(args)
-	args = StringSplit(argstring)
-	Log("Split(,): "+args.Length+" - "+args)
-
-	argstring = StringJoin(args, "-D-")
-	args = StringSplit(argstring, "-D-")
-	Log("Split(-D-): "+args.Length+" - "+args)
-
-
-	int[] TestArray = IntArray(30, 7)
-	Log("TestArray: "+TestArray)
-
-	int i = TestArray.Length
-	while i
-		i -= 1
-		TestArray[i] = i
-	endWhile
+	Tags = PapyrusUtil.RemoveString(Tags, "Tag2")
+	Log("RemoveString: "+Tags)
+	
+	Tags[3] = "Tag4"
+	Log("Array Set 2: "+Tags)
 
 
-	Log("Indexed: "+TestArray)
+	Tags = Utility.CreateStringArray(0)
+	Log("Empty Init: "+Tags)
+	Log("Empty Length: "+Tags.Length)
 
-	int[] SlicedArray = SliceIntArray(TestArray, 5, 10)
-	Log("Slice 5-10: "+SlicedArray)
+	Log("--------")
 
-	SlicedArray = SliceIntArray(TestArray, 0, 10)
-	Log("Slice 0-10: "+SlicedArray)
+	Form PlayerRef = Game.GetPlayer() as Form
+	Log("Form Test: "+PlayerRef)
 
-	SlicedArray = SliceIntArray(TestArray, 15)
-	Log("Slice 15+: "+SlicedArray)
+	Form[] TestArray = Utility.CreateFormArray(5)
+	Log("Array Init: "+TestArray)
 
-	SlicedArray = SliceIntArray(TestArray, 15, 40)
-	Log("Slice 15-40: "+SlicedArray)
+	TestArray[0] = PlayerRef
+	Log("Array Set: "+TestArray)
 
-	SlicedArray = SliceIntArray(TestArray, 28)
-	Log("Slice 28+: "+SlicedArray)
-
-	SlicedArray = SliceIntArray(TestArray, 29)
-	Log("Slice 29+: "+SlicedArray)
-
-	SlicedArray = SliceIntArray(TestArray, 30)
-	Log("Slice 30+: "+SlicedArray)
-
-	SlicedArray = SliceIntArray(TestArray, 31)
-	Log("Slice 31+: "+SlicedArray)
-
-	SlicedArray = SliceIntArray(TestArray, 40, 20)
-	Log("Slice 40-20: "+SlicedArray)
+	Form[] FilledArray = Utility.CreateFormArray(5, PlayerRef)
+	Log("Fill Test: "+FilledArray)
+	
+	FilledArray[0] = None
+	Log("None Test: "+FilledArray)
 
 
-	Log("Count 5: "+CountInt(TestArray, 5))
+	; sslBaseAnimation Animation = SexLab.GetAnimationByName("Bleagh Female Masturbation")
+	; string racekey = MiscUtil.GetRaceEditorID(SexLab.PlayerRef.GetLeveledActorBase().GetRace())+"F.0"
 
-	TestArray = PushInt(TestArray, 5)
-	Log("Pushed/Count 5: "+CountInt(TestArray, 5))
+	; Log("Anim: "+Animation.Name+" RaceKey: "+racekey)
 
-	TestArray = RemoveInt(TestArray, 5)
-	Log("Remove/Count 5: "+CountInt(TestArray, 5)+" -- "+TestArray)
+	; Log("Adjust 1(-0.33) : "+sslBaseAnimation._AdjustOffset("ProfileTest1.json", Animation.Registry, racekey, 1, 0, -0.33))
+	; Log("Adjust 2(0.21)  : "+sslBaseAnimation._AdjustOffset("ProfileTest1.json", Animation.Registry, racekey, 1, 1, 0.21))
+	; Log("Adjust 3(1.0)   : "+sslBaseAnimation._AdjustOffset("ProfileTest1.json", Animation.Registry, racekey, 2, 0, 1.0))
+	; Log("Adjust 4(-1.0)  : "+sslBaseAnimation._AdjustOffset("ProfileTest1.json", Animation.Registry, racekey, 3, 3, -1.0))
+	; sslBaseAnimation._SetAdjustment("ProfileTest1.json", Animation.Registry, racekey, 3, 0, 8008.135)
+	; if sslBaseAnimation._SaveProfile("ProfileTest1.json")
+	; 	Log("-- Saved Profile --")
+	; endIf
 
 
-	int[] TestArray2 = IntArray(30, 5)
-	Log("TestArray: "+TestArray)
-	Log("TestArray2: "+TestArray)
+	; Log("Keys: "+Animation.GetAdjustKeys())
 
-	int[] MergeArray = MergeIntArray(TestArray, TestArray2)
-	Log("MergeArray(dupes): "+MergeArray)
 
-	MergeArray = MergeIntArray(TestArray, TestArray2, true)
-	Log("MergeArray(remove): "+MergeArray)
+	; sslAnimationSlots AnimSlots = Game.GetFormFromFile(0x639DF, "SexLab.esm") as sslAnimationSlots
+
+	; Alias[] Objects = AliasArray(64)
+	; Log(Objects.Length+" : "+Objects)
+
+
+	; Log(AnimSlots+" Alias Count: "+AnimSlots.GetNumAliases())
+
+	; Alias Object = AnimSlots.GetNthAlias(0) as Alias
+	; Log("Object: "+Object)
+
+	; Objects = PushAlias(Objects, Object)
+	; Objects[0] = Object as Alias
+
+	; Log("Objects[0]: "+Objects[0])
+
+	; Log(Objects.Length+" : "+Objects)
+
+	; Log("--------")
+
+	; Objects = new Alias[128]
+	; Log(Objects.Length+" : "+Objects)
+
+
+	; Log(AnimSlots+" Alias Count: "+AnimSlots.GetNumAliases())
+
+	; Object = AnimSlots.GetNthAlias(0) as Alias
+	; Log("Object: "+Object)
+
+	; Objects[0] = Object as Alias
+
+	; Log("Objects[0]: "+Objects[0])
+
+	; Log(Objects.Length+" : "+Objects)
+
+	; Log("--------")
+
+	; string[] args = StringArray(10, "arg")
+	; Log("Join(,): "+StringJoin(args))
+	; Log("Join(-): "+StringJoin(args, "-"))
+	; Log("Join(-D-): "+StringJoin(args, "-D-"))
+
+	; string argstring = StringJoin(args)
+	; args = StringSplit(argstring)
+	; Log("Split(,): "+args.Length+" - "+args)
+
+	; argstring = StringJoin(args, "-D-")
+	; args = StringSplit(argstring, "-D-")
+	; Log("Split(-D-): "+args.Length+" - "+args)
+
+
+	; int[] TestArray = IntArray(30, 7)
+	; Log("TestArray: "+TestArray)
+
+	; int i = TestArray.Length
+	; while i
+	; 	i -= 1
+	; 	TestArray[i] = i
+	; endWhile
+
+
+	; Log("Indexed: "+TestArray)
+
+	; int[] SlicedArray = SliceIntArray(TestArray, 5, 10)
+	; Log("Slice 5-10: "+SlicedArray)
+
+	; SlicedArray = SliceIntArray(TestArray, 0, 10)
+	; Log("Slice 0-10: "+SlicedArray)
+
+	; SlicedArray = SliceIntArray(TestArray, 15)
+	; Log("Slice 15+: "+SlicedArray)
+
+	; SlicedArray = SliceIntArray(TestArray, 15, 40)
+	; Log("Slice 15-40: "+SlicedArray)
+
+	; SlicedArray = SliceIntArray(TestArray, 28)
+	; Log("Slice 28+: "+SlicedArray)
+
+	; SlicedArray = SliceIntArray(TestArray, 29)
+	; Log("Slice 29+: "+SlicedArray)
+
+	; SlicedArray = SliceIntArray(TestArray, 30)
+	; Log("Slice 30+: "+SlicedArray)
+
+	; SlicedArray = SliceIntArray(TestArray, 31)
+	; Log("Slice 31+: "+SlicedArray)
+
+	; SlicedArray = SliceIntArray(TestArray, 40, 20)
+	; Log("Slice 40-20: "+SlicedArray)
+
+
+	; Log("Count 5: "+CountInt(TestArray, 5))
+
+	; TestArray = PushInt(TestArray, 5)
+	; Log("Pushed/Count 5: "+CountInt(TestArray, 5))
+
+	; TestArray = RemoveInt(TestArray, 5)
+	; Log("Remove/Count 5: "+CountInt(TestArray, 5)+" -- "+TestArray)
+
+
+	; int[] TestArray2 = IntArray(30, 5)
+	; Log("TestArray: "+TestArray)
+	; Log("TestArray2: "+TestArray)
+
+	; int[] MergeArray = MergeIntArray(TestArray, TestArray2)
+	; Log("MergeArray(dupes): "+MergeArray)
+
+	; MergeArray = MergeIntArray(TestArray, TestArray2, true)
+	; Log("MergeArray(remove): "+MergeArray)
 
 	; float[] Arr = PapyrusUtil._FloatArray(6, 6.666)
 	; Log(Arr.Length + " - "+Arr)

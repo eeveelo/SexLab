@@ -6,9 +6,14 @@ function PreBenchmarkSetup()
 	Setup()
 endFunction
 
+string function Tester(bool signed, int value, int equals)
+	return ""
+endfunction
+
+
 state Test1
 	string function Label()
-		return ""
+		return "SKSE"
 	endFunction
 
 	string function Proof()
@@ -24,11 +29,15 @@ state Test1
 			nth -= 1
 			; START code to benchmark
 
+
+
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline
 	endFunction
 endState
+
+
 
 
 

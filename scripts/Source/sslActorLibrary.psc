@@ -180,7 +180,7 @@ int function ValidateActor(Actor ActorRef)
 		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They appear to already be animating")
 		return -10
 	elseIf FormListFind(Config, "ValidActors", ActorRef) != -1
-		; Log("ValidateActor("+BaseRef.GetName()+") -- TRUE -- Cache HIT")
+		; Log("ValidateActor("+BaseRef.GetName()+") -- TRUE -- HIT")
 		return 1
 	elseIf !CanAnimate(ActorRef)
 		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are forbidden from animating")
@@ -204,7 +204,7 @@ int function ValidateActor(Actor ActorRef)
 		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are a creature that is currently not supported ("+MiscUtil.GetRaceEditorID(BaseRef.GetRace())+")")
 		return -17
 	endIf
-	Log("ValidateActor("+BaseRef.GetName()+") -- TRUE -- Cache MISS")
+	Log("ValidateActor("+BaseRef.GetName()+") -- TRUE -- MISS")
 	FormListAdd(Config, "ValidActors", ActorRef, false)
 	return 1
 endFunction
@@ -248,19 +248,33 @@ function ClearForcedGender(Actor ActorRef)
 endFunction
 
 int function GetGender(Actor ActorRef)
-	ActorBase BaseRef = ActorRef.GetLeveledActorBase()
-	if SexLabUtil.HasRace(BaseRef.GetRace())
-		return 2 ; Creature
-	elseIf ActorRef.IsInFaction(GenderFaction)
-		return ActorRef.GetFactionRank(GenderFaction) ; Override
+	if ActorRef
+		ActorBase BaseRef = ActorRef.GetLeveledActorBase()
+		if SexLabUtil.HasRace(BaseRef.GetRace())
+			return 2;BaseRef.GetSex() + 2 ; Creatures: 2+
+		elseIf ActorRef.IsInFaction(GenderFaction)
+			return ActorRef.GetFactionRank(GenderFaction) ; Override
+		else
+			return BaseRef.GetSex() ; Default
+		endIf
 	endIf
-	return BaseRef.GetSex() ; Default
+	return -1 ; Invalid actor
+endFunction
+
+int[] function GetGendersAll(Actor[] Positions)
+	int i = Positions.Length
+	int[] Genders = Utility.CreateIntArray(i)
+	while i
+		i -= 1
+		Genders[i] = GetGender(Positions[i])
+	endWhile
+	return Genders
 endFunction
 
 int[] function GenderCount(Actor[] Positions)
 	int[] Genders = new int[3]
 	int i = Positions.Length
-	while i
+	while i > 0
 		i -= 1
 		int g = GetGender(Positions[i])
 		Genders[g] = Genders[g] + 1

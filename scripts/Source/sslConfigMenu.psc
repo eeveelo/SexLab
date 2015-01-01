@@ -766,6 +766,17 @@ bool IsCreatureEditor
 sslBaseAnimation Animation
 string AdjustKey
 int Position
+int SlotPage
+int SlotPageEnd
+
+sslAnimationSlots property AnimType hidden
+	sslAnimationSlots function get()
+		if IsCreatureEditor
+			return CreatureSlots
+		endIf
+		return AnimSlots
+	endfunction
+endProperty
 
 function AnimationEditor()
 	SetCursorFillMode(LEFT_TO_RIGHT)
@@ -792,6 +803,11 @@ function AnimationEditor()
 	; Check if editing a creature animation
 	IsCreatureEditor = Animation.IsCreature
 
+	; Set current pagination settings
+	SlotPage    = AnimType.FindPage(Animation.Registry)
+	SlotPageEnd = ((AnimType.Slotted as float / 125.0) as int) + 1
+
+	; Show editor options
 	SetTitleText(Animation.Name)
 	AddMenuOptionST("AnimationSelect", "$SSL_Animation", Animation.Name)
 	if Animation.PositionCount == 1 || (TargetRef && Animation.PositionCount == 2 && (!IsCreatureEditor || (IsCreatureEditor && Animation.HasActorRace(TargetRef))))
@@ -843,39 +859,65 @@ string function GenderLabel(string id)
 	return "$Unknown"
 endFunction
 
+string[] function _Pagination()
+	string[] Output
+	return Output
+endFunction
+
 state AnimationSelect
-	event OnMenuOpenST()
-		string[] Switch = new string[1]
+
+	string[] function _Pagination()
+		string[] Output = new string[1]
 		if IsCreatureEditor
-			Switch[0] = "$SSL_SwitchNormalAnimationEditor"
-			SetMenuDialogOptions(MergeStringArray(Switch, CreatureSlots.GetNames()))
-			SetMenuDialogStartIndex(CreatureSlots.Slots.Find(Animation))
+			Output[0] = "$SSL_SwitchNormalAnimationEditor"
 		else
-			Switch[0] = "$SSL_SwitchCreatureAnimationEditor"
-			SetMenuDialogOptions(MergeStringArray(Switch, AnimSlots.GetNames()))
-			SetMenuDialogStartIndex(AnimSlots.Slots.Find(Animation))
+			Output[0] = "$SSL_SwitchCreatureAnimationEditor"
 		endIf
+		int Slotted = AnimType.Slotted
+		if SlotPage < SlotPageEnd
+			Output = PapyrusUtil.PushString(Output, "NEXT PAGE =>")
+		endIf
+		if SlotPage > 1
+			Output = PapyrusUtil.PushString(Output, "<= PREVIOUS PAGE")
+		endIf
+		return Output
+	endfunction
+
+	event OnMenuOpenST()
+		string[] PageOptions = MergeStringArray(_Pagination(), AnimType.GetSlotNames(SlotPage))
+		SetMenuDialogOptions(PageOptions)
+		SetMenuDialogStartIndex(PageOptions.Find(Animation.Name))
 		SetMenuDialogDefaultIndex(0)
 	endEvent
+
 	event OnMenuAcceptST(int i)
 		AdjustKey = "Global"
 		Position  = 0
-		if IsCreatureEditor
-			if i >= CreatureSlots.Slotted ; Switch to normal animations
-				IsCreatureEditor = false
-				Animation = AnimSlots.GetBySlot(0)
-			else ; Get selected creature animation
-				Animation = CreatureSlots.GetBySlot(i)
+		string[] PageOptions = _Pagination()
+		int NumOptions     = PageOptions.Length
+		if i < PageOptions.Length
+			; Normal/Creature swap
+			if i == 0
+				if IsCreatureEditor
+					IsCreatureEditor = false
+					Animation = AnimSlots.GetBySlot(0)
+				else
+					IsCreatureEditor = true
+					Animation = CreatureSlots.GetBySlot(0)
+				endIf
+				SetMenuOptionValueST(Animation.Name)
+				ForcePageReset()
+				return
+			elseIf PageOptions[i] == "<= PREVIOUS PAGE"
+				SlotPage -= 1
+			elseIf PageOptions[i] == "NEXT PAGE =>"
+				SlotPage += 1
 			endIf
-		else
-			if i >= AnimSlots.Slotted ; Switch to creature animations
-				IsCreatureEditor = true
-				Animation = CreatureSlots.GetBySlot(0)
-			else ; Get selected actor animation
-				Animation = AnimSlots.GetBySlot(i)
-			endIf
+			i += 1
 		endIf
-
+		i -= PageOptions.Length
+		i += ((SlotPage - 1) * 125)
+		Animation = AnimType.GetBySlot(i)
 		SetMenuOptionValueST(Animation.Name)
 		ForcePageReset()
 	endEvent
@@ -894,7 +936,7 @@ endState
 
 state AnimationPosition
 	event OnMenuOpenST()
-		string[] Positions = StringArray(Animation.PositionCount)
+		string[] Positions = Utility.CreateStringArray(Animation.PositionCount)
 		int i = Positions.Length
 		while i
 			i -= 1
@@ -1000,7 +1042,7 @@ function ToggleAnimations()
 	endIf
 
 	int i
-	while i < Slotted
+	while i < Slotted && i < 125 ; TODO
 		if Slots[i].Registered
 			AddToggleOptionST("Animation_"+i, Slots[i].Name, GetToggle(Slots[i]))
 		endIf
@@ -2170,7 +2212,7 @@ endState
 state PlayerVoice
 	event OnMenuOpenST()
 		int i = VoiceSlots.Slotted
-		string[] VoiceNames = StringArray(i + 1)
+		string[] VoiceNames = Utility.CreateStringArray(i + 1)
 		VoiceNames[0] = "$SSL_Random"
 		while i
 			i -= 1
@@ -2201,7 +2243,7 @@ endState
 state TargetVoice
 	event OnMenuOpenST()
 		int i = VoiceSlots.Slotted
-		string[] VoiceNames = StringArray(i + 1)
+		string[] VoiceNames = Utility.CreateStringArray(i + 1)
 		VoiceNames[0] = "$SSL_Random"
 		while i
 			i -= 1

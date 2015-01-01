@@ -22,8 +22,6 @@ string function GetStringVer()
 	return SexLabUtil.GetStringVer()
 endFunction
 
-sslSystemConfig property Config auto
-
 bool property Enabled hidden
 	bool function get()
 		return GetState() != "Disabled"
@@ -35,6 +33,8 @@ bool property IsRunning hidden
 		return ThreadSlots.IsRunning()
 	endFunction
 endProperty
+
+sslSystemConfig property Config auto
 
 ;#---------------------------#
 ;#                           #
@@ -957,7 +957,6 @@ function Log(string Log, string Type = "NOTICE")
 	endIf
 endFunction
 
-
 auto state Disabled
 	sslThreadModel function NewThread(float TimeOut = 30.0)
 		Log("NewThread() - Failed to make new thread model; system is currently disabled or not installed", "FATAL")
@@ -983,13 +982,3 @@ state Enabled
 		ModEvent.Send(ModEvent.Create("SexLabEnabled"))
 	endEvent
 endState
-
-
-function TestHook(int tid, bool HasPlayer = false)
-	Debug.TraceAndBox("TestHook!\n"+tid+" - "+HasPlayer)
-	Log("TestHook!")
-	Log("tid["+tid+"]: "+GetController(tid))
-	Log("HasPlayer["+HasPlayer+"]")
-endFunction
-
-Actor[] property TestActors auto hidden

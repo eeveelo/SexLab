@@ -234,7 +234,7 @@ endFunction
 
 function _GetSkills(Actor ActorRef, float[] Output) global native
 float[] function GetSkills(Actor ActorRef) global
-	float[] Output = FloatArray(18)
+	float[] Output = new float[18]
 	_GetSkills(ActorRef, Output)
 	return Output
 endFunction

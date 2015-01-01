@@ -60,6 +60,7 @@ function StopAll()
 	int i = Slots.Length
 	while i
 		i -= 1
+		SexLabUtil.DebugLog("StopAll() check --", "Slots["+i+"]", true)
 		string SlotState = Slots[i].GetState()
 		if SlotState == "Making"
 			SexLabUtil.DebugLog("Making during StopAll - Initializing.", "Slots["+i+"]", true)
@@ -110,7 +111,7 @@ function Setup()
 		if Slots[i]
 			while Slots[i].IsStarting()
 				Log("Slots["+i+"] - "+Slots[i], "IsStarting()")
-				Utility.Wait(0.1)
+				Utility.WaitMenuMode(0.5)
 			endWhile
 			Slots[i].Stop()
 		else
@@ -123,12 +124,10 @@ function Setup()
 	while i
 		i -= 1
 		if Slots[i]
-			; Ensure quest isn't still stopping
 			while Slots[i].IsStopping()
 				Log("Slots["+i+"] - "+Slots[i], "IsStopping()")
-				Utility.Wait(0.1)
+				Utility.WaitMenuMode(0.5)
 			endWhile
-			; Setup thread once quest has started up
 			if Slots[i].Start()
 				Slots[i].SetTID(i)
 			else

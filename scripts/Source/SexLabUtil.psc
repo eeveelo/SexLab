@@ -172,4 +172,4 @@ bool function HasKeywordSub(form ObjRef, string LookFor) global native
 function PrintConsole(string output) global native
 
 
-bool function DumpForm(form obj) global native
+; bool function DumpForm(form obj) global native

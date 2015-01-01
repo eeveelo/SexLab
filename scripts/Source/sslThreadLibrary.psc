@@ -92,33 +92,35 @@ endFunction
 
 Actor[] function SortActors(Actor[] Positions, bool FemaleFirst = true)
 	int ActorCount = Positions.Length
-	if ActorCount < 2
-		return Positions ; Why reorder a single actor?
+	int Priority   = FemaleFirst as int
+	if ActorCount < 2 || (ActorCount == 2 && ActorLib.GetGender(Positions[0]) == Priority)
+		return Positions ; No need to sort actors.
 	endIf
-	int PriorityGender = (FemaleFirst as int)
-	Actor[] Sorted = PapyrusUtil.ActorArray(ActorCount)
-	int i
+	; Check first occurance of priority gender.
+	int[] Genders = ActorLib.GetGendersAll(Positions)
+	int i = Genders.Find(Priority)
+	if i == -1 ;|| (i == 0 && Genders.RFind(Priority) == 0)
+		return Positions ; Prefered gender not present
+	endIf
+	; Sort actors of priority gender into start of array
+	Actor[] Sorted
 	while i < ActorCount
-		; Fill actor into sorted array
-		Actor ActorRef = Positions[i]
-		Sorted[i] = ActorRef
-		; Check if actor is proper gender
-		if ActorLib.GetGender(ActorRef) != PriorityGender
-			int n = (i + 1)
-			while n < ActorCount
-				; Swap for actor who has correct gender
-				if ActorLib.GetGender(Positions[n]) == PriorityGender
-					Actor NextRef = Positions[n]
-					Sorted[i] = NextRef
-					Positions[i] = NextRef
-					Positions[n] = ActorRef
-					n = ActorCount
-				endIf
-				n += 1
-			endWhile
+		; Priority gender or last actor, just add them.
+		if Genders[i] == Priority
+			Genders[i] = -1
+			Sorted = PapyrusUtil.PushActor(Sorted, Positions[i])
+		endIf
+		i += 1
+	endwhile
+	; Insert remaining actors
+	i = 0
+	while i < ActorCount
+		if Genders[i] != -1
+			Sorted = PapyrusUtil.PushActor(Sorted, Positions[i])
 		endIf
 		i += 1
 	endWhile
+	; Return sorted actor array
 	return Sorted
 endFunction
 

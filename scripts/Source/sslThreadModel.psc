@@ -31,7 +31,12 @@ Actor property VictimRef auto hidden
 Actor property PlayerRef auto hidden
 
 ; Thread status
+; bool _HasPlayer
 bool property HasPlayer auto hidden
+; 	bool function get()
+; 		return _HasPlayer
+; 	endFunction
+; endProperty
 bool property AutoAdvance auto hidden
 bool property LeadIn auto hidden
 bool property FastEnd auto hidden
@@ -688,24 +693,19 @@ bool function HasTag(string Tag)
 endFunction
 
 bool function AddTag(string Tag)
-	if HasTag(Tag) || Tag == ""
-		return false
-	endIf
-	int i = Tags.Find(Tag)
-	if i == -1
+	if Tag != "" && Tags.Find(Tag) == -1
 		Tags = PapyrusUtil.PushString(Tags, Tag)
-	else
-		Tags[i] = Tag
+		return true
 	endIf
-	return true
+	return false
 endFunction
 
 bool function RemoveTag(string Tag)
-	if !HasTag(Tag) || Tag == ""
-		return false
+	if Tag != "" && Tags.Find(Tag) != -1
+		Tags = PapyrusUtil.RemoveString(Tags, Tag)
+		return true
 	endIf
-	Tags[Tags.Find(Tag)] = ""
-	return true
+	return false
 endFunction
 
 bool function ToggleTag(string Tag)
@@ -892,11 +892,11 @@ endFunction
 function Initialize()
 	UnregisterForUpdate()
 	; Clear aliases
-	ActorAlias[0].GoToState("")
-	ActorAlias[1].GoToState("")
-	ActorAlias[2].GoToState("")
-	ActorAlias[3].GoToState("")
-	ActorAlias[4].GoToState("")
+	; ActorAlias[0].GoToState("")
+	; ActorAlias[1].GoToState("")
+	; ActorAlias[2].GoToState("")
+	; ActorAlias[3].GoToState("")
+	; ActorAlias[4].GoToState("")
 	ActorAlias[0].ClearAlias()
 	ActorAlias[1].ClearAlias()
 	ActorAlias[2].ClearAlias()
@@ -932,10 +932,11 @@ function Initialize()
 	SkillXP        = new float[6]
 	SkillBonus     = new float[6]
 	; Storage Data
-	Positions         = PapyrusUtil.ActorArray(0)
-	Hooks             = PapyrusUtil.StringArray(0)
-	Tags              = PapyrusUtil.StringArray(0)
-	CustomTimers      = PapyrusUtil.FloatArray(0)
+	Actor[] aDel
+	Positions         = aDel
+	Hooks             = Utility.CreateStringArray(0)
+	Tags              = Utility.CreateStringArray(0)
+	CustomTimers      = Utility.CreateFloatArray(0)
 	CustomAnimations  = sslUtility.AnimationArray(0)
 	PrimaryAnimations = sslUtility.AnimationArray(0)
 	LeadAnimations    = sslUtility.AnimationArray(0)
@@ -981,60 +982,56 @@ sslActorAlias function PickAlias(Actor ActorRef)
 endFunction
 
 function SetTID(int id)
+	thread_id = id
+	PlayerRef = Game.GetPlayer()
+
 	; Reset function Libraries - SexLabQuestFramework
-	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
-	if SexLabQuestFramework
-		Config    = SexLabQuestFramework as sslSystemConfig
-		ThreadLib = SexLabQuestFramework as sslThreadLibrary
-		ActorLib  = SexLabQuestFramework as sslActorLibrary
+	if !Config || !ThreadLib || !ActorLib
+		Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
+		if SexLabQuestFramework
+			Config    = SexLabQuestFramework as sslSystemConfig
+			ThreadLib = SexLabQuestFramework as sslThreadLibrary
+			ActorLib  = SexLabQuestFramework as sslActorLibrary
+		endIf
 	endIf
 	; Reset secondary object registry - SexLabQuestRegistry
-	Form SexLabQuestRegistry = Game.GetFormFromFile(0x664FB, "SexLab.esm")
-	if SexLabQuestRegistry
-		CreatureSlots = SexLabQuestRegistry as sslCreatureAnimationSlots
+	if !CreatureSlots
+		Form SexLabQuestRegistry = Game.GetFormFromFile(0x664FB, "SexLab.esm")
+		if SexLabQuestRegistry
+			CreatureSlots = SexLabQuestRegistry as sslCreatureAnimationSlots
+		endIf
 	endIf
 	; Reset animation registry - SexLabQuestAnimations
-	Form SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm")
-	if SexLabQuestAnimations
-		AnimSlots = SexLabQuestAnimations as sslAnimationSlots
+	if !AnimSlots
+		Form SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm")
+		if SexLabQuestAnimations
+			AnimSlots = SexLabQuestAnimations as sslAnimationSlots
+		endIf
 	endIf
 
-	; Reset script status
-	if Start()
-		thread_id = id
-		PlayerRef = Game.GetPlayer()
-		Log("Start...", "Setup")
+	; Init thread info
+	EventTypes = new string[5]
+	EventTypes[0] = "Sync"
+	EventTypes[1] = "Prepare"
+	EventTypes[2] = "Reset"
+	EventTypes[3] = "Strip"
+	EventTypes[4] = "Orgasm"
 
-		Debug.Trace("DEBUG TMP - Config: "+Config)
-		Debug.Trace("DEBUG TMP - CreatureSlots: "+CreatureSlots)
-		Debug.Trace("DEBUG TMP - AnimSlots: "+AnimSlots)
+	ActorAlias = new sslActorAlias[5]
+	ActorAlias[0] = GetNthAlias(0) as sslActorAlias
+	ActorAlias[1] = GetNthAlias(1) as sslActorAlias
+	ActorAlias[2] = GetNthAlias(2) as sslActorAlias
+	ActorAlias[3] = GetNthAlias(3) as sslActorAlias
+	ActorAlias[4] = GetNthAlias(4) as sslActorAlias
 
-		; Init thread info
-		EventTypes = new string[5]
-		EventTypes[0] = "Sync"
-		EventTypes[1] = "Prepare"
-		EventTypes[2] = "Reset"
-		EventTypes[3] = "Strip"
-		EventTypes[4] = "Orgasm"
+	ActorAlias[0].Setup()
+	ActorAlias[1].Setup()
+	ActorAlias[2].Setup()
+	ActorAlias[3].Setup()
+	ActorAlias[4].Setup()
 
-		ActorAlias = new sslActorAlias[5]
-		ActorAlias[0] = GetNthAlias(0) as sslActorAlias
-		ActorAlias[1] = GetNthAlias(1) as sslActorAlias
-		ActorAlias[2] = GetNthAlias(2) as sslActorAlias
-		ActorAlias[3] = GetNthAlias(3) as sslActorAlias
-		ActorAlias[4] = GetNthAlias(4) as sslActorAlias
-
-		ActorAlias[0].Setup()
-		ActorAlias[1].Setup()
-		ActorAlias[2].Setup()
-		ActorAlias[3].Setup()
-		ActorAlias[4].Setup()
-
-		Initialize()
-		Log("DONE!", "Setup")
-	else
-		Log("QUEST START FAILED!", "FATAL")
-	endIf
+	Initialize()
+	Log(self, "Setup()")
 endFunction
 
 ; ------------------------------------------------------- ;

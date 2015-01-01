@@ -79,17 +79,107 @@ function LoadAnimations()
 	RegisterAnimation("ZynFemdom")
 	RegisterAnimation("ZynFourWay")
 	RegisterAnimation("DarkInvestigationsThreesome")
+	; TEMP
+	RegisterAnimation("ExtraTMP1")
+	RegisterAnimation("ExtraTMP2")
+	RegisterAnimation("ExtraTMP3")
+	RegisterAnimation("ExtraTMP4")
+	RegisterAnimation("ExtraTMP5")
+	RegisterAnimation("ExtraTMP6")
+	RegisterAnimation("ExtraTMP7")
+	RegisterAnimation("ExtraTMP8")
+	RegisterAnimation("ExtraTMP9")
+	RegisterAnimation("ExtraTMP10")
+	RegisterAnimation("ExtraTMP11")
+	RegisterAnimation("ExtraTMP12")
+	RegisterAnimation("ExtraTMP13")
+	RegisterAnimation("ExtraTMP14")
+	RegisterAnimation("ExtraTMP15")
+	RegisterAnimation("ExtraTMP16")
+	RegisterAnimation("ExtraTMP17")
+	RegisterAnimation("ExtraTMP18")
+	RegisterAnimation("ExtraTMP19")
+	RegisterAnimation("ExtraTMP20")
+	RegisterAnimation("ExtraTMP21")
+	RegisterAnimation("ExtraTMP22")
+	RegisterAnimation("ExtraTMP23")
+	RegisterAnimation("ExtraTMP24")
+	RegisterAnimation("ExtraTMP25")
+	RegisterAnimation("ExtraTMP26")
+	RegisterAnimation("ExtraTMP27")
+	RegisterAnimation("ExtraTMP28")
+	RegisterAnimation("ExtraTMP29")
+	RegisterAnimation("ExtraTMP30")
+	RegisterAnimation("ExtraTMP31")
+	RegisterAnimation("ExtraTMP32")
+	RegisterAnimation("ExtraTMP33")
+	RegisterAnimation("ExtraTMP34")
+	RegisterAnimation("ExtraTMP35")
+	RegisterAnimation("ExtraTMP36")
+	RegisterAnimation("ExtraTMP37")
+	RegisterAnimation("ExtraTMP38")
+	RegisterAnimation("ExtraTMP39")
+	RegisterAnimation("ExtraTMP40")
+	RegisterAnimation("ExtraTMP41")
+	RegisterAnimation("ExtraTMP42")
+	RegisterAnimation("ExtraTMP43")
+	RegisterAnimation("ExtraTMP44")
+	RegisterAnimation("ExtraTMP45")
+	RegisterAnimation("ExtraTMP46")
+	RegisterAnimation("ExtraTMP47")
+	RegisterAnimation("ExtraTMP48")
+	RegisterAnimation("ExtraTMP49")
+	RegisterAnimation("ExtraTMP50")
+	RegisterAnimation("ExtraTMP51")
+	RegisterAnimation("ExtraTMP52")
+	RegisterAnimation("ExtraTMP53")
+	RegisterAnimation("ExtraTMP54")
+	RegisterAnimation("ExtraTMP55")
+	RegisterAnimation("ExtraTMP56")
+	RegisterAnimation("ExtraTMP57")
+	RegisterAnimation("ExtraTMP58")
+	RegisterAnimation("ExtraTMP59")
+	RegisterAnimation("ExtraTMP60")
+	RegisterAnimation("ExtraTMP61")
+	RegisterAnimation("ExtraTMP62")
+	RegisterAnimation("ExtraTMP63")
+	RegisterAnimation("ExtraTMP64")
+	RegisterAnimation("ExtraTMP65")
+	RegisterAnimation("ExtraTMP66")
+	RegisterAnimation("ExtraTMP67")
+	RegisterAnimation("ExtraTMP68")
+	RegisterAnimation("ExtraTMP69")
+	RegisterAnimation("ExtraTMP70")
+	RegisterAnimation("ExtraTMP71")
+	RegisterAnimation("ExtraTMP72")
+	RegisterAnimation("ExtraTMP73")
+	RegisterAnimation("ExtraTMP74")
+	RegisterAnimation("ExtraTMP75")
+	RegisterAnimation("ExtraTMP76")
+	RegisterAnimation("ExtraTMP77")
+	RegisterAnimation("ExtraTMP78")
+	RegisterAnimation("ExtraTMP79")
+	RegisterAnimation("ExtraTMP80")
+	RegisterAnimation("ExtraTMP81")
+	RegisterAnimation("ExtraTMP82")
+	RegisterAnimation("ExtraTMP83")
+	RegisterAnimation("ExtraTMP84")
+	RegisterAnimation("ExtraTMP85")
+	RegisterAnimation("ExtraTMP86")
+	RegisterAnimation("ExtraTMP87")
+	RegisterAnimation("ExtraTMP88")
+	RegisterAnimation("ExtraTMP89")
+	RegisterAnimation("ExtraTMP90")
+	RegisterAnimation("ExtraTMP91")
 endFunction
 
 function ArrokBlowjob(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Arrok Blowjob"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Sucking
 
-	int a1 = Base.AddPosition(Female, addCum=Oral)
+	int a1 = Base.AddPosition(Female, Oral)
 	Base.AddPositionStage(a1, "Arrok_Blowjob_A1_S1", 0, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "Arrok_Blowjob_A1_S2", 0, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "Arrok_Blowjob_A1_S2", 0, silent = true, openMouth = true)
@@ -118,9 +208,8 @@ function ArrokBoobjob(int id)
 
 	Base.Name = "Arrok Boobjob"
 
-	Base.SetContent(Sexual)
 
-	int a1 = Base.AddPosition(Female, addCum=Oral)
+	int a1 = Base.AddPosition(Female, Oral)
 	Base.AddPositionStage(a1, "Arrok_Boobjob_A1_S1", 0)
 	Base.AddPositionStage(a1, "Arrok_Boobjob_A1_S2", 0)
 	Base.AddPositionStage(a1, "Arrok_Boobjob_A1_S3", 0)
@@ -148,11 +237,9 @@ function ArrokCowgirl(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Arrok Cowgirl"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	int a1 = Base.AddPosition(Female, VaginalAnal)
 	Base.AddPositionStage(a1, "Arrok_Cowgirl_A1_S1", 0)
 	Base.AddPositionStage(a1, "Arrok_Cowgirl_A1_S2", 0)
 	Base.AddPositionStage(a1, "Arrok_Cowgirl_A1_S3", 0)
@@ -187,11 +274,9 @@ function ArrokDevilsThreeway(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Arrok Devils Threeway"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = SexMix
 
-	int a1 = Base.AddPosition(Female, addCum=VaginalOralAnal)
+	int a1 = Base.AddPosition(Female, VaginalOralAnal)
 	Base.AddPositionStage(a1, "Arrok_DevilsThreeway_A1_S1", 0, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "Arrok_DevilsThreeway_A1_S2", 0, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "Arrok_DevilsThreeway_A1_S3", 0, silent = true, openMouth = true)
@@ -227,11 +312,9 @@ function ArrokDoggyStyle(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Arrok DoggyStyle"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Anal)
+	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "Arrok_DoggyStyle_A1_S1", 0)
 	Base.AddPositionStage(a1, "Arrok_DoggyStyle_A1_S2", 0)
 	Base.AddPositionStage(a1, "Arrok_DoggyStyle_A1_S3", 0)
@@ -258,7 +341,6 @@ function ArrokForeplay(int id)
 
 	Base.Name = "Arrok Foreplay"
 
-	Base.SetContent(Foreplay)
 
 	int a1 = Base.AddPosition(Female)
 	Base.AddPositionStage(a1, "Arrok_Foreplay_A1_S1", 0)
@@ -288,11 +370,9 @@ function ArrokLegUp(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Arrok Leg Up Fuck"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	int a1 = Base.AddPosition(Female, VaginalAnal)
 	Base.AddPositionStage(a1, "Arrok_LegUp_A1_S1", 0)
 	Base.AddPositionStage(a1, "Arrok_LegUp_A1_S2", 0)
 	Base.AddPositionStage(a1, "Arrok_LegUp_A1_S3", 0)
@@ -323,7 +403,6 @@ function ArrokMaleMasturbation(int id)
 
 	Base.Name = "Arrok Male Masturbation"
 
-	Base.SetContent(Sexual)
 
 	int a1 = Base.AddPosition(Male)
 	Base.AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S1", 0, sos = 3)
@@ -344,11 +423,9 @@ function ArrokMissionary(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Arrok Missionary"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	int a1 = Base.AddPosition(Female, Vaginal)
 	Base.AddPositionStage(a1, "Arrok_Missionary_A1_S1", 0)
 	Base.AddPositionStage(a1, "Arrok_Missionary_A1_S2", 0)
 	Base.AddPositionStage(a1, "Arrok_Missionary_A1_S3", 0)
@@ -375,11 +452,9 @@ function ArrokOral(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Arrok 69"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = SexMix
 
-	int a1 = Base.AddPosition(Female, addCum=Oral)
+	int a1 = Base.AddPosition(Female, Oral)
 	Base.AddPositionStage(a1, "Arrok_Oral_A1_S1", 0)
 	Base.AddPositionStage(a1, "Arrok_Oral_A1_S2", 0)
 	Base.AddPositionStage(a1, "Arrok_Oral_A1_S3", 0, silent = true, openMouth = true)
@@ -411,11 +486,9 @@ function ArrokReverseCowgirl(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Arrok Reverse Cowgirl"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	int a1 = Base.AddPosition(Female, VaginalAnal)
 	Base.AddPositionStage(a1, "Arrok_ReverseCowgirl_A1_S1", 0)
 	Base.AddPositionStage(a1, "Arrok_ReverseCowgirl_A1_S2", 0)
 	Base.AddPositionStage(a1, "Arrok_ReverseCowgirl_A1_S3", 0)
@@ -442,11 +515,9 @@ function ArrokSideways(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Arrok Sideways Fuck"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	int a1 = Base.AddPosition(Female, VaginalAnal)
 	Base.AddPositionStage(a1, "Arrok_Sideways_A1_S1", 0)
 	Base.AddPositionStage(a1, "Arrok_Sideways_A1_S2", 0)
 	Base.AddPositionStage(a1, "Arrok_Sideways_A1_S3", 0)
@@ -474,11 +545,9 @@ function ArrokStanding(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Arrok Standing Fuck"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	int a1 = Base.AddPosition(Female, VaginalAnal)
 	Base.AddPositionStage(a1, "Arrok_Standing_A1_S1", 0)
 	Base.AddPositionStage(a1, "Arrok_Standing_A1_S2", 0)
 	Base.AddPositionStage(a1, "Arrok_Standing_A1_S3", 0)
@@ -506,7 +575,6 @@ function ArrokStandingForeplay(int id)
 
 	Base.Name = "Arrok Standing Foreplay"
 
-	Base.SetContent(Foreplay)
 
 	int a1 = Base.AddPosition(Female)
 	Base.AddPositionStage(a1, "Arrok_StandingForeplay_A1_S1", 0, silent = true)
@@ -536,17 +604,15 @@ function ArrokTricycle(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Arrok Tricycle"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = SexMix
 
-	int a1 = Base.AddPosition(Female, addCum=Oral)
+	int a1 = Base.AddPosition(Female, Oral)
 	Base.AddPositionStage(a1, "Arrok_Tricycle_A1_S1", -1, up = 2, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "Arrok_Tricycle_A1_S2", 0)
 	Base.AddPositionStage(a1, "Arrok_Tricycle_A1_S3", 0)
 	Base.AddPositionStage(a1, "Arrok_Tricycle_A1_S4", 1, side = 2.5, up = 3, silent = true, openMouth = true)
 
-	int a2 = Base.AddPosition(Female, addCum=Oral)
+	int a2 = Base.AddPosition(Female, Oral)
 	Base.AddPositionStage(a2, "Arrok_Tricycle_A2_S1", -100)
 	Base.AddPositionStage(a2, "Arrok_Tricycle_A2_S2", -100)
 	Base.AddPositionStage(a2, "Arrok_Tricycle_A2_S3", -100.5, silent = true, openMouth = true)
@@ -578,11 +644,9 @@ function ArrokHugFuck(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Arrok HugFuck"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	int a1 = Base.AddPosition(Female, Vaginal)
 	Base.AddPositionStage(a1, "Arrok_Hugfuck_A1_S1", 0)
 	Base.AddPositionStage(a1, "Arrok_Hugfuck_A1_S2", 0)
 	Base.AddPositionStage(a1, "Arrok_Hugfuck_A1_S3", 0)
@@ -610,8 +674,6 @@ function ArrokLesbian(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Arrok Lesbian"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
 	int a1 = Base.AddPosition(Female)
@@ -641,7 +703,6 @@ function ArrokSittingForeplay(int id)
 
 	Base.Name = "Arrok Sitting Foreplay"
 
-	Base.SetContent(Foreplay)
 
 	int a1 = Base.AddPosition(Female)
 	Base.AddPositionStage(a1, "Arrok_SittingForeplay_A1_S1", 0)
@@ -671,11 +732,9 @@ function ArrokAnal(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Arrok Anal"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Anal)
+	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "Arrok_Anal_A1_S1", 0)
 	Base.AddPositionStage(a1, "Arrok_Anal_A1_S2", 0)
 	Base.AddPositionStage(a1, "Arrok_Anal_A1_S3", 0)
@@ -702,11 +761,9 @@ function ArrokRape(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Arrok Rape"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Oral)
+	int a1 = Base.AddPosition(Female, Oral)
 	Base.AddPositionStage(a1, "Arrok_Rape_A1_S1", 0)
 	Base.AddPositionStage(a1, "Arrok_Rape_A1_S2", 0)
 	Base.AddPositionStage(a1, "Arrok_Rape_A1_S3", 0)
@@ -735,11 +792,9 @@ function ArrokLedgeBlowjob(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Arrok Bed Blowjob"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Sucking
 
-	int a1 = Base.AddPosition(Female, addCum=Oral)
+	int a1 = Base.AddPosition(Female, Oral)
 	Base.AddPositionStage(a1, "Arrok_LedgeBlowjob_A1_S1", 0)
 	Base.AddPositionStage(a1, "Arrok_LedgeBlowjob_A1_S2", 0)
 	Base.AddPositionStage(a1, "Arrok_LedgeBlowjob_A1_S3", 0)
@@ -771,12 +826,10 @@ function SexLabAggrBehind(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Rough Behind"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
 
-	int a1 = Base.AddPosition(Female, addCum=Anal)
+	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "AggrBehind_A1_S1", 0)
 	Base.AddPositionStage(a1, "AggrBehind_A1_S2", 0)
 	Base.AddPositionStage(a1, "AggrBehind_A1_S3", 0)
@@ -803,11 +856,9 @@ function SexLabAggrDoggyStyle(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Rough Doggy Style"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Anal)
+	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "AggrDoggyStyle_A1_S1", 0)
 	Base.AddPositionStage(a1, "AggrDoggyStyle_A1_S2", 0)
 	Base.AddPositionStage(a1, "AggrDoggyStyle_A1_S3", 0)
@@ -835,11 +886,9 @@ function SexLabAggrMissionary(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Rough Missionary"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	int a1 = Base.AddPosition(Female, VaginalAnal)
 	Base.AddPositionStage(a1, "AggrMissionary_A1_S1", 0)
 	Base.AddPositionStage(a1, "AggrMissionary_A1_S2", 0)
 	Base.AddPositionStage(a1, "AggrMissionary_A1_S3", 0)
@@ -868,9 +917,8 @@ function SexLabBoobjob(int id)
 
 	Base.Name = "Boobjob"
 
-	Base.SetContent(Sexual)
 
-	int a1 = Base.AddPosition(Female, addCum=Oral)
+	int a1 = Base.AddPosition(Female, Oral)
 	Base.AddPositionStage(a1, "Boobjob_A1_S1", 0)
 	Base.AddPositionStage(a1, "Boobjob_A1_S2", 0)
 	Base.AddPositionStage(a1, "Boobjob_A1_S3", 0)
@@ -896,11 +944,9 @@ function SexLabDoggyStyle(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Doggy Style"
-
 	Base.SoundFX = Squishing
-	Base.SetContent(Sexual)
 
-	int a1 = Base.AddPosition(Female, addCum=Anal)
+	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "DoggyStyle_A1_S1", 0)
 	Base.AddPositionStage(a1, "DoggyStyle_A1_S2", 0)
 	Base.AddPositionStage(a1, "DoggyStyle_A1_S3", 0)
@@ -925,11 +971,9 @@ function SexLabHuggingSex(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Hugging Fuck"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	int a1 = Base.AddPosition(Female, Vaginal)
 	Base.AddPositionStage(a1, "HuggingSex_A1_S1", 0)
 	Base.AddPositionStage(a1, "HuggingSex_A1_S2", 0)
 	Base.AddPositionStage(a1, "HuggingSex_A1_S3", 0)
@@ -955,11 +999,9 @@ function SexLabMissionary(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Missionary"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	int a1 = Base.AddPosition(Female, Vaginal)
 	Base.AddPositionStage(a1, "Missionary_A1_S1", 0)
 	Base.AddPositionStage(a1, "Missionary_A1_S2", 0)
 	Base.AddPositionStage(a1, "Missionary_A1_S3", 0)
@@ -985,11 +1027,9 @@ function SexLabReverseCowgirl(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Reverse Cowgirl"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	int a1 = Base.AddPosition(Female, VaginalAnal)
 	Base.AddPositionStage(a1, "ReverseCowgirl_A1_S1", 0)
 	Base.AddPositionStage(a1, "ReverseCowgirl_A1_S2", 0)
 	Base.AddPositionStage(a1, "ReverseCowgirl_A1_S3", 0)
@@ -1015,11 +1055,9 @@ function SexLabSideways(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Sideways Fuck"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	int a1 = Base.AddPosition(Female, VaginalAnal)
 	Base.AddPositionStage(a1, "Sideways_A1_S1", 0)
 	Base.AddPositionStage(a1, "Sideways_A1_S2", 0)
 	Base.AddPositionStage(a1, "Sideways_A1_S3", 0)
@@ -1045,11 +1083,9 @@ function SexLabStanding(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Standing Fuck"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Anal)
+	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "Standing_A1_S1", 0)
 	Base.AddPositionStage(a1, "Standing_A1_S2", 0)
 	Base.AddPositionStage(a1, "Standing_A1_S3", 0)
@@ -1075,8 +1111,6 @@ function SexLabTribadism(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Tribadism"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
 	int a1 = Base.AddPosition(Female)
@@ -1103,9 +1137,8 @@ function BleaghFootJob(int id)
 
 	Base.Name = "Bleagh FootJob"
 
-	Base.SetContent(Sexual)
 
-	int a1 = Base.AddPosition(Female, addCum=Anal)
+	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "Bleagh_FootJob_A1_S1", 0)
 	Base.AddPositionStage(a1, "Bleagh_FootJob_A1_S2", 0)
 	Base.AddPositionStage(a1, "Bleagh_FootJob_A1_S3", 0)
@@ -1133,8 +1166,6 @@ function BleaghFemaleSolo(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Bleagh Female Masturbation"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
 	int a1 = Base.AddPosition(Female)
@@ -1156,11 +1187,9 @@ function APAnal(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "AP Anal"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Anal)
+	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "AP_Anal_A1_S1", 0)
 	Base.AddPositionStage(a1, "AP_Anal_A1_S2", 0)
 	Base.AddPositionStage(a1, "AP_Anal_A1_S3", 0)
@@ -1189,11 +1218,9 @@ function APBedMissionary(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "AP Bed Missionary"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	int a1 = Base.AddPosition(Female, Vaginal)
 	Base.AddPositionStage(a1, "AP_BedMissionary_A1_S1", 0)
 	Base.AddPositionStage(a1, "AP_BedMissionary_A1_S2", 0)
 	Base.AddPositionStage(a1, "AP_BedMissionary_A1_S3", 0)
@@ -1223,11 +1250,9 @@ function APBlowjob(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "AP Blowjob"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Sucking
 
-	int a1 = Base.AddPosition(Female, addCum=Oral)
+	int a1 = Base.AddPosition(Female, Oral)
 	Base.AddPositionStage(a1, "AP_Blowjob_A1_S1", 0, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "AP_Blowjob_A1_S2", 0, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "AP_Blowjob_A1_S3", 0, silent = true, openMouth = true)
@@ -1259,9 +1284,8 @@ function APBoobjob(int id)
 
 	Base.Name = "AP Boobjob"
 
-	Base.SetContent(Sexual)
 
-	int a1 = Base.AddPosition(Female, addCum=Oral)
+	int a1 = Base.AddPosition(Female, Oral)
 	Base.AddPositionStage(a1, "AP_Boobjob_A1_S1", 0)
 	Base.AddPositionStage(a1, "AP_Boobjob_A1_S2", 0)
 	Base.AddPositionStage(a1, "AP_Boobjob_A1_S3", 0)
@@ -1291,11 +1315,9 @@ function APCowgirl(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "AP Cowgirl"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	int a1 = Base.AddPosition(Female, VaginalAnal)
 	Base.AddPositionStage(a1, "AP_Cowgirl_A1_S1", 0)
 	Base.AddPositionStage(a1, "AP_Cowgirl_A1_S2", 0)
 	Base.AddPositionStage(a1, "AP_Cowgirl_A1_S3", 0)
@@ -1326,8 +1348,6 @@ function APFemaleSolo(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "AP Female Masturbation"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
 	int a1 = Base.AddPosition(Female)
@@ -1350,8 +1370,6 @@ function APFisting(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "AP Fisting"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
 	int a1 = Base.AddPosition(Female)
@@ -1386,9 +1404,8 @@ function APHandjob(int id)
 
 	Base.Name = "AP Handjob"
 
-	Base.SetContent(Sexual)
 
-	int a1 = Base.AddPosition(Female, addCum=Oral)
+	int a1 = Base.AddPosition(Female, Oral)
 	Base.AddPositionStage(a1, "AP_Handjob_A1_S1", 0, up = 0.5, silent = true)
 	Base.AddPositionStage(a1, "AP_Handjob_A1_S2", 0, up = 0.5, silent = true)
 	Base.AddPositionStage(a1, "AP_Handjob_A1_S3", 0, up = 0.5, silent = true)
@@ -1417,11 +1434,9 @@ function APKneelBlowjob(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "AP Kneeling Blowjob"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Sucking
 
-	int a1 = Base.AddPosition(Female, addCum=Oral)
+	int a1 = Base.AddPosition(Female, Oral)
 	Base.AddPositionStage(a1, "AP_KneelBlowjob_A1_S1", 0, up = 1, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "AP_KneelBlowjob_A1_S2", 0, up = 1, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "AP_KneelBlowjob_A1_S3", 0, up = 1, silent = true, openMouth = true)
@@ -1452,11 +1467,9 @@ function APLegUp(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "AP Leg Up Fuck"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	int a1 = Base.AddPosition(Female, Vaginal)
 	Base.AddPositionStage(a1, "AP_LegUp_A1_S1", 0)
 	Base.AddPositionStage(a1, "AP_LegUp_A1_S2", 0)
 	Base.AddPositionStage(a1, "AP_LegUp_A1_S3", 0)
@@ -1485,11 +1498,9 @@ function APShoulder(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "AP Shoulder"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	int a1 = Base.AddPosition(Female, VaginalAnal)
 	Base.AddPositionStage(a1, "AP_Shoulder_A1_S1", 0)
 	Base.AddPositionStage(a1, "AP_Shoulder_A1_S2", 0)
 	Base.AddPositionStage(a1, "AP_Shoulder_A1_S3", 0)
@@ -1517,11 +1528,9 @@ function APStandBlowjob(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "AP Standing Blowjob"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Sucking
 
-	int a1 = Base.AddPosition(Female, addCum=Oral)
+	int a1 = Base.AddPosition(Female, Oral)
 	Base.AddPositionStage(a1, "AP_StandBlowjob_A1_S1", 0, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "AP_StandBlowjob_A1_S2", 0, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "AP_StandBlowjob_A1_S3", 0, silent = true, openMouth = true)
@@ -1552,11 +1561,9 @@ function APStanding(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "AP Standing"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	int a1 = Base.AddPosition(Female, Vaginal)
 	Base.AddPositionStage(a1, "AP_Standing_A1_S1", 0)
 	Base.AddPositionStage(a1, "AP_Standing_A1_S2", 0)
 	Base.AddPositionStage(a1, "AP_Standing_A1_S3", 0)
@@ -1584,11 +1591,9 @@ function APDoggyStyle(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "AP DoggyStyle"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Anal)
+	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "AP_DoggyStyle_A1_S1", 0)
 	Base.AddPositionStage(a1, "AP_DoggyStyle_A1_S2", 0)
 	Base.AddPositionStage(a1, "AP_DoggyStyle_A1_S3", 0)
@@ -1617,11 +1622,9 @@ function APHoldLegUp(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "AP Holding Leg Up"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	int a1 = Base.AddPosition(Female, Vaginal)
 	Base.AddPositionStage(a1, "AP_HoldLegUp_A1_S1", 0)
 	Base.AddPositionStage(a1, "AP_HoldLegUp_A1_S2", 0)
 	Base.AddPositionStage(a1, "AP_HoldLegUp_A1_S3", 0)
@@ -1651,11 +1654,9 @@ function APFaceDown(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "AP Face Down Anal"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Anal)
+	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "AP_FaceDown_A1_S1", 0)
 	Base.AddPositionStage(a1, "AP_FaceDown_A1_S2", 0)
 	Base.AddPositionStage(a1, "AP_FaceDown_A1_S3", 0)
@@ -1685,11 +1686,9 @@ function APSkullFuck(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "AP Skull Fuck"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Sucking
 
-	int a1 = Base.AddPosition(Female, addCum=Oral)
+	int a1 = Base.AddPosition(Female, Oral)
 	Base.AddPositionStage(a1, "AP_SkullFuck_A1_S1", 0, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "AP_SkullFuck_A1_S2", 0, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "AP_SkullFuck_A1_S3", 0, silent = true, openMouth = true)
@@ -1721,11 +1720,9 @@ function ZynRoughStanding(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Zyn Rough Standing"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Sucking
 
-	int a1 = Base.AddPosition(Female, addCum=VaginalOral)
+	int a1 = Base.AddPosition(Female, VaginalOral)
 	Base.AddPositionStage(a1, "Zyn_RoughStanding_A1_S1", 0)
 	Base.AddPositionStage(a1, "Zyn_RoughStanding_A1_S2", silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "Zyn_RoughStanding_A1_S3", 0)
@@ -1754,11 +1751,9 @@ function ZynLesbian(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Zyn Lesbian"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	int a1 = Base.AddPosition(Female, Vaginal)
 	Base.AddPositionStage(a1, "Zyn_Lesbian_A1_S1", 0, silent = true)
 	Base.AddPositionStage(a1, "Zyn_Lesbian_A1_S2", 0)
 	Base.AddPositionStage(a1, "Zyn_Lesbian_A1_S3", 0)
@@ -1785,8 +1780,6 @@ function ZynLicking(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Zyn Licking"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = SexMix
 
 	int a1 = Base.AddPosition(Female)
@@ -1817,11 +1810,9 @@ function ZynDoublePenetration(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Zyn Double Penetration"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = SexMix
 
-	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	int a1 = Base.AddPosition(Female, VaginalAnal)
 	Base.AddPositionStage(a1, "Zyn_DoublePenetration_A2_S1", 100)
 	Base.AddPositionStage(a1, "Zyn_DoublePenetration_A2_S2", 100)
 	Base.AddPositionStage(a1, "Zyn_DoublePenetration_A2_S3", 100)
@@ -1855,8 +1846,6 @@ function ZynFemdom(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Zyn FemDom"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = SexMix
 
 	int a1 = Base.AddPosition(Female)
@@ -1865,7 +1854,7 @@ function ZynFemdom(int id)
 	Base.AddPositionStage(a1, "Zyn_Femdom_A1_S3", 0, strapon = true)
 	Base.AddPositionStage(a1, "Zyn_Femdom_A1_S4", 0, strapon = true)
 
-	int a2 = Base.AddPosition(Male, addCum=Vaginal)
+	int a2 = Base.AddPosition(Male, Vaginal)
 	Base.AddPositionStage(a2, "Zyn_Femdom_A2_S1", -100)
 	Base.AddPositionStage(a2, "Zyn_Femdom_A2_S2", -100)
 	Base.AddPositionStage(a2, "Zyn_Femdom_A2_S3", -100)
@@ -1894,11 +1883,9 @@ function ZynMissionary(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Zyn Missionary"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=VaginalOral)
+	int a1 = Base.AddPosition(Female, VaginalOral)
 	Base.AddPositionStage(a1, "Zyn_Missionary_A1_S1", 0)
 	Base.AddPositionStage(a1, "Zyn_Missionary_A1_S2", 0)
 	Base.AddPositionStage(a1, "Zyn_Missionary_A1_S3", 0)
@@ -1927,11 +1914,9 @@ function ZynDoggystyle(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Zyn DoggyStyle"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Anal)
+	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "Zyn_Doggystyle_A1_S1", 0)
 	Base.AddPositionStage(a1, "Zyn_Doggystyle_A1_S2", 0)
 	Base.AddPositionStage(a1, "Zyn_Doggystyle_A1_S3", 0)
@@ -1960,30 +1945,28 @@ function ZynFourWay(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "Zyn Gay Fourway"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = SexMix
 
 	; A2's animations better conform to a female role and female positions need to be listed first
-	int a1 = Base.AddPosition(Female, addCum=VaginalOralAnal)
+	int a1 = Base.AddPosition(Female, VaginalOralAnal)
 	Base.AddPositionStage(a1, "Zyn_4Way_A2_S1", 101, openMouth = true, strapon = true)
 	Base.AddPositionStage(a1, "Zyn_4Way_A2_S2", 101, strapon = true)
 	Base.AddPositionStage(a1, "Zyn_4Way_A2_S3", 101, openMouth = true, strapon = true, sos = 2)
 	Base.AddPositionStage(a1, "Zyn_4Way_A2_S4", 101, openMouth = true, strapon = true, sos = 2)
 
-	int a2 = Base.AddPosition(Male, addCum=VaginalAnal)
+	int a2 = Base.AddPosition(Male, VaginalAnal)
 	Base.AddPositionStage(a2, "Zyn_4Way_A1_S1", 0, openMouth = true)
 	Base.AddPositionStage(a2, "Zyn_4Way_A1_S2", 0)
 	Base.AddPositionStage(a2, "Zyn_4Way_A1_S3", 0)
 	Base.AddPositionStage(a2, "Zyn_4Way_A1_S4", 0)
 
-	int a3 = Base.AddPosition(Male, addCum=VaginalOral)
+	int a3 = Base.AddPosition(Male, VaginalOral)
 	Base.AddPositionStage(a3, "Zyn_4Way_A3_S1", 48)
 	Base.AddPositionStage(a3, "Zyn_4Way_A3_S2", 48, sos = 2)
 	Base.AddPositionStage(a3, "Zyn_4Way_A3_S3", 48, openMouth = true)
 	Base.AddPositionStage(a3, "Zyn_4Way_A3_S4", 48)
 
-	int a4 = Base.AddPosition(Male, addCum=VaginalAnal)
+	int a4 = Base.AddPosition(Male, VaginalAnal)
 	Base.AddPositionStage(a4, "Zyn_4Way_A4_S1", -108)
 	Base.AddPositionStage(a4, "Zyn_4Way_A4_S2", -108)
 	Base.AddPositionStage(a4, "Zyn_4Way_A4_S3", -108)
@@ -2006,11 +1989,9 @@ function DarkInvestigationsThreesome(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "DI Forced Threesome"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = SexMix
 
-	int a1 = Base.AddPosition(Female, addCum=VaginalOralAnal)
+	int a1 = Base.AddPosition(Female, VaginalOralAnal)
 	Base.AddPositionStage(a1, "zdi2_Threesome_A1_S1", 0, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "zdi2_Threesome_A1_S2", 0, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "zdi2_Threesome_A1_S3", 0, silent = true, openMouth = true)
@@ -2051,11 +2032,9 @@ function DarkInvestigationsDoggystyle(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "DI Doggystyle"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Anal)
+	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
 	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
 	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S3", 0)
@@ -2087,11 +2066,9 @@ function DarkInvestigationsBlowjob(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name = "DI Blowjob"
-
-	Base.SetContent(Sexual)
 	Base.SoundFX = Sucking
 
-	int a1 = Base.AddPosition(Female, addCum=Oral)
+	int a1 = Base.AddPosition(Female, Oral)
 	Base.AddPositionStage(a1, "zdi2_Blowjob_A1_S1", 0)
 	Base.AddPositionStage(a1, "zdi2_Blowjob_A1_S2", 0, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "zdi2_Blowjob_A1_S3", 0, silent = true, openMouth = true)
@@ -2117,5 +2094,1190 @@ function DarkInvestigationsBlowjob(int id)
 	Base.AddTag("Oral")
 	Base.AddTag("Dirty")
 
+	Base.Save(id)
+endFunction
+
+
+function ExtraTMP1(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [1]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP2(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [2]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP3(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [3]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP4(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [4]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP5(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [5]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP6(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [6]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP7(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [7]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP8(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [8]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP9(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [9]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP10(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [10]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP11(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [11]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP12(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [12]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP13(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [13]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP14(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [14]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP15(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [15]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP16(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [16]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP17(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [17]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP18(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [18]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP19(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [19]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP20(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [20]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP21(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [21]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP22(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [22]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP23(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [23]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP24(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [24]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP25(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [25]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP26(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [26]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP27(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [27]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP28(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [28]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP29(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [29]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP30(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [30]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP31(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [31]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP32(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [32]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP33(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [33]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP34(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [34]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP35(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [35]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP36(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [36]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP37(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [37]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP38(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [38]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP39(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [39]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP40(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [40]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP41(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [41]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP42(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [42]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP43(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [43]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP44(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [44]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP45(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [45]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP46(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [46]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP47(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [47]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP48(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [48]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP49(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [49]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP50(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [50]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP51(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [51]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP52(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [52]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP53(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [53]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP54(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [54]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP55(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [55]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP56(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [56]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP57(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [57]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP58(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [58]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP59(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [59]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP60(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [60]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP61(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [61]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP62(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [62]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP63(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [63]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP64(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [64]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP65(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [65]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP66(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [66]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP67(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [67]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP68(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [68]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP69(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [69]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP70(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [70]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP71(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [71]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP72(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [72]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP73(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [73]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP74(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [74]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP75(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [75]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP76(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [76]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP77(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [77]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP78(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [78]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP79(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [79]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP80(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [80]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP81(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [81]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP82(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [82]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP83(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [83]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP84(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [84]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP85(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [85]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP86(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [86]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP87(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [87]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP88(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [88]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP89(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [89]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP90(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [90]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
+	Base.Save(id)
+endFunction
+function ExtraTMP91(int id)
+	sslBaseAnimation Base = Create(id)
+	Base.Name = "ExtraTMP [91]"
+	int a1 = Base.AddPosition(Female, Anal)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "zdi2_Doggystyle_A1_S2", 0)
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S1", -82)
+	Base.AddPositionStage(a2, "zdi2_Doggystyle_A2_S2", -82)
+	Base.AddTag("Sex")
+	Base.AddTag("Vaginal")
 	Base.Save(id)
 endFunction
