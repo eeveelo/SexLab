@@ -16,42 +16,75 @@ ObjectReference MarkerRef
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
 
-	string Tag = "Tag1"
-	Log("String Test: "+Tag)
-	String[] Tags = Utility.CreateStringArray(5)
-	Log("Array Init: "+Tags)
-	Tags[0] = Tag
-	Tags[1] = "Tag2"
-	Tags[2] = "Tag3"
-	Log("Array Set: "+Tags)
+	; Benchmark().StartBenchmark(4, 10000)
 
-	Tags = PapyrusUtil.RemoveString(Tags, "Tag2")
-	Log("RemoveString: "+Tags)
+	; Form PlayerRef = Game.GetPlayer()
+	; Form[] Array   = Utility.CreateFormArray(5)
+	; Log("Array("+Array.Length+"): "+Array)
+	; Array[1] = PlayerRef
+	; PapyrusUtil._SetFormValue(Array, 3, PlayerRef)
+	; Log("Array("+Array.Length+"): "+Array)
+
+	; sslBaseAnimation Animation = SexLab.GetAnimationByName("Bleagh Female Masturbation")
+
+	; string AdjustKey = Animation.MakeAdjustKey(sslUtility.MakeActorArray(TargetRef))
+	; string RaceKey = sslUtility.RemoveString(AdjustKey+".0", Animation.Key(""))
+
+	; Log("AdjustKey: "+AdjustKey)
+	; Log("RaceKey: "+RaceKey)
+
+	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 1, 0.1)
+	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 2, 1.5)
+	; Animation.UpdateAdjustmentAll(AdjustKey, 1, 1, 0.2)
+	; Animation.UpdateAdjustmentAll(AdjustKey, 1, 2, 0.25)
+	; Animation.UpdateAdjustmentAll(AdjustKey, 1, 3, 0.66)
+	; Animation.UpdateAdjustment(AdjustKey, 0, 1, 3, 0.33)
+
+	; Log("JsonUtil Save(): "+JsonUtil.Save(Animation.Profile))
+	; Log("SexLabUtil Save(): "+sslBaseAnimation._SaveProfile("DevProfile_1.json"))
+
+	; float[] ppu = Animation.GetPositionAdjustments(AdjustKey, 0, 1)
+	; float[] slu = sslBaseAnimation._GetStageAdjustments("DevProfile_1.json", Animation.Registry, RaceKey, 1)
+
+	; Log("JsonUtil: "+ppu)
+	; Log("SexLabUtil: "+slu)
+
+	; string Tag = "Tag1"
+	; Log("String Test: "+Tag)
+	; String[] Tags = Utility.CreateStringArray(5)
+	; Log("Array Init: "+Tags)
+	; Tags[0] = Tag
+	; Tags[1] = "Tag2"
+	; Tags[2] = "Tag3"
+	; Log("Array Set: "+Tags)
+
+	; Tags = PapyrusUtil.RemoveString(Tags, "Tag2")
+	; Log("RemoveString: "+Tags)
 	
-	Tags[3] = "Tag4"
-	Log("Array Set 2: "+Tags)
+	; Tags[3] = "Tag4"
+	; Log("Array Set 2: "+Tags)
 
 
-	Tags = Utility.CreateStringArray(0)
-	Log("Empty Init: "+Tags)
-	Log("Empty Length: "+Tags.Length)
+	; Tags = Utility.CreateStringArray(0)
+	; Log("Empty Init: "+Tags)
+	; Log("Empty Length: "+Tags.Length)
 
-	Log("--------")
+	; Log("--------")
 
-	Form PlayerRef = Game.GetPlayer() as Form
-	Log("Form Test: "+PlayerRef)
+	; Form PlayerRef = Game.GetPlayer() as Form
+	; Log("Form Test: "+PlayerRef)
 
-	Form[] TestArray = Utility.CreateFormArray(5)
-	Log("Array Init: "+TestArray)
+	; Form[] TestArray = Utility.CreateFormArray(5)
+	; Log("Array Init: "+TestArray)
 
-	TestArray[0] = PlayerRef
-	Log("Array Set: "+TestArray)
+	; TestArray[0] = PlayerRef
+	; Log("Array Set: "+TestArray)
 
-	Form[] FilledArray = Utility.CreateFormArray(5, PlayerRef)
-	Log("Fill Test: "+FilledArray)
+	; Form[] FilledArray = Utility.CreateFormArray(5, PlayerRef)
+	; Log("Fill Test: "+FilledArray)
 	
-	FilledArray[0] = None
-	Log("None Test: "+FilledArray)
+	; FilledArray[0] = None
+	; Log("None Test: "+FilledArray)
 
 
 	; sslBaseAnimation Animation = SexLab.GetAnimationByName("Bleagh Female Masturbation")

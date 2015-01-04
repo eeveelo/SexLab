@@ -5,13 +5,11 @@ import StorageUtil
 
 ; Expression storage
 string[] Registry
+Alias[] AliasSlots
 int property Slotted auto hidden
-sslBaseExpression[] Slots
-sslBaseExpression[] Slots2
-sslBaseExpression[] Slots3
 sslBaseExpression[] property Expressions hidden
 	sslBaseExpression[] function get()
-		return Slots
+		return GetSlots(1)
 	endFunction
 endProperty
 
@@ -92,15 +90,27 @@ sslBaseExpression function GetByName(string FindName)
 endFunction
 
 sslBaseExpression function GetBySlot(int index)
-	if index < 0 || index >= Slotted
-		return none
-	elseif index < 125
-		return Slots[index]
-	elseif index < 250
-		return Slots2[(index - 125)]
-	elseif index < 375
-		return Slots3[(index - 250)]
+	if index >= 0 && index < Slotted
+		return AliasSlots[index] as sslBaseExpression
 	endIf
+	return none
+endFunction
+
+sslBaseExpression[] function GetSlots(int page = 1)
+	if page > 3 || page < 1
+		return sslUtility.ExpressionArray(0)
+	endIf
+	sslBaseExpression[] PageSlots = new sslBaseExpression[125]
+	int i = 125
+	int n = page * 125
+	while i
+		i -= 1
+		n -= 1
+		if AliasSlots[n]
+			PageSlots[i] = AliasSlots[n] as sslBaseExpression
+		endIf
+	endWhile
+	return PageSlots
 endFunction
 
 int function FindByRegistrar(string Registrar)
@@ -116,27 +126,14 @@ endFunction
 
 int property PageCount hidden
 	int function get()
-		if Slotted < 125
-			return 1
-		elseIf Slotted < 250
-			return 2
-		elseIf Slotted < 375
-			return 3
-		endIf
-		return 1
+		return (Slotted / 125) + 1
 	endFunction
 endProperty
 
 int function FindPage(string Registrar)
 	int i = Registry.Find(Registrar)
-	if i < 0
-		return -1
-	elseIf i < 125
-		return 1
-	elseIf i < 250
-		return 2
-	elseIf i < 375
-		return 3
+	if i != -1
+		return (i / 125) + 1
 	endIf
 	return -1
 endFunction
@@ -152,13 +149,8 @@ int function FindByName(string FindName)
 	return -1
 endFunction
 
-string[] function GetSlotNames(int SlotsPage)
-	if SlotsPage == 2
-		return GetNames(Slots2)
-	elseIf SlotsPage == 3
-		return GetNames(Slots3)
-	endIf
-	return GetNames(Slots)
+string[] function GetSlotNames(int page = 1)
+	return GetNames(GetSlots(page))
 endfunction
 
 string[] function GetNames(sslBaseExpression[] SlotList)
@@ -200,11 +192,15 @@ endFunction
 function Setup()
 	GoToState("Locked")
 	; Init slots
-	Slotted  = 0
-	Registry = Utility.CreateStringArray(350)
-	Slots    = new sslBaseExpression[125]
-	Slots2   = new sslBaseExpression[1]
-	Slots3   = new sslBaseExpression[1]
+	Slotted    = 0	
+	Registry   = Utility.CreateStringArray(375)
+	AliasSlots = Utility.CreateAliasArray(375, GetNthAlias(0))
+	; DEV TEMP: SKSE Beta workaround - clear used dummy aliases
+	int i = AliasSlots.Length
+	while i
+		i -= 1
+		AliasSlots[i] = none
+	endWhile
 	; Init defaults
 	RegisterSlots()
 	GoToState("")
@@ -219,30 +215,18 @@ function RegisterSlots()
 endFunction
 
 int function Register(string Registrar)
-	int i = Registry.Find("")
-	if i != -1 && Registry.Find(Registrar) == -1
-		Registry[i] = Registrar
-		Slotted = i + 1
-		if i < 125
-			Slots[i]  = GetNthAlias(i) as sslBaseExpression
-		elseIf i < 250
-			if Slots2.Length != 125
-				Slots2 = new sslBaseExpression[125]
-			endIf
-			Slots2[(i - 125)] = GetNthAlias(i) as sslBaseExpression
-		elseIf i < 375
-			if Slots3.Length != 125
-				Slots3 = new sslBaseExpression[125]
-			endIf
-			Slots3[(i - 250)] = GetNthAlias(i) as sslBaseExpression
-		endIf
-		return i
+	if Registry.Find(Registrar) != -1 || Slotted >= Registry.Length
+		return -1
 	endIf
-	return -1
+	Slotted += 1
+	int i = Registry.Find("")
+	Registry[i]   = Registrar
+	AliasSlots[i] = GetNthAlias(i)
+	return i
 endFunction
 
 bool function TestSlots()
-	return Slotted > 0 && Registry.Length == 100 && Slots.Length == 100 && Slots.Find(none) > 0 && Registry.Find("") > 0
+	return true;Slotted > 0 && Registry.Length == 100 && Slots1.Length == 100 && Slots1.Find(none) > 0 && Registry.Find("") > 0
 endFunction
 
 state Locked

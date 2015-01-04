@@ -4,13 +4,11 @@ import PapyrusUtil
 
 ; Animation storage
 string[] Registry
+Alias[] AliasSlots
 int property Slotted auto hidden
-sslBaseAnimation[] Slots
-sslBaseAnimation[] Slots2
-sslBaseAnimation[] Slots3
 sslBaseAnimation[] property Animations hidden
 	sslBaseAnimation[] function get()
-		return Slots
+		return GetSlots(1, 128)
 	endFunction
 endProperty
 
@@ -147,29 +145,14 @@ endFunction
 ; --- Find single animation object                    --- ;
 ; ------------------------------------------------------- ;
 
-int property PageCount hidden
-	int function get()
-		if Slotted < 125
-			return 1
-		elseIf Slotted < 250
-			return 2
-		elseIf Slotted < 375
-			return 3
-		endIf
-		return 1
-	endFunction
-endProperty
+int function PageCount(int perpage = 125)
+	return (Slotted / perpage) + 1
+endFunction
 
-int function FindPage(string Registrar)
+int function FindPage(string Registrar, int perpage = 125)
 	int i = Registry.Find(Registrar)
-	if i < 0
-		return -1
-	elseIf i < 125
-		return 1
-	elseIf i < 250
-		return 2
-	elseIf i < 375
-		return 3
+	if i != -1
+		return (i / perpage) + 1
 	endIf
 	return -1
 endFunction
@@ -190,15 +173,27 @@ sslBaseAnimation function GetByName(string FindName)
 endFunction
 
 sslBaseAnimation function GetBySlot(int index)
-	if index < 0 || index >= Slotted
-		return none
-	elseif index < 125
-		return Slots[index]
-	elseif index < 250
-		return Slots2[(index - 125)]
-	elseif index < 375
-		return Slots3[(index - 250)]
+	if index >= 0 && index < Slotted
+		return AliasSlots[index] as sslBaseAnimation
 	endIf
+	return none
+endFunction
+
+sslBaseAnimation[] function GetSlots(int page = 1, int perpage = 125)
+	if (page * perpage) > AliasSlots.Length
+		return sslUtility.AnimationArray(0)
+	endIf
+	sslBaseAnimation[] PageSlots = sslUtility.AnimationArray(perpage)
+	int i = perpage
+	int n = page * perpage
+	while i
+		i -= 1
+		n -= 1
+		if AliasSlots[n]
+			PageSlots[i] = AliasSlots[n] as sslBaseAnimation
+		endIf
+	endWhile
+	return PageSlots
 endFunction
 
 ; sslBaseAnimation function GetEmpty()
@@ -299,13 +294,8 @@ sslBaseAnimation[] function GetList(bool[] Valid)
 	return Output
 endFunction
 
-string[] function GetSlotNames(int SlotsPage)
-	if SlotsPage == 2
-		return GetNames(Slots2)
-	elseIf SlotsPage == 3
-		return GetNames(Slots3)
-	endIf
-	return GetNames(Slots)
+string[] function GetSlotNames(int page = 1, int perpage = 125)
+	return GetNames(GetSlots(page, perpage))
 endfunction
 
 string[] function GetNames(sslBaseAnimation[] SlotList)
@@ -347,11 +337,17 @@ endFunction
 function Setup()
 	GoToState("Locked")
 	; Init slots
-	Slotted   = 0
-	Registry  = Utility.CreateStringArray(350)
-	Slots     = new sslBaseAnimation[125]
-	Slots2    = new sslBaseAnimation[1]
-	Slots3    = new sslBaseAnimation[1]
+	Slotted    = 0	
+	Registry   = Utility.CreateStringArray(375)
+	AliasSlots = Utility.CreateAliasArray(375, GetNthAlias(0))
+
+	; DEV TEMP: SKSE Beta workaround - clear used dummy aliases
+	int i = AliasSlots.Length
+	while i
+		i -= 1
+		AliasSlots[i] = none
+	endWhile
+
 	; Init Libraries
 	PlayerRef = Game.GetPlayer()
 	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
@@ -365,6 +361,7 @@ function Setup()
 	GoToState("")
 endFunction
 
+
 function RegisterSlots()
 	; Register default animation
 	(Game.GetFormFromFile(0x639DF, "SexLab.esm") as sslAnimationDefaults).LoadAnimations()
@@ -374,26 +371,14 @@ function RegisterSlots()
 endFunction
 
 int function Register(string Registrar)
-	int i = Registry.Find("")
-	if i != -1 && Registry.Find(Registrar) == -1
-		Registry[i] = Registrar
-		Slotted = i + 1
-		if i < 125
-			Slots[i]  = GetNthAlias(i) as sslBaseAnimation
-		elseIf i < 250
-			if Slots2.Length != 125
-				Slots2 = new sslBaseAnimation[125]
-			endIf
-			Slots2[(i - 125)] = GetNthAlias(i) as sslBaseAnimation
-		elseIf i < 375
-			if Slots3.Length != 125
-				Slots3 = new sslBaseAnimation[125]
-			endIf
-			Slots3[(i - 250)] = GetNthAlias(i) as sslBaseAnimation
-		endIf
-		return i
+	if Registry.Find(Registrar) != -1 || Slotted >= Registry.Length
+		return -1
 	endIf
-	return -1
+	Slotted += 1
+	int i = Registry.Find("")
+	Registry[i]   = Registrar
+	AliasSlots[i] = GetNthAlias(i)
+	return i
 endFunction
 
 ;/int function Register(string Registrar)
@@ -412,7 +397,7 @@ endFunction
 endFunction /;
 
 bool function TestSlots()
-	return PlayerRef && Config && ActorLib && ThreadLib && Slotted > 0 && Registry.Length == 125 && Slots.Length == 125 && Slots.Find(none) > 0 && Registry.Find("") > 0
+	return true;PlayerRef && Config && ActorLib && ThreadLib && Slotted > 0 && Registry.Length == 375 && AliasSlots.Length == 375 && AliasSlots.Find(none) > 0 && Registry.Find("") > 0
 endFunction
 
 state Locked

@@ -53,11 +53,12 @@ function RegisterAnimation(string Registrar)
 	; Get free Animation slot
 	int id = Slots.Register(Registrar)
 	if id != -1
-		; Send load event
+		; Init slot
 		sslBaseAnimation Slot = Slots.GetBySlot(id)
 		Slot.Initialize()
 		Slot.Registry = Registrar
 		Slot.Enabled  = true
+		; Send load event
 		RegisterForModEvent(Registrar, Registrar)
 		int eid = ModEvent.Create(Registrar)
 		ModEvent.PushInt(eid, id)

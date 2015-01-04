@@ -304,6 +304,7 @@ function UpdateAdjustment(string AdjustKey, int Position, int Stage, int Slot, f
 	if Position < Actors
 		InitAdjustments(AdjustKey, Position)
 		JsonUtil.FloatListAdjust(Profile, AdjustKey+"."+Position, AdjIndex(Stage, Slot), AdjustBy)
+		sslBaseAnimation._AdjustOffset("DevProfile_1.json", Registry, sslUtility.RemoveString(AdjustKey+"."+Position, Key("")), Stage, Slot, AdjustBy)
 	endIf
 endFunction
 
@@ -312,7 +313,8 @@ function UpdateAdjustmentAll(string AdjustKey, int Position, int Slot, float Adj
 		InitAdjustments(AdjustKey, Position)
 		int Stage = Stages
 		while Stage
-			JsonUtil.FloatListAdjust(Profile,  AdjustKey+"."+Position, AdjIndex(Stage, Slot), AdjustBy)
+			JsonUtil.FloatListAdjust(Profile, AdjustKey+"."+Position, AdjIndex(Stage, Slot), AdjustBy)
+			sslBaseAnimation._AdjustOffset("DevProfile_1.json", Registry, sslUtility.RemoveString(AdjustKey+"."+Position, Key("")), Stage, Slot, AdjustBy)
 			Stage -= 1
 		endWhile
 	endIf
@@ -789,9 +791,11 @@ bool function _Update_AdjustKey_159c(string ProfilePath, string AdjustKey)
 	return Adjusted
 endFunction
 
-; function _SetAdjustment(string profile, string registry, string racekey, int stage, int nth, float value) global native
-; float function _AdjustOffset(string profile, string registry, string racekey, int stage, int nth, float by) global native
-; bool function _SaveProfile(string profile) global native
+function _SetAdjustment(string profile, string registry, string racekey, int stage, int nth, float value) global native
+float function _AdjustOffset(string profile, string registry, string racekey, int stage, int nth, float by) global native
+bool function _SaveProfile(string profile) global native
+float[] function _GetStageAdjustments(string profile, string registry, string racekey, int stage) global native
+float[] function _GetAllAdjustments(string profile, string registry, string racekey) global native
 
 ; float[] function GetAllOffsets(string AdjustKey, int Position)
 ; 	float[] Output = FloatArray((Stages * 4))

@@ -164,7 +164,7 @@ event OnPageReset(string page)
 	elseIf page == "$SSL_SexDiary" || page == "$SSL_SexJournal"
 		SexDiary()
 
-		; Player Diary/Journal
+	; Player Diary/Journal
 	elseIf page == "Troubleshoot"
 		Troubleshoot()
 
@@ -216,7 +216,6 @@ event OnSliderOpenST()
 		SetSliderDialogRange(3, 300)
 		SetSliderDialogInterval(1)
 		SetSliderDialogDefaultValue(15)
-
 	endIf
 
 endEvent
@@ -768,6 +767,7 @@ string AdjustKey
 int Position
 int SlotPage
 int SlotPageEnd
+int PerPage = 30
 
 sslAnimationSlots property AnimType hidden
 	sslAnimationSlots function get()
@@ -804,8 +804,8 @@ function AnimationEditor()
 	IsCreatureEditor = Animation.IsCreature
 
 	; Set current pagination settings
-	SlotPage    = AnimType.FindPage(Animation.Registry)
-	SlotPageEnd = ((AnimType.Slotted as float / 125.0) as int) + 1
+	SlotPage    = AnimType.FindPage(Animation.Registry, PerPage)
+	SlotPageEnd = AnimType.PageCount(PerPage)
 
 	; Show editor options
 	SetTitleText(Animation.Name)
@@ -884,7 +884,7 @@ state AnimationSelect
 	endfunction
 
 	event OnMenuOpenST()
-		string[] PageOptions = MergeStringArray(_Pagination(), AnimType.GetSlotNames(SlotPage))
+		string[] PageOptions = MergeStringArray(_Pagination(), AnimType.GetSlotNames(SlotPage, PerPage))
 		SetMenuDialogOptions(PageOptions)
 		SetMenuDialogStartIndex(PageOptions.Find(Animation.Name))
 		SetMenuDialogDefaultIndex(0)
@@ -916,7 +916,7 @@ state AnimationSelect
 			i += 1
 		endIf
 		i -= PageOptions.Length
-		i += ((SlotPage - 1) * 125)
+		i += ((SlotPage - 1) * PerPage)
 		Animation = AnimType.GetBySlot(i)
 		SetMenuOptionValueST(Animation.Name)
 		ForcePageReset()
@@ -1022,40 +1022,34 @@ endState
 
 string[] TAModes
 int ta
+int pg
 
 function ToggleAnimations()
 	SetCursorFillMode(LEFT_TO_RIGHT)
 
 	SetTitleText(TAModes[ta])
 	AddMenuOptionST("TAModeSelect", "$SSL_View", TAModes[ta])
-	AddHeaderOption("")
 
-	sslBaseAnimation[] Slots
-	int Slotted
-
+	sslAnimationSlots Slots = AnimSlots
 	if ta == 3
-		Slots   = CreatureSlots.Slots
-		Slotted = CreatureSlots.Slotted
+		Slots = CreatureSlots		
+	endIf
+	sslBaseAnimation[] Animations = Slots.GetSlots(pg)
+
+	int Slotted = Slots.Slotted
+	if Slotted > PerPage
+		AddTextOptionST("AnimationTogglePage", "Toggle Page #", pg)
 	else
-		Slots   = AnimSlots.Slots
-		Slotted = AnimSlots.Slotted
+		AddHeaderOption("")
 	endIf
 
 	int i
-	while i < Slotted && i < 125 ; TODO
-		if Slots[i].Registered
-			AddToggleOptionST("Animation_"+i, Slots[i].Name, GetToggle(Slots[i]))
+	while i < Slotted && i < PerPage ; TODO
+		if Animations[i] && Animations[i].Registered
+			AddToggleOptionST("Animation_"+i, Animations[i].Name, GetToggle(Animations[i]))
 		endIf
 		i += 1
 	endWhile
-endFunction
-
-sslBaseAnimation[] function GetSlots()
-	if ta == 3
-		return CreatureSlots.Slots
-	else
-		return AnimSlots.Slots
-	endIf
 endFunction
 
 bool function GetToggle(sslBaseAnimation Anim)
@@ -1076,15 +1070,40 @@ state TAModeSelect
 	endEvent
 	event OnMenuAcceptST(int i)
 		ta = i
+		pg = 1
 		SetMenuOptionValueST(TAModes[ta])
 		ForcePageReset()
 	endEvent
 	event OnDefaultST()
 		ta = 0
+		pg = 1
 		SetMenuOptionValueST(TAModes[ta])
 		ForcePageReset()
 	endEvent
 endState
+
+state AnimationTogglePage
+	event OnSelectST()
+		int Slotted = AnimSlots.Slotted
+		if ta == 3
+			Slotted = CreatureSlots.Slotted
+		endIf
+		pg += 1
+		if pg > SlotPageEnd
+			pg = 1
+		endIf
+		SetTextOptionValueST(pg)
+		ForcePageReset()
+	endEvent
+	event OnDefaultST()
+		pg = 1
+		SetTextOptionValueST(pg)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("")
+	endEvent
+endState
+
 
 ; ------------------------------------------------------- ;
 ; --- Toggle Expressions                              --- ;
@@ -1284,7 +1303,7 @@ state ExpressionSelect
 	event OnMenuOpenST()
 		SetMenuDialogStartIndex(ExpressionSlots.Expressions.Find(Expression))
 		SetMenuDialogDefaultIndex(0)
-		SetMenuDialogOptions(ExpressionSlots.GetNames())
+		SetMenuDialogOptions(ExpressionSlots.GetNames(ExpressionSlots.Expressions))
 	endEvent
 	event OnMenuAcceptST(int i)
 		Phase = 1
@@ -1751,9 +1770,9 @@ event OnConfigOpen()
 	Pages[3]  = "$SSL_TimersStripping"
 	Pages[4]  = "$SSL_PlayerHotkeys"
 	; Pages[4]  = "$SSL_ExpressionSelection"
-	Pages[5]  = "$SSL_ExpressionEditor"
-	Pages[6]  = "$SSL_ToggleAnimations"
-	Pages[7]  = "$SSL_AnimationEditor"
+	Pages[5]  = "$SSL_ToggleAnimations"
+	Pages[6]  = "$SSL_AnimationEditor"
+	Pages[7]  = "$SSL_ExpressionEditor"
 	Pages[8]  = "$SSL_RebuildClean"
 	; Pages[9]  = "Troubleshoot"
 	if PlayerRef.GetLeveledActorBase().GetSex() == 0
@@ -1782,6 +1801,7 @@ event OnConfigOpen()
 	Chances[2] = "$SSL_Always"
 
 	; Animation Editor
+	PerPage = 30
 
 	; Expression Editor
 	Phases = new string[5]
@@ -1888,6 +1908,7 @@ event OnConfigOpen()
 
 	; Toggle Animations
 	ta = 0
+	pg = 1
 	TAModes = new string[4]
 	TAModes[0] = "$SSL_ToggleAnimations"
 	TAModes[1] = "$SSL_ForeplayAnimations"

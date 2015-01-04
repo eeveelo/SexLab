@@ -25,13 +25,11 @@ function RegisterExpression(string Registrar)
 	; Get free Expression slot
 	int id = Slots.Register(Registrar)
 	if id != -1
-		; Get slot
-		sslBaseExpression Slot = Slots.GetNthAlias(id) as sslBaseExpression
-		Slots.Expressions[id] = Slot
-		; Init Voice
+		; Init slot
+		sslBaseExpression Slot = Slots.GetBySlot(id)
 		Slot.Initialize()
 		Slot.Registry = Registrar
-		Slot.Enabled = true
+		Slot.Enabled  = true
 		; Send load event
 		RegisterForModEvent(Registrar, Registrar)
 		int handle = ModEvent.Create(Registrar)

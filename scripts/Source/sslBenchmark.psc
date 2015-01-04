@@ -4,39 +4,199 @@ import SexLabUtil
 
 function PreBenchmarkSetup()
 	Setup()
-endFunction
+	; Animation = AnimSlots.GetbyRegistrar("bleaghfemalesolo")
+	; Registry = Animation.Registry
+	; AdjustKey = Animation.MakeAdjustKey(sslUtility.MakeActorArray(PlayerRef))
+	; RaceKey = sslUtility.RemoveString(AdjustKey, Animation.Key(""))+".0"
+	; Profile = Animation.Profile
+	; AdjIndex = Animation.AdjIndex(1, 3)
 
-string function Tester(bool signed, int value, int equals)
-	return ""
-endfunction
+	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 1, 0.1)
+	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 2, 1.5)
+	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 1, 0.1)
+	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 2, 1.5)
+	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 1, 0.1)
+	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 2, 1.5)
+	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 1, 0.1)
+	; Animation.UpdateAdjustment(AdjustKey, 0, 2, 0, 1.2)
+	; Animation.UpdateAdjustment(AdjustKey, 0, 2, 0, 1.2)
+	; Animation.UpdateAdjustment(AdjustKey, 0, 2, 0, 1.2)
+	; Animation.UpdateAdjustment(AdjustKey, 0, 2, 0, 1.2)
+	; Animation.UpdateAdjustment(AdjustKey, 0, 2, 0, 1.2)
+	; Animation.UpdateAdjustment(AdjustKey, 0, 2, 0, 1.2)
+	; Animation.UpdateAdjustment(AdjustKey, 0, 3, 0, 1.3)
+	; Animation.UpdateAdjustment(AdjustKey, 0, 3, 0, 1.3)
+	; Animation.UpdateAdjustment(AdjustKey, 0, 3, 0, 1.3)
+	; Animation.UpdateAdjustment(AdjustKey, 0, 3, 0, 1.3)
+	; Log("JsonUtil Save(): "+JsonUtil.Save(Animation.Profile))
+	; Log("SexLabUtil Save(): "+sslBaseAnimation._SaveProfile("DevProfile_1.json"))
+
+endFunction
 
 
 state Test1
 	string function Label()
-		return "SKSE"
+		return "VoiceSlots"
 	endFunction
 
 	string function Proof()
-		return ""
+		return "Voice[10]: "+VoiceSlots.GetBySlot(10).Name
 	endFunction
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
 		; START any variable preparions needed
-
+		sslBaseVoice Slot
 		; END any variable preparions needed
 		baseline += Utility.GetCurrentRealTime()
 		while nth
 			nth -= 1
 			; START code to benchmark
-
-
-
+			Slot = VoiceSlots.GetBySlot(10)
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline
 	endFunction
 endState
 
+state Test2
+	string function Label()
+		return "ExpressionSlots"
+	endFunction
+
+	string function Proof()
+		return "Expression[10]: "+ExpressionSlots.GetBySlot(10).Name
+	endFunction
+
+	float function RunTest(int nth = 5000, float baseline = 0.0)
+		; START any variable preparions needed
+		sslBaseExpression Slot
+		; END any variable preparions needed
+		baseline += Utility.GetCurrentRealTime()
+		while nth
+			nth -= 1
+			; START code to benchmark
+			Slot = ExpressionSlots.GetBySlot(10)
+			; END code to benchmark
+		endWhile
+		return Utility.GetCurrentRealTime() - baseline
+	endFunction
+endState
+
+state Test3
+	string function Label()
+		return "AnimationSlots"
+	endFunction
+
+	string function Proof()
+		return "Animation[132]: "+AnimSlots.GetBySlot(132).Name
+	endFunction
+
+	float function RunTest(int nth = 5000, float baseline = 0.0)
+		; START any variable preparions needed
+		sslBaseAnimation Slot
+		; END any variable preparions needed
+		baseline += Utility.GetCurrentRealTime()
+		while nth
+			nth -= 1
+			; START code to benchmark
+			Slot = AnimSlots.GetBySlot(10)
+			; END code to benchmark
+		endWhile
+		return Utility.GetCurrentRealTime() - baseline
+	endFunction
+endState
+
+
+state Test4
+	string function Label()
+		return "CreatureSlots"
+	endFunction
+
+	string function Proof()
+		return "Creature[10]: "+CreatureSlots.GetBySlot(10).Name
+	endFunction
+
+	float function RunTest(int nth = 5000, float baseline = 0.0)
+		; START any variable preparions needed
+		sslBaseAnimation Slot
+		; END any variable preparions needed
+		baseline += Utility.GetCurrentRealTime()
+		while nth
+			nth -= 1
+			; START code to benchmark
+			Slot = CreatureSlots.GetBySlot(10)
+			; END code to benchmark
+		endWhile
+		return Utility.GetCurrentRealTime() - baseline
+	endFunction
+endState
+
+
+
+;/
+sslBaseAnimation Animation
+string AdjustKey
+string RaceKey
+string Registry
+string Profile
+int AdjIndex
+state Test1
+	string function Label()
+		return "JsonUtil"
+	endFunction
+
+	string function Proof()
+		float[] All   = Animation.GetAllAdjustments(AdjustKey)
+		float[] Stage = Animation.GetPositionAdjustments(AdjustKey, 0, 2)
+		return AdjustKey+"\n - All("+All.Length+") - Stage("+Stage.Length+"):\n"+All+"\n"+Stage
+	endFunction
+
+	float function RunTest(int nth = 5000, float baseline = 0.0)
+		; START any variable preparions needed
+		float[] Offsets = Animation.GetPositionAdjustments(AdjustKey, 0, 2)
+		Log(Label()+" - Offsets: "+Offsets)
+		; END any variable preparions needed
+		baseline += Utility.GetCurrentRealTime()
+		while nth
+			nth -= 1
+			; START code to benchmark
+			JsonUtil.FloatListAdjust(Profile, AdjustKey, AdjIndex, 0.1)
+			Offsets = Animation.GetPositionAdjustments(AdjustKey, 0, 2)
+			; END code to benchmark
+		endWhile
+		return Utility.GetCurrentRealTime() - baseline
+	endFunction
+endState
+
+
+state Test2
+	string function Label()
+		return "SexLabUtil"
+	endFunction
+
+	string function Proof()
+		float[] All   = sslBaseAnimation._GetAllAdjustments("DevProfile_1.json", Registry, RaceKey)
+		float[] Stage = sslBaseAnimation._GetStageAdjustments("DevProfile_1.json", Registry, RaceKey, 1)
+		return RaceKey+"\n - All("+All.Length+") - Stage("+Stage.Length+"):\n"+All+"\n"+Stage
+	endFunction
+
+	float function RunTest(int nth = 5000, float baseline = 0.0)
+		; START any variable preparions needed
+		float[] Offsets = sslBaseAnimation._GetStageAdjustments("DevProfile_1.json", Registry, RaceKey, 1)
+		Log(Label()+" - Offsets: "+Offsets)
+		; END any variable preparions needed
+		baseline += Utility.GetCurrentRealTime()
+		while nth
+			nth -= 1
+			; START code to benchmark
+			sslBaseAnimation._AdjustOffset("DevProfile_1.json", Registry, RaceKey, 1, 3, 0.1)
+			Offsets = sslBaseAnimation._GetStageAdjustments("DevProfile_1.json", Registry, RaceKey, 1)
+			; END code to benchmark
+		endWhile
+		return Utility.GetCurrentRealTime() - baseline
+	endFunction
+endState
+/;
 
 
 

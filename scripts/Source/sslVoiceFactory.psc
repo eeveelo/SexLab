@@ -21,10 +21,8 @@ function RegisterVoice(string Registrar)
 	; Get free voice slot
 	int id = Slots.Register(Registrar)
 	if id != -1
-		; Get slot
-		sslBaseVoice Slot = Slots.GetNthAlias(id) as sslBaseVoice
-		Slots.Voices[id] = Slot
-		; Init Voice
+		; Init slot
+		sslBaseVoice Slot = Slots.GetBySlot(id)
 		Slot.Initialize()
 		Slot.Registry = Registrar
 		Slot.Enabled = true

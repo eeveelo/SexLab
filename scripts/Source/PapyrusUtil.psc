@@ -3,6 +3,9 @@ scriptname PapyrusUtil Hidden
 ; Get version of papyrus library. For version 2.8 will be returned 28.
 int function GetVersion() global native
 
+; function _SetFormValue(Form[] Array, int index, Form value) global native
+; function _SetAliasValue(Alias[] Array, int index, Alias value) global native
+; function _SetIntValue(int[] Array, int index, int value) global native
 
 ; ##
 ; ## Array manipulation utilities
