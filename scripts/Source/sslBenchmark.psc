@@ -11,6 +11,8 @@ function PreBenchmarkSetup()
 	; Profile = Animation.Profile
 	; AdjIndex = Animation.AdjIndex(1, 3)
 
+	; Animation._Init(Registry)
+
 	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 1, 0.1)
 	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 2, 1.5)
 	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 1, 0.1)
@@ -32,26 +34,32 @@ function PreBenchmarkSetup()
 	; Log("SexLabUtil Save(): "+sslBaseAnimation._SaveProfile("DevProfile_1.json"))
 
 endFunction
-
+;/ 
+sslBaseAnimation Animation
+string Registry
+string AdjustKey
+string RaceKey
+string Profile
+int AdjIndex
 
 state Test1
 	string function Label()
-		return "VoiceSlots"
+		return "JsonUtil"
 	endFunction
 
 	string function Proof()
-		return "Voice[10]: "+VoiceSlots.GetBySlot(10).Name
+		return Animation.GetPositionAdjustments(AdjustKey, 0, 1)
 	endFunction
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
 		; START any variable preparions needed
-		sslBaseVoice Slot
+		float[] Offsets
 		; END any variable preparions needed
 		baseline += Utility.GetCurrentRealTime()
 		while nth
 			nth -= 1
 			; START code to benchmark
-			Slot = VoiceSlots.GetBySlot(10)
+			Offsets = Animation.GetPositionAdjustments(AdjustKey, 0, 1)
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline
@@ -60,22 +68,22 @@ endState
 
 state Test2
 	string function Label()
-		return "ExpressionSlots"
+		return "Global"
 	endFunction
 
 	string function Proof()
-		return "Expression[10]: "+ExpressionSlots.GetBySlot(10).Name
+		return sslBaseAnimation._GetStageAdjustments("DevProfile_1.json", Registry, RaceKey, 1)
 	endFunction
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
 		; START any variable preparions needed
-		sslBaseExpression Slot
+		float[] Offsets
 		; END any variable preparions needed
 		baseline += Utility.GetCurrentRealTime()
 		while nth
 			nth -= 1
 			; START code to benchmark
-			Slot = ExpressionSlots.GetBySlot(10)
+			Offsets = sslBaseAnimation._GetStageAdjustments("DevProfile_1.json", Registry, RaceKey, 1)
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline
@@ -84,130 +92,36 @@ endState
 
 state Test3
 	string function Label()
-		return "AnimationSlots"
+		return "Native"
 	endFunction
 
 	string function Proof()
-		return "Animation[132]: "+AnimSlots.GetBySlot(132).Name
+		return Animation._GetStageAdjustmentsNative("DevProfile_1.json", RaceKey, 1)
 	endFunction
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
 		; START any variable preparions needed
-		sslBaseAnimation Slot
+		float[] Offsets
 		; END any variable preparions needed
 		baseline += Utility.GetCurrentRealTime()
 		while nth
 			nth -= 1
 			; START code to benchmark
-			Slot = AnimSlots.GetBySlot(10)
+			Offsets = Animation._GetStageAdjustmentsNative("DevProfile_1.json", RaceKey, 1)
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline
 	endFunction
 endState
-
-
-state Test4
-	string function Label()
-		return "CreatureSlots"
-	endFunction
-
-	string function Proof()
-		return "Creature[10]: "+CreatureSlots.GetBySlot(10).Name
-	endFunction
-
-	float function RunTest(int nth = 5000, float baseline = 0.0)
-		; START any variable preparions needed
-		sslBaseAnimation Slot
-		; END any variable preparions needed
-		baseline += Utility.GetCurrentRealTime()
-		while nth
-			nth -= 1
-			; START code to benchmark
-			Slot = CreatureSlots.GetBySlot(10)
-			; END code to benchmark
-		endWhile
-		return Utility.GetCurrentRealTime() - baseline
-	endFunction
-endState
-
-
-
-;/
-sslBaseAnimation Animation
-string AdjustKey
-string RaceKey
-string Registry
-string Profile
-int AdjIndex
-state Test1
-	string function Label()
-		return "JsonUtil"
-	endFunction
-
-	string function Proof()
-		float[] All   = Animation.GetAllAdjustments(AdjustKey)
-		float[] Stage = Animation.GetPositionAdjustments(AdjustKey, 0, 2)
-		return AdjustKey+"\n - All("+All.Length+") - Stage("+Stage.Length+"):\n"+All+"\n"+Stage
-	endFunction
-
-	float function RunTest(int nth = 5000, float baseline = 0.0)
-		; START any variable preparions needed
-		float[] Offsets = Animation.GetPositionAdjustments(AdjustKey, 0, 2)
-		Log(Label()+" - Offsets: "+Offsets)
-		; END any variable preparions needed
-		baseline += Utility.GetCurrentRealTime()
-		while nth
-			nth -= 1
-			; START code to benchmark
-			JsonUtil.FloatListAdjust(Profile, AdjustKey, AdjIndex, 0.1)
-			Offsets = Animation.GetPositionAdjustments(AdjustKey, 0, 2)
-			; END code to benchmark
-		endWhile
-		return Utility.GetCurrentRealTime() - baseline
-	endFunction
-endState
-
-
-state Test2
-	string function Label()
-		return "SexLabUtil"
-	endFunction
-
-	string function Proof()
-		float[] All   = sslBaseAnimation._GetAllAdjustments("DevProfile_1.json", Registry, RaceKey)
-		float[] Stage = sslBaseAnimation._GetStageAdjustments("DevProfile_1.json", Registry, RaceKey, 1)
-		return RaceKey+"\n - All("+All.Length+") - Stage("+Stage.Length+"):\n"+All+"\n"+Stage
-	endFunction
-
-	float function RunTest(int nth = 5000, float baseline = 0.0)
-		; START any variable preparions needed
-		float[] Offsets = sslBaseAnimation._GetStageAdjustments("DevProfile_1.json", Registry, RaceKey, 1)
-		Log(Label()+" - Offsets: "+Offsets)
-		; END any variable preparions needed
-		baseline += Utility.GetCurrentRealTime()
-		while nth
-			nth -= 1
-			; START code to benchmark
-			sslBaseAnimation._AdjustOffset("DevProfile_1.json", Registry, RaceKey, 1, 3, 0.1)
-			Offsets = sslBaseAnimation._GetStageAdjustments("DevProfile_1.json", Registry, RaceKey, 1)
-			; END code to benchmark
-		endWhile
-		return Utility.GetCurrentRealTime() - baseline
-	endFunction
-endState
-/;
-
-
-
-
-
+ /;
 
 function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10, bool UseBaseLoop = false)
 	PreBenchmarkSetup()
 
 	Debug.Notification("Starting benchmark...")
 	Utility.WaitMenuMode(1.0)
+
+	float[] Results = Utility.CreateFloatArray(Tests)
 
 	int Proof = 1
 	while Proof <= Tests
@@ -219,7 +133,7 @@ function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10, bo
 	int Benchmark = 1
 	while Benchmark <= Tests
 		GoToState("Test"+Benchmark)
-		Log("Starting Test #"+Benchmark+"/"+Tests+": "+Label())
+		Log("---- START #"+Benchmark+"/"+Tests+": "+Label()+" ----")
 
 		float Total = 0.0
 		float Base  = 0.0
@@ -241,10 +155,26 @@ function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10, bo
 			endIf
 			n += 1
 		endWhile
-		Log("Average Result: "+(Total / Loops), Label())
+		Total = (Total / Loops)
+		Results[(Benchmark - 1)] = Total
+		Log("Average Result: "+Total, Label())
+		Log("---- END "+Label()+" ----")
 		Debug.Notification("Finished "+Label())
 		Benchmark += 1
 	endWhile
+
+	Debug.Trace("\n---- FINAL RESULTS ----")
+	MiscUtil.PrintConsole("\n---- FINAL RESULTS ----")
+	Benchmark = 1
+	while Benchmark <= Tests
+		GoToState("Test"+Benchmark)
+		Log("Average Result: "+Results[(Benchmark - 1)], Label())
+		Benchmark += 1
+	endWhile
+	Log("\n")
+
+	GoToState("")
+	Utility.WaitMenuMode(1.0)
 	Debug.TraceAndBox("Benchmark Over, see console or debug log for results")
 endFunction
 

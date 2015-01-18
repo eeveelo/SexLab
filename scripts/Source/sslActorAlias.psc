@@ -96,13 +96,13 @@ bool function SetActor(Actor ProspectRef, bool Victimize = false, sslBaseVoice U
 	BaseRef    = ActorRef.GetLeveledActorBase()
 	ActorName  = BaseRef.GetName()
 	BaseSex    = BaseRef.GetSex()
+	ActorVoice = BaseRef.GetVoiceType()
 	Gender     = ActorLib.GetGender(ActorRef)
 	IsMale     = Gender == 0
 	IsFemale   = Gender == 1
 	IsCreature = Gender == 2
 	IsVictim   = Victimize
 	IsPlayer   = ActorRef == PlayerRef
-	ActorVoice = BaseRef.GetVoiceType()
 	IsTracked  = Config.ThreadLib.IsActorTracked(ActorRef)
 	TrackedEvent("Added")
 	if !IsCreature
@@ -181,7 +181,7 @@ state Ready
 		; Remove any unwanted combat effects
 		ClearEffects()
 		; Starting Information
-		Flags      = new int[5]
+		Flags      = new int[6]
 		Offsets    = new float[4]
 		Loc        = new float[6]
 		SkillBonus = Thread.SkillBonus

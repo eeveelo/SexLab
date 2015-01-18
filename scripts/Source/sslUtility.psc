@@ -1,13 +1,5 @@
 scriptname sslUtility hidden
 
-float function FloatIfElse(bool isTrue, float returnTrue, float returnFalse = 0.0) global native
-int function IntIfElse(bool isTrue, int returnTrue, int returnFalse = 0) global native
-string function StringIfElse(bool isTrue, string returnTrue, string returnFalse = "") global native
-Form function FormIfElse(bool isTrue, Form returnTrue, Form returnFalse = none) global native
-Actor function ActorIfElse(bool isTrue, Actor returnTrue, Actor returnFalse = none) global native
-ObjectReference function ObjectIfElse(bool isTrue, ObjectReference returnTrue, ObjectReference returnFalse = none) global native
-ReferenceAlias function AliasIfElse(bool isTrue, ReferenceAlias returnTrue, ReferenceAlias returnFalse = none) global native
-
 ;/-----------------------------------------------\;
 ;|	Misc Utility Functions
 ;\-----------------------------------------------/;

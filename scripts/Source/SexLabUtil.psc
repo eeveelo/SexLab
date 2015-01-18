@@ -69,11 +69,11 @@ bool function IsValidActor(Actor ActorRef) global
 endFunction
 
 bool function HasCreature(Actor ActorRef) global
-	return StorageUtil.StringListHas(GetConfig(), "SexLabCreatures", MiscUtil.GetActorRaceEditorID(ActorRef))
+	return sslCreatureAnimationSlots.HasCreatureType(ActorRef)
 endFunction
 
 bool function HasRace(Race RaceRef) global
-	return StorageUtil.StringListHas(GetConfig(), "SexLabCreatures", MiscUtil.GetRaceEditorID(RaceRef))
+	return sslCreatureAnimationSlots.HasRaceType(RaceRef)
 endFunction
 
 string function MakeGenderTag(Actor[] Positions) global
@@ -101,6 +101,21 @@ endFunction
 ; ------------------------------------------------------- ;
 ; --- Developer Utilities                             --- ;
 ; ------------------------------------------------------- ;
+
+int function GetPluginVersion() global native
+bool function HasKeywordSub(form ObjRef, string LookFor) global native
+string function RemoveSubString(string Input, string RemoveString) global native
+function PrintConsole(string output) global native
+
+; Inline true/false return - pseudo papyrus ternary
+float function FloatIfElse(bool isTrue, float returnTrue, float returnFalse = 0.0) global native
+int function IntIfElse(bool isTrue, int returnTrue, int returnFalse = 0) global native
+string function StringIfElse(bool isTrue, string returnTrue, string returnFalse = "") global native
+Form function FormIfElse(bool isTrue, Form returnTrue, Form returnFalse = none) global native
+Actor function ActorIfElse(bool isTrue, Actor returnTrue, Actor returnFalse = none) global native
+ObjectReference function ObjectIfElse(bool isTrue, ObjectReference returnTrue, ObjectReference returnFalse = none) global native
+ReferenceAlias function AliasIfElse(bool isTrue, ReferenceAlias returnTrue, ReferenceAlias returnFalse = none) global native
+Actor[] function MakeActorArray(Actor Actor1 = none, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none) global native
 
 function Wait(float seconds) global
 	float timer = Utility.GetCurrentRealTime() + seconds
@@ -151,25 +166,8 @@ float function Timer(float Timestamp, string Log) global
 	return Utility.GetCurrentRealTime()
 endFunction
 
-;#------------------------------#
-;#  SKSE Bound functions        #
-;#        by h38fh2mf           #
-;#------------------------------#
-
+; Deprecated
 function EnableFreeCamera(bool Enabling = true, float sucsm = 5.0) global
-	bool InFreeCamera = Game.GetCameraState() == 3
-	if Enabling && !InFreeCamera
-		MiscUtil.SetFreeCameraSpeed(sucsm)
-		MiscUtil.ToggleFreeCamera()
-	elseIf !Enabling && InFreeCamera
-		MiscUtil.ToggleFreeCamera()
-	endIf
+	return MiscUtil.SetFreeCameraState(Enabling, sucsm)
 endFunction
 
-; bool function EnterFreeCamera() global native
-int function GetPluginVersion() global native
-bool function HasKeywordSub(form ObjRef, string LookFor) global native
-function PrintConsole(string output) global native
-
-
-; bool function DumpForm(form obj) global native

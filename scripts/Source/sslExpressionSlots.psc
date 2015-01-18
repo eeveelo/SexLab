@@ -4,14 +4,19 @@ import PapyrusUtil
 import StorageUtil
 
 ; Expression storage
+Alias[] Objects
 string[] Registry
-Alias[] AliasSlots
 int property Slotted auto hidden
 sslBaseExpression[] property Expressions hidden
 	sslBaseExpression[] function get()
 		return GetSlots(1)
 	endFunction
 endProperty
+
+
+; Libraries
+sslSystemConfig property Config auto
+Actor property PlayerRef auto
 
 ; ------------------------------------------------------- ;
 ; --- Expression Filtering                            --- ;
@@ -27,11 +32,11 @@ sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none
 		Tag = "Normal"
 	endIf
 	bool IsFemale = ActorRef.GetLeveledActorBase().GetSex() == 1
-	bool[] Valid = Utility.CreateBoolArray(Slotted)
+	bool[] Valid  = Utility.CreateBoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
-		sslBaseExpression Slot = GetBySlot(i)
+		sslBaseExpression Slot = Objects[i] as sslBaseExpression
 		Valid[i] = Slot.Registered && Slot.HasTag(Tag) && ((IsFemale && Slot.PhasesFemale > 0) || (!IsFemale && Slot.PhasesMale > 0))
 	endWhile
 	return SelectRandom(Valid)
@@ -42,7 +47,7 @@ sslBaseExpression function RandomByTag(string Tag)
 	int i = Slotted
 	while i
 		i -= 1
-		sslBaseExpression Slot = GetBySlot(i)
+		sslBaseExpression Slot = Objects[i] as sslBaseExpression
 		Valid[i] = Slot.Registered && Slot.HasTag(Tag)
 	endWhile
 	return SelectRandom(Valid)
@@ -66,10 +71,22 @@ sslBaseExpression[] function GetList(bool[] Valid)
 	if Valid.Length > 0 && Valid.Find(true) != -1
 		int n = Valid.Find(true)
 		int i = CountBool(Valid, true)
+		; Trim over 100 to random selection
+		if i > 100
+			int end = Valid.RFind(true) - 1
+			while i > 100
+				int rand = Valid.Find(true, Utility.RandomInt(n, end))
+				if rand != -1 && Valid[rand]
+					Valid[rand] = false
+					i -= 1
+				endIf
+			endWhile
+		endIf
+		; Get list
 		Output = sslUtility.ExpressionArray(i)
 		while n != -1
 			i -= 1
-			Output[i] = GetBySlot(n)
+			Output[i] = Objects[i] as sslBaseExpression
 			n += 1
 			if n < Slotted
 				n = Valid.Find(true, n)
@@ -81,59 +98,39 @@ sslBaseExpression[] function GetList(bool[] Valid)
 	return Output
 endFunction
 
-sslBaseExpression function GetByRegistrar(string Registrar)
-	return GetBySlot(FindByRegistrar(Registrar))
+string[] function GetNames(sslBaseExpression[] SlotList)
+	int i = SlotList.Length
+	string[] Names = Utility.CreateStringArray(i)
+	while i
+		i -= 1
+		if SlotList[i]
+			Names[i] = SlotList[i].Name
+		endIf
+	endWhile
+	if Names.Find("") != -1
+		Names = PapyrusUtil.RemoveString(Names, "")
+	endIf
+	return Names
 endFunction
 
-sslBaseExpression function GetByName(string FindName)
-	return GetBySlot(FindByName(FindName))
-endFunction
+; ------------------------------------------------------- ;
+; --- Registry Access                                     ;
+; ------------------------------------------------------- ;
 
 sslBaseExpression function GetBySlot(int index)
 	if index >= 0 && index < Slotted
-		return AliasSlots[index] as sslBaseExpression
+		return Objects[index] as sslBaseExpression
 	endIf
 	return none
-endFunction
-
-sslBaseExpression[] function GetSlots(int page = 1)
-	if page > 3 || page < 1
-		return sslUtility.ExpressionArray(0)
-	endIf
-	sslBaseExpression[] PageSlots = new sslBaseExpression[125]
-	int i = 125
-	int n = page * 125
-	while i
-		i -= 1
-		n -= 1
-		if AliasSlots[n]
-			PageSlots[i] = AliasSlots[n] as sslBaseExpression
-		endIf
-	endWhile
-	return PageSlots
-endFunction
-
-int function FindByRegistrar(string Registrar)
-	if Registrar != ""
-		return Registry.Find(Registrar)
-	endIf
-	return -1
 endFunction
 
 bool function IsRegistered(string Registrar)
 	return FindByRegistrar(Registrar) != -1
 endFunction
 
-int property PageCount hidden
-	int function get()
-		return (Slotted / 125) + 1
-	endFunction
-endProperty
-
-int function FindPage(string Registrar)
-	int i = Registry.Find(Registrar)
-	if i != -1
-		return (i / 125) + 1
+int function FindByRegistrar(string Registrar)
+	if Registrar != ""
+		return Registry.Find(Registrar)
 	endIf
 	return -1
 endFunction
@@ -149,23 +146,73 @@ int function FindByName(string FindName)
 	return -1
 endFunction
 
-string[] function GetSlotNames(int page = 1)
-	return GetNames(GetSlots(page))
+sslBaseExpression function GetByName(string FindName)
+	return GetBySlot(FindByName(FindName))
+endFunction
+
+sslBaseExpression function GetbyRegistrar(string Registrar)
+	return GetBySlot(FindByRegistrar(Registrar))
+endFunction
+
+; ------------------------------------------------------- ;
+; --- Object MCM Pagination                               ;
+; ------------------------------------------------------- ;
+
+int function PageCount(int perpage = 125)
+	return ((Slotted as float / perpage as float) as int) + 1
+endFunction
+
+int function FindPage(string Registrar, int perpage = 125)
+	int i = Registry.Find(Registrar)
+	if i != -1
+		return (i / perpage) + 1
+	endIf
+	return -1
+endFunction
+
+string[] function GetSlotNames(int page = 1, int perpage = 125)
+	return GetNames(GetSlots(page, perpage))
 endfunction
 
-string[] function GetNames(sslBaseExpression[] SlotList)
-	int i = SlotList.Length
-	string[] Names = Utility.CreateStringArray(i)
+sslBaseExpression[] function GetSlots(int page = 1, int perpage = 125)
+	if (page * perpage) > PageCount(perpage)
+		return sslUtility.ExpressionArray(0)
+	endIf
+	perpage = PapyrusUtil.ClampInt(perpage, 1, 128) 
+	sslBaseExpression[] PageSlots = sslUtility.ExpressionArray(perpage)
+	int i = perpage
+	int n = page * perpage
 	while i
 		i -= 1
-		if SlotList[i]
-			Names[i] = SlotList[i].Name
+		n -= 1
+		if Objects[n]
+			PageSlots[i] = Objects[n] as sslBaseExpression
 		endIf
 	endWhile
-	if Names.Find("") != -1
-		Names = PapyrusUtil.RemoveString(Names, "")
+	return PageSlots
+endFunction
+
+; ------------------------------------------------------- ;
+; --- Object Registration                                 ;
+; ------------------------------------------------------- ;
+
+function RegisterSlots()
+	; Register default Expressions
+	(Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslExpressionDefaults).LoadExpressions()
+	; Send mod event for 3rd party Expressions
+	ModEvent.Send(ModEvent.Create("SexLabSlotExpressions"))
+	Debug.Notification("$SSL_NotifyExpressionInstall")
+endFunction
+
+int function Register(string Registrar)
+	if Registry.Find(Registrar) != -1 || Slotted >= Registry.Length
+		return -1
 	endIf
-	return Names
+	Slotted += 1
+	int i = Registry.Find("")
+	Registry[i] = Registrar
+	Objects[i]  = GetNthAlias(i)
+	return i
 endFunction
 
 sslBaseExpression function RegisterExpression(string Registrar, Form CallbackForm = none, ReferenceAlias CallbackAlias = none)
@@ -194,36 +241,19 @@ function Setup()
 	; Init slots
 	Slotted    = 0	
 	Registry   = Utility.CreateStringArray(375)
-	AliasSlots = Utility.CreateAliasArray(375, GetNthAlias(0))
-	; DEV TEMP: SKSE Beta workaround - clear used dummy aliases
-	int i = AliasSlots.Length
+	Objects = Utility.CreateAliasArray(375, GetNthAlias(0))
+	; DEVTEMP: SKSE Beta workaround - clear used dummy aliases
+	int i = Objects.Length
 	while i
 		i -= 1
-		AliasSlots[i] = none
+		Objects[i] = none
 	endWhile
+	; /DEVTEMP
 	; Init defaults
 	RegisterSlots()
 	GoToState("")
 endFunction
 
-function RegisterSlots()
-	; Register default Expressions
-	(Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslExpressionDefaults).LoadExpressions()
-	; Send mod event for 3rd party Expressions
-	ModEvent.Send(ModEvent.Create("SexLabSlotExpressions"))
-	Debug.Notification("$SSL_NotifyExpressionInstall")
-endFunction
-
-int function Register(string Registrar)
-	if Registry.Find(Registrar) != -1 || Slotted >= Registry.Length
-		return -1
-	endIf
-	Slotted += 1
-	int i = Registry.Find("")
-	Registry[i]   = Registrar
-	AliasSlots[i] = GetNthAlias(i)
-	return i
-endFunction
 
 bool function TestSlots()
 	return true;Slotted > 0 && Registry.Length == 100 && Slots1.Length == 100 && Slots1.Find(none) > 0 && Registry.Find("") > 0

@@ -3,6 +3,7 @@ Scriptname sslEffectDebug extends ActiveMagicEffect
 import PapyrusUtil
 
 SexLabFramework property SexLab Auto
+Actor property PlayerRef auto
 
 Actor Ref1
 Actor Ref2
@@ -15,6 +16,120 @@ ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
+	; Benchmark(3, 15000)
+
+	sslBaseAnimation Animation = SexLab.GetAnimationByRegistry("APSkullFuck")
+
+
+	; sslBaseAnimation._SaveProfile(Animation.Profile)
+
+	; Log("Animation: "+Animation.Name)
+	; Log("OpenMouth: "+Animation.UseOpenMouth(0, 1))
+	; Log("IsSilent(0, 1): "+Animation.IsSilent(0, 1))
+	; Log("IsSilent(1, 1): "+Animation.IsSilent(1, 1))
+	; Log("IsSilent(0, "+Animation.StageCount+"): "+Animation.IsSilent(0, Animation.StageCount))
+	; Log("IsSilent(1, "+Animation.StageCount+"): "+Animation.IsSilent(1, Animation.StageCount))
+	; Log("GetGender(0): "+Animation.GetGender(0))
+	; Log("GetGender(1): "+Animation.GetGender(1))
+	; Log("GetGender(2): "+Animation.GetGender(2))
+	; Log("GetSchlong(0, 1): "+Animation.GetSchlong("Global", 0, 1))
+	; Log("GetSchlong(0, 2): "+Animation.GetSchlong("Global", 0, 2))
+	; Log("GetSchlong(0, 3): "+Animation.GetSchlong("Global", 0, 3))
+	; Log("GetSchlong(0, 4): "+Animation.GetSchlong("Global", 0, 4))
+	; Log("GetSchlong(0, 5): "+Animation.GetSchlong("Global", 0, 5))
+	; Log("GetSchlong(0, 5): "+Animation.GetSchlong("Global", 0, 6))
+	; Log("GetSchlong(1, 1): "+Animation.GetSchlong("Global", 1, 1))
+	; Log("GetSchlong(1, 2): "+Animation.GetSchlong("Global", 1, 2))
+	; Log("GetSchlong(1, 3): "+Animation.GetSchlong("Global", 1, 3))
+	; Log("GetSchlong(1, 4): "+Animation.GetSchlong("Global", 1, 4))
+	; Log("GetSchlong(1, 5): "+Animation.GetSchlong("Global", 1, 5))
+	; Log("GetSchlong(1, 5): "+Animation.GetSchlong("Global", 1, 6))
+
+
+
+
+
+
+
+
+
+
+	; string AdjustKey = Animation.MakeAdjustKey(sslUtility.MakeActorArray(TargetRef))
+	; string RaceKey = sslUtility.RemoveString(AdjustKey+".0", Animation.Key(""))
+
+	; Log("AdjustKey: "+AdjustKey)
+	; Log("RaceKey: "+RaceKey)
+
+
+	; Animation._Init(Animation.Registry)
+	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 1, 0.1)
+	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 2, 1.5)
+	; Animation.UpdateAdjustmentAll(AdjustKey, 1, 1, 0.2)
+	; Animation.UpdateAdjustmentAll(AdjustKey, 1, 2, 0.25)
+	; Animation.UpdateAdjustmentAll(AdjustKey, 1, 3, 0.66)
+	; Animation.UpdateAdjustment(AdjustKey, 0, 1, 3, 0.33)
+
+
+	; Log("JsonUtil Save(): "+JsonUtil.Save(Animation.Profile))
+	; Log("SexLabUtil Save(): "+sslBaseAnimation._SaveProfile("DevProfile_1.json"))
+
+	; float[] ppu = Animation.GetPositionAdjustments(AdjustKey, 0, 1)
+	; float[] slu = sslBaseAnimation._GetStageAdjustments("DevProfile_1.json", Animation.Registry, RaceKey, 1)
+	; float[] slu2 = Animation._GetStageAdjustmentsNative("DevProfile_1.json", RaceKey, 1)
+
+	; Log("JsonUtil: "+ppu)
+	; Log("Global: "+slu)
+	; Log("Native: "+slu2)
+
+
+	; sslBaseAnimation[] Anims = SexLab.GetAnimationsByTags(2, "Vaginal,Dirty")
+	; Log("Slots("+Anims.Length+"): "+Anims)
+	; Log(SexLab.AnimSlots.GetNames(Anims))
+
+	; Utility.Wait(2.0)
+
+	; Log("-- Tester1: "+Anims[0].Name)
+	; Log("BaseObjectTest: "+Anims[0].BaseObjectTest("BaseKey1"))
+	; Log("BaseObjectTest: "+Anims[0].BaseObjectTest(""))
+	; Log("AnimationTest:  "+Anims[0].AnimationTest(""))
+	; Log("AnimationTest:  "+Anims[0].AnimationTest("AnimKey1"))
+	; Log("AnimationTest:  "+Anims[0].AnimationTest(""))
+	; Log("BaseObjectTest: "+Anims[0].BaseObjectTest(""))
+	; sslBaseAnimation Var1 = Anims[0]
+	; Log("Var1 BaseObject:    "+Var1.BaseObjectTest(""))
+	; Log("Var1 AnimationTest: "+Var1.AnimationTest(""))
+
+	; Log("-- Tester2: "+Anims[1].Name)
+	; Log("BaseObjectTest: "+Anims[1].BaseObjectTest("BaseKey2"))
+	; Log("BaseObjectTest: "+Anims[1].BaseObjectTest(""))
+	; Log("AnimationTest:  "+Anims[1].AnimationTest(""))
+	; Log("AnimationTest:  "+Anims[1].AnimationTest("AnimKey2"))
+	; Log("AnimationTest:  "+Anims[1].AnimationTest(""))
+	; Log("BaseObjectTest: "+Anims[1].BaseObjectTest(""))
+	; sslBaseAnimation Var2 = Anims[1]
+	; Log("Var2 BaseObject:    "+Var2.BaseObjectTest(""))
+	; Log("Var2 AnimationTest: "+Var2.AnimationTest(""))
+
+	; Benchmark(4, 200, 5, false)
+
+
+
+	; Log("Test,e:\n\t '"+SexLabUtil.RemoveSubString("Test", "e")+"'")
+	; Log("TEST,test:\n\t '"+SexLabUtil.RemoveSubString("TEST", "test")+"'")
+	; Log(",test:\n\t '"+SexLabUtil.RemoveSubString("", "test")+"'")
+	; Log("Test,:\n\t '"+SexLabUtil.RemoveSubString("Test", "")+"'")
+	; Log("Testtest,TEST:\n\t '"+SexLabUtil.RemoveSubString("Testtest", "TEST")+"'")
+	; Log("Test1test,TEST:\n\t '"+SexLabUtil.RemoveSubString("Test1test", "TEST")+"'")
+	; Log("12345,123456:\n\t '"+SexLabUtil.RemoveSubString("12345", "123456")+"'")
+	; Log("123456,12345:\n\t '"+SexLabUtil.RemoveSubString("123456", "12345")+"'")
+
+
+	; Benchmark().StartBenchmark(4, 15000)
+
+	; string[] RaceKeys = sslCreatureAnimationSlots.GetAllRaceKeys()
+	; Log("RaceKeys("+RaceKeys.Length+"): "+RaceKeys)
+	; string[] Bears = sslCreatureAnimationSlots.GetAllRaceIDs("Bears")
+	; Log("Bears("+Bears.Length+"): "+Bears)
 
 	; Benchmark().StartBenchmark(4, 10000)
 
@@ -27,18 +142,7 @@ event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
 	; sslBaseAnimation Animation = SexLab.GetAnimationByName("Bleagh Female Masturbation")
 
-	; string AdjustKey = Animation.MakeAdjustKey(sslUtility.MakeActorArray(TargetRef))
-	; string RaceKey = sslUtility.RemoveString(AdjustKey+".0", Animation.Key(""))
 
-	; Log("AdjustKey: "+AdjustKey)
-	; Log("RaceKey: "+RaceKey)
-
-	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 1, 0.1)
-	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 2, 1.5)
-	; Animation.UpdateAdjustmentAll(AdjustKey, 1, 1, 0.2)
-	; Animation.UpdateAdjustmentAll(AdjustKey, 1, 2, 0.25)
-	; Animation.UpdateAdjustmentAll(AdjustKey, 1, 3, 0.66)
-	; Animation.UpdateAdjustment(AdjustKey, 0, 1, 3, 0.33)
 
 	; Log("JsonUtil Save(): "+JsonUtil.Save(Animation.Profile))
 	; Log("SexLabUtil Save(): "+sslBaseAnimation._SaveProfile("DevProfile_1.json"))
@@ -583,6 +687,6 @@ bool function IsStrippable(form ItemRef)
 	return true
 endFunction
 
-sslBenchmark function Benchmark()
-	return Quest.GetQuest("SexLabDev") as sslBenchmark
+sslBenchmark function Benchmark(int Tests = 1, int Iterations = 5000, int Loops = 10, bool UseBaseLoop = false)
+	return (Quest.GetQuest("SexLabDev") as sslBenchmark).StartBenchmark(Tests, Iterations, Loops, UseBaseLoop)
 endFunction

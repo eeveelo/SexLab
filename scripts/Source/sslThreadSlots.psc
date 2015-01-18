@@ -60,7 +60,6 @@ function StopAll()
 	int i = Slots.Length
 	while i
 		i -= 1
-		SexLabUtil.DebugLog("StopAll() check --", "Slots["+i+"]", true)
 		string SlotState = Slots[i].GetState()
 		if SlotState == "Making"
 			SexLabUtil.DebugLog("Making during StopAll - Initializing.", "Slots["+i+"]", true)
@@ -82,7 +81,6 @@ function Setup()
 	GoToState("Locked")
 	StorageUtil.FormListClear(self, "ActiveActors")
 	Config = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
-
 
 	; Slot Form IDs
 	int[] SlotFormID = new int[15]

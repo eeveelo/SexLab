@@ -250,7 +250,7 @@ endFunction
 int function GetGender(Actor ActorRef)
 	if ActorRef
 		ActorBase BaseRef = ActorRef.GetLeveledActorBase()
-		if SexLabUtil.HasRace(BaseRef.GetRace())
+		if sslCreatureAnimationSlots.HasRaceType(BaseRef.GetRace())
 			return 2;BaseRef.GetSex() + 2 ; Creatures: 2+
 		elseIf ActorRef.IsInFaction(GenderFaction)
 			return ActorRef.GetFactionRank(GenderFaction) ; Override

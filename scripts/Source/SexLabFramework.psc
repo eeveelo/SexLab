@@ -320,6 +320,10 @@ sslBaseAnimation function GetAnimationByName(string FindName)
 	return AnimSlots.GetByName(FindName)
 endFunction
 
+sslBaseAnimation function GetAnimationByRegistry(string Registry)
+	return AnimSlots.GetByRegistrar(Registry)
+endFunction
+
 int function CountTag(sslBaseAnimation[] Anims, string Tags)
 	return AnimSlots.CountTag(Anims, Tags)
 endFunction

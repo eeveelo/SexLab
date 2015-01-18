@@ -4,12 +4,12 @@ import PapyrusUtil
 import StorageUtil
 
 ; Voices storage
+Alias[] Objects
 string[] Registry
-Alias[] AliasSlots
 int property Slotted auto hidden
 sslBaseVoice[] property Voices hidden
 	sslBaseVoice[] function get()
-		return GetSlots(1)
+		return GetSlots(1, 128)
 	endFunction
 endProperty
 
@@ -146,10 +146,22 @@ sslBaseVoice[] function GetList(bool[] Valid)
 	if Valid.Length > 0 && Valid.Find(true) != -1
 		int n = Valid.Find(true)
 		int i = CountBool(Valid, true)
+		; Trim over 100 to random selection
+		if i > 100
+			int end = Valid.RFind(true) - 1
+			while i > 100
+				int rand = Valid.Find(true, Utility.RandomInt(n, end))
+				if rand != -1 && Valid[rand]
+					Valid[rand] = false
+					i -= 1
+				endIf
+			endWhile
+		endIf
+		; Get list
 		Output = sslUtility.VoiceArray(i)
 		while n != -1
 			i -= 1
-			Output[i] = GetBySlot(n)
+			Output[i] = Objects[i] as sslBaseVoice
 			n += 1
 			if n < Slotted
 				n = Valid.Find(true, n)
@@ -161,59 +173,39 @@ sslBaseVoice[] function GetList(bool[] Valid)
 	return Output
 endFunction
 
-sslBaseVoice function GetByRegistrar(string Registrar)
-	return GetBySlot(FindByRegistrar(Registrar))
+string[] function GetNames(sslBaseVoice[] SlotList)
+	int i = SlotList.Length
+	string[] Names = Utility.CreateStringArray(i)
+	while i
+		i -= 1
+		if SlotList[i]
+			Names[i] = SlotList[i].Name
+		endIf
+	endWhile
+	if Names.Find("") != -1
+		Names = PapyrusUtil.RemoveString(Names, "")
+	endIf
+	return Names
 endFunction
 
-sslBaseVoice function GetByName(string FindName)
-	return GetBySlot(FindByName(FindName))
-endFunction
+; ------------------------------------------------------- ;
+; --- Registry Access                                     ;
+; ------------------------------------------------------- ;
 
 sslBaseVoice function GetBySlot(int index)
 	if index >= 0 && index < Slotted
-		return AliasSlots[index] as sslBaseVoice
+		return Objects[index] as sslBaseVoice
 	endIf
 	return none
-endFunction
-
-sslBaseVoice[] function GetSlots(int page = 1)
-	if page > 3 || page < 1
-		return sslUtility.VoiceArray(0)
-	endIf
-	sslBaseVoice[] PageSlots = new sslBaseVoice[125]
-	int i = 125
-	int n = page * 125
-	while i
-		i -= 1
-		n -= 1
-		if AliasSlots[n]
-			PageSlots[i] = AliasSlots[n] as sslBaseVoice
-		endIf
-	endWhile
-	return PageSlots
-endFunction
-
-int function FindByRegistrar(string Registrar)
-	if Registrar != ""
-		return Registry.Find(Registrar)
-	endIf
-	return -1
 endFunction
 
 bool function IsRegistered(string Registrar)
 	return FindByRegistrar(Registrar) != -1
 endFunction
 
-int property PageCount hidden
-	int function get()
-		return (Slotted / 125) + 1
-	endFunction
-endProperty
-
-int function FindPage(string Registrar)
-	int i = Registry.Find(Registrar)
-	if i != -1
-		return (i / 125) + 1
+int function FindByRegistrar(string Registrar)
+	if Registrar != ""
+		return Registry.Find(Registrar)
 	endIf
 	return -1
 endFunction
@@ -229,23 +221,73 @@ int function FindByName(string FindName)
 	return -1
 endFunction
 
-string[] function GetSlotNames(int page = 1)
-	return GetNames(GetSlots(page))
+sslBaseVoice function GetByName(string FindName)
+	return GetBySlot(FindByName(FindName))
+endFunction
+
+sslBaseVoice function GetbyRegistrar(string Registrar)
+	return GetBySlot(FindByRegistrar(Registrar))
+endFunction
+
+; ------------------------------------------------------- ;
+; --- Object MCM Pagination                               ;
+; ------------------------------------------------------- ;
+
+int function PageCount(int perpage = 125)
+	return ((Slotted as float / perpage as float) as int) + 1
+endFunction
+
+int function FindPage(string Registrar, int perpage = 125)
+	int i = Registry.Find(Registrar)
+	if i != -1
+		return (i / perpage) + 1
+	endIf
+	return -1
+endFunction
+
+string[] function GetSlotNames(int page = 1, int perpage = 125)
+	return GetNames(GetSlots(page, perpage))
 endfunction
 
-string[] function GetNames(sslBaseVoice[] SlotList)
-	int i = SlotList.Length
-	string[] Names = Utility.CreateStringArray(i)
+sslBaseVoice[] function GetSlots(int page = 1, int perpage = 125)
+	if (page * perpage) > PageCount(perpage)
+		return sslUtility.VoiceArray(0)
+	endIf
+	perpage = PapyrusUtil.ClampInt(perpage, 1, 128) 
+	sslBaseVoice[] PageSlots = sslUtility.VoiceArray(perpage)
+	int i = perpage
+	int n = page * perpage
 	while i
 		i -= 1
-		if SlotList[i]
-			Names[i] = SlotList[i].Name
+		n -= 1
+		if Objects[n]
+			PageSlots[i] = Objects[n] as sslBaseVoice
 		endIf
 	endWhile
-	if Names.Find("") != -1
-		Names = PapyrusUtil.RemoveString(Names, "")
+	return PageSlots
+endFunction
+
+; ------------------------------------------------------- ;
+; --- Object Registration                                 ;
+; ------------------------------------------------------- ;
+
+function RegisterSlots()
+	; Register default voices
+	(Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslVoiceDefaults).LoadVoices()
+	; Send mod event for 3rd party voices
+	ModEvent.Send(ModEvent.Create("SexLabSlotVoices"))
+	Debug.Notification("$SSL_NotifyVoiceInstall")
+endFunction
+
+int function Register(string Registrar)
+	if Registry.Find(Registrar) != -1 || Slotted >= Registry.Length
+		return -1
 	endIf
-	return Names
+	Slotted += 1
+	int i = Registry.Find("")
+	Registry[i] = Registrar
+	Objects[i]  = GetNthAlias(i)
+	return i
 endFunction
 
 sslBaseVoice function RegisterVoice(string Registrar, Form CallbackForm = none, ReferenceAlias CallbackAlias = none)
@@ -274,51 +316,38 @@ function Setup()
 	; Init slots
 	Slotted   = 0
 	Registry   = Utility.CreateStringArray(375)
-	AliasSlots = Utility.CreateAliasArray(375, GetNthAlias(0))
-
-	; DEV TEMP: SKSE Beta workaround - clear used dummy aliases
-	int i = AliasSlots.Length
+	Objects  = Utility.CreateAliasArray(375, GetNthAlias(0))
+	; DEVTEMP: SKSE Beta workaround - clear used dummy aliases
+	int i = Objects.Length
 	while i
 		i -= 1
-		AliasSlots[i] = none
+		Objects[i] = none
 	endWhile
-
+	; /DEVTEMP
 	; Init Libraries
 	PlayerRef = Game.GetPlayer()
-	Config    = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
+	if !Config
+		Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
+		if SexLabQuestFramework
+			Config    = SexLabQuestFramework as sslSystemConfig
+		endIf
+	endIf
 	; Init defaults
 	RegisterSlots()
 	; RegisterCreatureVoices()
 	GoToState("")
 endFunction
 
-function RegisterSlots()
-	; Register default voices
-	(Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslVoiceDefaults).LoadVoices()
-	; Send mod event for 3rd party voices
-	ModEvent.Send(ModEvent.Create("SexLabSlotVoices"))
-	Debug.Notification("$SSL_NotifyVoiceInstall")
-endFunction
-
-int function Register(string Registrar)
-	if Registry.Find(Registrar) != -1 || Slotted >= Registry.Length
-		return -1
-	endIf
-	Slotted += 1
-	int i = Registry.Find("")
-	Registry[i]   = Registrar
-	AliasSlots[i] = GetNthAlias(i)
-	return i
-endFunction
-
-bool function TestSlots()
-	return true;PlayerRef && Config && Slotted > 0 && Registry.Length == 100 && Slots1.Length == 100 && Slots1.Find(none) > 0 && Registry.Find("") > 0
-endFunction
-
 state Locked
 	function Setup()
 	endFunction
 endState
+
+bool function TestSlots()
+	return true
+endFunction
+
+
 
 ; function RegisterCreatureVoices()
 ; 	VoiceType CV

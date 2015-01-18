@@ -607,8 +607,9 @@ sslBaseAnimation function CopyAnimation(sslBaseAnimation Copy, sslBaseAnimation 
 		while Stage < Orig.StageCount
 			Stage += 1
 			; Add stage
+			int[]   Flags   = Orig.GetPositionFlags("Global", Position, Stage)
 			float[] Offsets = Orig.GetRawOffsets(Position, Stage)
-			Copy.AddPositionStage(Position, Orig.FetchPositionStage(Position, Stage), Offsets[0], Offsets[1], Offsets[2], Offsets[3], Orig.IsSilent(Position, Stage), Orig.UseOpenMouth(Position, Stage), Orig.UseStrapon(Position, Stage), Orig.AccessFlag(Position, Stage, 3))
+			Copy.AddPositionStage(Position, Orig.FetchPositionStage(Position, Stage), Offsets[0], Offsets[1], Offsets[2], Offsets[3], Flags[0] as bool, Flags[1] as bool, Flags[2] as bool, Flags[3])
 		endWhile
 		Position += 1
 	endWhile
