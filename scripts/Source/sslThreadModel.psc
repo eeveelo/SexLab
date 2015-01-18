@@ -315,16 +315,6 @@ state Making
 		endIf
 
 		; ------------------------- ;
-		; --  Prepare Events     -- ;
-		; ------------------------- ;
-
-		RegisterForModEvent(Key(EventTypes[0]+"Done"), EventTypes[0]+"Done")
-		RegisterForModEvent(Key(EventTypes[1]+"Done"), EventTypes[1]+"Done")
-		RegisterForModEvent(Key(EventTypes[2]+"Done"), EventTypes[2]+"Done")
-		RegisterForModEvent(Key(EventTypes[3]+"Done"), EventTypes[3]+"Done")
-		RegisterForModEvent(Key(EventTypes[4]+"Done"), EventTypes[4]+"Done")
-
-		; ------------------------- ;
 		; --  Start Controller   -- ;
 		; ------------------------- ;
 
@@ -337,8 +327,19 @@ state Making
 		Initialize()
 	endEvent
 	event OnBeginState()
-		t = Utility.GetCurrentRealTime()
 		Log("Entering Making State", "Thread["+thread_id+"]")
+		; Action Events
+		RegisterForModEvent(Key(EventTypes[0]+"Done"), EventTypes[0]+"Done")
+		RegisterForModEvent(Key(EventTypes[1]+"Done"), EventTypes[1]+"Done")
+		RegisterForModEvent(Key(EventTypes[2]+"Done"), EventTypes[2]+"Done")
+		RegisterForModEvent(Key(EventTypes[3]+"Done"), EventTypes[3]+"Done")
+		RegisterForModEvent(Key(EventTypes[4]+"Done"), EventTypes[4]+"Done")
+		; Alias Events
+		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_0", "AliasEventDone")
+		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_1", "AliasEventDone")
+		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_2", "AliasEventDone")
+		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_3", "AliasEventDone")
+		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_4", "AliasEventDone")
 	endEvent
 endState
 
@@ -524,7 +525,7 @@ function ChangeActors(Actor[] NewPositions)
 		endIf
 	endWhile
 	; New adjustment profile
-	UpdateActorKey()
+	; UpdateActorKey()
 	UpdateAdjustKey()
 	Log(AdjustKey, "Adjustment Profile")
 	; Reposition actors
@@ -809,12 +810,31 @@ endFunction
 ; ------------------------------------------------------- ;
 
 string[] EventTypes
+
+bool[] EventSlots
 float[] AliasLag
 int[] AliasDone
 
 string function Key(string Callback)
 	return "SSL_"+thread_id+"_"+Callback
 endFunction
+
+; SSL_AliasEventDone_
+; function AliasEvent(string Callback, float WaitTime = 0.0)
+; 	int slot = EventSlots.Find(false)
+; 	EventSlots[i] = true
+; 	if WaitTime > 0.0
+
+; 		AliasDone[i] = 0
+; 		AliasLag[i] = Utility.GetCurrentRealTime() + WaitTime
+; 		RegisterForSingleUpdate(WaitTime)
+; 	endIf
+; 	AliasDone[slot] = 0
+; 	ModEvent.Send(ModEvent.Create(Key(Callback)))
+; endFunction
+
+; function AliasEventDone()
+; endFunction
 
 function AliasEvent(string Callback, float WaitTime = 0.0)
 	if WaitTime > 0.0
@@ -824,27 +844,30 @@ function AliasEvent(string Callback, float WaitTime = 0.0)
 			return
 		endIf
 		AliasDone[i] = 0
-		AliasLag[i] = Utility.GetCurrentRealTime() + WaitTime
+		AliasLag[i]  = Utility.GetCurrentRealTime() + WaitTime
 		RegisterForSingleUpdate(WaitTime)
 	endIf
 	ModEvent.Send(ModEvent.Create(Key(Callback)))
 endFunction
-
 function AliasEventDone(string Callback = "Alias")
 	int i = EventTypes.Find(Callback)
-	AliasDone[i] = AliasDone[i] + 1
-	if AliasDone[i] >= ActorCount
-		; Notify of failsafe trigger - likely due to lag
-		float timer = Utility.GetCurrentRealTime() - AliasLag[i]
-		Log(Callback+" Timer: " + timer, "AliasEventDone")
-		if timer > 0 && Config.DebugMode
-			Debug.Notification(Callback+" Alias Completion Lag: "+timer)
+	if AliasLag[i] != 0.0
+		AliasDone[i] = AliasDone[i] + 1
+		if AliasDone[i] >= ActorCount 
+			; Notify of failsafe trigger - likely due to lag
+			float timer = Utility.GetCurrentRealTime() - AliasLag[i]
+			Log(Callback+" Timer: " + timer, "AliasEventDone")
+			if timer > 0 && Config.DebugMode
+				Debug.Notification(Callback+" Alias Completion Lag: "+timer)
+			endIf
+			; Reset event checks
+			AliasDone[i] = 0
+			AliasLag[i]  = 0.0
+			; Send completion event
+			ModEvent.Send(ModEvent.Create(Key(Callback+"Done")))
 		endIf
-		; Reset event checks
-		AliasDone[i] = 0
-		AliasLag[i] = 0.0
-		; Send done event
-		ModEvent.Send(ModEvent.Create(Key(Callback+"Done")))
+	else
+		Log(Callback+" not tracked.")
 	endIf
 endFunction
 
@@ -952,7 +975,7 @@ function Log(string Log, string Type = "NOTICE")
 	endIf
 endFunction
 
-function UpdateActorKey()
+;/function UpdateActorKey()
 	string NewKey
 	if !Config.RaceAdjustments
 		NewKey += ".Global"
@@ -968,6 +991,23 @@ endFunction
 
 function UpdateAdjustKey()
 	AdjustKey = Animation.Registry+ActorKeys
+endFunction/;
+
+function UpdateAdjustKey()
+	if !Config.RaceAdjustments
+		AdjustKey = "Global"
+	else
+		int i
+		string NewKey
+		while i < ActorCount
+			NewKey += PositionAlias(i).GetActorKey()
+			i += 1
+			if i < ActorCount
+				NewKey += "."
+			endIf
+		endWhile
+		AdjustKey = NewKey
+	endIf
 endFunction
 
 sslActorAlias function PickAlias(Actor ActorRef)

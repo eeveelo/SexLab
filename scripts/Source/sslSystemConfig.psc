@@ -471,46 +471,21 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function ExportProfile(int Profile = 1)
-	JsonUtil.Save("../SexLab/AnimationProfile_"+Profile+".json", DebugMode)
+	SaveAdjustmentProfile()
 endFunction
 
 function ImportProfile(int Profile = 1)
-	string ProfilePath = "../SexLab/AnimationProfile_"+Profile+".json"
-	if !JsonUtil.Load(ProfilePath)
-		JsonUtil.Save(ProfilePath)
-	endIf
+	SetAdjustmentProfile("../SexLab/AnimationProfile_"+Profile+".json")
 endfunction
 
 function SwapToProfile(int Profile)
-	if Profile != AnimProfile
-		ExportProfile(AnimProfile)
-		ImportProfile(Profile)
-		AnimProfile = Profile
-		UpdateProfile(Profile)
-	endIf
+	AnimProfile = Profile
+	SetAdjustmentProfile("../SexLab/AnimationProfile_"+Profile+".json")
 endFunction
 
-;v1.59c - altered animation profile structure
-function UpdateProfile(int Profile)
-	string ProfilePath = "../SexLab/AnimationProfile_"+Profile+".json"
-	int i = AnimSlots.Slotted
-	while i
-		i -= 1
-		sslBaseAnimation Anim = AnimSlots.GetBySlot(i)
-		if Anim
-			Anim._Update_Profile_159c(ProfilePath)
-		endIf
-	endWhile
-	i = CreatureSlots.Slotted
-	while i
-		i -= 1
-		sslBaseAnimation Anim = CreatureSlots.GetBySlot(i)
-		if Anim
-			Anim._Update_Profile_159c(ProfilePath)
-		endIf
-	endWhile
-	JsonUtil.Save(ProfilePath)
-endFunction
+bool function SetAdjustmentProfile(string ProfileName) global native
+bool function SaveAdjustmentProfile() global native
+
 
 ; ------------------------------------------------------- ;
 ; --- System Use                                      --- ;
@@ -564,6 +539,8 @@ function Reload()
 	UnregisterForAllKeys()
 	RegisterForKey(ToggleFreeCamera)
 	RegisterForKey(TargetActor)
+
+	ImportProfile(PapyrusUtil.ClampInt(AnimProfile, 1, 5))
 
 	; Remove any NPC thread control player has
 	; DisableThreadControl(Control)

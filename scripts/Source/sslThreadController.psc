@@ -25,7 +25,8 @@ bool hkReady
 
 state Prepare
 	function FireAction()
-		UpdateActorKey()
+		; UpdateActorKey()
+		UpdateAdjustKey()
 		SetAnimation()
 		Log(AdjustKey, "Adjustment Profile")
 		AliasEvent("Prepare", 30.0)
@@ -310,7 +311,7 @@ state Animating
 		Positions[AdjustPos] = MovedActor
 		Positions[NewPos] = AdjustActor
 		; New adjustment profile
-		UpdateActorKey()
+		; UpdateActorKey()
 		UpdateAdjustKey()
 		Log(AdjustKey, "Adjustment Profile")
 		; Sync new positions
@@ -473,7 +474,7 @@ function SetAnimation(int aid = -1)
 	endIf
 	; Set active animation
 	Animation = Animations[aid]
-	UpdateAdjustKey()
+	; UpdateAdjustKey()
 	RecordSkills()
 	; Update animation info
 	string[] Tags = Animation.GetTags()
@@ -565,7 +566,7 @@ state Ending
 		SendThreadEvent("AnimationEnd")
 		; Export animations if adjusted
 		if Adjusted
-			Config.ExportProfile(Config.AnimProfile)
+			sslSystemConfig.SaveAdjustmentProfile()
 		endIf
 		; Clear thread and make available for new animation
 		Initialize()
