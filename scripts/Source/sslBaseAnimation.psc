@@ -7,13 +7,9 @@ import PapyrusUtil
 int Actors
 int Stages
 
-; Storage arrays
-string[] LastKeys
-; int[] Flags      ; = silent, openmouth, strapon, schlong offset, cum
-
 string[] Animations
+string[] LastKeys
 
-; int[] Genders     ; = males, females, creature(male), creature(female)
 int[] Positions   ; = gender
 int[] CumIDs      ; = per stage cumIDs
 int[] Schlongs    ; = per stage schlong offset
@@ -28,132 +24,38 @@ float[] CenterAdjust
 float[] Offsets   ; = forward, side, up, rotate
 float[] BedOffset ; = forward, side, up, rotate
 
-int aid
-int sid
+; ------------------------------------------------------- ;
+; --- Array Indexers                                  --- ;
+; ------------------------------------------------------- ;
 
-Form[] StageSoundFX
-Sound property SoundFX hidden
-	Sound function get()
-		return StageSoundFX[0] as Sound
-	endFunction
-	function set(Sound var)
-		StageSoundFX[0] = var as Form
-	endFunction
-endProperty
+int function DataIndex(int Slots, int Position, int Stage, int Slot = 0)
+	return ( Position * (Stages * Slots) ) + ( (Stage - 1) * Slots ) + Slot
+endFunction
 
-; Information
-bool property IsSexual hidden
-	bool function get()
-		return HasTag("Sex") || HasTag("Vaginal") || HasTag("Anal") || HasTag("Oral")
-	endFunction
-endProperty
-bool property IsCreature hidden
-	bool function get()
-		return Genders[2] > 0 || Genders[3] > 0
-	endFunction
-endProperty
+int function StageIndex(int Position, int Stage)
+	return ((Position * Stages) + (Stage - 1))
+endFunction
 
-bool property IsVaginal hidden
-	bool function get()
-		return HasTag("Vaginal")
-	endFunction
-endProperty
-bool property IsAnal hidden
-	bool function get()
-		return HasTag("Anal")
-	endFunction
-endProperty
-bool property IsOral hidden
-	bool function get()
-		return HasTag("Oral")
-	endFunction
-endProperty
-bool property IsDirty hidden
-	bool function get()
-		return HasTag("Dirty")
-	endFunction
-endProperty
-bool property IsLoving hidden
-	bool function get()
-		return HasTag("Loving")
-	endFunction
-endProperty
-
-; Animation handling tags
-bool property IsBedOnly hidden
-	bool function get()
-		return HasTag("BedOnly")
-	endFunction
-endProperty
-
-int property StageCount hidden
-	int function get()
-		return Stages
-	endFunction
-endProperty
-int property PositionCount hidden
-	int function get()
-		return Actors
-	endFunction
-endProperty
-
-int[] property Genders auto hidden
-int property Males hidden
-	int function get()
-		return Genders[0]
-	endFunction
-endProperty
-int property Females hidden
-	int function get()
-		return Genders[1]
-	endFunction
-endProperty
-int property Creatures hidden
-	int function get()
-		return Genders[2]
-	endFunction
-endProperty
-
-string property RaceType auto hidden
-Form[] property CreatureRaces hidden
-	form[] function get()
-		string[] Races = sslCreatureAnimationSlots.GetAllRaceIDs(RaceType)
-		int i = Races.Length
-		Form[] RaceRefs = Utility.CreateFormArray(i)
-		while i
-			i -= 1
-			RaceRefs[i] = Race.GetRace(Races[i])
-		endWhile
-		return ClearNone(RaceRefs)
-	endFunction
-endProperty
-
-string property Profile hidden
-	string function get()
-		return "../SexLab/AnimationProfile_"+Config.AnimProfile+".json"
-	endFunction
-endProperty
+int function AdjIndex(int Stage, int Slot = 0, int Slots = 4)
+	return ((Stage - 1) * Slots) + Slot
+endfunction
 
 ; ------------------------------------------------------- ;
 ; --- Animation Events                                --- ;
 ; ------------------------------------------------------- ;
 
-string[] function FetchPosition(int position)
-	if position > Actors || position < 0
-		Log("Unknown position, '"+stage+"' given", "FetchPosition")
+string[] function FetchPosition(int Position)
+	if Position >= Actors || Position < 0
+		Log("Unknown Position, '"+Position+"' given", "FetchPosition")
 		return none
 	endIf
-	string[] anims = Utility.CreateStringArray(Stages)
-	int stage = 0
-	while stage <= Stages
-		anims[stage] = FetchPositionStage(position, (stage + 1))
-		stage += 1
+	int Stage
+	string[] Anims = Utility.CreateStringArray(Stages)
+	while Stage <= Stages
+		Stage += 1
+		Anims[Stage] = Animations[StageIndex(Position, Stage)]
 	endWhile
-	return anims
-endFunction
-
-string function FetchPositionStage(int position, int Stage)
-	return Animations[((position * Stages) + (stage - 1))]
+	return Anims
 endFunction
 
 string[] function FetchStage(int stage)
@@ -161,49 +63,22 @@ string[] function FetchStage(int stage)
 		Log("Unknown stage, '"+stage+"' given", "FetchStage")
 		return none
 	endIf
-	string[] anims = Utility.CreateStringArray(Actors)
-	int position = 0
-	while position < Actors
-		anims[position] = FetchPositionStage(position, stage)
-		position += 1
+	int Position
+	string[] Anims = Utility.CreateStringArray(Actors)
+	while Position < Actors
+		Anims[Position] = Animations[StageIndex(Position, Stage)]
+		Position += 1
 	endWhile
-	return anims
+	return Anims
+endFunction
+
+string function FetchPositionStage(int position, int Stage)
+	return Animations[StageIndex(Position, Stage)]
 endFunction
 
 ; ------------------------------------------------------- ;
-; --- Data Accessors                                  --- ;
+; --- Stage Timer                                     --- ;
 ; ------------------------------------------------------- ;
-
-int function DataIndex(int Slots, int Position, int Stage, int Slot = 0)
-	return ( Position * (Stages * Slots) ) + ( (Stage - 1) * Slots ) + Slot
-endFunction
-
-int function AdjIndex(int Stage, int Slot = 0, int Slots = 4)
-	return ((Stage - 1) * Slots) + Slot
-endfunction
-
-int function StageIndex(int Position, int Stage)
-	return ((Position * Stages) + (Stage - 1))
-endFunction
-
-; int function AccessFlag(int Position, int Stage, int Slot)
-; 	int i = StageIndex(Position, Stage)
-; 	if Slot == 0
-; 		return Silences[i] as int
-; 	elseIf Slot == 1
-; 		return OpenMouths[i] as int
-; 	elseIf Slot == 2
-; 		return Strapons[i] as int
-; 	elseIf Slot == 4
-; 		return Schlongs[i]
-; 	else
-; 		return -1
-; 	endIf
-; endFunction
-
-; int function AccessPosition(int Position, int Slot)
-; 	return Positions[((Position * 2) + Slot)]
-; endFunction
 
 bool function HasTimer(int Stage)
 	return Stage > 0 && Stage <= Timers.Length && Timers[(Stage - 1)] != 0.0
@@ -216,6 +91,74 @@ float function GetTimer(int Stage)
 	return Timers[(Stage - 1)]
 endFunction
 
+function SetStageTimer(int stage, float timer)
+	; Validate stage
+	if stage > Stages || stage < 1
+		Log("Unknown animation stage, '"+stage+"' given.", "SetStageTimer")
+		return
+	endIf
+	; Initialize timer array if needed
+	if Timers.Length != Stages
+		Timers = Utility.CreateFloatArray(Stages)
+	endIf
+	; Set timer
+	Timers[(stage - 1)] = timer
+endFunction
+
+float function GetTimersRunTime(float[] StageTimers)
+	if StageTimers.Length < 2
+		return -1.0
+	endIf
+	float seconds  = 0.0
+	int LastTimer  = (StageTimers.Length - 1)
+	int LastStage  = (StageCount - 1)
+	int Stage = StageCount
+	while Stage > 0
+ 		Stage -= 1
+ 		if HasTimer(Stage)
+ 			seconds += GetTimer(Stage)
+ 		elseIf Stage < LastStage
+ 			seconds += StageTimers[ClampInt(Stage, 0, (LastTimer - 1))]
+ 		elseIf Stage >= LastStage
+ 			seconds += StageTimers[LastTimer]
+ 		endIf
+	endWhile
+	return seconds
+endFunction
+
+float function GetRunTime()
+	return GetTimersRunTime(Config.StageTimer)
+endFunction
+
+float function GetRunTimeLeadIn()
+	return GetTimersRunTime(Config.StageTimerLeadIn)
+endFunction
+
+float function GetRunTimeAggressive()
+	return GetTimersRunTime(Config.StageTimerAggr)
+endFunction
+
+; ------------------------------------------------------- ;
+; --- SoundFX                                         --- ;
+; ------------------------------------------------------- ;
+
+Form[] StageSoundFX
+Sound property SoundFX hidden
+	Sound function get()
+		if StageSoundFX[0]
+			return StageSoundFX[0] as Sound
+		endIf
+		return none
+	endFunction
+	function set(Sound var)
+		if var
+			StageSoundFX[0] = var as Form
+		else
+			StageSoundFX[0] = none
+		endIf
+	endFunction
+endProperty
+
 Sound function GetSoundFX(int Stage)
 	if Stage < 1 || Stage > StageSoundFX.Length
 		return StageSoundFX[0] as Sound
@@ -223,10 +166,23 @@ Sound function GetSoundFX(int Stage)
 	return StageSoundFX[(Stage - 1)] as Sound
 endFunction
 
-int[] function GetPositionFlags(string AdjustKey, int Position, int Stage)
-	int[] Output = new int[6]
-	return PositionFlags(Output, AdjustKey, Position, Stage)
+function SetStageSoundFX(int stage, Sound StageFX)
+	; Validate stage
+	if stage > Stages || stage < 1
+		Log("Unknown animation stage, '"+stage+"' given.", "SetStageSound")
+		return
+	endIf
+	; Initialize fx array if needed
+	if StageSoundFX.Length != Stages
+		StageSoundFX = ResizeFormArray(StageSoundFX, Stages, SoundFX)
+	endIf
+	; Set Stage fx
+	StageSoundFX[(stage - 1)] = StageFX
 endFunction
+
+; ------------------------------------------------------- ;
+; --- Offsets                                         --- ;
+; ------------------------------------------------------- ;
 
 float[] function GetPositionOffsets(string AdjustKey, int Position, int Stage)
 	float[] Output = new float[4]
@@ -251,25 +207,6 @@ endFunction
 
 bool function _HasAdjustments(string Registrar, string AdjustKey, int Stage) global native
 
-; ------------------------------------------------------- ;
-; --- Data Copy To                                    --- ;
-; ------------------------------------------------------- ;
-
-int[] function PositionFlags(int[] Output, string AdjustKey, int Position, int Stage)
-	AdjustKey += "."+Position
-	; int i = DataIndex(4, Position, Stage)
-	int i = StageIndex(Position, Stage)
-	Output[0] = Silences[i] as int
-	Output[1] = OpenMouths[i] as int
-	Output[2] = Strapons[i] as int
-	Output[3] = GetSchlong(AdjustKey, Position, Stage)
-	Output[4] = GetGender(Position)
-	Output[5] = CumIDs[i]
-	return Output
-endFunction
-
-; function CalcCoords(float[] Output, float[] CenterLoc, float[] Offsets, string AdjustKey, int Stage)
-; function _PositionOffsets(float[] Output, float[] Raw, string AdjustKey, int Stage, float CenterAdjuster = 0.0) global native
 function _PositionOffsets(string Registrar, string AdjustKey, string LastKey, int Stage, float[] RawOffsets) global native
 float[] function PositionOffsets(float[] Output, string AdjustKey, int Position, int Stage)
 	int i = DataIndex(4, Position, Stage)
@@ -290,17 +227,20 @@ float[] function RawOffsets(float[] Output, int Position, int Stage)
 	return Output
 endFunction
 
-; float[] function PositionAdjustments(float[] Output, string AdjustKey, int Position, int Stage)
-; 	if JsonUtil.FloatListCount(Profile, AdjustKey+"."+Position) > AdjIndex(Stage, 3)
-; 		JsonUtil.FloatListSlice(Profile, AdjustKey+"."+Position, Output, AdjIndex(Stage))
-; 	else
-; 		Output[3] = GetSchlong(AdjustKey, Position, Stage)
-; 	endIf
-; 	return Output
-; endFunction
+function SetBedOffsets(float forward, float sideward, float upward, float rotate)
+	BedOffset = new float[4]
+	BedOffset[0] = forward
+	BedOffset[1] = sideward
+	BedOffset[2] = upward
+	BedOffset[3] = rotate
+endFunction
+
+float[] function GetBedOffsets()
+	return BedOffset
+endFunction
 
 ; ------------------------------------------------------- ;
-; --- Update Offsets                                  --- ;
+; --- Adjustments                                     --- ;
 ; ------------------------------------------------------- ;
 
 function _SetAdjustment(string Registrar, string AdjustKey, int Stage, int Slot, float Adjustment) global native
@@ -391,35 +331,34 @@ function InitAdjustments(string AdjustKey, int Position)
 		_CopyAdjustments(Registry, AdjustKey, List)
 	endIf
 	LastKeys[Position] = AdjustKey
-
-
-	; int i = AdjIndex(Stages, 3)
-	; if JsonUtil.FloatListCount(Profile, AdjustKey+"."+Position) <= i
-	; 	float[] Adjusts = Utility.CreateFloatArray((Stages * 4))
-	; 	if JsonUtil.FloatListCount(Profile, LastKey+"."+Position) == Adjusts.Length; && JsonUtil.StringListCount(Profile, Registry) > 0
-	; 		Log("CopyKey ["+LastKey+"] -> ["+AdjustKey+"]")
-	; 		JsonUtil.FloatListSlice(Profile, LastKey+"."+Position, Adjusts)
-	; 	else
-	; 		int n = Stages
-	; 		while n > 0
-	; 			Adjusts[AdjIndex(n, 3)] = AccessFlag(Position, n, 3)
-	; 			n -= 1
-	; 		endWhile
-	; 	endIf
-	; 	; Save initialized array.
-	; 	string KeyPart = SexLabUtil.RemoveSubString(AdjustKey, Key(""))
-	; 	JsonUtil.FloatListCopy(Profile, AdjustKey+"."+Position, Adjusts)
-	; 	if KeyPart != "Global"
-	; 		JsonUtil.StringListAdd(Profile, "Adjusted", Registry, false)
-	; 		JsonUtil.StringListAdd(Profile, Registry, KeyPart, false)
-	; 	endIf
-	; endIf
-	; LastKey = AdjustKey
 endFunction
 
 string[] function _GetAdjustKeys(string Registrar) global native
 string[] function GetAdjustKeys()
 	return _GetAdjustKeys(Registry)
+endFunction
+
+
+; ------------------------------------------------------- ;
+; --- Flags                                           --- ;
+; ------------------------------------------------------- ;
+
+int[] function GetPositionFlags(string AdjustKey, int Position, int Stage)
+	int[] Output = new int[6]
+	return PositionFlags(Output, AdjustKey, Position, Stage)
+endFunction
+
+int[] function PositionFlags(int[] Output, string AdjustKey, int Position, int Stage)
+	AdjustKey += "."+Position
+	; int i = DataIndex(4, Position, Stage)
+	int i = StageIndex(Position, Stage)
+	Output[0] = Silences[i] as int
+	Output[1] = OpenMouths[i] as int
+	Output[2] = Strapons[i] as int
+	Output[3] = GetSchlong(AdjustKey, Position, Stage)
+	Output[4] = GetGender(Position)
+	Output[5] = CumIDs[i]
+	return Output
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -450,6 +389,10 @@ endFunction
 
 int function GetCumID(int Position, int Stage = 1)
 	return CumIDs[StageIndex(Position, Stage)]
+endFunction
+
+function SetStageCumID(int Position, int Stage, int CumID)
+	CumIDs[StageIndex(Position, Stage)] = CumID
 endFunction
 
 int function GetCum(int Position)
@@ -494,51 +437,6 @@ endFunction
 
 function SetContent(int contentType)
 	; No longer used
-endFunction
-
-float function GetTimersRunTime(float[] StageTimers)
-	if StageTimers.Length < 2
-		return -1.0
-	endIf
-	float seconds  = 0.0
-	int LastTimer  = (StageTimers.Length - 1)
-	int LastStage  = (StageCount - 1)
-	int Stage = StageCount
-	while Stage > 0
- 		Stage -= 1
- 		if HasTimer(Stage)
- 			seconds += GetTimer(Stage)
- 		elseIf Stage < LastStage
- 			seconds += StageTimers[ClampInt(Stage, 0, (LastTimer - 1))]
- 		elseIf Stage >= LastStage
- 			seconds += StageTimers[LastTimer]
- 		endIf
-	endWhile
-	return seconds
-endFunction
-
-float function GetRunTime()
-	return GetTimersRunTime(Config.StageTimer)
-endFunction
-
-float function GetRunTimeLeadIn()
-	return GetTimersRunTime(Config.StageTimerLeadIn)
-endFunction
-
-float function GetRunTimeAggressive()
-	return GetTimersRunTime(Config.StageTimerAggr)
-endFunction
-
-function SetBedOffsets(float forward, float sideward, float upward, float rotate)
-	BedOffset = new float[4]
-	BedOffset[0] = forward
-	BedOffset[1] = sideward
-	BedOffset[2] = upward
-	BedOffset[3] = rotate
-endFunction
-
-float[] function GetBedOffsets()
-	return BedOffset
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -595,37 +493,9 @@ endFunction
 ; ------------------------------------------------------- ;
 ; --- Animation Setup                                 --- ;
 ; ------------------------------------------------------- ;
-function SetStageSoundFX(int stage, Sound StageFX)
-	; Validate stage
-	if stage > Stages || stage < 1
-		Log("Unknown animation stage, '"+stage+"' given.", "SetStageSound")
-		return
-	endIf
-	; Initialize fx array if needed
-	if StageSoundFX.Length != Stages
-		StageSoundFX = ResizeFormArray(StageSoundFX, Stages, SoundFX)
-	endIf
-	; Set Stage fx
-	StageSoundFX[(stage - 1)] = StageFX
-endFunction
 
-function SetStageTimer(int stage, float timer)
-	; Validate stage
-	if stage > Stages || stage < 1
-		Log("Unknown animation stage, '"+stage+"' given.", "SetStageTimer")
-		return
-	endIf
-	; Initialize timer array if needed
-	if Timers.Length != Stages
-		Timers = Utility.CreateFloatArray(Stages)
-	endIf
-	; Set timer
-	Timers[(stage - 1)] = timer
-endFunction
-
-function SetStageCumID(int Position, int Stage, int CumID)
-	CumIDs[((Position * Stages) + (Stage - 1))] = CumID
-endFunction
+int aid
+int sid
 
 bool Locked
 int function AddPosition(int Gender = 0, int AddCum = -1)
@@ -653,7 +523,6 @@ int function AddPosition(int Gender = 0, int AddCum = -1)
 			CumIDs = PapyrusUtil.ResizeIntArray(CumIDs, Stages)
 		endIf
 		CumIDs     = PapyrusUtil.ResizeIntArray(CumIDs, idx, AddCum)
-		; Offsets
 		Offsets    = PapyrusUtil.ResizeFloatArray(Offsets, (pid + 1) * (Stages * 4))
 	else
 		Offsets    = new float[128]
@@ -688,6 +557,7 @@ function AddPositionStage(int Position, string AnimationEvent, float forward = 0
 endFunction
 
 function Save(int id = -1)
+	parent.Save(id)
 	; Finalize config data
 	Positions = PapyrusUtil.ResizeIntArray(Positions, Actors)
 	LastKeys  = PapyrusUtil.ResizeStringArray(LastKeys, Actors)
@@ -701,8 +571,8 @@ function Save(int id = -1)
 		Offsets    = PapyrusUtil.ResizeFloatArray(Offsets, (Stages * 4))
 	endIf
 	; Create and add gender tag
-	string Tag
 	int i
+	string Tag
 	while i < Actors
 		int Gender = Positions[i]
 		if Gender == 0
@@ -725,7 +595,6 @@ function Save(int id = -1)
 		endWhile
 	endIf
 	; Log the new animation
-	SlotID = id
 	if IsCreature
 		Log(Name, "Creatures["+id+"]")
 	else
@@ -784,134 +653,102 @@ bool function CheckByTags(int ActorCount, string[] Search, string[] Suppress, bo
 	return Enabled && ActorCount == PositionCount && CheckTags(Search, RequireAll) && (Suppress.Length < 1 || !HasOneTag(Suppress))
 endFunction
 
+; ------------------------------------------------------- ;
+; --- Properties                                      --- ;
+; ------------------------------------------------------- ;
 
-; float[] function GetAllOffsets(string AdjustKey, int Position)
-; 	float[] Output = FloatArray((Stages * 4))
-; 	AdjustKey += "."+Position
-; 	if JsonUtil.FloatListCount(Profile, AdjustKey) < Output.Length
-; 		AdjustKey = StorageUtil.GetStringValue(Storage, Key("LastKey"), Key("Global"))+"."+Position
-; 	endIf
-; 	JsonUtil.FloatListSlice(Profile, AdjustKey, Output)
-; 	GetAllPositionOffsets(Output, Offsets, CenterAdjust, Position, Stages)
-; 	return Output
-; endfunction
-; function GetAllPositionOffsets(float[] Adjusts, float[] Offset, float[] Forward, int Position, int Stage) global native
+; Creature Use
+string property RaceType auto hidden
+Form[] property CreatureRaces hidden
+	form[] function get()
+		string[] Races = sslCreatureAnimationSlots.GetAllRaceIDs(RaceType)
+		int i = Races.Length
+		Form[] RaceRefs = Utility.CreateFormArray(i)
+		while i
+			i -= 1
+			RaceRefs[i] = Race.GetRace(Races[i])
+		endWhile
+		return ClearNone(RaceRefs)
+	endFunction
+endProperty
 
-; ; ------------------------------------------------------- ;
-; ; --- Tagging System                                  --- ;
-; ; ------------------------------------------------------- ;
+; Information
+bool property IsSexual hidden
+	bool function get()
+		return HasTag("Sex") || HasTag("Vaginal") || HasTag("Anal") || HasTag("Oral")
+	endFunction
+endProperty
+bool property IsCreature hidden
+	bool function get()
+		return Genders[2] > 0 || Genders[3] > 0
+	endFunction
+endProperty
 
-; bool function AddTag(string Tag) native
-; bool function HasTag(string Tag) native
-; bool function RemoveTag(string Tag) native
-; bool function ToggleTag(string Tag) native
-; bool function AddTagConditional(string Tag, bool AddTag) native
-; bool function ParseTags(string[] TagList, bool RequireAll = true) native
-; bool function CheckTags(string[] CheckTags, bool RequireAll = true, bool Suppress = false) native
-; bool function HasOneTag(string[] TagList) native
-; bool function HasAllTag(string[] TagList) native
+bool property IsVaginal hidden
+	bool function get()
+		return HasTag("Vaginal")
+	endFunction
+endProperty
+bool property IsAnal hidden
+	bool function get()
+		return HasTag("Anal")
+	endFunction
+endProperty
+bool property IsOral hidden
+	bool function get()
+		return HasTag("Oral")
+	endFunction
+endProperty
+bool property IsDirty hidden
+	bool function get()
+		return HasTag("Dirty")
+	endFunction
+endProperty
+bool property IsLoving hidden
+	bool function get()
+		return HasTag("Loving")
+	endFunction
+endProperty
 
-; function AddTags(string[] TagList)
-; 	int i = TagList.Length
-; 	while i
-; 		i -= 1
-; 		AddTag(TagList[i])
-; 	endWhile
-; endFunction
+; Animation handling tags
+bool property IsBedOnly hidden
+	bool function get()
+		return HasTag("BedOnly")
+	endFunction
+endProperty
 
-; int function TagCount() native
-; string function GetNthTag(int i) native
-; function TagSlice(string[] Ouput) native
+int property StageCount hidden
+	int function get()
+		return Stages
+	endFunction
+endProperty
+int property PositionCount hidden
+	int function get()
+		return Actors
+	endFunction
+endProperty
 
-; string[] function GetTags()
-; 	int i = TagCount()
-; 	Log(Registry+" - TagCount: "+i)
-; 	if i < 1
-; 		return sslUtility.StringArray(0)
-; 	endIf
-; 	string[] Output = sslUtility.StringArray(i)
-; 	TagSlice(Output)
-; 	Log(Registry+" - SKSE Tags: "+Output)
-; 	return Output
-; endFunction
+; Position Genders
+int[] property Genders auto hidden
+int property Males hidden
+	int function get()
+		return Genders[0]
+	endFunction
+endProperty
+int property Females hidden
+	int function get()
+		return Genders[1]
+	endFunction
+endProperty
+int property Creatures hidden
+	int function get()
+		return Genders[2]
+	endFunction
+endProperty
 
-; function RevertTags() native
 
-
-
-; function LoadObj(string kReg, string kName) native global
-; function SaveObj(string kReg) native global
-; function _AddTag(string kReg, string kTag) native global
-; function _AddTags(string kReg, string[] kTags) native global
-; function _RemoveTag(string kReg, string kTag) native global
-; int function _FindTag(string kReg, string kTag) native global
-; bool function _HasTag(string kReg, string kTag) native global
-
-; bool function HasTag(string Tag)
-; 	return _HasTag(Registry, Tag)
-; endFunction
-
-; bool function AddTag(string Tag)
-; 	_AddTag(Registry, Tag)
-; 	return parent.AddTag(Tag)
-; endFunction
-
-; function AddTags(string[] TagList)
-; 	_AddTags(Registry, TagList)
-; 	parent.AddTags(TagList)
-; endFunction
-
-; bool function RemoveTag(string Tag)
-; 	_RemoveTag(Registry, Tag)
-; 	return parent.RemoveTag(Tag)
-; endFunction
-
-; bool function ToggleTag(string Tag)
-; 	return (RemoveTag(Tag) || AddTag(Tag)) && HasTag(Tag)
-; endFunction
-
-; bool function AddTagConditional(string Tag, bool AddTag)
-; 	if Tag != ""
-; 		if AddTag
-; 			AddTag(Tag)
-; 		elseIf !AddTag
-; 			RemoveTag(Tag)
-; 		endIf
-; 	endIf
-; 	return AddTag
-; endFunction
-
-; bool function CheckTags(string[] CheckTags, bool RequireAll = true, bool Suppress = false)
-; 	bool Valid = ParseTags(CheckTags, RequireAll)
-; 	return (Valid && !Suppress) || (!Valid && Suppress)
-; endFunction
-
-; bool function ParseTags(string[] TagList, bool RequireAll = true)
-; 	if RequireAll
-; 		return HasAllTag(TagList)
-; 	else
-; 		return HasOneTag(TagList)
-; 	endIf
-; endFunction
-
-; bool function HasOneTag(string[] TagList)
-; 	int i = TagList.Length
-; 	while i
-; 		i -= 1
-; 		if HasTag(TagList[i])
-; 			return true
-; 		endIf
-; 	endWhile
-; 	return false
-; endFunction
-
-; bool function HasAllTag(string[] TagList)
-; 	int i = TagList.Length
-; 	while i
-; 		i -= 1
-; 		if !HasTag(TagList[i])
-; 			return false
-; 		endIf
-; 	endWhile
-; 	return true
-; endFunction
+;/ string property Profile hidden
+	string function get()
+		return "../SexLab/AnimationProfile_"+Config.AnimProfile+".json"
+	endFunction
+endProperty /;

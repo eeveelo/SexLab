@@ -319,28 +319,24 @@ endFunction
 function CountPhases()
 	Phases = new int[2]
 	; Male phases
-	Phases[0] = Phases[0] + ((AddFloatValues(Male1) > 0) as int)
-	Phases[0] = Phases[0] + ((AddFloatValues(Male2) > 0) as int)
-	Phases[0] = Phases[0] + ((AddFloatValues(Male3) > 0) as int)
-	Phases[0] = Phases[0] + ((AddFloatValues(Male4) > 0) as int)
-	Phases[0] = Phases[0] + ((AddFloatValues(Male5) > 0) as int)
+	Phases[0] = ((AddFloatValues(Male1) > 0) as int) \		
+		+ ((AddFloatValues(Male2) > 0) as int) \
+		+ ((AddFloatValues(Male3) > 0) as int) \
+		+ ((AddFloatValues(Male4) > 0) as int) \
+		+ ((AddFloatValues(Male5) > 0) as int)
 	; Female phases
-	Phases[1] = Phases[1] + ((AddFloatValues(Female1) > 0) as int)
-	Phases[1] = Phases[1] + ((AddFloatValues(Female2) > 0) as int)
-	Phases[1] = Phases[1] + ((AddFloatValues(Female3) > 0) as int)
-	Phases[1] = Phases[1] + ((AddFloatValues(Female4) > 0) as int)
-	Phases[1] = Phases[1] + ((AddFloatValues(Female5) > 0) as int)
+	Phases[1] = ((AddFloatValues(Female1) > 0) as int) \
+		+ ((AddFloatValues(Female2) > 0) as int) \
+		+ ((AddFloatValues(Female3) > 0) as int) \
+		+ ((AddFloatValues(Female4) > 0) as int) \
+		+ ((AddFloatValues(Female5) > 0) as int)
 	; Enable it if phases are present
-	if Phases[0] > 0 || Phases[1] > 0
-		Enabled = true
-	else
-		Enabled = false
-	endIf
+	Enabled = Phases[0] > 0 || Phases[1] > 0
 endFunction
 
 function Save(int id = -1)
+	parent.Save(id)
 	CountPhases()
-	SlotID = id
 	Log(Name, "Expressions["+id+"]")
 endFunction
 

@@ -37,35 +37,10 @@ event OnVersionUpdate(int version)
 		SystemAlias.InstallSystem()
 	endif
 	; Send update/install event
-	int eid = ModEvent.Create(sslUtility.StringIfElse(CurrentVersion <= 0, "SexLabInstalled", "SexLabUpdated"))
+	int eid = ModEvent.Create(SexLabUtil.StringIfElse(CurrentVersion <= 0, "SexLabInstalled", "SexLabUpdated"))
 	ModEvent.PushInt(eid, version)
 	ModEvent.Send(eid)
 endEvent
-
-; function SetupSystem()
-; 	Debug.Trace("Installing SexLab v"+GetStringVer())
-; 	Debug.Notification("Installing SexLab v"+GetStringVer())
-; 	; Make sure we have all the needed libraries
-; 	LoadLibs(true)
-; 	Config.DebugMode = true
-; 	; Disable system from being used during setup
-; 	SexLab.GoToState("Disabled")
-; 	SexLab.Setup()
-; 	; Check if system is able to install and init defaults
-; 	if SexLab && Config && Config.CheckSystem()
-; 		; Setup object slots
-; 		Config.SetDefaults()
-; 		VoiceSlots.Setup()
-; 		ExpressionSlots.Setup()
-; 		CreatureSlots.Setup()
-; 		AnimSlots.Setup()
-; 		ThreadSlots.Setup()
-; 		; Enable system for use
-; 		SexLab.GoToState("Enabled")
-; 	else
-; 		Debug.TraceStack("SexLab - FATAL - Failed setup checks - ["+SexLab+", "+Config+", "+ActorLib+", "+ThreadLib+", "+Stats+", "+ThreadSlots+", "+AnimSlots+", "+CreatureSlots+", "+VoiceSlots+", "+ExpressionSlots+"]")
-; 	endIf
-; endFunction
 
 event OnGameReload()
 	Debug.Trace("SexLab MCM Loaded CurrentVerison: "+CurrentVersion)
@@ -108,6 +83,31 @@ function LoadLibs(bool Forced = false)
 		PlayerRef = Game.GetPlayer()
 	endIf
 endFunction
+
+; ------------------------------------------------------- ;
+; --- Object Pagination                               --- ;
+; ------------------------------------------------------- ;
+
+int PerPage
+int OnPage
+int LastPage
+
+string[] function PaginationMenu(string BeforePages = "", string AfterPages = "")
+	string[] Output
+	if BeforePages != ""
+		Output = PapyrusUtil.PushString(Output, BeforePages)
+	endIf
+	if OnPage < LastPage
+		Output = PapyrusUtil.PushString(Output, "NEXT PAGE ->")
+	endIf
+	if OnPage > 1
+		Output = PapyrusUtil.PushString(Output, "<- PREVIOUS PAGE")
+	endIf
+	if AfterPages != ""
+		Output = PapyrusUtil.PushString(Output, AfterPages)
+	endIf
+	return Output
+endfunction
 
 ; ------------------------------------------------------- ;
 ; --- Create MCM Pages                                --- ;
@@ -191,12 +191,12 @@ event OnSliderOpenST()
 	if Options[0] == "Adjust"
 		; Stage, Slot
 		if Options[2] == "3" ; SOS
-			SetSliderDialogStartValue(Animation.GetSchlong(Animation.Key(AdjustKey), Position, Options[1] as int))
+			SetSliderDialogStartValue(Animation.GetSchlong(AdjustKey, Position, Options[1] as int))
 			SetSliderDialogRange(-9, 9)
 			SetSliderDialogInterval(1)
 			SetSliderDialogDefaultValue(0)
 		else ; Alignments
-			SetSliderDialogStartValue(Animation.GetAdjustment(Animation.Key(AdjustKey), Position, Options[1] as int, Options[2] as int))
+			SetSliderDialogStartValue(Animation.GetAdjustment(AdjustKey, Position, Options[1] as int, Options[2] as int))
 			SetSliderDialogRange(-100.0, 100.0)
 			SetSliderDialogInterval(0.50)
 			SetSliderDialogDefaultValue(0.0)
@@ -226,7 +226,7 @@ event OnSliderAcceptST(float value)
 	; Animation Editor
 	if Options[0] == "Adjust"
 		; Stage, Slot
-		Animation.SetAdjustment(Animation.Key(AdjustKey), Position, Options[1] as int, Options[2] as int, value)
+		Animation.SetAdjustment(AdjustKey, Position, Options[1] as int, Options[2] as int, value)
 		Config.ExportProfile(Config.AnimProfile)
 		if Options[2] == "3" ; SOS
 			SetSliderOptionValueST(value, "{0}")
@@ -760,23 +760,12 @@ endFunction
 ; ------------------------------------------------------- ;
 
 ; Current edit target
+sslBaseAnimation Animation
+sslAnimationSlots AnimationSlots
 bool PreventOverwrite
 bool IsCreatureEditor
-sslBaseAnimation Animation
 string AdjustKey
 int Position
-int SlotPage
-int SlotPageEnd
-int PerPage = 30
-
-sslAnimationSlots property AnimType hidden
-	sslAnimationSlots function get()
-		if IsCreatureEditor
-			return CreatureSlots
-		endIf
-		return AnimSlots
-	endfunction
-endProperty
 
 function AnimationEditor()
 	SetCursorFillMode(LEFT_TO_RIGHT)
@@ -788,7 +777,7 @@ function AnimationEditor()
 			PreventOverwrite = true
 			Animation = Thread.Animation
 			Position  = Thread.GetAdjustPos()
-			AdjustKey = sslUtility.RemoveString(Thread.AdjustKey, Animation.Key(""))
+			AdjustKey = SexLabUtil.RemoveSubString(Thread.AdjustKey, Animation.Key(""))
 		endIf
 	endIf
 
@@ -802,11 +791,16 @@ function AnimationEditor()
 
 	; Check if editing a creature animation
 	IsCreatureEditor = Animation.IsCreature
+	AnimationSlots   = AnimSlots
+	if IsCreatureEditor
+		AnimationSlots = CreatureSlots
+	endIf
 
 	; Set current pagination settings
-	SlotPage    = AnimType.FindPage(Animation.Registry, PerPage)
-	SlotPageEnd = AnimType.PageCount(PerPage)
-
+	PerPage     = 125
+	OnPage      = AnimationSlots.FindPage(Animation.Registry, PerPage)
+	LastPage    = AnimationSlots.PageCount(PerPage)
+		
 	; Show editor options
 	SetTitleText(Animation.Name)
 	AddMenuOptionST("AnimationSelect", "$SSL_Animation", Animation.Name)
@@ -835,7 +829,7 @@ function AnimationEditor()
 	int Stage = 1
 	while Stage <= Animation.StageCount
 
-		float[] Adjustments = Animation.GetPositionAdjustments(Animation.Key(AdjustKey), Position, Stage)
+		float[] Adjustments = Animation.GetPositionAdjustments(AdjustKey, Position, Stage)
 		AddHeaderOption("$SSL_Stage{"+Stage+"}Adjustments")
 		AddHeaderOption(Profile)
 
@@ -859,68 +853,45 @@ string function GenderLabel(string id)
 	return "$Unknown"
 endFunction
 
-string[] function _Pagination()
-	string[] Output
-	return Output
-endFunction
-
+string[] PageOptions
+string[] MenuOptions
 state AnimationSelect
 
-	string[] function _Pagination()
-		string[] Output = new string[1]
-		if IsCreatureEditor
-			Output[0] = "$SSL_SwitchNormalAnimationEditor"
-		else
-			Output[0] = "$SSL_SwitchCreatureAnimationEditor"
-		endIf
-		int Slotted = AnimType.Slotted
-		if SlotPage < SlotPageEnd
-			Output = PapyrusUtil.PushString(Output, "NEXT PAGE =>")
-		endIf
-		if SlotPage > 1
-			Output = PapyrusUtil.PushString(Output, "<= PREVIOUS PAGE")
-		endIf
-		return Output
-	endfunction
-
 	event OnMenuOpenST()
-		string[] PageOptions = MergeStringArray(_Pagination(), AnimType.GetSlotNames(SlotPage, PerPage))
-		SetMenuDialogOptions(PageOptions)
-		SetMenuDialogStartIndex(PageOptions.Find(Animation.Name))
-		SetMenuDialogDefaultIndex(0)
+		PageOptions = PaginationMenu(SexLabUtil.StringIfElse(IsCreatureEditor, "$SSL_SwitchNormalAnimationEditor", "$SSL_SwitchCreatureAnimationEditor"))
+		MenuOptions = MergeStringArray(PageOptions, AnimationSlots.GetSlotNames(OnPage, PerPage))
+		SetMenuDialogOptions(MenuOptions)
+		SetMenuDialogStartIndex(MenuOptions.Find(Animation.Name))
+		SetMenuDialogDefaultIndex(MenuOptions.Find(Animation.Name))
 	endEvent
 
 	event OnMenuAcceptST(int i)
 		AdjustKey = "Global"
 		Position  = 0
-		string[] PageOptions = _Pagination()
-		int NumOptions     = PageOptions.Length
-		if i < PageOptions.Length
-			; Normal/Creature swap
-			if i == 0
-				if IsCreatureEditor
-					IsCreatureEditor = false
-					Animation = AnimSlots.GetBySlot(0)
-				else
-					IsCreatureEditor = true
-					Animation = CreatureSlots.GetBySlot(0)
-				endIf
-				SetMenuOptionValueST(Animation.Name)
-				ForcePageReset()
-				return
-			elseIf PageOptions[i] == "<= PREVIOUS PAGE"
-				SlotPage -= 1
-			elseIf PageOptions[i] == "NEXT PAGE =>"
-				SlotPage += 1
+		if i == 0
+			if IsCreatureEditor
+				IsCreatureEditor = false
+				Animation = AnimSlots.GetBySlot(0)
+			else
+				IsCreatureEditor = true
+				Animation = CreatureSlots.GetBySlot(0)
 			endIf
-			i += 1
-		endIf
-		i -= PageOptions.Length
-		i += ((SlotPage - 1) * PerPage)
-		Animation = AnimType.GetBySlot(i)
+			SetMenuOptionValueST(Animation.Name)
+			ForcePageReset()
+			return
+		elseIf MenuOptions[i] == "<- PREVIOUS PAGE"
+			Animation = AnimationSlots.GetBySlot(((OnPage - 2) * PerPage))
+		elseIf MenuOptions[i] == "NEXT PAGE ->"
+			Animation = AnimationSlots.GetBySlot((OnPage * PerPage))
+		else
+			i -= PageOptions.Length
+			i += ((OnPage - 1) * PerPage)
+			Animation = AnimationSlots.GetBySlot(i)
+		endIf		
 		SetMenuOptionValueST(Animation.Name)
 		ForcePageReset()
 	endEvent
+	
 	event OnDefaultST()
 		if IsCreatureEditor
 			Animation = CreatureSlots.GetBySlot(0)
@@ -1030,13 +1001,13 @@ function ToggleAnimations()
 	SetTitleText(TAModes[ta])
 	AddMenuOptionST("TAModeSelect", "$SSL_View", TAModes[ta])
 
-	sslAnimationSlots Slots = AnimSlots
+	AnimationSlots = AnimSlots
 	if ta == 3
-		Slots = CreatureSlots		
+		AnimationSlots = CreatureSlots		
 	endIf
-	sslBaseAnimation[] Animations = Slots.GetSlots(pg)
+	sslBaseAnimation[] Animations = AnimationSlots.GetSlots(pg, 126)
 
-	int Slotted = Slots.Slotted
+	int Slotted = AnimationSlots.Slotted
 	if Slotted > PerPage
 		AddTextOptionST("AnimationTogglePage", "Toggle Page #", pg)
 	else
@@ -1089,7 +1060,7 @@ state AnimationTogglePage
 			Slotted = CreatureSlots.Slotted
 		endIf
 		pg += 1
-		if pg > SlotPageEnd
+		if pg > LastPage
 			pg = 1
 		endIf
 		SetTextOptionValueST(pg)
@@ -1801,7 +1772,8 @@ event OnConfigOpen()
 	Chances[2] = "$SSL_Always"
 
 	; Animation Editor
-	PerPage = 30
+	PerPage = 125
+	pg = 1
 
 	; Expression Editor
 	Phases = new string[5]
@@ -2058,8 +2030,8 @@ state CumEffectTimer
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(Config.CumTimer)
 		SetSliderDialogDefaultValue(120)
-		SetSliderDialogRange(5, 900)
-		SetSliderDialogInterval(5)
+		SetSliderDialogRange(0, 43200)
+		SetSliderDialogInterval(10)
 	endEvent
 	event OnSliderAcceptST(float value)
 		Config.CumTimer = value

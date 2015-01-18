@@ -1,9 +1,14 @@
 scriptname sslBaseObject extends ReferenceAlias hidden
 
-bool property Enabled auto hidden
+; Config accessor
+sslSystemConfig property Config auto hidden
 
+; Object base info
 int property SlotID auto hidden
 string property Name auto hidden
+; string property DisplayName auto hidden
+bool property Enabled auto hidden
+
 string property Registry auto hidden
 bool property Registered hidden
 	bool function get()
@@ -11,21 +16,14 @@ bool property Registered hidden
 	endFunction
 endProperty
 
-; Config accessor
-sslSystemConfig property Config auto hidden
-
-; Storage key
-Form property Storage auto hidden
-
-; Phantom slots claim/touch time
-bool property Ephemeral auto hidden
-
-; Search tags
-string[] Tags
-
 ; ------------------------------------------------------- ;
 ; --- Tagging System                                  --- ;
 ; ------------------------------------------------------- ;
+
+string[] Tags
+string[] function GetTags()
+	return Tags
+endFunction
 
 bool function HasTag(string Tag)
 	return Tag != "" && Tags.Find(Tag) != -1
@@ -105,22 +103,29 @@ bool function HasAllTag(string[] TagList)
 	return true
 endFunction
 
-string[] function GetTags()
-	return Tags
-endFunction
+; ------------------------------------------------------- ;
+; --- Phantom Slots                                   --- ;
+; ------------------------------------------------------- ;
 
-; ------------------------------------------------------- ;
-; --- System Use                                      --- ;
-; ------------------------------------------------------- ;
+; Phantom slots owner
+Form property Storage auto hidden
+bool property Ephemeral hidden
+	bool function get()
+		return Storage != none
+	endFunction
+endProperty
 
 function MakeEphemeral(string Token, Form OwnerForm)
 	Initialize()
-	Ephemeral = true
 	Enabled   = true
 	Registry  = Token
 	Storage   = OwnerForm
 	Log("Created Non-Global Object '"+Token+"''", Storage)
 endFunction
+
+; ------------------------------------------------------- ;
+; --- System Use                                      --- ;
+; ------------------------------------------------------- ;
 
 string function Key(string type = "")
 	return Registry+"."+type
@@ -134,21 +139,22 @@ function Log(string Log, string Type = "NOTICE")
 	Debug.Trace("SEXLAB - "+Log)
 endFunction
 
+function Save(int id = -1)
+	; if DisplayName == ""
+	; 	DisplayName = Name
+	; endIf
+	SlotID = id
+endFunction
+
 function Initialize()
-	SlotID    = -1
-	Name      = ""
-	Registry  = ""
-	Enabled   = false
-	Ephemeral = false
-	Storage   = GetOwningQuest()
-	Tags      = Utility.CreateStringArray(0)
 	if !Config
 		Config = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
 	endIf
+	Name        = ""
+	; DisplayName = ""
+	Registry    = ""
+	SlotID      = -1
+	Enabled     = false
+	Storage     = none
+	Tags = Utility.CreateStringArray(0)
 endFunction
-
-function Save(int id = -1)
-endFunction
-
-
-bool function BaseObjectTest(string racekey) native

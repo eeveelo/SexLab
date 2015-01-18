@@ -37,14 +37,9 @@ bool function CheckGender(int CheckGender)
 endFunction
 
 function Save(int id = -1)
-	; Make sure we have a gender tag
-	if Gender == 0 || Gender == -1
-		AddTag("Male")
-	elseIf Gender == 1 || Gender == -1
-		AddTag("Female")
-	endIf
-	; Log
-	SlotID = id
+	parent.Save(id)
+	AddTagConditional("Male",   (Gender == 0 || Gender == -1))
+	AddTagConditional("Female", (Gender == 1 || Gender == -1))
 	Log(Name, "Voices["+id+"]")
 endFunction
 
