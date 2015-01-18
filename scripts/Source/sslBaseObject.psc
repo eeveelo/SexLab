@@ -127,15 +127,11 @@ string function Key(string type = "")
 endFunction
 
 function Log(string Log, string Type = "NOTICE")
-	Log = Type+": "+Log
+	Log = Type+" - "+Registry+" - "+Log
 	if Config.DebugMode
 		SexLabUtil.PrintConsole(Log)
 	endIf
-	if Type == "FATAL"
-		Debug.TraceStack("SEXLAB - "+Log)
-	else
-		Debug.Trace("SEXLAB - "+Log)
-	endIf
+	Debug.Trace("SEXLAB - "+Log)
 endFunction
 
 function Initialize()
@@ -153,3 +149,6 @@ endFunction
 
 function Save(int id = -1)
 endFunction
+
+
+bool function BaseObjectTest(string racekey) native

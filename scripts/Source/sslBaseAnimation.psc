@@ -4,7 +4,34 @@ scriptname sslBaseAnimation extends sslBaseObject
 import PapyrusUtil
 
 ; Config
-; int property SFX auto hidden
+int Actors
+int Stages
+
+; Storage arrays
+string[] LastKeys
+; int[] Flags      ; = silent, openmouth, strapon, schlong offset, cum
+
+string[] Animations
+
+; int[] Genders     ; = males, females, creature(male), creature(female)
+int[] Positions   ; = gender
+int[] CumIDs      ; = per stage cumIDs
+int[] Schlongs    ; = per stage schlong offset
+
+bool[] Silences
+bool[] OpenMouths
+bool[] Strapons
+
+float[] Timers
+float[] CenterAdjust
+
+float[] Offsets   ; = forward, side, up, rotate
+float[] BedOffset ; = forward, side, up, rotate
+
+int aid
+int sid
+
+Form[] StageSoundFX
 Sound property SoundFX hidden
 	Sound function get()
 		return StageSoundFX[0] as Sound
@@ -13,30 +40,6 @@ Sound property SoundFX hidden
 		StageSoundFX[0] = var as Form
 	endFunction
 endProperty
-Form[] StageSoundFX
-
-int Actors
-int Stages
-
-; Storage arrays
-string LastKey
-string[] Animations
-string[] RaceIDs
-float[] Timers
-float[] CenterAdjust
-float[] Offsets   ; = forward, side, up, rotate
-float[] BedOffset ; = forward, side, up, rotate
-int[] Positions   ; = gender, cum
-int[] Flags       ; = silent (bool), openmouth (bool), strapon (bool), schlong offset (int)
-
-int[] Flags0
-int[] Flags1
-int[] Flags2
-int[] Flags3
-int[] Flags4
-
-int sid
-int aid
 
 ; Information
 bool property IsSexual hidden
@@ -46,7 +49,7 @@ bool property IsSexual hidden
 endProperty
 bool property IsCreature hidden
 	bool function get()
-		return Genders[2] != 0
+		return Genders[2] > 0 || Genders[3] > 0
 	endFunction
 endProperty
 
@@ -111,13 +114,15 @@ int property Creatures hidden
 	endFunction
 endProperty
 
-form[] property CreatureRaces hidden
+string property RaceType auto hidden
+Form[] property CreatureRaces hidden
 	form[] function get()
-		int i = RaceIDs.Length
-		form[] RaceRefs
+		string[] Races = sslCreatureAnimationSlots.GetAllRaceIDs(RaceType)
+		int i = Races.Length
+		Form[] RaceRefs = Utility.CreateFormArray(i)
 		while i
 			i -= 1
-			RaceRefs = PushForm(RaceRefs, Race.GetRace(RaceIDs[i]))
+			RaceRefs[i] = Race.GetRace(Races[i])
 		endWhile
 		return ClearNone(RaceRefs)
 	endFunction
@@ -147,7 +152,7 @@ string[] function FetchPosition(int position)
 	return anims
 endFunction
 
-string function FetchPositionStage(int position, int stage)
+string function FetchPositionStage(int position, int Stage)
 	return Animations[((position * Stages) + (stage - 1))]
 endFunction
 
@@ -177,13 +182,28 @@ int function AdjIndex(int Stage, int Slot = 0, int Slots = 4)
 	return ((Stage - 1) * Slots) + Slot
 endfunction
 
-int function AccessFlag(int Position, int Stage, int Slot)
-	return Flags[DataIndex(4, Position, Stage, Slot)]
+int function StageIndex(int Position, int Stage)
+	return ((Position * Stages) + (Stage - 1))
 endFunction
 
-int function AccessPosition(int Position, int Slot)
-	return Positions[((Position * 2) + Slot)]
-endFunction
+; int function AccessFlag(int Position, int Stage, int Slot)
+; 	int i = StageIndex(Position, Stage)
+; 	if Slot == 0
+; 		return Silences[i] as int
+; 	elseIf Slot == 1
+; 		return OpenMouths[i] as int
+; 	elseIf Slot == 2
+; 		return Strapons[i] as int
+; 	elseIf Slot == 4
+; 		return Schlongs[i]
+; 	else
+; 		return -1
+; 	endIf
+; endFunction
+
+; int function AccessPosition(int Position, int Slot)
+; 	return Positions[((Position * 2) + Slot)]
+; endFunction
 
 bool function HasTimer(int Stage)
 	return Stage > 0 && Stage <= Timers.Length && Timers[(Stage - 1)] != 0.0
@@ -204,7 +224,7 @@ Sound function GetSoundFX(int Stage)
 endFunction
 
 int[] function GetPositionFlags(string AdjustKey, int Position, int Stage)
-	int[] Output = new int[5]
+	int[] Output = new int[6]
 	return PositionFlags(Output, AdjustKey, Position, Stage)
 endFunction
 
@@ -218,17 +238,18 @@ float[] function GetRawOffsets(int Position, int Stage)
 	return RawOffsets(Output, Position, Stage)
 endFunction
 
+float[] function _GetStageAdjustments(string Registrar, string AdjustKey, int Stage) global native
 float[] function GetPositionAdjustments(string AdjustKey, int Position, int Stage)
-	float[] Output = new float[4]
-	return PositionAdjustments(Output, AdjustKey, Position, Stage)
+	return _GetStageAdjustments(Registry, AdjustKey+"."+Position, Stage)
 endFunction
 
 ;float[] function _GetAllAdjustments(string sProfile, string sRegistry, string sAdjustKey) global native
+float[] function _GetAllAdjustments(string Registrar, string AdjustKey) global native
 float[] function GetAllAdjustments(string AdjustKey)
-	float[] Output = Utility.CreateFloatArray((Stages * 4))
-	JsonUtil.FloatListSlice(Profile, AdjustKey, Output)
-	return Output
+	return _GetAllAdjustments(Registry, Adjustkey)
 endFunction
+
+bool function _HasAdjustments(string Registrar, string AdjustKey, int Stage) global native
 
 ; ------------------------------------------------------- ;
 ; --- Data Copy To                                    --- ;
@@ -236,34 +257,27 @@ endFunction
 
 int[] function PositionFlags(int[] Output, string AdjustKey, int Position, int Stage)
 	AdjustKey += "."+Position
-	int i = DataIndex(4, Position, Stage)
-	Output[0] = Flags[i]
-	Output[1] = Flags[(i + 1)]
-	Output[2] = Flags[(i + 2)]
+	; int i = DataIndex(4, Position, Stage)
+	int i = StageIndex(Position, Stage)
+	Output[0] = Silences[i] as int
+	Output[1] = OpenMouths[i] as int
+	Output[2] = Strapons[i] as int
 	Output[3] = GetSchlong(AdjustKey, Position, Stage)
 	Output[4] = GetGender(Position)
+	Output[5] = CumIDs[i]
 	return Output
 endFunction
 
+; function CalcCoords(float[] Output, float[] CenterLoc, float[] Offsets, string AdjustKey, int Stage)
+; function _PositionOffsets(float[] Output, float[] Raw, string AdjustKey, int Stage, float CenterAdjuster = 0.0) global native
+function _PositionOffsets(string Registrar, string AdjustKey, string LastKey, int Stage, float[] RawOffsets) global native
 float[] function PositionOffsets(float[] Output, string AdjustKey, int Position, int Stage)
 	int i = DataIndex(4, Position, Stage)
-	int n = AdjIndex(Stage)
-	; Check if we have any offsets
-	AdjustKey += "."+Position
-	if JsonUtil.FloatListCount(Profile, AdjustKey) < n
-		AdjustKey = LastKey+"."+Position
-	endIf
-	; Reset the array values
-	Output[0] = 0.0
-	Output[1] = 0.0
-	Output[2] = 0.0
-	Output[3] = 0.0
-	; Get adjustkey's adjustments
-	JsonUtil.FloatListSlice(Profile, AdjustKey, Output, n)
-	Output[0] = Output[0] + Offsets[i] + CenterAdjust[(Stage - 1)] ; Forward
-	Output[1] = Output[1] + Offsets[(i + 1)] ; Side
-	Output[2] = Output[2] + Offsets[(i + 2)] ; Up
+	Output[0] = Offsets[i] + CenterAdjust[(Stage - 1)] ; Forward
+	Output[1] = Offsets[(i + 1)] ; Side
+	Output[2] = Offsets[(i + 2)] ; Up
 	Output[3] = Offsets[(i + 3)] ; Rot - no offset
+	_PositionOffsets(Registry, AdjustKey+"."+Position, LastKeys[Position], Stage, Output)
 	return Output
 endFunction
 
@@ -276,45 +290,45 @@ float[] function RawOffsets(float[] Output, int Position, int Stage)
 	return Output
 endFunction
 
-float[] function PositionAdjustments(float[] Output, string AdjustKey, int Position, int Stage)
-	if JsonUtil.FloatListCount(Profile, AdjustKey+"."+Position) > AdjIndex(Stage, 3)
-		JsonUtil.FloatListSlice(Profile, AdjustKey+"."+Position, Output, AdjIndex(Stage))
-	else
-		Output[3] = GetSchlong(AdjustKey, Position, Stage)
-	endIf
-	return Output
-endFunction
+; float[] function PositionAdjustments(float[] Output, string AdjustKey, int Position, int Stage)
+; 	if JsonUtil.FloatListCount(Profile, AdjustKey+"."+Position) > AdjIndex(Stage, 3)
+; 		JsonUtil.FloatListSlice(Profile, AdjustKey+"."+Position, Output, AdjIndex(Stage))
+; 	else
+; 		Output[3] = GetSchlong(AdjustKey, Position, Stage)
+; 	endIf
+; 	return Output
+; endFunction
 
 ; ------------------------------------------------------- ;
 ; --- Update Offsets                                  --- ;
 ; ------------------------------------------------------- ;
 
+function _SetAdjustment(string Registrar, string AdjustKey, int Stage, int Slot, float Adjustment) global native
 function SetAdjustment(string AdjustKey, int Position, int Stage, int Slot, float Adjustment)
 	if Position < Actors
 		InitAdjustments(AdjustKey, Position)
-		JsonUtil.FloatListSet(Profile, AdjustKey+"."+Position, AdjIndex(Stage, Slot), Adjustment)
+		sslBaseAnimation._SetAdjustment(Registry, AdjustKey+"."+Position, Stage, Slot, Adjustment)
 	endIf
 endFunction
 
+float function _GetAdjustment(string Registrar, string AdjustKey, int Stage, int nth) global native
 float function GetAdjustment(string AdjustKey, int Position, int Stage, int Slot)
-	return JsonUtil.FloatListGet(Profile, AdjustKey+"."+Position, AdjIndex(Stage, Slot))
+	return sslBaseAnimation._GetAdjustment(Registry, AdjustKey+"."+Position, Stage, Slot)
 endFunction
 
+float function _UpdateAdjustment(string Registrar, string AdjustKey, int Stage, int nth, float by) global native
 function UpdateAdjustment(string AdjustKey, int Position, int Stage, int Slot, float AdjustBy)
 	if Position < Actors
 		InitAdjustments(AdjustKey, Position)
-		JsonUtil.FloatListAdjust(Profile, AdjustKey+"."+Position, AdjIndex(Stage, Slot), AdjustBy)
-		sslBaseAnimation._AdjustOffset("DevProfile_1.json", Registry, sslUtility.RemoveString(AdjustKey+"."+Position, Key("")), Stage, Slot, AdjustBy)
+		sslBaseAnimation._UpdateAdjustment(Registry, AdjustKey+"."+Position, Stage, Slot, AdjustBy)
 	endIf
 endFunction
-
 function UpdateAdjustmentAll(string AdjustKey, int Position, int Slot, float AdjustBy)
 	if Position < Actors
 		InitAdjustments(AdjustKey, Position)
 		int Stage = Stages
 		while Stage
-			JsonUtil.FloatListAdjust(Profile, AdjustKey+"."+Position, AdjIndex(Stage, Slot), AdjustBy)
-			sslBaseAnimation._AdjustOffset("DevProfile_1.json", Registry, sslUtility.RemoveString(AdjustKey+"."+Position, Key("")), Stage, Slot, AdjustBy)
+			sslBaseAnimation._UpdateAdjustment(Registry, AdjustKey+"."+Position, Stage, Slot, AdjustBy)
 			Stage -= 1
 		endWhile
 	endIf
@@ -344,68 +358,68 @@ function AdjustUpward(string AdjustKey, int Position, int Stage, float AdjustBy,
 	endIf
 endFunction
 
+function _ClearAdjustments(string Registrar, string AdjustKey) global native
 function RestoreOffsets(string AdjustKey)
-	JsonUtil.FloatListClear(Profile, AdjustKey+".0")
-	JsonUtil.FloatListClear(Profile, AdjustKey+".1")
-	JsonUtil.FloatListClear(Profile, AdjustKey+".2")
-	JsonUtil.FloatListClear(Profile, AdjustKey+".3")
-	JsonUtil.FloatListClear(Profile, AdjustKey+".4")
+	_ClearAdjustments(Registry, AdjustKey+".0")
+	_ClearAdjustments(Registry, AdjustKey+".1")
+	_ClearAdjustments(Registry, AdjustKey+".2")
+	_ClearAdjustments(Registry, AdjustKey+".3")
+	_ClearAdjustments(Registry, AdjustKey+".4")
 endFunction
 
+bool function _CopyAdjustments(string Registrar, string AdjustKey, float[] Array) global native
 function InitAdjustments(string AdjustKey, int Position)
-	int i = AdjIndex(Stages, 3)
-	if JsonUtil.FloatListCount(Profile, AdjustKey+"."+Position) <= i
-		float[] Adjusts = Utility.CreateFloatArray((Stages * 4))
-		if JsonUtil.FloatListCount(Profile, LastKey+"."+Position) == Adjusts.Length; && JsonUtil.StringListCount(Profile, Registry) > 0
-			Log("CopyKey ["+LastKey+"] -> ["+AdjustKey+"]")
-			JsonUtil.FloatListSlice(Profile, LastKey+"."+Position, Adjusts)
-		else
-			int n = Stages
-			while n > 0
-				Adjusts[AdjIndex(n, 3)] = AccessFlag(Position, n, 3)
-				n -= 1
+	AdjustKey += "."+Position
+	if !_HasAdjustments(Registry, AdjustKey, Stages)
+		float[] List
+		string CopyKey = LastKeys[Position]
+		if CopyKey == "" || !_HasAdjustments(Registry, CopyKey, Stages)
+			CopyKey = "Global."+Position
+		endIf
+		List = _GetAllAdjustments(Registry, CopyKey)
+		if List.Length != (Stages * 4)
+			List = PapyrusUtil.ResizeFloatArray(List, (Stages * 4))
+			int Stage = Stages
+			while Stage > 0
+				List[AdjIndex(Stage, 3)] = Schlongs[StageIndex(Position, Stage)]
+				Stage -= 1
 			endWhile
-		endIf
-		; Save initialized array.
-		string KeyPart = sslUtility.RemoveString(AdjustKey, Key(""))
-		JsonUtil.FloatListCopy(Profile, AdjustKey+"."+Position, Adjusts)
-		if KeyPart != "Global"
-			JsonUtil.StringListAdd(Profile, "Adjusted", Registry, false)
-			JsonUtil.StringListAdd(Profile, Registry, KeyPart, false)
-		endIf
-	endIf
-	LastKey = AdjustKey
-endFunction
-
-string function MakeAdjustKey(Actor[] ActorList, bool RaceKey = true)
-	if !RaceKey || ActorList.Length != Actors
-		return Key("Global")
-	endIf
-	string AdjustKey = Registry
-	int i
-	while i < Actors
-		ActorBase BaseRef = ActorList[i].GetLeveledActorBase()
-		string RaceID = MiscUtil.GetRaceEditorID(BaseRef.GetRace())
-		if IsCreature && GetGender(i) == 2
-			AdjustKey += "."+RaceID+"C"
-		elseIf BaseRef.GetSex() == 1
-			AdjustKey += "."+RaceID+"F"
+			Log(List, "Initialized("+AdjustKey+")")
 		else
-			AdjustKey += "."+RaceID+"M"
+			Log(List, "CopyAdjustments("+CopyKey+", "+AdjustKey+")")
 		endIf
-		i += 1
-	endWhile
-	return AdjustKey
+		_CopyAdjustments(Registry, AdjustKey, List)
+	endIf
+	LastKeys[Position] = AdjustKey
+
+
+	; int i = AdjIndex(Stages, 3)
+	; if JsonUtil.FloatListCount(Profile, AdjustKey+"."+Position) <= i
+	; 	float[] Adjusts = Utility.CreateFloatArray((Stages * 4))
+	; 	if JsonUtil.FloatListCount(Profile, LastKey+"."+Position) == Adjusts.Length; && JsonUtil.StringListCount(Profile, Registry) > 0
+	; 		Log("CopyKey ["+LastKey+"] -> ["+AdjustKey+"]")
+	; 		JsonUtil.FloatListSlice(Profile, LastKey+"."+Position, Adjusts)
+	; 	else
+	; 		int n = Stages
+	; 		while n > 0
+	; 			Adjusts[AdjIndex(n, 3)] = AccessFlag(Position, n, 3)
+	; 			n -= 1
+	; 		endWhile
+	; 	endIf
+	; 	; Save initialized array.
+	; 	string KeyPart = SexLabUtil.RemoveSubString(AdjustKey, Key(""))
+	; 	JsonUtil.FloatListCopy(Profile, AdjustKey+"."+Position, Adjusts)
+	; 	if KeyPart != "Global"
+	; 		JsonUtil.StringListAdd(Profile, "Adjusted", Registry, false)
+	; 		JsonUtil.StringListAdd(Profile, Registry, KeyPart, false)
+	; 	endIf
+	; endIf
+	; LastKey = AdjustKey
 endFunction
 
+string[] function _GetAdjustKeys(string Registrar) global native
 string[] function GetAdjustKeys()
-	string[] Output = new string[1]
-	Output[0] = "Global"
-	string[] AdjustKeys = JsonUtil.StringListToArray(Profile, Registry)
-	if(AdjustKeys.Length > 0)
-		Output = PapyrusUtil.MergeStringArray(Output, AdjustKeys)
-	endIf
-	return Output
+	return _GetAdjustKeys(Registry)
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -413,23 +427,33 @@ endFunction
 ; ------------------------------------------------------- ;
 
 bool function IsSilent(int Position, int Stage)
-	return AccessFlag(Position, Stage, 0) as bool
+	return Silences[StageIndex(Position, Stage)]
 endFunction
 
 bool function UseOpenMouth(int Position, int Stage)
-	return AccessFlag(Position, Stage, 1) as bool
+	return OpenMouths[StageIndex(Position, Stage)]
 endFunction
 
 bool function UseStrapon(int Position, int Stage)
-	return AccessFlag(Position, Stage, 2) as bool
+	return Strapons[StageIndex(Position, Stage)]
 endFunction
 
+; int function _GetSchlong(string ProfileName, string Registry, string AdjustKey, string LastKey, int Stage, int retDefault) global native
 int function GetSchlong(string AdjustKey, int Position, int Stage)
-	int i = AdjIndex(Stage, 3)
-	if i < JsonUtil.FloatListCount(Profile, AdjustKey)
-		return JsonUtil.FloatListGet(Profile, AdjustKey, i) as int
+	if _HasAdjustments(Registry, AdjustKey, Stage)
+		return _GetAdjustment(Registry, AdjustKey, Stage, 3) as int
+	elseIf LastKeys[Position] != "" && _HasAdjustments(Registry, LastKeys[Position], Stage)
+		return _GetAdjustment(Registry, LastKeys[Position], Stage, 3) as int
 	endIf
-	return AccessFlag(Position, Stage, 3)
+	return Schlongs[StageIndex(Position, Stage)]
+endFunction
+
+int function GetCumID(int Position, int Stage = 1)
+	return CumIDs[StageIndex(Position, Stage)]
+endFunction
+
+int function GetCum(int Position)
+	return GetCumID(Position, Stages)
 endFunction
 
 int function ActorCount()
@@ -441,47 +465,27 @@ int function StageCount()
 endFunction
 
 int function GetGender(int Position)
-	return AccessPosition(Position, 0)
+	return Positions[Position]
 endFunction
 
 bool function MalePosition(int Position)
-	return AccessPosition(Position, 0) == 0
+	return Positions[Position] == 0
 endFunction
 
 bool function FemalePosition(int Position)
-	return AccessPosition(Position, 0) == 1
+	return Positions[Position] == 1
 endFunction
 
 bool function CreaturePosition(int Position)
-	return AccessPosition(Position, 0) == 2
+	return Positions[Position] >= 2
 endFunction
 
 int function FemaleCount()
-	int count = 0
-	int i = 0
-	while i < Actors
-		if AccessPosition(i, 0) == 1
-			count += 1
-		endIf
-		i += 1
-	endWhile
-	return count
+	return Genders[1]
 endFunction
 
 int function MaleCount()
-	int count = 0
-	int i = 0
-	while i < Actors
-		if AccessPosition(i, 0) == 0
-			count += 1
-		endIf
-		i += 1
-	endWhile
-	return count
-endFunction
-
-int function GetCum(int Position)
-	return AccessPosition(Position, 1)
+	return Genders[0]
 endFunction
 
 bool function IsSexual()
@@ -554,45 +558,43 @@ function AddRace(Race RaceRef)
 endFunction
 
 bool function HasRaceID(string RaceID)
-	return RaceID != "" && RaceIDs.Find(RaceID) != -1
+	return RaceType != "" && RaceID != "" && sslCreatureAnimationSlots.HasRaceID(RaceType, RaceID)
 endFunction
 
 function AddRaceID(string RaceID)
-	if HasRaceID(RaceID) || Race.GetRace(RaceID) == none
-		return ; Invalid race form or already added
+	if !HasRaceID(RaceID)
+		sslCreatureAnimationSlots.AddRaceID(RaceType, RaceID)
 	endIf
-	; Init ID storage
-	if RaceIDs.Length < 1
-		RaceIDs = new string[5]
-	endIf
-	; Add to animation
-	int i = RaceIDs.Find("")
-	if i != -1
-		RaceIDs[i] = RaceID
+endFunction
+
+function SetRaceKey(string RaceKey)
+	if sslCreatureAnimationSlots.HasRaceKey(RaceKey)
+		RaceType = RaceKey
 	else
-		RaceIDs = PushString(RaceIDs, RaceID)
+		Log("Unknown or empty RaceKey!", "SetRaceKey("+RaceKey+")")
 	endIf
-	; Add global
-	StorageUtil.StringListAdd(Config, "SexLabCreatures", RaceID, false)
 endFunction
 
 function SetRaceIDs(string[] RaceList)
-	int i
-	while i < RaceList.Length
-		StorageUtil.StringListAdd(Config, "SexLabCreatures", RaceList[i], false)
-		i += 1
+	RaceType = ""
+	int i = RaceList.Length
+	while i
+		i -= 1
+		string RaceKey = sslCreatureAnimationSlots.GetRaceKeyByID(RaceList[i])
+		if RaceKey != "" && RaceType != RaceKey
+			RaceType = RaceKey
+			i = 0
+		endIf
 	endWhile
-	RaceIDs = RaceList
 endFunction
 
 string[] function GetRaceIDs()
-	return RaceIDs
+	return sslCreatureAnimationSlots.GetAllRaceIDs(RaceType)
 endFunction
 
 ; ------------------------------------------------------- ;
 ; --- Animation Setup                                 --- ;
 ; ------------------------------------------------------- ;
-
 function SetStageSoundFX(int stage, Sound StageFX)
 	; Validate stage
 	if stage > Stages || stage < 1
@@ -621,28 +623,65 @@ function SetStageTimer(int stage, float timer)
 	Timers[(stage - 1)] = timer
 endFunction
 
+function SetStageCumID(int Position, int Stage, int CumID)
+	CumIDs[((Position * Stages) + (Stage - 1))] = CumID
+endFunction
+
+bool Locked
 int function AddPosition(int Gender = 0, int AddCum = -1)
+	if Actors >= 5
+		return -1
+	endIf
+	while Locked
+		Utility.WaitMenuMode(0.05)
+		Debug.Trace(Registry+" AddPosition Lock! -- Adding Actor: "+Actors)
+	endWhile
+	Locked = true
+
+	int pid = Actors
 	Genders[Gender] = Genders[Gender] + 1
-	int pid = (Actors * 2)
-	Positions[pid + 0] = Gender
-	Positions[pid + 1] = AddCum
+	Positions[pid]  = Gender
+	if pid > 0
+		; Single item / per stage containers
+		int idx    = (pid + 1) * Stages
+		Animations = PapyrusUtil.ResizeStringArray(Animations, idx)
+		Silences   = PapyrusUtil.ResizeBoolArray(Silences, idx)
+		OpenMouths = PapyrusUtil.ResizeBoolArray(OpenMouths, idx)
+		Strapons   = PapyrusUtil.ResizeBoolArray(Strapons, idx)
+		Schlongs   = PapyrusUtil.ResizeIntArray(Schlongs, idx)
+		if pid == 1
+			CumIDs = PapyrusUtil.ResizeIntArray(CumIDs, Stages)
+		endIf
+		CumIDs     = PapyrusUtil.ResizeIntArray(CumIDs, idx, AddCum)
+		; Offsets
+		Offsets    = PapyrusUtil.ResizeFloatArray(Offsets, (pid + 1) * (Stages * 4))
+	else
+		Offsets    = new float[128]
+		Animations = new string[32]
+		Silences   = new bool[32]
+		OpenMouths = new bool[32]
+		Strapons   = new bool[32]
+		Schlongs   = new int[32]
+		CumIDs     = Utility.CreateIntArray(32, AddCum)
+	endIf
 	Actors += 1
-	return (Actors - 1)
+	
+	Locked = false
+	return pid
 endFunction
 
 function AddPositionStage(int Position, string AnimationEvent, float forward = 0.0, float side = 0.0, float up = 0.0, float rotate = 0.0, bool silent = false, bool openMouth = false, bool strapon = true, int sos = 0)
 	Animations[aid] = AnimationEvent
+	Silences[aid]   = silent
+	OpenMouths[aid] = openMouth
+	Strapons[aid]   = strapon
+	Schlongs[aid]   = sos
 	aid += 1
 
 	Offsets[sid + 0] = forward
 	Offsets[sid + 1] = side
 	Offsets[sid + 2] = up
 	Offsets[sid + 3] = rotate
-
-	Flags[sid + 0]   = silent as int
-	Flags[sid + 1]   = openMouth as int
-	Flags[sid + 2]   = strapon as int
-	Flags[sid + 3]   = sos
 	sid += 4
 
 	Stages += (Position == 0) as int
@@ -650,17 +689,22 @@ endFunction
 
 function Save(int id = -1)
 	; Finalize config data
-	Flags      = ResizeIntArray(Flags, sid)
-	Offsets    = ResizeFloatArray(Offsets, sid)
-	Positions  = ResizeIntArray(Positions, (Actors * 2))
-	Animations = ResizeStringArray(Animations, aid)
-	RaceIDs    = ClearEmpty(RaceIDs)
-	LastKey    = Key("Global")
+	Positions = PapyrusUtil.ResizeIntArray(Positions, Actors)
+	LastKeys  = PapyrusUtil.ResizeStringArray(LastKeys, Actors)
+	if Actors == 1
+		Animations = PapyrusUtil.ResizeStringArray(Animations, Stages)
+		Silences   = PapyrusUtil.ResizeBoolArray(Silences, Stages)
+		OpenMouths = PapyrusUtil.ResizeBoolArray(OpenMouths, Stages)
+		Strapons   = PapyrusUtil.ResizeBoolArray(Strapons, Stages)
+		Schlongs   = PapyrusUtil.ResizeIntArray(Schlongs, Stages)
+		CumIDs     = PapyrusUtil.ResizeIntArray(CumIDs, Stages)
+		Offsets    = PapyrusUtil.ResizeFloatArray(Offsets, (Stages * 4))
+	endIf
 	; Create and add gender tag
 	string Tag
 	int i
 	while i < Actors
-		int Gender = AccessPosition(i, 0)
+		int Gender = Positions[i]
 		if Gender == 0
 			Tag += "M"
 		elseIf Gender == 1
@@ -709,93 +753,37 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function Initialize()
-	sid          = 0
-	aid          = 0
-	Actors       = 0
-	Stages       = 0
-	LastKey      = ""
-	Genders      = new int[3]
-	Positions    = new int[10]
-	Flags        = new int[120]
-	Animations   = new string[30]
-	Offsets      = new float[120]
+	aid        = 0
+	sid        = 0
+	Actors     = 0
+	Stages     = 0
+	RaceType   = ""
+	Genders    = new int[4]
+	Positions  = new int[5]
+	Offsets    = new float[1]
+	LastKeys   = new string[5]
+	Animations = new string[1]
+	Silences   = new bool[1]
+	OpenMouths = new bool[1]
+	Strapons   = new bool[1]
+	Schlongs   = new int[1]
 
 	BedOffset    = new float[4]
 	BedOffset[0] = 33.0
 	BedOffset[2] = 37.0
 
 	Timers       = new float[1]
-	RaceIDs      = new string[1]
 	StageSoundFX = new Form[1]
+
+	Locked = false
 
 	parent.Initialize()
 endFunction
 
-function _Update_Profile_159c(string ProfilePath)
-	_Update_AdjustKey_159c(ProfilePath, "Global")
-	JsonUtil.FloatListClear(ProfilePath, Key("Adjust.Global"))
-	string KeysList = Key("AdjustKeys")
-	int i = JsonUtil.StringListCount(ProfilePath, KeysList)
-	while i
-		i -= 1
-		string AdjustKey = JsonUtil.StringListGet(ProfilePath, KeysList, i)
-		if AdjustKey != "" && _Update_AdjustKey_159c(ProfilePath, AdjustKey)
-			float[] OldAdjust = new float[4]
-			float[] NewAdjust = new float[4]
-			JsonUtil.FloatListSlice(ProfilePath, Key("Adjust."+AdjustKey), OldAdjust, DataIndex(4, 0, 2, 0))
-			JsonUtil.FloatListSlice(ProfilePath, Key(AdjustKey+".0"), NewAdjust, DataIndex(4, 0, 2, 0))
-			if OldAdjust[0] != NewAdjust[0] || OldAdjust[1] != NewAdjust[1] || OldAdjust[2] != NewAdjust[2] || OldAdjust[3] != NewAdjust[3]
-				Log(OldAdjust+" != "+NewAdjust, Registry+"."+AdjustKey+" - ERROR")
-			endIf
-		endIf
-		JsonUtil.FloatListClear(ProfilePath, Key("Adjust."+AdjustKey))
-	endWhile
-	JsonUtil.StringListClear(ProfilePath, KeysList)
+bool function CheckByTags(int ActorCount, string[] Search, string[] Suppress, bool RequireAll)
+	return Enabled && ActorCount == PositionCount && CheckTags(Search, RequireAll) && (Suppress.Length < 1 || !HasOneTag(Suppress))
 endFunction
 
-bool function _Update_AdjustKey_159c(string ProfilePath, string AdjustKey)
-	bool Adjusted = false
-	if JsonUtil.FloatListCount(ProfilePath, Key("Adjust."+AdjustKey)) > 0
-		string OldKey = Key("Adjust."+AdjustKey)
-		int Position
-		while Position < Actors
-			bool HasAdjustments = false
-			float[] Adjustments = Utility.CreateFloatArray((Stages*4))
-			int Stage = 0
-			while Stage < Stages
-				Stage += 1
-				int i = (Stage - 1) * 4
-				int old_i = DataIndex(4, Position, Stage, 0)
-				Adjustments[(i+0)] = JsonUtil.FloatListGet(ProfilePath, OldKey, (old_i+0))
-				Adjustments[(i+1)] = JsonUtil.FloatListGet(ProfilePath, OldKey, (old_i+1))
-				Adjustments[(i+2)] = JsonUtil.FloatListGet(ProfilePath, OldKey, (old_i+2))
-				Adjustments[(i+3)] = JsonUtil.FloatListGet(ProfilePath, OldKey, (old_i+3))
-				if Adjustments[(i+0)] != 0.0 || Adjustments[(i+1)] != 0.0 || Adjustments[(i+2)] != 0.0 || Adjustments[(i+3)] != AccessFlag(Position, Stage, 3)
-					HasAdjustments = true
-				endIf
-			endWhile
-			string NewKey = Key(AdjustKey+"."+Position)
-			if !HasAdjustments
-				JsonUtil.FloatListClear(ProfilePath, NewKey)
-			else
-				Adjusted = true
-				JsonUtil.FloatListCopy(ProfilePath, NewKey, Adjustments)
-			endIf
-			Position += 1
-		endWhile
-	endIf
-	if Adjusted && AdjustKey != "Global"
-		JsonUtil.StringListAdd(ProfilePath, "Adjusted", Registry, false)
-		JsonUtil.StringListAdd(ProfilePath, Registry, AdjustKey, false)
-	endIf
-	return Adjusted
-endFunction
-
-function _SetAdjustment(string profile, string registry, string racekey, int stage, int nth, float value) global native
-float function _AdjustOffset(string profile, string registry, string racekey, int stage, int nth, float by) global native
-bool function _SaveProfile(string profile) global native
-float[] function _GetStageAdjustments(string profile, string registry, string racekey, int stage) global native
-float[] function _GetAllAdjustments(string profile, string registry, string racekey) global native
 
 ; float[] function GetAllOffsets(string AdjustKey, int Position)
 ; 	float[] Output = FloatArray((Stages * 4))
@@ -807,7 +795,7 @@ float[] function _GetAllAdjustments(string profile, string registry, string race
 ; 	GetAllPositionOffsets(Output, Offsets, CenterAdjust, Position, Stages)
 ; 	return Output
 ; endfunction
-; function GetAllPositionOffsets(float[] Adjusts, float[] Offset, float[] Forward, int Position, int StageCount) global native
+; function GetAllPositionOffsets(float[] Adjusts, float[] Offset, float[] Forward, int Position, int Stage) global native
 
 ; ; ------------------------------------------------------- ;
 ; ; --- Tagging System                                  --- ;
