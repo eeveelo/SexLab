@@ -52,9 +52,11 @@ bool[] StripOverride
 float StartedAt
 float ActorScale
 float AnimScale
-form Strapon
 int HighestRelation
 int Enjoyment
+
+form Strapon
+form HadStrapon
 
 ; Animation Position/Stage flags
 bool property OpenMouth hidden
@@ -87,7 +89,7 @@ endProperty
 ; --- Load/Clear Alias For Use                        --- ;
 ; ------------------------------------------------------- ;
 
-bool function SetActor(Actor ProspectRef, bool Victimize = false, sslBaseVoice UseVoice = none, bool ForceSilent = false)
+bool function SetActor(Actor ProspectRef)
 	if !ProspectRef || ProspectRef != GetReference()
 		return false ; Failed to set prospective actor into alias
 	endIf
@@ -95,42 +97,35 @@ bool function SetActor(Actor ProspectRef, bool Victimize = false, sslBaseVoice U
 	ActorRef   = ProspectRef
 	BaseRef    = ActorRef.GetLeveledActorBase()
 	ActorName  = BaseRef.GetName()
-	BaseSex    = BaseRef.GetSex()
 	ActorVoice = BaseRef.GetVoiceType()
+	BaseSex    = BaseRef.GetSex()
 	Gender     = ActorLib.GetGender(ActorRef)
 	IsMale     = Gender == 0
 	IsFemale   = Gender == 1
-	IsCreature = Gender == 2
-	IsVictim   = Victimize
+	IsCreature = Gender >= 2
 	IsPlayer   = ActorRef == PlayerRef
 	IsTracked  = Config.ThreadLib.IsActorTracked(ActorRef)
-	TrackedEvent("Added")
-	if !IsCreature
-		SetVoice(UseVoice, ForceSilent)
-		if !IsPlayer
-			Stats.SeedActor(ActorRef)
-		endIf
-	else
+	Thread.Genders[Gender] = Thread.Genders[Gender] + 1
+	; Player and creature specific
+	if IsCreature
 		Thread.CreatureRef = BaseRef.GetRace()
+	elseIf !IsPlayer
+		Stats.SeedActor(ActorRef)	
 	endIf
 	; Actor's Adjustment Key
-	if Config.RaceAdjustments
-		ActorKey = MiscUtil.GetRaceEditorID(BaseRef.GetRace())
-		if IsCreature
-			ActorKey += "C"
-		elseIf BaseSex == 1
-			ActorKey += "F"
-		else
-			ActorKey += "M"
-		endIf
+	ActorKey = MiscUtil.GetRaceEditorID(BaseRef.GetRace())
+	if IsCreature
+		ActorKey += "C"
+	elseIf BaseSex == 1
+		ActorKey += "F"
+	else
+		ActorKey += "M"
 	endIf
-	; Update threads gender
-	Thread.Genders[Gender] = Thread.Genders[Gender] + 1
-	; Get ready for mod events
-	RegisterEvents()
 	; Ready
-	Log("Slotted '"+ActorName+"'", self)
+	RegisterEvents()
+	TrackedEvent("Added")
 	GoToState("Ready")
+	Log("Slotted '"+ActorName+"'", self)
 	return true
 endFunction
 
@@ -144,21 +139,19 @@ function ClearAlias()
 	endIf
 	; Make sure actor is reset
 	if GetReference()
-		; Get actor incase variable initialized
-		ActorRef   = GetReference() as Actor
-		; Remove any unwanted combat effects
-		ClearEffects()
 		; Init variables needed for reset
+		ActorRef   = GetReference() as Actor
 		BaseRef    = ActorRef.GetLeveledActorBase()
 		ActorName  = BaseRef.GetName()
 		BaseSex    = BaseRef.GetSex()
 		Gender     = ActorLib.GetGender(ActorRef)
 		IsMale     = Gender == 0
 		IsFemale   = Gender == 1
-		IsCreature = Gender == 2
+		IsCreature = Gender >= 2
 		IsPlayer   = ActorRef == PlayerRef
 		Log("'"+ActorName+"' / '"+ActorRef+"' present during alias clear! This is usually harmless as the alias and actor will correct itself, but is usually a sign that a thread did not close cleanly.", self)
 		; Reset actor back to default
+		ClearEffects()
 		RestoreActorDefaults()
 		StopAnimating(true)
 		UnlockActor()
@@ -173,7 +166,7 @@ endFunction
 
 state Ready
 
-	bool function SetActor(Actor ProspectRef, bool MakeVictim = false, sslBaseVoice UseVoice = none, bool ForceSilent = false)
+	bool function SetActor(Actor ProspectRef)
 		return false
 	endFunction
 
@@ -198,7 +191,7 @@ state Ready
 		ActorScale = ( display / base )
 		AnimScale  = ActorScale
 		ActorRef.SetScale(ActorScale)
-		if Thread.ActorCount > 1 && Config.ScaleActors
+		if Thread.ActorCount > 1 && Config.ScaleActors ; FIXME: || IsCreature?
 			AnimScale = (1.0 / base)
 		endIf
 		; Stop movement
@@ -223,13 +216,15 @@ state Ready
 		if !IsCreature
 			; Decide on strapon for female, default to worn, otherwise pick random.
 			if IsFemale && Config.UseStrapons
-				Strapon = Config.WornStrapon(ActorRef)
-				if !Strapon
+				HadStrapon = Config.WornStrapon(ActorRef)
+				Strapon    = HadStrapon
+				if !HadStrapon
 					Strapon = Config.GetStrapon()
 				endIf
 			endIf
 			; Strip actor
 			Strip()
+			ResolveStrapon()
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 			; Pick a voice if needed
 			if !Voice && !IsForcedSilent
@@ -244,15 +239,14 @@ state Ready
 			if Thread.HasPlayer
 				SkilledActor = PlayerRef
 			; If a non-creature couple, base skills off partner
-			elseIf Thread.ActorCount == 2 && !Thread.HasCreature
+			elseIf Thread.ActorCount > 1 && !Thread.HasCreature
 				SkilledActor = Thread.Positions[sslUtility.IndexTravel(Position, Thread.ActorCount)]
 			endIf
 			Skills = Stats.GetSkillLevels(SkilledActor)
-			; Get highest relationship ahead of time
 			HighestRelation = Thread.GetHighestPresentRelationshipRank(ActorRef)
 		endIf
-		GoToState("Animating")
 		; Enter animatable state - rest is non vital and can finish as queued
+		GoToState("Animating")
 		Thread.AliasEventDone("Prepare")
 	endFunction
 endState
@@ -314,13 +308,7 @@ state Animating
 		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
 		if !IsCreature
 			; Equip Strapon if needed and enabled
-			if Strapon
-				if UseStrapon && !ActorRef.IsEquipped(Strapon)
-					ActorRef.EquipItem(Strapon, true, true)
-				elseif !UseStrapon && ActorRef.IsEquipped(Strapon)
-					ActorRef.UnequipItem(Strapon, true, true)
-				endIf
-			endIf
+			ResolveStrapon()
 			; Clear any existing expression as a default - to remove open mouth
 			; ActorRef.ClearExpressionOverride()
 			if OpenMouth
@@ -576,7 +564,7 @@ function RestoreActorDefaults()
 			BaseRef.SetVoiceType(ActorVoice)
 		endIf
 		; Remove strapon
-		if Strapon
+		if Strapon && Strapon != HadStrapon
 			ActorRef.RemoveItem(Strapon, 1, true)
 		endIf
 		; Reset expression
@@ -589,6 +577,18 @@ endFunction
 ; ------------------------------------------------------- ;
 ; --- Data Accessors                                  --- ;
 ; ------------------------------------------------------- ;
+
+function SetVictim(bool Victimize)
+	IsVictim = Victimize
+	if Victimize
+		Thread.VictimRef    = ActorRef
+		Thread.IsAggressive = true
+	endIf
+endFunction
+
+bool function IsVictim()
+	return IsVictim
+endFunction
 
 string function GetActorKey()
 	return ActorKey
@@ -621,6 +621,9 @@ int function GetPain()
 endFunction
 
 function SetVoice(sslBaseVoice ToVoice = none, bool ForceSilence = false)
+	if IsCreature
+		return
+	endIf
 	IsForcedSilent = ForceSilence
 	if ToVoice
 		Voice = ToVoice
@@ -653,20 +656,30 @@ bool function IsUsingStrapon()
 	return Strapon && ActorRef.IsEquipped(Strapon)
 endFunction
 
+function ResolveStrapon(bool force = false)
+	if Strapon
+		if UseStrapon && !ActorRef.IsEquipped(Strapon)
+			ActorRef.EquipItem(Strapon, true, true)
+		elseIf !UseStrapon && ActorRef.IsEquipped(Strapon)
+			ActorRef.UnequipItem(Strapon, true, true)
+		endIf
+	endIf
+endFunction
+
 function EquipStrapon()
-	if IsUsingStrapon()
+	if Strapon && !ActorRef.IsEquipped(Strapon)
 		ActorRef.EquipItem(Strapon, true, true)
 	endIf
 endFunction
 
 function UnequipStrapon()
-	if IsUsingStrapon()
+	if Strapon && ActorRef.IsEquipped(Strapon)
 		ActorRef.UnequipItem(Strapon, true, true)
 	endIf
 endFunction
 
 function SetStrapon(Form ToStrapon)
-	if Strapon
+	if Strapon && !HadStrapon
 		ActorRef.RemoveItem(Strapon, 1, true)
 	endIf
 	Strapon = ToStrapon
@@ -704,8 +717,8 @@ function Strip()
 		Strip = Config.GetStrip(IsFemale, Thread.LeadIn, Thread.IsAggressive, IsVictim)
 	endIf
 	; Stripped storage
-	Form[] Stripped = new Form[34]
 	Form ItemRef
+	Form[] Stripped = new Form[34]
 	; Strip Weapon
 	if Strip[32]
 		; Right hand
@@ -893,6 +906,7 @@ function Initialize()
 	; Forms
 	ActorRef       = none
 	MarkerRef      = none
+	HadStrapon     = none
 	Strapon        = none
 	; Voice
 	Voice          = none

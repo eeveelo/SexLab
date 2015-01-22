@@ -143,26 +143,21 @@ state Making
 	int function AddActor(Actor ActorRef, bool IsVictim = false, sslBaseVoice Voice = none, bool ForceSilent = false)
 		; Ensure we have room for actor
 		if !ActorRef
-			Log("AddActor(NONE) -- Failed to add actor -- Actor is a figment of your imagination", "FATAL")
-			Initialize()
+			Fatal("Failed to add actor -- Actor is a figment of your imagination", "AddActor(NONE)")
 			return -1
 		elseIf ActorCount >= 5
-			Log("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- Thread has reached actor limit", "FATAL")
-			Initialize()
+			Fatal("Failed to add actor -- Thread has reached actor limit", "AddActor("+ActorRef.GetLeveledActorBase().GetName()+")")
 			return -1
 		elseIf Positions.Find(ActorRef) != -1
-			Log("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- They have been already added to this thread", "FATAL")
-			Initialize()
+			Fatal("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- They have been already added to this thread", "AddActor("+ActorRef.GetLeveledActorBase().GetName()+")")
 			return -1
 		elseIf ActorLib.ValidateActor(ActorRef) < 0
-			Log("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- They are not a valid target for animation", "FATAL")
-			Initialize()
+			Fatal("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- They are not a valid target for animation", "AddActor("+ActorRef.GetLeveledActorBase().GetName()+")")
 			return -1
 		endIf
 		sslActorAlias Slot = PickAlias(ActorRef)
-		if !Slot || !Slot.SetActor(ActorRef, IsVictim, Voice, ForceSilent)
-			Log("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- They were unable to fill an actor alias", "FATAL")
-			Initialize()
+		if !Slot || !Slot.SetActor(ActorRef)
+			Fatal("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- They were unable to fill an actor alias", "AddActor("+ActorRef.GetLeveledActorBase().GetName()+")")
 			return -1
 		endIf
 		; Update thread info
@@ -170,10 +165,8 @@ state Making
 		ActorCount = Positions.Length
 		HasPlayer  = Positions.Find(PlayerRef) != -1
 		; Flag as victim
-		if IsVictim
-			VictimRef = ActorRef
-			IsAggressive = true
-		endIf
+		Slot.SetVictim(IsVictim)
+		Slot.SetVoice(Voice, ForceSilent)
 		; Return position
 		return Positions.Find(ActorRef)
 	endFunction
@@ -181,8 +174,7 @@ state Making
 	bool function AddActors(Actor[] ActorList, Actor VictimActor = none)
 		int Count = ActorList.Length
 		if Count < 1 || ((Positions.Length + Count) > 5) || ActorList.Find(none) != -1
-			Log("AddActors() - Failed to add actor list as it either contains to many actors placing the thread over it's limit, none at all, or an invalid 'None' entry -- "+ActorList, "FATAL")
-			Initialize()
+			Fatal("Failed to add actor list as it either contains to many actors placing the thread over it's limit, none at all, or an invalid 'None' entry -- "+ActorList, "AddActors()")
 			return false
 		endIf
 		int i
@@ -205,8 +197,7 @@ state Making
 		; ------------------------- ;
 
 		if ActorCount < 1 || Positions.Length == 0
-			Log("StartThread() - No valid actors available for animation", "FATAL")
-			Initialize()
+			Fatal("No valid actors available for animation")
 			return none
 		endIf
 
@@ -271,8 +262,7 @@ state Making
 
 				SetAnimations(CreatureSlots.GetByRace(ActorCount, CreatureRef))
 				if PrimaryAnimations.Length == 0
-					Log("StartThread() - Failed to find valid creature animations.", "FATAL")
-					Initialize()
+					Fatal("Failed to find valid creature animations.")
 					return none
 				endIf
 			endIf
@@ -283,8 +273,7 @@ state Making
 		elseIf PrimaryAnimations.Length == 0
 			SetAnimations(AnimSlots.GetByDefault(Males, Females, IsAggressive, (BedRef != none), Config.RestrictAggressive))
 			if PrimaryAnimations.Length == 0
-				Log("StartThread() - Unable to find valid default animations", "FATAL")
-				Initialize()
+				Fatal("Unable to find valid default animations")
 				return none
 			endIf
 		endIf
@@ -323,11 +312,10 @@ state Making
 	endFunction
 
 	event OnUpdate()
-		Log("Thread has timed out of the making process; resetting model for selection pool", "FATAL")
-		Initialize()
+		Fatal("Thread has timed out of the making process; resetting model for selection pool")
 	endEvent
 	event OnBeginState()
-		Log("Entering Making State", "Thread["+thread_id+"]")
+		Log("Entering Making State")
 		; Action Events
 		RegisterForModEvent(Key(EventTypes[0]+"Done"), EventTypes[0]+"Done")
 		RegisterForModEvent(Key(EventTypes[1]+"Done"), EventTypes[1]+"Done")
@@ -968,10 +956,22 @@ function Initialize()
 	GoToState("Unlocked")
 endFunction
 
-function Log(string Log, string Type = "NOTICE")
-	SexLabUtil.DebugLog(Log, "Thread["+thread_id+"] "+Type, Config.DebugMode)
-	if Type == "FATAL"
-		Debug.TraceStack("Thread["+thread_id+"] "+Log)
+function Log(string msg, string src = "")
+	msg = "Thread["+thread_id+"] "+src+" - "+msg
+	Debug.Trace("SEXLAB - " + msg)
+	if Config.DebugMode
+		SexLabUtil.PrintConsole(msg)
+	endIf
+endFunction
+
+function Fatal(string msg, string src = "", bool halt = true)
+	msg = "FATAL - Thread["+thread_id+"] "+src+" - "+msg
+	Debug.TraceStack("SEXLAB - " + msg)
+	if Config.DebugMode
+		SexLabUtil.PrintConsole(msg)
+	endIf
+	if halt
+		Initialize()
 	endIf
 endFunction
 
@@ -1088,19 +1088,19 @@ endState
 
 ; Making
 sslThreadModel function Make()
-	Log("Make() - Cannot enter make on a locked thread", "FATAL")
+	Log("Cannot enter make on a locked thread", "Make() ERROR")
 	return none
 endFunction
 sslThreadController function StartThread()
-	Log("StartThread() - Cannot start thread while not in a Making state", "FATAL")
+	Log("Cannot start thread while not in a Making state", "StartThread() ERROR")
 	return none
 endFunction
 int function AddActor(Actor ActorRef, bool IsVictim = false, sslBaseVoice Voice = none, bool ForceSilent = false)
-	Log("AddActor() - Cannot add an actor to a locked thread", "FATAL")
+	Log("Cannot add an actor to a locked thread", "AddActor() ERROR")
 	return -1
 endFunction
 bool function AddActors(Actor[] ActorList, Actor VictimActor = none)
-	Log("AddActors() - Cannot add a list of actors to a locked thread", "FATAL")
+	Log("Cannot add a list of actors to a locked thread", "AddActors() ERROR")
 	return false
 endFunction
 ; State varied

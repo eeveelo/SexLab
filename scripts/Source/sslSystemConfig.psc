@@ -250,7 +250,7 @@ form function PickStrapon(Actor ActorRef)
 	if Strapon
 		return Strapon
 	endIf
-	return Strapons[Utility.RandomInt(0, Strapons.Length - 1)]
+	return GetStrapon()
 endFunction
 
 form function EquipStrapon(Actor ActorRef)
