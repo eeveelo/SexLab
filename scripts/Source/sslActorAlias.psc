@@ -41,6 +41,7 @@ sslBaseExpression Expression
 ; Positioning
 ObjectReference MarkerRef
 float[] Offsets
+float[] Center
 float[] Loc
 
 ; Storage
@@ -125,7 +126,7 @@ bool function SetActor(Actor ProspectRef)
 	RegisterEvents()
 	TrackedEvent("Added")
 	GoToState("Ready")
-	Log("Slotted '"+ActorName+"'", self)
+	Log(self, "SetActor("+ActorRef+")")
 	return true
 endFunction
 
@@ -149,7 +150,7 @@ function ClearAlias()
 		IsFemale   = Gender == 1
 		IsCreature = Gender >= 2
 		IsPlayer   = ActorRef == PlayerRef
-		Log("'"+ActorName+"' / '"+ActorRef+"' present during alias clear! This is usually harmless as the alias and actor will correct itself, but is usually a sign that a thread did not close cleanly.", self)
+		Log("Actor present during alias clear! This is usually harmless as the alias and actor will correct itself, but is usually a sign that a thread did not close cleanly.", "ClearAlias("+ActorRef+" / "+self+")")
 		; Reset actor back to default
 		ClearEffects()
 		RestoreActorDefaults()
@@ -183,7 +184,8 @@ state Ready
 		AdjustKey  = Thread.AdjustKey
 		Position   = Thread.Positions.Find(ActorRef)
 		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
-		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage)
+		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, Thread.BedTypeID)
+		Center     = Thread.CenterLocation
 		; Calculate scales
 		float display = ActorRef.GetScale()
 		ActorRef.SetScale(1.0)
@@ -194,10 +196,11 @@ state Ready
 		if Thread.ActorCount > 1 && Config.ScaleActors ; FIXME: || IsCreature?
 			AnimScale = (1.0 / base)
 		endIf
+		Log("display/base/animscale = "+display+"/"+base+"/"+AnimScale)
 		; Stop movement
 		LockActor()
 		; Starting position
-		OffsetCoords(Loc, Thread.CenterLocation, Offsets)
+		OffsetCoords(Loc, Center, Offsets)
 		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
@@ -265,13 +268,13 @@ state Animating
 		; Start update loop
 		TrackedEvent("Start")
 		StartedAt = Utility.GetCurrentRealTime()
-		RegisterForSingleUpdate(Utility.RandomFloat(1.5, 3.0))
+		RegisterForSingleUpdate(Utility.RandomFloat(1.0, 3.0))
 	endFunction
 
 	event OnUpdate()
 		; Check if still among the living and able.
 		if ActorRef.IsDisabled() || (ActorRef.IsDead() && ActorRef.GetActorValue("Health") < 1.0)
-			Log("Actor is disabled or has no health, unable to continue animating", ActorName)
+			Log("Actor is disabled or has no health - Unable to continue animating")
 			Thread.EndAnimation(true)
 			return
 		endIf
@@ -279,7 +282,7 @@ state Animating
 		if Position == 0
 			Thread.RecordSkills()
 			Thread.SetBonuses()
-		endIf
+		endIf	
 		; Sync enjoyment level
 		GetEnjoyment()
 		; Apply Expression / sync enjoyment
@@ -300,9 +303,9 @@ state Animating
 		AdjustKey  = Thread.AdjustKey
 		Stage      = Thread.Stage
 		Position   = Thread.Positions.Find(ActorRef)
-		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
 		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
-		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage)
+		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, Thread.BedTypeID)
+		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
 		; Update alias info
 		GetEnjoyment()
 		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
@@ -312,11 +315,11 @@ state Animating
 			; Clear any existing expression as a default - to remove open mouth
 			; ActorRef.ClearExpressionOverride()
 			if OpenMouth
-				OpenMouth()
+				sslBaseExpression.OpenMouth(ActorRef)
 			elseIf Expression
 				RefreshExpression()
-			elseIf IsMouthOpen()
-				CloseMouth()
+			elseIf sslBaseExpression.IsMouthOpen(ActorRef)
+				sslBaseExpression.CloseMouth(ActorRef)
 			endIf
 		endIf
 	endFunction
@@ -328,29 +331,31 @@ state Animating
 	endFunction
 
 	function RefreshLoc()
-		Offsets = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage)
+		Offsets = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, Thread.BedTypeID)
 		SyncLocation(false)
 	endFunction
 
 	function SyncLocation(bool Force = false)
 		; Set Loc Array to offset coordinates
-		float[] CenterLocation = Thread.CenterLocation
-		OffsetCoords(Loc, CenterLocation, Offsets)
+		; Log("Bed("+Thread.BedTypeID+"): "+Animation.GetBedOffsets()+" Offsets: "+Offsets)
+		OffsetCoords(Loc, Center, Offsets)
+		; Log("Loc: "+Loc)
+
 		; Adjust by bed if needed
-		if Thread.BedRef
-			float[] BedOffset = Animation.GetBedOffsets()
-			OffsetBed(Loc, BedOffset, CenterLocation[5])
-			;/ float[] BedOffset = Animation.GetBedOffsets()
-			Loc[0] = Loc[0] + (BedOffset[0] * Math.sin(CenterLocation[5])) + (BedOffset[1] * Math.cos(CenterLocation[5]))
-			Loc[1] = Loc[1] + (BedOffset[0] * Math.cos(CenterLocation[5])) + (BedOffset[1] * Math.sin(CenterLocation[5]))
-			Loc[2] = Loc[2] + BedOffset[2]
-			Loc[5] = Loc[5] + BedOffset[3]
-			if Loc[5] >= 360.0
-				Loc[5] = Loc[5] - 360.0
-			elseIf Loc[5] < 0
-				Loc[5] = Loc[5] + 360.0
-			endIf /;
-		endIf
+		; if Thread.BedRef
+		; 	float[] BedOffset = Animation.GetBedOffsets()
+		; 	OffsetBed(Loc, BedOffset, CenterLocation[5])
+		; 	float[] BedOffset = Animation.GetBedOffsets()
+		; 	Loc[0] = Loc[0] + (BedOffset[0] * Math.sin(CenterLocation[5])) + (BedOffset[1] * Math.cos(CenterLocation[5]))
+		; 	Loc[1] = Loc[1] + (BedOffset[0] * Math.cos(CenterLocation[5])) + (BedOffset[1] * Math.sin(CenterLocation[5]))
+		; 	Loc[2] = Loc[2] + BedOffset[2]
+		; 	Loc[5] = Loc[5] + BedOffset[3]
+		; 	if Loc[5] >= 360.0
+		; 		Loc[5] = Loc[5] - 360.0
+		; 	elseIf Loc[5] < 0
+		; 		Loc[5] = Loc[5] + 360.0
+		; 	endIf
+		; endIf
 		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		; Avoid forcibly setting on player coords if avoidable - causes annoying graphical flickering
@@ -406,12 +411,12 @@ state Animating
 	event ResetActor()
 		ClearEvents()
 		GoToState("Resetting")
-		Log("-- Resetting! -- ", ActorName)
+		Log("Resetting!")
 		; Update stats
 		if !IsCreature
-			Log(ActorName+" -- BEFORE: "+sslActorStats.GetSkills(ActorRef))
+			; Log("Stats BEFORE: "+sslActorStats.GetSkills(ActorRef))
 			sslActorStats.RecordThread(ActorRef, Gender, HighestRelation, StartedAt, Utility.GetCurrentRealTime(), Utility.GetCurrentGameTime(), Thread.HasPlayer, Thread.VictimRef, Thread.Genders, Thread.SkillXP)
-			Log(ActorName+" -- AFTER: "+sslActorStats.GetSkills(ActorRef))
+			; Log("Stats AFTER: "+sslActorStats.GetSkills(ActorRef))
 			; Stats.RecordThread(ActorRef, (IsPlayer || Thread.HasPlayer), Thread.ActorCount, HighestRelation, (Utility.GetCurrentRealTime() - StartedAt), Thread.VictimRef, Thread.SkillXP, Thread.Genders)
 		endIf
 		; Apply cum
@@ -694,7 +699,7 @@ endFunction
 
 function OverrideStrip(bool[] SetStrip)
 	if SetStrip.Length != 33
-		Thread.Log(ActorName+" -- Invalid strip bool override array given. Must be length 33; was given "+SetStrip.Length, "ERROR")
+		Thread.Log("Invalid strip override bool[] - Must be length 33 - was "+SetStrip.Length, "OverrideStrip()")
 	else
 		StripOverride = SetStrip
 	endIf
@@ -714,8 +719,9 @@ function Strip()
 	if StripOverride.Length == 33
 		Strip = StripOverride
 	else
-		Strip = Config.GetStrip(IsFemale, Thread.LeadIn, Thread.IsAggressive, IsVictim)
+		Strip = Config.GetStrip(IsFemale, Thread.LeadIn || Thread.IsLimitedStrip(), Thread.IsAggressive, IsVictim)
 	endIf
+	Log(Strip, "LimitedStrip("+Thread.IsLimitedStrip()+")")
 	; Stripped storage
 	Form ItemRef
 	Form[] Stripped = new Form[34]
@@ -825,21 +831,6 @@ bool property DoRedress hidden
 	endFunction
 endProperty
 
-function OpenMouth()
-	; sslBaseExpression.ClearPhoneme(ActorRef)
-	ActorRef.SetExpressionOverride(16, 100)
-	ActorRef.SetExpressionPhoneme(1, 0.4)
-endFunction
-
-function CloseMouth()
-	ActorRef.ClearExpressionOverride()
-	ActorRef.SetExpressionPhoneme(1, 0.0)
-endFunction
-
-bool function IsMouthOpen()
-	return (MfgConsoleFunc.GetExpressionID(ActorRef) == 16 && MfgConsoleFunc.GetExpressionValue(ActorRef) == 100) || (MfgConsoleFunc.GetPhonemeModifier(ActorRef, 0, 1) >= 40)
-endFunction
-
 function RefreshExpression()
 	if ActorRef && Expression && !IsCreature
 		Expression.Apply(ActorRef, Enjoyment, BaseSex)
@@ -944,15 +935,11 @@ function Setup()
 	Thread    = GetOwningQuest() as sslThreadController
 endFunction
 
-function Log(string Log, string Type = "NOTICE")
-	Log = Type+": "+Log
+function Log(string msg, string src = "")
+	msg = "ActorAlias["+ActorName+"] "+src+" - "+msg
+	Debug.Trace("SEXLAB - " + msg)
 	if Config.DebugMode
-		SexLabUtil.PrintConsole(Log)
-	endIf
-	if Type == "FATAL"
-		Debug.TraceStack("SEXLAB - "+Log)
-	else
-		Debug.Trace("SEXLAB - "+Log)
+		SexLabUtil.PrintConsole(msg)
 	endIf
 endFunction
 
