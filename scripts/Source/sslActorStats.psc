@@ -525,6 +525,17 @@ string function LastSexTimerStringRealTime(Actor ActorRef)
 	return ParseTime(SecondsSinceLastSexRealTime(ActorRef) as int)
 endFunction
 
+;/ int function GetArousal(Actor ActorRef)
+	float Hours    = HoursSinceLastSexGameTime(ActorRef)
+	float Modifier = _GetSkill(ActorRef, kArousalModifier)
+	float Arousal  = (Hours * _GetSkill(ActorRef, kArousalRate))
+	if Modifier != 0.0
+		Arousal += Modifier
+		if Arousal >= 100 || Arousal <= 0
+			_SetSkill(ActorRef, kArousalModifier, 0.0)
+	endIf
+endFunction /;
+
 ; ------------------------------------------------------- ;
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
@@ -861,6 +872,16 @@ int property kLastGameTime hidden
 		return 17
 	endFunction
 endProperty
+;/ int property kArousalRate hidden
+	int function get()
+		return 18
+	endFunction
+endProperty
+int property kArousalModifier hidden
+	int function get()
+		return 19
+	endFunction
+endProperty /;
 
 
 ; ------------------------------------------------------- ;

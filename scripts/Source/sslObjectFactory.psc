@@ -14,7 +14,16 @@ endFunction
 int function MaleFemale() global
 	return -1
 endFunction
-; Cum Types
+int function Creature() global
+	return 2
+endFunction
+int function CreatureMale() global
+	return 2
+endFunction
+int function CreatureFemale() global
+	return 3
+endFunction
+; CumID Types
 int function Vaginal() global
 	return 1
 endFunction
@@ -35,16 +44,6 @@ int function OralAnal() global
 endFunction
 int function VaginalOralAnal() global
 	return 7
-endFunction
-; Content Types
-int function Misc() global
-	return 0
-endFunction
-int function Sexual() global
-	return 1
-endFunction
-int function Foreplay() global
-	return 2
 endFunction
 ; SFX Types
 Sound function Squishing() global
@@ -640,4 +639,19 @@ sslBaseExpression function CopyExpression(sslBaseExpression Copy, sslBaseExpress
 		Gender += 1
 	endWhile
 	return Copy
+endFunction
+
+; ------------------------------------------------------- ;
+; --- DEPRECATED - DO NOT USE                         --- ;
+; ------------------------------------------------------- ;
+
+; Content Types - no longer used
+int function Misc() global
+	return 0
+endFunction
+int function Sexual() global
+	return 1
+endFunction
+int function Foreplay() global
+	return 2
 endFunction

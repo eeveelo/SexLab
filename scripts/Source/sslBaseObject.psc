@@ -132,7 +132,7 @@ string function Key(string type = "")
 endFunction
 
 function Log(string Log, string Type = "NOTICE")
-	Log = Type+" - "+Registry+" - "+Log
+	Log = Type+" "+Registry+" - "+Log
 	if Config.DebugMode
 		SexLabUtil.PrintConsole(Log)
 	endIf
