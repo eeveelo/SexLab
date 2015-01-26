@@ -184,7 +184,7 @@ endFunction
 ; --- Offsets                                         --- ;
 ; ------------------------------------------------------- ;
 
-float[] function GetPositionOffsets(string AdjustKey, int Position, int Stage)
+float[] function GetPositionOffsets(string AdjustKey, int Position, int Stage, int BedTypeID = -1)
 	float[] Output = new float[4]
 	return PositionOffsets(Output, AdjustKey, Position, Stage)
 endFunction
@@ -208,12 +208,19 @@ endFunction
 bool function _HasAdjustments(string Registrar, string AdjustKey, int Stage) global native
 
 function _PositionOffsets(string Registrar, string AdjustKey, string LastKey, int Stage, float[] RawOffsets) global native
-float[] function PositionOffsets(float[] Output, string AdjustKey, int Position, int Stage)
+float[] function PositionOffsets(float[] Output, string AdjustKey, int Position, int Stage, int BedTypeID = -1)
 	int i = DataIndex(4, Position, Stage)
 	Output[0] = Offsets[i] + CenterAdjust[(Stage - 1)] ; Forward
 	Output[1] = Offsets[(i + 1)] ; Side
 	Output[2] = Offsets[(i + 2)] ; Up
 	Output[3] = Offsets[(i + 3)] ; Rot - no offset
+	if BedTypeID != -1 && BedOffset.Length == 4
+		; float[] Bed = GetBedOffsets()
+		Output[0] = Output[0] + BedOffset[0]
+		Output[1] = Output[1] + BedOffset[1]
+		Output[2] = Output[2] + BedOffset[2]
+		Output[3] = Output[3] + BedOffset[3]
+	endIf
 	_PositionOffsets(Registry, AdjustKey+"."+Position, LastKeys[Position], Stage, Output)
 	return Output
 endFunction
@@ -228,6 +235,14 @@ float[] function RawOffsets(float[] Output, int Position, int Stage)
 endFunction
 
 function SetBedOffsets(float forward, float sideward, float upward, float rotate)
+	; Reverse defaults if setting to 0
+	if forward == 0
+		forward -= Config.BedOffset[0]
+	endIf
+	if upward == 0
+		upward  -= Config.BedOffset[2]
+	endIf
+
 	BedOffset = new float[4]
 	BedOffset[0] = forward
 	BedOffset[1] = sideward
@@ -236,7 +251,10 @@ function SetBedOffsets(float forward, float sideward, float upward, float rotate
 endFunction
 
 float[] function GetBedOffsets()
-	return BedOffset
+	if BedOffset.Length > 0
+		return BedOffset
+	endIf
+	return Config.BedOffset
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -637,9 +655,12 @@ function Initialize()
 	Strapons   = new bool[1]
 	Schlongs   = new int[1]
 
-	BedOffset    = new float[4]
-	BedOffset[0] = 33.0
-	BedOffset[2] = 37.0
+	; SingleBed    = Utility.CreateFloatArray(0)
+	; DoubleBed    = Utility.CreateFloatArray(0)
+
+	BedOffset = Utility.CreateFloatArray(0)
+	; BedOffset[0] = 33.0
+	; BedOffset[2] = 37.0
 
 	Timers       = new float[1]
 	StageSoundFX = new Form[1]

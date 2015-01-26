@@ -14,6 +14,7 @@ scriptname SexLabFramework extends Quest
 ;#------------------------------------------------------------------#
 ;####################################################################
 
+
 int function GetVersion()
 	return SexLabUtil.GetVersion()
 endFunction
@@ -230,6 +231,14 @@ endFunction
 
 bool function IsBedRoll(ObjectReference BedRef)
 	return ThreadLib.IsBedRoll(BedRef)
+endFunction
+
+bool function IsDoubleBed(ObjectReference BedRef)
+	return ThreadLib.IsDoubleBed(BedRef)
+endFunction
+
+bool function IsSingleBed(ObjectReference BedRef)
+	return ThreadLib.IsSingleBed(BedRef)
 endFunction
 
 bool function IsBedAvailable(ObjectReference BedRef)

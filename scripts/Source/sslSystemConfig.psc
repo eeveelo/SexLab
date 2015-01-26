@@ -75,6 +75,7 @@ Sound property SexMixedFX auto
 Static property LocationMarker auto
 FormList property BedsList auto
 FormList property BedRollsList auto
+FormList property DoubleBedsList auto
 Message property UseBed auto
 Message property CleanSystemFinish auto
 Message property CheckSKSE auto
@@ -169,6 +170,7 @@ bool[] property StripAggressor auto hidden
 float[] property StageTimer auto hidden
 float[] property StageTimerLeadIn auto hidden
 float[] property StageTimerAggr auto hidden
+float[] property BedOffset auto hidden
 
 ; Data
 Actor property TargetRef auto hidden
@@ -373,9 +375,7 @@ function GetThreadControl(sslThreadController TargetThread)
 	Game.SetPlayerAIDriven()
 	; Give player control
 	Control.AutoAdvance = false
-	Control.HasPlayer   = true
-	Control.EnableHotkeys()
-	Control.HasPlayer   = false
+	Control.EnableHotkeys(true)
 	Log("Player has taken control of thread "+Control)
 endFunction
 
@@ -485,7 +485,6 @@ endFunction
 
 bool function SetAdjustmentProfile(string ProfileName) global native
 bool function SaveAdjustmentProfile() global native
-
 
 ; ------------------------------------------------------- ;
 ; --- System Use                                      --- ;
@@ -653,16 +652,19 @@ function SetDefaults()
 
 	StripLeadInFemale = new bool[33]
 	StripLeadInFemale[0] = true
-	StripLeadInFemale[2] = true
+	; StripLeadInFemale[2] = true
 	StripLeadInFemale[9] = true
-	StripLeadInFemale[14] = true
+	; StripLeadInFemale[14] = true
 	StripLeadInFemale[32] = true
 
 	StripLeadInMale = new bool[33]
 	StripLeadInMale[0] = true
-	StripLeadInMale[2] = true
+	; StripLeadInMale[2] = true
+	StripLeadInMale[8] = true
 	StripLeadInMale[9] = true
-	StripLeadInMale[14] = true
+	StripLeadInMale[19] = true
+	StripLeadInMale[22] = true
+	; StripLeadInMale[14] = true
 	StripLeadInMale[32] = true
 
 	StripVictim = new bool[33]
@@ -706,6 +708,10 @@ function SetDefaults()
 	StageTimerAggr[2] = 10.0
 	StageTimerAggr[3] = 10.0
 	StageTimerAggr[4] = 4.0
+
+	BedOffset = new float[4]
+	BedOffset[0] = 30.0
+	BedOffset[2] = 37.0
 
 	; Reload config
 	Reload()

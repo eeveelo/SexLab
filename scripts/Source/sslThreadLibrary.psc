@@ -3,8 +3,9 @@ scriptname sslThreadLibrary extends sslSystemLibrary
 import StorageUtil
 
 ; Data
-FormList property BedRollsList auto hidden
 FormList property BedsList auto hidden
+FormList property DoubleBedsList auto hidden
+FormList property BedRollsList auto hidden
 
 ; ------------------------------------------------------- ;
 ; --- Object Locators                                 --- ;
@@ -154,7 +155,31 @@ Actor[] function SortCreatures(actor[] Positions, sslBaseAnimation Animation)
 endFunction
 
 bool function IsBedRoll(ObjectReference BedRef)
-	return BedRollsList.HasForm(BedRef)
+	return BedRef && BedRollsList.HasForm(BedRef.GetBaseObject())
+endFunction
+
+bool function IsDoubleBed(ObjectReference BedRef)
+	return BedRef && DoubleBedsList.HasForm(BedRef.GetBaseObject())
+endFunction
+
+bool function IsSingleBed(ObjectReference BedRef)
+	return BedRef && BedsList.HasForm(BedRef.GetBaseObject()) && !BedRollsList.HasForm(BedRef.GetBaseObject()) && !DoubleBedsList.HasForm(BedRef.GetBaseObject())
+endFunction
+
+int function GetBedType(ObjectReference BedRef)
+	if BedRef
+		Form BaseRef = BedRef.GetBaseObject()
+		if !BedsList.HasForm(BaseRef)
+			return -1
+		elseIf BedRollsList.HasForm(BaseRef)
+			return 0
+		elseIf DoubleBedsList.HasForm(BaseRef)
+			return 2
+		else
+			return 1
+		endIf
+	endIf
+	return -1
 endFunction
 
 bool function IsBedAvailable(ObjectReference BedRef)
@@ -290,6 +315,7 @@ endFunction
 
 function Setup()
 	parent.Setup()
-	BedRollsList = Config.BedRollsList
-	BedsList     = Config.BedsList
+	BedsList       = Config.BedsList
+	DoubleBedsList = Config.DoubleBedsList
+	BedRollsList   = Config.BedRollsList
 endFunction

@@ -44,7 +44,7 @@ state Prepare
 		ActorAlias[3].StartAnimating()
 		ActorAlias[4].StartAnimating()
 		; Set starting adjusted actor
-		AdjustPos = (ActorCount > 1) as int
+		AdjustPos   = (ActorCount > 1) as int
 		AdjustAlias = PositionAlias(AdjustPos)
 		; Send starter events
 		SendThreadEvent("AnimationStart")
@@ -622,8 +622,8 @@ function SetBonuses()
 	endIf
 endFunction
 
-function EnableHotkeys()
-	if HasPlayer
+function EnableHotkeys(bool forced = false)
+	if HasPlayer || forced
 		; RegisterForKey(Config.kBackwards)
 		; RegisterForKey(Config.kAdjustStage)
 		RegisterForKey(Config.AdvanceAnimation)

@@ -94,7 +94,6 @@ endProperty
 ; Thread info
 float[] property CenterLocation auto hidden
 ObjectReference property CenterRef auto hidden
-ObjectReference property BedRef auto hidden
 
 float property StartedAt auto hidden
 float property TotalTime hidden
@@ -103,6 +102,38 @@ float property TotalTime hidden
 	endFunction
 endProperty
 
+
+; Beds
+int BedFlag ; -1 = forbid 0 = allow   1 = force
+int BedType ; -1 = none   0 = bedroll 1 = single 2 = double
+ObjectReference property BedRef auto hidden
+int property BedTypeID hidden
+	int function get()
+		return BedType
+	endFunction
+endProperty
+bool property UsingBed hidden
+	bool function get()
+		return BedType != -1
+	endFunction
+endProperty
+bool property UsingBedRoll hidden
+	bool function get()
+		return BedType == 0
+	endFunction
+endProperty
+bool property UsingSingleBed hidden
+	bool function get()
+		return BedType == 1
+	endFunction
+endProperty
+bool property UsingDoubleBed hidden
+	bool function get()
+		return BedType == 2
+	endFunction
+endProperty
+
+; Genders
 int[] property Genders auto hidden
 int property Males hidden
 	int function get()
@@ -114,9 +145,19 @@ int property Females hidden
 		return Genders[1]
 	endFunction
 endProperty
-int property Creatures hidden
+int property MaleCreatures hidden
 	int function get()
 		return Genders[2]
+	endFunction
+endProperty
+int property FemaleCreatures hidden
+	int function get()
+		return Genders[3]
+	endFunction
+endProperty
+int property Creatures hidden
+	int function get()
+		return Genders[2] + Genders[3]
 	endFunction
 endProperty
 bool property HasCreature hidden
@@ -126,7 +167,6 @@ bool property HasCreature hidden
 endProperty
 
 ; Local readonly
-int BedFlag ; 0 = allow, 1 = force, -1 = forbid
 bool NoLeadIn
 string[] Hooks
 string[] Tags
@@ -335,6 +375,10 @@ endState
 ; --- Actor Setup                                     --- ;
 ; ------------------------------------------------------- ;
 
+bool function IsLimitedStrip()
+	return AnimSlots.CountTag(Animations, "Oral,Foreplay,LimitedStrip") == Animations.Length
+endFunction
+
 ; Actor Overrides
 function SetStrip(Actor ActorRef, bool[] StripSlots)
 	ActorAlias(ActorRef).OverrideStrip(StripSlots)
@@ -422,6 +466,11 @@ endFunction
 
 bool function HasActor(Actor ActorRef)
 	return Positions.Find(ActorRef) != -1
+endFunction
+
+; Aggressive/Victim Setup
+function SetVictim(Actor ActorRef, bool Victimize = true)
+	ActorAlias(ActorRef).SetVictim(Victimize)
 endFunction
 
 bool function IsVictim(Actor ActorRef)
@@ -594,21 +643,30 @@ endfunction
 function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 	if CenterOn
 		CenterRef = CenterOn
-		CenterOnCoords(CenterOn.GetPositionX(), CenterOn.GetPositionY(), CenterOn.GetPositionZ(), CenterOn.GetAngleX(), CenterOn.GetAngleY(), CenterOn.GetAngleZ(), false)
-		if Config.BedsList.HasForm(CenterOn.GetBaseObject())
-			if Config.BedRollsList.HasForm(CenterOn.GetBaseObject())
-				CenterLocation[0] = CenterLocation[0] + (33.0 * Math.sin(CenterLocation[5]))
-				CenterLocation[1] = CenterLocation[1] + (33.0 * Math.cos(CenterLocation[5]))
-				CenterLocation[2] = CenterLocation[2] +  3.0
+		CenterLocation[0] = CenterOn.GetPositionX()
+		CenterLocation[1] = CenterOn.GetPositionY()
+		CenterLocation[2] = CenterOn.GetPositionZ()
+		CenterLocation[3] = CenterOn.GetAngleX()
+		CenterLocation[4] = CenterOn.GetAngleY()
+		CenterLocation[5] = CenterOn.GetAngleZ()
+		; Check if it's a bed
+		BedRef  = none
+		BedType = ThreadLib.GetBedType(CenterOn)
+		if BedType != -1
+			BedRef = CenterOn
+			float[] BedOffset = Config.BedOffset
+			CenterLocation[0] = CenterLocation[0] + (BedOffset[0] * Math.sin(CenterLocation[5]))
+			CenterLocation[1] = CenterLocation[1] + (BedOffset[0] * Math.cos(CenterLocation[5]))
+			if BedType > 0
+				CenterLocation[2] = CenterLocation[2] + BedOffset[2]
 			else
-				BedRef = CenterOn
+				CenterLocation[2] = CenterLocation[2] + 7.0
 			endIf
 		endIf
 	endIf
 endFunction
 
 function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, float RotX = 0.0, float RotY = 0.0, float RotZ = 0.0, bool resync = true)
-	CenterLocation = new float[6]
 	CenterLocation[0] = LocX
 	CenterLocation[1] = LocY
 	CenterLocation[2] = LocZ
@@ -931,17 +989,19 @@ function Initialize()
 	; Floats
 	StartedAt      = 0.0
 	; Integers
+	BedType        = -1
 	BedFlag        = 0
 	ActorCount     = 0
 	Stage          = 1
 	; Strings
 	AdjustKey      = ""
 	; Storage Info
-	Genders        = new int[3]
+	Genders        = new int[4]
 	AliasDone      = new int[5]
 	AliasLag       = new float[5]
 	SkillXP        = new float[6]
 	SkillBonus     = new float[6]
+	CenterLocation = new float[6]
 	; Storage Data
 	Actor[] aDel
 	Positions         = aDel
@@ -1071,7 +1131,7 @@ function SetTID(int id)
 	ActorAlias[4].Setup()
 
 	Initialize()
-	Log(self, "Setup()")
+	Log(self, "Setup")
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -1123,7 +1183,7 @@ endFunction
 ; Animating
 event OnKeyDown(int keyCode)
 endEvent
-function EnableHotkeys()
+function EnableHotkeys(bool forced = false)
 endFunction
 function RealignActors()
 endFunction
@@ -1147,8 +1207,6 @@ endfunction
 function SetBedding(int flag = 0)
 	SetBedFlag(flag)
 endFunction
-
-function _SetupID(int threadID) native
 
 ; bool function _SendThreadEvent(string eventName, bool withPlayer) native
 ; function TestEvent(string eventName, bool withPlayer = false) global
