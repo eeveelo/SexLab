@@ -106,32 +106,7 @@ function Setup()
 	while i
 		i -= 1
 		Slots[i] = Game.GetFormFromFile(SlotFormID[i], "SexLab.esm") as sslThreadController
-		if Slots[i]
-			while Slots[i].IsStarting()
-				Log("Slots["+i+"] - "+Slots[i], "IsStarting()")
-				Utility.WaitMenuMode(0.5)
-			endWhile
-			Slots[i].Stop()
-		else
-			Log("Slots["+i+"] - Failed to get form - "+SlotFormID[i]+" - "+Game.GetFormFromFile(SlotFormID[i], "SexLab.esm"), "FATAL")
-		endIf
-	endWhile
-
-	; Start and setup threads + actoraliases
-	i = Slots.Length
-	while i
-		i -= 1
-		if Slots[i]
-			while Slots[i].IsStopping()
-				Log("Slots["+i+"] - "+Slots[i], "IsStopping()")
-				Utility.WaitMenuMode(0.5)
-			endWhile
-			if Slots[i].Start()
-				Slots[i].SetTID(i)
-			else
-				Log("Slots["+i+"] - Failed to start thread - "+Slots[i], "FATAL")
-			endIf
-		endIf
+		Slots[i].SetTID(i)
 	endWhile
 
 	Debug.Trace("SexLab Threads: "+Slots)
