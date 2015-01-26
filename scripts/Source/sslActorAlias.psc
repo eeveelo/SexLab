@@ -175,7 +175,7 @@ state Ready
 		; Remove any unwanted combat effects
 		ClearEffects()
 		; Starting Information
-		Flags      = new int[6]
+		Flags      = new int[5]
 		Offsets    = new float[4]
 		Loc        = new float[6]
 		SkillBonus = Thread.SkillBonus
@@ -278,11 +278,6 @@ state Animating
 			Thread.EndAnimation(true)
 			return
 		endIf
-		; Ping thread to update skill xp
-		if Position == 0
-			Thread.RecordSkills()
-			Thread.SetBonuses()
-		endIf	
 		; Sync enjoyment level
 		GetEnjoyment()
 		; Apply Expression / sync enjoyment
@@ -336,26 +331,7 @@ state Animating
 	endFunction
 
 	function SyncLocation(bool Force = false)
-		; Set Loc Array to offset coordinates
-		; Log("Bed("+Thread.BedTypeID+"): "+Animation.GetBedOffsets()+" Offsets: "+Offsets)
 		OffsetCoords(Loc, Center, Offsets)
-		; Log("Loc: "+Loc)
-
-		; Adjust by bed if needed
-		; if Thread.BedRef
-		; 	float[] BedOffset = Animation.GetBedOffsets()
-		; 	OffsetBed(Loc, BedOffset, CenterLocation[5])
-		; 	float[] BedOffset = Animation.GetBedOffsets()
-		; 	Loc[0] = Loc[0] + (BedOffset[0] * Math.sin(CenterLocation[5])) + (BedOffset[1] * Math.cos(CenterLocation[5]))
-		; 	Loc[1] = Loc[1] + (BedOffset[0] * Math.cos(CenterLocation[5])) + (BedOffset[1] * Math.sin(CenterLocation[5]))
-		; 	Loc[2] = Loc[2] + BedOffset[2]
-		; 	Loc[5] = Loc[5] + BedOffset[3]
-		; 	if Loc[5] >= 360.0
-		; 		Loc[5] = Loc[5] - 360.0
-		; 	elseIf Loc[5] < 0
-		; 		Loc[5] = Loc[5] + 360.0
-		; 	endIf
-		; endIf
 		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		; Avoid forcibly setting on player coords if avoidable - causes annoying graphical flickering
@@ -392,7 +368,7 @@ state Animating
 
 	function OrgasmEffect()
 		; Apply cum
-		int CumID = Animation.GetCum(Position)
+		int CumID = Animation.GetCumID(Position, Stage)
 		if CumID > 0 && Config.UseCum && (Thread.Males > 0 || Config.AllowFFCum || Thread.HasCreature)
 			ActorLib.ApplyCum(ActorRef, CumID)
 		endIf
@@ -605,6 +581,10 @@ int function GetEnjoyment()
 	elseif IsCreature
 		Enjoyment = (PapyrusUtil.ClampFloat((Utility.GetCurrentRealTime() - StartedAt) / 6.0, 0.0, 40.0) + ((Stage as float / Animation.StageCount as float) * 60.0)) as int
 	else
+		if Position == 0
+			Thread.RecordSkills()
+			Thread.SetBonuses()
+		endIf
 		Enjoyment = CalcEnjoyment(SkillBonus, Skills, Thread.LeadIn, IsFemale, (Utility.GetCurrentRealTime() - StartedAt), Stage, Animation.StageCount)
 	endIf
 	return Enjoyment
@@ -974,7 +954,7 @@ endEvent
 
 int function CalcEnjoyment(float[] XP, float[] SkillsAmounts, bool IsLeadin, bool IsFemaleActor, float Timer, int OnStage, int MaxStage) global native
 function OffsetCoords(float[] Output, float[] CenterCoords, float[] OffsetBy) global native
-function OffsetBed(float[] Output, float[] BedOffsets, float CenterRot) global native
+; function OffsetBed(float[] Output, float[] BedOffsets, float CenterRot) global native
 bool function IsInPosition(Actor CheckActor, ObjectReference CheckMarker, float maxdistance = 30.0) global native
 
 ; bool function _SetActor(Actor ProspectRef) native

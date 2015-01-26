@@ -29,15 +29,15 @@ float[] BedOffset ; = forward, side, up, rotate
 ; ------------------------------------------------------- ;
 
 int function DataIndex(int Slots, int Position, int Stage, int Slot = 0)
-	return ( Position * (Stages * Slots) ) + ( (Stage - 1) * Slots ) + Slot
+	return ( Position * (Stages * Slots) ) + ( (ClampInt(Stage, 1, Stages) - 1) * Slots ) + Slot
 endFunction
 
 int function StageIndex(int Position, int Stage)
-	return ((Position * Stages) + (Stage - 1))
+	return ((Position * Stages) + (ClampInt(Stage, 1, Stages) - 1))
 endFunction
 
 int function AdjIndex(int Stage, int Slot = 0, int Slots = 4)
-	return ((Stage - 1) * Slots) + Slot
+	return ((ClampInt(Stage, 1, Stages) - 1) * Slots) + Slot
 endfunction
 
 ; ------------------------------------------------------- ;
@@ -362,7 +362,7 @@ endFunction
 ; ------------------------------------------------------- ;
 
 int[] function GetPositionFlags(string AdjustKey, int Position, int Stage)
-	int[] Output = new int[6]
+	int[] Output = new int[5]
 	return PositionFlags(Output, AdjustKey, Position, Stage)
 endFunction
 
@@ -375,7 +375,6 @@ int[] function PositionFlags(int[] Output, string AdjustKey, int Position, int S
 	Output[2] = Strapons[i] as int
 	Output[3] = GetSchlong(AdjustKey, Position, Stage)
 	Output[4] = GetGender(Position)
-	Output[5] = CumIDs[i]
 	return Output
 endFunction
 
