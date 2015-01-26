@@ -161,7 +161,7 @@ sslBaseVoice[] function GetList(bool[] Valid)
 		Output = sslUtility.VoiceArray(i)
 		while n != -1
 			i -= 1
-			Output[i] = Objects[i] as sslBaseVoice
+			Output[i] = Objects[n] as sslBaseVoice
 			n += 1
 			if n < Slotted
 				n = Valid.Find(true, n)
@@ -250,7 +250,7 @@ string[] function GetSlotNames(int page = 1, int perpage = 125)
 endfunction
 
 sslBaseVoice[] function GetSlots(int page = 1, int perpage = 125)
-	if (page * perpage) > PageCount(perpage)
+	if page > PageCount(perpage) || page < 1
 		return sslUtility.VoiceArray(0)
 	endIf
 	perpage = PapyrusUtil.ClampInt(perpage, 1, 128) 

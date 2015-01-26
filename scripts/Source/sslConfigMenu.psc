@@ -256,7 +256,7 @@ event OnSelectST()
 
 	; Sound Settings - Voice Toggle
 	if Options[0] == "Voice"
-		sslBaseVoice Slot = VoiceSlots.Voices[(Options[1] as int)]
+		sslBaseVoice Slot = VoiceSlots.GetBySlot(Options[1] as int)
 		Slot.Enabled = !Slot.Enabled
 		SetToggleOptionValueST(Slot.Enabled)
 
@@ -748,8 +748,9 @@ function SoundSettings()
 	AddHeaderOption("")
 	int i
 	while i < VoiceSlots.Slotted
-		if VoiceSlots.Voices[i].Registered
-			AddToggleOptionST("Voice_"+i, VoiceSlots.Voices[i].Name, VoiceSlots.Voices[i].Enabled)
+		sslBaseVoice Voice = VoiceSlots.GetBySlot(i)
+		if Voice
+			AddToggleOptionST("Voice_"+i, Voice.Name, Voice.Enabled)
 		endIf
 		i += 1
 	endWhile
@@ -2204,16 +2205,12 @@ state NudeSuitFemales
 endState
 state PlayerVoice
 	event OnMenuOpenST()
-		int i = VoiceSlots.Slotted
-		string[] VoiceNames = Utility.CreateStringArray(i + 1)
+		string[] VoiceNames = new string[1]
 		VoiceNames[0] = "$SSL_Random"
-		while i
-			i -= 1
-			VoiceNames[(i + 1)] = VoiceSlots.Voices[i].Name
-		endWhile
+		VoiceNames = PapyrusUtil.MergeStringArray(VoiceNames, VoiceSlots.GetSlotNames(1, 127))
+		SetMenuDialogOptions(VoiceNames)
 		SetMenuDialogStartIndex(VoiceSlots.FindSaved(PlayerRef) + 1)
 		SetMenuDialogDefaultIndex(0)
-		SetMenuDialogOptions(VoiceNames)
 	endEvent
 	event OnMenuAcceptST(int i)
 		i -= 1
@@ -2235,16 +2232,12 @@ state PlayerVoice
 endState
 state TargetVoice
 	event OnMenuOpenST()
-		int i = VoiceSlots.Slotted
-		string[] VoiceNames = Utility.CreateStringArray(i + 1)
+		string[] VoiceNames = new string[1]
 		VoiceNames[0] = "$SSL_Random"
-		while i
-			i -= 1
-			VoiceNames[(i + 1)] = VoiceSlots.Voices[i].Name
-		endWhile
+		VoiceNames = PapyrusUtil.MergeStringArray(VoiceNames, VoiceSlots.GetSlotNames(1, 127))
+		SetMenuDialogOptions(VoiceNames)
 		SetMenuDialogStartIndex(VoiceSlots.FindSaved(TargetRef) + 1)
 		SetMenuDialogDefaultIndex(0)
-		SetMenuDialogOptions(VoiceNames)
 	endEvent
 	event OnMenuAcceptST(int i)
 		i -= 1
@@ -2463,25 +2456,16 @@ state CleanSystem
 			Utility.Wait(0.1)
 
 			; Reset relevant quests
-			Quest SexLabQuestFramework  = Game.GetFormFromFile(0xD62, "SexLab.esm") as Quest
-			SexLabQuestFramework.Stop()
-			Utility.Wait(0.2)
-			SexLabQuestFramework.Start()
-
-			Quest SexLabQuestAnimations = Game.GetFormFromFile(0x639DF, "SexLab.esm") as Quest
-			SexLabQuestAnimations.Stop()
-			Utility.Wait(0.2)
-			SexLabQuestAnimations.Start()
-
-			Quest SexLabQuestRegistry   = Game.GetFormFromFile(0x664FB, "SexLab.esm") as Quest
-			SexLabQuestRegistry.Stop()
-			Utility.Wait(0.2)
-			SexLabQuestRegistry.Start()
-
-			Quest SexLabObjectFactory = Game.GetFormFromFile(0x78818, "SexLab.esm") as Quest
-			SexLabObjectFactory.Stop()
-			Utility.Wait(0.2)
-			SexLabObjectFactory.Start()
+			ResetQuest(Game.GetFormFromFile(0x00D62, "SexLab.esm") as Quest)
+			ResetQuest(Game.GetFormFromFile(0x639DF, "SexLab.esm") as Quest)
+			ResetQuest(Game.GetFormFromFile(0x664FB, "SexLab.esm") as Quest)
+			ResetQuest(Game.GetFormFromFile(0x78818, "SexLab.esm") as Quest)
+			sslThreadController[] Threads = ThreadSlots.Threads
+			int i = Threads.Length
+			while i
+				i -= 1
+				ResetQuest(Threads[i])
+			endwhile
 
 			; Setup & clean system
 			SystemAlias.SetupSystem()
@@ -2863,6 +2847,24 @@ function Log(string Log, string Type = "NOTICE")
 		Debug.TraceStack("SEXLAB - "+Log)
 	else
 		Debug.Trace("SEXLAB - "+Log)
+	endIf
+endFunction
+
+function ResetQuest(Quest QuestRef)
+	if QuestRef
+		while QuestRef.IsStarting()
+			Utility.WaitMenuMode(0.1)
+		endWhile
+		QuestRef.Stop()
+		while QuestRef.IsStopping()
+			Utility.WaitMenuMode(0.1)
+		endWhile
+		if !QuestRef.Start()
+			QuestRef.Start()
+			Log("Failed to start quest!", "ResetQuest("+QuestRef+")")
+		endIf
+	else
+		Log("Invalid quest!", "ResetQuest("+QuestRef+")")
 	endIf
 endFunction
 
