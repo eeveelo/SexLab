@@ -26,6 +26,7 @@ int Stage
 
 ; Animation
 sslBaseAnimation Animation
+string AnimEvent
 string AdjustKey
 string ActorKey
 
@@ -183,6 +184,7 @@ state Ready
 		Animation  = Thread.Animation
 		AdjustKey  = Thread.AdjustKey
 		Position   = Thread.Positions.Find(ActorRef)
+		AnimEvent  = Animation.FetchPositionStage(Position, Stage)
 		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
 		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, Thread.BedTypeID)
 		Center     = Thread.CenterLocation
@@ -258,6 +260,11 @@ endState
 ; --- Animation Loop                                  --- ;
 ; ------------------------------------------------------- ;
 
+function PlayAnimation()
+	Debug.SendAnimationEvent(ActorRef, AnimEvent)
+	; RefreshLoc()
+endFunction
+
 state Animating
 
 	function StartAnimating()
@@ -299,6 +306,7 @@ state Animating
 		AdjustKey  = Thread.AdjustKey
 		Stage      = Thread.Stage
 		Position   = Thread.Positions.Find(ActorRef)
+		AnimEvent  = Animation.FetchPositionStage(Position, Stage)
 		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
 		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, Thread.BedTypeID)
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
@@ -848,6 +856,7 @@ function RegisterEvents()
 	RegisterForModEvent(e+"Sync", "SyncActor")
 	RegisterForModEvent(e+"Orgasm", "OrgasmEffect")
 	RegisterForModEvent(e+"Strip", "Strip")
+	RegisterForModEvent(e+"Animate", "PlayAnimation")
 endFunction
 
 function ClearEvents()
@@ -859,6 +868,7 @@ function ClearEvents()
 	UnregisterForModEvent(e+"Sync")
 	UnregisterForModEvent(e+"Orgasm")
 	UnregisterForModEvent(e+"Strip")
+	UnregisterForModEvent(e+"Animate")
 endFunction
 
 function Initialize()

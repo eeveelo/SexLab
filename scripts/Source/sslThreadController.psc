@@ -93,12 +93,12 @@ endState
 state Animating
 
 	function FireAction()
-		Log("Stage: "+Stage, "Animating")
-		PlayAnimation()
 		UnregisterForUpdate()
+		Log("Stage: "+Stage, "Animating")
 		; Prepare loop
-		SoundFX    = Animation.GetSoundFX(Stage)
-		SFXDelay   = PapyrusUtil.ClampFloat(Config.SFXDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
+		SoundFX  = Animation.GetSoundFX(Stage)
+		SFXDelay = PapyrusUtil.ClampFloat(Config.SFXDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
+		PlayAnimation()
 		; Send events
 		if !LeadIn && Stage >= StageCount
 			SendThreadEvent("OrgasmStart")
@@ -148,31 +148,8 @@ state Animating
 	endFunction
 
 	function PlayAnimation()
-		UnregisterForUpdate()
-		; Send with as little overhead as possible to improve syncing
-		string[] AnimEvents = Animation.FetchStage(Stage)
-		if ActorCount == 1
-			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
-		elseIf ActorCount == 2
-			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
-			Debug.SendAnimationEvent(Positions[1], AnimEvents[1])
-		elseIf ActorCount == 3
-			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
-			Debug.SendAnimationEvent(Positions[1], AnimEvents[1])
-			Debug.SendAnimationEvent(Positions[2], AnimEvents[2])
-		elseIf ActorCount == 4
-			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
-			Debug.SendAnimationEvent(Positions[1], AnimEvents[1])
-			Debug.SendAnimationEvent(Positions[2], AnimEvents[2])
-			Debug.SendAnimationEvent(Positions[3], AnimEvents[3])
-		elseIf ActorCount == 5
-			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
-			Debug.SendAnimationEvent(Positions[1], AnimEvents[1])
-			Debug.SendAnimationEvent(Positions[2], AnimEvents[2])
-			Debug.SendAnimationEvent(Positions[3], AnimEvents[3])
-			Debug.SendAnimationEvent(Positions[4], AnimEvents[4])
-		endIf
-		RegisterForSingleUpdate(0.2)
+		ModEvent.Send(ModEvent.Create(Key("Animate")))
+		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 	endFunction
 
 	function ClearIdles()
@@ -211,14 +188,11 @@ state Animating
 		if ActorCount == 1
 			ActorAlias[0].SyncThread()
 			ActorAlias[0].SyncLocation(true)
-			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
 		elseIf ActorCount == 2
 			ActorAlias[0].SyncThread()
 			ActorAlias[1].SyncThread()
 			ActorAlias[0].SyncLocation(true)
 			ActorAlias[1].SyncLocation(true)
-			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
-			Debug.SendAnimationEvent(Positions[1], AnimEvents[1])
 		elseIf ActorCount == 3
 			ActorAlias[0].SyncThread()
 			ActorAlias[1].SyncThread()
@@ -226,9 +200,6 @@ state Animating
 			ActorAlias[0].SyncLocation(true)
 			ActorAlias[1].SyncLocation(true)
 			ActorAlias[2].SyncLocation(true)
-			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
-			Debug.SendAnimationEvent(Positions[1], AnimEvents[1])
-			Debug.SendAnimationEvent(Positions[2], AnimEvents[2])
 		elseIf ActorCount == 4
 			ActorAlias[0].SyncThread()
 			ActorAlias[1].SyncThread()
@@ -238,10 +209,6 @@ state Animating
 			ActorAlias[1].SyncLocation(true)
 			ActorAlias[2].SyncLocation(true)
 			ActorAlias[3].SyncLocation(true)
-			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
-			Debug.SendAnimationEvent(Positions[1], AnimEvents[1])
-			Debug.SendAnimationEvent(Positions[2], AnimEvents[2])
-			Debug.SendAnimationEvent(Positions[3], AnimEvents[3])
 		elseIf ActorCount == 5
 			ActorAlias[0].SyncThread()
 			ActorAlias[1].SyncThread()
@@ -253,13 +220,9 @@ state Animating
 			ActorAlias[2].SyncLocation(true)
 			ActorAlias[3].SyncLocation(true)
 			ActorAlias[4].SyncLocation(true)
-			Debug.SendAnimationEvent(Positions[0], AnimEvents[0])
-			Debug.SendAnimationEvent(Positions[1], AnimEvents[1])
-			Debug.SendAnimationEvent(Positions[2], AnimEvents[2])
-			Debug.SendAnimationEvent(Positions[3], AnimEvents[3])
-			Debug.SendAnimationEvent(Positions[4], AnimEvents[4])
 		endIf
-		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
+		
+		PlayAnimation()
 		RegisterForSingleUpdate(0.2)
 	endFunction
 
