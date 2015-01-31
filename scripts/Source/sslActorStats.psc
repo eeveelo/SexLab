@@ -184,7 +184,7 @@ bool function IsSkilled(Actor ActorRef) global native
 
 function _SeedActor(Actor ActorRef, float RealTime, float GameTime) global native
 function SeedActor(Actor ActorRef)
-	if ActorRef != PlayerRef && !IsSkilled(ActorRef) && ActorRef.HasKeyword(Config.ActorTypeNPC)
+	if !IsSkilled(ActorRef) && ActorRef.HasKeyword(Config.ActorTypeNPC)
 		_SeedActor(ActorRef, Utility.GetCurrentRealTime(), Utility.GetCurrentGameTime())
 		Log(ActorRef.GetLeveledActorBase().GetName()+" Seeded: "+GetSkills(ActorRef))
 	endIf
