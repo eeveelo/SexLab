@@ -12,14 +12,20 @@ sslThreadController[] property Threads hidden
 endProperty
 
 sslThreadModel function PickModel(float TimeOut = 30.0)
+	while GetState() == "Locked"
+		Utility.WaitMenuMode(0.1)
+	endWhile
+	GoToState("Locked")
+	sslThreadModel Thread
 	int i
-	while i < Slots.Length
+	while !Thread && i < Slots.Length
 		if !Slots[i].IsLocked
-			return Slots[i].Make()
+			Thread = Slots[i].Make()
 		endIf
 		i += 1
 	endWhile
-	return none
+	GoToState("")
+	return Thread
 endFunction
 
 sslThreadController function GetController(int tid)
