@@ -27,8 +27,8 @@ Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000
 	Suppressed[22] = IgnoreRef2
 	Suppressed[21] = IgnoreRef3
 	Suppressed[20] = IgnoreRef4
-	; Attempt 20 times before giving up.
-	int i = 20
+	; Attempt 30 times before giving up.
+	int i = 30
 	while i
 		i -= 1
 		Actor FoundRef = Game.FindRandomActorFromRef(CenterRef, Radius)
@@ -81,9 +81,9 @@ Actor[] function FindAvailablePartners(actor[] Positions, int total, int males =
 			Positions = PapyrusUtil.PushActor(Positions, FoundRef)
 			; Update search counts
 			int gender = ActorLib.GetGender(FoundRef)
-			males -= (gender == 0) as int
+			males   -= (gender == 0) as int
 			females -= (gender == 1) as int
-			needed -= 1
+			needed  -= 1
 		endIf
 		attempts -= 1
 	endWhile
