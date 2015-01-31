@@ -16,7 +16,18 @@ Actor[] function ActorArray(int size, Actor filler = none) global native
 
 float[] function ResizeFloatArray(float[] ArrayValues, int toSize, float filler = 0.0) global native
 int[] function ResizeIntArray(int[] ArrayValues, int toSize, int filler = 0) global native
-bool[] function ResizeBoolArray(bool[] ArrayValues, int toSize, bool filler = false) global native
+bool[] function ResizeBoolArray(bool[] ArrayValues, int toSize, bool filler = false) global
+	bool[] Output = Utility.CreateBoolArray(toSize, filler)
+	int i = ArrayValues.Length
+	if i > toSize
+		i = toSize
+	endIf
+	while i
+		i -= 1
+		Output[i] = ArrayValues[i]
+	endWhile
+	return Output
+endFunction
 string[] function ResizeStringArray(string[] ArrayValues, int toSize, string filler = "") global native
 Form[] function ResizeFormArray(Form[] ArrayValues, int toSize, Form filler = none) global native
 Alias[] function ResizeAliasArray(Alias[] ArrayValues, int toSize, Alias filler = none) global native
@@ -25,7 +36,9 @@ Actor[] function ResizeActorArray(Actor[] ArrayValues, int toSize, Actor filler 
 
 float[] function PushFloat(float[] ArrayValues, float push) global native
 int[] function PushInt(int[] ArrayValues, int push) global native
-bool[] function PushBool(bool[] ArrayValues, bool push) global native
+bool[] function PushBool(bool[] ArrayValues, bool push) global
+	return ResizeBoolArray(ArrayValues, ArrayValues.Length + 1, push)
+endFunction
 string[] function PushString(string[] ArrayValues, string push) global native
 Form[] function PushForm(Form[] ArrayValues, Form push) global native
 Alias[] function PushAlias(Alias[] ArrayValues, Alias push) global native
