@@ -94,11 +94,11 @@ state Animating
 
 	function FireAction()
 		Log("Stage: "+Stage, "Animating")
+		PlayAnimation()
+		UnregisterForUpdate()
 		; Prepare loop
 		SoundFX    = Animation.GetSoundFX(Stage)
 		SFXDelay   = PapyrusUtil.ClampFloat(Config.SFXDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
-		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
-		PlayAnimation()
 		; Send events
 		if !LeadIn && Stage >= StageCount
 			SendThreadEvent("OrgasmStart")
@@ -414,9 +414,9 @@ state Animating
 		; Enable Controls
 		sslActorAlias Slot = ActorAlias(PlayerRef)
 		Slot.UnlockActor()
-		Debug.SendAnimationEvent(PlayerRef, "IdleForceDefaultState")
-		; Slot.StopAnimating(true)
-		PlayerRef.StopTranslation()
+		Slot.StopAnimating(true)
+		; Debug.SendAnimationEvent(PlayerRef, "IdleForceDefaultState")
+		; PlayerRef.StopTranslation()
 		; Lock hotkeys and wait 7 seconds
 		Debug.Notification("Player movement unlocked - repositioning scene in 7 seconds...")
 		Utility.Wait(7.0)
@@ -425,12 +425,13 @@ state Animating
 		; Give player time to settle incase airborne
 		Utility.Wait(1.0)
 		; Recenter on coords to avoid stager + resync animations
-		if !CenterOnBed(true, 400.0)
+		if !CenterOnBed(true, 300.0)
 			CenterOnObject(PlayerRef, true)
 		endIf
 		; Return to animation loop
-		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
-		RegisterForSingleUpdate(0.1)
+		RealignActors()
+		; StageTimer = Utility.GetCurrentRealTime() + GetTimer()
+		; RegisterForSingleUpdate(0.1)
 	endFunction
 
 	event OnKeyDown(int KeyCode)
@@ -456,7 +457,7 @@ state Orgasm
 			SoundFX.Play(CenterRef)
 		endIf
 		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
-		RegisterForSingleUpdate(0.5)
+		RegisterForSingleUpdate(0.1)
 	endFunction
 	event OnUpdate()
 		OrgasmDone()
@@ -500,13 +501,12 @@ endFunction
 
 float function GetTimer()
 	; Custom acyclic stage timer
-	if Animation.HasTimer(Stage)
-		Log("Stage has timer: "+Animation.GetTimer(Stage))
-		TimedStage = true
+	TimedStage = Animation.HasTimer(Stage)
+	if TimedStage
+		; Log("Stage has timer: "+Animation.GetTimer(Stage))
 		return Animation.GetTimer(Stage)
 	endIf
 	; Default stage timers
-	TimedStage = false
 	int last = ( Timers.Length - 1 )
 	if Stage < last
 		return Timers[(Stage - 1)]
@@ -533,7 +533,7 @@ function EndLeadIn()
 		LeadIn = false
 		SetAnimation()
 		; Add runtime to foreplay skill xp
-		SkillXP[0] = SkillXP[0] + (TotalTime / 14.0)
+		SkillXP[0] = SkillXP[0] + (TotalTime / 16.0)
 		; Restrip with new strip options
 		AliasEvent("Strip")
 		; Start primary animations at stage 1
@@ -544,31 +544,31 @@ endFunction
 
 function EndAnimation(bool Quickly = false)
 	UnregisterForUpdate()
-	GoToState("Ending")
-	DisableHotkeys()
-	Config.DisableThreadControl(self)
-	RecordSkills()
-	; Set fast flag to skip slow ending functions
-	Stage   = StageCount
+	Utility.WaitMenuMode(0.2)
 	FastEnd = Quickly
-	; Send end event
-	SendThreadEvent("AnimationEnding")
-	Utility.WaitMenuMode(0.5)
-	AliasEvent("Reset", 45.0)
+	Stage   = StageCount
+	GoToState("Ending")
 endFunction
 
 state Ending
+	event OnBeginState()
+		RecordSkills()
+		DisableHotkeys()
+		Config.DisableThreadControl(self)
+		SendThreadEvent("AnimationEnding")
+		Utility.WaitMenuMode(0.5)
+		AliasEvent("Reset", 45.0)
+	endEvent
 	function ResetDone()
 		Log("Reset", "AliasEvent")
 		RegisterForSingleUpdate(1.0)
 	endFunction
 	event OnUpdate()
 		SendThreadEvent("AnimationEnd")
-		; Export animations if adjusted
 		if Adjusted
 			sslSystemConfig.SaveAdjustmentProfile()
 		endIf
-		; Clear thread and make available for new animation
+		Utility.WaitMenuMode(1.0)
 		Initialize()
 	endEvent
 	; Don't allow to be called twice
