@@ -801,7 +801,7 @@ function AnimationEditor()
 	PerPage     = 125
 	OnPage      = AnimationSlots.FindPage(Animation.Registry, PerPage)
 	LastPage    = AnimationSlots.PageCount(PerPage)
-		
+
 	; Show editor options
 	SetTitleText(Animation.Name)
 	AddMenuOptionST("AnimationSelect", "$SSL_Animation", Animation.Name)
@@ -831,6 +831,8 @@ function AnimationEditor()
 	while Stage <= Animation.StageCount
 
 		float[] Adjustments = Animation.GetPositionAdjustments(AdjustKey, Position, Stage)
+		Log(Adjustments, "AnimationEditor("+AdjustKey+", "+Position+", "+Stage+")")
+
 		AddHeaderOption("$SSL_Stage{"+Stage+"}Adjustments")
 		AddHeaderOption(Profile)
 

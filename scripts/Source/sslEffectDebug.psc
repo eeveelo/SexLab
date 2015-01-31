@@ -15,24 +15,45 @@ string ActorName
 ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
+
+	; Benchmark(2, 100, 10)
+
+	; sslAnimationSlots AnimSlots = SexLab.AnimSlots
+	; Log("Filter: "+AnimSlots.Filter)
+	; Utility.Wait(2.0)
+
+	; sslBaseAnimation[] GetByTags       = AnimSlots.GetbyTags(2, "FM,Oral")
+	; Log("GetByTags("+GetByTags.Length+") - "+GetbyTags)
+	; Utility.Wait(2.0)
+
+	; sslBaseAnimation[] GetByTagsCall   = AnimSlots.GetByTagsCall(2, "FM,Oral")
+	; Log("GetByTagsCall("+GetByTagsCall.Length+") - "+GetByTagsCall)
+	; Utility.Wait(2.0)
+
+	; sslBaseAnimation[] GetByTagsFilter = AnimSlots.GetByTagsFilter(2, "FM,Oral")
+	; Log("GetByTagsFilter("+GetByTagsFilter.Length+") - "+GetByTagsFilter)
+	; Utility.Wait(2.0)
+
+
+
 	; SexLab.QuickStart(CasterRef, TargetRef, AnimationTags="Oral")
 	; Furniture BaseMarker = SexLab.Config.BaseMarker
-	MiscObject BaseMarker = SexLab.Config.IdleMarker
+	; MiscObject BaseMarker = SexLab.Config.IdleMarker
 
-	if TargetRef != Game.GetPlayer() && Input.IsKeyPressed(29)
-		TargetRef.SetRestrained(false)
-		TargetRef.SetDontMove(false)
-	endIf
+	; if TargetRef != Game.GetPlayer() && Input.IsKeyPressed(29)
+	; 	TargetRef.SetRestrained(false)
+	; 	TargetRef.SetDontMove(false)
+	; endIf
 
-	MarkerRef = TargetRef.PlaceAtMe(BaseMarker)
-	Utility.Wait(0.5)
-	; while !MarkerRef.Is3DLoaded() || MarkerRef.IsDisabled()
-	; endwhile
-	Log(MarkerRef)
-	TargetRef.SetVehicle(MarkerRef)
+	; MarkerRef = TargetRef.PlaceAtMe(BaseMarker)
+	; Utility.Wait(0.5)
+	; ; while !MarkerRef.Is3DLoaded() || MarkerRef.IsDisabled()
+	; ; endwhile
+	; Log(MarkerRef)
+	; TargetRef.SetVehicle(MarkerRef)
 
-	Utility.Wait(3.0)
-	Dispel()
+	; Utility.Wait(3.0)
+	; Dispel()
 endEvent
 
 event OnUpdate()

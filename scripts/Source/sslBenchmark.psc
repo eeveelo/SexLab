@@ -34,86 +34,32 @@ function PreBenchmarkSetup()
 	; Log("SexLabUtil Save(): "+sslBaseAnimation._SaveProfile("DevProfile_1.json"))
 
 endFunction
-;/ 
-sslBaseAnimation Animation
-string Registry
-string AdjustKey
-string RaceKey
-string Profile
-int AdjIndex
+
 
 state Test1
 	string function Label()
-		return "JsonUtil"
+		return "GetByTags"
 	endFunction
 
 	string function Proof()
-		return Animation.GetPositionAdjustments(AdjustKey, 0, 1)
+		sslBaseAnimation[] Anims = AnimSlots.GetByTags(2, "FM,Vaginal", "Aggressive")
+		return "("+Anims.Length+") - "+Anims
 	endFunction
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
 		; START any variable preparions needed
-		float[] Offsets
 		; END any variable preparions needed
 		baseline += Utility.GetCurrentRealTime()
 		while nth
 			nth -= 1
 			; START code to benchmark
-			Offsets = Animation.GetPositionAdjustments(AdjustKey, 0, 1)
+			AnimSlots.GetByTags(2, "FM,Vaginal", "Aggressive")
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline
 	endFunction
 endState
 
-state Test2
-	string function Label()
-		return "Global"
-	endFunction
-
-	string function Proof()
-		return sslBaseAnimation._GetStageAdjustments("DevProfile_1.json", Registry, RaceKey, 1)
-	endFunction
-
-	float function RunTest(int nth = 5000, float baseline = 0.0)
-		; START any variable preparions needed
-		float[] Offsets
-		; END any variable preparions needed
-		baseline += Utility.GetCurrentRealTime()
-		while nth
-			nth -= 1
-			; START code to benchmark
-			Offsets = sslBaseAnimation._GetStageAdjustments("DevProfile_1.json", Registry, RaceKey, 1)
-			; END code to benchmark
-		endWhile
-		return Utility.GetCurrentRealTime() - baseline
-	endFunction
-endState
-
-state Test3
-	string function Label()
-		return "Native"
-	endFunction
-
-	string function Proof()
-		return Animation._GetStageAdjustmentsNative("DevProfile_1.json", RaceKey, 1)
-	endFunction
-
-	float function RunTest(int nth = 5000, float baseline = 0.0)
-		; START any variable preparions needed
-		float[] Offsets
-		; END any variable preparions needed
-		baseline += Utility.GetCurrentRealTime()
-		while nth
-			nth -= 1
-			; START code to benchmark
-			Offsets = Animation._GetStageAdjustmentsNative("DevProfile_1.json", RaceKey, 1)
-			; END code to benchmark
-		endWhile
-		return Utility.GetCurrentRealTime() - baseline
-	endFunction
-endState
- /;
 
 function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10, bool UseBaseLoop = false)
 	PreBenchmarkSetup()

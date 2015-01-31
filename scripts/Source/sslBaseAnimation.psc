@@ -196,6 +196,7 @@ endFunction
 
 float[] function _GetStageAdjustments(string Registrar, string AdjustKey, int Stage) global native
 float[] function GetPositionAdjustments(string AdjustKey, int Position, int Stage)
+	InitAdjustments(AdjustKey, Position)
 	return _GetStageAdjustments(Registry, AdjustKey+"."+Position, Stage)
 endFunction
 
@@ -669,10 +670,6 @@ function Initialize()
 	parent.Initialize()
 endFunction
 
-bool function CheckByTags(int ActorCount, string[] Search, string[] Suppress, bool RequireAll)
-	return Enabled && ActorCount == PositionCount && CheckTags(Search, RequireAll) && (Suppress.Length < 1 || !HasOneTag(Suppress))
-endFunction
-
 ; ------------------------------------------------------- ;
 ; --- Properties                                      --- ;
 ; ------------------------------------------------------- ;
@@ -772,3 +769,7 @@ endProperty
 		return "../SexLab/AnimationProfile_"+Config.AnimProfile+".json"
 	endFunction
 endProperty /;
+
+bool function CheckByTags(int ActorCount, string[] Search, string[] Suppress, bool RequireAll)
+	return Enabled && ActorCount == PositionCount && CheckTags(Search, RequireAll) && (Suppress.Length < 1 || !HasOneTag(Suppress))
+endFunction

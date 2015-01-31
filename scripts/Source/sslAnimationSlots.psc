@@ -34,19 +34,6 @@ sslBaseAnimation[] function GetByTags(int ActorCount, string Tags, string TagsSu
 	return GetList(valid)
 endFunction
 
-sslBaseAnimation[] function GetByTags2(int ActorCount, string Tags, string TagsSuppressed = "", bool RequireAll = true)
-	; Debug.Trace("GetByTags2("+ActorCount+", "+Tags+", "+TagsSuppressed+", "+RequireAll+")")
-	bool[] Valid      = Utility.CreateBoolArray(Slotted)
-	string[] Suppress = StringSplit(TagsSuppressed)
-	string[] Search   = StringSplit(Tags)
-	int i = Slotted
-	while i
-		i -= 1
-		Valid[i] = (Objects[i] as sslBaseAnimation).CheckByTags(ActorCount, Search, Suppress, RequireAll)
-	endWhile
-	return GetList(valid)
-endFunction
-
 sslBaseAnimation[] function GetByType(int ActorCount, int Males = -1, int Females = -1, int StageCount = -1, bool Aggressive = false, bool Sexual = true)
 	; Debug.Trace("GetByType("+ActorCount+", "+Males+", "+Females+", "+StageCount+", "+Aggressive+", "+Sexual+")")
 	; Search
@@ -201,7 +188,7 @@ endFunction
 ; ------------------------------------------------------- ;
 
 sslBaseAnimation[] function GetList(bool[] Valid)
-	Debug.Trace("GetList() - "+Valid)
+	; Debug.Trace("GetList() - "+Valid)
 	sslBaseAnimation[] Output
 	if Valid.Length > 0 && Valid.Find(true) != -1
 		int n = Valid.Find(true)
@@ -274,7 +261,7 @@ int function CountTag(sslBaseAnimation[] Anims, string Tags)
 endFunction
 
 bool[] function FindTagged(sslBaseAnimation[] Anims, string Tags)
-	if Anims.Length < 1 || Tags == ""
+	if !Anims || Anims.Length < 1 || Tags == ""
 		return Utility.CreateBoolArray(0)
 	endIf
 	bool[] Output     = Utility.CreateBoolArray(i)

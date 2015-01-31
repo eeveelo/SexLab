@@ -267,7 +267,8 @@ state Animating
 		endIf
 		; Start update loop
 		TrackedEvent("Start")
-		StartedAt = Utility.GetCurrentRealTime()
+		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
+		StartedAt  = Utility.GetCurrentRealTime()
 		RegisterForSingleUpdate(Utility.RandomFloat(1.0, 3.0))
 	endFunction
 
@@ -304,6 +305,7 @@ state Animating
 		; Update alias info
 		GetEnjoyment()
 		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
+		Log("Enjoyment: "+Enjoyment+" SOS: "+Schlong)
 		if !IsCreature
 			; Equip Strapon if needed and enabled
 			ResolveStrapon()
@@ -390,9 +392,9 @@ state Animating
 		Log("Resetting!")
 		; Update stats
 		if !IsCreature
-			; Log("Stats BEFORE: "+sslActorStats.GetSkills(ActorRef))
+			Log("Stats BEFORE: "+sslActorStats.GetSkills(ActorRef))
 			sslActorStats.RecordThread(ActorRef, Gender, HighestRelation, StartedAt, Utility.GetCurrentRealTime(), Utility.GetCurrentGameTime(), Thread.HasPlayer, Thread.VictimRef, Thread.Genders, Thread.SkillXP)
-			; Log("Stats AFTER: "+sslActorStats.GetSkills(ActorRef))
+			Log("Stats AFTER: "+sslActorStats.GetSkills(ActorRef))
 			; Stats.RecordThread(ActorRef, (IsPlayer || Thread.HasPlayer), Thread.ActorCount, HighestRelation, (Utility.GetCurrentRealTime() - StartedAt), Thread.VictimRef, Thread.SkillXP, Thread.Genders)
 		endIf
 		; Apply cum
