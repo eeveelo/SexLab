@@ -252,7 +252,7 @@ state Ready
 		endIf
 		; Enter animatable state - rest is non vital and can finish as queued
 		GoToState("Animating")
-		Thread.AliasEventDone("Prepare")
+		Thread.SyncEventDone("Prepare")
 	endFunction
 endState
 
@@ -277,6 +277,7 @@ state Animating
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
 		StartedAt  = Utility.GetCurrentRealTime()
 		RegisterForSingleUpdate(Utility.RandomFloat(1.0, 3.0))
+		UnregisterForModEvent(Thread.Key("Start"))
 	endFunction
 
 	event OnUpdate()
@@ -332,7 +333,7 @@ state Animating
 	function SyncActor()
 		SyncThread()
 		SyncLocation(false)
-		Thread.AliasEventDone("Sync")
+		Thread.SyncEventDone("Sync")
 	endFunction
 
 	function RefreshLoc()
@@ -346,7 +347,7 @@ state Animating
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		; Avoid forcibly setting on player coords if avoidable - causes annoying graphical flickering
 		if Force && IsPlayer && IsInPosition(ActorRef, MarkerRef, 40.0)
-			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 10000, 0)
+			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 5000, 0)
 		elseIf Force
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
@@ -358,7 +359,7 @@ state Animating
 
 	function Snap()
 		; Quickly move into place and angle if actor is off by a lot
-		if !IsInPosition(ActorRef, MarkerRef, 40.0)
+		if !IsInPosition(ActorRef, MarkerRef, 100.0)
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			ActorRef.SetVehicle(MarkerRef)
@@ -390,7 +391,7 @@ state Animating
 		Config.OrgasmFX.Play(ActorRef)
 		VoiceDelay = 0.8
 		; Notify thread of finish
-		Thread.AliasEventDone("Orgasm")
+		Thread.SyncEventDone("Orgasm")
 		RegisterForSingleUpdate(VoiceDelay)
 	endFunction
 
@@ -426,7 +427,7 @@ state Animating
 		; Free alias slot
 		Clear()
 		GoToState("")
-		Thread.AliasEventDone("Reset")
+		Thread.SyncEventDone("Reset")
 		Initialize()
 	endEvent
 endState
@@ -831,9 +832,9 @@ endFunction
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
 
-function TrackedEvent(string eventName)
+function TrackedEvent(string EventName)
 	if IsTracked
-		Thread.SendTrackedEvent(ActorRef, eventName, Thread.tid)
+		Thread.SendTrackedEvent(ActorRef, EventName)
 	endif
 endFunction
 
@@ -857,6 +858,7 @@ function RegisterEvents()
 	RegisterForModEvent(e+"Orgasm", "OrgasmEffect")
 	RegisterForModEvent(e+"Strip", "Strip")
 	RegisterForModEvent(e+"Animate", "PlayAnimation")
+	RegisterForModEvent(e+"Start", "StartAnimating")
 endFunction
 
 function ClearEvents()
@@ -869,6 +871,7 @@ function ClearEvents()
 	UnregisterForModEvent(e+"Orgasm")
 	UnregisterForModEvent(e+"Strip")
 	UnregisterForModEvent(e+"Animate")
+	UnregisterForModEvent(e+"Start")
 endFunction
 
 function Initialize()

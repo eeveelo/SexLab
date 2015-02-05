@@ -29,7 +29,7 @@ state Prepare
 		UpdateAdjustKey()
 		SetAnimation()
 		Log(AdjustKey, "Adjustment Profile")
-		AliasEvent("Prepare", 30.0)
+		SyncEvent("Prepare", 30.0)
 	endFunction
 
 	function PrepareDone()
@@ -37,12 +37,6 @@ state Prepare
 	endFunction
 
 	event OnUpdate()
-		; Start actor loops
-		ActorAlias[0].StartAnimating()
-		ActorAlias[1].StartAnimating()
-		ActorAlias[2].StartAnimating()
-		ActorAlias[3].StartAnimating()
-		ActorAlias[4].StartAnimating()
 		; Set starting adjusted actor
 		AdjustPos   = (ActorCount > 1) as int
 		AdjustAlias = PositionAlias(AdjustPos)
@@ -54,6 +48,8 @@ state Prepare
 		; Start time trackers
 		SkillTime = Utility.GetCurrentRealTime()
 		StartedAt = Utility.GetCurrentRealTime()
+		; Start actor loops
+		QuickEvent("Start")
 		; Begin animating loop
 		Action("Advancing")
 	endEvent
@@ -80,7 +76,7 @@ state Advancing
 			endIf
 			return
 		endIf
-		AliasEvent("Sync", 10.0)
+		SyncEvent("Sync", 10.0)
 	endFunction
 	function SyncDone()
 		Action("Animating")
@@ -408,24 +404,13 @@ endState
 
 function TriggerOrgasm()
 	UnregisterforUpdate()
-	GoToState("Orgasm")
-	AliasEvent("Orgasm", 5.0)
+	QuickEvent("Orgasm")
+	if SoundFX
+		SoundFX.Play(CenterRef)
+	endIf
+	StageTimer += 3.0
+	RegisterForSingleUpdate(3.0)
 endFunction
-
-state Orgasm
-	function OrgasmDone()
-		UnregisterforUpdate()
-		GoToState("Animating")
-		if SoundFX
-			SoundFX.Play(CenterRef)
-		endIf
-		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
-		RegisterForSingleUpdate(0.1)
-	endFunction
-	event OnUpdate()
-		OrgasmDone()
-	endEvent
-endState
 
 ; ------------------------------------------------------- ;
 ; --- Context Sensitive Info                          --- ;
@@ -498,7 +483,7 @@ function EndLeadIn()
 		; Add runtime to foreplay skill xp
 		SkillXP[0] = SkillXP[0] + (TotalTime / 16.0)
 		; Restrip with new strip options
-		AliasEvent("Strip")
+		QuickEvent("Strip")
 		; Start primary animations at stage 1
 		SendThreadEvent("LeadInEnd")
 		Action("Advancing")
@@ -520,7 +505,7 @@ state Ending
 		Config.DisableThreadControl(self)
 		SendThreadEvent("AnimationEnding")
 		Utility.WaitMenuMode(0.5)
-		AliasEvent("Reset", 45.0)
+		SyncEvent("Reset", 45.0)
 	endEvent
 	function ResetDone()
 		Log("Reset", "AliasEvent")

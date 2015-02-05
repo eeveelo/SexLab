@@ -347,7 +347,7 @@ state Making
 		; --  Start Controller   -- ;
 		; ------------------------- ;
 
-		Action("Prepare")
+		GoToState("Prepare")
 		return self as sslThreadController
 	endFunction
 
@@ -542,7 +542,7 @@ function ChangeActors(Actor[] NewPositions)
 	if LeadIn && NewPositions.Length != 2
 		Stage  = 1
 		LeadIn = false
-		AliasEvent("Strip")
+		QuickEvent("Strip")
 		SendThreadEvent("LeadInEnd")
 	endIf
 	; Prepare actors who weren't present before
@@ -847,7 +847,6 @@ function SetupThreadEvent(string HookEvent)
 		ModEvent.Send(eid)
 		; Log("Thread Hook Sent: "+HookEvent)
 	endIf
-	; Legacy support for < v1.50 - To be removed eventually
 	SendModEvent(HookEvent, thread_id)
 endFunction
 
@@ -856,81 +855,56 @@ endFunction
 ; ------------------------------------------------------- ;
 
 string[] EventTypes
-
-bool[] EventSlots
-float[] AliasLag
+float[] AliasTimer
 int[] AliasDone
 
 string function Key(string Callback)
 	return "SSL_"+thread_id+"_"+Callback
 endFunction
 
-; SSL_AliasEventDone_
-; function AliasEvent(string Callback, float WaitTime = 0.0)
-; 	int slot = EventSlots.Find(false)
-; 	EventSlots[i] = true
-; 	if WaitTime > 0.0
-
-; 		AliasDone[i] = 0
-; 		AliasLag[i] = Utility.GetCurrentRealTime() + WaitTime
-; 		RegisterForSingleUpdate(WaitTime)
-; 	endIf
-; 	AliasDone[slot] = 0
-; 	ModEvent.Send(ModEvent.Create(Key(Callback)))
-; endFunction
-
-; function AliasEventDone()
-; endFunction
-
-function AliasEvent(string Callback, float WaitTime = 0.0)
-	if WaitTime > 0.0
-		int i = EventTypes.Find(Callback)
-		if AliasDone[i] != 0
-			Log(Callback+" attempting to start during previous event")
-			return
-		endIf
-		AliasDone[i] = 0
-		AliasLag[i]  = Utility.GetCurrentRealTime() + WaitTime
-		RegisterForSingleUpdate(WaitTime)
-	endIf
+function QuickEvent(string Callback)
 	ModEvent.Send(ModEvent.Create(Key(Callback)))
-endFunction
-function AliasEventDone(string Callback = "Alias")
-	int i = EventTypes.Find(Callback)
-	if AliasLag[i] != 0.0
-		AliasDone[i] = AliasDone[i] + 1
-		if AliasDone[i] >= ActorCount 
-			; Notify of failsafe trigger - likely due to lag
-			float timer = Utility.GetCurrentRealTime() - AliasLag[i]
-			Log(Callback+" Timer: " + timer, "AliasEventDone")
-			if timer > 0 && Config.DebugMode
-				Debug.Notification(Callback+" Alias Completion Lag: "+timer)
-			endIf
-			; Reset event checks
-			AliasDone[i] = 0
-			AliasLag[i]  = 0.0
-			; Send completion event
-			ModEvent.Send(ModEvent.Create(Key(Callback+"Done")))
-		endIf
+endfunction
+
+function SyncEvent(string Callback, float WaitTime)
+	int id = EventTypes.Find(Callback)
+	if AliasTimer[id] == 0.0
+		AliasTimer[id] = Utility.GetCurrentRealTime() + WaitTime
+		RegisterForSingleUpdate(WaitTime)
+		ModEvent.Send(ModEvent.Create(Key(Callback)))
 	else
-		Log(Callback+" not tracked.")
+		Log(Callback+" sync event attempting to start during previous wait sync")
 	endIf
 endFunction
 
-function SendTrackedEvent(Actor ActorRef, string Hook = "", int id = -1)
+function SyncEventDone(string Callback)
+	int id = EventTypes.Find(Callback)
+	if AliasTimer[id] != 0.0
+		AliasDone[id] = AliasDone[id] + 1
+		if AliasDone[id] >= ActorCount
+			UnregisterforUpdate()
+			Log("Lag Timer: " + (AliasTimer[id] - Utility.GetCurrentRealTime()), "SyncDone("+EventTypes[id]+")")
+			AliasTimer[id] = 0.0
+			AliasDone[id]  = 0
+			ModEvent.Send(ModEvent.Create(Key(EventTypes[id]+"Done")))
+		endIf
+	endIf
+endFunction
+
+function SendTrackedEvent(Actor ActorRef, string Hook = "")
 	; Append hook type, global if empty
 	if Hook != ""
 		Hook = "_"+Hook
 	endIf
 	; Send generic player callback event
 	if ActorRef == PlayerRef
-		SetupActorEvent(PlayerRef, "PlayerTrack_"+Hook, id)
+		SetupActorEvent(PlayerRef, "PlayerTrack_"+Hook)
 	endIf
 	; Send actor callback events
 	int i = StorageUtil.StringListCount(ActorRef, "SexLabEvents")
 	while i
 		i -= 1
-		SetupActorEvent(ActorRef, StorageUtil.StringListGet(ActorRef, "SexLabEvents", i)+Hook, id)
+		SetupActorEvent(ActorRef, StorageUtil.StringListGet(ActorRef, "SexLabEvents", i)+Hook)
 	endWhile
 	; Send faction callback events
 	i = StorageUtil.FormListCount(Config, "TrackedFactions")
@@ -941,16 +915,16 @@ function SendTrackedEvent(Actor ActorRef, string Hook = "", int id = -1)
 			int n = StorageUtil.StringListCount(FactionRef, "SexLabEvents")
 			while n
 				n -= 1
-				SetupActorEvent(ActorRef, StorageUtil.StringListGet(FactionRef, "SexLabEvents", n)+Hook, id)
+				SetupActorEvent(ActorRef, StorageUtil.StringListGet(FactionRef, "SexLabEvents", n)+Hook)
 			endwhile
 		endIf
 	endWhile
 endFunction
 
-function SetupActorEvent(Actor ActorRef, string Callback, int id = -1)
+function SetupActorEvent(Actor ActorRef, string Callback)
 	int eid = ModEvent.Create(Callback)
 	ModEvent.PushForm(eid, ActorRef)
-	ModEvent.PushInt(eid, id)
+	ModEvent.PushInt(eid, thread_id)
 	ModEvent.Send(eid)
 endFunction
 
@@ -998,7 +972,7 @@ function Initialize()
 	; Storage Info
 	Genders        = new int[4]
 	AliasDone      = new int[5]
-	AliasLag       = new float[5]
+	AliasTimer     = new float[5]
 	SkillXP        = new float[6]
 	SkillBonus     = new float[6]
 	CenterLocation = new float[6]
