@@ -186,6 +186,11 @@ int function ValidateActor(Actor ActorRef)
 		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are forbidden from animating")
 		return -11
 	elseIf !ActorRef.Is3DLoaded()
+		Utility.Wait(2.0)
+		if ActorRef.Is3DLoaded()
+			Log("ValidateActor("+BaseRef.GetName()+") -- RECHECK -- The actor wasn't loadded but was after a short wait...")
+			return ValidateActor(ActorRef)
+		endIf
 		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are not loaded")
 		return -12
 	elseIf ActorRef.IsDead() && ActorRef.GetActorValue("Health") < 1.0
@@ -251,7 +256,7 @@ int function GetGender(Actor ActorRef)
 	if ActorRef
 		ActorBase BaseRef = ActorRef.GetLeveledActorBase()
 		if sslCreatureAnimationSlots.HasRaceType(BaseRef.GetRace())
-			return 2;BaseRef.GetSex() + 2 ; Creatures: 2+
+			return BaseRef.GetSex() + 2 ; Creatures: 2+
 		elseIf ActorRef.IsInFaction(GenderFaction)
 			return ActorRef.GetFactionRank(GenderFaction) ; Override
 		else
@@ -264,7 +269,7 @@ endFunction
 int[] function GetGendersAll(Actor[] Positions)
 	int i = Positions.Length
 	int[] Genders = Utility.CreateIntArray(i)
-	while i
+	while i > 0
 		i -= 1
 		Genders[i] = GetGender(Positions[i])
 	endWhile
@@ -272,7 +277,7 @@ int[] function GetGendersAll(Actor[] Positions)
 endFunction
 
 int[] function GenderCount(Actor[] Positions)
-	int[] Genders = new int[3]
+	int[] Genders = new int[4]
 	int i = Positions.Length
 	while i > 0
 		i -= 1
@@ -296,6 +301,14 @@ endFunction
 
 int function CreatureCount(Actor[] Positions)
 	return GenderCount(Positions)[2]
+endFunction
+
+int function CreatureMaleCount(Actor[] Positions)
+	return GenderCount(Positions)[2]
+endFunction
+
+int function CreatureFemaleCount(Actor[] Positions)
+	return GenderCount(Positions)[3]
 endFunction
 
 string function MakeGenderTag(Actor[] Positions)

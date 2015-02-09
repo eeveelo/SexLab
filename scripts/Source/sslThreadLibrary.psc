@@ -170,16 +170,16 @@ int function GetBedType(ObjectReference BedRef)
 	if BedRef
 		Form BaseRef = BedRef.GetBaseObject()
 		if !BedsList.HasForm(BaseRef)
-			return -1
-		elseIf BedRollsList.HasForm(BaseRef)
 			return 0
-		elseIf DoubleBedsList.HasForm(BaseRef)
-			return 2
-		else
+		elseIf BedRollsList.HasForm(BaseRef)
 			return 1
+		elseIf DoubleBedsList.HasForm(BaseRef)
+			return 3
+		else
+			return 2
 		endIf
 	endIf
-	return -1
+	return 0
 endFunction
 
 bool function IsBedAvailable(ObjectReference BedRef)
