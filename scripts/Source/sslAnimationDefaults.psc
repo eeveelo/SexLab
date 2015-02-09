@@ -1,8 +1,14 @@
 scriptname sslAnimationDefaults extends sslAnimationFactory
 
+function RegisterCategory(string Type)
+	ModEvent.Send(ModEvent.Create("SexLabSlotAnimations_"+Type))
+	Utility.WaitMenuMode(0.4)
+endFunction
+
 function LoadAnimations()
 	; Prepare factory resources (as non creature)
 	PrepareFactory()
+
 	; Missionary
 	RegisterAnimation("SexLabMissionary")
 	RegisterAnimation("SexLabAggrMissionary")
@@ -12,6 +18,8 @@ function LoadAnimations()
 	RegisterAnimation("APBedMissionary")
 	RegisterAnimation("APHoldLegUp")
 	RegisterAnimation("APLegUp")
+	RegisterCategory("Missionary")
+
 	; Doggystyle
 	RegisterAnimation("SexLabDoggyStyle")
 	RegisterAnimation("SexLabAggrBehind")
@@ -21,15 +29,21 @@ function LoadAnimations()
 	RegisterAnimation("ZynDoggystyle")
 	RegisterAnimation("DarkInvestigationsDoggystyle")
 	RegisterAnimation("APDoggyStyle")
+	RegisterCategory("Doggystyle")
+
 	; Cowgirl
 	RegisterAnimation("SexLabReverseCowgirl")
 	RegisterAnimation("ArrokCowgirl")
 	RegisterAnimation("ArrokReverseCowgirl")
 	RegisterAnimation("APCowgirl")
+	RegisterCategory("Cowgirl")
+
 	; Sideways
 	RegisterAnimation("SexLabSideways")
 	RegisterAnimation("ArrokSideways")
 	RegisterAnimation("APShoulder")
+	RegisterCategory("Sideways")
+	
 	; Standing
 	RegisterAnimation("SexLabHuggingSex")
 	RegisterAnimation("SexLabStanding")
@@ -37,10 +51,14 @@ function LoadAnimations()
 	RegisterAnimation("ArrokStanding")
 	RegisterAnimation("APStanding")
 	RegisterAnimation("ZynRoughStanding")
+	RegisterCategory("Standing")
+	
 	; Anal
 	RegisterAnimation("ArrokAnal")
 	RegisterAnimation("APAnal")
 	RegisterAnimation("APFaceDown")
+	RegisterCategory("Anal")
+	
 	; Oral
 	RegisterAnimation("ArrokBlowjob")
 	RegisterAnimation("ArrokOral")
@@ -51,27 +69,41 @@ function LoadAnimations()
 	RegisterAnimation("APStandBlowjob")
 	RegisterAnimation("APHandjob")
 	RegisterAnimation("APSkullFuck")
+	RegisterCategory("Oral")
+	
 	; Boobjob
 	RegisterAnimation("SexLabBoobjob")
 	RegisterAnimation("ArrokBoobjob")
 	RegisterAnimation("APBoobjob")
+	RegisterCategory("Boobjob")
+	
 	; Foreplay
 	RegisterAnimation("ArrokForeplay")
 	RegisterAnimation("ArrokSittingForeplay")
 	RegisterAnimation("ArrokStandingForeplay")
+	RegisterCategory("Foreplay")
+
 	; Footjob
 	RegisterAnimation("BleaghFootJob")
-	; Solo
-	RegisterAnimation("BleaghFemaleSolo")
-	RegisterAnimation("APFemaleSolo")
-	RegisterAnimation("ArrokMaleMasturbation")
+	RegisterCategory("Footjob")
+	
 	; Gay/Lesbian
 	RegisterAnimation("SexLabTribadism")
 	RegisterAnimation("ArrokLesbian")
 	RegisterAnimation("ZynLesbian")
 	RegisterAnimation("ZynLicking")
+	RegisterCategory("Lesbian")
+	
+	; Solo
+	RegisterAnimation("BleaghFemaleSolo")
+	RegisterAnimation("APFemaleSolo")
+	RegisterAnimation("ArrokMaleMasturbation")
+	RegisterCategory("Solo")
+	
 	; Misc
 	RegisterAnimation("APFisting")
+	RegisterCategory("Misc")
+	
 	; 3P+
 	RegisterAnimation("ArrokDevilsThreeway")
 	RegisterAnimation("ArrokTricycle")
@@ -79,6 +111,8 @@ function LoadAnimations()
 	RegisterAnimation("ZynFemdom")
 	RegisterAnimation("ZynFourWay")
 	RegisterAnimation("DarkInvestigationsThreesome")
+	RegisterCategory("Orgy")
+	
 	; TEMP
 	;/ RegisterAnimation("ExtraTMP1")
 	RegisterAnimation("ExtraTMP2")

@@ -32,20 +32,40 @@ Sound property Squirting auto hidden
 
 ; Prepare the factory for use with the default animation slots
 function PrepareFactory()
-	Squishing = Game.GetFormFromFile(0x65A31, "SexLab.esm") as Sound
-	Sucking   = Game.GetFormFromFile(0x65A32, "SexLab.esm") as Sound
-	SexMix    = Game.GetFormFromFile(0x65A33, "SexLab.esm") as Sound
-	Squirting = Game.GetFormFromFile(0x65A34, "SexLab.esm") as Sound
-	Slots     = Game.GetFormFromFile(0x639DF, "SexLab.esm") as sslAnimationSlots
+	if !Squishing
+		Squishing = Game.GetFormFromFile(0x65A31, "SexLab.esm") as Sound
+	endIf
+	if !Sucking
+		Sucking   = Game.GetFormFromFile(0x65A32, "SexLab.esm") as Sound
+	endIf
+	if !SexMix
+		SexMix    = Game.GetFormFromFile(0x65A33, "SexLab.esm") as Sound
+	endIf
+	if !Squirting
+		Squirting = Game.GetFormFromFile(0x65A34, "SexLab.esm") as Sound
+	endIf
+	if !Slots
+		Slots     = Game.GetFormFromFile(0x639DF, "SexLab.esm") as sslAnimationSlots
+	endIf
 endFunction
 
 ; Prepare the factory for use with the default creature animation slots
 function PrepareFactoryCreatures()
-	Squishing = Game.GetFormFromFile(0x65A31, "SexLab.esm") as Sound
-	Sucking   = Game.GetFormFromFile(0x65A32, "SexLab.esm") as Sound
-	SexMix    = Game.GetFormFromFile(0x65A33, "SexLab.esm") as Sound
-	Squirting = Game.GetFormFromFile(0x65A34, "SexLab.esm") as Sound
-	Slots     = Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslCreatureAnimationSlots
+	if !Squishing
+		Squishing = Game.GetFormFromFile(0x65A31, "SexLab.esm") as Sound
+	endIf
+	if !Sucking
+		Sucking   = Game.GetFormFromFile(0x65A32, "SexLab.esm") as Sound
+	endIf
+	if !SexMix
+		SexMix    = Game.GetFormFromFile(0x65A33, "SexLab.esm") as Sound
+	endIf
+	if !Squirting
+		Squirting = Game.GetFormFromFile(0x65A34, "SexLab.esm") as Sound
+	endIf
+	if !Slots
+		Slots     = Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslCreatureAnimationSlots
+	endIf
 endFunction
 
 ; Send callback event to start registration
