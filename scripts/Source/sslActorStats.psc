@@ -184,7 +184,7 @@ bool function IsSkilled(Actor ActorRef) global native
 
 function _SeedActor(Actor ActorRef, float RealTime, float GameTime) global native
 function SeedActor(Actor ActorRef)
-	if !IsSkilled(ActorRef) && ActorRef.HasKeyword(Config.ActorTypeNPC)
+	if ActorRef != PlayerRef && !IsSkilled(ActorRef) && ActorRef.HasKeyword(Config.ActorTypeNPC)
 		_SeedActor(ActorRef, Utility.GetCurrentRealTime(), Utility.GetCurrentGameTime())
 		Log(ActorRef.GetLeveledActorBase().GetName()+" Seeded: "+GetSkills(ActorRef))
 	endIf
@@ -232,12 +232,12 @@ string function GetTitle(int Level)
 	return StatTitles[ClampInt(Level, 0, 6)]
 endFunction
 
-function _GetSkills(Actor ActorRef, float[] Output) global native
-float[] function GetSkills(Actor ActorRef) global
+float[] function GetSkills(Actor ActorRef) global native
+;/ float[] function GetSkills(Actor ActorRef) global
 	float[] Output = new float[18]
 	_GetSkills(ActorRef, Output)
 	return Output
-endFunction
+endFunction /;
 
 float[] function GetSkillLevels(Actor ActorRef)
 	float[] Skills = GetSkills(ActorRef)

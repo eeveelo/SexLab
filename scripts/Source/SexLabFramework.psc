@@ -84,6 +84,14 @@ endFunction
 ;#  ACTOR FUNCTIONS             #
 ;#------------------------------#
 
+;/**
+* Checks if given actor is a valid target for SexLab animation.
+* 
+* @param	Actor	ActorRef 	The actor to check for validation
+* @return	int 	The integer code of the validation state
+*                   1 if valid actor, signed int if invalid.
+*                   
+**/;
 int function ValidateActor(Actor ActorRef)
 	return ActorLib.ValidateActor(ActorRef)
 endFunction

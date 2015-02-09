@@ -4,56 +4,56 @@ import SexLabUtil
 
 function PreBenchmarkSetup()
 	Setup()
-	; Animation = AnimSlots.GetbyRegistrar("bleaghfemalesolo")
-	; Registry = Animation.Registry
-	; AdjustKey = Animation.MakeAdjustKey(sslUtility.MakeActorArray(PlayerRef))
-	; RaceKey = sslUtility.RemoveString(AdjustKey, Animation.Key(""))+".0"
-	; Profile = Animation.Profile
-	; AdjIndex = Animation.AdjIndex(1, 3)
-
-	; Animation._Init(Registry)
-
-	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 1, 0.1)
-	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 2, 1.5)
-	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 1, 0.1)
-	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 2, 1.5)
-	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 1, 0.1)
-	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 2, 1.5)
-	; Animation.UpdateAdjustmentAll(AdjustKey, 0, 1, 0.1)
-	; Animation.UpdateAdjustment(AdjustKey, 0, 2, 0, 1.2)
-	; Animation.UpdateAdjustment(AdjustKey, 0, 2, 0, 1.2)
-	; Animation.UpdateAdjustment(AdjustKey, 0, 2, 0, 1.2)
-	; Animation.UpdateAdjustment(AdjustKey, 0, 2, 0, 1.2)
-	; Animation.UpdateAdjustment(AdjustKey, 0, 2, 0, 1.2)
-	; Animation.UpdateAdjustment(AdjustKey, 0, 2, 0, 1.2)
-	; Animation.UpdateAdjustment(AdjustKey, 0, 3, 0, 1.3)
-	; Animation.UpdateAdjustment(AdjustKey, 0, 3, 0, 1.3)
-	; Animation.UpdateAdjustment(AdjustKey, 0, 3, 0, 1.3)
-	; Animation.UpdateAdjustment(AdjustKey, 0, 3, 0, 1.3)
-	; Log("JsonUtil Save(): "+JsonUtil.Save(Animation.Profile))
-	; Log("SexLabUtil Save(): "+sslBaseAnimation._SaveProfile("DevProfile_1.json"))
-
+	RealTime = new float[1]
 endFunction
 
+float[] RealTime
 
 state Test1
 	string function Label()
-		return "GetByTags"
+		return "RealTime[0]"
 	endFunction
 
 	string function Proof()
-		sslBaseAnimation[] Anims = AnimSlots.GetByTags(2, "FM,Vaginal", "Aggressive")
-		return "("+Anims.Length+") - "+Anims
+		RealTime[0] = Utility.GetCurrentRealTime()
+		return RealTime[0]
 	endFunction
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
 		; START any variable preparions needed
+		RealTime[0] = Utility.GetCurrentRealTime()
+		float Time  = RealTime[0] 
 		; END any variable preparions needed
 		baseline += Utility.GetCurrentRealTime()
 		while nth
 			nth -= 1
 			; START code to benchmark
-			AnimSlots.GetByTags(2, "FM,Vaginal", "Aggressive")
+			Time = RealTime[0]
+			; END code to benchmark
+		endWhile
+		return Utility.GetCurrentRealTime() - baseline
+	endFunction
+endState
+
+
+state Test2
+	string function Label()
+		return "Utility.GetCurrentRealTime()"
+	endFunction
+
+	string function Proof()
+		return Utility.GetCurrentRealTime()
+	endFunction
+
+	float function RunTest(int nth = 5000, float baseline = 0.0)
+		; START any variable preparions needed
+		float Time = 0.0
+		; END any variable preparions needed
+		baseline += Utility.GetCurrentRealTime()
+		while nth
+			nth -= 1
+			; START code to benchmark
+			Time = Utility.GetCurrentRealTime()
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline

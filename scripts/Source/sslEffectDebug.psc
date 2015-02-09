@@ -16,7 +16,10 @@ ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	; Benchmark(2, 100, 10)
+
+	Benchmark(2, 1000, 10)
+
+
 
 	; sslAnimationSlots AnimSlots = SexLab.AnimSlots
 	; Log("Filter: "+AnimSlots.Filter)
