@@ -221,6 +221,10 @@ bool function UsesNudeSuit(bool IsFemale)
 	return ((!IsFemale && UseMaleNudeSuit) || (IsFemale && UseFemaleNudeSuit))
 endFunction
 
+bool function HasCreatureInstall()
+	return FNIS.GetMajor(true) > 0 && (Game.GetCameraState() < 8 || PlayerRef.GetAnimationVariableInt("SexLabCreatures") > 0)
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Strapon Functions                               --- ;
 ; ------------------------------------------------------- ;

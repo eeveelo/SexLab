@@ -2064,8 +2064,17 @@ endState
 
 state AllowCreatures
 	event OnSelectST()
-		Config.AllowCreatures = !Config.AllowCreatures
+		if !Config.AllowCreatures && !Config.HasCreatureInstall()
+			Config.AllowCreatures = false
+			ShowMessage("Could not enable, FNIS Creature pack or SexLab creature files not detected.")
+		else
+			Config.AllowCreatures = !Config.AllowCreatures
+		endIf
 		SetToggleOptionValueST(Config.AllowCreatures)
+		; Register creature animations if needed
+		if Config.AllowCreatures && CreatureSlots.Slotted < 1
+			CreatureSlots.Setup()
+		endIf
 	endEvent
 	event OnDefaultST()
 		Config.AllowCreatures = false

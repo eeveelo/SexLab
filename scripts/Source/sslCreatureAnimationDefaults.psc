@@ -1,20 +1,34 @@
 scriptname sslCreatureAnimationDefaults extends sslAnimationFactory
 
+function RegisterCategory(string Type)
+	ModEvent.Send(ModEvent.Create("SexLabSlotCreatureAnimations_"+Type))
+	Utility.WaitMenuMode(0.4)
+endFunction
+
 function LoadCreatureAnimations()
 	; Prepare factory resources (as creature)
 	PrepareFactoryCreatures()
+	
 	; Bear
 	RegisterAnimation("BearDoggystyle")
+	RegisterCategory("Bear")
+
 	; Dog
 	RegisterAnimation("CanineDoggystyle")
 	RegisterAnimation("CanineDoggystyle2")
 	RegisterAnimation("CanineMissionary")
+	RegisterCategory("Dog")
+	
 	; Chaurus
 	RegisterAnimation("ChaurusForward")
 	RegisterAnimation("ChaurusReverse")
+	RegisterCategory("Chaurus")
+	
 	; Dragon
 	RegisterAnimation("DragonPenetration")
 	RegisterAnimation("DragonTongue")
+	RegisterCategory("Dragon")
+	
 	; Draugr
 	RegisterAnimation("DraugrDoggystyle")
 	RegisterAnimation("DraugrHolding")
@@ -22,6 +36,8 @@ function LoadCreatureAnimations()
 	RegisterAnimation("DraugrGangbang3P")
 	RegisterAnimation("DraugrGangbang4P")
 	RegisterAnimation("DraugrGangbang5P")
+	RegisterCategory("Draugr")
+	
 	; Falmer
 	RegisterAnimation("FalmerDoggystyle")
 	RegisterAnimation("FalmerHolding")
@@ -29,48 +45,72 @@ function LoadCreatureAnimations()
 	RegisterAnimation("FalmerGangbang3P")
 	RegisterAnimation("FalmerGangbang4P")
 	RegisterAnimation("FalmerGangbang5P")
+	RegisterCategory("Falmer")
+	
 	; Dawguard Gargoyle
 	RegisterAnimation("GargoyleDoggystyle")
 	RegisterAnimation("GargoyleHolding")
 	RegisterAnimation("GargoyleMissionary")
+	RegisterCategory("Gargoyle")
+	
 	; Giant
 	RegisterAnimation("GiantPenetration")
 	RegisterAnimation("GiantHarrassment")
 	RegisterAnimation("GiantHolding")
+	RegisterCategory("Giant")
+	
 	; Horse
 	RegisterAnimation("HorseDoggystyle")
 	RegisterAnimation("HorsePanicDoggystyle")
 	RegisterAnimation("HorseGroping")
-	; Rieklings
+	RegisterCategory("Horse")
+	
+	; Riekling
 	RegisterAnimation("RieklingMissionary")
 	RegisterAnimation("RieklingThreeWay")
+	RegisterCategory("Riekling")
+	
 	; SabreCat
 	RegisterAnimation("CatDoggystyle")
+	RegisterCategory("SabreCat")
+	
 	; Dragonborn Daedra Seeker
 	RegisterAnimation("DaedraHugging")
+	RegisterCategory("Seeker")
+	
 	; Spider
 	RegisterAnimation("SpiderDouble")
 	RegisterAnimation("SpiderPenetration")
 	RegisterAnimation("BigSpiderPenetration")
+	RegisterCategory("Spider")
+	
 	; Troll
 	RegisterAnimation("TrollDoggystyle")
 	RegisterAnimation("TrollHolding")
 	RegisterAnimation("TrollMissionary")
 	RegisterAnimation("TrollDominate")
 	RegisterAnimation("TrollGrabbing")
+	RegisterCategory("Troll")
+	
 	; Werewolf
 	RegisterAnimation("WerewolfAggrDoggystyle")
 	RegisterAnimation("WerewolfDoggystyle")
 	RegisterAnimation("WerewolfHolding")
 	RegisterAnimation("WerewolfMissionary")
+	RegisterCategory("Werewolf")
+	
 	; Wolf
 	RegisterAnimation("WolfDoggystyle")
 	RegisterAnimation("WolfDoggystyle2")
 	RegisterAnimation("WolfMissionary")
+	RegisterCategory("Wolf")
+	
 	; Dawnguard Vampire Lord
 	RegisterAnimation("VampireLordDoggystyle")
 	RegisterAnimation("VampireLordHolding")
 	RegisterAnimation("VampireLordMissionary")
+	RegisterCategory("VampireLord")
+	
 endFunction
 
 function BearDoggystyle(int id)
