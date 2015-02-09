@@ -184,7 +184,7 @@ endFunction
 ; --- Offsets                                         --- ;
 ; ------------------------------------------------------- ;
 
-float[] function GetPositionOffsets(string AdjustKey, int Position, int Stage, int BedTypeID = -1)
+float[] function GetPositionOffsets(string AdjustKey, int Position, int Stage)
 	float[] Output = new float[4]
 	return PositionOffsets(Output, AdjustKey, Position, Stage)
 endFunction
@@ -209,13 +209,13 @@ endFunction
 bool function _HasAdjustments(string Registrar, string AdjustKey, int Stage) global native
 
 function _PositionOffsets(string Registrar, string AdjustKey, string LastKey, int Stage, float[] RawOffsets) global native
-float[] function PositionOffsets(float[] Output, string AdjustKey, int Position, int Stage, int BedTypeID = -1)
+float[] function PositionOffsets(float[] Output, string AdjustKey, int Position, int Stage, int BedTypeID = 0)
 	int i = DataIndex(4, Position, Stage)
 	Output[0] = Offsets[i] + CenterAdjust[(Stage - 1)] ; Forward
 	Output[1] = Offsets[(i + 1)] ; Side
 	Output[2] = Offsets[(i + 2)] ; Up
 	Output[3] = Offsets[(i + 3)] ; Rot - no offset
-	if BedTypeID != -1 && BedOffset.Length == 4
+	if BedTypeID > 0 && BedOffset.Length == 4
 		; float[] Bed = GetBedOffsets()
 		Output[0] = Output[0] + BedOffset[0]
 		Output[1] = Output[1] + BedOffset[1]

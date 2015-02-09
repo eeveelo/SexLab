@@ -1,10 +1,13 @@
 scriptname sslThreadController extends sslThreadModel
 { Animation Thread Controller: Runs manipulation logic of thread based on information from model. Access only through functions; NEVER create a property directly to this. }
 
+import PapyrusUtil
+
 ; Animation
 float SkillTime
 
 ; SFX
+float BaseDelay
 float SFXDelay
 float SFXTimer
 
@@ -40,14 +43,17 @@ state Prepare
 		; Set starting adjusted actor
 		AdjustPos   = (ActorCount > 1) as int
 		AdjustAlias = PositionAlias(AdjustPos)
+		; Get localized config options
+		BaseDelay = Config.SFXDelay
 		; Send starter events
 		SendThreadEvent("AnimationStart")
 		if LeadIn
 			SendThreadEvent("LeadInStart")
 		endIf
 		; Start time trackers
-		SkillTime = Utility.GetCurrentRealTime()
-		StartedAt = Utility.GetCurrentRealTime()
+		RealTime[0] = Utility.GetCurrentRealTime()
+		SkillTime = RealTime[0]
+		StartedAt = RealTime[0]
 		; Start actor loops
 		QuickEvent("Start")
 		; Begin animating loop
@@ -93,7 +99,7 @@ state Animating
 		Log("Stage: "+Stage, "Animating")
 		; Prepare loop
 		SoundFX  = Animation.GetSoundFX(Stage)
-		SFXDelay = PapyrusUtil.ClampFloat(Config.SFXDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
+		SFXDelay = ClampFloat(BaseDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
 		PlayAnimation()
 		; Send events
 		if !LeadIn && Stage >= StageCount
@@ -110,16 +116,16 @@ state Animating
 	endFunction
 
 	event OnUpdate()
-		float CurrentTime = Utility.GetCurrentRealTime()
+		RealTime[0] = Utility.GetCurrentRealTime()
 		; Advance stage on timer
-		if (AutoAdvance || TimedStage) && StageTimer < CurrentTime
+		if (AutoAdvance || TimedStage) && StageTimer < RealTime[0]
 			GoToStage((Stage + 1))
 			return
 		endIf
 		; Play SFX
-		if SoundFX && SFXTimer < CurrentTime
+		if SoundFX && SFXTimer < RealTime[0]
 			SoundFX.Play(CenterRef)
-			SFXTimer = CurrentTime + SFXDelay
+			SFXTimer = RealTime[0] + SFXDelay
 		endIf
 		; Loop
 		RegisterForSingleUpdate(0.5)
@@ -145,7 +151,7 @@ state Animating
 
 	function PlayAnimation()
 		ModEvent.Send(ModEvent.Create(Key("Animate")))
-		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
+		StageTimer = RealTime[0] + GetTimer()
 	endFunction
 
 	function ClearIdles()
@@ -285,42 +291,44 @@ state Animating
 	function AdjustForward(bool backwards = false, bool adjustStage = false)
 		UnregisterforUpdate()
 		Adjusted = true
-		Animation.AdjustForward(AdjustKey, AdjustPos, Stage, PapyrusUtil.SignFloat(backwards, 0.50), adjustStage)
-		AdjustAlias.RefreshLoc()
-		while Input.IsKeyPressed(Config.AdjustForward)
-			Animation.AdjustForward(AdjustKey, AdjustPos, Stage, PapyrusUtil.SignFloat(backwards, 0.50), adjustStage)
+		Animation.AdjustForward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
+		int k = Config.AdjustForward
+		while Input.IsKeyPressed(k)
+			Animation.AdjustForward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
 			AdjustAlias.RefreshLoc()
 		endWhile
-		RegisterForSingleUpdate(0.2)
+		RegisterForSingleUpdate(0.1)
 	endFunction
 
 	function AdjustSideways(bool backwards = false, bool adjustStage = false)
 		UnregisterforUpdate()
 		Adjusted = true
-		Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, PapyrusUtil.SignFloat(backwards, 0.50), adjustStage)
+		Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
 		AdjustAlias.RefreshLoc()
-		while Input.IsKeyPressed(Config.AdjustSideways)
-			Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, PapyrusUtil.SignFloat(backwards, 0.50), adjustStage)
+		int k = Config.AdjustSideways
+		while Input.IsKeyPressed(k)
+			Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
 			AdjustAlias.RefreshLoc()
 		endWhile
-		RegisterForSingleUpdate(0.2)
+		RegisterForSingleUpdate(0.1)
 	endFunction
 
 	function AdjustUpward(bool backwards = false, bool adjustStage = false)
 		UnregisterforUpdate()
 		Adjusted = true
-		Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, PapyrusUtil.SignFloat(backwards, 0.50), adjustStage)
+		Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
 		AdjustAlias.RefreshLoc()
-		while Input.IsKeyPressed(Config.AdjustUpward)
-			Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, PapyrusUtil.SignFloat(backwards, 0.50), adjustStage)
+		int k = Config.AdjustUpward
+		while Input.IsKeyPressed(k)
+			Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
 			AdjustAlias.RefreshLoc()
 		endWhile
-		RegisterForSingleUpdate(0.2)
+		RegisterForSingleUpdate(0.1)
 	endFunction
 
 	function RotateScene(bool backwards = false)
 		UnregisterForUpdate()
-		CenterLocation[5] = CenterLocation[5] + PapyrusUtil.SignFloat(backwards, 45.0)
+		CenterLocation[5] = CenterLocation[5] + SignFloat(backwards, 15.0)
 		if CenterLocation[5] >= 360.0
 			CenterLocation[5] = CenterLocation[5] - 360.0
 		elseIf CenterLocation[5] < 0.0
@@ -529,7 +537,7 @@ endState
 ; ------------------------------------------------------- ;
 
 function RecordSkills()
-	float TimeNow = Utility.GetCurrentRealTime()
+	float TimeNow = RealTime[0]
 	float xp = ((TimeNow - SkillTime) / 15.0)
 	if xp >= 0.375
 		if IsVaginal

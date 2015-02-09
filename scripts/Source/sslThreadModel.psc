@@ -31,12 +31,7 @@ Actor property VictimRef auto hidden
 Actor property PlayerRef auto hidden
 
 ; Thread status
-; bool _HasPlayer
 bool property HasPlayer auto hidden
-; 	bool function get()
-; 		return _HasPlayer
-; 	endFunction
-; endProperty
 bool property AutoAdvance auto hidden
 bool property LeadIn auto hidden
 bool property FastEnd auto hidden
@@ -95,13 +90,13 @@ endProperty
 float[] property CenterLocation auto hidden
 ObjectReference property CenterRef auto hidden
 
+float[] property RealTime auto hidden
 float property StartedAt auto hidden
 float property TotalTime hidden
 	float function get()
-		return Utility.GetCurrentRealTime() - StartedAt
+		return RealTime[0] - StartedAt
 	endFunction
 endProperty
-
 
 ; Beds
 int BedFlag ; -1 = forbid 0 = allow   1 = force
@@ -114,22 +109,22 @@ int property BedTypeID hidden
 endProperty
 bool property UsingBed hidden
 	bool function get()
-		return BedType != -1
+		return BedType > 0
 	endFunction
 endProperty
 bool property UsingBedRoll hidden
 	bool function get()
-		return BedType == 0
+		return BedType == 1
 	endFunction
 endProperty
 bool property UsingSingleBed hidden
 	bool function get()
-		return BedType == 1
+		return BedType == 2
 	endFunction
 endProperty
 bool property UsingDoubleBed hidden
 	bool function get()
-		return BedType == 2
+		return BedType == 3
 	endFunction
 endProperty
 
@@ -344,10 +339,10 @@ state Making
 		endIf
 
 		; ------------------------- ;
-		; --  Start Controller   -- ;
+		; --  Start Controller   -- 4;
 		; ------------------------- ;
 
-		GoToState("Prepare")
+		Action("Prepare")
 		return self as sslThreadController
 	endFunction
 
@@ -652,7 +647,7 @@ function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 		; Check if it's a bed
 		BedRef  = none
 		BedType = ThreadLib.GetBedType(CenterOn)
-		if BedType != -1
+		if BedType > 0
 			BedRef = CenterOn
 			float[] BedOffset = Config.BedOffset
 			CenterLocation[0] = CenterLocation[0] + (BedOffset[0] * Math.sin(CenterLocation[5]))
@@ -869,7 +864,7 @@ endfunction
 function SyncEvent(string Callback, float WaitTime)
 	int id = EventTypes.Find(Callback)
 	if AliasTimer[id] == 0.0
-		AliasTimer[id] = Utility.GetCurrentRealTime() + WaitTime
+		AliasTimer[id] = RealTime[0] + WaitTime
 		RegisterForSingleUpdate(WaitTime)
 		ModEvent.Send(ModEvent.Create(Key(Callback)))
 	else
@@ -883,7 +878,7 @@ function SyncEventDone(string Callback)
 		AliasDone[id] = AliasDone[id] + 1
 		if AliasDone[id] >= ActorCount
 			UnregisterforUpdate()
-			Log("Lag Timer: " + (AliasTimer[id] - Utility.GetCurrentRealTime()), "SyncDone("+EventTypes[id]+")")
+			Log("Lag Timer: " + (AliasTimer[id] - RealTime[0]), "SyncDone("+EventTypes[id]+")")
 			AliasTimer[id] = 0.0
 			AliasDone[id]  = 0
 			ModEvent.Send(ModEvent.Create(Key(EventTypes[id]+"Done")))
@@ -935,11 +930,6 @@ endFunction
 function Initialize()
 	UnregisterForUpdate()
 	; Clear aliases
-	; ActorAlias[0].GoToState("")
-	; ActorAlias[1].GoToState("")
-	; ActorAlias[2].GoToState("")
-	; ActorAlias[3].GoToState("")
-	; ActorAlias[4].GoToState("")
 	ActorAlias[0].ClearAlias()
 	ActorAlias[1].ClearAlias()
 	ActorAlias[2].ClearAlias()
@@ -963,7 +953,7 @@ function Initialize()
 	; Floats
 	StartedAt      = 0.0
 	; Integers
-	BedType        = -1
+	BedType        = 0
 	BedFlag        = 0
 	ActorCount     = 0
 	Stage          = 1
@@ -976,6 +966,7 @@ function Initialize()
 	SkillXP        = new float[6]
 	SkillBonus     = new float[6]
 	CenterLocation = new float[6]
+	RealTime       = new float[1]
 	; Storage Data
 	Actor[] aDel
 	Positions         = aDel
@@ -1084,6 +1075,7 @@ function SetTID(int id)
 	endIf
 
 	; Init thread info
+	RealTime   = new float[1]
 	EventTypes = new string[5]
 	EventTypes[0] = "Sync"
 	EventTypes[1] = "Prepare"

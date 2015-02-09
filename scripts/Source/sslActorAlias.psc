@@ -47,18 +47,20 @@ float[] Loc
 
 ; Storage
 int[] Flags
-form[] Equipment
-float[] Skills
-float[] SkillBonus
+Form[] Equipment
 bool[] StripOverride
+float[] SkillBonus
+float[] Skills
+
 float StartedAt
 float ActorScale
 float AnimScale
 int HighestRelation
 int Enjoyment
+int BedTypeID
 
-form Strapon
-form HadStrapon
+Form Strapon
+Form HadStrapon
 
 ; Animation Position/Stage flags
 bool property OpenMouth hidden
@@ -87,6 +89,8 @@ bool property MalePosition hidden
 	endFunction
 endProperty
 
+float[] RealTime
+
 ; ------------------------------------------------------- ;
 ; --- Load/Clear Alias For Use                        --- ;
 ; ------------------------------------------------------- ;
@@ -107,6 +111,7 @@ bool function SetActor(Actor ProspectRef)
 	IsCreature = Gender >= 2
 	IsPlayer   = ActorRef == PlayerRef
 	IsTracked  = Config.ThreadLib.IsActorTracked(ActorRef)
+	RealTime   = Thread.RealTime
 	Thread.Genders[Gender] = Thread.Genders[Gender] + 1
 	; Player and creature specific
 	if IsCreature
@@ -166,6 +171,7 @@ endFunction
 ; --- Actor Prepartion                                --- ;
 ; ------------------------------------------------------- ;
 
+
 state Ready
 
 	bool function SetActor(Actor ProspectRef)
@@ -184,9 +190,10 @@ state Ready
 		Animation  = Thread.Animation
 		AdjustKey  = Thread.AdjustKey
 		Position   = Thread.Positions.Find(ActorRef)
+		BedTypeID  = Thread.BedTypeID
 		AnimEvent  = Animation.FetchPositionStage(Position, Stage)
 		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
-		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, Thread.BedTypeID)
+		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedTypeID)
 		Center     = Thread.CenterLocation
 		; Calculate scales
 		float display = ActorRef.GetScale()
@@ -262,8 +269,37 @@ endState
 
 function PlayAnimation()
 	Debug.SendAnimationEvent(ActorRef, AnimEvent)
-	; RefreshLoc()
 endFunction
+
+event SyncStage(int ToStage)
+	if ActorRef
+		Stage      = ToStage
+		AnimEvent  = Animation.FetchPositionStage(Position, Stage)
+		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
+		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedTypeID)
+		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
+		RefreshActor()
+		SyncLocation(false)
+	endIf
+endEvent
+
+event SyncAnimation()
+
+endEvent
+
+function RefreshActor()
+	if ActorRef
+		GetEnjoyment()
+		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
+		Log("Enjoyment: "+Enjoyment+" SOS: "+Schlong)
+		if !IsCreature
+			ResolveStrapon()
+			RefreshExpression()
+		endIf
+	endIf
+endFunction
+
+
 
 state Animating
 
@@ -275,7 +311,7 @@ state Animating
 		; Start update loop
 		TrackedEvent("Start")
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
-		StartedAt  = Utility.GetCurrentRealTime()
+		StartedAt  = RealTime[0]
 		RegisterForSingleUpdate(Utility.RandomFloat(1.0, 3.0))
 		UnregisterForModEvent(Thread.Key("Start"))
 	endFunction
@@ -287,13 +323,9 @@ state Animating
 			Thread.EndAnimation(true)
 			return
 		endIf
-		; Sync enjoyment level
+		; Sync enjoyment level and expression
 		GetEnjoyment()
-		; Apply Expression / sync enjoyment
-		if !OpenMouth
-			RefreshExpression()
-		endIf
-		; Moan if not silent
+		RefreshExpression()
 		if !IsSilent
 			Voice.Moan(ActorRef, Enjoyment, IsVictim)
 		endIf
@@ -307,26 +339,18 @@ state Animating
 		AdjustKey  = Thread.AdjustKey
 		Stage      = Thread.Stage
 		Position   = Thread.Positions.Find(ActorRef)
+		BedTypeID  = Thread.BedTypeID
 		AnimEvent  = Animation.FetchPositionStage(Position, Stage)
 		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
-		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, Thread.BedTypeID)
+		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedTypeID)
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
 		; Update alias info
 		GetEnjoyment()
 		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
 		Log("Enjoyment: "+Enjoyment+" SOS: "+Schlong)
 		if !IsCreature
-			; Equip Strapon if needed and enabled
 			ResolveStrapon()
-			; Clear any existing expression as a default - to remove open mouth
-			; ActorRef.ClearExpressionOverride()
-			if OpenMouth
-				sslBaseExpression.OpenMouth(ActorRef)
-			elseIf Expression
-				RefreshExpression()
-			elseIf sslBaseExpression.IsMouthOpen(ActorRef)
-				sslBaseExpression.CloseMouth(ActorRef)
-			endIf
+			RefreshExpression()
 		endIf
 	endFunction
 
@@ -337,8 +361,8 @@ state Animating
 	endFunction
 
 	function RefreshLoc()
-		Offsets = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, Thread.BedTypeID)
-		SyncLocation(false)
+		Offsets = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedTypeID)
+		SyncLocation(true)
 	endFunction
 
 	function SyncLocation(bool Force = false)
@@ -346,8 +370,11 @@ state Animating
 		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		; Avoid forcibly setting on player coords if avoidable - causes annoying graphical flickering
-		if Force && IsPlayer && IsInPosition(ActorRef, MarkerRef, 40.0)
-			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 5000, 0)
+		if Force && IsInPosition(ActorRef, MarkerRef, 50.0)
+			ActorRef.SetVehicle(MarkerRef)
+			ActorRef.SetScale(AnimScale)
+			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 5000, 0)
+			return ; OnTranslationComplete() will take over when in place
 		elseIf Force
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
@@ -365,7 +392,7 @@ state Animating
 			ActorRef.SetVehicle(MarkerRef)
 			ActorRef.SetScale(AnimScale)
 		elseIf ActorRef.GetDistance(MarkerRef) > 0.2
-			ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1.0, 5000, 0)
+			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1000, 0)
 			return ; OnTranslationComplete() will take over when in place
 		endIf
 		; Begin very slowly rotating a small amount to hold position
@@ -373,7 +400,8 @@ state Animating
 	endFunction
 
 	event OnTranslationComplete()
-		Utility.Wait(0.5)
+		; Log(Loc, "OnTranslationComplete()")
+		; Utility.Wait(0.3)
 		Snap()
 	endEvent
 
@@ -590,13 +618,13 @@ int function GetEnjoyment()
 	if !ActorRef
 		Enjoyment = 0
 	elseif IsCreature
-		Enjoyment = (PapyrusUtil.ClampFloat((Utility.GetCurrentRealTime() - StartedAt) / 6.0, 0.0, 40.0) + ((Stage as float / Animation.StageCount as float) * 60.0)) as int
+		Enjoyment = (PapyrusUtil.ClampFloat((RealTime[0] - StartedAt) / 6.0, 0.0, 40.0) + ((Stage as float / Animation.StageCount as float) * 60.0)) as int
 	else
 		if Position == 0
 			Thread.RecordSkills()
 			Thread.SetBonuses()
 		endIf
-		Enjoyment = CalcEnjoyment(SkillBonus, Skills, Thread.LeadIn, IsFemale, (Utility.GetCurrentRealTime() - StartedAt), Stage, Animation.StageCount)
+		Enjoyment = CalcEnjoyment(SkillBonus, Skills, Thread.LeadIn, IsFemale, (RealTime[0] - StartedAt), Stage, Animation.StageCount)
 	endIf
 	return Enjoyment
 endFunction
@@ -823,8 +851,14 @@ bool property DoRedress hidden
 endProperty
 
 function RefreshExpression()
-	if ActorRef && Expression && !IsCreature
+	if !ActorRef || IsCreature
+		; Do nothing
+	elseIf OpenMouth
+		sslBaseExpression.OpenMouth(ActorRef)
+	elseIf Expression
 		Expression.Apply(ActorRef, Enjoyment, BaseSex)
+	elseIf sslBaseExpression.IsMouthOpen(ActorRef)
+		sslBaseExpression.CloseMouth(ActorRef)
 	endIf
 endFunction
 
@@ -859,6 +893,7 @@ function RegisterEvents()
 	RegisterForModEvent(e+"Strip", "Strip")
 	RegisterForModEvent(e+"Animate", "PlayAnimation")
 	RegisterForModEvent(e+"Start", "StartAnimating")
+	RegisterForModEvent(e+"Move", "StartAnimating")
 endFunction
 
 function ClearEvents()
@@ -969,6 +1004,12 @@ endEvent
 
 int function CalcEnjoyment(float[] XP, float[] SkillsAmounts, bool IsLeadin, bool IsFemaleActor, float Timer, int OnStage, int MaxStage) global native
 function OffsetCoords(float[] Output, float[] CenterCoords, float[] OffsetBy) global native
+
+; function AdjustCoords(float[] Output, float[] CenterCoords, ) global native
+; function AdjustOffset(int i, float amount, bool backwards, bool adjustStage)
+; 	Animation.
+; endFunction
+
 ; function OffsetBed(float[] Output, float[] BedOffsets, float CenterRot) global native
 bool function IsInPosition(Actor CheckActor, ObjectReference CheckMarker, float maxdistance = 30.0) global native
 
