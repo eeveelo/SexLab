@@ -66,6 +66,10 @@ event UpdateSystem(int ToVersion)
 	LogAll("SexLab v"+SexLabUtil.GetStringVer()+" - Updating...")
 
 	; Perform update functions
+	CreatureSlots.Setup()
+	AnimSlots.Setup()
+	ThreadSlots.Setup()
+
 
 	LogAll("SexLab Update v"+SexLabUtil.GetStringVer()+" - Ready!")
 	Version = ToVersion
