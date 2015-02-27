@@ -595,7 +595,7 @@ function Reload()
 	; Factory.Cleanup()
 
 	; DEV TEMP - force on during development
-	UseCreatureGender  = true
+	; UseCreatureGender  = true
 endFunction
 
 function SetDefaults()
