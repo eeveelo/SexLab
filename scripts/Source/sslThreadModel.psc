@@ -291,11 +291,15 @@ state Making
 					i = 0
 				endIf
 			endWhile
+			PrimaryAnimations = CreatureSlots.FilterCreatureGenders(PrimaryAnimations, Genders[2], Genders[3])
 			; Pick default creature animations if currently empty (none or failed above check)
 			if PrimaryAnimations.Length == 0
 				Log("Selecting new creature animations - "+PrimaryAnimations)
-
-				SetAnimations(CreatureSlots.GetByRace(ActorCount, CreatureRef))
+				; sslBaseAnimation[] CreatureAnimations = CreatureSlots.GetByRace(ActorCount, CreatureRef)
+				; CreatureSlots.FilterCreatureGenders(CreatureAnimations, Genders[2], Genders[3])
+				Log("Creature Genders: "+Genders)
+				sslBaseAnimation[] CreatureAnimations = CreatureSlots.GetByRaceGenders(ActorCount, CreatureRef, Genders[2], Genders[3])
+				SetAnimations(CreatureAnimations)
 				if PrimaryAnimations.Length == 0
 					Fatal("Failed to find valid creature animations.")
 					return none
@@ -927,60 +931,6 @@ endFunction
 ; --- Thread Setup - SYSTEM USE ONLY                  --- ;
 ; ------------------------------------------------------- ;
 
-function Initialize()
-	UnregisterForUpdate()
-	; Clear aliases
-	ActorAlias[0].ClearAlias()
-	ActorAlias[1].ClearAlias()
-	ActorAlias[2].ClearAlias()
-	ActorAlias[3].ClearAlias()
-	ActorAlias[4].ClearAlias()
-	; Forms
-	VictimRef      = none
-	CenterRef      = none
-	SoundFX        = none
-	BedRef         = none
-	; Boolean
-	AutoAdvance    = true
-	HasPlayer      = false
-	LeadIn         = false
-	NoLeadIn       = false
-	FastEnd        = false
-	IsAggressive   = false
-	IsVaginal      = false
-	IsAnal         = false
-	IsOral         = false
-	; Floats
-	StartedAt      = 0.0
-	; Integers
-	BedType        = 0
-	BedFlag        = 0
-	ActorCount     = 0
-	Stage          = 1
-	; Strings
-	AdjustKey      = ""
-	; Storage Info
-	Genders        = new int[4]
-	AliasDone      = new int[5]
-	AliasTimer     = new float[5]
-	SkillXP        = new float[6]
-	SkillBonus     = new float[6]
-	CenterLocation = new float[6]
-	RealTime       = new float[1]
-	; Storage Data
-	Actor[] aDel
-	Positions         = aDel
-	Hooks             = Utility.CreateStringArray(0)
-	Tags              = Utility.CreateStringArray(0)
-	CustomTimers      = Utility.CreateFloatArray(0)
-	CustomAnimations  = sslUtility.AnimationArray(0)
-	PrimaryAnimations = sslUtility.AnimationArray(0)
-	LeadAnimations    = sslUtility.AnimationArray(0)
-	Animation         = none
-	; Enter thread selection pool
-	GoToState("Unlocked")
-endFunction
-
 function Log(string msg, string src = "")
 	msg = "Thread["+thread_id+"] "+src+" - "+msg
 	Debug.Trace("SEXLAB - " + msg)
@@ -999,24 +949,6 @@ function Fatal(string msg, string src = "", bool halt = true)
 		Initialize()
 	endIf
 endFunction
-
-;/function UpdateActorKey()
-	string NewKey
-	if !Config.RaceAdjustments
-		NewKey += ".Global"
-	else
-		int i
-		while i < ActorCount
-			NewKey += "."+PositionAlias(i).GetActorKey()
-			i += 1
-		endWhile
-	endIf
-	ActorKeys = NewKey
-endFunction
-
-function UpdateAdjustKey()
-	AdjustKey = Animation.Registry+ActorKeys
-endFunction/;
 
 function UpdateAdjustKey()
 	if !Config.RaceAdjustments
@@ -1099,6 +1031,82 @@ function SetTID(int id)
 	Initialize()
 	Log(self, "Setup")
 endFunction
+
+function Initialize()
+	UnregisterForUpdate()
+	; Clear aliases
+	ActorAlias[0].ClearAlias()
+	ActorAlias[1].ClearAlias()
+	ActorAlias[2].ClearAlias()
+	ActorAlias[3].ClearAlias()
+	ActorAlias[4].ClearAlias()
+	; Forms
+	VictimRef      = none
+	CenterRef      = none
+	SoundFX        = none
+	BedRef         = none
+	; Boolean
+	AutoAdvance    = true
+	HasPlayer      = false
+	LeadIn         = false
+	NoLeadIn       = false
+	FastEnd        = false
+	IsAggressive   = false
+	IsVaginal      = false
+	IsAnal         = false
+	IsOral         = false
+	; Floats
+	StartedAt      = 0.0
+	; Integers
+	BedType        = 0
+	BedFlag        = 0
+	ActorCount     = 0
+	Stage          = 1
+	; Strings
+	AdjustKey      = ""
+	; Storage Info
+	Genders        = new int[4]
+	AliasDone      = new int[5]
+	AliasTimer     = new float[5]
+	; Thread+Alias shares
+	RealTime       = new float[1]
+	SkillXP        = new float[6]
+	SkillBonus     = new float[6]
+	CenterLocation = new float[6]
+
+	; IntShare    = new int[3]
+	; FloatShare  = new float[2]
+	; StringShare = new string[1]
+	; BoolShare   = new bool[9]
+
+	; Storage Data
+	Animation         = none
+	CustomAnimations  = sslUtility.AnimationArray(0)
+	PrimaryAnimations = sslUtility.AnimationArray(0)
+	LeadAnimations    = sslUtility.AnimationArray(0)
+	Hooks             = Utility.CreateStringArray(0)
+	Tags              = Utility.CreateStringArray(0)
+	CustomTimers      = Utility.CreateFloatArray(0)
+	Positions         = PapyrusUtil.ActorArray(0)
+	; Enter thread selection pool
+	GoToState("Unlocked")
+endFunction
+
+; int[] property IntShare auto hidden ; Stage, ActorCount, BedTypeID
+; float[] property FloatShare auto hidden ; RealTime, StartedAt
+; string[] property StringShare auto hidden ; AdjustKey
+; bool[] property BoolShare auto hidden ; 
+; sslBaseAnimation[] property _Animation auto hidden ; Animation
+
+; sslBaseAnimation property Animation hidden
+; 	sslBaseAnimation function get()
+; 		return _Animation[0]
+; 	endFunction
+; 	function set(sslBaseAnimation value)
+; 		_Animation[0] = value
+; 	endfunction
+; endProperty
+
 
 ; ------------------------------------------------------- ;
 ; --- State Restricted                                --- ;

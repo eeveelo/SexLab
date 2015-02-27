@@ -170,4 +170,3 @@ endFunction
 function EnableFreeCamera(bool Enabling = true, float sucsm = 5.0) global
 	return MiscUtil.SetFreeCameraState(Enabling, sucsm)
 endFunction
-

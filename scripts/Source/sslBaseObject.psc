@@ -12,7 +12,7 @@ bool property Enabled auto hidden
 string property Registry auto hidden
 bool property Registered hidden
 	bool function get()
-		return Registry != ""
+		return Registry != "" && Storage == none
 	endFunction
 endProperty
 

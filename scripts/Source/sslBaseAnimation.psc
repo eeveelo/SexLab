@@ -759,9 +759,20 @@ int property Females hidden
 endProperty
 int property Creatures hidden
 	int function get()
+		return Genders[2] + Genders[3]
+	endFunction
+endProperty
+int property MaleCreatures hidden
+	int function get()
 		return Genders[2]
 	endFunction
 endProperty
+int property FemaleCreatures hidden
+	int function get()
+		return Genders[3]
+	endFunction
+endProperty
+
 
 
 ;/ string property Profile hidden
