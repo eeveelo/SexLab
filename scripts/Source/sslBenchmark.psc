@@ -4,62 +4,29 @@ import SexLabUtil
 
 function PreBenchmarkSetup()
 	Setup()
-	RealTime = new float[1]
 endFunction
-
-float[] RealTime
 
 state Test1
 	string function Label()
-		return "RealTime[0]"
+		return ""
 	endFunction
 
 	string function Proof()
-		RealTime[0] = Utility.GetCurrentRealTime()
-		return RealTime[0]
+		return ""
 	endFunction
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
 		; START any variable preparions needed
-		RealTime[0] = Utility.GetCurrentRealTime()
-		float Time  = RealTime[0] 
 		; END any variable preparions needed
 		baseline += Utility.GetCurrentRealTime()
 		while nth
 			nth -= 1
 			; START code to benchmark
-			Time = RealTime[0]
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline
 	endFunction
 endState
-
-
-state Test2
-	string function Label()
-		return "Utility.GetCurrentRealTime()"
-	endFunction
-
-	string function Proof()
-		return Utility.GetCurrentRealTime()
-	endFunction
-
-	float function RunTest(int nth = 5000, float baseline = 0.0)
-		; START any variable preparions needed
-		float Time = 0.0
-		; END any variable preparions needed
-		baseline += Utility.GetCurrentRealTime()
-		while nth
-			nth -= 1
-			; START code to benchmark
-			Time = Utility.GetCurrentRealTime()
-			; END code to benchmark
-		endWhile
-		return Utility.GetCurrentRealTime() - baseline
-	endFunction
-endState
-
 
 function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10, bool UseBaseLoop = false)
 	PreBenchmarkSetup()
@@ -173,3 +140,31 @@ endEvent
 
 event Hook(int tid, bool HasPlayer)
 endEvent
+
+
+; Form[] function GetEquippedItems(Actor ActorRef)
+; 	Form ItemRef
+; 	Form[] Output = new Form[34]
+
+; 	; Weapons
+; 	ItemRef = ActorRef.GetEquippedWeapon(false) ; Right Hand
+; 	if ItemRef && IsToggleable(ItemRef)
+; 		Output[33] = ItemRef
+; 	endIf
+; 	ItemRef = ActorRef.GetEquippedWeapon(true) ; Left Hand
+; 	if ItemRef && ItemRef != Output[33] && IsToggleable(ItemRef)
+; 		Output[32] = ItemRef
+; 	endIf
+
+; 	; Armor
+; 	int i = 32
+; 	while i
+; 		i -= 1
+; 		ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
+; 		if ItemRef && Output.Find(ItemRef) == -1 && IsToggleable(ItemRef)
+; 			Output[i] = ItemRef
+; 		endIf
+; 	endWhile
+
+; 	return PapyrusUtil.ClearNone(Output)
+; endFunction

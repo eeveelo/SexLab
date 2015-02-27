@@ -72,8 +72,40 @@ Form[] function StripActor(Actor ActorRef, Actor VictimRef = none, bool DoAnimat
 	return StripSlots(ActorRef, Config.GetStrip((GetGender(ActorRef) == 1), LeadIn, (VictimRef != none), (VictimRef != none && ActorRef == VictimRef)), DoAnimate)
 endFunction
 
+function MakeNoStrip(Form ItemRef)
+	if ItemRef && !StorageUtil.FormListHas(none, "NoStrip", ItemRef)
+		StorageUtil.FormListAdd(none, "NoStrip", ItemRef, false)
+		StorageUtil.FormListRemove(none, "AlwaysStrip", ItemRef, true)
+	endIf
+endFunction
+
+function MakeAlwaysStrip(Form ItemRef)
+	if ItemRef && !StorageUtil.FormListHas(none, "AlwaysStrip", ItemRef)
+		StorageUtil.FormListAdd(none, "AlwaysStrip", ItemRef, false)
+		StorageUtil.FormListRemove(none, "NoStrip", ItemRef, true)
+	endIf
+endFunction
+
+function ClearStripOverride(Form ItemRef)
+	StorageUtil.FormListRemove(none, "NoStrip", ItemRef, true)
+	StorageUtil.FormListRemove(none, "AlwaysStrip", ItemRef, true)
+endFunction
+
+function ResetStripOverrides()
+	StorageUtil.FormListClear(none, "NoStrip")
+	StorageUtil.FormListClear(none, "AlwaysStrip")
+endFunction
+
+bool function IsNoStrip(Form ItemRef)
+	return SexLabUtil.HasKeywordSub(ItemRef, "NoStrip") || StorageUtil.FormListHas(none, "NoStrip", ItemRef)
+endFunction
+
+bool function IsAlwaysStrip(Form ItemRef)
+	return SexLabUtil.HasKeywordSub(ItemRef, "AlwaysStrip") || StorageUtil.FormListHas(none, "AlwaysStrip", ItemRef)
+endFunction
+
 bool function IsStrippable(Form ItemRef)
-	return ItemRef && !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")
+	return ItemRef && !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip") && !StorageUtil.FormListHas(none, "NoStrip", ItemRef)
 endFunction
 
 Form function StripSlot(Actor ActorRef, int SlotMask)
@@ -120,13 +152,11 @@ Form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 	; Strip armors
 	int i = Strip.RFind(true, 31)
 	while i >= 0
-		if Strip[i]
-			; Grab item in slot
-			ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
-			if IsStrippable(ItemRef)
-				ActorRef.UnequipItem(ItemRef, false, true)
-				Stripped[i] = ItemRef
-			endIf
+		; Grab item in slot
+		ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
+		if ItemRef && (IsAlwaysStrip(ItemRef) || (Strip[i] && IsStrippable(ItemRef)))
+			ActorRef.UnequipItem(ItemRef, false, true)
+			Stripped[i] = ItemRef
 		endIf
 		i -= 1
 	endWhile
@@ -256,7 +286,11 @@ int function GetGender(Actor ActorRef)
 	if ActorRef
 		ActorBase BaseRef = ActorRef.GetLeveledActorBase()
 		if sslCreatureAnimationSlots.HasRaceType(BaseRef.GetRace())
-			return BaseRef.GetSex() + 2 ; Creatures: 2+
+			if !Config.UseCreatureGender
+				return 2 ; Creature - All Male
+			else
+				return 2 + BaseRef.GetSex() ; CreatureGenders: 2+
+			endIf
 		elseIf ActorRef.IsInFaction(GenderFaction)
 			return ActorRef.GetFactionRank(GenderFaction) ; Override
 		else

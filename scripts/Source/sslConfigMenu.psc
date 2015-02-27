@@ -144,6 +144,9 @@ event OnPageReset(string page)
 	elseIf page == "$SSL_TimersStripping"
 		TimersStripping()
 
+	elseIf page == "$SSL_StripEditor"
+		StripEditor()
+
 	; Toggle animations on/off
 	elseIf page == "$SSL_ToggleAnimations"
 		ToggleAnimations()
@@ -267,6 +270,24 @@ event OnSelectST()
 		Stripping[i] = !Stripping[i]
 		SetToggleOptionValueST(Stripping[i])
 
+	; Strip Editor
+	elseIf Options[0] == "StripEditor"
+		Form ItemRef
+		if (Options[1] as int) == 0
+			ItemRef = ItemsPlayer[(Options[2] as int)]
+		else
+			ItemRef = ItemsTarget[(Options[2] as int)]
+		endIf
+
+		if ActorLib.IsAlwaysStrip(ItemRef)
+			ActorLib.ClearStripOverride(ItemRef)
+		elseIf ActorLib.IsNoStrip(ItemRef)
+			ActorLib.MakeAlwaysStrip(ItemRef)
+		else
+			ActorLib.MakeNoStrip(ItemRef)
+		endIf
+		SetTextOptionValueST(GetStripState(ItemRef))
+
 	; Animation Toggle
 	elseIf Options[0] == "Animation"
 		; Get animation to toggle
@@ -310,6 +331,24 @@ event OnSelectST()
 	endIf
 endEvent
 
+;/ event OnHighlightST()
+	string[] Options = MapOptions()
+	; Strip Editor
+	if Options[0] == "StripEditor"
+		Form ItemRef
+		if (Options[1] as int) == "0"
+			ItemRef = ItemsPlayer[(Options[2] as int)]
+		else
+			ItemRef = ItemsTarget[(Options[2] as int)]
+		endIf
+		string Info = ItemRef.GetName()+"["+ItemRef.GetType()+"]"
+		if ItemRef.GetType() == 26 || ItemRef.GetType() == 53
+			Info += "\nSlots: " + GetSlotMasks(StatRef, ItemRef)		
+		endIf
+		SetInfoText(Info)
+	endIf
+endEvent /;
+
 ; event OnDefaultST()
 ; endEvent
 
@@ -324,12 +363,12 @@ string[] Chances
 
 function AnimationSettings()
 	SetCursorFillMode(TOP_TO_BOTTOM)
-	; AddHeaderOption("$SSL_PlayerSettings")
+	AddHeaderOption("$SSL_PlayerSettings")
 	AddToggleOptionST("AutoAdvance","$SSL_AutoAdvanceStages", Config.AutoAdvance)
 	AddToggleOptionST("DisableVictim","$SSL_DisableVictimControls", Config.DisablePlayer)
 	AddToggleOptionST("AutomaticTFC","$SSL_AutomaticTFC", Config.AutoTFC)
 	AddSliderOptionST("AutomaticSUCSM","$SSL_AutomaticSUCSM", Config.AutoSUCSM, "{0}")
-	; AddHeaderOption("$SSL_ExtraEffects")
+	AddHeaderOption("$SSL_ExtraEffects")
 	AddToggleOptionST("UseExpressions","$SSL_UseExpressions", Config.UseExpressions)
 	AddToggleOptionST("UseLipSync", "$SSL_UseLipSync", Config.UseLipSync)
 	AddToggleOptionST("OrgasmEffects","$SSL_OrgasmEffects", Config.OrgasmEffects)
@@ -340,10 +379,11 @@ function AnimationSettings()
 	AddToggleOptionST("BedRemoveStanding","$SSL_BedRemoveStanding", Config.BedRemoveStanding)
 
 	SetCursorPosition(1)
-	; AddHeaderOption("$SSL_AnimationHandling")
 	AddMenuOptionST("AnimationProfile", "$SSL_AnimationProfile", "Profile #"+Config.AnimProfile)
-	AddToggleOptionST("RaceAdjustments","$SSL_RaceAdjustments", Config.RaceAdjustments)
 	AddToggleOptionST("AllowCreatures","$SSL_AllowCreatures", Config.AllowCreatures)
+	AddToggleOptionST("UseCreatureGender","$SSL_UseCreatureGender", Config.UseCreatureGender)
+	AddHeaderOption("$SSL_AnimationHandling")
+	AddToggleOptionST("RaceAdjustments","$SSL_RaceAdjustments", Config.RaceAdjustments)
 	AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", Config.ScaleActors)
 	AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", Config.ForeplayStage)
 	AddToggleOptionST("RestrictAggressive","$SSL_RestrictAggressive", Config.RestrictAggressive)
@@ -1679,6 +1719,149 @@ state TSModeSelect
 endState
 
 ; ------------------------------------------------------- ;
+; --- Strip Editor                                    --- ;
+; ------------------------------------------------------- ;
+
+Form[] ItemsPlayer
+Form[] ItemsTarget
+bool FullInventoryPlayer
+bool FullInventoryTarget
+
+function StripEditor()
+	AddHeaderOption("$SSL_Equipment{"+PlayerRef.GetLeveledActorBase().GetName()+"}")
+	AddToggleOptionST("FullInventoryPlayer", "$SSL_FullInventory", FullInventoryPlayer)
+
+	ItemsPlayer = GetItems(PlayerRef, FullInventoryPlayer)
+	int Max = AddItemToggles(ItemsPlayer, 0, 123)
+
+	if ItemsPlayer.Length % 2 != 0
+		AddEmptyOption()
+		Max -= 1
+	endIf
+
+	if TargetRef && Max >= 4
+		AddHeaderOption("$SSL_Equipment{"+TargetRef.GetLeveledActorBase().GetName()+"}")
+		AddToggleOptionST("FullInventoryTarget", "$SSL_FullInventory", FullInventoryTarget)
+
+		ItemsTarget = GetItems(TargetRef, FullInventoryTarget)
+		Max = AddItemToggles(ItemsTarget, 1, Max)
+	endIf
+
+	if Max < 1
+		AddHeaderOption("NOTICE: Max Display Items Reached!")
+	endIf
+endFunction
+
+int function AddItemToggles(Form[] Items, int ID, int Max)
+	int i
+	while i < Items.Length && Max
+		Max -= 1
+		string Name = Items[i].GetName()
+		if Name == ""
+			Name = "$SSL_Unknown"
+		endIf
+		AddTextOptionST("StripEditor_"+ID+"_"+i, Name, GetStripState(Items[i]))
+		i += 1
+	endWhile
+	return Max
+endFunction
+
+; function AddStripToggles(Form[] Items, )
+
+string function GetStripState(Form ItemRef)
+	if !ItemRef
+		return "NONE"
+	elseIf ActorLib.IsNoStrip(ItemRef)
+		return "$SSL_NeverRemove"
+	elseIf ActorLib.IsAlwaysStrip(ItemRef)
+		return "$SSL_AlwaysRemove"
+	else
+		return "---"
+	endIf
+endFunction
+
+bool function IsToggleable(Form ItemRef)
+	return !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip") && !SexLabUtil.HasKeywordSub(ItemRef, "AlwaysStrip")
+endFunction
+;/ int function ItemToggleFlag(Form ItemRef)
+	if !ItemRef || SexLabUtil.HasKeywordSub(ItemRef, "NoStrip") || SexLabUtil.HasKeywordSub(ItemRef, "AlwaysStrip")
+		return OPTION_FLAG_DISABLED
+	else
+		return OPTION_FLAG_NONE
+	endIf
+endFunction /;
+
+Form[] function GetItems(Actor ActorRef, bool FullInventory = false)
+	if FullInventory
+		return GetFullInventory(ActorRef)
+	else
+		return GetEquippedItems(ActorRef)
+	endIf
+endFunction
+
+Form[] function GetEquippedItems(Actor ActorRef)
+	Form ItemRef
+	Form[] Output = new Form[34]
+
+	; Weapons
+	ItemRef = ActorRef.GetEquippedWeapon(false) ; Right Hand
+	if ItemRef && IsToggleable(ItemRef)
+		Output[33] = ItemRef
+	endIf
+	ItemRef = ActorRef.GetEquippedWeapon(true) ; Left Hand
+	if ItemRef && ItemRef != Output[33] && IsToggleable(ItemRef)
+		Output[32] = ItemRef
+	endIf
+
+	; Armor
+	int i = 32
+	while i
+		i -= 1
+		ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
+		if ItemRef && Output.Find(ItemRef) == -1 && IsToggleable(ItemRef)
+			Output[i] = ItemRef
+		endIf
+	endWhile
+
+	return PapyrusUtil.ClearNone(Output)
+endFunction
+
+Form[] function GetFullInventory(Actor ActorRef)
+	int[] Valid = new int[3]
+	Valid[0] = 26 ; kArmor
+	Valid[1] = 41 ; kWeapon 
+	Valid[2] = 53 ; kLeveledItem
+
+	Form ItemRef
+	Form[] Output = GetEquippedItems(ActorRef)
+
+	int i = ActorRef.GetNumItems()
+	while i
+		i -= 1
+		ItemRef = ActorRef.GetNthForm(i)
+		if Valid.Find(ItemRef.GetType()) != -1 && Output.Find(ItemRef) == -1 && IsToggleable(ItemRef)
+			Output = PapyrusUtil.PushForm(Output, ItemRef)
+		endIf
+	endWhile
+
+	return Output
+endFunction
+
+state FullInventoryPlayer
+	event OnSelectST()
+		FullInventoryPlayer = !FullInventoryPlayer
+		ForcePageReset()
+	endEvent
+endState
+
+state FullInventoryTarget
+	event OnSelectST()
+		FullInventoryTarget = !FullInventoryTarget
+		ForcePageReset()
+	endEvent
+endState
+
+; ------------------------------------------------------- ;
 ; --- Rebuild & Clean                                 --- ;
 ; ------------------------------------------------------- ;
 
@@ -1699,8 +1882,10 @@ function RebuildClean()
 	AddTextOptionST("ResetAnimationRegistry","$SSL_ResetAnimationRegistry", "$SSL_ClickHere")
 	AddTextOptionST("ResetVoiceRegistry","$SSL_ResetVoiceRegistry", "$SSL_ClickHere")
 	AddTextOptionST("ResetExpressionRegistry","$SSL_ResetExpressionRegistry", "$SSL_ClickHere")
+	AddTextOptionST("ResetStripOverrides","$SSL_ResetStripOverrides", "$SSL_ClickHere")
 	AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
 	AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
+
 	AddHeaderOption("$SSL_UpgradeUninstallReinstall")
 	AddTextOptionST("CleanSystem","$SSL_CleanSystem", "$SSL_ClickHere")
 
@@ -1737,17 +1922,18 @@ event OnConfigOpen()
 	; Make sure we have all the needed libraries
 	LoadLibs()
 	; MCM option pages
-	Pages     = new string[9]
+	Pages     = new string[10]
 	Pages[0]  = "$SSL_SexDiary"
 	Pages[1]  = "$SSL_AnimationSettings"
-	Pages[2]  = "$SSL_SoundSettings"
-	Pages[3]  = "$SSL_TimersStripping"
-	Pages[4]  = "$SSL_PlayerHotkeys"
+	Pages[2]  = "$SSL_PlayerHotkeys"
+	Pages[3]  = "$SSL_SoundSettings"
+	Pages[4]  = "$SSL_TimersStripping"
+	Pages[5]  = "$SSL_StripEditor"
 	; Pages[4]  = "$SSL_ExpressionSelection"
-	Pages[5]  = "$SSL_ToggleAnimations"
-	Pages[6]  = "$SSL_AnimationEditor"
-	Pages[7]  = "$SSL_ExpressionEditor"
-	Pages[8]  = "$SSL_RebuildClean"
+	Pages[6]  = "$SSL_ToggleAnimations"
+	Pages[7]  = "$SSL_AnimationEditor"
+	Pages[8]  = "$SSL_ExpressionEditor"
+	Pages[9]  = "$SSL_RebuildClean"
 	; Pages[9]  = "Troubleshoot"
 	if PlayerRef.GetLeveledActorBase().GetSex() == 0
 		Pages[0] = "$SSL_SexJournal"
@@ -1889,6 +2075,16 @@ event OnConfigOpen()
 	TAModes[1] = "$SSL_ForeplayAnimations"
 	TAModes[2] = "$SSL_AggressiveAnimations"
 	TAModes[3] = "$SSL_CreatureAnimations"
+
+	; Strip Editor
+	; ShowFullInventory = false
+	; Items = GetItems(PlayerRef)
+	FullInventoryPlayer = false
+	FullInventoryTarget = false
+	ItemsPlayer = GetItems(PlayerRef, false)
+	if TargetRef
+		ItemsTarget = GetItems(TargetRef, false)
+	endIf
 endEvent
 
 event OnConfigClose()
@@ -2082,6 +2278,19 @@ state AllowCreatures
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAllowCreatures")
+	endEvent
+endState
+state UseCreatureGender
+	event OnSelectST()
+		Config.UseCreatureGender = !Config.UseCreatureGender
+		SetToggleOptionValueST(Config.UseCreatureGender)
+	endEvent
+	event OnDefaultST()
+		Config.UseCreatureGender = false
+		SetToggleOptionValueST(Config.UseCreatureGender)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoUseCreatureGender")
 	endEvent
 endState
 state NPCBed
@@ -2439,6 +2648,18 @@ state ResetExpressionRegistry
 		ExpressionSlots.Setup()
 		ShowMessage("$SSL_RunRebuildExpressions", false)
 		Debug.Notification("$SSL_RunRebuildExpressions")
+		SetOptionFlagsST(OPTION_FLAG_NONE)
+		SetTextOptionValueST("$SSL_ClickHere")
+	endEvent
+endState
+state ResetStripOverrides
+	event OnSelectST()
+		SetTextOptionValueST("$SSL_Resetting")
+		SetOptionFlagsST(OPTION_FLAG_DISABLED)
+		
+		ActorLib.ResetStripOverrides()
+
+		ShowMessage("$Done", false)
 		SetOptionFlagsST(OPTION_FLAG_NONE)
 		SetTextOptionValueST("$SSL_ClickHere")
 	endEvent
