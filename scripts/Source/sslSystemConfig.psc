@@ -126,6 +126,7 @@ bool property ForeplayStage auto hidden
 bool property OrgasmEffects auto hidden
 bool property RaceAdjustments auto hidden
 bool property BedRemoveStanding auto hidden
+bool property UseCreatureGender auto hidden
 
 ; Integers
 int property AnimProfile auto hidden
@@ -171,6 +172,13 @@ float[] property StageTimer auto hidden
 float[] property StageTimerLeadIn auto hidden
 float[] property StageTimerAggr auto hidden
 float[] property BedOffset auto hidden
+
+; Compatibility checks
+bool property HasHDTHeels auto hidden
+bool property HasFrostfall auto hidden
+bool property HasSchlongs auto hidden
+
+MagicEffect HDTHeelEffect
 
 ; Data
 Actor property TargetRef auto hidden
@@ -491,6 +499,32 @@ bool function SetAdjustmentProfile(string ProfileName) global native
 bool function SaveAdjustmentProfile() global native
 
 ; ------------------------------------------------------- ;
+; --- 3rd party compatibility                         --- ;
+; ------------------------------------------------------- ;
+
+Spell function GetHDTSpell(Actor ActorRef)
+	if !HasHDTHeels || !HDTHeelEffect || !ActorRef || !ActorRef.GetWornForm(Armor.GetMaskForSlot(37))
+		return none
+	endIf
+	int i = ActorRef.GetSpellCount()
+	while i
+		i -= 1
+		Spell SpellRef = ActorRef.GetNthSpell(i)
+		if StringUtil.Find(SpellRef.GetName(), "High Heel") != -1
+			return SpellRef
+		endIf
+		int n = SpellRef.GetNumEffects()
+		while n
+			n -= 1
+			if SpellRef.GetNthEffectMagicEffect(n) == HDTHeelEffect
+				return SpellRef
+			endIf
+		endWhile
+	endWhile
+	return none
+endFunction
+
+; ------------------------------------------------------- ;
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
 
@@ -545,13 +579,23 @@ function Reload()
 
 	ImportProfile(PapyrusUtil.ClampInt(AnimProfile, 1, 5))
 
+	; HasSchlongs     = Game.GetModByName("Schlongs of Skyrim - Core.esm") != 255 || Game.GetModByName("SAM - Shape Atlas for Men.esp")
+	; HasFrostfall    = Game.GetModByName("Chesko_Frostfall.esp") != 255
+	HasHDTHeels = Game.GetModByName("hdtHighHeel.esm") != 255
+	if HasHDTHeels && !HDTHeelEffect
+		HDTHeelEffect = Game.GetFormFromFile(0x800, "hdtHighHeel.esm") as MagicEffect
+	endIf
+
 	; Remove any NPC thread control player has
-	; DisableThreadControl(Control)
+	DisableThreadControl(Control)
 	; Validate tracked factions & actors
 	; ValidateTrackedActors()
 	; ValidateTrackedFactions()
 	; Cleanup phantom slots with missing owners
 	; Factory.Cleanup()
+
+	; DEV TEMP - force on during development
+	UseCreatureGender  = true
 endFunction
 
 function SetDefaults()
@@ -577,6 +621,7 @@ function SetDefaults()
 	OrgasmEffects      = false
 	RaceAdjustments    = true
 	BedRemoveStanding  = true
+	UseCreatureGender  = false
 
 	; Integers
 	AnimProfile        = 1

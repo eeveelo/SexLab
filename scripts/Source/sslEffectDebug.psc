@@ -16,10 +16,12 @@ ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
+	Log("Waiting: "+CasterRef)
+	Utility.Wait(15.0)
+	Log("Starting")
+	SexLab.QuickStart(TargetRef, CasterRef)
 
-	Benchmark(2, 1000, 10)
-
-
+	; Benchmark(3, 50, 5)
 
 	; sslAnimationSlots AnimSlots = SexLab.AnimSlots
 	; Log("Filter: "+AnimSlots.Filter)

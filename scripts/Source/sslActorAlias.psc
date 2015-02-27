@@ -62,6 +62,12 @@ int BedTypeID
 Form Strapon
 Form HadStrapon
 
+Spell HDTHeelSpell
+Form HadBoots
+
+; Thread/alias shares
+float[] RealTime
+
 ; Animation Position/Stage flags
 bool property OpenMouth hidden
 	bool function get()
@@ -88,8 +94,6 @@ bool property MalePosition hidden
 		return Flags[4] == 0
 	endFunction
 endProperty
-
-float[] RealTime
 
 ; ------------------------------------------------------- ;
 ; --- Load/Clear Alias For Use                        --- ;
@@ -238,6 +242,11 @@ state Ready
 			Strip()
 			ResolveStrapon()
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
+			; Find HDT High Heels
+			HDTHeelSpell = Config.GetHDTSpell(ActorRef)
+			if HDTHeelSpell
+				ActorRef.RemoveSpell(HDTHeelSpell)
+			endIf
 			; Pick a voice if needed
 			if !Voice && !IsForcedSilent
 				SetVoice(Config.VoiceSlots.PickVoice(ActorRef), IsForcedSilent)
@@ -451,6 +460,14 @@ state Animating
 		; Unstrip items in storage, if any
 		if !ActorRef.IsDead()
 			Unstrip()
+			; Reapply HDT High Heel if they had it and need it again.
+			if HDTHeelSpell && ActorRef.GetWornForm(Armor.GetMaskForSlot(37))
+				if ActorRef.HasSpell(HDTHeelSpell)
+					Log(HDTHeelSpell+" -> "+Config.GetHDTSpell(ActorRef), "DEV - HDTHighHeels ("+ActorRef.HasSpell(HDTHeelSpell)+")")
+				endIf
+				Log("HDTHeelSpell re-applying", "DEV - HDTHighHeels")
+				ActorRef.AddSpell(HDTHeelSpell)
+			endIf
 		endIf
 		; Free alias slot
 		Clear()
@@ -724,6 +741,10 @@ function OverrideStrip(bool[] SetStrip)
 	endIf
 endFunction
 
+bool function IsStrippable(Form ItemRef)
+	return ItemRef && (SexLabUtil.HasKeywordSub(ItemRef, "AlwaysStrip") || !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")) && (StorageUtil.FormListHas(none, "AlwaysStrip", ItemRef) || !StorageUtil.FormListHas(none, "NoStrip", ItemRef))
+endFunction
+
 function Strip()
 	if !ActorRef || IsCreature
 		return
@@ -748,13 +769,13 @@ function Strip()
 	if Strip[32]
 		; Right hand
 		ItemRef = ActorRef.GetEquippedWeapon(false)
-		if ItemRef && !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")
+		if IsStrippable(ItemRef)
 			ActorRef.UnequipItemEX(ItemRef, 1, false)
 			Stripped[33] = ItemRef
 		endIf
 		; Left hand
 		ItemRef = ActorRef.GetEquippedWeapon(true)
-		if ItemRef && !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")
+		if IsStrippable(ItemRef)
 			ActorRef.UnequipItemEX(ItemRef, 2, false)
 			Stripped[32] = ItemRef
 		endIf
@@ -762,13 +783,11 @@ function Strip()
 	; Strip armor slots
 	int i = Strip.RFind(true, 31)
 	while i >= 0
-		if Strip[i]
-			; Grab item in slot
-			ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
-			if ItemRef && !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")
-				ActorRef.UnequipItem(ItemRef, false, true)
-				Stripped[i] = ItemRef
-			endIf
+		; Grab item in slot
+		ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
+		if ItemRef && (ActorLib.IsAlwaysStrip(ItemRef) || (Strip[i] && IsStrippable(ItemRef)))
+			ActorRef.UnequipItem(ItemRef, false, true)
+			Stripped[i] = ItemRef
 		endIf
 		; Move to next slot
 		i -= 1
@@ -893,7 +912,6 @@ function RegisterEvents()
 	RegisterForModEvent(e+"Strip", "Strip")
 	RegisterForModEvent(e+"Animate", "PlayAnimation")
 	RegisterForModEvent(e+"Start", "StartAnimating")
-	RegisterForModEvent(e+"Move", "StartAnimating")
 endFunction
 
 function ClearEvents()
@@ -1015,3 +1033,18 @@ bool function IsInPosition(Actor CheckActor, ObjectReference CheckMarker, float 
 
 ; bool function _SetActor(Actor ProspectRef) native
 ; function _ApplyExpression(Actor ProspectRef, int[] Presets) global native
+
+
+; function GetVars()
+; 	IntShare = Thread.IntShare
+; 	FloatShare = Thread.FloatShare
+; 	StringShare = Thread.StringShare
+; 	BoolShare
+; endFunction
+
+; int[] property IntShare auto hidden ; Stage, ActorCount, BedTypeID
+; float[] property FloatShare auto hidden ; RealTime, StartedAt
+; string[] property StringShare auto hidden ; AdjustKey
+; bool[] property BoolShare auto hidden ; 
+; sslBaseAnimation[] property _Animation auto hidden ; Animation
+
