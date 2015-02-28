@@ -127,6 +127,7 @@ bool property OrgasmEffects auto hidden
 bool property RaceAdjustments auto hidden
 bool property BedRemoveStanding auto hidden
 bool property UseCreatureGender auto hidden
+bool property LimitedStrip auto hidden
 
 ; Integers
 int property AnimProfile auto hidden
@@ -622,6 +623,7 @@ function SetDefaults()
 	RaceAdjustments    = true
 	BedRemoveStanding  = true
 	UseCreatureGender  = false
+	LimitedStrip       = true
 
 	; Integers
 	AnimProfile        = 1

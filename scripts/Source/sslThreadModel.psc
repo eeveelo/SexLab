@@ -374,8 +374,8 @@ endState
 ; --- Actor Setup                                     --- ;
 ; ------------------------------------------------------- ;
 
-bool function IsLimitedStrip()
-	return AnimSlots.CountTag(Animations, "Oral,Foreplay,LimitedStrip") == Animations.Length
+bool function UseLimitedStrip()
+	return LeadIn || (Config.LimitedStrip && AnimSlots.CountTag(Animations, "Oral,Foreplay,LimitedStrip") == Animations.Length)
 endFunction
 
 ; Actor Overrides

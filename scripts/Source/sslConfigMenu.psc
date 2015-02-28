@@ -371,6 +371,7 @@ function AnimationSettings()
 	AddHeaderOption("$SSL_ExtraEffects")
 	AddToggleOptionST("UseExpressions","$SSL_UseExpressions", Config.UseExpressions)
 	AddToggleOptionST("UseLipSync", "$SSL_UseLipSync", Config.UseLipSync)
+	AddToggleOptionST("LimitedStrip","$SSL_LimitedStrip", Config.LimitedStrip)
 	AddToggleOptionST("OrgasmEffects","$SSL_OrgasmEffects", Config.OrgasmEffects)
 	AddToggleOptionST("UseCum","$SSL_ApplyCumEffects", Config.UseCum)
 	AddToggleOptionST("AllowFemaleFemaleCum","$SSL_AllowFemaleFemaleCum", Config.AllowFFCum)
@@ -2184,6 +2185,19 @@ state UseLipSync
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoUseLipSync")
+	endEvent
+endState
+state LimitedStrip
+	event OnSelectST()
+		Config.LimitedStrip = !Config.LimitedStrip
+		SetToggleOptionValueST(Config.LimitedStrip)
+	endEvent
+	event OnDefaultST()
+		Config.LimitedStrip = true
+		SetToggleOptionValueST(Config.LimitedStrip)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_LimitedStripInfo")
 	endEvent
 endState
 state RedressVictim

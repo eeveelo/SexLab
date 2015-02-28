@@ -759,9 +759,8 @@ function Strip()
 	if StripOverride.Length == 33
 		Strip = StripOverride
 	else
-		Strip = Config.GetStrip(IsFemale, Thread.LeadIn || Thread.IsLimitedStrip(), Thread.IsAggressive, IsVictim)
+		Strip = Config.GetStrip(IsFemale, Thread.UseLimitedStrip(), Thread.IsAggressive, IsVictim)
 	endIf
-	Log(Strip, "LimitedStrip("+Thread.IsLimitedStrip()+")")
 	; Stripped storage
 	Form ItemRef
 	Form[] Stripped = new Form[34]
