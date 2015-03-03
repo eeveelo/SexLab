@@ -16,10 +16,21 @@ ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	Log("Waiting: "+CasterRef)
-	Utility.Wait(15.0)
-	Log("Starting")
-	SexLab.QuickStart(TargetRef, CasterRef)
+	float RealTime = Utility.GetCurrentRealTime()
+	float GameTime = Utility.GetCurrentGameTime()
+	sslActorStats._SeedActor(TargetRef, RealTime, GameTime)
+	Log("Ashal Seed:")
+	Log(SexLab.Stats.PrintSkills(TargetRef))
+
+	sslActorStats._SeedActor2(TargetRef, RealTime, GameTime)
+	Log("CPU Seed:")
+	Log(SexLab.Stats.PrintSkills(TargetRef))
+
+
+	; Log("Waiting: "+CasterRef)
+	; Utility.Wait(15.0)
+	; Log("Starting")
+	; SexLab.QuickStart(TargetRef, CasterRef)
 
 	; Benchmark(3, 50, 5)
 
