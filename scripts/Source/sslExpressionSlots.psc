@@ -241,13 +241,13 @@ function Setup()
 	; Init slots
 	Slotted    = 0	
 	Registry   = Utility.CreateStringArray(375)
-	Objects = Utility.CreateAliasArray(375);, GetNthAlias(0)
+	Objects = Utility.CreateAliasArray(375, GetNthAlias(0))
 	; DEVTEMP: SKSE Beta workaround - clear used dummy aliases
-	;/ int i = Objects.Length
+	int i = Objects.Length
 	while i
 		i -= 1
 		Objects[i] = none
-	endWhile /;
+	endWhile
 	; /DEVTEMP
 	; Init defaults
 	RegisterSlots()
