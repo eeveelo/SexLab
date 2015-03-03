@@ -1,7 +1,8 @@
 scriptname sslBaseAnimation extends sslBaseObject
 
 ; import sslUtility
-import PapyrusUtil
+; import PapyrusUtil
+; import Utility
 
 ; Config
 int Actors
@@ -9,6 +10,7 @@ int Stages
 
 string[] Animations
 string[] LastKeys
+string[] RaceTypes
 
 int[] Positions   ; = gender
 int[] CumIDs      ; = per stage cumIDs
@@ -18,10 +20,12 @@ bool[] Silences
 bool[] OpenMouths
 bool[] Strapons
 
+; int[] Flags
+
 float[] Timers
 float[] CenterAdjust
 
-float[] Offsets   ; = forward, side, up, rotate
+; float[] Offsets   ; = forward, side, up, rotate
 float[] BedOffset ; = forward, side, up, rotate
 
 ; ------------------------------------------------------- ;
@@ -29,15 +33,23 @@ float[] BedOffset ; = forward, side, up, rotate
 ; ------------------------------------------------------- ;
 
 int function DataIndex(int Slots, int Position, int Stage, int Slot = 0)
-	return ( Position * (Stages * Slots) ) + ( (ClampInt(Stage, 1, Stages) - 1) * Slots ) + Slot
+	return ( Position * (Stages * Slots) ) + ( (PapyrusUtil.ClampInt(Stage, 1, Stages) - 1) * Slots ) + Slot
 endFunction
 
 int function StageIndex(int Position, int Stage)
-	return ((Position * Stages) + (ClampInt(Stage, 1, Stages) - 1))
+	return ((Position * Stages) + (PapyrusUtil.ClampInt(Stage, 1, Stages) - 1))
 endFunction
 
 int function AdjIndex(int Stage, int Slot = 0, int Slots = 4)
-	return ((ClampInt(Stage, 1, Stages) - 1) * Slots) + Slot
+	return ((PapyrusUtil.ClampInt(Stage, 1, Stages) - 1) * Slots) + Slot
+endfunction
+
+int function OffsetIndex(int Stage, int Slot)
+	return ((PapyrusUtil.ClampInt(Stage, 1, Stages) - 1) * 4) + Slot
+endfunction
+
+int function FlagIndex(int Stage, int Slot)
+	return ((PapyrusUtil.ClampInt(Stage, 1, Stages) - 1) * 5) + Slot
 endfunction
 
 ; ------------------------------------------------------- ;
@@ -118,7 +130,7 @@ float function GetTimersRunTime(float[] StageTimers)
  		if HasTimer(Stage)
  			seconds += GetTimer(Stage)
  		elseIf Stage < LastStage
- 			seconds += StageTimers[ClampInt(Stage, 0, (LastTimer - 1))]
+ 			seconds += StageTimers[PapyrusUtil.ClampInt(Stage, 0, (LastTimer - 1))]
  		elseIf Stage >= LastStage
  			seconds += StageTimers[LastTimer]
  		endIf
@@ -174,7 +186,7 @@ function SetStageSoundFX(int stage, Sound StageFX)
 	endIf
 	; Initialize fx array if needed
 	if StageSoundFX.Length != Stages
-		StageSoundFX = ResizeFormArray(StageSoundFX, Stages, SoundFX)
+		StageSoundFX = PapyrusUtil.ResizeFormArray(StageSoundFX, Stages, SoundFX)
 	endIf
 	; Set Stage fx
 	StageSoundFX[(stage - 1)] = StageFX
@@ -210,7 +222,8 @@ bool function _HasAdjustments(string Registrar, string AdjustKey, int Stage) glo
 
 function _PositionOffsets(string Registrar, string AdjustKey, string LastKey, int Stage, float[] RawOffsets) global native
 float[] function PositionOffsets(float[] Output, string AdjustKey, int Position, int Stage, int BedTypeID = 0)
-	int i = DataIndex(4, Position, Stage)
+	int i = OffsetIndex(Stage, 0)
+	float[] Offsets = OffsetsArray(Position)
 	Output[0] = Offsets[i] + CenterAdjust[(Stage - 1)] ; Forward
 	Output[1] = Offsets[(i + 1)] ; Side
 	Output[2] = Offsets[(i + 2)] ; Up
@@ -227,7 +240,8 @@ float[] function PositionOffsets(float[] Output, string AdjustKey, int Position,
 endFunction
 
 float[] function RawOffsets(float[] Output, int Position, int Stage)
-	int i = DataIndex(4, Position, Stage)
+	int i = OffsetIndex(Stage, 0)
+	float[] Offsets = OffsetsArray(Position)
 	Output[0] = Offsets[i] ; Forward
 	Output[1] = Offsets[(i + 1)] ; Side
 	Output[2] = Offsets[(i + 2)] ; Up
@@ -357,7 +371,6 @@ string[] function GetAdjustKeys()
 	return _GetAdjustKeys(Registry)
 endFunction
 
-
 ; ------------------------------------------------------- ;
 ; --- Flags                                           --- ;
 ; ------------------------------------------------------- ;
@@ -369,11 +382,11 @@ endFunction
 
 int[] function PositionFlags(int[] Output, string AdjustKey, int Position, int Stage)
 	AdjustKey += "."+Position
-	; int i = DataIndex(4, Position, Stage)
-	int i = StageIndex(Position, Stage)
-	Output[0] = Silences[i] as int
-	Output[1] = OpenMouths[i] as int
-	Output[2] = Strapons[i] as int
+	int i = FlagIndex(Stage, 0)
+	int[] Flags = FlagsArray(Position)
+	Output[0] = Flags[i]
+	Output[1] = Flags[i + 1]
+	Output[2] = Flags[i + 2]
 	Output[3] = GetSchlong(AdjustKey, Position, Stage)
 	Output[4] = GetGender(Position)
 	return Output
@@ -384,15 +397,15 @@ endFunction
 ; ------------------------------------------------------- ;
 
 bool function IsSilent(int Position, int Stage)
-	return Silences[StageIndex(Position, Stage)]
+	return FlagsArray(Position)[FlagIndex(Stage, kSilent)] as bool
 endFunction
 
 bool function UseOpenMouth(int Position, int Stage)
-	return OpenMouths[StageIndex(Position, Stage)]
+	return FlagsArray(Position)[FlagIndex(Stage, kOpenMouth)] as bool
 endFunction
 
 bool function UseStrapon(int Position, int Stage)
-	return Strapons[StageIndex(Position, Stage)]
+	return FlagsArray(Position)[FlagIndex(Stage, kStrapon)] as bool
 endFunction
 
 ; int function _GetSchlong(string ProfileName, string Registry, string AdjustKey, string LastKey, int Stage, int retDefault) global native
@@ -402,15 +415,15 @@ int function GetSchlong(string AdjustKey, int Position, int Stage)
 	elseIf LastKeys[Position] != "" && _HasAdjustments(Registry, LastKeys[Position], Stage)
 		return _GetAdjustment(Registry, LastKeys[Position], Stage, 3) as int
 	endIf
-	return Schlongs[StageIndex(Position, Stage)]
+	return FlagsArray(Position)[FlagIndex(Stage, kSchlong)]
 endFunction
 
 int function GetCumID(int Position, int Stage = 1)
-	return CumIDs[StageIndex(Position, Stage)]
+	return FlagsArray(Position)[FlagIndex(Stage, kCumID)]
 endFunction
 
 function SetStageCumID(int Position, int Stage, int CumID)
-	CumIDs[StageIndex(Position, Stage)] = CumID
+	FlagsArray(Position)[FlagIndex(Stage, kCumID)] = CumID
 endFunction
 
 int function GetCum(int Position)
@@ -513,7 +526,8 @@ endFunction
 ; ------------------------------------------------------- ;
 
 int aid
-int sid
+int oid
+int fid
 
 bool Locked
 int function AddPosition(int Gender = 0, int AddCum = -1)
@@ -525,69 +539,100 @@ int function AddPosition(int Gender = 0, int AddCum = -1)
 		Debug.Trace(Registry+" AddPosition Lock! -- Adding Actor: "+Actors)
 	endWhile
 	Locked = true
-
-	int pid = Actors
-	Genders[Gender] = Genders[Gender] + 1
-	Positions[pid]  = Gender
-	if pid > 0
-		; Single item / per stage containers
-		int idx    = (pid + 1) * Stages
-		Animations = PapyrusUtil.ResizeStringArray(Animations, idx)
-		Silences   = PapyrusUtil.ResizeBoolArray(Silences, idx)
-		OpenMouths = PapyrusUtil.ResizeBoolArray(OpenMouths, idx)
-		Strapons   = PapyrusUtil.ResizeBoolArray(Strapons, idx)
-		Schlongs   = PapyrusUtil.ResizeIntArray(Schlongs, idx)
-		if pid == 1
-			CumIDs = PapyrusUtil.ResizeIntArray(CumIDs, Stages)
-		endIf
-		CumIDs     = PapyrusUtil.ResizeIntArray(CumIDs, idx, AddCum)
-		Offsets    = PapyrusUtil.ResizeFloatArray(Offsets, (pid + 1) * (Stages * 4))
-	else
-		Offsets    = new float[128]
-		Animations = new string[32]
-		Silences   = new bool[32]
-		OpenMouths = new bool[32]
-		Strapons   = new bool[32]
-		Schlongs   = new int[32]
-		CumIDs     = Utility.CreateIntArray(32, AddCum)
-	endIf
-	Actors += 1
 	
+	oid = 0
+	fid = 0
+
+	Genders[Gender]   = Genders[Gender] + 1
+	Positions[Actors] = Gender
+
+	InitArrays(Actors)
+	FlagsArray(Actors)[kCumID] = AddCum
+
+	Actors += 1
 	Locked = false
+	return (Actors - 1)
+endFunction
+
+int function AddCreaturePosition(string RaceKey, int Gender = 2, int AddCum = -1)
+	if Actors >= 5
+		return -1
+	elseIf Gender <= 0 || Gender > 3
+		Gender = 2
+	elseIf Gender == 1
+		Gender = 3
+	endIf
+
+	int pid = AddPosition(Gender, AddCum)
+	if pid != -1 && RaceKey != ""
+		RaceTypes[pid] = RaceKey
+		if RaceType == ""
+			RaceType = RaceKey
+		endIf
+	endIf
 	return pid
 endFunction
 
-function AddPositionStage(int Position, string AnimationEvent, float forward = 0.0, float side = 0.0, float up = 0.0, float rotate = 0.0, bool silent = false, bool openMouth = false, bool strapon = true, int sos = 0)
-	Animations[aid] = AnimationEvent
-	Silences[aid]   = silent
-	OpenMouths[aid] = openMouth
-	Strapons[aid]   = strapon
-	Schlongs[aid]   = sos
+function AddPositionStage(int Position, string AnimationEvent, float forward = 0.0, float side = 0.0, float up = 0.0, float rotate = 0.0, bool silent = false, bool openmouth = false, bool strapon = true, int sos = 0)
+	; Out of range position or empty animation event
+	if Position == -1 || Position >= 5 || AnimationEvent == ""
+		Log("FATAL: Invalid arguments!", "AddPositionStage("+Position+", "+AnimationEvent+")")
+		return
+	endIf
+
+	; First position dictates stage count and sizes
+	if Position == 0
+		Stages += 1
+		; Flag stage overflow
+		if (fid + kFlagEnd) >= Flags0.Length
+			Log("WARNING: Flags position overflow, resizing! - Current flags: "+Flags0, "AddPositionStage("+Position+", "+AnimationEvent+")")
+			Flags0 = PapyrusUtil.ResizeIntArray(Flags0, (Flags0.Length + 32))
+		endIf
+		; Offset stage overflow
+		if (oid + kOffsetEnd) >= Offsets0.Length
+			Log("WARNING: Offsets position overflow, resizing! - Current offsets: "+Offsets0, "AddPositionStage("+Position+", "+AnimationEvent+")")
+			Offsets0 = PapyrusUtil.ResizeFloatArray(Offsets0, (Offsets0.Length + 32))
+		endIf
+	endIf
+
+	; Save stage animation event
+	if aid < 128
+		Animations[aid] = AnimationEvent
+	else
+		if aid == 128
+			Log("WARNING: Animation stage overflow, resorting to push! - Current events: "+Animations, "AddPositionStage("+Position+", "+AnimationEvent+")")
+		endIf
+		Animations = PapyrusUtil.PushString(Animations, AnimationEvent)
+	endIf
 	aid += 1
 
-	Offsets[sid + 0] = forward
-	Offsets[sid + 1] = side
-	Offsets[sid + 2] = up
-	Offsets[sid + 3] = rotate
-	sid += 4
+	; Save position flags
+	int[] Flags = FlagsArray(Position)
+	Flags[fid + 0] = silent as int
+	Flags[fid + 1] = openmouth as int
+	Flags[fid + 2] = strapon as int
+	Flags[fid + 3] = sos
+	Flags[fid + 4] = Flags[kCumID]
+	fid += kFlagEnd
 
-	Stages += (Position == 0) as int
+	; Save position offsets
+	float[] Offsets = OffsetsArray(Position)
+	Offsets[oid + 0] = forward
+	Offsets[oid + 1] = side
+	Offsets[oid + 2] = up
+	Offsets[oid + 3] = rotate
+	oid += kOffsetEnd
+
 endFunction
 
 function Save(int id = -1)
 	parent.Save(id)
 	; Finalize config data
-	Positions = PapyrusUtil.ResizeIntArray(Positions, Actors)
-	LastKeys  = PapyrusUtil.ResizeStringArray(LastKeys, Actors)
-	if Actors == 1
-		Animations = PapyrusUtil.ResizeStringArray(Animations, Stages)
-		Silences   = PapyrusUtil.ResizeBoolArray(Silences, Stages)
-		OpenMouths = PapyrusUtil.ResizeBoolArray(OpenMouths, Stages)
-		Strapons   = PapyrusUtil.ResizeBoolArray(Strapons, Stages)
-		Schlongs   = PapyrusUtil.ResizeIntArray(Schlongs, Stages)
-		CumIDs     = PapyrusUtil.ResizeIntArray(CumIDs, Stages)
-		Offsets    = PapyrusUtil.ResizeFloatArray(Offsets, (Stages * 4))
-	endIf
+	Flags0     = PapyrusUtil.ResizeIntArray(Flags0, (Stages * kFlagEnd))
+	Offsets0   = PapyrusUtil.ResizeFloatArray(Offsets0, (Stages * kOffsetEnd))
+	Animations = PapyrusUtil.ResizeStringArray(Animations, aid)
+	; Positions  = PapyrusUtil.ResizeIntArray(Positions, Actors)
+	; LastKeys   = PapyrusUtil.ResizeStringArray(LastKeys, Actors)
 	; Create and add gender tag
 	int i
 	string Tag
@@ -597,8 +642,12 @@ function Save(int id = -1)
 			Tag += "M"
 		elseIf Gender == 1
 			Tag += "F"
-		elseIf Gender == 2
+		elseIf Gender >= 2
 			Tag += "C"
+			; Fill racetypes if older non-addcreatureposition() was used
+			if RaceTypes[i] == ""
+				RaceTypes[i] = RaceType
+			endIf
 		endIf
 		i += 1
 	endWhile
@@ -614,8 +663,10 @@ function Save(int id = -1)
 	endIf
 	; Log the new animation
 	if IsCreature
+		RaceTypes = PapyrusUtil.ResizeStringArray(RaceTypes, Actors)
 		Log(Name, "Creatures["+id+"]")
 	else
+		RaceTypes = Utility.CreateStringArray(0)
 		Log(Name, "Animations["+id+"]")
 	endIf
 endFunction
@@ -626,7 +677,7 @@ float function CalcCenterAdjuster(int Stage)
 	int Position = Actors
 	while Position
 		Position -= 1
-		float Forward = Offsets[DataIndex(4, Position, Stage)]
+		float Forward = OffsetsArray(Position)[OffsetIndex(Stage, 0)]
 		if Math.Abs(Forward) > Math.Abs(Adjuster)
 			Adjuster = Forward
 		endIf
@@ -640,30 +691,33 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function Initialize()
-	aid        = 0
-	sid        = 0
-	Actors     = 0
-	Stages     = 0
-	RaceType   = ""
-	Genders    = new int[4]
-	Positions  = new int[5]
-	Offsets    = new float[1]
-	LastKeys   = new string[5]
-	Animations = new string[1]
-	Silences   = new bool[1]
-	OpenMouths = new bool[1]
-	Strapons   = new bool[1]
-	Schlongs   = new int[1]
-
-	; SingleBed    = Utility.CreateFloatArray(0)
-	; DoubleBed    = Utility.CreateFloatArray(0)
-
-	BedOffset = Utility.CreateFloatArray(0)
-	; BedOffset[0] = 33.0
-	; BedOffset[2] = 37.0
-
-	Timers       = new float[1]
+	aid       = 0
+	oid       = 0
+	fid       = 0
+	Actors    = 0
+	Stages    = 0
+	RaceType  = ""
+	Genders   = new int[4]
+	Positions = new int[5]
+	RaceTypes = new string[5]
+	LastKeys  = new string[5]
 	StageSoundFX = new Form[1]
+
+	Animations   = Utility.CreateStringArray(0)
+	BedOffset    = Utility.CreateFloatArray(0)
+	Timers       = Utility.CreateFloatArray(0)
+
+	Flags0 = Utility.CreateIntArray(0)
+	Flags1 = Utility.CreateIntArray(0)
+	Flags2 = Utility.CreateIntArray(0)
+	Flags3 = Utility.CreateIntArray(0)
+	Flags4 = Utility.CreateIntArray(0)
+
+	Offsets0 = Utility.CreateFloatArray(0)
+	Offsets1 = Utility.CreateFloatArray(0)
+	Offsets2 = Utility.CreateFloatArray(0)
+	Offsets3 = Utility.CreateFloatArray(0)
+	Offsets4 = Utility.CreateFloatArray(0)
 
 	Locked = false
 
@@ -685,7 +739,7 @@ Form[] property CreatureRaces hidden
 			i -= 1
 			RaceRefs[i] = Race.GetRace(Races[i])
 		endWhile
-		return ClearNone(RaceRefs)
+		return PapyrusUtil.ClearNone(RaceRefs)
 	endFunction
 endProperty
 
@@ -773,8 +827,6 @@ int property FemaleCreatures hidden
 	endFunction
 endProperty
 
-
-
 ;/ string property Profile hidden
 	string function get()
 		return "../SexLab/AnimationProfile_"+Config.AnimProfile+".json"
@@ -784,3 +836,118 @@ endProperty /;
 bool function CheckByTags(int ActorCount, string[] Search, string[] Suppress, bool RequireAll)
 	return Enabled && ActorCount == PositionCount && CheckTags(Search, RequireAll) && (Suppress.Length < 1 || !HasOneTag(Suppress))
 endFunction
+
+
+int[] Flags0
+int[] Flags1
+int[] Flags2
+int[] Flags3
+int[] Flags4
+
+int property kSilent    = 0 autoreadonly hidden
+int property kOpenMouth = 1 autoreadonly hidden
+int property kStrapon   = 2 autoreadonly hidden
+int property kSchlong   = 3 autoreadonly hidden
+int property kCumID     = 4 autoreadonly hidden
+int property kFlagEnd hidden
+	int function get()
+		return 5
+	endFunction
+endProperty
+
+int[] function FlagsArray(int Position)
+	if Position == 0
+		return Flags0
+	elseIf Position == 1
+		return Flags1
+	elseIf Position == 2
+		return Flags2
+	elseIf Position == 3
+		return Flags3
+	elseIf Position == 4
+		return Flags4
+	else
+		return Utility.CreateIntArray(0)
+	endIf
+endFunction
+
+function FlagsSave(int Position, int[] Flags)
+	if Position == 0
+		Flags0 = Flags
+	elseIf Position == 1
+		Flags1 = Flags
+	elseIf Position == 2
+		Flags2 = Flags
+	elseIf Position == 3
+		Flags3 = Flags
+	elseIf Position == 4
+		Flags4 = Flags
+	endIf
+endFunction
+
+float[] Offsets0
+float[] Offsets1
+float[] Offsets2
+float[] Offsets3
+float[] Offsets4
+
+int property kForward  = 0 autoreadonly hidden
+int property kSideways = 1 autoreadonly hidden
+int property kUpward   = 2 autoreadonly hidden
+int property kRotate   = 3 autoreadonly hidden
+int property kOffsetEnd hidden
+	int function get()
+		return 4
+	endFunction
+endProperty
+
+float[] function OffsetsArray(int Position)
+	if Position == 0
+		return Offsets0
+	elseIf Position == 1
+		return Offsets1
+	elseIf Position == 2
+		return Offsets2
+	elseIf Position == 3
+		return Offsets3
+	elseIf Position == 4
+		return Offsets4
+	else
+		return Utility.CreateFloatArray(0)
+	endIf
+endFunction
+
+function OffsetsSave(int Position, float[] Offsets)
+	if Position == 0
+		Offsets0 = Offsets
+	elseIf Position == 1
+		Offsets1 = Offsets
+	elseIf Position == 2
+		Offsets2 = Offsets
+	elseIf Position == 3
+		Offsets3 = Offsets
+	elseIf Position == 4
+		Offsets4 = Offsets
+	endIf
+endFunction
+
+function InitArrays(int Position)
+	if Position == 0
+		Flags0     = new int[128]
+		Offsets0   = new float[128]
+		Animations = new string[128]
+	elseIf Position == 1
+		Flags1   = Utility.CreateIntArray((Stages * kFlagEnd))
+		Offsets1 = Utility.CreateFloatArray((Stages * kOffsetEnd))
+	elseIf Position == 2
+		Flags2   = Utility.CreateIntArray((Stages * kFlagEnd))
+		Offsets2 = Utility.CreateFloatArray((Stages * kOffsetEnd))
+	elseIf Position == 3
+		Flags3   = Utility.CreateIntArray((Stages * kFlagEnd))
+		Offsets3 = Utility.CreateFloatArray((Stages * kOffsetEnd))
+	elseIf Position == 4
+		Flags4   = Utility.CreateIntArray((Stages * kFlagEnd))
+		Offsets4 = Utility.CreateFloatArray((Stages * kOffsetEnd))
+	endIf
+endFunction
+
