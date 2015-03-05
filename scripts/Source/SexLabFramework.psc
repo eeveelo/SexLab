@@ -389,6 +389,14 @@ sslBaseAnimation[] function GetCreatueAnimationsByRaceGenders(int ActorCount, Ra
 	return CreatureSlots.GetByRaceGenders(ActorCount, RaceRef, MaleCreatures, FemaleCreatures, ForceUse)
 endFunction
 
+sslBaseAnimation function GetCreatureAnimationByName(string FindName)
+	return CreatureSlots.GetByName(FindName)
+endFunction
+
+sslBaseAnimation function GetCreatureAnimationByRegistry(string Registry)
+	return CreatureSlots.GetByRegistrar(Registry)
+endFunction
+
 ;#---------------------------#
 ;#  END CREATURES FUNCTIONS  #
 ;#---------------------------#
