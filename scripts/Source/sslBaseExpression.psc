@@ -38,6 +38,9 @@ int property PhasesFemale hidden
 	endFunction
 endProperty
 
+Form[] MaleEquip
+Form[] FemaleEquip
+
 float[] Male1
 float[] Male2
 float[] Male3
@@ -79,51 +82,56 @@ endFunction
 function ClearPhoneme(Actor ActorRef) global native
 function ClearModifier(Actor ActorRef) global native
 
+float function GetModifier(Actor ActorRef, int id) global native
+float function GetPhoneme(Actor ActorRef, int id) global native
+float function GetExpression(Actor ActorRef, bool getId) global native
+
 function OpenMouth(Actor ActorRef) global
-	ClearPhoneme(ActorRef)
+	; ClearPhoneme(ActorRef)
 	ActorRef.SetExpressionOverride(16, 100)
-	ActorRef.SetExpressionPhoneme(1, 0.4)
+	ActorRef.SetExpressionPhoneme(1, 0.5)
 endFunction
 
 function CloseMouth(Actor ActorRef) global
-	ActorRef.ClearExpressionOverride()
 	ActorRef.SetExpressionPhoneme(1, 0.0)
+	if GetExpression(ActorRef, true) == 16.0
+		ActorRef.ClearExpressionOverride()
+	endIf
 endFunction
 
 bool function IsMouthOpen(Actor ActorRef) global
-	return GetPhoneme(ActorRef, 1) >= 40
+	return GetPhoneme(ActorRef, 1) >= 0.5 || (GetExpression(ActorRef, true) == 16.0 && GetExpression(ActorRef, false) >= 0.7)
 endFunction
 
 function ClearMFG(Actor ActorRef) global
-	ClearPhoneme(ActorRef)
-	ClearModifier(ActorRef)
-	ActorRef.ResetExpressionOverrides()
+	; ClearPhoneme(ActorRef)
+	; ClearModifier(ActorRef)
 	ActorRef.ClearExpressionOverride()
+	ActorRef.ResetExpressionOverrides()
 endFunction
 
-function ApplyPresetFloats(Actor ActorRef, float[] Preset) global
-	ApplyPresetArray(ActorRef, Preset)
-	; ActorRef.SetExpressionOverride(Preset[30] as int, Preset[31] as int)
-endFunction
-
-function ApplyPreset(Actor ActorRef, int[] Preset) global
+function ApplyPresetFloats(Actor ActorRef, float[] Preset) global native
+float[] function GetCurrentMFG(Actor ActorRef) global
+	float[] Preset = new float[32]
 	int i
-	; Set Phoneme
+	; Get Phoneme
 	int p
 	while p <= 15
-		ActorRef.SetExpressionPhoneme(p, Preset[i] as float / 100.0)
+		Preset[i] = GetPhoneme(ActorRef, p) ; 0.0 - 1.0
 		i += 1
 		p += 1
 	endWhile
-	; Set Modifers
+	; Get Modifers
 	int m
 	while m <= 13
-		ActorRef.SetExpressionModifier(m, Preset[i] as float / 100.0)
+		Preset[i] = GetModifier(ActorRef, m) ; 0.0 - 1.0
 		i += 1
 		m += 1
 	endWhile
-	; Set expression
-	ActorRef.SetExpressionOverride(Preset[30], Preset[31])
+	; Get Exression/Mood type and value
+	Preset[30] = GetExpression(ActorRef, true)  ; 0 - 16
+	Preset[31] = GetExpression(ActorRef, false) ; 0.0 - 1.0
+	return Preset
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -139,7 +147,7 @@ function SetIndex(int Phase, int Gender, int Mode, int id, int value)
 		value = 0
 	endIf
 	Preset[i] = value as float
-	if i < 30
+	if i != 30
 		Preset[i] = Preset[i] / 100.0
 	endIf
 	SetPhase(Phase, Gender, Preset)
@@ -196,7 +204,7 @@ endFunction
 
 function AddPhase(int Phase, int Gender)
 	float[] Preset = GetPhase(Phase, Gender)
-	if Preset[30] == 0.0 || Preset[31] == 0.0
+	if Preset[31] == 0.0 || Preset[30] < 0.0 || Preset[30] > 16.0
 		Preset[30] = 7.0
 		Preset[31] = 0.5
 	endIf
@@ -282,7 +290,7 @@ float[] function GetPhonemes(int Phase, int Gender)
 	float[] Output = new float[16]
 	float[] Preset = GetPhase(Phase, Gender)
 	int i
-	while i < 16
+	while i <= PhonemeIDs
 		Output[i] = Preset[Phoneme + i]
 		i += 1
 	endWhile
@@ -293,7 +301,7 @@ float[] function GetModifiers(int Phase, int Gender)
 	float[] Output = new float[14]
 	float[] Preset = GetPhase(Phase, Gender)
 	int i
-	while i < 14
+	while i <= ModifierIDs
 		Output[i] = Preset[Modifier + i]
 		i += 1
 	endWhile
@@ -305,31 +313,61 @@ int function GetMoodType(int Phase, int Gender)
 endFunction
 
 int function GetMoodAmount(int Phase, int Gender)
-	return GetPhase(Phase, Gender)[31] as int
+	return (GetPhase(Phase, Gender)[31] * 100.0) as int
 endFunction
 
 int function GetIndex(int Phase, int Gender, int Mode, int id)
-	return (GetPhase(Phase, Gender)[Mode + id]) as int
+	return (GetPhase(Phase, Gender)[Mode + id] * 100.0) as int
 endFunction
 
 ; ------------------------------------------------------- ;
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
 
+int function ValidatePreset(float[] Preset)
+	if Preset.Length == 32 ; Must be appropiate size
+		int i = 30
+		while i
+			i -= 1
+			if Preset[i] > 0.0
+				return 1 ; Must have alteast one phoneme or modifier value
+			endIf
+		endWhile
+	endIf
+	return 0
+endFunction
+
 function CountPhases()
-	Phases = new int[2]
+	; Only count the phase if previous phase existed.
+	Phases = new int[2]	
 	; Male phases
-	Phases[0] = ((AddFloatValues(Male1) > 0) as int) \		
-		+ ((AddFloatValues(Male2) > 0) as int) \
-		+ ((AddFloatValues(Male3) > 0) as int) \
-		+ ((AddFloatValues(Male4) > 0) as int) \
-		+ ((AddFloatValues(Male5) > 0) as int)
+	Phases[0] = ValidatePreset(Male1)
+	if Phases[0] == 1
+		Phases[0] = Phases[0] + ValidatePreset(Male2)
+	endIf
+	if Phases[0] == 2
+		Phases[0] = Phases[0] + ValidatePreset(Male3)
+	endIf
+	if Phases[0] == 3
+		Phases[0] = Phases[0] + ValidatePreset(Male4)
+	endIf
+	if Phases[0] == 4
+		Phases[0] = Phases[0] + ValidatePreset(Male5)
+	endIf
 	; Female phases
-	Phases[1] = ((AddFloatValues(Female1) > 0) as int) \
-		+ ((AddFloatValues(Female2) > 0) as int) \
-		+ ((AddFloatValues(Female3) > 0) as int) \
-		+ ((AddFloatValues(Female4) > 0) as int) \
-		+ ((AddFloatValues(Female5) > 0) as int)
+	Phases[1] = ValidatePreset(Female1)
+	if Phases[1] == 1
+		Phases[1] = Phases[1] + ValidatePreset(Female2)
+	endIf
+	if Phases[1] == 2
+		Phases[1] = Phases[1] + ValidatePreset(Female3)
+	endIf
+	if Phases[1] == 3
+		Phases[1] = Phases[1] + ValidatePreset(Female4)
+	endIf
+	if Phases[1] == 4
+		Phases[1] = Phases[1] + ValidatePreset(Female5)
+	endIf
 	; Enable it if phases are present
 	Enabled = Phases[0] > 0 || Phases[1] > 0
 endFunction
@@ -344,6 +382,9 @@ function Initialize()
 	parent.Initialize()
 	; Gender phase counts
 	Phases = new int[2]
+	; Extra phase equips
+	MaleEquip   = new Form[5]
+	FemaleEquip = new Form[5]
 	; Individual Phases
 	Male1   = Utility.CreateFloatArray(0)
 	Male2   = Utility.CreateFloatArray(0)
@@ -441,16 +482,6 @@ bool function ImportJson()
 	return true
 endFunction
 
-
-; ------------------------------------------------------- ;
-; --- REFACTOR DEPRECATION                            --- ;
-; ------------------------------------------------------- ;
-
-; int[] function GetPhase(int Phase, int Gender)
-; endFunction
-; function SetPhase(int Phase, int Gender, int[] Preset)
-; endFunction
-
 ; ------------------------------------------------------- ;
 ; --- DEPRECATED                                      --- ;
 ; ------------------------------------------------------- ;
@@ -470,46 +501,31 @@ int function CalcPhase(int Strength, bool IsFemale)
 	return PickPhase(Strength, (IsFemale as int))
 endFunction
 
+function ApplyPreset(Actor ActorRef, int[] Preset) global
+	int i
+	; Set Phoneme
+	int p
+	while p <= 15
+		ActorRef.SetExpressionPhoneme(p, Preset[i] as float / 100.0)
+		i += 1
+		p += 1
+	endWhile
+	; Set Modifers
+	int m
+	while m <= 13
+		ActorRef.SetExpressionModifier(m, Preset[i] as float / 100.0)
+		i += 1
+		m += 1
+	endWhile
+	; Set expression
+	ActorRef.SetExpressionOverride(Preset[30], Preset[31])
+endFunction
+
 ; ------------------------------------------------------- ;
-; --- Tagging System                                  --- ;
+; --- REFACTOR DEPRECATION                            --- ;
 ; ------------------------------------------------------- ;
 
-; bool function AddTag(string Tag) native
-; bool function HasTag(string Tag) native
-; bool function RemoveTag(string Tag) native
-; bool function ToggleTag(string Tag) native
-; bool function AddTagConditional(string Tag, bool AddTag) native
-; bool function ParseTags(string[] TagList, bool RequireAll = true) native
-; bool function CheckTags(string[] CheckTags, bool RequireAll = true, bool Suppress = false) native
-; bool function HasOneTag(string[] TagList) native
-; bool function HasAllTag(string[] TagList) native
-
-; function AddTags(string[] TagList)
-; 	int i = TagList.Length
-; 	while i
-; 		i -= 1
-; 		AddTag(TagList[i])
-; 	endWhile
+; int[] function GetPhase(int Phase, int Gender)
 ; endFunction
-
-; int function TagCount() native
-; string function GetNthTag(int i) native
-; function TagSlice(string[] Ouput) native
-
-; string[] function GetTags()
-; 	int i = TagCount()
-; 	Log(Registry+" - TagCount: "+i)
-; 	if i < 1
-; 		return sslUtility.StringArray(0)
-; 	endIf
-; 	string[] Output = sslUtility.StringArray(i)
-; 	TagSlice(Output)
-; 	Log(Registry+" - SKSE Tags: "+Output)
-; 	return Output
+; function SetPhase(int Phase, int Gender, int[] Preset)
 ; endFunction
-
-; function RevertTags() native
-
-float function GetModifier(Actor ActorRef, int id) global native
-float function GetPhoneme(Actor ActorRef, int id) global native
-function ApplyPresetArray(Actor ActorRef, float[] Preset) global native

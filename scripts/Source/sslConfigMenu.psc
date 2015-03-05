@@ -25,6 +25,7 @@ sslExpressionSlots ExpressionSlots
 Actor TargetRef
 int TargetFlag
 string TargetName
+string PlayerName
 
 ; ------------------------------------------------------- ;
 ; --- Configuration Events                            --- ;
@@ -1012,7 +1013,7 @@ state AnimationTest
 			Thread.DisableLeadIn(true)
 			; select a solo actor
 			if Animation.PositionCount == 1
-				if TargetRef && TargetRef.Is3DLoaded() && ShowMessage("Which actor would you like to play the solo animation \""+Animation.Name+"\" with?", true, TargetName, PlayerRef.GetLeveledActorBase().GetName())
+				if TargetRef && TargetRef.Is3DLoaded() && ShowMessage("Which actor would you like to play the solo animation \""+Animation.Name+"\" with?", true, TargetName, PlayerName)
 					Thread.AddActor(TargetRef)
 				else
 					Thread.AddActor(PlayerRef)
@@ -1244,6 +1245,7 @@ function ExpressionEditor()
 	; 4
 	AddToggleOptionST("ExpressionAggressor", "$SSL_ExpressionsAggressor", Expression.HasTag("Aggressor"))
 	AddTextOptionST("ExpressionTestPlayer", "$SSL_TestOnPlayer", "$SSL_Apply", Math.LogicalAnd(OPTION_FLAG_NONE, (!Expression.HasPhase(Phase, PlayerRef)) as int))
+	; AddTextOptionST("ExpressionCopyFrom", "$SSL_ExpressionCopyFrom", "$SSL_ClickHere")
 
 	; 5
 	AddMenuOptionST("ExpressionPhase", "$SSL_Modifying{"+Expression.Name+"}Phase", Phase)
@@ -1289,8 +1291,8 @@ function ExpressionEditor()
 	AddMenuOptionST("MoodTypeFemale", "$SSL_MoodType", Moods[Expression.GetMoodType(Phase, Female)], FlagF)
 	AddMenuOptionST("MoodTypeMale", "$SSL_MoodType", Moods[Expression.GetMoodType(Phase, Male)], FlagM)
 
-	AddSliderOptionST("MoodAmountFemale", "$SSL_MoodStrength", Expression.GetMoodAmount(Phase, Female), "{0}", FlagF)
-	AddSliderOptionST("MoodAmountMale", "$SSL_MoodStrength", Expression.GetMoodAmount(Phase, Male), "{0}", FlagM)
+	AddSliderOptionST("MoodAmountFemale", "$SSL_MoodStrength", Expression.GetMoodAmount(Phase, Female) * 100.0, "{0}", FlagF)
+	AddSliderOptionST("MoodAmountMale", "$SSL_MoodStrength", Expression.GetMoodAmount(Phase, Male) * 100.0, "{0}", FlagM)
 
 	; Modifier settings
 	AddHeaderOption("$SSL_{$SSL_Female}-{$SSL_Modifier}", FlagF)
@@ -1383,6 +1385,31 @@ state ImportExpression
 	endEvent
 endState
 
+state ExpressionCopyFrom
+	event OnSelectST()
+
+		Actor ActorRef = PlayerRef
+		if TargetRef && ShowMessage("$SSL_ExpressionCopyFromTarget", true, TargetName, PlayerName)
+			ActorRef == TargetRef
+		endIf
+		float[] Preset = sslBaseExpression.GetCurrentMFG(ActorRef)
+		; float[] TmpExp = new float[2]
+		; TmpExp[0] = Preset[30]
+		; TmpExp[1] = Preset[31]
+		; Preset[30] = 0.0
+		; Preset[31] = 0.0
+		; if PapyrusUtil.AddFloatValues(Preset) > 0.0
+		; 	Expression.SavePhase(Preset)
+		; else
+		; 	ShowMessage("$SSL_ExpressionCopy{"+ActorRef.GetLeveledActorBase().GetName()+"}Empty")
+		; endIf 
+
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_ExpressionCopyFromInfo")
+	endEvent
+endState
+
 state ExpressionTestPlayer
 	event OnSelectST()
 		if PlayerRef.Is3DLoaded()
@@ -1393,7 +1420,7 @@ endState
 
 state ExpressionTestTarget
 	event OnSelectST()
-		if TargetRef && TargetRef.Is3DLoaded()
+		if TargetRef
 			TestApply(TargetRef)
 		endIf
 	endEvent
@@ -1544,7 +1571,7 @@ function SexDiary()
 	if TargetRef != StatRef
 		AddTextOptionST("SetStatTarget", "$SSL_Viewing{"+StatRef.GetLeveledActorBase().GetName()+"}", "$SSL_View{"+TargetName+"}", TargetFlag)
 	else
-		AddTextOptionST("SetStatTarget", "$SSL_Viewing{"+TargetName+"}", "$SSL_View{"+PlayerRef.GetLeveledActorBase().GetName()+"}")
+		AddTextOptionST("SetStatTarget", "$SSL_Viewing{"+TargetName+"}", "$SSL_View{"+PlayerName+"}")
 	endIf
 
 	AddHeaderOption("$SSL_SexualExperience")
@@ -1729,7 +1756,7 @@ bool FullInventoryPlayer
 bool FullInventoryTarget
 
 function StripEditor()
-	AddHeaderOption("$SSL_Equipment{"+PlayerRef.GetLeveledActorBase().GetName()+"}")
+	AddHeaderOption("$SSL_Equipment{"+PlayerName+"}")
 	AddToggleOptionST("FullInventoryPlayer", "$SSL_FullInventory", FullInventoryPlayer)
 
 	ItemsPlayer = GetItems(PlayerRef, FullInventoryPlayer)
@@ -1939,6 +1966,9 @@ event OnConfigOpen()
 	if PlayerRef.GetLeveledActorBase().GetSex() == 0
 		Pages[0] = "$SSL_SexJournal"
 	endIf
+	; Basic player info
+	PlayerName = PlayerRef.GetLeveledActorBase().GetName()
+
 	; Target actor
 	StatRef = PlayerRef
 	TargetRef = Config.TargetRef
@@ -2762,7 +2792,7 @@ function ExportSettings()
 	File = "../SexLab/SexlabConfig.json"
 
 	; Set label of export
-	JsonUtil.SetStringValue(File, "ExportLabel", PlayerRef.GetLeveledActorBase().GetName()+" - "+Utility.GetCurrentRealTime() as int)
+	JsonUtil.SetStringValue(File, "ExportLabel", PlayerName+" - "+Utility.GetCurrentRealTime() as int)
 
 	; Booleans
 	ExportBool("RestrictAggressive", Config.RestrictAggressive)
