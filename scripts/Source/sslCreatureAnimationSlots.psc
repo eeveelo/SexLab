@@ -133,9 +133,15 @@ endfunction
 
 function RegisterSlots()
 	StorageUtil.StringListClear(Config, "SexLabCreatures") ; No longer used
-	(Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslCreatureAnimationDefaults).LoadCreatureAnimations()
-	ModEvent.Send(ModEvent.Create("SexLabSlotCreatureAnimations"))
-	Debug.Notification("$SSL_NotifyCreatureAnimationInstall")
+	if !Config.AllowCreatures
+		Config.Log("Creatures not enabled, skipping registration.", "RegisterSlots() Creature")
+	elseIf !Config.HasCreatureInstall()
+		Config.Log("No FNIS Creature Pack or SexLab creature behaviors detected, skipping registration.", "RegisterSlots() Creature")
+	else
+		(Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslCreatureAnimationDefaults).LoadCreatureAnimations()
+		ModEvent.Send(ModEvent.Create("SexLabSlotCreatureAnimations"))
+		Debug.Notification("$SSL_NotifyCreatureAnimationInstall")
+	endIf
 endFunction
 
 function RegisterRaces()

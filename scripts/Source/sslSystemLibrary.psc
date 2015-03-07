@@ -1,22 +1,22 @@
 scriptname sslSystemLibrary extends Quest hidden
 
 ; Settings access
-sslSystemConfig property Config auto hidden
+sslSystemConfig property Config auto
 
 ; Function libraries
-sslActorLibrary property ActorLib auto hidden
-sslThreadLibrary property ThreadLib auto hidden
-sslActorStats property Stats auto hidden
+sslActorLibrary property ActorLib auto
+sslThreadLibrary property ThreadLib auto
+sslActorStats property Stats auto
 
 ; Object registeries
-sslThreadSlots property ThreadSlots auto hidden
-sslAnimationSlots property AnimSlots auto hidden
-sslCreatureAnimationSlots property CreatureSlots auto hidden
-sslVoiceSlots property VoiceSlots auto hidden
-sslExpressionSlots property ExpressionSlots auto hidden
+sslThreadSlots property ThreadSlots auto
+sslAnimationSlots property AnimSlots auto
+sslCreatureAnimationSlots property CreatureSlots auto
+sslVoiceSlots property VoiceSlots auto
+sslExpressionSlots property ExpressionSlots auto
 
 ; Data
-Actor property PlayerRef auto hidden
+Actor property PlayerRef auto
 
 function LoadLibs(bool Forced = false)
 	; Sync function Libraries - SexLabQuestFramework

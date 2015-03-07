@@ -73,11 +73,12 @@ endFunction
 ; --- Ephemeral Animations                            --- ;
 ; ------------------------------------------------------- ;
 
-string[] aids
+int ASlotted
+string[] ATokens
 sslBaseAnimation[] Animations
 
 sslBaseAnimation[] function GetOwnerAnimations(Form Owner)
-	bool[] Valid = new bool[64]
+	bool[] Valid = Utility.CreateBoolArray(ASlotted)
 	int i = Animations.Length
 	while i
 		i -= 1
@@ -94,7 +95,7 @@ sslBaseAnimation[] function GetOwnerAnimations(Form Owner)
 		i -= 1
 		Output[i] = Animations[pos]
 		pos += 1
-		if pos < 64
+		if pos < ASlotted
 			pos = Valid.Find(true, pos)
 		else
 			pos = -1
@@ -108,12 +109,15 @@ sslBaseAnimation function NewAnimation(string Token, Form Owner)
 		Log("NewAnimation("+Token+") - Failed to create animation - Invalid arguments given - Token given already exists ("+FindAnimation(Token)+") or was empty", "ERROR")
 		return none
 	endIf
-	int i = aids.Find("")
+	int i = ATokens.Find("")
 	if i == -1
 		Log("NewAnimation("+Token+") - Failed to create animation - unable to find a free animation slot", "ERROR")
 		return none
 	endIf
-	aids[i] = Token
+	ATokens[i] = Token
+	if i >= ASlotted
+		ASlotted += 1
+	endIf
 	Animations[i] = GetNthAlias(i) as sslBaseAnimation
 	Animations[i].MakeEphemeral(Token, Owner)
 	return Animations[i]
@@ -152,11 +156,11 @@ sslBaseAnimation function GetAnimation(string Token)
 endFunction
 
 int function FindAnimation(string Token)
-	return aids.Find(Token)
+	return ATokens.Find(Token)
 endFunction
 
 bool function HasAnimation(string Token)
-	return aids.Find(Token) != -1
+	return ATokens.Find(Token) != -1
 endFunction
 
 bool function ReleaseAnimation(string Token)
@@ -164,7 +168,7 @@ bool function ReleaseAnimation(string Token)
 	if i != -1
 		Animations[i].Initialize()
 		Animations[i] = none
-		aids[i] = ""
+		ATokens[i] = ""
 		return true
 	endIf
 	return false
@@ -231,11 +235,12 @@ endFunction
 ; --- Ephemeral Voices                                --- ;
 ; ------------------------------------------------------- ;
 
-string[] vids
+int VSlotted
+string[] VTokens
 sslBaseVoice[] Voices
 
 sslBaseVoice[] function GetOwnerVoices(Form Owner)
-	bool[] Valid = new bool[64]
+	bool[] Valid = Utility.CreateBoolArray(VSlotted)
 	int i = Voices.Length
 	while i
 		i -= 1
@@ -252,7 +257,7 @@ sslBaseVoice[] function GetOwnerVoices(Form Owner)
 		i -= 1
 		Output[i] = Voices[pos]
 		pos += 1
-		if pos < 64
+		if pos < VSlotted
 			pos = Valid.Find(true, pos)
 		else
 			pos = -1
@@ -266,12 +271,15 @@ sslBaseVoice function NewVoice(string Token, Form Owner)
 		Log("NewVoice("+Token+") - Failed to create voice - Invalid arguments given - Token given already exists ("+FindVoice(Token)+") or was empty", "ERROR")
 		return none
 	endIf
-	int i = vids.Find("")
+	int i = VTokens.Find("")
 	if i == -1
 		Log("NewVoice("+Token+") - Failed to create voice - unable to find a free vpoce slot", "ERROR")
 		return none
 	endIf
-	vids[i] = Token
+	VTokens[i] = Token
+	if i >= VSlotted
+		VSlotted += 1
+	endIf
 	Voices[i] = GetNthAlias(i) as sslBaseVoice
 	Voices[i].MakeEphemeral(Token, Owner)
 	return Voices[i]
@@ -310,11 +318,11 @@ sslBaseVoice function GetVoice(string Token)
 endFunction
 
 int function FindVoice(string Token)
-	return vids.Find(Token)
+	return VTokens.Find(Token)
 endFunction
 
 bool function HasVoice(string Token)
-	return vids.Find(Token) != -1
+	return VTokens.Find(Token) != -1
 endFunction
 
 bool function ReleaseVoice(string Token)
@@ -322,7 +330,7 @@ bool function ReleaseVoice(string Token)
 	if i != -1
 		Voices[i].Initialize()
 		Voices[i] = none
-		vids[i] = ""
+		VTokens[i] = ""
 		return true
 	endIf
 	return false
@@ -382,11 +390,12 @@ endFunction
 ; --- Ephemeral Expressions                           --- ;
 ; ------------------------------------------------------- ;
 
-string[] eids
+int ESlotted
+string[] ETokens
 sslBaseExpression[] Expressions
 
 sslBaseExpression[] function GetOwnerExpressions(Form Owner)
-	bool[] Valid = new bool[64]
+	bool[] Valid = Utility.CreateBoolArray(ESlotted)
 	int i = Expressions.Length
 	while i
 		i -= 1
@@ -403,7 +412,7 @@ sslBaseExpression[] function GetOwnerExpressions(Form Owner)
 		i -= 1
 		Output[i] = Expressions[pos]
 		pos += 1
-		if pos < 64
+		if pos < ESlotted
 			pos = Valid.Find(true, pos)
 		else
 			pos = -1
@@ -416,12 +425,15 @@ sslBaseExpression function NewExpression(string Token, Form Owner)
 		Log("NewExpression("+Token+") - Failed to create Expression - Invalid arguments given - Token given already exists ("+FindExpression(Token)+") or was empty", "ERROR")
 		return none
 	endIf
-	int i = eids.Find("")
+	int i = ETokens.Find("")
 	if i == -1
-		Log("NewExpression("+Token+") - Failed to create Expression - unable to find a free vpoce slot", "ERROR")
+		Log("NewExpression("+Token+") - Failed to create Expression - unable to find a free expression slot", "ERROR")
 		return none
 	endIf
-	eids[i] = Token
+	ETokens[i] = Token
+	if i >= ESlotted
+		ESlotted += 1
+	endIf
 	Expressions[i] = GetNthAlias(i) as sslBaseExpression
 	Expressions[i].MakeEphemeral(Token, Owner)
 	return Expressions[i]
@@ -460,11 +472,11 @@ sslBaseExpression function GetExpression(string Token)
 endFunction
 
 int function FindExpression(string Token)
-	return eids.Find(Token)
+	return ETokens.Find(Token)
 endFunction
 
 bool function HasExpression(string Token)
-	return eids.Find(Token) != -1
+	return ETokens.Find(Token) != -1
 endFunction
 
 bool function ReleaseExpression(string Token)
@@ -472,7 +484,7 @@ bool function ReleaseExpression(string Token)
 	if i != -1
 		Expressions[i].Initialize()
 		Expressions[i] = none
-		eids[i] = ""
+		ETokens[i] = ""
 		return true
 	endIf
 	return false
@@ -531,6 +543,11 @@ endFunction
 ; --- System Use Only                                 --- ;
 ; ------------------------------------------------------- ;
 
+function Setup()
+	parent.Setup()
+	Cleanup()
+endFunction
+
 function SendCallback(string Token, int Slot, Form CallbackForm = none, ReferenceAlias CallbackAlias = none) global
 	if CallbackForm
 		CallbackForm.RegisterForModEvent(Token, Token)
@@ -552,48 +569,60 @@ endFunction
 
 function Cleanup()
 	; Init slots if empty
-	if aids.Length < 64
-		aids = new string[64]
-		Animations = new sslBaseAnimation[64]
+	if ATokens.Length != 128
+		ASlotted   = 0
+		ATokens    = new string[128]
+		Animations = new sslBaseAnimation[128]
 	endIf
-	if vids.Length < 64
-		vids = new string[64]
-		Voices = new sslBaseVoice[64]
+	if VTokens.Length != 128
+		VSlotted = 0
+		VTokens  = new string[128]
+		Voices   = new sslBaseVoice[128]
 	endIf
-	if eids.Length < 64
-		eids = new string[64]
-		Expressions = new sslBaseExpression[64]
+	if ETokens.Length != 128
+		ESlotted    = 0
+		ETokens     = new string[128]
+		Expressions = new sslBaseExpression[128]
 	endIf
 	; Check for empty forms for storage to indicate owner has been disabled
-	int i = Animations.Length
+	int i = ASlotted
 	while i
 		i -= 1
 		if Animations[i] && Animations[i].Registered && !Animations[i].Storage
-			Log("Clearing phantom animation ["+i+"] '"+aids[i]+"'")
+			Log("Clearing phantom animation ["+i+"] '"+ATokens[i]+"'")
 			Animations[i].Initialize()
 			Animations[i] = none
-			aids[i] = ""
+			ATokens[i] = ""
 		endIf
+	endWhile
+	i = VSlotted
+	while i
+		i -= 1
 		if Voices[i] && Voices[i].Registered && !Voices[i].Storage
-			Log("Clearing phantom voice ["+i+"] '"+vids[i]+"'")
+			Log("Clearing phantom voice ["+i+"] '"+VTokens[i]+"'")
 			Voices[i].Initialize()
 			Voices[i] = none
-			vids[i] = ""
+			VTokens[i] = ""
 		endIf
+	endWhile
+	i = ESlotted
+	while i
+		i -= 1
 		if Expressions[i] && Expressions[i].Registered && !Expressions[i].Storage
-			Log("Clearing phantom expression["+i+"] '"+eids[i]+"'")
+			Log("Clearing phantom expression["+i+"] '"+ETokens[i]+"'")
 			Expressions[i].Initialize()
 			Expressions[i] = none
-			eids[i] = ""
+			ETokens[i] = ""
 		endIf
 	endWhile
 endFunction
 
+
+; TODO: needs rewrite to match current animation script
 sslBaseAnimation function CopyAnimation(sslBaseAnimation Copy, sslBaseAnimation Orig)
 	; Set info
 	Copy.Name = Orig.Name
 	Copy.SoundFX = Orig.SoundFX
-	Copy.SetContent(Orig.IsSexual as int)
 	Copy.AddTags(Orig.GetTags())
 	Copy.SetRaceIDs(Orig.GetRaceIDs())
 	; Loop positions
@@ -655,3 +684,4 @@ endFunction
 int function Foreplay() global
 	return 2
 endFunction
+

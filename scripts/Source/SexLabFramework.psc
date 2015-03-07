@@ -915,17 +915,17 @@ Actor property PlayerRef auto
 Faction property AnimatingFaction auto hidden
 
 ; Function libraries
-sslActorLibrary property ActorLib auto hidden
-sslThreadLibrary property ThreadLib auto hidden
-sslActorStats property Stats auto hidden
+sslActorLibrary property ActorLib auto
+sslThreadLibrary property ThreadLib auto
+sslActorStats property Stats auto
 
 ; Object registeries
-sslThreadSlots property ThreadSlots auto hidden
-sslAnimationSlots property AnimSlots auto hidden
-sslCreatureAnimationSlots property CreatureSlots auto hidden
-sslVoiceSlots property VoiceSlots auto hidden
-sslExpressionSlots property ExpressionSlots auto hidden
-sslObjectFactory property Factory auto hidden
+sslThreadSlots property ThreadSlots auto
+sslAnimationSlots property AnimSlots auto
+sslCreatureAnimationSlots property CreatureSlots auto
+sslVoiceSlots property VoiceSlots auto
+sslExpressionSlots property ExpressionSlots auto
+sslObjectFactory property Factory auto
 
 ; Animation Threads
 sslThreadController[] property Threads hidden
