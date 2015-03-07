@@ -45,7 +45,6 @@ bool function SetupSystem()
 	; Function libraries
 	ThreadLib.Setup()
 	ActorLib.Setup()
-	Factory.Setup()
 	Stats.Setup()
 
 	; Object registeries
@@ -68,7 +67,6 @@ event UpdateSystem(int ToVersion)
 	; Perform update functions
 	ThreadLib.Setup()
 	ActorLib.Setup()
-	Factory.Setup()
 	Stats.Setup()
 	Factory.Setup()
 	VoiceSlots.Setup()
@@ -123,11 +121,11 @@ event OnInit()
 endEvent
 
 event InstallDone(int ver)
-	Debug.TraceAndBox("InstallDone("+ver+")")
+	LogAll("InstallDone("+ver+")")
 endEvent
 
 event UpdateDone(int ver)
-	Debug.TraceAndBox("UpdateDone("+ver+")")
+	LogAll("UpdateDone("+ver+")")
 endEvent
 
 function ValidateTrackedActors()
@@ -191,6 +189,7 @@ function Log(string Log, string Type = "NOTICE")
 endFunction
 
 function LogAll(string Log)
+	Log = "SexLab  - "+Log
 	Debug.Notification(Log)
 	Debug.Trace(Log)
 	MiscUtil.PrintConsole(Log)
