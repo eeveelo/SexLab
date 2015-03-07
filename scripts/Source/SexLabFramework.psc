@@ -326,11 +326,11 @@ sslBaseAnimation[] function GetAnimationsByDefault(int Males, int Females, bool 
 endFunction
 
 sslBaseAnimation[] function MergeAnimationLists(sslBaseAnimation[] List1, sslBaseAnimation[] List2)
-	return AnimSlots.MergeLists(List1, List2)
+	return sslUtility.MergeAnimationLists(List1, List2)
 endFunction
 
 sslBaseAnimation[] function RemoveTagged(sslBaseAnimation[] Anims, string Tags)
-	return AnimSlots.RemoveTagged(Anims, Tags)
+	return sslUtility.RemoveTaggedAnimations(Anims, Tags)
 endFunction
 
 sslBaseAnimation function GetAnimationByName(string FindName)

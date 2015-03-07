@@ -104,44 +104,6 @@ sslBaseAnimation[] function GetByDefault(int Males, int Females, bool IsAggressi
 	return GetList(Valid)
 endFunction
 
-sslBaseAnimation[] function RemoveTagged(sslBaseAnimation[] Anims, string Tags)
-	bool[] Valid  = FindTagged(Anims, Tags)
-	int found = CountBool(Valid, true)
-	if found == 0
-		return Anims
-	endIf
-	int i = Valid.Length
-	int n = (i - found)
-	sslBaseAnimation[] Output = sslUtility.AnimationArray(n)
-	while i && n
-		i -= 1
-		if !Valid[i]
-			n -= 1
-			Output[n] = Anims[i]
-		endIf
-	endwhile
-	return Output
-endFunction
-
-sslBaseAnimation[] function MergeLists(sslBaseAnimation[] List1, sslBaseAnimation[] List2)
-	int Count = List2.Length
-	int i = List2.Length
-	while i
-		i -= 1
-		Count -= ((List1.Find(List2[i]) != -1) as int)
-	endWhile
-	sslBaseAnimation[] Output = sslUtility.IncreaseAnimation(Count, List1)
-	i = List2.Length
-	while i && Count
-		i -= 1
-		if List1.Find(List2[i]) == -1
-			Count -= 1
-			Output[Count] = List2[i]
-		endIf
-	endWhile
-	return Output
-endFunction
-
 ; ------------------------------------------------------- ;
 ; --- Registry Access                                     ;
 ; ------------------------------------------------------- ;
@@ -258,20 +220,6 @@ int function CountTag(sslBaseAnimation[] Anims, string Tags)
 		count += Anims[i].HasOneTag(Checking) as int
 	endWhile
 	return count
-endFunction
-
-bool[] function FindTagged(sslBaseAnimation[] Anims, string Tags)
-	if !Anims || Anims.Length < 1 || Tags == ""
-		return Utility.CreateBoolArray(0)
-	endIf
-	bool[] Output     = Utility.CreateBoolArray(i)
-	string[] Checking = StringSplit(Tags)
-	int i = Anims.Length
-	while i
-		i -= 1
-		Output[i] = Anims[i].HasOneTag(Checking)
-	endWhile
-	return Output
 endFunction
 
 int function GetCount(bool IgnoreDisabled = true)
@@ -408,4 +356,20 @@ endState
 
 bool function TestSlots()
 	return true
+endFunction
+
+; ------------------------------------------------------- ;
+; --- D Use Only                                 --- ;
+; ------------------------------------------------------- ;
+
+sslBaseAnimation[] function RemoveTagged(sslBaseAnimation[] Anims, string Tags)
+	return sslUtility.RemoveTaggedAnimations(Anims, Tags)
+endFunction
+
+sslBaseAnimation[] function MergeLists(sslBaseAnimation[] List1, sslBaseAnimation[] List2)
+	return sslUtility.MergeAnimationLists(List1, List2)
+endFunction
+
+bool[] function FindTagged(sslBaseAnimation[] Anims, string Tags)
+	return sslUtility.FindTaggedAnimations(Anims, Tags)
 endFunction

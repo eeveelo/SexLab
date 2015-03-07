@@ -42,6 +42,58 @@ sslBaseAnimation[] function EmptyAnimationArray() global
 	return empty
 endFunction
 
+sslBaseAnimation[] function MergeAnimationLists(sslBaseAnimation[] List1, sslBaseAnimation[] List2) global
+	int Count = List2.Length
+	int i = List2.Length
+	while i
+		i -= 1
+		Count -= ((List1.Find(List2[i]) != -1) as int)
+	endWhile
+	sslBaseAnimation[] Output = sslUtility.IncreaseAnimation(Count, List1)
+	i = List2.Length
+	while i && Count
+		i -= 1
+		if List1.Find(List2[i]) == -1
+			Count -= 1
+			Output[Count] = List2[i]
+		endIf
+	endWhile
+	return Output
+endFunction
+
+sslBaseAnimation[] function RemoveTaggedAnimations(sslBaseAnimation[] Anims, string Tags) global
+	bool[] Valid  = FindTaggedAnimations(Anims, Tags)
+	int found = PapyrusUtil.CountBool(Valid, true)
+	if found == 0
+		return Anims
+	endIf
+	int i = Valid.Length
+	int n = (i - found)
+	sslBaseAnimation[] Output = sslUtility.AnimationArray(n)
+	while i && n
+		i -= 1
+		if !Valid[i]
+			n -= 1
+			Output[n] = Anims[i]
+		endIf
+	endwhile
+	return Output
+endFunction
+
+bool[] function FindTaggedAnimations(sslBaseAnimation[] Anims, string Tags) global
+	if !Anims || Anims.Length < 1 || Tags == ""
+		return Utility.CreateBoolArray(0)
+	endIf
+	bool[] Output     = Utility.CreateBoolArray(i)
+	string[] Checking = PapyrusUtil.StringSplit(Tags)
+	int i = Anims.Length
+	while i
+		i -= 1
+		Output[i] = Anims[i].HasOneTag(Checking)
+	endWhile
+	return Output
+endFunction
+
 ;/-----------------------------------------------\;
 ;|	Utility Functions
 ;\-----------------------------------------------/;
