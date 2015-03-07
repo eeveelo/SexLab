@@ -45,7 +45,7 @@ Faction property ForbiddenFaction auto
 Weapon property DummyWeapon auto
 Armor property NudeSuit auto
 Armor property CalypsStrapon auto
-form[] property Strapons auto hidden
+Form[] property Strapons auto hidden
 
 Spell property CumVaginalOralAnalSpell auto
 Spell property CumOralAnalSpell auto
@@ -238,14 +238,14 @@ endFunction
 ; --- Strapon Functions                               --- ;
 ; ------------------------------------------------------- ;
 
-form function GetStrapon()
+Form function GetStrapon()
 	if Strapons.Length > 0
 		return Strapons[Utility.RandomInt(0, (Strapons.Length - 1))]
 	endIf
 	return none
 endFunction
 
-form function WornStrapon(Actor ActorRef)
+Form function WornStrapon(Actor ActorRef)
 	int i = Strapons.Length
 	while i
 		i -= 1
@@ -260,7 +260,7 @@ bool function HasStrapon(Actor ActorRef)
 	return WornStrapon(ActorRef) != none
 endFunction
 
-form function PickStrapon(Actor ActorRef)
+Form function PickStrapon(Actor ActorRef)
 	form Strapon = WornStrapon(ActorRef)
 	if Strapon
 		return Strapon
@@ -268,7 +268,7 @@ form function PickStrapon(Actor ActorRef)
 	return GetStrapon()
 endFunction
 
-form function EquipStrapon(Actor ActorRef)
+Form function EquipStrapon(Actor ActorRef)
 	form Strapon = PickStrapon(ActorRef)
 	if Strapon
 		ActorRef.AddItem(Strapon, 1, true)
@@ -775,10 +775,339 @@ function SetDefaults()
 	VoiceSlots.ForgetVoice(PlayerRef)
 endFunction
 
+; ------------------------------------------------------- ;
+; --- Export/Import to JSON                           --- ;
+; ------------------------------------------------------- ;
+
+string File
+function ExportSettings()
+	File = "../SexLab/SexlabConfig.json"
+
+	; Set label of export
+	JsonUtil.SetStringValue(File, "ExportLabel", PlayerRef.GetLeveledActorBase().GetName()+" - "+Utility.GetCurrentRealTime() as int)
+
+	; Booleans
+	ExportBool("RestrictAggressive", RestrictAggressive)
+	ExportBool("AllowCreatures", AllowCreatures)
+	ExportBool("NPCSaveVoice", NPCSaveVoice)
+	ExportBool("UseStrapons", UseStrapons)
+	ExportBool("RedressVictim", RedressVictim)
+	ExportBool("RagdollEnd", RagdollEnd)
+	ExportBool("UseMaleNudeSuit", UseMaleNudeSuit)
+	ExportBool("UseFemaleNudeSuit", UseFemaleNudeSuit)
+	ExportBool("UndressAnimation", UndressAnimation)
+	ExportBool("UseLipSync", UseLipSync)
+	ExportBool("UseExpressions", UseExpressions)
+	ExportBool("ScaleActors", ScaleActors)
+	ExportBool("UseCum", UseCum)
+	ExportBool("AllowFFCum", AllowFFCum)
+	ExportBool("DisablePlayer", DisablePlayer)
+	ExportBool("AutoTFC", AutoTFC)
+	ExportBool("AutoAdvance", AutoAdvance)
+	ExportBool("ForeplayStage", ForeplayStage)
+	ExportBool("OrgasmEffects", OrgasmEffects)
+	ExportBool("RaceAdjustments", RaceAdjustments)
+	ExportBool("BedRemoveStanding", BedRemoveStanding)
+	ExportBool("UseCreatureGender", UseCreatureGender)
+	ExportBool("LimitedStrip", LimitedStrip)
+
+	; Integers
+	ExportInt("AnimProfile", AnimProfile)
+	ExportInt("NPCBed", NPCBed)
+
+	ExportInt("Backwards", Backwards)
+	ExportInt("AdjustStage", AdjustStage)
+	ExportInt("AdvanceAnimation", AdvanceAnimation)
+	ExportInt("ChangeAnimation", ChangeAnimation)
+	ExportInt("ChangePositions", ChangePositions)
+	ExportInt("AdjustChange", AdjustChange)
+	ExportInt("AdjustForward", AdjustForward)
+	ExportInt("AdjustSideways", AdjustSideways)
+	ExportInt("AdjustUpward", AdjustUpward)
+	ExportInt("RealignActors", RealignActors)
+	ExportInt("MoveScene", MoveScene)
+	ExportInt("RestoreOffsets", RestoreOffsets)
+	ExportInt("RotateScene", RotateScene)
+	ExportInt("EndAnimation", EndAnimation)
+	ExportInt("ToggleFreeCamera", ToggleFreeCamera)
+	ExportInt("TargetActor", TargetActor)
+
+	; Floats
+	ExportFloat("CumTimer", CumTimer)
+	ExportFloat("AutoSUCSM", AutoSUCSM)
+	ExportFloat("MaleVoiceDelay", MaleVoiceDelay)
+	ExportFloat("FemaleVoiceDelay", FemaleVoiceDelay)
+	ExportFloat("VoiceVolume", VoiceVolume)
+	ExportFloat("SFXDelay", SFXDelay)
+	ExportFloat("SFXVolume", SFXVolume)
+
+	; Boolean Arrays
+	ExportBoolList("StripMale", StripMale, 33)
+	ExportBoolList("StripFemale", StripFemale, 33)
+	ExportBoolList("StripLeadInFemale", StripLeadInFemale, 33)
+	ExportBoolList("StripLeadInMale", StripLeadInMale, 33)
+	ExportBoolList("StripVictim", StripVictim, 33)
+	ExportBoolList("StripAggressor", StripAggressor, 33)
+
+	; Float Array
+	ExportFloatList("StageTimer", StageTimer, 5)
+	ExportFloatList("StageTimerLeadIn", StageTimerLeadIn, 5)
+	ExportFloatList("StageTimerAggr", StageTimerAggr, 5)
+
+	; Export object registry
+	ExportAnimations()
+	ExportCreatures()
+	ExportExpressions()
+	ExportVoices()
+
+	; Save to JSON file
+	JsonUtil.Save(File, false)
+endFunction
+
+function ImportSettings()
+	File = "../SexLab/SexlabConfig.json"
+
+	; Booleans
+	RestrictAggressive = ImportBool("RestrictAggressive", RestrictAggressive)
+	AllowCreatures     = ImportBool("AllowCreatures", AllowCreatures)
+	NPCSaveVoice       = ImportBool("NPCSaveVoice", NPCSaveVoice)
+	UseStrapons        = ImportBool("UseStrapons", UseStrapons)
+	RedressVictim      = ImportBool("RedressVictim", RedressVictim)
+	RagdollEnd         = ImportBool("RagdollEnd", RagdollEnd)
+	UseMaleNudeSuit    = ImportBool("UseMaleNudeSuit", UseMaleNudeSuit)
+	UseFemaleNudeSuit  = ImportBool("UseFemaleNudeSuit", UseFemaleNudeSuit)
+	UndressAnimation   = ImportBool("UndressAnimation", UndressAnimation)
+	UseLipSync         = ImportBool("UseLipSync", UseLipSync)
+	UseExpressions     = ImportBool("UseExpressions", UseExpressions)
+	ScaleActors        = ImportBool("ScaleActors", ScaleActors)
+	UseCum             = ImportBool("UseCum", UseCum)
+	AllowFFCum         = ImportBool("AllowFFCum", AllowFFCum)
+	DisablePlayer      = ImportBool("DisablePlayer", DisablePlayer)
+	AutoTFC            = ImportBool("AutoTFC", AutoTFC)
+	AutoAdvance        = ImportBool("AutoAdvance", AutoAdvance)
+	ForeplayStage      = ImportBool("ForeplayStage", ForeplayStage)
+	OrgasmEffects      = ImportBool("OrgasmEffects", OrgasmEffects)
+	RaceAdjustments    = ImportBool("RaceAdjustments", RaceAdjustments)
+	BedRemoveStanding  = ImportBool("BedRemoveStanding", BedRemoveStanding)
+	UseCreatureGender  = ImportBool("UseCreatureGender", UseCreatureGender)
+	LimitedStrip       = ImportBool("LimitedStrip", LimitedStrip)
+
+	; Integers
+	AnimProfile        = ImportInt("AnimProfile", AnimProfile)
+	NPCBed             = ImportInt("NPCBed", NPCBed)
+
+	Backwards          = ImportInt("Backwards", Backwards)
+	AdjustStage        = ImportInt("AdjustStage", AdjustStage)
+	AdvanceAnimation   = ImportInt("AdvanceAnimation", AdvanceAnimation)
+	ChangeAnimation    = ImportInt("ChangeAnimation", ChangeAnimation)
+	ChangePositions    = ImportInt("ChangePositions", ChangePositions)
+	AdjustChange       = ImportInt("AdjustChange", AdjustChange)
+	AdjustForward      = ImportInt("AdjustForward", AdjustForward)
+	AdjustSideways     = ImportInt("AdjustSideways", AdjustSideways)
+	AdjustUpward       = ImportInt("AdjustUpward", AdjustUpward)
+	RealignActors      = ImportInt("RealignActors", RealignActors)
+	MoveScene          = ImportInt("MoveScene", MoveScene)
+	RestoreOffsets     = ImportInt("RestoreOffsets", RestoreOffsets)
+	RotateScene        = ImportInt("RotateScene", RotateScene)
+	EndAnimation       = ImportInt("EndAnimation", EndAnimation)
+	ToggleFreeCamera   = ImportInt("ToggleFreeCamera", ToggleFreeCamera)
+	TargetActor        = ImportInt("TargetActor", TargetActor)
+
+	; Floats
+	CumTimer           = ImportFloat("CumTimer", CumTimer)
+	AutoSUCSM          = ImportFloat("AutoSUCSM", AutoSUCSM)
+	MaleVoiceDelay     = ImportFloat("MaleVoiceDelay", MaleVoiceDelay)
+	FemaleVoiceDelay   = ImportFloat("FemaleVoiceDelay", FemaleVoiceDelay)
+	VoiceVolume        = ImportFloat("VoiceVolume", VoiceVolume)
+	SFXDelay           = ImportFloat("SFXDelay", SFXDelay)
+	SFXVolume          = ImportFloat("SFXVolume", SFXVolume)
+
+	; Boolean Arrays
+	StripMale          = ImportBoolList("StripMale", StripMale, 33)
+	StripFemale        = ImportBoolList("StripFemale", StripFemale, 33)
+	StripLeadInFemale  = ImportBoolList("StripLeadInFemale", StripLeadInFemale, 33)
+	StripLeadInMale    = ImportBoolList("StripLeadInMale", StripLeadInMale, 33)
+	StripVictim        = ImportBoolList("StripVictim", StripVictim, 33)
+	StripAggressor     = ImportBoolList("StripAggressor", StripAggressor, 33)
+
+	; Float Array
+	StageTimer         = ImportFloatList("StageTimer", StageTimer, 5)
+	StageTimerLeadIn   = ImportFloatList("StageTimerLeadIn", StageTimerLeadIn, 5)
+	StageTimerAggr     = ImportFloatList("StageTimerAggr", StageTimerAggr, 5)
+
+	; Export object registry
+	ImportAnimations()
+	ImportCreatures()
+	ImportExpressions()
+	ImportVoices()
+
+	; Reload settings with imported values
+	Reload()
+endFunction
+
+; Integers
+function ExportInt(string Name, int Value)
+	JsonUtil.SetIntValue(File, Name, Value)
+endFunction
+int function ImportInt(string Name, int Value)
+	return JsonUtil.GetIntValue(File, Name, Value)
+endFunction
+
+; Booleans
+function ExportBool(string Name, bool Value)
+	JsonUtil.SetIntValue(File, Name, Value as int)
+endFunction
+bool function ImportBool(string Name, bool Value)
+	return JsonUtil.GetIntValue(File, Name, Value as int) as bool
+endFunction
+
+; Floats
+function ExportFloat(string Name, float Value)
+	JsonUtil.SetFloatValue(File, Name, Value)
+endFunction
+float function ImportFloat(string Name, float Value)
+	return JsonUtil.GetFloatValue(File, Name, Value)
+endFunction
+
+; Float Arrays
+function ExportFloatList(string Name, float[] Values, int len)
+	JsonUtil.FloatListClear(File, Name)
+	JsonUtil.FloatListCopy(File, Name, Values)
+endFunction
+float[] function ImportFloatList(string Name, float[] Values, int len)
+	if JsonUtil.FloatListCount(File, Name) == len
+		if Values.Length != len
+			Values = Utility.CreateFloatArray(len)
+		endIf
+		int i
+		while i < len
+			Values[i] = JsonUtil.FloatListGet(File, Name, i)
+			i += 1
+		endWhile
+	endIf
+	return Values
+endFunction
+
+; Boolean Arrays
+function ExportBoolList(string Name, bool[] Values, int len)
+	JsonUtil.IntListClear(File, Name)
+	int i
+	while i < len
+		JsonUtil.IntListAdd(File, Name, Values[i] as int)
+		i += 1
+	endWhile
+endFunction
+bool[] function ImportBoolList(string Name, bool[] Values, int len)
+	if JsonUtil.IntListCount(File, Name) == len
+		if Values.Length != len
+			Values = Utility.CreateBoolArray(len)
+		endIf
+		int i
+		while i < len
+			Values[i] = JsonUtil.IntListGet(File, Name, i) as bool
+			i += 1
+		endWhile
+	endIf
+	return Values
+endFunction
+
+; Animations
+function ExportAnimations()
+	JsonUtil.StringListClear(File, "Animations")
+	int i = AnimSlots.Slotted
+	while i
+		i -= 1
+		sslBaseAnimation Slot = AnimSlots.GetBySlot(i)
+		JsonUtil.StringListAdd(File, "Animations", sslUtility.MakeArgs(",", Slot.Registry, Slot.Enabled as int, Slot.HasTag("Foreplay") as int, Slot.HasTag("Aggressive") as int))
+	endWhile
+endfunction
+function ImportAnimations()
+	int i = JsonUtil.StringListCount(File, "Animations")
+	while i
+		i -= 1
+		; Registrar, Enabled, Foreplay, Aggressive
+		string[] args = PapyrusUtil.StringSplit(JsonUtil.StringListGet(File, "Animations", i))
+		if args.Length == 4 && AnimSlots.FindByRegistrar(args[0]) != -1
+			sslBaseAnimation Slot = AnimSlots.GetbyRegistrar(args[0])
+			Slot.Enabled = (args[1] as int) as bool
+			Slot.AddTagConditional("Foreplay", (args[2] as int) as bool)
+			Slot.AddTagConditional("Aggressive", (args[3] as int) as bool)
+		endIf
+	endWhile
+endFunction
+
+; Creatures
+function ExportCreatures()
+	JsonUtil.StringListClear(File, "Creatures")
+	int i = CreatureSlots.Slotted
+	while i
+		i -= 1
+		sslBaseAnimation Slot = CreatureSlots.GetBySlot(i)
+		JsonUtil.StringListAdd(File, "Creatures", sslUtility.MakeArgs(",", Slot.Registry, Slot.Enabled as int))
+	endWhile
+endFunction
+function ImportCreatures()
+	int i = JsonUtil.StringListCount(File, "Creatures")
+	while i
+		i -= 1
+		; Registrar, Enabled
+		string[] args = PapyrusUtil.StringSplit(JsonUtil.StringListGet(File, "Creatures", i))
+		if args.Length == 2 && CreatureSlots.FindByRegistrar(args[0]) != -1
+			CreatureSlots.GetbyRegistrar(args[0]).Enabled = (args[1] as int) as bool
+		endIf
+	endWhile
+endFunction
+
+; Expressions
+function ExportExpressions()
+	int i = ExpressionSlots.Slotted
+	while i
+		i -= 1
+		ExpressionSlots.GetBySlot(i).ExportJson()
+	endWhile
+endfunction
+function ImportExpressions()
+	int i = ExpressionSlots.Slotted
+	while i
+		i -= 1
+		ExpressionSlots.GetBySlot(i).ImportJson()
+	endWhile
+endFunction
+
+; Voices
+function ExportVoices()
+	JsonUtil.StringListClear(File, "Voices")
+	int i = VoiceSlots.Slotted
+	while i
+		i -= 1
+		sslBaseVoice Slot = VoiceSlots.GetBySlot(i)
+		JsonUtil.StringListAdd(File, "Voices", sslUtility.MakeArgs(",", Slot.Registry, Slot.Enabled as int))
+	endWhile
+	; Player voice
+	JsonUtil.SetStringValue(File, "PlayerVoice", VoiceSlots.GetSavedName(PlayerRef))
+endfunction
+function ImportVoices()
+	int i = JsonUtil.StringListCount(File, "Voices")
+	while i
+		i -= 1
+		; Registrar, Enabled
+		string[] args = PapyrusUtil.StringSplit(JsonUtil.StringListGet(File, "Voices", i))
+		if args.Length == 2 && VoiceSlots.FindByRegistrar(args[0]) != -1
+			VoiceSlots.GetbyRegistrar(args[0]).Enabled = (args[1] as int) as bool
+		endIf
+	endWhile
+	; Player voice
+	VoiceSlots.ForgetVoice(PlayerRef)
+	VoiceSlots.SaveVoice(PlayerRef, VoiceSlots.GetByName(JsonUtil.GetStringValue(File, "PlayerVoice", "$SSL_Random")))
+endFunction
+
+; ------------------------------------------------------- ;
+; --- Misc                                            --- ;
+; ------------------------------------------------------- ;
+
 event OnInit()
 	parent.OnInit()
 	SetDefaults()
-	; DebugMode = true
 endEvent
 
 function ReloadData()
@@ -822,7 +1151,6 @@ function ReloadData()
 	; UseBed =                  Game.GetFormFromFile(0x, "SexLab.esm")
 	; VoicesPlayer =            Game.GetFormFromFile(0x, "SexLab.esm")
 endFunction
-
 
 ; ------------------------------------------------------- ;
 ; --- Pre 1.50 Config Accessors                       --- ;
