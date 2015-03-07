@@ -326,22 +326,38 @@ state Making
 			endIf
 		endIf
 
-		; If a bed is present, remove any standing animations
-		if BedRef && Config.BedRemoveStanding
-			; Remove standing animations from primary
-			sslBaseAnimation[] NoStandingPrimary = AnimSlots.RemoveTagged(PrimaryAnimations, "Standing")
-			if NoStandingPrimary.Length > 0
-				PrimaryAnimations = NoStandingPrimary
-			endIf
-			; Remove standing from lead in
-			if LeadAnimations.Length > 0
-				sslBaseAnimation[] NoStandingLead = AnimSlots.RemoveTagged(LeadAnimations, "Standing")
-				if NoStandingLead.Length > 0
-					LeadAnimations = NoStandingLead
+		; If a bed is present, remove any furniture animations, and optionally any standing animations
+		if BedRef
+			string Filter = "Furniture"
+				if Config.BedRemoveStanding
+					Filter += ",Standing"
 				endIf
-			endIf
+				; Remove furniture/standing animations from primary
+				sslBaseAnimation[] FilteredPrimary = sslUtility.RemoveTaggedAnimations(PrimaryAnimations, Filter)
+				if FilteredPrimary.Length == 0
+				elseIf FilteredPrimary.Length != PrimaryAnimations.Length
+					Log("Filtered out '"+(LeadAnimations.Length - FilteredPrimary.Length)+"' Primary Animations with tags '"+Filter+"'")
+					PrimaryAnimations = FilteredPrimary
+				endIf
+				; Remove furniture/standing from lead in
+				if LeadIn && LeadAnimations.Length > 0
+					sslBaseAnimation[] FilteredLead = sslUtility.RemoveTaggedAnimations(LeadAnimations, Filter)
+					if FilteredLead.Length != LeadAnimations.Length
+						Log("Filtered out '"+(LeadAnimations.Length - FilteredLead.Length)+"' Lead In Animations with tags '"+Filter+"'")
+						LeadAnimations = FilteredLead
+					endIf
+				endIf
 		endIf
 
+		; Make sure we are still good to start after all the filters
+		if LeadAnimations.Length < 1
+			LeadIn = false
+		endIf
+		if PrimaryAnimations.Length < 1
+			Fatal("Empty primary animations after filters")
+			return none
+		endIf
+		
 		; ------------------------- ;
 		; --  Start Controller   -- 4;
 		; ------------------------- ;
@@ -595,7 +611,7 @@ function AddAnimation(sslBaseAnimation AddAnimation, bool ForceTo = false)
 	if AddAnimation
 		sslBaseAnimation[] Adding = new sslBaseAnimation[1]
 		Adding[0] = AddAnimation
-		PrimaryAnimations = AnimSlots.MergeLists(PrimaryAnimations, Adding)
+		PrimaryAnimations = sslUtility.MergeAnimationLists(PrimaryAnimations, Adding)
 	endIf
 endFunction
 
