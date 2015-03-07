@@ -105,9 +105,9 @@ event OnPlayerLoadGame()
 			UpdateSystem(SexLabUtil.GetVersion())
 		else
 			Config.Reload()
+			Factory.Cleanup()
 			ValidateTrackedFactions()
 			ValidateTrackedActors()
-			SexLab.Factory.Cleanup()
 		endIf
 	else
 		SexLab.GoToState("Disabled")

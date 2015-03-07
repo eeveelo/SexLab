@@ -239,9 +239,9 @@ endFunction
 function Setup()
 	GoToState("Locked")
 	; Init slots
-	Slotted    = 0	
-	Registry   = Utility.CreateStringArray(375)
-	Objects = Utility.CreateAliasArray(375, GetNthAlias(0))
+	Slotted  = 0	
+	Registry = Utility.CreateStringArray(375)
+	Objects  = Utility.CreateAliasArray(375, GetNthAlias(0))
 	; DEVTEMP: SKSE Beta workaround - clear used dummy aliases
 	int i = Objects.Length
 	while i
@@ -251,15 +251,14 @@ function Setup()
 	; /DEVTEMP
 	; Init defaults
 	RegisterSlots()
-	GoToState("")
-endFunction
-
-
-bool function TestSlots()
-	return true;Slotted > 0 && Registry.Length == 100 && Slots1.Length == 100 && Slots1.Find(none) > 0 && Registry.Find("") > 0
+	GoToState("Locked")
 endFunction
 
 state Locked
 	function Setup()
 	endFunction
 endState
+
+bool function TestSlots()
+	return true;Slotted > 0 && Registry.Length == 100 && Slots1.Length == 100 && Slots1.Find(none) > 0 && Registry.Find("") > 0
+endFunction

@@ -16,15 +16,98 @@ ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	float RealTime = Utility.GetCurrentRealTime()
-	float GameTime = Utility.GetCurrentGameTime()
-	sslActorStats._SeedActor(TargetRef, RealTime, GameTime)
-	Log("Ashal Seed:")
-	Log(SexLab.Stats.PrintSkills(TargetRef))
+	if StorageUtil.HasFormValue(none, "TestObj")
+		Form ObjForm = StorageUtil.GetFormValue(none, "TestObj")
+		Log("Obj Saved ["+ObjForm.GetFormID()+"]: "+ObjForm)
+		Log("Value Del(1)"+StorageUtil.GetIntValue(ObjForm, "Test"))
+		Utility.Wait(2.0)
+	endIf
+ 
+	sslSystemConfig Config = SexLab.Config
+	ObjectReference Obj = TargetRef.PlaceAtMe(Config.BaseMarker, 1)
+	Utility.Wait(2.0)
 
-	sslActorStats._SeedActor2(TargetRef, RealTime, GameTime)
-	Log("CPU Seed:")
-	Log(SexLab.Stats.PrintSkills(TargetRef))
+	Log("Obj New ["+Obj.GetFormID()+"]: "+Obj)
+	StorageUtil.SetIntValue(Obj, "Test", 42)
+	StorageUtil.SetFormValue(none, "TestObj", Obj)
+	Log("Value Set: "+StorageUtil.GetIntValue(Obj, "Test"))
+
+	Utility.Wait(2.0)
+
+	Obj.Disable()
+	Obj.Delete()
+	Obj = none
+
+	Utility.Wait(2.0)
+
+	Log("Value Del(2)"+StorageUtil.GetIntValue(Obj, "Test"))
+	Utility.Wait(1.0)
+
+	; int[] Array = new int[20]
+	; int i = Array.Length
+	; while i
+	; 	i -= 1
+	; 	Array[i] = i
+	; endWhile
+
+	; Log("Array: "+Array)
+
+	; Log("9-15: "+PapyrusUtil.SliceIntArray(Array, 9, 15))
+	; Log("0-9: "+PapyrusUtil.SliceIntArray(Array, 0, 9))
+	; Log("15-end: "+PapyrusUtil.SliceIntArray(Array, 15))
+	; Log("0-end: "+PapyrusUtil.SliceIntArray(Array, 0))
+	; Log("10-10: "+PapyrusUtil.SliceIntArray(Array, 10, 10))
+	; Log("15-25: "+PapyrusUtil.SliceIntArray(Array, 15, 25))
+
+	; Log("--- Slice ---")
+
+	; string[] Strs = Utility.CreateStringArray(20, "dsfsdf")
+	; Strs[0] = "test1"
+	; Strs[1] = "test1"
+	; Strs[3] = "test3"
+	; Strs[4] = "test1"
+	; Strs[6] = "test3"
+	; Strs[7] = "test1"
+	; Strs[11] = ""
+	; Strs[12] = "test1"
+	; Strs[13] = ""
+	; Strs[18] = "test1"
+	; Strs[19] = "test2"
+	; Log("Strs: "+Strs)
+
+	; Log("test1: "+PapyrusUtil.RemoveString(Strs, "test1"))
+	; Log("test2: "+PapyrusUtil.RemoveString(Strs, "test2"))
+	; Log("EMPTY: "+PapyrusUtil.ClearEmpty(Strs))
+
+	; Log("--- Forms ---")
+
+	; Form[] Forms
+	; Log("UNINIT: "+PapyrusUtil.RemoveForm(Forms, none))
+	; Forms = new form[3]
+	; Forms[0] = TargetRef
+	; Forms[1] = TargetRef
+	; Forms[2] = SexLab
+	; Log("SexLab: "+PapyrusUtil.RemoveForm(Forms, SexLab))
+	; Log("TargetRef: "+PapyrusUtil.RemoveForm(Forms, TargetRef))
+	; Log("missing: "+PapyrusUtil.RemoveForm(Forms, SexLab.Config.CalypsStrapon))
+	; Forms[0] = none
+	; Forms[1] = none
+	; Log("none: "+PapyrusUtil.ClearNone(Forms))
+	; Forms[0] = TargetRef
+	; Forms[1] = TargetRef
+	; Forms[2] = TargetRef
+	; Log("all: "+PapyrusUtil.RemoveForm(Forms, TargetRef))
+
+
+	; float RealTime = Utility.GetCurrentRealTime()
+	; float GameTime = Utility.GetCurrentGameTime()
+	; sslActorStats._SeedActor(TargetRef, RealTime, GameTime)
+	; Log("Ashal Seed:")
+	; Log(SexLab.Stats.PrintSkills(TargetRef))
+
+	; sslActorStats._SeedActor2(TargetRef, RealTime, GameTime)
+	; Log("CPU Seed:")
+	; Log(SexLab.Stats.PrintSkills(TargetRef))
 
 
 	; Log("Waiting: "+CasterRef)

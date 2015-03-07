@@ -589,14 +589,6 @@ function Reload()
 
 	; Remove any NPC thread control player has
 	DisableThreadControl(Control)
-	; Validate tracked factions & actors
-	; ValidateTrackedActors()
-	; ValidateTrackedFactions()
-	; Cleanup phantom slots with missing owners
-	; Factory.Cleanup()
-
-	; DEV TEMP - force on during development
-	; UseCreatureGender  = true
 endFunction
 
 function SetDefaults()

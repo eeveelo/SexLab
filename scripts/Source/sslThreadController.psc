@@ -562,19 +562,19 @@ endfunction
 function SetBonuses()
 	SkillBonus[0] = SkillXP[0]
 	if IsVaginal
-		SkillBonus[1] = SkillXP[1] + 1.0
+		SkillBonus[1] = SkillXP[1]
 	endIf
 	if IsAnal
-		SkillBonus[2] = SkillXP[2] + 1.0
+		SkillBonus[2] = SkillXP[2]
 	endIf
 	if IsOral
-		SkillBonus[3] = SkillXP[3] + 1.0
+		SkillBonus[3] = SkillXP[3]
 	endIf
 	if IsLoving
-		SkillBonus[4] = SkillXP[4] + 1.0
+		SkillBonus[4] = SkillXP[4]
 	endIf
 	if IsDirty
-		SkillBonus[5] = SkillXP[5] + 1.0
+		SkillBonus[5] = SkillXP[5]
 	endIf
 endFunction
 

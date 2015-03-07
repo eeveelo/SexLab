@@ -353,6 +353,7 @@ state Animating
 		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
 		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedTypeID)
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
+		Log(AnimEvent+" - "+Flags+" - "+Offsets)
 		; Update alias info
 		GetEnjoyment()
 		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)

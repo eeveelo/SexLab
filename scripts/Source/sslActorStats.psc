@@ -183,6 +183,7 @@ endFunction
 bool function IsSkilled(Actor ActorRef) global native
 
 function _SeedActor(Actor ActorRef, float RealTime, float GameTime) global native
+; function _SeedActor2(Actor ActorRef, float RealTime, float GameTime) global native
 function SeedActor(Actor ActorRef)
 	if ActorRef != PlayerRef && !IsSkilled(ActorRef) && ActorRef.HasKeyword(Config.ActorTypeNPC)
 		_SeedActor(ActorRef, Utility.GetCurrentRealTime(), Utility.GetCurrentGameTime())
@@ -872,6 +873,34 @@ int property kLastGameTime hidden
 		return 17
 	endFunction
 endProperty
+
+
+string function PrintSkills(Actor ActorRef)
+	float[] Skills = GetSkills(ActorRef)
+	string Output
+	Output += " -- "+ActorRef.GetLeveledActorBase().GetName()+" -- \n"
+	Output += "\tForeplay: "+Skills[kForeplay] + "\n"
+	Output += "\tVaginal: "+Skills[kVaginal] + "\n"
+	Output += "\tAnal: "+Skills[kAnal] + "\n"
+	Output += "\tOral: "+Skills[kOral] + "\n"
+	Output += "\tPure: "+Skills[kPure] + "\n"
+	Output += "\tLewd: "+Skills[kLewd] + "\n"
+	Output += "\tMales: "+Skills[kMales] + "\n"
+	Output += "\tFemales: "+Skills[kFemales] + "\n"
+	Output += "\tCreatures: "+Skills[kCreatures] + "\n"
+	Output += "\tMasturbation: "+Skills[kMasturbation] + "\n"
+	Output += "\tAggressor: "+Skills[kAggressor] + "\n"
+	Output += "\tVictim: "+Skills[kVictim] + "\n"
+	Output += "\tSexCount: "+Skills[kSexCount] + "\n"
+	Output += "\tPlayerSex: "+Skills[kPlayerSex] + "\n"
+	Output += "\tSexuality: "+Skills[kSexuality] + "\n"
+	Output += "\tTimeSpent: "+Skills[kTimeSpent] + "\n"
+	Output += "\tLastRealTime: "+Skills[kLastRealTime] + "\n"
+	Output += "\tLastGameTime: "+Skills[kLastGameTime] + "\n"
+	Output += " --- "
+	return Output
+endFunction
+
 ;/ int property kArousalRate hidden
 	int function get()
 		return 18

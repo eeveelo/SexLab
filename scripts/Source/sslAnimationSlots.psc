@@ -359,7 +359,7 @@ bool function TestSlots()
 endFunction
 
 ; ------------------------------------------------------- ;
-; --- D Use Only                                 --- ;
+; --- Legacy Use Only                                 --- ;
 ; ------------------------------------------------------- ;
 
 sslBaseAnimation[] function RemoveTagged(sslBaseAnimation[] Anims, string Tags)
