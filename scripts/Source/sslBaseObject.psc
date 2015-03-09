@@ -31,7 +31,12 @@ endFunction
 
 bool function AddTag(string Tag)
 	if Tag != "" && Tags.Find(Tag) == -1
-		Tags = PapyrusUtil.PushString(Tags, Tag)
+		int i = Tags.Find("")
+		if i != -1
+			Tags[i] = Tag
+		else
+			Tags = PapyrusUtil.PushString(Tags, Tag)
+		endIf
 		return true
 	endIf
 	return false
@@ -120,7 +125,7 @@ function MakeEphemeral(string Token, Form OwnerForm)
 	Enabled   = true
 	Registry  = Token
 	Storage   = OwnerForm
-	Log("Created Non-Global Object '"+Token+"''", Storage)
+	Log("Created Non-Global Object '"+Token+"'", Storage)
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -140,21 +145,22 @@ function Log(string Log, string Type = "NOTICE")
 endFunction
 
 function Save(int id = -1)
-	; if DisplayName == ""
-	; 	DisplayName = Name
-	; endIf
 	SlotID = id
+	; Trim tags
+	int i = Tags.Find("")
+	if i != -1
+		Tags = PapyrusUtil.ResizeStringArray(Tags, i)
+	endIf
 endFunction
 
 function Initialize()
 	if !Config
 		Config = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
 	endIf
-	Name        = ""
-	; DisplayName = ""
-	Registry    = ""
-	SlotID      = -1
-	Enabled     = false
-	Storage     = none
-	Tags = Utility.CreateStringArray(0)
+	Name     = ""
+	Registry = ""
+	SlotID   = -1
+	Enabled  = false
+	Storage  = none
+	Tags     = new string[16]
 endFunction
