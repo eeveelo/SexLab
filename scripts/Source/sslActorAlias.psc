@@ -797,7 +797,7 @@ function Strip()
 		ActorRef.EquipItem(Config.NudeSuit, true, true)
 	endIf
 	; Store stripped items
-	Equipment = PapyrusUtil.MergeFormArray(Equipment, PapyrusUtil.ClearNone(Stripped))
+	Equipment = PapyrusUtil.MergeFormArray(Equipment, PapyrusUtil.ClearNone(Stripped), true)
 endFunction
 
 function UnStrip()
@@ -812,7 +812,7 @@ function UnStrip()
  	if !DoRedress
  		return ; Fuck clothes, bitch.
  	endIf
- 	; Equip Strippedb
+ 	; Equip Stripped
  	int hand = 1
  	int i = Equipment.Length
  	while i

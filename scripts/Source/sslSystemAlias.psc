@@ -51,8 +51,8 @@ bool function SetupSystem()
 	Factory.Setup()
 	VoiceSlots.Setup()
 	ExpressionSlots.Setup()
-	CreatureSlots.Setup()
 	AnimSlots.Setup()
+	CreatureSlots.Setup()
 	ThreadSlots.Setup()
 
 	Version = SexLabUtil.GetVersion()
@@ -71,8 +71,8 @@ event UpdateSystem(int ToVersion)
 	Factory.Setup()
 	VoiceSlots.Setup()
 	ExpressionSlots.Setup()
-	CreatureSlots.Setup()
 	AnimSlots.Setup()
+	CreatureSlots.Setup()
 	ThreadSlots.Setup()
 
 	LogAll("SexLab Update v"+SexLabUtil.GetStringVer()+" - Ready!")
@@ -179,7 +179,7 @@ function CleanLists()
 endFunction
 
 ; ------------------------------------------------------- ;
-; --- System Utils                                    --- ;
+; --- System Utils                                   --- ;
 ; ------------------------------------------------------- ;
 
 function Log(string Log, string Type = "NOTICE")

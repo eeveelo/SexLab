@@ -837,7 +837,6 @@ bool function CheckByTags(int ActorCount, string[] Search, string[] Suppress, bo
 	return Enabled && ActorCount == PositionCount && CheckTags(Search, RequireAll) && (Suppress.Length < 1 || !HasOneTag(Suppress))
 endFunction
 
-
 int[] Flags0
 int[] Flags1
 int[] Flags2
