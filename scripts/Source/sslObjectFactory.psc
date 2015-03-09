@@ -543,11 +543,6 @@ endFunction
 ; --- System Use Only                                 --- ;
 ; ------------------------------------------------------- ;
 
-function Setup()
-	parent.Setup()
-	Cleanup()
-endFunction
-
 function SendCallback(string Token, int Slot, Form CallbackForm = none, ReferenceAlias CallbackAlias = none) global
 	if CallbackForm
 		CallbackForm.RegisterForModEvent(Token, Token)
@@ -558,7 +553,7 @@ function SendCallback(string Token, int Slot, Form CallbackForm = none, Referenc
 	int e = ModEvent.Create(Token)
 	ModEvent.PushInt(e, Slot)
 	ModEvent.Send(e)
-	Utility.WaitMenuMode(0.2)
+	Utility.WaitMenuMode(0.5)
 	if CallbackForm
 		CallbackForm.UnregisterForModEvent(Token)
 	endIf
@@ -567,19 +562,37 @@ function SendCallback(string Token, int Slot, Form CallbackForm = none, Referenc
 	endIf
 endFunction
 
+function Setup()
+	parent.Setup()
+
+	ASlotted   = 0
+	ATokens    = new string[128]
+	Animations = new sslBaseAnimation[128]
+
+	VSlotted = 0
+	VTokens  = new string[128]
+	Voices   = new sslBaseVoice[128]
+
+	ESlotted    = 0
+	ETokens     = new string[128]
+	Expressions = new sslBaseExpression[128]
+
+	Cleanup()
+endFunction
+
 function Cleanup()
 	; Init slots if empty
-	if ATokens.Length != 128
+	if ATokens.Length != 128 || Animations.Length != 128
 		ASlotted   = 0
 		ATokens    = new string[128]
 		Animations = new sslBaseAnimation[128]
 	endIf
-	if VTokens.Length != 128
+	if VTokens.Length != 128 || Voices.Length != 128
 		VSlotted = 0
 		VTokens  = new string[128]
 		Voices   = new sslBaseVoice[128]
 	endIf
-	if ETokens.Length != 128
+	if ETokens.Length != 128 || Expressions.Length != 128
 		ESlotted    = 0
 		ETokens     = new string[128]
 		Expressions = new sslBaseExpression[128]
@@ -616,7 +629,6 @@ function Cleanup()
 		endIf
 	endWhile
 endFunction
-
 
 ; TODO: needs rewrite to match current animation script
 sslBaseAnimation function CopyAnimation(sslBaseAnimation Copy, sslBaseAnimation Orig)
