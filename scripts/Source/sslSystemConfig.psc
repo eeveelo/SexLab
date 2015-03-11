@@ -249,7 +249,7 @@ Form function WornStrapon(Actor ActorRef)
 	int i = Strapons.Length
 	while i
 		i -= 1
-		if ActorRef.IsEquipped(Strapons[i])
+		if ActorRef.GetItemCount(Strapons[i]) > 0
 			return Strapons[i]
 		endIf
 	endWhile

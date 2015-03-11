@@ -280,36 +280,6 @@ function PlayAnimation()
 	Debug.SendAnimationEvent(ActorRef, AnimEvent)
 endFunction
 
-event SyncStage(int ToStage)
-	if ActorRef
-		Stage      = ToStage
-		AnimEvent  = Animation.FetchPositionStage(Position, Stage)
-		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
-		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedTypeID)
-		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
-		RefreshActor()
-		SyncLocation(false)
-	endIf
-endEvent
-
-event SyncAnimation()
-
-endEvent
-
-function RefreshActor()
-	if ActorRef
-		GetEnjoyment()
-		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
-		Log("Enjoyment: "+Enjoyment+" SOS: "+Schlong)
-		if !IsCreature
-			ResolveStrapon()
-			RefreshExpression()
-		endIf
-	endIf
-endFunction
-
-
-
 state Animating
 
 	function StartAnimating()
@@ -338,7 +308,7 @@ state Animating
 		if !IsSilent
 			Voice.Moan(ActorRef, Enjoyment, IsVictim)
 		endIf
-		; Loop
+		; LoopB
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent
 
@@ -353,6 +323,7 @@ state Animating
 		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
 		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedTypeID)
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
+		; TODO: Offsets and flags seem to be off in some cases, noteably offset roation.
 		Log(AnimEvent+" - "+Flags+" - "+Offsets)
 		; Update alias info
 		GetEnjoyment()
@@ -380,7 +351,7 @@ state Animating
 		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		; Avoid forcibly setting on player coords if avoidable - causes annoying graphical flickering
-		if Force && IsInPosition(ActorRef, MarkerRef, 50.0)
+		if Force && IsPlayer && IsInPosition(ActorRef, MarkerRef, 40.0)
 			ActorRef.SetVehicle(MarkerRef)
 			ActorRef.SetScale(AnimScale)
 			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 5000, 0)
@@ -396,17 +367,17 @@ state Animating
 
 	function Snap()
 		; Quickly move into place and angle if actor is off by a lot
-		if !IsInPosition(ActorRef, MarkerRef, 100.0)
+		if !IsInPosition(ActorRef, MarkerRef, 75.0)
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			ActorRef.SetVehicle(MarkerRef)
 			ActorRef.SetScale(AnimScale)
-		elseIf ActorRef.GetDistance(MarkerRef) > 0.2
-			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 1000, 0)
+		elseIf ActorRef.GetDistance(MarkerRef) > 0.5
+			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 5000, 0)
 			return ; OnTranslationComplete() will take over when in place
 		endIf
 		; Begin very slowly rotating a small amount to hold position
-		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.01, 1.0, 500, 0.001)
+		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.001, 20.0, 500, 0.00001)
 	endFunction
 
 	event OnTranslationComplete()

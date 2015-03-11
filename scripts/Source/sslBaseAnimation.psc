@@ -229,13 +229,16 @@ float[] function PositionOffsets(float[] Output, string AdjustKey, int Position,
 	Output[2] = Offsets[(i + 2)] ; Up
 	Output[3] = Offsets[(i + 3)] ; Rot - no offset
 	if BedTypeID > 0 && BedOffset.Length == 4
-		; float[] Bed = GetBedOffsets()
-		Output[0] = Output[0] + BedOffset[0]
-		Output[1] = Output[1] + BedOffset[1]
-		Output[2] = Output[2] + BedOffset[2]
-		Output[3] = Output[3] + BedOffset[3]
+		float[] Bed = GetBedOffsets()
+		; Log("Using Bed Offsets: "+Bed)
+		Output[0] = Output[0] + Bed[0]
+		Output[1] = Output[1] + Bed[1]
+		Output[2] = Output[2] + Bed[2]
+		Output[3] = Output[3] + Bed[3]
 	endIf
+	Log("Raw("+Registry+", "+AdjustKey+"."+Position+", "+LastKeys[Position]+", "+Stage+"): "+Output)
 	_PositionOffsets(Registry, AdjustKey+"."+Position, LastKeys[Position], Stage, Output)
+	Log("Adj("+Registry+", "+AdjustKey+"."+Position+", "+LastKeys[Position]+", "+Stage+"): "+Output)
 	return Output
 endFunction
 

@@ -1914,11 +1914,10 @@ function RebuildClean()
 	AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
 	AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
 
-	AddHeaderOption("$SSL_UpgradeUninstallReinstall")
-	AddTextOptionST("CleanSystem","$SSL_CleanSystem", "$SSL_ClickHere")
-
 	SetCursorPosition(1)
 	AddToggleOptionST("DebugMode","$SSL_DebugMode", Config.DebugMode)
+	AddHeaderOption("$SSL_UpgradeUninstallReinstall")
+	AddTextOptionST("CleanSystem","$SSL_CleanSystem", "$SSL_ClickHere")
 	AddHeaderOption("$SSL_AvailableStrapons")
 	AddTextOptionST("RebuildStraponList","$SSL_RebuildStraponList", "$SSL_ClickHere")
 	int i = Config.Strapons.Length
