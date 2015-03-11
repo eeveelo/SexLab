@@ -335,14 +335,14 @@ state Making
 				; Remove furniture/standing animations from primary
 				sslBaseAnimation[] FilteredPrimary = sslUtility.RemoveTaggedAnimations(PrimaryAnimations, Filter)
 				if FilteredPrimary.Length == 0
-				elseIf FilteredPrimary.Length != PrimaryAnimations.Length
+				elseIf FilteredPrimary.Length > 0 && FilteredPrimary.Length != PrimaryAnimations.Length
 					Log("Filtered out '"+(LeadAnimations.Length - FilteredPrimary.Length)+"' Primary Animations with tags '"+Filter+"'")
 					PrimaryAnimations = FilteredPrimary
 				endIf
 				; Remove furniture/standing from lead in
 				if LeadIn && LeadAnimations.Length > 0
 					sslBaseAnimation[] FilteredLead = sslUtility.RemoveTaggedAnimations(LeadAnimations, Filter)
-					if FilteredLead.Length != LeadAnimations.Length
+					if FilteredLead.Length > 0 && FilteredLead.Length != LeadAnimations.Length
 						Log("Filtered out '"+(LeadAnimations.Length - FilteredLead.Length)+"' Lead In Animations with tags '"+Filter+"'")
 						LeadAnimations = FilteredLead
 					endIf
