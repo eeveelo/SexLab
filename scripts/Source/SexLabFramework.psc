@@ -1031,37 +1031,3 @@ state Enabled
 		ModEvent.Send(ModEvent.Create("SexLabEnabled"))
 	endEvent
 endState
-
-
-
-bool _messageResult
-bool _waitForMessage
-
-Bool function ShowMessage(String a_message, Bool a_withCancel = false, String a_acceptLabel = "$Ok", String a_cancelLabel = "$Cancel")
-	while _waitForMessage
-		Debug.Trace("Message Wait: "+a_message)
-		Utility.WaitMenuMode(0.1)
-	endWhile
-	_waitForMessage = true
-	_messageResult = false
-	String[] params = new String[3]
-	params[0] = a_message
-	params[1] = a_acceptLabel
-	if a_withCancel
-		params[2] = a_cancelLabel
-	else
-		params[2] = ""
-	endIf
-	self.RegisterForModEvent("SKICP_messageDialogClosed", "OnMessageDialogClose")
-	ui.InvokeStringA("Journal Menu", "_root.ConfigPanelFader.configPanel" + ".showMessageDialog", params)
-	while _waitForMessage
-		utility.WaitMenuMode(0.1)
-	endWhile
-	self.UnregisterForModEvent("SKICP_messageDialogClosed")
-	return _messageResult
-endFunction
-
-function OnMessageDialogClose(String a_eventName, String a_strArg, Float a_numArg, Form a_sender)
-	_messageResult = a_numArg as Bool
-	_waitForMessage = false
-endFunction
