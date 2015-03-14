@@ -369,6 +369,8 @@ function AnimationSettings()
 	AddToggleOptionST("DisableVictim","$SSL_DisableVictimControls", Config.DisablePlayer)
 	AddToggleOptionST("AutomaticTFC","$SSL_AutomaticTFC", Config.AutoTFC)
 	AddSliderOptionST("AutomaticSUCSM","$SSL_AutomaticSUCSM", Config.AutoSUCSM, "{0}")
+	AddTextOptionST("PlayerGender","$SSL_PlayerGender", SexLabUtil.StringIfElse(ActorLib.GetGender(PlayerRef) == 0, "$SSL_Male", "$SSL_Female"))
+
 	AddHeaderOption("$SSL_ExtraEffects")
 	AddToggleOptionST("UseExpressions","$SSL_UseExpressions", Config.UseExpressions)
 	AddToggleOptionST("UseLipSync", "$SSL_UseLipSync", Config.UseLipSync)
@@ -2125,6 +2127,7 @@ event OnConfigClose()
 	TSModes   = new string[1]
 	TAModes   = new string[1]
 	Biped     = new string[1]
+	ModEvent.Send(ModEvent.Create("SexLabConfigClose"))
 endEvent
 
 ; ------------------------------------------------------- ;
@@ -2189,7 +2192,20 @@ state AutomaticSUCSM
 		SetInfoText("$SSL_InfoAutomaticSUCSM")
 	endEvent
 endState
-
+state PlayerGender
+	event OnSelectST()
+		int Gender = ActorLib.GetGender(PlayerRef)
+		ActorLib.TreatAsGender(PlayerRef, Gender == 0)
+		SetTextOptionValueST(SexLabUtil.StringIfElse(Gender == 1, "$SSL_Male", "$SSL_Female"))
+	endEvent
+	event OnDefaultST()
+		ActorLib.ClearForcedGender(PlayerRef)
+		SetTextOptionValueST(SexLabUtil.StringIfElse(ActorLib.GetGender(PlayerRef) == 1, "$SSL_Male", "$SSL_Female"))
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoPlayerGender")
+	endEvent
+endState
 state UseExpressions
 	event OnSelectST()
 		Config.UseExpressions = !Config.UseExpressions
