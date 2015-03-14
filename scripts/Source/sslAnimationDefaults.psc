@@ -15,6 +15,9 @@ function LoadAnimations()
 	RegisterAnimation("ArrokMissionary")
 	RegisterAnimation("ArrokLegUp")
 	RegisterAnimation("ZynMissionary")
+	RegisterAnimation("zjMissionary")
+	RegisterAnimation("zjLaying")
+	RegisterAnimation("zjLyingVar")
 	RegisterAnimation("APBedMissionary")
 	RegisterAnimation("APHoldLegUp")
 	RegisterAnimation("APLegUp")
@@ -29,12 +32,15 @@ function LoadAnimations()
 	RegisterAnimation("ZynDoggystyle")
 	RegisterAnimation("DarkInvestigationsDoggystyle")
 	RegisterAnimation("APDoggyStyle")
+	RegisterAnimation("zjDoggy")
+	RegisterAnimation("zjDomination")
 	RegisterCategory("Doggystyle")
 
 	; Cowgirl
 	RegisterAnimation("SexLabReverseCowgirl")
 	RegisterAnimation("ArrokCowgirl")
 	RegisterAnimation("ArrokReverseCowgirl")
+	RegisterAnimation("zjCowgirl")
 	RegisterAnimation("APCowgirl")
 	RegisterCategory("Cowgirl")
 
@@ -49,12 +55,17 @@ function LoadAnimations()
 	RegisterAnimation("SexLabStanding")
 	RegisterAnimation("ArrokHugFuck")
 	RegisterAnimation("ArrokStanding")
-	RegisterAnimation("APStanding")
 	RegisterAnimation("ZynRoughStanding")
+	RegisterAnimation("ZynStanding")
+	RegisterAnimation("zjStanding")
+	RegisterAnimation("zjStandingVar")
+	RegisterAnimation("zjHolding")
+	RegisterAnimation("APStanding")
 	RegisterCategory("Standing")
 	
 	; Anal
 	RegisterAnimation("ArrokAnal")
+	RegisterAnimation("zjAnal")
 	RegisterAnimation("APAnal")
 	RegisterAnimation("APFaceDown")
 	RegisterCategory("Anal")
@@ -81,6 +92,9 @@ function LoadAnimations()
 	RegisterAnimation("ArrokForeplay")
 	RegisterAnimation("ArrokSittingForeplay")
 	RegisterAnimation("ArrokStandingForeplay")
+	RegisterAnimation("zjEroMassage")
+	RegisterAnimation("zjBreastFeeding")
+	RegisterAnimation("zjBreastFeedingVar")
 	RegisterCategory("Foreplay")
 
 	; Footjob
@@ -1078,7 +1092,6 @@ function BleaghFootJob(int id)
 
 	Base.Name    = "Bleagh FootJob"
 
-
 	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "Bleagh_FootJob_A1_S1", 0)
 	Base.AddPositionStage(a1, "Bleagh_FootJob_A1_S2", 0)
@@ -1926,6 +1939,43 @@ function ZynFourWay(int id)
 	Base.Save(id)
 endFunction
 
+function ZynStanding(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Zyn Standing"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "Zyn_Standing_A1_S1", 0)
+	Base.AddPositionStage(a1, "Zyn_Standing_A1_S2", 0, openMouth = true)
+	Base.AddPositionStage(a1, "Zyn_Standing_A1_S3", 0)
+	Base.AddPositionStage(a1, "Zyn_Standing_A1_S4", 0)
+	Base.AddPositionStage(a1, "Zyn_Standing_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Zyn_Standing_A2_S1", 0)
+	Base.AddPositionStage(a2, "Zyn_Standing_A2_S2", 0)
+	Base.AddPositionStage(a2, "Zyn_Standing_A2_S3", 0)
+	Base.AddPositionStage(a2, "Zyn_Standing_A2_S4", 0)
+	Base.AddPositionStage(a2, "Zyn_Standing_A2_S5", 0)
+
+	Base.SetStageTimer(5, 9.0)
+
+	Base.SetStageSoundFX(1, none)
+	Base.SetStageSoundFX(2, Sucking)
+	Base.SetStageSoundFX(3, Sucking)
+
+	Base.AddTag("Zyn")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Standing")
+	Base.AddTag("Vaginal")
+	Base.AddTag("Dirty")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
 function DarkInvestigationsThreesome(int id)
 	sslBaseAnimation Base = Create(id)
 
@@ -2034,6 +2084,386 @@ function DarkInvestigationsBlowjob(int id)
 	Base.AddTag("Blowjob")
 	Base.AddTag("Oral")
 	Base.AddTag("Dirty")
+
+	Base.Save(id)
+endFunction
+
+function zjAnal(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "3jiou Anal"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "3j_Anal_A1_S1", 0)
+	Base.AddPositionStage(a1, "3j_Anal_A1_S2", 0)
+	Base.AddPositionStage(a1, "3j_Anal_A1_S3", 0)
+	Base.AddPositionStage(a1, "3j_Anal_A1_S4", 0)
+	Base.AddPositionStage(a1, "3j_Anal_A1_S5", 0)
+	
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "3j_Anal_A2_S1", 0, sos = 4)
+	Base.AddPositionStage(a2, "3j_Anal_A2_S2", 0, sos = 6)
+	Base.AddPositionStage(a2, "3j_Anal_A2_S3", 0, sos = 4)
+	Base.AddPositionStage(a2, "3j_Anal_A2_S4", 0, sos = 2)
+	Base.AddPositionStage(a2, "3j_Anal_A2_S5", 0, sos = 4)
+	
+	Base.AddTag("3jiou")
+	Base.AddTag("Sex")
+	Base.AddTag("Anal")
+	Base.AddTag("Behind")
+	Base.AddTag("Dirty")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function zjCowgirl(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "3jiou Cowgirl"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "3j_Cowgirl_A1_S1", 0)
+	Base.AddPositionStage(a1, "3j_Cowgirl_A1_S2", 0)
+	Base.AddPositionStage(a1, "3j_Cowgirl_A1_S3", 0)
+	Base.AddPositionStage(a1, "3j_Cowgirl_A1_S4", 0)
+	Base.AddPositionStage(a1, "3j_Cowgirl_A1_S5", 0)
+		
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "3j_Cowgirl_A2_S1", 0)
+	Base.AddPositionStage(a2, "3j_Cowgirl_A2_S2", 0)
+	Base.AddPositionStage(a2, "3j_Cowgirl_A2_S3", 0)
+	Base.AddPositionStage(a2, "3j_Cowgirl_A2_S4", 0)
+	Base.AddPositionStage(a2, "3j_Cowgirl_A2_S5", 0)
+	
+	Base.AddTag("3jiou")
+	Base.AddTag("Sex")
+	Base.AddTag("Cowgirl")
+	Base.AddTag("Vaginal")	
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function zjDoggy(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "3jiou Doggystyle"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "3j_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "3j_Doggystyle_A1_S2", 0)
+	Base.AddPositionStage(a1, "3j_Doggystyle_A1_S3", 0)
+	Base.AddPositionStage(a1, "3j_Doggystyle_A1_S4", 0)
+	
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "3j_Doggystyle_A1_S1", 0, sos = 0)
+	Base.AddPositionStage(a2, "3j_Doggystyle_A1_S2", 0, sos = 0)
+	Base.AddPositionStage(a2, "3j_Doggystyle_A1_S3", 0, sos = 0)
+	Base.AddPositionStage(a2, "3j_Doggystyle_A1_S4", 0, sos = 0)
+	
+	Base.AddTag("3jiou")
+	Base.AddTag("Sex")
+	Base.AddTag("Doggystyle")
+	Base.AddTag("Behind")
+	Base.AddTag("Anal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function zjDomination(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "3jiou Domination"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "3j_Domination_A1_S1", 0)
+	Base.AddPositionStage(a1, "3j_Domination_A1_S2", 0)
+	Base.AddPositionStage(a1, "3j_Domination_A1_S3", 0)
+	Base.AddPositionStage(a1, "3j_Domination_A1_S4", 0)
+	Base.AddPositionStage(a1, "3j_Domination_A1_S5", 0)
+	
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "3j_Domination_A2_S1", 0)
+	Base.AddPositionStage(a2, "3j_Domination_A2_S2", 0)
+	Base.AddPositionStage(a2, "3j_Domination_A2_S3", 0)
+	Base.AddPositionStage(a2, "3j_Domination_A2_S4", 0)
+	Base.AddPositionStage(a2, "3j_Domination_A2_S5", 0)
+
+	Base.AddTag("3jiou")	
+	Base.AddTag("Sex")
+	Base.AddTag("Dirty")
+	Base.AddTag("Behind")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function zjEroMassage(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "3jiou Ero Massage"
+
+	int a1 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a1, "3j_Massage_A1_S1", 0)
+	Base.AddPositionStage(a1, "3j_Massage_A1_S2", 0)
+	Base.AddPositionStage(a1, "3j_Massage_A1_S3", 0)
+
+	int a2 = Base.AddPosition(Male) 
+	Base.AddPositionStage(a2, "3j_Massage_A2_S1", 0, silent = true)
+	Base.AddPositionStage(a2, "3j_Massage_A2_S2", 0, silent = true)
+	Base.AddPositionStage(a2, "3j_Massage_A2_S3", 0)
+
+	Base.AddTag("3jiou")
+	Base.AddTag("Vaginal")
+	Base.AddTag("Foreplay")
+	Base.AddTag("LeadIn")
+	Base.AddTag("Laying")	
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+
+function zjHolding(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "3jiou Holding"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "3j_Holding_A1_S1", 0)
+	Base.AddPositionStage(a1, "3j_Holding_A1_S2", 0)
+	Base.AddPositionStage(a1, "3j_Holding_A1_S3", 0)
+	Base.AddPositionStage(a1, "3j_Holding_A1_S4", 0)
+	
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "3j_Holding_A2_S1", 0, sos = 9)
+	Base.AddPositionStage(a2, "3j_Holding_A2_S2", 0, sos = 0)
+	Base.AddPositionStage(a2, "3j_Holding_A2_S3", 0, sos = -2)
+	Base.AddPositionStage(a2, "3j_Holding_A2_S4", 0, sos = 9)
+	
+	Base.AddTag("3jiou")
+	Base.AddTag("Sex")
+	Base.AddTag("Standing")
+	Base.AddTag("Anal")	
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+
+function zjLaying(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "3jiou Laying"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a1, "3j_Laying_A1_S1", 0)
+	Base.AddPositionStage(a1, "3j_Laying_A1_S2", 0)
+	Base.AddPositionStage(a1, "3j_Laying_A1_S3", 0)
+	Base.AddPositionStage(a1, "3j_Laying_A1_S4", 0)
+	Base.AddPositionStage(a1, "3j_Laying_A1_S5", 0)
+	
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "3j_Laying_A2_S1", 0, sos = 3)
+	Base.AddPositionStage(a2, "3j_Laying_A2_S2", 0, sos = 3)
+	Base.AddPositionStage(a2, "3j_Laying_A2_S3", 0, sos = 3)
+	Base.AddPositionStage(a2, "3j_Laying_A2_S4", 0, sos = 3)
+	Base.AddPositionStage(a2, "3j_Laying_A2_S5", 0, sos = 3)
+	
+	Base.AddTag("3jiou")
+	Base.AddTag("Sex")
+	Base.AddTag("Missionary")
+	Base.AddTag("Laying")
+	Base.AddTag("Vaginal")	
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function zjLyingVar(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "3jiou Laying Variant"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "3j_Layingvar_A1_S1", 0)
+	Base.AddPositionStage(a1, "3j_Layingvar_A1_S2", 0)
+	Base.AddPositionStage(a1, "3j_Layingvar_A1_S3", 0)
+	Base.AddPositionStage(a1, "3j_Layingvar_A1_S4", 0)
+	Base.AddPositionStage(a1, "3j_Layingvar_A1_S5", 0)
+	
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "3j_Layingvar_A2_S1", 0, sos = 0)
+	Base.AddPositionStage(a2, "3j_Layingvar_A2_S2", 0, sos = 9)
+	Base.AddPositionStage(a2, "3j_Layingvar_A2_S3", 0, sos = 0)
+	Base.AddPositionStage(a2, "3j_Layingvar_A2_S4", 0, sos = 0)
+	Base.AddPositionStage(a2, "3j_Layingvar_A2_S5", 0, sos = 0)
+	
+	Base.AddTag("3jiou")
+	Base.AddTag("Sex")
+	Base.AddTag("Missionary")
+	Base.AddTag("Laying")
+	Base.AddTag("Anal")	
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function zjMissionary(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "3jiou Missionary"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "3j_Missionary_A1_S1", 0)
+	Base.AddPositionStage(a1, "3j_Missionary_A1_S2", 0)
+	Base.AddPositionStage(a1, "3j_Missionary_A1_S3", 0)
+	Base.AddPositionStage(a1, "3j_Missionary_A1_S4", 0)
+	
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "3j_Missionary_A2_S1", 0)
+	Base.AddPositionStage(a2, "3j_Missionary_A2_S2", 0)
+	Base.AddPositionStage(a2, "3j_Missionary_A2_S3", 0)
+	Base.AddPositionStage(a2, "3j_Missionary_A2_S4", 0)
+	
+	Base.AddTag("3jiou")
+	Base.AddTag("Sex")
+	Base.AddTag("Missionary")
+	Base.AddTag("Lying")
+	Base.AddTag("Vaginal")	
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function zjStanding(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "3jiou Standing"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "3j_Standing_A1_S1", 0)
+	Base.AddPositionStage(a1, "3j_Standing_A1_S2", 0)
+	Base.AddPositionStage(a1, "3j_Standing_A1_S3", 0)
+	Base.AddPositionStage(a1, "3j_Standing_A1_S4", 0)
+	Base.AddPositionStage(a1, "3j_Standing_A1_S5", 0)
+	Base.AddPositionStage(a1, "3j_Standing_A1_S6", 0)
+	
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "3j_Standing_A2_S1", 0, sos = 4)
+	Base.AddPositionStage(a2, "3j_Standing_A2_S2", 0, sos = 6)
+	Base.AddPositionStage(a2, "3j_Standing_A2_S3", 0, sos = 4)
+	Base.AddPositionStage(a2, "3j_Standing_A2_S4", 0, sos = 2)
+	Base.AddPositionStage(a2, "3j_Standing_A2_S5", 0, sos = 4)
+	Base.AddPositionStage(a2, "3j_Standing_A2_S6", 0, sos = 4)
+	
+	Base.AddTag("3jiou")
+	Base.AddTag("Sex")
+	Base.AddTag("Standing")
+	Base.AddTag("Behind")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function zjStandingVar(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "3jiou Standing Variant"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "3j_Standingvar_A1_S1", 0, up = 0)
+	Base.AddPositionStage(a1, "3j_Standingvar_A1_S2", 0, up = 0)
+	Base.AddPositionStage(a1, "3j_Standingvar_A1_S3", 0, up = 0)
+	Base.AddPositionStage(a1, "3j_Standingvar_A1_S4", 0, up = 0)
+	Base.AddPositionStage(a1, "3j_Standingvar_A1_S5", 0, up = 0)
+	
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "3j_Standingvar_A2_S1", 0, sos = 4)
+	Base.AddPositionStage(a2, "3j_Standingvar_A2_S2", 0, sos = 6)
+	Base.AddPositionStage(a2, "3j_Standingvar_A2_S3", 0, sos = 4)
+	Base.AddPositionStage(a2, "3j_Standingvar_A2_S4", 0, sos = 2)
+	Base.AddPositionStage(a2, "3j_Standingvar_A2_S5", 0, sos = 4)
+	
+	Base.AddTag("3jiou")
+	Base.AddTag("Sex")
+	Base.AddTag("Standing")
+	Base.AddTag("Behind")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function zjBreastFeeding(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "3jiou Breast Feeding"
+	Base.SoundFX = Sucking
+
+	int a1 = Base.AddPosition(Female)
+	Base.AddPositionStage(a1, "3j_BreastFeeding_A1_S1", 0)
+	Base.AddPositionStage(a1, "3j_BreastFeeding_A1_S2", 0)
+	Base.AddPositionStage(a1, "3j_BreastFeeding_A1_S3", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "3j_BreastFeeding_A1_S4", 0)
+	
+	int a2 = Base.AddPosition(Female)
+	Base.AddPositionStage(a2, "3j_BreastFeeding_A2_S1", -2, up = 1, silent = true, openMouth = true)
+	Base.AddPositionStage(a2, "3j_BreastFeeding_A2_S2", -0.5, up = 2, silent = true, openMouth = true)
+	Base.AddPositionStage(a2, "3j_BreastFeeding_A2_S3", 2, up = 2)
+	Base.AddPositionStage(a2, "3j_BreastFeeding_A2_S4", 0)
+
+	Base.AddTag("3jiou")
+	Base.AddTag("Sex")
+	Base.AddTag("Lesbian")
+	Base.AddTag("Foreplay")
+	Base.AddTag("Leadin")
+	Base.AddTag("Kissing")
+	Base.AddTag("Loving")
+	Base.AddTag("FF")
+
+	Base.Save(id)
+endFunction
+
+
+function zjBreastFeedingVar(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "3jiou Breast Feeding Variant"
+	Base.SoundFX = Sucking
+
+	int a1 = Base.AddPosition(Female)
+	Base.AddPositionStage(a1, "3j_BreastFeedingvar_A1_S1", 0)
+	Base.AddPositionStage(a1, "3j_BreastFeedingvar_A1_S2", 0)
+	Base.AddPositionStage(a1, "3j_BreastFeedingvar_A1_S3", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "3j_BreastFeedingvar_A1_S3", 0)
+	
+	int a2 = Base.AddPosition(Male, addCum=Vaginal)
+	Base.AddPositionStage(a2, "3j_BreastFeedingvar_A2_S1", -2, up = 1, silent = true, openMouth = true)
+	Base.AddPositionStage(a2, "3j_BreastFeedingvar_A2_S2", -0.5, up = 2, silent = true, openMouth = true)
+	Base.AddPositionStage(a2, "3j_BreastFeedingvar_A2_S3", 2, up = 2, sos = -1)		
+	Base.AddPositionStage(a2, "3j_BreastFeedingvar_A2_S3", 0, sos = -1)	
+
+	Base.AddTag("3jiou")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Foreplay")
+	Base.AddTag("LeadIn")
+	Base.AddTag("MF")
 
 	Base.Save(id)
 endFunction

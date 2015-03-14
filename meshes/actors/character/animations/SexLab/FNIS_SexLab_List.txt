@@ -1,6 +1,6 @@
-Version V1.59c
+Version V1.60
 
-b SexLab_Test_15800 AggrMissionary_A1_S3.hkx
+b SexLab_Test_16000 AggrMissionary_A1_S3.hkx
 
 '
 ' Unknown Animators Animations
@@ -589,6 +589,16 @@ s Zyn_Licking_A2_S1 Zyn_Licking_A2_S1.hkx
 + -a Zyn_Licking_A2_S4 Zyn_Licking_A2_S4.hkx
 + Zyn_Licking_A2_S4b Zyn_Licking_A2_S4b.hkx
 
+s Zyn_Standing_a1_s1 Zyn_Standing_a1_s1.hkx
++ Zyn_Standing_a1_s2 Zyn_Standing_a1_s2.hkx
++ Zyn_Standing_a1_s3 Zyn_Standing_a1_s3.hkx
++ Zyn_Standing_a1_s4 Zyn_Standing_a1_s4.hkx
++ Zyn_Standing_a1_s5 Zyn_Standing_a1_s5.hkx
+s Zyn_Standing_a2_s1 Zyn_Standing_a2_s1.hkx
++ Zyn_Standing_a2_s2 Zyn_Standing_a2_s2.hkx
++ Zyn_Standing_a2_s3 Zyn_Standing_a2_s3.hkx
++ Zyn_Standing_a2_s4 Zyn_Standing_a2_s4.hkx
++ Zyn_Standing_a2_s5 Zyn_Standing_a2_s5.hkx
 
 '
 ' Bleagh Animation
@@ -670,3 +680,136 @@ s zdi2_Doggystyle_A2_S1  zdi2_Threesome_A2_S1.hkx
 + -a zdi2_Doggystyle_A2_S4 zdi2_Threesome_A2_S4.hkx
 + zdi2_Doggystyle_A2_S4b zdi2_Doggystyle_A2_S4b.hkx
 
+
+'
+' 3jiou Animation
+'
+
+s 3j_Anal_A1_S1 3j_Anal_A1_S1.hkx
++ 3j_Anal_A1_S2 3j_Anal_A1_S2.hkx
++ 3j_Anal_A1_S3 3j_Anal_A1_S3.hkx
++ 3j_Anal_A1_S4 3j_Anal_A1_S4.hkx
++ 3j_Anal_A1_S5 3j_Anal_A1_S5.hkx
+s 3j_Anal_A2_S1 3j_Anal_A2_S1.hkx
++ 3j_Anal_A2_S2 3j_Anal_A2_S2.hkx
++ 3j_Anal_A2_S3 3j_Anal_A2_S3.hkx
++ 3j_Anal_A2_S4 3j_Anal_A2_S4.hkx
++ 3j_Anal_A2_S5 3j_Anal_A2_S5.hkx
+
+s 3j_Cowgirl_A1_S1 3j_Cowgirl_A1_S1.hkx
++ 3j_Cowgirl_A1_S2 3j_Cowgirl_A1_S2.hkx
++ 3j_Cowgirl_A1_S3 3j_Cowgirl_A1_S3.hkx
++ 3j_Cowgirl_A1_S4 3j_Cowgirl_A1_S4.hkx
++ 3j_Cowgirl_A1_S5 3j_Cowgirl_A1_S5.hkx
+s 3j_Cowgirl_A2_S1 3j_Cowgirl_A2_S1.hkx
++ 3j_Cowgirl_A2_S2 3j_Cowgirl_A2_S2.hkx
++ 3j_Cowgirl_A2_S3 3j_Cowgirl_A2_S3.hkx
++ 3j_Cowgirl_A2_S4 3j_Cowgirl_A2_S4.hkx
++ 3j_Cowgirl_A2_S5 3j_Cowgirl_A2_S5.hkx
+
+s 3j_Doggystyle_A1_S1 3j_Doggystyle_A1_S1.hkx
++ 3j_Doggystyle_A1_S2 3j_Doggystyle_A1_S2.hkx
++ 3j_Doggystyle_A1_S3 3j_Doggystyle_A1_S3.hkx
++ 3j_Doggystyle_A1_S4 3j_Doggystyle_A1_S4.hkx
+s 3j_Doggystyle_A2_S1 3j_Doggystyle_A2_S1.hkx
++ 3j_Doggystyle_A2_S2 3j_Doggystyle_A2_S2.hkx
++ 3j_Doggystyle_A2_S3 3j_Doggystyle_A2_S3.hkx
++ 3j_Doggystyle_A2_S4 3j_Doggystyle_A2_S4.hkx
+
+s 3j_Domination_A1_S1 3j_Domination_A1_S1.hkx
++ 3j_Domination_A1_S2 3j_Domination_A1_S2.hkx
++ 3j_Domination_A1_S3 3j_Domination_A1_S3.hkx
++ 3j_Domination_A1_S4 3j_Domination_A1_S4.hkx
++ 3j_Domination_A1_S5 3j_Domination_A1_S5.hkx
+s 3j_Domination_A2_S1 3j_Domination_A2_S1.hkx
++ 3j_Domination_A2_S2 3j_Domination_A2_S2.hkx
++ 3j_Domination_A2_S3 3j_Domination_A2_S3.hkx
++ 3j_Domination_A2_S4 3j_Domination_A2_S4.hkx
++ 3j_Domination_A2_S5 3j_Domination_A2_S5.hkx
+
+s 3j_Massage_A1_S1 3j_Massage_A1_S1.hkx
++ 3j_Massage_A1_S2 3j_Massage_A1_S2.hkx
++ 3j_Massage_A1_S3 3j_Massage_A1_S3.hkx
+s 3j_Massage_A2_S1 3j_Massage_A2_S1.hkx
++ 3j_Massage_A2_S2 3j_Massage_A2_S2.hkx
++ 3j_Massage_A2_S3 3j_Massage_A2_S3.hkx
+
+s 3j_Laying_A1_S1 3j_Laying_A1_S1.hkx
++ 3j_Laying_A1_S2 3j_Laying_A1_S2.hkx
++ 3j_Laying_A1_S3 3j_Laying_A1_S3.hkx
++ 3j_Laying_A1_S4 3j_Laying_A1_S4.hkx
++ 3j_Laying_A1_S5 3j_Laying_A1_S5.hkx
+s 3j_Laying_A2_S1 3j_Laying_A2_S1.hkx
++ 3j_Laying_A2_S2 3j_Laying_A2_S2.hkx
++ 3j_Laying_A2_S3 3j_Laying_A2_S3.hkx
++ 3j_Laying_A2_S4 3j_Laying_A2_S4.hkx
++ 3j_Laying_A2_S5 3j_Laying_A2_S5.hkx
+
+s 3j_Layingvar_A1_S1 3j_Layingvar_A1_S1.hkx
++ 3j_Layingvar_A1_S2 3j_Layingvar_A1_S2.hkx
++ 3j_Layingvar_A1_S3 3j_Layingvar_A1_S3.hkx
++ 3j_Layingvar_A1_S4 3j_Layingvar_A1_S4.hkx
++ 3j_Layingvar_A1_S5 3j_Layingvar_A1_S5.hkx
+s 3j_Layingvar_A2_S1 3j_Layingvar_A2_S1.hkx
++ 3j_Layingvar_A2_S2 3j_Layingvar_A2_S2.hkx
++ 3j_Layingvar_A2_S3 3j_Layingvar_A2_S3.hkx
++ 3j_Layingvar_A2_S4 3j_Layingvar_A2_S4.hkx
++ 3j_Layingvar_A2_S5 3j_Layingvar_A2_S5.hkx
+
+s 3j_Standing_A1_S1 3j_Standing_A1_S1.hkx
++ 3j_Standing_A1_S2 3j_Standing_A1_S2.hkx
++ 3j_Standing_A1_S3 3j_Standing_A1_S3.hkx
++ 3j_Standing_A1_S4 3j_Standing_A1_S4.hkx
++ 3j_Standing_A1_S5 3j_Standing_A1_S5.hkx
++ 3j_Standing_A1_S6 3j_Standing_A1_S6.hkx
+s 3j_Standing_A2_S1 3j_Standing_A2_S1.hkx
++ 3j_Standing_A2_S2 3j_Standing_A2_S2.hkx
++ 3j_Standing_A2_S3 3j_Standing_A2_S3.hkx
++ 3j_Standing_A2_S4 3j_Standing_A2_S4.hkx
++ 3j_Standing_A2_S5 3j_Standing_A2_S5.hkx
++ 3j_Standing_A2_S6 3j_Standing_A2_S6.hkx
+
+s 3j_Standingvar_A1_S1 3j_Standingvar_A1_S1.hkx
++ 3j_Standingvar_A1_S2 3j_Standingvar_A1_S2.hkx
++ 3j_Standingvar_A1_S3 3j_Standingvar_A1_S3.hkx
++ 3j_Standingvar_A1_S4 3j_Standingvar_A1_S4.hkx
++ 3j_Standingvar_A1_S5 3j_Standingvar_A1_S5.hkx
+s 3j_Standingvar_A2_S1 3j_Standingvar_A2_S1.hkx
++ 3j_Standingvar_A2_S2 3j_Standingvar_A2_S2.hkx
++ 3j_Standingvar_A2_S3 3j_Standingvar_A2_S3.hkx
++ 3j_Standingvar_A2_S4 3j_Standingvar_A2_S4.hkx
++ 3j_Standingvar_A2_S5 3j_Standingvar_A2_S5.hkx
+
+s 3j_Holding_A1_S1 3j_Holding_A1_S1.hkx
++ 3j_Holding_A1_S2 3j_Holding_A1_S2.hkx
++ 3j_Holding_A1_S3 3j_Holding_A1_S3.hkx
++ 3j_Holding_A1_S4 3j_Holding_A1_S4.hkx
+s 3j_Holding_A2_S1 3j_Holding_A2_S1.hkx
++ 3j_Holding_A2_S2 3j_Holding_A2_S2.hkx
++ 3j_Holding_A2_S3 3j_Holding_A2_S3.hkx
++ 3j_Holding_A2_S4 3j_Holding_A2_S4.hkx
+
+s 3j_Missionary_A1_S1 3j_Missionary_A1_S1.hkx
++ 3j_Missionary_A1_S2 3j_Missionary_A1_S2.hkx
++ 3j_Missionary_A1_S3 3j_Missionary_A1_S3.hkx
++ 3j_Missionary_A1_S4 3j_Missionary_A1_S4.hkx
+s 3j_Missionary_A2_S1 3j_Missionary_A2_S1.hkx
++ 3j_Missionary_A2_S2 3j_Missionary_A2_S2.hkx
++ 3j_Missionary_A2_S3 3j_Missionary_A2_S3.hkx
++ 3j_Missionary_A2_S4 3j_Missionary_A2_S4.hkx
+
+s 3j_BreastFeeding_A1_S1 3j_BreastFeeding_A1_S1.hkx
++ 3j_BreastFeeding_A1_S2 3j_BreastFeeding_A1_S2.hkx
++ 3j_BreastFeeding_A1_S3 3j_BreastFeeding_A1_S3.hkx
++ 3j_BreastFeeding_A1_S4 3j_BreastFeeding_A1_S4.hkx
+s 3j_BreastFeeding_A2_S1 3j_BreastFeeding_A2_S1.hkx
++ 3j_BreastFeeding_A2_S2 3j_BreastFeeding_A2_S2.hkx
++ 3j_BreastFeeding_A2_S3 3j_BreastFeeding_A2_S3.hkx
++ 3j_BreastFeeding_A2_S4 3j_BreastFeeding_A2_S4.hkx
+
+s 3j_BreastFeedingvar_A1_S1 3j_BreastFeedingvar_A1_S1.hkx
++ 3j_BreastFeedingvar_A1_S2 3j_BreastFeedingvar_A1_S2.hkx
++ 3j_BreastFeedingvar_A1_S3 3j_BreastFeedingvar_A1_S3.hkx
+s 3j_BreastFeedingvar_A2_S1 3j_BreastFeedingvar_A2_S1.hkx
++ 3j_BreastFeedingvar_A2_S2 3j_BreastFeedingvar_A2_S2.hkx
++ 3j_BreastFeedingvar_A2_S3 3j_BreastFeedingvar_A2_S3.hkx
