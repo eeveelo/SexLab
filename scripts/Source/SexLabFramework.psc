@@ -200,6 +200,10 @@ function TreatAsFemale(Actor ActorRef)
 	ActorLib.TreatAsFemale(ActorRef)
 endFunction
 
+function TreatAsGender(Actor ActorRef, bool AsFemale)
+	ActorLib.TreatAsGender(ActorRef, AsFemale)
+endFunction
+
 function ClearForcedGender(Actor ActorRef)
 	ActorLib.ClearForcedGender(ActorRef)
 endFunction

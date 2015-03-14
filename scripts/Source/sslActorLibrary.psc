@@ -271,15 +271,23 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function TreatAsMale(Actor ActorRef)
-	ActorRef.SetFactionRank(GenderFaction, 0)
+	TreatAsGender(ActorRef, false)
 endFunction
 
 function TreatAsFemale(Actor ActorRef)
-	ActorRef.SetFactionRank(GenderFaction, 1)
+	TreatAsGender(ActorRef, true)
 endFunction
 
 function ClearForcedGender(Actor ActorRef)
 	ActorRef.RemoveFromFaction(GenderFaction)
+endFunction
+
+function TreatAsGender(Actor ActorRef, bool AsFemale)
+	ActorRef.RemoveFromFaction(GenderFaction)
+	int sex = ActorRef.GetLeveledActorBase().GetSex()
+	if (sex != 0 && !AsFemale) || (sex != 1 && AsFemale) 
+		ActorRef.SetFactionRank(GenderFaction, AsFemale as int)
+	endIf
 endFunction
 
 int function GetGender(Actor ActorRef)
@@ -297,7 +305,7 @@ int function GetGender(Actor ActorRef)
 			return BaseRef.GetSex() ; Default
 		endIf
 	endIf
-	return -1 ; Invalid actor
+	return 0 ; Invalid actor - default to male for compatibility
 endFunction
 
 int[] function GetGendersAll(Actor[] Positions)
