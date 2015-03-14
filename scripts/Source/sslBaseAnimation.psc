@@ -103,10 +103,10 @@ float function GetTimer(int Stage)
 	return Timers[(Stage - 1)]
 endFunction
 
-function SetStageTimer(int stage, float timer)
+function SetStageTimer(int Stage, float Timer)
 	; Validate stage
-	if stage > Stages || stage < 1
-		Log("Unknown animation stage, '"+stage+"' given.", "SetStageTimer")
+	if Stage > Stages || Stage < 1
+		Log("Unknown animation stage, '"+Stage+"' given.", "SetStageTimer")
 		return
 	endIf
 	; Initialize timer array if needed
@@ -114,7 +114,7 @@ function SetStageTimer(int stage, float timer)
 		Timers = Utility.CreateFloatArray(Stages)
 	endIf
 	; Set timer
-	Timers[(stage - 1)] = timer
+	Timers[(Stage - 1)] = Timer
 endFunction
 
 float function GetTimersRunTime(float[] StageTimers)
@@ -208,8 +208,7 @@ endFunction
 
 float[] function _GetStageAdjustments(string Registrar, string AdjustKey, int Stage) global native
 float[] function GetPositionAdjustments(string AdjustKey, int Position, int Stage)
-	InitAdjustments(AdjustKey, Position)
-	return _GetStageAdjustments(Registry, AdjustKey+"."+Position, Stage)
+	return _GetStageAdjustments(Registry, InitAdjustments(AdjustKey, Position), Stage)
 endFunction
 
 ;float[] function _GetAllAdjustments(string sProfile, string sRegistry, string sAdjustKey) global native
@@ -218,7 +217,7 @@ float[] function GetAllAdjustments(string AdjustKey)
 	return _GetAllAdjustments(Registry, Adjustkey)
 endFunction
 
-bool function _HasAdjustments(string Registrar, string AdjustKey, int Stage) global native
+bool function HasAdjustments(string Registrar, string AdjustKey, int Stage) global native
 
 function _PositionOffsets(string Registrar, string AdjustKey, string LastKey, int Stage, float[] RawOffsets) global native
 float[] function PositionOffsets(float[] Output, string AdjustKey, int Position, int Stage, int BedTypeID = 0)
@@ -228,13 +227,20 @@ float[] function PositionOffsets(float[] Output, string AdjustKey, int Position,
 	Output[1] = Offsets[(i + 1)] ; Side
 	Output[2] = Offsets[(i + 2)] ; Up
 	Output[3] = Offsets[(i + 3)] ; Rot - no offset
-	if BedTypeID > 0 && BedOffset.Length == 4
-		float[] Bed = GetBedOffsets()
-		; Log("Using Bed Offsets: "+Bed)
-		Output[0] = Output[0] + Bed[0]
-		Output[1] = Output[1] + Bed[1]
-		Output[2] = Output[2] + Bed[2]
-		Output[3] = Output[3] + Bed[3]
+	if BedTypeID > 0
+		if BedOffset.Length == 4
+			Output[0] = Output[0] + BedOffset[0]
+			Output[1] = Output[1] + BedOffset[1]
+			Output[3] = Output[3] + BedOffset[3]
+			if BedTypeID == 1
+				Output[2] = Output[2] + BedOffset[2] ; Only on non-bedrolls
+			endIf
+		else
+			Output[0] = Output[0] + 30.0
+			if BedTypeID == 1
+				Output[2] = Output[2] + 37.0 ; Only on non-bedrolls
+			endIf
+		endIf
 	endIf
 	Log("Raw("+Registry+", "+AdjustKey+"."+Position+", "+LastKeys[Position]+", "+Stage+"): "+Output)
 	_PositionOffsets(Registry, AdjustKey+"."+Position, LastKeys[Position], Stage, Output)
@@ -282,7 +288,7 @@ endFunction
 function _SetAdjustment(string Registrar, string AdjustKey, int Stage, int Slot, float Adjustment) global native
 function SetAdjustment(string AdjustKey, int Position, int Stage, int Slot, float Adjustment)
 	if Position < Actors
-		InitAdjustments(AdjustKey, Position)
+		LastKeys[Position] = InitAdjustments(AdjustKey, Position)
 		sslBaseAnimation._SetAdjustment(Registry, AdjustKey+"."+Position, Stage, Slot, Adjustment)
 	endIf
 endFunction
@@ -295,13 +301,13 @@ endFunction
 float function _UpdateAdjustment(string Registrar, string AdjustKey, int Stage, int nth, float by) global native
 function UpdateAdjustment(string AdjustKey, int Position, int Stage, int Slot, float AdjustBy)
 	if Position < Actors
-		InitAdjustments(AdjustKey, Position)
+		LastKeys[Position] = InitAdjustments(AdjustKey, Position)
 		sslBaseAnimation._UpdateAdjustment(Registry, AdjustKey+"."+Position, Stage, Slot, AdjustBy)
 	endIf
 endFunction
 function UpdateAdjustmentAll(string AdjustKey, int Position, int Slot, float AdjustBy)
 	if Position < Actors
-		InitAdjustments(AdjustKey, Position)
+		LastKeys[Position] = InitAdjustments(AdjustKey, Position)
 		int Stage = Stages
 		while Stage
 			sslBaseAnimation._UpdateAdjustment(Registry, AdjustKey+"."+Position, Stage, Slot, AdjustBy)
@@ -344,29 +350,37 @@ function RestoreOffsets(string AdjustKey)
 endFunction
 
 bool function _CopyAdjustments(string Registrar, string AdjustKey, float[] Array) global native
-function InitAdjustments(string AdjustKey, int Position)
+string function InitAdjustments(string AdjustKey, int Position)
 	AdjustKey += "."+Position
-	if !_HasAdjustments(Registry, AdjustKey, Stages)
-		float[] List
+	if !HasAdjustments(Registry, AdjustKey, Stages)
+		; Pick key to copy from
 		string CopyKey = LastKeys[Position]
-		if CopyKey == "" || !_HasAdjustments(Registry, CopyKey, Stages)
+		if CopyKey == "" || CopyKey == "Global."+Position || !HasAdjustments(Registry, CopyKey, Stages)
 			CopyKey = "Global."+Position
 		endIf
-		List = _GetAllAdjustments(Registry, CopyKey)
+		; Get adjustments from lastkey or default global
+		float[] List = _GetAllAdjustments(Registry, CopyKey)
 		if List.Length != (Stages * 4)
-			List = PapyrusUtil.ResizeFloatArray(List, (Stages * 4))
-			int Stage = Stages
-			while Stage > 0
-				List[AdjIndex(Stage, 3)] = Schlongs[StageIndex(Position, Stage)]
-				Stage -= 1
-			endWhile
-			Log(List, "Initialized("+AdjustKey+")")
+			List = GetEmptyAdjustments(Position)
+			Log(List, "InitAdjustments("+AdjustKey+")")
 		else
 			Log(List, "CopyAdjustments("+CopyKey+", "+AdjustKey+")")
 		endIf
+		; Copy list to profile
 		_CopyAdjustments(Registry, AdjustKey, List)
 	endIf
-	LastKeys[Position] = AdjustKey
+	return AdjustKey
+endFunction
+
+float[] function GetEmptyAdjustments(int Position)
+	float[] Output = Utility.CreateFloatArray((Stages * 4))
+	int[] Flags = FlagsArray(Position)
+	int Stage = Stages
+	while Stage > 0
+		Output[AdjIndex(Stage, kSchlong)] = Flags[FlagIndex(Stage, kSchlong)]
+		Stage -= 1
+	endWhile
+	return Output
 endFunction
 
 string[] function _GetAdjustKeys(string Registrar) global native
@@ -374,6 +388,14 @@ string[] function GetAdjustKeys()
 	return _GetAdjustKeys(Registry)
 endFunction
 
+;/ string function GetLastKey()
+	return StorageUtil.GetStringValue(Config, Key("LastKey"), "Global")
+endFunction
+
+string function PickKey(string AdjustKey, int Position)
+
+endFunction
+ /;
 ; ------------------------------------------------------- ;
 ; --- Flags                                           --- ;
 ; ------------------------------------------------------- ;
@@ -384,7 +406,6 @@ int[] function GetPositionFlags(string AdjustKey, int Position, int Stage)
 endFunction
 
 int[] function PositionFlags(int[] Output, string AdjustKey, int Position, int Stage)
-	AdjustKey += "."+Position
 	int i = FlagIndex(Stage, 0)
 	int[] Flags = FlagsArray(Position)
 	Output[0] = Flags[i]
@@ -413,9 +434,9 @@ endFunction
 
 ; int function _GetSchlong(string ProfileName, string Registry, string AdjustKey, string LastKey, int Stage, int retDefault) global native
 int function GetSchlong(string AdjustKey, int Position, int Stage)
-	if _HasAdjustments(Registry, AdjustKey, Stage)
-		return _GetAdjustment(Registry, AdjustKey, Stage, 3) as int
-	elseIf LastKeys[Position] != "" && _HasAdjustments(Registry, LastKeys[Position], Stage)
+	if HasAdjustments(Registry, AdjustKey+"."+Position, Stage)
+		return _GetAdjustment(Registry, AdjustKey+"."+Position, Stage, 3) as int
+	elseIf LastKeys[Position] != "" && HasAdjustments(Registry, LastKeys[Position], Stage)
 		return _GetAdjustment(Registry, LastKeys[Position], Stage, 3) as int
 	endIf
 	return FlagsArray(Position)[FlagIndex(Stage, kSchlong)]
@@ -625,7 +646,6 @@ function AddPositionStage(int Position, string AnimationEvent, float forward = 0
 	Offsets[oid + 2] = up
 	Offsets[oid + 3] = rotate
 	oid += kOffsetEnd
-
 endFunction
 
 function Save(int id = -1)
@@ -703,12 +723,16 @@ function Initialize()
 	Genders   = new int[4]
 	Positions = new int[5]
 	RaceTypes = new string[5]
-	LastKeys  = new string[5]
 	StageSoundFX = new Form[1]
 
-	Animations   = Utility.CreateStringArray(0)
-	BedOffset    = Utility.CreateFloatArray(0)
-	Timers       = Utility.CreateFloatArray(0)
+	; Only init if needed to keep between registry resets.
+	if LastKeys.Length != 5
+		LastKeys  = new string[5]
+	endIf
+
+	Animations = Utility.CreateStringArray(0)
+	BedOffset  = Utility.CreateFloatArray(0)
+	Timers     = Utility.CreateFloatArray(0)
 
 	Flags0 = Utility.CreateIntArray(0)
 	Flags1 = Utility.CreateIntArray(0)
