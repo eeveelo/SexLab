@@ -212,6 +212,7 @@ function RegisterRaces()
 	ClearRaceKey("Giants")
 	AddRaceID("Giants", "GiantRace")
 	AddRaceID("Giants", "DLC2GhostFrostGiantRace")
+	AddRaceID("Giants", "_00GiantFrostRace")
 
 	ClearRaceKey("Horses")
 	AddRaceID("Horses", "HorseRace")
