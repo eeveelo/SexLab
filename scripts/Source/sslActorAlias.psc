@@ -941,6 +941,8 @@ function Initialize()
 endFunction
 
 function Setup()
+	PlayerRef = Game.GetPlayer()
+	Thread    = GetOwningQuest() as sslThreadController
 	; Reset function Libraries - SexLabQuestFramework
 	if !Config || !ActorLib || !Stats
 		Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
@@ -950,8 +952,6 @@ function Setup()
 			Stats    = SexLabQuestFramework as sslActorStats
 		endIf
 	endIf
-	PlayerRef = Game.GetPlayer()
-	Thread    = GetOwningQuest() as sslThreadController
 endFunction
 
 function Log(string msg, string src = "")
@@ -991,8 +991,9 @@ endEvent
 event OnOrgasm()
 endEvent
 
-int function CalcEnjoyment(float[] XP, float[] SkillsAmounts, bool IsLeadin, bool IsFemaleActor, float Timer, int OnStage, int MaxStage) global native
 function OffsetCoords(float[] Output, float[] CenterCoords, float[] OffsetBy) global native
+bool function IsInPosition(Actor CheckActor, ObjectReference CheckMarker, float maxdistance = 30.0) global native
+int function CalcEnjoyment(float[] XP, float[] SkillsAmounts, bool IsLeadin, bool IsFemaleActor, float Timer, int OnStage, int MaxStage) global native
 
 ; function AdjustCoords(float[] Output, float[] CenterCoords, ) global native
 ; function AdjustOffset(int i, float amount, bool backwards, bool adjustStage)
@@ -1000,7 +1001,6 @@ function OffsetCoords(float[] Output, float[] CenterCoords, float[] OffsetBy) gl
 ; endFunction
 
 ; function OffsetBed(float[] Output, float[] BedOffsets, float CenterRot) global native
-bool function IsInPosition(Actor CheckActor, ObjectReference CheckMarker, float maxdistance = 30.0) global native
 
 ; bool function _SetActor(Actor ProspectRef) native
 ; function _ApplyExpression(Actor ProspectRef, int[] Presets) global native
@@ -1008,7 +1008,7 @@ bool function IsInPosition(Actor CheckActor, ObjectReference CheckMarker, float 
 
 ; function GetVars()
 ; 	IntShare = Thread.IntShare
-; 	FloatShare = Thread.FloatShare
+; 	FloatShare = Thread.FloatS1hare
 ; 	StringShare = Thread.StringShare
 ; 	BoolShare
 ; endFunction
@@ -1018,4 +1018,5 @@ bool function IsInPosition(Actor CheckActor, ObjectReference CheckMarker, float 
 ; string[] property StringShare auto hidden ; AdjustKey
 ; bool[] property BoolShare auto hidden ; 
 ; sslBaseAnimation[] property _Animation auto hidden ; Animation
+
 
