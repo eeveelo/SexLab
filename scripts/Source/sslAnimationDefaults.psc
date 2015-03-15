@@ -18,6 +18,8 @@ function LoadAnimations()
 	RegisterAnimation("zjMissionary")
 	RegisterAnimation("zjLaying")
 	RegisterAnimation("zjLyingVar")
+	RegisterAnimation("LeitoMissionary")
+	RegisterAnimation("LeitoMissionaryVar")
 	RegisterAnimation("APBedMissionary")
 	RegisterAnimation("APHoldLegUp")
 	RegisterAnimation("APLegUp")
@@ -31,9 +33,10 @@ function LoadAnimations()
 	RegisterAnimation("ArrokRape")
 	RegisterAnimation("ZynDoggystyle")
 	RegisterAnimation("DarkInvestigationsDoggystyle")
-	RegisterAnimation("APDoggyStyle")
 	RegisterAnimation("zjDoggy")
 	RegisterAnimation("zjDomination")
+	RegisterAnimation("LeitoDoggy")
+	RegisterAnimation("APDoggyStyle")
 	RegisterCategory("Doggystyle")
 
 	; Cowgirl
@@ -41,6 +44,8 @@ function LoadAnimations()
 	RegisterAnimation("ArrokCowgirl")
 	RegisterAnimation("ArrokReverseCowgirl")
 	RegisterAnimation("zjCowgirl")
+	RegisterAnimation("LeitoCowgirl")
+	RegisterAnimation("LeitoRCowgirl")
 	RegisterAnimation("APCowgirl")
 	RegisterCategory("Cowgirl")
 
@@ -60,12 +65,14 @@ function LoadAnimations()
 	RegisterAnimation("zjStanding")
 	RegisterAnimation("zjStandingVar")
 	RegisterAnimation("zjHolding")
+	RegisterAnimation("LeitoStanding")
 	RegisterAnimation("APStanding")
 	RegisterCategory("Standing")
 	
 	; Anal
 	RegisterAnimation("ArrokAnal")
 	RegisterAnimation("zjAnal")
+	RegisterAnimation("LeitoDoggyAnal")
 	RegisterAnimation("APAnal")
 	RegisterAnimation("APFaceDown")
 	RegisterCategory("Anal")
@@ -75,6 +82,8 @@ function LoadAnimations()
 	RegisterAnimation("ArrokOral")
 	RegisterAnimation("ArrokLedgeBlowjob")
 	RegisterAnimation("DarkInvestigationsBlowjob")
+	RegisterAnimation("LeitoBlowjob")
+	RegisterAnimation("LeitoCunnilingus")
 	RegisterAnimation("APBlowjob")
 	RegisterAnimation("APKneelBlowjob")
 	RegisterAnimation("APStandBlowjob")
@@ -95,10 +104,15 @@ function LoadAnimations()
 	RegisterAnimation("zjEroMassage")
 	RegisterAnimation("zjBreastFeeding")
 	RegisterAnimation("zjBreastFeedingVar")
+	RegisterAnimation("LeitoKissing")
+	RegisterAnimation("LeitoSpoon")
 	RegisterCategory("Foreplay")
 
 	; Footjob
 	RegisterAnimation("BleaghFootJob")
+	RegisterAnimation("LeitoFeet")
+	RegisterAnimation("LeitoFeet2")
+	RegisterAnimation("LeitoFeet3")
 	RegisterCategory("Footjob")
 	
 	; Gay/Lesbian
@@ -110,8 +124,9 @@ function LoadAnimations()
 	
 	; Solo
 	RegisterAnimation("BleaghFemaleSolo")
-	RegisterAnimation("APFemaleSolo")
+	RegisterAnimation("LeitoFemaleSolo")
 	RegisterAnimation("ArrokMaleMasturbation")
+	RegisterAnimation("APFemaleSolo")
 	RegisterCategory("Solo")
 	
 	; Misc
@@ -2463,6 +2478,491 @@ function zjBreastFeedingVar(int id)
 	Base.AddTag("Straight")
 	Base.AddTag("Foreplay")
 	Base.AddTag("LeadIn")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+
+function LeitoBlowjob(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Leito Blowjob"
+	Base.SoundFX = Sucking
+
+	int a1 = Base.AddPosition(Female, addCum=Oral)
+	Base.AddPositionStage(a1, "Leito_BlowJob_A1_S1", 0, silent = true)
+	Base.AddPositionStage(a1, "Leito_BlowJob_A1_S2", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "Leito_BlowJob_A1_S3", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "Leito_BlowJob_A1_S4", 0, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "Leito_BlowJob_A1_S5", 0, silent = true, openMouth = true)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Leito_BlowJob_A2_S1", 0, sos = 1)
+	Base.AddPositionStage(a2, "Leito_BlowJob_A2_S2", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_BlowJob_A2_S3", 0, sos = 2)
+	Base.AddPositionStage(a2, "Leito_BlowJob_A2_S4", 0, sos = 2)
+	Base.AddPositionStage(a2, "Leito_BlowJob_A2_S5", 0, sos = -1)
+
+	Base.SetStageSoundFX(1, none)
+
+	Base.AddTag("Leito")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Oral")
+	Base.AddTag("Dirty")
+	Base.AddTag("Blowjob")
+	Base.AddTag("Knees")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function LeitoCunnilingus(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Leito Cunnilingus"
+	Base.SoundFX = Sucking
+
+	int a1 = Base.AddPosition(Female)
+	Base.AddPositionStage(a1, "Leito_Cunnilingus_A1_S1", 0)
+	Base.AddPositionStage(a1, "Leito_Cunnilingus_A1_S2", 0)
+	Base.AddPositionStage(a1, "Leito_Cunnilingus_A1_S3", 0)
+	Base.AddPositionStage(a1, "Leito_Cunnilingus_A1_S4", 0)
+	Base.AddPositionStage(a1, "Leito_Cunnilingus_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Leito_Cunnilingus_A2_S1", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Cunnilingus_A2_S2", 0, silent = true, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Cunnilingus_A2_S3", 0, silent = true, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Cunnilingus_A2_S4", 0, silent = true, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Cunnilingus_A2_S5", 0, sos = 3)
+
+	Base.SetStageTimer(5, 7.0)
+
+	Base.AddTag("Leito")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Dirty")
+	Base.AddTag("Cunnilingus")
+	Base.AddTag("Foreplay")
+	Base.AddTag("LeadIn")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function LeitoCowgirl(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Leito Cowgirl"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "Leito_Cowgirl_A1_S1", 0)
+	Base.AddPositionStage(a1, "Leito_Cowgirl_A1_S2", 0)
+	Base.AddPositionStage(a1, "Leito_Cowgirl_A1_S3", 0)
+	Base.AddPositionStage(a1, "Leito_Cowgirl_A1_S4", 0)
+	Base.AddPositionStage(a1, "Leito_Cowgirl_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Leito_Cowgirl_A2_S1", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Cowgirl_A2_S2", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Cowgirl_A2_S3", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Cowgirl_A2_S4", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Cowgirl_A2_S5", 0, sos = 3)
+
+	Base.SetStageSoundFX(5, none)
+
+	Base.AddTag("Leito")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Dirty")
+	Base.AddTag("Cowgirl")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function LeitoDoggy(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Leito Doggystyle"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "Leito_Doggystyle_A1_S1", 0)
+	Base.AddPositionStage(a1, "Leito_Doggystyle_A1_S2", 0)
+	Base.AddPositionStage(a1, "Leito_Doggystyle_A1_S3", 0)
+	Base.AddPositionStage(a1, "Leito_Doggystyle_A1_S4", 0)
+	Base.AddPositionStage(a1, "Leito_Doggystyle_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Leito_Doggystyle_A2_S1", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Doggystyle_A2_S2", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Doggystyle_A2_S3", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Doggystyle_A2_S4", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Doggystyle_A2_S5", 0, sos = 3)
+
+	Base.SetStageSoundFX(1, none)
+	Base.SetStageSoundFX(5, none)
+
+	Base.AddTag("Leito")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Dirty")
+	Base.AddTag("DoggyStyle")
+	Base.AddTag("Knees")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function LeitoDoggyAnal(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Leito Doggystyle Anal"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "Leito_DoggystyleAnal_A1_S1", 0)
+	Base.AddPositionStage(a1, "Leito_DoggystyleAnal_A1_S2", 0)
+	Base.AddPositionStage(a1, "Leito_DoggystyleAnal_A1_S3", 0)
+	Base.AddPositionStage(a1, "Leito_DoggystyleAnal_A1_S4", 0)
+	Base.AddPositionStage(a1, "Leito_DoggystyleAnal_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Leito_DoggystyleAnal_A2_S1", 0, sos = 0)
+	Base.AddPositionStage(a2, "Leito_DoggystyleAnal_A2_S2", 0, sos = 0)
+	Base.AddPositionStage(a2, "Leito_DoggystyleAnal_A2_S3", 0, sos = 0)
+	Base.AddPositionStage(a2, "Leito_DoggystyleAnal_A2_S4", 0, sos = 0)
+	Base.AddPositionStage(a2, "Leito_DoggystyleAnal_A2_S5", 0, sos = 0)
+
+	Base.AddTag("Leito")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Dirty")
+	Base.AddTag("DoggyStyle")
+	Base.AddTag("Knees")
+	Base.AddTag("Anal")
+	Base.AddTag("Behind")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function LeitoFemaleSolo(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Leito Female Solo"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female)
+	Base.AddPositionStage(a1, "Leito_FemaleSolo_A1_S1", 0)
+	Base.AddPositionStage(a1, "Leito_FemaleSolo_A1_S2", 0)
+	Base.AddPositionStage(a1, "Leito_FemaleSolo_A1_S3", 0)
+	Base.AddPositionStage(a1, "Leito_FemaleSolo_A1_S4", 0)
+	Base.AddPositionStage(a1, "Leito_FemaleSolo_A1_S5", 0)
+
+	Base.SetStageTimer(5, 8.2)
+	
+	Base.AddTag("Leito")
+	Base.AddTag("Sex")
+	Base.AddTag("Solo")
+	Base.AddTag("Masturbation")
+	Base.AddTag("Kneeling")
+	Base.AddTag("Dirty")
+
+	Base.Save(id)
+endFunction
+
+function LeitoFeet(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Leito Footjob 1"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female)
+	Base.AddPositionStage(a1, "Leito_Feet_A1_S1", 0)
+	Base.AddPositionStage(a1, "Leito_Feet_A1_S2", 0)
+	Base.AddPositionStage(a1, "Leito_Feet_A1_S3", 0)
+	Base.AddPositionStage(a1, "Leito_Feet_A1_S4", 0)
+	Base.AddPositionStage(a1, "Leito_Feet_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Leito_Feet_A2_S1", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Feet_A2_S2", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Feet_A2_S3", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Feet_A2_S4", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Feet_A2_S5", 0, sos = 3)
+
+	Base.SetStageSoundFX(1, none)
+	Base.SetStageSoundFX(2, none)
+	Base.SetStageSoundFX(5, none)
+
+	Base.AddTag("Leito")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Dirty")
+	Base.AddTag("Fetish")
+	Base.AddTag("Feet")
+	Base.AddTag("Footjob")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function LeitoFeet2(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Leito Footjob 2"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female)
+	Base.AddPositionStage(a1, "Leito_Feet2_A1_S1", 0)
+	Base.AddPositionStage(a1, "Leito_Feet2_A1_S2", 0)
+	Base.AddPositionStage(a1, "Leito_Feet2_A1_S3", 0)
+	Base.AddPositionStage(a1, "Leito_Feet2_A1_S4", 0)
+	Base.AddPositionStage(a1, "Leito_Feet2_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male, addCum=Vaginal)
+	Base.AddPositionStage(a2, "Leito_Feet2_A2_S1", 0, sos = 9)
+	Base.AddPositionStage(a2, "Leito_Feet2_A2_S2", 0, sos = 1)
+	Base.AddPositionStage(a2, "Leito_Feet2_A2_S3", 0, sos = 0)
+	Base.AddPositionStage(a2, "Leito_Feet2_A2_S4", 0, sos = 0)
+	Base.AddPositionStage(a2, "Leito_Feet2_A2_S5", 0, sos = 0)
+
+	Base.SetStageSoundFX(1, none)
+	Base.SetStageSoundFX(2, none)
+	Base.SetStageSoundFX(5, none)
+
+	Base.AddTag("Leito")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Dirty")
+	Base.AddTag("Fetish")
+	Base.AddTag("Feet")
+	Base.AddTag("Footjob")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function LeitoFeet3(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Leito Footjob 3"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Anal)
+	Base.AddPositionStage(a1, "Leito_Feet3_A1_S1", 0)
+	Base.AddPositionStage(a1, "Leito_Feet3_A1_S2", 0)
+	Base.AddPositionStage(a1, "Leito_Feet3_A1_S3", 0)
+	Base.AddPositionStage(a1, "Leito_Feet3_A1_S4", 0)
+	Base.AddPositionStage(a1, "Leito_Feet3_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Leito_Feet3_A2_S1", 0, sos = 6)
+	Base.AddPositionStage(a2, "Leito_Feet3_A2_S2", 0, sos = 6)
+	Base.AddPositionStage(a2, "Leito_Feet3_A2_S3", 0, sos = 0)
+	Base.AddPositionStage(a2, "Leito_Feet3_A2_S4", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Feet3_A2_S5", 0, sos = 3)
+
+	Base.AddTag("Leito")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Dirty")
+	Base.AddTag("Fetish")
+	Base.AddTag("Feet")
+	Base.AddTag("Footjob")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function LeitoKissing(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Leito Kissing"
+
+	int a1 = Base.AddPosition(Female)
+	Base.AddPositionStage(a1, "Leito_Kissing_A1_S1", 0)
+	Base.AddPositionStage(a1, "Leito_Kissing_A1_S2", 0)
+	Base.AddPositionStage(a1, "Leito_Kissing_A1_S3", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Leito_Kissing_A2_S1", 0)
+	Base.AddPositionStage(a2, "Leito_Kissing_A2_S2", 0)
+	Base.AddPositionStage(a2, "Leito_Kissing_A2_S3", 0)
+
+	Base.SetStageTimer(1, 1.8)
+	Base.SetStageTimer(3, 0.7)
+
+	Base.AddTag("Leito")
+	Base.AddTag("Foreplay")
+	Base.AddTag("LeadIn")
+	Base.AddTag("Straight")
+	Base.AddTag("Kissing")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function LeitoMissionary(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Leito Missionary"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "Leito_Missionary_A1_S1", 0)
+	Base.AddPositionStage(a1, "Leito_Missionary_A1_S2", 0)
+	Base.AddPositionStage(a1, "Leito_Missionary_A1_S3", 0)
+	Base.AddPositionStage(a1, "Leito_Missionary_A1_S4", 0)
+	Base.AddPositionStage(a1, "Leito_Missionary_A1_S5", 0)
+	
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Leito_Missionary_A2_S1", 0)
+	Base.AddPositionStage(a2, "Leito_Missionary_A2_S2", 0)
+	Base.AddPositionStage(a2, "Leito_Missionary_A2_S3", 0)
+	Base.AddPositionStage(a2, "Leito_Missionary_A2_S4", 0)
+	Base.AddPositionStage(a2, "Leito_Missionary_A2_S5", 0)
+	
+	Base.AddTag("Leito")
+	Base.AddTag("Sex")
+	Base.AddTag("Missionary")
+	Base.AddTag("Lying")
+	Base.AddTag("Vaginal")	
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function LeitoMissionaryVar(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Leito Missionary 2"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "Leito_Missionary2_A1_S1", 0)
+	Base.AddPositionStage(a1, "Leito_Missionary2_A1_S2", 0)
+	Base.AddPositionStage(a1, "Leito_Missionary2_A1_S3", 0)
+	Base.AddPositionStage(a1, "Leito_Missionary2_A1_S4", 0)
+	Base.AddPositionStage(a1, "Leito_Missionary2_A1_S5", 0)
+	
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Leito_Missionary2_A2_S1", 0)
+	Base.AddPositionStage(a2, "Leito_Missionary2_A2_S2", 0)
+	Base.AddPositionStage(a2, "Leito_Missionary2_A2_S3", 0)
+	Base.AddPositionStage(a2, "Leito_Missionary2_A2_S4", 0)
+	Base.AddPositionStage(a2, "Leito_Missionary2_A2_S5", 0)
+	
+	Base.AddTag("Leito")
+	Base.AddTag("Sex")
+	Base.AddTag("Missionary")
+	Base.AddTag("Lying")
+	Base.AddTag("Vaginal")	
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function LeitoRCowgirl(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Leito Reverse Cowgirl"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "Leito_ReverseCowgirl_A1_S1", 0)
+	Base.AddPositionStage(a1, "Leito_ReverseCowgirl_A1_S2", 0)
+	Base.AddPositionStage(a1, "Leito_ReverseCowgirl_A1_S3", 0)
+	Base.AddPositionStage(a1, "Leito_ReverseCowgirl_A1_S4", 0)
+	Base.AddPositionStage(a1, "Leito_ReverseCowgirl_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Leito_ReverseCowgirl_A2_S1", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_ReverseCowgirl_A2_S2", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_ReverseCowgirl_A2_S3", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_ReverseCowgirl_A2_S4", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_ReverseCowgirl_A2_S5", 0, sos = 3)
+
+	Base.AddTag("Leito")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Dirty")
+	Base.AddTag("RCowgirl")
+	Base.AddTag("Vaginal")
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function LeitoSpoon(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Leito Spooning"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "Leito_Spooning_A1_S1", 0)
+	Base.AddPositionStage(a1, "Leito_Spooning_A1_S2", 0)
+	Base.AddPositionStage(a1, "Leito_Spooning_A1_S3", 0)
+	Base.AddPositionStage(a1, "Leito_Spooning_A1_S4", 0)
+	Base.AddPositionStage(a1, "Leito_Spooning_A1_S5", 0)
+	
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Leito_Spooning_A2_S1", 0, sos = 8)
+	Base.AddPositionStage(a2, "Leito_Spooning_A2_S2", 0, sos = 8)
+	Base.AddPositionStage(a2, "Leito_Spooning_A2_S3", 0, sos = 8)
+	Base.AddPositionStage(a2, "Leito_Spooning_A2_S4", 0, sos = 8)
+	Base.AddPositionStage(a2, "Leito_Spooning_A2_S5", 0, sos = 8)
+	
+	Base.AddTag("Leito")
+	Base.AddTag("Sex")
+	Base.AddTag("Spooning")
+	Base.AddTag("Lying")
+	Base.AddTag("Vaginal")	
+	Base.AddTag("MF")
+
+	Base.Save(id)
+endFunction
+
+function LeitoStanding(int id)
+	sslBaseAnimation Base = Create(id)
+
+	Base.Name = "Leito Standing"
+	Base.SoundFX = Squishing
+
+	int a1 = Base.AddPosition(Female, addCum=Vaginal)
+	Base.AddPositionStage(a1, "Leito_Standing_A1_S1", 0)
+	Base.AddPositionStage(a1, "Leito_Standing_A1_S2", 0)
+	Base.AddPositionStage(a1, "Leito_Standing_A1_S3", 0)
+	Base.AddPositionStage(a1, "Leito_Standing_A1_S4", 0)
+	Base.AddPositionStage(a1, "Leito_Standing_A1_S5", 0)
+
+	int a2 = Base.AddPosition(Male)
+	Base.AddPositionStage(a2, "Leito_Standing_A2_S1", 0, sos = -1)
+	Base.AddPositionStage(a2, "Leito_Standing_A2_S2", 0, sos = -1)
+	Base.AddPositionStage(a2, "Leito_Standing_A2_S3", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Standing_A2_S4", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Standing_A2_S5", 0, sos = 3)
+
+	Base.SetStageSoundFX(1, none)
+	Base.SetStageSoundFX(2, none)
+
+	Base.AddTag("Leito")
+	Base.AddTag("Sex")
+	Base.AddTag("Straight")
+	Base.AddTag("Dirty")
+	Base.AddTag("Standing")
+	Base.AddTag("Vaginal")
 	Base.AddTag("MF")
 
 	Base.Save(id)
