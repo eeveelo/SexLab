@@ -36,6 +36,11 @@ Skryim SexLab Framework
      Bleagh - http://www.loverslab.com/topic/22484-bleagh
      PanicForever - http://www.loverslab.com/topic/23426-panics
      Athstai - http://dark-investigations.blogspot.com
+     3jiou - http://www.loverslab.com/topic/38317-3js-animations/
+     Mitos - http://www.loverslab.com/topic/42217-mitos-animation-shop/
+     Leito86 - http://www.loverslab.com/topic/39465-animations-by-leito-12915-new-animations/
+     4uDIK - http://www.loverslab.com/topic/38934-%D0%B0nimations-for-sexlab/
+     FalloutBoy2 - http://www.loverslab.com/topic/39160-animation-complete/
 
     Audio:
      Lovers with PK
@@ -49,7 +54,6 @@ Skryim SexLab Framework
 
     SKSE Plugins:
      h38fh2mf
-     kapaer
      Ashal
 
     Scripting:
