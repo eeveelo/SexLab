@@ -75,7 +75,7 @@ sslThreadController function QuickStart(Actor Actor1, Actor Actor2 = none, Actor
 	Actor[] Positions = sslUtility.MakeActorArray(Actor1, Actor2, Actor3, Actor4, Actor5)
 	sslBaseAnimation[] Anims
 	if AnimationTags != ""
-		Anims = AnimSlots.GetByTags(Positions.Length, AnimationTags)
+		Anims = AnimSlots.GetByTags(Positions.Length, AnimationTags, "", false)
 	endIf
 	return ThreadSlots.GetController(StartSex(Positions, Anims, Victim, none, true, Hook))
 endFunction

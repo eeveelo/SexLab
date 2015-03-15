@@ -16,34 +16,40 @@ ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	if StorageUtil.HasFormValue(none, "TestObj")
-		Form ObjForm = StorageUtil.GetFormValue(none, "TestObj")
-		Log("Obj Saved ["+ObjForm.GetFormID()+"]: "+ObjForm)
-		Log("Value Del(1)"+StorageUtil.GetIntValue(ObjForm, "Test"))
-		Utility.Wait(2.0)
+	if TargetRef == PlayerRef
+		SexLab.QuickStart(CasterRef, AnimationTags = "FalloutBoy2,Mitos,4uDIK,3jiou,Leito")
+	else
+		SexLab.QuickStart(CasterRef, TargetRef, AnimationTags = "FalloutBoy2,Mitos,4uDIK,3jiou,Leito")
 	endIf
+
+	; if StorageUtil.HasFormValue(none, "TestObj")
+	; 	Form ObjForm = StorageUtil.GetFormValue(none, "TestObj")
+	; 	Log("Obj Saved ["+ObjForm.GetFormID()+"]: "+ObjForm)
+	; 	Log("Value Del(1)"+StorageUtil.GetIntValue(ObjForm, "Test"))
+	; 	Utility.Wait(2.0)
+	; endIf
  
-	sslSystemConfig Config = SexLab.Config
-	ObjectReference Obj = TargetRef.PlaceAtMe(Config.BaseMarker, 1)
-	Utility.Wait(2.0)
+	; sslSystemConfig Config = SexLab.Config
+	; ObjectReference Obj = TargetRef.PlaceAtMe(Config.BaseMarker, 1)
+	; Utility.Wait(2.0)
 
-	Log("Obj New ["+Obj.GetFormID()+"]: "+Obj)
-	StorageUtil.SetIntValue(Obj, "Test", 42)
-	StorageUtil.SetFormValue(none, "TestObj", Obj)
-	Log("Value Set: "+StorageUtil.GetIntValue(Obj, "Test"))
+	; Log("Obj New ["+Obj.GetFormID()+"]: "+Obj)
+	; StorageUtil.SetIntValue(Obj, "Test", 42)
+	; StorageUtil.SetFormValue(none, "TestObj", Obj)
+	; Log("Value Set: "+StorageUtil.GetIntValue(Obj, "Test"))
 
-	Utility.Wait(2.0)
+	; Utility.Wait(2.0)
 
-	Obj.Disable()
-	Obj.Delete()
-	Obj = none
+	; Obj.Disable()
+	; Obj.Delete()
+	; Obj = none
 
-	Utility.Wait(2.0)
+	; Utility.Wait(2.0)
 
-	Log("Value Del(2)"+StorageUtil.GetIntValue(Obj, "Test"))
-	Utility.Wait(1.0)
+	; Log("Value Del(2)"+StorageUtil.GetIntValue(Obj, "Test"))
+	; Utility.Wait(1.0)
 
-	; int[] Array = new int[20]
+	; ; int[] Array = new int[20]
 	; int i = Array.Length
 	; while i
 	; 	i -= 1
