@@ -814,6 +814,24 @@ s 3j_BreastFeedingvar_A2_S1 3j_BreastFeedingvar_A2_S1.hkx
 + 3j_BreastFeedingvar_A2_S2 3j_BreastFeedingvar_A2_S2.hkx
 + 3j_BreastFeedingvar_A2_S3 3j_BreastFeedingvar_A2_S3.hkx
 
+s 3j_FFM_A1_S1 3j_FFM_A1_S1.hkx
++ 3j_FFM_A1_S2 3j_FFM_A1_S2.hkx
++ 3j_FFM_A1_S3 3j_FFM_A1_S3.hkx
++ 3j_FFM_A1_S4 3j_FFM_A1_S4.hkx
++ 3j_FFM_A1_S5 3j_FFM_A1_S5.hkx
++ 3j_FFM_A1_S6 3j_FFM_A1_S6.hkx
+s 3j_FFM_A2_S1 3j_FFM_A2_S1.hkx
++ 3j_FFM_A2_S2 3j_FFM_A2_S2.hkx
++ 3j_FFM_A2_S3 3j_FFM_A2_S3.hkx
++ 3j_FFM_A2_S4 3j_FFM_A2_S4.hkx
++ 3j_FFM_A2_S5 3j_FFM_A2_S5.hkx
++ 3j_FFM_A2_S6 3j_FFM_A2_S6.hkx
+s 3j_FFM_A3_S1 3j_FFM_A3_S1.hkx
++ 3j_FFM_A3_S2 3j_FFM_A3_S2.hkx
++ 3j_FFM_A3_S3 3j_FFM_A3_S3.hkx
++ 3j_FFM_A3_S4 3j_FFM_A3_S4.hkx
++ 3j_FFM_A3_S5 3j_FFM_A3_S5.hkx
++ 3j_FFM_A3_S6 3j_FFM_A3_S6.hkx
 
 '
 ' Leito Animation
@@ -910,11 +928,12 @@ s Leito_Feet_A2_S1 Leito_Feet_A2_S1.hkx
 s Leito_Kissing_A1_S1 Leito_Kissing_A1_S1.hkx
 + Leito_Kissing_A1_S2 Leito_Kissing_A1_S2.hkx
 + Leito_Kissing_A1_S3 Leito_Kissing_A1_S3.hkx
-+ Leito_Kissing_A1_full Leito_Kissing_A1_full.hkx
 s Leito_Kissing_A2_S1 Leito_Kissing_A2_S1.hkx
 + Leito_Kissing_A2_S2 Leito_Kissing_A2_S2.hkx
 + Leito_Kissing_A2_S3 Leito_Kissing_A2_S3.hkx
-+ Leito_Kissing_A2_full Leito_Kissing_A2_full.hkx
+
+b Leito_Kissing_A1_full Leito_Kissing_A1_full.hkx
+b Leito_Kissing_A2_full Leito_Kissing_A2_full.hkx
 
 s Leito_Missionary1_A1_S1 Leito_Missionary1_A1_S1.hkx
 + Leito_Missionary1_A1_S2 Leito_Missionary1_A1_S2.hkx
@@ -1172,4 +1191,4 @@ s FB_FemaleSolo_A1_S1 FB_FemaleSolo_A1_S1.hkx
 + FB_FemaleSolo_A1_S2 FB_FemaleSolo_A1_S2.hkx
 + FB_FemaleSolo_A1_S3 FB_FemaleSolo_A1_S3.hkx
 + FB_FemaleSolo_A1_S4 FB_FemaleSolo_A1_S4.hkx
-+ FB_FemaleSolo_A1_S5 FB_FemaleSolo_A1_S5.hkx
++ -a FB_FemaleSolo_A1_S5 FB_FemaleSolo_A1_S5.hkx
