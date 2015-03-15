@@ -287,6 +287,8 @@ state Animating
 		if IsPlayer && Config.AutoTFC
 			SexLabUtil.EnableFreeCamera(true, Config.AutoSUCSM)
 		endIf
+		; TODO: Add a light source option here. (possibly with frostfall benefit?)
+		;
 		; Start update loop
 		TrackedEvent("Start")
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
@@ -323,12 +325,10 @@ state Animating
 		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
 		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedTypeID)
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
-		; TODO: Offsets and flags seem to be off in some cases, noteably offset roation.
-		Log(AnimEvent+" - "+Flags+" - "+Offsets)
 		; Update alias info
 		GetEnjoyment()
 		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
-		Log("Enjoyment: "+Enjoyment+" SOS: "+Schlong)
+		; Log("Enjoyment: "+Enjoyment+" SOS: "+Schlong)
 		if !IsCreature
 			ResolveStrapon()
 			RefreshExpression()

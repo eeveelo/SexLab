@@ -242,9 +242,7 @@ float[] function PositionOffsets(float[] Output, string AdjustKey, int Position,
 			endIf
 		endIf
 	endIf
-	Log("Raw("+Registry+", "+AdjustKey+"."+Position+", "+LastKeys[Position]+", "+Stage+"): "+Output)
 	_PositionOffsets(Registry, AdjustKey+"."+Position, LastKeys[Position], Stage, Output)
-	Log("Adj("+Registry+", "+AdjustKey+"."+Position+", "+LastKeys[Position]+", "+Stage+"): "+Output)
 	return Output
 endFunction
 
