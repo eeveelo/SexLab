@@ -209,7 +209,7 @@ state Ready
 		if Thread.ActorCount > 1 && Config.ScaleActors ; FIXME: || IsCreature?
 			AnimScale = (1.0 / base)
 		endIf
-		Log("display/base/animscale = "+display+"/"+base+"/"+AnimScale)
+		; Log("display/base/animscale = "+display+"/"+base+"/"+AnimScale)
 		; Stop movement
 		LockActor()
 		; Starting position
@@ -562,7 +562,7 @@ function RestoreActorDefaults()
 		if !ActorRef
 			return ; No actor, reset prematurely or bad call to alias
 		endIf
-	endIf
+	endIf	
 	; Reset to starting scale
 	if ActorScale != 0.0
 		ActorRef.SetScale(ActorScale)
@@ -577,7 +577,11 @@ function RestoreActorDefaults()
 			ActorRef.RemoveItem(Strapon, 1, true)
 		endIf
 		; Reset expression
-		sslBaseExpression.ClearMFG(ActorRef)
+		if Expression
+			sslBaseExpression.ClearMFG(ActorRef)
+		else
+			sslBaseExpression.CloseMouth(ActorRef)
+		endIf
 	endIf
 	; Remove SOS erection
 	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
