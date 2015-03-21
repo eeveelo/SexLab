@@ -162,8 +162,9 @@ function DebugLog(string Log, string Type = "NOTICE", bool DebugMode = false) gl
 endFunction
 
 float function Timer(float Timestamp, string Log) global
-	DebugLog(Log, "["+(Utility.GetCurrentRealTime() - Timestamp)+"]", true)
-	return Utility.GetCurrentRealTime()
+	float i = Utility.GetCurrentRealTime()
+	DebugLog(Log, "["+(i - Timestamp)+"]", true)
+	return i
 endFunction
 
 ; Deprecated

@@ -93,8 +93,10 @@ function OpenMouth(Actor ActorRef) global
 endFunction
 
 function CloseMouth(Actor ActorRef) global
-	ActorRef.SetExpressionPhoneme(1, 0.0)
-	if GetExpression(ActorRef, true) == 16.0
+	if GetPhoneme(ActorRef, 1) >= 0.5
+		ActorRef.SetExpressionPhoneme(1, 0.0)
+	endIf
+	if GetExpression(ActorRef, true) == 16.0 && GetExpression(ActorRef, false) >= 0.7
 		ActorRef.ClearExpressionOverride()
 	endIf
 endFunction

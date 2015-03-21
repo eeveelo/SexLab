@@ -200,7 +200,7 @@ state Ready
 		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedTypeID)
 		Center     = Thread.CenterLocation
 		; Calculate scales
-		float display = ActorRef.GetScale()
+		;/ float display = ActorRef.GetScale()
 		ActorRef.SetScale(1.0)
 		float base = ActorRef.GetScale()
 		ActorScale = ( display / base )
@@ -208,7 +208,7 @@ state Ready
 		ActorRef.SetScale(ActorScale)
 		if Thread.ActorCount > 1 && Config.ScaleActors ; FIXME: || IsCreature?
 			AnimScale = (1.0 / base)
-		endIf
+		endIf /;
 		; Log("display/base/animscale = "+display+"/"+base+"/"+AnimScale)
 		; Stop movement
 		LockActor()
@@ -218,8 +218,8 @@ state Ready
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
-		ActorRef.SetVehicle(MarkerRef)
-		ActorRef.SetScale(AnimScale)
+		; ActorRef.SetVehicle(MarkerRef)
+		; ActorRef.SetScale(AnimScale)
 		; Disable autoadvance if disabled for player
 		if IsPlayer
 			if IsVictim && Config.DisablePlayer
@@ -352,16 +352,16 @@ state Animating
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		; Avoid forcibly setting on player coords if avoidable - causes annoying graphical flickering
 		if Force && IsPlayer && IsInPosition(ActorRef, MarkerRef, 40.0)
-			ActorRef.SetVehicle(MarkerRef)
-			ActorRef.SetScale(AnimScale)
+			; ActorRef.SetVehicle(MarkerRef)
+			; ActorRef.SetScale(AnimScale)
 			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 5000, 0)
 			return ; OnTranslationComplete() will take over when in place
 		elseIf Force
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		endIf
-		ActorRef.SetVehicle(MarkerRef)
-		ActorRef.SetScale(AnimScale)
+		; ActorRef.SetVehicle(MarkerRef)
+		; ActorRef.SetScale(AnimScale)
 		Snap()
 	endFunction
 
@@ -370,14 +370,14 @@ state Animating
 		if !IsInPosition(ActorRef, MarkerRef, 75.0)
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
-			ActorRef.SetVehicle(MarkerRef)
-			ActorRef.SetScale(AnimScale)
+			; ActorRef.SetVehicle(MarkerRef)
+			; ActorRef.SetScale(AnimScale)
 		elseIf ActorRef.GetDistance(MarkerRef) > 0.5
 			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 5000, 0)
 			return ; OnTranslationComplete() will take over when in place
 		endIf
 		; Begin very slowly rotating a small amount to hold position
-		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.001, 20.0, 500, 0.00001)
+		; ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.001, 20.0, 500, 0.00001)
 	endFunction
 
 	event OnTranslationComplete()
@@ -502,6 +502,9 @@ function LockActor()
 	ActorRef.SetFactionRank(Config.AnimatingFaction, 1)
 	ActorUtil.AddPackageOverride(ActorRef, Config.DoNothing, 100, 1)
 	ActorRef.EvaluatePackage()
+	; Animation Driven
+	; ActorRef.SetAnimationVariableBool("bAnimationDriven", true)
+	; ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", false)
 	; Disable movement
 	if IsPlayer
 		if Game.GetCameraState() == 0
@@ -525,8 +528,8 @@ function LockActor()
 	MarkerRef.Enable()
 	MarkerRef.MoveTo(ActorRef)
 	ActorRef.StopTranslation()
-	ActorRef.SetVehicle(MarkerRef)
-	ActorRef.SetScale(AnimScale)
+	; ActorRef.SetVehicle(MarkerRef)
+	; ActorRef.SetScale(AnimScale)
 endFunction
 
 function UnlockActor()
@@ -535,11 +538,14 @@ function UnlockActor()
 	endIf
 	; Detach positioning marker
 	ActorRef.StopTranslation()
-	ActorRef.SetVehicle(none)
+	; ActorRef.SetVehicle(none)
 	; Remove from animation faction
 	ActorRef.RemoveFromFaction(Config.AnimatingFaction)
 	ActorUtil.RemovePackageOverride(ActorRef, Config.DoNothing)
 	ActorRef.EvaluatePackage()
+	; Animation Driven
+	; ActorRef.SetAnimationVariableBool("bAnimationDriven", false)
+	; ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 	; Enable movement
 	if IsPlayer
 		; Disable free camera, if in it

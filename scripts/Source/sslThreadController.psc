@@ -32,6 +32,7 @@ state Prepare
 		UpdateAdjustKey()
 		SetAnimation()
 		Log(AdjustKey, "Adjustment Profile")
+		t = SexLabUtil.Timer(t, "Prepare - Start")
 		SyncEvent("Prepare", 30.0)
 	endFunction
 
@@ -40,24 +41,30 @@ state Prepare
 	endFunction
 
 	event OnUpdate()
+		t = SexLabUtil.Timer(t, "Prepare - Prepare Update")
 		; Set starting adjusted actor
 		AdjustPos   = (ActorCount > 1) as int
 		AdjustAlias = PositionAlias(AdjustPos)
 		; Get localized config options
 		BaseDelay = Config.SFXDelay
 		; Send starter events
+		t = SexLabUtil.Timer(t, "Prepare - Config")
 		SendThreadEvent("AnimationStart")
 		if LeadIn
 			SendThreadEvent("LeadInStart")
 		endIf
+		t = SexLabUtil.Timer(t, "Prepare - Events")
 		; Start time trackers
 		RealTime[0] = Utility.GetCurrentRealTime()
 		SkillTime = RealTime[0]
 		StartedAt = RealTime[0]
+		t = SexLabUtil.Timer(t, "Prepare - Timers")
 		; Start actor loops
 		QuickEvent("Start")
+		t = SexLabUtil.Timer(t, "Prepare - Actor Loops")
 		; Begin animating loop
 		Action("Advancing")
+		t = SexLabUtil.Timer(t, "Prepare - Advancing")
 	endEvent
 
 	function RecordSkills()

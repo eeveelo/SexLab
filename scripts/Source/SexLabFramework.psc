@@ -313,10 +313,6 @@ sslBaseAnimation[] function GetAnimationsByTags(int ActorCount, string Tags, str
 	return AnimSlots.GetByTags(ActorCount, Tags, TagSuppress, RequireAll)
 endFunction
 
-sslBaseAnimation[] function GetAnimationsByTag(int ActorCount, string Tag1, string Tag2 = "", string Tag3 = "", string TagSuppress = "", bool RequireAll = true)
-	return AnimSlots.GetByTags(ActorCount, sslUtility.MakeArgs(",", Tag1, Tag2, Tag3), TagSuppress, RequireAll)
-endFunction
-
 sslBaseAnimation[] function GetAnimationsByType(int ActorCount, int Males = -1, int Females = -1, int StageCount = -1, bool Aggressive = false, bool Sexual = true)
 	return AnimSlots.GetByType(ActorCount, Males, Females, StageCount, Aggressive, Sexual)
 endFunction
@@ -371,6 +367,11 @@ endFunction
 
 string function GetGenderTag(int Females = 0, int Males = 0, int Creatures = 0)
 	return ActorLib.GetGenderTag(Females, Males, Creatures)
+endFunction
+
+; DEPRECATED
+sslBaseAnimation[] function GetAnimationsByTag(int ActorCount, string Tag1, string Tag2 = "", string Tag3 = "", string TagSuppress = "", bool RequireAll = true)
+	return AnimSlots.GetByTags(ActorCount, sslUtility.MakeArgs(",", Tag1, Tag2, Tag3), TagSuppress, RequireAll)
 endFunction
 
 ;#---------------------------#

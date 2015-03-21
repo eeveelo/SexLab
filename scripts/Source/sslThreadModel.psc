@@ -176,6 +176,7 @@ float property t auto hidden
 
 state Making
 	int function AddActor(Actor ActorRef, bool IsVictim = false, sslBaseVoice Voice = none, bool ForceSilent = false)
+		t = SexLabUtil.Timer(t, "AddActortor - Begin")
 		; Ensure we have room for actor
 		if !ActorRef
 			Fatal("Failed to add actor -- Actor is a figment of your imagination", "AddActor(NONE)")
@@ -191,17 +192,21 @@ state Making
 			return -1
 		endIf
 		sslActorAlias Slot = PickAlias(ActorRef)
+		t = SexLabUtil.Timer(t, "AddActortor - PickAlias")
 		if !Slot || !Slot.SetActor(ActorRef)
 			Fatal("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- They were unable to fill an actor alias", "AddActor("+ActorRef.GetLeveledActorBase().GetName()+")")
 			return -1
 		endIf
+		t = SexLabUtil.Timer(t, "AddActortor - SetActor")
 		; Update thread info
 		Positions  = PapyrusUtil.PushActor(Positions, ActorRef)
 		ActorCount = Positions.Length
 		HasPlayer  = Positions.Find(PlayerRef) != -1
+		t = SexLabUtil.Timer(t, "AddActortor - Info")
 		; Flag as victim
 		Slot.SetVictim(IsVictim)
 		Slot.SetVoice(Voice, ForceSilent)
+		t = SexLabUtil.Timer(t, "AddActortor - Victim/Voice")
 		; Return position
 		return Positions.Find(ActorRef)
 	endFunction
@@ -223,6 +228,7 @@ state Making
 	endFunction
 
 	sslThreadController function StartThread()
+		t = SexLabUtil.Timer(t, "StartThread - Begin")
 		GoToState("Starting")
 		UnregisterForUpdate()
 		int i
@@ -235,6 +241,7 @@ state Making
 			Fatal("No valid actors available for animation")
 			return none
 		endIf
+		t = SexLabUtil.Timer(t, "StartThread - Validate")
 
 		; ------------------------- ;
 		; --    Locate Center    -- ;
@@ -263,6 +270,7 @@ state Making
 			endIf
 		endIf
 
+		t = SexLabUtil.Timer(t, "StartThread - Locate Center")
 		; ------------------------- ;
 		; -- Validate Animations -- ;
 		; ------------------------- ;
@@ -310,11 +318,13 @@ state Making
 
 		; Get default primary animations if none
 		elseIf PrimaryAnimations.Length == 0
+			t = SexLabUtil.Timer(t, "StartThread - Pick primary")
 			SetAnimations(AnimSlots.GetByDefault(Males, Females, IsAggressive, (BedRef != none), Config.RestrictAggressive))
 			if PrimaryAnimations.Length == 0
 				Fatal("Unable to find valid default animations")
 				return none
 			endIf
+			t = SexLabUtil.Timer(t, "StartThread - Pick primary - done")
 		endIf
 
 		; Get default foreplay if none and enabled
@@ -326,29 +336,31 @@ state Making
 			endIf
 		endIf
 
+		t = SexLabUtil.Timer(t, "StartThread - Validate animations")
 		; If a bed is present, remove any furniture animations, and optionally any standing animations
 		if BedRef
 			string Filter = "Furniture"
-				if Config.BedRemoveStanding
-					Filter += ",Standing"
+			if Config.BedRemoveStanding
+				Filter += ",Standing"
+			endIf
+			; Remove furniture/standing animations from primary
+			sslBaseAnimation[] FilteredPrimary = sslUtility.RemoveTaggedAnimations(PrimaryAnimations, Filter)
+			if FilteredPrimary.Length == 0
+			elseIf FilteredPrimary.Length > 0 && FilteredPrimary.Length != PrimaryAnimations.Length
+				Log("Filtered out '"+(LeadAnimations.Length - FilteredPrimary.Length)+"' Primary Animations with tags '"+Filter+"'")
+				PrimaryAnimations = FilteredPrimary
+			endIf
+			; Remove furniture/standing from lead in
+			if LeadIn && LeadAnimations.Length > 0
+				sslBaseAnimation[] FilteredLead = sslUtility.RemoveTaggedAnimations(LeadAnimations, Filter)
+				if FilteredLead.Length > 0 && FilteredLead.Length != LeadAnimations.Length
+					Log("Filtered out '"+(LeadAnimations.Length - FilteredLead.Length)+"' Lead In Animations with tags '"+Filter+"'")
+					LeadAnimations = FilteredLead
 				endIf
-				; Remove furniture/standing animations from primary
-				sslBaseAnimation[] FilteredPrimary = sslUtility.RemoveTaggedAnimations(PrimaryAnimations, Filter)
-				if FilteredPrimary.Length == 0
-				elseIf FilteredPrimary.Length > 0 && FilteredPrimary.Length != PrimaryAnimations.Length
-					Log("Filtered out '"+(LeadAnimations.Length - FilteredPrimary.Length)+"' Primary Animations with tags '"+Filter+"'")
-					PrimaryAnimations = FilteredPrimary
-				endIf
-				; Remove furniture/standing from lead in
-				if LeadIn && LeadAnimations.Length > 0
-					sslBaseAnimation[] FilteredLead = sslUtility.RemoveTaggedAnimations(LeadAnimations, Filter)
-					if FilteredLead.Length > 0 && FilteredLead.Length != LeadAnimations.Length
-						Log("Filtered out '"+(LeadAnimations.Length - FilteredLead.Length)+"' Lead In Animations with tags '"+Filter+"'")
-						LeadAnimations = FilteredLead
-					endIf
-				endIf
+			endIf
 		endIf
 
+		t = SexLabUtil.Timer(t, "StartThread - Filter animations")
 		; Make sure we are still good to start after all the filters
 		if LeadAnimations.Length < 1
 			LeadIn = false
@@ -362,6 +374,7 @@ state Making
 		; --  Start Controller   -- 4;
 		; ------------------------- ;
 
+		t = SexLabUtil.Timer(t, "StartThread - END")
 		Action("Prepare")
 		return self as sslThreadController
 	endFunction
@@ -371,6 +384,7 @@ state Making
 	endEvent
 	event OnBeginState()
 		Log("Entering Making State")
+		t = SexLabUtil.Timer(0, "TIMER BEGIN")
 		; Action Events
 		RegisterForModEvent(Key(EventTypes[0]+"Done"), EventTypes[0]+"Done")
 		RegisterForModEvent(Key(EventTypes[1]+"Done"), EventTypes[1]+"Done")
@@ -383,6 +397,7 @@ state Making
 		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_2", "AliasEventDone")
 		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_3", "AliasEventDone")
 		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_4", "AliasEventDone")
+		t = SexLabUtil.Timer(t, "Register Events")
 	endEvent
 endState
 

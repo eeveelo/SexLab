@@ -237,6 +237,18 @@ int function FloatListCount(Form ObjKey, string KeyName) global native
 int function StringListCount(Form ObjKey, string KeyName) global native
 int function FormListCount(Form ObjKey, string KeyName) global native
 
+;/ Get the number of occurrences of a specific value within a list.
+
+   ObjKey: form to check on. Set none to check global list.
+   KeyName: name of list.
+   value: value to look for.
+   [optional] exclude: if true, function will return number of elements NOT equal to value.
+/;
+int function IntListCountValue(Form ObjKey, string KeyName, int value, bool exclude = false) global native
+int function FloatListCountValue(Form ObjKey, string KeyName, float value, bool exclude = false) global native
+int function StringListCountValue(Form ObjKey, string KeyName, string value, bool exclude = false) global native
+int function FormListCountValue(Form ObjKey, string KeyName, Form value, bool exclude = false) global native
+
 ;/ Find a value in list on form or globally and return its
    index or -1 if value was not found.
 
