@@ -87,115 +87,265 @@ endFunction
 ;/**
 * Checks if given actor is a valid target for SexLab animation.
 * 
-* @param	Actor	ActorRef 	The actor to check for validation
-* @return	int 	The integer code of the validation state
-*                   1 if valid actor, signed int if invalid.
-*                   
+* @param  Actor ActorRef - The actor to check for validation
+* @return  int - The integer code of the validation state
+*                1 if valid actor, signed int if invalid.
 **/;
 int function ValidateActor(Actor ActorRef)
 	return ActorLib.ValidateActor(ActorRef)
 endFunction
 
+;/**
+* Checks if given actor is a valid target for SexLab animation.
+* Equivalent to ValidateActor() == 1
+**/;
 bool function IsValidActor(Actor ActorRef)
 	return ActorLib.IsValidActor(ActorRef)
 endFunction
 
+;/**
+* Checks if the given actor is active in any SexLab animation
+* 
+* @param  Actor ActorRef - The actor to check for activity
+* @return bool - TRUE if ActorRef is being animated by SexLab.
+**/;
 bool function IsActorActive(Actor ActorRef)
 	return SexLabUtil.IsActorActive(ActorRef)
 endFunction
 
-Actor[] function MakeActorArray(Actor Actor1 = none, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none)
-	return sslUtility.MakeActorArray(Actor1, Actor2, Actor3, Actor4, Actor5)
-endFunction
 
+;/**
+* Searches within a given area for a SexLab valid actor
+* 
+* @param  ObjectReference CenterRef - The object to use as the center point in the search. 
+* @param  float Radius - The distance from the center point to search.
+* @param  int FindGender - The desired gender id to look for, -1 for any, 0 for male, 1 for female.
+* @param  Actor IgnoreRef1 - An actor you know for certain you do not want returned by this function.
+* @param  Actor IgnoreRef2 - An actor you know for certain you do not want returned by this function.
+* @param  Actor IgnoreRef3 - An actor you know for certain you do not want returned by this function.
+* @param  Actor IgnoreRef4 - An actor you know for certain you do not want returned by this function.
+* @return Actor - A valid actor found, if any. Returns none if no valid actor found.
+**/;
 Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none)
 	return ThreadLib.FindAvailableActor(CenterRef, Radius, FindGender, IgnoreRef1, IgnoreRef2, IgnoreRef3, IgnoreRef4)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 Actor[] function FindAvailablePartners(actor[] Positions, int TotalActors, int Males = -1, int Females = -1, float Radius = 10000.0)
 	return ThreadLib.FindAvailablePartners(Positions, TotalActors, Males, Females, Radius)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 Actor[] function SortActors(Actor[] Positions, bool FemaleFirst = true)
 	return ThreadLib.SortActors(Positions, FemaleFirst)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 function ApplyCum(Actor ActorRef, int CumID)
 	ActorLib.ApplyCum(ActorRef, CumID)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 function AddCum(Actor ActorRef, bool Vaginal = true, bool Oral = true, bool Anal = true)
 	ActorLib.AddCum(ActorRef, Vaginal, Oral, Anal)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 function ClearCum(Actor ActorRef)
 	ActorLib.ClearCum(ActorRef)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 form[] function StripActor(Actor ActorRef, Actor VictimRef = none, bool DoAnimate = true, bool LeadIn = false)
 	return ActorLib.StripActor(ActorRef, VictimRef, DoAnimate, LeadIn)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false, bool AllowNudesuit = true)
 	return ActorLib.StripSlots(ActorRef, Strip, DoAnimate, AllowNudesuit)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 function UnstripActor(Actor ActorRef, form[] Stripped, bool IsVictim = false)
 	ActorLib.UnstripActor(ActorRef, Stripped, IsVictim)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 bool function IsStrippable(form ItemRef)
 	return ActorLib.IsStrippable(ItemRef)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 form function StripWeapon(Actor ActorRef, bool RightHand = true)
 	return none ; ActorLib.StripWeapon(ActorRef, RightHand)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 form function StripSlot(Actor ActorRef, int SlotMask)
 	return ActorLib.StripSlot(ActorRef, SlotMask)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 form function WornStrapon(Actor ActorRef)
 	return Config.WornStrapon(ActorRef)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 bool function HasStrapon(Actor ActorRef)
 	return Config.HasStrapon(ActorRef)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 form function PickStrapon(Actor ActorRef)
 	return Config.PickStrapon(ActorRef)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 form function EquipStrapon(Actor ActorRef)
 	return Config.EquipStrapon(ActorRef)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 function UnequipStrapon(Actor ActorRef)
 	Config.UnequipStrapon(ActorRef)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 Armor function LoadStrapon(string esp, int id)
 	return Config.LoadStrapon(esp, id)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 function ForbidActor(Actor ActorRef)
 	ActorLib.ForbidActor(ActorRef)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 function AllowActor(Actor ActorRef)
 	ActorLib.AllowActor(ActorRef)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 bool function IsForbidden(Actor ActorRef)
 	return ActorLib.IsForbidden(ActorRef)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 function TreatAsMale(Actor ActorRef)
 	ActorLib.TreatAsMale(ActorRef)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 function TreatAsFemale(Actor ActorRef)
 	ActorLib.TreatAsFemale(ActorRef)
 endFunction
@@ -204,26 +354,62 @@ function TreatAsGender(Actor ActorRef, bool AsFemale)
 	ActorLib.TreatAsGender(ActorRef, AsFemale)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 function ClearForcedGender(Actor ActorRef)
 	ActorLib.ClearForcedGender(ActorRef)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 int function GetGender(Actor ActorRef)
 	return ActorLib.GetGender(ActorRef)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 int[] function GenderCount(Actor[] Positions)
 	return ActorLib.GenderCount(Positions)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 int function MaleCount(Actor[] Positions)
 	return ActorLib.MaleCount(Positions)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 int function FemaleCount(Actor[] Positions)
 	return ActorLib.FemaleCount(Positions)
 endFunction
 
+;/**
+* 
+* 
+* @param  
+* @return  
+**/;
 int function CreatureCount(Actor[] Positions)
 	return ActorLib.CreatureCount(Positions)
 endFunction
@@ -382,15 +568,15 @@ endFunction
 ;# START CREATURES FUNCTIONS #
 ;#---------------------------#
 
-sslBaseAnimation[] function GetCreatueAnimationsByRace(int ActorCount, Race RaceRef)
+sslBaseAnimation[] function GetCreatureAnimationsByRace(int ActorCount, Race RaceRef)
 	return CreatureSlots.GetByRace(ActorCount, RaceRef)
 endFunction
 
-sslBaseAnimation[] function GetCreatueAnimationsByRaceKey(int ActorCount, string RaceKey)
+sslBaseAnimation[] function GetCreatureAnimationsByRaceKey(int ActorCount, string RaceKey)
 	return CreatureSlots.GetByRaceKey(ActorCount, RaceKey)
 endFunction
 
-sslBaseAnimation[] function GetCreatueAnimationsByRaceGenders(int ActorCount, Race RaceRef, int MaleCreatures = 0, int FemaleCreatures = 0, bool ForceUse = false)
+sslBaseAnimation[] function GetCreatureAnimationsByRaceGenders(int ActorCount, Race RaceRef, int MaleCreatures = 0, int FemaleCreatures = 0, bool ForceUse = false)
 	return CreatureSlots.GetByRaceGenders(ActorCount, RaceRef, MaleCreatures, FemaleCreatures, ForceUse)
 endFunction
 
@@ -900,6 +1086,23 @@ endFunction
 ;#---------------------------#
 ;#   END FACTORY FUNCTIONS   #
 ;#---------------------------#
+
+
+;#---------------------------#
+;#  START UTILITY FUNCTIONS  #
+;#  For more see:            #
+;#  - SexLabUtil.psc         #
+;#  - sslUtility.psc         #
+;#---------------------------#
+
+Actor[] function MakeActorArray(Actor Actor1 = none, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none)
+	return sslUtility.MakeActorArray(Actor1, Actor2, Actor3, Actor4, Actor5)
+endFunction
+
+;#---------------------------#
+;#   END UTILITY FUNCTIONS   #
+;#---------------------------#
+
 
 ;#---------------------------#
 ;#                           #
