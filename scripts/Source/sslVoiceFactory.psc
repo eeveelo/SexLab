@@ -32,6 +32,7 @@ function RegisterVoice(string Registrar)
 		ModEvent.PushInt(handle, id)
 		ModEvent.Send(handle)
 	endIf
+	Utility.WaitMenuMode(0.1)
 endFunction
 
 ; Gets the voice resource object for use in the callback, MUST be called at start of callback to get the appropiate resource

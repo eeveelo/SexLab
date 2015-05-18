@@ -113,6 +113,7 @@ function Setup()
 		i -= 1
 		Slots[i] = Game.GetFormFromFile(SlotFormID[i], "SexLab.esm") as sslThreadController
 		Slots[i].SetTID(i)
+		Utility.WaitMenuMode(1.0)
 	endWhile
 
 	Debug.Trace("SexLab Threads: "+Slots)

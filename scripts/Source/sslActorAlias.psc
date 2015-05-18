@@ -527,6 +527,7 @@ function LockActor()
 	endIf
 	MarkerRef.Enable()
 	MarkerRef.MoveTo(ActorRef)
+	MarkerRef.SetMotionType(MarkerRef.Motion_Keyframed)
 	ActorRef.StopTranslation()
 	; ActorRef.SetVehicle(MarkerRef)
 	; ActorRef.SetScale(AnimScale)

@@ -205,11 +205,21 @@ function RegisterSlots()
 endFunction
 
 int function Register(string Registrar)
-	if Registry.Find(Registrar) != -1 || Slotted >= Registry.Length
+	if Registry.Find(Registrar) != -1 || Slotted >= 375
 		return -1
 	endIf
 	Slotted += 1
 	int i = Registry.Find("")
+	if i == -1
+		int n = Registry.Length + 32
+		if n > 375
+			n = 375
+		endIf
+		Config.Log("Resizing expression registry slots: "+Registry.Length+" -> "+n, "Register")
+		Registry = PapyrusUtil.ResizeStringArray(Registry, n)
+		Objects  = PapyrusUtil.ResizeAliasArray(Objects, n)
+		i = Registry.Find("")
+	endIf
 	Registry[i] = Registrar
 	Objects[i]  = GetNthAlias(i)
 	return i
@@ -240,8 +250,8 @@ function Setup()
 	GoToState("Locked")
 	; Init slots
 	Slotted  = 0	
-	Registry = Utility.CreateStringArray(375)
-	Objects  = Utility.CreateAliasArray(375, GetNthAlias(0))
+	Registry = Utility.CreateStringArray(32)
+	Objects  = Utility.CreateAliasArray(32, GetNthAlias(0))
 	; DEVTEMP: SKSE Beta workaround - clear used dummy aliases
 	int i = Objects.Length
 	while i

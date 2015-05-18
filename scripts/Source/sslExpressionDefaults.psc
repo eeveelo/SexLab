@@ -25,12 +25,7 @@ function Pleasure(int id)
 	sslBaseExpression Base = Create(id)
 
 	Base.Name = "Pleasure"
-
-	Base.AddTag("Happy")
-	Base.AddTag("Consensual")
-	Base.AddTag("Pleasure")
-
-	Base.AddTag("Normal")
+	Base.SetTags("Normal,Happy,Consensual,Pleasure")
 
 	; Female
 	Base.SetMood(1, Female, 2, 30)
@@ -109,13 +104,7 @@ function Shy(int id)
 	sslBaseExpression Base = Create(id)
 
 	Base.Name = "Shy"
-
-	Base.AddTag("Consensual")
-	Base.AddTag("Nervous")
-	Base.AddTag("Sad")
-	Base.AddTag("Shy")
-
-	Base.AddTag("Normal")
+	Base.SetTags("Normal,Consensual,Nervous,Sad,Shy")
 
 	; Male + Female
 	Base.SetMood(1, MaleFemale, 4, 90)
@@ -142,13 +131,7 @@ function Afraid(int id)
 	sslBaseExpression Base = Create(id)
 
 	Base.Name = "Afraid"
-
-	Base.AddTag("Afraid")
-	Base.AddTag("Scared")
-	Base.AddTag("Pain")
-	Base.AddTag("Negative")
-
-	Base.AddTag("Aggressor")
+	Base.SetTags("Aggressor,Afraid,Scared,Pain,Negative")
 
 	; Male + Female
 	Base.SetMood(1, MaleFemale, 3, 100)
@@ -197,13 +180,7 @@ function Pained(int id)
 	sslBaseExpression Base = Create(id)
 
 	Base.Name = "Pained"
-
-	Base.AddTag("Afraid")
-	Base.AddTag("Pain")
-	Base.AddTag("Pained")
-	Base.AddTag("Negative")
-
-	Base.AddTag("Victim")
+	Base.SetTags("Victim,Afraid,Pain,Pained,Negative")
 
 	; Male + Female
 	Base.SetMood(1, MaleFemale, 3, 100)
@@ -249,13 +226,7 @@ function Angry(int id)
 	sslBaseExpression Base = Create(id)
 
 	Base.Name = "Angry"
-
-	Base.AddTag("Mad")
-	Base.AddTag("Angry")
-	Base.AddTag("Upset")
-
-	Base.AddTag("Aggressor")
-	Base.AddTag("Victim")
+	Base.SetTags("Aggressor,Victim,Mad,Angry,Upset")
 
 	; Male + Female
 	Base.SetMood(1, MaleFemale, 0, 40)
@@ -281,11 +252,7 @@ function Happy(int id)
 	sslBaseExpression Base = Create(id)
 
 	Base.Name = "Happy"
-
-	Base.AddTag("Happy")
-	Base.AddTag("Consensual")
-
-	Base.AddTag("Normal")
+	Base.AddTag("Normal,Happy,Consensual")
 
 	; Male + Female
 	Base.SetMood(1, MaleFemale, 2, 50)
@@ -312,11 +279,7 @@ function Sad(int id)
 	sslBaseExpression Base = Create(id)
 
 	Base.Name = "Sad"
-
-	Base.AddTag("Sad")
-
-	Base.AddTag("Normal")
-	Base.AddTag("Victim")
+	Base.SetTags("Normal,Victim,Sad")
 
 	; Male + Female
 	Base.SetMood(1, MaleFemale, 2, 50)
@@ -343,13 +306,7 @@ function Joy(int id)
 	sslBaseExpression Base = Create(id)
 
 	Base.Name = "Joy"
-
-	Base.AddTag("Happy")
-	Base.AddTag("Joy")
-	Base.AddTag("Pleasure")
-	Base.AddTag("Consensual")
-
-	Base.AddTag("Normal")
+	Base.SetTags("Normal,Happy,Joy,Pleasure,Consensual")
 
 	; Female
 	Base.SetMood(1, Female, 10, 45)

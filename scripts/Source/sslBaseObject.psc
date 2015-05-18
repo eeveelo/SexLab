@@ -108,6 +108,10 @@ bool function HasAllTag(string[] TagList)
 	return true
 endFunction
 
+function SetTags(string TagList)
+	AddTags(PapyrusUtil.StringSplit(TagList))
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Phantom Slots                                   --- ;
 ; ------------------------------------------------------- ;
@@ -162,5 +166,5 @@ function Initialize()
 	SlotID   = -1
 	Enabled  = false
 	Storage  = none
-	Tags     = new string[16]
+	Tags     = new string[12]
 endFunction

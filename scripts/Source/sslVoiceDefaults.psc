@@ -29,9 +29,7 @@ function FemaleClassic(int id)
 	Base.Medium = Game.GetFormFromFile(0x67547, "SexLab.esm") as Sound
 	Base.Hot = Game.GetFormFromFile(0x67546, "SexLab.esm") as Sound
 
-	Base.AddTag("Female")
-	Base.AddTag("Classic")
-	Base.AddTag("Normal")
+	Base.SetTags("Female,Classic,Normal")
 
 	Base.Save(id)
 endFunction
@@ -46,10 +44,7 @@ function FemaleBreathy(int id)
 	Base.Medium = Game.GetFormFromFile(0x6754A, "SexLab.esm") as Sound
 	Base.Hot = Game.GetFormFromFile(0x67549, "SexLab.esm") as Sound
 
-	Base.AddTag("Female")
-	Base.AddTag("Breathy")
-	Base.AddTag("Loud")
-	Base.AddTag("Rough")
+	Base.SetTags("Female,Breathy,Loud,Rough")
 
 	Base.Save(id)
 endFunction
@@ -64,9 +59,7 @@ function FemaleYoung(int id)
 	Base.Medium = Game.GetFormFromFile(0x6754D, "SexLab.esm") as Sound
 	Base.Hot = Game.GetFormFromFile(0x6754C, "SexLab.esm") as Sound
 
-	Base.AddTag("Female")
-	Base.AddTag("Young")
-	Base.AddTag("Loud")
+	Base.SetTags("Female,Young,Loud")
 
 	Base.Save(id)
 endFunction
@@ -81,10 +74,7 @@ function FemaleStimulated(int id)
 	Base.Medium = Game.GetFormFromFile(0x67550, "SexLab.esm") as Sound
 	Base.Hot = Game.GetFormFromFile(0x6754F, "SexLab.esm") as Sound
 
-	Base.AddTag("Female")
-	Base.AddTag("Stimulated")
-	Base.AddTag("Loud")
-	Base.AddTag("Excited")
+	Base.SetTags("Female,Stimulated,Loud,Excited")
 
 	Base.Save(id)
 endFunction
@@ -99,9 +89,7 @@ function FemaleQuiet(int id)
 	Base.Medium = Game.GetFormFromFile(0x67553, "SexLab.esm") as Sound
 	Base.Hot = Game.GetFormFromFile(0x67552, "SexLab.esm") as Sound
 
-	Base.AddTag("Female")
-	Base.AddTag("Quiet")
-	Base.AddTag("Timid")
+	Base.SetTags("Female,Quiet,Timid")
 
 	Base.Save(id)
 endFunction
@@ -117,10 +105,7 @@ function FemaleExcitable(int id)
 	Base.Hot = Game.GetFormFromFile(0x67555, "SexLab.esm") as Sound
 
 
-	Base.AddTag("Female")
-	Base.AddTag("Excitable")
-	Base.AddTag("Excited")
-	Base.AddTag("Loud")
+	Base.SetTags("Female,Excitable,Excited,Loud")
 
 	Base.Save(id)
 endFunction
@@ -135,10 +120,7 @@ function FemaleAverage(int id)
 	Base.Medium = Game.GetFormFromFile(0x67559, "SexLab.esm") as Sound
 	Base.Hot = Game.GetFormFromFile(0x67558, "SexLab.esm") as Sound
 
-	Base.AddTag("Female")
-	Base.AddTag("Average")
-	Base.AddTag("Normal")
-	Base.AddTag("Harsh")
+	Base.SetTags("Female,Average,Normal,Harsh")
 
 	Base.Save(id)
 endFunction
@@ -153,11 +135,7 @@ function FemaleMature(int id)
 	Base.Medium = Game.GetFormFromFile(0x6755C, "SexLab.esm") as Sound
 	Base.Hot = Game.GetFormFromFile(0x6755B, "SexLab.esm") as Sound
 
-	Base.AddTag("Female")
-	Base.AddTag("Mature")
-	Base.AddTag("Old")
-	Base.AddTag("Harsh")
-	Base.AddTag("Rough")
+	Base.SetTags("Female,Mature,Old,Harsh,Rough")
 
 	Base.Save(id)
 endFunction
@@ -172,10 +150,7 @@ function MaleNeutral(int id)
 	Base.Medium = Game.GetFormFromFile(0x6755F, "SexLab.esm") as Sound
 	Base.Hot = Game.GetFormFromFile(0x6755E, "SexLab.esm") as Sound
 
-	Base.AddTag("Male")
-	Base.AddTag("Neutral")
-	Base.AddTag("Quiet")
-	Base.AddTag("Normal")
+	Base.SetTags("Male,Neutral,Quiet,Normal")
 
 	Base.Save(id)
 endFunction
@@ -190,9 +165,7 @@ function MaleCalm(int id)
 	Base.Medium = Game.GetFormFromFile(0x67562, "SexLab.esm") as Sound
 	Base.Hot = Game.GetFormFromFile(0x67561, "SexLab.esm") as Sound
 
-	Base.AddTag("Male")
-	Base.AddTag("Calm")
-	Base.AddTag("Quiet")
+	Base.SetTags("Male,Calm,Quiet")
 
 	Base.Save(id)
 endFunction
@@ -207,11 +180,7 @@ function MaleRough(int id)
 	Base.Medium = Game.GetFormFromFile(0x67565, "SexLab.esm") as Sound
 	Base.Hot = Game.GetFormFromFile(0x67564, "SexLab.esm") as Sound
 
-	Base.AddTag("Male")
-	Base.AddTag("Rough")
-	Base.AddTag("Harsh")
-	Base.AddTag("Loud")
-	Base.AddTag("Old")
+	Base.SetTags("Male,Rough,Harsh,Loud,Old")
 
 	Base.Save(id)
 endFunction
@@ -226,10 +195,7 @@ function MaleAverage(int id)
 	Base.Medium = Game.GetFormFromFile(0x67568, "SexLab.esm") as Sound
 	Base.Hot = Game.GetFormFromFile(0x67567, "SexLab.esm") as Sound
 
-	Base.AddTag("Male")
-	Base.AddTag("Average")
-	Base.AddTag("Normal")
-	Base.AddTag("Quiet")
+	Base.SetTags("Male,Average,Normal,Quiet")
 
 	Base.Save(id)
 endFunction

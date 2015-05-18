@@ -16,6 +16,11 @@ bool function SexLabIsActive() global
 	return GetAPI() != none
 endFunction
 
+bool function SexLabIsReady() global
+	SexLabFramework SexLab = GetAPI()
+	return SexLab != none && SexLab.Enabled
+endFunction
+
 SexLabFramework function GetAPI() global
 	return Game.GetFormFromFile(0xD62, "SexLab.esm") as SexLabFramework
 endFunction
@@ -56,6 +61,10 @@ endFunction
 ; --- Common Utilities                                --- ;
 ; ------------------------------------------------------- ;
 
+string function ActorName(Actor ActorRef) global
+	return ActorRef.GetLeveledActorBase().GetName()
+endFunction
+
 int function GetGender(Actor ActorRef) global
 	return GetAPI().ActorLib.GetGender(ActorRef)
 endFunction
@@ -94,6 +103,23 @@ string function GetGenderTag(int Females = 0, int Males = 0, int Creatures = 0) 
 	while Creatures
 		Creatures -= 1
 		Tag += "C"
+	endWhile
+	return Tag
+endFunction
+
+string function GetReverseGenderTag(int Females = 0, int Males = 0, int Creatures = 0) global
+	string Tag
+	while Creatures
+		Creatures -= 1
+		Tag += "C"
+	endWhile
+	while Males
+		Males -= 1
+		Tag += "M"
+	endWhile
+	while Females
+		Females -= 1
+		Tag += "F"
 	endWhile
 	return Tag
 endFunction

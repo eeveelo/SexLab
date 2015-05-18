@@ -516,7 +516,7 @@ sslBaseAnimation[] function MergeAnimationLists(sslBaseAnimation[] List1, sslBas
 endFunction
 
 sslBaseAnimation[] function RemoveTagged(sslBaseAnimation[] Anims, string Tags)
-	return sslUtility.RemoveTaggedAnimations(Anims, Tags)
+	return sslUtility.RemoveTaggedAnimations(Anims, PapyrusUtil.StringSplit(Tags))
 endFunction
 
 sslBaseAnimation function GetAnimationByName(string FindName)

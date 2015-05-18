@@ -3,6 +3,7 @@ scriptname sslThreadModel extends Quest hidden
 
 ; import sslUtility
 ; import StorageUtil
+; import SexLabUtil
 
 int thread_id
 int property tid hidden
@@ -330,37 +331,67 @@ state Making
 		; Get default foreplay if none and enabled
 		if !HasCreature && !IsAggressive && ActorCount == 2 && !NoLeadIn && LeadAnimations.Length == 0 && Config.ForeplayStage
 			if BedRef
-				SetLeadAnimations(AnimSlots.GetByTags(2, "LeadIn", "Standing"))
+				SetLeadAnimations(AnimSlots.GetByTags(2, "LeadIn", SexLabUtil.StringIfElse(Config.BedRemoveStanding, "Furniture,Standing", "Furniture")))
 			else
 				SetLeadAnimations(AnimSlots.GetByTags(2, "LeadIn"))
 			endIf
 		endIf
 
 		t = SexLabUtil.Timer(t, "StartThread - Validate animations")
-		; If a bed is present, remove any furniture animations, and optionally any standing animations
-		if BedRef
-			string Filter = "Furniture"
-			if Config.BedRemoveStanding
-				Filter += ",Standing"
-			endIf
-			; Remove furniture/standing animations from primary
-			sslBaseAnimation[] FilteredPrimary = sslUtility.RemoveTaggedAnimations(PrimaryAnimations, Filter)
-			if FilteredPrimary.Length == 0
-			elseIf FilteredPrimary.Length > 0 && FilteredPrimary.Length != PrimaryAnimations.Length
-				Log("Filtered out '"+(LeadAnimations.Length - FilteredPrimary.Length)+"' Primary Animations with tags '"+Filter+"'")
+
+		
+		; Filter animations based on user settings and scene
+		string[] Filters
+		sslBaseAnimation[] FilteredPrimary
+		sslBaseAnimation[] FilteredLead
+
+		; Remove non same sex animations per user settings
+		if ActorCount > 1 && Creatures == 0 && (Males == 0 || Females == 0) && Config.RestrictSameSex
+			Filters    = new string[1]
+			Filters[0] = SexLabUtil.GetGenderTag(Females, Males)
+			; Remove non-tagged from primary
+			FilteredPrimary = sslUtility.FilterTaggedAnimations(PrimaryAnimations, Filters, true)
+			if FilteredPrimary.Length > 0
+				Log("Filtered out '"+(PrimaryAnimations.Length - FilteredPrimary.Length)+"' Non Same Sex Primary Animations with tags: "+Filters)
 				PrimaryAnimations = FilteredPrimary
 			endIf
-			; Remove furniture/standing from lead in
+			; Remove furniture/standing animations from lead in
 			if LeadIn && LeadAnimations.Length > 0
-				sslBaseAnimation[] FilteredLead = sslUtility.RemoveTaggedAnimations(LeadAnimations, Filter)
-				if FilteredLead.Length > 0 && FilteredLead.Length != LeadAnimations.Length
-					Log("Filtered out '"+(LeadAnimations.Length - FilteredLead.Length)+"' Lead In Animations with tags '"+Filter+"'")
+				FilteredLead = sslUtility.FilterTaggedAnimations(LeadAnimations, Filters, true)
+				if FilteredLead.Length > 0
+					Log("Filtered out '"+(LeadAnimations.Length - FilteredLead.Length)+"' Non Same Sex Lead In Animations with tags: "+Filters)
 					LeadAnimations = FilteredLead
 				endIf
 			endIf
 		endIf
+		t = SexLabUtil.Timer(t, "StartThread - Filter same sex animations")
 
-		t = SexLabUtil.Timer(t, "StartThread - Filter animations")
+		; Filter non-bed friendly animations
+		if BedRef
+			if Config.BedRemoveStanding
+				Filters    = new string[2]
+				Filters[1] = "Standing"
+			else
+				Filters = new string[1]
+			endIf
+			Filters[0] = "Furniture"
+			; Remove furniture/standing animations from primary
+			FilteredPrimary = sslUtility.FilterTaggedAnimations(PrimaryAnimations, Filters, false)
+			if FilteredPrimary.Length > 0
+				Log("Filtered out '"+(PrimaryAnimations.Length - FilteredPrimary.Length)+"' Primary Animations with tags: "+Filters)
+				PrimaryAnimations = FilteredPrimary
+			endIf
+			; Remove furniture/standing animations from lead in
+			if LeadIn && LeadAnimations.Length > 0
+				FilteredLead = sslUtility.FilterTaggedAnimations(LeadAnimations, Filters, false)
+				if FilteredLead.Length > 0
+					Log("Filtered out '"+(LeadAnimations.Length - FilteredLead.Length)+"' Lead In Animations with tags: "+Filters)
+					LeadAnimations = FilteredLead
+				endIf
+			endIf
+		endIf
+		t = SexLabUtil.Timer(t, "StartThread - Filter bed animations")
+
 		; Make sure we are still good to start after all the filters
 		if LeadAnimations.Length < 1
 			LeadIn = false
@@ -371,7 +402,7 @@ state Making
 		endIf
 		
 		; ------------------------- ;
-		; --  Start Controller   -- 4;
+		; --  Start Controller   -- ;
 		; ------------------------- ;
 
 		t = SexLabUtil.Timer(t, "StartThread - END")
@@ -411,7 +442,6 @@ endFunction
 
 ; Actor Overrides
 function SetStrip(Actor ActorRef, bool[] StripSlots)
-	ActorAlias(ActorRef).OverrideStrip(StripSlots)
 	if StripSlots.Length == 33
 		ActorAlias(ActorRef).OverrideStrip(StripSlots)
 	else

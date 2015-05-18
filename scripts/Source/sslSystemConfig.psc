@@ -128,6 +128,7 @@ bool property RaceAdjustments auto hidden
 bool property BedRemoveStanding auto hidden
 bool property UseCreatureGender auto hidden
 bool property LimitedStrip auto hidden
+bool property RestrictSameSex auto hidden
 
 ; Integers
 int property AnimProfile auto hidden
@@ -591,10 +592,15 @@ function Reload()
 	DisableThreadControl(Control)
 endFunction
 
+function Setup()
+	parent.Setup()
+	SetDefaults()
+endFunction
+
 function SetDefaults()
 	; Booleans
 	RestrictAggressive = true
-	AllowCreatures     = false
+	; AllowCreatures     = false
 	NPCSaveVoice       = false
 	UseStrapons        = true
 	RedressVictim      = true
@@ -616,6 +622,7 @@ function SetDefaults()
 	BedRemoveStanding  = true
 	UseCreatureGender  = false
 	LimitedStrip       = true
+	RestrictSameSex    = false
 
 	; Integers
 	AnimProfile        = 1
@@ -802,6 +809,7 @@ function ExportSettings()
 	ExportBool("BedRemoveStanding", BedRemoveStanding)
 	ExportBool("UseCreatureGender", UseCreatureGender)
 	ExportBool("LimitedStrip", LimitedStrip)
+	ExportBool("RestrictSameSex", RestrictSameSex)
 
 	; Integers
 	ExportInt("AnimProfile", AnimProfile)
@@ -883,6 +891,7 @@ function ImportSettings()
 	BedRemoveStanding  = ImportBool("BedRemoveStanding", BedRemoveStanding)
 	UseCreatureGender  = ImportBool("UseCreatureGender", UseCreatureGender)
 	LimitedStrip       = ImportBool("LimitedStrip", LimitedStrip)
+	RestrictSameSex    = ImportBool("RestrictSameSex", RestrictSameSex)
 
 	; Integers
 	AnimProfile        = ImportInt("AnimProfile", AnimProfile)

@@ -33,20 +33,12 @@ string PlayerName
 
 event OnVersionUpdate(int version)
 	LoadLibs(true)
-	; Start first time install
-	if CurrentVersion < 15990
-		SystemAlias.InstallSystem()
-	endif
-	; Send update/install event
-	int eid = ModEvent.Create(SexLabUtil.StringIfElse(CurrentVersion <= 0, "SexLabInstalled", "SexLabUpdated"))
-	ModEvent.PushInt(eid, version)
-	ModEvent.Send(eid)
 endEvent
 
 event OnGameReload()
+	parent.OnGameReload()
 	Debug.Trace("SexLab MCM Loaded CurrentVerison: "+CurrentVersion)
 	MiscUtil.PrintConsole("SexLab MCM Loaded CurrentVerison: "+CurrentVersion)
-	parent.OnGameReload()
 endEvent
 
 function LoadLibs(bool Forced = false)
@@ -391,6 +383,7 @@ function AnimationSettings()
 	AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", Config.ScaleActors)
 	AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", Config.ForeplayStage)
 	AddToggleOptionST("RestrictAggressive","$SSL_RestrictAggressive", Config.RestrictAggressive)
+	AddToggleOptionST("RestrictSameSex","$SSL_RestrictSameSex", Config.RestrictSameSex)
 	AddToggleOptionST("UndressAnimation","$SSL_UndressAnimation", Config.UndressAnimation)
 	AddToggleOptionST("RedressVictim","$SSL_VictimsRedress", Config.RedressVictim)
 	AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", Config.RagdollEnd)
@@ -949,6 +942,10 @@ state AnimationSelect
 		Position  = 0
 		SetMenuOptionValueST(Animation.Name)
 		ForcePageReset()
+	endEvent
+
+	event OnHighlightST()
+		SetInfoText(Animation.Name+" Tags:\n"+PapyrusUtil.StringJoin(Animation.GetTags(), ", "))
 	endEvent
 endState
 
@@ -1896,9 +1893,13 @@ endState
 ; ------------------------------------------------------- ;
 
 function RebuildClean()
+	int i
+
 	SetCursorFillMode(TOP_TO_BOTTOM)
 
 	AddHeaderOption("SexLab v"+GetStringVer()+" by Ashal@LoversLab.com")
+
+	AddEmptyOption()
 	AddHeaderOption("$SSL_Maintenance")
 
 	if SexLab.Enabled
@@ -1920,9 +1921,21 @@ function RebuildClean()
 	AddToggleOptionST("DebugMode","$SSL_DebugMode", Config.DebugMode)
 	AddHeaderOption("$SSL_UpgradeUninstallReinstall")
 	AddTextOptionST("CleanSystem","$SSL_CleanSystem", "$SSL_ClickHere")
+
+	AddEmptyOption()
+	;/ AddHeaderOption("Tag Viewer")
+	AddMenuOptionST("AnimationSelect", "$SSL_Animation", Animation.Name)
+	string[] Tags = Animation.GetTags()
+	i = Tags.Length
+	while i
+		i -= 1
+		AddTextOptionST("TagViewer_"+i, Tags[i], " ", OPTION_FLAG_DISABLED)
+	endWhile /;
+
+	AddEmptyOption()
 	AddHeaderOption("$SSL_AvailableStrapons")
 	AddTextOptionST("RebuildStraponList","$SSL_RebuildStraponList", "$SSL_ClickHere")
-	int i = Config.Strapons.Length
+	i = Config.Strapons.Length
 	while i
 		i -= 1
 		if Config.Strapons[i]
@@ -2412,6 +2425,19 @@ state RestrictAggressive
 	event OnDefaultST()
 		Config.RestrictAggressive = true
 		SetToggleOptionValueST(Config.RestrictAggressive)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoRestrictAggressive")
+	endEvent
+endState
+state RestrictSameSex
+	event OnSelectST()
+		Config.RestrictSameSex = !Config.RestrictSameSex
+		SetToggleOptionValueST(Config.RestrictSameSex)
+	endEvent
+	event OnDefaultST()
+		Config.RestrictSameSex = false
+		SetToggleOptionValueST(Config.RestrictSameSex)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoRestrictAggressive")

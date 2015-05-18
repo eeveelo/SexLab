@@ -571,6 +571,15 @@ int function AddPosition(int Gender = 0, int AddCum = -1)
 	InitArrays(Actors)
 	FlagsArray(Actors)[kCumID] = AddCum
 
+	if Gender >= 2
+		if RaceTypes.Length == 0
+			RaceTypes = new string[5]
+		endIf
+		if RaceType != ""
+			RaceTypes[Actors] = RaceType
+		endIf
+	endIf
+
 	Actors += 1
 	Locked = false
 	return (Actors - 1)
@@ -584,14 +593,12 @@ int function AddCreaturePosition(string RaceKey, int Gender = 2, int AddCum = -1
 	elseIf Gender == 1
 		Gender = 3
 	endIf
-
+	
 	int pid = AddPosition(Gender, AddCum)
 	if pid != -1 && RaceKey != ""
 		RaceTypes[pid] = RaceKey
-		if RaceType == ""
-			RaceType = RaceKey
-		endIf
 	endIf
+
 	return pid
 endFunction
 
@@ -655,24 +662,8 @@ function Save(int id = -1)
 	; Positions  = PapyrusUtil.ResizeIntArray(Positions, Actors)
 	; LastKeys   = PapyrusUtil.ResizeStringArray(LastKeys, Actors)
 	; Create and add gender tag
-	int i
-	string Tag
-	while i < Actors
-		int Gender = Positions[i]
-		if Gender == 0
-			Tag += "M"
-		elseIf Gender == 1
-			Tag += "F"
-		elseIf Gender >= 2
-			Tag += "C"
-			; Fill racetypes if older non-addcreatureposition() was used
-			if RaceTypes[i] == ""
-				RaceTypes[i] = RaceType
-			endIf
-		endIf
-		i += 1
-	endWhile
-	AddTag(Tag)
+	AddTag(SexLabUtil.GetGenderTag(Females, Males, Creatures))
+	AddTag(SexLabUtil.GetReverseGenderTag(Females, Males, Creatures))
 	; Init forward offset list
 	CenterAdjust = Utility.CreateFloatArray(Stages)
 	if Actors > 1
@@ -684,10 +675,9 @@ function Save(int id = -1)
 	endIf
 	; Log the new animation
 	if IsCreature
-		RaceTypes = PapyrusUtil.ResizeStringArray(RaceTypes, Actors)
+		; RaceTypes = PapyrusUtil.ResizeStringArray(RaceTypes, Actors)
 		Log(Name, "Creatures["+id+"]")
 	else
-		RaceTypes = Utility.CreateStringArray(0)
 		Log(Name, "Animations["+id+"]")
 	endIf
 endFunction
@@ -720,7 +710,6 @@ function Initialize()
 	RaceType  = ""
 	Genders   = new int[4]
 	Positions = new int[5]
-	RaceTypes = new string[5]
 	StageSoundFX = new Form[1]
 
 	; Only init if needed to keep between registry resets.
@@ -728,6 +717,7 @@ function Initialize()
 		LastKeys  = new string[5]
 	endIf
 
+	RaceTypes  = Utility.CreateStringArray(0)
 	Animations = Utility.CreateStringArray(0)
 	BedOffset  = Utility.CreateFloatArray(0)
 	Timers     = Utility.CreateFloatArray(0)

@@ -61,35 +61,54 @@ sslBaseAnimation[] function MergeAnimationLists(sslBaseAnimation[] List1, sslBas
 	return Output
 endFunction
 
-sslBaseAnimation[] function RemoveTaggedAnimations(sslBaseAnimation[] Anims, string Tags) global
-	bool[] Valid  = FindTaggedAnimations(Anims, Tags)
-	int found = PapyrusUtil.CountBool(Valid, true)
-	if found == 0
+sslBaseAnimation[] function FilterTaggedAnimations(sslBaseAnimation[] Anims, string[] Tags, bool HasTag = true) global
+	if !Anims || Anims.Length < 1
+		return Anims
+	elseIf !Tags || Tags.Length < 1
+		if HasTag
+			return AnimationArray(0)
+		endIf
 		return Anims
 	endIf
-	int i = Valid.Length
-	int n = (i - found)
+	int i = Anims.Length
+	bool[] Valid = Utility.CreateBoolArray(i)
+	while i
+		i -= 1
+		Valid[i] = Anims[i].HasOneTag(Tags) == HasTag
+	endWhile
+	; Check results
+	if Valid.Find(true) == -1
+		return AnimationArray(0) ; No valid animations
+	elseIf Valid.Find(false) == -1
+		return Anims ; All valid animations
+	endIf
+	; Filter output
+	i = Anims.Length
+	int n = PapyrusUtil.CountBool(Valid, true)
 	sslBaseAnimation[] Output = sslUtility.AnimationArray(n)
 	while i && n
 		i -= 1
-		if !Valid[i]
+		if Valid[i]
 			n -= 1
 			Output[n] = Anims[i]
 		endIf
-	endwhile
+	endWhile
 	return Output
 endFunction
 
-bool[] function FindTaggedAnimations(sslBaseAnimation[] Anims, string Tags) global
-	if !Anims || Anims.Length < 1 || Tags == ""
+sslBaseAnimation[] function RemoveTaggedAnimations(sslBaseAnimation[] Anims, string[] Tags) global
+	return FilterTaggedAnimations(Anims, Tags, false)
+endFunction
+
+bool[] function FindTaggedAnimations(sslBaseAnimation[] Anims, string[] Tags) global
+	if Anims.Length < 1 || Tags.Length < 0
 		return Utility.CreateBoolArray(0)
 	endIf
-	bool[] Output     = Utility.CreateBoolArray(i)
-	string[] Checking = PapyrusUtil.StringSplit(Tags)
 	int i = Anims.Length
+	bool[] Output = Utility.CreateBoolArray(i)
 	while i
 		i -= 1
-		Output[i] = Anims[i].HasOneTag(Checking)
+		Output[i] = Anims[i].HasOneTag(Tags)
 	endWhile
 	return Output
 endFunction
@@ -177,11 +196,11 @@ endFunction
 
 
 bool[] function BoolArray(int size) global
-	; Debug.Trace("SEXLAB -- sslUtility.BoolArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.BoolArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return Utility.CreateBoolArray(size)
 endFunction
 float[] function FloatArray(int size) global
-	; Debug.Trace("SEXLAB -- sslUtility.FloatArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.FloatArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return Utility.CreateFloatArray(size)
 endFunction
 int[] function IntArray(int size) global
@@ -189,26 +208,26 @@ int[] function IntArray(int size) global
 	return Utility.CreateIntArray(size)
 endFunction
 string[] function StringArray(int size) global
-	; Debug.Trace("SEXLAB -- sslUtility.StringArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.StringArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return Utility.CreateStringArray(size)
 endFunction
 Form[] function FormArray(int size) global
-	; Debug.Trace("SEXLAB -- sslUtility.FormArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.FormArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return Utility.CreateFormArray(size)
 endFunction
 Actor[] function ActorArray(int size) global
-	; Debug.Trace("SEXLAB -- sslUtility.ActorArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.ActorArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ActorArray(size)
 endFunction
 
 
 ; string function MakeArgs(string delimiter, string arg1, string arg2 = "", string arg3 = "", string arg4 = "", string arg5 = "") global
-; 	; Debug.Trace("SEXLAB -- sslUtility.MakeArgs -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.MakeArgs -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 ; 	return PapyrusUtil.MakeArgs(delimiter, arg1, arg2, arg3, arg4, arg5)
 ; endFunction
 
 string[] function ArgString(string args, string delimiter = ",") global
-	; Debug.Trace("SEXLAB -- sslUtility.ArgString -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.ArgString -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.StringSplit(args, delimiter)
 endFunction
 
@@ -246,12 +265,12 @@ endFunction
 ; 	PapyrusUtil.FloatCopyTo(Array, Output, StartIndex, Endindex)
 ; endFunction
 ; function IntCopyTo(int[] Array, int[] Output, int StartIndex = 0, int EndIndex = -1) global
-; 	; Debug.Trace("SEXLAB -- sslUtility.IntCopyTo -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	; Debug.Trace("SEXLAB -- sslUtility.IntCopyTo -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 ; 	PapyrusUtil.IntCopyTo(Array, Output, StartIndex, Endindex)
 ; endFunction
 
 int[] function SliceIntArray(int[] Array, int startindex = 0, int endindex = -1) global
-	; Debug.Trace("SEXLAB -- sslUtility.SliceIntArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.SliceIntArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.SliceIntArray(Array, startindex, endindex)
 endFunction
 
@@ -305,22 +324,22 @@ int function WrapIndex(int index, int len) global
 endFunction
 
 float[] function IncreaseFloat(int by, float[] Array) global
-	; Debug.Trace("SEXLAB -- sslUtility.IncreaseFloat -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.IncreaseFloat -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ResizeFloatArray(Array, (Array.Length + by))
 endFunction
 
 float[] function TrimFloatArray(float[] Array, int len) global
-	; Debug.Trace("SEXLAB -- sslUtility.TrimFloatArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.TrimFloatArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ResizeFloatArray(Array, len)
 endFunction
 
 float[] function PushFloat(float var, float[] Array) global
-	; Debug.Trace("SEXLAB -- sslUtility.PushFloat -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.PushFloat -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.PushFloat(Array, var)
 endFunction
 
 float[] function MergeFloatArray(float[] Push, float[] Array) global
-	; Debug.Trace("SEXLAB -- sslUtility.MergeFloatArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.MergeFloatArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.MergeFloatArray(Array, Push)
 endFunction
 
@@ -335,20 +354,20 @@ endFunction
 ; endFunction
 
 float[] function EmptyFloatArray() global
-	; Debug.Trace("SEXLAB -- sslUtility.EmptyFloatArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.EmptyFloatArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return Utility.CreateFloatArray(0)
 endFunction
 
 string[] function IncreaseString(int by, string[] Array) global
-	; Debug.Trace("SEXLAB -- sslUtility.IncreaseString -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.IncreaseString -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ResizeStringArray(Array, (Array.Length + by))
 endFunction
 string[] function TrimStringArray(string[] Array, int len) global
-	; Debug.Trace("SEXLAB -- sslUtility.TrimStringArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.TrimStringArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ResizeStringArray(Array, len)
 endFunction
 string[] function PushString(string var, string[] Array) global
-	; Debug.Trace("SEXLAB -- sslUtility.PushString -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.PushString -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.PushString(Array, var)
 endFunction
 string[] function MergeStringArray(string[] Push, string[] Array) global
@@ -356,61 +375,61 @@ string[] function MergeStringArray(string[] Push, string[] Array) global
 	; Debug.Trace("-- sslUtility.PapyrusUtil SEXLAB -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 endFunction
 string[] function ClearEmpty(string[] Array) global
-	; Debug.Trace("SEXLAB -- sslUtility.ClearEmpty -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.ClearEmpty -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.RemoveString(Array, "")
 endFunction
 string[] function EmptyStringArray() global
-	; Debug.Trace("SEXLAB -- sslUtility.EmptyStringArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.EmptyStringArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return Utility.CreateStringArray(0)
 endFunction
 
 bool[] function IncreaseBool(int by, bool[] Array) global
-	; Debug.Trace("SEXLAB -- sslUtility.IncreaseBool -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.IncreaseBool -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ResizeBoolArray(Array, (Array.Length + by))
 endFunction
 
 bool[] function TrimBoolArray(bool[] Array, int len) global
-	; Debug.Trace("SEXLAB -- sslUtility.TrimBoolArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.TrimBoolArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ResizeBoolArray(Array, len)
 endFunction
 
 bool[] function PushBool(bool var, bool[] Array) global
-	; Debug.Trace("SEXLAB -- sslUtility.PushBool -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.PushBool -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.PushBool(Array, var)
 endFunction
 
 bool[] function MergeBoolArray(bool[] Push, bool[] Array) global
-	; Debug.Trace("SEXLAB -- sslUtility.MergeBoolArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.MergeBoolArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.MergeBoolArray(Array, Push)
 endFunction
 
 bool[] function EmptyBoolArray() global
-	; Debug.Trace("SEXLAB -- sslUtility.EmptyBoolArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.EmptyBoolArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return Utility.CreateBoolArray(0)
 endFunction
 
 form[] function IncreaseForm(int by, form[] Array) global
-	; Debug.Trace("SEXLAB -- sslUtility.IncreaseForm -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.IncreaseForm -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.ResizeFormArray(Array, (Array.Length + by))
 endFunction
 
 form[] function PushForm(form var, form[] Array) global
-	; Debug.Trace("SEXLAB -- sslUtility.PushForm -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.PushForm -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.PushForm(Array, var)
 endFunction
 
 form[] function MergeFormArray(form[] Push, form[] Array) global
-	; Debug.Trace("SEXLAB -- sslUtility.MergeFormArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.MergeFormArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.MergeFormArray(Array, Push)
 endFunction
 
 Form[] function ClearNone(Form[] Array) global
-	; Debug.Trace("SEXLAB -- sslUtility.ClearNone -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.ClearNone -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return PapyrusUtil.RemoveForm(Array, none)
 endFunction
 
 form[] function EmptyFormArray() global
-	; Debug.Trace("SEXLAB -- sslUtility.EmptyFormArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
+	Debug.Trace("SEXLAB -- sslUtility.EmptyFormArray -- DEVELOPMENT DEPRECATION, MOTHER FUCKER - Check PapyrusUtil.psc alternative.")
 	return Utility.CreateFormArray(0)
 endFunction
 
