@@ -22,6 +22,7 @@ sslObjectFactory property Factory auto
 ; ------------------------------------------------------- ;
 
 event OnPlayerLoadGame()
+	MenuWait()
 	Log("Version "+CurrentVersion, "LOADED")
 	; Check for install
 	if Config.CheckSystem()
@@ -45,6 +46,7 @@ event OnInit()
 endEvent
 
 event OnUpdate()
+	MenuWait()
 	if CurrentVersion != SexLabUtil.GetVersion()
 		InstallSystem()
 	endIf
@@ -208,6 +210,12 @@ function LogAll(string Log)
 	MiscUtil.PrintConsole(Log)
 endFunction
 
+function MenuWait()
+	Utility.Wait(2.0)
+	while Utility.IsInMenuMode()
+		Utility.Wait(0.5)
+	endWhile
+endFunction
 
 function LoadLibs(bool Forced = false)
 	; Sync function Libraries - SexLabQuestFramework

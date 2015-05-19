@@ -67,6 +67,7 @@ Form HadBoots
 
 ; Thread/alias shares
 float[] RealTime
+bool DebugMode
 
 ; Animation Position/Stage flags
 bool property OpenMouth hidden
@@ -116,6 +117,7 @@ bool function SetActor(Actor ProspectRef)
 	IsPlayer   = ActorRef == PlayerRef
 	IsTracked  = Config.ThreadLib.IsActorTracked(ActorRef)
 	RealTime   = Thread.RealTime
+	DebugMode  = Thread.DebugMode
 	Thread.Genders[Gender] = Thread.Genders[Gender] + 1
 	; Player and creature specific
 	if IsCreature
@@ -968,7 +970,7 @@ endFunction
 function Log(string msg, string src = "")
 	msg = "ActorAlias["+ActorName+"] "+src+" - "+msg
 	Debug.Trace("SEXLAB - " + msg)
-	if Config.DebugMode
+	if DebugMode
 		SexLabUtil.PrintConsole(msg)
 	endIf
 endFunction

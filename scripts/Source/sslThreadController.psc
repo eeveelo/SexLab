@@ -29,6 +29,7 @@ bool hkReady
 state Prepare
 	function FireAction()
 		; UpdateActorKey()
+		ResolveTimers()
 		UpdateAdjustKey()
 		SetAnimation()
 		Log(AdjustKey, "Adjustment Profile")
@@ -89,6 +90,7 @@ state Advancing
 			endIf
 			return
 		endIf
+		ResolveTimers()
 		SyncEvent("Sync", 10.0)
 	endFunction
 	function SyncDone()
@@ -188,12 +190,12 @@ state Animating
 	function RealignActors()
 		UnregisterForUpdate()
 
-		if Config.BackwardsPressed()
+		if !Config.BackwardsPressed()
 			ClearIdles()
 			Utility.Wait(0.5)
 		endIf
 
-		string[] AnimEvents = Animation.FetchStage(Stage)
+		; string[] AnimEvents = Animation.FetchStage(Stage)
 		if ActorCount == 1
 			ActorAlias[0].SyncThread()
 			ActorAlias[0].SyncLocation(true)

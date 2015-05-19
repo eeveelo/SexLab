@@ -72,17 +72,21 @@ bool property IsDirty auto hidden
 bool property IsLoving auto hidden
 
 ; Timer Info
+bool UseCustomTimers
 float[] CustomTimers
+float[] ConfigTimers
 float[] property Timers hidden
 	float[] function get()
-		if CustomTimers.Length != 0
+		if UseCustomTimers
 			return CustomTimers
-		elseif LeadIn
-			return Config.StageTimerLeadIn
-		elseif IsAggressive
-			return Config.StageTimerAggr
+		endIf
+		return ConfigTimers
+	endFunction
+	function set(float[] value)
+		if UseCustomTimers
+			CustomTimers = value
 		else
-			return Config.StageTimer
+			ConfigTimers = value
 		endIf
 	endFunction
 endProperty
@@ -170,6 +174,8 @@ string ActorKeys
 
 ; Debug testing
 float property t auto hidden
+
+bool property DebugMode auto hidden
 
 ; ------------------------------------------------------- ;
 ; --- Thread Making API                               --- ;
@@ -414,8 +420,9 @@ state Making
 		Fatal("Thread has timed out of the making process; resetting model for selection pool")
 	endEvent
 	event OnBeginState()
-		Log("Entering Making State")
+		DebugMode = Config.DebugMode
 		t = SexLabUtil.Timer(0, "TIMER BEGIN")
+		Log("Entering Making State")
 		; Action Events
 		RegisterForModEvent(Key(EventTypes[0]+"Done"), EventTypes[0]+"Done")
 		RegisterForModEvent(Key(EventTypes[1]+"Done"), EventTypes[1]+"Done")
@@ -682,12 +689,13 @@ function SetBedFlag(int flag = 0)
 	BedFlag = flag
 endFunction
 
-function SetTimers(float[] setTimers)
-	if setTimers.Length < 1
+function SetTimers(float[] SetTimers)
+	if !SetTimers || SetTimers.Length < 1
 		Log("SetTimers() - Empty timers given.", "ERROR")
-		return
+	else
+		CustomTimers    = SetTimers
+		UseCustomTimers = true
 	endIf
-	CustomTimers = setTimers
 endFunction
 
 float function GetStageTimer(int maxstage)
@@ -995,7 +1003,7 @@ endFunction
 function Log(string msg, string src = "")
 	msg = "Thread["+thread_id+"] "+src+" - "+msg
 	Debug.Trace("SEXLAB - " + msg)
-	if Config.DebugMode
+	if DebugMode
 		SexLabUtil.PrintConsole(msg)
 	endIf
 endFunction
@@ -1003,7 +1011,7 @@ endFunction
 function Fatal(string msg, string src = "", bool halt = true)
 	msg = "FATAL - Thread["+thread_id+"] "+src+" - "+msg
 	Debug.TraceStack("SEXLAB - " + msg)
-	if Config.DebugMode
+	if DebugMode
 		SexLabUtil.PrintConsole(msg)
 	endIf
 	if halt
@@ -1037,6 +1045,18 @@ sslActorAlias function PickAlias(Actor ActorRef)
 		i += 1
 	endWhile
 	return none
+endFunction
+
+function ResolveTimers()
+	if !UseCustomTimers
+		if LeadIn
+			ConfigTimers = Config.StageTimerLeadIn
+		elseIf IsAggressive
+			ConfigTimers = Config.StageTimerAggr
+		else
+			ConfigTimers = Config.StageTimer
+		endIf
+	endIf
 endFunction
 
 function SetTID(int id)
@@ -1116,6 +1136,7 @@ function Initialize()
 	IsVaginal      = false
 	IsAnal         = false
 	IsOral         = false
+	UseCustomTimers= false
 	; Floats
 	StartedAt      = 0.0
 	; Integers
@@ -1142,13 +1163,13 @@ function Initialize()
 
 	; Storage Data
 	Animation         = none
+	Positions         = PapyrusUtil.ActorArray(0)
 	CustomAnimations  = sslUtility.AnimationArray(0)
 	PrimaryAnimations = sslUtility.AnimationArray(0)
 	LeadAnimations    = sslUtility.AnimationArray(0)
 	Hooks             = Utility.CreateStringArray(0)
 	Tags              = Utility.CreateStringArray(0)
 	CustomTimers      = Utility.CreateFloatArray(0)
-	Positions         = PapyrusUtil.ActorArray(0)
 	; Enter thread selection pool
 	GoToState("Unlocked")
 endFunction
