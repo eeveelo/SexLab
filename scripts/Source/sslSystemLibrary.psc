@@ -50,6 +50,8 @@ function LoadLibs(bool Forced = false)
 	if Forced || !PlayerRef
 		PlayerRef = Game.GetPlayer()
 	endIf
+	; Watch for SexLabDebugMode event
+	RegisterForModEvent("SexLabDebugMode", "SetDebugMode")
 endFunction
 
 function Setup()
@@ -63,9 +65,16 @@ event OnInit()
 	Debug.Trace("SEXLAB -- Init "+self)
 endEvent
 
+bool property InDebugMode auto hidden
+event SetDebugMode(bool ToMode)
+	InDebugMode = ToMode
+	; SexLabUtil.PrintConsole("SEXLABTEST: "+self+ "SET DEBUG MODE ["+ToMode+"]")
+	; Debug.Trace("SEXLABTEST: "+self+ "SET DEBUG MODE ["+ToMode+"]")
+endEvent
+
 function Log(string Log, string Type = "NOTICE")
 	Log = Type+": "+Log
-	if Config.DebugMode
+	if InDebugMode
 		SexLabUtil.PrintConsole(Log)
 	endIf
 	if Type == "FATAL"

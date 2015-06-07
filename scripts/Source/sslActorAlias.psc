@@ -24,9 +24,8 @@ sslThreadController Thread
 int Position
 int Stage
 
-; Animation
+; string AnimEvent
 sslBaseAnimation Animation
-string AnimEvent
 string AdjustKey
 string ActorKey
 
@@ -49,7 +48,6 @@ float[] Loc
 int[] Flags
 Form[] Equipment
 bool[] StripOverride
-float[] SkillBonus
 float[] Skills
 
 float StartedAt
@@ -57,7 +55,7 @@ float ActorScale
 float AnimScale
 int HighestRelation
 int Enjoyment
-int BedTypeID
+int Orgasms
 
 Form Strapon
 Form HadStrapon
@@ -65,9 +63,6 @@ Form HadStrapon
 Spell HDTHeelSpell
 Form HadBoots
 
-; Thread/alias shares
-float[] RealTime
-bool DebugMode
 
 ; Animation Position/Stage flags
 bool property OpenMouth hidden
@@ -104,6 +99,7 @@ bool function SetActor(Actor ProspectRef)
 	if !ProspectRef || ProspectRef != GetReference()
 		return false ; Failed to set prospective actor into alias
 	endIf
+	LoadShares()
 	; Init actor alias information
 	ActorRef   = ProspectRef
 	BaseRef    = ActorRef.GetLeveledActorBase()
@@ -114,16 +110,15 @@ bool function SetActor(Actor ProspectRef)
 	IsMale     = Gender == 0
 	IsFemale   = Gender == 1
 	IsCreature = Gender >= 2
-	IsPlayer   = ActorRef == PlayerRef
 	IsTracked  = Config.ThreadLib.IsActorTracked(ActorRef)
-	RealTime   = Thread.RealTime
-	DebugMode  = Thread.DebugMode
-	Thread.Genders[Gender] = Thread.Genders[Gender] + 1
+	IsPlayer   = ActorRef == PlayerRef
 	; Player and creature specific
 	if IsCreature
 		Thread.CreatureRef = BaseRef.GetRace()
 	elseIf !IsPlayer
-		Stats.SeedActor(ActorRef)	
+		Stats.SeedActor(ActorRef)
+	else
+		Thread.HasPlayer = true
 	endIf
 	; Actor's Adjustment Key
 	ActorKey = MiscUtil.GetRaceEditorID(BaseRef.GetRace())
@@ -173,6 +168,29 @@ function ClearAlias()
 	Initialize()
 endFunction
 
+
+; Thread/alias shares
+bool DebugMode
+
+bool[] IsType
+int[] BedStatus
+float[] RealTime
+float[] SkillBonus
+string[] AnimEvents
+Actor[] Positions
+
+
+function LoadShares()
+	DebugMode  = Config.DebugMode
+
+	IsType     = Thread.IsType
+	BedStatus  = Thread.BedStatus
+	RealTime   = Thread.RealTime
+	SkillBonus = Thread.SkillBonus
+	AnimEvents = Thread.AnimEvents
+	Positions  = Thread.Positions
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Actor Prepartion                                --- ;
 ; ------------------------------------------------------- ;
@@ -191,18 +209,15 @@ state Ready
 		Flags      = new int[5]
 		Offsets    = new float[4]
 		Loc        = new float[6]
-		SkillBonus = Thread.SkillBonus
 		Stage      = Thread.Stage
-		Animation  = Thread.Animation
 		AdjustKey  = Thread.AdjustKey
-		Position   = Thread.Positions.Find(ActorRef)
-		BedTypeID  = Thread.BedTypeID
-		AnimEvent  = Animation.FetchPositionStage(Position, Stage)
+		Position   = Positions.Find(ActorRef)
+		; AnimEvent  = Animation.FetchPositionStage(Position, Stage)
 		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
-		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedTypeID)
+		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedStatus[1])
 		Center     = Thread.CenterLocation
 		; Calculate scales
-		;/ float display = ActorRef.GetScale()
+		float display = ActorRef.GetScale()
 		ActorRef.SetScale(1.0)
 		float base = ActorRef.GetScale()
 		ActorScale = ( display / base )
@@ -210,8 +225,8 @@ state Ready
 		ActorRef.SetScale(ActorScale)
 		if Thread.ActorCount > 1 && Config.ScaleActors ; FIXME: || IsCreature?
 			AnimScale = (1.0 / base)
-		endIf /;
-		; Log("display/base/animscale = "+display+"/"+base+"/"+AnimScale)
+		endIf
+		Log("display/base/animscale = "+display+"/"+base+"/"+AnimScale)
 		; Stop movement
 		LockActor()
 		; Starting position
@@ -220,8 +235,7 @@ state Ready
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
-		; ActorRef.SetVehicle(MarkerRef)
-		; ActorRef.SetScale(AnimScale)
+		AttachMarker()
 		; Disable autoadvance if disabled for player
 		if IsPlayer
 			if IsVictim && Config.DisablePlayer
@@ -255,7 +269,7 @@ state Ready
 			endIf
 			; Pick an expression if needed
 			if !Expression && Config.UseExpressions
-				Expression = Config.ExpressionSlots.PickExpression(ActorRef, Thread.VictimRef)
+				Expression = Config.ExpressionSlots.PickByStatus(ActorRef, IsVictim, IsType[0] && !IsVictim)
 			endIf
 			; Always use players stats if present, so players stats mean something more for npcs
 			Actor SkilledActor = ActorRef
@@ -263,7 +277,7 @@ state Ready
 				SkilledActor = PlayerRef
 			; If a non-creature couple, base skills off partner
 			elseIf Thread.ActorCount > 1 && !Thread.HasCreature
-				SkilledActor = Thread.Positions[sslUtility.IndexTravel(Position, Thread.ActorCount)]
+				SkilledActor = Positions[sslUtility.IndexTravel(Position, Thread.ActorCount)]
 			endIf
 			Skills = Stats.GetSkillLevels(SkilledActor)
 			HighestRelation = Thread.GetHighestPresentRelationshipRank(ActorRef)
@@ -279,7 +293,7 @@ endState
 ; ------------------------------------------------------- ;
 
 function PlayAnimation()
-	Debug.SendAnimationEvent(ActorRef, AnimEvent)
+	Debug.SendAnimationEvent(ActorRef, AnimEvents[Position])
 endFunction
 
 state Animating
@@ -312,25 +326,23 @@ state Animating
 		if !IsSilent
 			Voice.Moan(ActorRef, Enjoyment, IsVictim)
 		endIf
-		; LoopB
+		; Loop
 		RegisterForSingleUpdate(VoiceDelay)
 	endEvent
 
 	function SyncThread()
 		; Sync with thread info
-		Animation  = Thread.Animation
 		AdjustKey  = Thread.AdjustKey
 		Stage      = Thread.Stage
-		Position   = Thread.Positions.Find(ActorRef)
-		BedTypeID  = Thread.BedTypeID
-		AnimEvent  = Animation.FetchPositionStage(Position, Stage)
+		Position   = Positions.Find(ActorRef)
+		; AnimEvent  = Animation.FetchPositionStage(Position, Stage)
 		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
-		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedTypeID)
+		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedStatus[1])
 		VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
 		; Update alias info
 		GetEnjoyment()
 		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
-		; Log("Enjoyment: "+Enjoyment+" SOS: "+Schlong)
+		Log("Enjoyment: "+Enjoyment+" SOS: "+Schlong)
 		if !IsCreature
 			ResolveStrapon()
 			RefreshExpression()
@@ -344,7 +356,7 @@ state Animating
 	endFunction
 
 	function RefreshLoc()
-		Offsets = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedTypeID)
+		Offsets = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedStatus[1])
 		SyncLocation(true)
 	endFunction
 
@@ -354,16 +366,14 @@ state Animating
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		; Avoid forcibly setting on player coords if avoidable - causes annoying graphical flickering
 		if Force && IsPlayer && IsInPosition(ActorRef, MarkerRef, 40.0)
-			; ActorRef.SetVehicle(MarkerRef)
-			; ActorRef.SetScale(AnimScale)
+			AttachMarker()
 			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 5000, 0)
 			return ; OnTranslationComplete() will take over when in place
 		elseIf Force
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		endIf
-		; ActorRef.SetVehicle(MarkerRef)
-		; ActorRef.SetScale(AnimScale)
+		AttachMarker()
 		Snap()
 	endFunction
 
@@ -372,14 +382,13 @@ state Animating
 		if !IsInPosition(ActorRef, MarkerRef, 75.0)
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
-			; ActorRef.SetVehicle(MarkerRef)
-			; ActorRef.SetScale(AnimScale)
+			AttachMarker()
 		elseIf ActorRef.GetDistance(MarkerRef) > 0.5
 			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 5000, 0)
 			return ; OnTranslationComplete() will take over when in place
 		endIf
 		; Begin very slowly rotating a small amount to hold position
-		; ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.001, 20.0, 500, 0.00001)
+		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.001, 20.0, 500, 0.00001)
 	endFunction
 
 	event OnTranslationComplete()
@@ -389,8 +398,15 @@ state Animating
 	endEvent
 
 	function OrgasmEffect()
+		Orgasms += 1
+		Log("Orgasms: "+Orgasms+" Enjoyment: "+Enjoyment)
 		; Apply cum
-		int CumID = Animation.GetCumID(Position, Stage)
+		int CumID
+		if Positions.Length == 2
+			CumID = Animation.GetCumID(SexLabUtil.IntIfElse(Position == 0, 1, 0), Stage)
+		else
+			CumID = Animation.GetCumID(Position, Stage)
+		endIf
 		if CumID > 0 && Config.UseCum && (Thread.Males > 0 || Config.AllowFFCum || Thread.HasCreature)
 			ActorLib.ApplyCum(ActorRef, CumID)
 		endIf
@@ -492,6 +508,13 @@ function StopAnimating(bool Quick = false)
 	endIf
 endFunction
 
+function AttachMarker()
+	ActorRef.SetVehicle(MarkerRef)
+	if AnimScale != 1.0
+		ActorRef.SetScale(AnimScale)
+	endIf
+endFunction
+
 function LockActor()
 	if !ActorRef
 		return
@@ -504,9 +527,6 @@ function LockActor()
 	ActorRef.SetFactionRank(Config.AnimatingFaction, 1)
 	ActorUtil.AddPackageOverride(ActorRef, Config.DoNothing, 100, 1)
 	ActorRef.EvaluatePackage()
-	; Animation Driven
-	; ActorRef.SetAnimationVariableBool("bAnimationDriven", true)
-	; ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", false)
 	; Disable movement
 	if IsPlayer
 		if Game.GetCameraState() == 0
@@ -529,10 +549,8 @@ function LockActor()
 	endIf
 	MarkerRef.Enable()
 	MarkerRef.MoveTo(ActorRef)
-	MarkerRef.SetMotionType(MarkerRef.Motion_Keyframed)
 	ActorRef.StopTranslation()
-	; ActorRef.SetVehicle(MarkerRef)
-	; ActorRef.SetScale(AnimScale)
+	AttachMarker()
 endFunction
 
 function UnlockActor()
@@ -541,14 +559,11 @@ function UnlockActor()
 	endIf
 	; Detach positioning marker
 	ActorRef.StopTranslation()
-	; ActorRef.SetVehicle(none)
+	ActorRef.SetVehicle(none)
 	; Remove from animation faction
 	ActorRef.RemoveFromFaction(Config.AnimatingFaction)
 	ActorUtil.RemovePackageOverride(ActorRef, Config.DoNothing)
 	ActorRef.EvaluatePackage()
-	; Animation Driven
-	; ActorRef.SetAnimationVariableBool("bAnimationDriven", false)
-	; ActorRef.SetAnimationVariableBool("bHumanoidFootIKEnable", true)
 	; Enable movement
 	if IsPlayer
 		; Disable free camera, if in it
@@ -600,12 +615,29 @@ endFunction
 ; --- Data Accessors                                  --- ;
 ; ------------------------------------------------------- ;
 
+int function GetGender()
+	return Gender
+endFunction
+
 function SetVictim(bool Victimize)
-	IsVictim = Victimize
+	; Make victim
 	if Victimize
-		Thread.VictimRef    = ActorRef
-		Thread.IsAggressive = true
+		Thread.Victims   = PapyrusUtil.PushActor(Thread.Victims, ActorRef)
+		Thread.VictimRef = ActorRef
+		IsType[0]        = true
+	; Was victim but now isn't, update thread
+	elseIf IsVictim && !Victimize
+		Actor[] Victims = Thread.Victims
+		if Victims.Length > 1
+			Thread.Victims   = PapyrusUtil.RemoveActor(Thread.Victims, ActorRef)
+			Thread.VictimRef = Thread.Victims[0]
+		else
+			Thread.Victims   = none
+			Thread.VictimRef = none
+			IsType[0]        = false
+		endIf
 	endIf
+	IsVictim = Victimize
 endFunction
 
 bool function IsVictim()
@@ -627,6 +659,10 @@ int function GetEnjoyment()
 			Thread.SetBonuses()
 		endIf
 		Enjoyment = CalcEnjoyment(SkillBonus, Skills, Thread.LeadIn, IsFemale, (RealTime[0] - StartedAt), Stage, Animation.StageCount)
+		if Enjoyment >= ((Orgasms + 1) * 100)
+			OrgasmEffect()
+			; Enjoyment = (Enjoyment - (Enjoyment - 100))
+		endIf
 	endIf
 	return Enjoyment
 endFunction
@@ -744,7 +780,7 @@ function Strip()
 	if StripOverride.Length == 33
 		Strip = StripOverride
 	else
-		Strip = Config.GetStrip(IsFemale, Thread.UseLimitedStrip(), Thread.IsAggressive, IsVictim)
+		Strip = Config.GetStrip(IsFemale, Thread.UseLimitedStrip(), IsType[0], IsVictim)
 	endIf
 	; Stripped storage
 	Form ItemRef
@@ -1026,7 +1062,7 @@ int function CalcEnjoyment(float[] XP, float[] SkillsAmounts, bool IsLeadin, boo
 ; 	BoolShare
 ; endFunction
 
-; int[] property IntShare auto hidden ; Stage, ActorCount, BedTypeID
+; int[] property IntShare auto hidden ; Stage, ActorCount, BedStatus[1]
 ; float[] property FloatShare auto hidden ; RealTime, StartedAt
 ; string[] property StringShare auto hidden ; AdjustKey
 ; bool[] property BoolShare auto hidden ; 

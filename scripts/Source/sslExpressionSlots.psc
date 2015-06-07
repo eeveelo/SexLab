@@ -23,32 +23,28 @@ Actor property PlayerRef auto
 ; ------------------------------------------------------- ;
 
 sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none)
+	return PickByStatus(ActorRef, (VictimRef && VictimRef == ActorRef), (VictimRef && VictimRef != ActorRef))
+endFunction
+
+sslBaseExpression function PickByStatus(Actor ActorRef, bool IsVictim = false, bool IsAggressor = false)
 	string Tag
-	if ActorRef == VictimRef
+	if IsVictim
 		Tag = "Victim"
-	elseIf VictimRef && ActorRef != VictimRef
+	elseIf IsAggressor
 		Tag = "Aggressor"
 	else
 		Tag = "Normal"
 	endIf
-	bool IsFemale = ActorRef.GetLeveledActorBase().GetSex() == 1
-	bool[] Valid  = Utility.CreateBoolArray(Slotted)
-	int i = Slotted
-	while i
-		i -= 1
-		sslBaseExpression Slot = Objects[i] as sslBaseExpression
-		Valid[i] = Slot.Registered && Slot.HasTag(Tag) && ((IsFemale && Slot.PhasesFemale > 0) || (!IsFemale && Slot.PhasesMale > 0))
-	endWhile
-	return SelectRandom(Valid)
+	return RandomByTag(Tag, ActorRef.GetLeveledActorBase().GetSex() == 1)
 endFunction
 
-sslBaseExpression function RandomByTag(string Tag)
+sslBaseExpression function RandomByTag(string Tag, bool ForFemale = true)
 	bool[] Valid = Utility.CreateBoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
 		sslBaseExpression Slot = Objects[i] as sslBaseExpression
-		Valid[i] = Slot.Registered && Slot.HasTag(Tag)
+		Valid[i] = Slot.HasTag(Tag) && ((ForFemale && Slot.PhasesFemale > 0) || (!ForFemale && Slot.PhasesMale > 0))
 	endWhile
 	return SelectRandom(Valid)
 endFunction
@@ -208,16 +204,22 @@ int function Register(string Registrar)
 	if Registry.Find(Registrar) != -1 || Slotted >= 375
 		return -1
 	endIf
+	int i = Slotted
 	Slotted += 1
-	int i = Registry.Find("")
-	if i == -1
+	if i >= Registry.Length
 		int n = Registry.Length + 32
 		if n > 375
 			n = 375
 		endIf
 		Config.Log("Resizing expression registry slots: "+Registry.Length+" -> "+n, "Register")
-		Registry = PapyrusUtil.ResizeStringArray(Registry, n)
-		Objects  = PapyrusUtil.ResizeAliasArray(Objects, n)
+		Registry = Utility.ResizeStringArray(Registry, n)
+		Objects  = Utility.ResizeAliasArray(Objects, n, GetNthAlias(0))
+		while n
+			n -= 1
+			if Registry[n] == ""
+				Objects[n] = none
+			endIf
+		endWhile
 		i = Registry.Find("")
 	endIf
 	Registry[i] = Registrar
@@ -250,15 +252,8 @@ function Setup()
 	GoToState("Locked")
 	; Init slots
 	Slotted  = 0	
-	Registry = Utility.CreateStringArray(32)
-	Objects  = Utility.CreateAliasArray(32, GetNthAlias(0))
-	; DEVTEMP: SKSE Beta workaround - clear used dummy aliases
-	int i = Objects.Length
-	while i
-		i -= 1
-		Objects[i] = none
-	endWhile
-	; /DEVTEMP
+	Registry = new string[32]
+	Objects  = new Alias[32]
 	; Init defaults
 	RegisterSlots()
 	GoToState("Locked")

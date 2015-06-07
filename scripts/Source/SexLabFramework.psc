@@ -649,8 +649,12 @@ endFunction
 ;# BEGIN EXPRESSION FUNCTION #
 ;#---------------------------#
 
+sslBaseExpression function PickExpressionByStatus(Actor ActorRef, bool IsVictim = false, bool IsAggressor = false)
+	return ExpressionSlots.PickByStatus(ActorRef, IsVictim, IsAggressor)
+endFunction
+
 sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none)
-	return ExpressionSlots.PickExpression(ActorRef, VictimRef)
+	return ExpressionSlots.PickByStatus(ActorRef, (VictimRef && VictimRef == ActorRef), (VictimRef && VictimRef != ActorRef))
 endFunction
 
 sslBaseExpression function RandomExpressionByTag(string Tag)
@@ -1204,7 +1208,7 @@ endFunction
 
 function Log(string Log, string Type = "NOTICE")
 	Log = Type+": "+Log
-	if Config.DebugMode
+	if Config.InDebugMode
 		SexLabUtil.PrintConsole(Log)
 	endIf
 	if Type == "FATAL"

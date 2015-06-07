@@ -28,15 +28,18 @@ sslCreatureAnimationSlots property CreatureSlots auto
 ; Actor Info
 sslActorAlias[] property ActorAlias auto hidden
 Actor[] property Positions auto hidden
-Actor property VictimRef auto hidden
 Actor property PlayerRef auto hidden
 
+Actor[] property Victims auto hidden
+Actor property VictimRef auto hidden
+
 ; Thread status
+; bool[] property Status auto hidden
+
 bool property HasPlayer auto hidden
 bool property AutoAdvance auto hidden
 bool property LeadIn auto hidden
 bool property FastEnd auto hidden
-bool property IsAggressive auto hidden
 
 ; Creature animation
 Race property CreatureRef auto hidden
@@ -46,6 +49,7 @@ int property Stage auto hidden
 int property ActorCount auto hidden
 string property AdjustKey auto hidden
 Sound property SoundFX auto hidden
+string[] property AnimEvents auto hidden
 sslBaseAnimation property Animation auto hidden
 sslBaseAnimation[] CustomAnimations
 sslBaseAnimation[] PrimaryAnimations
@@ -63,13 +67,58 @@ sslBaseAnimation[] property Animations hidden
 endProperty
 
 ; Stat Tracking Info
-float[] property SkillXP auto hidden ; [0] Foreplay, [1] Vaginal, [2] Anal, [3] Oral, [4] Pure, [5] Lewd
-float[] property SkillBonus auto hidden
-bool property IsVaginal auto hidden
-bool property IsAnal auto hidden
-bool property IsOral auto hidden
-bool property IsDirty auto hidden
-bool property IsLoving auto hidden
+float[] property SkillBonus auto hidden ; [0] Foreplay, [1] Vaginal, [2] Anal, [3] Oral, [4] Pure, [5] Lewd
+float[] property SkillXP auto hidden    ; [0] Foreplay, [1] Vaginal, [2] Anal, [3] Oral, [4] Pure, [5] Lewd
+
+bool[] property IsType auto hidden ; [0] IsAggressive, [1] IsVaginal, [2] IsAnal, [3] IsOral, [4] IsLoving, [5] IsDirty
+bool property IsAggressive hidden
+	bool function get()
+		return IsType[0]
+	endfunction
+	function set(bool value)
+		IsType[0] = value
+	endFunction
+endProperty
+bool property IsVaginal hidden
+	bool function get()
+		return IsType[1]
+	endfunction
+	function set(bool value)
+		IsType[1] = value
+	endFunction
+endProperty
+bool property IsAnal hidden
+	bool function get()
+		return IsType[2]
+	endfunction
+	function set(bool value)
+		IsType[2] = value
+	endFunction
+endProperty
+bool property IsOral hidden
+	bool function get()
+		return IsType[3]
+	endfunction
+	function set(bool value)
+		IsType[3] = value
+	endFunction
+endProperty
+bool property IsLoving hidden
+	bool function get()
+		return IsType[4]
+	endfunction
+	function set(bool value)
+		IsType[4] = value
+	endFunction
+endProperty
+bool property IsDirty hidden
+	bool function get()
+		return IsType[5]
+	endfunction
+	function set(bool value)
+		IsType[5] = value
+	endFunction
+endProperty
 
 ; Timer Info
 bool UseCustomTimers
@@ -104,32 +153,33 @@ float property TotalTime hidden
 endProperty
 
 ; Beds
-int BedFlag ; -1 = forbid 0 = allow   1 = force
-int BedType ; -1 = none   0 = bedroll 1 = single 2 = double
+int[] property BedStatus auto hidden
+; BedStatus[0] = -1 forbid, 0 allow, 1 force
+; BedStatus[1] = -1 none, 0 bedroll, 1 single, 2 double
 ObjectReference property BedRef auto hidden
 int property BedTypeID hidden
 	int function get()
-		return BedType
+		return BedStatus[1]
 	endFunction
 endProperty
 bool property UsingBed hidden
 	bool function get()
-		return BedType > 0
+		return BedStatus[1] > 0
 	endFunction
 endProperty
 bool property UsingBedRoll hidden
 	bool function get()
-		return BedType == 1
+		return BedStatus[1] == 1
 	endFunction
 endProperty
 bool property UsingSingleBed hidden
 	bool function get()
-		return BedType == 2
+		return BedStatus[1] == 2
 	endFunction
 endProperty
 bool property UsingDoubleBed hidden
 	bool function get()
-		return BedType == 3
+		return BedStatus[1] == 3
 	endFunction
 endProperty
 
@@ -175,16 +225,13 @@ string ActorKeys
 ; Debug testing
 float property t auto hidden
 
-bool property DebugMode auto hidden
-
 ; ------------------------------------------------------- ;
 ; --- Thread Making API                               --- ;
 ; ------------------------------------------------------- ;
 
 state Making
 	int function AddActor(Actor ActorRef, bool IsVictim = false, sslBaseVoice Voice = none, bool ForceSilent = false)
-		t = SexLabUtil.Timer(t, "AddActortor - Begin")
-		; Ensure we have room for actor
+		; Ensure we can add actor to thread
 		if !ActorRef
 			Fatal("Failed to add actor -- Actor is a figment of your imagination", "AddActor(NONE)")
 			return -1
@@ -199,21 +246,19 @@ state Making
 			return -1
 		endIf
 		sslActorAlias Slot = PickAlias(ActorRef)
-		t = SexLabUtil.Timer(t, "AddActortor - PickAlias")
 		if !Slot || !Slot.SetActor(ActorRef)
 			Fatal("AddActor("+ActorRef.GetLeveledActorBase().GetName()+") -- Failed to add actor -- They were unable to fill an actor alias", "AddActor("+ActorRef.GetLeveledActorBase().GetName()+")")
 			return -1
 		endIf
-		t = SexLabUtil.Timer(t, "AddActortor - SetActor")
-		; Update thread info
+		; Update position info
 		Positions  = PapyrusUtil.PushActor(Positions, ActorRef)
 		ActorCount = Positions.Length
-		HasPlayer  = Positions.Find(PlayerRef) != -1
-		t = SexLabUtil.Timer(t, "AddActortor - Info")
+		; Update gender counts
+		int g      = Slot.GetGender()
+		Genders[g] = Genders[g] + 1
 		; Flag as victim
 		Slot.SetVictim(IsVictim)
 		Slot.SetVoice(Voice, ForceSilent)
-		t = SexLabUtil.Timer(t, "AddActortor - Victim/Voice")
 		; Return position
 		return Positions.Find(ActorRef)
 	endFunction
@@ -263,13 +308,13 @@ state Making
 			endIf
 		endIf
 		; Search for nearby bed
-		if !CenterRef && BedFlag != -1
+		if !CenterRef && BedStatus[0] != -1
 			CenterOnBed(HasPlayer, 750.0)
 		endIf
 		; Center on fallback choices
 		if !CenterRef
-			if IsAggressive
-				CenterOnObject(VictimRef)
+			if IsType[0]
+				CenterOnObject(Victims[0])
 			elseIf HasPlayer
 				CenterOnObject(PlayerRef)
 			else
@@ -326,7 +371,7 @@ state Making
 		; Get default primary animations if none
 		elseIf PrimaryAnimations.Length == 0
 			t = SexLabUtil.Timer(t, "StartThread - Pick primary")
-			SetAnimations(AnimSlots.GetByDefault(Males, Females, IsAggressive, (BedRef != none), Config.RestrictAggressive))
+			SetAnimations(AnimSlots.GetByDefault(Males, Females, IsType[0], (BedRef != none), Config.RestrictAggressive))
 			if PrimaryAnimations.Length == 0
 				Fatal("Unable to find valid default animations")
 				return none
@@ -335,7 +380,7 @@ state Making
 		endIf
 
 		; Get default foreplay if none and enabled
-		if !HasCreature && !IsAggressive && ActorCount == 2 && !NoLeadIn && LeadAnimations.Length == 0 && Config.ForeplayStage
+		if !HasCreature && !IsType[0] && ActorCount == 2 && !NoLeadIn && LeadAnimations.Length == 0 && Config.ForeplayStage
 			if BedRef
 				SetLeadAnimations(AnimSlots.GetByTags(2, "LeadIn", SexLabUtil.StringIfElse(Config.BedRemoveStanding, "Furniture,Standing", "Furniture")))
 			else
@@ -420,7 +465,6 @@ state Making
 		Fatal("Thread has timed out of the making process; resetting model for selection pool")
 	endEvent
 	event OnBeginState()
-		DebugMode = Config.DebugMode
 		t = SexLabUtil.Timer(0, "TIMER BEGIN")
 		Log("Entering Making State")
 		; Action Events
@@ -541,11 +585,11 @@ function SetVictim(Actor ActorRef, bool Victimize = true)
 endFunction
 
 bool function IsVictim(Actor ActorRef)
-	return VictimRef == ActorRef
+	return ActorRef && VictimRef && Victims.Find(ActorRef) != -1
 endFunction
 
 bool function IsAggressor(Actor ActorRef)
-	return VictimRef && VictimRef != ActorRef
+	return ActorRef && VictimRef && Victims.Find(ActorRef) == -1
 endFunction
 
 int function GetHighestPresentRelationshipRank(Actor ActorRef)
@@ -602,7 +646,7 @@ function ChangeActors(Actor[] NewPositions)
 	HasPlayer  = NewPositions.Find(PlayerRef)
 	; Select new animations for changed actor count
 	if PrimaryAnimations[0].PositionCount != ActorCount
-		SetAnimations(AnimSlots.GetByDefault(NewGenders[0], NewGenders[1], IsAggressive, (BedRef != none), Config.RestrictAggressive))
+		SetAnimations(AnimSlots.GetByDefault(NewGenders[0], NewGenders[1], IsType[0], (BedRef != none), Config.RestrictAggressive))
 		SetAnimation()
 	endIf
 	; End lead in if thread was in it and can't be now
@@ -679,14 +723,14 @@ function DisableLeadIn(bool disabling = true)
 endFunction
 
 function DisableBedUse(bool disabling = true)
-	BedFlag = 0
+	BedStatus[0] = 0
 	if disabling
-		BedFlag = -1
+		BedStatus[0] = -1
 	endIf
 endFunction
 
 function SetBedFlag(int flag = 0)
-	BedFlag = flag
+	BedStatus[0] = flag
 endFunction
 
 function SetTimers(float[] SetTimers)
@@ -719,13 +763,13 @@ function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 		CenterLocation[5] = CenterOn.GetAngleZ()
 		; Check if it's a bed
 		BedRef  = none
-		BedType = ThreadLib.GetBedType(CenterOn)
-		if BedType > 0
+		BedStatus[1] = ThreadLib.GetBedType(CenterOn)
+		if BedStatus[1] > 0
 			BedRef = CenterOn
 			float[] BedOffset = Config.BedOffset
 			CenterLocation[0] = CenterLocation[0] + (BedOffset[0] * Math.sin(CenterLocation[5]))
 			CenterLocation[1] = CenterLocation[1] + (BedOffset[0] * Math.cos(CenterLocation[5]))
-			if BedType > 0
+			if BedStatus[1] > 0
 				CenterLocation[2] = CenterLocation[2] + BedOffset[2]
 			else
 				CenterLocation[2] = CenterLocation[2] + 7.0
@@ -745,7 +789,7 @@ endFunction
 
  bool function CenterOnBed(bool AskPlayer = true, float Radius = 750.0)
  	ObjectReference FoundBed
-	if BedFlag == -1
+	if BedStatus[0] == -1
 		return false ; Beds forbidden by flag
 	elseIf HasPlayer
 		FoundBed = ThreadLib.FindBed(PlayerRef, Radius) ; Check within radius of player
@@ -753,7 +797,7 @@ endFunction
 		FoundBed = ThreadLib.FindBed(Positions[0], Radius) ; Check within radius of first position, if NPC beds are allowed
 	endIf
 	; Found a bed AND EITHER forced use OR don't care about players choice OR or player approved
-	if FoundBed && (BedFlag == 1 || (!AskPlayer || (AskPlayer && (Config.UseBed.Show() as bool))))
+	if FoundBed && (BedStatus[0] == 1 || (!AskPlayer || (AskPlayer && (Config.UseBed.Show() as bool))))
 		CenterOnObject(FoundBed)
 		return true ; Bed found and approved for use
 	endIf
@@ -1051,7 +1095,7 @@ function ResolveTimers()
 	if !UseCustomTimers
 		if LeadIn
 			ConfigTimers = Config.StageTimerLeadIn
-		elseIf IsAggressive
+		elseIf IsType[0]
 			ConfigTimers = Config.StageTimerAggr
 		else
 			ConfigTimers = Config.StageTimer
@@ -1062,6 +1106,9 @@ endFunction
 function SetTID(int id)
 	thread_id = id
 	PlayerRef = Game.GetPlayer()
+	
+	; Watch for SexLabDebugMode event
+	RegisterForModEvent("SexLabDebugMode", "SetDebugMode")
 
 	; Reset function Libraries - SexLabQuestFramework
 	if !Config || !ThreadLib || !ActorLib
@@ -1088,7 +1135,6 @@ function SetTID(int id)
 	endIf
 
 	; Init thread info
-	RealTime   = new float[1]
 	EventTypes = new string[5]
 	EventTypes[0] = "Sync"
 	EventTypes[1] = "Prepare"
@@ -1122,7 +1168,6 @@ function Initialize()
 	ActorAlias[3].ClearAlias()
 	ActorAlias[4].ClearAlias()
 	; Forms
-	VictimRef      = none
 	CenterRef      = none
 	SoundFX        = none
 	BedRef         = none
@@ -1132,29 +1177,28 @@ function Initialize()
 	LeadIn         = false
 	NoLeadIn       = false
 	FastEnd        = false
-	IsAggressive   = false
-	IsVaginal      = false
-	IsAnal         = false
-	IsOral         = false
 	UseCustomTimers= false
 	; Floats
 	StartedAt      = 0.0
 	; Integers
-	BedType        = 0
-	BedFlag        = 0
+	BedStatus[1]   = 0
+	BedStatus[0]   = 0
 	ActorCount     = 0
 	Stage          = 1
 	; Strings
 	AdjustKey      = ""
 	; Storage Info
+	Victims        = new Actor[1]
 	Genders        = new int[4]
 	AliasDone      = new int[5]
 	AliasTimer     = new float[5]
 	; Thread+Alias shares
+	AnimEvents     = new string[5]
 	RealTime       = new float[1]
 	SkillXP        = new float[6]
 	SkillBonus     = new float[6]
 	CenterLocation = new float[6]
+	IsType         = new bool[6]
 
 	; IntShare    = new int[3]
 	; FloatShare  = new float[2]
@@ -1164,6 +1208,7 @@ function Initialize()
 	; Storage Data
 	Animation         = none
 	Positions         = PapyrusUtil.ActorArray(0)
+	Victims           = PapyrusUtil.ActorArray(0)
 	CustomAnimations  = sslUtility.AnimationArray(0)
 	PrimaryAnimations = sslUtility.AnimationArray(0)
 	LeadAnimations    = sslUtility.AnimationArray(0)
@@ -1173,6 +1218,13 @@ function Initialize()
 	; Enter thread selection pool
 	GoToState("Unlocked")
 endFunction
+
+bool property DebugMode auto hidden
+event SetDebugMode(bool ToMode)
+	DebugMode = ToMode
+	; SexLabUtil.PrintConsole("SEXLABTEST: "+self+ "SET DEBUG MODE ["+ToMode+"]")
+	; Debug.Trace("SEXLABTEST: "+self+ "SET DEBUG MODE ["+ToMode+"]")
+endEvent
 
 ; int[] property IntShare auto hidden ; Stage, ActorCount, BedTypeID
 ; float[] property FloatShare auto hidden ; RealTime, StartedAt

@@ -245,7 +245,7 @@ int function ValidateActor(Actor ActorRef)
 endFunction
 
 bool function CanAnimate(Actor ActorRef)
-	Race ActorRace = ActorRef.GetLeveledActorBase().GetRace()
+	Race ActorRace  = ActorRef.GetLeveledActorBase().GetRace()
 	string RaceName = ActorRace.GetName()+MiscUtil.GetRaceEditorID(ActorRace)
 	return !(ActorRef.IsInFaction(ForbiddenFaction) || ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Child") != -1  || StringUtil.Find(RaceName, "Little") != -1 || StringUtil.Find(RaceName, "117") != -1 || StringUtil.Find(RaceName, "Enfant") != -1 || (StringUtil.Find(RaceName, "Elin") != -1 && ActorRef.GetScale() < 0.94) ||  (StringUtil.Find(RaceName, "Monli") != -1 && ActorRef.GetScale() < 0.92))
 endFunction
@@ -342,7 +342,8 @@ int function FemaleCount(Actor[] Positions)
 endFunction
 
 int function CreatureCount(Actor[] Positions)
-	return GenderCount(Positions)[2]
+	int[] Genders = GenderCount(Positions)
+	return Genders[2] + Genders[3]
 endFunction
 
 int function CreatureMaleCount(Actor[] Positions)

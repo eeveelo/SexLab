@@ -70,9 +70,9 @@ string[] function FetchPosition(int Position)
 	return Anims
 endFunction
 
-string[] function FetchStage(int stage)
-	if stage > Stages
-		Log("Unknown stage, '"+stage+"' given", "FetchStage")
+string[] function FetchStage(int Stage)
+	if Stage > Stages
+		Log("Unknown Stage, '"+Stage+"' given", "FetchStage")
 		return none
 	endIf
 	int Position
@@ -82,6 +82,18 @@ string[] function FetchStage(int stage)
 		Position += 1
 	endWhile
 	return Anims
+endFunction
+
+function GetAnimEvents(string[] AnimEvents, int Stage)
+	if AnimEvents.Length != 5 || Stage > Stages
+		Log("Invalid Call("+AnimEvents+", "+Stage+"/"+Stages+")", "GetanimEvents")
+	else
+		int Position
+		while Position < Actors
+			AnimEvents[Position] = Animations[StageIndex(Position, Stage)]
+			Position += 1
+		endWhile
+	endIf
 endFunction
 
 string function FetchPositionStage(int position, int Stage)
@@ -557,7 +569,7 @@ int function AddPosition(int Gender = 0, int AddCum = -1)
 		return -1
 	endIf
 	while Locked
-		Utility.WaitMenuMode(0.05)
+		Utility.WaitMenuMode(0.1)
 		Debug.Trace(Registry+" AddPosition Lock! -- Adding Actor: "+Actors)
 	endWhile
 	Locked = true
@@ -570,6 +582,10 @@ int function AddPosition(int Gender = 0, int AddCum = -1)
 
 	InitArrays(Actors)
 	FlagsArray(Actors)[kCumID] = AddCum
+
+	string[] TagList = GetTags()
+	TagList[0] = TagList[0]+GetGenderString(Gender)
+	TagList[1] = GetGenderString(Gender)+TagList[1]
 
 	if Gender >= 2
 		if RaceTypes.Length == 0
@@ -654,16 +670,13 @@ function AddPositionStage(int Position, string AnimationEvent, float forward = 0
 endFunction
 
 function Save(int id = -1)
-	parent.Save(id)
+	parent.Save(id)	
 	; Finalize config data
-	Flags0     = PapyrusUtil.ResizeIntArray(Flags0, (Stages * kFlagEnd))
-	Offsets0   = PapyrusUtil.ResizeFloatArray(Offsets0, (Stages * kOffsetEnd))
-	Animations = PapyrusUtil.ResizeStringArray(Animations, aid)
-	; Positions  = PapyrusUtil.ResizeIntArray(Positions, Actors)
-	; LastKeys   = PapyrusUtil.ResizeStringArray(LastKeys, Actors)
-	; Create and add gender tag
-	AddTag(SexLabUtil.GetGenderTag(Females, Males, Creatures))
-	AddTag(SexLabUtil.GetReverseGenderTag(Females, Males, Creatures))
+	Flags0     = Utility.ResizeIntArray(Flags0, (Stages * kFlagEnd))
+	Offsets0   = Utility.ResizeFloatArray(Offsets0, (Stages * kOffsetEnd))
+	Animations = Utility.ResizeStringArray(Animations, aid)
+	; Positions  = Utility.ResizeIntArray(Positions, Actors)
+	; LastKeys   = Utility.ResizeStringArray(LastKeys, Actors)
 	; Init forward offset list
 	CenterAdjust = Utility.CreateFloatArray(Stages)
 	if Actors > 1
@@ -673,12 +686,17 @@ function Save(int id = -1)
 			Stage -= 1
 		endWhile
 	endIf
+	; Remove duplicate gender tags
+	string[] TagList = GetTags()
+	if TagList[0] == TagList[1]
+		TagList[1] = ""
+	endIf
 	; Log the new animation
 	if IsCreature
 		; RaceTypes = PapyrusUtil.ResizeStringArray(RaceTypes, Actors)
-		Log(Name, "Creatures["+id+"]")
+		Log(Name, "Creatures["+id+"] ("+Females+", "+Males+", "+Creatures+")")
 	else
-		Log(Name, "Animations["+id+"]")
+		Log(Name, "Animations["+id+"] ("+Females+", "+Males+")")
 	endIf
 endFunction
 
@@ -695,6 +713,34 @@ float function CalcCenterAdjuster(int Stage)
 	endWhile
 	; Get signed half of highest/lowest offset
 	return Adjuster * -0.5
+endFunction
+
+string function GenderTag(int count, string gender)
+	if count == 0
+		return ""
+	elseIf count == 1
+		return gender
+	elseIf count == 2
+		return gender+gender
+	elseIf count == 3
+		return gender+gender+gender
+	elseIf count == 4
+		return gender+gender+gender+gender
+	elseIf count == 5
+		return gender+gender+gender+gender+gender
+	endIf
+	return ""
+endFunction
+
+string function GetGenderString(int Gender)
+	if Gender == 0
+		return "M"
+	elseIf Gender == 1
+		return "F"
+	elseIf Gender >= 2
+		return "C"
+	endIf
+	return ""
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -880,9 +926,8 @@ int[] function FlagsArray(int Position)
 		return Flags3
 	elseIf Position == 4
 		return Flags4
-	else
-		return Utility.CreateIntArray(0)
 	endIf
+	return Utility.CreateIntArray(0)
 endFunction
 
 function FlagsSave(int Position, int[] Flags)
@@ -926,9 +971,8 @@ float[] function OffsetsArray(int Position)
 		return Offsets3
 	elseIf Position == 4
 		return Offsets4
-	else
-		return Utility.CreateFloatArray(0)
 	endIf
+	return Utility.CreateFloatArray(0)
 endFunction
 
 function OffsetsSave(int Position, float[] Offsets)
@@ -964,4 +1008,3 @@ function InitArrays(int Position)
 		Offsets4 = Utility.CreateFloatArray((Stages * kOffsetEnd))
 	endIf
 endFunction
-

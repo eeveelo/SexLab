@@ -58,6 +58,10 @@ function AddTags(string[] TagList)
 	endWhile
 endFunction
 
+function SetTags(string TagList)
+	AddTags(StringUtil.Split(TagList, ","))
+endFunction
+
 bool function ToggleTag(string Tag)
 	return (RemoveTag(Tag) || AddTag(Tag)) && HasTag(Tag)
 endFunction
@@ -108,10 +112,6 @@ bool function HasAllTag(string[] TagList)
 	return true
 endFunction
 
-function SetTags(string TagList)
-	AddTags(PapyrusUtil.StringSplit(TagList))
-endFunction
-
 ; ------------------------------------------------------- ;
 ; --- Phantom Slots                                   --- ;
 ; ------------------------------------------------------- ;
@@ -142,7 +142,7 @@ endFunction
 
 function Log(string Log, string Type = "NOTICE")
 	Log = Type+" "+Registry+" - "+Log
-	if Config.DebugMode
+	if Config.InDebugMode
 		SexLabUtil.PrintConsole(Log)
 	endIf
 	Debug.Trace("SEXLAB - "+Log)
@@ -166,5 +166,5 @@ function Initialize()
 	SlotID   = -1
 	Enabled  = false
 	Storage  = none
-	Tags     = new string[12]
+	Tags     = new string[16]
 endFunction

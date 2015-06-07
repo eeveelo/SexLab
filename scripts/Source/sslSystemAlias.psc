@@ -22,33 +22,16 @@ sslObjectFactory property Factory auto
 ; ------------------------------------------------------- ;
 
 event OnPlayerLoadGame()
-	MenuWait()
-	Log("Version "+CurrentVersion, "LOADED")
+	Log("Version "+CurrentVersion+" / "+SexLabUtil.GetVersion(), "LOADED")
 	; Check for install
-	if Config.CheckSystem()
-		if CurrentVersion <= 0
-			RegisterForSingleUpdate(5.0)
-		else
-			Config.Reload()
-			; Perform pending updates
-			UpdateSystem(CurrentVersion, SexLabUtil.GetVersion())
-			; Cleanup tasks
-			Factory.Cleanup()
-			ValidateTrackedFactions()
-			ValidateTrackedActors()
-		endIf
-	endIf	
-endEvent
-
-event OnInit()
-	LoadLibs(false)
-	OnPlayerLoadGame()
-endEvent
-
-event OnUpdate()
-	MenuWait()
-	if CurrentVersion != SexLabUtil.GetVersion()
-		InstallSystem()
+	if CurrentVersion > 0 && Config.CheckSystem()
+		Config.Reload()
+		; Perform pending updates
+		UpdateSystem(CurrentVersion, SexLabUtil.GetVersion())
+		; Cleanup tasks
+		Factory.Cleanup()
+		ValidateTrackedFactions()
+		ValidateTrackedActors()
 	endIf
 endEvent
 
@@ -63,14 +46,31 @@ int property CurrentVersion hidden
 	endFunction
 endProperty
 
+bool property IsInstalled hidden
+	bool function get()
+		return Version > 0 && GetState() == "Ready"
+	endFunction
+endProperty
+
+bool property UpdatePending hidden
+	bool function get()
+		return Version > 0 && Version < SexLabUtil.GetVersion()
+	endFunction
+endProperty
+
+event OnInit()
+	GoToState("")
+	LoadLibs(false)
+	Version = 0
+endEvent
+
 bool function SetupSystem()
-	LoadLibs(true)
 	Version = SexLabUtil.GetVersion()
 	SexLab.GoToState("Disabled")
-
-	Config.DebugMode = true
+	GoToState("Setup")
 
 	; Framework
+	LoadLibs(false)
 	SexLab.Setup()
 	Config.Setup()
 
@@ -87,6 +87,7 @@ bool function SetupSystem()
 	CreatureSlots.Setup()
 	ThreadSlots.Setup()
 
+	GoToState("Ready")
 	SexLab.GoToState("Enabled")
 	LogAll("SexLab v"+SexLabUtil.GetStringVer()+" - Ready!")
 	return true
@@ -100,11 +101,13 @@ event UpdateSystem(int OldVersion, int NewVersion)
 		Debug.TraceAndBox("SEXLAB ERROR: Unsupported version rollback detected ("+OldVersion+"->"+NewVersion+") Proceed at your own risk!")
 
 	elseif OldVersion < NewVersion
-		Version = NewVersion
 		LogAll("SexLab v"+SexLabUtil.GetStringVer()+" - Updating...")
 		SexLab.GoToState("Disabled")
-		; Perform update functions
 
+		GoToState("Updating")
+		Version = NewVersion
+
+		; Perform update functions
 		ThreadLib.Setup()
 		ActorLib.Setup()
 		Stats.Setup()
@@ -116,6 +119,7 @@ event UpdateSystem(int OldVersion, int NewVersion)
 		ThreadSlots.Setup()
 
 		; End update functions
+		GoToState("Ready")
 		SexLab.GoToState("Enabled")
 		LogAll("SexLab Update v"+SexLabUtil.GetStringVer()+" - Ready!")
 		SendVersionEvent("SexLabUpdated")

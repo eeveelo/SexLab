@@ -83,8 +83,9 @@ function RegisterAnimation(string Registrar)
 		int eid = ModEvent.Create(Registrar)
 		ModEvent.PushInt(eid, id)
 		ModEvent.Send(eid)
+		; Utility.WaitMenuMode(0.2)
+		; Debug.Trace("RegisterAnimation["+id+"] - Wait")
 	endIf
-	Utility.WaitMenuMode(0.25)
 endFunction
 
 ; Gets the Animation resource object for use in the callback, MUST be called at start of callback to get the appropiate resource

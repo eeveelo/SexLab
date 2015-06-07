@@ -33,7 +33,6 @@ state Prepare
 		UpdateAdjustKey()
 		SetAnimation()
 		Log(AdjustKey, "Adjustment Profile")
-		t = SexLabUtil.Timer(t, "Prepare - Start")
 		SyncEvent("Prepare", 30.0)
 	endFunction
 
@@ -42,30 +41,24 @@ state Prepare
 	endFunction
 
 	event OnUpdate()
-		t = SexLabUtil.Timer(t, "Prepare - Prepare Update")
 		; Set starting adjusted actor
 		AdjustPos   = (ActorCount > 1) as int
 		AdjustAlias = PositionAlias(AdjustPos)
 		; Get localized config options
 		BaseDelay = Config.SFXDelay
 		; Send starter events
-		t = SexLabUtil.Timer(t, "Prepare - Config")
 		SendThreadEvent("AnimationStart")
 		if LeadIn
 			SendThreadEvent("LeadInStart")
 		endIf
-		t = SexLabUtil.Timer(t, "Prepare - Events")
 		; Start time trackers
 		RealTime[0] = Utility.GetCurrentRealTime()
 		SkillTime = RealTime[0]
 		StartedAt = RealTime[0]
-		t = SexLabUtil.Timer(t, "Prepare - Timers")
 		; Start actor loops
 		QuickEvent("Start")
-		t = SexLabUtil.Timer(t, "Prepare - Actor Loops")
 		; Begin animating loop
 		Action("Advancing")
-		t = SexLabUtil.Timer(t, "Prepare - Advancing")
 	endEvent
 
 	function RecordSkills()
@@ -159,6 +152,7 @@ state Animating
 	endFunction
 
 	function PlayAnimation()
+		Animation.GetAnimEvents(AnimEvents, Stage)
 		ModEvent.Send(ModEvent.Create(Key("Animate")))
 		StageTimer = RealTime[0] + GetTimer()
 	endFunction
@@ -195,7 +189,6 @@ state Animating
 			Utility.Wait(0.5)
 		endIf
 
-		; string[] AnimEvents = Animation.FetchStage(Stage)
 		if ActorCount == 1
 			ActorAlias[0].SyncThread()
 			ActorAlias[0].SyncLocation(true)
@@ -297,39 +290,42 @@ state Animating
 		RegisterForSingleUpdate(0.2)
 	endFunction
 
-	function AdjustForward(bool backwards = false, bool adjustStage = false)
+	function AdjustForward(bool backwards = false, bool AdjustStage = false)
 		UnregisterforUpdate()
+		float Amount = SignFloat(backwards, 0.50)
 		Adjusted = true
-		Animation.AdjustForward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
+		Animation.AdjustForward(AdjustKey, AdjustPos, Stage, Amount, AdjustStage)
 		int k = Config.AdjustForward
 		while Input.IsKeyPressed(k)
-			Animation.AdjustForward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
+			Animation.AdjustForward(AdjustKey, AdjustPos, Stage, Amount, AdjustStage)
 			AdjustAlias.RefreshLoc()
 		endWhile
 		RegisterForSingleUpdate(0.1)
 	endFunction
 
-	function AdjustSideways(bool backwards = false, bool adjustStage = false)
+	function AdjustSideways(bool backwards = false, bool AdjustStage = false)
 		UnregisterforUpdate()
+		float Amount = SignFloat(backwards, 0.50)
 		Adjusted = true
-		Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
+		Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, Amount, AdjustStage)
 		AdjustAlias.RefreshLoc()
 		int k = Config.AdjustSideways
 		while Input.IsKeyPressed(k)
-			Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
+			Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, Amount, AdjustStage)
 			AdjustAlias.RefreshLoc()
 		endWhile
 		RegisterForSingleUpdate(0.1)
 	endFunction
 
-	function AdjustUpward(bool backwards = false, bool adjustStage = false)
+	function AdjustUpward(bool backwards = false, bool AdjustStage = false)
+		float Amount = SignFloat(backwards, 0.50)
 		UnregisterforUpdate()
 		Adjusted = true
-		Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
+		Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, Amount, AdjustStage)
 		AdjustAlias.RefreshLoc()
 		int k = Config.AdjustUpward
 		while Input.IsKeyPressed(k)
-			Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, SignFloat(backwards, 0.50), adjustStage)
+			Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, Amount, AdjustStage)
 			AdjustAlias.RefreshLoc()
 		endWhile
 		RegisterForSingleUpdate(0.1)
@@ -444,13 +440,14 @@ function SetAnimation(int aid = -1)
 	RecordSkills()
 	; Update animation info
 	string[] Tags = Animation.GetTags()
-	IsVaginal   = Females > 0 && Tags.Find("Vaginal") != -1
-	IsAnal      = Tags.Find("Anal")   != -1 || (Females == 0 && Tags.Find("Vaginal") != -1)
-	IsOral      = Tags.Find("Oral")   != -1
-	IsLoving    = Tags.Find("Loving") != -1
-	IsDirty     = Tags.Find("Dirty")  != -1
-	StageCount  = Animation.StageCount
-	SoundFX     = Animation.GetSoundFX(Stage)
+	; IsType = [1] IsVaginal, [2] IsAnal, [3] IsOral, [4] IsLoving, [5] IsDirty
+	IsType[1]  = Females > 0 && Tags.Find("Vaginal") != -1
+	IsType[2]  = Tags.Find("Anal")   != -1 || (Females == 0 && Tags.Find("Vaginal") != -1)
+	IsType[3]  = Tags.Find("Oral")   != -1
+	IsType[4]  = Tags.Find("Loving") != -1
+	IsType[5]  = Tags.Find("Dirty")  != -1
+	StageCount = Animation.StageCount
+	SoundFX    = Animation.GetSoundFX(Stage)
 	SetBonuses()
 	; Inform player of animation being played now
 	if HasPlayer
@@ -549,19 +546,19 @@ function RecordSkills()
 	float TimeNow = RealTime[0]
 	float xp = ((TimeNow - SkillTime) / 15.0)
 	if xp >= 0.375
-		if IsVaginal
+		if IsType[1]
 			SkillXP[1] = SkillXP[1] + xp
 		endIf
-		if IsAnal
+		if IsType[2]
 			SkillXP[2] = SkillXP[2] + xp
 		endIf
-		if IsOral
+		if IsType[3]
 			SkillXP[3] = SkillXP[3] + xp
 		endIf
-		if IsLoving
+		if IsType[4]
 			SkillXP[4] = SkillXP[4] + xp
 		endIf
-		if IsDirty
+		if IsType[5]
 			SkillXP[5] = SkillXP[5] + xp
 		endIf
 	endIf
@@ -570,19 +567,19 @@ endfunction
 
 function SetBonuses()
 	SkillBonus[0] = SkillXP[0]
-	if IsVaginal
+	if IsType[1]
 		SkillBonus[1] = SkillXP[1]
 	endIf
-	if IsAnal
+	if IsType[2]
 		SkillBonus[2] = SkillXP[2]
 	endIf
-	if IsOral
+	if IsType[3]
 		SkillBonus[3] = SkillXP[3]
 	endIf
-	if IsLoving
+	if IsType[4]
 		SkillBonus[4] = SkillXP[4]
 	endIf
-	if IsDirty
+	if IsType[5]
 		SkillBonus[5] = SkillXP[5]
 	endIf
 endFunction
@@ -647,11 +644,11 @@ function ChangeAnimation(bool backwards = false)
 endFunction
 function ChangePositions(bool backwards = false)
 endFunction
-function AdjustForward(bool backwards = false, bool adjuststage = false)
+function AdjustForward(bool backwards = false, bool AdjustStage = false)
 endFunction
-function AdjustSideways(bool backwards = false, bool adjuststage = false)
+function AdjustSideways(bool backwards = false, bool AdjustStage = false)
 endFunction
-function AdjustUpward(bool backwards = false, bool adjuststage = false)
+function AdjustUpward(bool backwards = false, bool AdjustStage = false)
 endFunction
 function RotateScene(bool backwards = false)
 endFunction
@@ -684,7 +681,7 @@ function AutoAlign(bool DoMove)
 	string Node0 = "Skirt"
 	string Node1 = "Skirt"
 
-	if IsOral
+	if IsType[3]
 		Node0 = "NPC Head [Head]"
 	endIf
 

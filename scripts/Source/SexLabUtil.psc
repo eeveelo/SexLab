@@ -92,15 +92,15 @@ endFunction
 
 string function GetGenderTag(int Females = 0, int Males = 0, int Creatures = 0) global
 	string Tag
-	while Females
+	while Females > 0
 		Females -= 1
 		Tag += "F"
 	endWhile
-	while Males
+	while Males > 0
 		Males -= 1
 		Tag += "M"
 	endWhile
-	while Creatures
+	while Creatures > 0
 		Creatures -= 1
 		Tag += "C"
 	endWhile
@@ -109,15 +109,15 @@ endFunction
 
 string function GetReverseGenderTag(int Females = 0, int Males = 0, int Creatures = 0) global
 	string Tag
-	while Creatures
+	while Creatures > 0
 		Creatures -= 1
 		Tag += "C"
 	endWhile
-	while Males
+	while Males > 0
 		Males -= 1
 		Tag += "M"
 	endWhile
-	while Females
+	while Females > 0
 		Females -= 1
 		Tag += "F"
 	endWhile

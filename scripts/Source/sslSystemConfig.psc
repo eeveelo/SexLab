@@ -20,24 +20,28 @@ bool property Enabled hidden
 	endFunction
 endProperty
 
-bool bDebugMode
+; bool property InDebugMode auto hidden
 bool property DebugMode hidden
 	bool function get()
-		return bDebugMode
+		return InDebugMode
 	endFunction
 	function set(bool value)
-		bDebugMode = value
-		if bDebugMode
-			; MiscUtil.PrintConsole("SexLab Debug/Development Mode Activated")
+		InDebugMode = value
+		if InDebugMode
+			MiscUtil.PrintConsole("SexLab Debug/Development Mode Activated")
 			PlayerRef.AddSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
 			PlayerRef.AddSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
 		else
-			; MiscUtil.PrintConsole("SexLab Debug/Development Mode Deactivated")
+			MiscUtil.PrintConsole("SexLab Debug/Development Mode Deactivated")
 			PlayerRef.RemoveSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
 			PlayerRef.RemoveSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
 		endIf
+		int eid = ModEvent.Create("SexLabDebugMode")
+		ModEvent.PushBool(eid, value)
+		ModEvent.Send(eid)
 	endFunction
 endProperty
+
 
 Faction property AnimatingFaction auto
 Faction property GenderFaction auto
@@ -552,8 +556,8 @@ bool function CheckSystem()
 		CheckPapyrusUtil.Show(2.8)
 		return false
 	; Check FNIS generation - soft fail
-	elseIf !FNIS.IsGenerated()
-		CheckFNIS.Show()
+	; elseIf !FNIS.IsGenerated()
+		; CheckFNIS.Show()
 	endIf
 	; Return result
 	return true

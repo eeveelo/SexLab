@@ -625,18 +625,18 @@ function Setup()
 	SkillNames[17] = "LastSex.GameTime"
 
 	; v1.59b - Converted stats to use float lists instead of individual values
-	UpgradeLegacyStats(PlayerRef)
-	int i = FormListCount(none, "SexLab.SeededActors")
-	if i > 0
-		; Log(i, "SeededActors")
-		while i
-			i -= 1
-			if FormListGet(none, "SexLab.SeededActors", i) != none
-				UpgradeLegacyStats(FormListGet(none, "SexLab.SeededActors", i) as Actor)
-			endIf
-			FormListRemoveAt(none, "SexLab.SeededActors", i)
-		endWhile
-	endIf
+	; UpgradeLegacyStats(PlayerRef)
+	; int i = FormListCount(none, "SexLab.SeededActors")
+	; if i > 0
+	; 	; Log(i, "SeededActors")
+	; 	while i
+	; 		i -= 1
+	; 		if FormListGet(none, "SexLab.SeededActors", i) != none
+	; 			UpgradeLegacyStats(FormListGet(none, "SexLab.SeededActors", i) as Actor)
+	; 		endIf
+	; 		FormListRemoveAt(none, "SexLab.SeededActors", i)
+	; 	endWhile
+	; endIf
 endFunction
 
 function ClearCustomStats(Actor ActorRef)

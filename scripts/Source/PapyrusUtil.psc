@@ -14,8 +14,12 @@ int function GetVersion() global native
 Actor[] function ActorArray(int size, Actor filler = none) global native
 ; ObjectReference[] function ObjectRefArray(int size, ObjectReference filler = none) global native
 
-float[] function ResizeFloatArray(float[] ArrayValues, int toSize, float filler = 0.0) global native
-int[] function ResizeIntArray(int[] ArrayValues, int toSize, int filler = 0) global native
+float[] function ResizeFloatArray(float[] ArrayValues, int toSize, float filler = 0.0) global
+	return Utility.ResizeFloatArray(ArrayValues, toSize, filler)
+endFunction
+int[] function ResizeIntArray(int[] ArrayValues, int toSize, int filler = 0) global
+	return Utility.ResizeIntArray(ArrayValues, toSize, filler)
+endFunction
 bool[] function ResizeBoolArray(bool[] ArrayValues, int toSize, bool filler = false) global
 	bool[] Output = Utility.CreateBoolArray(toSize, filler)
 	int i = ArrayValues.Length
@@ -28,9 +32,15 @@ bool[] function ResizeBoolArray(bool[] ArrayValues, int toSize, bool filler = fa
 	endWhile
 	return Output
 endFunction
-string[] function ResizeStringArray(string[] ArrayValues, int toSize, string filler = "") global native
-Form[] function ResizeFormArray(Form[] ArrayValues, int toSize, Form filler = none) global native
-Alias[] function ResizeAliasArray(Alias[] ArrayValues, int toSize, Alias filler = none) global native
+string[] function ResizeStringArray(string[] ArrayValues, int toSize, string filler = "") global
+	return Utility.ResizeStringArray(ArrayValues, toSize, filler)
+endFunction
+Form[] function ResizeFormArray(Form[] ArrayValues, int toSize, Form filler = none) global
+	return Utility.ResizeFormArray(ArrayValues, toSize, filler)
+endFunction
+Alias[] function ResizeAliasArray(Alias[] ArrayValues, int toSize, Alias filler = none) global
+	return Utility.ResizeAliasArray(ArrayValues, toSize, filler)
+endFunction
 Actor[] function ResizeActorArray(Actor[] ArrayValues, int toSize, Actor filler = none) global native
 ; ObjectReference[] function ResizeObjectRefArray(ObjectReference[] ArrayValues, int toSize, ObjectReference filler = none) global native
 

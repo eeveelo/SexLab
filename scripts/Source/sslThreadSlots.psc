@@ -129,14 +129,9 @@ state Locked
 	endFunction
 endState
 
-function Log(string Log, string Type = "NOTICE")
-	Log = Type+": "+Log
+function Log(string msg)
 	if Config.DebugMode
-		SexLabUtil.PrintConsole(Log)
+		MiscUtil.PrintConsole(msg)
 	endIf
-	if Type == "FATAL"
-		Debug.TraceStack("SEXLAB - "+Log)
-	else
-		Debug.Trace("SEXLAB - "+Log)
-	endIf
+	Debug.Trace("SEXLAB - "+msg)
 endFunction
