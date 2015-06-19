@@ -1,5 +1,7 @@
 Version V1.60
 
+AnimVar SexLabFramework INT32 16000
+
 b SexLab_Test_16000 AggrMissionary_A1_S3.hkx
 
 '
