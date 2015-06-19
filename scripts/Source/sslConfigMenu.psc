@@ -2,6 +2,7 @@ scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
 import PapyrusUtil
+import SexLabUtil
 
 ; Framework
 Actor property PlayerRef auto
@@ -14,7 +15,7 @@ sslActorLibrary ActorLib
 sslThreadLibrary ThreadLib
 sslActorStats Stats
 
-; Object registeries
+; Object registries
 sslThreadSlots ThreadSlots
 sslAnimationSlots AnimSlots
 sslCreatureAnimationSlots CreatureSlots
@@ -160,22 +161,28 @@ event OnConfigOpen()
 	; Make sure we have all the needed libraries
 	LoadLibs()
 	; MCM option pages
-	Pages     = new string[10]
-	Pages[0]  = "$SSL_SexDiary"
-	Pages[1]  = "$SSL_AnimationSettings"
-	Pages[2]  = "$SSL_PlayerHotkeys"
-	Pages[3]  = "$SSL_SoundSettings"
-	Pages[4]  = "$SSL_TimersStripping"
-	Pages[5]  = "$SSL_StripEditor"
-	; Pages[4]  = "$SSL_ExpressionSelection"
-	Pages[6]  = "$SSL_ToggleAnimations"
-	Pages[7]  = "$SSL_AnimationEditor"
-	Pages[8]  = "$SSL_ExpressionEditor"
-	Pages[9]  = "$SSL_RebuildClean"
-	; Pages[9]  = "Troubleshoot"
-	if PlayerRef.GetLeveledActorBase().GetSex() == 0
-		Pages[0] = "$SSL_SexJournal"
+	if !SystemAlias.IsInstalled
+		Pages     = new string[1]
+		Pages[0]  = "Install"
+	else
+		Pages     = new string[10]
+		Pages[0]  = "$SSL_SexDiary"
+		Pages[1]  = "$SSL_AnimationSettings"
+		Pages[2]  = "$SSL_PlayerHotkeys"
+		Pages[3]  = "$SSL_SoundSettings"
+		Pages[4]  = "$SSL_TimersStripping"
+		Pages[5]  = "$SSL_StripEditor"
+		; Pages[4]  = "$SSL_ExpressionSelection"
+		Pages[6]  = "$SSL_ToggleAnimations"
+		Pages[7]  = "$SSL_AnimationEditor"
+		Pages[8]  = "$SSL_ExpressionEditor"
+		Pages[9]  = "$SSL_RebuildClean"
+		; Pages[9]  = "Troubleshoot"
+		if PlayerRef.GetLeveledActorBase().GetSex() == 0
+			Pages[0] = "$SSL_SexJournal"
+		endIf
 	endIf
+	
 
 	; Basic player info
 	PlayerName = PlayerRef.GetLeveledActorBase().GetName()
@@ -560,20 +567,28 @@ endfunction
 ; --- Install Menu                                    --- ;
 ; ------------------------------------------------------- ;
 
-bool installlogo
 function InstallMenu()
-	if !installlogo
-		installlogo = true
-		LoadCustomContent("SexLab/logo.dds", 184, 31)
-		Utility.WaitMenuMode(1.0)
-		UnloadCustomContent()
-	endIf
-	SetCursorFillMode(LEFT_TO_RIGHT)
-	AddHeaderOption("SexLab v"+SexLabUtil.GetStringVer())
 	SetCursorFillMode(TOP_TO_BOTTOM)
-	
-	AddTextOptionST("InstallSystem","Install SexLab "+SexLabUtil.GetStringVer(), "$SSL_ClickHere")
 
+	AddHeaderOption("SexLab v"+GetStringVer())
+	AddHeaderOption("Prequisite Check")
+	SystemCheckOptions()
+	
+	SetCursorPosition(1)
+	AddHeaderOption("SexLab v"+GetStringVer()+" by Ashal@LoversLab.com")
+	AddTextOptionST("InstallSystem","Install SexLab "+GetStringVer(), "$SSL_ClickHere")
+
+endFunction
+
+function SystemCheckOptions()
+	AddTextOptionST("CheckSKSE", "Skyrim Script Extender (1.7.3+)", StringIfElse(Config.CheckSystemPart("SKSE"), "ERROR", "Ready"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckSexLabUtil", "SexLabUtil.dll SKSE Plugin  (1.6+)", StringIfElse(Config.CheckSystemPart("SexLabUtil"), "ERROR", "Ready"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckPapyrusUtil", "StorageUtil.dll SKSE Plugin  (3.0+)", StringIfElse(Config.CheckSystemPart("PapyrusUtil"), "ERROR", "Ready"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNIS", "FNIS - Fores New Idles in Skyrim (5.2+)", StringIfElse(Config.CheckSystemPart("FNIS"), "ERROR", "Ready"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNISGenerated", "FNIS For Users Behaviors Generated", StringIfElse(Config.CheckSystemPart("FNISGenerated"), "WARNING", "Ready"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNISSexLabFramework", "FNIS SexLab Framework Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabFramework"), "MISSING", "Ready"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNISCreatures", "FNIS Creature Pack (5.1+)", StringIfElse(Config.CheckSystemPart("FNISCreatures"), "MISSING", "Ready"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNISSexLabCreatures", "FNIS SexLab Creatures Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabCreatures"), "MISSING", "Ready"), OPTION_FLAG_DISABLED)
 endFunction
 
 state InstallSystem
@@ -1054,7 +1069,7 @@ function AnimationEditor()
 			PreventOverwrite = true
 			Animation = Thread.Animation
 			Position  = Thread.GetAdjustPos()
-			AdjustKey = SexLabUtil.RemoveSubString(Thread.AdjustKey, Animation.Key(""))
+			AdjustKey = SexLabUtil.RemoveSubString(Thread.AdjustKey[0], Animation.Key(""))
 		endIf
 	endIf
 
@@ -1158,9 +1173,9 @@ state AnimationSelect
 			SetMenuOptionValueST(Animation.Name)
 			ForcePageReset()
 			return
-		elseIf MenuOptions[i] == "<- PREVIOUS PAGE"
+		elseIf MenuOptions[i] == "← PREVIOUS PAGE"
 			Animation = AnimationSlots.GetBySlot(((OnPage - 2) * PerPage))
-		elseIf MenuOptions[i] == "NEXT PAGE ->"
+		elseIf MenuOptions[i] == "NEXT PAGE →"
 			Animation = AnimationSlots.GetBySlot((OnPage * PerPage))
 		else
 			i -= PageOptions.Length
@@ -1470,7 +1485,7 @@ function ExpressionEditor()
 
 	; 1
 	AddMenuOptionST("ExpressionSelect", "$SSL_ModifyingExpression", Expression.Name)
-	AddHeaderOption("")
+	AddToggleOptionST("ExpressionEnabled", "$SSL_ExpressionEnabled", Expression.Enabled)
 
 	; 2
 	AddToggleOptionST("ExpressionNormal", "$SSL_ExpressionsNormal", Expression.HasTag("Normal"))
@@ -1679,6 +1694,18 @@ function TestApply(Actor ActorRef)
 	endIf
 endFunction
 
+state ExpressionEnabled
+	event OnSelectST()
+		Expression.Enabled = !Expression.Enabled
+		SetToggleOptionValueST(Expression.Enabled)
+	endEvent
+	event OnDefaultST()
+		Expression.Enabled = Expression.HasTag("Normal") && Expression.HasTag("Victim") && Expression.HasTag("Aggressor")
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoExpressionEnabled")
+	endEvent
+endState
 state ExpressionNormal
 	event OnSelectST()
 		Expression.ToggleTag("Normal")
@@ -2137,40 +2164,31 @@ function RebuildClean()
 	SetCursorFillMode(TOP_TO_BOTTOM)
 
 	AddHeaderOption("SexLab v"+GetStringVer()+" by Ashal@LoversLab.com")
+	AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
 
-	AddEmptyOption()
+	AddHeaderOption("$SSL_UpgradeUninstallReinstall")
+	AddTextOptionST("CleanSystem","$SSL_CleanSystem", "$SSL_ClickHere")
+
 	AddHeaderOption("$SSL_Maintenance")
-
 	if SexLab.Enabled
 		AddTextOptionST("ToggleSystem","$SSL_EnabledSystem", "$SSL_DoDisable")
 	else
 		AddTextOptionST("ToggleSystem","$SSL_DisabledSystem", "$SSL_DoEnable")
 	endIf
-
 	AddTextOptionST("RestoreDefaultSettings","$SSL_RestoreDefaultSettings", "$SSL_ClickHere")
 	AddTextOptionST("StopCurrentAnimations","$SSL_StopCurrentAnimations", "$SSL_ClickHere")
 	AddTextOptionST("ResetAnimationRegistry","$SSL_ResetAnimationRegistry", "$SSL_ClickHere")
 	AddTextOptionST("ResetVoiceRegistry","$SSL_ResetVoiceRegistry", "$SSL_ClickHere")
 	AddTextOptionST("ResetExpressionRegistry","$SSL_ResetExpressionRegistry", "$SSL_ClickHere")
 	AddTextOptionST("ResetStripOverrides","$SSL_ResetStripOverrides", "$SSL_ClickHere")
-	AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
-	AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
 
 	SetCursorPosition(1)
 	AddToggleOptionST("DebugMode","$SSL_DebugMode", Config.InDebugMode)
-	AddHeaderOption("$SSL_UpgradeUninstallReinstall")
-	AddTextOptionST("CleanSystem","$SSL_CleanSystem", "$SSL_ClickHere")
+	AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
 
-	AddEmptyOption()
-	;/ AddHeaderOption("Tag Viewer")
-	AddMenuOptionST("AnimationSelect", "$SSL_Animation", Animation.Name)
-	string[] Tags = Animation.GetTags()
-	i = Tags.Length
-	while i
-		i -= 1
-		AddTextOptionST("TagViewer_"+i, Tags[i], " ", OPTION_FLAG_DISABLED)
-	endWhile /;
-
+	AddHeaderOption("System Requirements")
+	SystemCheckOptions()
+	
 	AddEmptyOption()
 	AddHeaderOption("$SSL_AvailableStrapons")
 	AddTextOptionST("RebuildStraponList","$SSL_RebuildStraponList", "$SSL_ClickHere")
@@ -2484,7 +2502,7 @@ state RestrictSameSex
 		SetToggleOptionValueST(Config.RestrictSameSex)
 	endEvent
 	event OnHighlightST()
-		SetInfoText("$SSL_InfoRestrictAggressive")
+		SetInfoText("$SSL_InfoRestrictSameSex")
 	endEvent
 endState
 state UndressAnimation

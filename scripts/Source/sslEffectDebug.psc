@@ -16,11 +16,17 @@ ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	if TargetRef == PlayerRef
-		SexLab.QuickStart(CasterRef, AnimationTags = "FalloutBoy2,Mitos,4uDIK,3jiou,Leito")
-	else
-		SexLab.QuickStart(CasterRef, TargetRef, AnimationTags = "FalloutBoy2,Mitos,4uDIK,3jiou,Leito")
-	endIf
+	; Utility.WaitMenuMode(4.0)
+
+	; Log("USING BASELOOP")
+	; Benchmark(4, UseBaseLoop=true)
+
+
+	; if TargetRef == PlayerRef
+	; 	SexLab.QuickStart(CasterRef, AnimationTags = "FalloutBoy2,Mitos,4uDIK,3jiou,Leito")
+	; else
+	; 	SexLab.QuickStart(CasterRef, TargetRef, AnimationTags = "FalloutBoy2,Mitos,4uDIK,3jiou,Leito")
+	; endIf
 
 	; if StorageUtil.HasFormValue(none, "TestObj")
 	; 	Form ObjForm = StorageUtil.GetFormValue(none, "TestObj")

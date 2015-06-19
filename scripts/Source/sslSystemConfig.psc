@@ -534,29 +534,64 @@ endFunction
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
 
+bool function CheckSystemPart(string CheckSystem)
+	if CheckSystem == "Skyrim"
+		return (StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float) < 1.9
+
+	elseIf CheckSystem == "SKSE"
+		return SKSE.GetScriptVersionRelease() < 48
+
+	elseIf CheckSystem == "SkyUI"
+		return Quest.GetQuest("SKI_ConfigManagerInstance") == none
+
+	elseIf CheckSystem == "SexLabUtil"
+		return SexLabUtil.GetPluginVersion() < 15903
+
+	elseIf CheckSystem == "PapyrusUtil"
+		return PapyrusUtil.GetVersion() < 28
+
+	elseIf CheckSystem == "FNIS"
+		return FNIS.VersionCompare(5, 4, 2) >= 0
+
+	elseIf CheckSystem == "FNISGenerated"
+		return FNIS.IsGenerated()
+
+	elseIf CheckSystem == "FNISCreatures"
+		return FNIS.VersionCompare(5, 3, 0, true) >= 0
+
+	elseIf CheckSystem == "FNISSexLabFramework"
+		return PlayerRef.GetAnimationVariableInt("SexLabFramework") >= 16000
+
+	elseIf CheckSystem == "FNISSexLabCreatures"
+		return PlayerRef.GetAnimationVariableInt("SexLabCreatures") >= 16000
+
+	endIf
+	return false
+endFunction
+
 bool function CheckSystem()
 	; Check Skyrim Version
-	if (StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float) < 1.9
+	if CheckSystemPart("Skyrim")
 		CheckSkyrim.Show()
 		return false
 	; Check SKSE install
-	elseIf SKSE.GetScriptVersionRelease() < 47
-		CheckSKSE.Show(1.72)
+	elseIf CheckSystemPart("SKSE")
+		CheckSKSE.Show(1.73)
 		return false
 	; Check SkyUI install - depends on passing SKSE check passing
-	elseIf Quest.GetQuest("SKI_ConfigManagerInstance") == none
+	elseIf CheckSystemPart("SkyUI")
 		CheckSkyUI.Show(4.1)
 		return false
 	; Check SexLabUtil install - this should never happen if they have properly updated
-	elseIf SexLabUtil.GetPluginVersion() < 15903
+	elseIf CheckSystemPart("SexLabUtil")
 		CheckSexLabUtil.Show()
 		return false
 	; Check PapyrusUtil install - depends on passing SKSE check passing
-	elseIf PapyrusUtil.GetVersion() < 28
+	elseIf CheckSystemPart("PapyrusUtil")
 		CheckPapyrusUtil.Show(2.8)
 		return false
 	; Check FNIS generation - soft fail
-	; elseIf !FNIS.IsGenerated()
+	; elseIf CheckSystemPart("FNISSexLabFramework")
 		; CheckFNIS.Show()
 	endIf
 	; Return result

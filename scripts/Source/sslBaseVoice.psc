@@ -1,8 +1,8 @@
 scriptname sslBaseVoice extends sslBaseObject
 
-Sound property Mild auto hidden
-Sound property Medium auto hidden
-Sound property Hot auto hidden
+Sound property Mild auto
+Sound property Medium auto
+Sound property Hot auto
 
 int property Gender auto hidden
 bool property Male hidden

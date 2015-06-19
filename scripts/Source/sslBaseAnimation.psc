@@ -442,15 +442,22 @@ bool function UseStrapon(int Position, int Stage)
 	return FlagsArray(Position)[FlagIndex(Stage, kStrapon)] as bool
 endFunction
 
-; int function _GetSchlong(string ProfileName, string Registry, string AdjustKey, string LastKey, int Stage, int retDefault) global native
+int function _GetSchlong(string Registrar, string AdjustKey, string LastKey, int Stage) global native
 int function GetSchlong(string AdjustKey, int Position, int Stage)
-	if HasAdjustments(Registry, AdjustKey+"."+Position, Stage)
-		return _GetAdjustment(Registry, AdjustKey+"."+Position, Stage, 3) as int
-	elseIf LastKeys[Position] != "" && HasAdjustments(Registry, LastKeys[Position], Stage)
-		return _GetAdjustment(Registry, LastKeys[Position], Stage, 3) as int
+	int var = sslBaseAnimation._GetSchlong(Registry, AdjustKey+"."+Position, LastKeys[Position], Stage)
+	if var == -99
+		var = FlagsArray(Position)[FlagIndex(Stage, kSchlong)]
 	endIf
-	return FlagsArray(Position)[FlagIndex(Stage, kSchlong)]
+	return var
 endFunction
+
+; 	if HasAdjustments(Registry, AdjustKey+"."+Position, Stage)
+; 		return _GetAdjustment(Registry, AdjustKey+"."+Position, Stage, 3) as int
+; 	elseIf LastKeys[Position] != "" && HasAdjustments(Registry, LastKeys[Position], Stage)
+; 		return _GetAdjustment(Registry, LastKeys[Position], Stage, 3) as int
+; 	endIf
+; 	return FlagsArray(Position)[FlagIndex(Stage, kSchlong)]
+; endFunction
 
 int function GetCumID(int Position, int Stage = 1)
 	return FlagsArray(Position)[FlagIndex(Stage, kCumID)]

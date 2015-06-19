@@ -45,10 +45,18 @@ bool property FastEnd auto hidden
 Race property CreatureRef auto hidden
 
 ; Animation Info
-int property Stage auto hidden
+int[] property StageShare auto hidden
+int property Stage hidden
+	int function get()
+		return StageShare[0]
+	endFunction
+	function set(int value)
+		StageShare[0] = value
+	endFunction
+endProperty
 int property ActorCount auto hidden
-string property AdjustKey auto hidden
 Sound property SoundFX auto hidden
+string[] property AdjustKey auto hidden
 string[] property AnimEvents auto hidden
 sslBaseAnimation property Animation auto hidden
 sslBaseAnimation[] CustomAnimations
@@ -230,6 +238,27 @@ float property t auto hidden
 ; ------------------------------------------------------- ;
 
 state Making
+	event OnUpdate()
+		Fatal("Thread has timed out of the making process; resetting model for selection pool")
+	endEvent
+	event OnBeginState()
+		t = SexLabUtil.Timer(0, "TIMER BEGIN")
+		Log("Entering Making State")
+		; Action Events
+		RegisterForModEvent(Key(EventTypes[0]+"Done"), EventTypes[0]+"Done")
+		RegisterForModEvent(Key(EventTypes[1]+"Done"), EventTypes[1]+"Done")
+		RegisterForModEvent(Key(EventTypes[2]+"Done"), EventTypes[2]+"Done")
+		RegisterForModEvent(Key(EventTypes[3]+"Done"), EventTypes[3]+"Done")
+		RegisterForModEvent(Key(EventTypes[4]+"Done"), EventTypes[4]+"Done")
+		; Alias Events
+		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_0", "AliasEventDone")
+		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_1", "AliasEventDone")
+		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_2", "AliasEventDone")
+		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_3", "AliasEventDone")
+		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_4", "AliasEventDone")
+		t = SexLabUtil.Timer(t, "Register Events")
+	endEvent
+
 	int function AddActor(Actor ActorRef, bool IsVictim = false, sslBaseVoice Voice = none, bool ForceSilent = false)
 		; Ensure we can add actor to thread
 		if !ActorRef
@@ -390,66 +419,70 @@ state Making
 
 		t = SexLabUtil.Timer(t, "StartThread - Validate animations")
 
-		
-		; Filter animations based on user settings and scene
-		string[] Filters
-		sslBaseAnimation[] FilteredPrimary
-		sslBaseAnimation[] FilteredLead
 
-		; Remove non same sex animations per user settings
-		if ActorCount > 1 && Creatures == 0 && (Males == 0 || Females == 0) && Config.RestrictSameSex
-			Filters    = new string[1]
-			Filters[0] = SexLabUtil.GetGenderTag(Females, Males)
-			; Remove non-tagged from primary
-			FilteredPrimary = sslUtility.FilterTaggedAnimations(PrimaryAnimations, Filters, true)
-			if FilteredPrimary.Length > 0
-				Log("Filtered out '"+(PrimaryAnimations.Length - FilteredPrimary.Length)+"' Non Same Sex Primary Animations with tags: "+Filters)
-				PrimaryAnimations = FilteredPrimary
-			endIf
-			; Remove furniture/standing animations from lead in
-			if LeadIn && LeadAnimations.Length > 0
-				FilteredLead = sslUtility.FilterTaggedAnimations(LeadAnimations, Filters, true)
-				if FilteredLead.Length > 0
-					Log("Filtered out '"+(LeadAnimations.Length - FilteredLead.Length)+"' Non Same Sex Lead In Animations with tags: "+Filters)
-					LeadAnimations = FilteredLead
+		if CustomAnimations || CustomAnimations.Length < 1
+			
+			; Filter animations based on user settings and scene
+			string[] Filters
+			sslBaseAnimation[] FilteredPrimary
+			sslBaseAnimation[] FilteredLead
+
+			; Remove non same sex animations per user settings
+			if ActorCount > 1 && Creatures == 0 && (Males == 0 || Females == 0) && Config.RestrictSameSex
+				Filters    = new string[1]
+				Filters[0] = SexLabUtil.GetGenderTag(Females, Males)
+				; Remove non-tagged from primary
+				FilteredPrimary = sslUtility.FilterTaggedAnimations(PrimaryAnimations, Filters, true)
+				if FilteredPrimary.Length > 0
+					Log("Filtered out '"+(PrimaryAnimations.Length - FilteredPrimary.Length)+"' Non Same Sex Primary Animations with tags: "+Filters)
+					PrimaryAnimations = FilteredPrimary
+				endIf
+				; Remove furniture/standing animations from lead in
+				if LeadIn && LeadAnimations.Length > 0
+					FilteredLead = sslUtility.FilterTaggedAnimations(LeadAnimations, Filters, true)
+					if FilteredLead.Length > 0
+						Log("Filtered out '"+(LeadAnimations.Length - FilteredLead.Length)+"' Non Same Sex Lead In Animations with tags: "+Filters)
+						LeadAnimations = FilteredLead
+					endIf
 				endIf
 			endIf
-		endIf
-		t = SexLabUtil.Timer(t, "StartThread - Filter same sex animations")
+			t = SexLabUtil.Timer(t, "StartThread - Filter same sex animations")
 
-		; Filter non-bed friendly animations
-		if BedRef
-			if Config.BedRemoveStanding
-				Filters    = new string[2]
-				Filters[1] = "Standing"
-			else
-				Filters = new string[1]
-			endIf
-			Filters[0] = "Furniture"
-			; Remove furniture/standing animations from primary
-			FilteredPrimary = sslUtility.FilterTaggedAnimations(PrimaryAnimations, Filters, false)
-			if FilteredPrimary.Length > 0
-				Log("Filtered out '"+(PrimaryAnimations.Length - FilteredPrimary.Length)+"' Primary Animations with tags: "+Filters)
-				PrimaryAnimations = FilteredPrimary
-			endIf
-			; Remove furniture/standing animations from lead in
-			if LeadIn && LeadAnimations.Length > 0
-				FilteredLead = sslUtility.FilterTaggedAnimations(LeadAnimations, Filters, false)
-				if FilteredLead.Length > 0
-					Log("Filtered out '"+(LeadAnimations.Length - FilteredLead.Length)+"' Lead In Animations with tags: "+Filters)
-					LeadAnimations = FilteredLead
+			; Filter non-bed friendly animations
+			if BedRef
+				if Config.BedRemoveStanding
+					Filters    = new string[2]
+					Filters[1] = "Standing"
+				else
+					Filters = new string[1]
+				endIf
+				Filters[0] = "Furniture"
+				; Remove furniture/standing animations from primary
+				FilteredPrimary = sslUtility.FilterTaggedAnimations(PrimaryAnimations, Filters, false)
+				if FilteredPrimary.Length > 0
+					Log("Filtered out '"+(PrimaryAnimations.Length - FilteredPrimary.Length)+"' Primary Animations with tags: "+Filters)
+					PrimaryAnimations = FilteredPrimary
+				endIf
+				; Remove furniture/standing animations from lead in
+				if LeadIn && LeadAnimations.Length > 0
+					FilteredLead = sslUtility.FilterTaggedAnimations(LeadAnimations, Filters, false)
+					if FilteredLead.Length > 0
+						Log("Filtered out '"+(LeadAnimations.Length - FilteredLead.Length)+"' Lead In Animations with tags: "+Filters)
+						LeadAnimations = FilteredLead
+					endIf
 				endIf
 			endIf
-		endIf
-		t = SexLabUtil.Timer(t, "StartThread - Filter bed animations")
+			t = SexLabUtil.Timer(t, "StartThread - Filter bed animations")
 
-		; Make sure we are still good to start after all the filters
-		if LeadAnimations.Length < 1
-			LeadIn = false
-		endIf
-		if PrimaryAnimations.Length < 1
-			Fatal("Empty primary animations after filters")
-			return none
+			; Make sure we are still good to start after all the filters
+			if LeadAnimations.Length < 1
+				LeadIn = false
+			endIf
+			if PrimaryAnimations.Length < 1
+				Fatal("Empty primary animations after filters")
+				return none
+			endIf
+
 		endIf
 		
 		; ------------------------- ;
@@ -461,26 +494,6 @@ state Making
 		return self as sslThreadController
 	endFunction
 
-	event OnUpdate()
-		Fatal("Thread has timed out of the making process; resetting model for selection pool")
-	endEvent
-	event OnBeginState()
-		t = SexLabUtil.Timer(0, "TIMER BEGIN")
-		Log("Entering Making State")
-		; Action Events
-		RegisterForModEvent(Key(EventTypes[0]+"Done"), EventTypes[0]+"Done")
-		RegisterForModEvent(Key(EventTypes[1]+"Done"), EventTypes[1]+"Done")
-		RegisterForModEvent(Key(EventTypes[2]+"Done"), EventTypes[2]+"Done")
-		RegisterForModEvent(Key(EventTypes[3]+"Done"), EventTypes[3]+"Done")
-		RegisterForModEvent(Key(EventTypes[4]+"Done"), EventTypes[4]+"Done")
-		; Alias Events
-		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_0", "AliasEventDone")
-		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_1", "AliasEventDone")
-		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_2", "AliasEventDone")
-		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_3", "AliasEventDone")
-		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_4", "AliasEventDone")
-		t = SexLabUtil.Timer(t, "Register Events")
-	endEvent
 endState
 
 ; ------------------------------------------------------- ;
@@ -593,32 +606,39 @@ bool function IsAggressor(Actor ActorRef)
 endFunction
 
 int function GetHighestPresentRelationshipRank(Actor ActorRef)
-	int Highest
+	if ActorCount == 1
+		return SexLabUtil.IntIfElse(ActorRef == Positions[0], 0, ActorRef.GetRelationshipRank(Positions[0]))
+	endIf
+	int out = -4 ; lowest possible
 	int i = ActorCount
 	while i > 0
 		i -= 1
-		if ActorRef != Positions[i] && ActorRef.GetRelationshipRank(Positions[i]) > Highest
-			Highest = ActorRef.GetRelationshipRank(Positions[i])
+		if Positions[i] != ActorRef && out < 4
+			int rank = ActorRef.GetRelationshipRank(Positions[i])
+			if rank > out
+				out = rank
+			endIf
 		endIf
 	endWhile
-	return Highest
+	return out
 endFunction
 
 int function GetLowestPresentRelationshipRank(Actor ActorRef)
-	if ActorCount < 3
-		return GetHighestPresentRelationshipRank(ActorRef) ; Results will be same for 1 and 2 actors
+	if ActorCount == 1
+		return SexLabUtil.IntIfElse(ActorRef == Positions[0], 0, ActorRef.GetRelationshipRank(Positions[0]))
 	endIf
-	; Init to next position
-	int Lowest = ActorRef.GetRelationshipRank(Positions[sslUtility.IndexTravel(Positions.Find(ActorRef), ActorCount)])
-	; Loop through all actors
+	int out = 4 ; lowest possible
 	int i = ActorCount
 	while i > 0
 		i -= 1
-		if ActorRef != Positions[i] && ActorRef.GetRelationshipRank(Positions[i]) < Lowest
-			Lowest = ActorRef.GetRelationshipRank(Positions[i])
+		if Positions[i] != ActorRef && out > -4
+			int rank = ActorRef.GetRelationshipRank(Positions[i])
+			if rank < out
+				out = rank
+			endIf
 		endIf
 	endWhile
-	return Lowest
+	return out
 endFunction
 
 function ChangeActors(Actor[] NewPositions)
@@ -675,7 +695,7 @@ function ChangeActors(Actor[] NewPositions)
 	; New adjustment profile
 	; UpdateActorKey()
 	UpdateAdjustKey()
-	Log(AdjustKey, "Adjustment Profile")
+	Log(AdjustKey[0], "Adjustment Profile")
 	; Reposition actors
 	RealignActors()
 	RegisterForSingleUpdate(0.1)
@@ -1065,7 +1085,7 @@ endFunction
 
 function UpdateAdjustKey()
 	if !Config.RaceAdjustments
-		AdjustKey = "Global"
+		AdjustKey[0] = "Global"
 	else
 		int i
 		string NewKey
@@ -1076,7 +1096,7 @@ function UpdateAdjustKey()
 				NewKey += "."
 			endIf
 		endWhile
-		AdjustKey = NewKey
+		AdjustKey[0] = NewKey
 	endIf
 endFunction
 
@@ -1167,6 +1187,21 @@ function Initialize()
 	ActorAlias[2].ClearAlias()
 	ActorAlias[3].ClearAlias()
 	ActorAlias[4].ClearAlias()
+	; Storage Info
+	Victims        = new Actor[1]
+	Genders        = new int[4]
+	AliasDone      = new int[5]
+	AliasTimer     = new float[5]
+	; Thread+Alias shares
+	AnimEvents     = new string[5]
+	RealTime       = new float[1]
+	SkillXP        = new float[6]
+	SkillBonus     = new float[6]
+	CenterLocation = new float[6]
+	IsType         = new bool[6]
+	AdjustKey      = new string[1]
+	BedStatus      = new int[2]
+	StageShare     = new int[1]
 	; Forms
 	CenterRef      = none
 	SoundFX        = none
@@ -1181,24 +1216,8 @@ function Initialize()
 	; Floats
 	StartedAt      = 0.0
 	; Integers
-	BedStatus[1]   = 0
-	BedStatus[0]   = 0
-	ActorCount     = 0
 	Stage          = 1
-	; Strings
-	AdjustKey      = ""
-	; Storage Info
-	Victims        = new Actor[1]
-	Genders        = new int[4]
-	AliasDone      = new int[5]
-	AliasTimer     = new float[5]
-	; Thread+Alias shares
-	AnimEvents     = new string[5]
-	RealTime       = new float[1]
-	SkillXP        = new float[6]
-	SkillBonus     = new float[6]
-	CenterLocation = new float[6]
-	IsType         = new bool[6]
+	ActorCount     = 0
 
 	; IntShare    = new int[3]
 	; FloatShare  = new float[2]
@@ -1248,6 +1267,7 @@ endEvent
 
 state Unlocked
 	sslThreadModel function Make()
+		Initialize()
 		GoToState("Making")
 		RegisterForSingleUpdate(60.0)
 		return self

@@ -21,8 +21,12 @@ endProperty
 ; ------------------------------------------------------- ;
 
 string[] Tags
-string[] function GetTags()
+
+string[] function GetRawTags()
 	return Tags
+endFunction
+string[] function GetTags()
+	return PapyrusUtil.ClearEmpty(Tags)
 endFunction
 
 bool function HasTag(string Tag)

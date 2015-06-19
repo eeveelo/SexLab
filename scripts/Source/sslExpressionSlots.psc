@@ -44,7 +44,7 @@ sslBaseExpression function RandomByTag(string Tag, bool ForFemale = true)
 	while i
 		i -= 1
 		sslBaseExpression Slot = Objects[i] as sslBaseExpression
-		Valid[i] = Slot.HasTag(Tag) && ((ForFemale && Slot.PhasesFemale > 0) || (!ForFemale && Slot.PhasesMale > 0))
+		Valid[i] = Slot.Enabled && Slot.HasTag(Tag) && ((ForFemale && Slot.PhasesFemale > 0) || (!ForFemale && Slot.PhasesMale > 0))
 	endWhile
 	return SelectRandom(Valid)
 endFunction

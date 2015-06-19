@@ -538,6 +538,32 @@ endFunction
 endFunction /;
 
 ; ------------------------------------------------------- ;
+; --- Other Actor Info                                --- ;
+; ------------------------------------------------------- ;
+
+int function GetHighestRelationshipRankInList(Actor ActorRef, Actor[] ActorList) global
+	int i = ActorList.Length
+	if i == 1
+		if ActorRef == ActorList[0]
+			return 0
+		else
+			return ActorRef.GetRelationshipRank(ActorList[0])
+		endIf
+	endIf
+	int out = -4 ; lowest possible
+	while i > 0
+		i -= 1
+		if ActorList[i] != ActorRef && out < 4
+			int rank = ActorRef.GetRelationshipRank(ActorList[i])
+			if rank > out
+				out = rank
+			endIf
+		endIf
+	endWhile
+	return out
+endFunction
+
+; ------------------------------------------------------- ;
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
 
