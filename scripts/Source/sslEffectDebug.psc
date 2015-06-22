@@ -16,6 +16,14 @@ ObjectReference MarkerRef
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
+
+	Log("Is3DLoaded: "+CasterRef.Is3DLoaded())
+	Log("SexLabFramework: "+CasterRef.GetAnimationVariableInt("SexLabFramework"))
+	Log("SexLabCreature: "+CasterRef.GetAnimationVariableInt("SexLabCreature"))
+	Log("iIsPlayer: "+CasterRef.GetAnimationVariableInt("iIsPlayer"))
+	Log("i1stPerson: "+CasterRef.GetAnimationVariableInt("i1stPerson"))
+
+
 	; Utility.WaitMenuMode(4.0)
 
 	; Log("USING BASELOOP")
@@ -164,7 +172,7 @@ event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	; TargetRef.SetVehicle(MarkerRef)
 
 	; Utility.Wait(3.0)
-	; Dispel()
+	Dispel()
 endEvent
 
 event OnUpdate()

@@ -581,14 +581,14 @@ function InstallMenu()
 endFunction
 
 function SystemCheckOptions()
-	AddTextOptionST("CheckSKSE", "Skyrim Script Extender (1.7.3+)", StringIfElse(Config.CheckSystemPart("SKSE"), "ERROR", "Ready"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckSexLabUtil", "SexLabUtil.dll SKSE Plugin  (1.6+)", StringIfElse(Config.CheckSystemPart("SexLabUtil"), "ERROR", "Ready"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckPapyrusUtil", "StorageUtil.dll SKSE Plugin  (3.0+)", StringIfElse(Config.CheckSystemPart("PapyrusUtil"), "ERROR", "Ready"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckFNIS", "FNIS - Fores New Idles in Skyrim (5.2+)", StringIfElse(Config.CheckSystemPart("FNIS"), "ERROR", "Ready"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckFNISGenerated", "FNIS For Users Behaviors Generated", StringIfElse(Config.CheckSystemPart("FNISGenerated"), "WARNING", "Ready"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckFNISSexLabFramework", "FNIS SexLab Framework Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabFramework"), "MISSING", "Ready"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckFNISCreatures", "FNIS Creature Pack (5.1+)", StringIfElse(Config.CheckSystemPart("FNISCreatures"), "MISSING", "Ready"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckFNISSexLabCreatures", "FNIS SexLab Creatures Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabCreatures"), "MISSING", "Ready"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckSKSE", "Skyrim Script Extender (1.7.3+)", StringIfElse(Config.CheckSystemPart("SKSE"), "Ready", "ERROR"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckSexLabUtil", "SexLabUtil.dll SKSE Plugin  (1.6+)", StringIfElse(Config.CheckSystemPart("SexLabUtil"), "Ready", "ERROR"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckPapyrusUtil", "StorageUtil.dll SKSE Plugin  (3.0+)", StringIfElse(Config.CheckSystemPart("PapyrusUtil"), "Ready", "ERROR"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNIS", "FNIS - Fores New Idles in Skyrim (5.2+)", StringIfElse(Config.CheckSystemPart("FNIS"), "Ready", "ERROR"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNISGenerated", "FNIS For Users Behaviors Generated", StringIfElse(Config.CheckSystemPart("FNISGenerated"), "Ready", "Warning"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNISSexLabFramework", "FNIS SexLab Framework Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabFramework"), "Ready", "Missing"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNISCreaturePack", "FNIS Creature Pack (5.1+)", StringIfElse(Config.CheckSystemPart("FNISCreaturePack"), "Ready", "Missing"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNISSexLabCreature", "FNIS SexLab Creature Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabCreature"), "Ready", "Missing"), OPTION_FLAG_DISABLED)
 endFunction
 
 state InstallSystem
