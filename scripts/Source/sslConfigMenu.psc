@@ -1067,18 +1067,18 @@ function AnimationEditor()
 		sslThreadController Thread = ThreadSlots.GetActorController(PlayerRef)
 		if Thread.GetState() == "Animating"
 			PreventOverwrite = true
-			Animation = Thread.Animation
 			Position  = Thread.GetAdjustPos()
-			AdjustKey = SexLabUtil.RemoveSubString(Thread.AdjustKey[0], Animation.Key(""))
+			Animation = Thread.Animation
+			AdjustKey = Thread.AdjustKey
 		endIf
 	endIf
 
 	; Pick a default animation
 	if !Animation
-		IsCreatureEditor = false
+		Position  = 0
 		Animation = AnimSlots.GetBySlot(0)
 		AdjustKey = "Global"
-		Position  = 0
+		IsCreatureEditor = false
 	endIf
 
 	; Check if editing a creature animation
@@ -2396,7 +2396,7 @@ state AllowCreatures
 	event OnSelectST()
 		if !Config.AllowCreatures && !Config.HasCreatureInstall()
 			Config.AllowCreatures = false
-			ShowMessage("Could not enable, FNIS Creature pack or SexLab creature files not detected.")
+			ShowMessage("Could not enable, FNIS Creature Pack or SexLab Creature files not detected.")
 		else
 			Config.AllowCreatures = !Config.AllowCreatures
 		endIf
