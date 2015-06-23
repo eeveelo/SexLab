@@ -112,10 +112,25 @@ function Setup()
 	while i
 		i -= 1
 		Slots[i] = Game.GetFormFromFile(SlotFormID[i], "SexLab.esm") as sslThreadController
-		Slots[i].SetTID(i)
-		Utility.WaitMenuMode(1.0)
+		if !Slots[i].IsStopped() || Slots[i].IsStopping()
+			Slots[i].Stop()
+			float max = Utility.GetCurrentRealTime() + 5.0
+			while Slots[i].IsStopping() && Utility.GetCurrentRealTime() <= max
+				Utility.Wait(0.5)
+			endwhile
+		endIf
 	endWhile
-
+	Utility.WaitMenuMode(1.0)
+	i = Slots.Length
+	while i
+		i -= 1
+		if Slots[i].Start()
+			Slots[i].SetTID(i)
+		else
+			Config.Log("Failed to start thread quest("+i+"): "+Slots[i])
+		endIf
+	endWhile
+	
 	Debug.Trace("SexLab Threads: "+Slots)
 	GoToState("")
 endFunction

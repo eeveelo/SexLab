@@ -34,6 +34,9 @@ function ApplyCum(Actor ActorRef, int CumID)
 endFunction
 
 function AddCum(Actor ActorRef, bool Vaginal = true, bool Oral = true, bool Anal = true)
+	if !Vaginal && !Oral && !Anal
+		return ; Nothing to do
+	endIf
 	Vaginal = Vaginal || ActorRef.HasMagicEffectWithKeyword(CumVaginalKeyword)
 	Oral = Oral || ActorRef.HasMagicEffectWithKeyword(CumOralKeyword)
 	Anal = Anal || ActorRef.HasMagicEffectWithKeyword(CumAnalKeyword)

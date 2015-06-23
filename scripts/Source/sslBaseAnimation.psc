@@ -86,7 +86,7 @@ endFunction
 
 function GetAnimEvents(string[] AnimEvents, int Stage)
 	if AnimEvents.Length != 5 || Stage > Stages
-		Log("Invalid Call("+AnimEvents+", "+Stage+"/"+Stages+")", "GetanimEvents")
+		Log("Invalid Call("+AnimEvents+", "+Stage+"/"+Stages+")", "GetAnimEvents")
 	else
 		int Position
 		while Position < Actors
@@ -96,7 +96,7 @@ function GetAnimEvents(string[] AnimEvents, int Stage)
 	endIf
 endFunction
 
-string function FetchPositionStage(int position, int Stage)
+string function FetchPositionStage(int Position, int Stage)
 	return Animations[StageIndex(Position, Stage)]
 endFunction
 
@@ -247,11 +247,11 @@ float[] function PositionOffsets(float[] Output, string AdjustKey, int Position,
 			if BedTypeID == 1
 				Output[2] = Output[2] + BedOffset[2] ; Only on non-bedrolls
 			endIf
-		else
-			Output[0] = Output[0] + 30.0
-			if BedTypeID == 1
-				Output[2] = Output[2] + 37.0 ; Only on non-bedrolls
-			endIf
+		; else
+		; 	Output[0] = Output[0] + 30.0
+		; 	if BedTypeID == 1
+		; 		Output[2] = Output[2] + 37.0 ; Only on non-bedrolls
+		; 	endIf
 		endIf
 	endIf
 	_PositionOffsets(Registry, AdjustKey+"."+Position, LastKeys[Position], Stage, Output)

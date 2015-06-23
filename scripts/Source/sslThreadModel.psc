@@ -28,14 +28,12 @@ sslCreatureAnimationSlots property CreatureSlots auto
 ; Actor Info
 sslActorAlias[] property ActorAlias auto hidden
 Actor[] property Positions auto hidden
-Actor property PlayerRef auto hidden
-
 Actor[] property Victims auto hidden
 Actor property VictimRef auto hidden
+Actor property PlayerRef auto hidden
 
 ; Thread status
 ; bool[] property Status auto hidden
-
 bool property HasPlayer auto hidden
 bool property AutoAdvance auto hidden
 bool property LeadIn auto hidden
@@ -45,20 +43,38 @@ bool property FastEnd auto hidden
 Race property CreatureRef auto hidden
 
 ; Animation Info
-int[] property StageShare auto hidden
+int[] property sStage auto hidden
 int property Stage hidden
 	int function get()
-		return StageShare[0]
+		return sStage[0]
 	endFunction
 	function set(int value)
-		StageShare[0] = value
+		sStage[0] = value
 	endFunction
 endProperty
 int property ActorCount auto hidden
 Sound property SoundFX auto hidden
-string[] property AdjustKey auto hidden
-string[] property AnimEvents auto hidden
-sslBaseAnimation property Animation auto hidden
+string[] property sAdjustKey auto hidden
+string property AdjustKey hidden
+	string function get()
+		return sAdjustKey[0]
+	endFunction
+	function set(string value)
+		sAdjustKey[0] = value
+	endFunction
+endProperty
+string[] property sAnimEvents auto hidden
+
+sslBaseAnimation[] property sAnimation auto hidden
+sslBaseAnimation property Animation hidden
+	sslBaseAnimation function get()
+		return sAnimation[0]
+	endFunction
+	function set(sslBaseAnimation value)
+		sAnimation[0] = value
+	endFunction
+endProperty
+
 sslBaseAnimation[] CustomAnimations
 sslBaseAnimation[] PrimaryAnimations
 sslBaseAnimation[] LeadAnimations
@@ -664,6 +680,11 @@ function ChangeActors(Actor[] NewPositions)
 	Positions  = NewPositions
 	ActorCount = NewPositions.Length
 	HasPlayer  = NewPositions.Find(PlayerRef)
+	ActorAlias[0].GetPosition()
+	ActorAlias[1].GetPosition()
+	ActorAlias[2].GetPosition()
+	ActorAlias[3].GetPosition()
+	ActorAlias[4].GetPosition()
 	; Select new animations for changed actor count
 	if PrimaryAnimations[0].PositionCount != ActorCount
 		SetAnimations(AnimSlots.GetByDefault(NewGenders[0], NewGenders[1], IsType[0], (BedRef != none), Config.RestrictAggressive))
@@ -695,7 +716,7 @@ function ChangeActors(Actor[] NewPositions)
 	; New adjustment profile
 	; UpdateActorKey()
 	UpdateAdjustKey()
-	Log(AdjustKey[0], "Adjustment Profile")
+	Log(sAdjustKey[0], "Adjustment Profile")
 	; Reposition actors
 	RealignActors()
 	RegisterForSingleUpdate(0.1)
@@ -1085,7 +1106,7 @@ endFunction
 
 function UpdateAdjustKey()
 	if !Config.RaceAdjustments
-		AdjustKey[0] = "Global"
+		sAdjustKey[0] = "Global"
 	else
 		int i
 		string NewKey
@@ -1096,7 +1117,7 @@ function UpdateAdjustKey()
 				NewKey += "."
 			endIf
 		endWhile
-		AdjustKey[0] = NewKey
+		sAdjustKey[0] = NewKey
 	endIf
 endFunction
 
@@ -1174,11 +1195,26 @@ function SetTID(int id)
 	ActorAlias[2].Setup()
 	ActorAlias[3].Setup()
 	ActorAlias[4].Setup()
-
+	
+	InitShares()
 	Initialize()
 	Log(self, "Setup")
 endFunction
 
+function InitShares()
+	sAnimation     = new sslBaseAnimation[1]
+	sAnimEvents    = new string[5]
+	sAdjustKey     = new string[1]
+	RealTime       = new float[1]
+	BedStatus      = new int[2]
+	sStage         = new int[1]
+	AliasDone      = new int[5]
+	AliasTimer     = new float[5]
+	SkillXP        = new float[6]
+	SkillBonus     = new float[6]
+	CenterLocation = new float[6]
+	IsType         = new bool[6]
+endFunction
 function Initialize()
 	UnregisterForUpdate()
 	; Clear aliases
@@ -1188,20 +1224,8 @@ function Initialize()
 	ActorAlias[3].ClearAlias()
 	ActorAlias[4].ClearAlias()
 	; Storage Info
-	Victims        = new Actor[1]
 	Genders        = new int[4]
-	AliasDone      = new int[5]
-	AliasTimer     = new float[5]
-	; Thread+Alias shares
-	AnimEvents     = new string[5]
-	RealTime       = new float[1]
-	SkillXP        = new float[6]
-	SkillBonus     = new float[6]
-	CenterLocation = new float[6]
-	IsType         = new bool[6]
-	AdjustKey      = new string[1]
-	BedStatus      = new int[2]
-	StageShare     = new int[1]
+	Victims        = new Actor[1]
 	; Forms
 	CenterRef      = none
 	SoundFX        = none
@@ -1218,11 +1242,6 @@ function Initialize()
 	; Integers
 	Stage          = 1
 	ActorCount     = 0
-
-	; IntShare    = new int[3]
-	; FloatShare  = new float[2]
-	; StringShare = new string[1]
-	; BoolShare   = new bool[9]
 
 	; Storage Data
 	Animation         = none
@@ -1267,6 +1286,7 @@ endEvent
 
 state Unlocked
 	sslThreadModel function Make()
+		InitShares()
 		Initialize()
 		GoToState("Making")
 		RegisterForSingleUpdate(60.0)

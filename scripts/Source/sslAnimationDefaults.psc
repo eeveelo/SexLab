@@ -662,7 +662,7 @@ function ArrokLedgeBlowjob(int id)
 	Base.AddPositionStage(a2, "Arrok_LedgeBlowjob_A2_S4", 0, sos = 0)
 	Base.AddPositionStage(a2, "Arrok_LedgeBlowjob_A2_S5", 0, sos = 0)
 
-	Base.SetBedOffsets(0, 0, 0, 0)
+	Base.SetBedOffsets(-30.0, 0, -37.0, 0)
 
 	Base.SetTags("Arrok,TBBP,Sex,Blowjob,Dirty,Oral,BedOnly")
 
