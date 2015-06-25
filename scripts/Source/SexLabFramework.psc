@@ -35,6 +35,12 @@ bool property IsRunning hidden
 	endFunction
 endProperty
 
+int property ActiveAnimations hidden
+	int function get()
+		return ThreadSlots.ActiveThreads()
+	endFunction
+endProperty
+
 sslSystemConfig property Config auto
 
 ;#---------------------------#

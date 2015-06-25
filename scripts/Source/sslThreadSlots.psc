@@ -61,6 +61,16 @@ bool function IsRunning()
 	return false
 endfunction
 
+int function ActiveThreads()
+	int Count
+	int i = Slots.Length
+	while i
+		i -= 1
+		Count += (Slots[i].IsLocked as int)
+	endwhile
+	return Count
+endfunction
+
 function StopAll()
 	; End all threads
 	int i = Slots.Length
