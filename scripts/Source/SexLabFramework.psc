@@ -837,6 +837,22 @@ float function AdjustPurity(Actor ActorRef, float amount)
 	return Stats.AdjustPurity(ActorRef, amount)
 endFunction
 
+function SetSexuality(Actor ActorRef, int amount)
+	Stats.SetSkill(ActorRef, "Sexuality", PapyrusUtil.ClampInt(amount, 1, 100))
+endFunction
+
+function SetSexualityStraight(Actor ActorRef)
+	Stats.SetSkill(ActorRef, "Sexuality", 100)
+endFunction
+
+function SetSexualityBisexual(Actor ActorRef)
+	Stats.SetSkill(ActorRef, "Sexuality", 50)
+endFunction
+
+function SetSexualityGay(Actor ActorRef)
+	Stats.SetSkill(ActorRef, "Sexuality", 1)
+endFunction
+
 int function GetSexuality(Actor ActorRef)
 	return Stats.GetSexuality(ActorRef)
 endFunction
