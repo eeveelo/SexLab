@@ -163,36 +163,11 @@ state Animating
 		ActorAlias[2].StopAnimating(true)
 		ActorAlias[3].StopAnimating(true)
 		ActorAlias[4].StopAnimating(true)
-		;/ if ActorCount == 1
-			Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
-		elseIf ActorCount == 2
-			Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
-			Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
-		elseIf ActorCount == 3
-			Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
-			Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
-			Debug.SendAnimationEvent(Positions[2], "IdleForceDefaultState")
-		elseIf ActorCount == 4
-			Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
-			Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
-			Debug.SendAnimationEvent(Positions[2], "IdleForceDefaultState")
-			Debug.SendAnimationEvent(Positions[3], "IdleForceDefaultState")
-		elseIf ActorCount == 5
-			Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
-			Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
-			Debug.SendAnimationEvent(Positions[2], "IdleForceDefaultState")
-			Debug.SendAnimationEvent(Positions[3], "IdleForceDefaultState")
-			Debug.SendAnimationEvent(Positions[4], "IdleForceDefaultState")
-		endIf /;
+		Utility.WaitMenuMode(0.5)
 	endFunction
 
 	function RealignActors()
 		UnregisterForUpdate()
-
-		if Config.BackwardsPressed()
-			ClearIdles()
-			Utility.WaitMenuMode(0.5)
-		endIf
 
 		if ActorCount == 1
 			ActorAlias[0].SyncThread()
@@ -392,8 +367,8 @@ state Animating
 		sslActorAlias Slot = ActorAlias(PlayerRef)
 		Slot.UnlockActor()
 		Slot.StopAnimating(true)
-		; Debug.SendAnimationEvent(PlayerRef, "IdleForceDefaultState")
-		; PlayerRef.StopTranslation()
+		PlayerRef.StopTranslation()
+		Debug.SendAnimationEvent(PlayerRef, "IdleForceDefaultState")
 		; Lock hotkeys and wait 7 seconds
 		Debug.Notification("Player movement unlocked - repositioning scene in 7 seconds...")
 		Utility.Wait(7.0)
@@ -406,6 +381,7 @@ state Animating
 			CenterOnObject(PlayerRef, true)
 		endIf
 		; Return to animation loop
+		ClearIdles()
 		RealignActors()
 		; StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		; RegisterForSingleUpdate(0.1)

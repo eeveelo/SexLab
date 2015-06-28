@@ -319,11 +319,7 @@ event OnConfigOpen()
 	; Toggle Animations
 	ta = 0
 	pg = 1
-	TAModes = new string[4]
-	TAModes[0] = "$SSL_ToggleAnimations"
-	TAModes[1] = "$SSL_ForeplayAnimations"
-	TAModes[2] = "$SSL_AggressiveAnimations"
-	TAModes[3] = "$SSL_CreatureAnimations"
+
 
 	; Strip Editor
 	; ShowFullInventory = false
@@ -630,7 +626,7 @@ function AnimationSettings()
 
 	SetCursorPosition(1)
 	AddMenuOptionST("AnimationProfile", "$SSL_AnimationProfile", "Profile #"+Config.AnimProfile)
-	AddToggleOptionST("AllowCreatures","$SSL_AllowCreatures", Config.AllowCreatures)
+	AddToggleOptionST("AllowCreatures","$SSL_AllowCreatures", Config.AllowCreatures, Math.LogicalAnd(OPTION_FLAG_NONE, (!Config.HasCreatureInstall() && !Config.AllowCreatures) as int))
 	AddToggleOptionST("UseCreatureGender","$SSL_UseCreatureGender", Config.UseCreatureGender)
 	AddHeaderOption("$SSL_AnimationHandling")
 	AddToggleOptionST("RaceAdjustments","$SSL_RaceAdjustments", Config.RaceAdjustments)
@@ -1122,7 +1118,7 @@ function AnimationEditor()
 	while Stage <= Animation.StageCount
 
 		float[] Adjustments = Animation.GetPositionAdjustments(AdjustKey, Position, Stage)
-		Log(Adjustments, "AnimationEditor("+AdjustKey+", "+Position+", "+Stage+")")
+		; Log(Adjustments, "AnimationEditor("+AdjustKey+", "+Position+", "+Stage+")")
 
 		AddHeaderOption("$SSL_Stage{"+Stage+"}Adjustments")
 		AddHeaderOption(Profile)
@@ -1152,7 +1148,11 @@ string[] MenuOptions
 state AnimationSelect
 
 	event OnMenuOpenST()
-		PageOptions = PaginationMenu(SexLabUtil.StringIfElse(IsCreatureEditor, "$SSL_SwitchNormalAnimationEditor", "$SSL_SwitchCreatureAnimationEditor"))
+		if Config.AllowCreatures
+			PageOptions = PaginationMenu(StringIfElse(IsCreatureEditor, "$SSL_SwitchNormalAnimationEditor", "$SSL_SwitchCreatureAnimationEditor"))
+		else
+			PageOptions = PaginationMenu()
+		endIf
 		MenuOptions = MergeStringArray(PageOptions, AnimationSlots.GetSlotNames(OnPage, PerPage))
 		SetMenuDialogOptions(MenuOptions)
 		SetMenuDialogStartIndex(MenuOptions.Find(Animation.Name))
@@ -1162,7 +1162,7 @@ state AnimationSelect
 	event OnMenuAcceptST(int i)
 		AdjustKey = "Global"
 		Position  = 0
-		if i == 0
+		if MenuOptions[i] == "$SSL_SwitchNormalAnimationEditor" || MenuOptions[i] == "$SSL_SwitchCreatureAnimationEditor"
 			if IsCreatureEditor
 				IsCreatureEditor = false
 				Animation = AnimSlots.GetBySlot(0)
@@ -1173,9 +1173,9 @@ state AnimationSelect
 			SetMenuOptionValueST(Animation.Name)
 			ForcePageReset()
 			return
-		elseIf MenuOptions[i] == "← PREVIOUS PAGE"
+		elseIf MenuOptions[i] == "<- PREVIOUS PAGE"
 			Animation = AnimationSlots.GetBySlot(((OnPage - 2) * PerPage))
-		elseIf MenuOptions[i] == "NEXT PAGE →"
+		elseIf MenuOptions[i] == "NEXT PAGE ->"
 			Animation = AnimationSlots.GetBySlot((OnPage * PerPage))
 		else
 			i -= PageOptions.Length
@@ -1295,6 +1295,19 @@ int pg
 
 function ToggleAnimations()
 	SetCursorFillMode(LEFT_TO_RIGHT)
+
+	if Config.AllowCreatures
+		TAModes = new string[4]
+		TAModes[0] = "$SSL_ToggleAnimations"
+		TAModes[1] = "$SSL_ForeplayAnimations"
+		TAModes[2] = "$SSL_AggressiveAnimations"
+		TAModes[3] = "$SSL_CreatureAnimations"
+	else
+		TAModes = new string[3]
+		TAModes[0] = "$SSL_ToggleAnimations"
+		TAModes[1] = "$SSL_ForeplayAnimations"
+		TAModes[2] = "$SSL_AggressiveAnimations"
+	endIf
 
 	SetTitleText(TAModes[ta])
 	AddMenuOptionST("TAModeSelect", "$SSL_View", TAModes[ta])
@@ -2189,7 +2202,6 @@ function RebuildClean()
 	AddHeaderOption("System Requirements")
 	SystemCheckOptions()
 	
-	AddEmptyOption()
 	AddHeaderOption("$SSL_AvailableStrapons")
 	AddTextOptionST("RebuildStraponList","$SSL_RebuildStraponList", "$SSL_ClickHere")
 	i = Config.Strapons.Length

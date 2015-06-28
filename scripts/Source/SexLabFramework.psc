@@ -126,10 +126,7 @@ endFunction
 * @param  ObjectReference CenterRef - The object to use as the center point in the search. 
 * @param  float Radius - The distance from the center point to search.
 * @param  int FindGender - The desired gender id to look for, -1 for any, 0 for male, 1 for female.
-* @param  Actor IgnoreRef1 - An actor you know for certain you do not want returned by this function.
-* @param  Actor IgnoreRef2 - An actor you know for certain you do not want returned by this function.
-* @param  Actor IgnoreRef3 - An actor you know for certain you do not want returned by this function.
-* @param  Actor IgnoreRef4 - An actor you know for certain you do not want returned by this function.
+* @param  Actor IgnoreRef1/2/3/4 - An actor you know for certain you do not want returned by this function.
 * @return Actor - A valid actor found, if any. Returns none if no valid actor found.
 **/;
 Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none)

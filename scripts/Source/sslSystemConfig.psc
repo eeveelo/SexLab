@@ -459,6 +459,9 @@ function HotkeyCallback(sslThreadController Thread, int keyCode)
 
 	; RePosition Actors
 	elseIf keyCode == RealignActors
+		if BackwardsPressed()
+			Thread.ClearIdles()
+		endIf
 		Thread.RealignActors()
 
 	; Auto adjust alignments

@@ -4,6 +4,8 @@ Sound property Mild auto
 Sound property Medium auto
 Sound property Hot auto
 
+Topic property LipSync auto hidden
+
 int property Gender auto hidden
 bool property Male hidden
 	bool function get()
@@ -17,19 +19,28 @@ bool property Female hidden
 endProperty
 
 function Moan(Actor ActorRef, int Strength = 30, bool IsVictim = false)
-	if Config.UseLipSync && Game.GetCameraState() != 3
-		ActorRef.Say(Config.LipSync)
-	endIf
+	LipSync(ActorRef, Strength)
 	GetSound(Strength, IsVictim).PlayAndWait(ActorRef)
 endFunction
 
+function MoanNoWait(Actor ActorRef, int Strength = 30, bool IsVictim = false, float Volume = 1.0)
+	LipSync(ActorRef, Strength)
+	Sound.SetInstanceVolume(GetSound(Strength, IsVictim).Play(ActorRef), Volume)
+endFunction
+
 Sound function GetSound(int Strength, bool IsVictim = false)
-	if IsVictim
-		return Medium
-	elseIf Strength > 75
+	if Strength > 75
 		return Hot
+	elseIf IsVictim
+		return Medium
 	endIf
 	return Mild
+endFunction
+
+function LipSync(Actor ActorRef, int Strength, bool ForceUse = false)
+	if ForceUse || Config.UseLipSync
+		ActorRef.Say(LipSync)
+	endIf
 endFunction
 
 bool function CheckGender(int CheckGender)
@@ -38,6 +49,7 @@ endFunction
 
 function Save(int id = -1)
 	parent.Save(id)
+	LipSync = Config.LipSync
 	AddTagConditional("Male",   (Gender == 0 || Gender == -1))
 	AddTagConditional("Female", (Gender == 1 || Gender == -1))
 	Log(Name, "Voices["+id+"]")
