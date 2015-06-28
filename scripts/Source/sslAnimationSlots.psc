@@ -256,13 +256,20 @@ string[] function GetSlotNames(int page = 1, int perpage = 125)
 endfunction
 
 sslBaseAnimation[] function GetSlots(int page = 1, int perpage = 125)
+	perpage = PapyrusUtil.ClampInt(perpage, 1, 128)
 	if page > PageCount(perpage) || page < 1
 		return sslUtility.AnimationArray(0)
 	endIf
-	perpage = PapyrusUtil.ClampInt(perpage, 1, 128) 
-	sslBaseAnimation[] PageSlots = sslUtility.AnimationArray(perpage)
-	int i = perpage
-	int n = page * perpage
+	int n
+	sslBaseAnimation[] PageSlots
+	if page == PageCount(perpage)
+		n = Slotted
+		PageSlots = sslUtility.AnimationArray((Slotted - ((page - 1) * perpage)))
+	else
+		n = page * perpage
+		PageSlots = sslUtility.AnimationArray(perpage)
+	endIf
+	int i = PageSlots.Length
 	while i
 		i -= 1
 		n -= 1
@@ -327,6 +334,18 @@ sslBaseAnimation function RegisterAnimation(string Registrar, Form CallbackForm 
 		sslObjectFactory.SendCallback(Registrar, id, CallbackForm, CallbackAlias)
 	endIf
 	return Slot
+endFunction
+
+bool function UnregisterAnimation(string Registrar)
+	if Registrar != "" && Registry.Find(Registrar) != -1
+		int Slot = Registry.Find(Registrar)
+		(Objects[Slot] as sslBaseAnimation).Initialize()
+		Objects[Slot] = none
+		Registry[Slot] = ""
+		Config.Log("Animation["+Slot+"] "+Registrar, "UnregisterAnimation()")
+		return true	
+	endIf
+	return false
 endFunction
 
 ; ------------------------------------------------------- ;

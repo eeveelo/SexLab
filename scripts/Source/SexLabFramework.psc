@@ -1093,6 +1093,22 @@ sslBaseExpression function MakeExpressionRegistered(string Token)
 	return Factory.MakeExpressionRegistered(Token)
 endFunction
 
+bool function RemoveRegisteredAnimation(string Registrar)
+	return AnimSlots.UnregisterAnimation(Registrar)
+endFunction
+
+bool function RemoveRegisteredCreatureAnimation(string Registrar)
+	return CreatureSlots.UnregisterAnimation(Registrar)
+endFunction
+
+bool function RemoveRegisteredVoice(string Registrar)
+	return VoiceSlots.UnregisterVoice(Registrar)
+endFunction
+
+bool function RemoveRegisteredExpression(string Registrar)
+	return ExpressionSlots.UnregisterExpression(Registrar)
+endFunction
+
 ;#---------------------------#
 ;#   END FACTORY FUNCTIONS   #
 ;#---------------------------#

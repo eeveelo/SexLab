@@ -171,13 +171,20 @@ string[] function GetSlotNames(int page = 1, int perpage = 125)
 endfunction
 
 sslBaseExpression[] function GetSlots(int page = 1, int perpage = 125)
+	perpage = PapyrusUtil.ClampInt(perpage, 1, 128)
 	if page > PageCount(perpage) || page < 1
 		return sslUtility.ExpressionArray(0)
 	endIf
-	perpage = PapyrusUtil.ClampInt(perpage, 1, 128) 
-	sslBaseExpression[] PageSlots = sslUtility.ExpressionArray(perpage)
-	int i = perpage
-	int n = page * perpage
+	int n
+	sslBaseExpression[] PageSlots
+	if page == PageCount(perpage)
+		n = Slotted
+		PageSlots = sslUtility.ExpressionArray((Slotted - ((page - 1) * perpage)))
+	else
+		n = page * perpage
+		PageSlots = sslUtility.ExpressionArray(perpage)
+	endIf
+	int i = PageSlots.Length
 	while i
 		i -= 1
 		n -= 1
@@ -242,6 +249,18 @@ sslBaseExpression function RegisterExpression(string Registrar, Form CallbackFor
 		sslObjectFactory.SendCallback(Registrar, id, CallbackForm, CallbackAlias)
 	endIf
 	return Slot
+endFunction
+
+bool function UnregisterExpression(string Registrar)
+	if Registrar != "" && Registry.Find(Registrar) != -1
+		int Slot = Registry.Find(Registrar)
+		(Objects[Slot] as sslBaseExpression).Initialize()
+		Objects[Slot] = none
+		Registry[Slot] = ""
+		Config.Log("Expression["+Slot+"] "+Registrar, "UnregisterExpression()")
+		return true	
+	endIf
+	return false
 endFunction
 
 ; ------------------------------------------------------- ;
