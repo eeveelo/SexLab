@@ -28,6 +28,12 @@ state Test1
 	endFunction
 endState
 
+
+
+
+
+
+
 function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10, bool UseBaseLoop = false)
 	PreBenchmarkSetup()
 

@@ -67,7 +67,7 @@ endEvent
 bool function SetupSystem()
 	Version = SexLabUtil.GetVersion()
 	SexLab.GoToState("Disabled")
-	GoToState("Setup")
+	GoToState("Installing")
 
 	; Framework
 	LoadLibs(false)
@@ -103,8 +103,8 @@ event UpdateSystem(int OldVersion, int NewVersion)
 	elseif OldVersion < NewVersion
 		LogAll("SexLab v"+SexLabUtil.GetStringVer()+" - Updating...")
 		SexLab.GoToState("Disabled")
-
 		GoToState("Updating")
+		
 		Version = NewVersion
 
 		; Perform update functions

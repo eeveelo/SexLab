@@ -1147,9 +1147,10 @@ endFunction
 function SetTID(int id)
 	thread_id = id
 	PlayerRef = Game.GetPlayer()
-	
+
 	; Watch for SexLabDebugMode event
 	RegisterForModEvent("SexLabDebugMode", "SetDebugMode")
+	DebugMode = Config.DebugMode
 
 	; Reset function Libraries - SexLabQuestFramework
 	if !Config || !ThreadLib || !ActorLib
@@ -1217,6 +1218,7 @@ function InitShares()
 endFunction
 function Initialize()
 	UnregisterForUpdate()
+	DebugMode = Config.DebugMode
 	; Clear aliases
 	ActorAlias[0].ClearAlias()
 	ActorAlias[1].ClearAlias()

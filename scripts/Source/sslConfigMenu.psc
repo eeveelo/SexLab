@@ -520,45 +520,6 @@ event OnSelectST()
 	endIf
 endEvent
 
-;/ event OnHighlightST()
-	string[] Options = MapOptions()
-	; Strip Editor
-	if Options[0] == "StripEditor"
-		Form ItemRef
-		if (Options[1] as int) == "0"
-			ItemRef = ItemsPlayer[(Options[2] as int)]
-		else
-			ItemRef = ItemsTarget[(Options[2] as int)]
-		endIf
-		string Info = ItemRef.GetName()+"["+ItemRef.GetType()+"]"
-		if ItemRef.GetType() == 26 || ItemRef.GetType() == 53
-			Info += "\nSlots: " + GetSlotMasks(StatRef, ItemRef)		
-		endIf
-		SetInfoText(Info)
-	endIf
-endEvent /;
-
-; event OnDefaultST()
-; endEvent
-
-; event OnHighlightST()
-; endEvent
-
-function DisableCurrentST(string toText = "")
-	if toText != ""
-		SetTextOptionValueST(toText)
-	endIf
-	SetOptionFlagsST(OPTION_FLAG_DISABLED)
-endfunction
-
-function EnableCurrentST(string toText = "")
-	if toText != ""
-		SetTextOptionValueST(toText)
-	endIf
-	SetOptionFlagsST(OPTION_FLAG_NONE)
-endfunction
-
-
 ; ------------------------------------------------------- ;
 ; --- Install Menu                                    --- ;
 ; ------------------------------------------------------- ;
@@ -572,7 +533,19 @@ function InstallMenu()
 	
 	SetCursorPosition(1)
 	AddHeaderOption("SexLab v"+GetStringVer()+" by Ashal@LoversLab.com")
-	AddTextOptionST("InstallSystem","Install SexLab "+GetStringVer(), "$SSL_ClickHere")
+
+	; Install/Update button
+	string AliasState = SystemAlias.GetState()
+	int opt = OPTION_FLAG_NONE
+	if AliasState == "Updating" || AliasState == "Installing"
+		opt = OPTION_FLAG_DISABLED
+	endIf
+	AddTextOptionST("InstallSystem","$SSL_InstallUpdateSexLab{"+GetStringVer()+"}", "$SSL_ClickHere", opt)
+	if AliasState == "Updating"
+		AddTextOption("Updating: Close menus till done", "!")
+	elseIf AliasState == "Installing"
+		AddTextOption("Installing: Close menus till done", "!")
+	endIf
 
 endFunction
 
@@ -589,11 +562,13 @@ endFunction
 
 state InstallSystem
 	event OnSelectST()
-		DisableCurrentST("Installling...")
+		SetOptionFlagsST(OPTION_FLAG_DISABLED)
+		SetTextOptionValueST("Working")
 
 		SystemAlias.InstallSystem()
 
-		EnableCurrentST("$SSL_ClickHere")
+		SetTextOptionValueST("$SSL_ClickHere")
+		SetOptionFlagsST(OPTION_FLAG_NONE)
 		ForcePageReset()
 	endEvent
 endState
@@ -1498,7 +1473,7 @@ function ExpressionEditor()
 
 	; 1
 	AddMenuOptionST("ExpressionSelect", "$SSL_ModifyingExpression", Expression.Name)
-	AddToggleOptionST("ExpressionEnabled", "$SSL_ExpressionEnabled", Expression.Enabled)
+	AddToggleOptionST("ExpressionEnabled", "$Enabled", Expression.Enabled)
 
 	; 2
 	AddToggleOptionST("ExpressionNormal", "$SSL_ExpressionsNormal", Expression.HasTag("Normal"))
@@ -2760,10 +2735,12 @@ endState
 state RestoreDefaultSettings
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnRestoreDefaults")
-			DisableCurrentST("$SSL_Resetting")
+			SetOptionFlagsST(OPTION_FLAG_DISABLED)
+			SetTextOptionValueST("$SSL_Resetting")			
 			Config.SetDefaults()
 			ShowMessage("$SSL_RunRestoreDefaults", false)
-			EnableCurrentST("$SSL_ClickHere")
+			SetTextOptionValueST("$SSL_ClickHere")
+			SetOptionFlagsST(OPTION_FLAG_NONE)
 			; ForcePageReset()
 		endIf
 	endEvent
@@ -2776,39 +2753,47 @@ state StopCurrentAnimations
 endState
 state ResetAnimationRegistry
 	event OnSelectST()
-		DisableCurrentST("$SSL_Resetting")
+		SetOptionFlagsST(OPTION_FLAG_DISABLED)
+		SetTextOptionValueST("$SSL_Resetting")		
 		ThreadSlots.StopAll()
 		AnimSlots.Setup()
 		CreatureSlots.Setup()
 		ShowMessage("$SSL_RunRebuildAnimations", false)
 		Debug.Notification("$SSL_RunRebuildAnimations")
-		EnableCurrentST("$SSL_ClickHere")
+		SetTextOptionValueST("$SSL_ClickHere")
+		SetOptionFlagsST(OPTION_FLAG_NONE)
 	endEvent
 endState
 state ResetVoiceRegistry
 	event OnSelectST()
-		DisableCurrentST("$SSL_Resetting")
+		SetOptionFlagsST(OPTION_FLAG_DISABLED)
+		SetTextOptionValueST("$SSL_Resetting")		
 		VoiceSlots.Setup()
 		ShowMessage("$SSL_RunRebuildVoices", false)
 		Debug.Notification("$SSL_RunRebuildVoices")
-		EnableCurrentST("$SSL_ClickHere")
+		SetTextOptionValueST("$SSL_ClickHere")
+		SetOptionFlagsST(OPTION_FLAG_NONE)
 	endEvent
 endState
 state ResetExpressionRegistry
 	event OnSelectST()
-		DisableCurrentST("$SSL_Resetting")
+		SetOptionFlagsST(OPTION_FLAG_DISABLED)
+		SetTextOptionValueST("$SSL_Resetting")		
 		ExpressionSlots.Setup()
 		ShowMessage("$SSL_RunRebuildExpressions", false)
 		Debug.Notification("$SSL_RunRebuildExpressions")
-		EnableCurrentST("$SSL_ClickHere")
+		SetTextOptionValueST("$SSL_ClickHere")
+		SetOptionFlagsST(OPTION_FLAG_NONE)
 	endEvent
 endState
 state ResetStripOverrides
 	event OnSelectST()
-		DisableCurrentST("$SSL_Resetting")
+		SetOptionFlagsST(OPTION_FLAG_DISABLED)
+		SetTextOptionValueST("$SSL_Resetting")		
 		ActorLib.ResetStripOverrides()
 		ShowMessage("$Done", false)
-		EnableCurrentST("$SSL_ClickHere")
+		SetTextOptionValueST("$SSL_ClickHere")
+		SetOptionFlagsST(OPTION_FLAG_NONE)
 	endEvent
 endState
 state DebugMode

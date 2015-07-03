@@ -137,7 +137,7 @@ function Setup()
 		if Slots[i].Start()
 			Slots[i].SetTID(i)
 		else
-			Config.Log("Failed to start thread quest("+i+"): "+Slots[i])
+			Log("Failed to start thread quest("+i+"): "+Slots[i])
 		endIf
 	endWhile
 	
