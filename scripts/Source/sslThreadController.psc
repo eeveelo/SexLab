@@ -102,7 +102,7 @@ state Animating
 		; Prepare loop
 		SoundFX  = Animation.GetSoundFX(Stage)
 		SFXDelay = ClampFloat(BaseDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
-		PlayAnimation()
+		PlayStageAnimations()
 		; Send events
 		if !LeadIn && Stage >= StageCount
 			SendThreadEvent("OrgasmStart")
@@ -151,62 +151,88 @@ state Animating
 		Action("Advancing")
 	endFunction
 
-	function PlayAnimation()
-		Animation.GetAnimEvents(sAnimEvents, Stage)
-		ModEvent.Send(ModEvent.Create(Key("Animate")))
-		StageTimer = RealTime[0] + GetTimer()
-	endFunction
+	; function PlayStageAnimations()
+	; 	Animation.GetAnimEvents(sAnimEvents, Stage)
+	; 	ModEvent.Send(ModEvent.Create(Key("Animate")))
+	; 	StageTimer = RealTime[0] + GetTimer()
+	; endFunction
 
 	function ClearIdles()
-		ActorAlias[0].StopAnimating(true)
+		; if ActorCount == 1
+		; 	Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
+		; elseIf ActorCount == 2
+		; 	Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
+		; 	Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
+		; elseIf ActorCount == 3
+		; 	Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
+		; 	Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
+		; 	Debug.SendAnimationEvent(Positions[2], "IdleForceDefaultState")
+		; elseIf ActorCount == 4
+		; 	Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
+		; 	Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
+		; 	Debug.SendAnimationEvent(Positions[2], "IdleForceDefaultState")
+		; 	Debug.SendAnimationEvent(Positions[3], "IdleForceDefaultState")
+		; elseIf ActorCount == 5
+		; 	Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
+		; 	Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
+		; 	Debug.SendAnimationEvent(Positions[2], "IdleForceDefaultState")
+		; 	Debug.SendAnimationEvent(Positions[3], "IdleForceDefaultState")
+		; 	Debug.SendAnimationEvent(Positions[4], "IdleForceDefaultState")
+		; endIf
+		Utility.Wait(0.1)
 		ActorAlias[1].StopAnimating(true)
 		ActorAlias[2].StopAnimating(true)
 		ActorAlias[3].StopAnimating(true)
 		ActorAlias[4].StopAnimating(true)
-		Utility.WaitMenuMode(0.5)
 	endFunction
 
 	function RealignActors()
 		UnregisterForUpdate()
 
-		if ActorCount == 1
-			ActorAlias[0].SyncThread()
-			ActorAlias[0].SyncLocation(true)
-		elseIf ActorCount == 2
-			ActorAlias[0].SyncThread()
-			ActorAlias[1].SyncThread()
-			ActorAlias[0].SyncLocation(true)
-			ActorAlias[1].SyncLocation(true)
-		elseIf ActorCount == 3
-			ActorAlias[0].SyncThread()
-			ActorAlias[1].SyncThread()
-			ActorAlias[2].SyncThread()
-			ActorAlias[0].SyncLocation(true)
-			ActorAlias[1].SyncLocation(true)
-			ActorAlias[2].SyncLocation(true)
-		elseIf ActorCount == 4
-			ActorAlias[0].SyncThread()
-			ActorAlias[1].SyncThread()
-			ActorAlias[2].SyncThread()
-			ActorAlias[3].SyncThread()
-			ActorAlias[0].SyncLocation(true)
-			ActorAlias[1].SyncLocation(true)
-			ActorAlias[2].SyncLocation(true)
-			ActorAlias[3].SyncLocation(true)
-		elseIf ActorCount == 5
-			ActorAlias[0].SyncThread()
-			ActorAlias[1].SyncThread()
-			ActorAlias[2].SyncThread()
-			ActorAlias[3].SyncThread()
-			ActorAlias[4].SyncThread()
-			ActorAlias[0].SyncLocation(true)
-			ActorAlias[1].SyncLocation(true)
-			ActorAlias[2].SyncLocation(true)
-			ActorAlias[3].SyncLocation(true)
-			ActorAlias[4].SyncLocation(true)
-		endIf
+		; if ActorCount == 1
+		; 	ActorAlias[0].SyncThread()
+		; 	ActorAlias[0].SyncLocation(true)
+		; elseIf ActorCount == 2
+		; 	ActorAlias[0].SyncThread()
+		; 	ActorAlias[1].SyncThread()
+		; 	ActorAlias[0].SyncLocation(true)
+		; 	ActorAlias[1].SyncLocation(true)
+		; elseIf ActorCount == 3
+		; 	ActorAlias[0].SyncThread()
+		; 	ActorAlias[1].SyncThread()
+		; 	ActorAlias[2].SyncThread()
+		; 	ActorAlias[0].SyncLocation(true)
+		; 	ActorAlias[1].SyncLocation(true)
+		; 	ActorAlias[2].SyncLocation(true)
+		; elseIf ActorCount == 4
+		; 	ActorAlias[0].SyncThread()
+		; 	ActorAlias[1].SyncThread()
+		; 	ActorAlias[2].SyncThread()
+		; 	ActorAlias[3].SyncThread()
+		; 	ActorAlias[0].SyncLocation(true)
+		; 	ActorAlias[1].SyncLocation(true)
+		; 	ActorAlias[2].SyncLocation(true)
+		; 	ActorAlias[3].SyncLocation(true)
+		; elseIf ActorCount == 5
+		; 	ActorAlias[0].SyncThread()
+		; 	ActorAlias[1].SyncThread()
+		; 	ActorAlias[2].SyncThread()
+		; 	ActorAlias[3].SyncThread()
+		; 	ActorAlias[4].SyncThread()
+		; 	ActorAlias[0].SyncLocation(true)
+		; 	ActorAlias[1].SyncLocation(true)
+		; 	ActorAlias[2].SyncLocation(true)
+		; 	ActorAlias[3].SyncLocation(true)
+		; 	ActorAlias[4].SyncLocation(true)
+		; endIf
+
+		ActorAlias[0].SyncAll(true)
+		ActorAlias[1].SyncAll(true)
+		ActorAlias[2].SyncAll(true)
+		ActorAlias[3].SyncAll(true)
+		ActorAlias[4].SyncAll(true)
 		
-		PlayAnimation()
+		PlayStageAnimations()
 		RegisterForSingleUpdate(0.2)
 	endFunction
 
@@ -381,7 +407,7 @@ state Animating
 			CenterOnObject(PlayerRef, true)
 		endIf
 		; Return to animation loop
-		ClearIdles()
+		; ClearIdles()
 		RealignActors()
 		; StageTimer = Utility.GetCurrentRealTime() + GetTimer()
 		; RegisterForSingleUpdate(0.1)
@@ -439,7 +465,12 @@ function SetAnimation(int aid = -1)
 	if Stage >= StageCount
 		GoToStage((StageCount - 1))
 	else
-		RealignActors()
+		ActorAlias[0].SyncAll(false)
+		ActorAlias[1].SyncAll(false)
+		ActorAlias[2].SyncAll(false)
+		ActorAlias[3].SyncAll(false)
+		ActorAlias[4].SyncAll(false)
+		PlayStageAnimations()
 	endIf
 endFunction
 
@@ -608,6 +639,12 @@ int function GetAdjustPos()
 	return AdjustPos
 endFunction
 
+function PlayStageAnimations()
+	Animation.GetAnimEvents(sAnimEvents, Stage)
+	ModEvent.Send(ModEvent.Create(Key("Animate")))
+	StageTimer = RealTime[0] + GetTimer()
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- State Restricted                                --- ;
 ; ------------------------------------------------------- ;
@@ -618,8 +655,6 @@ auto state Unlocked
 endState
 
 ; State Animating
-function PlayAnimation()
-endFunction
 function AdvanceStage(bool backwards = false)
 endFunction
 function ChangeAnimation(bool backwards = false)

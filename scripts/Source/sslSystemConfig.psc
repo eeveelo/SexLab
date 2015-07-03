@@ -533,6 +533,46 @@ Spell function GetHDTSpell(Actor ActorRef)
 	return none
 endFunction
 
+
+Faction property BardExcludeFaction auto
+ReferenceAlias property BardBystander1 auto
+ReferenceAlias property BardBystander2 auto
+ReferenceAlias property BardBystander3 auto
+ReferenceAlias property BardBystander4 auto
+ReferenceAlias property BardBystander5 auto
+
+bool function CheckBardAudience(Actor ActorRef, bool RemoveFromAudience = true)
+	if !ActorRef
+		return false; Invalid argument
+	elseIf !RemoveFromAudience
+		return ActorRef == BardBystander1.GetReference() || ActorRef == BardBystander2.GetReference() || ActorRef == BardBystander3.GetReference() \
+			|| ActorRef == BardBystander4.GetReference() || ActorRef == BardBystander5.GetReference()
+	elseIf BystanderClear(ActorRef, BardBystander1)
+		return true
+	elseIf BystanderClear(ActorRef, BardBystander2)
+		return true
+	elseIf BystanderClear(ActorRef, BardBystander3)
+		return true
+	elseIf BystanderClear(ActorRef, BardBystander4)
+		return true
+	elseIf BystanderClear(ActorRef, BardBystander5)
+		return true
+	else
+		return false ; Not in audience
+	endIf
+	ActorRef.EvaluatePackage()
+endFunction
+
+bool function BystanderClear(Actor ActorRef, ReferenceAlias BardBystander)
+	if ActorRef == BardBystander.GetReference()
+		BardBystander.Clear()
+		ActorRef.EvaluatePackage()
+		Log("Cleared from bard audience", "CheckBardAudience("+ActorRef+")")
+		return true
+	endIf
+	return false
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;

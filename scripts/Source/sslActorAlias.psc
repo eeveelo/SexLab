@@ -323,18 +323,20 @@ endState
 ; ------------------------------------------------------- ;
 
 function PlayAnimation()
+	; Log("PlayAnimation("+Position+") - "+AnimEvents[Position])
 	Debug.SendAnimationEvent(ActorRef, AnimEvents[Position])
 endFunction
 
 state Animating
 
 	function StartAnimating()
+		; TODO: Add a light source option here. (possibly with frostfall benefit?)
+		; Remove from bard audience if in one
+		Config.CheckBardAudience(ActorRef, true)
 		; If enabled, start Auto TFC for player
 		if IsPlayer && Config.AutoTFC
 			SexLabUtil.EnableFreeCamera(true, Config.AutoSUCSM)
 		endIf
-		; TODO: Add a light source option here. (possibly with frostfall benefit?)
-		;
 		; Prepare for loop
 		TrackedEvent("Start")
 		StartedAt = RealTime[0]
@@ -363,12 +365,10 @@ state Animating
 
 	function SyncThread()
 		; Sync with thread info
-		if AnimEvents[Position] == ""
-			GetPosition()
-			AnimEvents[Position] = Animation.FetchPositionStage(Position, Stage)
-		endIf
-		Flags   = Animation.PositionFlags(Flags, AdjustKey[0], Position, Stage)
-		Offsets = Animation.PositionOffsets(Offsets, AdjustKey[0], Position, Stage, BedStatus[1])
+		GetPosition()
+		
+		; Flags   = Animation.PositionFlags(Flags, AdjustKey[0], Position, Stage)
+		; Offsets = Animation.PositionOffsets(Offsets, AdjustKey[0], Position, Stage, BedStatus[1])
 
 		; VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
 		VoiceDelay = BaseDelay
@@ -387,6 +387,7 @@ state Animating
 			ResolveStrapon()
 			RefreshExpression()
 		endIf
+		; SyncLocation(false)
 	endFunction
 
 	function SyncActor()
@@ -522,6 +523,11 @@ state Resetting
 	function Initialize()
 	endFunction
 endState
+
+function SyncAll(bool Force = false)
+	SyncThread()
+	SyncLocation(Force)
+endFunction
 
 ; ------------------------------------------------------- ;
 ; --- Actor Manipulation                              --- ;
@@ -963,6 +969,7 @@ function GetPosition()
 		Position = Thread.Positions.Find(ActorRef)
 		Flags    = Animation.PositionFlags(Flags, AdjustKey[0], Position, Stage)
 		Offsets  = Animation.PositionOffsets(Offsets, AdjustKey[0], Position, Stage, BedStatus[1])
+		AnimEvents[Position] = Animation.FetchPositionStage(Position, Stage)
 	endIf
 endFunction
 

@@ -417,6 +417,18 @@ int function CreatureCount(Actor[] Positions)
 	return ActorLib.CreatureCount(Positions)
 endFunction
 
+;/**
+* Removes an actor from the audience of any currently active bard scenes, preventing them from playing the clapping animation.
+* For more future prevention, add actor to the faction BardAudienceExcludedFaction (id: 0x0010FCB4)
+* 
+* @param  Actor ActorRef - The actor you want to remove/check
+* @param  bool RemoveFromAudience - Set to FALSE to only check if they are present and not remove them fromt he audience.
+* @return bool - TRUE if ActorRef was/is present in a bard audience
+**/;
+bool function CheckBardAudience(Actor ActorRef, bool RemoveFromAudience = true)
+	return Config.CheckBardAudience(ActorRef, RemoveFromAudience)
+endFunction
+
 ;#------------------------------#
 ;#     END ACTOR FUNCTIONS      #
 ;#------------------------------#

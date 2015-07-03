@@ -2,7 +2,8 @@ Scriptname sslEffectDebug extends ActiveMagicEffect
 
 import PapyrusUtil
 
-SexLabFramework property SexLab Auto
+SexLabFramework property SexLab auto
+sslSystemConfig property Config auto
 Actor property PlayerRef auto
 
 Actor Ref1
@@ -14,27 +15,60 @@ float scale2
 string ActorName
 ObjectReference MarkerRef
 
-event OnEffectStart(Actor TargetRef, Actor CasterRef)
+form[] function GetAudience()
+	form[] Audience = new Form[5]
+	Audience[0] = Config.BardBystander1.GetReference()
+	Audience[1] = Config.BardBystander2.GetReference()
+	Audience[2] = Config.BardBystander3.GetReference()
+	Audience[3] = Config.BardBystander4.GetReference()
+	Audience[4] = Config.BardBystander5.GetReference()
+	return Audience
+endFunction
 
-	LockActor(TargetRef)
-	Debug.SendAnimationEvent(TargetRef, "Arrok_Missionary_A1_S2")
-	Log("Playing Arrok_Missionary_A1_S2")
-	Utility.Wait(5.0)
-	Log("AddSpeedModifier(2.0)....")
-	AnimUtil.AddSpeedModifier(TargetRef, 2.0, 1.0, "Arrok_Missionary_A1_S2")
-	Utility.Wait(5.0)
-	Log("AddSpeedModifier(5.0)....")
-	AnimUtil.AddSpeedModifier(TargetRef, 5.0, 1.0, "Arrok_Missionary_A1_S2")
-	Utility.Wait(5.0)
-	Log("RemoveSpeedModifier...")
-	AnimUtil.RemoveSpeedModifier(TargetRef, "Arrok_Missionary_A1_S2")
-	Utility.Wait(5.0)
-	Log("ClearSpeedModifier...")
-	AnimUtil.ClearSpeedModifier("Arrok_Missionary_A1_S2")
-	Utility.Wait(5.0)
-	Log("Reset...")
-	Debug.SendAnimationEvent(TargetRef, "IdleForceDefaultState")
-	UnlockActor(TargetRef)
+event OnEffectStart(Actor TargetRef, Actor CasterRef)
+	Config = SexLab.Config
+
+
+	Log("-- PRE AUDIENCE --")
+	Log(GetAudience())
+	SexLab.CheckBardAudience(TargetRef, true)
+	Log("-- REMOVED --")
+	Log(GetAudience())
+	utility.wait(2.0)
+	Log("-- REMOVED(2) --")
+	Log(GetAudience())
+	utility.wait(2.0)
+	Log("-- REMOVED(4) --")
+	Log(GetAudience())
+	utility.wait(2.0)
+	Log("-- REMOVED(6) --")
+	Log(GetAudience())
+	utility.wait(2.0)
+	Log("-- REMOVED(8) --")
+	Log(GetAudience())
+	utility.wait(2.0)
+	Log("-- REMOVED(10) --")
+	Log(GetAudience())
+
+	; LockActor(TargetRef)
+	; Debug.SendAnimationEvent(TargetRef, "Arrok_Missionary_A1_S2")
+	; Log("Playing Arrok_Missionary_A1_S2")
+	; Utility.Wait(5.0)
+	; Log("AddSpeedModifier(2.0)....")
+	; AnimUtil.AddSpeedModifier(TargetRef, 2.0, 1.0, "Arrok_Missionary_A1_S2")
+	; Utility.Wait(5.0)
+	; Log("AddSpeedModifier(5.0)....")
+	; AnimUtil.AddSpeedModifier(TargetRef, 5.0, 1.0, "Arrok_Missionary_A1_S2")
+	; Utility.Wait(5.0)
+	; Log("RemoveSpeedModifier...")
+	; AnimUtil.RemoveSpeedModifier(TargetRef, "Arrok_Missionary_A1_S2")
+	; Utility.Wait(5.0)
+	; Log("ClearSpeedModifier...")
+	; AnimUtil.ClearSpeedModifier("Arrok_Missionary_A1_S2")
+	; Utility.Wait(5.0)
+	; Log("Reset...")
+	; Debug.SendAnimationEvent(TargetRef, "IdleForceDefaultState")
+	; UnlockActor(TargetRef)
 
 	; Log("Is3DLoaded: "+CasterRef.Is3DLoaded())
 	; Log("SexLabFramework: "+CasterRef.GetAnimationVariableInt("SexLabFramework"))
