@@ -544,23 +544,13 @@ ReferenceAlias property BardBystander5 auto
 bool function CheckBardAudience(Actor ActorRef, bool RemoveFromAudience = true)
 	if !ActorRef
 		return false; Invalid argument
-	elseIf !RemoveFromAudience
+	elseIf RemoveFromAudience
+		return BystanderClear(ActorRef, BardBystander1) || BystanderClear(ActorRef, BardBystander2) || BystanderClear(ActorRef, BardBystander3) \
+			|| BystanderClear(ActorRef, BardBystander4) || BystanderClear(ActorRef, BardBystander5)
+	else
 		return ActorRef == BardBystander1.GetReference() || ActorRef == BardBystander2.GetReference() || ActorRef == BardBystander3.GetReference() \
 			|| ActorRef == BardBystander4.GetReference() || ActorRef == BardBystander5.GetReference()
-	elseIf BystanderClear(ActorRef, BardBystander1)
-		return true
-	elseIf BystanderClear(ActorRef, BardBystander2)
-		return true
-	elseIf BystanderClear(ActorRef, BardBystander3)
-		return true
-	elseIf BystanderClear(ActorRef, BardBystander4)
-		return true
-	elseIf BystanderClear(ActorRef, BardBystander5)
-		return true
-	else
-		return false ; Not in audience
 	endIf
-	ActorRef.EvaluatePackage()
 endFunction
 
 bool function BystanderClear(Actor ActorRef, ReferenceAlias BardBystander)
