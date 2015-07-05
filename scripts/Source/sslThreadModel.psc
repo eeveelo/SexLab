@@ -258,7 +258,6 @@ state Making
 		Fatal("Thread has timed out of the making process; resetting model for selection pool")
 	endEvent
 	event OnBeginState()
-		t = SexLabUtil.Timer(0, "TIMER BEGIN")
 		Log("Entering Making State")
 		; Action Events
 		RegisterForModEvent(Key(EventTypes[0]+"Done"), EventTypes[0]+"Done")
@@ -272,7 +271,6 @@ state Making
 		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_2", "AliasEventDone")
 		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_3", "AliasEventDone")
 		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_4", "AliasEventDone")
-		t = SexLabUtil.Timer(t, "Register Events")
 	endEvent
 
 	int function AddActor(Actor ActorRef, bool IsVictim = false, sslBaseVoice Voice = none, bool ForceSilent = false)
@@ -325,7 +323,6 @@ state Making
 	endFunction
 
 	sslThreadController function StartThread()
-		t = SexLabUtil.Timer(t, "StartThread - Begin")
 		GoToState("Starting")
 		UnregisterForUpdate()
 		int i
@@ -338,7 +335,6 @@ state Making
 			Fatal("No valid actors available for animation")
 			return none
 		endIf
-		t = SexLabUtil.Timer(t, "StartThread - Validate")
 
 		; ------------------------- ;
 		; --    Locate Center    -- ;
@@ -367,7 +363,6 @@ state Making
 			endIf
 		endIf
 
-		t = SexLabUtil.Timer(t, "StartThread - Locate Center")
 		; ------------------------- ;
 		; -- Validate Animations -- ;
 		; ------------------------- ;
@@ -415,13 +410,11 @@ state Making
 
 		; Get default primary animations if none
 		elseIf PrimaryAnimations.Length == 0
-			t = SexLabUtil.Timer(t, "StartThread - Pick primary")
 			SetAnimations(AnimSlots.GetByDefault(Males, Females, IsType[0], (BedRef != none), Config.RestrictAggressive))
 			if PrimaryAnimations.Length == 0
 				Fatal("Unable to find valid default animations")
 				return none
 			endIf
-			t = SexLabUtil.Timer(t, "StartThread - Pick primary - done")
 		endIf
 
 		; Get default foreplay if none and enabled
@@ -432,9 +425,6 @@ state Making
 				SetLeadAnimations(AnimSlots.GetByTags(2, "LeadIn"))
 			endIf
 		endIf
-
-		t = SexLabUtil.Timer(t, "StartThread - Validate animations")
-
 
 		if CustomAnimations || CustomAnimations.Length < 1
 			
@@ -462,7 +452,6 @@ state Making
 					endIf
 				endIf
 			endIf
-			t = SexLabUtil.Timer(t, "StartThread - Filter same sex animations")
 
 			; Filter non-bed friendly animations
 			if BedRef
@@ -488,7 +477,6 @@ state Making
 					endIf
 				endIf
 			endIf
-			t = SexLabUtil.Timer(t, "StartThread - Filter bed animations")
 
 			; Make sure we are still good to start after all the filters
 			if LeadAnimations.Length < 1
@@ -505,7 +493,6 @@ state Making
 		; --  Start Controller   -- ;
 		; ------------------------- ;
 
-		t = SexLabUtil.Timer(t, "StartThread - END")
 		Action("Prepare")
 		return self as sslThreadController
 	endFunction
