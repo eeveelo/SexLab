@@ -203,15 +203,21 @@ event OnConfigOpen()
 	; Reset animation editor auto selector
 	PreventOverwrite = false
 
+	; All paged menus need this
+	PerPage = 125
+
+	; AnimationEditor
+	AnimEditPage = 1
+
+	; ToggleAnimations
+	TogglePage = 1
+	ta = 0
+
 	; Animation Settings
 	Chances = new string[3]
 	Chances[0] = "$SSL_Never"
 	Chances[1] = "$SSL_Sometimes"
 	Chances[2] = "$SSL_Always"
-
-	; Animation Editor
-	PerPage = 125
-	pg = 1
 
 	; Expression Editor
 	Phases = new string[5]
@@ -316,10 +322,6 @@ event OnConfigOpen()
 	Biped[31] = "$SSL_MiscSlot61"
 	Biped[32] = "$SSL_Weapons"
 
-	; Toggle Animations
-	ta = 0
-	pg = 1
-
 
 	; Strip Editor
 	; ShowFullInventory = false
@@ -347,19 +349,19 @@ endEvent
 ; --- Object Pagination                               --- ;
 ; ------------------------------------------------------- ;
 
+; All paged menus need
 int PerPage
-int OnPage
 int LastPage
 
-string[] function PaginationMenu(string BeforePages = "", string AfterPages = "")
+string[] function PaginationMenu(string BeforePages = "", string AfterPages = "", int CurrentPage)
 	string[] Output
 	if BeforePages != ""
 		Output = PapyrusUtil.PushString(Output, BeforePages)
 	endIf
-	if OnPage < LastPage
+	if CurrentPage < LastPage
 		Output = PapyrusUtil.PushString(Output, "NEXT PAGE ->")
 	endIf
-	if OnPage > 1
+	if CurrentPage > 1
 		Output = PapyrusUtil.PushString(Output, "<- PREVIOUS PAGE")
 	endIf
 	if AfterPages != ""
@@ -481,11 +483,14 @@ event OnSelectST()
 	elseIf Options[0] == "Animation"
 		; Get animation to toggle
 		sslBaseAnimation Slot
-		if ta == 3
-			Slot = CreatureSlots.GetBySlot(Options[1] as int)
-		else
-			Slot = AnimSlots.GetBySlot(Options[1] as int)
-		endIf
+		Slot = AnimToggles[(Options[1] as int)]
+
+		; if ta == 3
+		; 	; Slot = CreatureSlots.GetBySlot(Options[1] as int)
+		; 	Slot = AnimToggles[i]
+		; else
+		; 	; Slot = AnimSlots.GetBySlot(Options[1] as int)
+		; endIf
 		; Toggle action
 		if ta == 1
 			Slot.ToggleTag("LeadIn")
@@ -1029,6 +1034,7 @@ bool PreventOverwrite
 bool IsCreatureEditor
 string AdjustKey
 int Position
+int AnimEditPage
 
 function AnimationEditor()
 	SetCursorFillMode(LEFT_TO_RIGHT)
@@ -1053,16 +1059,16 @@ function AnimationEditor()
 	endIf
 
 	; Check if editing a creature animation
-	IsCreatureEditor = Animation.IsCreature
 	AnimationSlots   = AnimSlots
+	IsCreatureEditor = Animation.IsCreature
 	if IsCreatureEditor
 		AnimationSlots = CreatureSlots
 	endIf
 
 	; Set current pagination settings
-	PerPage     = 125
-	OnPage      = AnimationSlots.FindPage(Animation.Registry, PerPage)
-	LastPage    = AnimationSlots.PageCount(PerPage)
+	PerPage      = 125
+	LastPage     = AnimationSlots.PageCount(PerPage)
+	AnimEditPage = AnimationSlots.FindPage(Animation.Registry, PerPage)
 
 	; Show editor options
 	SetTitleText(Animation.Name)
@@ -1124,11 +1130,11 @@ state AnimationSelect
 
 	event OnMenuOpenST()
 		if Config.AllowCreatures
-			PageOptions = PaginationMenu(StringIfElse(IsCreatureEditor, "$SSL_SwitchNormalAnimationEditor", "$SSL_SwitchCreatureAnimationEditor"))
+			PageOptions = PaginationMenu(StringIfElse(IsCreatureEditor, "$SSL_SwitchNormalAnimationEditor", "$SSL_SwitchCreatureAnimationEditor"), "", AnimEditPage)
 		else
-			PageOptions = PaginationMenu()
+			PageOptions = PaginationMenu("", "", AnimEditPage)
 		endIf
-		MenuOptions = MergeStringArray(PageOptions, AnimationSlots.GetSlotNames(OnPage, PerPage))
+		MenuOptions = MergeStringArray(PageOptions, AnimationSlots.GetSlotNames(AnimEditPage, PerPage))
 		SetMenuDialogOptions(MenuOptions)
 		SetMenuDialogStartIndex(MenuOptions.Find(Animation.Name))
 		SetMenuDialogDefaultIndex(MenuOptions.Find(Animation.Name))
@@ -1149,12 +1155,12 @@ state AnimationSelect
 			ForcePageReset()
 			return
 		elseIf MenuOptions[i] == "<- PREVIOUS PAGE"
-			Animation = AnimationSlots.GetBySlot(((OnPage - 2) * PerPage))
+			Animation = AnimationSlots.GetBySlot(((AnimEditPage - 2) * PerPage))
 		elseIf MenuOptions[i] == "NEXT PAGE ->"
-			Animation = AnimationSlots.GetBySlot((OnPage * PerPage))
+			Animation = AnimationSlots.GetBySlot((AnimEditPage * PerPage))
 		else
 			i -= PageOptions.Length
-			i += ((OnPage - 1) * PerPage)
+			i += ((AnimEditPage - 1) * PerPage)
 			Animation = AnimationSlots.GetBySlot(i)
 		endIf		
 		SetMenuOptionValueST(Animation.Name)
@@ -1264,12 +1270,25 @@ endState
 ; --- Toggle Animations                               --- ;
 ; ------------------------------------------------------- ;
 
+sslBaseAnimation[] AnimToggles
 string[] TAModes
+int TogglePage
 int ta
-int pg
 
 function ToggleAnimations()
 	SetCursorFillMode(LEFT_TO_RIGHT)
+
+	PerPage  = 126
+	LastPage = AnimationSlots.PageCount(PerPage)
+	if TogglePage > LastPage || TogglePage < 1
+		TogglePage = 1
+	endIf
+
+	AnimationSlots = AnimSlots
+	if ta == 3
+		AnimationSlots = CreatureSlots		
+	endIf
+	AnimToggles = AnimationSlots.GetSlots(TogglePage, PerPage)
 
 	if Config.AllowCreatures
 		TAModes = new string[4]
@@ -1287,23 +1306,17 @@ function ToggleAnimations()
 	SetTitleText(TAModes[ta])
 	AddMenuOptionST("TAModeSelect", "$SSL_View", TAModes[ta])
 
-	AnimationSlots = AnimSlots
-	if ta == 3
-		AnimationSlots = CreatureSlots		
-	endIf
-	sslBaseAnimation[] Animations = AnimationSlots.GetSlots(pg, 126)
-
 	int Slotted = AnimationSlots.Slotted
 	if Slotted > PerPage
-		AddTextOptionST("AnimationTogglePage", "Toggle Page #", pg)
+		AddTextOptionST("AnimationTogglePage", "Toggle Page #", TogglePage)
 	else
 		AddHeaderOption("")
 	endIf
 
 	int i
-	while i < Slotted && i < PerPage ; TODO
-		if Animations[i] && Animations[i].Registered
-			AddToggleOptionST("Animation_"+i, Animations[i].Name, GetToggle(Animations[i]))
+	while i < AnimToggles.Length
+		if AnimToggles[i] && AnimToggles[i].Registered
+			AddToggleOptionST("Animation_"+i, AnimToggles[i].Name, GetToggle(AnimToggles[i]))
 		endIf
 		i += 1
 	endWhile
@@ -1327,13 +1340,13 @@ state TAModeSelect
 	endEvent
 	event OnMenuAcceptST(int i)
 		ta = i
-		pg = 1
+		TogglePage = 1
 		SetMenuOptionValueST(TAModes[ta])
 		ForcePageReset()
 	endEvent
 	event OnDefaultST()
 		ta = 0
-		pg = 1
+		TogglePage = 1
 		SetMenuOptionValueST(TAModes[ta])
 		ForcePageReset()
 	endEvent
@@ -1341,20 +1354,16 @@ endState
 
 state AnimationTogglePage
 	event OnSelectST()
-		int Slotted = AnimSlots.Slotted
-		if ta == 3
-			Slotted = CreatureSlots.Slotted
+		TogglePage += 1
+		if TogglePage > LastPage
+			TogglePage = 1
 		endIf
-		pg += 1
-		if pg > LastPage
-			pg = 1
-		endIf
-		SetTextOptionValueST(pg)
+		SetTextOptionValueST(TogglePage)
 		ForcePageReset()
 	endEvent
 	event OnDefaultST()
-		pg = 1
-		SetTextOptionValueST(pg)
+		TogglePage = 1
+		SetTextOptionValueST(TogglePage)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("")
