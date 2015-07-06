@@ -135,8 +135,8 @@ float function GetTimersRunTime(float[] StageTimers)
 	endIf
 	float seconds  = 0.0
 	int LastTimer  = (StageTimers.Length - 1)
-	int LastStage  = (StageCount - 1)
-	int Stage = StageCount
+	int LastStage  = (Stages - 1)
+	int Stage = Stages
 	while Stage > 0
  		Stage -= 1
  		if HasTimer(Stage)
@@ -229,7 +229,10 @@ float[] function GetAllAdjustments(string AdjustKey)
 	return _GetAllAdjustments(Registry, Adjustkey)
 endFunction
 
-bool function HasAdjustments(string Registrar, string AdjustKey, int Stage) global native
+bool function _HasAdjustments(string Registrar, string AdjustKey, int Stage) global native
+bool function HasAdjustments(string AdjustKey, int Stage)
+	return _HasAdjustments(Registry, AdjustKey, Stage)
+endFunction
 
 function _PositionOffsets(string Registrar, string AdjustKey, string LastKey, int Stage, float[] RawOffsets) global native
 float[] function PositionOffsets(float[] Output, string AdjustKey, int Position, int Stage, int BedTypeID = 0)
@@ -360,12 +363,34 @@ function RestoreOffsets(string AdjustKey)
 endFunction
 
 bool function _CopyAdjustments(string Registrar, string AdjustKey, float[] Array) global native
+
+function CopyAdjustmentsFrom(string AdjustKey, string CopyKey, int Position)
+	CopyKey   = CopyKey+"."+Position
+	AdjustKey = AdjustKey+"."+Position
+	float[] List
+	if _HasAdjustments(Registry, CopyKey, Stages)
+		List = _GetAllAdjustments(Registry, CopyKey)
+	else
+		List = GetEmptyAdjustments(Position)
+	endIf
+	_ClearAdjustments(Registry, AdjustKey)
+	_CopyAdjustments(Registry, AdjustKey, List)
+endFunction
+
+string function GetLastKey(int Position)
+	string LastKey = LastKeys[Position]
+	if LastKey != "" && LastKey != "Global."+Position && _HasAdjustments(Registry, LastKey, Stages)
+		return LastKey
+	endIf
+	return "Global."+Position
+endFunction
+
 string function InitAdjustments(string AdjustKey, int Position)
 	AdjustKey += "."+Position
-	if !HasAdjustments(Registry, AdjustKey, Stages)
+	if !_HasAdjustments(Registry, AdjustKey, Stages)
 		; Pick key to copy from
 		string CopyKey = LastKeys[Position]
-		if CopyKey == "" || CopyKey == "Global."+Position || !HasAdjustments(Registry, CopyKey, Stages)
+		if CopyKey == "" || CopyKey == "Global."+Position || !_HasAdjustments(Registry, CopyKey, Stages)
 			CopyKey = "Global."+Position
 		endIf
 		; Get adjustments from lastkey or default global

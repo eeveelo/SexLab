@@ -358,10 +358,10 @@ string[] function PaginationMenu(string BeforePages = "", string AfterPages = ""
 		Output = PapyrusUtil.PushString(Output, BeforePages)
 	endIf
 	if CurrentPage < LastPage
-		Output = PapyrusUtil.PushString(Output, "NEXT PAGE ->")
+		Output = PapyrusUtil.PushString(Output, "$SSL_NextPage")
 	endIf
 	if CurrentPage > 1
-		Output = PapyrusUtil.PushString(Output, "<- PREVIOUS PAGE")
+		Output = PapyrusUtil.PushString(Output, "$SSL_PrevPage")
 	endIf
 	if AfterPages != ""
 		Output = PapyrusUtil.PushString(Output, AfterPages)
@@ -1077,6 +1077,9 @@ function AnimationEditor()
 	LastPage     = AnimationSlots.PageCount(PerPage)
 	AnimEditPage = AnimationSlots.FindPage(Animation.Registry, PerPage)
 
+	; Adjustkeys for current animation
+	AdjustKeys = Animation.GetAdjustKeys()
+
 	; Show editor options
 	SetTitleText(Animation.Name)
 	AddMenuOptionST("AnimationSelect", "$SSL_Animation", Animation.Name)
@@ -1088,6 +1091,9 @@ function AnimationEditor()
 
 	AddMenuOptionST("AnimationAdjustKey", "$SSL_AdjustmentProfile", AdjustKey)
 	AddMenuOptionST("AnimationPosition", "$SSL_Position", "$SSL_{"+GenderLabel(Animation.GetGender(Position))+"}Gender{"+(Position + 1)+"}Position")
+
+	AddMenuOptionST("AnimationAdjustCopy", "$SSL_CopyFromProfile", "$SSL_Select")
+	AddEmptyOption()
 
 	string Profile
 	if AdjustKey != "Global"
@@ -1133,6 +1139,8 @@ endFunction
 
 string[] PageOptions
 string[] MenuOptions
+string[] AdjustKeys
+
 state AnimationSelect
 
 	event OnMenuOpenST()
@@ -1161,9 +1169,9 @@ state AnimationSelect
 			SetMenuOptionValueST(Animation.Name)
 			ForcePageReset()
 			return
-		elseIf MenuOptions[i] == "<- PREVIOUS PAGE"
+		elseIf MenuOptions[i] == "$SSL_PrevPage"
 			Animation = AnimationSlots.GetBySlot(((AnimEditPage - 2) * PerPage))
-		elseIf MenuOptions[i] == "NEXT PAGE ->"
+		elseIf MenuOptions[i] == "$SSL_NextPage"
 			Animation = AnimationSlots.GetBySlot((AnimEditPage * PerPage))
 		else
 			i -= PageOptions.Length
@@ -1217,16 +1225,40 @@ endState
 
 state AnimationAdjustKey
 	event OnMenuOpenST()
-		string[] AdjustKeys = Animation.GetAdjustKeys()
 		SetMenuDialogStartIndex(AdjustKeys.Find(AdjustKey))
 		SetMenuDialogDefaultIndex(AdjustKeys.Find("Global"))
 		SetMenuDialogOptions(AdjustKeys)
 	endEvent
 	event OnMenuAcceptST(int i)
-		string[] AdjustKeys = Animation.GetAdjustKeys()
 		AdjustKey  = AdjustKeys[i]
 		SetMenuOptionValueST(AdjustKeys[i])
 		ForcePageReset()
+	endEvent
+	event OnDefaultST()
+		AdjustKey = "Global"
+		SetMenuOptionValueST(AdjustKey)
+		ForcePageReset()
+	endEvent
+endState
+
+state AnimationAdjustCopy
+	event OnMenuOpenST()
+		SetMenuDialogStartIndex(AdjustKeys.Find(AdjustKey))
+		SetMenuDialogDefaultIndex(AdjustKeys.Find("Global"))
+		SetMenuDialogOptions(AdjustKeys)
+	endEvent
+	event OnMenuAcceptST(int i)
+		string CopyKey = AdjustKeys[i]
+		if CopyKey != AdjustKey && ShowMessage(Animation.Name+"\nOverwrite saved adjustments for '"+AdjustKey+"' with the adjustments from '"+CopyKey+"'?", true, "$Yes", "$No")
+			Animation.RestoreOffsets(AdjustKey)
+			int n = Animation.PositionCount
+			while n
+				n -= 1
+				Animation.CopyAdjustmentsFrom(AdjustKey, CopyKey, n)
+			endWhile
+			ForcePageReset()
+		endIf
+		; SetMenuOptionValueST(AdjustKeys[i])
 	endEvent
 	event OnDefaultST()
 		AdjustKey = "Global"
