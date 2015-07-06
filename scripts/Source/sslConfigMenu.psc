@@ -168,16 +168,15 @@ event OnConfigOpen()
 		Pages     = new string[10]
 		Pages[0]  = "$SSL_SexDiary"
 		Pages[1]  = "$SSL_AnimationSettings"
-		Pages[2]  = "$SSL_PlayerHotkeys"
-		Pages[3]  = "$SSL_SoundSettings"
+		Pages[2]  = "$SSL_SoundSettings"
+		Pages[3]  = "$SSL_PlayerHotkeys"
 		Pages[4]  = "$SSL_TimersStripping"
-		Pages[5]  = "$SSL_StripEditor"
-		; Pages[4]  = "$SSL_ExpressionSelection"
-		Pages[6]  = "$SSL_ToggleAnimations"
-		Pages[7]  = "$SSL_AnimationEditor"
-		Pages[8]  = "$SSL_ExpressionEditor"
+		Pages[5]  = "$SSL_ToggleAnimations"
+		Pages[6]  = "$SSL_AnimationEditor"
+		Pages[7]  = "$SSL_ExpressionEditor"
+		Pages[8]  = "$SSL_StripEditor"
 		Pages[9]  = "$SSL_RebuildClean"
-		; Pages[9]  = "Troubleshoot"
+		; Pages[]  = "Troubleshoot"
 		if PlayerRef.GetLeveledActorBase().GetSex() == 0
 			Pages[0] = "$SSL_SexJournal"
 		endIf
@@ -377,6 +376,14 @@ endfunction
 string[] function MapOptions()
 	return StringSplit(GetState(), "_")
 endFunction
+
+event OnHighlightST()
+	string[] Options = MapOptions()
+	if Options[0] == "Animation"
+		sslBaseAnimation Slot = AnimToggles[(Options[1] as int)]
+		SetInfoText(Slot.Name+" Tags:\n"+StringJoin(Slot.GetTags(), ", "))
+	endIf
+endEvent
 
 event OnSliderOpenST()
 	string[] Options = MapOptions()
@@ -1180,7 +1187,7 @@ state AnimationSelect
 	endEvent
 
 	event OnHighlightST()
-		SetInfoText(Animation.Name+" Tags:\n"+PapyrusUtil.StringJoin(Animation.GetTags(), ", "))
+		SetInfoText(Animation.Name+" Tags:\n"+StringJoin(Animation.GetTags(), ", "))
 	endEvent
 endState
 
