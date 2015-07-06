@@ -63,7 +63,7 @@ endFunction
 
 function ApplyPhase(Actor ActorRef, int Phase, int Gender)
 	if Phase <= Phases[Gender]
-		ApplyPresetFloats(ActorRef, GetPhase(Phase, Gender))
+		ApplyPresetFloats(ActorRef, GenderPhase(Phase, Gender))
 	endIf
 endFunction
 
@@ -72,7 +72,7 @@ int function PickPhase(int Strength, int Gender)
 endFunction
 
 float[] function SelectPhase(int Strength, int Gender)
-	return GetPhase(PickPhase(Strength, Gender), Gender)
+	return GenderPhase(PickPhase(Strength, Gender), Gender)
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -141,7 +141,7 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function SetIndex(int Phase, int Gender, int Mode, int id, int value)
-	float[] Preset = GetPhase(Phase, Gender)
+	float[] Preset = GenderPhase(Phase, Gender)
 	int i = Mode+id
 	if value > 100
 		value = 100
@@ -205,7 +205,7 @@ function EmptyPhase(int Phase, int Gender)
 endFunction
 
 function AddPhase(int Phase, int Gender)
-	float[] Preset = GetPhase(Phase, Gender)
+	float[] Preset = GenderPhase(Phase, Gender)
 	if Preset[31] == 0.0 || Preset[30] < 0.0 || Preset[30] > 16.0
 		Preset[30] = 7.0
 		Preset[31] = 0.5
@@ -227,7 +227,7 @@ bool function HasPhase(int Phase, Actor ActorRef)
 	return (Gender == 1 && Phase <= PhasesFemale) || (Gender == 0 && Phase <= PhasesMale)
 endFunction
 
-float[] function GetPhase(int Phase, int Gender)
+float[] function GenderPhase(int Phase, int Gender)
 	float[] Preset
 	if Gender == Male
 		if Phase == 1
@@ -290,7 +290,7 @@ endFunction
 
 float[] function GetPhonemes(int Phase, int Gender)
 	float[] Output = new float[16]
-	float[] Preset = GetPhase(Phase, Gender)
+	float[] Preset = GenderPhase(Phase, Gender)
 	int i
 	while i <= PhonemeIDs
 		Output[i] = Preset[Phoneme + i]
@@ -301,7 +301,7 @@ endFunction
 
 float[] function GetModifiers(int Phase, int Gender)
 	float[] Output = new float[14]
-	float[] Preset = GetPhase(Phase, Gender)
+	float[] Preset = GenderPhase(Phase, Gender)
 	int i
 	while i <= ModifierIDs
 		Output[i] = Preset[Modifier + i]
@@ -311,15 +311,15 @@ float[] function GetModifiers(int Phase, int Gender)
 endFunction
 
 int function GetMoodType(int Phase, int Gender)
-	return GetPhase(Phase, Gender)[30] as int
+	return GenderPhase(Phase, Gender)[30] as int
 endFunction
 
 int function GetMoodAmount(int Phase, int Gender)
-	return (GetPhase(Phase, Gender)[31] * 100.0) as int
+	return (GenderPhase(Phase, Gender)[31] * 100.0) as int
 endFunction
 
 int function GetIndex(int Phase, int Gender, int Mode, int id)
-	return (GetPhase(Phase, Gender)[Mode + id] * 100.0) as int
+	return (GenderPhase(Phase, Gender)[Mode + id] * 100.0) as int
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -337,6 +337,26 @@ int function ValidatePreset(float[] Preset)
 		endWhile
 	endIf
 	return 0
+endFunction
+
+int[] function ToIntArray(float[] FloatArray)
+	int[] Output = new int[32]
+	int i = FloatArray.Length
+	while i
+		i -= 1
+		Output[i] = (FloatArray[i] * 100.0) as int
+	endWhile
+	return Output
+endFunction
+
+float[] function ToFloatArray(int[] IntArray)
+	float[] Output = new float[32]
+	int i = IntArray.Length
+	while i
+		i -= 1
+		Output[i] = (IntArray[i] as float) / 100.0
+	endWhile
+	return Output
 endFunction
 
 function CountPhases()
@@ -495,7 +515,11 @@ function ApplyTo(Actor ActorRef, int Strength = 50, bool IsFemale = true, bool O
 	endIf
 endFunction
 
-float[] function PickPreset(int Strength, bool IsFemale)
+int[] function GetPhase(int Phase, int Gender)
+	return ToIntArray(GenderPhase(Phase, Gender))
+endFunction
+
+int[] function PickPreset(int Strength, bool IsFemale)
 	return GetPhase(CalcPhase(Strength, IsFemale), (IsFemale as int))
 endFunction
 

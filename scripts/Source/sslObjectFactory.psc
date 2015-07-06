@@ -675,7 +675,7 @@ sslBaseExpression function CopyExpression(sslBaseExpression Copy, sslBaseExpress
 		int Phase
 		while Phase < Orig.PhaseCounts[Gender]
 			Phase += 1
-			Copy.SetPhase(Phase, Gender, Orig.GetPhase(Phase, Gender))
+			Copy.SetPhase(Phase, Gender, Orig.GenderPhase(Phase, Gender))
 		endWhile
 		Gender += 1
 	endWhile
