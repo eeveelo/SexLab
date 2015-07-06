@@ -286,6 +286,24 @@ function RegisterRaces()
 	ClearRaceKey("Seekers")
 	AddRaceID("Seekers", "DLC2SeekerRace")
 
+	ClearRaceKey("Lurkers")
+	AddRaceID("Lurkers", "DLC2LurkerRace")
+
+	ClearRaceKey("Spriggans")
+	AddRaceID("Spriggans", "SprigganRace")
+	AddRaceID("Spriggans", "SprigganMatronRace")
+	AddRaceID("Spriggans", "SprigganEarthMotherRace")
+
+	ClearRaceKey("FlameAtronach")
+	AddRaceID("FlameAtronach", "AtronachFlameRace")
+	AddRaceID("FlameAtronach", "_SLSD_AtronachFlameRace")
+
+	ClearRaceKey("Skeevers")
+	AddRaceID("Skeevers", "SkeeverRace")
+
+	ClearRaceKey("Chickens")
+	AddRaceID("Chkickens", "ChickenRace")
+
 	; Send creature race key registration event
 	ModEvent.Send(ModEvent.Create("SexLabRegisterCreatureKey"))
 endFunction
