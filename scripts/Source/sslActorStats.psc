@@ -575,11 +575,13 @@ function RecordThread(Actor ActorRef, int Gender, int HadRelation, float Started
 	AddSex(ActorRef, TotalTime, HasPlayer, VictimRef != none, Genders[0], Genders[1], Genders[2])
 endFunction /;
 
+function _ResetStats(Actor ActorRef) global native
 function ResetStats(Actor ActorRef)
 	FloatListClear(ActorRef, "SexLabSkills")
 	FormListClear(ActorRef, "SexPartners")
 	ClearCustomStats(ActorRef)
 	ClearLegacyStats(ActorRef)
+	_ResetStats(ActorRef)
 endFunction
 
 function Setup()
