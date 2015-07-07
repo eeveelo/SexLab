@@ -42,6 +42,11 @@ endFunction
 
 event OnVersionUpdate(int version)
 	LoadLibs(false)
+	if CurrentVersion < 15920
+		ResetAllQuests()
+		LoadLibs(true)
+		SystemAlias.SetupSystem()
+	endIf
 endEvent
 
 event OnGameReload()
@@ -160,6 +165,7 @@ endEvent
 event OnConfigOpen()
 	; Make sure we have all the needed libraries
 	LoadLibs()
+	
 	; MCM option pages
 	if !SystemAlias.IsInstalled
 		Pages     = new string[1]
@@ -181,7 +187,6 @@ event OnConfigOpen()
 			Pages[0] = "$SSL_SexJournal"
 		endIf
 	endIf
-	
 
 	; Basic player info
 	PlayerName = PlayerRef.GetLeveledActorBase().GetName()
@@ -212,115 +217,131 @@ event OnConfigOpen()
 	TogglePage = 1
 	ta = 0
 
+	; Stripping/Timers toggles
+	ts = 0
+
 	; Animation Settings
-	Chances = new string[3]
-	Chances[0] = "$SSL_Never"
-	Chances[1] = "$SSL_Sometimes"
-	Chances[2] = "$SSL_Always"
+	if Chances.Length < 3 || Chances.Find("") != -1
+		Chances = new string[3]
+		Chances[0] = "$SSL_Never"
+		Chances[1] = "$SSL_Sometimes"
+		Chances[2] = "$SSL_Always"
+	endIf
 
 	; Expression Editor
-	Phases = new string[5]
-	Phases[0] = "Phase 1"
-	Phases[1] = "Phase 2"
-	Phases[2] = "Phase 3"
-	Phases[3] = "Phase 4"
-	Phases[4] = "Phase 5"
+	if Phases.Length < 3 || Phases.Find("") != -1
+		Phases = new string[5]
+		Phases[0] = "Phase 1"
+		Phases[1] = "Phase 2"
+		Phases[2] = "Phase 3"
+		Phases[3] = "Phase 4"
+		Phases[4] = "Phase 5"
+	endIf
 
-	Moods = new string[17]
-	Moods[0]  = "Dialogue Anger"
-	Moods[1]  = "Dialogue Fear"
-	Moods[2]  = "Dialogue Happy"
-	Moods[3]  = "Dialogue Sad"
-	Moods[4]  = "Dialogue Surprise"
-	Moods[5]  = "Dialogue Puzzled"
-	Moods[6]  = "Dialogue Disgusted"
-	Moods[7]  = "Mood Neutral"
-	Moods[8]  = "Mood Anger"
-	Moods[9]  = "Mood Fear"
-	Moods[10] = "Mood Happy"
-	Moods[11] = "Mood Sad"
-	Moods[12] = "Mood Surprise"
-	Moods[13] = "Mood Puzzled"
-	Moods[14] = "Mood Disgusted"
-	Moods[15] = "Combat Anger"
-	Moods[16] = "Combat Shout"
+	if Moods.Length < 3 || Moods.Find("") != -1
+		Moods = new string[17]
+		Moods[0]  = "Dialogue Anger"
+		Moods[1]  = "Dialogue Fear"
+		Moods[2]  = "Dialogue Happy"
+		Moods[3]  = "Dialogue Sad"
+		Moods[4]  = "Dialogue Surprise"
+		Moods[5]  = "Dialogue Puzzled"
+		Moods[6]  = "Dialogue Disgusted"
+		Moods[7]  = "Mood Neutral"
+		Moods[8]  = "Mood Anger"
+		Moods[9]  = "Mood Fear"
+		Moods[10] = "Mood Happy"
+		Moods[11] = "Mood Sad"
+		Moods[12] = "Mood Surprise"
+		Moods[13] = "Mood Puzzled"
+		Moods[14] = "Mood Disgusted"
+		Moods[15] = "Combat Anger"
+		Moods[16] = "Combat Shout"
+	endIf
 
-	Phonemes = new string[16]
-	Phonemes[0]  = "0: Aah"
-	Phonemes[1]  = "1: BigAah"
-	Phonemes[2]  = "2: BMP"
-	Phonemes[3]  = "3: ChjSh"
-	Phonemes[4]  = "4: DST"
-	Phonemes[5]  = "5: Eee"
-	Phonemes[6]  = "6: Eh"
-	Phonemes[7]  = "7: FV"
-	Phonemes[8]  = "8: i"
-	Phonemes[9]  = "9: k"
-	Phonemes[10] = "10: N"
-	Phonemes[11] = "11: Oh"
-	Phonemes[12] = "12: OohQ"
-	Phonemes[13] = "13: R"
-	Phonemes[14] = "14: Th"
-	Phonemes[15] = "15: W"
+	if Phonemes.Length < 3 || Phonemes.Find("") != -1
+		Phonemes = new string[16]
+		Phonemes[0]  = "0: Aah"
+		Phonemes[1]  = "1: BigAah"
+		Phonemes[2]  = "2: BMP"
+		Phonemes[3]  = "3: ChjSh"
+		Phonemes[4]  = "4: DST"
+		Phonemes[5]  = "5: Eee"
+		Phonemes[6]  = "6: Eh"
+		Phonemes[7]  = "7: FV"
+		Phonemes[8]  = "8: i"
+		Phonemes[9]  = "9: k"
+		Phonemes[10] = "10: N"
+		Phonemes[11] = "11: Oh"
+		Phonemes[12] = "12: OohQ"
+		Phonemes[13] = "13: R"
+		Phonemes[14] = "14: Th"
+		Phonemes[15] = "15: W"
+	endIf
 
-	Modifiers = new string[14]
-	Modifiers[0]  = "0: BlinkL"
-	Modifiers[1]  = "1: BlinkR"
-	Modifiers[2]  = "2: BrowDownL"
-	Modifiers[3]  = "3: BrownDownR"
-	Modifiers[4]  = "4: BrowInL"
-	Modifiers[5]  = "5: BrowInR"
-	Modifiers[6]  = "6: BrowUpL"
-	Modifiers[7]  = "7: BrowUpR"
-	Modifiers[8]  = "8: LookDown"
-	Modifiers[9]  = "9: LookLeft"
-	Modifiers[10] = "10: LookRight"
-	Modifiers[11] = "11: LookUp"
-	Modifiers[12] = "12: SquintL"
-	Modifiers[13] = "13: SquintR"
+	if Modifiers.Length < 3 || Modifiers.Find("") != -1
+		Modifiers = new string[14]
+		Modifiers[0]  = "0: BlinkL"
+		Modifiers[1]  = "1: BlinkR"
+		Modifiers[2]  = "2: BrowDownL"
+		Modifiers[3]  = "3: BrownDownR"
+		Modifiers[4]  = "4: BrowInL"
+		Modifiers[5]  = "5: BrowInR"
+		Modifiers[6]  = "6: BrowUpL"
+		Modifiers[7]  = "7: BrowUpR"
+		Modifiers[8]  = "8: LookDown"
+		Modifiers[9]  = "9: LookLeft"
+		Modifiers[10] = "10: LookRight"
+		Modifiers[11] = "11: LookUp"
+		Modifiers[12] = "12: SquintL"
+		Modifiers[13] = "13: SquintR"
+	endIf
 
 	; Timers & Stripping
-	ts = 0
-	TSModes = new string[3]
-	TSModes[0] = "$SSL_NormalTimersStripping"
-	TSModes[1] = "$SSL_ForeplayTimersStripping"
-	TSModes[2] = "$SSL_AggressiveTimersStripping"
+	if TSModes.Length < 3 || TSModes.Find("") != -1
+		TSModes = new string[3]
+		TSModes[0] = "$SSL_NormalTimersStripping"
+		TSModes[1] = "$SSL_ForeplayTimersStripping"
+		TSModes[2] = "$SSL_AggressiveTimersStripping"
+	endIf
 
+	; Biped item slots (i + 30)
 	Biped = new string[33]
-	Biped[0]  = "$SSL_Head"
-	Biped[1]  = "$SSL_Hair"
-	Biped[2]  = "$SSL_Torso"
-	Biped[3]  = "$SSL_Hands"
-	Biped[4]  = "$SSL_Forearms"
-	Biped[5]  = "$SSL_Amulet"
-	Biped[6]  = "$SSL_Ring"
-	Biped[7]  = "$SSL_Feet"
-	Biped[8]  = "$SSL_Calves"
-	Biped[9]  = "$SSL_Shield"
-	Biped[10] = "$SSL_Tail"
-	Biped[11] = "$SSL_LongHair"
-	Biped[12] = "$SSL_Circlet"
-	Biped[13] = "$SSL_Ears"
-	Biped[14] = "$SSL_FaceMouth"
-	Biped[15] = "$SSL_Neck"
-	Biped[16] = "$SSL_Chest"
-	Biped[17] = "$SSL_Back"
-	Biped[18] = "$SSL_MiscSlot48"
-	Biped[19] = "$SSL_PelvisOutergarnments"
-	Biped[20] = "$SSL_DecapitatedHead" ; decapitated head [NordRace]
-	Biped[21] = "$SSL_Decapitate" ; decapitate [NordRace]
-	Biped[22] = "$SSL_PelvisUndergarnments"
-	Biped[23] = "$SSL_LegsRightLeg"
-	Biped[24] = "$SSL_LegsLeftLeg"
-	Biped[25] = "$SSL_FaceJewelry"
-	Biped[26] = "$SSL_ChestUndergarnments"
-	Biped[27] = "$SSL_Shoulders"
-	Biped[28] = "$SSL_ArmsLeftArmUndergarnments"
-	Biped[29] = "$SSL_ArmsRightArmOutergarnments"
-	Biped[30] = "$SSL_MiscSlot60"
-	Biped[31] = "$SSL_MiscSlot61"
-	Biped[32] = "$SSL_Weapons"
-
+	if Biped.Length < 33 || Biped.Find("") != -1
+		Biped[0]  = "$SSL_Head"
+		Biped[1]  = "$SSL_Hair"
+		Biped[2]  = "$SSL_Torso"
+		Biped[3]  = "$SSL_Hands"
+		Biped[4]  = "$SSL_Forearms"
+		Biped[5]  = "$SSL_Amulet"
+		Biped[6]  = "$SSL_Ring"
+		Biped[7]  = "$SSL_Feet"
+		Biped[8]  = "$SSL_Calves"
+		Biped[9]  = "$SSL_Shield"
+		Biped[10] = "$SSL_Tail"
+		Biped[11] = "$SSL_LongHair"
+		Biped[12] = "$SSL_Circlet"
+		Biped[13] = "$SSL_Ears"
+		Biped[14] = "$SSL_FaceMouth"
+		Biped[15] = "$SSL_Neck"
+		Biped[16] = "$SSL_Chest"
+		Biped[17] = "$SSL_Back"
+		Biped[18] = "$SSL_MiscSlot48"
+		Biped[19] = "$SSL_PelvisOutergarnments"
+		Biped[20] = "$SSL_DecapitatedHead" ; decapitated head [NordRace]
+		Biped[21] = "$SSL_Decapitate" ; decapitate [NordRace]
+		Biped[22] = "$SSL_PelvisUndergarnments"
+		Biped[23] = "$SSL_LegsRightLeg"
+		Biped[24] = "$SSL_LegsLeftLeg"
+		Biped[25] = "$SSL_FaceJewelry"
+		Biped[26] = "$SSL_ChestUndergarnments"
+		Biped[27] = "$SSL_Shoulders"
+		Biped[28] = "$SSL_ArmsLeftArmUndergarnments"
+		Biped[29] = "$SSL_ArmsRightArmOutergarnments"
+		Biped[30] = "$SSL_MiscSlot60"
+		Biped[31] = "$SSL_MiscSlot61"
+		Biped[32] = "$SSL_Weapons"		
+	endIf
 
 	; Strip Editor
 	; ShowFullInventory = false
@@ -334,13 +355,6 @@ event OnConfigOpen()
 endEvent
 
 event OnConfigClose()
-	Phases    = new string[1]
-	Moods     = new string[1]
-	Phonemes  = new string[1]
-	Modifiers = new string[1]
-	TSModes   = new string[1]
-	TAModes   = new string[1]
-	Biped     = new string[1]
 	ModEvent.Send(ModEvent.Create("SexLabConfigClose"))
 endEvent
 
@@ -540,7 +554,7 @@ function InstallMenu()
 	SetCursorFillMode(TOP_TO_BOTTOM)
 
 	AddHeaderOption("SexLab v"+GetStringVer())
-	AddHeaderOption("Prequisite Check")
+	AddHeaderOption("$SSL_PrerequisiteCheck")
 	SystemCheckOptions()
 	
 	SetCursorPosition(1)
@@ -554,22 +568,22 @@ function InstallMenu()
 	endIf
 	AddTextOptionST("InstallSystem","$SSL_InstallUpdateSexLab{"+GetStringVer()+"}", "$SSL_ClickHere", opt)
 	if AliasState == "Updating"
-		AddTextOption("Updating: Close menus till done", "!")
+		AddTextOption("$SSL_CurrentlyUpdating", "!")
 	elseIf AliasState == "Installing"
-		AddTextOption("Installing: Close menus till done", "!")
+		AddTextOption("$SSL_CurrentlyInstalling", "!")
 	endIf
 
 endFunction
 
 function SystemCheckOptions()
-	AddTextOptionST("CheckSKSE", "Skyrim Script Extender (1.7.3+)", StringIfElse(Config.CheckSystemPart("SKSE"), "Ready", "ERROR"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckSexLabUtil", "SexLabUtil.dll SKSE Plugin  (1.6+)", StringIfElse(Config.CheckSystemPart("SexLabUtil"), "Ready", "ERROR"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckPapyrusUtil", "StorageUtil.dll SKSE Plugin  (3.0+)", StringIfElse(Config.CheckSystemPart("PapyrusUtil"), "Ready", "ERROR"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckFNIS", "FNIS - Fores New Idles in Skyrim (5.2+)", StringIfElse(Config.CheckSystemPart("FNIS"), "Ready", "ERROR"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckFNISGenerated", "FNIS For Users Behaviors Generated", StringIfElse(Config.CheckSystemPart("FNISGenerated"), "Ready", "Warning"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckFNISSexLabFramework", "FNIS SexLab Framework Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabFramework"), "Ready", "Missing"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckFNISCreaturePack", "FNIS Creature Pack (5.1+)", StringIfElse(Config.CheckSystemPart("FNISCreaturePack"), "Ready", "Missing"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckFNISSexLabCreature", "FNIS SexLab Creature Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabCreature"), "Ready", "Missing"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckSKSE", "Skyrim Script Extender (1.7.3+)", StringIfElse(Config.CheckSystemPart("SKSE"), "ok", "X"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckSexLabUtil", "SexLabUtil.dll SKSE Plugin  (1.6+)", StringIfElse(Config.CheckSystemPart("SexLabUtil"), "ok", "X"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckPapyrusUtil", "StorageUtil.dll SKSE Plugin  (3.0+)", StringIfElse(Config.CheckSystemPart("PapyrusUtil"), "ok", "X"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNIS", "FNIS - Fores New Idles in Skyrim (5.2+)", StringIfElse(Config.CheckSystemPart("FNIS"), "ok", "X"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNISGenerated", "FNIS For Users Behaviors Generated", StringIfElse(Config.CheckSystemPart("FNISGenerated"), "ok", "?"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNISSexLabFramework", "FNIS SexLab Framework Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabFramework"), "ok", "?"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNISCreaturePack", "FNIS Creature Pack (5.1+)", StringIfElse(Config.CheckSystemPart("FNISCreaturePack"), "ok", "?"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNISSexLabCreature", "FNIS SexLab Creature Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabCreature"), "ok", "?"), OPTION_FLAG_DISABLED)
 endFunction
 
 state InstallSystem
@@ -1249,7 +1263,7 @@ state AnimationAdjustCopy
 	endEvent
 	event OnMenuAcceptST(int i)
 		string CopyKey = AdjustKeys[i]
-		if CopyKey != AdjustKey && ShowMessage(Animation.Name+"\nOverwrite saved adjustments for '"+AdjustKey+"' with the adjustments from '"+CopyKey+"'?", true, "$Yes", "$No")
+		if CopyKey != AdjustKey && ShowMessage("$SSL_ProfileOverwrite{"+AdjustKey+"}With{"+CopyKey+"}", true, "$Yes", "$No")
 			Animation.RestoreOffsets(AdjustKey)
 			int n = Animation.PositionCount
 			while n
@@ -1521,7 +1535,7 @@ function ExpressionEditor()
 
 	; 1
 	AddMenuOptionST("ExpressionSelect", "$SSL_ModifyingExpression", Expression.Name)
-	AddToggleOptionST("ExpressionEnabled", "$Enabled", Expression.Enabled)
+	AddToggleOptionST("ExpressionEnabled", "$SSL_Enabled", Expression.Enabled)
 
 	; 2
 	AddToggleOptionST("ExpressionNormal", "$SSL_ExpressionsNormal", Expression.HasTag("Normal"))
@@ -2867,19 +2881,8 @@ state CleanSystem
 			ShowMessage("$SSL_RunCleanSystem", false)
 			Utility.Wait(0.1)
 
-			; Reset relevant quests
-			ResetQuest(Game.GetFormFromFile(0x00D62, "SexLab.esm") as Quest)
-			ResetQuest(Game.GetFormFromFile(0x639DF, "SexLab.esm") as Quest)
-			ResetQuest(Game.GetFormFromFile(0x664FB, "SexLab.esm") as Quest)
-			ResetQuest(Game.GetFormFromFile(0x78818, "SexLab.esm") as Quest)
-			sslThreadController[] Threads = ThreadSlots.Threads
-			int i = Threads.Length
-			while i
-				i -= 1
-				ResetQuest(Threads[i])
-			endwhile
-
 			; Setup & clean system
+			ResetAllQuests()
 			SystemAlias.SetupSystem()
 			Stats.CleanDeadStats()
 
@@ -2936,6 +2939,20 @@ function Log(string Log, string Type = "NOTICE")
 	else
 		Debug.Trace("SEXLAB - "+Log)
 	endIf
+endFunction
+
+function ResetAllQuests()
+	; Reset relevant quests
+	ResetQuest(Game.GetFormFromFile(0x00D62, "SexLab.esm") as Quest)
+	ResetQuest(Game.GetFormFromFile(0x639DF, "SexLab.esm") as Quest)
+	ResetQuest(Game.GetFormFromFile(0x664FB, "SexLab.esm") as Quest)
+	ResetQuest(Game.GetFormFromFile(0x78818, "SexLab.esm") as Quest)
+	sslThreadController[] Threads = ThreadSlots.Threads
+	int i = Threads.Length
+	while i
+		i -= 1
+		ResetQuest(Threads[i])
+	endwhile
 endFunction
 
 function ResetQuest(Quest QuestRef)
