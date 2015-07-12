@@ -203,7 +203,7 @@ function ArrokBoobjob(int id)
 	Base.AddPositionStage(a2, "Arrok_Boobjob_A2_S3", -119, sos = -2)
 	Base.AddPositionStage(a2, "Arrok_Boobjob_A2_S4", -119, sos = -2)
 
-	Base.SetTags("Arrok,BBP,Sex,Dirty,Boobjob,Breast,LeadIn")
+	Base.SetTags("Arrok,BBP,Sex,Dirty,Paizuri,Boobjob,Boobs,Breast,LeadIn")
 
 	Base.Save(id)
 endFunction
@@ -263,7 +263,7 @@ function ArrokDevilsThreeway(int id)
 	Base.AddPositionStage(a3, "Arrok_DevilsThreeway_A3_S3", 120, sos = -3)
 	Base.AddPositionStage(a3, "Arrok_DevilsThreeway_A3_S4", 100, sos = -3)
 
-	Base.SetTags("Sex,Arrok,BBP,Doggy,Blowjob,Oral,Orgy,Vaginal,Dirty")
+	Base.SetTags("Sex,Arrok,BBP,Doggy,Doggy Style,DoggyStyle,Blowjob,Oral,Orgy,Vaginal,Dirty")
 
 	Base.Save(id)
 endFunction
@@ -286,7 +286,7 @@ function ArrokDoggyStyle(int id)
 	Base.AddPositionStage(a2, "Arrok_DoggyStyle_A2_S3", -100, sos = -2)
 	Base.AddPositionStage(a2, "Arrok_DoggyStyle_A2_S4", -100, sos = -2)
 
-	Base.SetTags("Arrok,BBP,Sex,Doggy Style,Anal")
+	Base.SetTags("Arrok,BBP,Sex,Doggy,Doggy Style,DoggyStyle,Anal")
 
 	Base.Save(id)
 endFunction
@@ -309,7 +309,7 @@ function ArrokForeplay(int id)
 	Base.AddPositionStage(a2, "Arrok_Foreplay_A2_S3", 0, strapon = false, sos = 5)
 	Base.AddPositionStage(a2, "Arrok_Foreplay_A2_S4", 0, strapon = false, sos = 5)
 
-	Base.SetTags("Arrok,BBP,Foreplay,Laying,Loving,Cuddling,LeadIn")
+	Base.SetTags("Arrok,BBP,Foreplay,Laying,Lying,OnBack,Loving,Cuddling,LeadIn")
 
 	Base.Save(id)
 endFunction
@@ -334,7 +334,7 @@ function ArrokLegUp(int id)
 	Base.AddPositionStage(a2, "Arrok_LegUp_A2_S4", 44, rotate = 180, sos = 4)
 	Base.AddPositionStage(a2, "Arrok_LegUp_A2_S5", 44, rotate = 180, sos = 3)
 
-	Base.SetTags("Arrok,BBP,Dirty,Laying,Aggressive,AggressiveDefault,Vaginal")
+	Base.SetTags("Arrok,BBP,Dirty,Laying,Lying,OnBack,Aggressive,AggressiveDefault,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -351,7 +351,7 @@ function ArrokMaleMasturbation(int id)
 	Base.AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S3", 0, sos = 3)
 	Base.AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S4", 0, sos = 3)
 
-	Base.SetTags("Sex,Solo,Masturbation,Standing,Dirty")
+	Base.SetTags("Arrok,Sex,Solo,Masturbation,Standing,Dirty")
 
 	Base.Save(id)
 endFunction
@@ -374,7 +374,7 @@ function ArrokMissionary(int id)
 	Base.AddPositionStage(a2, "Arrok_Missionary_A2_S3", -105, sos = 3)
 	Base.AddPositionStage(a2, "Arrok_Missionary_A2_S4", -107, sos = 7)
 
-	Base.SetTags("Arrok,BBP,Sex,Missionary,Laying,Vaginal")
+	Base.SetTags("Arrok,BBP,Sex,Missionary,Laying,Lying,OnBack,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -424,7 +424,7 @@ function ArrokReverseCowgirl(int id)
 	Base.AddPositionStage(a2, "Arrok_ReverseCowgirl_A2_S3", -105, sos = 8)
 	Base.AddPositionStage(a2, "Arrok_ReverseCowgirl_A2_S4", -105, sos = 8)
 
-	Base.SetTags("Arrok,BBP,Sex,Dirty,Cowgirl,Anal")
+	Base.SetTags("Arrok,BBP,Sex,Dirty,ReverseCowgirl,Cowgirl,Anal")
 
 	Base.Save(id)
 endFunction
@@ -711,7 +711,7 @@ function SexLabAggrDoggyStyle(int id)
 	Base.AddPositionStage(a2, "AggrDoggyStyle_A2_S3", -100, sos = 7)
 	Base.AddPositionStage(a2, "AggrDoggyStyle_A2_S4", -100, sos = 5)
 
-	Base.SetTags("Default,Sex,DoggyStyle,Behind,Anal,Aggressive,AggressiveDefault")
+	Base.SetTags("Default,Sex,DoggyStyle,Doggy Style,Doggy,Behind,Anal,Aggressive,AggressiveDefault")
 
 	Base.Save(id)
 endFunction
@@ -734,7 +734,7 @@ function SexLabAggrMissionary(int id)
 	Base.AddPositionStage(a2, "AggrMissionary_A2_S3", -86, sos = 3)
 	Base.AddPositionStage(a2, "AggrMissionary_A2_S4", -86, sos = 3)
 
-	Base.SetTags("Default,Sex,Missionary,Laying,Vaginal,Aggressive,AggressiveDefault")
+	Base.SetTags("Default,Sex,Missionary,Laying,Lying,OnBack,Vaginal,Aggressive,AggressiveDefault")
 
 	Base.Save(id)
 endFunction
@@ -757,7 +757,7 @@ function SexLabBoobjob(int id)
 	Base.AddPositionStage(a2, "Boobjob_A2_S3", -102)
 	Base.AddPositionStage(a2, "Boobjob_A2_S4", -102)
 
-	Base.SetTags("Default,Sex,Boobjob,Dirty,Breast")
+	Base.SetTags("Default,Sex,Paizuri,Boobjob,Dirty,Breast,Boobs")
 
 	Base.Save(id)
 endFunction
@@ -780,7 +780,7 @@ function SexLabDoggyStyle(int id)
 	Base.AddPositionStage(a2, "DoggyStyle_A2_S3", -104, sos = 3)
 	Base.AddPositionStage(a2, "DoggyStyle_A2_S4", -104, sos = 3)
 
-	Base.SetTags("Default,Sex,Doggy Style,Vaginal")
+	Base.SetTags("Default,Sex,Doggy Style,DoggyStyle,Doggy,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -826,7 +826,7 @@ function SexLabMissionary(int id)
 	Base.AddPositionStage(a2, "Missionary_A2_S3", -100, sos = 2)
 	Base.AddPositionStage(a2, "Missionary_A2_S4", -100, sos = 2)
 
-	Base.SetTags("Default,Sex,Missionary,Laying,Vaginal")
+	Base.SetTags("Default,Sex,Missionary,Laying,Lying,OnBack,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -849,7 +849,7 @@ function SexLabReverseCowgirl(int id)
 	Base.AddPositionStage(a2, "ReverseCowgirl_A2_S3", -107, sos = 3)
 	Base.AddPositionStage(a2, "ReverseCowgirl_A2_S4", -107, sos = 3)
 
-	Base.SetTags("Default,Sex,Dirty,Cowgirl,Anal")
+	Base.SetTags("Default,Sex,Dirty,ReverseCowgirl,Cowgirl,Anal")
 
 	Base.Save(id)
 endFunction
@@ -940,7 +940,7 @@ function BleaghFootJob(int id)
 	Base.AddPositionStage(a2, "Bleagh_FootJob_A2_S4", 42, rotate = 180)
 	Base.AddPositionStage(a2, "Bleagh_FootJob_A2_S5", 42, rotate = 180)
 
-	Base.SetTags("Sex,Fetish,Feet,Footjob,Bleagh")
+	Base.SetTags("Bleagh,Sex,Fetish,Feet,Footjob")
 
 	Base.Save(id)
 endFunction
@@ -958,7 +958,7 @@ function BleaghFemaleSolo(int id)
 	Base.AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S4", 0)
 	Base.AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S5", 0)
 
-	Base.SetTags("Sex,Solo,Masturbation,Dirty")
+	Base.SetTags("Bleagh,Sex,Solo,Masturbation,Dirty")
 
 	Base.Save(id)
 endFunction
@@ -1060,7 +1060,7 @@ function APBoobjob(int id)
 	Base.AddPositionStage(a2, "AP_IdleStand_A2_S4", 30, rotate = 180, sos = 6)
 	Base.AddPositionStage(a2, "AP_IdleStand_A2_S5", 30, rotate = 180, sos = 6)
 
-	Base.SetTags("AP,Sex,Straight,Dirty,Boobjob,Standing,Breast")
+	Base.SetTags("AP,Sex,Straight,Dirty,Paizuri,Boobjob,Standing,Breast,Boobs")
 
 	Base.Save(id)
 endFunction
@@ -1106,7 +1106,7 @@ function APFemaleSolo(int id)
 	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S5", 0)
 	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S6", 0)
 
-	Base.SetTags("Sex,Solo,Masturbation,Dirty")
+	Base.SetTags("AP,Sex,Solo,Masturbation,Dirty")
 
 	Base.Save(id)
 endFunction
@@ -1206,7 +1206,7 @@ function APLegUp(int id)
 	Base.AddPositionStage(a2, "AP_LegUp_A2_S4", 44, up = 5, rotate = 180, sos = 3)
 	Base.AddPositionStage(a2, "AP_LegUp_A2_S5", 44, up = 5, rotate = 180, sos = 3)
 
-	Base.SetTags("AP,Dirty,Laying,Aggressive,AggressiveDefault,Vaginal")
+	Base.SetTags("AP,Sex,Dirty,Laying,Lying,OnBack,Aggressive,AggressiveDefault,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1306,7 +1306,7 @@ function APDoggyStyle(int id)
 	Base.AddPositionStage(a2, "AP_HoldLegUp_A2_S3", 44, rotate = 180)
 	Base.AddPositionStage(a2, "AP_HoldLegUp_A2_S3", 44, rotate = 180)
 
-	Base.SetTags("AP,Sex,Straight,DoggyStyle,Knees,Anal")
+	Base.SetTags("AP,Sex,Straight,DoggyStyle,Doggy Style,Doggy,Knees,Anal")
 
 	Base.Save(id)
 endFunction
@@ -1331,7 +1331,7 @@ function APHoldLegUp(int id)
 	Base.AddPositionStage(a2, "AP_HoldLegUp_A2_S3", 44, rotate = 180)
 	Base.AddPositionStage(a2, "AP_HoldLegUp_A2_S3", 44, rotate = 180)
 
-	Base.SetTags("AP,Sex,Laying,Aggressive,AggressiveDefault,Straight,Anal")
+	Base.SetTags("AP,Sex,Laying,Lying,OnBack,Aggressive,AggressiveDefault,Straight,Anal")
 
 	Base.Save(id)
 endFunction
@@ -1356,7 +1356,7 @@ function APFaceDown(int id)
 	Base.AddPositionStage(a2, "AP_FaceDown_A2_S3", 44, rotate = 180)
 	Base.AddPositionStage(a2, "AP_FaceDown_A2_S4", 44, rotate = 180)
 
-	Base.SetTags("AP,Sex,Laying,Aggressive,AggressiveDefault,Straight,Anal")
+	Base.SetTags("AP,Sex,Laying,Lying,OnBack,Aggressive,AggressiveDefault,Straight,Anal")
 
 	Base.Save(id)
 endFunction
@@ -1535,7 +1535,7 @@ function ZynMissionary(int id)
 	Base.AddPositionStage(a2, "Zyn_Missionary_A2_S4", -105, sos = 7)
     Base.AddPositionStage(a2, "Zyn_Missionary_A2_S5", -105, sos = 7)
 
-	Base.SetTags("Zyn,BBP,Sex,Laying,Missionary,Vaginal")
+	Base.SetTags("Zyn,BBP,Sex,Laying,Lying,OnBack,Missionary,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1560,7 +1560,7 @@ function ZynDoggystyle(int id)
 	Base.AddPositionStage(a2, "Zyn_Doggystyle_A2_S4", -104, sos = 3)
 	Base.AddPositionStage(a2, "Zyn_Doggystyle_A2_S5", -104, sos = 3)
 
-	Base.SetTags("Zyn,BBP,Sex,Dirty,DoggyStyle,Vaginal")
+	Base.SetTags("Zyn,BBP,Sex,Dirty,DoggyStyle,Doggy Style,Doggy,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1659,7 +1659,7 @@ function DarkInvestigationsThreesome(int id)
 	Base.SetStageSoundFX(4, none)
 	Base.SetStageTimer(4, 26.0)
 
-	Base.SetTags("Sex,Dark Investigations,zDI,Athstai,Doggy,Blowjob,Oral,Orgy,Vaginal,Dirty,Forced")
+	Base.SetTags("Sex,Dark Investigations,zDI,Athstai,Doggy,Doggy Style,DoggyStyle,Blowjob,Oral,Orgy,Vaginal,Dirty,Forced")
 
 	Base.Save(id)
 endFunction
@@ -1685,7 +1685,7 @@ function DarkInvestigationsDoggystyle(int id)
 	Base.SetStageSoundFX(4, none)
 	Base.SetStageTimer(4, 26.0)
 
-	Base.SetTags("Sex,Dark Investigations,zDI,Athstai,Doggy,Vaginal,Dirty")
+	Base.SetTags("Sex,Dark Investigations,zDI,Athstai,Doggy,Doggy Style,DoggyStyle,Vaginal,Dirty")
 
 	Base.Save(id)
 endFunction
@@ -1786,7 +1786,7 @@ function zjDoggy(int id)
 	Base.AddPositionStage(a2, "3j_Doggystyle_A2_S3", 0)
 	Base.AddPositionStage(a2, "3j_Doggystyle_A2_S4", 0)
 	
-	Base.SetTags("3jiou,Sex,DoggyStyle,Behind,Anal")
+	Base.SetTags("3jiou,Sex,Doggy,DoggyStyle,Doggy Style,Behind,Anal")
 
 	Base.Save(id)
 endFunction
@@ -1831,7 +1831,7 @@ function zjEroMassage(int id)
 	Base.AddPositionStage(a2, "3j_Massage_A2_S2", 0, silent = true)
 	Base.AddPositionStage(a2, "3j_Massage_A2_S3", 0)
 
-	Base.SetTags("3jiou,Vaginal,Foreplay,LeadIn,Laying")
+	Base.SetTags("3jiou,Vaginal,Foreplay,LeadIn,Laying,Lying")
 
 	Base.Save(id)
 endFunction
@@ -1881,7 +1881,7 @@ function zjLaying(int id)
 	Base.AddPositionStage(a2, "3j_Laying_A2_S4", 0, sos = 3)
 	Base.AddPositionStage(a2, "3j_Laying_A2_S5", 0, sos = 3)
 	
-	Base.SetTags("3jiou,Sex,Missionary,Laying,Vaginal")
+	Base.SetTags("3jiou,Sex,Missionary,Laying,Lying,OnBack,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1906,7 +1906,7 @@ function zjLyingVar(int id)
 	Base.AddPositionStage(a2, "3j_Layingvar_A2_S4", 0, sos = 0)
 	Base.AddPositionStage(a2, "3j_Layingvar_A2_S5", 0, sos = 0)
 	
-	Base.SetTags("3jiou,Sex,Missionary,Laying,Anal")
+	Base.SetTags("3jiou,Sex,Missionary,Laying,Lying,OnBack,Anal")
 
 	Base.Save(id)
 endFunction
@@ -1929,7 +1929,7 @@ function zjMissionary(int id)
 	Base.AddPositionStage(a2, "3j_Missionary_A2_S3", 0)
 	Base.AddPositionStage(a2, "3j_Missionary_A2_S4", 0)
 	
-	Base.SetTags("3jiou,Sex,Missionary,Lying,Vaginal")	
+	Base.SetTags("3jiou,Sex,Missionary,Laying,Lying,OnBack,Vaginal")	
 
 	Base.Save(id)
 endFunction
@@ -1989,7 +1989,7 @@ endFunction
 function zjBreastFeeding(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Name = "3jiou Breast Feeding"
+	Base.Name = "3jiou Breasteeding"
 	Base.SoundFX = Sucking
 
 	int a1 = Base.AddPosition(Female)
@@ -2004,7 +2004,7 @@ function zjBreastFeeding(int id)
 	Base.AddPositionStage(a2, "3j_BreastFeeding_A2_S3", 2, up = 2)
 	Base.AddPositionStage(a2, "3j_BreastFeeding_A2_S4", 0)
 
-	Base.SetTags("3jiou,Sex,Lesbian,Foreplay,Leadin,Kissing,Loving")
+	Base.SetTags("3jiou,Sex,Lesbian,Foreplay,Leadin,Kissing,Loving,Boobs,Breast,Breastfeeding")
 
 	Base.Save(id)
 endFunction
@@ -2013,7 +2013,7 @@ endFunction
 function zjBreastFeedingVar(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Name = "3jiou Breast Feeding Variant"
+	Base.Name = "3jiou Breastfeeding Variant"
 	Base.SoundFX = Sucking
 
 	int a1 = Base.AddPosition(Female)
@@ -2028,7 +2028,7 @@ function zjBreastFeedingVar(int id)
 	Base.AddPositionStage(a2, "3j_BreastFeedingvar_A2_S3", 2, up = 2, sos = -1)		
 	Base.AddPositionStage(a2, "3j_BreastFeedingvar_A2_S3", 0, sos = -1)	
 
-	Base.SetTags("3jiou,Sex,Straight,Foreplay,LeadIn")
+	Base.SetTags("3jiou,Sex,Straight,Foreplay,LeadIn,Boobs,Breast,Breastfeeding")
 
 	Base.Save(id)
 endFunction
@@ -2060,7 +2060,7 @@ function zjThreesome(int id)
 	Base.AddPositionStage(a3, "3j_FFM_A3_S4", 0)
 	Base.AddPositionStage(a3, "3j_FFM_A3_S5", 0)
 
-	Base.SetTags("3jiou,Sex,BBP,Doggy,Blowjob,Oral,Anal,Orgy,Vaginal,Dirty")
+	Base.SetTags("3jiou,Sex,BBP,Doggy,Doggy Style,DoggyStyle,Blowjob,Oral,Anal,Orgy,Vaginal,Dirty")
 
 	Base.Save(id)
 endFunction
@@ -2169,7 +2169,7 @@ function LeitoDoggy(int id)
 	Base.SetStageSoundFX(1, none)
 	Base.SetStageSoundFX(5, none)
 
-	Base.SetTags("Leito,Sex,Straight,Dirty,DoggyStyle,Knees,Vaginal")
+	Base.SetTags("Leito,Sex,Straight,Dirty,DoggyStyle,Doggy Style,Doggy,Knees,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -2194,7 +2194,7 @@ function LeitoDoggyAnal(int id)
 	Base.AddPositionStage(a2, "Leito_DoggystyleAnal_A2_S4", 0, sos = 0)
 	Base.AddPositionStage(a2, "Leito_DoggystyleAnal_A2_S5", 0, sos = 0)
 
-	Base.SetTags("Leito,Sex,Straight,Dirty,DoggyStyle,Knees,Anal,Behind")
+	Base.SetTags("Leito,Sex,Straight,Dirty,DoggyStyle,Doggy Style,Doggy,Knees,Anal,Behind")
 
 	Base.Save(id)
 endFunction
@@ -2345,7 +2345,7 @@ function LeitoMissionary(int id)
 	Base.AddPositionStage(a2, "Leito_Missionary1_A2_S4", 0)
 	Base.AddPositionStage(a2, "Leito_Missionary1_A2_S5", 0)
 	
-	Base.SetTags("Leito,Sex,Missionary,Lying,Vaginal")	
+	Base.SetTags("Leito,Sex,Missionary,Laying,Lying,OnBack,Vaginal")	
 
 	Base.Save(id)
 endFunction
@@ -2370,7 +2370,7 @@ function LeitoMissionaryVar(int id)
 	Base.AddPositionStage(a2, "Leito_Missionary2_A2_S4", 0)
 	Base.AddPositionStage(a2, "Leito_Missionary2_A2_S5", 0)
 	
-	Base.SetTags("Leito,Sex,Missionary,Lying,Vaginal")
+	Base.SetTags("Leito,Sex,Missionary,Laying,Lying,OnBack,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -2395,7 +2395,7 @@ function LeitoRCowgirl(int id)
 	Base.AddPositionStage(a2, "Leito_ReverseCowgirl_A2_S4", 0, sos = 3)
 	Base.AddPositionStage(a2, "Leito_ReverseCowgirl_A2_S5", 0, sos = 3)
 
-	Base.SetTags("Leito,Sex,Straight,Dirty,ReverseCowgirl,Vaginal")
+	Base.SetTags("Leito,Sex,Straight,Dirty,ReverseCowgirl,Cowgirl,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -2420,7 +2420,7 @@ function LeitoSpoon(int id)
 	Base.AddPositionStage(a2, "Leito_Spooning_A2_S4", 0, sos = 8)
 	Base.AddPositionStage(a2, "Leito_Spooning_A2_S5", 0, sos = 8)
 	
-	Base.SetTags("Leito,Sex,Spooning,Lying,Vaginal")
+	Base.SetTags("Leito,Sex,Spooning,Laying,Lying,OnBack,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -2476,7 +2476,7 @@ function fdBedMissionary(int id)
 	Base.AddPositionStage(a2, "4D_BedMissionary_A2_S4", rotate = 180, sos = 3)
 	Base.AddPositionStage(a2, "4D_BedMissionary_A2_S4", rotate = 180, sos = 3)
 
-	Base.SetTags("4D,4uDIK,Sex,Straight,Missionary,Laying,Vaginal")
+	Base.SetTags("4D,4uDIK,Sex,Straight,Missionary,Laying,Lying,OnBack,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -2528,7 +2528,7 @@ function fdDoggyStyle(int id)
 	Base.AddPositionStage(a2, "4D_DoggyStyle_A2_S4", 0, rotate = 180)
 	Base.AddPositionStage(a2, "4D_DoggyStyle_A2_S5", 0, rotate = 180)
 
-	Base.SetTags("4D,4uDIK,Sex,Straight,Anal,DoggyStyle,Knees")
+	Base.SetTags("4D,4uDIK,Sex,Straight,Anal,DoggyStyle,Doggy Style,Doggy,Knees")
 
 	Base.Save(id)
 endFunction
@@ -2544,7 +2544,7 @@ function fdFMasturbation(int id)
 	Base.AddPositionStage(a1, "4D_FemaleSolo_A1_S3", 0)
 	Base.AddPositionStage(a1, "4D_FemaleSolo_A1_S4", 0)
 
-	Base.SetTags("4D,4uDIK,Sex,Solo,Masturbation,Laying,Dirty")
+	Base.SetTags("4D,4uDIK,Sex,Solo,Masturbation,Laying,Lying,OnBack,Dirty")
 
 	Base.Save(id)
 endFunction
@@ -2585,7 +2585,7 @@ function fdMMasturbation(int id)
 	Base.AddPositionStage(a1, "4D_MaleSolo_A1_S3", 0, sos = 3)
 	Base.AddPositionStage(a1, "4D_MaleSolo_A1_S4", 0, sos = 3)
 
-	Base.SetTags("4D,4uDIK,Sex,Solo,Masturbation,Laying,Dirty")
+	Base.SetTags("4D,4uDIK,Sex,Solo,Masturbation,Laying,Lying,OnBack,Dirty")
 
 	Base.Save(id)
 endFunction
@@ -2613,7 +2613,7 @@ function fdLegUp(int id)
 
 	Base.SetStageSoundFX(1, Sucking)
 
-	Base.SetTags("4D,4uDIK,Dirty,Laying,Vaginal")
+	Base.SetTags("4D,4uDIK,Dirty,Laying,Lying,OnBack,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -2638,7 +2638,7 @@ function fdRCowgirl(int id)
 	Base.AddPositionStage(a2, "4D_ReverseCowgirl_A2_S4", 0, sos = -4)
 	Base.AddPositionStage(a2, "4D_ReverseCowgirl_A2_S5", 0, sos = -4)
 
-	Base.SetTags("4D,4uDIK,Sex,Straight,Dirty,ReverseCowgirl,Vaginal")
+	Base.SetTags("4D,4uDIK,Sex,Straight,Dirty,ReverseCowgirl,Cowgirl,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -2670,7 +2670,7 @@ function fdThreesome(int id)
 	Base.AddPositionStage(a3, "4D_Threesome_A3_S4", 0)
 	Base.AddPositionStage(a3, "4D_Threesome_A3_S5", 0)
 
-	Base.SetTags("Sex,4D,4uDIK,BBP,Doggy,Blowjob,Oral,Anal,Orgy,Vaginal,Dirty")
+	Base.SetTags("Sex,4D,4uDIK,BBP,Doggy,Doggy Style,DoggyStyle,Blowjob,Oral,Anal,Orgy,Vaginal,Dirty")
 
 	Base.Save(id)
 endFunction
@@ -2770,7 +2770,7 @@ function MitosLapLove(int id)
 	Base.AddPositionStage(a2, "Mitos_Laplove_A2_S4", 0)
 	Base.AddPositionStage(a2, "Mitos_Laplove_A2_S5", 0)
 
-	Base.SetTags("Mitos,Sex,Straight,Loving,Laying,Vaginal")
+	Base.SetTags("Mitos,Sex,Straight,Loving,Laying,Lying,OnBack,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -2819,7 +2819,7 @@ function MitosReverseCowgirl(int id)
 	Base.AddPositionStage(a2, "Mitos_ReverseCowgirl_A2_S4", 0)
 	Base.AddPositionStage(a2, "Mitos_ReverseCowgirl_A2_S5", 0)
 
-	Base.SetTags("Mitos,Sex,Straight,Dirty,Laying,ReverseCowgirl,Vaginal")
+	Base.SetTags("Mitos,Sex,Straight,Dirty,Laying,Lying,OnBack,ReverseCowgirl,Cowgirl,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -2885,7 +2885,7 @@ function FBFMasturbation(int id)
 
 	Base.SetStageTimer(5, 7.0)
 
-	Base.SetTags("FB2,FalloutBoy2,Sex,Solo,Masturbation,Laying,Dirty")
+	Base.SetTags("FB2,FalloutBoy2,Sex,Solo,Masturbation,Laying,Lying,OnBack,Dirty")
 
 	Base.Save(id)
 endFunction
