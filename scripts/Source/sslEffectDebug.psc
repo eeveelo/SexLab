@@ -15,18 +15,9 @@ float scale2
 string ActorName
 ObjectReference MarkerRef
 
-form[] function GetAudience()
-	form[] Audience = new Form[5]
-	Audience[0] = Config.BardBystander1.GetReference()
-	Audience[1] = Config.BardBystander2.GetReference()
-	Audience[2] = Config.BardBystander3.GetReference()
-	Audience[3] = Config.BardBystander4.GetReference()
-	Audience[4] = Config.BardBystander5.GetReference()
-	return Audience
-endFunction
-
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	Config = SexLab.Config
+
 
 	; Log("-- PRE AUDIENCE --")
 	; Log(GetAudience())

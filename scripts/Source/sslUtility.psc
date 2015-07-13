@@ -113,6 +113,49 @@ bool[] function FindTaggedAnimations(sslBaseAnimation[] Anims, string[] Tags) gl
 	return Output
 endFunction
 
+sslBaseAnimation function AnimationIfElse(bool isTrue, sslBaseAnimation returnTrue, sslBaseAnimation returnFalse) global
+	if isTrue
+		return returnTrue
+	endIf
+	return returnFalse
+endfunction
+
+sslBaseAnimation[] function AnimationArrayIfElse(bool isTrue, sslBaseAnimation[] returnTrue, sslBaseAnimation[] returnFalse) global
+	if isTrue
+		return returnTrue
+	endIf
+	return returnFalse
+endfunction
+
+; TODO
+sslBaseAnimation[] function RemoveDupesFromList(sslBaseAnimation[] List, sslBaseAnimation[] Removing, bool PreventAll = true)
+	if !Removing || Removing.Length < 1 || !List || List.Length < 1
+		return List
+	endIf
+	int Dupes
+	int i = Removing.Length
+	while i
+		i -= 1
+		Dupes += (List.Find(Removing[i]) != -1) as int
+	endWhile
+	if Dupes == 0 || (PreventAll && List.Length == Dupes)
+		return List
+	elseIf !PreventAll && Dupes == List.Length
+		return sslUtility.AnimationArray(0)
+	endIf 
+	sslBaseAnimation[] Output = sslUtility.AnimationArray(List.Length - Dupes)
+	int n = Output.Length
+	i = List.Length
+	while i > 0 && n > 0
+		i -= 1
+		if Removing.Find(List[i]) == -1
+			n -= 1
+			Output[n] = List[i]
+		endIf
+	endwhile
+	return Output
+endFunction
+
 ;/-----------------------------------------------\;
 ;|	Utility Functions
 ;\-----------------------------------------------/;
