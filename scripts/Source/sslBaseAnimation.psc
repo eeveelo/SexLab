@@ -9,8 +9,9 @@ int Actors
 int Stages
 
 string[] Animations
-string[] LastKeys
 string[] RaceTypes
+string[] LastKeys
+string LastKeyReg
 
 int[] Positions   ; = gender
 int[] CumIDs      ; = per stage cumIDs
@@ -49,7 +50,7 @@ int function OffsetIndex(int Stage, int Slot)
 endfunction
 
 int function FlagIndex(int Stage, int Slot)
-	return ((PapyrusUtil.ClampInt(Stage, 1, Stages) - 1) * 5) + Slot
+	return ((PapyrusUtil.ClampInt(Stage, 1, Stages) - 1) * 6) + Slot
 endfunction
 
 ; ------------------------------------------------------- ;
@@ -488,8 +489,18 @@ int function GetCumID(int Position, int Stage = 1)
 	return FlagsArray(Position)[FlagIndex(Stage, kCumID)]
 endFunction
 
-function SetStageCumID(int Position, int Stage, int CumID)
-	FlagsArray(Position)[FlagIndex(Stage, kCumID)] = CumID
+int function GetCumSource(int Position, int Stage = 1)
+	return FlagsArray(Position)[FlagIndex(Stage, kCumSrc)]
+endFunction
+
+bool function IsCumSource(int SourcePosition, int TargetPosition, int Stage = 1)
+	int CumSrc = GetCumSource(TargetPosition, Stage)
+	return CumSrc == -1 || CumSrc == SourcePosition 
+endFunction
+
+function SetStageCumID(int Position, int Stage, int CumID, int CumSource = -1)
+	FlagsArray(Position)[FlagIndex(Stage, kCumID)]  = CumID
+	FlagsArray(Position)[FlagIndex(Stage, kCumSrc)] = CumSource
 endFunction
 
 int function GetCum(int Position)
@@ -690,6 +701,7 @@ function AddPositionStage(int Position, string AnimationEvent, float forward = 0
 	Flags[fid + 2] = strapon as int
 	Flags[fid + 3] = sos
 	Flags[fid + 4] = Flags[kCumID]
+	Flags[fid + 5] = -1
 	fid += kFlagEnd
 
 	; Save position offsets
@@ -723,12 +735,17 @@ function Save(int id = -1)
 	if TagList[0] == TagList[1]
 		TagList[1] = ""
 	endIf
+	; Reset saved keys if they no longer match
+	if LastKeyReg != Registry
+		LastKeys = new string[5]
+	endIf
+	LastKeyReg = Registry
 	; Log the new animation
 	if IsCreature
 		; RaceTypes = PapyrusUtil.ResizeStringArray(RaceTypes, Actors)
-		Log(Name, "Creatures["+id+"] ("+Females+", "+Males+", "+Creatures+")")
+		Log(Name, "Creatures["+id+"]")
 	else
-		Log(Name, "Animations["+id+"] ("+Females+", "+Males+")")
+		Log(Name, "Animations["+id+"]")
 	endIf
 endFunction
 
@@ -941,9 +958,10 @@ int property kOpenMouth = 1 autoreadonly hidden
 int property kStrapon   = 2 autoreadonly hidden
 int property kSchlong   = 3 autoreadonly hidden
 int property kCumID     = 4 autoreadonly hidden
+int property kCumSrc    = 5 autoreadonly hidden
 int property kFlagEnd hidden
 	int function get()
-		return 5
+		return 6
 	endFunction
 endProperty
 

@@ -104,19 +104,25 @@ event UpdateSystem(int OldVersion, int NewVersion)
 		LogAll("SexLab v"+SexLabUtil.GetStringVer()+" - Updating...")
 		SexLab.GoToState("Disabled")
 		GoToState("Updating")
-		
 		Version = NewVersion
 
+		; TODO: first update by 1.60 should probably be done by MCM instead, so quests can be reset
 		; Perform update functions
-		ThreadLib.Setup()
-		ActorLib.Setup()
-		Stats.Setup()
-		Factory.Setup()
-		VoiceSlots.Setup()
-		ExpressionSlots.Setup()
-		AnimSlots.Setup()
-		CreatureSlots.Setup()
-		ThreadSlots.Setup()
+		if OldVersion == 15920 && NewVersion <= 15921
+			; 1.60 beta 2
+			AnimSlots.Setup() ; Added cum source positions to animations
+
+		else ; Full system setup
+			ThreadLib.Setup()
+			ActorLib.Setup()
+			Stats.Setup()
+			Factory.Setup()
+			VoiceSlots.Setup()
+			ExpressionSlots.Setup()
+			AnimSlots.Setup()
+			CreatureSlots.Setup()
+			ThreadSlots.Setup()
+		endIf
 
 		; End update functions
 		GoToState("Ready")

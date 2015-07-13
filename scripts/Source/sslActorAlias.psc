@@ -439,6 +439,7 @@ state Animating
 	endEvent
 
 	function OnOrgasm()
+		Enjoyment += 100
 		OrgasmEffect()
 		Thread.SyncEventDone("Orgasm")
 	endfunction
@@ -448,10 +449,26 @@ state Animating
 		BaseEnjoyment -= Enjoyment
 		Log("Orgasms: "+Orgasms+" Enjoyment: "+Enjoyment+" BaseEnjoyment: "+BaseEnjoyment)
 
-		; Apply cum to female position from male orgasm
-		if MalePosition && Config.UseCum && (IsMale || (Config.AllowFFCum && IsFemale))
-			Thread.PositionAlias(0).ApplyCum()
+		; Apply cum to female positions from male position orgasm
+		int i = Thread.ActorCount
+		if i > 1 && MalePosition && Config.UseCum && (IsMale || (Config.AllowFFCum && IsFemale))
+			if i == 2
+				Thread.PositionAlias(SexLabUtil.IntIfElse(Position == 1, 0, 1)).ApplyCum()
+			else
+				while i > 0
+					i -= 1
+					if Position != i && Animation.IsCumSource(Position, i, Stage)
+						Thread.PositionAlias(i).ApplyCum()
+					endIf
+				endWhile
+			endIf
 		endIf
+
+		; Send an orgasm event hook with actor and orgasm count
+		int eid = ModEvent.Create("SexLabOrgasm")
+		ModEvent.PushForm(eid, ActorRef)
+		ModEvent.PushInt(eid, Orgasms)
+		ModEvent.Send(eid)
 
 		; Shake camera for player
 		if IsPlayer && Game.GetCameraState() != 3
@@ -466,6 +483,7 @@ state Animating
 		else
 			OrgasmFX.Play(ActorRef)
 		endIf
+
 		; VoiceDelay = 0.8
 		RegisterForSingleUpdate(0.8)
 	endFunction
@@ -654,11 +672,8 @@ function RestoreActorDefaults()
 			ActorRef.RemoveItem(Strapon, 1, true)
 		endIf
 		; Reset expression
-		if Expression
-			sslBaseExpression.ClearMFG(ActorRef)
-		else
-			sslBaseExpression.CloseMouth(ActorRef)
-		endIf
+		ActorRef.ClearExpressionOverride()
+		ActorRef.ResetExpressionOverrides()
 	endIf
 	; Remove SOS erection
 	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
@@ -705,7 +720,7 @@ int function GetEnjoyment()
 	if !ActorRef
 		Enjoyment = 0
 	elseif !IsSkilled
-		Enjoyment = (PapyrusUtil.ClampFloat((RealTime[0] - StartedAt) / 6.0, 0.0, 40.0) + ((Stage as float / Animation.StageCount as float) * 60.0)) as int
+		Enjoyment = (PapyrusUtil.ClampFloat(((RealTime[0] - StartedAt) + 1.0) / 7.0, 0.0, 40.0) + ((Stage as float / Animation.StageCount as float) * 60.0)) as int
 	else
 		if Position == 0
 			Thread.RecordSkills()
@@ -957,10 +972,11 @@ function RefreshExpression()
 		; Do nothing
 	elseIf OpenMouth
 		sslBaseExpression.OpenMouth(ActorRef)
-	elseIf Expression
-		Expression.Apply(ActorRef, Enjoyment, BaseSex)
-	elseIf sslBaseExpression.IsMouthOpen(ActorRef)
+	else
 		sslBaseExpression.CloseMouth(ActorRef)
+		if Expression
+			Expression.Apply(ActorRef, Enjoyment, BaseSex)
+		endIf
 	endIf
 endFunction
 
