@@ -541,12 +541,27 @@ state Ending
 	event OnUpdate()
 		SendThreadEvent("AnimationEnd")
 		if Adjusted
+			Log("Auto saving adjustments...")
 			sslSystemConfig.SaveAdjustmentProfile()
 		endIf
-		Utility.WaitMenuMode(1.0)
-		Initialize()
+		GoToState("Frozen")
 	endEvent
 	; Don't allow to be called twice
+	function EndAnimation(bool Quickly = false)
+	endFunction
+endState
+
+state Frozen
+	; Hold before full reset so hook events can finish
+	event OnBeginState()
+		RegisterForSingleUpdate(10.0)
+	endEvent
+	event OnEndState()
+		Log("Returning to thread pool...")
+	endEvent
+	event OnUpdate()
+		Initialize()
+	endEvent
 	function EndAnimation(bool Quickly = false)
 	endFunction
 endState
@@ -557,8 +572,8 @@ endState
 
 function RecordSkills()
 	float TimeNow = RealTime[0]
-	float xp = ((TimeNow - SkillTime) / 15.0)
-	if xp >= 0.375
+	float xp = ((TimeNow - SkillTime) / 10.0)
+	if xp >= 0.5
 		if IsType[1]
 			SkillXP[1] = SkillXP[1] + xp
 		endIf
