@@ -133,6 +133,8 @@ bool property BedRemoveStanding auto hidden
 bool property UseCreatureGender auto hidden
 bool property LimitedStrip auto hidden
 bool property RestrictSameSex auto hidden
+bool property SeparateOrgasms auto hidden
+bool property RemoveHeelEffect auto hidden
 
 ; Integers
 int property AnimProfile auto hidden
@@ -694,7 +696,9 @@ function SetDefaults()
 	BedRemoveStanding  = true
 	UseCreatureGender  = false
 	LimitedStrip       = true
-	RestrictSameSex    = false
+	RestrictSameSex    = true
+	SeparateOrgasms    = true
+	RemoveHeelEffect   = HasHDTHeels
 
 	; Integers
 	AnimProfile        = 1
@@ -882,6 +886,8 @@ function ExportSettings()
 	ExportBool("UseCreatureGender", UseCreatureGender)
 	ExportBool("LimitedStrip", LimitedStrip)
 	ExportBool("RestrictSameSex", RestrictSameSex)
+	ExportBool("SeparateOrgasms", SeparateOrgasms)
+	ExportBool("RemoveHeelEffect", RemoveHeelEffect)
 
 	; Integers
 	ExportInt("AnimProfile", AnimProfile)
@@ -964,6 +970,8 @@ function ImportSettings()
 	UseCreatureGender  = ImportBool("UseCreatureGender", UseCreatureGender)
 	LimitedStrip       = ImportBool("LimitedStrip", LimitedStrip)
 	RestrictSameSex    = ImportBool("RestrictSameSex", RestrictSameSex)
+	SeparateOrgasms    = ImportBool("SeparateOrgasms", SeparateOrgasms)
+	RemoveHeelEffect   = ImportBool("RemoveHeelEffect", RemoveHeelEffect)
 
 	; Integers
 	AnimProfile        = ImportInt("AnimProfile", AnimProfile)

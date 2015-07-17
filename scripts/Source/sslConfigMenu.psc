@@ -619,6 +619,7 @@ function AnimationSettings()
 	AddToggleOptionST("UseLipSync", "$SSL_UseLipSync", Config.UseLipSync)
 	AddToggleOptionST("LimitedStrip","$SSL_LimitedStrip", Config.LimitedStrip)
 	AddToggleOptionST("OrgasmEffects","$SSL_OrgasmEffects", Config.OrgasmEffects)
+	AddToggleOptionST("SeparateOrgasms","$SSL_SeparateOrgasms", Config.SeparateOrgasms)
 	AddToggleOptionST("UseCum","$SSL_ApplyCumEffects", Config.UseCum)
 	AddToggleOptionST("AllowFemaleFemaleCum","$SSL_AllowFemaleFemaleCum", Config.AllowFFCum)
 	AddSliderOptionST("CumEffectTimer","$SSL_CumEffectTimer", Config.CumTimer, "$SSL_Seconds")
@@ -639,6 +640,7 @@ function AnimationSettings()
 	AddToggleOptionST("RedressVictim","$SSL_VictimsRedress", Config.RedressVictim)
 	AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", Config.RagdollEnd)
 	AddToggleOptionST("StraponsFemale","$SSL_FemalesUseStrapons", Config.UseStrapons)
+	AddToggleOptionST("RemoveHeelEffect","$SSL_RemoveHeelEffect", Config.RemoveHeelEffect)
 	AddToggleOptionST("NudeSuitMales","$SSL_UseNudeSuitMales", Config.UseMaleNudeSuit)
 	AddToggleOptionST("NudeSuitFemales","$SSL_UseNudeSuitFemales", Config.UseFemaleNudeSuit)
 endFunction
@@ -1548,7 +1550,9 @@ function ExpressionEditor()
 	; 4
 	AddToggleOptionST("ExpressionAggressor", "$SSL_ExpressionsAggressor", Expression.HasTag("Aggressor"))
 	AddTextOptionST("ExpressionTestPlayer", "$SSL_TestOnPlayer", "$SSL_Apply", Math.LogicalAnd(OPTION_FLAG_NONE, (!Expression.HasPhase(Phase, PlayerRef)) as int))
-	; AddTextOptionST("ExpressionCopyFrom", "$SSL_ExpressionCopyFrom", "$SSL_ClickHere")
+
+	; AddTextOptionST("ExpressionCopyFromPlayer", "$SSL_ExpressionCopyFrom", "$SSL_ClickHere")
+	; AddTextOptionST("ExpressionCopyFromTarget", "$SSL_ExpressionCopyFrom", "$SSL_ClickHere", Math.LogicalAnd(OPTION_FLAG_NONE, (TargetRef == none) as int))
 
 	; 5
 	AddMenuOptionST("ExpressionPhase", "$SSL_Modifying{"+Expression.Name+"}Phase", Phase)
@@ -1688,25 +1692,18 @@ state ImportExpression
 	endEvent
 endState
 
-state ExpressionCopyFrom
+state ExpressionCopyFromPlayer
 	event OnSelectST()
-
 		Actor ActorRef = PlayerRef
 		if TargetRef && ShowMessage("$SSL_ExpressionCopyFromTarget", true, TargetName, PlayerName)
 			ActorRef == TargetRef
 		endIf
 		float[] Preset = sslBaseExpression.GetCurrentMFG(ActorRef)
-		; float[] TmpExp = new float[2]
-		; TmpExp[0] = Preset[30]
-		; TmpExp[1] = Preset[31]
-		; Preset[30] = 0.0
-		; Preset[31] = 0.0
-		; if PapyrusUtil.AddFloatValues(Preset) > 0.0
-		; 	Expression.SavePhase(Preset)
-		; else
-		; 	ShowMessage("$SSL_ExpressionCopy{"+ActorRef.GetLeveledActorBase().GetName()+"}Empty")
-		; endIf 
-
+		if PapyrusUtil.AddFloatValues(Preset) > (Preset[30] + Preset[31])
+			Expression.SetPhase(Phase, ActorRef.GetLeveledActorBase().GetSex(), Preset)
+		else
+			ShowMessage("$SSL_ExpressionCopy{"+ActorRef.GetLeveledActorBase().GetName()+"}Empty")
+		endIf
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_ExpressionCopyFromInfo")
@@ -2362,7 +2359,7 @@ state LimitedStrip
 		SetToggleOptionValueST(Config.LimitedStrip)
 	endEvent
 	event OnDefaultST()
-		Config.LimitedStrip = true
+		Config.LimitedStrip = false
 		SetToggleOptionValueST(Config.LimitedStrip)
 	endEvent
 	event OnHighlightST()
@@ -2438,6 +2435,32 @@ state OrgasmEffects
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoOrgasmEffects")
+	endEvent
+endState
+state SeparateOrgasms
+	event OnSelectST()
+		Config.SeparateOrgasms = !Config.SeparateOrgasms
+		SetToggleOptionValueST(Config.SeparateOrgasms)
+	endEvent
+	event OnDefaultST()
+		Config.SeparateOrgasms = false
+		SetToggleOptionValueST(Config.SeparateOrgasms)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoSeparateOrgasms")
+	endEvent
+endState
+state RemoveHeelEffect
+	event OnSelectST()
+		Config.RemoveHeelEffect = !Config.RemoveHeelEffect
+		SetToggleOptionValueST(Config.RemoveHeelEffect)
+	endEvent
+	event OnDefaultST()
+		Config.RemoveHeelEffect = Config.HasHDTHeels
+		SetToggleOptionValueST(Config.RemoveHeelEffect)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoRemoveHeelEffect")
 	endEvent
 endState
 

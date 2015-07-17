@@ -281,9 +281,12 @@ state Ready
 			ResolveStrapon()
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 			; Find HDT High Heels
-			HDTHeelSpell = Config.GetHDTSpell(ActorRef)
-			if HDTHeelSpell
-				ActorRef.RemoveSpell(HDTHeelSpell)
+			if Config.RemoveHeelEffect 
+				HDTHeelSpell = Config.GetHDTSpell(ActorRef)
+				if HDTHeelSpell
+					Log(HDTHeelSpell, "HDTHeelSpell")
+					ActorRef.RemoveSpell(HDTHeelSpell)
+				endIf
 			endIf
 			; Pick a voice if needed
 			if !Voice && !IsForcedSilent
@@ -529,7 +532,6 @@ state Animating
 		Clear()
 		GoToState("")
 		Thread.SyncEventDone("Reset")
-		Initialize()
 	endEvent
 endState
 
@@ -730,7 +732,11 @@ int function GetEnjoyment()
 		if Enjoyment < 0
 			Enjoyment = 0
 		elseIf Enjoyment >= 100
-			OrgasmEffect()
+			if Config.SeparateOrgasms
+				OrgasmEffect()
+			else
+				Enjoyment = 100
+			endIf
 		endIf
 	endIf
 	return Enjoyment
@@ -830,6 +836,11 @@ endFunction
 
 Form function GetStrapon()
 	return Strapon
+endFunction
+
+bool function PregnancyRisk()
+	int cumID = Animation.GetCumID(Position, Stage)
+	return cumID > 0 && (cumID == 1 || cumID == 4 || cumID == 5 || cumID == 7) && IsFemale && !MalePosition && Thread.IsVaginal
 endFunction
 
 function OverrideStrip(bool[] SetStrip)
@@ -1055,6 +1066,7 @@ function Initialize()
 	MarkerRef      = none
 	HadStrapon     = none
 	Strapon        = none
+	HDTHeelSpell   = none
 	; Voice
 	Voice          = none
 	ActorVoice     = none
