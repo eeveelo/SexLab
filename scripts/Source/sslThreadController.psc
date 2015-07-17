@@ -141,109 +141,10 @@ state Animating
 		endIf
 	endFunction
 
-	; ------------------------------------------------------- ;
-	; --- Loop functions                                  --- ;
-	; ------------------------------------------------------- ;
-
 	function GoToStage(int ToStage)
 		UnregisterForUpdate()
 		Stage = ToStage
 		Action("Advancing")
-	endFunction
-
-	; function PlayStageAnimations()
-	; 	Animation.GetAnimEvents(sAnimEvents, Stage)
-	; 	ModEvent.Send(ModEvent.Create(Key("Animate")))
-	; 	StageTimer = RealTime[0] + GetTimer()
-	; endFunction
-
-	function ClearIdles()
-		; if ActorCount == 1
-		; 	Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
-		; elseIf ActorCount == 2
-		; 	Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
-		; 	Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
-		; elseIf ActorCount == 3
-		; 	Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
-		; 	Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
-		; 	Debug.SendAnimationEvent(Positions[2], "IdleForceDefaultState")
-		; elseIf ActorCount == 4
-		; 	Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
-		; 	Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
-		; 	Debug.SendAnimationEvent(Positions[2], "IdleForceDefaultState")
-		; 	Debug.SendAnimationEvent(Positions[3], "IdleForceDefaultState")
-		; elseIf ActorCount == 5
-		; 	Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
-		; 	Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
-		; 	Debug.SendAnimationEvent(Positions[2], "IdleForceDefaultState")
-		; 	Debug.SendAnimationEvent(Positions[3], "IdleForceDefaultState")
-		; 	Debug.SendAnimationEvent(Positions[4], "IdleForceDefaultState")
-		; endIf
-		Utility.Wait(0.1)
-		ActorAlias[1].StopAnimating(true)
-		ActorAlias[2].StopAnimating(true)
-		ActorAlias[3].StopAnimating(true)
-		ActorAlias[4].StopAnimating(true)
-	endFunction
-
-	function RealignActors()
-		UnregisterForUpdate()
-
-		; if ActorCount == 1
-		; 	ActorAlias[0].SyncThread()
-		; 	ActorAlias[0].SyncLocation(true)
-		; elseIf ActorCount == 2
-		; 	ActorAlias[0].SyncThread()
-		; 	ActorAlias[1].SyncThread()
-		; 	ActorAlias[0].SyncLocation(true)
-		; 	ActorAlias[1].SyncLocation(true)
-		; elseIf ActorCount == 3
-		; 	ActorAlias[0].SyncThread()
-		; 	ActorAlias[1].SyncThread()
-		; 	ActorAlias[2].SyncThread()
-		; 	ActorAlias[0].SyncLocation(true)
-		; 	ActorAlias[1].SyncLocation(true)
-		; 	ActorAlias[2].SyncLocation(true)
-		; elseIf ActorCount == 4
-		; 	ActorAlias[0].SyncThread()
-		; 	ActorAlias[1].SyncThread()
-		; 	ActorAlias[2].SyncThread()
-		; 	ActorAlias[3].SyncThread()
-		; 	ActorAlias[0].SyncLocation(true)
-		; 	ActorAlias[1].SyncLocation(true)
-		; 	ActorAlias[2].SyncLocation(true)
-		; 	ActorAlias[3].SyncLocation(true)
-		; elseIf ActorCount == 5
-		; 	ActorAlias[0].SyncThread()
-		; 	ActorAlias[1].SyncThread()
-		; 	ActorAlias[2].SyncThread()
-		; 	ActorAlias[3].SyncThread()
-		; 	ActorAlias[4].SyncThread()
-		; 	ActorAlias[0].SyncLocation(true)
-		; 	ActorAlias[1].SyncLocation(true)
-		; 	ActorAlias[2].SyncLocation(true)
-		; 	ActorAlias[3].SyncLocation(true)
-		; 	ActorAlias[4].SyncLocation(true)
-		; endIf
-
-		ActorAlias[0].SyncAll(true)
-		ActorAlias[1].SyncAll(true)
-		ActorAlias[2].SyncAll(true)
-		ActorAlias[3].SyncAll(true)
-		ActorAlias[4].SyncAll(true)
-		
-		PlayStageAnimations()
-		RegisterForSingleUpdate(0.2)
-	endFunction
-
-	function MoveActors()
-		UnregisterForUpdate()
-		ActorAlias[0].RefreshLoc()
-		ActorAlias[1].RefreshLoc()
-		ActorAlias[2].RefreshLoc()
-		ActorAlias[3].RefreshLoc()
-		ActorAlias[4].RefreshLoc()
-		RegisterForSingleUpdate(0.2)
 	endFunction
 
 	; ------------------------------------------------------- ;
@@ -290,8 +191,7 @@ state Animating
 		; Sync new positions
 		AdjustPos = NewPos
 		GoToState("Animating")
-		RealignActors()
-		MoveActors()
+		ResetPositions(true)
 		SendThreadEvent("PositionChange")
 		RegisterForSingleUpdate(0.2)
 	endFunction
@@ -420,7 +320,53 @@ state Animating
 			hkReady = true
 		endIf
 	endEvent
+
+	function ClearIdles()
+		Utility.Wait(0.1)
+		ActorAlias[0].StopAnimating(true)
+		ActorAlias[1].StopAnimating(true)
+		ActorAlias[2].StopAnimating(true)
+		ActorAlias[3].StopAnimating(true)
+		ActorAlias[4].StopAnimating(true)
+		Utility.Wait(0.5)
+	endFunction
+
+	function MoveActors()
+		Utility.Wait(0.1)
+		ActorAlias[0].RefreshLoc()
+		ActorAlias[1].RefreshLoc()
+		ActorAlias[2].RefreshLoc()
+		ActorAlias[3].RefreshLoc()
+		ActorAlias[4].RefreshLoc()
+		Utility.Wait(0.1)
+	endFunction
+
+	function RealignActors()
+		UnregisterForUpdate()
+		Utility.Wait(0.1)
+		ActorAlias[0].SyncAll(true)
+		ActorAlias[1].SyncAll(true)
+		ActorAlias[2].SyncAll(true)
+		ActorAlias[3].SyncAll(true)
+		ActorAlias[4].SyncAll(true)
+		Utility.Wait(0.1)
+		PlayStageAnimations()
+		RegisterForSingleUpdate(1.0)
+	endFunction
+
+	function ResetPositions(bool ClearIdles = true)
+		UnregisterForUpdate()
+		if ClearIdles
+			ClearIdles()
+		endIf
+		MoveActors()
+		RealignActors()
+	endFunction
+
 endState
+
+function ResetPositions(bool ClearIdles = true)
+endFunction
 
 function TriggerOrgasm()
 	UnregisterforUpdate()
@@ -443,10 +389,12 @@ function SetAnimation(int aid = -1)
 	endIf
 	; Set active animation
 	Animation = Animations[aid]
-	Animation.GetAnimEvents(sAnimEvents, Stage)
-	; UpdateAdjustKey()
-	RecordSkills()
+	; Inform player of animation being played now
+	if HasPlayer
+		SexLabUtil.PrintConsole("Playing Animation: " + Animation.Name)
+	endIf
 	; Update animation info
+	RecordSkills()
 	string[] Tags = Animation.GetRawTags()
 	; IsType = [1] IsVaginal, [2] IsAnal, [3] IsOral, [4] IsLoving, [5] IsDirty
 	IsType[1]  = Females > 0 && Tags.Find("Vaginal") != -1
@@ -456,21 +404,18 @@ function SetAnimation(int aid = -1)
 	IsType[5]  = Tags.Find("Dirty")  != -1
 	StageCount = Animation.StageCount
 	SoundFX    = Animation.GetSoundFX(Stage)
+	Animation.GetAnimEvents(sAnimEvents, Stage)
 	SetBonuses()
-	; Inform player of animation being played now
-	if HasPlayer
-		SexLabUtil.PrintConsole("Playing Animation: " + Animation.Name)
-	endIf
 	; Check for out of range stage
 	if Stage >= StageCount
 		GoToStage((StageCount - 1))
 	else
+		PlayStageAnimations()
 		ActorAlias[0].SyncAll(false)
 		ActorAlias[1].SyncAll(false)
 		ActorAlias[2].SyncAll(false)
 		ActorAlias[3].SyncAll(false)
 		ActorAlias[4].SyncAll(false)
-		PlayStageAnimations()
 	endIf
 endFunction
 

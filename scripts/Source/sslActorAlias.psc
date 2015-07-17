@@ -343,7 +343,7 @@ state Animating
 		; Prepare for loop
 		TrackedEvent("Start")
 		StartedAt = RealTime[0]
-		SyncThread()
+		SyncAll(true)
 		; Start update loop		
 		UnregisterForModEvent(Thread.Key("Start"))
 		RegisterForSingleUpdate(Utility.RandomFloat(1.0, 3.0))
@@ -369,11 +369,6 @@ state Animating
 	function SyncThread()
 		; Sync with thread info
 		GetPosition()
-		
-		; Flags   = Animation.PositionFlags(Flags, AdjustKey[0], Position, Stage)
-		; Offsets = Animation.PositionOffsets(Offsets, AdjustKey[0], Position, Stage, BedStatus[1])
-
-		; VoiceDelay = Config.GetVoiceDelay(IsFemale, Stage, IsSilent)
 		VoiceDelay = BaseDelay
 		if !IsSilent && Stage > 1
 			VoiceDelay -= (Stage * 0.8) + Utility.RandomFloat(-0.2, 0.4)
@@ -382,14 +377,17 @@ state Animating
 			endIf
 		endIf
 
-		; Update alias info
-		GetEnjoyment()
-		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
-		; Log("Enjoyment: "+Enjoyment+" SOS: "+Schlong)
+		; Sync status		
 		if !IsCreature
 			ResolveStrapon()
 			RefreshExpression()
 		endIf
+
+		; Update alias info
+		GetEnjoyment()
+		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
+		Log("Enjoyment: "+Enjoyment+" SOS: "+Schlong)
+
 		; SyncLocation(false)
 	endFunction
 
@@ -561,6 +559,10 @@ function StopAnimating(bool Quick = false)
 	if IsPlayer && Game.GetCameraState() == 3
 		Config.ToggleFreeCamera()
 	endIf
+	; Clear possibly troublesome effects
+	ActorRef.StopTranslation()
+	ActorRef.SetVehicle(none)
+	; Stop animevent
 	if IsCreature
 		; Reset creature idle
 		Debug.SendAnimationEvent(ActorRef, "Reset")
@@ -648,7 +650,7 @@ function UnlockActor()
 		; Game.SetPlayerAIDriven(false)
 	else
 		ActorRef.SetRestrained(false)
-		ActorRef.SetDontMove(false)
+		; ActorRef.SetDontMove(false)
 	endIf
 endFunction
 
