@@ -15,9 +15,18 @@ float scale2
 string ActorName
 ObjectReference MarkerRef
 
+sslBenchmark function Benchmark(int Tests = 1, int Iterations = 5000, int Loops = 10, bool UseBaseLoop = false)
+	return (Quest.GetQuest("SexLabDev") as sslBenchmark).StartBenchmark(Tests, Iterations, Loops, UseBaseLoop)
+endFunction
+
+
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	Config = SexLab.Config
 
+	Log(sslUtility.GetAnimationNames(SexLab.GetAnimationsByTag(1, "Masturbation,M", RequireAll = true)))
+	Log(sslUtility.GetAnimationNames(SexLab.GetAnimationsByTag(1, "Masturbation,M", RequireAll = false)))
+
+	Benchmark(2, 2000, 7)
 
 	; Log("-- PRE AUDIENCE --")
 	; Log(GetAudience())
@@ -330,6 +339,3 @@ bool function IsStrippable(form ItemRef)
 	return true
 endFunction
 
-sslBenchmark function Benchmark(int Tests = 1, int Iterations = 5000, int Loops = 10, bool UseBaseLoop = false)
-	return (Quest.GetQuest("SexLabDev") as sslBenchmark).StartBenchmark(Tests, Iterations, Loops, UseBaseLoop)
-endFunction

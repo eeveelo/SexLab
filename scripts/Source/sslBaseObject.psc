@@ -82,16 +82,13 @@ bool function AddTagConditional(string Tag, bool AddTag)
 endFunction
 
 bool function CheckTags(string[] CheckTags, bool RequireAll = true, bool Suppress = false)
+	; return RequireAll && HasAllTag(CheckTags) || RequireAll && HasAllTag(CheckTags)
 	bool Valid = ParseTags(CheckTags, RequireAll)
 	return (Valid && !Suppress) || (!Valid && Suppress)
 endFunction
 
 bool function ParseTags(string[] TagList, bool RequireAll = true)
-	if RequireAll
-		return HasAllTag(TagList)
-	else
-		return HasOneTag(TagList)
-	endIf
+	return (RequireAll && HasAllTag(TagList)) || (!RequireAll && HasOneTag(TagList))
 endFunction
 
 bool function HasOneTag(string[] TagList)

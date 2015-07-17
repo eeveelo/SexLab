@@ -384,7 +384,7 @@ state Making
 			while i
 				i -= 1
 				if !LeadAnimations[i].HasRace(CreatureRef) || LeadAnimations[i].PositionCount != ActorCount
-					Log("Invalid creture lead in animation added - "+PrimaryAnimations[i].Name)
+					Log("Invalid creature lead in animation added - "+PrimaryAnimations[i].Name)
 
 					LeadAnimations = sslUtility.AnimationArray(0)
 					LeadIn = false
@@ -455,13 +455,11 @@ state Making
 
 			; Filter non-bed friendly animations
 			if BedRef
-				if Config.BedRemoveStanding
-					Filters    = new string[2]
-					Filters[1] = "Standing"
-				else
-					Filters = new string[1]
-				endIf
+				Filters = new string[1]
 				Filters[0] = "Furniture"
+				if Config.BedRemoveStanding
+					Filters = PapyrusUtil.PushString(Filters, "Standing")
+				endIf
 				; Remove furniture/standing animations from primary
 				FilteredPrimary = sslUtility.FilterTaggedAnimations(PrimaryAnimations, Filters, false)
 				if FilteredPrimary.Length > 0
@@ -592,7 +590,12 @@ bool function IsPlayerPosition(int Position)
 endFunction
 
 bool function HasActor(Actor ActorRef)
-	return Positions.Find(ActorRef) != -1
+	return ActorRef && Positions.Find(ActorRef) != -1
+endFunction
+
+bool function PregnancyRisk(Actor ActorRef, bool AllowFemaleCum = false, bool AllowCreatureCum = false)
+	return ActorRef && HasActor(ActorRef) && ActorCount > 1 && ActorAlias(ActorRef).PregnancyRisk() \
+		&& (Males > 0 || (AllowFemaleCum && Females > 1 && Config.AllowFFCum) || (AllowCreatureCum && MaleCreatures > 0))
 endFunction
 
 ; Aggressive/Victim Setup
@@ -601,11 +604,11 @@ function SetVictim(Actor ActorRef, bool Victimize = true)
 endFunction
 
 bool function IsVictim(Actor ActorRef)
-	return ActorRef && VictimRef && Victims.Find(ActorRef) != -1
+	return HasActor(ActorRef) && VictimRef && Victims.Find(ActorRef) != -1
 endFunction
 
 bool function IsAggressor(Actor ActorRef)
-	return ActorRef && VictimRef && Victims.Find(ActorRef) == -1
+	return HasActor(ActorRef) && VictimRef && Victims.Find(ActorRef) == -1
 endFunction
 
 int function GetHighestPresentRelationshipRank(Actor ActorRef)

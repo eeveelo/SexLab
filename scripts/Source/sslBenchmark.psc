@@ -1,9 +1,11 @@
 scriptname sslBenchmark extends sslSystemLibrary
 
 import SexLabUtil
+import StringUtil
 
 function PreBenchmarkSetup()
 	Setup()
+
 endFunction
 
 state Test1
@@ -16,7 +18,7 @@ state Test1
 	endFunction
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
-		; START any variable preparions needed
+ 		; START any variable preparions needed
 		; END any variable preparions needed
 		baseline += Utility.GetCurrentRealTime()
 		while nth
@@ -27,6 +29,98 @@ state Test1
 		return Utility.GetCurrentRealTime() - baseline
 	endFunction
 endState
+
+; state Test1
+; 	string function Label()
+; 		return "GetByDefault - OLD"
+; 	endFunction
+
+; 	string function Proof()
+; 		string Output
+; 		sslBaseAnimation[] Anims
+; 		Anims = AnimSlots.GetByDefault(1, 1, false, false, true)
+; 		Output += "// FM = "+Anims.Length+" /"
+; 		Anims = AnimSlots.GetByDefault(0, 1, false, false, true)
+; 		Output += "// F = "+Anims.Length+" /"
+; 		Anims = AnimSlots.GetByDefault(0, 2, false, false, true)
+; 		Output += "// FF = "+Anims.Length+" /"
+; 		Anims = AnimSlots.GetByDefault(2, 0, false, false, true)
+; 		Output += "// MM = "+Anims.Length+" /"
+; 		Anims = AnimSlots.GetByDefault(1, 1, false, true, true)
+; 		Output += "// FM Bed = "+Anims.Length+" /"
+; 		Anims = AnimSlots.GetByDefault(1, 1, true, false, true)
+; 		Output += "// FM AggrRestrict = "+Anims.Length+" /"
+; 		Anims = AnimSlots.GetByDefault(1, 1, true, false, false)
+; 		Output += "// FM AggrNoRestrict = "+Anims.Length+" /"
+; 		Anims = AnimSlots.GetByDefault(1, 1, false, false, false)
+; 		Output += "// FM NoRestrict = "+Anims.Length+" /"
+; 		return Output
+; 	endFunction
+
+; 	float function RunTest(int nth = 5000, float baseline = 0.0)
+; 		; START any variable preparions needed
+; 		sslBaseAnimation[] Anims1 
+; 		sslBaseAnimation[] Anims2
+; 		sslBaseAnimation[] Anims3
+; 		; END any variable preparions needed
+; 		baseline += Utility.GetCurrentRealTime()
+; 		while nth
+; 			nth -= 1
+; 			; START code to benchmark
+; 			Anims1 = AnimSlots.GetByDefault(1, 1, false, false, true)
+; 			Anims2 = AnimSlots.GetByDefault(1, 1, false, true, true)
+; 			Anims3 = AnimSlots.GetByDefault(1, 1, true, false, true)
+; 			; END code to benchmark
+; 		endWhile
+; 		return Utility.GetCurrentRealTime() - baseline
+; 	endFunction
+; endState
+
+; state Test2
+; 	string function Label()
+; 		return "GetByDefault - NEW"
+; 	endFunction
+
+; 	string function Proof()
+; 		string Output
+; 		sslBaseAnimation[] Anims
+		; Anims = AnimSlots.GetByDefault2(1, 1, false, false, true)
+		; Output += "// FM = "+Anims.Length+" /"
+		; Anims = AnimSlots.GetByDefault2(0, 1, false, false, true)
+		; Output += "// F = "+Anims.Length+" /"
+		; Anims = AnimSlots.GetByDefault2(0, 2, false, false, true)
+		; Output += "// FF = "+Anims.Length+" /"
+		; Anims = AnimSlots.GetByDefault2(2, 0, false, false, true)
+		; Output += "// MM = "+Anims.Length+" /"
+		; Anims = AnimSlots.GetByDefault2(1, 1, false, true, true)
+		; Output += "// FM Bed = "+Anims.Length+" /"
+		; Anims = AnimSlots.GetByDefault2(1, 1, true, false, true)
+		; Output += "// FM AggrRestrict = "+Anims.Length+" /"
+		; Anims = AnimSlots.GetByDefault2(1, 1, true, false, false)
+		; Output += "// FM AggrNoRestrict = "+Anims.Length+" /"
+		; Anims = AnimSlots.GetByDefault2(1, 1, false, false, false)
+		; Output += "// FM NoRestrict = "+Anims.Length+" /"
+		; return Output
+; 	endFunction
+
+; 	float function RunTest(int nth = 5000, float baseline = 0.0)
+; 		; START any variable preparions needed
+; 		sslBaseAnimation[] Anims1 
+; 		sslBaseAnimation[] Anims2
+; 		sslBaseAnimation[] Anims3
+; 		; END any variable preparions needed
+; 		baseline += Utility.GetCurrentRealTime()
+; 		while nth
+; 			nth -= 1
+; 			; START code to benchmark
+; 			Anims1 = AnimSlots.GetByDefault2(1, 1, false, false, true)
+; 			Anims2 = AnimSlots.GetByDefault2(1, 1, false, true, true)
+; 			Anims3 = AnimSlots.GetByDefault2(1, 1, true, false, true)
+; 			; END code to benchmark
+; 		endWhile
+; 		return Utility.GetCurrentRealTime() - baseline
+; 	endFunction
+; endState
 
 
 

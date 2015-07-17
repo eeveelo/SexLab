@@ -128,7 +128,7 @@ sslBaseAnimation[] function AnimationArrayIfElse(bool isTrue, sslBaseAnimation[]
 endfunction
 
 ; TODO
-sslBaseAnimation[] function RemoveDupesFromList(sslBaseAnimation[] List, sslBaseAnimation[] Removing, bool PreventAll = true)
+sslBaseAnimation[] function RemoveDupesFromList(sslBaseAnimation[] List, sslBaseAnimation[] Removing, bool PreventAll = true) global
 	if !Removing || Removing.Length < 1 || !List || List.Length < 1
 		return List
 	endIf
@@ -154,6 +154,16 @@ sslBaseAnimation[] function RemoveDupesFromList(sslBaseAnimation[] List, sslBase
 		endIf
 	endwhile
 	return Output
+endFunction
+
+string[] function GetAnimationNames(sslBaseAnimation[] List) global
+	int i = List.Length 
+	string[] Names = Utility.CreateStringArray(i)
+	while i
+		i -= 1
+		Names[i] = List[i].Name
+	endWhile
+	return Names
 endFunction
 
 ;/-----------------------------------------------\;
