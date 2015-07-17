@@ -106,6 +106,8 @@ event UpdateSystem(int OldVersion, int NewVersion)
 		GoToState("Updating")
 		Version = NewVersion
 
+		Config.ExportSettings()
+
 		; TODO: first update by 1.60 should probably be done by MCM instead, so quests can be reset
 		; Perform update functions
 		if OldVersion == 15920 && NewVersion <= 15921
@@ -123,6 +125,8 @@ event UpdateSystem(int OldVersion, int NewVersion)
 			CreatureSlots.Setup()
 			ThreadSlots.Setup()
 		endIf
+
+		Config.ImportSettings()
 
 		; End update functions
 		GoToState("Ready")
