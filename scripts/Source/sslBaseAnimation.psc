@@ -626,7 +626,7 @@ int function AddPosition(int Gender = 0, int AddCum = -1)
 	InitArrays(Actors)
 	FlagsArray(Actors)[kCumID] = AddCum
 
-	string[] TagList = GetTags()
+	string[] TagList = GetRawTags()
 	TagList[0] = TagList[0]+GetGenderString(Gender)
 	TagList[1] = GetGenderString(Gender)+TagList[1]
 
@@ -731,7 +731,7 @@ function Save(int id = -1)
 		endWhile
 	endIf
 	; Remove duplicate gender tags
-	string[] TagList = GetTags()
+	string[] TagList = GetRawTags()
 	if TagList[0] == TagList[1]
 		TagList[1] = ""
 	endIf
