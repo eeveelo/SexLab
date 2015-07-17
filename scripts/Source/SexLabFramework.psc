@@ -754,6 +754,28 @@ float function HookTime(string argString)
 	return ThreadSlots.GetController(argString as int).TotalTime
 endFunction
 
+; TODO: Overkill?
+int function GetEnjoyment(int tid, Actor ActorRef)
+	return ThreadSlots.GetController(tid).GetEnjoyment(ActorRef)
+endfunction
+
+bool function IsVictim(int tid, Actor ActorRef)
+	return ThreadSlots.GetController(tid).IsVictim(ActorRef)
+endFunction
+
+bool function IsAggressor(int tid, Actor ActorRef)
+	return ThreadSlots.GetController(tid).IsAggressor(ActorRef)
+endFunction
+
+bool function IsUsingStrapon(int tid, Actor ActorRef)
+	return ThreadSlots.GetController(tid).ActorAlias(ActorRef).IsUsingStrapon()
+endFunction
+
+bool function PregnancyRisk(int tid, Actor ActorRef, bool AllowFemaleCum = false, bool AllowCreatureCum = false)
+	return ThreadSlots.GetController(tid).PregnancyRisk(ActorRef, AllowFemaleCum, AllowCreatureCum)
+endfunction
+
+
 ;#---------------------------#
 ;#    END HOOK FUNCTIONS     #
 ;#---------------------------#
