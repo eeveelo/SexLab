@@ -326,6 +326,7 @@ function LoadStrapons()
 	if Game.GetModByName("SOS Equipable Schlong.esp") != 255
 		LoadStrapon("SOS Equipable Schlong.esp", 0x0D62)
 	endIf
+	ModEvent.Send(ModEvent.Create("SexLabLoadStrapons"))
 endFunction
 
 Armor function LoadStrapon(string esp, int id)
