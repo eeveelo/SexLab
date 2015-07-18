@@ -25,7 +25,9 @@ endFunction
 
 function MoanNoWait(Actor ActorRef, int Strength = 30, bool IsVictim = false, float Volume = 1.0)
 	LipSync(ActorRef, Strength)
-	Sound.SetInstanceVolume(GetSound(Strength, IsVictim).Play(ActorRef), Volume)
+	if Volume > 0.0
+		Sound.SetInstanceVolume(GetSound(Strength, IsVictim).Play(ActorRef), Volume)
+	endIf
 endFunction
 
 Sound function GetSound(int Strength, bool IsVictim = false)
