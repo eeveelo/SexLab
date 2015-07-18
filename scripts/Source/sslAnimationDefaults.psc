@@ -1867,7 +1867,7 @@ function zjLaying(int id)
 	Base.Name = "3jiou Laying"
 	Base.SoundFX = Squishing
 
-	int a1 = Base.AddPosition(Female, addCum=Oral)
+	int a1 = Base.AddPosition(Female, addCum=Anal)
 	Base.AddPositionStage(a1, "3j_Laying_A1_S1", 0)
 	Base.AddPositionStage(a1, "3j_Laying_A1_S2", 0)
 	Base.AddPositionStage(a1, "3j_Laying_A1_S3", 0)
@@ -1881,6 +1881,12 @@ function zjLaying(int id)
 	Base.AddPositionStage(a2, "3j_Laying_A2_S4", 0, sos = 3)
 	Base.AddPositionStage(a2, "3j_Laying_A2_S5", 0, sos = 3)
 	
+	Base.SetStageCumID(a1, 1, Vaginal)
+	Base.SetStageCumID(a1, 2, Anal)
+	Base.SetStageCumID(a1, 3, Anal)
+	Base.SetStageCumID(a1, 4, Vaginal)
+	Base.SetStageCumID(a1, 5, Oral)
+
 	Base.SetTags("3jiou,Sex,Missionary,Laying,Lying,OnBack,Vaginal")
 
 	Base.Save(id)
@@ -1905,7 +1911,10 @@ function zjLyingVar(int id)
 	Base.AddPositionStage(a2, "3j_Layingvar_A2_S3", 0, sos = 0)
 	Base.AddPositionStage(a2, "3j_Layingvar_A2_S4", 0, sos = 0)
 	Base.AddPositionStage(a2, "3j_Layingvar_A2_S5", 0, sos = 0)
-	
+
+	Base.SetStageCumID(a1, 1, Oral)
+	Base.SetStageCumID(a1, 3, Vaginal)
+
 	Base.SetTags("3jiou,Sex,Missionary,Laying,Lying,OnBack,Anal")
 
 	Base.Save(id)
