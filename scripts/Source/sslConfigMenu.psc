@@ -1333,7 +1333,7 @@ int ta
 function ToggleAnimations()
 	SetCursorFillMode(LEFT_TO_RIGHT)
 
-	PerPage  = 126
+	PerPage  = 124
 	LastPage = AnimationSlots.PageCount(PerPage)
 	if TogglePage > LastPage || TogglePage < 1
 		TogglePage = 1
@@ -1365,8 +1365,11 @@ function ToggleAnimations()
 	if Slotted > PerPage
 		AddTextOptionST("AnimationTogglePage", "Toggle Page #", TogglePage)
 	else
-		AddHeaderOption("")
+		AddEmptyOption()
 	endIf
+
+	AddHeaderOption("")
+	AddHeaderOption("")
 
 	int i
 	while i < AnimToggles.Length
@@ -2222,8 +2225,8 @@ function RebuildClean()
 	else
 		AddTextOptionST("ToggleSystem","$SSL_DisabledSystem", "$SSL_DoEnable")
 	endIf
-	AddTextOptionST("RestoreDefaultSettings","$SSL_RestoreDefaultSettings", "$SSL_ClickHere")
 	AddTextOptionST("StopCurrentAnimations","$SSL_StopCurrentAnimations", "$SSL_ClickHere")
+	AddTextOptionST("RestoreDefaultSettings","$SSL_RestoreDefaultSettings", "$SSL_ClickHere")
 	AddTextOptionST("ResetAnimationRegistry","$SSL_ResetAnimationRegistry", "$SSL_ClickHere")
 	AddTextOptionST("ResetVoiceRegistry","$SSL_ResetVoiceRegistry", "$SSL_ClickHere")
 	AddTextOptionST("ResetExpressionRegistry","$SSL_ResetExpressionRegistry", "$SSL_ClickHere")
