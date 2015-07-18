@@ -326,10 +326,12 @@ endState
 ; ------------------------------------------------------- ;
 
 function PlayAnimation()
-	; Log("PlayAnimation("+Position+") - "+AnimEvents[Position])
+	Utility.Wait(0.01)
 	Debug.SendAnimationEvent(ActorRef, AnimEvents[Position])
+	Utility.Wait(0.2)
 endFunction
 
+float LoopDelay
 state Animating
 
 	function StartAnimating()
@@ -358,12 +360,16 @@ state Animating
 		endIf
 		; Sync enjoyment level and expression
 		GetEnjoyment()
-		RefreshExpression()
-		if !IsSilent
-			Voice.Moan(ActorRef, Enjoyment, IsVictim)
+		if LoopDelay >= VoiceDelay
+			LoopDelay = 0
+			RefreshExpression()
+			if !IsSilent
+				Voice.Moan(ActorRef, Enjoyment, IsVictim)
+			endIf
 		endIf
 		; Loop
-		RegisterForSingleUpdate(VoiceDelay)
+		LoopDelay += (VoiceDelay * 0.35)
+		RegisterForSingleUpdate(VoiceDelay * 0.35)
 	endEvent
 
 	function SyncThread()
@@ -385,9 +391,10 @@ state Animating
 
 		; Update alias info
 		GetEnjoyment()
-		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
 		Log("Enjoyment: "+Enjoyment+" SOS: "+Schlong)
-
+		Utility.Wait(0.01)
+		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
+		Utility.Wait(0.1)
 		; SyncLocation(false)
 	endFunction
 
@@ -434,7 +441,7 @@ state Animating
 	endFunction
 
 	event OnTranslationComplete()
-		; Log(Loc, "OnTranslationComplete()")
+		; Log(Loc, "WARNING - OnTranslationComplete()")
 		; Utility.Wait(0.3)
 		Snap()
 	endEvent
@@ -478,13 +485,22 @@ state Animating
 
 		; Play SFX/Voice
 		if !IsSilent
-			Voice.Moan(ActorRef, 100, false)
-			OrgasmFX.Play(ActorRef)
-			Voice.Moan(ActorRef, 100, false)
+			Sound MoanFX = Voice.GetSound(100, false)
+			Sound.SetInstanceVolume(MoanFX.Play(ActorRef), 1.0)
+			Sound.SetInstanceVolume(OrgasmFX.Play(ActorRef), 1.0)
+			Utility.WaitMenuMode(0.8)
+			Sound.SetInstanceVolume(MoanFX.Play(ActorRef), 1.0)
+			Sound.SetInstanceVolume(OrgasmFX.Play(ActorRef), 1.0)
+			Utility.WaitMenuMode(0.8)
+			Sound.SetInstanceVolume(OrgasmFX.Play(ActorRef), 1.0)
+			Sound.SetInstanceVolume(MoanFX.Play(ActorRef), 1.0)
 		else
-			OrgasmFX.Play(ActorRef)
+			Sound.SetInstanceVolume(OrgasmFX.Play(ActorRef), 1.0)
+			Utility.WaitMenuMode(0.8)
+			Sound.SetInstanceVolume(OrgasmFX.Play(ActorRef), 1.0)
 		endIf
 
+		GetEnjoyment()
 		; VoiceDelay = 0.8
 		RegisterForSingleUpdate(0.8)
 	endFunction
@@ -495,9 +511,9 @@ state Animating
 		Log("Resetting!")
 		; Update stats
 		if !IsCreature
-			Log("Stats BEFORE: "+sslActorStats.GetSkills(ActorRef))
+			; Log("Stats BEFORE: "+sslActorStats.GetSkills(ActorRef))
 			sslActorStats.RecordThread(ActorRef, Gender, BestRelation, StartedAt, Utility.GetCurrentRealTime(), Utility.GetCurrentGameTime(), Thread.HasPlayer, Thread.VictimRef, Thread.Genders, Thread.SkillXP)
-			Log("Stats AFTER: "+sslActorStats.GetSkills(ActorRef))
+			; Log("Stats AFTER: "+sslActorStats.GetSkills(ActorRef))
 			; Stats.RecordThread(ActorRef, (IsPlayer || Thread.HasPlayer), Thread.ActorCount, BestRelation, (Utility.GetCurrentRealTime() - StartedAt), Thread.VictimRef, Thread.SkillXP, Thread.Genders)
 		endIf
 		; Apply cum
@@ -574,7 +590,9 @@ function StopAnimating(bool Quick = false)
 		ActorRef.PushActorAway(ActorRef, 0.75)
 	else
 		; Reset NPC/PC Idle Quickly
+		Utility.Wait(0.01)
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
+		Utility.Wait(0.1)
 		; Ragdoll NPC/PC if enabled and not in TFC
 		if !Quick && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
 			ActorRef.Moveto(ActorRef)
@@ -734,7 +752,7 @@ int function GetEnjoyment()
 		if Enjoyment < 0
 			Enjoyment = 0
 		elseIf Enjoyment >= 100
-			if Config.SeparateOrgasms
+			if Config.SeparateOrgasms && Stage != Animation.StageCount
 				OrgasmEffect()
 			else
 				Enjoyment = 100

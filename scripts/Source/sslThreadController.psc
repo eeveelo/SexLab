@@ -389,6 +389,7 @@ function SetAnimation(int aid = -1)
 	endIf
 	; Set active animation
 	Animation = Animations[aid]
+	Animations[aid].GetAnimEvents(sAnimEvents, Stage)
 	; Inform player of animation being played now
 	if HasPlayer
 		SexLabUtil.PrintConsole("Playing Animation: " + Animation.Name)
@@ -404,7 +405,6 @@ function SetAnimation(int aid = -1)
 	IsType[5]  = Tags.Find("Dirty")  != -1
 	StageCount = Animation.StageCount
 	SoundFX    = Animation.GetSoundFX(Stage)
-	Animation.GetAnimEvents(sAnimEvents, Stage)
 	SetBonuses()
 	; Check for out of range stage
 	if Stage >= StageCount
