@@ -668,7 +668,7 @@ function UnlockActor()
 		; Game.SetPlayerAIDriven(false)
 	else
 		ActorRef.SetRestrained(false)
-		; ActorRef.SetDontMove(false)
+		ActorRef.SetDontMove(false)
 	endIf
 endFunction
 
