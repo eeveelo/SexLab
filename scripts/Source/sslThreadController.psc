@@ -61,6 +61,8 @@ state Prepare
 		Action("Advancing")
 	endEvent
 
+	function PlayStageAnimations()
+	endFunction
 	function RecordSkills()
 	endFunction
 	function SetBonuses()
