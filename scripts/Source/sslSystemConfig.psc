@@ -592,10 +592,10 @@ bool function CheckSystemPart(string CheckSystem)
 	elseIf CheckSystem == "FNISCreaturePack"
 		return FNIS.VersionCompare(5, 1, 0, true) >= 0
 
-	elseIf CheckSystem == "FNISSexLabFramework" && PlayerRef.Is3DLoaded()
+	elseIf CheckSystem == "FNISSexLabFramework" && PlayerRef.Is3DLoaded() && Game.GetCameraState() > 3
 		return PlayerRef.GetAnimationVariableInt("SexLabFramework") >= 16000
 
-	elseIf CheckSystem == "FNISSexLabCreature" && PlayerRef.Is3DLoaded()
+	elseIf CheckSystem == "FNISSexLabCreature" && PlayerRef.Is3DLoaded() && Game.GetCameraState() > 3
 		return PlayerRef.GetAnimationVariableInt("SexLabCreature") >= 16000
 
 	endIf
