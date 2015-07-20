@@ -220,16 +220,16 @@ sslBaseAnimation[] function GetList(bool[] Valid)
 			endIf
 		endWhile
 		; Only bother with logging the selected animations if debug mode enabled.
-		; if Config.DebugMode
-		; 	string List = "SEXLAB - Found Animations - "
-		; 	i = Output.Length
-		; 	while i
-		; 		i -= 1
-		; 		List += "["+Output[i].Name+"] "
-		; 	endWhile
-		; 	Debug.trace(List)
-		; 	MiscUtil.PrintConsole(List)
-		; endIf
+		if Config.DebugMode
+			string List = "SEXLAB - Found Animations - "
+			i = Output.Length
+			while i
+				i -= 1
+				List += "["+Output[i].Name+"] "
+			endWhile
+			Debug.Trace(List)
+			MiscUtil.PrintConsole(List)
+		endIf
 	endIf
 	return Output
 endFunction
