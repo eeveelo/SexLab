@@ -12,7 +12,8 @@ sslThreadController[] property Threads hidden
 endProperty
 
 sslThreadModel function PickModel(float TimeOut = 30.0)
-	while GetState() == "Locked"
+	float failsafe = Utility.GetCurrentRealTime() + TimeOut
+	while GetState() == "Locked" && Utility.GetCurrentRealTime() < failsafe
 		Utility.WaitMenuMode(0.1)
 	endWhile
 	GoToState("Locked")
@@ -24,6 +25,18 @@ sslThreadModel function PickModel(float TimeOut = 30.0)
 		endIf
 		i += 1
 	endWhile
+	; Failsafe - check for possibly stuck/ending threads and use them.
+	if !Thread
+		i = 0
+		while !Thread && i < Slots.Length
+			string ThreadState = Slots[i].GetState()
+			if ThreadState == "Frozen" || ThreadState == "Ending"
+				Slots[i].Fatal("Resetting possibly stuck thread: "+Slots[i], "PickModel")
+				Thread = Slots[i].Make()
+			endIf
+			i += 1
+		endWhile
+	endIf
 	GoToState("")
 	return Thread
 endFunction

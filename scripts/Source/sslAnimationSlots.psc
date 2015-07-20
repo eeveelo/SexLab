@@ -38,11 +38,12 @@ sslBaseAnimation[] function GetByType(int ActorCount, int Males = -1, int Female
 	; Debug.Trace("GetByType("+ActorCount+", "+Males+", "+Females+", "+StageCount+", "+Aggressive+", "+Sexual+")")
 	; Search
 	bool[] Valid = Utility.CreateBoolArray(Slotted)
+	bool RestrictAggressive = Config.RestrictAggressive
 	int i = Slotted
 	while i
 		i -= 1
 		sslBaseAnimation Slot = Objects[i] as sslBaseAnimation
-		Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount && (Aggressive == Slot.HasTag("Aggressive") || !Config.RestrictAggressive) \
+		Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount && (!RestrictAggressive || Aggressive == Slot.HasTag("Aggressive")) \
 		&& (Males == -1 || Males == Slot.Males) && (Females == -1 || Females == Slot.Females) && (StageCount == -1 || StageCount == Slot.StageCount)
 	endWhile
 	return GetList(Valid)
@@ -71,42 +72,6 @@ sslBaseAnimation[] function PickByActors(Actor[] Positions, int Limit = 64, bool
 	endWhile
 	return Matches
 endFunction
-
-;/ sslBaseAnimation[] function GetByDefault2(int Males, int Females, bool IsAggressive = false, bool UsingBed = false, bool RestrictAggressive = true)
-	; Debug.Trace("GetByDefault("+Males+", "+Females+", "+IsAggressive+", "+UsingBed+", "+RestrictAggressive+")")
-	if Males == 0 && Females == 0
-		return none ; No actors passed or creatures present
-	endIf
-	; Info
-	int ActorCount = (Males + Females)
-	string[] Search = new string[1]
-	Search[0] = SexLabUtil.GetGenderTag(Females, Males)
-	if (Females == 2 && Males == 0) || (Males == 2 && Females == 0)
-		Search = PapyrusUtil.PushString(Search, "MF")
-	endIf
-	string[] Suppress
-	if !IsAggressive && RestrictAggressive
-		Suppress = PapyrusUtil.PushString(Suppress, "Aggressive")
-	endIf
-	if UsingBed
-		Suppress = PapyrusUtil.PushString(Suppress, "Furniture")
-		if Config.BedRemoveStanding
-			Suppress = PapyrusUtil.PushString(Suppress, "Standing")
-		endIf
-	endIf
-	RestrictAggressive = IsAggressive && RestrictAggressive
-	; Search
-	bool[] Valid = Utility.CreateBoolArray(Slotted)
-	int i = Slotted
-	while i
-		i -= 1
-		sslBaseAnimation Slot = Objects[i] as sslBaseAnimation
-		; Check for appropiate enabled aniamtion
-		Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount && Slot.HasOneTag(Search) && !Slot.HasOneTag(Suppress) && (!RestrictAggressive || (RestrictAggressive && Slot.HasTag("Aggressive")))
-	endWhile
-	return GetList(Valid)
-endFunction /;
-
 
 sslBaseAnimation[] function GetByDefault(int Males, int Females, bool IsAggressive = false, bool UsingBed = false, bool RestrictAggressive = true)
 	; Debug.Trace("GetByDefault("+Males+", "+Females+", "+IsAggressive+", "+UsingBed+", "+RestrictAggressive+")")
