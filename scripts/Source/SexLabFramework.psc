@@ -91,10 +91,97 @@ endFunction
 ;#------------------------------#
 
 ;/**
+* Gets an actors "SexLab gender" which may differ from their vanilla ActorBase.GetSex() if their gender has been overridden.
+* 
+* @param  Actor ActorRef - The actor to get the SexLab gender for.
+* @return int - 0 for male, 1 for female, 3 for creature, 4 for female creature if creature genders are enabled and they are female - otherwise female creatures will default to 3 along with males.
+**/;
+int function GetGender(Actor ActorRef)
+	return ActorLib.GetGender(ActorRef)
+endFunction
+
+;/**
+* Force an actors SexLab gender to be considered male, even if their ActorBase.GetSex() is female. Useful for having SexLab treat female hermaphrodites as if they were male.
+* 
+* @param  Actor ActorRef - The actor to set SexLab gender to male.
+**/;
+function TreatAsMale(Actor ActorRef)
+	ActorLib.TreatAsMale(ActorRef)
+endFunction
+
+;/**
+* Force an actors SexLab gender to be considered male, even if their ActorBase.GetSex() is male. Useful for having SexLab treat male character as if they were female.
+* 
+* @param  Actor ActorRef - The actor to set SexLab gender to female.
+**/;
+function TreatAsFemale(Actor ActorRef)
+	ActorLib.TreatAsFemale(ActorRef)
+endFunction
+
+;/**
+* Force an actors SexLab gender to be considered male or female.
+* 
+* @param  Actor ActorRef - The actor to set SexLab gender.
+* @param  bool AsFemale - TRUE to make female, FALSE to make male.
+**/;
+function TreatAsGender(Actor ActorRef, bool AsFemale)
+	ActorLib.TreatAsGender(ActorRef, AsFemale)
+endFunction
+
+;/**
+* Clears any forced SexLab genders on actor from TreatAsMale/Female/Gender() functions.
+* 
+* @param  Actor ActorRef - The actor to clear forced gender on, reverting them to their vanilla gender.
+**/;
+function ClearForcedGender(Actor ActorRef)
+	ActorLib.ClearForcedGender(ActorRef)
+endFunction
+
+;/**
+* Get an array of counts for the each gender in a list of actors.
+* 
+* @param  Actor[] Positions - The array of actors you want to check.
+* @return int[] - A 4 length array of the genders. [0] Males, [1] Females, [2] Creatures, [3] Female Creatures - if Creature Genders are enabled by the user.
+**/;
+int[] function GenderCount(Actor[] Positions)
+	return ActorLib.GenderCount(Positions)
+endFunction
+
+;/**
+* 
+* 
+* @param  Actor[] Positions - The array of actors you want to check.
+* @return int - The number of males in Positions array.
+**/;
+int function MaleCount(Actor[] Positions)
+	return ActorLib.MaleCount(Positions)
+endFunction
+
+;/**
+* 
+* 
+* @param  Actor[] Positions - The array of actors you want to check.
+* @return int - The number of females in Positions array.
+**/;
+int function FemaleCount(Actor[] Positions)
+	return ActorLib.FemaleCount(Positions)
+endFunction
+
+;/**
+* 
+* 
+* @param  Actor[] Positions - The array of actors you want to check.
+* @return int - The number of creatures in Positions array.
+**/;
+int function CreatureCount(Actor[] Positions)
+	return ActorLib.CreatureCount(Positions)
+endFunction
+
+;/**
 * Checks if given actor is a valid target for SexLab animation.
 * 
 * @param  Actor ActorRef - The actor to check for validation
-* @return  int - The integer code of the validation state
+* @return int - The integer code of the validation state
 *                1 if valid actor, signed int if invalid.
 **/;
 int function ValidateActor(Actor ActorRef)
@@ -116,9 +203,36 @@ endFunction
 * @return bool - TRUE if ActorRef is being animated by SexLab.
 **/;
 bool function IsActorActive(Actor ActorRef)
-	return SexLabUtil.IsActorActive(ActorRef)
+	return ActorRef.IsInFaction(Config.AnimatingFaction)
 endFunction
 
+;/**
+* Make an actor never allowed to engage in SexLab scenes.
+* 
+* @param  Actor ActorRef - The actor to forbid from SexLab use.
+**/;
+function ForbidActor(Actor ActorRef)
+	ActorLib.ForbidActor(ActorRef)
+endFunction
+
+;/**
+* Removes an actor from the forbidden list, undoing the effects of ForbidActor()
+* 
+* @param  Actor ActorRef - The actor to remove from the forbid list.
+**/;
+function AllowActor(Actor ActorRef)
+	ActorLib.AllowActor(ActorRef)
+endFunction
+
+;/**
+* Checks if an actor is currently forbidden from use in SexLab scenes.
+* 
+* @param  Actor ActorRef - The actor to check.
+* @return bool - TRUE if the actor is forbidden from use.
+**/;
+bool function IsForbidden(Actor ActorRef)
+	return ActorLib.IsForbidden(ActorRef)
+endFunction
 
 ;/**
 * Searches within a given area for a SexLab valid actor
@@ -134,288 +248,169 @@ Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000
 endFunction
 
 ;/**
+* Searches within a given area for multiple SexLab valid actors
 * 
-* 
-* @param  
-* @return  
+* @param  Actor[] Positions - A list of at least 1 actor you want to find the needed partners for.
+* @param  int TotalActors - The desired total number of actors you want in the return array.
+* @param  int Males - From the TotalActors amount, you want at least this many males.
+* @param  int Females - From the TotalActors amount, you want at least this many females.
+* @param  float Radius - The distance from the center point to search.
+* @return Actor[] - A list of valid actors that is at most the length of TotalActors.
 **/;
-Actor[] function FindAvailablePartners(actor[] Positions, int TotalActors, int Males = -1, int Females = -1, float Radius = 10000.0)
+Actor[] function FindAvailablePartners(Actor[] Positions, int TotalActors, int Males = -1, int Females = -1, float Radius = 10000.0)
 	return ThreadLib.FindAvailablePartners(Positions, TotalActors, Males, Females, Radius)
 endFunction
 
 ;/**
+* Sort a list of actors to include either female or male actors first in the array.
+* SexLab animations generally expect the female actor to be listed first in a scene.
 * 
-* 
-* @param  
-* @return  
+* @param  Actor[] Positions - The list of actors to sort by gender
+* @param  bool FemaleFirst - If switched to FALSE, male actors will be sorted first instead of females.
+* @return Actor[] - The final sorted list of actors.
 **/;
 Actor[] function SortActors(Actor[] Positions, bool FemaleFirst = true)
 	return ThreadLib.SortActors(Positions, FemaleFirst)
 endFunction
 
 ;/**
+* Applies the cum effect to an actor for the given locations
 * 
-* 
-* @param  
-* @return  
-**/;
-function ApplyCum(Actor ActorRef, int CumID)
-	ActorLib.ApplyCum(ActorRef, CumID)
-endFunction
-
-;/**
-* 
-* 
-* @param  
-* @return  
+* @param  Actor ActorRef - The actor to apply the cum effectshader to
+* @param  bool Vaginal/Oral/Anal - Each location set to TRUE will have it's effect stacked.
 **/;
 function AddCum(Actor ActorRef, bool Vaginal = true, bool Oral = true, bool Anal = true)
 	ActorLib.AddCum(ActorRef, Vaginal, Oral, Anal)
 endFunction
 
 ;/**
+* Removes existing cum effectshaders.
 * 
-* 
-* @param  
-* @return  
+* @param  Actor ActorRef - The actor you want to remove the effectshaders from.
 **/;
 function ClearCum(Actor ActorRef)
 	ActorLib.ClearCum(ActorRef)
 endFunction
 
 ;/**
+* Strip an actor using SexLab's strip settings as chosen by the user from the SexLab MCM
 * 
-* 
-* @param  
-* @return  
+* @param  Actor ActorRef - The actor whose equipment shall be un-equipped.
+* @param  Actor VictimRef - If ActorRef matches VictimRef victim strip settings are used. If VictimRef is set but doesn't match, aggressor settings are used.
+* @param  bool DoAnimate - Whether or not to play the actor stripping animation during
+* @param  bool LeadIn - If TRUE and VictimRef == none, Foreplay strip settings will be used.
+* @return Form[] - An array of all equipment stripped from ActorRef
 **/;
-form[] function StripActor(Actor ActorRef, Actor VictimRef = none, bool DoAnimate = true, bool LeadIn = false)
+Form[] function StripActor(Actor ActorRef, Actor VictimRef = none, bool DoAnimate = true, bool LeadIn = false)
 	return ActorLib.StripActor(ActorRef, VictimRef, DoAnimate, LeadIn)
 endFunction
 
 ;/**
+* Strip an actor of equipment using a custom selection of biped objects / slot masks.
+* See for slot values: http://www.creationkit.com/Biped_Object
 * 
-* 
-* @param  
-* @return  
+* @param  Actor ActorRef - The actor whose equipment shall be un-equipped.
+* @param  bool[] Strip - MUST be exactly 33 array length. Any index set to TRUE will be stripped using nth + 30 = biped object / slot mask. The extra index Strip[32] = weapons
+* @param  bool DoAnimate - Whether or not to play the actor stripping animation during
+* @param  bool AllowNudesuit - Whether to allow the use of nudesuits, if the user has that option enabled in the MCM (the poor fool)
+* @return Form[] - An array of all equipment stripped from ActorRef
 **/;
-form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false, bool AllowNudesuit = true)
+Form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false, bool AllowNudesuit = true)
 	return ActorLib.StripSlots(ActorRef, Strip, DoAnimate, AllowNudesuit)
 endFunction
 
 ;/**
+* Equips an actor with the given equipment. Intended for reversing the results of the Strip functions using their return results.
 * 
-* 
-* @param  
-* @return  
+* @param  Actor ActorRef - The actor whose equipment shall be re-equipped.
+* @param  Form[] Stripped - A form array of all the equipment to be equipped on ActorRef. Typically the saved result of StripActor() or StripSlots()
+* @param  bool IsVictim - If TRUE and the user has the SexLab MCM option for Victims Redress disabled, the actor will not actually re-equip their gear.
 **/;
-function UnstripActor(Actor ActorRef, form[] Stripped, bool IsVictim = false)
+function UnstripActor(Actor ActorRef, Form[] Stripped, bool IsVictim = false)
 	ActorLib.UnstripActor(ActorRef, Stripped, IsVictim)
 endFunction
 
 ;/**
+* Check if a given item is considered able to be removed by the SexLab strip functions.
 * 
-* 
-* @param  
-* @return  
+* @param  Form ItemRef - The item you want to check.
+* @return bool - TRUE if the item does not have the keyword with the word "NoStrip" in it, or is flagged as "Always Strip" in the SexLab MCM Strip Editor.
 **/;
-bool function IsStrippable(form ItemRef)
+bool function IsStrippable(Form ItemRef)
 	return ActorLib.IsStrippable(ItemRef)
 endFunction
 
 ;/**
+* Removes the item from the given slot mask, if it is considered strippable by SexLab.
 * 
-* 
-* @param  
-* @return  
+* @param  Actor ActorRef - The actor to un-equip the slot from
+* @param  int SlotMask - The slot mask id for your chosen biped object. See more: http://www.creationkit.com/Slot_Masks_-_Armor
+* @return Form - The item equipped on the SlotMask if removed. None if it was not removed or nothing was there.
 **/;
-form function StripWeapon(Actor ActorRef, bool RightHand = true)
-	return none ; ActorLib.StripWeapon(ActorRef, RightHand)
-endFunction
-
-;/**
-* 
-* 
-* @param  
-* @return  
-**/;
-form function StripSlot(Actor ActorRef, int SlotMask)
+Form function StripSlot(Actor ActorRef, int SlotMask)
 	return ActorLib.StripSlot(ActorRef, SlotMask)
 endFunction
 
 ;/**
+* Checks and returns for any registered SexLab strapons in an actors inventory.
 * 
-* 
-* @param  
-* @return  
+* @param  Actor ActorRef - The actor to look for a strapon on.
+* @return Form - The SexLab registered strapon actor is currently wearing, if any.
 **/;
-form function WornStrapon(Actor ActorRef)
+Form function WornStrapon(Actor ActorRef)
 	return Config.WornStrapon(ActorRef)
 endFunction
 
 ;/**
+* Checks for any registered SexLab strapons on an actor.
 * 
-* 
-* @param  
-* @return  
+* @param  Actor ActorRef - The actor to look for a strapon on.
+* @return bool - TRUE if the actor has a SexLab registered strapon equipped or in their inventory.
 **/;
 bool function HasStrapon(Actor ActorRef)
 	return Config.HasStrapon(ActorRef)
 endFunction
 
 ;/**
+* Picks a strapon from the SexLab registered strapons for the actor to use.
 * 
-* 
-* @param  
-* @return  
+* @param  Actor ActorRef - The actor to look for a strapon to use.
+* @return Form - A randomly selected strapon or the strapon the actor already has in inventory, if any.
 **/;
-form function PickStrapon(Actor ActorRef)
+Form function PickStrapon(Actor ActorRef)
 	return Config.PickStrapon(ActorRef)
 endFunction
 
 ;/**
+* Equips a SexLab registered strapon on the actor.
 * 
-* 
-* @param  
-* @return  
+* @param  Actor ActorRef - The actor to equip a strapon.
+* @return Form - The strapon equipped, either randomly selected or pre-owned by ActorRef.
 **/;
-form function EquipStrapon(Actor ActorRef)
+Form function EquipStrapon(Actor ActorRef)
 	return Config.EquipStrapon(ActorRef)
 endFunction
 
 ;/**
+* Un-equips a strapon from an actor, if they are wearing one.
 * 
-* 
-* @param  
-* @return  
+* @param  Actor ActorRef - The actor to un-equip any worn strapon.
 **/;
 function UnequipStrapon(Actor ActorRef)
 	Config.UnequipStrapon(ActorRef)
 endFunction
 
 ;/**
+* Loads an armor from mod into the list of valid strapons to use.
 * 
-* 
-* @param  
-* @return  
+* @param  string esp - the .esp/.esm mod to load a form from.
+* @param  int id - the form id to load from the esp 
+* @return Armor - If form was found and is a valid armor, a copy of the loaded Armor form. 
 **/;
 Armor function LoadStrapon(string esp, int id)
 	return Config.LoadStrapon(esp, id)
 endFunction
 
-;/**
-* 
-* 
-* @param  
-* @return  
-**/;
-function ForbidActor(Actor ActorRef)
-	ActorLib.ForbidActor(ActorRef)
-endFunction
-
-;/**
-* 
-* 
-* @param  
-* @return  
-**/;
-function AllowActor(Actor ActorRef)
-	ActorLib.AllowActor(ActorRef)
-endFunction
-
-;/**
-* 
-* 
-* @param  
-* @return  
-**/;
-bool function IsForbidden(Actor ActorRef)
-	return ActorLib.IsForbidden(ActorRef)
-endFunction
-
-;/**
-* 
-* 
-* @param  
-* @return  
-**/;
-function TreatAsMale(Actor ActorRef)
-	ActorLib.TreatAsMale(ActorRef)
-endFunction
-
-;/**
-* 
-* 
-* @param  
-* @return  
-**/;
-function TreatAsFemale(Actor ActorRef)
-	ActorLib.TreatAsFemale(ActorRef)
-endFunction
-
-function TreatAsGender(Actor ActorRef, bool AsFemale)
-	ActorLib.TreatAsGender(ActorRef, AsFemale)
-endFunction
-
-;/**
-* 
-* 
-* @param  
-* @return  
-**/;
-function ClearForcedGender(Actor ActorRef)
-	ActorLib.ClearForcedGender(ActorRef)
-endFunction
-
-;/**
-* 
-* 
-* @param  
-* @return  
-**/;
-int function GetGender(Actor ActorRef)
-	return ActorLib.GetGender(ActorRef)
-endFunction
-
-;/**
-* 
-* 
-* @param  
-* @return  
-**/;
-int[] function GenderCount(Actor[] Positions)
-	return ActorLib.GenderCount(Positions)
-endFunction
-
-;/**
-* 
-* 
-* @param  
-* @return  
-**/;
-int function MaleCount(Actor[] Positions)
-	return ActorLib.MaleCount(Positions)
-endFunction
-
-;/**
-* 
-* 
-* @param  
-* @return  
-**/;
-int function FemaleCount(Actor[] Positions)
-	return ActorLib.FemaleCount(Positions)
-endFunction
-
-;/**
-* 
-* 
-* @param  
-* @return  
-**/;
-int function CreatureCount(Actor[] Positions)
-	return ActorLib.CreatureCount(Positions)
-endFunction
 
 ;/**
 * Removes an actor from the audience of any currently active bard scenes, preventing them from playing the clapping animation.
@@ -1176,6 +1171,20 @@ endFunction
 ;#   END UTILITY FUNCTIONS   #
 ;#---------------------------#
 
+
+
+;#---------------------------#
+;#   DEPRECATED FUNCTIONS    #
+;#  AVOID USING IF POSSIBLE  #
+;#---------------------------#
+
+function ApplyCum(Actor ActorRef, int CumID)
+	ActorLib.ApplyCum(ActorRef, CumID)
+endFunction
+
+form function StripWeapon(Actor ActorRef, bool RightHand = true)
+	return none ; ActorLib.StripWeapon(ActorRef, RightHand)
+endFunction
 
 ;#---------------------------#
 ;#                           #
