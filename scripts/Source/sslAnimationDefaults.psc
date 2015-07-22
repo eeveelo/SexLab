@@ -245,7 +245,7 @@ function ArrokDevilsThreeway(int id)
 	Base.Name    = "Arrok Devils Threeway"
 	Base.SoundFX = SexMix
 
-	int a1 = Base.AddPosition(Female, VaginalOralAnal)
+	int a1 = Base.AddPosition(Female)
 	Base.AddPositionStage(a1, "Arrok_DevilsThreeway_A1_S1", 0, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "Arrok_DevilsThreeway_A1_S2", 0, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "Arrok_DevilsThreeway_A1_S3", 0, silent = true, openMouth = true)
@@ -262,6 +262,11 @@ function ArrokDevilsThreeway(int id)
 	Base.AddPositionStage(a3, "Arrok_DevilsThreeway_A3_S2", 100, sos = 9)
 	Base.AddPositionStage(a3, "Arrok_DevilsThreeway_A3_S3", 120, sos = -3)
 	Base.AddPositionStage(a3, "Arrok_DevilsThreeway_A3_S4", 100, sos = -3)
+
+	Base.SetStageCumID(a1, 1, Oral)
+	Base.SetStageCumID(a1, 2, OralAnal)
+	Base.SetStageCumID(a1, 3, VaginalOral)
+	Base.SetStageCumID(a1, 4, Oral)
 
 	Base.SetTags("Sex,Arrok,BBP,Doggy,Doggy Style,DoggyStyle,Blowjob,Oral,Orgy,Vaginal,Dirty")
 
@@ -343,7 +348,6 @@ function ArrokMaleMasturbation(int id)
 	sslBaseAnimation Base = Create(id)
 
 	Base.Name    = "Arrok Male Masturbation"
-
 
 	int a1 = Base.AddPosition(Male)
 	Base.AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S1", 0, sos = 3)
@@ -504,13 +508,13 @@ function ArrokTricycle(int id)
 	Base.Name    = "Arrok Tricycle"
 	Base.SoundFX = SexMix
 
-	int a1 = Base.AddPosition(Female, Oral)
+	int a1 = Base.AddPosition(Female)
 	Base.AddPositionStage(a1, "Arrok_Tricycle_A1_S1", -1, up = 2, silent = true, openMouth = true)
 	Base.AddPositionStage(a1, "Arrok_Tricycle_A1_S2", 0)
 	Base.AddPositionStage(a1, "Arrok_Tricycle_A1_S3", 0)
 	Base.AddPositionStage(a1, "Arrok_Tricycle_A1_S4", 1, side = 2.5, up = 3, silent = true, openMouth = true)
 
-	int a2 = Base.AddPosition(Female, Oral)
+	int a2 = Base.AddPosition(Female)
 	Base.AddPositionStage(a2, "Arrok_Tricycle_A2_S1", -100)
 	Base.AddPositionStage(a2, "Arrok_Tricycle_A2_S2", -100)
 	Base.AddPositionStage(a2, "Arrok_Tricycle_A2_S3", -100.5, silent = true, openMouth = true)
@@ -521,6 +525,13 @@ function ArrokTricycle(int id)
 	Base.AddPositionStage(a3, "Arrok_Tricycle_A3_S2", 108, silent = true, openMouth = true, sos = 5)
 	Base.AddPositionStage(a3, "Arrok_Tricycle_A3_S3", 108, sos = -1)
 	Base.AddPositionStage(a3, "Arrok_Tricycle_A3_S4", 108, sos = -3)
+
+	Base.SetStageCumID(a1, 1, Oral, a3)
+	Base.SetStageCumID(a1, 2, Vaginal, a3)
+	Base.SetStageCumID(a1, 4, Oral, a3)
+
+	Base.SetStageCumID(a2, 3, VaginalAnal, a3)
+	Base.SetStageCumID(a2, 4, Oral, a3)
 
 	Base.SetTags("Sex,Arrok,BBP,Tricycle,Threeway,Blowjob,Oral,Cunnilingus,Orgy,Vaginal,Dirty")
 
@@ -2048,14 +2059,14 @@ function zjThreesome(int id)
 	Base.Name = "3jiou Threesome"
 	Base.SoundFX = SexMix
 
-	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	int a1 = Base.AddPosition(Female, addCum=Anal)
 	Base.AddPositionStage(a1, "3j_FFM_A1_S1", 0, openMouth = true)
 	Base.AddPositionStage(a1, "3j_FFM_A1_S2", 0, openMouth = true)
 	Base.AddPositionStage(a1, "3j_FFM_A1_S3", 0, openMouth = true)
 	Base.AddPositionStage(a1, "3j_FFM_A1_S4", 0, openMouth = true)
 	Base.AddPositionStage(a1, "3j_FFM_A1_S5", 0)
 
-	int a2 = Base.AddPosition(Female, addCum=Vaginal)
+	int a2 = Base.AddPosition(Female)
 	Base.AddPositionStage(a2, "3j_FFM_A2_S1", 0)
 	Base.AddPositionStage(a2, "3j_FFM_A2_S2", 0)
 	Base.AddPositionStage(a2, "3j_FFM_A2_S3", 0)
@@ -2068,6 +2079,15 @@ function zjThreesome(int id)
 	Base.AddPositionStage(a3, "3j_FFM_A3_S3", 0)
 	Base.AddPositionStage(a3, "3j_FFM_A3_S4", 0)
 	Base.AddPositionStage(a3, "3j_FFM_A3_S5", 0)
+
+	Base.SetStageCumID(a1, 1, Anal, a3)
+	Base.SetStageCumID(a1, 2, Anal, a3)
+	Base.SetStageCumID(a1, 3, Anal, a3)
+	Base.SetStageCumID(a1, 4, Vaginal, a3)
+	Base.SetStageCumID(a1, 5, Anal, a3)
+
+	Base.SetStageCumID(a2, 4, Oral, a3)
+	Base.SetStageCumID(a2, 5, Oral, a3)
 
 	Base.SetTags("3jiou,Sex,BBP,Doggy,Doggy Style,DoggyStyle,Blowjob,Oral,Anal,Orgy,Vaginal,Dirty")
 
@@ -2658,7 +2678,7 @@ function fdThreesome(int id)
 	Base.Name = "4uDIK Threesome"
 	Base.SoundFX = SexMix
 
-	int a1 = Base.AddPosition(Female, addCum=VaginalAnal)
+	int a1 = Base.AddPosition(Female, addCum=OralAnal)
 	Base.AddPositionStage(a1, "4D_Threesome_A1_S1", 0, silent=true, openMouth = true)
 	Base.AddPositionStage(a1, "4D_Threesome_A1_S2", 0, silent=true, openMouth = true)
 	Base.AddPositionStage(a1, "4D_Threesome_A1_S3", 0, silent=true, openMouth = true)
@@ -2678,6 +2698,8 @@ function fdThreesome(int id)
 	Base.AddPositionStage(a3, "4D_Threesome_A3_S3", 0)
 	Base.AddPositionStage(a3, "4D_Threesome_A3_S4", 0)
 	Base.AddPositionStage(a3, "4D_Threesome_A3_S5", 0)
+
+	Base.SetStageCumID(a1, 5, VaginalAnal)
 
 	Base.SetTags("Sex,4D,4uDIK,BBP,Doggy,Doggy Style,DoggyStyle,Blowjob,Oral,Anal,Orgy,Vaginal,Dirty")
 
