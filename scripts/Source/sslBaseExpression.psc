@@ -88,21 +88,25 @@ float function GetExpression(Actor ActorRef, bool getId) global native
 
 function OpenMouth(Actor ActorRef) global
 	; ClearPhoneme(ActorRef)
-	ActorRef.SetExpressionOverride(16, 100)
-	ActorRef.SetExpressionPhoneme(1, 0.5)
+	Utility.Wait(0.01)
+	ActorRef.SetExpressionOverride(16, 80)
+	ActorRef.SetExpressionPhoneme(1, 0.4)
+	Utility.Wait(0.1)
 endFunction
 
 function CloseMouth(Actor ActorRef) global
-	if GetPhoneme(ActorRef, 1) >= 0.5
+	Utility.Wait(0.01)
+	; if GetPhoneme(ActorRef, 1) >= 0.4
 		ActorRef.SetExpressionPhoneme(1, 0.0)
-	endIf
-	if GetExpression(ActorRef, true) == 16.0 && GetExpression(ActorRef, false) >= 0.7
+	; endIf
+	if GetExpression(ActorRef, true) == 16.0; && GetExpression(ActorRef, false) >= 0.7
 		ActorRef.ClearExpressionOverride()
 	endIf
+	Utility.Wait(0.1)
 endFunction
 
 bool function IsMouthOpen(Actor ActorRef) global
-	return GetPhoneme(ActorRef, 1) >= 0.5 || (GetExpression(ActorRef, true) == 16.0 && GetExpression(ActorRef, false) >= 0.7)
+	return GetPhoneme(ActorRef, 1) >= 0.4 || (GetExpression(ActorRef, true) == 16.0 && GetExpression(ActorRef, false) >= 0.7)
 endFunction
 
 function ClearMFG(Actor ActorRef) global

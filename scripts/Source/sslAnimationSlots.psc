@@ -190,7 +190,7 @@ sslBaseAnimation[] function GetList(bool[] Valid)
 			i = Output.Length
 			while i
 				i -= 1
-				List += "["+Output[i].Name+"] "
+				List += "["+Output[i].Name+"]"
 			endWhile
 			Debug.Trace(List)
 			MiscUtil.PrintConsole(List)

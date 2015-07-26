@@ -394,7 +394,7 @@ function AddSex(Actor ActorRef, float TimeSpent = 0.0, bool WithPlayer = false, 
 	endIf
 	if WithPlayer && ActorRef != PlayerRef
 		_AdjustSkill(ActorRef, kPlayerSex, 1)
-		; FormListAdd(PlayerRef, "SexPartners", ActorRef, false)
+		FormListAdd(PlayerRef, "SexPartners", ActorRef, false)
 	endIf
 endFunction
 
@@ -412,6 +412,45 @@ endFunction
 
 bool function HadPlayerSex(Actor ActorRef)
 	return _GetSkill(ActorRef, kPlayerSex) >= 1.0
+endFunction
+
+Actor function LastSexPartner(Actor ActorRef)
+	return LastActorInList(ActorRef, "SexPartners")
+endFunction
+bool function HasHadSexTogether(Actor ActorRef1, Actor ActorRef2)
+	return ActorRef1 && ActorRef2 && (FormListHas(ActorRef1, "SexPartners", ActorRef2) || FormListHas(ActorRef2, "SexPartners", ActorRef1))
+endfunction
+
+Actor function LastAggressor(Actor ActorRef)
+	return LastActorInList(ActorRef, "WasVictimOf")
+endFunction
+bool function WasVictimOf(Actor VictimRef, Actor AggressorRef)
+	return VictimRef && AggressorRef && (FormListHas(VictimRef, "WasVictimOf", AggressorRef) || FormListHas(AggressorRef, "WasAggressorTo", VictimRef))
+endFunction
+
+Actor function LastVictim(Actor ActorRef)
+	return LastActorInList(ActorRef, "WasAggressorTo")
+endFunction
+bool function WasAggressorTo(Actor AggressorRef, Actor VictimRef)
+	return AggressorRef && VictimRef && (FormListHas(AggressorRef, "WasAggressorTo", VictimRef) || FormListHas(VictimRef, "WasVictimOf", AggressorRef))
+endFunction
+
+Actor function LastActorInList(Actor ActorRef, string List)
+	FormListRemove(ActorRef, List, none, true)
+	int i = FormListCount(ActorRef, List)
+	while i > 0
+		i -= 1
+		Form FormRef = FormListGet(ActorRef, List, i)
+		if FormRef
+			int Type = FormRef.GetType()
+			if Type == 43 || Type == 44 || Type == 62
+				return FormRef as Actor
+			else
+				FormListRemoveAt(ActorRef, List, i)
+			endIf
+		endIf
+	endWhile
+	return none
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -569,6 +608,68 @@ endFunction
 
 
 function RecordThread(Actor ActorRef, int Gender, int HadRelation, float StartedAt, float RealTime, float GameTime, bool WithPlayer, Actor VictimRef, int[] Genders, float[] SkillXP) global native
+function AddPartners(Actor ActorRef, Actor[] AllPositions, Actor[] Victims)
+	if !ActorRef || !AllPositions || AllPositions.Length < 2 || AllPositions.Find(none) != -1
+		return ; No Positions
+	endIf
+	Actor[] Positions = RemoveActor(AllPositions, ActorRef)
+	bool IsVictim     = Victims[0] && Victims.Find(ActorRef) != -1
+	bool IsAggressor  = Victims[0] && Victims.Find(ActorRef) == -1
+	int PartnerCount  = Positions.Length
+
+	FormListRemove(ActorRef, "SexPartners", none, true)
+	FormListRemove(ActorRef, "WasVictimOf", none, true)
+	FormListRemove(ActorRef, "WasAggressorTo", none, true)
+
+	int i = PartnerCount
+	while i
+		i -= 1
+		FormListRemove(ActorRef, "SexPartners", Positions[i], true)
+		FormListAdd(ActorRef, "SexPartners", Positions[i], false)
+	endWhile
+	;/ if ActorRef != PlayerRef
+		TrimList(ActorRef, "SexPartners", 8)
+	endIf /;
+
+	if IsVictim
+		i = PartnerCount
+		while i
+			i -= 1
+			if Victims.Find(Positions[i]) == -1
+				FormListRemove(ActorRef, "WasVictimOf", Positions[i], true)
+				FormListAdd(ActorRef, "WasVictimOf", Positions[i], false)
+			endIf
+		endWhile
+		;/ if ActorRef == PlayerRef
+			TrimList(ActorRef, "WasVictimOf", 16)
+		else
+			TrimList(ActorRef, "WasVictimOf", 8)
+		endIf /;
+
+	elseIf IsAggressor
+		i = PartnerCount
+		while i
+			i -= 1
+			if Victims.Find(Positions[i]) != -1
+				FormListRemove(ActorRef, "WasAggressorTo", Positions[i], true)
+				FormListAdd(ActorRef, "WasAggressorTo", Positions[i], false)
+			endIf
+		endWhile
+		;/ if ActorRef == PlayerRef
+			TrimList(ActorRef, "WasAggressorTo", 16)
+		else
+			TrimList(ActorRef, "WasAggressorTo", 8)
+		endIf /;
+	endIf
+endFunction
+function TrimList(Actor ActorRef, string List, int count)
+	count = FormListCount(ActorRef, List) - count
+	while count > 0
+		count -= 1
+		FormListRemoveAt(ActorRef, List, 0)
+	endwhile
+endFunction
+
 ;/ function RecordThread(Actor ActorRef, bool HasPlayer, int Positions, int HighestRelation, float TotalTime, Actor VictimRef, float[] SkillXP, int[] Genders)
 	AddSkillXP(ActorRef, SkillXP[0], SkillXP[1], SkillXP[2], SkillXP[3])
 	AddPurityXP(ActorRef, SkillXP[4], SkillXP[5], VictimRef != none, VictimRef == ActorRef, Genders[2] > 0, Positions, HighestRelation)

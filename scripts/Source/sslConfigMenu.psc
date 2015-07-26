@@ -43,7 +43,9 @@ endFunction
 event OnVersionUpdate(int version)
 	LoadLibs(false)
 	if CurrentVersion < 15920
-		ResetAllQuests()
+		if CurrentVersion > 0
+			ResetAllQuests()
+		endIf
 		LoadLibs(true)
 		SystemAlias.SetupSystem()
 	endIf
@@ -2214,7 +2216,8 @@ function RebuildClean()
 	SetCursorFillMode(TOP_TO_BOTTOM)
 
 	AddHeaderOption("SexLab v"+GetStringVer()+" by Ashal@LoversLab.com")
-	AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
+	AddToggleOptionST("DebugMode","$SSL_DebugMode", Config.InDebugMode)
+
 
 	AddHeaderOption("$SSL_UpgradeUninstallReinstall")
 	AddTextOptionST("CleanSystem","$SSL_CleanSystem", "$SSL_ClickHere")
@@ -2233,8 +2236,8 @@ function RebuildClean()
 	AddTextOptionST("ResetStripOverrides","$SSL_ResetStripOverrides", "$SSL_ClickHere")
 
 	SetCursorPosition(1)
-	AddToggleOptionST("DebugMode","$SSL_DebugMode", Config.InDebugMode)
 	AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
+	AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
 
 	AddHeaderOption("System Requirements")
 	SystemCheckOptions()

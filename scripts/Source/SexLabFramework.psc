@@ -859,6 +859,27 @@ bool function HadPlayerSex(Actor ActorRef)
 	return Stats.HadPlayerSex(ActorRef)
 endFunction
 
+Actor function LastSexPartner(Actor ActorRef)
+	return Stats.LastSexPartner(ActorRef)
+endFunction
+bool function HasHadSexTogether(Actor ActorRef1, Actor ActorRef2)
+	return Stats.HasHadSexTogether(ActorRef1, ActorRef2)
+endfunction
+
+Actor function LastAggressor(Actor ActorRef)
+	return Stats.LastAggressor(ActorRef)
+endFunction
+bool function WasVictimOf(Actor VictimRef, Actor AggressorRef)
+	return Stats.WasVictimOf(VictimRef, AggressorRef)
+endFunction
+
+Actor function LastVictim(Actor ActorRef)
+	return Stats.LastVictim(ActorRef)
+endFunction
+bool function WasAggressorTo(Actor AggressorRef, Actor VictimRef)
+	return Stats.WasAggressorTo(AggressorRef, VictimRef)
+endFunction
+
 float function AdjustPurity(Actor ActorRef, float amount)
 	return Stats.AdjustPurity(ActorRef, amount)
 endFunction

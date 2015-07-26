@@ -98,6 +98,8 @@ FormList property SexLabVoices auto
 SoundCategory property AudioSFX auto
 SoundCategory property AudioVoice auto
 
+Idle property IdleReset auto
+
 GlobalVariable property DebugVar1 auto
 GlobalVariable property DebugVar2 auto
 GlobalVariable property DebugVar3 auto
@@ -156,7 +158,6 @@ int property RotateScene auto hidden
 int property EndAnimation auto hidden
 int property ToggleFreeCamera auto hidden
 int property TargetActor auto hidden
-; int property AutoAlign auto hidden
 
 ; Floats
 float property CumTimer auto hidden
@@ -430,63 +431,6 @@ bool function AdjustStagePressed()
 	return Input.GetNumKeysPressed() > 1 && (Input.IsKeyPressed(AdjustStage) || (AdjustStage == 157 && Input.IsKeyPressed(29)) || (AdjustStage == 29 && Input.IsKeyPressed(157)))
 endFunction
 
-function HotkeyCallback(sslThreadController Thread, int keyCode)
-
-	; Advance Stage
-	if keyCode == AdvanceAnimation
-		Thread.AdvanceStage(BackwardsPressed())
-
-	; Change Animation
-	elseIf keyCode == ChangeAnimation
-		Thread.ChangeAnimation(BackwardsPressed())
-
-	; Forward / Backward adjustments
-	elseIf keyCode == AdjustForward
-		Thread.AdjustForward(BackwardsPressed(), AdjustStagePressed())
-
-	; Up / Down adjustments
-	elseIf keyCode == AdjustUpward
-		Thread.AdjustUpward(BackwardsPressed(), AdjustStagePressed())
-
-	; Left / Right adjustments
-	elseIf keyCode == AdjustSideways
-		Thread.AdjustSideways(BackwardsPressed(), AdjustStagePressed())
-
-	; Rotate Scene
-	elseIf keyCode == RotateScene
-		Thread.RotateScene(BackwardsPressed())
-
-	; Change Adjusted Actor
-	elseIf keyCode == AdjustChange
-		Thread.AdjustChange(BackwardsPressed())
-
-	; RePosition Actors
-	elseIf keyCode == RealignActors
-		Thread.ResetPositions(BackwardsPressed())
-
-	; Auto adjust alignments
-	; elseIf keyCode == AutoAlign
-	; 	Thread.AutoAlign(BackwardsPressed())
-
-	; Change Positions
-	elseIf keyCode == ChangePositions
-		Thread.ChangePositions(BackwardsPressed())
-
-	; Restore animation offsets
-	elseIf keyCode == RestoreOffsets
-		Thread.RestoreOffsets()
-
-	; Move Scene
-	elseIf keyCode == MoveScene
-		Thread.MoveScene()
-
-	; EndAnimation
-	elseIf keyCode == EndAnimation
-		Thread.EndAnimation(true)
-
-	endIf
-endFunction
-
 ; ------------------------------------------------------- ;
 ; --- Animation Profiles                              --- ;
 ; ------------------------------------------------------- ;
@@ -693,9 +637,9 @@ function SetDefaults()
 	RaceAdjustments    = true
 	BedRemoveStanding  = true
 	UseCreatureGender  = false
-	LimitedStrip       = true
-	RestrictSameSex    = true
-	SeparateOrgasms    = true
+	LimitedStrip       = false
+	RestrictSameSex    = false
+	SeparateOrgasms    = false
 	RemoveHeelEffect   = HasHDTHeels
 
 	; Integers
@@ -718,7 +662,6 @@ function SetDefaults()
 	ToggleFreeCamera   = 81 ; NUM 3
 	EndAnimation       = 207; End
 	TargetActor        = 49 ; N
-	; AutoAlign          = 83 ; NUM .
 
 	; Floats
 	CumTimer           = 120.0
@@ -776,14 +719,14 @@ function SetDefaults()
 
 	StripLeadInFemale = new bool[33]
 	StripLeadInFemale[0] = true
-	; StripLeadInFemale[2] = true
+	StripLeadInFemale[2] = true
 	StripLeadInFemale[9] = true
 	; StripLeadInFemale[14] = true
 	StripLeadInFemale[32] = true
 
 	StripLeadInMale = new bool[33]
 	StripLeadInMale[0] = true
-	; StripLeadInMale[2] = true
+	StripLeadInMale[2] = true
 	StripLeadInMale[8] = true
 	StripLeadInMale[9] = true
 	StripLeadInMale[19] = true
@@ -1097,7 +1040,7 @@ function ExportAnimations()
 	while i
 		i -= 1
 		sslBaseAnimation Slot = AnimSlots.GetBySlot(i)
-		JsonUtil.StringListAdd(File, "Animations", sslUtility.MakeArgs(",", Slot.Registry, Slot.Enabled as int, Slot.HasTag("Foreplay") as int, Slot.HasTag("Aggressive") as int))
+		JsonUtil.StringListAdd(File, "Animations", sslUtility.MakeArgs(",", Slot.Registry, Slot.Enabled as int, Slot.HasTag("LeadIn") as int, Slot.HasTag("Aggressive") as int))
 	endWhile
 endfunction
 function ImportAnimations()
@@ -1109,7 +1052,7 @@ function ImportAnimations()
 		if args.Length == 4 && AnimSlots.FindByRegistrar(args[0]) != -1
 			sslBaseAnimation Slot = AnimSlots.GetbyRegistrar(args[0])
 			Slot.Enabled = (args[1] as int) as bool
-			Slot.AddTagConditional("Foreplay", (args[2] as int) as bool)
+			Slot.AddTagConditional("LeadIn", (args[2] as int) as bool)
 			Slot.AddTagConditional("Aggressive", (args[3] as int) as bool)
 		endIf
 	endWhile

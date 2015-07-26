@@ -16,6 +16,7 @@ bool IsMale
 bool IsFemale
 bool IsCreature
 bool IsVictim
+bool IsAggressor
 bool IsPlayer
 bool IsTracked
 bool IsSkilled
@@ -24,7 +25,9 @@ bool IsSkilled
 sslThreadController Thread
 int Position
 
-; string AnimEvent
+float StartWait
+string StartAnimEvent
+string EndAnimEvent
 string ActorKey
 
 ; Voice
@@ -100,7 +103,6 @@ bool function SetActor(Actor ProspectRef)
 	if !ProspectRef || ProspectRef != GetReference()
 		return false ; Failed to set prospective actor into alias
 	endIf
-	LoadShares()
 	; Init actor alias information
 	ActorRef   = ProspectRef
 	BaseRef    = ActorRef.GetLeveledActorBase()
@@ -185,22 +187,12 @@ bool DebugMode
 int[] BedStatus
 float[] RealTime
 float[] SkillBonus
-string[] AnimEvents
-string[] AdjustKey
+string AdjustKey
 bool[] IsType
-sslBaseAnimation[] sAnimation
-sslBaseAnimation property Animation hidden
-	sslBaseAnimation function get()
-		return sAnimation[0]
-	endFunction
-endProperty
-int[] sStage
-int property Stage hidden
-	int function get()
-		return sStage[0]
-	endFunction
-endProperty
 
+int Stage
+string AnimEvent
+sslBaseAnimation Animation
 
 function LoadShares()
 	DebugMode  = Config.DebugMode
@@ -209,12 +201,8 @@ function LoadShares()
 	BedStatus  = Thread.BedStatus
 	RealTime   = Thread.RealTime
 	SkillBonus = Thread.SkillBonus
-	AnimEvents = Thread.sAnimEvents
 	IsType     = Thread.IsType
-
-	AdjustKey  = Thread.sAdjustKey
-	sAnimation = Thread.sAnimation
-	sStage     = Thread.sStage
+	AdjustKey  = Thread.AdjustKey
 
 	Flags      = new int[5]
 	Offsets    = new float[4]
@@ -237,7 +225,8 @@ state Ready
 		ClearEffects()
 		; Starting Information
 		LoadShares()
-		GetPosition()
+		GetPositionInfo()
+		IsAggressor = Thread.VictimRef && Thread.Victims.Find(ActorRef) == -1
 		; Calculate scales
 		float display = ActorRef.GetScale()
 		ActorRef.SetScale(1.0)
@@ -248,16 +237,9 @@ state Ready
 		if Thread.ActorCount > 1 && Config.ScaleActors ; FIXME: || IsCreature?
 			AnimScale = (1.0 / base)
 		endIf
-		Log("display/base/animscale = "+display+"/"+base+"/"+AnimScale)
+		string LogInfo = "Scales["+display+"/"+base+"/"+AnimScale+"] "
 		; Stop movement
 		LockActor()
-		; Starting position
-		OffsetCoords(Loc, Center, Offsets)
-		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
-		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
-		ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
-		ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
-		AttachMarker()
 		; Disable autoadvance if disabled for player
 		if IsPlayer
 			if IsVictim && Config.DisablePlayer
@@ -292,9 +274,15 @@ state Ready
 			if !Voice && !IsForcedSilent
 				SetVoice(Config.VoiceSlots.PickVoice(ActorRef), IsForcedSilent)
 			endIf
+			if Voice
+				LogInfo += "Voice["+Voice.Name+"] "
+			endIf
 			; Pick an expression if needed
 			if !Expression && Config.UseExpressions
 				Expression = Config.ExpressionSlots.PickByStatus(ActorRef, IsVictim, IsType[0] && !IsVictim)
+			endIf
+			if Expression
+				LogInfo += "Expression["+Expression.Name+"] "
 			endIf
 		endIf
 		IsSkilled = !IsCreature || sslActorStats.IsSkilled(ActorRef)
@@ -311,14 +299,29 @@ state Ready
 			Skills       = Stats.GetSkillLevels(SkilledActor)
 			BestRelation = Thread.GetHighestPresentRelationshipRank(ActorRef)
 			if !IsVictim
-				BaseEnjoyment = Utility.RandomInt(BestRelation, ((Skills[Stats.kLewd]*2) as int) + (BestRelation + 1))
+				BaseEnjoyment = Utility.RandomInt(BestRelation, ((Skills[Stats.kLewd]*2.5) as int) + (BestRelation + 1))
 			endIf
-			Log("BaseEnjoyment: "+BaseEnjoyment)
+		else
+			BaseEnjoyment = Utility.RandomInt(0, 10)
 		endIf
-		; Enter animatable state - rest is non vital and can finish as queued
-		GoToState("Animating")
-		Thread.SyncEventDone("Prepare")
+		if BaseEnjoyment < 0
+			BaseEnjoyment = 0
+		endIf
+		LogInfo += "BaseEnjoyment["+BaseEnjoyment+"]"
+		Log(LogInfo)
+		; Play custom starting animation event
+		if StartAnimEvent != ""
+			Debug.SendAnimationEvent(ActorRef, StartAnimEvent)
+		endIf
+		RegisterForSingleUpdate(StartWait)
 	endFunction
+	event OnUpdate()
+		; Enter animatable state
+		GoToState("Animating")
+		if Thread.GetState() == "Prepare"
+			Thread.SyncEventDone(kPrepareActor)
+		endIf
+	endEvent
 endState
 
 ; ------------------------------------------------------- ;
@@ -326,8 +329,9 @@ endState
 ; ------------------------------------------------------- ;
 
 function PlayAnimation()
-	Utility.Wait(0.01)
-	Debug.SendAnimationEvent(ActorRef, AnimEvents[Position])
+	AnimEvent = Animation.FetchPositionStage(Position, Stage)
+	Debug.SendAnimationEvent(ActorRef, AnimEvent)
+	Log("PlayAnimation: "+AnimEvent)
 	Utility.Wait(0.2)
 endFunction
 
@@ -335,6 +339,13 @@ float LoopDelay
 state Animating
 
 	function StartAnimating()
+		; Starting position
+		OffsetCoords(Loc, Center, Offsets)
+		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
+		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
+		ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
+		ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
+		AttachMarker()
 		; TODO: Add a light source option here. (possibly with frostfall benefit?)
 		; Remove from bard audience if in one
 		Config.CheckBardAudience(ActorRef, true)
@@ -352,6 +363,12 @@ state Animating
 	endFunction
 
 	event OnUpdate()
+		; Debug.Trace("(alias update)")
+		; Pause further updates if in menu
+		while Utility.IsInMenuMode()
+			Utility.WaitMenuMode(1.5)
+			StartedAt += 1.0
+		endWhile
 		; Check if still among the living and able.
 		if ActorRef.IsDisabled() || (ActorRef.IsDead() && ActorRef.GetActorValue("Health") < 1.0)
 			Log("Actor is disabled or has no health - Unable to continue animating")
@@ -372,9 +389,17 @@ state Animating
 		RegisterForSingleUpdate(VoiceDelay * 0.35)
 	endEvent
 
+	function RefreshActor()
+		GoToState("Animating")
+		SyncThread()
+		SyncLocation(true)
+		RegisterForSingleUpdate(1.0)
+		Thread.SyncEventDone(kRefreshActor)
+	endFunction
+
 	function SyncThread()
 		; Sync with thread info
-		GetPosition()
+		GetPositionInfo()
 		VoiceDelay = BaseDelay
 		if !IsSilent && Stage > 1
 			VoiceDelay -= (Stage * 0.8) + Utility.RandomFloat(-0.2, 0.4)
@@ -383,15 +408,15 @@ state Animating
 			endIf
 		endIf
 
+		; Update alias info
+		GetEnjoyment()
+
 		; Sync status		
 		if !IsCreature
 			ResolveStrapon()
 			RefreshExpression()
 		endIf
-
-		; Update alias info
-		GetEnjoyment()
-		Log("Enjoyment: "+Enjoyment+" SOS: "+Schlong)
+		; Log("Enjoyment: "+Enjoyment+" SOS: "+Schlong)
 		Utility.Wait(0.01)
 		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
 		Utility.Wait(0.1)
@@ -401,11 +426,16 @@ state Animating
 	function SyncActor()
 		SyncThread()
 		SyncLocation(false)
-		Thread.SyncEventDone("Sync")
+		Thread.SyncEventDone(kSyncActor)
+	endFunction
+
+	function SyncAll(bool Force = false)
+		SyncThread()
+		SyncLocation(Force)
 	endFunction
 
 	function RefreshLoc()
-		Offsets = Animation.PositionOffsets(Offsets, AdjustKey[0], Position, Stage, BedStatus[1])
+		Offsets = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedStatus[1])
 		SyncLocation(true)
 	endFunction
 
@@ -416,7 +446,7 @@ state Animating
 		; Avoid forcibly setting on player coords if avoidable - causes annoying graphical flickering
 		if Force && IsPlayer && IsInPosition(ActorRef, MarkerRef, 40.0)
 			AttachMarker()
-			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 5000, 0)
+			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 10000, 0)
 			return ; OnTranslationComplete() will take over when in place
 		elseIf Force
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
@@ -433,7 +463,7 @@ state Animating
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			AttachMarker()
 		elseIf ActorRef.GetDistance(MarkerRef) > 0.5
-			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 5000, 0)
+			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 10000, 0)
 			return ; OnTranslationComplete() will take over when in place
 		endIf
 		; Begin very slowly rotating a small amount to hold position
@@ -446,16 +476,16 @@ state Animating
 		Snap()
 	endEvent
 
-	function OnOrgasm()
+	;/ function OnOrgasm()
 		Enjoyment += 100
 		OrgasmEffect()
-		Thread.SyncEventDone("Orgasm")
-	endfunction
+	endfunction /;
 
 	function OrgasmEffect()
 		Orgasms += 1
+		Enjoyment += (100 - Enjoyment)
 		BaseEnjoyment -= Enjoyment
-		Log("Orgasms: "+Orgasms+" Enjoyment: "+Enjoyment+" BaseEnjoyment: "+BaseEnjoyment)
+		Log("Orgasms["+Orgasms+"] Enjoyment ["+Enjoyment+"] BaseEnjoyment["+BaseEnjoyment+"]")
 
 		; Apply cum to female positions from male position orgasm
 		int i = Thread.ActorCount
@@ -511,10 +541,8 @@ state Animating
 		Log("Resetting!")
 		; Update stats
 		if !IsCreature
-			; Log("Stats BEFORE: "+sslActorStats.GetSkills(ActorRef))
 			sslActorStats.RecordThread(ActorRef, Gender, BestRelation, StartedAt, Utility.GetCurrentRealTime(), Utility.GetCurrentGameTime(), Thread.HasPlayer, Thread.VictimRef, Thread.Genders, Thread.SkillXP)
-			; Log("Stats AFTER: "+sslActorStats.GetSkills(ActorRef))
-			; Stats.RecordThread(ActorRef, (IsPlayer || Thread.HasPlayer), Thread.ActorCount, BestRelation, (Utility.GetCurrentRealTime() - StartedAt), Thread.VictimRef, Thread.SkillXP, Thread.Genders)
+			Stats.AddPartners(ActorRef, Thread.Positions, Thread.Victims)
 		endIf
 		; Apply cum
 		int CumID = Animation.GetCum(Position)
@@ -527,7 +555,7 @@ state Animating
 		endIf
 		; Tracked events
 		TrackedEvent("End")
-		StopAnimating(Thread.FastEnd)
+		StopAnimating(Thread.FastEnd, EndAnimEvent)
 		RestoreActorDefaults()
 		UnlockActor()
 		; Unstrip items in storage, if any
@@ -545,7 +573,7 @@ state Animating
 		; Free alias slot
 		Clear()
 		GoToState("")
-		Thread.SyncEventDone("Reset")
+		Thread.SyncEventDone(kResetActor)
 	endEvent
 endState
 
@@ -559,15 +587,13 @@ state Resetting
 endState
 
 function SyncAll(bool Force = false)
-	SyncThread()
-	SyncLocation(Force)
 endFunction
 
 ; ------------------------------------------------------- ;
 ; --- Actor Manipulation                              --- ;
 ; ------------------------------------------------------- ;
 
-function StopAnimating(bool Quick = false)
+function StopAnimating(bool Quick = false, string ResetAnim = "IdleForceDefaultState")
 	if !ActorRef
 		return
 	endIf
@@ -586,15 +612,16 @@ function StopAnimating(bool Quick = false)
 		Debug.SendAnimationEvent(ActorRef, "FNISDefault")
 		Debug.SendAnimationEvent(ActorRef, "IdleReturnToDefault")
 		Debug.SendAnimationEvent(ActorRef, "ForceFurnExit")
-		ActorRef.Moveto(ActorRef)
-		ActorRef.PushActorAway(ActorRef, 0.75)
+		if ResetAnim != "IdleForceDefaultState" && ResetAnim != ""
+			ActorRef.Moveto(ActorRef)
+			ActorRef.PushActorAway(ActorRef, 0.75)
+		endIf
 	else
 		; Reset NPC/PC Idle Quickly
-		Utility.Wait(0.01)
-		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
+		Debug.SendAnimationEvent(ActorRef, ResetAnim)
 		Utility.Wait(0.1)
 		; Ragdoll NPC/PC if enabled and not in TFC
-		if !Quick && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
+		if !Quick && ResetAnim != "" && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
 			ActorRef.Moveto(ActorRef)
 			ActorRef.PushActorAway(ActorRef, 0.1)
 		endIf
@@ -728,6 +755,9 @@ function SetVictim(bool Victimize)
 		endIf
 	endIf
 	IsVictim = Victimize
+	if IsVictim
+		IsAggressor = false
+	endIf
 endFunction
 
 bool function IsVictim()
@@ -737,6 +767,13 @@ endFunction
 string function GetActorKey()
 	return ActorKey
 endFunction
+
+function SetAdjustKey(string KeyVar)
+	if ActorRef
+		AdjustKey = KeyVar
+		Position  = Thread.Positions.Find(ActorRef)
+	endIf
+endfunction
 
 int function GetEnjoyment()
 	if !ActorRef
@@ -748,7 +785,7 @@ int function GetEnjoyment()
 			Thread.RecordSkills()
 			Thread.SetBonuses()
 		endIf
-		Enjoyment = BaseEnjoyment + CalcEnjoyment(SkillBonus, Skills, Thread.LeadIn, IsFemale, (RealTime[0] - StartedAt), Stage, Animation.StageCount)
+		Enjoyment = BaseEnjoyment + CalcEnjoyment(Thread.SkillBonus, Skills, Thread.LeadIn, IsFemale, (RealTime[0] - StartedAt), Stage, Animation.StageCount)
 		if Enjoyment < 0
 			Enjoyment = 0
 		elseIf Enjoyment >= 100
@@ -816,6 +853,15 @@ endFunction
 
 sslBaseExpression function GetExpression()
 	return Expression
+endFunction
+
+function SetStartAnimationEvent(string EventName, float PlayTime)
+	StartAnimEvent = EventName
+	StartWait = PapyrusUtil.ClampFloat(PlayTime, 0.1, 10.0)
+endFunction
+
+function SetEndAnimationEvent(string EventName)
+	EndAnimEvent = EventName
 endFunction
 
 bool function IsUsingStrapon()
@@ -1011,12 +1057,16 @@ function RefreshExpression()
 	endIf
 endFunction
 
-function GetPosition()
+function GetPositionInfo()
 	if ActorRef
-		Position = Thread.Positions.Find(ActorRef)
-		Flags    = Animation.PositionFlags(Flags, AdjustKey[0], Position, Stage)
-		Offsets  = Animation.PositionOffsets(Offsets, AdjustKey[0], Position, Stage, BedStatus[1])
-		AnimEvents[Position] = Animation.FetchPositionStage(Position, Stage)
+		if !AdjustKey
+			SetAdjustKey(Thread.AdjustKey)
+		endIf
+		Stage     = Thread.Stage
+		Animation = Thread.Animation
+		Flags     = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
+		Offsets   = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedStatus[1])
+		AnimEvent = Animation.FetchPositionStage(Position, Stage)
 	endIf
 endFunction
 
@@ -1042,35 +1092,49 @@ function ClearEffects()
 	endIf
 endFunction
 
+int property kPrepareActor = 0 autoreadonly hidden
+int property kSyncActor    = 1 autoreadonly hidden
+int property kResetActor   = 2 autoreadonly hidden
+int property kRefreshActor = 3 autoreadonly hidden
+
 function RegisterEvents()
 	string e = Thread.Key("")
-	RegisterForModEvent(e+"Prepare", "PrepareActor")
-	RegisterForModEvent(e+"Reset", "ResetActor")
-	RegisterForModEvent(e+"Sync", "SyncActor")
-	RegisterForModEvent(e+"Orgasm", "OnOrgasm")
-	RegisterForModEvent(e+"Strip", "Strip")
-	RegisterForModEvent(e+"Animate", "PlayAnimation")
+	; Quick Events
 	RegisterForModEvent(e+"Start", "StartAnimating")
+	RegisterForModEvent(e+"Animate", "PlayAnimation")
+	RegisterForModEvent(e+"Orgasm", "OrgasmEffect")
+	RegisterForModEvent(e+"Strip", "Strip")
+	; Sync Events
+	RegisterForModEvent(e+"Prepare", "PrepareActor")
+	RegisterForModEvent(e+"Sync", "SyncActor")
+	RegisterForModEvent(e+"Reset", "ResetActor")
+
+	RegisterForModEvent(e+"Refresh", "RefreshActor")
 endFunction
 
 function ClearEvents()
+	Log("CLEARING EVENTS")
 	GoToState("")
 	UnregisterForUpdate()
 	string e = Thread.Key("")
-	UnregisterForModEvent(e+"Prepare")
-	UnregisterForModEvent(e+"Reset")
-	UnregisterForModEvent(e+"Sync")
+	; Quick Events
+	UnregisterForModEvent(e+"Start")
+	UnregisterForModEvent(e+"Animate")
 	UnregisterForModEvent(e+"Orgasm")
 	UnregisterForModEvent(e+"Strip")
-	UnregisterForModEvent(e+"Animate")
-	UnregisterForModEvent(e+"Start")
+	; Sync Events
+	UnregisterForModEvent(e+"Prepare")
+	UnregisterForModEvent(e+"Sync")
+	UnregisterForModEvent(e+"Reset")
+
+	UnregisterForModEvent(e+"Refresh")
 endFunction
 
 function Initialize()
-	; Stop events
-	ClearEvents()
 	; Clear actor
 	if ActorRef
+		; Stop events
+		ClearEvents()
 		; Remove nudesuit if present
 		if ActorRef.GetItemCount(Config.NudeSuit) > 0
 			ActorRef.RemoveItem(Config.NudeSuit, ActorRef.GetItemCount(Config.NudeSuit), true)
@@ -1098,11 +1162,14 @@ function Initialize()
 	NoUndress      = false
 	NoRedress      = false
 	; Floats
-	ActorScale     = 0.0
-	AnimScale      = 0.0
 	BestRelation   = 0
 	BaseEnjoyment  = 0
+	ActorScale     = 0.0
+	AnimScale      = 0.0
+	StartWait      = 0.1
 	; Strings
+	EndAnimEvent   = "IdleForceDefaultState"
+	StartAnimEvent = ""
 	ActorKey       = ""
 	; Storage
 	StripOverride  = Utility.CreateBoolArray(0)
@@ -1124,6 +1191,7 @@ function Setup()
 	PlayerRef = Game.GetPlayer()
 	Thread    = GetOwningQuest() as sslThreadController
 	OrgasmFX  = Config.OrgasmFX
+	DebugMode = Config.DebugMode
 endFunction
 
 function Log(string msg, string src = "")
@@ -1160,9 +1228,10 @@ function OrgasmEffect()
 endFunction
 event ResetActor()
 endEvent
+function RefreshActor()
+endFunction
 event OnOrgasm()
 	OrgasmEffect()
-	Thread.SyncEventDone("Orgasm")
 endEvent
 
 function OffsetCoords(float[] Output, float[] CenterCoords, float[] OffsetBy) global native

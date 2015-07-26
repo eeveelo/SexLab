@@ -13,11 +13,11 @@ FormList property BedRollsList auto hidden
 
 bool function CheckActor(Actor CheckRef, int CheckGender = -1)
 	int IsGender = ActorLib.GetGender(CheckRef)
-	return (CheckGender != 2 && IsGender != 2 && (CheckGender == -1 || IsGender == CheckGender) && ActorLib.IsValidActor(CheckRef))
+	return ((CheckGender < 2 && IsGender < 2) || (CheckGender >= 2 && IsGender >= 2)) && (CheckGender == -1 || IsGender == CheckGender) && ActorLib.IsValidActor(CheckRef)
 endFunction
 
 Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none)
-	if !CenterRef || FindGender > 2 || FindGender < -1 || Radius < 0.1
+	if !CenterRef || FindGender > 3 || FindGender < -1 || Radius < 0.1
 		return none ; Invalid args
 	endIf
 	; Create supression list
@@ -41,10 +41,21 @@ Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000
 	return none
 endFunction
 
+Actor function FindAvailableCreature(ObjectReference CenterRef, float Radius = 5000.0, string CreatureType = "", int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none)
+	if !CenterRef || FindGender > 3 || FindGender < -1 || Radius < 0.1
+		return none ; Invalid args
+	endIf
+	if FindGender == 0
+		FindGender = 2
+	elseIf FindGender == 1
+		FindGender = 3
+	endIf
+endFunction
+
 ; TODO: probably needs some love
 Actor[] function FindAvailablePartners(actor[] Positions, int total, int males = -1, int females = -1, float radius = 10000.0)
 	int needed = (total - Positions.Length)
-	if needed <= 0 || Positions.Length < 1
+	if needed <= 0
 		return Positions ; Nothing to do
 	endIf
 	; Get needed gender counts based on current counts

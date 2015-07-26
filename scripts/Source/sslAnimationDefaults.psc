@@ -1724,7 +1724,7 @@ function DarkInvestigationsBlowjob(int id)
 	Base.SetStageSoundFX(4, none)
 	Base.SetStageTimer(4, 12.0)
 
-	Base.SetTags("Sex,Dark Investigations,zDI,Athstai,Handjob,Blowjob,Oral,Dirty")
+	Base.SetTags("Sex,Dark Investigations,zDI,Athstai,Standing,Handjob,Blowjob,Oral,Dirty")
 
 	Base.Save(id)
 endFunction

@@ -31,6 +31,7 @@ Actor[] property Positions auto hidden
 Actor[] property Victims auto hidden
 Actor property VictimRef auto hidden
 Actor property PlayerRef auto hidden
+Form[] property ActorForms auto hidden
 
 ; Thread status
 ; bool[] property Status auto hidden
@@ -43,38 +44,12 @@ bool property FastEnd auto hidden
 Race property CreatureRef auto hidden
 
 ; Animation Info
-int[] property sStage auto hidden
-int property Stage hidden
-	int function get()
-		return sStage[0]
-	endFunction
-	function set(int value)
-		sStage[0] = value
-	endFunction
-endProperty
+int property Stage auto hidden
 int property ActorCount auto hidden
 Sound property SoundFX auto hidden
-string[] property sAdjustKey auto hidden
-string property AdjustKey hidden
-	string function get()
-		return sAdjustKey[0]
-	endFunction
-	function set(string value)
-		sAdjustKey[0] = value
-	endFunction
-endProperty
-string[] property sAnimEvents auto hidden
+string property AdjustKey auto hidden
 
-sslBaseAnimation[] property sAnimation auto hidden
-sslBaseAnimation property Animation hidden
-	sslBaseAnimation function get()
-		return sAnimation[0]
-	endFunction
-	function set(sslBaseAnimation value)
-		sAnimation[0] = value
-	endFunction
-endProperty
-
+sslBaseAnimation property Animation auto hidden
 sslBaseAnimation[] CustomAnimations
 sslBaseAnimation[] PrimaryAnimations
 sslBaseAnimation[] LeadAnimations
@@ -247,6 +222,7 @@ string[] Tags
 string ActorKeys
 
 ; Debug testing
+bool property DebugMode auto hidden
 float property t auto hidden
 
 ; ------------------------------------------------------- ;
@@ -264,13 +240,6 @@ state Making
 		RegisterForModEvent(Key(EventTypes[1]+"Done"), EventTypes[1]+"Done")
 		RegisterForModEvent(Key(EventTypes[2]+"Done"), EventTypes[2]+"Done")
 		RegisterForModEvent(Key(EventTypes[3]+"Done"), EventTypes[3]+"Done")
-		RegisterForModEvent(Key(EventTypes[4]+"Done"), EventTypes[4]+"Done")
-		; Alias Events
-		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_0", "AliasEventDone")
-		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_1", "AliasEventDone")
-		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_2", "AliasEventDone")
-		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_3", "AliasEventDone")
-		RegisterForModEvent("SSL_AliasEventDone_"+thread_id+"_4", "AliasEventDone")
 	endEvent
 
 	int function AddActor(Actor ActorRef, bool IsVictim = false, sslBaseVoice Voice = none, bool ForceSilent = false)
@@ -295,6 +264,7 @@ state Making
 		endIf
 		; Update position info
 		Positions  = PapyrusUtil.PushActor(Positions, ActorRef)
+		ActorForms = PapyrusUtil.PushForm(ActorForms, ActorRef)
 		ActorCount = Positions.Length
 		; Update gender counts
 		int g      = Slot.GetGender()
@@ -518,12 +488,20 @@ function DisableUndressAnimation(Actor ActorRef, bool disabling = true)
 	ActorAlias(ActorRef).DoUndress = !disabling
 endFunction
 
+function DisableRedress(Actor ActorRef, bool disabling = true)
+	ActorAlias(ActorRef).DoRedress = !disabling
+endFunction
+
 function DisableRagdollEnd(Actor ActorRef, bool disabling = true)
 	ActorAlias(ActorRef).DoRagdoll = !disabling
 endFunction
 
-function DisableRedress(Actor ActorRef, bool disabling = true)
-	ActorAlias(ActorRef).DoRedress = !disabling
+function SetStartAnimationEvent(Actor ActorRef, string EventName = "", float PlayTime = 0.1)
+	ActorAlias(ActorRef).SetStartAnimationEvent(EventName, PlayTime)
+endFunction
+
+function SetEndAnimationEvent(Actor ActorRef, string EventName = "IdleForceDefaultState")
+	ActorAlias(ActorRef).SetEndAnimationEvent(EventName)
 endFunction
 
 ; Voice
@@ -669,12 +647,12 @@ function ChangeActors(Actor[] NewPositions)
 	Genders    = NewGenders
 	Positions  = NewPositions
 	ActorCount = NewPositions.Length
-	HasPlayer  = NewPositions.Find(PlayerRef)
-	ActorAlias[0].GetPosition()
-	ActorAlias[1].GetPosition()
-	ActorAlias[2].GetPosition()
-	ActorAlias[3].GetPosition()
-	ActorAlias[4].GetPosition()
+	HasPlayer  = NewPositions.Find(PlayerRef) != -1
+	ActorAlias[0].GetPositionInfo()
+	ActorAlias[1].GetPositionInfo()
+	ActorAlias[2].GetPositionInfo()
+	ActorAlias[3].GetPositionInfo()
+	ActorAlias[4].GetPositionInfo()
 	; Select new animations for changed actor count
 	if PrimaryAnimations[0].PositionCount != ActorCount
 		SetAnimations(AnimSlots.GetByDefault(NewGenders[0], NewGenders[1], IsType[0], (BedRef != none), Config.RestrictAggressive))
@@ -698,15 +676,12 @@ function ChangeActors(Actor[] NewPositions)
 				Log("ChangeActors("+NewPositions+") -- Failed to add new actor '"+Positions[i].GetLeveledActorBase().GetName()+"' -- They were unable to fill an actor alias", "FATAL")
 				return
 			endIf
+			ActorForms = PapyrusUtil.PushForm(ActorForms, Positions[i])
 			Slot.DoUndress = false
 			Slot.PrepareActor()
 			Slot.StartAnimating()
 		endIf
 	endWhile
-	; New adjustment profile
-	; UpdateActorKey()
-	UpdateAdjustKey()
-	Log(sAdjustKey[0], "Adjustment Profile")
 	; Reposition actors
 	RealignActors()
 	RegisterForSingleUpdate(0.1)
@@ -1000,6 +975,13 @@ endFunction
 string[] EventTypes
 float[] AliasTimer
 int[] AliasDone
+float SyncTimer
+int SyncDone
+
+int property kPrepareActor   = 0 autoreadonly hidden
+int property kSyncActor      = 1 autoreadonly hidden
+int property kResetActor     = 2 autoreadonly hidden
+int property kRefreshActor   = 3 autoreadonly hidden
 
 string function Key(string Callback)
 	return "SSL_"+thread_id+"_"+Callback
@@ -1009,19 +991,47 @@ function QuickEvent(string Callback)
 	ModEvent.Send(ModEvent.Create(Key(Callback)))
 endfunction
 
-function SyncEvent(string Callback, float WaitTime)
-	int id = EventTypes.Find(Callback)
-	if AliasTimer[id] == 0.0
-		AliasTimer[id] = RealTime[0] + WaitTime
+function SyncEvent(int id, float WaitTime)
+	if SyncTimer <= 0 || SyncTimer < Utility.GetCurrentRealTime()
+		SyncDone  = 0
+		SyncTimer = Utility.GetCurrentRealTime() + WaitTime
 		RegisterForSingleUpdate(WaitTime)
-		ModEvent.Send(ModEvent.Create(Key(Callback)))
+ 		ModEvent.Send(ModEvent.Create(Key(EventTypes[id])))
 	else
-		Log(Callback+" sync event attempting to start during previous wait sync")
+		Log(EventTypes[id]+" sync event attempting to start during previous wait sync")
+		RegisterForSingleUpdate(WaitTime * 0.25)
 	endIf
 endFunction
 
-function SyncEventDone(string Callback)
-	int id = EventTypes.Find(Callback)
+function SyncEventDone(int id)
+	if SyncTimer != 0.0
+		SyncDone += 1
+		if SyncDone >= ActorCount
+			UnregisterforUpdate()
+			if DebugMode
+				Log("Lag Timer: " + (SyncTimer - Utility.GetCurrentRealTime()), "SyncDone("+EventTypes[id]+")")
+			endIf
+			SyncDone  = 0
+			SyncTimer = 0.0
+			ModEvent.Send(ModEvent.Create(Key(EventTypes[id]+"Done")))
+		endIf
+	else
+		Log("WARNING: SyncEventDone("+id+") OUT OF TURN")
+	endIf
+endFunction
+
+;/ function SyncEvent(int id, float WaitTime)
+	if AliasTimer[id] <= 0.0 || AliasTimer[id] < Utility.GetCurrentRealTime()
+		RegisterForSingleUpdate(WaitTime)
+		AliasTimer[id] = Utility.GetCurrentRealTime() + WaitTime
+ 		ModEvent.Send(ModEvent.Create(Key(Callback)))
+	else
+		Log(Callback+" sync event attempting to start during previous wait sync")
+		RegisterForSingleUpdate(WaitTime * 0.25)
+	endIf
+endFunction
+
+function SyncEventDone(int id)
 	if AliasTimer[id] != 0.0
 		AliasDone[id] = AliasDone[id] + 1
 		if AliasDone[id] >= ActorCount
@@ -1031,8 +1041,11 @@ function SyncEventDone(string Callback)
 			AliasDone[id]  = 0
 			ModEvent.Send(ModEvent.Create(Key(EventTypes[id]+"Done")))
 		endIf
+	else
+		Log("WARNING: SyncEventDone("+id+") OUT OF TURN")
 	endIf
-endFunction
+endFunction /;
+
 
 function SendTrackedEvent(Actor ActorRef, string Hook = "")
 	; Append hook type, global if empty
@@ -1096,7 +1109,7 @@ endFunction
 
 function UpdateAdjustKey()
 	if !Config.RaceAdjustments
-		sAdjustKey[0] = "Global"
+		AdjustKey = "Global"
 	else
 		int i
 		string NewKey
@@ -1107,8 +1120,13 @@ function UpdateAdjustKey()
 				NewKey += "."
 			endIf
 		endWhile
-		sAdjustKey[0] = NewKey
+		AdjustKey = NewKey
 	endIf
+	ActorAlias[0].SetAdjustKey(AdjustKey)
+	ActorAlias[1].SetAdjustKey(AdjustKey)
+	ActorAlias[2].SetAdjustKey(AdjustKey)
+	ActorAlias[3].SetAdjustKey(AdjustKey)
+	ActorAlias[4].SetAdjustKey(AdjustKey)
 endFunction
 
 sslActorAlias function PickAlias(Actor ActorRef)
@@ -1135,13 +1153,6 @@ function ResolveTimers()
 endFunction
 
 function SetTID(int id)
-	thread_id = id
-	PlayerRef = Game.GetPlayer()
-
-	; Watch for SexLabDebugMode event
-	RegisterForModEvent("SexLabDebugMode", "SetDebugMode")
-	DebugMode = Config.DebugMode
-
 	; Reset function Libraries - SexLabQuestFramework
 	if !Config || !ThreadLib || !ActorLib
 		Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
@@ -1166,13 +1177,16 @@ function SetTID(int id)
 		endIf
 	endIf
 
+	thread_id = id
+	PlayerRef = Game.GetPlayer()
+	DebugMode = Config.DebugMode
+	
 	; Init thread info
-	EventTypes = new string[5]
-	EventTypes[0] = "Sync"
-	EventTypes[1] = "Prepare"
+	EventTypes = new string[4]
+	EventTypes[0] = "Prepare"
+	EventTypes[1] = "Sync"
 	EventTypes[2] = "Reset"
-	EventTypes[3] = "Strip"
-	EventTypes[4] = "Orgasm"
+	EventTypes[3] = "Refresh"
 
 	ActorAlias = new sslActorAlias[5]
 	ActorAlias[0] = GetNthAlias(0) as sslActorAlias
@@ -1193,22 +1207,29 @@ function SetTID(int id)
 endFunction
 
 function InitShares()
-	sAnimation     = new sslBaseAnimation[1]
-	sAnimEvents    = new string[5]
-	sAdjustKey     = new string[1]
+	DebugMode      = Config.DebugMode
+	;/ sAnimation     = new sslBaseAnimation[1]
+	sAnimEvents    = new string[5] /;
 	BedStatus      = new int[2]
-	sStage         = new int[1]
-	AliasDone      = new int[5]
+	; sStage         = new int[1]
+	AliasDone      = new int[6]
 	RealTime       = new float[1]
-	AliasTimer     = new float[5]
+	AliasTimer     = new float[6]
 	SkillXP        = new float[6]
 	SkillBonus     = new float[6]
 	CenterLocation = new float[6]
 	IsType         = new bool[6]
+
+	if EventTypes.Length != 4 || EventTypes.Find("") != -1
+		EventTypes = new string[4]
+		EventTypes[0] = "Prepare"
+		EventTypes[1] = "Sync"
+		EventTypes[2] = "Reset"
+		EventTypes[3] = "Refresh"
+	endIf
 endFunction
 function Initialize()
 	UnregisterForUpdate()
-	DebugMode = Config.DebugMode
 	; Clear aliases
 	ActorAlias[0].ClearAlias()
 	ActorAlias[1].ClearAlias()
@@ -1231,9 +1252,11 @@ function Initialize()
 	UseCustomTimers= false
 	; Floats
 	StartedAt      = 0.0
+	SyncDone       = 0
 	; Integers
 	Stage          = 1
 	ActorCount     = 0
+	SyncTimer      = 0.0
 
 	; Storage Data
 	Animation         = none
@@ -1245,32 +1268,10 @@ function Initialize()
 	Hooks             = Utility.CreateStringArray(0)
 	Tags              = Utility.CreateStringArray(0)
 	CustomTimers      = Utility.CreateFloatArray(0)
+	ActorForms        = Utility.CreateFormArray(0)
 	; Enter thread selection pool
 	GoToState("Unlocked")
 endFunction
-
-bool property DebugMode auto hidden
-event SetDebugMode(bool ToMode)
-	DebugMode = ToMode
-	; SexLabUtil.PrintConsole("SEXLABTEST: "+self+ "SET DEBUG MODE ["+ToMode+"]")
-	; Debug.Trace("SEXLABTEST: "+self+ "SET DEBUG MODE ["+ToMode+"]")
-endEvent
-
-; int[] property IntShare auto hidden ; Stage, ActorCount, BedTypeID
-; float[] property FloatShare auto hidden ; RealTime, StartedAt
-; string[] property StringShare auto hidden ; AdjustKey
-; bool[] property BoolShare auto hidden ; 
-; sslBaseAnimation[] property _Animation auto hidden ; Animation
-
-; sslBaseAnimation property Animation hidden
-; 	sslBaseAnimation function get()
-; 		return _Animation[0]
-; 	endFunction
-; 	function set(sslBaseAnimation value)
-; 		_Animation[0] = value
-; 	endfunction
-; endProperty
-
 
 ; ------------------------------------------------------- ;
 ; --- State Restricted                                --- ;
@@ -1310,6 +1311,8 @@ function EndAction()
 endFunction
 function SyncDone()
 endFunction
+function RefreshDone()
+endFunction
 function PrepareDone()
 endFunction
 function ResetDone()
@@ -1347,10 +1350,3 @@ endfunction
 function SetBedding(int flag = 0)
 	SetBedFlag(flag)
 endFunction
-
-; bool function _SendThreadEvent(string eventName, bool withPlayer) native
-; function TestEvent(string eventName, bool withPlayer = false) global
-	; sslThreadController Thread = SexLabUtil.GetAPI().Threads[2]
-	; Thread._SetupID(Thread.tid)
-	; Thread._SendThreadEvent(eventName, withPlayer)
-; endFunction

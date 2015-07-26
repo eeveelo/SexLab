@@ -23,10 +23,21 @@ endFunction
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	Config = SexLab.Config
 
-	Log(sslUtility.GetAnimationNames(SexLab.GetAnimationsByTag(1, "Masturbation,M", RequireAll = true)))
-	Log(sslUtility.GetAnimationNames(SexLab.GetAnimationsByTag(1, "Masturbation,M", RequireAll = false)))
+	sslThreadModel Thread = SexLab.NewThread()
+	Thread.AddActor(CasterRef)
+	Thread.AddActor(TargetRef)
 
-	Benchmark(2, 2000, 7)
+	sslBaseAnimation[] Anims = new sslBaseAnimation[3]
+	Anims[0] = SexLab.GetAnimationByRegistry("ArrokLegUp")
+	Anims[1] = SexLab.GetAnimationByRegistry("ArrokOral")
+	Anims[2] = SexLab.GetAnimationByRegistry("ArrokBoobjob")
+
+	Thread.SetAnimations(Anims)
+	; Thread.SetStartAnimationEvent(TargetRef, "Arrok_Undress_G0", 5.0)
+	; Thread.SetEndAnimationEvent(CasterRef, "Arrok_Undress_G1")
+	; Thread.SetEndAnimationEvent(TargetRef, "")
+
+	Thread.StartThread()
 
 	; Log("-- PRE AUDIENCE --")
 	; Log(GetAudience())
