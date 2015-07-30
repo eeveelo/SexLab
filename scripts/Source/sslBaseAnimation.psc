@@ -251,11 +251,11 @@ float[] function PositionOffsets(float[] Output, string AdjustKey, int Position,
 			if BedTypeID == 1
 				Output[2] = Output[2] + BedOffset[2] ; Only on non-bedrolls
 			endIf
-		; else
-		; 	Output[0] = Output[0] + 30.0
-		; 	if BedTypeID == 1
-		; 		Output[2] = Output[2] + 37.0 ; Only on non-bedrolls
-		; 	endIf
+		else
+			Output[0] = Output[0] + 30.0
+			if BedTypeID == 1
+				Output[2] = Output[2] + 37.0 ; Only on non-bedrolls
+			endIf
 		endIf
 	endIf
 	_PositionOffsets(Registry, AdjustKey+"."+Position, LastKeys[Position], Stage, Output)

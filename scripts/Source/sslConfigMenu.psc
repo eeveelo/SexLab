@@ -1,4 +1,4 @@
-scriptname sslConfigMenu extends SKI_ConfigBase
+                              scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
 import PapyrusUtil

@@ -324,56 +324,56 @@ state Animating
 	endFunction
 
 	event OnKeyDown(int KeyCode)
-		StateCheck()
+		; StateCheck()
 		if hkReady && !Utility.IsInMenuMode() ; || UI.IsMenuOpen("Console") || UI.IsMenuOpen("Loading Menu")
 			hkReady = false
 			int i = Hotkeys.Find(KeyCode)
 			; Advance Stage
-			if i == AdvanceAnimation
+			if i == kAdvanceAnimation
 				AdvanceStage(Config.BackwardsPressed())
 
 			; Change Animation
-			elseIf i == ChangeAnimation
+			elseIf i == kChangeAnimation
 				ChangeAnimation(Config.BackwardsPressed())
 
 			; Forward / Backward adjustments
-			elseIf i == AdjustForward
+			elseIf i == kAdjustForward
 				AdjustForward(Config.BackwardsPressed(), Config.AdjustStagePressed())
 
 			; Up / Down adjustments
-			elseIf i == AdjustUpward
+			elseIf i == kAdjustUpward
 				AdjustUpward(Config.BackwardsPressed(), Config.AdjustStagePressed())
 
 			; Left / Right adjustments
-			elseIf i == AdjustSideways
+			elseIf i == kAdjustSideways
 				AdjustSideways(Config.BackwardsPressed(), Config.AdjustStagePressed())
 
 			; Rotate Scene
-			elseIf i == RotateScene
+			elseIf i == kRotateScene
 				RotateScene(Config.BackwardsPressed())
 
 			; Change Adjusted Actor
-			elseIf i == AdjustChange
+			elseIf i == kAdjustChange
 				AdjustChange(Config.BackwardsPressed())
 
 			; RePosition Actors
-			elseIf i == RealignActors
+			elseIf i == kRealignActors
 				ResetPositions(Config.BackwardsPressed())
 
 			; Change Positions
-			elseIf i == ChangePositions
+			elseIf i == kChangePositions
 				ChangePositions(Config.BackwardsPressed())
 
 			; Restore animation offsets
-			elseIf i == RestoreOffsets
+			elseIf i == kRestoreOffsets
 				RestoreOffsets()
 
 			; Move Scene
-			elseIf i == MoveScene
+			elseIf i == kMoveScene
 				MoveScene()
 
 			; EndAnimation
-			elseIf i == EndAnimation
+			elseIf i == kEndAnimation
 				EndAnimation(true)
 
 			endIf
@@ -408,9 +408,9 @@ endState
 
 state Refresh
 	event OnBeginState()
-		SyncEvent(kSyncActor, 10.0)
+		SyncEvent(kRefreshActor, 10.0)
 	endEvent
-	function SyncDone()
+	function RefreshDone()
 		RegisterForSingleUpdate(0.1)
 	endFunction
 	event OnUpdate()
@@ -443,27 +443,6 @@ function ClearIdles()
 		Debug.SendAnimationEvent(Positions[3], "IdleForceDefaultState")
 		Debug.SendAnimationEvent(Positions[4], "IdleForceDefaultState")
 	endIf
-	;/ if ActorCount == 1
-		PositionAlias(0).StopAnimating(true)
-	elseIf ActorCount == 2
-		PositionAlias(0).StopAnimating(true)
-		PositionAlias(1).StopAnimating(true)
-	elseIf ActorCount == 3
-		PositionAlias(0).StopAnimating(true)
-		PositionAlias(1).StopAnimating(true)
-		PositionAlias(2).StopAnimating(true)
-	elseIf ActorCount == 4
-		PositionAlias(0).StopAnimating(true)
-		PositionAlias(1).StopAnimating(true)
-		PositionAlias(2).StopAnimating(true)
-		PositionAlias(3).StopAnimating(true)
-	elseIf ActorCount == 5
-		PositionAlias(0).StopAnimating(true)
-		PositionAlias(1).StopAnimating(true)
-		PositionAlias(2).StopAnimating(true)
-		PositionAlias(3).StopAnimating(true)
-		PositionAlias(4).StopAnimating(true)
-	endIf /;
 	; Utility.Wait(0.3)
 endFunction
 
@@ -665,18 +644,18 @@ endFunction
 function EnableHotkeys(bool forced = false)
 	if HasPlayer || forced
 		Hotkeys = new int[12]
-		Hotkeys[AdvanceAnimation] = Config.AdvanceAnimation
-		Hotkeys[ChangeAnimation]  = Config.ChangeAnimation
-		Hotkeys[ChangePositions]  = Config.ChangePositions
-		Hotkeys[AdjustChange]     = Config.AdjustChange
-		Hotkeys[AdjustForward]    = Config.AdjustForward
-		Hotkeys[AdjustSideways]   = Config.AdjustSideways
-		Hotkeys[AdjustUpward]     = Config.AdjustUpward
-		Hotkeys[RealignActors]    = Config.RealignActors
-		Hotkeys[RestoreOffsets]   = Config.RestoreOffsets
-		Hotkeys[MoveScene]        = Config.MoveScene
-		Hotkeys[RotateScene]      = Config.RotateScene
-		Hotkeys[EndAnimation]     = Config.EndAnimation
+		Hotkeys[kAdvanceAnimation] = Config.AdvanceAnimation
+		Hotkeys[kChangeAnimation]  = Config.ChangeAnimation
+		Hotkeys[kChangePositions]  = Config.ChangePositions
+		Hotkeys[kAdjustChange]     = Config.AdjustChange
+		Hotkeys[kAdjustForward]    = Config.AdjustForward
+		Hotkeys[kAdjustSideways]   = Config.AdjustSideways
+		Hotkeys[kAdjustUpward]     = Config.AdjustUpward
+		Hotkeys[kRealignActors]    = Config.RealignActors
+		Hotkeys[kRestoreOffsets]   = Config.RestoreOffsets
+		Hotkeys[kMoveScene]        = Config.MoveScene
+		Hotkeys[kRotateScene]      = Config.RotateScene
+		Hotkeys[kEndAnimation]     = Config.EndAnimation
 		int i
 		while i < Hotkeys.Length
 			RegisterForKey(Hotkeys[i])
@@ -752,25 +731,25 @@ function GoToStage(int ToStage)
 endFunction
 
 int[] Hotkeys
-int property AdvanceAnimation = 0  autoreadonly hidden
-int property ChangeAnimation  = 1  autoreadonly hidden
-int property ChangePositions  = 2  autoreadonly hidden
-int property AdjustChange     = 3  autoreadonly hidden
-int property AdjustForward    = 4  autoreadonly hidden
-int property AdjustSideways   = 5  autoreadonly hidden
-int property AdjustUpward     = 6  autoreadonly hidden
-int property RealignActors    = 7  autoreadonly hidden
-int property RestoreOffsets   = 8  autoreadonly hidden
-int property MoveScene        = 9  autoreadonly hidden
-int property RotateScene      = 10 autoreadonly hidden
-int property EndAnimation     = 11 autoreadonly hidden
+int property kAdvanceAnimation = 0  autoreadonly hidden
+int property kChangeAnimation  = 1  autoreadonly hidden
+int property kChangePositions  = 2  autoreadonly hidden
+int property kAdjustChange     = 3  autoreadonly hidden
+int property kAdjustForward    = 4  autoreadonly hidden
+int property kAdjustSideways   = 5  autoreadonly hidden
+int property kAdjustUpward     = 6  autoreadonly hidden
+int property kRealignActors    = 7  autoreadonly hidden
+int property kRestoreOffsets   = 8  autoreadonly hidden
+int property kMoveScene        = 9  autoreadonly hidden
+int property kRotateScene      = 10 autoreadonly hidden
+int property kEndAnimation     = 11 autoreadonly hidden
 
 
 event OnKeyDown(int keyCode)
-	StateCheck()
+	; StateCheck()
 endEvent
 
-function StateCheck()
+;/ function StateCheck()
 	Log("THREAD STATE: "+GetState())
 	if ActorCount == 1
 		ActorAlias[0].Log("State: "+ActorAlias[0].GetState())
@@ -793,4 +772,4 @@ function StateCheck()
 		ActorAlias[3].Log("State: "+ActorAlias[3].GetState())
 		ActorAlias[4].Log("State: "+ActorAlias[4].GetState())
 	endIf
-endFunction
+endFunction /;

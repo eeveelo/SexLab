@@ -721,7 +721,7 @@ function SetDefaults()
 	StripLeadInFemale[0] = true
 	StripLeadInFemale[2] = true
 	StripLeadInFemale[9] = true
-	; StripLeadInFemale[14] = true
+	StripLeadInFemale[14] = true
 	StripLeadInFemale[32] = true
 
 	StripLeadInMale = new bool[33]
@@ -729,9 +729,9 @@ function SetDefaults()
 	StripLeadInMale[2] = true
 	StripLeadInMale[8] = true
 	StripLeadInMale[9] = true
+	; StripLeadInMale[14] = true
 	StripLeadInMale[19] = true
 	StripLeadInMale[22] = true
-	; StripLeadInMale[14] = true
 	StripLeadInMale[32] = true
 
 	StripVictim = new bool[33]

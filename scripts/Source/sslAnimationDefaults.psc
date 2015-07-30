@@ -1638,6 +1638,9 @@ function ZynStanding(int id)
 	Base.SetStageSoundFX(2, Sucking)
 	Base.SetStageSoundFX(3, Sucking)
 
+	Base.SetStageCumID(a1, 1, Vaginal)
+	Base.SetStageCumID(a1, 2, Oral)
+
 	Base.SetTags("Zyn,Sex,Straight,Standing,Vaginal,Dirty")
 
 	Base.Save(id)
@@ -2009,7 +2012,7 @@ endFunction
 function zjBreastFeeding(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Name = "3jiou Breasteeding"
+	Base.Name = "3jiou Breastfeeding Lesbian"
 	Base.SoundFX = Sucking
 
 	int a1 = Base.AddPosition(Female)
@@ -2033,7 +2036,7 @@ endFunction
 function zjBreastFeedingVar(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Name = "3jiou Breastfeeding Variant"
+	Base.Name = "3jiou Breastfeeding Straight"
 	Base.SoundFX = Sucking
 
 	int a1 = Base.AddPosition(Female)

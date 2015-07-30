@@ -23,16 +23,37 @@ endFunction
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	Config = SexLab.Config
 
+	sslActorStats Stats = SexLab.Stats
+
+	SexLab.RegisterForModEvent("PlayerTrack_End", "StatCheck")
+
+
 	sslThreadModel Thread = SexLab.NewThread()
-	Thread.AddActor(CasterRef)
-	Thread.AddActor(TargetRef)
 
-	sslBaseAnimation[] Anims = new sslBaseAnimation[3]
-	Anims[0] = SexLab.GetAnimationByRegistry("ArrokLegUp")
-	Anims[1] = SexLab.GetAnimationByRegistry("ArrokOral")
-	Anims[2] = SexLab.GetAnimationByRegistry("ArrokBoobjob")
+	if Config.BackwardsPressed() || Config.AdjustStagePressed()
+		if Utility.RandomInt(0, 1)
+			Log("Player Victim")
+			Thread.AddActor(CasterRef)
+			Thread.AddActor(TargetRef)
+			Thread.SetVictim(CasterRef)
+		else
+			Log("Target Victim")
+			Thread.AddActor(TargetRef)
+			Thread.AddActor(CasterRef)
+			Thread.SetVictim(TargetRef)
+		endIf
+	else
+		Log("No Victim")
+		Thread.AddActor(CasterRef)
+		Thread.AddActor(TargetRef)
+	endIf
 
-	Thread.SetAnimations(Anims)
+	; sslBaseAnimation[] Anims = new sslBaseAnimation[3]
+	; Anims[0] = SexLab.GetAnimationByRegistry("ArrokLegUp")
+	; Anims[1] = SexLab.GetAnimationByRegistry("ArrokOral")
+	; Anims[2] = SexLab.GetAnimationByRegistry("ArrokBoobjob")
+
+	; Thread.SetAnimations(Anims)
 	; Thread.SetStartAnimationEvent(TargetRef, "Arrok_Undress_G0", 5.0)
 	; Thread.SetEndAnimationEvent(CasterRef, "Arrok_Undress_G1")
 	; Thread.SetEndAnimationEvent(TargetRef, "")
