@@ -290,7 +290,7 @@ function SendTrackedEvent(Actor ActorRef, string Hook = "", int id = -1)
 	endIf
 	; Send generic player callback event
 	if ActorRef == PlayerRef
-		SetupActorEvent(PlayerRef, "PlayerTrack_"+Hook, id)
+		SetupActorEvent(PlayerRef, "PlayerTrack"+Hook, id)
 	endIf
 	; Send actor callback events
 	int i = StringListCount(ActorRef, "SexLabEvents")

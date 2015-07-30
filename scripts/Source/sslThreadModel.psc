@@ -28,10 +28,7 @@ sslCreatureAnimationSlots property CreatureSlots auto
 ; Actor Info
 sslActorAlias[] property ActorAlias auto hidden
 Actor[] property Positions auto hidden
-Actor[] property Victims auto hidden
-Actor property VictimRef auto hidden
 Actor property PlayerRef auto hidden
-Form[] property ActorForms auto hidden
 
 ; Thread status
 ; bool[] property Status auto hidden
@@ -151,6 +148,27 @@ float property TotalTime hidden
 	endFunction
 endProperty
 
+Actor[] property Victims auto hidden
+Actor property VictimRef hidden
+	Actor function get()
+		if !Victims || Victims.Length < 1
+			return none
+		endIf
+		return Victims[(Victims.Length - 1)]
+	endFunction
+	function set(Actor ActorRef)
+		if ActorRef
+			if !Victims || Victims.Find(ActorRef) == -1
+				Victims = PapyrusUtil.PushActor(Victims, ActorRef)
+			endIf
+			IsAggressive = true
+		else
+			Victims = PapyrusUtil.ActorArray(0)
+			IsAggressive = false
+		endIf
+	endFunction
+endProperty
+
 ; Beds
 int[] property BedStatus auto hidden
 ; BedStatus[0] = -1 forbid, 0 allow, 1 force
@@ -264,7 +282,6 @@ state Making
 		endIf
 		; Update position info
 		Positions  = PapyrusUtil.PushActor(Positions, ActorRef)
-		ActorForms = PapyrusUtil.PushForm(ActorForms, ActorRef)
 		ActorCount = Positions.Length
 		; Update gender counts
 		int g      = Slot.GetGender()
@@ -361,7 +378,9 @@ state Making
 					i = 0
 				endIf
 			endWhile
-			PrimaryAnimations = CreatureSlots.FilterCreatureGenders(PrimaryAnimations, Genders[2], Genders[3])
+			if Config.UseCreatureGender
+				PrimaryAnimations = CreatureSlots.FilterCreatureGenders(PrimaryAnimations, Genders[2], Genders[3])
+			endIf
 			; Pick default creature animations if currently empty (none or failed above check)
 			if PrimaryAnimations.Length == 0
 				Log("Selecting new creature animations - "+PrimaryAnimations)
@@ -676,7 +695,6 @@ function ChangeActors(Actor[] NewPositions)
 				Log("ChangeActors("+NewPositions+") -- Failed to add new actor '"+Positions[i].GetLeveledActorBase().GetName()+"' -- They were unable to fill an actor alias", "FATAL")
 				return
 			endIf
-			ActorForms = PapyrusUtil.PushForm(ActorForms, Positions[i])
 			Slot.DoUndress = false
 			Slot.PrepareActor()
 			Slot.StartAnimating()
@@ -978,10 +996,10 @@ int[] AliasDone
 float SyncTimer
 int SyncDone
 
-int property kPrepareActor   = 0 autoreadonly hidden
-int property kSyncActor      = 1 autoreadonly hidden
-int property kResetActor     = 2 autoreadonly hidden
-int property kRefreshActor   = 3 autoreadonly hidden
+int property kPrepareActor = 0 autoreadonly hidden
+int property kSyncActor    = 1 autoreadonly hidden
+int property kResetActor   = 2 autoreadonly hidden
+int property kRefreshActor = 3 autoreadonly hidden
 
 string function Key(string Callback)
 	return "SSL_"+thread_id+"_"+Callback
@@ -992,9 +1010,9 @@ function QuickEvent(string Callback)
 endfunction
 
 function SyncEvent(int id, float WaitTime)
-	if SyncTimer <= 0 || SyncTimer < Utility.GetCurrentRealTime()
-		SyncDone  = 0
-		SyncTimer = Utility.GetCurrentRealTime() + WaitTime
+	if AliasTimer[id] <= 0 || AliasTimer[id] < Utility.GetCurrentRealTime()
+		AliasDone[id]  = 0
+		AliasTimer[id] = Utility.GetCurrentRealTime() + WaitTime
 		RegisterForSingleUpdate(WaitTime)
  		ModEvent.Send(ModEvent.Create(Key(EventTypes[id])))
 	else
@@ -1003,49 +1021,30 @@ function SyncEvent(int id, float WaitTime)
 	endIf
 endFunction
 
+bool SyncLock
 function SyncEventDone(int id)
-	if SyncTimer != 0.0
-		SyncDone += 1
-		if SyncDone >= ActorCount
-			UnregisterforUpdate()
-			if DebugMode
-				Log("Lag Timer: " + (SyncTimer - Utility.GetCurrentRealTime()), "SyncDone("+EventTypes[id]+")")
-			endIf
-			SyncDone  = 0
-			SyncTimer = 0.0
-			ModEvent.Send(ModEvent.Create(Key(EventTypes[id]+"Done")))
-		endIf
-	else
-		Log("WARNING: SyncEventDone("+id+") OUT OF TURN")
-	endIf
-endFunction
-
-;/ function SyncEvent(int id, float WaitTime)
-	if AliasTimer[id] <= 0.0 || AliasTimer[id] < Utility.GetCurrentRealTime()
-		RegisterForSingleUpdate(WaitTime)
-		AliasTimer[id] = Utility.GetCurrentRealTime() + WaitTime
- 		ModEvent.Send(ModEvent.Create(Key(Callback)))
-	else
-		Log(Callback+" sync event attempting to start during previous wait sync")
-		RegisterForSingleUpdate(WaitTime * 0.25)
-	endIf
-endFunction
-
-function SyncEventDone(int id)
-	if AliasTimer[id] != 0.0
+	while SyncLock
+		Log("SyncLock("+id+")")
+		Utility.WaitMenuMode(0.01)
+	endwhile
+	SyncLock = true
+	float TimeNow = Utility.GetCurrentRealTime()
+	if AliasTimer[id] != 0.0 || AliasTimer[id] < TimeNow
 		AliasDone[id] = AliasDone[id] + 1
 		if AliasDone[id] >= ActorCount
 			UnregisterforUpdate()
-			Log("Lag Timer: " + (AliasTimer[id] - RealTime[0]), "SyncDone("+EventTypes[id]+")")
-			AliasTimer[id] = 0.0
+			if DebugMode
+				Log("Lag Timer: " + (AliasTimer[id] - TimeNow), "SyncDone("+EventTypes[id]+")")
+			endIf
 			AliasDone[id]  = 0
+			AliasTimer[id] = 0.0
 			ModEvent.Send(ModEvent.Create(Key(EventTypes[id]+"Done")))
 		endIf
 	else
 		Log("WARNING: SyncEventDone("+id+") OUT OF TURN")
 	endIf
-endFunction /;
-
+	SyncLock = false
+endFunction
 
 function SendTrackedEvent(Actor ActorRef, string Hook = "")
 	; Append hook type, global if empty
@@ -1054,7 +1053,7 @@ function SendTrackedEvent(Actor ActorRef, string Hook = "")
 	endIf
 	; Send generic player callback event
 	if ActorRef == PlayerRef
-		SetupActorEvent(PlayerRef, "PlayerTrack_"+Hook)
+		SetupActorEvent(PlayerRef, "PlayerTrack"+Hook)
 	endIf
 	; Send actor callback events
 	int i = StorageUtil.StringListCount(ActorRef, "SexLabEvents")
@@ -1208,11 +1207,11 @@ endFunction
 
 function InitShares()
 	DebugMode      = Config.DebugMode
-	;/ sAnimation     = new sslBaseAnimation[1]
-	sAnimEvents    = new string[5] /;
-	BedStatus      = new int[2]
+	; sAnimation     = new sslBaseAnimation[1]
+	; sAnimEvents    = new string[5]
 	; sStage         = new int[1]
-	AliasDone      = new int[6]
+	BedStatus      = new int[2]
+	AliasDone      = new int[4]
 	RealTime       = new float[1]
 	AliasTimer     = new float[6]
 	SkillXP        = new float[6]
@@ -1236,9 +1235,6 @@ function Initialize()
 	ActorAlias[2].ClearAlias()
 	ActorAlias[3].ClearAlias()
 	ActorAlias[4].ClearAlias()
-	; Storage Info
-	Genders        = new int[4]
-	Victims        = new Actor[1]
 	; Forms
 	CenterRef      = none
 	SoundFX        = none
@@ -1251,15 +1247,15 @@ function Initialize()
 	FastEnd        = false
 	UseCustomTimers= false
 	; Floats
+	SyncTimer      = 0.0
 	StartedAt      = 0.0
 	SyncDone       = 0
 	; Integers
 	Stage          = 1
 	ActorCount     = 0
-	SyncTimer      = 0.0
-
 	; Storage Data
 	Animation         = none
+	Genders           = new int[4]
 	Positions         = PapyrusUtil.ActorArray(0)
 	Victims           = PapyrusUtil.ActorArray(0)
 	CustomAnimations  = sslUtility.AnimationArray(0)
@@ -1268,7 +1264,6 @@ function Initialize()
 	Hooks             = Utility.CreateStringArray(0)
 	Tags              = Utility.CreateStringArray(0)
 	CustomTimers      = Utility.CreateFloatArray(0)
-	ActorForms        = Utility.CreateFormArray(0)
 	; Enter thread selection pool
 	GoToState("Unlocked")
 endFunction
