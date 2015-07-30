@@ -609,12 +609,20 @@ endFunction
 
 function RecordThread(Actor ActorRef, int Gender, int HadRelation, float StartedAt, float RealTime, float GameTime, bool WithPlayer, Actor VictimRef, int[] Genders, float[] SkillXP) global native
 function AddPartners(Actor ActorRef, Actor[] AllPositions, Actor[] Victims)
+	Log(Victims, "Victims")
+	Log(AllPositions, "AllPositions")
 	if !ActorRef || !AllPositions || AllPositions.Length < 2 || AllPositions.Find(none) != -1
 		return ; No Positions
 	endIf
+	bool IsVictim    = false
+	bool IsAggressor = false
+	if Victims && Victims.Length > 0
+		IsVictim     = Victims.Find(ActorRef) != -1
+		IsAggressor  = Victims.Find(ActorRef) == -1
+	endIf
+	Log(ActorRef+" IsVictim: "+IsVictim+" IsAggressor: "+IsAggressor)
 	Actor[] Positions = RemoveActor(AllPositions, ActorRef)
-	bool IsVictim     = Victims[0] && Victims.Find(ActorRef) != -1
-	bool IsAggressor  = Victims[0] && Victims.Find(ActorRef) == -1
+	Log(Positions, "Positions")
 	int PartnerCount  = Positions.Length
 
 	FormListRemove(ActorRef, "SexPartners", none, true)
@@ -627,9 +635,9 @@ function AddPartners(Actor ActorRef, Actor[] AllPositions, Actor[] Victims)
 		FormListRemove(ActorRef, "SexPartners", Positions[i], true)
 		FormListAdd(ActorRef, "SexPartners", Positions[i], false)
 	endWhile
-	;/ if ActorRef != PlayerRef
+	if ActorRef != PlayerRef
 		TrimList(ActorRef, "SexPartners", 8)
-	endIf /;
+	endIf
 
 	if IsVictim
 		i = PartnerCount
@@ -640,11 +648,9 @@ function AddPartners(Actor ActorRef, Actor[] AllPositions, Actor[] Victims)
 				FormListAdd(ActorRef, "WasVictimOf", Positions[i], false)
 			endIf
 		endWhile
-		;/ if ActorRef == PlayerRef
-			TrimList(ActorRef, "WasVictimOf", 16)
-		else
+		if ActorRef != PlayerRef
 			TrimList(ActorRef, "WasVictimOf", 8)
-		endIf /;
+		endIf
 
 	elseIf IsAggressor
 		i = PartnerCount
@@ -655,11 +661,10 @@ function AddPartners(Actor ActorRef, Actor[] AllPositions, Actor[] Victims)
 				FormListAdd(ActorRef, "WasAggressorTo", Positions[i], false)
 			endIf
 		endWhile
-		;/ if ActorRef == PlayerRef
-			TrimList(ActorRef, "WasAggressorTo", 16)
-		else
+		if ActorRef != PlayerRef
 			TrimList(ActorRef, "WasAggressorTo", 8)
-		endIf /;
+		endIf
+
 	endIf
 endFunction
 function TrimList(Actor ActorRef, string List, int count)
