@@ -356,6 +356,7 @@ state Making
 
 		; Validate and grab creature animations
 		if HasCreature
+			Log("CreatureRef: "+CreatureRef)
 			; primary creature animations
 			i = PrimaryAnimations.Length
 			while i

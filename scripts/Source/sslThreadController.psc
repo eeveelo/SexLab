@@ -422,7 +422,7 @@ endState
 
 function ClearIdles()
 	Utility.Wait(0.1)
-	if ActorCount == 1
+	;/ if ActorCount == 1
 		Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
 	elseIf ActorCount == 2
 		Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
@@ -442,8 +442,13 @@ function ClearIdles()
 		Debug.SendAnimationEvent(Positions[2], "IdleForceDefaultState")
 		Debug.SendAnimationEvent(Positions[3], "IdleForceDefaultState")
 		Debug.SendAnimationEvent(Positions[4], "IdleForceDefaultState")
-	endIf
-	; Utility.Wait(0.3)
+	endIf /;
+	ActorAlias[0].StopAnimating(true)
+	ActorAlias[1].StopAnimating(true)
+	ActorAlias[2].StopAnimating(true)
+	ActorAlias[3].StopAnimating(true)
+	ActorAlias[4].StopAnimating(true)
+	Utility.Wait(0.3)
 endFunction
 
 function TriggerOrgasm()

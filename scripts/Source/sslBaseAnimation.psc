@@ -567,6 +567,21 @@ bool function HasRaceID(string RaceID)
 	return RaceType != "" && RaceID != "" && sslCreatureAnimationSlots.HasRaceID(RaceType, RaceID)
 endFunction
 
+bool function HasValidRaceKey(string[] RaceKeys)
+	int i = RaceKeys.Length
+	while i
+		i -= 1
+		if RaceKeys[i] != "" && RaceTypes.Find(RaceKeys[i]) != -1
+			return true
+		endIf
+	endWhile
+	return false
+endFunction
+
+bool function IsPositionRace(int Position, string RaceKey)
+	return RaceTypes.Length > 0 && RaceTypes[Position] == RaceKey
+endFunction
+
 function AddRaceID(string RaceID)
 	if !HasRaceID(RaceID)
 		sslCreatureAnimationSlots.AddRaceID(RaceType, RaceID)
@@ -578,6 +593,16 @@ function SetRaceKey(string RaceKey)
 		RaceType = RaceKey
 	else
 		Log("Unknown or empty RaceKey!", "SetRaceKey("+RaceKey+")")
+	endIf
+endFunction
+
+function SetPositionRaceKey(int Position, string RaceKey)
+	if GetGender(Position) >= 2
+		if !RaceTypes || RaceTypes.Length
+			RaceTypes = new string[5]
+		endIf
+		RaceTypes[Position] = RaceKey
+		RaceType            = RaceKey
 	endIf
 endFunction
 
@@ -630,15 +655,6 @@ int function AddPosition(int Gender = 0, int AddCum = -1)
 	TagList[0] = TagList[0]+GetGenderString(Gender)
 	TagList[1] = GetGenderString(Gender)+TagList[1]
 
-	if Gender >= 2
-		if RaceTypes.Length == 0
-			RaceTypes = new string[5]
-		endIf
-		if RaceType != ""
-			RaceTypes[Actors] = RaceType
-		endIf
-	endIf
-
 	Actors += 1
 	Locked = false
 	return (Actors - 1)
@@ -655,6 +671,10 @@ int function AddCreaturePosition(string RaceKey, int Gender = 2, int AddCum = -1
 	
 	int pid = AddPosition(Gender, AddCum)
 	if pid != -1 && RaceKey != ""
+		if !RaceTypes || RaceTypes.Length < 1
+			RaceTypes = new string[5]
+		endIf
+		RaceType       = RaceKey
 		RaceTypes[pid] = RaceKey
 	endIf
 

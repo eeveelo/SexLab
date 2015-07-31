@@ -76,10 +76,9 @@ sslBaseAnimation[] function GetByRaceGenders(int ActorCount, Race RaceRef, int M
 endFunction
 
 sslBaseAnimation[] function FilterCreatureGenders(sslBaseAnimation[] Anims, int MaleCreatures = 0, int FemaleCreatures = 0)
-	if !Config.UseCreatureGender
+	if !Config.UseCreatureGender || !Anims || Anims.Length < 1
 		return Anims
 	endIf
-	Log("Checking Creature Filter: "+GetNames(Anims))
 	int Del
 	int i = Anims.Length
 	while i
@@ -102,7 +101,6 @@ sslBaseAnimation[] function FilterCreatureGenders(sslBaseAnimation[] Anims, int 
 			Output[n] = Anims[i]
 		endIf
 	endWhile
-	Log("Filtered Creatures: "+GetNames(Output))
 	return Output
 endFunction
 
