@@ -26,6 +26,7 @@ event OnPlayerLoadGame()
 	; Check for install
 	if CurrentVersion > 0 && Config.CheckSystem()
 		Config.Reload()
+		ThreadSlots.StopAll()
 		; Perform pending updates
 		UpdateSystem(CurrentVersion, SexLabUtil.GetVersion())
 		; Cleanup tasks

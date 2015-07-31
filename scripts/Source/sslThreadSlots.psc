@@ -84,19 +84,25 @@ int function ActiveThreads()
 	return Count
 endfunction
 
+function StopThread(sslThreadController Slot)
+	string SlotState = Slot.GetState()
+	if SlotState == "Making"
+		SexLabUtil.DebugLog("Making during StopAll - Initializing.", Slot, true)
+		Slot.Initialize()
+	elseIf SlotState == "Frozen"
+		Slot.Initialize()
+	elseIf SlotState != "Unlocked"
+		SexLabUtil.DebugLog(SlotState+" during StopAll - EndAnimation.", Slot, true)
+		Slot.EndAnimation(true)
+	endIf
+endFunction
+
 function StopAll()
 	; End all threads
 	int i = Slots.Length
 	while i
 		i -= 1
-		string SlotState = Slots[i].GetState()
-		if SlotState == "Making"
-			SexLabUtil.DebugLog("Making during StopAll - Initializing.", "Slots["+i+"]", true)
-			Slots[i].Initialize()
-		elseIf SlotState != "Unlocked"
-			SexLabUtil.DebugLog(SlotState+" during StopAll - EndAnimation.", "Slots["+i+"]", true)
-			Slots[i].EndAnimation(true)
-		endIf
+		StopThread(Slots[i])
 	endWhile
 	; Send event
 	ModEvent.Send(ModEvent.Create("SexLabStoppedActive"))
