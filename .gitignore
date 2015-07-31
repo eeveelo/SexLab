@@ -5,3 +5,5 @@ meta.ini
 *sla*psc
 *sla*pex
 *.esp
+*.sublime-project
+*.sublime-workspace
