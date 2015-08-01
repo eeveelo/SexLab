@@ -1899,7 +1899,23 @@ function SexDiary()
 	AddTextOption("$SSL_ForeplayProficiency", Stats.GetSkillTitle(StatRef, "Foreplay"))
 	AddTextOption("$SSL_SexualPurity", Stats.GetPureTitle(StatRef))
 	AddTextOption("$SSL_SexualPerversion", Stats.GetLewdTitle(StatRef))
-	AddEmptyOption()
+	; AddEmptyOption()
+
+	Actor ActorRef
+	ActorRef = Stats.LastAggressor(StatRef)
+	AddTextOption("$SSL_LastAggressor", StringIfElse(ActorRef != none, ActorRef.GetLeveledActorBase().GetName(), "--"))
+
+	ActorRef = Stats.LastVictim(StatRef)
+	AddTextOption("$SSL_LastVictim", StringIfElse(ActorRef != none, ActorRef.GetLeveledActorBase().GetName(), "--"))
+
+	if StatRef == PlayerRef
+		ActorRef = Stats.MostUsedPlayerSexPartner()
+		AddTextOption("$SSL_MostActivePartner", StringIfElse(ActorRef != none, ActorRef.GetLeveledActorBase().GetName()+"("+Stats.PlayerSexCount(ActorRef)+")", "--"))
+	else
+		ActorRef = Stats.LastSexPartner(StatRef)
+		AddTextOption("$SSL_LastPartner", StringIfElse(ActorRef != none, ActorRef.GetLeveledActorBase().GetName(), "--"))
+	endIf
+
 
 	SetCursorPosition(1)
 
