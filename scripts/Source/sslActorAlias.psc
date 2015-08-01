@@ -178,6 +178,7 @@ function ClearAlias()
 		Unstrip()
 	endIf
 	Initialize()
+	GoToState("")
 endFunction
 
 
@@ -329,9 +330,8 @@ endState
 ; --- Animation Loop                                  --- ;
 ; ------------------------------------------------------- ;
 
-function PlayAnimation()
+function SendAnimation()
 endFunction
-
 
 function GetPositionInfo()
 	if ActorRef
@@ -374,9 +374,10 @@ state Animating
 		RegisterForSingleUpdate(Utility.RandomFloat(1.0, 3.0))
 	endFunction
 
-	function PlayAnimation()
-		AnimEvent = Animation.FetchPositionStage(Position, Stage)
+	function SendAnimation()
+		; AnimEvent = Animation.FetchPositionStage(Position, Stage)
 		Debug.SendAnimationEvent(ActorRef, AnimEvent)
+		Log(AnimEvent)
 		Utility.Wait(0.2)
 	endFunction
 
@@ -406,15 +407,6 @@ state Animating
 		RegisterForSingleUpdate(VoiceDelay * 0.35)
 	endEvent
 
-	function RefreshActor()
-		GoToState("Animating")
-		SyncThread()
-		SyncLocation(true)
-		AnimEvent = Animation.FetchPositionStage(Position, Stage)
-		RegisterForSingleUpdate(1.0)
-		Thread.SyncEventDone(kRefreshActor)
-	endFunction
-
 	function SyncThread()
 		; Sync with thread info
 		GetPositionInfo()
@@ -425,10 +417,8 @@ state Animating
 		if VoiceDelay < 0.8
 			VoiceDelay = Utility.RandomFloat(0.8, 1.4) ; Can't have delay shorter than animation update loop
 		endIf
-
 		; Update alias info
 		GetEnjoyment()
-
 		; Sync status		
 		if !IsCreature
 			ResolveStrapon()
@@ -580,10 +570,11 @@ state Animating
 			; Reapply HDT High Heel if they had it and need it again.
 			if HDTHeelSpell && ActorRef.GetWornForm(Armor.GetMaskForSlot(37))
 				if ActorRef.HasSpell(HDTHeelSpell)
-					Log(HDTHeelSpell+" -> "+Config.GetHDTSpell(ActorRef), "DEV - HDTHighHeels ("+ActorRef.HasSpell(HDTHeelSpell)+")")
+					Log(HDTHeelSpell+" -> "+Config.GetHDTSpell(ActorRef), "HDTHighHeels")
+				else
+					Log(HDTHeelSpell+" re-applying", "HDTHighHeels")
+					ActorRef.AddSpell(HDTHeelSpell)
 				endIf
-				Log("HDTHeelSpell re-applying", "DEV - HDTHighHeels")
-				ActorRef.AddSpell(HDTHeelSpell)
 			endIf
 		endIf
 		; Free alias slot
@@ -742,6 +733,17 @@ function RestoreActorDefaults()
 	endIf
 	; Remove SOS erection
 	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
+endFunction
+
+function RefreshActor()
+	if ActorRef
+		GoToState("Animating")
+		SyncThread()
+		SendAnimation()
+		SyncLocation(true)
+		RegisterForSingleUpdate(1.0)
+		Thread.SyncEventDone(kRefreshActor)
+	endIf
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -1098,7 +1100,7 @@ function RegisterEvents()
 	string e = Thread.Key("")
 	; Quick Events
 	RegisterForModEvent(e+"Start", "StartAnimating")
-	RegisterForModEvent(e+"Animate", "PlayAnimation")
+	RegisterForModEvent(e+"Animate", "SendAnimation")
 	RegisterForModEvent(e+"Orgasm", "OrgasmEffect")
 	RegisterForModEvent(e+"Strip", "Strip")
 	; Sync Events
@@ -1110,8 +1112,7 @@ function RegisterEvents()
 endFunction
 
 function ClearEvents()
-	Log("CLEARING EVENTS")
-	GoToState("")
+	; Log("CLEARING EVENTS")
 	UnregisterForUpdate()
 	string e = Thread.Key("")
 	; Quick Events
@@ -1132,6 +1133,7 @@ function Initialize()
 	if ActorRef
 		; Stop events
 		ClearEvents()
+		RestoreActorDefaults()
 		; Remove nudesuit if present
 		if ActorRef.GetItemCount(Config.NudeSuit) > 0
 			ActorRef.RemoveItem(Config.NudeSuit, ActorRef.GetItemCount(Config.NudeSuit), true)
@@ -1158,9 +1160,11 @@ function Initialize()
 	NoRagdoll      = false
 	NoUndress      = false
 	NoRedress      = false
-	; Floats
+	; Integers
+	Orgasms        = 0
 	BestRelation   = 0
 	BaseEnjoyment  = 0
+	; Floats
 	ActorScale     = 0.0
 	AnimScale      = 0.0
 	StartWait      = 0.1
@@ -1225,8 +1229,8 @@ function OrgasmEffect()
 endFunction
 event ResetActor()
 endEvent
-function RefreshActor()
-endFunction
+;/ function RefreshActor()
+endFunction /;
 event OnOrgasm()
 	OrgasmEffect()
 endEvent

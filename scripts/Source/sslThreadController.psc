@@ -393,7 +393,13 @@ state Animating
 
 	function RealignActors()
 		UnregisterForUpdate()
-		GoToState("Refresh")
+		ActorAlias[0].SyncAll(true)
+		ActorAlias[1].SyncAll(true)
+		ActorAlias[2].SyncAll(true)
+		ActorAlias[3].SyncAll(true)
+		ActorAlias[4].SyncAll(true)
+		Utility.Wait(0.1)
+		RegisterForSingleUpdate(0.5)
 	endFunction
 
 	function ResetPositions(bool ClearIdles = true)
@@ -414,6 +420,7 @@ state Refresh
 		RegisterForSingleUpdate(0.1)
 	endFunction
 	event OnUpdate()
+		Log("Refresh Done")
 		Action("Animating")
 	endEvent
 	function ResetPositions(bool ClearIdles = true)
@@ -493,12 +500,14 @@ function SetAnimation(int aid = -1)
 		GoToStage((StageCount - 1))
 	else
 		TimedStage = Animation.HasTimer(Stage)
-		ActorAlias[0].SyncAll(false)
-		ActorAlias[1].SyncAll(false)
-		ActorAlias[2].SyncAll(false)
-		ActorAlias[3].SyncAll(false)
-		ActorAlias[4].SyncAll(false)
+		ActorAlias[0].SyncAll(true)
+		ActorAlias[1].SyncAll(true)
+		ActorAlias[2].SyncAll(true)
+		ActorAlias[3].SyncAll(true)
+		ActorAlias[4].SyncAll(true)
+		Utility.Wait(0.2)
 		PlayStageAnimations()
+		Utility.Wait(0.5)
 	endIf
 endFunction
 
