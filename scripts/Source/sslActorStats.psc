@@ -453,6 +453,30 @@ Actor function LastActorInList(Actor ActorRef, string List)
 	return none
 endFunction
 
+Actor function MostUsedPlayerSexPartner()
+	FormListRemove(PlayerRef, "SexPartners", none, true)
+	Form[] SexPartners = FormListToArray(PlayerRef, "SexPartners")
+	Actor PartnerRef
+	int PartnerNum
+	int[] Types = new int[2]
+	Types[0] = 43 ; kNPC
+	Types[1] = 62 ; kCharacter
+	int i = SexPartners.Length
+	while i
+		i -= 1
+		if SexPartners[i] && Types.Find(SexPartners[i].GetType()) != -1
+			int Num = PlayerSexCount(SexPartners[i] as Actor)
+			if Num > PartnerNum
+				PartnerRef = SexPartners[i] as Actor
+				PartnerNum = Num
+			endIf
+		else
+			FormListRemoveAt(PlayerRef, "SexPartners", i)
+		endIf
+	endWhile
+	return PartnerRef
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Sexuality Stats                                 --- ;
 ; ------------------------------------------------------- ;
@@ -609,8 +633,6 @@ endFunction
 
 function RecordThread(Actor ActorRef, int Gender, int HadRelation, float StartedAt, float RealTime, float GameTime, bool WithPlayer, Actor VictimRef, int[] Genders, float[] SkillXP) global native
 function AddPartners(Actor ActorRef, Actor[] AllPositions, Actor[] Victims)
-	Log(Victims, "Victims")
-	Log(AllPositions, "AllPositions")
 	if !ActorRef || !AllPositions || AllPositions.Length < 2 || AllPositions.Find(none) != -1
 		return ; No Positions
 	endIf
@@ -620,9 +642,7 @@ function AddPartners(Actor ActorRef, Actor[] AllPositions, Actor[] Victims)
 		IsVictim     = Victims.Find(ActorRef) != -1
 		IsAggressor  = Victims.Find(ActorRef) == -1
 	endIf
-	Log(ActorRef+" IsVictim: "+IsVictim+" IsAggressor: "+IsAggressor)
 	Actor[] Positions = RemoveActor(AllPositions, ActorRef)
-	Log(Positions, "Positions")
 	int PartnerCount  = Positions.Length
 
 	FormListRemove(ActorRef, "SexPartners", none, true)

@@ -859,6 +859,10 @@ bool function HadPlayerSex(Actor ActorRef)
 	return Stats.HadPlayerSex(ActorRef)
 endFunction
 
+Actor function MostUsedPlayerSexPartner()
+	return Stats.MostUsedPlayerSexPartner()
+endFunction
+
 Actor function LastSexPartner(Actor ActorRef)
 	return Stats.LastSexPartner(ActorRef)
 endFunction
