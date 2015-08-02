@@ -33,8 +33,8 @@ event OnPlayerLoadGame()
 		ValidateTrackedFactions()
 		ValidateTrackedActors()
 		Factory.Cleanup()
-		Stats.CleanDeadStats()
-		CleanLists()
+		Config.CleanActorStorage()
+
 		; Send game loaded event
 		ModEvent.Send(ModEvent.Create("SexLabGameLoaded"))
 	endIf
@@ -92,6 +92,10 @@ bool function SetupSystem()
 	CreatureSlots.Setup()
 	ThreadSlots.Setup()
 
+	if StorageUtil.FormListCount(none, "SexLab.ActorStorage") < 1
+		Config.PreloadSavedStorage()
+	endIf
+
 	GoToState("Ready")
 	SexLab.GoToState("Enabled")
 	LogAll("SexLab v"+SexLabUtil.GetStringVer()+" - Ready!")
@@ -115,11 +119,8 @@ event UpdateSystem(int OldVersion, int NewVersion)
 
 		; TODO: first update by 1.60 should probably be done by MCM instead, so quests can be reset
 		; Perform update functions
-		if OldVersion == 15920 && NewVersion <= 15921
-			; 1.60 beta 2
-			AnimSlots.Setup() ; Added cum source positions to animations
-
-		else ; Full system setup
+		if OldVersion <= 15921
+			; Full system setup
 			ThreadLib.Setup()
 			ActorLib.Setup()
 			Stats.Setup()
@@ -129,6 +130,9 @@ event UpdateSystem(int OldVersion, int NewVersion)
 			AnimSlots.Setup()
 			CreatureSlots.Setup()
 			ThreadSlots.Setup()
+			if StorageUtil.FormListCount(none, "SexLab.ActorStorage") < 1
+				Config.PreloadSavedStorage()
+			endIf
 		endIf
 
 		Config.ImportSettings()
@@ -165,17 +169,14 @@ endFunction
 import StorageUtil
 
 function ValidateTrackedActors()
-	int[] Types = new int[3]
-	Types[0] = 43 ; kNPC
-	Types[1] = 44 ; kLeveledCharacter
-	Types[2] = 62 ; kCharacter
 	FormListRemove(Config, "TrackedActors", none, true)
 	Form[] TrackedActors = FormListToArray(Config, "TrackedActors")
 	int i = TrackedActors.Length
 	while i > 0
 		i -= 1
-		if !TrackedActors[i] || Types.Find(TrackedActors[i].GetType()) == -1
+		if !Config.IsActor(TrackedActors[i])
 			FormListRemoveAt(Config, "TrackedActors", i)
+			StringListClear(TrackedActors[i], "SexLabEvents")
 		endIf
 	endWhile
 endFunction
@@ -188,11 +189,12 @@ function ValidateTrackedFactions()
 		i -= 1
 		if !TrackedFactions[i] || TrackedFactions[i].GetType() != 11 ; kFaction
 			FormListRemoveAt(Config, "TrackedFactions", i)
+			StringListClear(TrackedFactions[i], "SexLabEvents")
 		endIf
 	endWhile
 endFunction
 
-function CleanLists()
+;/ function CleanLists()
 	FormListRemove(Config, "ValidActors", none, true)
 	int count = FormListCount(Config, "ValidActors")
 	int i = count
@@ -217,7 +219,7 @@ function CleanLists()
 		endIf
 	endWhile
 	Log("Actors Total: "+count+" / Removed: "+(count - FormListCount(Config, "ValidActors")), "CleanLists")
-endFunction
+endFunction /;
 
 ; ------------------------------------------------------- ;
 ; --- System Utils                                   --- ;

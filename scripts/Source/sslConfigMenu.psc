@@ -2935,7 +2935,7 @@ state CleanSystem
 			; Setup & clean system
 			ResetAllQuests()
 			SystemAlias.SetupSystem()
-			Stats.CleanDeadStats()
+			Config.CleanActorStorage()
 
 			ModEvent.Send(ModEvent.Create("SexLabReset"))
 			Config.CleanSystemFinish.Show()
