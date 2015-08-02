@@ -317,10 +317,7 @@ state Animating
 			CenterOnObject(PlayerRef, true)
 		endIf
 		; Return to animation loop
-		; ClearIdles()
-		RealignActors()
-		StageTimer = Utility.GetCurrentRealTime() + GetTimer()
-		RegisterForSingleUpdate(0.1)
+		ResetPositions(true)
 	endFunction
 
 	event OnKeyDown(int KeyCode)
@@ -428,8 +425,13 @@ state Refresh
 endState
 
 function ClearIdles()
+	ActorAlias[0].StopAnimating(true)
+	ActorAlias[1].StopAnimating(true)
+	ActorAlias[2].StopAnimating(true)
+	ActorAlias[3].StopAnimating(true)
+	ActorAlias[4].StopAnimating(true)
 	Utility.Wait(0.1)
-	;/ if ActorCount == 1
+	if ActorCount == 1
 		Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
 	elseIf ActorCount == 2
 		Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
@@ -449,13 +451,8 @@ function ClearIdles()
 		Debug.SendAnimationEvent(Positions[2], "IdleForceDefaultState")
 		Debug.SendAnimationEvent(Positions[3], "IdleForceDefaultState")
 		Debug.SendAnimationEvent(Positions[4], "IdleForceDefaultState")
-	endIf /;
-	ActorAlias[0].StopAnimating(true)
-	ActorAlias[1].StopAnimating(true)
-	ActorAlias[2].StopAnimating(true)
-	ActorAlias[3].StopAnimating(true)
-	ActorAlias[4].StopAnimating(true)
-	Utility.Wait(0.3)
+	endIf
+	Utility.Wait(0.1)
 endFunction
 
 function TriggerOrgasm()
@@ -701,6 +698,7 @@ int function GetAdjustPos()
 endFunction
 
 function PlayStageAnimations()
+	Animation.GetAnimEvents(AnimEvents, Stage)
 	QuickEvent("Animate")
 	StageTimer = RealTime[0] + GetTimer()
 endFunction

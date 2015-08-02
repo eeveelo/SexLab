@@ -327,7 +327,7 @@ function LockActor(actor ActorRef)
 	if ActorRef == SexLab.PlayerRef
 		Game.DisablePlayerControls(false, false, false, false, false, false, true, false, 0)
 		Game.ForceThirdPerson()
-		Game.SetPlayerAIDriven()
+		; Game.SetPlayerAIDriven()
 	else
 		ActorRef.SetRestrained(true)
 		ActorRef.SetDontMove(true)
@@ -342,7 +342,7 @@ function UnlockActor(actor ActorRef)
 	; Enable movement
 	if ActorRef == SexLab.PlayerRef
 		Game.EnablePlayerControls(false, false, false, false, false, false, true, false, 0)
-		Game.SetPlayerAIDriven(false)
+		; Game.SetPlayerAIDriven(false)
 	else
 		ActorRef.SetRestrained(false)
 		ActorRef.SetDontMove(false)

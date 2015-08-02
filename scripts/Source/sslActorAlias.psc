@@ -24,6 +24,7 @@ bool IsSkilled
 ; Current Thread state
 sslThreadController Thread
 int Position
+bool LeadIn
 
 float StartWait
 string StartAnimEvent
@@ -193,7 +194,7 @@ bool[] IsType
 
 int Stage
 int StageCount
-string AnimEvent
+string[] AnimEvents
 sslBaseAnimation Animation
 
 function LoadShares()
@@ -203,8 +204,10 @@ function LoadShares()
 	BedStatus  = Thread.BedStatus
 	RealTime   = Thread.RealTime
 	SkillBonus = Thread.SkillBonus
-	IsType     = Thread.IsType
 	AdjustKey  = Thread.AdjustKey
+	IsType     = Thread.IsType
+	LeadIn     = Thread.LeadIn
+	AnimEvents = Thread.AnimEvents
 
 	Flags      = new int[5]
 	Offsets    = new float[4]
@@ -338,12 +341,13 @@ function GetPositionInfo()
 		if !AdjustKey
 			SetAdjustKey(Thread.AdjustKey)
 		endIf
+		LeadIn     = Thread.LeadIn
 		Stage      = Thread.Stage
 		Animation  = Thread.Animation
 		StageCount = Animation.StageCount
 		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
 		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedStatus[1])
-		AnimEvent  = Animation.FetchPositionStage(Position, Stage)
+		AnimEvents[Position] = Animation.FetchPositionStage(Position, Stage)
 	endIf
 endFunction
 
@@ -358,6 +362,7 @@ state Animating
 		ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		AttachMarker()
+		ClearEffects()
 		; TODO: Add a light source option here. (possibly with frostfall benefit?)
 		; Remove from bard audience if in one
 		Config.CheckBardAudience(ActorRef, true)
@@ -376,9 +381,9 @@ state Animating
 
 	function SendAnimation()
 		; AnimEvent = Animation.FetchPositionStage(Position, Stage)
-		Debug.SendAnimationEvent(ActorRef, AnimEvent)
-		Log(AnimEvent)
-		Utility.Wait(0.2)
+		Log(AnimEvents[Position])
+		Debug.SendAnimationEvent(ActorRef, AnimEvents[Position])
+		; Utility.Wait(0.2)
 	endFunction
 
 	event OnUpdate()
@@ -651,8 +656,8 @@ function LockActor()
 	; Stop whatever they are doing
 	; Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 	; Start DoNothing package
-	ActorRef.SetFactionRank(Config.AnimatingFaction, 1)
 	ActorUtil.AddPackageOverride(ActorRef, Config.DoNothing, 100, 1)
+	ActorRef.SetFactionRank(Config.AnimatingFaction, 1)
 	ActorRef.EvaluatePackage()
 	; Disable movement
 	if IsPlayer
@@ -690,6 +695,7 @@ function UnlockActor()
 	; Remove from animation faction
 	ActorRef.RemoveFromFaction(Config.AnimatingFaction)
 	ActorUtil.RemovePackageOverride(ActorRef, Config.DoNothing)
+	ActorRef.SetFactionRank(Config.AnimatingFaction, 0)
 	ActorRef.EvaluatePackage()
 	; Enable movement
 	if IsPlayer
@@ -731,6 +737,11 @@ function RestoreActorDefaults()
 		ActorRef.ClearExpressionOverride()
 		ActorRef.ResetExpressionOverrides()
 	endIf
+	; Clear from animating faction
+	ActorRef.SetFactionRank(Config.AnimatingFaction, 0)
+	ActorRef.RemoveFromFaction(Config.AnimatingFaction)
+	ActorUtil.RemovePackageOverride(ActorRef, Config.DoNothing)
+	ActorRef.EvaluatePackage()
 	; Remove SOS erection
 	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
 endFunction
@@ -795,7 +806,7 @@ int function GetEnjoyment()
 			Thread.RecordSkills()
 			Thread.SetBonuses()
 		endIf
-		Enjoyment = BaseEnjoyment + CalcEnjoyment(Thread.SkillBonus, Skills, Thread.LeadIn, IsFemale, (RealTime[0] - StartedAt), Stage, StageCount)
+		Enjoyment = BaseEnjoyment + CalcEnjoyment(SkillBonus, Skills, LeadIn, IsFemale, (RealTime[0] - StartedAt), Stage, StageCount)
 		if Enjoyment < 0
 			Enjoyment = 0
 		elseIf Enjoyment >= 100

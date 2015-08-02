@@ -79,7 +79,7 @@ sslBaseAnimation[] Animations
 
 sslBaseAnimation[] function GetOwnerAnimations(Form Owner)
 	bool[] Valid = Utility.CreateBoolArray(ASlotted)
-	int i = Animations.Length
+	int i = ASlotted
 	while i
 		i -= 1
 		Valid[i] = Animations[i] && Animations[i].Registered && Animations[i].Storage == Owner

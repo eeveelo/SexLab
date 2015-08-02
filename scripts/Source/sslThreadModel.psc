@@ -45,6 +45,7 @@ int property Stage auto hidden
 int property ActorCount auto hidden
 Sound property SoundFX auto hidden
 string property AdjustKey auto hidden
+string[] property AnimEvents auto hidden
 
 sslBaseAnimation property Animation auto hidden
 sslBaseAnimation[] CustomAnimations
@@ -115,6 +116,7 @@ bool property IsDirty hidden
 		IsType[5] = value
 	endFunction
 endProperty
+
 
 ; Timer Info
 bool UseCustomTimers
@@ -341,7 +343,7 @@ state Making
 		endIf
 		; Center on fallback choices
 		if !CenterRef
-			if IsType[0]
+			if IsAggressive
 				CenterOnObject(Victims[0])
 			elseIf HasPlayer
 				CenterOnObject(PlayerRef)
@@ -400,7 +402,7 @@ state Making
 
 		; Get default primary animations if none
 		elseIf PrimaryAnimations.Length == 0
-			SetAnimations(AnimSlots.GetByDefault(Males, Females, IsType[0], (BedRef != none), Config.RestrictAggressive))
+			SetAnimations(AnimSlots.GetByDefault(Males, Females, IsAggressive, (BedRef != none), Config.RestrictAggressive))
 			if PrimaryAnimations.Length == 0
 				Fatal("Unable to find valid default animations")
 				return none
@@ -408,7 +410,7 @@ state Making
 		endIf
 
 		; Get default foreplay if none and enabled
-		if !HasCreature && !IsType[0] && ActorCount == 2 && !NoLeadIn && LeadAnimations.Length == 0 && Config.ForeplayStage
+		if !HasCreature && !IsAggressive && ActorCount == 2 && !NoLeadIn && LeadAnimations.Length == 0 && Config.ForeplayStage
 			if BedRef
 				SetLeadAnimations(AnimSlots.GetByTags(2, "LeadIn", SexLabUtil.StringIfElse(Config.BedRemoveStanding, "Furniture,Standing", "Furniture")))
 			else
@@ -675,7 +677,7 @@ function ChangeActors(Actor[] NewPositions)
 	ActorAlias[4].GetPositionInfo()
 	; Select new animations for changed actor count
 	if PrimaryAnimations[0].PositionCount != ActorCount
-		SetAnimations(AnimSlots.GetByDefault(NewGenders[0], NewGenders[1], IsType[0], (BedRef != none), Config.RestrictAggressive))
+		SetAnimations(AnimSlots.GetByDefault(NewGenders[0], NewGenders[1], IsAggressive, (BedRef != none), Config.RestrictAggressive))
 		SetAnimation()
 	endIf
 	; End lead in if thread was in it and can't be now
@@ -1144,7 +1146,7 @@ function ResolveTimers()
 	if !UseCustomTimers
 		if LeadIn
 			ConfigTimers = Config.StageTimerLeadIn
-		elseIf IsType[0]
+		elseIf IsAggressive
 			ConfigTimers = Config.StageTimerAggr
 		else
 			ConfigTimers = Config.StageTimer
@@ -1208,9 +1210,8 @@ endFunction
 
 function InitShares()
 	DebugMode      = Config.DebugMode
-	; sAnimation     = new sslBaseAnimation[1]
-	; sAnimEvents    = new string[5]
-	; sStage         = new int[1]
+	AnimEvents     = new string[5]
+	IsType         = new bool[6]
 	BedStatus      = new int[2]
 	AliasDone      = new int[4]
 	RealTime       = new float[1]
@@ -1218,7 +1219,6 @@ function InitShares()
 	SkillXP        = new float[6]
 	SkillBonus     = new float[6]
 	CenterLocation = new float[6]
-	IsType         = new bool[6]
 
 	if EventTypes.Length != 4 || EventTypes.Find("") != -1
 		EventTypes = new string[4]
