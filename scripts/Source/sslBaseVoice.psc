@@ -19,21 +19,31 @@ bool property Female hidden
 endProperty
 
 function Moan(Actor ActorRef, int Strength = 30, bool IsVictim = false)
-	LipSync(ActorRef, Strength)
-	GetSound(Strength, IsVictim).PlayAndWait(ActorRef)
+	if Strength < 1
+		Strength = 1
+	endIf
+	Sound SoundRef = GetSound(Strength, IsVictim)
+	if SoundRef
+		LipSync(ActorRef, Strength)
+		SoundRef.Play(ActorRef)
+		Utility.Wait(0.8)
+	endIf
 endFunction
 
 function MoanNoWait(Actor ActorRef, int Strength = 30, bool IsVictim = false, float Volume = 1.0)
-	LipSync(ActorRef, Strength)
 	if Volume > 0.0
-		Sound.SetInstanceVolume(GetSound(Strength, IsVictim).Play(ActorRef), Volume)
+		Sound SoundRef = GetSound(Strength, IsVictim)
+		if SoundRef
+			LipSync(ActorRef, Strength)
+			Sound.SetInstanceVolume(SoundRef.Play(ActorRef), Volume)
+		endIf
 	endIf
 endFunction
 
 Sound function GetSound(int Strength, bool IsVictim = false)
-	if Strength > 75
+	if Strength > 75 && Hot
 		return Hot
-	elseIf IsVictim
+	elseIf IsVictim && Medium
 		return Medium
 	endIf
 	return Mild
@@ -51,7 +61,6 @@ endFunction
 
 function Save(int id = -1)
 	parent.Save(id)
-	LipSync = Config.LipSync
 	AddTagConditional("Male",   (Gender == 0 || Gender == -1))
 	AddTagConditional("Female", (Gender == 1 || Gender == -1))
 	Log(Name, "Voices["+id+"]")
@@ -63,6 +72,7 @@ function Initialize()
 	Medium = none
 	Hot    = none
 	parent.Initialize()
+	LipSync = Config.LipSync
 endFunction
 
 ; ------------------------------------------------------- ;
