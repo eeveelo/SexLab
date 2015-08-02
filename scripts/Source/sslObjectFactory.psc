@@ -241,7 +241,7 @@ sslBaseVoice[] Voices
 
 sslBaseVoice[] function GetOwnerVoices(Form Owner)
 	bool[] Valid = Utility.CreateBoolArray(VSlotted)
-	int i = Voices.Length
+	int i = VSlotted
 	while i
 		i -= 1
 		Valid[i] = Voices[i] && Voices[i].Registered && Voices[i].Storage == Owner
@@ -396,7 +396,7 @@ sslBaseExpression[] Expressions
 
 sslBaseExpression[] function GetOwnerExpressions(Form Owner)
 	bool[] Valid = Utility.CreateBoolArray(ESlotted)
-	int i = Expressions.Length
+	int i = ESlotted
 	while i
 		i -= 1
 		Valid[i] = Expressions[i] && Expressions[i].Registered && Expressions[i].Storage == Owner
