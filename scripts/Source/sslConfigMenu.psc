@@ -42,10 +42,8 @@ endFunction
 
 event OnVersionUpdate(int version)
 	LoadLibs(false)
-	if CurrentVersion < 15920
-		if CurrentVersion > 0
-			ResetAllQuests()
-		endIf
+	if CurrentVersion > 0 && CurrentVersion < 15920
+		ResetAllQuests()
 		LoadLibs(true)
 		SystemAlias.SetupSystem()
 	endIf
@@ -1902,18 +1900,26 @@ function SexDiary()
 	; AddEmptyOption()
 
 	Actor ActorRef
-	ActorRef = Stats.LastAggressor(StatRef)
-	AddTextOption("$SSL_LastAggressor", StringIfElse(ActorRef != none, ActorRef.GetLeveledActorBase().GetName(), "--"))
-
-	ActorRef = Stats.LastVictim(StatRef)
-	AddTextOption("$SSL_LastVictim", StringIfElse(ActorRef != none, ActorRef.GetLeveledActorBase().GetName(), "--"))
-
 	if StatRef == PlayerRef
 		ActorRef = Stats.MostUsedPlayerSexPartner()
-		AddTextOption("$SSL_MostActivePartner", StringIfElse(ActorRef != none, ActorRef.GetLeveledActorBase().GetName()+"("+Stats.PlayerSexCount(ActorRef)+")", "--"))
+		if ActorRef
+			AddTextOption("$SSL_MostActivePartner", ActorRef.GetLeveledActorBase().GetName()+" ("+Stats.PlayerSexCount(ActorRef)+")")
+		endIf
 	else
 		ActorRef = Stats.LastSexPartner(StatRef)
-		AddTextOption("$SSL_LastPartner", StringIfElse(ActorRef != none, ActorRef.GetLeveledActorBase().GetName(), "--"))
+		if ActorRef
+			AddTextOption("$SSL_LastPartner", ActorRef.GetLeveledActorBase().GetName())
+		endIf
+	endIf
+
+	ActorRef = Stats.LastAggressor(StatRef)
+	if ActorRef
+		AddTextOption("$SSL_LastAggressor", ActorRef.GetLeveledActorBase().GetName())
+	endIf
+
+	ActorRef = Stats.LastVictim(StatRef)
+	if ActorRef
+		AddTextOption("$SSL_LastVictim", ActorRef.GetLeveledActorBase().GetName())
 	endIf
 
 
@@ -1930,14 +1936,14 @@ function SexDiary()
 	AddTextOption("$SSL_TimesAggressive", Stats.GetSkill(StatRef, "Aggressor"))
 	AddTextOption("$SSL_TimesVictim", Stats.GetSkill(StatRef, "Victim"))
 
-	AddEmptyOption()
-	SetCursorFillMode(LEFT_TO_RIGHT)
 	; Custom stats set by other mods
-	int i = Stats.GetNumStats()
-	while i
-		i -= 1
-		AddTextOption(Stats.GetNthStat(i), Stats.GetStatFull(StatRef, Stats.GetNthStat(i)))
-	endWhile
+	if StatRef == PlayerRef
+		int i = Stats.GetNumStats()
+		while i
+			i -= 1
+			AddTextOption(Stats.GetNthStat(i), Stats.GetStatFull(StatRef, Stats.GetNthStat(i)))
+		endWhile
+	endIf
 endFunction
 
 state SetStatTarget

@@ -437,17 +437,18 @@ endFunction
 
 Actor function LastActorInList(Actor ActorRef, string List)
 	FormListRemove(ActorRef, List, none, true)
-	int i = FormListCount(ActorRef, List)
+	Form[] ActorList = FormListToArray(ActorRef, List)
+	int[] Types = new int[3]
+	Types[0] = 43 ; kNPC
+	Types[1] = 44 ; kLeveledCharacter
+	Types[2] = 62 ; kCharacter
+	int i = ActorList.Length
 	while i > 0
 		i -= 1
-		Form FormRef = FormListGet(ActorRef, List, i)
-		if FormRef
-			int Type = FormRef.GetType()
-			if Type == 43 || Type == 44 || Type == 62
-				return FormRef as Actor
-			else
-				FormListRemoveAt(ActorRef, List, i)
-			endIf
+		if ActorList[i] && Types.Find(ActorList[i].GetType()) != -1
+			return ActorList[i] as Actor
+		else
+			FormListRemoveAt(ActorRef, List, i)
 		endIf
 	endWhile
 	return none
@@ -458,11 +459,12 @@ Actor function MostUsedPlayerSexPartner()
 	Form[] SexPartners = FormListToArray(PlayerRef, "SexPartners")
 	Actor PartnerRef
 	int PartnerNum
-	int[] Types = new int[2]
+	int[] Types = new int[3]
 	Types[0] = 43 ; kNPC
-	Types[1] = 62 ; kCharacter
+	Types[1] = 44 ; kLeveledCharacter
+	Types[2] = 62 ; kCharacter
 	int i = SexPartners.Length
-	while i
+	while i > 0
 		i -= 1
 		if SexPartners[i] && Types.Find(SexPartners[i].GetType()) != -1
 			int Num = PlayerSexCount(SexPartners[i] as Actor)
@@ -877,7 +879,7 @@ function CleanDeadStats()
 			if ActorRef && ActorRef != PlayerRef && ActorRef.IsDead()
 				ResetStats(ActorRef)
 				FormListRemove(none, "SexLab.SkilledActors", ActorRef)
-				Log("Skills Removed", ActorRef.GetLeveledActorBase().GetName())
+				; Log("Skills Removed", ActorRef.GetLeveledActorBase().GetName())
 			endIf
 		else
 			FormListRemoveAt(none, "SexLab.SkilledActors", i)

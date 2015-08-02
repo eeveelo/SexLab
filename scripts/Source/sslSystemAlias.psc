@@ -30,9 +30,13 @@ event OnPlayerLoadGame()
 		; Perform pending updates
 		UpdateSystem(CurrentVersion, SexLabUtil.GetVersion())
 		; Cleanup tasks
-		Factory.Cleanup()
 		ValidateTrackedFactions()
 		ValidateTrackedActors()
+		Factory.Cleanup()
+		Stats.CleanDeadStats()
+		CleanLists()
+		; Send game loaded event
+		ModEvent.Send(ModEvent.Create("SexLabGameLoaded"))
 	endIf
 endEvent
 
@@ -158,54 +162,61 @@ endFunction
 ; --- System Cleanup                                  --- ;
 ; ------------------------------------------------------- ;
 
+import StorageUtil
+
 function ValidateTrackedActors()
-	int i = StorageUtil.FormListCount(Config, "TrackedActors")
-	while i
+	int[] Types = new int[3]
+	Types[0] = 43 ; kNPC
+	Types[1] = 44 ; kLeveledCharacter
+	Types[2] = 62 ; kCharacter
+	FormListRemove(Config, "TrackedActors", none, true)
+	Form[] TrackedActors = FormListToArray(Config, "TrackedActors")
+	int i = TrackedActors.Length
+	while i > 0
 		i -= 1
-		Actor ActorRef = StorageUtil.FormListGet(Config, "TrackedActors", i) as Actor
-		if !ActorRef
-			StorageUtil.FormListRemoveAt(Config, "TrackedActors", i)
+		if !TrackedActors[i] || Types.Find(TrackedActors[i].GetType()) == -1
+			FormListRemoveAt(Config, "TrackedActors", i)
 		endIf
 	endWhile
 endFunction
 
 function ValidateTrackedFactions()
-	int i = StorageUtil.FormListCount(Config, "TrackedFactions")
+	FormListRemove(Config, "TrackedFactions", none, true)
+	Form[] TrackedFactions = FormListToArray(Config, "TrackedFactions")
+	int i = TrackedFactions.Length
 	while i
 		i -= 1
-		Faction FactionRef = StorageUtil.FormListGet(Config, "TrackedFactions", i) as Faction
-		if !FactionRef
-			StorageUtil.FormListRemoveAt(Config, "TrackedFactions", i)
+		if !TrackedFactions[i] || TrackedFactions[i].GetType() != 11 ; kFaction
+			FormListRemoveAt(Config, "TrackedFactions", i)
 		endIf
 	endWhile
 endFunction
 
 function CleanLists()
-	int count = StorageUtil.FormListCount(Config, "ValidActors")
-	Log("Total Actors: "+count, "CleanLists")
-	int i = StorageUtil.FormListCount(Config, "ValidActors")
+	FormListRemove(Config, "ValidActors", none, true)
+	int count = FormListCount(Config, "ValidActors")
+	int i = count
 	while i > 0
 		i -= 1
-		Form FormRef = StorageUtil.FormListGet(Config, "ValidActors", i)
+		Form FormRef = FormListGet(Config, "ValidActors", i)
 		if !FormRef
-			StorageUtil.FormListRemoveAt(Config, "ValidActors", i)
-			; Log("Is None", "Removing")
+			FormListRemoveAt(Config, "ValidActors", i)
 		else
 			Actor ActorRef = FormRef as Actor
 			if !ActorRef
-				StorageUtil.FormListRemoveAt(Config, "ValidActors", i)
+				FormListRemoveAt(Config, "ValidActors", i)
 				; Log(FormRef+" - Not Actor", "Removing")
 			elseIf ActorRef.IsDead() || ActorRef.IsDisabled()
-				StorageUtil.FormListRemove(Config, "ValidActors", ActorRef)
-				StorageUtil.FormListRemove(none, "SexLab.SkilledActors", ActorRef, true)
-				StorageUtil.FormListRemove(Config, "TrackedActors", ActorRef, true)
-				StorageUtil.FloatListClear(ActorRef, "SexLabSkills")
-				SexLab.Stats.ClearCustomStats(ActorRef)
+				FormListRemove(Config, "ValidActors", ActorRef)
+				FormListRemove(none, "SexLab.SkilledActors", ActorRef, true)
+				FormListRemove(Config, "TrackedActors", ActorRef, true)
+				FloatListClear(ActorRef, "SexLabSkills")
+				Stats.ResetStats(ActorRef)
 				; Log(FormRef + " - "+ ActorRef.GetLeveledActorBase().GetName()+" - IsDead: " + ActorRef.IsDead() + " IsDisabled: " + ActorRef.IsDisabled(), "Removing")
 			endIf
 		endIf
 	endWhile
-	Log("Actors Removed: "+(count - StorageUtil.FormListCount(Config, "ValidActors")), "CleanLists")
+	Log("Actors Total: "+count+" / Removed: "+(count - FormListCount(Config, "ValidActors")), "CleanLists")
 endFunction
 
 ; ------------------------------------------------------- ;
