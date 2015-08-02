@@ -522,10 +522,10 @@ bool function CheckSystemPart(string CheckSystem)
 		return Quest.GetQuest("SKI_ConfigManagerInstance") != none
 
 	elseIf CheckSystem == "SexLabUtil"
-		return SexLabUtil.GetPluginVersion() >= 15920
+		return SexLabUtil.GetPluginVersion() >= 16000
 
 	elseIf CheckSystem == "PapyrusUtil"
-		return PapyrusUtil.GetVersion() >= 29
+		return PapyrusUtil.GetVersion() >= 30
 
 	elseIf CheckSystem == "FNIS"
 		return FNIS.VersionCompare(5, 4, 2) >= 0

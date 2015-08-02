@@ -5,11 +5,11 @@ scriptname SexLabUtil hidden
 ; ------------------------------------------------------- ;
 
 int function GetVersion() global
-	return 15921
+	return 15922
 endFunction
 
 string function GetStringVer() global
-	return "1.60 beta 2b"
+	return "1.60 RC 1"
 endFunction
 
 bool function SexLabIsActive() global
