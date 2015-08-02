@@ -399,9 +399,9 @@ state Animating
 		RegisterForSingleUpdate(0.5)
 	endFunction
 
-	function ResetPositions(bool ClearIdles = true)
+	function ResetPositions(bool KeepIdles = true)
 		UnregisterForUpdate()
-		if ClearIdles
+		if !KeepIdles
 			ClearIdles()
 		endIf
 		GoToState("Refresh")
@@ -417,7 +417,6 @@ state Refresh
 		RegisterForSingleUpdate(0.1)
 	endFunction
 	event OnUpdate()
-		Log("Refresh Done")
 		Action("Animating")
 	endEvent
 	function ResetPositions(bool ClearIdles = true)
