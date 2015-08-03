@@ -350,6 +350,24 @@ function debug_DeleteAllValues() global native
 
 int function debug_Cleanup() global native
 
+Form[] function debug_AllIntObjs() global native
+Form[] function debug_AllFloatObjs() global native
+Form[] function debug_AllStringObjs() global native
+Form[] function debug_AllFormObjs() global native
+Form[] function debug_AllIntListObjs() global native
+Form[] function debug_AllFloatListObjs() global native
+Form[] function debug_AllStringListObjs() global native
+Form[] function debug_AllFormListObjs() global native
+
+string[] function debug_AllObjIntKeys(Form ObjKey) global native
+string[] function debug_AllObjFloatKeys(Form ObjKey) global native
+string[] function debug_AllObjStringKeys(Form ObjKey) global native
+string[] function debug_AllObjFormKeys(Form ObjKey) global native
+string[] function debug_AllObjIntListKeys(Form ObjKey) global native
+string[] function debug_AllObjFloatListKeys(Form ObjKey) global native
+string[] function debug_AllObjStringListKeys(Form ObjKey) global native
+string[] function debug_AllObjFormListKeys(Form ObjKey) global native
+
 int function debug_GetIntObjectCount() global native
 int function debug_GetFloatObjectCount() global native
 int function debug_GetStringObjectCount() global native
