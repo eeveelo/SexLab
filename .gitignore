@@ -7,3 +7,5 @@ meta.ini
 *.esp
 *.sublime-project
 *.sublime-workspace
+/staging/*
+*.bsa
