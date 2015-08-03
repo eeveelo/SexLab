@@ -205,19 +205,14 @@ endFunction
 ; ------------------------------------------------------- ;
 
 int function ValidateActor(Actor ActorRef)
-	ActorBase BaseRef = ActorRef.GetLeveledActorBase()
 	if !ActorRef
 		Log("ValidateActor(NONE) -- FALSE -- Because they don't exist.")
 		return -1
-	elseIf ActorRef.IsInFaction(AnimatingFaction)
+	endIf
+	ActorBase BaseRef = ActorRef.GetLeveledActorBase()
+	if ActorRef.IsInFaction(AnimatingFaction)
 		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They appear to already be animating")
 		return -10
-	elseIf FormListFind(Config, "ValidActors", ActorRef) != -1
-		; Log("ValidateActor("+BaseRef.GetName()+") -- TRUE -- HIT")
-		return 1
-	elseIf !CanAnimate(ActorRef)
-		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are forbidden from animating")
-		return -11
 	elseIf !ActorRef.Is3DLoaded()
 		Utility.WaitMenuMode(2.0)
 		if ActorRef.Is3DLoaded()
@@ -238,13 +233,30 @@ int function ValidateActor(Actor ActorRef)
 	elseIf ActorRef.IsOnMount()
 		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are currently mounted.")
 		return -16
-	elseIf ActorRef != PlayerRef && !ActorRef.HasKeyword(ActorTypeNPC) && !CreatureSlots.AllowedCreature(BaseRef.GetRace()) ; (!Config.AllowCreatures || (Config.AllowCreatures && !SexLabUtil.HasRace(BaseRef.GetRace())))
-		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are a creature that is currently not supported ("+MiscUtil.GetRaceEditorID(BaseRef.GetRace())+")")
-		return -17
+	elseIf FormListFind(Config, "ValidActors", ActorRef) != -1
+		Log("ValidateActor("+BaseRef.GetName()+") -- TRUE -- HIT")
+		return 1
+	elseIf !CanAnimate(ActorRef)
+		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are forbidden from animating")
+		return -11
+	elseIf ActorRef != PlayerRef && !ActorRef.HasKeyword(ActorTypeNPC)
+		if !Config.AllowCreatures
+			Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are possibly a creature but creature animations are currently disabled")
+			return -17
+		elseIf !sslCreatureAnimationSlots.HasCreatureType(ActorRef)
+			Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are a creature type that is currently not supported ("+MiscUtil.GetRaceEditorID(BaseRef.GetRace())+")")
+			return -18
+		elseIf !CreatureSlots.HasAnimation(BaseRef.GetRace(), GetGender(ActorRef))
+			Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are valid creature type, but have no valid animations currently enabled or installed.")
+			return -19
+		endIf
+		Log("ValidateActor("+BaseRef.GetName()+") -- TRUE -- CREATURE")
+		return 1
+	else
+		Log("ValidateActor("+BaseRef.GetName()+") -- TRUE -- MISS")
+		FormListAdd(Config, "ValidActors", ActorRef, false)
+		return 1
 	endIf
-	Log("ValidateActor("+BaseRef.GetName()+") -- TRUE -- MISS")
-	FormListAdd(Config, "ValidActors", ActorRef, false)
-	return 1
 endFunction
 
 bool function CanAnimate(Actor ActorRef)

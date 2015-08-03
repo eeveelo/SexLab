@@ -585,8 +585,8 @@ sslBaseAnimation function GetCreatureAnimationByRegistry(string Registry)
 	return CreatureSlots.GetByRegistrar(Registry)
 endFunction
 
-bool function HasCreataureAnimation(Race CreatureRace)
-	return CreatureSlots.HasAnimation(CreatureRace)
+bool function HasCreatureAnimation(Race CreatureRace, int Gender = 2)
+	return CreatureSlots.HasAnimation(CreatureRace, Gender)
 endFunction
 
 bool function AllowedCreature(Race CreatureRace)

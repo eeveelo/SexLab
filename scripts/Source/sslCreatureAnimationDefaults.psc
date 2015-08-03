@@ -133,7 +133,7 @@ function BearDoggystyle(int id)
 	Base.AddPositionStage(a2, "Bear_Doggystyle_A2_S3", 45.0, rotate=180.0)
 	Base.AddPositionStage(a2, "Bear_Doggystyle_A2_S4", 45.0, rotate=180.0)
 
-	Base.SetTags("Gone,Creature,Bestiality,Dirty,Doggystyle,Bear,Vaginal,NoGenders")
+	Base.SetTags("Gone,Creature,Bestiality,Dirty,Doggystyle,Bear,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -157,7 +157,7 @@ function ChaurusForward(int id)
 	Base.AddPositionStage(a2, "Chaurus_Forward_A2_S3", 40.0, rotate=180.0)
 	Base.AddPositionStage(a2, "Chaurus_Forward_A2_S4", 40.0, rotate=180.0)
 
-	Base.SetTags("Gone,Creature,Bestiality,Dirty,Holding,Chaurus,Vaginal,NoGenders")
+	Base.SetTags("Gone,Creature,Bestiality,Dirty,Holding,Chaurus,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -181,7 +181,7 @@ function ChaurusReverse(int id)
 	Base.AddPositionStage(a2, "Chaurus_Reverse_A2_S3", 40.0, rotate=180.0)
 	Base.AddPositionStage(a2, "Chaurus_Reverse_A2_S4", 40.0, rotate=180.0)
 
-	Base.SetTags("Gone,Creature,Bestiality,Dirty,Holding,Chaurus,Anal,NoGenders")
+	Base.SetTags("Gone,Creature,Bestiality,Dirty,Holding,Chaurus,Anal")
 
 	Base.Save(id)
 endFunction
@@ -205,7 +205,7 @@ function DaedraHugging(int id)
 	Base.AddPositionStage(a2, "Daedra_Hugging_A2_S3", 40.0, rotate=180.0)
 	Base.AddPositionStage(a2, "Daedra_Hugging_A2_S4", 40.0, rotate=180.0)
 
-	Base.SetTags("Gone,Creature,Bestiality,Dirty,Holding,Hugging,Daedra,Seeking,Vaginal,Anal,NoGenders")
+	Base.SetTags("Gone,Creature,Bestiality,Dirty,Holding,Hugging,Daedra,Seeking,Vaginal,Anal")
 
 	Base.Save(id)
 endFunction
@@ -229,7 +229,7 @@ function CanineDoggystyle(int id)
 	Base.AddPositionStage(a2, "Dog_Doggystyle_A2_S3", 45.0, rotate=180.0)
 	Base.AddPositionStage(a2, "Dog_Doggystyle_A2_S4", 45.0, rotate=180.0)
 
-	Base.SetTags("Gone,Creature,Bestiality,Dirty,Doggystyle,Canine,Dog,Vaginal,NoGenders")
+	Base.SetTags("Gone,Creature,Bestiality,Dirty,Doggystyle,Canine,Dog,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -255,7 +255,7 @@ function CanineDoggystyle2(int id)
 	Base.AddPositionStage(a2, "Dog_Doggystyle2_A2_S4")
 	Base.AddPositionStage(a2, "Dog_Doggystyle2_A2_S5")
 
-	Base.SetTags("Panicforever,Creature,Bestiality,Dirty,Doggystyle,Canine,Dog,Anal,NoGenders")
+	Base.SetTags("Panicforever,Creature,Bestiality,Dirty,Doggystyle,Canine,Dog,Anal")
 
 	Base.Save(id)
 endFunction
@@ -279,7 +279,7 @@ function CanineMissionary(int id)
 	Base.AddPositionStage(a2, "Dog_Missionary_A2_S3", 45.0, rotate=180.0)
 	Base.AddPositionStage(a2, "Dog_Missionary_A2_S4", 45.0, rotate=180.0)
 
-	Base.SetTags("Gone,Creature,Bestiality,Dirty,Missionary,Canine,Dog,Vaginal,NoGenders")
+	Base.SetTags("Gone,Creature,Bestiality,Dirty,Missionary,Canine,Dog,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -339,6 +339,7 @@ function DraugrDoggystyle(int id)
 	Base.Name     = "(Draugr) Doggystyle"
 	Base.SoundFX  = Squishing
 	; Base.RaceType = "Draugrs"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "Draugr_Doggystyle_A1_S1")
@@ -363,6 +364,7 @@ function DraugrGangbang3P(int id)
 	Base.Name     = "(Draugr) Gangbang 3P"
 	Base.SoundFX  = SexMix
 	; Base.RaceType = "Draugrs"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, VaginalOralAnal)
 	Base.AddPositionStage(a1, "Draugr_Gangbang_A1_S1", silent = true, openMouth = true)
@@ -393,6 +395,7 @@ function DraugrGangbang4P(int id)
 	Base.Name     = "(Draugr) Gangbang 4P"
 	Base.SoundFX  = SexMix
 	; Base.RaceType = "Draugrs"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, VaginalOralAnal)
 	Base.AddPositionStage(a1, "Draugr_Gangbang_A1_S1", silent = true, openMouth = true)
@@ -429,6 +432,7 @@ function DraugrGangbang5P(int id)
 	Base.Name     = "(Draugr) Gangbang 5P"
 	Base.SoundFX  = SexMix
 	; Base.RaceType = "Draugrs"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, VaginalOralAnal)
 	Base.AddPositionStage(a1, "Draugr_Gangbang_A1_S1", silent = true, openMouth = true)
@@ -471,6 +475,7 @@ function DraugrHolding(int id)
 	Base.Name     = "(Draugr) Holding"
 	Base.SoundFX  = Squishing
 	; Base.RaceType = "Draugrs"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "Draugr_Holding_A1_S1")
@@ -495,6 +500,7 @@ function DraugrMissionary(int id)
 	Base.Name     = "(Draugr) Missionary"
 	Base.SoundFX  = Squishing
 	; Base.RaceType = "Draugrs"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, Vaginal)
 	Base.AddPositionStage(a1, "Draugr_Missionary_A1_S1")
@@ -519,6 +525,7 @@ function FalmerDoggystyle(int id)
 	Base.Name     = "(Falmer) Doggystyle"
 	Base.SoundFX  = Squishing
 	; Base.RaceType = "Falmers"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "Falmer_Doggystyle_A1_S1")
@@ -543,6 +550,7 @@ function FalmerGangbang3P(int id)
 	Base.Name     = "(Falmer) Gangbang 3P"
 	Base.SoundFX  = SexMix
 	; Base.RaceType = "Falmers"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, VaginalOralAnal)
 	Base.AddPositionStage(a1, "Falmer_Gangbang_A1_S1", silent = true, openMouth = true)
@@ -573,6 +581,7 @@ function FalmerGangbang4P(int id)
 	Base.Name     = "(Falmer) Gangbang 4P"
 	Base.SoundFX  = SexMix
 	; Base.RaceType = "Falmers"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, VaginalOralAnal)
 	Base.AddPositionStage(a1, "Falmer_Gangbang_A1_S1", silent = true, openMouth = true)
@@ -609,6 +618,7 @@ function FalmerGangbang5P(int id)
 	Base.Name     = "(Falmer) Gangbang 5P"
 	Base.SoundFX  = SexMix
 	; Base.RaceType = "Falmers"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, VaginalOralAnal)
 	Base.AddPositionStage(a1, "Falmer_Gangbang_A1_S1", silent = true, openMouth = true)
@@ -651,6 +661,7 @@ function FalmerHolding(int id)
 	Base.Name     = "(Falmer) Holding"
 	Base.SoundFX  = Squishing
 	; Base.RaceType = "Falmers"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, VaginalAnal)
 	Base.AddPositionStage(a1, "Falmer_Holding_A1_S1")
@@ -675,6 +686,7 @@ function FalmerMissionary(int id)
 	Base.Name     = "(Falmer) Missionary"
 	Base.SoundFX  = Squishing
 	; Base.RaceType = "Falmers"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, Vaginal)
 	Base.AddPositionStage(a1, "Falmer_Missionary_A1_S1")
@@ -832,7 +844,7 @@ function CatDoggystyle(int id)
 	Base.AddPositionStage(a2, "Cat_Doggystyle_A2_S3", 45.0, rotate=180.0)
 	Base.AddPositionStage(a2, "Cat_Doggystyle_A2_S4", 45.0, rotate=180.0)
 
-	Base.SetTags("Gone,Creature,Bestiality,Dirty,Doggystyle,Cat,Vaginal,NoGenders")
+	Base.SetTags("Gone,Creature,Bestiality,Dirty,Doggystyle,Cat,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -862,7 +874,7 @@ function SpiderDouble(int id)
 	Base.AddPositionStage(a3, "Spider_Double_A3_S3", 70.0, rotate=180.0)
 	Base.AddPositionStage(a3, "Spider_Double_A3_S4", 70.0, rotate=180.0)
 
-	Base.SetTags("Gone,Creature,Bestiality,Dirty,Gangbang,Spider,Vaginal,Oral,NoGenders")
+	Base.SetTags("Gone,Creature,Bestiality,Dirty,Gangbang,Spider,Vaginal,Oral")
 
 	Base.Save(id)
 endFunction
@@ -886,7 +898,7 @@ function SpiderPenetration(int id)
 	Base.AddPositionStage(a2, "Spider_Penetration_A2_S3", 35.0, rotate=180.0)
 	Base.AddPositionStage(a2, "Spider_Penetration_A2_S4", 35.0, rotate=180.0)
 
-	Base.SetTags("Gone,Creature,Bestiality,Dirty,Missionary,Spider,Vaginal,NoGenders")
+	Base.SetTags("Gone,Creature,Bestiality,Dirty,Missionary,Spider,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -910,7 +922,7 @@ function BigSpiderPenetration(int id)
 	Base.AddPositionStage(a2, "BigSpider_Penetration_A2_S3", 35.0, rotate=180.0)
 	Base.AddPositionStage(a2, "BigSpider_Penetration_A2_S4", 35.0, rotate=180.0)
 
-	Base.SetTags("Gone,Creature,Bestiality,Dirty,Rough,Spider,Big Spider,Vaginal,NoGenders")
+	Base.SetTags("Gone,Creature,Bestiality,Dirty,Rough,Spider,Big Spider,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1038,6 +1050,7 @@ function VampireLordDoggystyle(int id)
 	Base.Name     = "(Vampire Lord) Doggystyle"
 	Base.SoundFX  = Squishing
 	; Base.RaceType = "VampireLords"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "VampireLord_Doggystyle_A1_S1")
@@ -1062,6 +1075,7 @@ function VampireLordHolding(int id)
 	Base.Name     = "(Vampire Lord) Holding"
 	Base.SoundFX  = Squishing
 	; Base.RaceType = "VampireLords"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, VaginalAnal)
 	Base.AddPositionStage(a1, "VampireLord_Holding_A1_S1")
@@ -1086,6 +1100,7 @@ function VampireLordMissionary(int id)
 	Base.Name     = "(Vampire Lord) Missionary"
 	Base.SoundFX  = Squishing
 	; Base.RaceType = "VampireLords"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, Vaginal)
 	Base.AddPositionStage(a1, "VampireLord_Missionary_A1_S1")
@@ -1110,6 +1125,7 @@ function WerewolfAggrDoggystyle(int id)
 	Base.Name     = "(Werewolf) Rough Doggystyle"
 	Base.SoundFX  = Squishing
 	; Base.RaceType = "Werewolves"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "Werewolf_AggrDoggystyle_A1_S1")
@@ -1134,6 +1150,7 @@ function WerewolfDoggystyle(int id)
 	Base.Name     = "(Werewolf) Doggystyle"
 	Base.SoundFX  = Squishing
 	; Base.RaceType = "Werewolves"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, Anal)
 	Base.AddPositionStage(a1, "Werewolf_Doggystyle_A1_S1")
@@ -1158,6 +1175,7 @@ function WerewolfHolding(int id)
 	Base.Name     = "(Werewolf) Holding"
 	Base.SoundFX  = Squishing
 	; Base.RaceType = "Werewolves"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, VaginalAnal)
 	Base.AddPositionStage(a1, "Werewolf_Holding_A1_S1")
@@ -1182,6 +1200,7 @@ function WerewolfMissionary(int id)
 	Base.Name     = "(Werewolf) Missionary"
 	Base.SoundFX  = Squishing
 	; Base.RaceType = "Werewolves"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, Vaginal)
 	Base.AddPositionStage(a1, "Werewolf_Missionary_A1_S1")
@@ -1219,7 +1238,7 @@ function WolfDoggystyle(int id)
 	Base.AddPositionStage(a2, "Wolf_Doggystyle_A2_S3", 45.0, rotate=180.0)
 	Base.AddPositionStage(a2, "Wolf_Doggystyle_A2_S4", 45.0, rotate=180.0)
 
-	Base.SetTags("Gone,Creature,Bestiality,Dirty,Doggystyle,Wolf,Anal,NoGenders")
+	Base.SetTags("Gone,Creature,Bestiality,Dirty,Doggystyle,Wolf,Anal")
 	
 	Base.Save(id)
 endFunction
@@ -1245,7 +1264,7 @@ function WolfDoggystyle2(int id)
 	Base.AddPositionStage(a2, "Wolf_Doggystyle2_A2_S4")
 	Base.AddPositionStage(a2, "Wolf_Doggystyle2_A2_S5")
 
-	Base.SetTags("Panicforever,Creature,Bestiality,Dirty,Doggystyle,Wolf,Vaginal,NoGenders")
+	Base.SetTags("Panicforever,Creature,Bestiality,Dirty,Doggystyle,Wolf,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1269,7 +1288,7 @@ function WolfMissionary(int id)
 	Base.AddPositionStage(a2, "Wolf_Missionary_A2_S3", 45.0, rotate=180.0)
 	Base.AddPositionStage(a2, "Wolf_Missionary_A2_S4", 45.0, rotate=180.0)
 
-	Base.SetTags("Gone,Creature,Bestiality,Dirty,Missionary,Wolf,Vaginal,NoGenders")
+	Base.SetTags("Gone,Creature,Bestiality,Dirty,Missionary,Wolf,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1293,7 +1312,7 @@ function GiantHarrassment(int id)
 	Base.AddPositionStage(a2, "Giant_Harrassment_A2_S3")
 	Base.AddPositionStage(a2, "Giant_Harrassment_A2_S4")
 
-	Base.SetTags("Panicforever,Creature,Bestiality,Dirty,Holding,Rough,Giant,Vaginal,NoGenders")
+	Base.SetTags("Panicforever,Creature,Bestiality,Dirty,Holding,Rough,Giant,Vaginal")
 
 	Base.Save(id)
 endFunction
@@ -1381,6 +1400,7 @@ function RieklingThreesome(int id)
 	Base.Name     = "(Riekling) Threesome"
 	Base.SoundFX  = SexMix
 	; Base.RaceType = "Rieklings"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, VaginalOralAnal)
 	Base.AddPositionStage(a1, "Riekling_Threesome_A1_S1")
@@ -1412,6 +1432,7 @@ function RieklingMissionary(int id)
 	Base.Name     = "(Riekling) Missionary"
 	Base.SoundFX  = Squishing
 	; Base.RaceType = "Rieklings"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, VaginalAnal)
 	Base.AddPositionStage(a1, "Riekling_Missionary_A1_S1")
@@ -1436,6 +1457,7 @@ function RieklingThreeWay(int id)
 	Base.Name     = "(Riekling) Three-Way"
 	Base.SoundFX  = SexMix
 	; Base.RaceType = "Rieklings"
+	Base.GenderedCreatures = true
 
 	int a1 = Base.AddPosition(Female, VaginalOralAnal)
 	Base.AddPositionStage(a1, "Riekling_ThreeWay_A1_S1")

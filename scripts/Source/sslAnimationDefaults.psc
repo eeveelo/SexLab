@@ -484,7 +484,6 @@ function ArrokStandingForeplay(int id)
 
 	Base.Name    = "Arrok Standing Foreplay"
 
-
 	int a1 = Base.AddPosition(Female)
 	Base.AddPositionStage(a1, "Arrok_StandingForeplay_A1_S1", 0, silent = true)
 	Base.AddPositionStage(a1, "Arrok_StandingForeplay_A1_S2", 0, silent = true)

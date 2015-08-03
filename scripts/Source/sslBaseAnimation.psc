@@ -29,6 +29,8 @@ float[] CenterAdjust
 ; float[] Offsets   ; = forward, side, up, rotate
 float[] BedOffset ; = forward, side, up, rotate
 
+bool property GenderedCreatures auto hidden
+
 ; ------------------------------------------------------- ;
 ; --- Array Indexers                                  --- ;
 ; ------------------------------------------------------- ;
@@ -531,6 +533,10 @@ bool function CreaturePosition(int Position)
 	return Positions[Position] >= 2
 endFunction
 
+bool function MatchGender(int Gender, int Position)
+	return Gender == GetGender(Position) || (!GenderedCreatures && Gender > 1)
+endFunction
+
 int function FemaleCount()
 	return Genders[1]
 endFunction
@@ -579,7 +585,11 @@ bool function HasValidRaceKey(string[] RaceKeys)
 endFunction
 
 bool function IsPositionRace(int Position, string RaceKey)
-	return RaceTypes.Length > 0 && RaceTypes[Position] == RaceKey
+	return RaceTypes && RaceTypes[Position] == RaceKey
+endFunction
+
+bool function HasPostionRace(int Position, string[] RaceKeys)
+	return RaceTypes && RaceKeys.Find(RaceTypes[Position]) != -1
 endFunction
 
 function AddRaceID(string RaceID)
@@ -823,6 +833,8 @@ function Initialize()
 	Actors    = 0
 	Stages    = 0
 	RaceType  = ""
+	GenderedCreatures = false
+
 	Genders   = new int[4]
 	Positions = new int[5]
 	StageSoundFX = new Form[1]
