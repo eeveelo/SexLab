@@ -1145,36 +1145,49 @@ bool function IsActor(Form FormRef)
 endFunction
 
 bool function IsImportant(Actor ActorRef)
-	if !ActorRef || ActorRef.IsDead() || ActorRef.IsDisabled()
+	if !ActorRef || ActorRef.IsDead() || ActorRef.IsDeleted() || ActorRef.IsChild()
 		return false
+	elseIf ActorRef == PlayerRef
+		return true
 	endIf
 	ActorBase BaseRef = ActorRef.GetLeveledActorBase()
-	return BaseRef.IsUnique() || BaseRef.IsEssential() || BaseRef.IsInvulnerable() || BaseRef.IsProtected() || ActorRef == PlayerRef
+	return BaseRef.IsUnique() || BaseRef.IsEssential() || BaseRef.IsInvulnerable() || BaseRef.IsProtected() || ActorRef.IsGuard() || ActorRef.IsPlayerTeammate()
 endFunction
 
 function StoreActor(Form FormRef)
-	FormListAdd(none, "SexLab.ActorStorage", FormRef, false)
+	if FormRef
+		FormListAdd(none, "SexLab.ActorStorage", FormRef, false)
+	endIf
 endFunction
 
 function PreloadSavedStorage()
 	int PreCount = FormListCount(none, "SexLab.ActorStorage")
 	FormListRemove(none, "SexLab.ActorStorage", none, true)
-	; Check string values for SexLab.SavedVoice
-	int i = debug_GetStringObjectCount()
+	; Check actors with saved stats
+	Actor[] Actors = sslActorStats.GetAllSkilledActors()
+	int i = Actors.Length
 	while i > 0
 		i -= 1
-		Form FormRef = debug_GetStringObject(i)
-		if FormRef && !FormListHas(none, "SexLab.ActorStorage", FormRef) && HasStringValue(FormRef, "SexLab.SavedVoice")
-			StoreActor(FormRef)
+		if Actors[i] && !FormListHas(none, "SexLab.ActorStorage", Actors[i])
+			StoreActor(Actors[i])
 		endIf
 	endWhile
-	; Check form list valise for partners, victims, aggressors, or legacy skill storage
-	i = debug_GetFormListObjectCount()
+	; Check string values for SexLab.SavedVoice
+	Form[] Forms = debug_AllStringObjs()
+	i = Forms.Length
 	while i > 0
 		i -= 1
-		Form FormRef = debug_GetFormListObject(i)
-		if FormRef && !FormListHas(none, "SexLab.ActorStorage", FormRef) && (FormListCount(FormRef, "SexPartners") > 0 || FormListCount(FormRef, "WasAggressorTo") > 0 || FormListCount(FormRef, "WasVictimOf") > 0 || FloatListCount(FormRef, "SexLabSkills") > 0)
-			StoreActor(FormRef)
+		if Forms[i] && !FormListHas(none, "SexLab.ActorStorage", Forms[i]) && HasStringValue(Forms[i], "SexLab.SavedVoice")
+			StoreActor(Forms[i])
+		endIf
+	endWhile
+	; Check form list for partners, victims, aggressors, or legacy skill storage
+	Forms = debug_AllFormListObjs()
+	i = Forms.Length
+	while i > 0
+		i -= 1
+		if Forms[i] && !FormListHas(none, "SexLab.ActorStorage", Forms[i]) && (FormListCount(Forms[i], "SexPartners") > 0 || FormListCount(Forms[i], "WasAggressorTo") > 0 || FormListCount(Forms[i], "WasVictimOf") > 0 || FloatListCount(Forms[i], "SexLabSkills") > 0)
+			StoreActor(Forms[i])
 		endIf
 	endWhile
 	; Load legacy skilled actor storage
@@ -1199,7 +1212,7 @@ function PreloadSavedStorage()
 endFunction
 
 function CleanActorStorage()
-	Log("Starting...", "CleanActorStorage")
+	Log("CleanActorStorage")
 	FormListRemove(none, "SexLab.ActorStorage", none, true)
 
 	Form[] ActorStorage = FormListToArray(none, "SexLab.ActorStorage")

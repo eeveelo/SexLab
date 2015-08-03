@@ -1,6 +1,7 @@
 Scriptname sslEffectDebug extends ActiveMagicEffect
 
 import PapyrusUtil
+import StorageUtil
 
 SexLabFramework property SexLab auto
 sslSystemConfig property Config auto
@@ -21,9 +22,27 @@ endFunction
 
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
-	; Config = SexLab.Config
+	Config = SexLab.Config
+
+	Form[] Objs = debug_AllFloatObjs()
+	Log("Objs("+Objs.Length+"): "+Objs)
+	Log(" -- ")
+	int i = Objs.Length
+	while i > 0
+		i -= 1
+		string[] Keys = debug_AllObjFloatKeys(Objs[i])
+		Log(Objs[i]+" Keys("+Keys.Length+") "+Keys)
+		int n = Keys.Length
+		while n > 0
+			n -= 1
+			Log("Key["+Keys[n]+"] "+GetFloatValue(Objs[i], Keys[n], -69.69))
+		endWhile
+		Log(" -- ")
+	endWhile
 
 	; sslActorStats Stats = SexLab.Stats
+	; Config.PreloadSavedStorage()
+	; Config.CleanActorStorage()
 
 	; SexLab.RegisterForModEvent("PlayerTrack_End", "StatCheck")
 
