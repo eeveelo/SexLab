@@ -549,25 +549,12 @@ int function GetAnimationCount(bool IgnoreDisabled = true)
 	return AnimSlots.GetCount(IgnoreDisabled)
 endFunction
 
-bool function AllowedCreature(Race CreatureRace)
-	return CreatureSlots.AllowedCreature(CreatureRace)
-endFunction
-
-bool function AllowedCreatureCombination(Race CreatureRace, Race CreatureRace2)
-	return CreatureSlots.AllowedCreatureCombination(CreatureRace, CreatureRace2)
-endFunction
-
 string function MakeAnimationGenderTag(Actor[] Positions)
 	return ActorLib.MakeGenderTag(Positions)
 endFunction
 
 string function GetGenderTag(int Females = 0, int Males = 0, int Creatures = 0)
 	return ActorLib.GetGenderTag(Females, Males, Creatures)
-endFunction
-
-; DEPRECATED
-sslBaseAnimation[] function GetAnimationsByTag(int ActorCount, string Tag1, string Tag2 = "", string Tag3 = "", string TagSuppress = "", bool RequireAll = true)
-	return AnimSlots.GetByTags(ActorCount, sslUtility.MakeArgs(",", Tag1, Tag2, Tag3), TagSuppress, RequireAll)
 endFunction
 
 ;#---------------------------#
@@ -596,6 +583,18 @@ endFunction
 
 sslBaseAnimation function GetCreatureAnimationByRegistry(string Registry)
 	return CreatureSlots.GetByRegistrar(Registry)
+endFunction
+
+bool function HasCreataureAnimation(Race CreatureRace)
+	return CreatureSlots.HasAnimation(CreatureRace)
+endFunction
+
+bool function AllowedCreature(Race CreatureRace)
+	return CreatureSlots.AllowedCreature(CreatureRace)
+endFunction
+
+bool function AllowedCreatureCombination(Race CreatureRace, Race CreatureRace2)
+	return CreatureSlots.AllowedCreatureCombination(CreatureRace, CreatureRace2)
 endFunction
 
 ;#---------------------------#
@@ -1202,6 +1201,10 @@ endFunction
 ;#   DEPRECATED FUNCTIONS    #
 ;#  AVOID USING IF POSSIBLE  #
 ;#---------------------------#
+
+sslBaseAnimation[] function GetAnimationsByTag(int ActorCount, string Tag1, string Tag2 = "", string Tag3 = "", string TagSuppress = "", bool RequireAll = true)
+	return AnimSlots.GetByTags(ActorCount, sslUtility.MakeArgs(",", Tag1, Tag2, Tag3), TagSuppress, RequireAll)
+endFunction
 
 function ApplyCum(Actor ActorRef, int CumID)
 	ActorLib.ApplyCum(ActorRef, CumID)

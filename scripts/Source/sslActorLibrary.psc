@@ -219,7 +219,7 @@ int function ValidateActor(Actor ActorRef)
 		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are forbidden from animating")
 		return -11
 	elseIf !ActorRef.Is3DLoaded()
-		Utility.Wait(2.0)
+		Utility.WaitMenuMode(2.0)
 		if ActorRef.Is3DLoaded()
 			Log("ValidateActor("+BaseRef.GetName()+") -- RECHECK -- The actor wasn't loadded but was after a short wait...")
 			return ValidateActor(ActorRef)

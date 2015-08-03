@@ -13,26 +13,11 @@ bool function ClearRaceKey(string RaceKey) global native
 bool function HasRaceIDType(string RaceID) global native
 bool function HasCreatureType(Actor ActorRef) global native
 bool function HasRaceType(Race RaceRef) global native
-string[] function GetAllRaceKeys() global native
+string[] function GetAllRaceKeys(Race RaceRef = none) global native
 string[] function GetAllRaceIDs(string RaceKey) global native
 
-; TODO: Make native
-string[] function GetRaceTypes(Race RaceRef) global
-	string RaceID = MiscUtil.GetRaceEditorID(RaceRef)
-	string[] RaceKeys = GetAllRaceKeys()
-	string[] Output
-	int i = RaceKeys.Length
-	while i
-		i -= 1
-		if HasRaceID(RaceKeys[i], RaceID)
-			Output = PapyrusUtil.PushString(Output, RaceKeys[i])
-		endIf
-	endWhile
-	return Output
-endFunction
-
 sslBaseAnimation[] function GetByRace(int ActorCount, Race RaceRef)
-	string[] RaceTypes = GetRaceTypes(RaceRef)
+	string[] RaceTypes = GetAllRaceKeys(RaceRef)
 	if RaceTypes.Length < 1
 		return sslUtility.AnimationArray(0)
 	endIf
@@ -61,7 +46,7 @@ sslBaseAnimation[] function GetByRaceGenders(int ActorCount, Race RaceRef, int M
 	if !Config.UseCreatureGender && !ForceUse
 		return GetByRace(ActorCount, RaceRef)
 	endIf
-	string[] RaceTypes = GetRaceTypes(RaceRef)
+	string[] RaceTypes = GetAllRaceKeys(RaceRef)
 	if RaceTypes.Length < 1
 		return sslUtility.AnimationArray(0)
 	endIf
@@ -76,7 +61,7 @@ sslBaseAnimation[] function GetByRaceGenders(int ActorCount, Race RaceRef, int M
 endFunction
 
 sslBaseAnimation[] function FilterCreatureGenders(sslBaseAnimation[] Anims, int MaleCreatures = 0, int FemaleCreatures = 0)
-	if !Config.UseCreatureGender || !Anims || Anims.Length < 1
+	if !Config.UseCreatureGender || !Anims
 		return Anims
 	endIf
 	int Del
@@ -104,6 +89,21 @@ sslBaseAnimation[] function FilterCreatureGenders(sslBaseAnimation[] Anims, int 
 	return Output
 endFunction
 
+bool function HasAnimation(Race RaceRef)
+	string[] RaceTypes = GetAllRaceKeys(RaceRef)
+	if RaceTypes
+		int i = Slotted
+		while i
+			i -= 1
+			sslBaseAnimation Slot = GetBySlot(i)
+			if Slot.Enabled && RaceTypes.Find(Slot.RaceType) != -1
+				return true
+			endIf
+		endWhile
+	endIf
+	return false
+endFunction
+
 bool function HasCreature(Actor ActorRef)
 	return sslCreatureAnimationSlots.HasCreatureType(ActorRef)
 endFunction
@@ -113,7 +113,7 @@ bool function HasRace(Race RaceRef)
 endFunction
 
 bool function AllowedCreature(Race RaceRef)
-	return Config.AllowCreatures && sslCreatureAnimationSlots.HasRaceType(RaceRef)
+	return Config.AllowCreatures && HasAnimation(RaceRef)
 endFunction
 
 bool function AllowedCreatureCombination(Race RaceRef1, Race RaceRef2)
