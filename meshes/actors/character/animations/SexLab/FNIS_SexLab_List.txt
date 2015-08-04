@@ -4,6 +4,9 @@ AnimVar SexLabFramework INT32 16000
 
 b SexLab_Test_16000 AggrMissionary_A1_S3.hkx
 
+s -a SexLabSequenceExit1 AggrBehind_A1_S1.hkx
++ -a SexLabSequenceExit2 AggrBehind_A1_S2.hkx
+
 '
 ' Unknown Animators Animations
 '
