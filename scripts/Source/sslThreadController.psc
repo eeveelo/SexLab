@@ -202,7 +202,7 @@ state Animating
 		; Sync new positions
 		AdjustPos = NewPos
 		; GoToState("Animating")
-		ResetPositions(true)
+		ResetPositions()
 		SendThreadEvent("PositionChange")
 		RegisterForSingleUpdate(1.0)
 	endFunction
@@ -317,7 +317,7 @@ state Animating
 			CenterOnObject(PlayerRef, true)
 		endIf
 		; Return to animation loop
-		ResetPositions(true)
+		ResetPositions()
 	endFunction
 
 	event OnKeyDown(int KeyCode)
@@ -355,7 +355,7 @@ state Animating
 
 			; RePosition Actors
 			elseIf i == kRealignActors
-				ResetPositions(Config.BackwardsPressed())
+				ResetPositions()
 
 			; Change Positions
 			elseIf i == kChangePositions
@@ -399,7 +399,7 @@ state Animating
 		RegisterForSingleUpdate(0.5)
 	endFunction
 
-	function ResetPositions(bool KeepIdles = true)
+	function ResetPositions()
 		UnregisterForUpdate()
 		GoToState("Refresh")
 	endFunction
@@ -416,41 +416,9 @@ state Refresh
 	event OnUpdate()
 		Action("Animating")
 	endEvent
-	function ResetPositions(bool ClearIdles = true)
+	function ResetPositions()
 	endFunction
 endState
-
-function ClearIdles()
-	ActorAlias[0].StopAnimating(true)
-	ActorAlias[1].StopAnimating(true)
-	ActorAlias[2].StopAnimating(true)
-	ActorAlias[3].StopAnimating(true)
-	ActorAlias[4].StopAnimating(true)
-
-	string[] Enter = new string[5]
-	Animation.GetAnimEvents(Enter, Stage)
-	;/ if ActorCount == 1
-		Debug.SendAnimationEvent(Positions[0], Enter[0]+"_REENTER")
-	elseIf ActorCount == 2
-		Debug.SendAnimationEvent(Positions[0], Enter[0]+"_REENTER")
-		Debug.SendAnimationEvent(Positions[1], Enter[1]+"_REENTER")
-	elseIf ActorCount == 3
-		Debug.SendAnimationEvent(Positions[0], Enter[0]+"_REENTER")
-		Debug.SendAnimationEvent(Positions[1], Enter[1]+"_REENTER")
-		Debug.SendAnimationEvent(Positions[2], Enter[2]+"_REENTER")
-	elseIf ActorCount == 4
-		Debug.SendAnimationEvent(Positions[0], Enter[0]+"_REENTER")
-		Debug.SendAnimationEvent(Positions[1], Enter[1]+"_REENTER")
-		Debug.SendAnimationEvent(Positions[2], Enter[2]+"_REENTER")
-		Debug.SendAnimationEvent(Positions[3], Enter[3]+"_REENTER")
-	elseIf ActorCount == 5
-		Debug.SendAnimationEvent(Positions[0], Enter[0]+"_REENTER")
-		Debug.SendAnimationEvent(Positions[1], Enter[1]+"_REENTER")
-		Debug.SendAnimationEvent(Positions[2], Enter[2]+"_REENTER")
-		Debug.SendAnimationEvent(Positions[3], Enter[3]+"_REENTER")
-		Debug.SendAnimationEvent(Positions[4], Enter[4]+"_REENTER")
-	endIf /;
-endFunction
 
 function TriggerOrgasm()
 	UnregisterforUpdate()
@@ -459,7 +427,7 @@ function TriggerOrgasm()
 	RegisterForSingleUpdate(3.0)
 endFunction
 
-function ResetPositions(bool ClearIdles = true)
+function ResetPositions()
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -730,8 +698,6 @@ function RestoreOffsets()
 endFunction
 function MoveScene()
 endFunction
-; function ClearIdles()
-; endFunction
 function RealignActors()
 endFunction
 function MoveActors()
