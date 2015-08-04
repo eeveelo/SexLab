@@ -890,7 +890,7 @@ function ExportSettings()
 	ExportVoices()
 
 	; Save to JSON file
-	JsonUtil.Save(File, false)
+	JsonUtil.Save(File, true)
 endFunction
 
 function ImportSettings()
