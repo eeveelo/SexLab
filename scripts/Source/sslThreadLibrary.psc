@@ -27,8 +27,8 @@ Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000
 	Suppressed[22] = IgnoreRef2
 	Suppressed[21] = IgnoreRef3
 	Suppressed[20] = IgnoreRef4
-	; Attempt 30 times before giving up.
-	int i = 30
+	; Attempt 20 times before giving up.
+	int i = 20
 	while i
 		i -= 1
 		Actor FoundRef = Game.FindRandomActorFromRef(CenterRef, Radius)
