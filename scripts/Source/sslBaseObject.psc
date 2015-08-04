@@ -63,7 +63,7 @@ function AddTags(string[] TagList)
 endFunction
 
 function SetTags(string TagList)
-	AddTags(StringUtil.Split(TagList, ","))
+	AddTags(PapyrusUtil.StringSplit(TagList))
 endFunction
 
 bool function ToggleTag(string Tag)
