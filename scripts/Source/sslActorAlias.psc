@@ -333,6 +333,7 @@ endState
 ; --- Animation Loop                                  --- ;
 ; ------------------------------------------------------- ;
 
+
 function SendAnimation()
 endFunction
 
@@ -348,11 +349,30 @@ function GetPositionInfo()
 		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
 		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedStatus[1])
 		AnimEvents[Position] = Animation.FetchPositionStage(Position, Stage)
+		CurrentSA  = Animation.Registry
 	endIf
 endFunction
 
+string PlayingSA
+string CurrentSA
 float LoopDelay
 state Animating
+
+	function SendAnimation()
+		; Reenter SA - On stage 1 while animation hasn't changed since last call
+		if Stage == 1 && PlayingSA == CurrentSA
+			Debug.SendAnimationEvent(ActorRef, AnimEvents[Position] + "_REENTER")
+		else
+			; Enter a new SA - Not necessary on stage 1 since both events would be the same
+			if Stage != 1 && PlayingSA != CurrentSA
+				Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
+			endIf
+			; Play the primary animation
+		 	Debug.SendAnimationEvent(ActorRef, AnimEvents[Position])
+		endIf
+		; Save id of last SA played
+		PlayingSA = Animation.Registry
+	endFunction
 
 	function StartAnimating()
 		; Starting position
@@ -377,13 +397,6 @@ state Animating
 		; Start update loop		
 		UnregisterForModEvent(Thread.Key("Start"))
 		RegisterForSingleUpdate(Utility.RandomFloat(1.0, 3.0))
-	endFunction
-
-	function SendAnimation()
-		; AnimEvent = Animation.FetchPositionStage(Position, Stage)
-		Log(AnimEvents[Position])
-		Debug.SendAnimationEvent(ActorRef, AnimEvents[Position])
-		; Utility.Wait(0.2)
 	endFunction
 
 	event OnUpdate()
@@ -747,11 +760,13 @@ function RestoreActorDefaults()
 endFunction
 
 function RefreshActor()
-	if ActorRef
-		GoToState("Animating")
+	if ActorRef && GetState() == "Animating"
 		SyncThread()
-		SendAnimation()
 		SyncLocation(true)
+		PlayingSA = "SexLabSequenceExit1"
+		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
+		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1")
+		; SendAnimation()
 		RegisterForSingleUpdate(1.0)
 		Thread.SyncEventDone(kRefreshActor)
 	endIf
@@ -1183,6 +1198,8 @@ function Initialize()
 	EndAnimEvent   = "IdleForceDefaultState"
 	StartAnimEvent = ""
 	ActorKey       = ""
+	PlayingSA      = ""
+	CurrentSA      = ""
 	; Storage
 	StripOverride  = Utility.CreateBoolArray(0)
 	Equipment      = Utility.CreateFormArray(0)

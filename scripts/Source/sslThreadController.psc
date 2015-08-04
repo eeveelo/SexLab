@@ -401,9 +401,6 @@ state Animating
 
 	function ResetPositions(bool KeepIdles = true)
 		UnregisterForUpdate()
-		if !KeepIdles
-			ClearIdles()
-		endIf
 		GoToState("Refresh")
 	endFunction
 
@@ -429,29 +426,30 @@ function ClearIdles()
 	ActorAlias[2].StopAnimating(true)
 	ActorAlias[3].StopAnimating(true)
 	ActorAlias[4].StopAnimating(true)
-	Utility.Wait(0.1)
-	if ActorCount == 1
-		Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
+
+	string[] Enter = new string[5]
+	Animation.GetAnimEvents(Enter, Stage)
+	;/ if ActorCount == 1
+		Debug.SendAnimationEvent(Positions[0], Enter[0]+"_REENTER")
 	elseIf ActorCount == 2
-		Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
-		Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
+		Debug.SendAnimationEvent(Positions[0], Enter[0]+"_REENTER")
+		Debug.SendAnimationEvent(Positions[1], Enter[1]+"_REENTER")
 	elseIf ActorCount == 3
-		Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
-		Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
-		Debug.SendAnimationEvent(Positions[2], "IdleForceDefaultState")
+		Debug.SendAnimationEvent(Positions[0], Enter[0]+"_REENTER")
+		Debug.SendAnimationEvent(Positions[1], Enter[1]+"_REENTER")
+		Debug.SendAnimationEvent(Positions[2], Enter[2]+"_REENTER")
 	elseIf ActorCount == 4
-		Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
-		Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
-		Debug.SendAnimationEvent(Positions[2], "IdleForceDefaultState")
-		Debug.SendAnimationEvent(Positions[3], "IdleForceDefaultState")
+		Debug.SendAnimationEvent(Positions[0], Enter[0]+"_REENTER")
+		Debug.SendAnimationEvent(Positions[1], Enter[1]+"_REENTER")
+		Debug.SendAnimationEvent(Positions[2], Enter[2]+"_REENTER")
+		Debug.SendAnimationEvent(Positions[3], Enter[3]+"_REENTER")
 	elseIf ActorCount == 5
-		Debug.SendAnimationEvent(Positions[0], "IdleForceDefaultState")
-		Debug.SendAnimationEvent(Positions[1], "IdleForceDefaultState")
-		Debug.SendAnimationEvent(Positions[2], "IdleForceDefaultState")
-		Debug.SendAnimationEvent(Positions[3], "IdleForceDefaultState")
-		Debug.SendAnimationEvent(Positions[4], "IdleForceDefaultState")
-	endIf
-	Utility.Wait(0.1)
+		Debug.SendAnimationEvent(Positions[0], Enter[0]+"_REENTER")
+		Debug.SendAnimationEvent(Positions[1], Enter[1]+"_REENTER")
+		Debug.SendAnimationEvent(Positions[2], Enter[2]+"_REENTER")
+		Debug.SendAnimationEvent(Positions[3], Enter[3]+"_REENTER")
+		Debug.SendAnimationEvent(Positions[4], Enter[4]+"_REENTER")
+	endIf /;
 endFunction
 
 function TriggerOrgasm()
