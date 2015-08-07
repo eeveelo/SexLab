@@ -50,7 +50,7 @@ Sound function GetSound(int Strength, bool IsVictim = false)
 endFunction
 
 function LipSync(Actor ActorRef, int Strength, bool ForceUse = false)
-	if ForceUse || Config.UseLipSync
+	if (ForceUse || Config.UseLipSync) && Game.GetCameraState() != 3
 		ActorRef.Say(LipSync)
 	endIf
 endFunction
