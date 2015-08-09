@@ -174,7 +174,7 @@ sslBaseAnimation[] function GetList(bool[] Valid)
 		endIf
 		; Get list
 		Output = sslUtility.AnimationArray(i)
-		while n != -1
+		while n != -1 && i > 0
 			i -= 1
 			Output[i] = Objects[n] as sslBaseAnimation
 			n += 1

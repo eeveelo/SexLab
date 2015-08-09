@@ -56,6 +56,7 @@ float[] Skills
 float StartedAt
 float ActorScale
 float AnimScale
+float LastOrgasm
 int BestRelation
 int BaseEnjoyment
 int Enjoyment
@@ -304,7 +305,7 @@ state Ready
 			Skills       = Stats.GetSkillLevels(SkilledActor)
 			BestRelation = Thread.GetHighestPresentRelationshipRank(ActorRef)
 			if !IsVictim
-				BaseEnjoyment = Utility.RandomInt(BestRelation, ((Skills[Stats.kLewd]*2.5) as int) + (BestRelation + 1))
+				BaseEnjoyment = Utility.RandomInt(BestRelation, ((Skills[Stats.kLewd]*1.5) as int) + (BestRelation + 1))
 			endIf
 		else
 			BaseEnjoyment = Utility.RandomInt(0, 10)
@@ -392,7 +393,8 @@ state Animating
 		endIf
 		; Prepare for loop
 		TrackedEvent("Start")
-		StartedAt = RealTime[0]
+		StartedAt  = RealTime[0]
+		LastOrgasm = RealTime[0] + 10.0
 		SyncAll(true)
 		; Start update loop		
 		UnregisterForModEvent(Thread.Key("Start"))
@@ -443,9 +445,7 @@ state Animating
 			RefreshExpression()
 		endIf
 		; Log("Enjoyment: "+Enjoyment+" SOS: "+Schlong)
-		Utility.Wait(0.01)
 		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
-		Utility.Wait(0.1)
 		; SyncLocation(false)
 	endFunction
 
@@ -500,12 +500,15 @@ state Animating
 		Snap()
 	endEvent
 
-	function OrgasmEffect()
-		Orgasms += 1
-		BaseEnjoyment -= Enjoyment
-		Enjoyment = Utility.RandomInt(10, PapyrusUtil.ClampInt(((Skills[Stats.kLewd]*2.5) as int) + (BestRelation + 10), 15, 33))
-		Log("Orgasms["+Orgasms+"] Enjoyment ["+Enjoyment+"] BaseEnjoyment["+BaseEnjoyment+"]")
+	event OrgasmStage()
+		SyncThread()
+		OrgasmEffect()
+	endEvent
 
+	function OrgasmEffect()
+		UnregisterForUpdate()
+		LastOrgasm = RealTime[0]
+		Orgasms += 1
 		; Apply cum to female positions from male position orgasm
 		int i = Thread.ActorCount
 		if i > 1 && MalePosition && Config.UseCum && (IsMale || (Config.AllowFFCum && IsFemale))
@@ -520,19 +523,16 @@ state Animating
 				endWhile
 			endIf
 		endIf
-
 		; Send an orgasm event hook with actor and orgasm count
 		TrackedEvent("Orgasm")
 		int eid = ModEvent.Create("SexLabOrgasm")
 		ModEvent.PushForm(eid, ActorRef)
 		ModEvent.PushInt(eid, Orgasms)
 		ModEvent.Send(eid)
-
 		; Shake camera for player
 		if IsPlayer && Game.GetCameraState() != 3
 			Game.ShakeCamera(none, 1.00, 2.0)
 		endIf
-
 		; Play SFX/Voice
 		if !IsSilent
 			Sound MoanFX = Voice.GetSound(100, false)
@@ -549,8 +549,10 @@ state Animating
 			Utility.WaitMenuMode(0.8)
 			Sound.SetInstanceVolume(OrgasmFX.Play(ActorRef), 1.0)
 		endIf
-
-		GetEnjoyment()
+		; Reset enjoyment build up
+		BaseEnjoyment -= Enjoyment
+		BaseEnjoyment += Utility.RandomInt(10, PapyrusUtil.ClampInt(((Skills[Stats.kLewd]*1.5) as int) + (BestRelation + 10), 10, 33))
+		Log("Orgasms["+Orgasms+"] Enjoyment ["+Enjoyment+"] BaseEnjoyment["+BaseEnjoyment+"] GetEnjoyment["+GetEnjoyment()+"]")
 		; VoiceDelay = 0.8
 		RegisterForSingleUpdate(0.8)
 	endFunction
@@ -560,7 +562,7 @@ state Animating
 		GoToState("Resetting")
 		Log("Resetting!")
 		; Update stats
-		if !IsCreature
+		if IsSkilled
 			Actor VictimRef = Thread.VictimRef
 			if IsVictim
 				VictimRef = ActorRef
@@ -583,7 +585,7 @@ state Animating
 		RestoreActorDefaults()
 		UnlockActor()
 		; Unstrip items in storage, if any
-		if !ActorRef.IsDead()
+		if !IsCreature && !ActorRef.IsDead()
 			Unstrip()
 			; Reapply HDT High Heel if they had it and need it again.
 			if HDTHeelSpell && ActorRef.GetWornForm(Armor.GetMaskForSlot(37))
@@ -761,6 +763,7 @@ endFunction
 
 function RefreshActor()
 	if ActorRef && GetState() == "Animating"
+		UnregisterForUpdate()
 		SyncThread()
 		SyncLocation(true)
 		PlayingSA = "SexLabSequenceExit1"
@@ -815,7 +818,7 @@ int function GetEnjoyment()
 	if !ActorRef
 		Enjoyment = 0
 	elseif !IsSkilled
-		Enjoyment = (PapyrusUtil.ClampFloat(((RealTime[0] - StartedAt) + 1.0) / 7.0, 0.0, 40.0) + ((Stage as float / StageCount as float) * 60.0)) as int
+		Enjoyment = (PapyrusUtil.ClampFloat(((RealTime[0] - StartedAt) + 1.0) / 5.0, 0.0, 40.0) + ((Stage as float / StageCount as float) * 60.0)) as int
 	else
 		if Position == 0
 			Thread.RecordSkills()
@@ -825,7 +828,7 @@ int function GetEnjoyment()
 		if Enjoyment < 0
 			Enjoyment = 0
 		elseIf Enjoyment >= 100
-			if Config.SeparateOrgasms && Stage != StageCount
+			if Config.SeparateOrgasms && Stage != StageCount && (RealTime[0] - LastOrgasm) > 3.0
 				OrgasmEffect()
 			else
 				Enjoyment = 100
@@ -981,12 +984,14 @@ function Strip()
 		; Right hand
 		ItemRef = ActorRef.GetEquippedWeapon(false)
 		if IsStrippable(ItemRef)
+			SexLabUtil.SaveEnchantment(ItemRef as ObjectReference)
 			ActorRef.UnequipItemEX(ItemRef, 1, false)
 			Stripped[33] = ItemRef
 		endIf
 		; Left hand
 		ItemRef = ActorRef.GetEquippedWeapon(true)
 		if IsStrippable(ItemRef)
+			SexLabUtil.SaveEnchantment(ItemRef as ObjectReference)
 			ActorRef.UnequipItemEX(ItemRef, 2, false)
 			Stripped[32] = ItemRef
 		endIf
@@ -997,7 +1002,8 @@ function Strip()
 		; Grab item in slot
 		ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
 		if ItemRef && (ActorLib.IsAlwaysStrip(ItemRef) || (Strip[i] && IsStrippable(ItemRef)))
-			ActorRef.UnequipItem(ItemRef, false, true)
+			SexLabUtil.SaveEnchantment(ItemRef as ObjectReference)
+			ActorRef.UnequipItemEX(ItemRef, 0, false)
 			Stripped[i] = ItemRef
 		endIf
 		; Move to next slot
@@ -1024,16 +1030,17 @@ function UnStrip()
  		return ; Fuck clothes, bitch.
  	endIf
  	; Equip Stripped
- 	int hand = 1
+ 	int hand = 2
  	int i = Equipment.Length
  	while i
  		i -= 1
  		if Equipment[i]
  			int type = Equipment[i].GetType()
  			if type == 22 || type == 82
- 				ActorRef.EquipSpell((Equipment[i] as Spell), hand)
+ 				ActorRef.EquipSpell((Equipment[i] as Spell), (hand == 2) as int)
  			else
- 				ActorRef.EquipItem(Equipment[i], false, true)
+ 				ActorRef.EquipItemEx(Equipment[i], hand, false)
+ 				SexLabUtil.ReloadEnchantment(Equipment[i] as ObjectReference)
  			endIf
  			; Move to other hand if weapon, light, spell, or leveledspell
  			hand -= ((hand == 1 && (type == 41 || type == 31 || type == 22 || type == 82)) as int)
@@ -1127,13 +1134,12 @@ function RegisterEvents()
 	; Quick Events
 	RegisterForModEvent(e+"Start", "StartAnimating")
 	RegisterForModEvent(e+"Animate", "SendAnimation")
-	RegisterForModEvent(e+"Orgasm", "OrgasmEffect")
+	RegisterForModEvent(e+"Orgasm", "OrgasmStage")
 	RegisterForModEvent(e+"Strip", "Strip")
 	; Sync Events
 	RegisterForModEvent(e+"Prepare", "PrepareActor")
 	RegisterForModEvent(e+"Sync", "SyncActor")
 	RegisterForModEvent(e+"Reset", "ResetActor")
-
 	RegisterForModEvent(e+"Refresh", "RefreshActor")
 endFunction
 
@@ -1150,7 +1156,6 @@ function ClearEvents()
 	UnregisterForModEvent(e+"Prepare")
 	UnregisterForModEvent(e+"Sync")
 	UnregisterForModEvent(e+"Reset")
-
 	UnregisterForModEvent(e+"Refresh")
 endFunction
 
@@ -1191,6 +1196,7 @@ function Initialize()
 	BestRelation   = 0
 	BaseEnjoyment  = 0
 	; Floats
+	LastOrgasm     = 0.0
 	ActorScale     = 0.0
 	AnimScale      = 0.0
 	StartWait      = 0.1
@@ -1261,6 +1267,8 @@ endEvent
 endFunction /;
 event OnOrgasm()
 	OrgasmEffect()
+endEvent
+event OrgasmStage()
 endEvent
 
 function OffsetCoords(float[] Output, float[] CenterCoords, float[] OffsetBy) global native

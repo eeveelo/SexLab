@@ -405,6 +405,11 @@ state Animating
 		GoToState("Refresh")
 	endFunction
 
+	function TriggerOrgasm()
+		UnregisterForUpdate()
+		GoToState("Orgasm")
+	endFunction
+
 endState
 
 state Refresh
@@ -421,15 +426,19 @@ state Refresh
 	endFunction
 endState
 
-function TriggerOrgasm()
-	UnregisterforUpdate()
-	QuickEvent("Orgasm")
-	StageTimer += 2.0
-	RegisterForSingleUpdate(2.0)
-endFunction
-
-function ResetPositions()
-endFunction
+state Orgasm
+	event OnBeginState()
+		QuickEvent("Orgasm")
+		RegisterForSingleUpdate(2.0)
+		if SoundFX
+			Sound.SetInstanceVolume(SoundFX.Play(CenterRef), 1.0)
+		endIf
+	endEvent
+	event OnUpdate()
+		GoToState("Animating")
+		RegisterForSingleUpdate(0.5)
+	endEvent
+endState
 
 ; ------------------------------------------------------- ;
 ; --- Context Sensitive Info                          --- ;
@@ -705,6 +714,10 @@ endFunction
 function MoveActors()
 endFunction
 function GoToStage(int ToStage)
+endFunction
+function ResetPositions()
+endFunction
+function TriggerOrgasm()
 endFunction
 
 int[] Hotkeys

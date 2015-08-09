@@ -22,259 +22,15 @@ endFunction
 
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
-	Config = SexLab.Config
 
-	Form[] Objs = debug_AllFloatObjs()
-	Log("Objs("+Objs.Length+"): "+Objs)
-	Log(" -- ")
-	int i = Objs.Length
-	while i > 0
-		i -= 1
-		string[] Keys = debug_AllObjFloatKeys(Objs[i])
-		Log(Objs[i]+" Keys("+Keys.Length+") "+Keys)
-		int n = Keys.Length
-		while n > 0
-			n -= 1
-			Log("Key["+Keys[n]+"] "+GetFloatValue(Objs[i], Keys[n], -69.69))
-		endWhile
-		Log(" -- ")
-	endWhile
+	Form[] Stripped = SexLab.StripActor(TargetRef, none, false)
+	Log(Stripped)
 
-	; sslActorStats Stats = SexLab.Stats
-	; Config.PreloadSavedStorage()
-	; Config.CleanActorStorage()
+	Utility.Wait(5.0)
 
-	; SexLab.RegisterForModEvent("PlayerTrack_End", "StatCheck")
+	SexLab.UnstripActor(TargetRef, Stripped)
+	Log("Done")
 
-
-	; sslThreadModel Thread = SexLab.NewThread()
-
-	; if Config.BackwardsPressed() || Config.AdjustStagePressed()
-	; 	if Utility.RandomInt(0, 1)
-	; 		Log("Player Victim")
-	; 		Thread.AddActor(CasterRef)
-	; 		Thread.AddActor(TargetRef)
-	; 		Thread.SetVictim(CasterRef)
-	; 	else
-	; 		Log("Target Victim")
-	; 		Thread.AddActor(TargetRef)
-	; 		Thread.AddActor(CasterRef)
-	; 		Thread.SetVictim(TargetRef)
-	; 	endIf
-	; else
-	; 	Log("No Victim")
-	; 	Thread.AddActor(CasterRef)
-	; 	Thread.AddActor(TargetRef)
-	; endIf
-
-	; sslBaseAnimation[] Anims = new sslBaseAnimation[3]
-	; Anims[0] = SexLab.GetAnimationByRegistry("ArrokLegUp")
-	; Anims[1] = SexLab.GetAnimationByRegistry("ArrokOral")
-	; Anims[2] = SexLab.GetAnimationByRegistry("ArrokBoobjob")
-
-	; Thread.SetAnimations(Anims)
-	; Thread.SetStartAnimationEvent(TargetRef, "Arrok_Undress_G0", 5.0)
-	; Thread.SetEndAnimationEvent(CasterRef, "Arrok_Undress_G1")
-	; Thread.SetEndAnimationEvent(TargetRef, "")
-
-	; Thread.StartThread()
-
-	; Log("-- PRE AUDIENCE --")
-	; Log(GetAudience())
-	; SexLab.CheckBardAudience(TargetRef, true)
-	; Log("-- REMOVED --")
-	; Log(GetAudience())
-	; utility.wait(2.0)
-	; Log("-- REMOVED(2) --")
-	; Log(GetAudience())
-	; utility.wait(2.0)
-	; Log("-- REMOVED(4) --")
-	; Log(GetAudience())
-	; utility.wait(2.0)
-	; Log("-- REMOVED(6) --")
-	; Log(GetAudience())
-	; utility.wait(2.0)
-	; Log("-- REMOVED(8) --")
-	; Log(GetAudience())
-	; utility.wait(2.0)
-	; Log("-- REMOVED(10) --")
-	; Log(GetAudience())
-
-	; LockActor(TargetRef)
-	; Debug.SendAnimationEvent(TargetRef, "Arrok_Missionary_A1_S2")
-	; Log("Playing Arrok_Missionary_A1_S2")
-	; Utility.Wait(5.0)
-	; Log("AddSpeedModifier(2.0)....")
-	; AnimUtil.AddSpeedModifier(TargetRef, 2.0, 1.0, "Arrok_Missionary_A1_S2")
-	; Utility.Wait(5.0)
-	; Log("AddSpeedModifier(5.0)....")
-	; AnimUtil.AddSpeedModifier(TargetRef, 5.0, 1.0, "Arrok_Missionary_A1_S2")
-	; Utility.Wait(5.0)
-	; Log("RemoveSpeedModifier...")
-	; AnimUtil.RemoveSpeedModifier(TargetRef, "Arrok_Missionary_A1_S2")
-	; Utility.Wait(5.0)
-	; Log("ClearSpeedModifier...")
-	; AnimUtil.ClearSpeedModifier("Arrok_Missionary_A1_S2")
-	; Utility.Wait(5.0)
-	; Log("Reset...")
-	; Debug.SendAnimationEvent(TargetRef, "IdleForceDefaultState")
-	; UnlockActor(TargetRef)
-
-	; Log("Is3DLoaded: "+CasterRef.Is3DLoaded())
-	; Log("SexLabFramework: "+CasterRef.GetAnimationVariableInt("SexLabFramework"))
-	; Log("SexLabCreature: "+CasterRef.GetAnimationVariableInt("SexLabCreature"))
-	; Log("iIsPlayer: "+CasterRef.GetAnimationVariableInt("iIsPlayer"))
-	; Log("i1stPerson: "+CasterRef.GetAnimationVariableInt("i1stPerson"))
-
-
-	; Utility.WaitMenuMode(4.0)
-
-	; Log("USING BASELOOP")
-	; Benchmark(4, UseBaseLoop=true)
-
-
-	; if TargetRef == PlayerRef
-	; 	SexLab.QuickStart(CasterRef, AnimationTags = "FalloutBoy2,Mitos,4uDIK,3jiou,Leito")
-	; else
-	; 	SexLab.QuickStart(CasterRef, TargetRef, AnimationTags = "FalloutBoy2,Mitos,4uDIK,3jiou,Leito")
-	; endIf
-
-	; if StorageUtil.HasFormValue(none, "TestObj")
-	; 	Form ObjForm = StorageUtil.GetFormValue(none, "TestObj")
-	; 	Log("Obj Saved ["+ObjForm.GetFormID()+"]: "+ObjForm)
-	; 	Log("Value Del(1)"+StorageUtil.GetIntValue(ObjForm, "Test"))
-	; 	Utility.Wait(2.0)
-	; endIf
- 
-	; sslSystemConfig Config = SexLab.Config
-	; ObjectReference Obj = TargetRef.PlaceAtMe(Config.BaseMarker, 1)
-	; Utility.Wait(2.0)
-
-	; Log("Obj New ["+Obj.GetFormID()+"]: "+Obj)
-	; StorageUtil.SetIntValue(Obj, "Test", 42)
-	; StorageUtil.SetFormValue(none, "TestObj", Obj)
-	; Log("Value Set: "+StorageUtil.GetIntValue(Obj, "Test"))
-
-	; Utility.Wait(2.0)
-
-	; Obj.Disable()
-	; Obj.Delete()
-	; Obj = none
-
-	; Utility.Wait(2.0)
-
-	; Log("Value Del(2)"+StorageUtil.GetIntValue(Obj, "Test"))
-	; Utility.Wait(1.0)
-
-	; ; int[] Array = new int[20]
-	; int i = Array.Length
-	; while i
-	; 	i -= 1
-	; 	Array[i] = i
-	; endWhile
-
-	; Log("Array: "+Array)
-
-	; Log("9-15: "+PapyrusUtil.SliceIntArray(Array, 9, 15))
-	; Log("0-9: "+PapyrusUtil.SliceIntArray(Array, 0, 9))
-	; Log("15-end: "+PapyrusUtil.SliceIntArray(Array, 15))
-	; Log("0-end: "+PapyrusUtil.SliceIntArray(Array, 0))
-	; Log("10-10: "+PapyrusUtil.SliceIntArray(Array, 10, 10))
-	; Log("15-25: "+PapyrusUtil.SliceIntArray(Array, 15, 25))
-
-	; Log("--- Slice ---")
-
-	; string[] Strs = Utility.CreateStringArray(20, "dsfsdf")
-	; Strs[0] = "test1"
-	; Strs[1] = "test1"
-	; Strs[3] = "test3"
-	; Strs[4] = "test1"
-	; Strs[6] = "test3"
-	; Strs[7] = "test1"
-	; Strs[11] = ""
-	; Strs[12] = "test1"
-	; Strs[13] = ""
-	; Strs[18] = "test1"
-	; Strs[19] = "test2"
-	; Log("Strs: "+Strs)
-
-	; Log("test1: "+PapyrusUtil.RemoveString(Strs, "test1"))
-	; Log("test2: "+PapyrusUtil.RemoveString(Strs, "test2"))
-	; Log("EMPTY: "+PapyrusUtil.ClearEmpty(Strs))
-
-	; Log("--- Forms ---")
-
-	; Form[] Forms
-	; Log("UNINIT: "+PapyrusUtil.RemoveForm(Forms, none))
-	; Forms = new form[3]
-	; Forms[0] = TargetRef
-	; Forms[1] = TargetRef
-	; Forms[2] = SexLab
-	; Log("SexLab: "+PapyrusUtil.RemoveForm(Forms, SexLab))
-	; Log("TargetRef: "+PapyrusUtil.RemoveForm(Forms, TargetRef))
-	; Log("missing: "+PapyrusUtil.RemoveForm(Forms, SexLab.Config.CalypsStrapon))
-	; Forms[0] = none
-	; Forms[1] = none
-	; Log("none: "+PapyrusUtil.ClearNone(Forms))
-	; Forms[0] = TargetRef
-	; Forms[1] = TargetRef
-	; Forms[2] = TargetRef
-	; Log("all: "+PapyrusUtil.RemoveForm(Forms, TargetRef))
-
-
-	; float RealTime = Utility.GetCurrentRealTime()
-	; float GameTime = Utility.GetCurrentGameTime()
-	; sslActorStats._SeedActor(TargetRef, RealTime, GameTime)
-	; Log("Ashal Seed:")
-	; Log(SexLab.Stats.PrintSkills(TargetRef))
-
-	; sslActorStats._SeedActor2(TargetRef, RealTime, GameTime)
-	; Log("CPU Seed:")
-	; Log(SexLab.Stats.PrintSkills(TargetRef))
-
-
-	; Log("Waiting: "+CasterRef)
-	; Utility.Wait(15.0)
-	; Log("Starting")
-	; SexLab.QuickStart(TargetRef, CasterRef)
-
-	; Benchmark(3, 50, 5)
-
-	; sslAnimationSlots AnimSlots = SexLab.AnimSlots
-	; Log("Filter: "+AnimSlots.Filter)
-	; Utility.Wait(2.0)
-
-	; sslBaseAnimation[] GetByTags       = AnimSlots.GetbyTags(2, "FM,Oral")
-	; Log("GetByTags("+GetByTags.Length+") - "+GetbyTags)
-	; Utility.Wait(2.0)
-
-	; sslBaseAnimation[] GetByTagsCall   = AnimSlots.GetByTagsCall(2, "FM,Oral")
-	; Log("GetByTagsCall("+GetByTagsCall.Length+") - "+GetByTagsCall)
-	; Utility.Wait(2.0)
-
-	; sslBaseAnimation[] GetByTagsFilter = AnimSlots.GetByTagsFilter(2, "FM,Oral")
-	; Log("GetByTagsFilter("+GetByTagsFilter.Length+") - "+GetByTagsFilter)
-	; Utility.Wait(2.0)
-
-
-
-	; SexLab.QuickStart(CasterRef, TargetRef, AnimationTags="Oral")
-	; Furniture BaseMarker = SexLab.Config.BaseMarker
-	; MiscObject BaseMarker = SexLab.Config.IdleMarker
-
-	; if TargetRef != Game.GetPlayer() && Input.IsKeyPressed(29)
-	; 	TargetRef.SetRestrained(false)
-	; 	TargetRef.SetDontMove(false)
-	; endIf
-
-	; MarkerRef = TargetRef.PlaceAtMe(BaseMarker)
-	; Utility.Wait(0.5)
-	; ; while !MarkerRef.Is3DLoaded() || MarkerRef.IsDisabled()
-	; ; endwhile
-	; Log(MarkerRef)
-	; TargetRef.SetVehicle(MarkerRef)
-
-	; Utility.Wait(3.0)
 	Dispel()
 endEvent
 
@@ -282,10 +38,12 @@ event OnUpdate()
 endEvent
 
 event OnEffectFinish(Actor TargetRef, Actor CasterRef)
-	TargetRef.SetVehicle(none)
-	MarkerRef.Disable()
-	MarkerRef.Delete()
-	MarkerRef = none
+	if MarkerRef
+		TargetRef.SetVehicle(none)
+		MarkerRef.Disable()
+		MarkerRef.Delete()
+		MarkerRef = none
+	endIf
 	Log("---- FINISHED ----")
 endEvent
 
@@ -296,7 +54,7 @@ endEvent
 ;\-----------------------------------------------/;
 
 function Log(string log)
-	Debug.Notification(log)
+	; Debug.Notification(log)
 	MiscUtil.PrintConsole(log)
 	Debug.OpenUserLog("SexLabDebug")
 	Debug.TraceUser("SexLabDebug", log)

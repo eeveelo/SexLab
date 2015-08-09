@@ -1178,18 +1178,18 @@ function APKneelBlowjob(int id)
 	Base.SoundFX = Sucking
 
 	int a1 = Base.AddPosition(Female, Oral)
-	Base.AddPositionStage(a1, "AP_KneelBlowjob_A1_S1", 0, up = 1, silent = true, openMouth = true)
-	Base.AddPositionStage(a1, "AP_KneelBlowjob_A1_S2", 0, up = 1, silent = true, openMouth = true)
-	Base.AddPositionStage(a1, "AP_KneelBlowjob_A1_S3", 0, up = 1, silent = true, openMouth = true)
-	Base.AddPositionStage(a1, "AP_KneelBlowjob_A1_S4", 0, up = 1, silent = true, openMouth = true)
-	Base.AddPositionStage(a1, "AP_KneelBlowjob_A1_S5", 0, up = 1, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_KneelBlowjob_A1_S1", 0, rotate = 180, up = 1, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_KneelBlowjob_A1_S2", 0, rotate = 180, up = 1, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_KneelBlowjob_A1_S3", 0, rotate = 180, up = 1, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_KneelBlowjob_A1_S4", 0, rotate = 180, up = 1, silent = true, openMouth = true)
+	Base.AddPositionStage(a1, "AP_KneelBlowjob_A1_S5", 0, rotate = 180, up = 1, silent = true, openMouth = true)
 
 	int a2 = Base.AddPosition(Male)
-	Base.AddPositionStage(a2, "AP_IdleStand_A2_S1", 44, rotate = 180, sos = 0)
-	Base.AddPositionStage(a2, "AP_IdleStand_A2_S2", 44, rotate = 180, sos = 0)
-	Base.AddPositionStage(a2, "AP_IdleStand_A2_S3", 44, rotate = 180, sos = 0)
-	Base.AddPositionStage(a2, "AP_IdleStand_A2_S4", 44, rotate = 180, sos = 0)
-	Base.AddPositionStage(a2, "AP_IdleStand_A2_S5", 44, rotate = 180, sos = 0)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S1", -45, sos = 1)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S2", -45, sos = 1)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S3", -45, sos = 1)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S4", -45, sos = 1)
+	Base.AddPositionStage(a2, "AP_IdleStand_A2_S5", -45, sos = 1)
 
 	Base.SetTags("AP,Sex,Straight,Penis,Oral,Blowjob,Standing,Kneeling,CumInMouth,Loving,LeadIn")
 
@@ -2421,10 +2421,10 @@ function LeitoRCowgirl(int id)
 
 	int a2 = Base.AddPosition(Male)
 	Base.AddPositionStage(a2, "Leito_ReverseCowgirl_A2_S1", 0, sos = 3)
-	Base.AddPositionStage(a2, "Leito_ReverseCowgirl_A2_S2", 0, sos = 3)
-	Base.AddPositionStage(a2, "Leito_ReverseCowgirl_A2_S3", 0, sos = 3)
-	Base.AddPositionStage(a2, "Leito_ReverseCowgirl_A2_S4", 0, sos = 3)
-	Base.AddPositionStage(a2, "Leito_ReverseCowgirl_A2_S5", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_ReverseCowgirl_A2_S2", 0, sos = 8)
+	Base.AddPositionStage(a2, "Leito_ReverseCowgirl_A2_S3", 0, sos = 8)
+	Base.AddPositionStage(a2, "Leito_ReverseCowgirl_A2_S4", 0, sos = 8)
+	Base.AddPositionStage(a2, "Leito_ReverseCowgirl_A2_S5", 0, sos = 8)
 
 	Base.SetTags("Leito,Sex,Straight,Penis,Vaginal,Cowgirl,Laying,Reverse,ReverseCowgirl,Beds,Creampie,Dirty")
 

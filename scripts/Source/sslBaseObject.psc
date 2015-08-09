@@ -21,7 +21,6 @@ endProperty
 ; ------------------------------------------------------- ;
 
 string[] Tags
-
 string[] function GetRawTags()
 	return Tags
 endFunction
@@ -154,7 +153,7 @@ function Save(int id = -1)
 	; Trim tags
 	int i = Tags.Find("")
 	if i != -1
-		Tags = PapyrusUtil.ResizeStringArray(Tags, i)
+		Tags = Utility.ResizeStringArray(Tags, (i + 1))
 	endIf
 endFunction
 
@@ -167,5 +166,5 @@ function Initialize()
 	SlotID   = -1
 	Enabled  = false
 	Storage  = none
-	Tags     = new string[16]
+	Tags     = new string[18]
 endFunction
