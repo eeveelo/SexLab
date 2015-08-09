@@ -105,7 +105,9 @@ event OnPageReset(string page)
 	; Logo Splash
 	elseif page == ""
 		if PlayerRef.IsInFaction(Config.AnimatingFaction) && ThreadSlots.FindActorController(PlayerRef) != -1
-			page == "$SSL_AnimationEditor"
+			UnloadCustomContent()
+			AnimationEditor()
+			return
 		else
 			LoadCustomContent("SexLab/logo.dds", 184, 31)
 			return
