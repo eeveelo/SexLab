@@ -102,9 +102,10 @@ state Animating
 	function FireAction()
 		UnregisterForUpdate()
 		; Prepare loop
-		ResolveTimers()
+		RealTime[0] = Utility.GetCurrentRealTime()
 		SoundFX  = Animation.GetSoundFX(Stage)
 		SFXDelay = ClampFloat(BaseDelay - ((Stage * 0.3) * ((Stage != 1) as int)), 0.5, 30.0)
+		ResolveTimers()
 		PlayStageAnimations()
 		; Send events
 		if !LeadIn && Stage >= StageCount
@@ -214,7 +215,7 @@ state Animating
 		Animation.AdjustForward(AdjustKey, AdjustPos, Stage, Amount, AdjustStage)
 		int k = Config.AdjustForward
 		while Input.IsKeyPressed(k)
-			Animation.AdjustForward(AdjustKey, AdjustPos, Stage, Amount, AdjustStage)
+			Animation.AdjustForward(AdjustKey, AdjustPos, Stage, Amount, Config.AdjustStagePressed())
 			AdjustAlias.RefreshLoc()
 		endWhile
 		RegisterForSingleUpdate(0.1)
@@ -228,7 +229,7 @@ state Animating
 		AdjustAlias.RefreshLoc()
 		int k = Config.AdjustSideways
 		while Input.IsKeyPressed(k)
-			Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, Amount, AdjustStage)
+			Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, Amount, Config.AdjustStagePressed())
 			AdjustAlias.RefreshLoc()
 		endWhile
 		RegisterForSingleUpdate(0.1)
@@ -242,7 +243,7 @@ state Animating
 		AdjustAlias.RefreshLoc()
 		int k = Config.AdjustUpward
 		while Input.IsKeyPressed(k)
-			Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, Amount, AdjustStage)
+			Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, Amount, Config.AdjustStagePressed())
 			AdjustAlias.RefreshLoc()
 		endWhile
 		RegisterForSingleUpdate(0.1)
@@ -423,8 +424,8 @@ endState
 function TriggerOrgasm()
 	UnregisterforUpdate()
 	QuickEvent("Orgasm")
-	StageTimer += 3.0
-	RegisterForSingleUpdate(3.0)
+	StageTimer += 2.0
+	RegisterForSingleUpdate(2.0)
 endFunction
 
 function ResetPositions()
@@ -449,7 +450,7 @@ function SetAnimation(int aid = -1)
 	RecordSkills()
 	string[] Tags = Animation.GetRawTags()
 	; IsType = [1] IsVaginal, [2] IsAnal, [3] IsOral, [4] IsLoving, [5] IsDirty
-	IsType[1]  = Females > 0 && Tags.Find("Vaginal") != -1
+	IsType[1]  = Females > 0 && (Tags.Find("Vaginal") != -1 || Tags.Find("Pussy") != -1)
 	IsType[2]  = Tags.Find("Anal")   != -1 || (Females == 0 && Tags.Find("Vaginal") != -1)
 	IsType[3]  = Tags.Find("Oral")   != -1
 	IsType[4]  = Tags.Find("Loving") != -1
@@ -467,9 +468,8 @@ function SetAnimation(int aid = -1)
 		ActorAlias[2].SyncAll(true)
 		ActorAlias[3].SyncAll(true)
 		ActorAlias[4].SyncAll(true)
-		Utility.Wait(0.2)
+		Utility.WaitMenuMode(0.2)
 		PlayStageAnimations()
-		Utility.Wait(0.5)
 	endIf
 endFunction
 
@@ -577,7 +577,7 @@ endState
 
 function RecordSkills()
 	float TimeNow = RealTime[0]
-	float xp = ((TimeNow - SkillTime) / 10.0)
+	float xp = ((TimeNow - SkillTime) / 8.0)
 	if xp >= 0.5
 		if IsType[1]
 			SkillXP[1] = SkillXP[1] + xp
@@ -663,9 +663,11 @@ int function GetAdjustPos()
 endFunction
 
 function PlayStageAnimations()
-	Animation.GetAnimEvents(AnimEvents, Stage)
-	QuickEvent("Animate")
-	StageTimer = RealTime[0] + GetTimer()
+	if Stage <= StageCount
+		Animation.GetAnimEvents(AnimEvents, Stage)
+		QuickEvent("Animate")
+		StageTimer = RealTime[0] + GetTimer()
+	endIf
 endFunction
 
 ; ------------------------------------------------------- ;

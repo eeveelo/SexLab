@@ -1,4 +1,4 @@
-                              scriptname sslConfigMenu extends SKI_ConfigBase
+scriptname sslConfigMenu extends SKI_ConfigBase
 {Skyrim SexLab Mod Configuration Menu}
 
 import PapyrusUtil
@@ -98,12 +98,18 @@ endFunction
 event OnPageReset(string page)
 	; Manual install pending
 	if !SystemAlias.IsInstalled
+		UnloadCustomContent()
 		InstallMenu()
 		return
+
 	; Logo Splash
-	elseIf page == ""
-		LoadCustomContent("SexLab/logo.dds", 184, 31)
-		return
+	elseif page == ""
+		if PlayerRef.IsInFaction(Config.AnimatingFaction) && ThreadSlots.FindActorController(PlayerRef) != -1
+			page == "$SSL_AnimationEditor"
+		else
+			LoadCustomContent("SexLab/logo.dds", 184, 31)
+			return
+		endIf
 	endIf
 	UnloadCustomContent()
 
@@ -221,7 +227,7 @@ event OnConfigOpen()
 	ts = 0
 
 	; Animation Settings
-	if Chances.Length < 3 || Chances.Find("") != -1
+	if Chances.Length != 3 || Chances.Find("") != -1
 		Chances = new string[3]
 		Chances[0] = "$SSL_Never"
 		Chances[1] = "$SSL_Sometimes"
@@ -229,7 +235,7 @@ event OnConfigOpen()
 	endIf
 
 	; Expression Editor
-	if Phases.Length < 3 || Phases.Find("") != -1
+	if Phases.Length != 5 || Phases.Find("") != -1
 		Phases = new string[5]
 		Phases[0] = "Phase 1"
 		Phases[1] = "Phase 2"
@@ -238,7 +244,7 @@ event OnConfigOpen()
 		Phases[4] = "Phase 5"
 	endIf
 
-	if Moods.Length < 3 || Moods.Find("") != -1
+	if Moods.Length != 17 || Moods.Find("") != -1
 		Moods = new string[17]
 		Moods[0]  = "Dialogue Anger"
 		Moods[1]  = "Dialogue Fear"
@@ -259,7 +265,7 @@ event OnConfigOpen()
 		Moods[16] = "Combat Shout"
 	endIf
 
-	if Phonemes.Length < 3 || Phonemes.Find("") != -1
+	if Phonemes.Length != 16 || Phonemes.Find("") != -1
 		Phonemes = new string[16]
 		Phonemes[0]  = "0: Aah"
 		Phonemes[1]  = "1: BigAah"
@@ -279,7 +285,7 @@ event OnConfigOpen()
 		Phonemes[15] = "15: W"
 	endIf
 
-	if Modifiers.Length < 3 || Modifiers.Find("") != -1
+	if Modifiers.Length != 14 || Modifiers.Find("") != -1
 		Modifiers = new string[14]
 		Modifiers[0]  = "0: BlinkL"
 		Modifiers[1]  = "1: BlinkR"
@@ -298,7 +304,7 @@ event OnConfigOpen()
 	endIf
 
 	; Timers & Stripping
-	if TSModes.Length < 3 || TSModes.Find("") != -1
+	if TSModes.Length != 3 || TSModes.Find("") != -1
 		TSModes = new string[3]
 		TSModes[0] = "$SSL_NormalTimersStripping"
 		TSModes[1] = "$SSL_ForeplayTimersStripping"
@@ -306,8 +312,8 @@ event OnConfigOpen()
 	endIf
 
 	; Biped item slots (i + 30)
-	Biped = new string[33]
-	if Biped.Length < 33 || Biped.Find("") != -1
+	if Biped.Length != 33 || Biped.Find("") != -1
+		Biped = new string[33]
 		Biped[0]  = "$SSL_Head"
 		Biped[1]  = "$SSL_Hair"
 		Biped[2]  = "$SSL_Torso"
@@ -579,10 +585,10 @@ function SystemCheckOptions()
 	AddTextOptionST("CheckSKSE", "Skyrim Script Extender (1.7.3+)", StringIfElse(Config.CheckSystemPart("SKSE"), "ok", "X"), OPTION_FLAG_DISABLED)
 	AddTextOptionST("CheckSexLabUtil", "SexLabUtil.dll SKSE Plugin  (1.6+)", StringIfElse(Config.CheckSystemPart("SexLabUtil"), "ok", "X"), OPTION_FLAG_DISABLED)
 	AddTextOptionST("CheckPapyrusUtil", "StorageUtil.dll SKSE Plugin  (3.0+)", StringIfElse(Config.CheckSystemPart("PapyrusUtil"), "ok", "X"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckFNIS", "FNIS - Fores New Idles in Skyrim (5.2+)", StringIfElse(Config.CheckSystemPart("FNIS"), "ok", "X"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNIS", "FNIS - Fores New Idles in Skyrim (5.4+)", StringIfElse(Config.CheckSystemPart("FNIS"), "ok", "X"), OPTION_FLAG_DISABLED)
 	AddTextOptionST("CheckFNISGenerated", "FNIS For Users Behaviors Generated", StringIfElse(Config.CheckSystemPart("FNISGenerated"), "ok", "?"), OPTION_FLAG_DISABLED)
 	AddTextOptionST("CheckFNISSexLabFramework", "FNIS SexLab Framework Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabFramework"), "ok", "?"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckFNISCreaturePack", "FNIS Creature Pack (5.1+)", StringIfElse(Config.CheckSystemPart("FNISCreaturePack"), "ok", "?"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNISCreaturePack", "FNIS Creature Pack (5.2+)", StringIfElse(Config.CheckSystemPart("FNISCreaturePack"), "ok", "?"), OPTION_FLAG_DISABLED)
 	AddTextOptionST("CheckFNISSexLabCreature", "FNIS SexLab Creature Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabCreature"), "ok", "?"), OPTION_FLAG_DISABLED)
 endFunction
 
@@ -702,8 +708,9 @@ function PlayerHotkeys()
 
 	SetCursorPosition(1)
 	AddHeaderOption("$SSL_AlignmentAdjustments")
+	AddTextOptionST("AdjustTargetStage", "$SSL_AdjustTargetStage", StringIfElse(Config.AdjustTargetStage, "$SSL_CurrentStage", "$SSL_AllStages"))
+	AddKeyMapOptionST("AdjustStage", StringIfElse(Config.AdjustTargetStage, "$SSL_AdjustAllStages", "$SSL_AdjustStage"), Config.AdjustStage)
 	AddKeyMapOptionST("BackwardsModifier", "$SSL_ReverseDirectionModifier", Config.Backwards)
-	AddKeyMapOptionST("AdjustStage","$SSL_AdjustStage", Config.AdjustStage)
 	AddKeyMapOptionST("AdjustChange","$SSL_ChangeActorBeingMoved", Config.AdjustChange)
 	AddKeyMapOptionST("AdjustForward","$SSL_MoveActorForwardBackward", Config.AdjustForward)
 	AddKeyMapOptionST("AdjustUpward","$SSL_AdjustPositionUpwardDownward", Config.AdjustUpward)
@@ -738,7 +745,7 @@ state AdjustStage
 		SetKeyMapOptionValueST(Config.AdjustStage)
 	endEvent
 	event OnHighlightST()
-		SetInfoText("$SSL_InfoAdjustStage")
+		SetInfoText(StringIfElse(Config.AdjustTargetStage, "$SSL_InfoAdjustAllStages", "$SSL_InfoAdjustStage"))
 	endEvent
 endState
 state AdjustChange
@@ -973,6 +980,19 @@ state ToggleFreeCamera
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoToggleFreeCamera")
+	endEvent
+endState
+state AdjustTargetStage
+	event OnSelectST()
+		Config.AdjustTargetStage = !Config.AdjustTargetStage
+		ForcePageReset()
+	endEvent
+	event OnDefaultST()
+		Config.AdjustTargetStage = false
+		SetTextOptionValueST("$SSL_AllStages")
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoAdjustTargetStage")
 	endEvent
 endState
 
@@ -2198,6 +2218,9 @@ Form[] function GetFullInventory(Actor ActorRef)
 	Valid[0] = 26 ; kArmor
 	Valid[1] = 41 ; kWeapon 
 	Valid[2] = 53 ; kLeveledItem
+	;/ Valid[3] = 124 ; kOutfit
+	Valid[4] = 102 ; kARMA
+	Valid[5] = 120 ; kEquipSlot /;
 
 	Form ItemRef
 	Form[] Output = GetEquippedItems(ActorRef)
@@ -2206,6 +2229,10 @@ Form[] function GetFullInventory(Actor ActorRef)
 	while i
 		i -= 1
 		ItemRef = ActorRef.GetNthForm(i)
+		if ItemRef && (ItemRef as ObjectReference)
+			ItemRef = (ItemRef as ObjectReference).GetBaseObject()
+		endIf
+		; Log("["+ItemRef.GetType()+"] "+ItemRef.GetName() + "  -- "+ItemRef )
 		if Valid.Find(ItemRef.GetType()) != -1 && Output.Find(ItemRef) == -1 && IsToggleable(ItemRef)
 			Output = PapyrusUtil.PushForm(Output, ItemRef)
 		endIf
@@ -2935,7 +2962,6 @@ state CleanSystem
 			; Setup & clean system
 			ResetAllQuests()
 			SystemAlias.SetupSystem()
-			Config.CleanActorStorage()
 
 			ModEvent.Send(ModEvent.Create("SexLabReset"))
 			Config.CleanSystemFinish.Show()
@@ -2993,6 +3019,7 @@ function Log(string Log, string Type = "NOTICE")
 endFunction
 
 function ResetAllQuests()
+	bool SaveDebug = Config.DebugMode
 	; Reset relevant quests
 	ResetQuest(Game.GetFormFromFile(0x00D62, "SexLab.esm") as Quest)
 	ResetQuest(Game.GetFormFromFile(0x639DF, "SexLab.esm") as Quest)
@@ -3004,6 +3031,7 @@ function ResetAllQuests()
 		i -= 1
 		ResetQuest(Threads[i])
 	endwhile
+	Config.DebugMode = SaveDebug
 endFunction
 
 function ResetQuest(Quest QuestRef)

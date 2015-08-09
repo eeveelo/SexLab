@@ -63,6 +63,7 @@ Keyword property CumOralKeyword auto
 Keyword property CumAnalKeyword auto
 Keyword property CumVaginalKeyword auto
 Keyword property ActorTypeNPC auto
+; Keyword property ActorActive auto
 
 ; FormList property ValidActorList auto
 ; FormList property NoStripList auto
@@ -137,6 +138,7 @@ bool property LimitedStrip auto hidden
 bool property RestrictSameSex auto hidden
 bool property SeparateOrgasms auto hidden
 bool property RemoveHeelEffect auto hidden
+bool property AdjustTargetStage auto hidden
 
 ; Integers
 int property AnimProfile auto hidden
@@ -424,11 +426,24 @@ function ToggleFreeCamera()
 endFunction
 
 bool function BackwardsPressed()
-	return Input.GetNumKeysPressed() > 1 && (Input.IsKeyPressed(Backwards) || (Backwards == 54 && Input.IsKeyPressed(42)) || (Backwards == 42 && Input.IsKeyPressed(54)))
+	return Input.GetNumKeysPressed() > 1 && MirrorPress(Backwards)
 endFunction
 
 bool function AdjustStagePressed()
-	return Input.GetNumKeysPressed() > 1 && (Input.IsKeyPressed(AdjustStage) || (AdjustStage == 157 && Input.IsKeyPressed(29)) || (AdjustStage == 29 && Input.IsKeyPressed(157)))
+	return (!AdjustTargetStage && Input.GetNumKeysPressed() > 1 && MirrorPress(AdjustStage)) \
+		|| (AdjustTargetStage && !(Input.GetNumKeysPressed() > 1 && MirrorPress(AdjustStage)))
+endFunction
+
+bool function MirrorPress(int mirrorkey)
+	if mirrorkey == 42 || mirrorkey == 54  ; Shift
+		return Input.IsKeyPressed(42) || Input.IsKeyPressed(54)
+	elseif mirrorkey == 29 || mirrorkey == 157 ; Ctrl
+		return Input.IsKeyPressed(29) || Input.IsKeyPressed(157)
+	elseif mirrorkey == 56 || mirrorkey == 184 ; Alt
+		return Input.IsKeyPressed(56) || Input.IsKeyPressed(184)
+	else
+		return Input.IsKeyPressed(mirrorkey)
+	endIf
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -651,6 +666,7 @@ function SetDefaults()
 	RestrictSameSex    = false
 	SeparateOrgasms    = false
 	RemoveHeelEffect   = HasHDTHeels
+	AdjustTargetStage  = false
 
 	; Integers
 	AnimProfile        = 1
@@ -839,6 +855,7 @@ function ExportSettings()
 	ExportBool("RestrictSameSex", RestrictSameSex)
 	ExportBool("SeparateOrgasms", SeparateOrgasms)
 	ExportBool("RemoveHeelEffect", RemoveHeelEffect)
+	ExportBool("AdjustTargetStage", AdjustTargetStage)
 
 	; Integers
 	ExportInt("AnimProfile", AnimProfile)
@@ -923,6 +940,7 @@ function ImportSettings()
 	RestrictSameSex    = ImportBool("RestrictSameSex", RestrictSameSex)
 	SeparateOrgasms    = ImportBool("SeparateOrgasms", SeparateOrgasms)
 	RemoveHeelEffect   = ImportBool("RemoveHeelEffect", RemoveHeelEffect)
+	AdjustTargetStage  = ImportBool("AdjustTargetStage", AdjustTargetStage)
 
 	; Integers
 	AnimProfile        = ImportInt("AnimProfile", AnimProfile)
