@@ -796,10 +796,10 @@ function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 			float[] BedOffset = Config.BedOffset
 			CenterLocation[0] = CenterLocation[0] + (BedOffset[0] * Math.sin(CenterLocation[5]))
 			CenterLocation[1] = CenterLocation[1] + (BedOffset[0] * Math.cos(CenterLocation[5]))
-			if BedStatus[1] > 0
+			if BedStatus[1] > 1
 				CenterLocation[2] = CenterLocation[2] + BedOffset[2]
 			else
-				CenterLocation[2] = CenterLocation[2] + 7.0
+				CenterLocation[2] = CenterLocation[2] + 4.0
 			endIf
 		endIf
 	endIf
@@ -1184,7 +1184,7 @@ function SetTID(int id)
 	DebugMode = Config.DebugMode
 	
 	; Init thread info
-	EventTypes = new string[4]
+	EventTypes = new string[5]
 	EventTypes[0] = "Prepare"
 	EventTypes[1] = "Sync"
 	EventTypes[2] = "Reset"
