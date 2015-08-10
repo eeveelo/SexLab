@@ -21,7 +21,7 @@ sslThreadLibrary property ThreadLib auto
 ; ------------------------------------------------------- ;
 
 sslBaseAnimation[] function GetByTags(int ActorCount, string Tags, string TagsSuppressed = "", bool RequireAll = true)
-	; Debug.Trace("GetByTags("+ActorCount+", "+Tags+", "+TagsSuppressed+", "+RequireAll+")")
+	Log("GetByTags(ActorCount="+ActorCount+", Tags="+Tags+", TagsSuppressed="+TagsSuppressed+", RequireAll="+RequireAll+")")
 	bool[] Valid      = Utility.CreateBoolArray(Slotted)
 	string[] Suppress = StringSplit(TagsSuppressed)
 	string[] Search   = StringSplit(Tags)
@@ -35,7 +35,7 @@ sslBaseAnimation[] function GetByTags(int ActorCount, string Tags, string TagsSu
 endFunction
 
 sslBaseAnimation[] function GetByType(int ActorCount, int Males = -1, int Females = -1, int StageCount = -1, bool Aggressive = false, bool Sexual = true)
-	; Debug.Trace("GetByType("+ActorCount+", "+Males+", "+Females+", "+StageCount+", "+Aggressive+", "+Sexual+")")
+	Log("GetByType(ActorCount="+ActorCount+", Males="+Males+", Females="+Females+", StageCount="+StageCount+", Aggressive="+Aggressive+")")
 	; Search
 	bool[] Valid = Utility.CreateBoolArray(Slotted)
 	bool RestrictAggressive = Config.RestrictAggressive
@@ -50,7 +50,7 @@ sslBaseAnimation[] function GetByType(int ActorCount, int Males = -1, int Female
 endFunction
 
 sslBaseAnimation[] function PickByActors(Actor[] Positions, int Limit = 64, bool Aggressive = false)
-	; Debug.Trace("PickByActors("+Positions+", "+Limit+", "+Aggressive+")")
+	Log("PickByActors(Positions="+Positions+", Limit="+Limit+", Aggressive="+Aggressive+")")
 	int[] Genders = ActorLib.GenderCount(Positions)
 	sslBaseAnimation[] Matches = GetByDefault(Genders[0], Genders[1], Aggressive)
 	if Matches.Length <= Limit
@@ -74,7 +74,7 @@ sslBaseAnimation[] function PickByActors(Actor[] Positions, int Limit = 64, bool
 endFunction
 
 sslBaseAnimation[] function GetByDefault(int Males, int Females, bool IsAggressive = false, bool UsingBed = false, bool RestrictAggressive = true)
-	; Debug.Trace("GetByDefault("+Males+", "+Females+", "+IsAggressive+", "+UsingBed+", "+RestrictAggressive+")")
+	Log("GetByDefault(Males="+Males+", Females="+Females+", IsAggressive="+IsAggressive+", UsingBed="+UsingBed+", RestrictAggressive="+RestrictAggressive+")")
 	if Males == 0 && Females == 0
 		return none ; No actors passed or creatures present
 	endIf
@@ -184,17 +184,19 @@ sslBaseAnimation[] function GetList(bool[] Valid)
 				n = -1
 			endIf
 		endWhile
-		; Only bother with logging the selected animations if debug mode enabled.
+		; Only bother with logging the selected animation names if debug mode enabled.
+		string List = "Found Animations("+Output.Length+")"
 		if Config.DebugMode
-			string List = "SEXLAB - Found Animations - "
+			List +=  " "
 			i = Output.Length
 			while i
 				i -= 1
 				List += "["+Output[i].Name+"]"
 			endWhile
-			Debug.Trace(List)
-			MiscUtil.PrintConsole(List)
 		endIf
+		Log(List)
+	else
+		Log("No Animations Found")
 	endIf
 	return Output
 endFunction

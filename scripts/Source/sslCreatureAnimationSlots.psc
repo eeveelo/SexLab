@@ -17,6 +17,7 @@ string[] function GetAllRaceKeys(Race RaceRef = none) global native
 string[] function GetAllRaceIDs(string RaceKey) global native
 
 sslBaseAnimation[] function GetByRace(int ActorCount, Race RaceRef)
+	Log("GetByRace(ActorCount="+ActorCount+", RaceRef="+RaceRef+")")
 	string[] RaceTypes = GetAllRaceKeys(RaceRef)
 	if RaceTypes.Length < 1
 		return sslUtility.AnimationArray(0)
@@ -32,6 +33,7 @@ sslBaseAnimation[] function GetByRace(int ActorCount, Race RaceRef)
 endFunction
 
 sslBaseAnimation[] function GetByRaceKey(int ActorCount, string RaceKey)
+	Log("GetByRaceKey(ActorCount="+ActorCount+", RaceKey="+RaceKey+")")
 	bool[] Valid  = Utility.CreateBoolArray(Slotted)
 	int i = Slotted
 	while i
@@ -43,6 +45,7 @@ sslBaseAnimation[] function GetByRaceKey(int ActorCount, string RaceKey)
 endFunction
 
 sslBaseAnimation[] function GetByRaceGenders(int ActorCount, Race RaceRef, int MaleCreatures = 0, int FemaleCreatures = 0, bool ForceUse = false)
+	Log("GetByRaceGenders(ActorCount="+ActorCount+", RaceRef="+RaceRef+", MaleCreatures="+MaleCreatures+", FemaleCreatures="+FemaleCreatures+", ForceUse="+ForceUse+")")
 	if !Config.UseCreatureGender && !ForceUse
 		return GetByRace(ActorCount, RaceRef)
 	endIf
