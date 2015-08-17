@@ -718,6 +718,14 @@ function ResetStats(Actor ActorRef)
 	FloatListClear(ActorRef, "SexLabSkills")
 endFunction
 
+function _EmptyStats(Actor ActorRef) global native
+function EmptyStats(Actor ActorRef)
+	if ActorRef
+		ResetStats(ActorRef)
+		_SetSkill(ActorRef, kSexuality, 60)
+	endIf
+endFunction
+
 function Setup()
 	parent.Setup()
 
