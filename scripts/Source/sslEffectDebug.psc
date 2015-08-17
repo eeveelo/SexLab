@@ -23,13 +23,29 @@ endFunction
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	Form[] Stripped = SexLab.StripActor(TargetRef, none, false)
-	Log(Stripped)
+	Topic Hit1 = Game.GetForm(0xA91F9) as Topic
+	if !Hit1
+		Log("Is right form")
+		Hit1 = Game.GetForm(0xA91FA) as Topic
+	endIf
+	if Hit1
+		Log("Playing...")
+		TargetRef.Say(Hit1)
+		Utility.Wait(1.2)	
+		TargetRef.Say(Hit1)
+		Utility.Wait(1.2)
+		TargetRef.Say(Hit1)
+		Utility.Wait(1.2)
+		TargetRef.Say(Hit1)
+		Utility.Wait(1.2)
+		TargetRef.Say(Hit1)
+		Utility.Wait(1.2)
+		TargetRef.Say(Hit1)
+		Utility.Wait(1.2)
+	else
+		Log("Failed to find hit topic")
+	endIf
 
-	Utility.Wait(5.0)
-
-	SexLab.UnstripActor(TargetRef, Stripped)
-	Log("Done")
 
 	Dispel()
 endEvent

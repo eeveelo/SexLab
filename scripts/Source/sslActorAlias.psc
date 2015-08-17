@@ -143,6 +143,10 @@ bool function SetActor(Actor ProspectRef)
 		BaseDelay  = Config.MaleVoiceDelay
 	endIf
 	VoiceDelay = BaseDelay
+	; Init some needed arrays
+	Flags   = new int[5]
+	Offsets = new float[4]
+	Loc     = new float[6]
 	; Ready
 	RegisterEvents()
 	TrackedEvent("Added")
@@ -209,10 +213,6 @@ function LoadShares()
 	IsType     = Thread.IsType
 	LeadIn     = Thread.LeadIn
 	AnimEvents = Thread.AnimEvents
-
-	Flags      = new int[5]
-	Offsets    = new float[4]
-	Loc        = new float[6]
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -484,20 +484,22 @@ state Animating
 
 	function Snap()
 		; Quickly move into place and angle if actor is off by a lot
-		if !IsInPosition(ActorRef, MarkerRef, 75.0)
+		float distance = ActorRef.GetDistance(MarkerRef)
+		if distance > 125.0 || !IsInPosition(ActorRef, MarkerRef, 75.0)
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			AttachMarker()
-		elseIf ActorRef.GetDistance(MarkerRef) > 0.5
-			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 10000, 0)
+		elseIf distance > 0.5
+			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 20000, 0)
 			return ; OnTranslationComplete() will take over when in place
-		endIf
-		; Begin very slowly rotating a small amount to hold position
+		endIf 
+		; Begin very slowly rotating a smallamount to hold position
 		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.001, 20.0, 500, 0.00001)
 	endFunction
 
 	event OnTranslationComplete()
-		Snap()
+		Log("OnTranslationComplete")
+		SyncLocation()
 	endEvent
 
 	event OrgasmStage()
@@ -681,7 +683,7 @@ function LockActor()
 		endIf
 		; abMovement = true, abFighting = true, abCamSwitch = false, abLooking = false, abSneaking = false, abMenu = true, abActivate = true, abJournalTabs = false, aiDisablePOVType = 0
 		Game.DisablePlayerControls(true, true, false, false, false, false, false, false, 0)
-		; Game.SetPlayerAIDriven()
+		Game.SetPlayerAIDriven()
 		; Enable hotkeys, if needed
 		if !(IsVictim && Config.DisablePlayer)
 			Thread.EnableHotkeys()
@@ -693,10 +695,16 @@ function LockActor()
 	; Attach positioning marker
 	if !MarkerRef
 		MarkerRef = ActorRef.PlaceAtMe(Config.BaseMarker)
+		Utility.Wait(0.1)
 	endIf
 	MarkerRef.Enable()
 	MarkerRef.MoveTo(ActorRef)
 	ActorRef.StopTranslation()
+	while ActorRef.GetDistance(MarkerRef) > 1.0
+		Log("MarkerRef not loaded yet...")
+		MarkerRef.MoveTo(ActorRef)
+		Utility.Wait(0.1)
+	endwhile
 	AttachMarker()
 endFunction
 
@@ -720,7 +728,7 @@ function UnlockActor()
 		endIf
 		Thread.DisableHotkeys()
 		Game.EnablePlayerControls(true, true, false, false, false, false, false, false, 0)
-		; Game.SetPlayerAIDriven(false)
+		Game.SetPlayerAIDriven(false)
 	else
 		ActorRef.SetRestrained(false)
 		ActorRef.SetDontMove(false)
@@ -764,6 +772,7 @@ endFunction
 function RefreshActor()
 	if ActorRef && GetState() == "Animating"
 		UnregisterForUpdate()
+		LoadShares()
 		SyncThread()
 		SyncLocation(true)
 		PlayingSA = "SexLabSequenceExit1"

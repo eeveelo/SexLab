@@ -377,7 +377,6 @@ bool function TestSlots()
 endFunction
 
 
-
 ; function RegisterCreatureVoices()
 ; 	VoiceType CV
 ; 	; Falmer

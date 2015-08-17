@@ -248,6 +248,20 @@ Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000
 endFunction
 
 ;/**
+* Searches within a given area for a SexLab valid creature
+* 
+* @param  string RaceKey - The SexLab RaceKey to find a creature whose race belongs to
+* @param  ObjectReference CenterRef - The object to use as the center point in the search. 
+* @param  float Radius - The distance from the center point to search.
+* @param  int FindGender - The desired gender id to look for, 2 for male/no gender, 3 for female.
+* @param  Actor IgnoreRef1/2/3/4 - An actor you know for certain you do not want returned by this function.
+* @return Actor - A valid actor found, if any. Returns none if no valid actor found.
+**/;
+Actor function FindAvailableCreature(string RaceKey, ObjectReference CenterRef, float Radius = 5000.0, int FindGender = 2, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none)
+	return ThreadLib.FindAvailableActor(CenterRef, Radius, FindGender, IgnoreRef1, IgnoreRef2, IgnoreRef3, IgnoreRef4, RaceKey)
+endFunction
+
+;/**
 * Searches within a given area for multiple SexLab valid actors
 * 
 * @param  Actor[] Positions - A list of at least 1 actor you want to find the needed partners for.
@@ -575,6 +589,18 @@ endFunction
 
 sslBaseAnimation[] function GetCreatureAnimationsByRaceGenders(int ActorCount, Race RaceRef, int MaleCreatures = 0, int FemaleCreatures = 0, bool ForceUse = false)
 	return CreatureSlots.GetByRaceGenders(ActorCount, RaceRef, MaleCreatures, FemaleCreatures, ForceUse)
+endFunction
+
+sslBaseAnimation[] function GetCreatureAnimationsByTags(int ActorCount, string Tags, string TagSuppress = "", bool RequireAll = true)
+	return CreatureSlots.GetByTags(ActorCount, Tags, TagSuppress, RequireAll)
+endFunction
+
+sslBaseAnimation[] function GetCreatureAnimationsByRaceTags(int ActorCount, Race RaceRef, string Tags, string TagSuppress = "", bool RequireAll = true)
+	return CreatureSlots.GetByRaceTags(ActorCount, RaceRef, Tags, TagSuppress, RequireAll)
+endFunction
+
+sslBaseAnimation[] function GetCreatureAnimationsByRaceKeyTags(int ActorCount, string RaceKey, string Tags, string TagSuppress = "", bool RequireAll = true)
+	return CreatureSlots.GetByRaceKeyTags(ActorCount, RaceKey, Tags, TagSuppress, RequireAll)
 endFunction
 
 sslBaseAnimation function GetCreatureAnimationByName(string FindName)
