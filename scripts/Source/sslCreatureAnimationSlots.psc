@@ -16,6 +16,8 @@ bool function HasRaceType(Race RaceRef) global native
 string[] function GetAllRaceKeys(Race RaceRef = none) global native
 string[] function GetAllRaceIDs(string RaceKey) global native
 
+import PapyrusUtil
+
 sslBaseAnimation[] function GetByRace(int ActorCount, Race RaceRef)
 	Log("GetByRace(ActorCount="+ActorCount+", RaceRef="+RaceRef+")")
 	string[] RaceTypes = GetAllRaceKeys(RaceRef)
@@ -32,14 +34,52 @@ sslBaseAnimation[] function GetByRace(int ActorCount, Race RaceRef)
 	return GetList(Valid)
 endFunction
 
+sslBaseAnimation[] function GetByRaceTags(int ActorCount, Race RaceRef, string Tags, string TagsSuppressed = "", bool RequireAll = true)
+	Log("GetByRaceTags(ActorCount="+ActorCount+", RaceRef="+RaceRef+", Tags="+Tags+", TagsSuppressed="+TagsSuppressed+", RequireAll="+RequireAll+")")
+	string[] RaceTypes = GetAllRaceKeys(RaceRef)
+	if RaceTypes.Length < 1
+		return sslUtility.AnimationArray(0)
+	endIf
+	bool[] Valid      = Utility.CreateBoolArray(Slotted)
+	string[] Suppress = StringSplit(TagsSuppressed)
+	string[] Search   = StringSplit(Tags)
+	int i = Slotted
+	while i
+		i -= 1
+		sslBaseAnimation Slot = GetBySlot(i)
+		Valid[i] = Slot.Enabled && RaceTypes.Find(Slot.RaceType) != -1 && ActorCount == Slot.PositionCount && Slot.TagSearch(Search, Suppress, RequireAll)
+	endWhile
+	return GetList(Valid)
+endFunction
+
 sslBaseAnimation[] function GetByRaceKey(int ActorCount, string RaceKey)
 	Log("GetByRaceKey(ActorCount="+ActorCount+", RaceKey="+RaceKey+")")
+	if !HasRaceKey(RaceKey)
+		return sslUtility.AnimationArray(0)
+	endIf
 	bool[] Valid  = Utility.CreateBoolArray(Slotted)
 	int i = Slotted
 	while i
 		i -= 1
 		sslBaseAnimation Slot = GetBySlot(i)
-		Valid[i] = Slot.Enabled && Slot.RaceType == RaceKey && ActorCount == Slot.PositionCount
+		Valid[i] = Slot.RaceType == RaceKey && Slot.Enabled && ActorCount == Slot.PositionCount
+	endWhile
+	return GetList(Valid)
+endFunction
+
+sslBaseAnimation[] function GetByRaceKeyTags(int ActorCount, string RaceKey, string Tags, string TagsSuppressed = "", bool RequireAll = true)
+	Log("GetByRaceKeyTags(ActorCount="+ActorCount+", RaceKey="+RaceKey+", Tags="+Tags+", TagsSuppressed="+TagsSuppressed+", RequireAll="+RequireAll+")")
+	if !HasRaceKey(RaceKey)
+		return sslUtility.AnimationArray(0)
+	endIf
+	bool[] Valid      = Utility.CreateBoolArray(Slotted)
+	string[] Suppress = StringSplit(TagsSuppressed)
+	string[] Search   = StringSplit(Tags)
+	int i = Slotted
+	while i
+		i -= 1
+		sslBaseAnimation Slot = GetBySlot(i)
+		Valid[i] = Slot.RaceType == RaceKey && Slot.Enabled && ActorCount == Slot.PositionCount && Slot.TagSearch(Search, Suppress, RequireAll)
 	endWhile
 	return GetList(Valid)
 endFunction
