@@ -254,13 +254,10 @@ int function ValidateActor(Actor ActorRef)
 			Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are valid creature type, but have no valid animations currently enabled or installed.")
 			return -19
 		endIf
-		Log("ValidateActor("+BaseRef.GetName()+") -- TRUE -- CREATURE")
-		return 1
-	else
-		Log("ValidateActor("+BaseRef.GetName()+") -- TRUE -- MISS")
-		FormListAdd(Config, "ValidActors", ActorRef, false)
-		return 1
 	endIf
+	Log("ValidateActor("+BaseRef.GetName()+") -- TRUE -- MISS")
+	FormListAdd(Config, "ValidActors", ActorRef, false)
+	return 1
 endFunction
 
 bool function CanAnimate(Actor ActorRef)
