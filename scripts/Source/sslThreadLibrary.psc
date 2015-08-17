@@ -6,6 +6,7 @@ import StorageUtil
 FormList property BedsList auto hidden
 FormList property DoubleBedsList auto hidden
 FormList property BedRollsList auto hidden
+Keyword property FurnitureBedRoll auto hidden
 
 ; ------------------------------------------------------- ;
 ; --- Object Locators                                 --- ;
@@ -16,12 +17,20 @@ bool function CheckActor(Actor CheckRef, int CheckGender = -1)
 	return ((CheckGender < 2 && IsGender < 2) || (CheckGender >= 2 && IsGender >= 2)) && (CheckGender == -1 || IsGender == CheckGender) && ActorLib.IsValidActor(CheckRef)
 endFunction
 
-Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none)
+Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none, string RaceKey = "")
 	if !CenterRef || FindGender > 3 || FindGender < -1 || Radius < 0.1
 		return none ; Invalid args
 	endIf
+	; Normalize creature genders search
+	if RaceKey != "" || FindGender >= 2
+		if FindGender == 0 || !Config.UseCreatureGender
+			FindGender = 2
+		elseIf FindGender == 1
+			FindGender = 3
+		endIf
+	endIf
 	; Create supression list
-	form[] Suppressed = new form[25]
+	Form[] Suppressed = new Form[25]
 	Suppressed[24] = CenterRef
 	Suppressed[23] = IgnoreRef1
 	Suppressed[22] = IgnoreRef2
@@ -32,24 +41,13 @@ Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000
 	while i
 		i -= 1
 		Actor FoundRef = Game.FindRandomActorFromRef(CenterRef, Radius)
-		if !FoundRef || (Suppressed.Find(FoundRef) == -1 && CheckActor(FoundRef, FindGender))
+		if !FoundRef || (Suppressed.Find(FoundRef) == -1 && CheckActor(FoundRef, FindGender) && (RaceKey == "" || sslCreatureAnimationSlots.HasRaceID(RaceKey, FoundRef.GetLeveledActorBase().GetRace())))
 			return FoundRef ; None means no actor in radius, give up now
 		endIf
 		Suppressed[i] = FoundRef
 	endWhile
 	; No actor found in attempts
 	return none
-endFunction
-
-Actor function FindAvailableCreature(ObjectReference CenterRef, float Radius = 5000.0, string CreatureType = "", int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none)
-	if !CenterRef || FindGender > 3 || FindGender < -1 || Radius < 0.1
-		return none ; Invalid args
-	endIf
-	if FindGender == 0
-		FindGender = 2
-	elseIf FindGender == 1
-		FindGender = 3
-	endIf
 endFunction
 
 ; TODO: probably needs some love
@@ -166,7 +164,7 @@ Actor[] function SortCreatures(actor[] Positions, sslBaseAnimation Animation)
 endFunction
 
 bool function IsBedRoll(ObjectReference BedRef)
-	return BedRef && BedRollsList.HasForm(BedRef.GetBaseObject())
+	return BedRef && (BedRollsList.HasForm(BedRef.GetBaseObject()) || BedRef.HasKeyword(FurnitureBedRoll))
 endFunction
 
 bool function IsDoubleBed(ObjectReference BedRef)
@@ -182,7 +180,7 @@ int function GetBedType(ObjectReference BedRef)
 		Form BaseRef = BedRef.GetBaseObject()
 		if !BedsList.HasForm(BaseRef)
 			return 0
-		elseIf BedRollsList.HasForm(BaseRef)
+		elseIf BedRollsList.HasForm(BedRef.GetBaseObject()) || BedRef.HasKeyword(FurnitureBedRoll)
 			return 1
 		elseIf DoubleBedsList.HasForm(BaseRef)
 			return 3
@@ -329,4 +327,5 @@ function Setup()
 	BedsList       = Config.BedsList
 	DoubleBedsList = Config.DoubleBedsList
 	BedRollsList   = Config.BedRollsList
+	FurnitureBedRoll = Config.FurnitureBedRoll
 endFunction
