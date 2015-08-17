@@ -104,9 +104,10 @@ event OnPageReset(string page)
 
 	; Logo Splash
 	elseif page == ""
-		if PlayerRef.IsInFaction(Config.AnimatingFaction) && ThreadSlots.FindActorController(PlayerRef) != -1
+		if !PreventOverwrite && PlayerRef.IsInFaction(Config.AnimatingFaction) && ThreadSlots.FindActorController(PlayerRef) != -1
 			UnloadCustomContent()
 			AnimationEditor()
+			PreventOverwrite = true
 			return
 		else
 			LoadCustomContent("SexLab/logo.dds", 184, 31)
@@ -202,6 +203,7 @@ event OnConfigOpen()
 	; Target actor
 	StatRef = PlayerRef
 	TargetRef = Config.TargetRef
+	EmptyStatToggle = false
 	if TargetRef && TargetRef.Is3DLoaded()
 		TargetName = TargetRef.GetLeveledActorBase().GetName()
 		TargetFlag = OPTION_FLAG_NONE
@@ -1252,11 +1254,13 @@ state AnimationPosition
 	event OnMenuAcceptST(int i)
 		Position = i
 		SetMenuOptionValueST("$SSL_{"+GenderLabel(Animation.GetGender(i))+"}Gender{"+(i + 1)+"}Position")
+		PreventOverwrite = true
 		ForcePageReset()
 	endEvent
 	event OnDefaultST()
 		Position = 0
 		SetMenuOptionValueST(Position)
+		PreventOverwrite = true
 		ForcePageReset()
 	endEvent
 endState
@@ -1270,11 +1274,13 @@ state AnimationAdjustKey
 	event OnMenuAcceptST(int i)
 		AdjustKey  = AdjustKeys[i]
 		SetMenuOptionValueST(AdjustKeys[i])
+		PreventOverwrite = true
 		ForcePageReset()
 	endEvent
 	event OnDefaultST()
 		AdjustKey = "Global"
 		SetMenuOptionValueST(AdjustKey)
+		PreventOverwrite = true
 		ForcePageReset()
 	endEvent
 endState
@@ -1623,8 +1629,8 @@ function ExpressionEditor()
 	AddMenuOptionST("MoodTypeFemale", "$SSL_MoodType", Moods[Expression.GetMoodType(Phase, Female)], FlagF)
 	AddMenuOptionST("MoodTypeMale", "$SSL_MoodType", Moods[Expression.GetMoodType(Phase, Male)], FlagM)
 
-	AddSliderOptionST("MoodAmountFemale", "$SSL_MoodStrength", Expression.GetMoodAmount(Phase, Female) * 100.0, "{0}", FlagF)
-	AddSliderOptionST("MoodAmountMale", "$SSL_MoodStrength", Expression.GetMoodAmount(Phase, Male) * 100.0, "{0}", FlagM)
+	AddSliderOptionST("MoodAmountFemale", "$SSL_MoodStrength", Expression.GetMoodAmount(Phase, Female), "{0}", FlagF)
+	AddSliderOptionST("MoodAmountMale", "$SSL_MoodStrength", Expression.GetMoodAmount(Phase, Male), "{0}", FlagM)
 
 	; Modifier settings
 	AddHeaderOption("$SSL_{$SSL_Female}-{$SSL_Modifier}", FlagF)
@@ -1632,8 +1638,8 @@ function ExpressionEditor()
 
 	int i = 0
 	while i <= 13
-		AddSliderOptionST("Expression_1_"+Modifier+"_"+i, Modifiers[i], FemaleModifiers[i] * 100.0, "{0}", FlagF)
-		AddSliderOptionST("Expression_0_"+Modifier+"_"+i, Modifiers[i], MaleModifiers[i] * 100.0, "{0}", FlagM)
+		AddSliderOptionST("Expression_1_"+Modifier+"_"+i, Modifiers[i], FemaleModifiers[i], "{0}", FlagF)
+		AddSliderOptionST("Expression_0_"+Modifier+"_"+i, Modifiers[i], MaleModifiers[i], "{0}", FlagM)
 		i += 1
 	endWhile
 
@@ -1642,8 +1648,8 @@ function ExpressionEditor()
 	AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Phoneme}", FlagM)
 	i = 0
 	while i <= 15
-		AddSliderOptionST("Expression_1_"+Phoneme+"_"+i, Phonemes[i], FemalePhonemes[i] * 100.0, "{0}", FlagF)
-		AddSliderOptionST("Expression_0_"+Phoneme+"_"+i, Phonemes[i], MalePhonemes[i] * 100.0, "{0}", FlagM)
+		AddSliderOptionST("Expression_1_"+Phoneme+"_"+i, Phonemes[i], FemalePhonemes[i], "{0}", FlagF)
+		AddSliderOptionST("Expression_0_"+Phoneme+"_"+i, Phonemes[i], MalePhonemes[i], "{0}", FlagM)
 		i += 1
 	endWhile
 endFunction
@@ -1991,10 +1997,17 @@ state SetStatSexuality
 		SetTextOptionValueST(Stats.GetSexualityTitle(StatRef))
 	endEvent
 endState
+
+bool EmptyStatToggle
 state ResetTargetStats
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnReset{"+StatRef.GetLeveledActorBase().GetName()+"}Stats")
-			Stats.ResetStats(StatRef)
+			EmptyStatToggle = !EmptyStatToggle
+			if EmptyStatToggle || StatRef == PlayerRef
+				Stats.EmptyStats(StatRef)
+			else
+				Stats.ResetStats(StatRef)
+			endIf
 			ForcePageReset()
 		endIf
 	endEvent
