@@ -364,7 +364,7 @@ state Making
 			while i
 				i -= 1
 				if !PrimaryAnimations[i].HasRace(CreatureRef) || PrimaryAnimations[i].PositionCount != ActorCount
-					Log("Invalid creture animation added - "+PrimaryAnimations[i].Name)
+					Log("Invalid creature animation added - "+PrimaryAnimations[i].Name)
 					PrimaryAnimations = sslUtility.AnimationArray(0)
 					i = 0
 				endIf
@@ -374,7 +374,7 @@ state Making
 			while i
 				i -= 1
 				if !LeadAnimations[i].HasRace(CreatureRef) || LeadAnimations[i].PositionCount != ActorCount
-					Log("Invalid creature lead in animation added - "+PrimaryAnimations[i].Name)
+					Log("Invalid creature lead in animation added - "+LeadAnimations[i].Name)
 
 					LeadAnimations = sslUtility.AnimationArray(0)
 					LeadIn = false
@@ -518,7 +518,7 @@ function DisableRagdollEnd(Actor ActorRef, bool disabling = true)
 	ActorAlias(ActorRef).DoRagdoll = !disabling
 endFunction
 
-function SetStartAnimationEvent(Actor ActorRef, string EventName = "", float PlayTime = 0.1)
+function SetStartAnimationEvent(Actor ActorRef, string EventName = "IdleForceDefaultState", float PlayTime = 0.1)
 	ActorAlias(ActorRef).SetStartAnimationEvent(EventName, PlayTime)
 endFunction
 
@@ -796,10 +796,11 @@ function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 			float[] BedOffset = Config.BedOffset
 			CenterLocation[0] = CenterLocation[0] + (BedOffset[0] * Math.sin(CenterLocation[5]))
 			CenterLocation[1] = CenterLocation[1] + (BedOffset[0] * Math.cos(CenterLocation[5]))
+			Log("Using Bed Type: "+BedStatus[1])
 			if BedStatus[1] > 1
 				CenterLocation[2] = CenterLocation[2] + BedOffset[2]
 			else
-				CenterLocation[2] = CenterLocation[2] + 4.0
+				CenterLocation[2] = CenterLocation[2] + 0.0 ; TODO: find ideal value
 			endIf
 		endIf
 	endIf

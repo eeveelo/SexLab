@@ -63,7 +63,8 @@ Keyword property CumOralKeyword auto
 Keyword property CumAnalKeyword auto
 Keyword property CumVaginalKeyword auto
 Keyword property ActorTypeNPC auto
-; Keyword property ActorActive auto
+Keyword property SexLabActive auto
+Keyword property FurnitureBedRoll auto
 
 ; FormList property ValidActorList auto
 ; FormList property NoStripList auto
@@ -1162,14 +1163,17 @@ bool function IsActor(Form FormRef)
 	return FormRef && ActorTypes.Find(FormRef.GetType()) != -1
 endFunction
 
-bool function IsImportant(Actor ActorRef)
-	if !ActorRef || ActorRef.IsDead() || ActorRef.IsDeleted() || ActorRef.IsChild()
+bool function IsImportant(Actor ActorRef, bool Strict = false)
+	if ActorRef == PlayerRef
+		return true
+	elseIf !ActorRef || ActorRef.IsDead() || ActorRef.IsDeleted() || ActorRef.IsChild()
 		return false
-	elseIf ActorRef == PlayerRef
+	elseIf !Strict
 		return true
 	endIf
+	; Strict check
 	ActorBase BaseRef = ActorRef.GetLeveledActorBase()
-	return BaseRef.IsUnique() || BaseRef.IsEssential() || BaseRef.IsInvulnerable() || BaseRef.IsProtected() || ActorRef.IsGuard() || ActorRef.IsPlayerTeammate()
+	return BaseRef.IsUnique() || BaseRef.IsEssential() || BaseRef.IsInvulnerable() || BaseRef.IsProtected() || ActorRef.IsGuard() || ActorRef.IsPlayerTeammate() || ActorRef.Is3DLoaded()
 endFunction
 
 function StoreActor(Form FormRef)
