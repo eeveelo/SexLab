@@ -29,7 +29,7 @@ sslBaseAnimation[] function GetByTags(int ActorCount, string Tags, string TagsSu
 	while i
 		i -= 1
 		sslBaseAnimation Slot = Objects[i] as sslBaseAnimation
-		Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount && Slot.ParseTags(Search, RequireAll) && (TagsSuppressed == "" || !Slot.HasOneTag(Suppress))
+		Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount && Slot.TagSearch(Search, Suppress, RequireAll)
 	endWhile
 	return GetList(valid)
 endFunction
@@ -158,7 +158,7 @@ endFunction
 sslBaseAnimation[] function GetList(bool[] Valid)
 	; Debug.Trace("GetList() - "+Valid)
 	sslBaseAnimation[] Output
-	if Valid.Length > 0 && Valid.Find(true) != -1
+	if Valid && Valid.Length > 0 && Valid.Find(true) != -1
 		int n = Valid.Find(true)
 		int i = CountBool(Valid, true)
 		; Trim over 100 to random selection

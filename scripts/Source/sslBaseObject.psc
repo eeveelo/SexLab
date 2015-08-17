@@ -90,11 +90,16 @@ bool function ParseTags(string[] TagList, bool RequireAll = true)
 	return (RequireAll && HasAllTag(TagList)) || (!RequireAll && HasOneTag(TagList))
 endFunction
 
+bool function TagSearch(string[] TagList, string[] Suppress, bool RequireAll)
+	return ((RequireAll && HasAllTag(TagList)) || (!RequireAll && HasOneTag(TagList))) \ 
+		&& (!Suppress || !HasOneTag(Suppress))
+endFunction
+
 bool function HasOneTag(string[] TagList)
 	int i = TagList.Length
 	while i
 		i -= 1
-		if HasTag(TagList[i])
+		if TagList[i] != "" && Tags.Find(TagList[i]) != -1
 			return true
 		endIf
 	endWhile
@@ -105,7 +110,7 @@ bool function HasAllTag(string[] TagList)
 	int i = TagList.Length
 	while i
 		i -= 1
-		if !HasTag(TagList[i])
+		if TagList[i] != "" && Tags.Find(TagList[i]) == -1
 			return false
 		endIf
 	endWhile
