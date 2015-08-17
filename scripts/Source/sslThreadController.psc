@@ -251,7 +251,8 @@ state Animating
 
 	function RotateScene(bool backwards = false)
 		UnregisterForUpdate()
-		CenterLocation[5] = CenterLocation[5] + SignFloat(backwards, 15.0)
+		float Amount = SignFloat(backwards, 15.0)
+		CenterLocation[5] = CenterLocation[5] + Amount
 		if CenterLocation[5] >= 360.0
 			CenterLocation[5] = CenterLocation[5] - 360.0
 		elseIf CenterLocation[5] < 0.0
@@ -262,6 +263,20 @@ state Animating
 		ActorAlias[2].RefreshLoc()
 		ActorAlias[3].RefreshLoc()
 		ActorAlias[4].RefreshLoc()
+		int k = Config.RotateScene
+		while Input.IsKeyPressed(k)
+			CenterLocation[5] = CenterLocation[5] + Amount
+			if CenterLocation[5] >= 360.0
+				CenterLocation[5] = CenterLocation[5] - 360.0
+			elseIf CenterLocation[5] < 0.0
+				CenterLocation[5] = CenterLocation[5] + 360.0
+			endIf
+			ActorAlias[0].RefreshLoc()
+			ActorAlias[1].RefreshLoc()
+			ActorAlias[2].RefreshLoc()
+			ActorAlias[3].RefreshLoc()
+			ActorAlias[4].RefreshLoc()
+		endWhile
 		RegisterForSingleUpdate(0.2)
 	endFunction
 
