@@ -2280,18 +2280,16 @@ function RebuildClean()
 	SetCursorFillMode(TOP_TO_BOTTOM)
 
 	AddHeaderOption("SexLab v"+GetStringVer()+" by Ashal@LoversLab.com")
-	AddToggleOptionST("DebugMode","$SSL_DebugMode", Config.InDebugMode)
-
-
-	AddHeaderOption("$SSL_UpgradeUninstallReinstall")
-	AddTextOptionST("CleanSystem","$SSL_CleanSystem", "$SSL_ClickHere")
-
-	AddHeaderOption("$SSL_Maintenance")
 	if SexLab.Enabled
 		AddTextOptionST("ToggleSystem","$SSL_EnabledSystem", "$SSL_DoDisable")
 	else
 		AddTextOptionST("ToggleSystem","$SSL_DisabledSystem", "$SSL_DoEnable")
 	endIf
+	AddTextOptionST("CleanSystem","$SSL_CleanSystem", "$SSL_ClickHere")
+
+	; AddHeaderOption("$SSL_UpgradeUninstallReinstall")
+	
+	AddHeaderOption("$SSL_Maintenance")
 	AddTextOptionST("StopCurrentAnimations","$SSL_StopCurrentAnimations", "$SSL_ClickHere")
 	AddTextOptionST("RestoreDefaultSettings","$SSL_RestoreDefaultSettings", "$SSL_ClickHere")
 	AddTextOptionST("ResetAnimationRegistry","$SSL_ResetAnimationRegistry", "$SSL_ClickHere")
@@ -2300,8 +2298,10 @@ function RebuildClean()
 	AddTextOptionST("ResetStripOverrides","$SSL_ResetStripOverrides", "$SSL_ClickHere")
 
 	SetCursorPosition(1)
-	AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
+	AddToggleOptionST("DebugMode","$SSL_DebugMode", Config.InDebugMode)
+
 	AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
+	AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
 
 	AddHeaderOption("System Requirements")
 	SystemCheckOptions()
@@ -2544,8 +2544,11 @@ state AllowCreatures
 		endIf
 		SetToggleOptionValueST(Config.AllowCreatures)
 		; Register creature animations if needed
-		if Config.AllowCreatures && CreatureSlots.Slotted < 1
+		if !Config.AllowCreatures && CreatureSlots.Slotted > 0
 			CreatureSlots.Setup()
+		elseIf Config.AllowCreatures && CreatureSlots.Slotted < 1
+			CreatureSlots.Setup()
+			CreatureSlots.RegisterSlots()
 		endIf
 	endEvent
 	event OnDefaultST()
