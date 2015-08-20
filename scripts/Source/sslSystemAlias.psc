@@ -116,7 +116,7 @@ event UpdateSystem(int OldVersion, int NewVersion)
 
 		; TODO: first update by 1.60 should probably be done by MCM instead, so quests can be reset
 		; Perform update functions
-		if OldVersion <= 15921
+		if OldVersion <= 15992
 			; Full system setup
 			ThreadLib.Setup()
 			ActorLib.Setup()
