@@ -1214,7 +1214,7 @@ endFunction
 ;#---------------------------#
 
 Actor[] function MakeActorArray(Actor Actor1 = none, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none)
-	return sslUtility.MakeActorArray(Actor1, Actor2, Actor3, Actor4, Actor5)
+	return SexLabUtil.MakeActorArray(Actor1, Actor2, Actor3, Actor4, Actor5)
 endFunction
 
 ;#---------------------------#

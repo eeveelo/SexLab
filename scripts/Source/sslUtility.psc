@@ -223,23 +223,7 @@ string function MakeArgs(string delimiter, string arg1, string arg2 = "", string
 endFunction
 
 Actor[] function MakeActorArray(Actor Actor1 = none, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none) global
-	Actor[] Output
-	if Actor1
-		Output = PapyrusUtil.PushActor(Output, Actor1)
-	endIf
-	if Actor2
-		Output = PapyrusUtil.PushActor(Output, Actor2)
-	endIf
-	if Actor3
-		Output = PapyrusUtil.PushActor(Output, Actor3)
-	endIf
-	if Actor4
-		Output = PapyrusUtil.PushActor(Output, Actor4)
-	endIf
-	if Actor5
-		Output = PapyrusUtil.PushActor(Output, Actor5)
-	endIf
-	return Output
+	return SexLabUtil.MakeActorArray(Actor1, Actor2, Actor3, Actor4, Actor5)
 endFunction
 
 ;/-----------------------------------------------\;
