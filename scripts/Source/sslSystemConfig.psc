@@ -593,9 +593,14 @@ endFunction
 
 function Reload()
 	; DebugMode = true
-
 	LoadLibs(false)
 	SexLab = SexLabUtil.GetAPI()
+
+	; Valid actor types refrence
+	ActorTypes = new int[3]
+	ActorTypes[0] = 43 ; kNPC
+	ActorTypes[1] = 44 ; kLeveledCharacter
+	ActorTypes[2] = 62 ; kCharacter
 
 	; Configure SFX & Voice volumes
 	AudioVoice.SetVolume(VoiceVolume)
@@ -621,14 +626,22 @@ function Reload()
 		HDTHeelEffect = Game.GetFormFromFile(0x800, "hdtHighHeel.esm") as MagicEffect
 	endIf
 
-	; Valid actor types refrence
-	ActorTypes = new int[3]
-	ActorTypes[0] = 43 ; kNPC
-	ActorTypes[1] = 44 ; kLeveledCharacter
-	ActorTypes[2] = 62 ; kCharacter
-
 	; Clean valid actors list
+	StorageUtil.FormListRemove(self, "ValidActors", PlayerRef, true)
 	StorageUtil.FormListRemove(self, "ValidActors", none, true)
+
+	; Remove gender override if player's gender matches normally
+	if PlayerRef.GetFactionRank(GenderFaction) == PlayerRef.GetLeveledActorBase().GetSex()
+		PlayerRef.RemoveFromFaction(GenderFaction)
+	endIf
+
+	; Clear or register creature animations if it's been toggled
+	if !AllowCreatures && CreatureSlots.Slotted > 0
+		CreatureSlots.Setup()
+	elseIf AllowCreatures && CreatureSlots.Slotted < 1
+		CreatureSlots.Setup()
+		CreatureSlots.RegisterSlots()
+	endIf
 
 	; Remove any NPC thread control player has
 	DisableThreadControl(Control)

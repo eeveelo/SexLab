@@ -23,7 +23,22 @@ endFunction
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	Topic Hit1 = Game.GetForm(0xA91F9) as Topic
+	Benchmark(2, 10000)
+
+	; bool[] arr = Utility.CreateBoolArray(10, false)
+	; Log("10: "+arr)
+	; arr = Utility.ResizeBoolArray(arr, 15, true)
+	; Log("15: "+arr)
+	; arr = PapyrusUtil.RemoveBool(arr, false)
+	; Log("5: "+arr)
+	; arr = Utility.ResizeBoolArray(arr, 10, false)
+	; Log("15: "+arr)
+	; arr = PapyrusUtil.PushBool(arr, true)
+	; Log("11: "+arr)
+	; arr = Utility.ResizeBoolArray(arr, (arr.Length + 1), true)
+	; Log("12: "+arr)
+
+	;/ Topic Hit1 = Game.GetForm(0xA91F9) as Topic
 	if !Hit1
 		Log("Is right form")
 		Hit1 = Game.GetForm(0xA91FA) as Topic
@@ -45,7 +60,7 @@ event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	else
 		Log("Failed to find hit topic")
 	endIf
-
+ /;
 
 	Dispel()
 endEvent
