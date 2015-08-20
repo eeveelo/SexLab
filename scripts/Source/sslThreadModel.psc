@@ -153,21 +153,16 @@ endProperty
 Actor[] property Victims auto hidden
 Actor property VictimRef hidden
 	Actor function get()
-		if !Victims || Victims.Length < 1
-			return none
+		if Victims
+			return Victims[0]
 		endIf
-		return Victims[(Victims.Length - 1)]
+		return none
 	endFunction
 	function set(Actor ActorRef)
-		if ActorRef
-			if !Victims || Victims.Find(ActorRef) == -1
-				Victims = PapyrusUtil.PushActor(Victims, ActorRef)
-			endIf
-			IsAggressive = true
-		else
-			Victims = PapyrusUtil.ActorArray(0)
-			IsAggressive = false
+		if ActorRef && (!Victims || Victims.Find(ActorRef) == -1)
+			Victims = PapyrusUtil.PushActor(Victims, ActorRef)
 		endIf
+		IsAggressive = ActorRef != none && Victims
 	endFunction
 endProperty
 
@@ -344,7 +339,7 @@ state Making
 		; Center on fallback choices
 		if !CenterRef
 			if IsAggressive
-				CenterOnObject(Victims[0])
+				CenterOnObject(VictimRef)
 			elseIf HasPlayer
 				CenterOnObject(PlayerRef)
 			else
@@ -604,11 +599,11 @@ function SetVictim(Actor ActorRef, bool Victimize = true)
 endFunction
 
 bool function IsVictim(Actor ActorRef)
-	return HasActor(ActorRef) && VictimRef && Victims.Find(ActorRef) != -1
+	return HasActor(ActorRef) && Victims && Victims.Find(ActorRef) != -1
 endFunction
 
 bool function IsAggressor(Actor ActorRef)
-	return HasActor(ActorRef) && VictimRef && Victims.Find(ActorRef) == -1
+	return HasActor(ActorRef) && Victims && Victims.Find(ActorRef) == -1
 endFunction
 
 int function GetHighestPresentRelationshipRank(Actor ActorRef)
@@ -1156,6 +1151,7 @@ function ResolveTimers()
 endFunction
 
 function SetTID(int id)
+	Log(self, "Setup")
 	; Reset function Libraries - SexLabQuestFramework
 	if !Config || !ThreadLib || !ActorLib
 		Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
@@ -1206,7 +1202,6 @@ function SetTID(int id)
 	
 	InitShares()
 	Initialize()
-	Log(self, "Setup")
 endFunction
 
 function InitShares()
@@ -1229,6 +1224,8 @@ function InitShares()
 		EventTypes[3] = "Refresh"
 	endIf
 endFunction
+
+bool Initialized
 function Initialize()
 	UnregisterForUpdate()
 	; Clear aliases
@@ -1238,6 +1235,7 @@ function Initialize()
 	ActorAlias[3].ClearAlias()
 	ActorAlias[4].ClearAlias()
 	; Forms
+	Animation      = none
 	CenterRef      = none
 	SoundFX        = none
 	BedRef         = none
@@ -1256,10 +1254,9 @@ function Initialize()
 	Stage          = 1
 	ActorCount     = 0
 	; Storage Data
-	Animation         = none
 	Genders           = new int[4]
-	Positions         = PapyrusUtil.ActorArray(0)
 	Victims           = PapyrusUtil.ActorArray(0)
+	Positions         = PapyrusUtil.ActorArray(0)
 	CustomAnimations  = sslUtility.AnimationArray(0)
 	PrimaryAnimations = sslUtility.AnimationArray(0)
 	LeadAnimations    = sslUtility.AnimationArray(0)
@@ -1268,6 +1265,7 @@ function Initialize()
 	CustomTimers      = Utility.CreateFloatArray(0)
 	; Enter thread selection pool
 	GoToState("Unlocked")
+	Initialized = true
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -1277,7 +1275,10 @@ endFunction
 state Unlocked
 	sslThreadModel function Make()
 		InitShares()
-		Initialize()
+		if !Initialized
+			Initialize()
+		endIf
+		Initialized = false
 		GoToState("Making")
 		RegisterForSingleUpdate(60.0)
 		return self
