@@ -349,8 +349,8 @@ function GetPositionInfo()
 		StageCount = Animation.StageCount
 		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
 		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedStatus[1])
-		AnimEvents[Position] = Animation.FetchPositionStage(Position, Stage)
 		CurrentSA  = Animation.Registry
+		; AnimEvents[Position] = Animation.FetchPositionStage(Position, Stage)
 	endIf
 endFunction
 
@@ -377,6 +377,7 @@ state Animating
 
 	function StartAnimating()
 		; Starting position
+		GetPositionInfo()
 		OffsetCoords(Loc, Center, Offsets)
 		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
@@ -405,11 +406,11 @@ state Animating
 		; Pause further updates if in menu
 		while Utility.IsInMenuMode()
 			Utility.WaitMenuMode(1.5)
-			StartedAt += 1.0
+			StartedAt += 1.2
 		endWhile
 		; Check if still among the living and able.
-		if ActorRef.IsDisabled() || (ActorRef.IsDead() && ActorRef.GetActorValue("Health") < 1.0)
-			Log("Actor is disabled or has no health - Unable to continue animating")
+		if !ActorRef.Is3DLoaded() || ActorRef.IsDisabled() || (ActorRef.IsDead() && ActorRef.GetActorValue("Health") < 1.0)
+			Log("Actor is out of cell, disabled, or has no health - Unable to continue animating")
 			Thread.EndAnimation(true)
 			return
 		endIf
@@ -439,12 +440,11 @@ state Animating
 		endIf
 		; Update alias info
 		GetEnjoyment()
-		; Sync status		
+		; Sync status
 		if !IsCreature
 			ResolveStrapon()
 			RefreshExpression()
 		endIf
-		; Log("Enjoyment: "+Enjoyment+" SOS: "+Schlong)
 		Debug.SendAnimationEvent(ActorRef, "SOSBend"+Schlong)
 		; SyncLocation(false)
 	endFunction
@@ -458,6 +458,20 @@ state Animating
 	function SyncAll(bool Force = false)
 		SyncThread()
 		SyncLocation(Force)
+	endFunction
+
+	function RefreshActor()
+		UnregisterForUpdate()
+		SyncThread()
+		SyncLocation(true)
+		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
+		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1")
+		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1_REENTER")
+		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
+		PlayingSA = "SexLabSequenceExit1"
+		SendAnimation()
+		RegisterForSingleUpdate(1.0)
+		Thread.SyncEventDone(kRefreshActor)
 	endFunction
 
 	function RefreshLoc()
@@ -508,12 +522,15 @@ state Animating
 	endEvent
 
 	function OrgasmEffect()
+		if (RealTime[0] - LastOrgasm) < 10.0
+			return
+		endIf
 		UnregisterForUpdate()
 		LastOrgasm = RealTime[0]
 		Orgasms += 1
 		; Apply cum to female positions from male position orgasm
 		int i = Thread.ActorCount
-		if i > 1 && MalePosition && Config.UseCum && (IsMale || (Config.AllowFFCum && IsFemale))
+		if i > 1 && Config.UseCum && (MalePosition || IsCreature) && (IsMale || IsCreature || (Config.AllowFFCum && IsFemale))
 			if i == 2
 				Thread.PositionAlias(SexLabUtil.IntIfElse(Position == 1, 0, 1)).ApplyCum()
 			else
@@ -525,36 +542,29 @@ state Animating
 				endWhile
 			endIf
 		endIf
-		; Send an orgasm event hook with actor and orgasm count
-		TrackedEvent("Orgasm")
+		; Reset enjoyment build up
+		BaseEnjoyment -= Enjoyment
+		BaseEnjoyment += Utility.RandomInt((BestRelation + 10), PapyrusUtil.ClampInt(((Skills[Stats.kLewd]*1.5) as int) + (BestRelation + 10), 10, 35))
+		int FullEnjoyment = GetEnjoyment()
 		int eid = ModEvent.Create("SexLabOrgasm")
+		; Send an orgasm event hook with actor and orgasm count
 		ModEvent.PushForm(eid, ActorRef)
+		ModEvent.PushInt(eid, FullEnjoyment)
 		ModEvent.PushInt(eid, Orgasms)
 		ModEvent.Send(eid)
+		TrackedEvent("Orgasm")
+		Log("Orgasms["+Orgasms+"] Enjoyment ["+Enjoyment+"] BaseEnjoyment["+BaseEnjoyment+"] FullEnjoyment["+FullEnjoyment+"]")
 		; Shake camera for player
-		if IsPlayer && Game.GetCameraState() != 3
+		if IsPlayer && Game.GetCameraState() != 3 && Config.OrgasmEffects
 			Game.ShakeCamera(none, 1.00, 2.0)
 		endIf
 		; Play SFX/Voice
 		if !IsSilent
 			Sound MoanFX = Voice.GetSound(100, false)
 			Sound.SetInstanceVolume(MoanFX.Play(ActorRef), 1.0)
-			Sound.SetInstanceVolume(OrgasmFX.Play(ActorRef), 1.0)
-			Utility.WaitMenuMode(0.8)
-			Sound.SetInstanceVolume(MoanFX.Play(ActorRef), 1.0)
-			Sound.SetInstanceVolume(OrgasmFX.Play(ActorRef), 1.0)
-			Utility.WaitMenuMode(0.8)
-			Sound.SetInstanceVolume(OrgasmFX.Play(ActorRef), 1.0)
-			Sound.SetInstanceVolume(MoanFX.Play(ActorRef), 1.0)
-		else
-			Sound.SetInstanceVolume(OrgasmFX.Play(ActorRef), 1.0)
-			Utility.WaitMenuMode(0.8)
-			Sound.SetInstanceVolume(OrgasmFX.Play(ActorRef), 1.0)
 		endIf
-		; Reset enjoyment build up
-		BaseEnjoyment -= Enjoyment
-		BaseEnjoyment += Utility.RandomInt(10, PapyrusUtil.ClampInt(((Skills[Stats.kLewd]*1.5) as int) + (BestRelation + 10), 10, 33))
-		Log("Orgasms["+Orgasms+"] Enjoyment ["+Enjoyment+"] BaseEnjoyment["+BaseEnjoyment+"] GetEnjoyment["+GetEnjoyment()+"]")
+		Sound.SetInstanceVolume(OrgasmFX.Play(MarkerRef), 1.0)
+		Utility.WaitMenuMode(0.4)
 		; VoiceDelay = 0.8
 		RegisterForSingleUpdate(0.8)
 	endFunction
@@ -770,18 +780,6 @@ function RestoreActorDefaults()
 endFunction
 
 function RefreshActor()
-	if ActorRef && GetState() == "Animating"
-		UnregisterForUpdate()
-		LoadShares()
-		SyncThread()
-		SyncLocation(true)
-		PlayingSA = "SexLabSequenceExit1"
-		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
-		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1")
-		; SendAnimation()
-		RegisterForSingleUpdate(1.0)
-		Thread.SyncEventDone(kRefreshActor)
-	endIf
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -793,19 +791,20 @@ int function GetGender()
 endFunction
 
 function SetVictim(bool Victimize)
+	Actor[] Victims = Thread.Victims
 	; Make victim
-	if !IsVictim && Victimize
-		Thread.VictimRef = ActorRef
+	if Victimize && (!Victims || Victims.Find(ActorRef) == -1)
+		Victims = PapyrusUtil.PushActor(Victims, ActorRef)
+		Thread.Victims = Victims
 	; Was victim but now isn't, update thread
 	elseIf IsVictim && !Victimize
-		Actor[] Victims = PapyrusUtil.RemoveActor(Thread.Victims, ActorRef)
-		Thread.Victims  = Victims
+		Victims = PapyrusUtil.RemoveActor(Victims, ActorRef)
+		Thread.Victims = Victims
 		if !Victims || Victims.Length < 1
-			IsType[0] = false
+			Thread.IsAggressive = false
 		endIf
 	endIf
-	IsVictim    = Victimize
-	IsAggressor = !Victimize && Thread.VictimRef
+	IsVictim = Victimize
 endFunction
 
 bool function IsVictim()
@@ -837,7 +836,7 @@ int function GetEnjoyment()
 		if Enjoyment < 0
 			Enjoyment = 0
 		elseIf Enjoyment >= 100
-			if Config.SeparateOrgasms && Stage != StageCount && (RealTime[0] - LastOrgasm) > 3.0
+			if Config.SeparateOrgasms && Stage != StageCount && (RealTime[0] - LastOrgasm) > 10.0
 				OrgasmEffect()
 			else
 				Enjoyment = 100
@@ -1006,7 +1005,7 @@ function Strip()
 		endIf
 	endIf
 	; Strip armor slots
-	int i = Strip.RFind(true, 31)
+	int i = 31
 	while i >= 0
 		; Grab item in slot
 		ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
@@ -1153,7 +1152,6 @@ function RegisterEvents()
 endFunction
 
 function ClearEvents()
-	; Log("CLEARING EVENTS")
 	UnregisterForUpdate()
 	string e = Thread.Key("")
 	; Quick Events
