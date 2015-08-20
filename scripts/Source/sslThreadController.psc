@@ -126,9 +126,8 @@ state Animating
 		; Pause further updates if in menu
 		if HasPlayer && Utility.IsInMenuMode()
 			while Utility.IsInMenuMode()
-				StageTimer += 1.0
 				Utility.WaitMenuMode(1.5)
-				; Log("Thread menu pause...")
+				StageTimer += 1.2
 			endWhile
 		endIf
 		; Advance stage on timer
@@ -415,43 +414,31 @@ state Animating
 		RegisterForSingleUpdate(0.5)
 	endFunction
 
-	function ResetPositions()
-		UnregisterForUpdate()
-		GoToState("Refresh")
-	endFunction
-
 	function TriggerOrgasm()
 		UnregisterForUpdate()
-		GoToState("Orgasm")
-	endFunction
-
-endState
-
-state Refresh
-	event OnBeginState()
-		SyncEvent(kRefreshActor, 10.0)
-	endEvent
-	function RefreshDone()
-		RegisterForSingleUpdate(0.1)
-	endFunction
-	event OnUpdate()
-		Action("Animating")
-	endEvent
-	function ResetPositions()
-	endFunction
-endState
-
-state Orgasm
-	event OnBeginState()
 		QuickEvent("Orgasm")
-		RegisterForSingleUpdate(2.0)
 		if SoundFX
 			Sound.SetInstanceVolume(SoundFX.Play(CenterRef), 1.0)
 		endIf
-	endEvent
+	endFunction
+
+	function ResetPositions()
+		UnregisterForUpdate()
+		GoToState("Refresh")
+		SyncEvent(kRefreshActor, 10.0)
+	endFunction
+endState
+
+state Refresh
+	function RefreshDone()
+		RegisterForSingleUpdate(0.5)
+	endFunction
+	function ResetPositions()
+		RegisterForSingleUpdate(0.5)
+	endFunction
 	event OnUpdate()
 		GoToState("Animating")
-		RegisterForSingleUpdate(0.5)
+		FireAction()
 	endEvent
 endState
 
@@ -563,18 +550,18 @@ state Ending
 		Config.DisableThreadControl(self)
 		SyncEvent(kResetActor, 45.0)
 	endEvent
-	function ResetDone()
-		; Log("Reset", "AliasEvent")
-		RegisterForSingleUpdate(0.1)
-	endFunction
 	event OnUpdate()
+		ResetDone()
+	endEvent
+	function ResetDone()
+		UnregisterforUpdate()
 		SendThreadEvent("AnimationEnd")
 		if Adjusted
 			Log("Auto saving adjustments...")
 			sslSystemConfig.SaveAdjustmentProfile()
 		endIf
 		GoToState("Frozen")
-	endEvent
+	endFunction
 	; Don't allow to be called twice
 	function EndAnimation(bool Quickly = false)
 	endFunction
