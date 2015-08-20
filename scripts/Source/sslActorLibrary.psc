@@ -155,7 +155,7 @@ Form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 		endIf
 	endIf
 	; Strip armors
-	int i = Strip.RFind(true, 31)
+	int i = 31
 	while i >= 0
 		; Grab item in slot
 		ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
