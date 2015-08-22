@@ -41,7 +41,8 @@ int property ActiveAnimations hidden
 	endFunction
 endProperty
 
-sslSystemConfig property Config auto
+; If extending this script, fill this property with the name of your mod.
+string property ModName auto
 
 ;#---------------------------#
 ;#                           #
@@ -56,23 +57,23 @@ endFunction
 
 int function StartSex(Actor[] Positions, sslBaseAnimation[] Anims, Actor Victim = none, ObjectReference CenterOn = none, bool AllowBed = true, string Hook = "")
 	; Claim a thread
-	sslThreadModel Make = NewThread()
-	if !Make
+	sslThreadModel Thread = NewThread()
+	if !Thread
 		Log("StartSex() - Failed to claim an available thread")
 		return -1
 	; Add actors list to thread
-	elseIf !Make.AddActors(Positions, Victim)
+	elseIf !Thread.AddActors(Positions, Victim)
 		Log("StartSex() - Failed to add some actors to thread")
 		return -1
 	endIf
 	; Configure our thread with passed arguments
-	Make.SetAnimations(Anims)
-	Make.CenterOnObject(CenterOn)
-	Make.DisableBedUse(!AllowBed)
-	Make.SetHook(Hook)
+	Thread.SetAnimations(Anims)
+	Thread.CenterOnObject(CenterOn)
+	Thread.DisableBedUse(!AllowBed)
+	Thread.SetHook(Hook)
 	; Start the animation
-	if Make.StartThread()
-		return Make.tid
+	if Thread.StartThread()
+		return Thread.tid
 	endIf
 	return -1
 endFunction
@@ -431,7 +432,7 @@ endFunction
 * For more future prevention, add actor to the faction BardAudienceExcludedFaction (id: 0x0010FCB4)
 * 
 * @param  Actor ActorRef - The actor you want to remove/check
-* @param  bool RemoveFromAudience - Set to FALSE to only check if they are present and not remove them fromt he audience.
+* @param  bool RemoveFromAudience - Set to FALSE to only check if they are present and not remove them from the audience.
 * @return bool - TRUE if ActorRef was/is present in a bard audience
 **/;
 bool function CheckBardAudience(Actor ActorRef, bool RemoveFromAudience = true)
@@ -444,69 +445,186 @@ endFunction
 
 
 ;#------------------------------#
-;#  BEGIN CONTROLLER FUNCTIONS  #
+;#    BEGIN THREAD FUNCTIONS    #
 ;#------------------------------#
 
+;/**
+* Searches for and returns an a bed within a given radius from a provided center. 
+* 
+* @param  ObjectReference CenterRef - An object/actor to use as the center point of your search.
+* @param  float Radius - The radius distance to search within the given CenterRef for a bed. 
+* @param  bool IgnoreUsed - When searching for beds, attempt to check if any actors are currently using the bed and ignore it if so. 
+* @param  ObjectReference IgnoreRef1/IgnoreRef2 - A bed object that might be within the search radius, but you know you don't want.
+* @return ObjectReference - The found valid bed within the radius. NONE if no bed found. 
+**/;
 ObjectReference function FindBed(ObjectReference CenterRef, float Radius = 1000.0, bool IgnoreUsed = true, ObjectReference IgnoreRef1 = none, ObjectReference IgnoreRef2 = none)
 	return ThreadLib.FindBed(CenterRef, Radius, IgnoreUsed, IgnoreRef1, IgnoreRef2)
 endFunction
 
+;/**
+* Check if a given bed is considered a bed roll.
+* 
+* @param  ObjectReference BedRef - The bed object you want to check.
+* @return bool - TRUE if BedRef is considered a bed roll.
+**/;
 bool function IsBedRoll(ObjectReference BedRef)
 	return ThreadLib.IsBedRoll(BedRef)
 endFunction
 
+;/**
+* Check if a given bed is considered a 2 person bed.
+* 
+* @param  ObjectReference BedRef - The bed object you want to check.
+* @return bool - TRUE if BedRef is considered a 2 person bed.
+**/;
 bool function IsDoubleBed(ObjectReference BedRef)
 	return ThreadLib.IsDoubleBed(BedRef)
 endFunction
 
+;/**
+* Check if a given bed is considered a single bed.
+* 
+* @param  ObjectReference BedRef - The bed object you want to check.
+* @return bool - TRUE if BedRef is considered a single bed.
+**/;
 bool function IsSingleBed(ObjectReference BedRef)
 	return ThreadLib.IsSingleBed(BedRef)
 endFunction
 
+;/**
+* Check if a given bed is appears to be in use by another actor.
+* 
+* @param  ObjectReference BedRef - The bed object you want to check.
+* @return bool - TRUE if BedRef is considered in use.
+**/;
 bool function IsBedAvailable(ObjectReference BedRef)
 	return ThreadLib.IsBedAvailable(BedRef)
 endFunction
 
-sslThreadController function GetActorController(Actor ActorRef)
-	return ThreadSlots.GetActorController(ActorRef)
-endFunction
-
-sslThreadController function GetPlayerController()
-	return ThreadSlots.GetActorController(PlayerRef)
-endFunction
-
+;/**
+* Gets the thread associated with the given thread id number. Mostly used for getting the thread associated with a hook event.
+* 
+* @param  int tid - The thread id number of the thread you wish to retrieve. Should be a number between 0-14
+* @return sslThreadController - The thread that the given tid belongs to.
+**/;
 sslThreadController function GetController(int tid)
 	return ThreadSlots.GetController(tid)
 endFunction
 
+;/**
+* Finds any thread controller an actor is currently associated with and returns it's thread id number.
+*
+* @param  Actor ActorRef - The actor to search for.
+* @return sslThreadController - The thread actor is currently in. NONE if actor couldn't be found.
+**/;
 int function FindActorController(Actor ActorRef)
 	return ThreadSlots.FindActorController(ActorRef)
 endFunction
 
+;/**
+* Finds any thread controller the player is currently associated with and returns it's thread id number
+* @return sslThreadController - The thread actor is currently in. NONE if actor couldn't be found.
+**/;
 int function FindPlayerController()
 	return ThreadSlots.FindActorController(PlayerRef)
 endFunction
 
+;/**
+* Finds any thread controller an actor is currently associated with and returns it.
+* 
+* @param  Actor ActorRef - The actor to search for.
+* @return sslThreadController - The thread the actor is currently part of. NONE if actor couldn't be found.
+**/;
+sslThreadController function GetActorController(Actor ActorRef)
+	return ThreadSlots.GetActorController(ActorRef)
+endFunction
+
+;/**
+* Finds any thread controller the player is currently associated with and returns it.
+* 
+* @return sslThreadController - The thread the player is currently part of. NONE if player couldn't be found.
+**/;
+sslThreadController function GetPlayerController()
+	return ThreadSlots.GetActorController(PlayerRef)
+endFunction
+
+;#---------------------------#
+;#   END THREAD FUNCTIONS    #
+;#---------------------------#
+
+;#------------------------------#
+;#  BEGIN TRACKING FUNCTIONS    #
+;#------------------------------#
+
+;/**
+*
+* TRACKING USAGE INSTRUCTIONS:
+* Any actor tracked either by specifically being marked for tracking, or belong to a faction that is tracked, will receive special mod events.
+* The default tracked event types are Added, Start, End, Orgasm. Which correspond with an actor being added to a thread, starting animation, ending animation, and having an orgasm.
+* Once you register a callback for an actor or faction, the mod event sent will be "<custom callback>_<event type>"
+* so if you TrackActor(ActorRef, "DoStuff") and you want to run a callback whenever ActorRef finishes an animation, then you would RegisterForMyEvent("DoStuff_End", "MyEventFunction")
+* The received event should then be "event(Form FormRef, int tid)" the FormRef is the actor who triggered it as a form you can cast, and the tid is the related thread id usable with GetController(tid)
+*
+* NOTE: The player has a default tracked event associated with them using the callback "PlayerTrack"
+**/;
+
+;/**
+* Associate a specific actor with a unique callback mod event that is sent whenever the actor performs certain actions within SexLab animations.
+* 
+* @param  Actor ActorRef - The actor you want to receive tracked events for.
+* @param  string Callback - The unique callback name you want to associate with this actor.
+**/;
 function TrackActor(Actor ActorRef, string Callback)
 	ThreadLib.TrackActor(ActorRef, Callback)
 endFunction
 
+;/**
+* Remove an associated callback from an actor.
+* 
+* @param  Actor ActorRef - The actor you want to remove the tracked events for.
+* @param  string Callback - The unique callback event you want to disable.
+**/;
 function UntrackActor(Actor ActorRef, string Callback)
 	ThreadLib.UntrackActor(ActorRef, Callback)
 endFunction
 
+;/**
+* Associate a specific actor with a unique callback mod event that is sent whenever the actor performs certain actions within SexLab animations.
+* 
+* @param  Faction FactionRef - The faction whose members you want to receive tracked events for.
+* @param  string Callback - The unique callback name you want to associate with this faction's actors.
+**/;
 function TrackFaction(Faction FactionRef, string Callback)
 	ThreadLib.TrackFaction(FactionRef, Callback)
 endFunction
 
+;/**
+* Remove an associated callback from a faction.
+* 
+* @param  Faction FactionRef - The faction you want to remove the tracked events for.
+* @param  string Callback - The unique callback event you want to disable.
+**/;
 function UntrackFaction(Faction FactionRef, string Callback)
 	ThreadLib.UntrackFaction(FactionRef, Callback)
 endFunction
 
+;/**
+* Send a custom tracked event for an actor, if they have any associated callbacks themselves or belong to a tracked factions.
+* 
+* @param  Actor ActorRef - The actor you want to send a custom tracked event for.
+* @param  string Hook - The event type you want to send, used in place of the default Added, Start, End, Orgasm hook types as "<Hook>_<Callback>"
+* @param  int id - An optional id number to send with your custom tracked event. This is normally the associated animation thread id number, but can be anything you want.
+**/;
 function SendTrackedEvent(Actor ActorRef, string Hook, int id = -1)
 	ThreadLib.SendTrackedEvent(ActorRef, Hook, id)
 endFunction
 
+;/**
+* Check if a given actor will receive any tracked events. Will always return TRUE if used on the player, due to the built in "PlayerTrack" callback.
+* 
+* @param  Actor ActorRef - The actor to check.
+* @return bool - TRUE if the actor has any associated callbacks, or belongs to any tracked factions.
+**/;
 bool function IsActorTracked(Actor ActorRef)
 	return ThreadLib.IsActorTracked(ActorRef)
 endFunction
@@ -519,57 +637,154 @@ endFunction
 ;# BEGIN ANIMATION FUNCTIONS #
 ;#---------------------------#
 
+;/**
+* Get an array of animations that have a specified set of tags.
+* 
+* @param  int ActorCount - The total number of actors, between 1-5 the returned animations should be intended for.
+* @param  string Tags - A comma separated list of animation tags you want to use as a filter for the returned animations.
+* @param  string TagSuppress - A comma separated list of animation tags you DO NOT want present on any of the returned animations.
+* @param  bool RequireAll - If TRUE, all tags in the provided "string Tags" list must be present in an animation to be returned. When FALSE only one tag in the list is needed.
+* @return sslBaseAnimation[] - An array of animations that fit the provided search arguments.
+**/;
 sslBaseAnimation[] function GetAnimationsByTags(int ActorCount, string Tags, string TagSuppress = "", bool RequireAll = true)
 	return AnimSlots.GetByTags(ActorCount, Tags, TagSuppress, RequireAll)
 endFunction
 
+;/**
+* Get an array of animations that fit a specified set of parameters.
+*
+* @param  int ActorCount - The total number of actors, between 1-5 the returned animations should be intended for.
+* @param  int Males - The total number of males the returned animations should be intended for. Set to -1 for any amount.
+* @param  int Females - The total number of females the returned animations should be intended for. Set to -1 for any amount.
+* @param  int StageCount - The total number of stages the returned animations should contain. Set to -1 for any amount.
+* @param  bool Aggressive - TRUE if you want the animations returned to include ones tagged as aggressive.
+* @param  bool Sexual - No longer used.
+* @return sslBaseAnimation[] - An array of animations that fit the provided search arguments.
+**/;
 sslBaseAnimation[] function GetAnimationsByType(int ActorCount, int Males = -1, int Females = -1, int StageCount = -1, bool Aggressive = false, bool Sexual = true)
 	return AnimSlots.GetByType(ActorCount, Males, Females, StageCount, Aggressive, Sexual)
 endFunction
 
-sslBaseAnimation[] function PickAnimationsByActors(actor[] Positions, int limit = 64, bool aggressive = false)
+;/**
+* Get an array of animations that fit the given array of actors using SexLab's default selection criteria.
+*  
+* @param  Actor[] Positions - An array of 1 to 5 actors you intend to use the resulting animations with.
+* @param  int Limit - Limits the number of animations returned to this amount. Searches that result in more than this will randomize the results to fit within the limit.
+* @param  bool Aggressive - TRUE if you want the animations returned to include ones tagged as aggressive.
+* @return sslBaseAnimation[] - An array of animations that fit the provided search arguments.
+**/;
+sslBaseAnimation[] function PickAnimationsByActors(Actor[] Positions, int Limit = 64, bool Aggressive = false)
 	return AnimSlots.PickByActors(Positions, limit, aggressive)
 endFunction
 
+;/**
+* Get an array of animations that fit the given number of males and females using SexLab's default selection criteria.
+*  
+* @param  int Males - The total number of males the returned animations should be intended for. Set to -1 for any amount.
+* @param  int Females - The total number of females the returned animations should be intended for. Set to -1 for any amount.
+* @param  bool IsAggressive - TRUE if the animations to be played are considered aggressive.
+* @param  bool UsingBed - TRUE if the animation is going to be played on a bed, which will filter out standing animations and allow BedOnly tagged animations.
+* @param  bool RestrictAggressive - If TRUE, only return aggressive animations if IsAggressive=true and none if IsAggressive=false.
+* @return sslBaseAnimation[] - An array of animations that fit the provided search arguments.
+**/;
 sslBaseAnimation[] function GetAnimationsByDefault(int Males, int Females, bool IsAggressive = false, bool UsingBed = false, bool RestrictAggressive = true)
 	return AnimSlots.GetByDefault(Males, Females, IsAggressive, UsingBed, RestrictAggressive)
 endFunction
 
-sslBaseAnimation[] function MergeAnimationLists(sslBaseAnimation[] List1, sslBaseAnimation[] List2)
-	return sslUtility.MergeAnimationLists(List1, List2)
-endFunction
-
-sslBaseAnimation[] function RemoveTagged(sslBaseAnimation[] Anims, string Tags)
-	return sslUtility.RemoveTaggedAnimations(Anims, PapyrusUtil.StringSplit(Tags))
-endFunction
-
+;/**
+* Get a single animation by name. Ignores if a user has the animation enabled or not.
+* 
+* @param  string FindName - The name of an animation as seen in the SexLab MCM.
+* @return sslBaseAnimation - The animation whose name matches, if found.
+**/;
 sslBaseAnimation function GetAnimationByName(string FindName)
 	return AnimSlots.GetByName(FindName)
 endFunction
 
+;/**
+* Get a single animation by it's unique registry name. Ignores if a user has the animation enabled or not.
+* 
+* @param  string Registry - The unique registry name of the animation. (string property Registry on any animation)
+* @return sslBaseAnimation - The animation whose registry matches, if found.
+**/;
 sslBaseAnimation function GetAnimationByRegistry(string Registry)
 	return AnimSlots.GetByRegistrar(Registry)
 endFunction
 
-int function CountTag(sslBaseAnimation[] Anims, string Tags)
-	return AnimSlots.CountTag(Anims, Tags)
-endFunction
-
+;/**
+* Find the registration slot number that an animation currently occupies.
+* 
+* @param  string FindName - The name of an animation as seen in the SexLab MCM.
+* @return int - The registration slot number for the animation.
+**/;
 int function FindAnimationByName(string FindName)
 	return AnimSlots.FindByName(FindName)
 endFunction
 
+;/**
+* Get the number of registered animations.
+* 
+* @param  bool IgnoreDisabled - If TRUE, only count animations that are enabled in the SexLab MCM, otherwise count all.
+* @return int - The total number of animations.
+**/;
 int function GetAnimationCount(bool IgnoreDisabled = true)
 	return AnimSlots.GetCount(IgnoreDisabled)
 endFunction
 
+;/**
+* Create a gender tag from a list of actors, in order: F for female, M for male, C for creatures
+* 
+* @param  Actor[] Positions - A list of actors to create a tag for
+* @return string - A usable tag for filtering animations by tag and gender. If given an array with 1 male and 1 female, the return will be "FM"
+**/;
 string function MakeAnimationGenderTag(Actor[] Positions)
 	return ActorLib.MakeGenderTag(Positions)
 endFunction
 
+;/**
+* Create a gender tag from specified amount of genders, in order: F for female, M for male, C for creatures
+* @param  int Females - The number of females (F) for the gender tag.
+* @param  int Males - The number of males (M) for the gender tag.
+* @param  int Creatures - The number of creatures (C) for the gender tag.
+* @return string - A usable tag for filtering animations by tag and gender. If given an array with 2 male and 1 female, the return will be "FMM"
+**/;
 string function GetGenderTag(int Females = 0, int Males = 0, int Creatures = 0)
 	return ActorLib.GetGenderTag(Females, Males, Creatures)
 endFunction
+
+;/**
+* Combine 2 separate lists of animations into a single list, removing any duplicates between the two. (Works with both regular and creature animations.)
+* 
+* @param  sslBaseAnimation[] List1 - The first array of animations to combine.
+* @param  sslBaseAnimation[] List2 - The second array of animations to combine.
+* @return sslBaseAnimation[] - All the animations from List1 and List2, with any duplicates between them removed.
+**/;
+sslBaseAnimation[] function MergeAnimationLists(sslBaseAnimation[] List1, sslBaseAnimation[] List2)
+	return sslUtility.MergeAnimationLists(List1, List2)
+endFunction
+
+;/**
+* Removes any animations from an existing list that contain one of the provided animation tags. (Works with both regular and creature animations.)
+* 
+* @param  sslBaseAnimation[] Anims - A list of animations you want to filter certain tags out of.
+* @param  string Tags - A comma separated list of animation tags to check Anim's element for, if any of the tags given are present, the animation won't be included in the return.
+* @return sslBaseAnimation[] - All the animations from Anims that did not have any of the provided tags.
+**/;
+sslBaseAnimation[] function RemoveTagged(sslBaseAnimation[] Anims, string Tags)
+	return sslUtility.RemoveTaggedAnimations(Anims, PapyrusUtil.StringSplit(Tags))
+endFunction
+
+;/**
+* Counts the number of animations in the given array that contain one of provided animation tags. (Works with both regular and creature animations.)
+* 
+* @param  sslBaseAnimation[] Anims - A list of animations you want to check for tags on.
+* @param  string Tags - A comma separated list of animation tags.
+* @return int - The number of animations from Anims that contain one of the tags provided.
+**/;
+int function CountTag(sslBaseAnimation[] Anims, string Tags)
+	return AnimSlots.CountTag(Anims, Tags)
+endFunction
+
 
 ;#---------------------------#
 ;#  END ANIMATION FUNCTIONS  #
@@ -579,46 +794,101 @@ endFunction
 ;# START CREATURES FUNCTIONS #
 ;#---------------------------#
 
+;/**
+*  
+* @param  bool var - 
+* @return bool - 
+**/;
 sslBaseAnimation[] function GetCreatureAnimationsByRace(int ActorCount, Race RaceRef)
 	return CreatureSlots.GetByRace(ActorCount, RaceRef)
 endFunction
 
+;/**
+*  
+* @param  bool var - 
+* @return bool - 
+**/;
 sslBaseAnimation[] function GetCreatureAnimationsByRaceKey(int ActorCount, string RaceKey)
 	return CreatureSlots.GetByRaceKey(ActorCount, RaceKey)
 endFunction
 
+;/**
+*  
+* @param  bool var - 
+* @return bool - 
+**/;
 sslBaseAnimation[] function GetCreatureAnimationsByRaceGenders(int ActorCount, Race RaceRef, int MaleCreatures = 0, int FemaleCreatures = 0, bool ForceUse = false)
 	return CreatureSlots.GetByRaceGenders(ActorCount, RaceRef, MaleCreatures, FemaleCreatures, ForceUse)
 endFunction
 
+;/**
+*  
+* @param  bool var - 
+* @return bool - 
+**/;
 sslBaseAnimation[] function GetCreatureAnimationsByTags(int ActorCount, string Tags, string TagSuppress = "", bool RequireAll = true)
 	return CreatureSlots.GetByTags(ActorCount, Tags, TagSuppress, RequireAll)
 endFunction
 
+;/**
+*  
+* @param  bool var - 
+* @return bool - 
+**/;
 sslBaseAnimation[] function GetCreatureAnimationsByRaceTags(int ActorCount, Race RaceRef, string Tags, string TagSuppress = "", bool RequireAll = true)
 	return CreatureSlots.GetByRaceTags(ActorCount, RaceRef, Tags, TagSuppress, RequireAll)
 endFunction
 
+;/**
+*  
+* @param  bool var - 
+* @return bool - 
+**/;
 sslBaseAnimation[] function GetCreatureAnimationsByRaceKeyTags(int ActorCount, string RaceKey, string Tags, string TagSuppress = "", bool RequireAll = true)
 	return CreatureSlots.GetByRaceKeyTags(ActorCount, RaceKey, Tags, TagSuppress, RequireAll)
 endFunction
 
+;/**
+*  
+* @param  bool var - 
+* @return bool - 
+**/;
 sslBaseAnimation function GetCreatureAnimationByName(string FindName)
 	return CreatureSlots.GetByName(FindName)
 endFunction
 
+;/**
+*  
+* @param  bool var - 
+* @return bool - 
+**/;
 sslBaseAnimation function GetCreatureAnimationByRegistry(string Registry)
 	return CreatureSlots.GetByRegistrar(Registry)
 endFunction
 
+;/**
+*  
+* @param  bool var - 
+* @return bool - 
+**/;
 bool function HasCreatureAnimation(Race CreatureRace, int Gender = 2)
 	return CreatureSlots.HasAnimation(CreatureRace, Gender)
 endFunction
 
+;/**
+*  
+* @param  bool var - 
+* @return bool - 
+**/;
 bool function AllowedCreature(Race CreatureRace)
 	return CreatureSlots.AllowedCreature(CreatureRace)
 endFunction
 
+;/**
+*  
+* @param  bool var - 
+* @return bool - 
+**/;
 bool function AllowedCreatureCombination(Race CreatureRace, Race CreatureRace2)
 	return CreatureSlots.AllowedCreatureCombination(CreatureRace, CreatureRace2)
 endFunction
@@ -1255,61 +1525,32 @@ endFunction
 ; ------------------------------------------------------- ;
 
 ; Data
-Actor property PlayerRef auto
+sslSystemConfig property Config auto hidden
 Faction property AnimatingFaction auto hidden
+Actor property PlayerRef auto hidden
 
 ; Function libraries
-sslActorLibrary property ActorLib auto
-sslThreadLibrary property ThreadLib auto
-sslActorStats property Stats auto
+sslActorLibrary property ActorLib auto hidden
+sslThreadLibrary property ThreadLib auto hidden
+sslActorStats property Stats auto hidden
 
-; Object registeries
-sslThreadSlots property ThreadSlots auto
-sslAnimationSlots property AnimSlots auto
-sslCreatureAnimationSlots property CreatureSlots auto
-sslVoiceSlots property VoiceSlots auto
-sslExpressionSlots property ExpressionSlots auto
-sslObjectFactory property Factory auto
+; Object registries
+sslThreadSlots property ThreadSlots auto hidden
+sslAnimationSlots property AnimSlots auto hidden
+sslCreatureAnimationSlots property CreatureSlots auto hidden
+sslVoiceSlots property VoiceSlots auto hidden
+sslExpressionSlots property ExpressionSlots auto hidden
+sslObjectFactory property Factory auto hidden
 
-; Animation Threads
-sslThreadController[] property Threads hidden
-	sslThreadController[] function get()
-		return ThreadSlots.Threads
-	endFunction
-endProperty
-
-; Animation Sets
-sslBaseAnimation[] property Animations hidden
-	sslBaseAnimation[] function get()
-		return AnimSlots.Animations
-	endFunction
-endProperty
-
-; Creature animations
-sslBaseAnimation[] property CreatureAnimations hidden
-	sslBaseAnimation[] function get()
-		return CreatureSlots.Animations
-	endFunction
-endProperty
-
-; Voice Sets
-sslBaseVoice[] property Voices hidden
-	sslBaseVoice[] function get()
-		return VoiceSlots.Voices
-	endFunction
-endProperty
-
-; Expression Sets
-sslBaseExpression[] property Expressions hidden
-	sslBaseExpression[] function get()
-		return ExpressionSlots.Expressions
-	endFunction
-endProperty
+; Mod Extends support
+SexLabFramework SexLab
+bool IsExtension
 
 function Setup()
 	; Reset function Libraries - SexLabQuestFramework
 	Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
 	if SexLabQuestFramework
+		SexLab      = SexLabQuestFramework as SexLabFramework
 		Config      = SexLabQuestFramework as sslSystemConfig
 		ThreadLib   = SexLabQuestFramework as sslThreadLibrary
 		ThreadSlots = SexLabQuestFramework as sslThreadSlots
@@ -1336,21 +1577,37 @@ function Setup()
 	; Sync Data
 	PlayerRef        = Game.GetPlayer()
 	AnimatingFaction = Config.AnimatingFaction
+	; Check if main framework file, or extended
+	IsExtension = self != SexLab
+	if IsExtension
+		Log(self+" - Loaded SexLab Extension")
+	else
+		Log(self+" - Loaded SexLabFramework")
+	endIf
 endFunction
+
+event OnInit()
+	Setup()
+endEvent
 
 function Log(string Log, string Type = "NOTICE")
 	Log = Type+": "+Log
 	if Config.InDebugMode
 		SexLabUtil.PrintConsole(Log)
 	endIf
-	if Type == "FATAL"
-		Debug.TraceStack("SEXLAB - "+Log)
+	if IsExtension && ModName != ""
+		Log = ModName+" - "+Log
 	else
-		Debug.Trace("SEXLAB - "+Log)
+		Log = "SEXLAB - "+Log
+	endIf
+	if Type == "FATAL"
+		Debug.TraceStack(Log)
+	else
+		Debug.Trace(Log)
 	endIf
 endFunction
 
-auto state Disabled
+state Disabled
 	sslThreadModel function NewThread(float TimeOut = 30.0)
 		Log("NewThread() - Failed to make new thread model; system is currently disabled or not installed", "FATAL")
 		return none
@@ -1360,18 +1617,52 @@ auto state Disabled
 		return -1
 	endFunction
 	sslThreadController function QuickStart(Actor Actor1, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none, Actor Victim = none, string Hook = "", string AnimationTags = "")
-		Log("QuestStart() - Failed to make new thread model; system is currently disabled or not installed", "FATAL")
+		Log("QuickStart() - Failed to make new thread model; system is currently disabled or not installed", "FATAL")
 		return none
 	endFunction
 	event OnBeginState()
-		Log("SexLabFramework - Disabled")
-		ModEvent.Send(ModEvent.Create("SexLabDisabled"))
+		if SexLab == self || (!SexLab && self == SexLabUtil.GetAPI())
+			Log("SexLabFramework - Disabled")
+			ModEvent.Send(ModEvent.Create("SexLabDisabled"))
+		endIf
 	endEvent
 endState
 
 state Enabled
 	event OnBeginState()
-		Log("SexLabFramework - Enabled")
-		ModEvent.Send(ModEvent.Create("SexLabEnabled"))
+		if SexLab == self || (!SexLab && self == SexLabUtil.GetAPI())
+			Log("SexLabFramework - Enabled")
+			ModEvent.Send(ModEvent.Create("SexLabEnabled"))
+		endIf
 	endEvent
 endState
+
+;#---------------------------#
+;#   NO LONGER USED, IGNORE  #
+;#---------------------------#
+
+sslBaseAnimation[] property Animations hidden
+	sslBaseAnimation[] function get()
+		return AnimSlots.Animations
+	endFunction
+endProperty
+sslBaseAnimation[] property CreatureAnimations hidden
+	sslBaseAnimation[] function get()
+		return CreatureSlots.Animations
+	endFunction
+endProperty
+sslBaseVoice[] property Voices hidden
+	sslBaseVoice[] function get()
+		return VoiceSlots.Voices
+	endFunction
+endProperty
+sslBaseExpression[] property Expressions hidden
+	sslBaseExpression[] function get()
+		return ExpressionSlots.Expressions
+	endFunction
+endProperty
+sslThreadController[] property Threads hidden
+	sslThreadController[] function get()
+		return ThreadSlots.Threads
+	endFunction
+endProperty

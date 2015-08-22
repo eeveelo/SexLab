@@ -2,6 +2,7 @@ scriptname sslThreadSlots extends Quest
 
 ; Libs
 sslSystemConfig property Config auto
+SexLabFramework property SexLab auto hidden
 
 ; Slots
 sslThreadController[] Slots
@@ -12,6 +13,10 @@ sslThreadController[] property Threads hidden
 endProperty
 
 sslThreadModel function PickModel(float TimeOut = 30.0)
+	if SexLab.GetState() == "Disabled"
+		SexLabUtil.DebugLog("Failed to start new thread - SexLab is currently disabled.", "PickModel", true)
+		return none
+	endIf
 	float failsafe = Utility.GetCurrentRealTime() + TimeOut
 	while GetState() == "Locked" && Utility.GetCurrentRealTime() < failsafe
 		Utility.WaitMenuMode(0.1)
@@ -114,9 +119,11 @@ endFunction
 
 function Setup()
 	GoToState("Locked")
-	StorageUtil.FormListClear(self, "ActiveActors")
-	Config = Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig
-
+	Quest SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm") as Quest
+	if SexLabQuestFramework
+		Config = SexLabQuestFramework as sslSystemConfig
+		SexLab = SexLabQuestFramework as SexLabFramework
+	endIf
 	; Slot Form IDs
 	int[] SlotFormID = new int[15]
 	SlotFormID[0]  = 0x61EEF
@@ -159,7 +166,7 @@ function Setup()
 			Log("Failed to start thread quest("+i+"): "+Slots[i])
 		endIf
 	endWhile
-	
+	StorageUtil.FormListClear(self, "ActiveActors") ; No longer used
 	Debug.Trace("SexLab Threads: "+Slots)
 	GoToState("")
 endFunction
