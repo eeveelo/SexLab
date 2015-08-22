@@ -4,7 +4,7 @@
 Skryim SexLab Framework
   By Ashal of Loverslab.com
 
-    Version 1.60 RC 3, released 2015/08/19
+    Version 1.60, released 2015/08/22
 
 -- Description --------------------------------------------------------------
 
@@ -21,7 +21,6 @@ Skryim SexLab Framework
 -- Modders Resource ---------------------------------------------------------
 
     API Guide: http://git.loverslab.com/sexlab/framework/wikis/home
-    What's New: http://git.loverslab.com/sexlab/framework/wikis/whatsnew
 
 -- Credits ------------------------------------------------------------------
 
@@ -76,5 +75,9 @@ Skryim SexLab Framework
 
     Email: Ashal@LoversLab.com
     Private Message: http://www.loverslab.com/user/1-ashal/
+
+-- Support Development / Donate ---------------------------------------------
+
+    https://www.patreon.com/loverslab
 
 -----------------------------------------------------------------------------

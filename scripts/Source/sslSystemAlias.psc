@@ -114,10 +114,11 @@ event UpdateSystem(int OldVersion, int NewVersion)
 
 		Config.ExportSettings()
 
-		; TODO: first update by 1.60 should probably be done by MCM instead, so quests can be reset
 		; Perform update functions
-		if OldVersion <= 15992
-			; Full system setup
+		if OldVersion < 16000
+			; Full system setup for < 1.60
+			SexLab.Setup()
+			Config.Setup()
 			ThreadLib.Setup()
 			ActorLib.Setup()
 			Stats.Setup()
@@ -127,8 +128,8 @@ event UpdateSystem(int OldVersion, int NewVersion)
 			AnimSlots.Setup()
 			CreatureSlots.Setup()
 			ThreadSlots.Setup()
-
 		endIf
+		
 		; Load/Clean storage lists
 		Config.PreloadSavedStorage()
 		Config.CleanActorStorage()

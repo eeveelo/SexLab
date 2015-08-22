@@ -573,7 +573,7 @@ bool function CheckSystem()
 		return false
 	; Check SkyUI install - depends on passing SKSE check passing
 	elseIf !CheckSystemPart("SkyUI")
-		CheckSkyUI.Show(4.1)
+		CheckSkyUI.Show(5.0)
 		return false
 	; Check SexLabUtil install - this should never happen if they have properly updated
 	elseIf !CheckSystemPart("SexLabUtil")
