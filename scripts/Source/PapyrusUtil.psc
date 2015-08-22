@@ -1,69 +1,41 @@
 scriptname PapyrusUtil Hidden
 
-; Get version of papyrus library. For version 2.8 will be returned 28.
+; Get version of papyrus library. For version 3.0 will return 30.
 int function GetVersion() global native
-
-; function _SetFormValue(Form[] Array, int index, Form value) global native
-; function _SetAliasValue(Alias[] Array, int index, Alias value) global native
-; function _SetIntValue(int[] Array, int index, int value) global native
 
 ; ##
 ; ## Array manipulation utilities
 ; ##
 
+; Few extra array types not provided by SKSE normally to help avoid having to use and cast Form arrays
 Actor[] function ActorArray(int size, Actor filler = none) global native
-; ObjectReference[] function ObjectRefArray(int size, ObjectReference filler = none) global native
-
-float[] function ResizeFloatArray(float[] ArrayValues, int toSize, float filler = 0.0) global
-	return Utility.ResizeFloatArray(ArrayValues, toSize, filler)
-endFunction
-int[] function ResizeIntArray(int[] ArrayValues, int toSize, int filler = 0) global
-	return Utility.ResizeIntArray(ArrayValues, toSize, filler)
-endFunction
-bool[] function ResizeBoolArray(bool[] ArrayValues, int toSize, bool filler = false) global
-	bool[] Output = Utility.CreateBoolArray(toSize, filler)
-	int i = ArrayValues.Length
-	if i > toSize
-		i = toSize
-	endIf
-	while i
-		i -= 1
-		Output[i] = ArrayValues[i]
-	endWhile
-	return Output
-endFunction
-string[] function ResizeStringArray(string[] ArrayValues, int toSize, string filler = "") global
-	return Utility.ResizeStringArray(ArrayValues, toSize, filler)
-endFunction
-Form[] function ResizeFormArray(Form[] ArrayValues, int toSize, Form filler = none) global
-	return Utility.ResizeFormArray(ArrayValues, toSize, filler)
-endFunction
-Alias[] function ResizeAliasArray(Alias[] ArrayValues, int toSize, Alias filler = none) global
-	return Utility.ResizeAliasArray(ArrayValues, toSize, filler)
-endFunction
 Actor[] function ResizeActorArray(Actor[] ArrayValues, int toSize, Actor filler = none) global native
-; ObjectReference[] function ResizeObjectRefArray(ObjectReference[] ArrayValues, int toSize, ObjectReference filler = none) global native
+ObjectReference[] function ObjRefArray(int size, ObjectReference filler = none) global native
+ObjectReference[] function ResizeObjRefArray(ObjectReference[] ArrayValues, int toSize, ObjectReference filler = none) global native
 
+; ## Append a value to the end of the given array and return the new array.
+; ## NOTE: The array has to be recreated each time you call this. For the sake of memory usage and performance, DO NOT use these to build up an array through a loop,
+; ##       in such a situation it is significantly faster to create the full length array first and then fill it. Best to limit to only the occasional need.
 float[] function PushFloat(float[] ArrayValues, float push) global native
 int[] function PushInt(int[] ArrayValues, int push) global native
-bool[] function PushBool(bool[] ArrayValues, bool push) global
-	return ResizeBoolArray(ArrayValues, ArrayValues.Length + 1, push)
-endFunction
+; bool[] function PushBool(bool[] ArrayValues, bool push) global native ; // Bugged - Non-native version available below
 string[] function PushString(string[] ArrayValues, string push) global native
 Form[] function PushForm(Form[] ArrayValues, Form push) global native
 Alias[] function PushAlias(Alias[] ArrayValues, Alias push) global native
 Actor[] function PushActor(Actor[] ArrayValues, Actor push) global native
-; ObjectReference[] function PushObjectRef(ObjectReference[] ArrayValues, ObjectReference push) global native
+ObjectReference[] function PushObjRef(ObjectReference[] ArrayValues, ObjectReference push) global native
 
+; ## Removes all elements from the given array matching the provided value and returns the shortened array.
 float[] function RemoveFloat(float[] ArrayValues, float ToRemove) global native
 int[] function RemoveInt(int[] ArrayValues, int ToRemove) global native
-bool[] function RemoveBool(bool[] ArrayValues, bool ToRemove) global native
+; bool[] function RemoveBool(bool[] ArrayValues, bool ToRemove) global native ; // Bugged - Non-native version available below
 string[] function RemoveString(string[] ArrayValues, string ToRemove) global native
 Form[] function RemoveForm(Form[] ArrayValues, Form ToRemove) global native
 Alias[] function RemoveAlias(Alias[] ArrayValues, Alias ToRemove) global native
 Actor[] function RemoveActor(Actor[] ArrayValues, Actor ToRemove) global native
-; ObjectReference[] function RemoveObjectRef(ObjectReference[] ArrayValues, ObjectReference ToRemove) global native
+ObjectReference[] function RemoveObjRef(ObjectReference[] ArrayValues, ObjectReference ToRemove) global native
 
+; ## Returns the number of instances an array has an element equal to the given value
 int function CountFloat(float[] ArrayValues, float EqualTo) global native
 int function CountInt(int[] ArrayValues, int EqualTo) global native
 int function CountBool(bool[] ArrayValues, bool EqualTo) global native
@@ -71,40 +43,28 @@ int function CountString(string[] ArrayValues, string EqualTo) global native
 int function CountForm(Form[] ArrayValues, Form EqualTo) global native
 int function CountAlias(Alias[] ArrayValues, Alias EqualTo) global native
 int function CountActor(Actor[] ArrayValues, Actor EqualTo) global native
-; int function CountObjectRef(ObjectReference[] ArrayValues, ObjectReference EqualTo) global native
+int function CountObjRef(ObjectReference[] ArrayValues, ObjectReference EqualTo) global native
 
+; ## Returns two arrays combined into one, optionally also removing any duplicate occurrences of a value.
 float[] function MergeFloatArray(float[] ArrayValues1, float[] ArrayValues2, bool RemoveDupes = false) global native
 int[] function MergeIntArray(int[] ArrayValues1, int[] ArrayValues2, bool RemoveDupes = false) global native
-bool[] function MergeBoolArray(bool[] ArrayValues1, bool[] ArrayValues2, bool RemoveDupes = false) global native
+; bool[] function MergeBoolArray(bool[] ArrayValues1, bool[] ArrayValues2, bool RemoveDupes = false) global native ; // Bugged - Non-native version available below
 string[] function MergeStringArray(string[] ArrayValues1, string[] ArrayValues2, bool RemoveDupes = false) global native
 Form[] function MergeFormArray(Form[] ArrayValues1, Form[] ArrayValues2, bool RemoveDupes = false) global native
 Alias[] function MergeAliasArray(Alias[] ArrayValues1, Alias[] ArrayValues2, bool RemoveDupes = false) global native
 Actor[] function MergeActorArray(Actor[] ArrayValues1, Actor[] ArrayValues2, bool RemoveDupes = false) global native
-; ObjectReference[] function MergeObjectRefArray(ObjectReference[] ArrayValues1, ObjectReference[] ArrayValues2, bool RemoveDupes = false) global native
+ObjectReference[] function MergeObjRefArray(ObjectReference[] ArrayValues1, ObjectReference[] ArrayValues2, bool RemoveDupes = false) global native
 
+; ## Returns a sub section of an array indicated by a starting and ending index.
+; ## The default argument "int EndIndex = -1" clamps the to the end of the array. Equivalent of setting EndIndex = (ArrayValues.Length - 1)
 float[] function SliceFloatArray(float[] ArrayValues, int StartIndex, int EndIndex = -1) global native
 int[] function SliceIntArray(int[] ArrayValues, int StartIndex, int EndIndex = -1) global native
-bool[] function SliceBoolArray(bool[] ArrayValues, int StartIndex, int EndIndex = -1) global native
+; bool[] function SliceBoolArray(bool[] ArrayValues, int StartIndex, int EndIndex = -1) global native ; // Bugged - Non-native version available below
 string[] function SliceStringArray(string[] ArrayValues, int StartIndex, int EndIndex = -1) global native
 Form[] function SliceFormArray(Form[] ArrayValues, int StartIndex, int EndIndex = -1) global native
 Alias[] function SliceAliasArray(Alias[] ArrayValues, int StartIndex, int EndIndex = -1) global native
 Actor[] function SliceActorArray(Actor[] ArrayValues, int StartIndex, int EndIndex = -1) global native
-; ObjectReference[] function SliceObjectRefArray(ObjectReference[] ArrayValues, int StartIndex, int EndIndex = -1) global native
-
-string[] function StringSplit(string ArgString, string Delimiter = ",") global native
-string function StringJoin(string[] Values, string Delimiter = ",") global native
-
-float function AddFloatValues(float[] Values) global native
-int function AddIntValues(int[] Values) global native
-
-float function WrapFloat(float value, float end, float start = 0.0) global native
-int function WrapInt(int value, int end, int start = 0) global native
-
-float function SignFloat(bool doSign, float value) global native
-int function SignInt(bool doSign, int value) global native
-
-float function ClampFloat(float value, float min, float max) global native
-int function ClampInt(int value, int min, int max) global native
+ObjectReference[] function SliceObjRefArray(ObjectReference[] ArrayValues, int StartIndex, int EndIndex = -1) global native
 
 ; ##
 ; ## Shortcuts for common usage
@@ -127,9 +87,128 @@ int function CountNone(Form[] ArrayValues) global
 	return CountForm(ArrayValues, none)
 endFunction
 
+; ##
+; ## Extra String Utilities
+; ##
+
+; ## Similar to SKSE's native StringUtil.Split() except results are whitespace trimmed. So comma, separated,list,can, be, spaced,or,not.
+string[] function StringSplit(string ArgString, string Delimiter = ",") global native
+
+; ## Opposite of StringSplit()
+string function StringJoin(string[] Values, string Delimiter = ",") global native
+
 
 ; ##
-; ## DEPRECATED: SKSE now provides their own variable sized arrays for these types.
+; ## Shortcuts for some common number actions. Mostly to help cut some basic and overly verbose checks down to a single line.
+; ## Making these native instead of normal globals is probably massive overkill...
+; ##
+
+; ## Return the total sum of all values stored in the given array
+int function AddIntValues(int[] Values) global native
+float function AddFloatValues(float[] Values) global native
+
+; ## Returns the value clamped to the min or max when out of range
+int function ClampInt(int value, int min, int max) global native
+float function ClampFloat(float value, float min, float max) global native
+
+; ## Similar to the clamp functions, only values wrap around to the other side of range instead.
+; ## Mostly useful for traversing around array values by wrapping the index from end to end without having to check for it being out of range first.
+; ##     i.e.: Form var = myFormArray[WrapInt(i, (myFormArray.Length - 1))]
+int function WrapInt(int value, int end, int start = 0) global native
+float function WrapFloat(float value, float end, float start = 0.0) global native
+
+; ## Returns the given value signed if bool is true, unsigned if false, regardless if value started out signed or not. 
+int function SignInt(bool doSign, int value) global native
+float function SignFloat(bool doSign, float value) global native
+
+; ##
+; ## Non-Native bool versions of some functions where SKSE version is bugged.
+; ## SKSE version VMResultArray<bool> fails to be manipulated by other native functions past creation.
+; ##
+
+bool[] function ResizeBoolArray(bool[] ArrayValues, int toSize, bool filler = false) global
+	bool[] Output = Utility.CreateBoolArray(toSize, filler)
+	int i = ArrayValues.Length
+	if i > toSize
+		i = toSize
+	endIf
+	while i
+		i -= 1
+		Output[i] = ArrayValues[i]
+	endWhile
+	return Output
+endFunction
+
+bool[] function PushBool(bool[] ArrayValues, bool push) global
+	return ResizeBoolArray(ArrayValues, ArrayValues.Length + 1, push)
+endFunction
+
+bool[] function RemoveBool(bool[] ArrayValues, bool ToRemove) global
+	int count = CountBool(ArrayValues, ToRemove)
+	return Utility.CreateBoolArray((ArrayValues.Length - Count), !ToRemove)
+endFunction
+
+bool[] function MergeBoolArray(bool[] ArrayValues1, bool[] ArrayValues2, bool RemoveDupes = false) global
+	if !ArrayValues1 && !ArrayValues2
+		return Utility.CreateBoolArray(0)
+	elseIf RemoveDupes
+		; Don't know why this option would ever be used for bool arrays, but provided for consistency sake with others
+		bool[] Output = new bool[1]
+		Output[0] = (ArrayValues1 && ArrayValues1[0]) || (!ArrayValues1 && ArrayValues2 && ArrayValues2[0])
+		if (ArrayValues1 && ArrayValues1.Find(!Output[0]) != -1) || (ArrayValues2 && ArrayValues2.Find(!Output[0]) != -1)
+			Output = PushBool(Output, !Output[0])
+		endIf
+		return Output
+	elseIf !ArrayValues1
+		return ArrayValues2
+	elseIf !ArrayValues2
+		return ArrayValues1
+	endIf
+	bool[] Output = Utility.CreateBoolArray(ArrayValues1.Length + ArrayValues2.Length)
+	bool[] Source = ArrayValues2
+	int n = Source.Length
+	int i = Output.Length
+	while i
+		i -= 1
+		n -= 1
+		if n < 0 && i > 0
+			Source = ArrayValues1
+			n = ArrayValues1.Length - 1
+		endIf
+		Output[i] = Source[n]
+	endWhile
+	return Output
+endFunction
+
+bool[] function SliceBoolArray(bool[] ArrayValues, int StartIndex, int EndIndex = -1) global
+	if !ArrayValues || (StartIndex > EndIndex && EndIndex > -1)
+		return Utility.CreateBoolArray(0)
+	elseIf StartIndex <= 0 && (EndIndex == -1 || EndIndex >= ArrayValues.Length)
+		return ArrayValues
+	endIf
+	if StartIndex < 0
+		StartIndex = 0
+	endIf
+	if EndIndex < 0 || EndIndex >= ArrayValues.Length
+		EndIndex = ArrayValues.Length - 1
+	endIf
+	if StartIndex == EndIndex
+		return Utility.CreateBoolArray(1, ArrayValues[StartIndex])
+	endIf
+	EndIndex += 1
+	bool[] Output = Utility.CreateBoolArray(EndIndex - StartIndex)
+	int i = Output.Length
+	while i && EndIndex
+		i -= 1
+		EndIndex -= 1
+		Output[i] = ArrayValues[EndIndex]
+	endWhile
+	return Output
+endFunction
+
+
+; ##
+; ## DEPRECATED: SKSE now provides their own variable sized arrays for these types - mirrored here for backwards compatibility.
 ; ##
 
 float[] function FloatArray(int size, float filler = 0.0) global
@@ -149,4 +228,20 @@ Form[] function FormArray(int size, Form filler = none) global
 endFunction
 Alias[] function AliasArray(int size, Alias filler = none) global
 	return Utility.CreateAliasArray(size, filler)
+endFunction
+
+float[] function ResizeFloatArray(float[] ArrayValues, int toSize, float filler = 0.0) global
+	return Utility.ResizeFloatArray(ArrayValues, toSize, filler)
+endFunction
+int[] function ResizeIntArray(int[] ArrayValues, int toSize, int filler = 0) global
+	return Utility.ResizeIntArray(ArrayValues, toSize, filler)
+endFunction
+string[] function ResizeStringArray(string[] ArrayValues, int toSize, string filler = "") global
+	return Utility.ResizeStringArray(ArrayValues, toSize, filler)
+endFunction
+Form[] function ResizeFormArray(Form[] ArrayValues, int toSize, Form filler = none) global
+	return Utility.ResizeFormArray(ArrayValues, toSize, filler)
+endFunction
+Alias[] function ResizeAliasArray(Alias[] ArrayValues, int toSize, Alias filler = none) global
+	return Utility.ResizeAliasArray(ArrayValues, toSize, filler)
 endFunction
