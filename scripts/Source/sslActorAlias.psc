@@ -464,11 +464,19 @@ state Animating
 		UnregisterForUpdate()
 		SyncThread()
 		SyncLocation(true)
-		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1")
 		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1_REENTER")
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 		PlayingSA = "SexLabSequenceExit1"
+		Utility.WaitMenuMode(0.2)
+		SendAnimation()
+		Utility.WaitMenuMode(0.5)
+		if Stage == 1
+			Debug.SendAnimationEvent(ActorRef, AnimEvents[Position]+"_REENTER")
+		else
+			Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
+			Debug.SendAnimationEvent(ActorRef, AnimEvents[Position])
+		endIf
 		SendAnimation()
 		RegisterForSingleUpdate(1.0)
 		Thread.SyncEventDone(kRefreshActor)
