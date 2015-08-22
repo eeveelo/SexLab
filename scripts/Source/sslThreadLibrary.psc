@@ -217,7 +217,10 @@ ObjectReference function FindBed(ObjectReference CenterRef, float Radius = 1000.
 		return none ; Invalid args
 	endIf
 	; Search for a nearby bed first before looking for random
-	ObjectReference NearRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
+	ObjectReference NearRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius * 0.4)
+	if !NearRef
+		NearRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
+	endIf
 	if !NearRef || (NearRef != IgnoreRef1 && NearRef != IgnoreRef2 && CheckBed(NearRef, IgnoreUsed))
 		return NearRef ; Use the nearby bed if found, if none than give up now and just return none
 	endIf
