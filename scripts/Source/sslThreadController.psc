@@ -112,7 +112,6 @@ state Animating
 			SendThreadEvent("OrgasmStart")
 			if Config.OrgasmEffects
 				TriggerOrgasm()
-				return
 			endIf		
 		endIf
 		; Begin loop
