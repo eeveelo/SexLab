@@ -2297,15 +2297,6 @@ function RebuildClean()
 	AddTextOptionST("ResetExpressionRegistry","$SSL_ResetExpressionRegistry", "$SSL_ClickHere")
 	AddTextOptionST("ResetStripOverrides","$SSL_ResetStripOverrides", "$SSL_ClickHere")
 
-	SetCursorPosition(1)
-	AddToggleOptionST("DebugMode","$SSL_DebugMode", Config.InDebugMode)
-
-	AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
-	AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
-
-	AddHeaderOption("System Requirements")
-	SystemCheckOptions()
-	
 	AddHeaderOption("$SSL_AvailableStrapons")
 	AddTextOptionST("RebuildStraponList","$SSL_RebuildStraponList", "$SSL_ClickHere")
 	i = Config.Strapons.Length
@@ -2319,6 +2310,15 @@ function RebuildClean()
 			AddTextOptionST("Strapon_"+i, Name, "$SSL_Remove")
 		endIf
 	endWhile
+
+	SetCursorPosition(1)
+	AddToggleOptionST("DebugMode","$SSL_DebugMode", Config.InDebugMode)
+
+	AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
+	AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
+
+	AddHeaderOption("System Requirements")
+	SystemCheckOptions()	
 endFunction
 
 ; ------------------------------------------------------- ;
