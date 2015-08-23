@@ -520,7 +520,7 @@ state Animating
 	endFunction
 
 	event OnTranslationComplete()
-		Log("OnTranslationComplete")
+		; Log("OnTranslationComplete")
 		SyncLocation()
 	endEvent
 
