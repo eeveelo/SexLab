@@ -1,5 +1,8 @@
 scriptname sslSystemAlias extends ReferenceAlias
 
+import StorageUtil
+import SexLabUtil
+
 ; Framework
 SexLabFramework property SexLab auto
 sslSystemConfig property Config auto
@@ -17,11 +20,14 @@ sslVoiceSlots property VoiceSlots auto
 sslExpressionSlots property ExpressionSlots auto
 sslObjectFactory property Factory auto
 
+Actor PlayerRef
+
 ; ------------------------------------------------------- ;
 ; --- System Startup                                  --- ;
 ; ------------------------------------------------------- ;
 
 event OnPlayerLoadGame()
+	LoadLibs()
 	Log("Version "+CurrentVersion+" / "+SexLabUtil.GetVersion(), "LOADED")
 	; Check for install
 	if CurrentVersion > 0 && Config.CheckSystem()
@@ -61,6 +67,15 @@ bool property UpdatePending hidden
 	endFunction
 endProperty
 
+bool property PreloadDone hidden
+	bool function get()
+		return GetIntValue(Config, "PreloadDone", 0) == 1
+	endFunction
+	function set(bool value)
+		SetIntValue(Config, "PreloadDone", value as int)
+	endFunction
+endProperty
+
 event OnInit()
 	GoToState("")
 	LoadLibs(false)
@@ -90,12 +105,12 @@ bool function SetupSystem()
 	CreatureSlots.Setup()
 	ThreadSlots.Setup()
 
-	Config.PreloadSavedStorage()
-	Config.CleanActorStorage()
-
+	; Finish setup
 	GoToState("Ready")
 	SexLab.GoToState("Enabled")
 	LogAll("SexLab v"+SexLabUtil.GetStringVer()+" - Ready!")
+	; Clean storage lists
+	CleanActorStorage()
 	return true
 endFunction
 
@@ -115,7 +130,10 @@ event UpdateSystem(int OldVersion, int NewVersion)
 		Config.ExportSettings()
 
 		; Perform update functions
-		if OldVersion < 16000
+		if OldVersion == 16000
+			PreloadDone = true
+
+		elseIf OldVersion < 16000
 			; Full system setup for < 1.60
 			SexLab.Setup()
 			Config.Setup()
@@ -129,10 +147,6 @@ event UpdateSystem(int OldVersion, int NewVersion)
 			CreatureSlots.Setup()
 			ThreadSlots.Setup()
 		endIf
-		
-		; Load/Clean storage lists
-		Config.PreloadSavedStorage()
-		Config.CleanActorStorage()
 
 		Config.ImportSettings()
 
@@ -141,6 +155,8 @@ event UpdateSystem(int OldVersion, int NewVersion)
 		SexLab.GoToState("Enabled")
 		LogAll("SexLab Update v"+SexLabUtil.GetStringVer()+" - Ready!")
 		SendVersionEvent("SexLabUpdated")
+		; Clean storage lists
+		CleanActorStorage()
 	endIf
 endEvent
 
@@ -165,15 +181,13 @@ endFunction
 ; --- System Cleanup                                  --- ;
 ; ------------------------------------------------------- ;
 
-import StorageUtil
-
 function CleanTrackedActors()
 	FormListRemove(Config, "TrackedActors", none, true)
 	Form[] TrackedActors = FormListToArray(Config, "TrackedActors")
 	int i = TrackedActors.Length
 	while i > 0
 		i -= 1
-		if !Config.IsActor(TrackedActors[i])
+		if !IsActor(TrackedActors[i])
 			FormListRemoveAt(Config, "TrackedActors", i)
 			StringListClear(TrackedActors[i], "SexLabEvents")
 		endIf
@@ -191,6 +205,50 @@ function CleanTrackedFactions()
 			StringListClear(TrackedFactions[i], "SexLabEvents")
 		endIf
 	endWhile
+endFunction
+
+function CleanActorStorage()
+	if !PreloadDone
+		GoToState("PreloadStorage")
+		return
+	endIf
+	Log("Starting..." ,"CleanActorStorage")
+	FormListRemove(none, "SexLab.ActorStorage", none, true)
+
+	Form[] ActorStorage = FormListToArray(none, "SexLab.ActorStorage")
+	int i = ActorStorage.Length
+	while i > 0
+		i -= 1
+		bool IsActor = IsActor(ActorStorage[i])
+		if !IsActor || (IsActor && !IsImportant(ActorStorage[i] as Actor, false))
+			ClearFromActorStorage(ActorStorage[i])
+		endIf
+	endWhile
+	; Log change in storage
+	int Count = FormListCount(none, "SexLab.ActorStorage")
+	if Count != ActorStorage.Length
+		Log(ActorStorage.Length+" -> "+Count, "CleanActorStorage")
+	endIf
+	debug_Cleanup()
+endFunction
+
+function ClearFromActorStorage(Form FormRef)
+	if IsActor(FormRef)
+		Actor ActorRef = FormRef as Actor
+		sslActorStats._ResetStats(ActorRef)
+		Stats.ClearCustomStats(ActorRef)
+		Stats.ClearLegacyStats(ActorRef)
+	endIf
+	UnsetStringValue(FormRef, "SexLab.SavedVoice")
+	UnsetStringValue(FormRef, "SexLab.CustomVoiceAlias")
+	UnsetFormValue(FormRef, "SexLab.CustomVoiceQuest")
+ 	FormListClear(FormRef, "SexPartners")
+	FormListClear(FormRef, "WasVictimOf")
+	FormListClear(FormRef, "WasAggressorTo")
+	FloatListClear(FormRef, "SexLabSkills")
+	FormListRemove(Config, "ValidActors", FormRef, true)
+	FormListRemove(none, "SexLab.SkilledActors", FormRef, true)
+	FormListRemove(none, "SexLab.ActorStorage", FormRef, true)
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -253,4 +311,75 @@ function LoadLibs(bool Forced = false)
 			Factory = SexLabObjectFactory as sslObjectFactory
 		endIf
 	endIf
+	if Forced || !PlayerRef
+		PlayerRef = GetReference() as Actor
+	endIf
 endFunction
+
+state PreloadStorage
+	event OnBeginState()
+		RegisterForSingleUpdate(0.1)
+	endEvent
+	event OnUpdate()
+		GoToState("Ready")
+		if PreloadDone
+			return
+		endIf
+		PreloadDone = true
+		Log("Preloading actor storage... This may take a long time...")
+		; Start actor preloading
+		int PreCount = FormListCount(none, "SexLab.ActorStorage")
+		FormListRemove(none, "SexLab.ActorStorage", none, true)
+		; Check actors with saved stats
+		Actor[] Actors = sslActorStats.GetAllSkilledActors()
+		int i = Actors.Length
+		while i > 0
+			i -= 1
+			if Actors[i] && !FormListHas(none, "SexLab.ActorStorage", Actors[i])
+				sslSystemConfig.StoreActor(Actors[i])
+			endIf
+		endWhile
+		; Check string values for SexLab.SavedVoice
+		Form[] Forms = debug_AllStringObjs()
+		i = Forms.Length
+		while i > 0
+			i -= 1
+			if Forms[i] && !FormListHas(none, "SexLab.ActorStorage", Forms[i]) && HasStringValue(Forms[i], "SexLab.SavedVoice")
+				sslSystemConfig.StoreActor(Forms[i])
+			endIf
+		endWhile
+		; Check form list for partners, victims, aggressors, or legacy skill storage
+		Forms = debug_AllFormListObjs()
+		i = Forms.Length
+		while i > 0
+			i -= 1
+			if Forms[i] && !FormListHas(none, "SexLab.ActorStorage", Forms[i]) && (FormListCount(Forms[i], "SexPartners") > 0 || FormListCount(Forms[i], "WasAggressorTo") > 0 || FormListCount(Forms[i], "WasVictimOf") > 0 || FloatListCount(Forms[i], "SexLabSkills") > 0)
+				sslSystemConfig.StoreActor(Forms[i])
+			endIf
+		endWhile
+		; Load legacy skilled actor storage
+		i = FormListCount(none, "SexLab.SkilledActors")
+		while i > 0
+			i -= 1
+			Form FormRef = FormListGet(none, "SexLab.SkilledActors", i)
+			if FormRef && FormRef != PlayerRef
+				if IsActor(FormRef)
+					Stats.UpgradeLegacyStats(FormRef, IsImportant(FormRef as Actor, true))
+				else
+					ClearFromActorStorage(FormRef)
+				endIf
+			endIf
+		endWhile
+		FormListClear(none, "SexLab.SkilledActors")
+		; Log change in storage
+		int Count = FormListCount(none, "SexLab.ActorStorage")
+		if Count != PreCount
+			Log(PreCount+" -> "+Count, "PreloadSavedStorage")
+		endIf
+		; Preload finished, now clean it.
+		CleanActorStorage()
+	endEvent
+endState
+
+event OnUpdate()
+endEvent

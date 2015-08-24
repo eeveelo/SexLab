@@ -118,7 +118,7 @@ function SaveVoice(Actor ActorRef, sslBaseVoice Saving)
 	if Registry.Find(Saving.Registry) != -1
 		; Voice is a default one from this script
 		SetStringValue(ActorRef, "SexLab.SavedVoice", Saving.Registry)
-		Config.StoreActor(ActorRef)
+		sslSystemConfig.StoreActor(ActorRef)
 	else
 		; Voice is a custom one from another quest/script
 		SetFormValue(ActorRef, "SexLab.CustomVoiceQuest", Saving.GetOwningQuest())

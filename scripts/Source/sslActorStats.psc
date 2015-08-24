@@ -189,7 +189,7 @@ function SeedActor(Actor ActorRef)
 	if ActorRef != PlayerRef && !IsSkilled(ActorRef) && ActorRef.HasKeyword(Config.ActorTypeNPC)
 		_SeedActor(ActorRef, Utility.GetCurrentRealTime(), Utility.GetCurrentGameTime())
 		Log(ActorRef.GetLeveledActorBase().GetName()+" Seeded: "+GetSkills(ActorRef))
-		Config.StoreActor(ActorRef)
+		sslSystemConfig.StoreActor(ActorRef)
 	endIf
 endFunction
 
@@ -652,7 +652,7 @@ function AddPartners(Actor ActorRef, Actor[] AllPositions, Actor[] Victims)
 	FormListRemove(ActorRef, "SexPartners", none, true)
 	FormListRemove(ActorRef, "WasVictimOf", none, true)
 	FormListRemove(ActorRef, "WasAggressorTo", none, true)
-	Config.StoreActor(ActorRef)
+	sslSystemConfig.StoreActor(ActorRef)
 	
 	int i = PartnerCount
 	while i
@@ -817,7 +817,7 @@ function UpgradeLegacyStats(Form FormRef, bool IsImportant)
 	elseIf !IsImportant
 		ClearLegacyStats(FormRef)
 		ClearCustomStats(FormRef)
-		Log(SexLabUtil.StringIfElse(Config.IsActor(FormRef), (FormRef as Actor).GetLeveledActorBase().GetName(), "None"), "Skills Removed")
+		Log(SexLabUtil.StringIfElse(SexLabUtil.IsActor(FormRef), (FormRef as Actor).GetLeveledActorBase().GetName(), "None"), "Skills Removed")
 	elseIf !IsSkilled(FormRef as Actor)
 		Actor ActorRef = FormRef as Actor
 		_SetSkill(ActorRef, 0, FloatListGet(ActorRef, "SexLabSkills", 0))
@@ -839,7 +839,7 @@ function UpgradeLegacyStats(Form FormRef, bool IsImportant)
 		_SetSkill(ActorRef, 16, FloatListGet(ActorRef, "SexLabSkills", 16))
 		_SetSkill(ActorRef, 17, FloatListGet(ActorRef, "SexLabSkills", 17))
 		ClearLegacyStats(ActorRef)
-		Config.StoreActor(ActorRef)
+		sslSystemConfig.StoreActor(ActorRef)
 		Log("UpgradeLegacyStats: ", ActorRef.GetLeveledActorBase().GetName()+" - "+GetSkills(ActorRef))
 	endIf
 endFunction
