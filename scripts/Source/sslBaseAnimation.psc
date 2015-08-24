@@ -356,6 +356,10 @@ function AdjustUpward(string AdjustKey, int Position, int Stage, float AdjustBy,
 	endIf
 endFunction
 
+function AdjustSchlong(string AdjustKey, int Position, int Stage, int AdjustBy)
+	UpdateAdjustment(AdjustKey, Position, Stage, 3, AdjustBy as float)
+endFunction
+
 function _ClearAdjustments(string Registrar, string AdjustKey) global native
 function RestoreOffsets(string AdjustKey)
 	_ClearAdjustments(Registry, AdjustKey+".0")

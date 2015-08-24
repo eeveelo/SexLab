@@ -278,6 +278,17 @@ state Animating
 		RegisterForSingleUpdate(0.2)
 	endFunction
 
+	function AdjustSchlong(bool backwards = false)
+		int Amount  = SignInt(backwards, 1)
+		int Schlong = Animation.GetSchlong(AdjustKey, AdjustPos, Stage) + Amount
+		if Math.Abs(Schlong) <= 9
+			Adjusted = true
+			Animation.AdjustSchlong(AdjustKey, AdjustPos, Stage, Amount)
+			AdjustAlias.GetPositionInfo()
+			Debug.SendAnimationEvent(Positions[AdjustPos], "SOSBend"+Schlong)
+		endIf
+	endFunction
+
 	function AdjustChange(bool backwards = false)
 		UnregisterForUpdate()
 		if ActorCount > 1
@@ -362,6 +373,10 @@ state Animating
 			; Rotate Scene
 			elseIf i == kRotateScene
 				RotateScene(Config.BackwardsPressed())
+
+			; Adjust schlong bend
+			elseIf i == kAdjustSchlong
+				AdjustSchlong(Config.BackwardsPressed())
 
 			; Change Adjusted Actor
 			elseIf i == kAdjustChange
@@ -629,7 +644,7 @@ endFunction
 
 function EnableHotkeys(bool forced = false)
 	if HasPlayer || forced
-		Hotkeys = new int[12]
+		Hotkeys = new int[13]
 		Hotkeys[kAdvanceAnimation] = Config.AdvanceAnimation
 		Hotkeys[kChangeAnimation]  = Config.ChangeAnimation
 		Hotkeys[kChangePositions]  = Config.ChangePositions
@@ -642,6 +657,7 @@ function EnableHotkeys(bool forced = false)
 		Hotkeys[kMoveScene]        = Config.MoveScene
 		Hotkeys[kRotateScene]      = Config.RotateScene
 		Hotkeys[kEndAnimation]     = Config.EndAnimation
+		Hotkeys[kAdjustSchlong]    = Config.AdjustSchlong
 		int i
 		while i < Hotkeys.Length
 			RegisterForKey(Hotkeys[i])
@@ -704,6 +720,8 @@ function AdjustUpward(bool backwards = false, bool AdjustStage = false)
 endFunction
 function RotateScene(bool backwards = false)
 endFunction
+function AdjustSchlong(bool backwards = false)
+endFunction
 function AdjustChange(bool backwards = false)
 endFunction
 function RestoreOffsets()
@@ -734,6 +752,7 @@ int property kRestoreOffsets   = 8  autoreadonly hidden
 int property kMoveScene        = 9  autoreadonly hidden
 int property kRotateScene      = 10 autoreadonly hidden
 int property kEndAnimation     = 11 autoreadonly hidden
+int property kAdjustSchlong    = 12 autoreadonly hidden
 
 
 event OnKeyDown(int keyCode)

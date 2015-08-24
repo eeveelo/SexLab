@@ -570,6 +570,15 @@ function InstallMenu()
 	SetCursorPosition(1)
 	AddHeaderOption("SexLab v"+GetStringVer()+" by Ashal@LoversLab.com")
 
+	; Check for critical failure from missing SystemAlias not being found.
+	if !SystemAlias
+		AddTextOption("CRITICAL ERROR: File Integrity", "")
+		AddTextOption("Framework quest / files overwritten...", "")
+		AddTextOption("Unable to resolve needed variables", "")
+		AddTextOption("Install unable continue as result", "")
+		return
+	endIf
+
 	; Install/Update button
 	string AliasState = SystemAlias.GetState()
 	int opt = OPTION_FLAG_NONE
@@ -719,6 +728,7 @@ function PlayerHotkeys()
 	AddKeyMapOptionST("AdjustForward","$SSL_MoveActorForwardBackward", Config.AdjustForward)
 	AddKeyMapOptionST("AdjustUpward","$SSL_AdjustPositionUpwardDownward", Config.AdjustUpward)
 	AddKeyMapOptionST("AdjustSideways","$SSL_MoveActorLeftRight", Config.AdjustSideways)
+	AddKeyMapOptionST("AdjustSchlong","$SSL_AdjustSchlong", Config.AdjustSchlong)
 	AddKeyMapOptionST("RotateScene", "$SSL_RotateScene", Config.RotateScene)
 	AddKeyMapOptionST("RestoreOffsets","$SSL_DeleteSavedAdjustments", Config.RestoreOffsets)
 endFunction
@@ -810,6 +820,21 @@ state AdjustSideways
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoAdjustSideways")
+	endEvent
+endState
+state AdjustSchlong
+	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
+		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+			Config.AdjustSchlong = newKeyCode
+			SetKeyMapOptionValueST(Config.AdjustSchlong)
+		endIf
+	endEvent
+	event OnDefaultST()
+		Config.AdjustSchlong = 46
+		SetKeyMapOptionValueST(Config.AdjustSchlong)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoAdjustSchlong")
 	endEvent
 endState
 state RotateScene

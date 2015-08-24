@@ -161,6 +161,7 @@ int property RotateScene auto hidden
 int property EndAnimation auto hidden
 int property ToggleFreeCamera auto hidden
 int property TargetActor auto hidden
+int property AdjustSchlong auto hidden
 
 ; Floats
 float property CumTimer auto hidden
@@ -702,6 +703,7 @@ function SetDefaults()
 	ToggleFreeCamera   = 81 ; NUM 3
 	EndAnimation       = 207; End
 	TargetActor        = 49 ; N
+	AdjustSchlong      = 46 ; C
 
 	; Floats
 	CumTimer           = 120.0
@@ -891,6 +893,7 @@ function ExportSettings()
 	ExportInt("EndAnimation", EndAnimation)
 	ExportInt("ToggleFreeCamera", ToggleFreeCamera)
 	ExportInt("TargetActor", TargetActor)
+	ExportInt("AdjustSchlong", AdjustSchlong)
 
 	; Floats
 	ExportFloat("CumTimer", CumTimer)
@@ -976,6 +979,7 @@ function ImportSettings()
 	EndAnimation       = ImportInt("EndAnimation", EndAnimation)
 	ToggleFreeCamera   = ImportInt("ToggleFreeCamera", ToggleFreeCamera)
 	TargetActor        = ImportInt("TargetActor", TargetActor)
+	AdjustSchlong      = ImportInt("AdjustSchlong", AdjustSchlong)
 
 	; Floats
 	CumTimer           = ImportFloat("CumTimer", CumTimer)
