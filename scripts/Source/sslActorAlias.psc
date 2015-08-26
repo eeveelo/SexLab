@@ -674,9 +674,7 @@ endFunction
 
 function AttachMarker()
 	ActorRef.SetVehicle(MarkerRef)
-	if AnimScale != 1.0
-		ActorRef.SetScale(AnimScale)
-	endIf
+	ActorRef.SetScale(AnimScale)
 endFunction
 
 function LockActor()
