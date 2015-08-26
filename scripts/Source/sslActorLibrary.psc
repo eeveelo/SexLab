@@ -140,18 +140,20 @@ Form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 	; Strip weapon
 	if Strip[32]
 		; Right hand
-		ItemRef = ActorRef.GetEquippedWeapon(false)
+		ItemRef = ActorRef.GetEquippedObject(1)
 		if IsStrippable(ItemRef)
+			Stripped[33] = ItemRef
 			SexLabUtil.SaveEnchantment(ItemRef as ObjectReference)
 			ActorRef.UnequipItemEX(ItemRef, 1, false)
-			Stripped[33] = ItemRef
+			StorageUtil.SetIntValue(ItemRef, "Hand", 1)
 		endIf
 		; Left hand
-		ItemRef = ActorRef.GetEquippedWeapon(true)
+		ItemRef = ActorRef.GetEquippedObject(0)
 		if IsStrippable(ItemRef)
+			Stripped[32] = ItemRef
 			SexLabUtil.SaveEnchantment(ItemRef as ObjectReference)
 			ActorRef.UnequipItemEX(ItemRef, 2, false)
-			Stripped[32] = ItemRef
+			StorageUtil.SetIntValue(ItemRef, "Hand", 2) 
 		endIf
 	endIf
 	; Strip armors
@@ -187,19 +189,15 @@ function UnstripActor(Actor ActorRef, Form[] Stripped, bool IsVictim = false)
 		return
 	endIf
 	; Equip stripped
-	int hand = 2
 	while i
 		i -= 1
 		if Stripped[i]
-			int type = Stripped[i].GetType()
-			if type == 22 || type == 82
- 				ActorRef.EquipSpell((Stripped[i] as Spell), (hand == 2) as int)
-			else
- 				ActorRef.EquipItemEx(Stripped[i], hand, false)
-				SexLabUtil.ReloadEnchantment(Stripped[i] as ObjectReference)
-			endIf
-			; Move to other hand if weapon, light, spell, or leveledspell
-			hand -= ((hand == 1 && (type == 41 || type == 31 || type == 22 || type == 82)) as int)
+ 			int hand = StorageUtil.GetIntValue(Stripped[i], "Hand", 0)
+ 			if hand != 0
+	 			StorageUtil.UnsetIntValue(Stripped[i], "Hand")
+	 		endIf
+	 		ActorRef.EquipItemEx(Stripped[i], hand, false)
+ 			SexLabUtil.ReloadEnchantment(Stripped[i] as ObjectReference)
 		endIf
 	endWhile
 endFunction
