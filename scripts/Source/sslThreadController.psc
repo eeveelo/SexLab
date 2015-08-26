@@ -428,8 +428,8 @@ state Animating
 
 	function TriggerOrgasm()
 		UnregisterForUpdate()
-		QuickEvent("Orgasm")
 		SoundFX.Play(CenterRef)
+		QuickEvent("Orgasm")
 		RegisterForSingleUpdate(0.5)
 	endFunction
 

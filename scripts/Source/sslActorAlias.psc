@@ -244,6 +244,19 @@ state Ready
 			AnimScale = (1.0 / base)
 		endIf
 		string LogInfo = "Scales["+display+"/"+base+"/"+AnimScale+"] "
+		; Attempt to walk to center
+		ObjectReference CenterRef = Thread.CenterRef
+		Log("CenterRef: "+CenterRef)
+		if !IsPlayer && CenterRef && SexLabUtil.IsActor(CenterRef) && ActorRef != CenterRef && ActorRef.GetDistance(CenterRef) < 1000.0 && ActorRef.GetDistance(CenterRef) > 100.0
+			ActorRef.KeepOffsetFromActor(CenterRef as Actor, Offsets[0], Offsets[1], 30.0, 0.0, 0.0, 180.0, 500.0, 100.0)
+			float Distance = ActorRef.GetDistance(CenterRef)
+			float Failsafe = Utility.GetCurrentRealTime() + 10.0
+			while Distance > 100.0 && Utility.GetCurrentRealTime() < Failsafe
+				Distance = ActorRef.GetDistance(CenterRef)				
+				Log("Distance From Center: "+Distance)
+				Utility.Wait(0.5)
+			endWhile
+		endIf
 		; Stop movement
 		LockActor()
 		; Disable autoadvance if disabled for player
@@ -711,13 +724,8 @@ function LockActor()
 		Utility.Wait(0.1)
 	endIf
 	MarkerRef.Enable()
-	MarkerRef.MoveTo(ActorRef)
 	ActorRef.StopTranslation()
-	while ActorRef.GetDistance(MarkerRef) > 1.0
-		Log("MarkerRef not loaded yet...")
-		MarkerRef.MoveTo(ActorRef)
-		Utility.Wait(0.1)
-	endwhile
+	MarkerRef.MoveTo(ActorRef)
 	AttachMarker()
 endFunction
 
@@ -1133,6 +1141,7 @@ function ClearEffects()
 	if ActorRef.IsSneaking()
 		ActorRef.StartSneaking()
 	endIf
+	ActorRef.ClearKeepOffsetFromActor()
 endFunction
 
 int property kPrepareActor = 0 autoreadonly hidden
@@ -1320,4 +1329,3 @@ int function CalcEnjoyment(float[] XP, float[] SkillsAmounts, bool IsLeadin, boo
 ; string[] property StringShare auto hidden ; AdjustKey
 ; bool[] property BoolShare auto hidden ; 
 ; sslBaseAnimation[] property _Animation auto hidden ; Animation
-
