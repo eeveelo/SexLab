@@ -110,9 +110,7 @@ state Animating
 		; Send events
 		if !LeadIn && Stage >= StageCount
 			SendThreadEvent("OrgasmStart")
-			if Config.OrgasmEffects
-				TriggerOrgasm()
-			endIf		
+			TriggerOrgasm()		
 		endIf
 		; Begin loop
 		RegisterForSingleUpdate(0.5)
@@ -431,9 +429,8 @@ state Animating
 	function TriggerOrgasm()
 		UnregisterForUpdate()
 		QuickEvent("Orgasm")
-		if SoundFX
-			Sound.SetInstanceVolume(SoundFX.Play(CenterRef), 1.0)
-		endIf
+		SoundFX.Play(CenterRef)
+		RegisterForSingleUpdate(0.5)
 	endFunction
 
 	function ResetPositions()

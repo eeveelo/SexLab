@@ -524,18 +524,37 @@ state Animating
 		SyncLocation()
 	endEvent
 
-	event OrgasmStage()
-		SyncThread()
-		OrgasmEffect()
-	endEvent
-
 	function OrgasmEffect()
 		if (RealTime[0] - LastOrgasm) < 10.0
 			return
 		endIf
 		UnregisterForUpdate()
 		LastOrgasm = RealTime[0]
-		Orgasms += 1
+		Orgasms   += 1
+		; Reset enjoyment build up, if using multiple orgasms
+		int FullEnjoyment = Enjoyment
+		if Config.SeparateOrgasms
+			BaseEnjoyment -= Enjoyment
+			BaseEnjoyment += Utility.RandomInt((BestRelation + 10), PapyrusUtil.ClampInt(((Skills[Stats.kLewd]*1.5) as int) + (BestRelation + 10), 10, 35))
+			FullEnjoyment  = GetEnjoyment()
+		endIf
+		; Send an orgasm event hook with actor and orgasm count
+		int eid = ModEvent.Create("SexLabOrgasm")
+		ModEvent.PushForm(eid, ActorRef)
+		ModEvent.PushInt(eid, FullEnjoyment)
+		ModEvent.PushInt(eid, Orgasms)
+		ModEvent.Send(eid)
+		TrackedEvent("Orgasm")
+		Log("Orgasms["+Orgasms+"] Enjoyment ["+Enjoyment+"] BaseEnjoyment["+BaseEnjoyment+"] FullEnjoyment["+FullEnjoyment+"]")
+		; Shake camera for player
+		if IsPlayer && Config.OrgasmEffects && Game.GetCameraState() != 3
+			Game.ShakeCamera(none, 1.00, 2.0)
+		endIf
+		; Play SFX/Voice
+		if !IsSilent
+			PlayLouder(Voice.GetSound(100, false), ActorRef, Config.VoiceVolume)
+		endIf
+		PlayLouder(OrgasmFX, MarkerRef, Config.SFXVolume)
 		; Apply cum to female positions from male position orgasm
 		int i = Thread.ActorCount
 		if i > 1 && Config.UseCum && (MalePosition || IsCreature) && (IsMale || IsCreature || (Config.AllowFFCum && IsFemale))
@@ -550,28 +569,6 @@ state Animating
 				endWhile
 			endIf
 		endIf
-		; Reset enjoyment build up
-		BaseEnjoyment -= Enjoyment
-		BaseEnjoyment += Utility.RandomInt((BestRelation + 10), PapyrusUtil.ClampInt(((Skills[Stats.kLewd]*1.5) as int) + (BestRelation + 10), 10, 35))
-		int FullEnjoyment = GetEnjoyment()
-		int eid = ModEvent.Create("SexLabOrgasm")
-		; Send an orgasm event hook with actor and orgasm count
-		ModEvent.PushForm(eid, ActorRef)
-		ModEvent.PushInt(eid, FullEnjoyment)
-		ModEvent.PushInt(eid, Orgasms)
-		ModEvent.Send(eid)
-		TrackedEvent("Orgasm")
-		Log("Orgasms["+Orgasms+"] Enjoyment ["+Enjoyment+"] BaseEnjoyment["+BaseEnjoyment+"] FullEnjoyment["+FullEnjoyment+"]")
-		; Shake camera for player
-		if IsPlayer && Game.GetCameraState() != 3 && Config.OrgasmEffects
-			Game.ShakeCamera(none, 1.00, 2.0)
-		endIf
-		; Play SFX/Voice
-		if !IsSilent
-			Sound MoanFX = Voice.GetSound(100, false)
-			Sound.SetInstanceVolume(MoanFX.Play(ActorRef), 1.0)
-		endIf
-		Sound.SetInstanceVolume(OrgasmFX.Play(MarkerRef), 1.0)
 		Utility.WaitMenuMode(0.4)
 		; VoiceDelay = 0.8
 		RegisterForSingleUpdate(0.8)
@@ -1150,7 +1147,7 @@ function RegisterEvents()
 	; Quick Events
 	RegisterForModEvent(e+"Start", "StartAnimating")
 	RegisterForModEvent(e+"Animate", "SendAnimation")
-	RegisterForModEvent(e+"Orgasm", "OrgasmStage")
+	RegisterForModEvent(e+"Orgasm", "OrgasmEffect")
 	RegisterForModEvent(e+"Strip", "Strip")
 	; Sync Events
 	RegisterForModEvent(e+"Prepare", "PrepareActor")
@@ -1210,6 +1207,7 @@ function Initialize()
 	Orgasms        = 0
 	BestRelation   = 0
 	BaseEnjoyment  = 0
+	Enjoyment      = 0
 	; Floats
 	LastOrgasm     = 0.0
 	ActorScale     = 0.0
@@ -1252,6 +1250,16 @@ function Log(string msg, string src = "")
 	endIf
 endFunction
 
+function PlayLouder(Sound SFX, ObjectReference FromRef, float Volume)
+	if SFX && FromRef && Volume > 0.0
+		if Volume > 0.5
+			Sound.SetInstanceVolume(SFX.Play(FromRef), 1.0)
+		else
+			Sound.SetInstanceVolume(SFX.Play(FromRef), Volume)
+		endIf
+	endIf
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- State Restricted                                --- ;
 ; ------------------------------------------------------- ;
@@ -1284,6 +1292,7 @@ event OnOrgasm()
 	OrgasmEffect()
 endEvent
 event OrgasmStage()
+	OrgasmEffect()
 endEvent
 
 function OffsetCoords(float[] Output, float[] CenterCoords, float[] OffsetBy) global native
