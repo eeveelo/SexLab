@@ -245,7 +245,7 @@ state Ready
 		endIf
 		string LogInfo = "Scales["+display+"/"+base+"/"+AnimScale+"] "
 		; Attempt to walk to center
-		ObjectReference CenterRef = Thread.CenterRef
+		;/ ObjectReference CenterRef = Thread.CenterRef
 		Log("CenterRef: "+CenterRef)
 		if !IsPlayer && CenterRef && SexLabUtil.IsActor(CenterRef) && ActorRef != CenterRef && ActorRef.GetDistance(CenterRef) < 1000.0 && ActorRef.GetDistance(CenterRef) > 100.0
 			ActorRef.KeepOffsetFromActor(CenterRef as Actor, Offsets[0], Offsets[1], 30.0, 0.0, 0.0, 180.0, 500.0, 100.0)
@@ -256,7 +256,7 @@ state Ready
 				Log("Distance From Center: "+Distance)
 				Utility.Wait(0.5)
 			endWhile
-		endIf
+		endIf /;
 		; Stop movement
 		LockActor()
 		; Disable autoadvance if disabled for player
