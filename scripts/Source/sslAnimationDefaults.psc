@@ -2507,7 +2507,7 @@ function fdBedMissionary(int id)
 	Base.AddPositionStage(a2, "4D_BedMissionary_A2_S4", rotate = 180, sos = 3)
 	Base.AddPositionStage(a2, "4D_BedMissionary_A2_S4", rotate = 180, sos = 3)
 
-	Base.SetTags("4D,4uDIK,Sex,Straight,Penis,Oral,Vaginal,Laying,Lying,OnBack,Beds,Missionary,Blowjob,Creampie")
+	Base.SetTags("4D,4uDIK,Sex,Straight,Penis,Oral,Vaginal,Laying,Lying,OnBack,Beds,Missionary,Creampie")
 
 	Base.Save(id)
 endFunction
@@ -2534,7 +2534,7 @@ function fdCowgirl(int id)
 	Base.AddPositionStage(a2, "4D_Cowgirl_A2_S4", 0, rotate = 180, sos = 2)
 	Base.AddPositionStage(a2, "4D_Cowgirl_A2_S4", 0, rotate = 180, sos = 2)
 
-	Base.SetTags("4D,4uDIK,Sex,Straight,Penis,Oral,Vaginal,Laying,Beds,Cowgirl,Blowjob,Creampie")
+	Base.SetTags("4D,4uDIK,Sex,Straight,Penis,Oral,Vaginal,Laying,Beds,Cowgirl,Creampie")
 
 	Base.Save(id)
 endFunction
@@ -2644,7 +2644,7 @@ function fdLegUp(int id)
 
 	Base.SetStageSoundFX(1, Sucking)
 
-	Base.SetTags("4D,4uDIK,Vaginal,Oral,Penis,Blowjob,Kneeling,Spooning,Doggystyle,Laying,Lying,OnBack,Dirty,Creampie")
+	Base.SetTags("4D,4uDIK,Vaginal,Oral,Penis,Kneeling,Spooning,Doggystyle,Laying,Lying,OnBack,Dirty,Creampie")
 
 	Base.Save(id)
 endFunction
@@ -2669,7 +2669,7 @@ function fdRCowgirl(int id)
 	Base.AddPositionStage(a2, "4D_ReverseCowgirl_A2_S4", 0, sos = -4)
 	Base.AddPositionStage(a2, "4D_ReverseCowgirl_A2_S5", 0, sos = -4)
 
-	Base.SetTags("4D,4uDIK,Sex,Straight,Mouth,Penis,Vaginal,Blowjob,Cowgirl,Reverse,ReverseCowgirl,Beds,Dirty,Creampie")
+	Base.SetTags("4D,4uDIK,Sex,Straight,Mouth,Penis,Vaginal,Cowgirl,Reverse,ReverseCowgirl,Beds,Dirty,Creampie")
 
 	Base.Save(id)
 endFunction
