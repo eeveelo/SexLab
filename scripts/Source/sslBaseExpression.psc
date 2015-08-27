@@ -79,30 +79,38 @@ endFunction
 ; --- Global Utilities                                --- ;
 ; ------------------------------------------------------- ;
 
-function ClearPhoneme(Actor ActorRef) global native
-function ClearModifier(Actor ActorRef) global native
+
 
 float function GetModifier(Actor ActorRef, int id) global native
 float function GetPhoneme(Actor ActorRef, int id) global native
 float function GetExpression(Actor ActorRef, bool getId) global native
 
+function ClearPhoneme(Actor ActorRef) global
+	int i
+	while i <= 15
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, i, 0)
+		i += 1
+	endWhile
+endFunction
+function ClearModifier(Actor ActorRef) global
+	int i
+	while i <= 13
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 1, i, 0)
+		i += 1
+	endWhile
+endFunction
+
 function OpenMouth(Actor ActorRef) global
-	; ClearPhoneme(ActorRef)
-	Utility.Wait(0.01)
+	ClearPhoneme(ActorRef)
 	ActorRef.SetExpressionOverride(16, 80)
 	ActorRef.SetExpressionPhoneme(1, 0.4)
-	Utility.Wait(0.1)
+	Utility.WaitMenuMode(0.1)
 endFunction
 
 function CloseMouth(Actor ActorRef) global
-	Utility.Wait(0.01)
-	; if GetPhoneme(ActorRef, 1) >= 0.4
-		ActorRef.SetExpressionPhoneme(1, 0.0)
-	; endIf
-	if GetExpression(ActorRef, true) == 16.0; && GetExpression(ActorRef, false) >= 0.7
-		ActorRef.ClearExpressionOverride()
-	endIf
-	Utility.Wait(0.1)
+	ActorRef.SetExpressionOverride(7, 50)
+	MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 0)
+	Utility.WaitMenuMode(0.1)
 endFunction
 
 bool function IsMouthOpen(Actor ActorRef) global
@@ -110,13 +118,31 @@ bool function IsMouthOpen(Actor ActorRef) global
 endFunction
 
 function ClearMFG(Actor ActorRef) global
-	; ClearPhoneme(ActorRef)
-	; ClearModifier(ActorRef)
 	ActorRef.ClearExpressionOverride()
-	ActorRef.ResetExpressionOverrides()
+	MfgConsoleFunc.SetPhonemeModifier(ActorRef, -1, 0, 0)
 endFunction
 
-function ApplyPresetFloats(Actor ActorRef, float[] Preset) global native
+function ApplyPresetFloats(Actor ActorRef, float[] Preset) global 
+	int i
+	; Set Phoneme
+	int p
+	while p <= 15
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, (Preset[i] * 100.0) as int)
+		i += 1
+		p += 1
+	endWhile
+	; Set Modifers
+	int m
+	while m <= 13
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 1, m, (Preset[i] * 100.0) as int)
+		i += 1
+		m += 1
+	endWhile
+	; Set expression
+	ActorRef.SetExpressionOverride(Preset[30] as int, (Preset[31] * 100.0) as int)
+endFunction
+
+
 float[] function GetCurrentMFG(Actor ActorRef) global
 	float[] Preset = new float[32]
 	int i
@@ -536,14 +562,14 @@ function ApplyPreset(Actor ActorRef, int[] Preset) global
 	; Set Phoneme
 	int p
 	while p <= 15
-		ActorRef.SetExpressionPhoneme(p, Preset[i] as float / 100.0)
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, Preset[i])
 		i += 1
 		p += 1
 	endWhile
 	; Set Modifers
 	int m
 	while m <= 13
-		ActorRef.SetExpressionModifier(m, Preset[i] as float / 100.0)
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 1, m, Preset[i])
 		i += 1
 		m += 1
 	endWhile

@@ -1663,8 +1663,8 @@ function ExpressionEditor()
 
 	int i = 0
 	while i <= 13
-		AddSliderOptionST("Expression_1_"+Modifier+"_"+i, Modifiers[i], FemaleModifiers[i], "{0}", FlagF)
-		AddSliderOptionST("Expression_0_"+Modifier+"_"+i, Modifiers[i], MaleModifiers[i], "{0}", FlagM)
+		AddSliderOptionST("Expression_1_"+Modifier+"_"+i, Modifiers[i], FemaleModifiers[i] * 100, "{0}", FlagF)
+		AddSliderOptionST("Expression_0_"+Modifier+"_"+i, Modifiers[i], MaleModifiers[i] * 100, "{0}", FlagM)
 		i += 1
 	endWhile
 
@@ -1673,8 +1673,8 @@ function ExpressionEditor()
 	AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Phoneme}", FlagM)
 	i = 0
 	while i <= 15
-		AddSliderOptionST("Expression_1_"+Phoneme+"_"+i, Phonemes[i], FemalePhonemes[i], "{0}", FlagF)
-		AddSliderOptionST("Expression_0_"+Phoneme+"_"+i, Phonemes[i], MalePhonemes[i], "{0}", FlagM)
+		AddSliderOptionST("Expression_1_"+Phoneme+"_"+i, Phonemes[i], FemalePhonemes[i] * 100, "{0}", FlagF)
+		AddSliderOptionST("Expression_0_"+Phoneme+"_"+i, Phonemes[i], MalePhonemes[i] * 100, "{0}", FlagM)
 		i += 1
 	endWhile
 endFunction
