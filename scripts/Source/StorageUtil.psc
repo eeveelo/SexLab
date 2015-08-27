@@ -377,6 +377,15 @@ int function debug_GetFloatListObjectCount() global native
 int function debug_GetStringListObjectCount() global native
 int function debug_GetFormListObjectCount() global native
 
+Form function debug_GetIntObject(int index) global native
+Form function debug_GetFloatObject(int index) global native
+Form function debug_GetStringObject(int index) global native
+Form function debug_GetFormObject(int index) global native
+Form function debug_GetIntListObject(int index) global native
+Form function debug_GetFloatListObject(int index) global native
+Form function debug_GetStringListObject(int index) global native
+Form function debug_GetFormListObject(int index) global native
+   
 int function debug_GetIntKeysCount(Form ObjKey) global native
 int function debug_GetFloatKeysCount(Form ObjKey) global native
 int function debug_GetStringKeysCount(Form ObjKey) global native
@@ -396,14 +405,6 @@ string function debug_GetStringListKey(Form ObjKey, int index) global native
 string function debug_GetFormListKey(Form ObjKey, int index) global native
 
 
-Form function debug_GetIntObject(int index) global native
-Form function debug_GetFloatObject(int index) global native
-Form function debug_GetStringObject(int index) global native
-Form function debug_GetFormObject(int index) global native
-Form function debug_GetIntListObject(int index) global native
-Form function debug_GetFloatListObject(int index) global native
-Form function debug_GetStringListObject(int index) global native
-Form function debug_GetFormListObject(int index) global native
 
 
 ;/
