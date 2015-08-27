@@ -23,7 +23,32 @@ endFunction
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	Benchmark(2, 10000)
+	sslBaseExpression Expression = SexLab.GetExpressionByName("Custom 1")
+	float[] Preset = Expression.GenderPhase(Expression.PickPhase(100, TargetRef.GetLeveledActorBase().GetSex()), TargetRef.GetLeveledActorBase().GetSex())
+	Log("Preset: "+Preset)
+	sslBaseExpression.ApplyPresetFloats(TargetRef, Preset)
+	Utility.Wait(5.0)
+	Log("OpenMouth")
+	sslBaseExpression.OpenMouth(TargetRef)
+	Utility.Wait(5.0)
+	Log("CloseMouth")
+	sslBaseExpression.CloseMouth(TargetRef)
+
+	Utility.Wait(5.0)
+	Log("ClearMFG")
+	sslBaseExpression.ApplyPresetFloats(TargetRef, Preset)
+	Utility.Wait(5.0)
+	sslBaseExpression.ClearMFG(TargetRef)
+
+	Utility.Wait(5.0)
+	Log("ClearMFG")
+	sslBaseExpression.ApplyPresetFloats2(TargetRef, Preset)
+	Utility.Wait(5.0)
+	sslBaseExpression.ClearMFG(TargetRef)
+
+	Log("ClearMFG")
+
+
 
 	; bool[] arr = Utility.CreateBoolArray(10, false)
 	; Log("10: "+arr)
@@ -85,7 +110,7 @@ endEvent
 ;\-----------------------------------------------/;
 
 function Log(string log)
-	; Debug.Notification(log)
+	Debug.Notification(log)
 	MiscUtil.PrintConsole(log)
 	Debug.OpenUserLog("SexLabDebug")
 	Debug.TraceUser("SexLabDebug", log)

@@ -27,13 +27,6 @@ state Test1
 		return Utility.GetCurrentRealTime() - baseline
 	endFunction
 endState
-n
-
-
-
-/*-+
-
-•
 
 function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10, bool UseBaseLoop = false)
 	PreBenchmarkSetup()
@@ -66,7 +59,7 @@ function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10, bo
 				Base = RunTest(Iterations)
 				GoToState("Test"+Benchmark)
 			endIf
-			floatTime = RunTest(Iterations, Base)
+			float Time = RunTest(Iterations, Base)
 			Total += Time
 			if UseBaseLoop
 				Log("Result #"+n+": "+Time+" -- EmptyLoop: "+Base, Label())
