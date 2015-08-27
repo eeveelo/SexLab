@@ -796,8 +796,9 @@ endFunction
 
 ;/**
 *  
-* @param  bool var - 
-* @return bool - 
+* @param  int ActorCount - The total number of actors, between 1-5 the returned animations should be intended for.
+* @param  Race RaceRef - The race the returned animations should be useable by.
+* @return sslBaseAnimation[] - An array of animations that fit the provided search arguments.
 **/;
 sslBaseAnimation[] function GetCreatureAnimationsByRace(int ActorCount, Race RaceRef)
 	return CreatureSlots.GetByRace(ActorCount, RaceRef)
@@ -805,8 +806,9 @@ endFunction
 
 ;/**
 *  
+* @param  int ActorCount - The total number of actors, between 1-5 the returned animations should be intended for.
 * @param  bool var - 
-* @return bool - 
+* @return sslBaseAnimation[] - An array of animations that fit the provided search arguments.
 **/;
 sslBaseAnimation[] function GetCreatureAnimationsByRaceKey(int ActorCount, string RaceKey)
 	return CreatureSlots.GetByRaceKey(ActorCount, RaceKey)
@@ -814,8 +816,12 @@ endFunction
 
 ;/**
 *  
+* @param  int ActorCount - The total number of actors, between 1-5 the returned animations should be intended for.
+* @param  Race RaceRef - The race the returned animations should be useable by.
 * @param  bool var - 
-* @return bool - 
+* @param  bool var - 
+* @param  bool var - 
+* @return sslBaseAnimation[] - An array of animations that fit the provided search arguments.
 **/;
 sslBaseAnimation[] function GetCreatureAnimationsByRaceGenders(int ActorCount, Race RaceRef, int MaleCreatures = 0, int FemaleCreatures = 0, bool ForceUse = false)
 	return CreatureSlots.GetByRaceGenders(ActorCount, RaceRef, MaleCreatures, FemaleCreatures, ForceUse)
@@ -823,8 +829,11 @@ endFunction
 
 ;/**
 *  
+* @param  int ActorCount - The total number of actors, between 1-5 the returned animations should be intended for.
 * @param  bool var - 
-* @return bool - 
+* @param  bool var - 
+* @param  bool var - 
+* @return sslBaseAnimation[] - An array of animations that fit the provided search arguments.
 **/;
 sslBaseAnimation[] function GetCreatureAnimationsByTags(int ActorCount, string Tags, string TagSuppress = "", bool RequireAll = true)
 	return CreatureSlots.GetByTags(ActorCount, Tags, TagSuppress, RequireAll)
@@ -832,8 +841,12 @@ endFunction
 
 ;/**
 *  
+* @param  int ActorCount - The total number of actors, between 1-5 the returned animations should be intended for.
+* @param  Race RaceRef - The race the returned animations should be useable by.
 * @param  bool var - 
-* @return bool - 
+* @param  bool var - 
+* @param  bool var - 
+* @return sslBaseAnimation[] - An array of animations that fit the provided search arguments.
 **/;
 sslBaseAnimation[] function GetCreatureAnimationsByRaceTags(int ActorCount, Race RaceRef, string Tags, string TagSuppress = "", bool RequireAll = true)
 	return CreatureSlots.GetByRaceTags(ActorCount, RaceRef, Tags, TagSuppress, RequireAll)
@@ -841,8 +854,12 @@ endFunction
 
 ;/**
 *  
+* @param  int ActorCount - The total number of actors, between 1-5 the returned animations should be intended for.
 * @param  bool var - 
-* @return bool - 
+* @param  bool var - 
+* @param  bool var - 
+* @param  bool var - 
+* @return sslBaseAnimation[] - An array of animations that fit the provided search arguments.
 **/;
 sslBaseAnimation[] function GetCreatureAnimationsByRaceKeyTags(int ActorCount, string RaceKey, string Tags, string TagSuppress = "", bool RequireAll = true)
 	return CreatureSlots.GetByRaceKeyTags(ActorCount, RaceKey, Tags, TagSuppress, RequireAll)
@@ -850,8 +867,8 @@ endFunction
 
 ;/**
 *  
-* @param  bool var - 
-* @return bool - 
+* @param  string FindName - The name of an animation as seen in the SexLab MCM.
+* @return sslBaseAnimation - The creature animation whose name matches, if found.
 **/;
 sslBaseAnimation function GetCreatureAnimationByName(string FindName)
 	return CreatureSlots.GetByName(FindName)
@@ -859,8 +876,8 @@ endFunction
 
 ;/**
 *  
-* @param  bool var - 
-* @return bool - 
+* @param  string Registry - The unique registry name of the animation. (string property Registry on any animation)
+* @return sslBaseAnimation - The creature animation whose registry matches, if found.
 **/;
 sslBaseAnimation function GetCreatureAnimationByRegistry(string Registry)
 	return CreatureSlots.GetByRegistrar(Registry)
@@ -868,6 +885,7 @@ endFunction
 
 ;/**
 *  
+* @param  bool var - 
 * @param  bool var - 
 * @return bool - 
 **/;
@@ -885,9 +903,11 @@ bool function AllowedCreature(Race CreatureRace)
 endFunction
 
 ;/**
-*  
-* @param  bool var - 
-* @return bool - 
+* Checks if two given creature's race continue a shared RaceKey, and thus likely a shared animation as well.
+* 
+* @param  Race CreatureRace - A creature race to check for a matching RaceKey with the other.
+* @param  Race CreatureRace2 - The other creature race to check for a matching RaceKey with the previous one.
+* @return bool - TRUE if they do have a shared RaceKey.
 **/;
 bool function AllowedCreatureCombination(Race CreatureRace, Race CreatureRace2)
 	return CreatureSlots.AllowedCreatureCombination(CreatureRace, CreatureRace2)
