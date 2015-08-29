@@ -975,8 +975,9 @@ function OverrideStrip(bool[] SetStrip)
 	endIf
 endFunction
 
-bool function IsStrippable(Form ItemRef)
-	return ItemRef && (SexLabUtil.HasKeywordSub(ItemRef, "AlwaysStrip") || !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")) && (StorageUtil.FormListHas(none, "AlwaysStrip", ItemRef) || !StorageUtil.FormListHas(none, "NoStrip", ItemRef))
+bool function ContinueStrip(Form ItemRef, bool DoStrip = true)
+	return ItemRef && ((StorageUtil.FormListHas(none, "AlwaysStrip", ItemRef) || SexLabUtil.HasKeywordSub(ItemRef, "AlwaysStrip")) \
+		|| (DoStrip && !(StorageUtil.FormListHas(none, "NoStrip", ItemRef) || SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")))) 
 endFunction
 
 function Strip()
@@ -998,32 +999,26 @@ function Strip()
 	; Stripped storage
 	Form ItemRef
 	Form[] Stripped = new Form[34]
-	; Strip Weapon
-	if Strip[32]
-		; Right hand
-		ItemRef = ActorRef.GetEquippedObject(1)
-		if IsStrippable(ItemRef)
-			Stripped[33] = ItemRef
-			SexLabUtil.SaveEnchantment(ItemRef as ObjectReference)
-			ActorRef.UnequipItemEX(ItemRef, 1, false)
-			StorageUtil.SetIntValue(ItemRef, "Hand", 1)
-		endIf
-		; Left hand
-		ItemRef = ActorRef.GetEquippedObject(0)
-		if IsStrippable(ItemRef)
-			Stripped[32] = ItemRef
-			SexLabUtil.SaveEnchantment(ItemRef as ObjectReference)
-			ActorRef.UnequipItemEX(ItemRef, 2, false)
-			StorageUtil.SetIntValue(ItemRef, "Hand", 2) 
-		endIf
+	; Right hand
+	ItemRef = ActorRef.GetEquippedObject(1)
+	if ContinueStrip(ItemRef, Strip[32])
+		Stripped[33] = ItemRef
+		ActorRef.UnequipItemEX(ItemRef, 1, false)
+		StorageUtil.SetIntValue(ItemRef, "Hand", 1)
+	endIf
+	; Left hand
+	ItemRef = ActorRef.GetEquippedObject(0)
+	if ContinueStrip(ItemRef, Strip[32])
+		Stripped[32] = ItemRef
+		ActorRef.UnequipItemEX(ItemRef, 2, false)
+		StorageUtil.SetIntValue(ItemRef, "Hand", 2) 
 	endIf
 	; Strip armor slots
 	int i = 31
 	while i >= 0
 		; Grab item in slot
 		ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
-		if ItemRef && (ActorLib.IsAlwaysStrip(ItemRef) || (Strip[i] && IsStrippable(ItemRef)))
-			SexLabUtil.SaveEnchantment(ItemRef as ObjectReference)
+		if ContinueStrip(ItemRef, Strip[i])
 			ActorRef.UnequipItemEX(ItemRef, 0, false)
 			Stripped[i] = ItemRef
 		endIf
@@ -1060,7 +1055,6 @@ function UnStrip()
 	 			StorageUtil.UnsetIntValue(Equipment[i], "Hand")
 	 		endIf
 	 		ActorRef.EquipItemEx(Equipment[i], hand, false)
- 			SexLabUtil.ReloadEnchantment(Equipment[i] as ObjectReference)
   		endIf
  	endWhile
 endFunction

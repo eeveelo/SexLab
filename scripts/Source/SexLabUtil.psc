@@ -90,28 +90,6 @@ string function MakeGenderTag(Actor[] Positions) global
 	return GetGenderTag(Genders[1], Genders[0], Genders[2])
 endFunction
 
-function SaveEnchantment(ObjectReference ItemRef) global
-	if ItemRef
-		Enchantment EnchantRef = ItemRef.GetEnchantment()
-		if EnchantRef
-			StorageUtil.SetFormValue(ItemRef, "Enchant", EnchantRef)
-			StorageUtil.SetFloatValue(ItemRef, "MaxCharge", ItemRef.GetItemMaxCharge())
-			StorageUtil.SetFloatValue(ItemRef, "ItemCharge", ItemRef.GetItemCharge())
-		endIf
-	endIf
-endFunction
-
-function ReloadEnchantment(ObjectReference ItemRef) global
-	Form EnchantRef = StorageUtil.GetFormValue(ItemRef, "Enchant", none)
-	if ItemRef && EnchantRef && EnchantRef.GetType() == 21
-		ItemRef.SetEnchantment(EnchantRef as Enchantment, StorageUtil.GetFloatValue(ItemRef, "MaxCharge", ItemRef.GetItemMaxCharge()))
-		ItemRef.SetItemCharge(StorageUtil.GetFloatValue(ItemRef, "ItemCharge", ItemRef.GetItemCharge()))
-		StorageUtil.UnsetFormValue(ItemRef, "Enchant")
-		StorageUtil.UnsetFloatValue(ItemRef, "ItemCharge")
-		StorageUtil.UnsetFloatValue(ItemRef, "MaxCharge")
-	endIf
-endFunction
-
 string function GetGenderTag(int Females = 0, int Males = 0, int Creatures = 0) global
 	string Tag
 	while Females > 0

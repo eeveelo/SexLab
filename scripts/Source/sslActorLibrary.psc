@@ -76,39 +76,59 @@ Form[] function StripActor(Actor ActorRef, Actor VictimRef = none, bool DoAnimat
 endFunction
 
 function MakeNoStrip(Form ItemRef)
-	if ItemRef && !StorageUtil.FormListHas(none, "NoStrip", ItemRef)
-		StorageUtil.FormListAdd(none, "NoStrip", ItemRef, false)
-		StorageUtil.FormListRemove(none, "AlwaysStrip", ItemRef, true)
+	if ItemRef && !FormListHas(none, "NoStrip", ItemRef)
+		FormListAdd(none, "NoStrip", ItemRef, false)
+		FormListRemove(none, "AlwaysStrip", ItemRef, true)
+		ObjectReference ObjRef = ItemRef as ObjectReference
+		if ObjRef && ObjRef.GetBaseObject()
+			ItemRef = ObjRef.GetBaseObject()
+			FormListAdd(none, "NoStrip", ItemRef, false)
+			FormListRemove(none, "AlwaysStrip", ItemRef, true)
+		endIf
 	endIf
 endFunction
 
 function MakeAlwaysStrip(Form ItemRef)
-	if ItemRef && !StorageUtil.FormListHas(none, "AlwaysStrip", ItemRef)
-		StorageUtil.FormListAdd(none, "AlwaysStrip", ItemRef, false)
-		StorageUtil.FormListRemove(none, "NoStrip", ItemRef, true)
+	if ItemRef && !FormListHas(none, "AlwaysStrip", ItemRef)
+		FormListAdd(none, "AlwaysStrip", ItemRef, false)
+		FormListRemove(none, "NoStrip", ItemRef, true)
+		ObjectReference ObjRef = ItemRef as ObjectReference
+		if ObjRef
+			FormListAdd(none, "AlwaysStrip", ObjRef, false)
+			FormListRemove(none, "NoStrip", ObjRef, true)
+		endIf
 	endIf
 endFunction
 
 function ClearStripOverride(Form ItemRef)
-	StorageUtil.FormListRemove(none, "NoStrip", ItemRef, true)
-	StorageUtil.FormListRemove(none, "AlwaysStrip", ItemRef, true)
+	FormListRemove(none, "NoStrip", ItemRef, true)
+	FormListRemove(none, "AlwaysStrip", ItemRef, true)
+	ObjectReference ObjRef = ItemRef as ObjectReference
+	if ObjRef && ObjRef.GetBaseObject()
+		FormListRemove(none, "NoStrip", ItemRef, true)
+		FormListRemove(none, "AlwaysStrip", ItemRef, true)
+	endIf
 endFunction
 
 function ResetStripOverrides()
-	StorageUtil.FormListClear(none, "NoStrip")
-	StorageUtil.FormListClear(none, "AlwaysStrip")
+	FormListClear(none, "NoStrip")
+	FormListClear(none, "AlwaysStrip")
 endFunction
 
 bool function IsNoStrip(Form ItemRef)
-	return SexLabUtil.HasKeywordSub(ItemRef, "NoStrip") || StorageUtil.FormListHas(none, "NoStrip", ItemRef)
+	return FormListHas(none, "NoStrip", ItemRef) || SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")
 endFunction
 
 bool function IsAlwaysStrip(Form ItemRef)
-	return SexLabUtil.HasKeywordSub(ItemRef, "AlwaysStrip") || StorageUtil.FormListHas(none, "AlwaysStrip", ItemRef)
+	return FormListHas(none, "AlwaysStrip", ItemRef) || SexLabUtil.HasKeywordSub(ItemRef, "AlwaysStrip")
 endFunction
 
 bool function IsStrippable(Form ItemRef)
-	return ItemRef && !SexLabUtil.HasKeywordSub(ItemRef, "NoStrip") && !StorageUtil.FormListHas(none, "NoStrip", ItemRef)
+	return ItemRef && (IsAlwaysStrip(ItemRef) || !IsNoStrip(ItemRef))
+endFunction
+
+bool function ContinueStrip(Form ItemRef, bool DoStrip = true)
+	return ItemRef && (IsAlwaysStrip(ItemRef) || (DoStrip && !IsNoStrip(ItemRef))) 
 endFunction
 
 Form function StripSlot(Actor ActorRef, int SlotMask)
@@ -137,32 +157,27 @@ Form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 	; Stripped storage
 	Form[] Stripped = new Form[34]
 	Form ItemRef
-	; Strip weapon
-	if Strip[32]
-		; Right hand
-		ItemRef = ActorRef.GetEquippedObject(1)
-		if IsStrippable(ItemRef)
-			Stripped[33] = ItemRef
-			SexLabUtil.SaveEnchantment(ItemRef as ObjectReference)
-			ActorRef.UnequipItemEX(ItemRef, 1, false)
-			StorageUtil.SetIntValue(ItemRef, "Hand", 1)
-		endIf
-		; Left hand
-		ItemRef = ActorRef.GetEquippedObject(0)
-		if IsStrippable(ItemRef)
-			Stripped[32] = ItemRef
-			SexLabUtil.SaveEnchantment(ItemRef as ObjectReference)
-			ActorRef.UnequipItemEX(ItemRef, 2, false)
-			StorageUtil.SetIntValue(ItemRef, "Hand", 2) 
-		endIf
+	; Strip weapons
+	; Right hand
+	ItemRef = ActorRef.GetEquippedObject(1)
+	if ContinueStrip(ItemRef, Strip[33])
+		Stripped[33] = ItemRef
+		ActorRef.UnequipItemEX(ItemRef, 1, false)
+		SetIntValue(ItemRef, "Hand", 1)
+	endIf
+	; Left hand
+	ItemRef = ActorRef.GetEquippedObject(0)
+	if ContinueStrip(ItemRef, Strip[32])
+		Stripped[32] = ItemRef
+		ActorRef.UnequipItemEX(ItemRef, 2, false)
+		SetIntValue(ItemRef, "Hand", 2) 
 	endIf
 	; Strip armors
 	int i = 31
 	while i >= 0
 		; Grab item in slot
 		ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
-		if ItemRef && (IsAlwaysStrip(ItemRef) || (Strip[i] && IsStrippable(ItemRef)))
-			SexLabUtil.SaveEnchantment(ItemRef as ObjectReference)
+		if ContinueStrip(ItemRef, Strip[i])
 			ActorRef.UnequipItem(ItemRef, false, true)
 			Stripped[i] = ItemRef
 		endIf
@@ -192,12 +207,11 @@ function UnstripActor(Actor ActorRef, Form[] Stripped, bool IsVictim = false)
 	while i
 		i -= 1
 		if Stripped[i]
- 			int hand = StorageUtil.GetIntValue(Stripped[i], "Hand", 0)
+ 			int hand = GetIntValue(Stripped[i], "Hand", 0)
  			if hand != 0
-	 			StorageUtil.UnsetIntValue(Stripped[i], "Hand")
+	 			UnsetIntValue(Stripped[i], "Hand")
 	 		endIf
 	 		ActorRef.EquipItemEx(Stripped[i], hand, false)
- 			SexLabUtil.ReloadEnchantment(Stripped[i] as ObjectReference)
 		endIf
 	endWhile
 endFunction
@@ -394,9 +408,9 @@ endFunction
 function Setup()
 	parent.Setup()
 	; Clear library caches
-	StorageUtil.FormListClear(Config, "ValidActors")
-	StorageUtil.FormListClear(Config, "StripList")
-	StorageUtil.FormListClear(Config, "NoStripList")
+	FormListClear(Config, "ValidActors")
+	FormListClear(Config, "StripList")
+	FormListClear(Config, "NoStripList")
 	; Load object data
 	AnimatingFaction        = Config.AnimatingFaction
 	GenderFaction           = Config.GenderFaction
