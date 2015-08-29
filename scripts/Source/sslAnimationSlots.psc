@@ -162,9 +162,9 @@ sslBaseAnimation[] function GetList(bool[] Valid)
 		int n = Valid.Find(true)
 		int i = CountBool(Valid, true)
 		; Trim over 100 to random selection
-		if i > 100
+		if i > 125
 			int end = Valid.RFind(true) - 1
-			while i > 100
+			while i > 125
 				int rand = Valid.Find(true, Utility.RandomInt(n, end))
 				if rand != -1 && Valid[rand]
 					Valid[rand] = false
