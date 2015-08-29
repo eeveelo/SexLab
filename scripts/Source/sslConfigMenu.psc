@@ -156,8 +156,8 @@ event OnPageReset(string page)
 		SexDiary()
 
 	; Player Diary/Journal
-	elseIf page == "Troubleshoot"
-		Troubleshoot()
+	; elseIf page == "Troubleshoot"
+	; 	Troubleshoot()
 
 	; System rebuild & clean
 	elseIf page == "$SSL_RebuildClean"
@@ -358,10 +358,6 @@ event OnConfigOpen()
 	; Items = GetItems(PlayerRef)
 	FullInventoryPlayer = false
 	FullInventoryTarget = false
-	ItemsPlayer = GetItems(PlayerRef, false)
-	if TargetRef
-		ItemsTarget = GetItems(TargetRef, false)
-	endIf
 endEvent
 
 event OnConfigClose()
@@ -403,9 +399,40 @@ endFunction
 
 event OnHighlightST()
 	string[] Options = MapOptions()
+	; Animation Toggle
 	if Options[0] == "Animation"
 		sslBaseAnimation Slot = AnimToggles[(Options[1] as int)]
 		SetInfoText(Slot.Name+" Tags:\n"+StringJoin(Slot.GetTags(), ", "))
+
+	; Timers & Stripping - Stripping
+	elseIf Options[0] == "Stripping"
+		string InfoText = PlayerRef.GetLeveledActorBase().GetName()+" Slot "+((Options[2] as int) + 30)+": "
+		InfoText += GetItemName(PlayerRef.GetWornForm(Armor.GetMaskForSlot((Options[2] as int) + 30)))
+		if TargetRef
+			InfoText += "\n"+TargetRef.GetLeveledActorBase().GetName()+" Slot "+((Options[2] as int) + 30)+": "
+			InfoText += GetItemName(TargetRef.GetWornForm(Armor.GetMaskForSlot((Options[2] as int) + 30)))
+		endIf
+		SetInfoText(InfoText)
+		
+	; Strip Editor
+	elseIf Options[0] == "StripEditor"
+		Form ItemRef
+		if (Options[1] as int) == 0
+			ItemRef = ItemsPlayer[(Options[2] as int)]
+		else
+			ItemRef = ItemsTarget[(Options[2] as int)]
+		endIf
+		string InfoText = GetItemName(ItemRef)
+		Armor ArmorRef = ItemRef as Armor
+		if ArmorRef
+			int[] SlotMasks = GetAllMaskSlots(ArmorRef.GetSlotMask())
+			if SlotMasks && ArmorRef
+				InfoText += "\nArmor Slots: "+SlotMasks
+			endIf
+		else
+			InfoText += "\nWeapon"
+		endIf
+		SetInfoText(InfoText)
 	endIf
 endEvent
 
@@ -2160,7 +2187,6 @@ function StripEditor()
 
 	ItemsPlayer = GetItems(PlayerRef, FullInventoryPlayer)
 	int Max = AddItemToggles(ItemsPlayer, 0, 123)
-
 	if ItemsPlayer.Length % 2 != 0
 		AddEmptyOption()
 		Max -= 1
@@ -2175,19 +2201,20 @@ function StripEditor()
 	endIf
 
 	if Max < 1
-		AddHeaderOption("NOTICE: Max Display Items Reached!")
+		AddHeaderOption("NOTICE: Max display of items reached!")
 	endIf
 endFunction
 
 int function AddItemToggles(Form[] Items, int ID, int Max)
+	if !Items
+		return Max
+	endIf
 	int i
 	while i < Items.Length && Max
-		Max -= 1
-		string Name = Items[i].GetName()
-		if Name == ""
-			Name = "$SSL_Unknown"
+		if Items[i]
+			AddTextOptionST("StripEditor_"+ID+"_"+i, GetItemName(Items[i]), GetStripState(Items[i]))
+			Max -= 1
 		endIf
-		AddTextOptionST("StripEditor_"+ID+"_"+i, Name, GetStripState(Items[i]))
 		i += 1
 	endWhile
 	return Max
@@ -2197,7 +2224,7 @@ endFunction
 
 string function GetStripState(Form ItemRef)
 	if !ItemRef
-		return "NONE"
+		return "none"
 	elseIf ActorLib.IsNoStrip(ItemRef)
 		return "$SSL_NeverRemove"
 	elseIf ActorLib.IsAlwaysStrip(ItemRef)
@@ -2226,11 +2253,36 @@ Form[] function GetItems(Actor ActorRef, bool FullInventory = false)
 	endIf
 endFunction
 
-Form[] function GetEquippedItems(Actor ActorRef)
-	Form ItemRef
-	Form[] Output = new Form[34]
+string function GetItemName(Form ItemRef)
+	if ItemRef
+		string Name = ItemRef.GetName()
+		if Name != "" && Name != " "
+			return Name
+		else 
+			return "$SSL_Unknown"
+		endIf
+	endIf
+	return "none"
+endFunction
 
+int[] function GetAllMaskSlots(int Mask)
+	int i = 30
+	int Slot = 0x01
+	int[] Output
+	while i < 62
+		if Math.LogicalAnd(Mask, Slot) == Slot
+			Output = PapyrusUtil.PushInt(Output, i)
+		endIf
+		Slot *= 2
+		i += 1
+	endWhile
+	return Output
+endFunction
+
+Form[] function GetEquippedItems(Actor ActorRef)
+	Form[] Output = new Form[34]
 	; Weapons
+	Form ItemRef
 	ItemRef = ActorRef.GetEquippedWeapon(false) ; Right Hand
 	if ItemRef && IsToggleable(ItemRef)
 		Output[33] = ItemRef
@@ -2241,15 +2293,21 @@ Form[] function GetEquippedItems(Actor ActorRef)
 	endIf
 
 	; Armor
-	int i = 32
-	while i
-		i -= 1
-		ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
-		if ItemRef && Output.Find(ItemRef) == -1 && IsToggleable(ItemRef)
-			Output[i] = ItemRef
+	int i
+	int Slot = 0x01
+	while i < 32
+		Form WornRef = ActorRef.GetWornForm(Slot)
+		if WornRef
+			if WornRef as ObjectReference
+				WornRef = (WornRef as ObjectReference).GetBaseObject()
+			endIf
+			if Output.Find(WornRef) == -1 && IsToggleable(WornRef)
+				Output[i] = WornRef
+			endIf
 		endIf
+		Slot *= 2
+		i    += 1
 	endWhile
-
 	return PapyrusUtil.ClearNone(Output)
 endFunction
 
@@ -2262,23 +2320,25 @@ Form[] function GetFullInventory(Actor ActorRef)
 	Valid[4] = 102 ; kARMA
 	Valid[5] = 120 ; kEquipSlot /;
 
-	Form ItemRef
 	Form[] Output = GetEquippedItems(ActorRef)
-
-	int i = ActorRef.GetNumItems()
-	while i
+	Form[] Items  = ActorRef.GetContainerForms()
+	int n = Output.Length
+	int i = Items.Length
+	Output = Utility.ResizeFormArray(Output, 126)
+	while i && n < 126
 		i -= 1
-		ItemRef = ActorRef.GetNthForm(i)
-		if ItemRef && (ItemRef as ObjectReference)
-			ItemRef = (ItemRef as ObjectReference).GetBaseObject()
-		endIf
-		; Log("["+ItemRef.GetType()+"] "+ItemRef.GetName() + "  -- "+ItemRef )
-		if Valid.Find(ItemRef.GetType()) != -1 && Output.Find(ItemRef) == -1 && IsToggleable(ItemRef)
-			Output = PapyrusUtil.PushForm(Output, ItemRef)
+		Form ItemRef = Items[i]
+		if ItemRef && Valid.Find(ItemRef.GetType()) != -1
+			if ItemRef as ObjectReference
+				ItemRef = (ItemRef as ObjectReference).GetBaseObject()
+			endIf
+			if Output.Find(ItemRef) == -1 && IsToggleable(ItemRef)
+				Output[n] = ItemRef
+				n += 1
+			endIf
 		endIf
 	endWhile
-
-	return Output
+	return PapyrusUtil.ClearNone(Output)
 endFunction
 
 state FullInventoryPlayer
