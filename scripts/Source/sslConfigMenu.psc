@@ -593,7 +593,7 @@ function InstallMenu()
 	AddHeaderOption("SexLab v"+GetStringVer())
 	AddHeaderOption("$SSL_PrerequisiteCheck")
 	SystemCheckOptions()
-	
+
 	SetCursorPosition(1)
 	AddHeaderOption("SexLab v"+GetStringVer()+" by Ashal@LoversLab.com")
 
@@ -603,6 +603,20 @@ function InstallMenu()
 		AddTextOption("Framework quest / files overwritten...", "")
 		AddTextOption("Unable to resolve needed variables", "")
 		AddTextOption("Install unable continue as result", "")
+		AddEmptyOption()
+		AddTextOption("Usually caused by incompatible SexLab addons.", "")
+		AddTextOption("Disable other SexLab addons (NOT SexLab.esm)", "")
+		AddTextOption("one by one and trying again until this message", "")
+		AddTextOption("goes away. Alternatively, with TES5Edit after", "")
+		AddTextOption("the background loader finishes check for any", "")
+		AddTextOption("mods overriding SexLab.esm's Quest records.", "")
+		AddTextOption("ScocLB.esm & SexlabScocLB.esp are the most", "")
+		AddTextOption("common cause of this problem.", "")
+		AddEmptyOption()
+		AddTextOption("If using Mod Organizer, check that no mods are", "")
+		AddTextOption("overwriting any of SexLab Frameworks files.", "")
+		AddTextOption("There should be no red - symbol under flags for", "")
+		AddTextOption("your SexLab Framework install in Mod Organizer.", "")
 		return
 	endIf
 
@@ -630,6 +644,14 @@ function SystemCheckOptions()
 	AddTextOptionST("CheckFNISSexLabFramework", "FNIS SexLab Framework Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabFramework"), "ok", "?"), OPTION_FLAG_DISABLED)
 	AddTextOptionST("CheckFNISCreaturePack", "FNIS Creature Pack (5.2+)", StringIfElse(Config.CheckSystemPart("FNISCreaturePack"), "ok", "?"), OPTION_FLAG_DISABLED)
 	AddTextOptionST("CheckFNISSexLabCreature", "FNIS SexLab Creature Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabCreature"), "ok", "?"), OPTION_FLAG_DISABLED)
+	AddEmptyOption()
+	AddTextOption("If you're getting a ? on any checks", "")
+	AddTextOption("try scrolling in and out of 3rd person mode", "")
+	AddTextOption("then checking again. These ? errors are", "")
+	AddTextOption("soft errors and can usually be ignored safely.", "")
+	AddTextOption("If scrolling in and out doesn't work and characters", "")
+	AddTextOption("stand frozen in place during animation than these", "")
+	AddTextOption("are the most likely causes. Fix your FNIS install.", "")
 endFunction
 
 state InstallSystem

@@ -332,6 +332,9 @@ state Ready
 		if StartAnimEvent != ""
 			Debug.SendAnimationEvent(ActorRef, StartAnimEvent)
 		endIf
+		if StartWait < 0.1
+			StartWait = 0.1
+		endIf
 		RegisterForSingleUpdate(StartWait)
 	endFunction
 	event OnUpdate()
