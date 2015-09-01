@@ -1,7 +1,7 @@
 Scriptname sslEffectDebug extends ActiveMagicEffect
 
 import PapyrusUtil
-import StorageUtil
+import JsonUtil
 
 SexLabFramework property SexLab auto
 sslSystemConfig property Config auto
@@ -22,48 +22,6 @@ endFunction
 
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
-
-;/ 	SetIntValue(SexLab, "RMT.23", 23)
-	Log("RMT.23 -Get- "+GetIntValue(SexLab, "RMT.23"))
-	Log("RMT.23 -Pluck 1- "+PluckIntValue(SexLab, "RMT.23", 0))
-	Log("RMT.23 -Pluck 2- "+PluckIntValue(SexLab, "RMT.23", 0))
-	Log("RMT.23 -Get- "+GetIntValue(SexLab, "RMT.23"))
-	SetIntValue(SexLab, "RMT.0", 0)
-	SetIntValue(SexLab, "RMD.9", 9)
-	SetIntValue(SexLab, "RMT.1", 1)
-	SetIntValue(SexLab, "RMT.2", 2)
-	SetIntValue(SexLab, "RMT.3", 3)
-	Log("RMT.0 -Get- "+GetIntValue(SexLab, "RMT.0"))
-	Log("RMD.9 -Get- "+GetIntValue(SexLab, "RMD.9"))
-	Log("RMT.1 -Get- "+GetIntValue(SexLab, "RMT.1"))
-	Log("RMT.2 -Get- "+GetIntValue(TargetRef, "RMT.2"))
-	Log("RMT.3 -Get- "+GetIntValue(SexLab, "RMT.3"))
-	Log("ClearIntValuePrefix(RMT) = "+ClearIntValuePrefix("RMT"))
-	Log("RMT.0 -Get- "+GetIntValue(SexLab, "RMT.0"))
-	Log("RMD.9 -Get- "+GetIntValue(SexLab, "RMD.9"))
-	Log("RMT.1 -Get- "+GetIntValue(SexLab, "RMT.1"))
-	Log("RMT.2 -Get- "+GetIntValue(TargetRef, "RMT.2"))
-	Log("RMT.3 -Get- "+GetIntValue(SexLab, "RMT.3"))
-	Log("ClearIntValuePrefix(RMD) = "+ClearIntValuePrefix("RMD"))
-	Log("RMT.0 -Get- "+GetIntValue(SexLab, "RMT.0"))
-	Log("RMD.9 -Get- "+GetIntValue(SexLab, "RMD.9"))
-	Log("RMT.1 -Get- "+GetIntValue(SexLab, "RMT.1"))
-	Log("RMT.2 -Get- "+GetIntValue(TargetRef, "RMT.2"))
-	Log("RMT.3 -Get- "+GetIntValue(SexLab, "RMT.3"))
- /;
-	Log("CountFloatListPrefix(SexLab) = "+CountFloatListPrefix("SexLab"))
-	Log("CountFloatValuePrefix(SexLab) = "+CountFloatValuePrefix("SexLab"))
-	Log("CountFormValuePrefix(SexLab) = "+CountFormValuePrefix("SexLab"))
-	Log("CountFormListPrefix(SexLab) = "+CountFormListPrefix("SexLab"))
-	Log("CountAllPrefix(SexLab) = "+CountAllPrefix("SexLab"))
-	Log("ClearAllPrefix(SexLab) = "+ClearAllPrefix("SexLab"))
-	
-	Log("CountFloatListPrefix(SexLab) = "+CountFloatListPrefix("SexLab"))
-	Log("CountFloatValuePrefix(SexLab) = "+CountFloatValuePrefix("SexLab"))
-	Log("CountFormValuePrefix(SexLab) = "+CountFormValuePrefix("SexLab"))
-	Log("CountFormListPrefix(SexLab) = "+CountFormListPrefix("SexLab"))
-	Log("CountAllPrefix(SexLab) = "+CountAllPrefix("SexLab"))
-
 
 	Dispel()
 endEvent
@@ -166,19 +124,3 @@ function UnlockActor(actor ActorRef)
 	ActorRef.StopTranslation()
 	ActorRef.SetVehicle(none)
 endFunction
-
-function CheckActor(Actor ActorRef, string check)
-	Log(check+" -- "+ActorRef.GetLeveledActorBase().GetName()+" SexLabActors: "+StorageUtil.FormListFind(none, "SexLabActors", ActorRef))
-endFunction
-
-bool function IsStrippable(form ItemRef)
-	int i = ItemRef.GetNumKeywords()
-	while i
-		i -= 1
-		if StringUtil.Find(ItemRef.GetNthKeyword(i).GetString(), "NoStrip") != -1 ;|| StringUtil.Find(kw, "Bound") != -1
-			return false
-		endIf
-	endWhile
-	return true
-endFunction
-
