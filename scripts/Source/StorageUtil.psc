@@ -113,6 +113,18 @@ float function GetFloatValue(Form ObjKey, string KeyName, float missing = 0.0) g
 string function GetStringValue(Form ObjKey, string KeyName, string missing = "") global native
 Form function GetFormValue(Form ObjKey, string KeyName, Form missing = none) global native
 
+;/ Plucks a previously saved int/float/string/Form value on form or globally.
+   Returning the value stored, then removing it from storage.
+
+   ObjKey: form to pluck from. Set none to get global value.
+   KeyName: name of value.
+   [optional] missing: if value has not been set, return this value instead.
+/;
+int function PluckIntValue(Form ObjKey, string KeyName, int missing = 0) global native
+float function PluckFloatValue(Form ObjKey, string KeyName, float missing = 0.0) global native
+string function PluckStringValue(Form ObjKey, string KeyName, string missing = "") global native
+Form function PluckFormValue(Form ObjKey, string KeyName, Form missing = none) global native
+
 ;/ Get previously saved int/float/string/Form value on form or globally.
 
    ObjKey: form to get from. Set none to get global value.
@@ -163,6 +175,39 @@ int function IntListSet(Form ObjKey, string KeyName, int index, int value) globa
 float function FloatListSet(Form ObjKey, string KeyName, int index, float value) global native
 string function StringListSet(Form ObjKey, string KeyName, int index, string value) global native
 Form function FormListSet(Form ObjKey, string KeyName, int index, Form value) global native
+
+;/ Plucks a value from list by index on form or globally.
+   The index is removed from the list's storage after returning it's value.
+
+   ObjKey: form to pluck value from. Set none to get global list value.
+   KeyName: name of list.
+   index: index of value in the list.
+   [optional] missing: if index has not been set, return this value instead.
+/;
+int function IntListPluck(Form ObjKey, string KeyName, int index, int missing) global native
+float function FloatListPluck(Form ObjKey, string KeyName, int index, float missing) global native
+string function StringListPluck(Form ObjKey, string KeyName, int index, string missing) global native
+Form function FormListPluck(Form ObjKey, string KeyName, int index, Form missing) global native
+
+;/ Gets the value of the very first element in a list, and subsequently removes the index afterward.
+
+   ObjKey: form to shift value from. Set none to get global list value.
+   KeyName: name of list to shift it's first value from.
+/;
+int function IntListShift(Form ObjKey, string KeyName) global native
+float function FloatListShift(Form ObjKey, string KeyName) global native
+string function StringListShift(Form ObjKey, string KeyName) global native
+Form function FormListShift(Form ObjKey, string KeyName) global native
+
+;/ Gets the value of the very last element in a list, and subsequently removes the index afterward.
+
+   ObjKey: form to pop value from. Set none to get global list value.
+   KeyName: name of list to pop off it's last value.
+/;
+int function IntListPop(Form ObjKey, string KeyName) global native
+float function FloatListPop(Form ObjKey, string KeyName) global native
+string function StringListPop(Form ObjKey, string KeyName) global native
+Form function FormListPop(Form ObjKey, string KeyName) global native
 
 ;/ Adjust the existing value of a list by the given amount.
 
@@ -340,6 +385,41 @@ int[] function IntListToArray(Form ObjKey, string KeyName) global native
 float[] function FloatListToArray(Form ObjKey, string KeyName) global native
 string[] function StringListToArray(Form ObjKey, string KeyName) global native
 Form[] function FormListToArray(Form ObjKey, string KeyName) global native
+
+;/ Counts each type of of any KeyName that starts with a given string prefix on all objects.
+
+   PrefixKey: The string a KeyName must start with to be counted. Cannot be empty.
+/;
+int function CountIntValuePrefix(string PrefixKey) global native
+int function CountFloatValuePrefix(string PrefixKey) global native
+int function CountStringValuePrefix(string PrefixKey) global native
+int function CountFormValuePrefix(string PrefixKey) global native
+
+int function CountIntListPrefix(string PrefixKey) global native
+int function CountFloatListPrefix(string PrefixKey) global native
+int function CountStringListPrefix(string PrefixKey) global native
+int function CountFormListPrefix(string PrefixKey) global native
+
+; Peforms all of the above prefix counts in one go.
+int function CountAllPrefix(string PrefixKey) global native
+
+;/ Clears each type of of any KeyName that starts with a given string prefix on all objects.
+   Returns the number of values/lists that were unset.
+
+   PrefixKey: The string a KeyName must start with to be cleared. Cannot be empty.
+/;
+int function ClearIntValuePrefix(string PrefixKey) global native
+int function ClearFloatValuePrefix(string PrefixKey) global native
+int function ClearStringValuePrefix(string PrefixKey) global native
+int function ClearFormValuePrefix(string PrefixKey) global native
+
+int function ClearIntListPrefix(string PrefixKey) global native
+int function ClearFloatListPrefix(string PrefixKey) global native
+int function ClearStringListPrefix(string PrefixKey) global native
+int function ClearFormListPrefix(string PrefixKey) global native
+
+; Peforms all of the above prefix clears in one go.
+int function ClearAllPrefix(string PrefixKey) global native
 
 ;/
 	Debug functions - can be helpful to find problems or for development.

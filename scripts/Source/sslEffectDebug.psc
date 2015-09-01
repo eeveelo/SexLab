@@ -23,69 +23,47 @@ endFunction
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	sslBaseExpression Expression = SexLab.GetExpressionByName("Custom 1")
-	float[] Preset = Expression.GenderPhase(Expression.PickPhase(100, TargetRef.GetLeveledActorBase().GetSex()), TargetRef.GetLeveledActorBase().GetSex())
-	Log("Preset: "+Preset)
-	sslBaseExpression.ApplyPresetFloats(TargetRef, Preset)
-	Utility.Wait(5.0)
-	Log("OpenMouth")
-	sslBaseExpression.OpenMouth(TargetRef)
-	Utility.Wait(5.0)
-	Log("CloseMouth")
-	sslBaseExpression.CloseMouth(TargetRef)
-
-	Utility.Wait(5.0)
-	Log("ClearMFG")
-	sslBaseExpression.ApplyPresetFloats(TargetRef, Preset)
-	Utility.Wait(5.0)
-	sslBaseExpression.ClearMFG(TargetRef)
-
-	Utility.Wait(5.0)
-	Log("ClearMFG")
-	sslBaseExpression.ApplyPresetFloats2(TargetRef, Preset)
-	Utility.Wait(5.0)
-	sslBaseExpression.ClearMFG(TargetRef)
-
-	Log("ClearMFG")
-
-
-
-	; bool[] arr = Utility.CreateBoolArray(10, false)
-	; Log("10: "+arr)
-	; arr = Utility.ResizeBoolArray(arr, 15, true)
-	; Log("15: "+arr)
-	; arr = PapyrusUtil.RemoveBool(arr, false)
-	; Log("5: "+arr)
-	; arr = Utility.ResizeBoolArray(arr, 10, false)
-	; Log("15: "+arr)
-	; arr = PapyrusUtil.PushBool(arr, true)
-	; Log("11: "+arr)
-	; arr = Utility.ResizeBoolArray(arr, (arr.Length + 1), true)
-	; Log("12: "+arr)
-
-	;/ Topic Hit1 = Game.GetForm(0xA91F9) as Topic
-	if !Hit1
-		Log("Is right form")
-		Hit1 = Game.GetForm(0xA91FA) as Topic
-	endIf
-	if Hit1
-		Log("Playing...")
-		TargetRef.Say(Hit1)
-		Utility.Wait(1.2)	
-		TargetRef.Say(Hit1)
-		Utility.Wait(1.2)
-		TargetRef.Say(Hit1)
-		Utility.Wait(1.2)
-		TargetRef.Say(Hit1)
-		Utility.Wait(1.2)
-		TargetRef.Say(Hit1)
-		Utility.Wait(1.2)
-		TargetRef.Say(Hit1)
-		Utility.Wait(1.2)
-	else
-		Log("Failed to find hit topic")
-	endIf
+;/ 	SetIntValue(SexLab, "RMT.23", 23)
+	Log("RMT.23 -Get- "+GetIntValue(SexLab, "RMT.23"))
+	Log("RMT.23 -Pluck 1- "+PluckIntValue(SexLab, "RMT.23", 0))
+	Log("RMT.23 -Pluck 2- "+PluckIntValue(SexLab, "RMT.23", 0))
+	Log("RMT.23 -Get- "+GetIntValue(SexLab, "RMT.23"))
+	SetIntValue(SexLab, "RMT.0", 0)
+	SetIntValue(SexLab, "RMD.9", 9)
+	SetIntValue(SexLab, "RMT.1", 1)
+	SetIntValue(SexLab, "RMT.2", 2)
+	SetIntValue(SexLab, "RMT.3", 3)
+	Log("RMT.0 -Get- "+GetIntValue(SexLab, "RMT.0"))
+	Log("RMD.9 -Get- "+GetIntValue(SexLab, "RMD.9"))
+	Log("RMT.1 -Get- "+GetIntValue(SexLab, "RMT.1"))
+	Log("RMT.2 -Get- "+GetIntValue(TargetRef, "RMT.2"))
+	Log("RMT.3 -Get- "+GetIntValue(SexLab, "RMT.3"))
+	Log("ClearIntValuePrefix(RMT) = "+ClearIntValuePrefix("RMT"))
+	Log("RMT.0 -Get- "+GetIntValue(SexLab, "RMT.0"))
+	Log("RMD.9 -Get- "+GetIntValue(SexLab, "RMD.9"))
+	Log("RMT.1 -Get- "+GetIntValue(SexLab, "RMT.1"))
+	Log("RMT.2 -Get- "+GetIntValue(TargetRef, "RMT.2"))
+	Log("RMT.3 -Get- "+GetIntValue(SexLab, "RMT.3"))
+	Log("ClearIntValuePrefix(RMD) = "+ClearIntValuePrefix("RMD"))
+	Log("RMT.0 -Get- "+GetIntValue(SexLab, "RMT.0"))
+	Log("RMD.9 -Get- "+GetIntValue(SexLab, "RMD.9"))
+	Log("RMT.1 -Get- "+GetIntValue(SexLab, "RMT.1"))
+	Log("RMT.2 -Get- "+GetIntValue(TargetRef, "RMT.2"))
+	Log("RMT.3 -Get- "+GetIntValue(SexLab, "RMT.3"))
  /;
+	Log("CountFloatListPrefix(SexLab) = "+CountFloatListPrefix("SexLab"))
+	Log("CountFloatValuePrefix(SexLab) = "+CountFloatValuePrefix("SexLab"))
+	Log("CountFormValuePrefix(SexLab) = "+CountFormValuePrefix("SexLab"))
+	Log("CountFormListPrefix(SexLab) = "+CountFormListPrefix("SexLab"))
+	Log("CountAllPrefix(SexLab) = "+CountAllPrefix("SexLab"))
+	Log("ClearAllPrefix(SexLab) = "+ClearAllPrefix("SexLab"))
+	
+	Log("CountFloatListPrefix(SexLab) = "+CountFloatListPrefix("SexLab"))
+	Log("CountFloatValuePrefix(SexLab) = "+CountFloatValuePrefix("SexLab"))
+	Log("CountFormValuePrefix(SexLab) = "+CountFormValuePrefix("SexLab"))
+	Log("CountFormListPrefix(SexLab) = "+CountFormListPrefix("SexLab"))
+	Log("CountAllPrefix(SexLab) = "+CountAllPrefix("SexLab"))
+
 
 	Dispel()
 endEvent

@@ -136,3 +136,15 @@ int function AdjustIntValue(string FileName, string KeyName, int amount) global 
 float function AdjustFloatValue(string FileName, string KeyName, float amount) global native
 Int function IntListAdjust(string FileName, string KeyName, int index, Int amount) global native
 float function FloatListAdjust(string FileName, string KeyName, int index, float amount) global native
+
+int function CountIntValuePrefix(string FileName, string PrefixKey) global native
+int function CountFloatValuePrefix(string FileName, string PrefixKey) global native
+int function CountStringValuePrefix(string FileName, string PrefixKey) global native
+int function CountFormValuePrefix(string FileName, string PrefixKey) global native
+
+int function CountIntListPrefix(string FileName, string PrefixKey) global native
+int function CountFloatListPrefix(string FileName, string PrefixKey) global native
+int function CountStringListPrefix(string FileName, string PrefixKey) global native
+int function CountFormListPrefix(string FileName, string PrefixKey) global native
+
+int function CountAllPrefix(string FileName, string PrefixKey) global native
