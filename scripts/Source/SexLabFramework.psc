@@ -795,9 +795,10 @@ endFunction
 ;#---------------------------#
 
 ;/**
+* Get an array of creature animations for a provided creature's race.
 *  
 * @param  int ActorCount - The total number of actors, between 1-5 the returned animations should be intended for.
-* @param  Race RaceRef - The race the returned animations should be useable by.
+* @param  Race RaceRef - The race the returned animations should be usable by.
 * @return sslBaseAnimation[] - An array of animations that fit the provided search arguments.
 **/;
 sslBaseAnimation[] function GetCreatureAnimationsByRace(int ActorCount, Race RaceRef)
@@ -805,9 +806,10 @@ sslBaseAnimation[] function GetCreatureAnimationsByRace(int ActorCount, Race Rac
 endFunction
 
 ;/**
-*  
+* Get an array of creature animations that require a specific number of actors and race type.
+* 
 * @param  int ActorCount - The total number of actors, between 1-5 the returned animations should be intended for.
-* @param  bool var - 
+* @param  string RaceKey - The creature race sexlab identifier used to identify animations meant for this race.
 * @return sslBaseAnimation[] - An array of animations that fit the provided search arguments.
 **/;
 sslBaseAnimation[] function GetCreatureAnimationsByRaceKey(int ActorCount, string RaceKey)
@@ -815,12 +817,13 @@ sslBaseAnimation[] function GetCreatureAnimationsByRaceKey(int ActorCount, strin
 endFunction
 
 ;/**
-*  
+* Get an array of creature animations for a specific number of actors, creature race, and optionally gender.
+* 
 * @param  int ActorCount - The total number of actors, between 1-5 the returned animations should be intended for.
-* @param  Race RaceRef - The race the returned animations should be useable by.
-* @param  bool var - 
-* @param  bool var - 
-* @param  bool var - 
+* @param  Race RaceRef - The race the returned animations should be usable by.
+* @param  int MaleCreatures - The number of male creatures the animation should use. Ignored if user does not have creature genders enabled or ForceUse is set to TRUE.
+* @param  int FemaleCreatures - The number of female creatures the animation should use. Ignored if user does not have creature genders enabled or ForceUse is set to TRUE.
+* @param  bool ForceUse - If left as the default value of FALSE, the MaleCreatures and FemaleCreatures argument will be ignored when creature genders aren't enabled by user.
 * @return sslBaseAnimation[] - An array of animations that fit the provided search arguments.
 **/;
 sslBaseAnimation[] function GetCreatureAnimationsByRaceGenders(int ActorCount, Race RaceRef, int MaleCreatures = 0, int FemaleCreatures = 0, bool ForceUse = false)
@@ -828,24 +831,13 @@ sslBaseAnimation[] function GetCreatureAnimationsByRaceGenders(int ActorCount, R
 endFunction
 
 ;/**
-*  
+* Get an array of creature animations that have a specified set of tags AND are valid for a specific creatures race.
+*
 * @param  int ActorCount - The total number of actors, between 1-5 the returned animations should be intended for.
-* @param  bool var - 
-* @param  bool var - 
-* @param  bool var - 
-* @return sslBaseAnimation[] - An array of animations that fit the provided search arguments.
-**/;
-sslBaseAnimation[] function GetCreatureAnimationsByTags(int ActorCount, string Tags, string TagSuppress = "", bool RequireAll = true)
-	return CreatureSlots.GetByTags(ActorCount, Tags, TagSuppress, RequireAll)
-endFunction
-
-;/**
-*  
-* @param  int ActorCount - The total number of actors, between 1-5 the returned animations should be intended for.
-* @param  Race RaceRef - The race the returned animations should be useable by.
-* @param  bool var - 
-* @param  bool var - 
-* @param  bool var - 
+* @param  Race RaceRef - The race the returned animations should be usable by.
+* @param  string Tags - A comma separated list of animation tags you want to use as a filter for the returned animations.
+* @param  string TagSuppress - A comma separated list of animation tags you DO NOT want present on any of the returned animations.
+* @param  bool RequireAll - If TRUE, all tags in the provided "string Tags" list must be present in an animation to be returned. When FALSE only one tag in the list is needed.
 * @return sslBaseAnimation[] - An array of animations that fit the provided search arguments.
 **/;
 sslBaseAnimation[] function GetCreatureAnimationsByRaceTags(int ActorCount, Race RaceRef, string Tags, string TagSuppress = "", bool RequireAll = true)
@@ -853,12 +845,13 @@ sslBaseAnimation[] function GetCreatureAnimationsByRaceTags(int ActorCount, Race
 endFunction
 
 ;/**
-*  
+** Get an array of creature animations that have a specified set of tags AND are valid for a specific creature race type.
+*
 * @param  int ActorCount - The total number of actors, between 1-5 the returned animations should be intended for.
-* @param  bool var - 
-* @param  bool var - 
-* @param  bool var - 
-* @param  bool var - 
+* @param  string RaceKey - The creature race sexlab identifier used to identify animations meant for this race.
+* @param  string Tags - A comma separated list of animation tags you want to use as a filter for the returned animations.
+* @param  string TagSuppress - A comma separated list of animation tags you DO NOT want present on any of the returned animations.
+* @param  bool RequireAll - If TRUE, all tags in the provided "string Tags" list must be present in an animation to be returned. When FALSE only one tag in the list is needed.4\
 * @return sslBaseAnimation[] - An array of animations that fit the provided search arguments.
 **/;
 sslBaseAnimation[] function GetCreatureAnimationsByRaceKeyTags(int ActorCount, string RaceKey, string Tags, string TagSuppress = "", bool RequireAll = true)
@@ -866,7 +859,22 @@ sslBaseAnimation[] function GetCreatureAnimationsByRaceKeyTags(int ActorCount, s
 endFunction
 
 ;/**
-*  
+* Get an array of creature animations that have a specified set of tags.
+* This will be a mix of different creature type animations, you likely want to use GetCreatureAnimationsByRaceTags() or GetCreatureAnimationsByRaceKeyTags() instead.
+* 
+* @param  int ActorCount - The total number of actors, between 1-5 the returned animations should be intended for.
+* @param  string Tags - A comma separated list of animation tags you want to use as a filter for the returned animations.
+* @param  string TagSuppress - A comma separated list of animation tags you DO NOT want present on any of the returned animations.
+* @param  bool RequireAll - If TRUE, all tags in the provided "string Tags" list must be present in an animation to be returned. When FALSE only one tag in the list is needed.
+* @return sslBaseAnimation[] - An array of animations that fit the provided search arguments.
+**/;
+sslBaseAnimation[] function GetCreatureAnimationsByTags(int ActorCount, string Tags, string TagSuppress = "", bool RequireAll = true)
+	return CreatureSlots.GetByTags(ActorCount, Tags, TagSuppress, RequireAll)
+endFunction
+
+;/**
+** Get a single creature animation by name. Ignores if a user has the animation enabled or not.
+*
 * @param  string FindName - The name of an animation as seen in the SexLab MCM.
 * @return sslBaseAnimation - The creature animation whose name matches, if found.
 **/;
@@ -875,7 +883,8 @@ sslBaseAnimation function GetCreatureAnimationByName(string FindName)
 endFunction
 
 ;/**
-*  
+* Get a single creature animation by it's unique registry name. Ignores if a user has the animation enabled or not.
+*
 * @param  string Registry - The unique registry name of the animation. (string property Registry on any animation)
 * @return sslBaseAnimation - The creature animation whose registry matches, if found.
 **/;
@@ -884,19 +893,21 @@ sslBaseAnimation function GetCreatureAnimationByRegistry(string Registry)
 endFunction
 
 ;/**
-*  
-* @param  bool var - 
-* @param  bool var - 
+* Checks if a given creature race has any usable animations currently registered.
+* 
+* @param  Race CreatureRace - The race of the creature you want to check for valid creature animations to use.
+* @param  int Gender - Any optional parameter to have it check if a specific creature gender has an animation. -1 (default) to ignore, 2 for Male, 3 for Female.
 * @return bool - 
 **/;
-bool function HasCreatureAnimation(Race CreatureRace, int Gender = 2)
+bool function HasCreatureAnimation(Race CreatureRace, int Gender = -1)
 	return CreatureSlots.HasAnimation(CreatureRace, Gender)
 endFunction
 
 ;/**
-*  
-* @param  bool var - 
-* @return bool - 
+* Checks if a given creature race is able to animate via sexlab at all.
+* 
+* @param  Race CreatureRace - The race to check if allowed to animate.
+* @return bool - TRUE if the creature has a valid enabled animation AND that creature animations are enabled.
 **/;
 bool function AllowedCreature(Race CreatureRace)
 	return CreatureSlots.AllowedCreature(CreatureRace)
