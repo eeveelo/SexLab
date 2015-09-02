@@ -782,7 +782,7 @@ function RestoreActorDefaults()
 		endIf
 		; Reset expression
 		ActorRef.ClearExpressionOverride()
-		ActorRef.ResetExpressionOverrides()
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, -1, 0, 0)
 	endIf
 	; Clear from animating faction
 	ActorRef.SetFactionRank(Config.AnimatingFaction, 0)
