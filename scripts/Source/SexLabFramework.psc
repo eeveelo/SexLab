@@ -932,49 +932,109 @@ endFunction
 ;#   BEGIN VOICE FUNCTIONS   #
 ;#---------------------------#
 
+;/**
+* Returns an actors saved voice object if the user has the "reuse voices" option enabled, otherwise random for gender.
+* 
+* @param  Actor ActorRef - The actor to pick a voice for.
+* @return sslBaseVoice - A suitable voice object for the actor to use.
+**/;
 sslBaseVoice function PickVoice(Actor ActorRef)
 	return VoiceSlots.PickVoice(ActorRef)
 endFunction
-
-; Alias of PickVoice()
-sslBaseVoice function GetVoice(Actor ActorRef)
+sslBaseVoice function GetVoice(Actor ActorRef) ; Alias of PickVoice()
 	return VoiceSlots.PickVoice(ActorRef)
 endFunction
 
+;/**
+* Saves a given voice to an actor. Once saved the function GetSavedVoice() will always return their saved voice,
+* PickVoice() / GetVoice() will also return this voice for the actor if the user has the "reuse voices" option enabled 
+* 
+* @param  Actor ActorRef - The actor to pick a voice for.
+* @return sslBaseVoice - A suitable voice object for the actor to use. Does not have to be a registered SexLab voice object.
+**/;
 function SaveVoice(Actor ActorRef, sslBaseVoice Saving)
 	VoiceSlots.SaveVoice(ActorRef, Saving)
 endFunction
 
+;/**
+* Removes any saved voice on an actor.
+* 
+* @param  Actor ActorRef - The actor you want to remove a saved voice from.
+**/;
 function ForgetVoice(Actor ActorRef)
 	VoiceSlots.ForgetVoice(ActorRef)
 endFunction
 
+;/**
+* Returns an actors saved voice object, if they have one saved.
+* 
+* @param  Actor ActorRef - The actor get the saved voice for.
+* @return sslBaseVoice - The actors saved voice object if one exists, otherwise NONE.
+**/;
+sslBaseVoice function GetSavedVoice(Actor ActorRef)
+	return VoiceSlots.GetSaved(ActorRef)
+endFunction
+
+;/**
+* Checks if the given Actor has a custom, non-registered SexLab voice.
+* 
+* @param  Actor ActorRef - The actor to check.
+* @return sslBaseVoice - A suitable voice object for the actor to use.
+**/;
+bool function HasCustomVoice(Actor ActorRef)
+	return VoiceSlots.HasCustomVoice(ActorRef)
+endFunction
+
+;/**
+* Get a random voice for a given gender.
+* 
+* @param  int Gender - The gender number to get a random voice for. 0 = male 1 = female.
+* @return sslBaseVoice - A suitable voice object for the actor to use.
+**/;
 sslBaseVoice function GetVoiceByGender(int Gender)
 	return VoiceSlots.PickGender(Gender)
 endFunction
 
+;/**
+* Get a single voice object by name. Ignores if a user has the voice enabled or not.
+* 
+* @param  string FindName - The name of an voice object as seen in the SexLab MCM.
+* @return sslBaseVoice - The voice object whose name matches, if found.
+**/;
 sslBaseVoice function GetVoiceByName(string FindName)
 	return VoiceSlots.GetByName(FindName)
 endFunction
 
+;/**
+* Find the registration slot number that an voice currently occupies.
+* 
+* @param  string FindName - The name of an voice as seen in the SexLab MCM.
+* @return int - The registration slot number for the voice.
+**/;
 int function FindVoiceByName(string FindName)
 	return VoiceSlots.FindByName(FindName)
 endFunction
 
+;/**
+* Returns a voice object by it's registration slot number.
+* 
+* @param  int slot - The slot number of the voice object.
+* @return sslBaseVoice - The voice object that currently occupies that slot, NONE if nothing occupies it.
+**/;
 sslBaseVoice function GetVoiceBySlot(int slot)
 	return VoiceSlots.GetBySlot(slot)
 endFunction
 
+;/**
+* Selects a single voice from a set of given tag options.
+* 
+* @param  string Tags - A comma separated list of voice tags you want to use as a filter.
+* @param  string TagSuppress - A comma separated list of voice tags you DO NOT want present on the returned voice.
+* @param  bool RequireAll - If TRUE, all tags in the provided "string Tags" list must be present in an voice to be returned. When FALSE only one tag in the list is needed.
+* @return sslBaseVoice - A randomly selected voice object among any that match the provided search arguments.
+**/;
 sslBaseVoice function GetVoiceByTags(string Tags, string TagSuppress = "", bool RequireAll = true)
 	return VoiceSlots.GetByTags(Tags, TagSuppress, RequireAll)
-endFunction
-
-sslBaseVoice function GetVoiceByTag(string Tag1, string Tag2 = "", string TagSuppress = "", bool RequireAll = true)
-	return VoiceSlots.GetByTags(sslUtility.MakeArgs(",", Tag1, Tag2), TagSuppress, RequireAll)
-endFunction
-
-bool function HasCustomVoice(Actor ActorRef)
-	return VoiceSlots.HasCustomVoice(ActorRef)
 endFunction
 
 ;#---------------------------#
@@ -985,60 +1045,156 @@ endFunction
 ;# BEGIN EXPRESSION FUNCTION #
 ;#---------------------------#
 
+;/**
+* Selects a random expression that fits the provided criteria.
+* 
+* @param  Actor ActorRef - The actor who will be using this expression and the following conditions apply to.
+* @param  bool IsVictim - Set to TRUE if the actor is considered the victim in an aggressive scene.
+* @param  bool IsAggressor - Set to TRUE if the actor is considered the aggressor in an aggressive scene.
+* @return sslBaseExpression - A randomly selected expression object among any that meet the needed criteria.
+**/;
 sslBaseExpression function PickExpressionByStatus(Actor ActorRef, bool IsVictim = false, bool IsAggressor = false)
 	return ExpressionSlots.PickByStatus(ActorRef, IsVictim, IsAggressor)
 endFunction
 
+;/**
+* Selects a random expression that fits the provided criteria. A slightly different method of doing the above.
+* 
+* @param  Actor ActorRef - The actor who will be using this expression.
+* @param  Actor VictimRef - The actor considered a victim in an aggressive scene.
+* @return sslBaseExpression - A randomly selected expression object among any that meet the needed criteria.
+**/;
 sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none)
 	return ExpressionSlots.PickByStatus(ActorRef, (VictimRef && VictimRef == ActorRef), (VictimRef && VictimRef != ActorRef))
 endFunction
 
+;/**
+* Selects a single expression from based on a single tag.
+* 
+* @param  string Tags - A single expression tag to use as the filter when picking randomly.
+* @return sslBaseExpression - A randomly selected expression object among any that have the provided tag.
+**/;
 sslBaseExpression function RandomExpressionByTag(string Tag)
 	return ExpressionSlots.RandomByTag(Tag)
 endFunction
 
+;/**
+* Get a single expression object by name. Ignores if a user has the expression enabled or not.
+* 
+* @param  string FindName - The name of an expression object as seen in the SexLab MCM.
+* @return sslBaseExpression - The expression object whose name matches, if found.
+**/;
 sslBaseExpression  function GetExpressionByName(string findName)
 	return ExpressionSlots.GetByName(findName)
 endFunction
 
-sslBaseExpression function GetExpressionBySlot(int slot)
-	return ExpressionSlots.GetBySlot(slot)
-endFunction
-
+;/**
+* Find the registration slot number that an expression currently occupies.
+* 
+* @param  string FindName - The name of an expression as seen in the SexLab MCM.
+* @return int - The registration slot number for the expression.
+**/;
 int function FindExpressionByName(string findName)
 	return ExpressionSlots.FindByName(findName)
 endFunction
 
+;/**
+* Returns a expression object by it's registration slot number.
+* 
+* @param  int slot - The slot number of the expression object.
+* @return sslBaseExpression - The expression object that currently occupies that slot, NONE if nothing occupies it.
+**/;
+sslBaseExpression function GetExpressionBySlot(int slot)
+	return ExpressionSlots.GetBySlot(slot)
+endFunction
+
+;/**
+* Opens an actors mouth.
+* Mirrored function of a global in sslBaseExpressions. Suggested to use global instead of the one in this script.
+* 
+* @param  Actor ActorRef - The actors whose mouth should open.
+**/;
 function OpenMouth(Actor ActorRef)
 	sslBaseExpression.OpenMouth(ActorRef)
 endFunction
 
+;/**
+* Closes an actors mouth.
+* Mirrored function of a global in sslBaseExpressions. Suggested to use global instead of the one in this script.
+*
+* @param  Actor ActorRef - The actors whose mouth should open.
+**/;
 function CloseMouth(Actor ActorRef)
 	sslBaseExpression.CloseMouth(ActorRef)
 endFunction
 
+;/**
+* Checks if an actors mouth is currently considered open or not.
+* Mirrored function of a global in sslBaseExpressions. Suggested to use global instead of the one in this script.
+*
+* @param  Actor ActorRef - The actors whose may or may not currently be open.
+* @return bool - TRUE if the actors mouth appears to be in an open state.
+**/;
 bool function IsMouthOpen(Actor ActorRef)
 	return sslBaseExpression.IsMouthOpen(ActorRef)
 endFunction
 
+;/**
+* Resets an actors mood, phonemes, and modifiers.
+* Mirrored function of a global in sslBaseExpressions. Suggested to use global instead of the one in this script.
+*
+* @param  Actor ActorRef - The actors whose expression should return to normal.
+**/;
 function ClearMFG(Actor ActorRef)
 	sslBaseExpression.ClearMFG(ActorRef)
 endFunction
 
+;/**
+* Resets all of an actors phonemes to 0.
+* Mirrored function of a global in sslBaseExpressions. Suggested to use global instead of the one in this script.
+*
+* @param  Actor ActorRef - The actor to clear phonemes on.
+**/;
 function ClearPhoneme(Actor ActorRef)
 	sslBaseExpression.ClearPhoneme(ActorRef)
 endFunction
 
+;/**
+* Resets all of an actors modifiers to 0.
+* Mirrored function of a global in sslBaseExpressions. Suggested to use global instead of the one in this script.
+*
+* @param  Actor ActorRef - The actor to clear modifiers on.
+**/;
 function ClearModifier(Actor ActorRef)
 	sslBaseExpression.ClearModifier(ActorRef)
 endFunction
 
+;/**
+* Applies an array of values to an actor, automatically setting their phonemes, modifiers, and mood.
+* Mirrored function of a global in sslBaseExpressions. Suggested to use global instead of the one in this script.
+*
+* @param  Actor ActorRef - The actors to apply the preset to.
+* @param  float[] Preset - Must be a 32 length array. Each index corresponds to an MFG id. Values range from 0.0 to 1.0, with the exception of mood type.
+*                          Phonemes   0-15 = Preset[0]  to Preset[15]
+*                          Modifiers  0-13 = Preset[16] to Preset[29]
+*                          Mood Type       = Preset[30]
+*                          Mood Value      = Preset[31]
+**/;
 function ApplyPresetFloats(Actor ActorRef, float[] Preset)
 	sslBaseExpression.ApplyPresetFloats(ActorRef, Preset)
 endfunction
 
-; DEPRECATED - Expression presets have migrated to float arrays of 0.0-1.0 instead of 0-100
-; in order to be directly compatible with SKSE's native MFG functions.
+;/**
+* Applies an array of values to an actor, automatically setting their phonemes, modifiers, and mood.
+* Mirrored function of a global in sslBaseExpressions. Suggested to use global instead of the one in this script.
+*
+* @param  Actor ActorRef - The actors to apply the preset to.
+* @param  int[] Preset - Must be a 32 length array. Each index corresponds to an MFG id. Values range from 0 to 100, with the exception of mood type.
+*                        Phonemes   0-15 = Preset[0]  to Preset[15]
+*                        Modifiers  0-13 = Preset[16] to Preset[29]
+*                        Mood Type       = Preset[30]
+*                        Mood Value      = Preset[31]
+**/;
 function ApplyPreset(Actor ActorRef, int[] Preset)
 	sslBaseExpression.ApplyPreset(ActorRef, Preset)
 endFunction
@@ -1531,6 +1687,10 @@ endFunction
 
 sslBaseAnimation[] function GetAnimationsByTag(int ActorCount, string Tag1, string Tag2 = "", string Tag3 = "", string TagSuppress = "", bool RequireAll = true)
 	return AnimSlots.GetByTags(ActorCount, sslUtility.MakeArgs(",", Tag1, Tag2, Tag3), TagSuppress, RequireAll)
+endFunction
+
+sslBaseVoice function GetVoiceByTag(string Tag1, string Tag2 = "", string TagSuppress = "", bool RequireAll = true)
+	return VoiceSlots.GetByTags(sslUtility.MakeArgs(",", Tag1, Tag2), TagSuppress, RequireAll)
 endFunction
 
 function ApplyCum(Actor ActorRef, int CumID)
