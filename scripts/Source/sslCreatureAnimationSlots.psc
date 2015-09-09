@@ -353,7 +353,7 @@ function RegisterRaces()
 	AddRaceID("Skeevers", "SkeeverRace")
 
 	ClearRaceKey("Chickens")
-	AddRaceID("Chkickens", "ChickenRace")
+	AddRaceID("Chickens", "ChickenRace")
 
 	; Send creature race key registration event
 	ModEvent.Send(ModEvent.Create("SexLabRegisterCreatureKey"))
