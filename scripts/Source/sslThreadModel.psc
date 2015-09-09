@@ -406,72 +406,51 @@ state Making
 
 		; Get default foreplay if none and enabled
 		if !HasCreature && !IsAggressive && ActorCount == 2 && !NoLeadIn && LeadAnimations.Length == 0 && Config.ForeplayStage
-			if BedRef
-				SetLeadAnimations(AnimSlots.GetByTags(2, "LeadIn", SexLabUtil.StringIfElse(Config.BedRemoveStanding, "Furniture,Standing", "Furniture")))
-			else
-				SetLeadAnimations(AnimSlots.GetByTags(2, "LeadIn"))
-			endIf
+			SetLeadAnimations(AnimSlots.GetByTags(2, "LeadIn"))
 		endIf
 
-		if CustomAnimations || CustomAnimations.Length < 1
-			
-			; Filter animations based on user settings and scene
-			string[] Filters
+		; Filter animations based on user settings and scene
+		if !CustomAnimations || CustomAnimations.Length < 1
+			string[] Filters = new string[3]
 			sslBaseAnimation[] FilteredPrimary
 			sslBaseAnimation[] FilteredLead
-
-			; Remove non same sex animations per user settings
-			if ActorCount > 1 && Creatures == 0 && (Males == 0 || Females == 0) && Config.RestrictSameSex
-				Filters    = new string[1]
-				Filters[0] = SexLabUtil.GetGenderTag(Females, Males)
-				; Remove non-tagged from primary
-				FilteredPrimary = sslUtility.FilterTaggedAnimations(PrimaryAnimations, Filters, true)
-				if FilteredPrimary.Length > 0
-					Log("Filtered out '"+(PrimaryAnimations.Length - FilteredPrimary.Length)+"' Non Same Sex Primary Animations with tags: "+Filters)
-					PrimaryAnimations = FilteredPrimary
-				endIf
-				; Remove furniture/standing animations from lead in
-				if LeadIn && LeadAnimations.Length > 0
-					FilteredLead = sslUtility.FilterTaggedAnimations(LeadAnimations, Filters, true)
-					if FilteredLead.Length > 0
-						Log("Filtered out '"+(LeadAnimations.Length - FilteredLead.Length)+"' Non Same Sex Lead In Animations with tags: "+Filters)
-						LeadAnimations = FilteredLead
-					endIf
-				endIf
+			; Filter tags for same sex restrictions
+			if ActorCount == 2 && Creatures == 0 && (Males == 0 || Females == 0) && Config.RestrictSameSex
+				Filters[0] = SexLabUtil.StringIfElse(Females == 2, "FM", "Breast")
 			endIf
-
-			; Filter non-bed friendly animations
+			; Filter tags for non-bed friendly animations
 			if BedRef
-				Filters = new string[1]
-				Filters[0] = "Furniture"
+				Filters[1] = "Furniture"
 				if Config.BedRemoveStanding
-					Filters = PapyrusUtil.PushString(Filters, "Standing")
+					Filters[2] = "Standing"
 				endIf
-				; Remove furniture/standing animations from primary
-				FilteredPrimary = sslUtility.FilterTaggedAnimations(PrimaryAnimations, Filters, false)
-				if FilteredPrimary.Length > 0
-					Log("Filtered out '"+(PrimaryAnimations.Length - FilteredPrimary.Length)+"' Primary Animations with tags: "+Filters)
-					PrimaryAnimations = FilteredPrimary
-				endIf
-				; Remove furniture/standing animations from lead in
-				if LeadIn && LeadAnimations.Length > 0
-					FilteredLead = sslUtility.FilterTaggedAnimations(LeadAnimations, Filters, false)
-					if FilteredLead.Length > 0
-						Log("Filtered out '"+(LeadAnimations.Length - FilteredLead.Length)+"' Lead In Animations with tags: "+Filters)
-						LeadAnimations = FilteredLead
-					endIf
+			else
+				Filters[1] = "BedOnly"
+			endIf
+			; Remove any animations with filtered tags
+			Filters = PapyrusUtil.RemoveString(Filters, "")
+			; Remove filtered tags from primary
+			FilteredPrimary = sslUtility.FilterTaggedAnimations(PrimaryAnimations, Filters, false)
+			if FilteredPrimary.Length > 0 && PrimaryAnimations.Length > FilteredPrimary.Length
+				Log("Filtered out '"+(PrimaryAnimations.Length - FilteredPrimary.Length)+"' primary animations with tags: "+Filters)
+				PrimaryAnimations = FilteredPrimary
+			endIf
+			; Remove filtered tags from lead in
+			if LeadAnimations && LeadAnimations.Length > 0
+				FilteredLead = sslUtility.FilterTaggedAnimations(LeadAnimations, Filters, false)
+				if LeadAnimations.Length > FilteredLead.Length
+					Log("Filtered out '"+(LeadAnimations.Length - FilteredLead.Length)+"' lead in animations with tags: "+Filters)
+					LeadAnimations = FilteredLead
 				endIf
 			endIf
-
 			; Make sure we are still good to start after all the filters
-			if LeadAnimations.Length < 1
+			if !LeadAnimations || LeadAnimations.Length < 1
 				LeadIn = false
 			endIf
-			if PrimaryAnimations.Length < 1
+			if !PrimaryAnimations || PrimaryAnimations.Length < 1
 				Fatal("Empty primary animations after filters")
 				return none
 			endIf
-
 		endIf
 		
 		; ------------------------- ;
