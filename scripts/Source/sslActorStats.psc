@@ -152,10 +152,10 @@ int function CalcSexuality(bool IsFemale, int Males, int Females)
 endFunction
 
 float function CalcLevelFloat(float Total, float Curve = 0.85)
-	if Total < 0.0
-		return 0.0
+	if Total > 0.0
+		return Math.Sqrt((Math.Abs(Total) / 2.0) * Curve)
 	endIf
-	return Math.Sqrt((Math.Abs(Total) / 2.0) * Curve)
+	return 0.0
 endFunction
 
 int function CalcLevel(float Total, float Curve = 0.85)
@@ -243,14 +243,16 @@ float[] function GetSkills(Actor ActorRef) global native
 endFunction /;
 
 float[] function GetSkillLevels(Actor ActorRef)
-	float[] Skills = GetSkills(ActorRef)
 	float[] Output = new float[6]
-	Output[0] = CalcLevelFloat(Skills[0], 0.85)
-	Output[1] = CalcLevelFloat(Skills[1], 0.85)
-	Output[2] = CalcLevelFloat(Skills[2], 0.85)
-	Output[3] = CalcLevelFloat(Skills[3], 0.85)
-	Output[4] = CalcLevelFloat(Skills[4], 0.30)
-	Output[5] = CalcLevelFloat(Skills[5], 0.30)
+	float[] Skills = GetSkills(ActorRef)
+	if Skills
+		Output[0] = CalcLevelFloat(Skills[0], 0.85)
+		Output[1] = CalcLevelFloat(Skills[1], 0.85)
+		Output[2] = CalcLevelFloat(Skills[2], 0.85)
+		Output[3] = CalcLevelFloat(Skills[3], 0.85)
+		Output[4] = CalcLevelFloat(Skills[4], 0.30)
+		Output[5] = CalcLevelFloat(Skills[5], 0.30)
+	endIf
 	return Output
 endFunction
 
