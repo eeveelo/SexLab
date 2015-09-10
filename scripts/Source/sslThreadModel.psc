@@ -141,6 +141,7 @@ endProperty
 ; Thread info
 float[] property CenterLocation auto hidden
 ObjectReference property CenterRef auto hidden
+ReferenceAlias property CenterAlias auto hidden
 
 float[] property RealTime auto hidden
 float property StartedAt auto hidden
@@ -777,6 +778,10 @@ function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 				CenterLocation[2] = CenterLocation[2] + 0.0 ; TODO: find ideal value
 			endIf
 		endIf
+		if CenterAlias.GetReference() != CenterRef
+			CenterAlias.TryToClear()
+			CenterAlias.ForceRefTo(CenterRef)
+		endIf
 	endIf
 endFunction
 
@@ -1130,6 +1135,10 @@ function ResolveTimers()
 endFunction
 
 function SetTID(int id)
+	thread_id = id
+	PlayerRef = Game.GetPlayer()
+	DebugMode = Config.DebugMode
+
 	Log(self, "Setup")
 	; Reset function Libraries - SexLabQuestFramework
 	if !Config || !ThreadLib || !ActorLib
@@ -1155,16 +1164,15 @@ function SetTID(int id)
 		endIf
 	endIf
 
-	thread_id = id
-	PlayerRef = Game.GetPlayer()
-	DebugMode = Config.DebugMode
 	
 	; Init thread info
-	EventTypes = new string[5]
+	EventTypes = new string[4]
 	EventTypes[0] = "Prepare"
 	EventTypes[1] = "Sync"
 	EventTypes[2] = "Reset"
 	EventTypes[3] = "Refresh"
+
+	CenterAlias = GetNthAlias(5) as ReferenceAlias
 
 	ActorAlias = new sslActorAlias[5]
 	ActorAlias[0] = GetNthAlias(0) as sslActorAlias
@@ -1194,13 +1202,15 @@ function InitShares()
 	SkillXP        = new float[6]
 	SkillBonus     = new float[6]
 	CenterLocation = new float[6]
-
 	if EventTypes.Length != 4 || EventTypes.Find("") != -1
-		EventTypes = new string[4]
+		EventTypes = new string[5]
 		EventTypes[0] = "Prepare"
 		EventTypes[1] = "Sync"
 		EventTypes[2] = "Reset"
 		EventTypes[3] = "Refresh"
+	endIf
+	if !CenterAlias
+		CenterAlias = GetAliasByName("CenterAlias") as ReferenceAlias
 	endIf
 endFunction
 
@@ -1213,6 +1223,9 @@ function Initialize()
 	ActorAlias[2].ClearAlias()
 	ActorAlias[3].ClearAlias()
 	ActorAlias[4].ClearAlias()
+	if CenterAlias
+		CenterAlias.Clear()
+	endIf
 	; Forms
 	Animation      = none
 	CenterRef      = none

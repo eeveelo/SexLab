@@ -28,11 +28,19 @@ bool hkReady
 
 state Prepare
 	function FireAction()
-		; UpdateActorKey()
-		; ResolveTimers()
+		; Ensure center is set
+		if !CenterRef
+			CenterOnObject(Positions[0], false)
+		endIf
+		if CenterAlias.GetReference() != CenterRef
+			CenterAlias.TryToClear()
+			CenterAlias.ForceRefTo(CenterRef)
+		endIf
+		; Set important vars needed for actor prep
 		UpdateAdjustKey()
 		SetAnimation()
 		Log(AdjustKey, "Adjustment Profile")
+		; Begin actor prep
 		SyncEvent(kPrepareActor, 30.0)
 	endFunction
 
@@ -41,6 +49,15 @@ state Prepare
 	endFunction
 
 	event OnUpdate()
+		; Reset loc, incase actor type center has moved during prep
+		if SexLabUtil.IsActor(CenterRef) && Positions.Find(CenterRef as Actor) != -1
+			CenterLocation[0] = CenterRef.GetPositionX()
+			CenterLocation[1] = CenterRef.GetPositionY()
+			CenterLocation[2] = CenterRef.GetPositionZ()
+			CenterLocation[3] = CenterRef.GetAngleX()
+			CenterLocation[4] = CenterRef.GetAngleY()
+			CenterLocation[5] = CenterRef.GetAngleZ()
+		endIf
 		; Set starting adjusted actor
 		AdjustPos   = (ActorCount > 1) as int
 		AdjustAlias = PositionAlias(AdjustPos)

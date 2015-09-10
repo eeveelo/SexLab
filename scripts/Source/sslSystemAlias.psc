@@ -251,6 +251,27 @@ function ClearFromActorStorage(Form FormRef)
 	FormListRemove(none, "SexLab.ActorStorage", FormRef, true)
 endFunction
 
+bool function IsActor(Form FormRef) global
+	if FormRef
+		int Type = FormRef.GetType()
+		return Type == 43 || Type == 44 || Type == 62 ; kNPC = 43 kLeveledCharacter = 44 kCharacter = 62
+	endIf
+	return false
+endFunction
+
+bool function IsImportant(Actor ActorRef, bool Strict = false) global
+	if ActorRef == Game.GetPlayer()
+		return true
+	elseIf !ActorRef || ActorRef.IsDead() || ActorRef.IsDeleted() || ActorRef.IsChild()
+		return false
+	elseIf !Strict
+		return true
+	endIf
+	; Strict check
+	ActorBase BaseRef = ActorRef.GetLeveledActorBase()
+	return BaseRef.IsUnique() || BaseRef.IsEssential() || BaseRef.IsInvulnerable() || BaseRef.IsProtected() || ActorRef.IsGuard() || ActorRef.IsPlayerTeammate() || ActorRef.Is3DLoaded()
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- System Utils                                   --- ;
 ; ------------------------------------------------------- ;

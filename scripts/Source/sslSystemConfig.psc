@@ -140,6 +140,7 @@ bool property RestrictSameSex auto hidden
 bool property SeparateOrgasms auto hidden
 bool property RemoveHeelEffect auto hidden
 bool property AdjustTargetStage auto hidden
+bool property PathToCenter auto hidden
 
 ; Integers
 int property AnimProfile auto hidden
@@ -676,7 +677,8 @@ function SetDefaults()
 	SeparateOrgasms    = false
 	RemoveHeelEffect   = HasHDTHeels
 	AdjustTargetStage  = false
-
+	PathToCenter       = true
+	
 	; Integers
 	AnimProfile        = 1
 	NPCBed             = 0
@@ -872,6 +874,7 @@ function ExportSettings()
 	ExportBool("SeparateOrgasms", SeparateOrgasms)
 	ExportBool("RemoveHeelEffect", RemoveHeelEffect)
 	ExportBool("AdjustTargetStage", AdjustTargetStage)
+	ExportBool("PathToCenter", PathToCenter)
 
 	; Integers
 	ExportInt("AnimProfile", AnimProfile)
@@ -958,6 +961,7 @@ function ImportSettings()
 	SeparateOrgasms    = ImportBool("SeparateOrgasms", SeparateOrgasms)
 	RemoveHeelEffect   = ImportBool("RemoveHeelEffect", RemoveHeelEffect)
 	AdjustTargetStage  = ImportBool("AdjustTargetStage", AdjustTargetStage)
+	PathToCenter       = ImportBool("PathToCenter", PathToCenter)
 
 	; Integers
 	AnimProfile        = ImportInt("AnimProfile", AnimProfile)

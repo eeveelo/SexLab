@@ -54,6 +54,26 @@ function Log(string log)
 	; MiscUtil.PrintConsole(ActorName+"\n"+log)
 endfunction
 
+string function GetActorNames(Actor[] Actors)
+	string names
+	int i = Actors.Length
+	while i
+		i -= 1
+		names += "["+Actors[i].GetLeveledActorBase().GetName()+"]"
+	endWhile
+	return names
+endFunction
+
+string function GetObjNames(ObjectReference[] Objects)
+	string names
+	int i = Objects.Length
+	while i
+		i -= 1
+		names += "["+Objects[i].GetName()+"]"
+	endWhile
+	return names
+endFunction
+
 float[] function GetCoords(Actor ActorRef)
 	float[] coords = new float[6]
 	coords[0] = ActorRef.GetPositionX()

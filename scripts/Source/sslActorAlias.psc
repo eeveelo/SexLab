@@ -20,6 +20,7 @@ bool IsAggressor
 bool IsPlayer
 bool IsTracked
 bool IsSkilled
+Faction AnimatingFaction
 
 ; Current Thread state
 sslThreadController Thread
@@ -204,6 +205,7 @@ sslBaseAnimation Animation
 
 function LoadShares()
 	DebugMode  = Config.DebugMode
+	AnimatingFaction = Config.AnimatingFaction ; TEMP
 
 	Center     = Thread.CenterLocation
 	BedStatus  = Thread.BedStatus
@@ -244,29 +246,11 @@ state Ready
 			AnimScale = (1.0 / base)
 		endIf
 		string LogInfo = "Scales["+display+"/"+base+"/"+AnimScale+"] "
-		; Attempt to walk to center
-		;/ ObjectReference CenterRef = Thread.CenterRef
-		Log("CenterRef: "+CenterRef)
-		if !IsPlayer && CenterRef && SexLabUtil.IsActor(CenterRef) && ActorRef != CenterRef && ActorRef.GetDistance(CenterRef) < 1000.0 && ActorRef.GetDistance(CenterRef) > 100.0
-			ActorRef.KeepOffsetFromActor(CenterRef as Actor, Offsets[0], Offsets[1], 30.0, 0.0, 0.0, 180.0, 500.0, 100.0)
-			float Distance = ActorRef.GetDistance(CenterRef)
-			float Failsafe = Utility.GetCurrentRealTime() + 10.0
-			while Distance > 100.0 && Utility.GetCurrentRealTime() < Failsafe
-				Distance = ActorRef.GetDistance(CenterRef)				
-				Log("Distance From Center: "+Distance)
-				Utility.Wait(0.5)
-			endWhile
-		endIf /;
-		; Stop movement
-		LockActor()
-		; Disable autoadvance if disabled for player
-		if IsPlayer
-			if IsVictim && Config.DisablePlayer
-				Thread.AutoAdvance = true
-			elseIf !Config.AutoAdvance
-				Thread.AutoAdvance = false
-			endIf
+		; Stop other movements
+		if Config.PathToCenter
+			PathToCenter()
 		endIf
+		LockActor()
 		; Extras for non creatures
 		if !IsCreature
 			; Decide on strapon for female, default to worn, otherwise pick random.
@@ -282,7 +266,7 @@ state Ready
 			ResolveStrapon()
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 			; Find HDT High Heels
-			if Config.RemoveHeelEffect 
+			if Config.RemoveHeelEffect
 				HDTHeelSpell = Config.GetHDTSpell(ActorRef)
 				if HDTHeelSpell
 					Log(HDTHeelSpell, "HDTHeelSpell")
@@ -337,6 +321,7 @@ state Ready
 		endIf
 		RegisterForSingleUpdate(StartWait)
 	endFunction
+
 	event OnUpdate()
 		; Enter animatable state
 		GoToState("Animating")
@@ -344,6 +329,40 @@ state Ready
 			Thread.SyncEventDone(kPrepareActor)
 		endIf
 	endEvent
+
+	function PathToCenter()
+		ObjectReference CenterRef = Thread.CenterAlias.GetReference()
+		if CenterRef && ActorRef && CenterRef != ActorRef
+			float Distance = ActorRef.GetDistance(CenterRef)
+			if Distance < 5000.0
+				if IsPlayer
+					Game.SetPlayerAIDriven()
+				endIf
+				ActorRef.SetFactionRank(AnimatingFaction, 2)
+				ActorRef.EvaluatePackage()
+				float Failsafe = Utility.GetCurrentRealTime() + 15.0
+				while Distance > 100.0 && Utility.GetCurrentRealTime() < Failsafe
+					Utility.Wait(0.5)
+					Distance = ActorRef.GetDistance(CenterRef)
+					Log("Distance From Center: "+Distance)
+				endWhile
+				ActorRef.SetFactionRank(AnimatingFaction, 1)
+				ActorRef.EvaluatePackage()
+			endIf
+		endIf
+		;/ ObjectReference CenterRef = Thread.CenterRef
+		Log("CenterRef: "+CenterRef)
+		if !IsPlayer && CenterRef && SexLabUtil.IsActor(CenterRef) && ActorRef != (CenterRef as Actor) && ActorRef.GetDistance(CenterRef) < 2000.0 && ActorRef.GetDistance(CenterRef) > 100.0
+			ActorRef.KeepOffsetFromActor(CenterRef as Actor, Offsets[0], Offsets[1], 30.0, 0.0, 0.0, 180.0, 500.0, 100.0)
+			float Distance = ActorRef.GetDistance(CenterRef)
+			float Failsafe = Utility.GetCurrentRealTime() + 10.0
+			while Distance > 100.0 && Utility.GetCurrentRealTime() < Failsafe
+				Distance = ActorRef.GetDistance(CenterRef)				
+				Log("Distance From Center: "+Distance)
+				Utility.Wait(0.5)
+			endWhile
+		endIf /;
+	endFunction
 endState
 
 ; ------------------------------------------------------- ;
@@ -401,6 +420,7 @@ state Animating
 		ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		AttachMarker()
 		ClearEffects()
+		Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 		; TODO: Add a light source option here. (possibly with frostfall benefit?)
 		; Remove from bard audience if in one
 		Config.CheckBardAudience(ActorRef, true)
@@ -703,7 +723,7 @@ function LockActor()
 	; Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 	; Start DoNothing package
 	ActorUtil.AddPackageOverride(ActorRef, Config.DoNothing, 100, 1)
-	ActorRef.SetFactionRank(Config.AnimatingFaction, 1)
+	ActorRef.SetFactionRank(AnimatingFaction, 1)
 	ActorRef.EvaluatePackage()
 	; Disable movement
 	if IsPlayer
@@ -713,8 +733,11 @@ function LockActor()
 		; abMovement = true, abFighting = true, abCamSwitch = false, abLooking = false, abSneaking = false, abMenu = true, abActivate = true, abJournalTabs = false, aiDisablePOVType = 0
 		Game.DisablePlayerControls(true, true, false, false, false, false, false, false, 0)
 		Game.SetPlayerAIDriven()
-		; Enable hotkeys, if needed
-		if !(IsVictim && Config.DisablePlayer)
+		; Enable hotkeys if needed, and disable autoadvance if not needed
+		if IsVictim && Config.DisablePlayer
+			Thread.AutoAdvance = true
+		else
+			Thread.AutoAdvance = Config.AutoAdvance
 			Thread.EnableHotkeys()
 		endIf
 	else
@@ -740,9 +763,9 @@ function UnlockActor()
 	ActorRef.StopTranslation()
 	ActorRef.SetVehicle(none)
 	; Remove from animation faction
-	ActorRef.RemoveFromFaction(Config.AnimatingFaction)
+	ActorRef.RemoveFromFaction(AnimatingFaction)
 	ActorUtil.RemovePackageOverride(ActorRef, Config.DoNothing)
-	ActorRef.SetFactionRank(Config.AnimatingFaction, 0)
+	ActorRef.SetFactionRank(AnimatingFaction, 0)
 	ActorRef.EvaluatePackage()
 	; Enable movement
 	if IsPlayer
@@ -785,8 +808,8 @@ function RestoreActorDefaults()
 		MfgConsoleFunc.SetPhonemeModifier(ActorRef, -1, 0, 0)
 	endIf
 	; Clear from animating faction
-	ActorRef.SetFactionRank(Config.AnimatingFaction, 0)
-	ActorRef.RemoveFromFaction(Config.AnimatingFaction)
+	ActorRef.SetFactionRank(AnimatingFaction, 0)
+	ActorRef.RemoveFromFaction(AnimatingFaction)
 	ActorUtil.RemovePackageOverride(ActorRef, Config.DoNothing)
 	ActorRef.EvaluatePackage()
 	; Remove SOS erection
@@ -999,6 +1022,7 @@ function Strip()
 	else
 		Strip = Config.GetStrip(IsFemale, Thread.UseLimitedStrip(), IsType[0], IsVictim)
 	endIf
+	Log("Strip: "+Strip)
 	; Stripped storage
 	Form ItemRef
 	Form[] Stripped = new Form[34]
@@ -1034,6 +1058,7 @@ function Strip()
 	endIf
 	; Store stripped items
 	Equipment = PapyrusUtil.MergeFormArray(Equipment, PapyrusUtil.ClearNone(Stripped), true)
+	Log("Equipment: "+Equipment)
 endFunction
 
 function UnStrip()
@@ -1242,6 +1267,7 @@ function Setup()
 	Thread    = GetOwningQuest() as sslThreadController
 	OrgasmFX  = Config.OrgasmFX
 	DebugMode = Config.DebugMode
+	AnimatingFaction = Config.AnimatingFaction
 endFunction
 
 function Log(string msg, string src = "")
@@ -1268,6 +1294,8 @@ endFunction
 
 ; Ready
 function PrepareActor()
+endFunction
+function PathToCenter()
 endFunction
 ; Animating
 function StartAnimating()
