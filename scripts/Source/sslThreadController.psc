@@ -225,9 +225,11 @@ state Animating
 		UnregisterforUpdate()
 		float Amount = SignFloat(backwards, 0.50)
 		Adjusted = true
+		PlayHotkeyFX(0, backwards)
 		Animation.AdjustForward(AdjustKey, AdjustPos, Stage, Amount, AdjustStage)
 		int k = Config.AdjustForward
 		while Input.IsKeyPressed(k)
+			PlayHotkeyFX(0, backwards)
 			Animation.AdjustForward(AdjustKey, AdjustPos, Stage, Amount, Config.AdjustStagePressed())
 			AdjustAlias.RefreshLoc()
 		endWhile
@@ -238,10 +240,12 @@ state Animating
 		UnregisterforUpdate()
 		float Amount = SignFloat(backwards, 0.50)
 		Adjusted = true
+		PlayHotkeyFX(0, backwards)
 		Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, Amount, AdjustStage)
 		AdjustAlias.RefreshLoc()
 		int k = Config.AdjustSideways
 		while Input.IsKeyPressed(k)
+			PlayHotkeyFX(0, backwards)
 			Animation.AdjustSideways(AdjustKey, AdjustPos, Stage, Amount, Config.AdjustStagePressed())
 			AdjustAlias.RefreshLoc()
 		endWhile
@@ -252,10 +256,12 @@ state Animating
 		float Amount = SignFloat(backwards, 0.50)
 		UnregisterforUpdate()
 		Adjusted = true
+		PlayHotkeyFX(2, backwards)
 		Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, Amount, AdjustStage)
 		AdjustAlias.RefreshLoc()
 		int k = Config.AdjustUpward
 		while Input.IsKeyPressed(k)
+			PlayHotkeyFX(2, backwards)
 			Animation.AdjustUpward(AdjustKey, AdjustPos, Stage, Amount, Config.AdjustStagePressed())
 			AdjustAlias.RefreshLoc()
 		endWhile
@@ -265,6 +271,7 @@ state Animating
 	function RotateScene(bool backwards = false)
 		UnregisterForUpdate()
 		float Amount = SignFloat(backwards, 15.0)
+		PlayHotkeyFX(1, !backwards)
 		CenterLocation[5] = CenterLocation[5] + Amount
 		if CenterLocation[5] >= 360.0
 			CenterLocation[5] = CenterLocation[5] - 360.0
@@ -278,6 +285,7 @@ state Animating
 		ActorAlias[4].RefreshLoc()
 		int k = Config.RotateScene
 		while Input.IsKeyPressed(k)
+			PlayHotkeyFX(1, !backwards)
 			CenterLocation[5] = CenterLocation[5] + Amount
 			if CenterLocation[5] >= 360.0
 				CenterLocation[5] = CenterLocation[5] - 360.0
@@ -301,6 +309,7 @@ state Animating
 			Animation.AdjustSchlong(AdjustKey, AdjustPos, Stage, Amount)
 			AdjustAlias.GetPositionInfo()
 			Debug.SendAnimationEvent(Positions[AdjustPos], "SOSBend"+Schlong)
+			PlayHotkeyFX(2, !backwards)
 		endIf
 	endFunction
 
@@ -309,6 +318,7 @@ state Animating
 		if ActorCount > 1
 			AdjustPos = sslUtility.IndexTravel(Positions.Find(AdjustAlias.ActorRef), ActorCount, backwards)
 			AdjustAlias = ActorAlias(Positions[AdjustPos])
+			PlayHotkeyFX(0, !backwards)
 			Debug.Notification("Adjusting Position For: "+AdjustAlias.ActorRef.GetLeveledActorBase().GetName())
 		endIf
 		RegisterForSingleUpdate(0.2)
@@ -658,6 +668,7 @@ endFunction
 
 function EnableHotkeys(bool forced = false)
 	if HasPlayer || forced
+		; Prepare bound keys
 		Hotkeys = new int[13]
 		Hotkeys[kAdvanceAnimation] = Config.AdvanceAnimation
 		Hotkeys[kChangeAnimation]  = Config.ChangeAnimation
@@ -677,6 +688,10 @@ function EnableHotkeys(bool forced = false)
 			RegisterForKey(Hotkeys[i])
 			i += 1
 		endwhile
+		; Prepare soundfx
+		HotkeyUp   = Config.HotkeyUp
+		HotkeyDown = Config.HotkeyDown
+		; Ready
 		hkReady = true
 	endIf
 endFunction
@@ -768,6 +783,15 @@ int property kRotateScene      = 10 autoreadonly hidden
 int property kEndAnimation     = 11 autoreadonly hidden
 int property kAdjustSchlong    = 12 autoreadonly hidden
 
+Sound[] HotkeyDown
+Sound[] HotkeyUp
+function PlayHotkeyFX(int i, bool backwards)
+	if backwards
+		HotkeyDown[i].Play(Positions[AdjustPos])
+	else
+		HotkeyUp[i].Play(Positions[AdjustPos])
+	endIf
+endFunction
 
 event OnKeyDown(int keyCode)
 	; StateCheck()

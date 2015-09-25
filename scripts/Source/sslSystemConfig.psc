@@ -78,6 +78,9 @@ Sound property SquishingFX auto
 Sound property SuckingFX auto
 Sound property SexMixedFX auto
 
+Sound[] property HotkeyUp auto
+Sound[] property HotkeyDown auto
+
 Static property LocationMarker auto
 FormList property BedsList auto
 FormList property BedRollsList auto
@@ -829,6 +832,19 @@ function SetDefaults()
 
 	; Reset data
 	LoadStrapons()
+
+	if !HotkeyUp || HotkeyUp.Length != 3 || HotkeyUp.Find(none) != -1
+		HotkeyUp = new Sound[3]
+		hotkeyUp[0] = Game.GetFormFromFile(0x8AAF0, "SexLab.esm") as Sound
+		hotkeyUp[1] = Game.GetFormFromFile(0x8AAF1, "SexLab.esm") as Sound
+		hotkeyUp[2] = Game.GetFormFromFile(0x8AAF2, "SexLab.esm") as Sound
+	endIf
+	if !HotkeyDown || HotkeyDown.Length != 3 || HotkeyDown.Find(none) != -1
+		HotkeyDown = new Sound[3]
+		hotkeyDown[0] = Game.GetFormFromFile(0x8AAF3, "SexLab.esm") as Sound
+		hotkeyDown[1] = Game.GetFormFromFile(0x8AAF4, "SexLab.esm") as Sound
+		hotkeyDown[2] = Game.GetFormFromFile(0x8AAF5, "SexLab.esm") as Sound
+	endIf
 
 	; Rest some player configurations
 	Stats.SetSkill(PlayerRef, "Sexuality", 75)
