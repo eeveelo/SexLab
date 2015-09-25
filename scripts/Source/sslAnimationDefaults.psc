@@ -976,6 +976,7 @@ endFunction
 function APAnal(int id)
 	sslBaseAnimation Base = Create(id)
 
+	Base.Enabled = false
 	Base.Name    = "AP Anal"
 	Base.SoundFX = Squishing
 
@@ -1001,6 +1002,7 @@ endFunction
 function APBedMissionary(int id)
 	sslBaseAnimation Base = Create(id)
 
+	Base.Enabled = false
 	Base.Name    = "AP Bed Missionary"
 	Base.SoundFX = Squishing
 
@@ -1028,6 +1030,7 @@ endFunction
 function APBlowjob(int id)
 	sslBaseAnimation Base = Create(id)
 
+	Base.Enabled = false
 	Base.Name    = "AP Blowjob"
 	Base.SoundFX = Sucking
 
@@ -1053,6 +1056,7 @@ endFunction
 function APBoobjob(int id)
 	sslBaseAnimation Base = Create(id)
 
+	Base.Enabled = false
 	Base.Name    = "AP Boobjob"
 
 
@@ -1078,6 +1082,7 @@ endFunction
 function APCowgirl(int id)
 	sslBaseAnimation Base = Create(id)
 
+	Base.Enabled = false
 	Base.Name    = "AP Cowgirl"
 	Base.SoundFX = Squishing
 
@@ -1105,6 +1110,7 @@ endFunction
 function APFemaleSolo(int id)
 	sslBaseAnimation Base = Create(id)
 
+	Base.Enabled = false
 	Base.Name    = "AP Female Masturbation"
 	Base.SoundFX = Squishing
 
@@ -1124,6 +1130,7 @@ endFunction
 function APFisting(int id)
 	sslBaseAnimation Base = Create(id)
 
+	Base.Enabled = false
 	Base.Name    = "AP Fisting"
 	Base.SoundFX = Squishing
 
@@ -1149,6 +1156,7 @@ endFunction
 function APHandjob(int id)
 	sslBaseAnimation Base = Create(id)
 
+	Base.Enabled = false
 	Base.Name    = "AP Handjob"
 
 
@@ -1174,6 +1182,7 @@ endFunction
 function APKneelBlowjob(int id)
 	sslBaseAnimation Base = Create(id)
 
+	Base.Enabled = false
 	Base.Name    = "AP Kneeling Blowjob"
 	Base.SoundFX = Sucking
 
@@ -1199,6 +1208,7 @@ endFunction
 function APLegUp(int id)
 	sslBaseAnimation Base = Create(id)
 
+	Base.Enabled = false
 	Base.Name    = "AP Leg Up Fuck"
 	Base.SoundFX = Squishing
 
@@ -1224,6 +1234,7 @@ endFunction
 function APShoulder(int id)
 	sslBaseAnimation Base = Create(id)
 
+	Base.Enabled = false
 	Base.Name    = "AP Shoulder"
 	Base.SoundFX = Squishing
 
@@ -1249,6 +1260,7 @@ endFunction
 function APStandBlowjob(int id)
 	sslBaseAnimation Base = Create(id)
 
+	Base.Enabled = false
 	Base.Name    = "AP Standing Blowjob"
 	Base.SoundFX = Sucking
 
@@ -1274,6 +1286,7 @@ endFunction
 function APStanding(int id)
 	sslBaseAnimation Base = Create(id)
 
+	Base.Enabled = false
 	Base.Name    = "AP Standing"
 	Base.SoundFX = Squishing
 
@@ -1299,6 +1312,7 @@ endFunction
 function APDoggyStyle(int id)
 	sslBaseAnimation Base = Create(id)
 
+	Base.Enabled = false
 	Base.Name    = "AP DoggyStyle"
 	Base.SoundFX = Squishing
 
@@ -1324,6 +1338,7 @@ endFunction
 function APHoldLegUp(int id)
 	sslBaseAnimation Base = Create(id)
 
+	Base.Enabled = false
 	Base.Name    = "AP Holding Leg Up"
 	Base.SoundFX = Squishing
 
@@ -1349,6 +1364,7 @@ endFunction
 function APFaceDown(int id)
 	sslBaseAnimation Base = Create(id)
 
+	Base.Enabled = false
 	Base.Name    = "AP Face Down Anal"
 	Base.SoundFX = Squishing
 
@@ -1374,6 +1390,7 @@ endFunction
 function APSkullFuck(int id)
 	sslBaseAnimation Base = Create(id)
 
+	Base.Enabled = false
 	Base.Name    = "AP Skull Fuck"
 	Base.SoundFX = Sucking
 
