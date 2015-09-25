@@ -22,7 +22,7 @@ endFunction
 
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
-
+	Benchmark(3, 7500, 10, false)
 	Dispel()
 endEvent
 
