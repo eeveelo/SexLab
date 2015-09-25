@@ -103,7 +103,7 @@ endFunction
 function OpenMouth(Actor ActorRef) global
 	ClearPhoneme(ActorRef)
 	ActorRef.SetExpressionOverride(16, 80)
-	ActorRef.SetExpressionPhoneme(1, 0.4)
+	ActorRef.SetExpressionPhoneme(1, 0.60)
 	Utility.WaitMenuMode(0.1)
 endFunction
 
