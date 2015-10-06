@@ -249,7 +249,7 @@ int function ValidateActor(Actor ActorRef)
 	elseIf ActorRef.IsOnMount()
 		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are currently mounted.")
 		return -16
-	elseIf FormListFind(Config, "ValidActors", ActorRef) != -1
+	elseIf FormListFind(Config, "ValidActors", ActorRef) != -1 && !ActorRef.IsInFaction(ForbiddenFaction)
 		Log("ValidateActor("+BaseRef.GetName()+") -- TRUE -- HIT")
 		return 1
 	elseIf !CanAnimate(ActorRef)
@@ -283,6 +283,7 @@ bool function IsValidActor(Actor ActorRef)
 endFunction
 
 function ForbidActor(Actor ActorRef)
+	FormListRemove(Config, "ValidActors", ActorRef, true)
 	ActorRef.AddToFaction(ForbiddenFaction)
 endFunction
 
