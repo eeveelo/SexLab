@@ -46,6 +46,9 @@ event OnVersionUpdate(int version)
 		ResetAllQuests()
 		LoadLibs(true)
 		SystemAlias.SetupSystem()
+	; elseIf CurrentVersion == 0 && Config.DebugMode
+	; 	LoadLibs(true)
+	; 	SystemAlias.SetupSystem()
 	endIf
 endEvent
 
@@ -598,25 +601,9 @@ function InstallMenu()
 	AddHeaderOption("SexLab v"+GetStringVer()+" by Ashal@LoversLab.com")
 
 	; Check for critical failure from missing SystemAlias not being found.
-	if !SystemAlias
-		AddTextOption("CRITICAL ERROR: File Integrity", "")
-		AddTextOption("Framework quest / files overwritten...", "")
-		AddTextOption("Unable to resolve needed variables", "")
-		AddTextOption("Install unable continue as result", "")
-		AddEmptyOption()
-		AddTextOption("Usually caused by incompatible SexLab addons.", "")
-		AddTextOption("Disable other SexLab addons (NOT SexLab.esm)", "")
-		AddTextOption("one by one and trying again until this message", "")
-		AddTextOption("goes away. Alternatively, with TES5Edit after", "")
-		AddTextOption("the background loader finishes check for any", "")
-		AddTextOption("mods overriding SexLab.esm's Quest records.", "")
-		AddTextOption("ScocLB.esm & SexlabScocLB.esp are the most", "")
-		AddTextOption("common cause of this problem.", "")
-		AddEmptyOption()
-		AddTextOption("If using Mod Organizer, check that no mods are", "")
-		AddTextOption("overwriting any of SexLab Frameworks files.", "")
-		AddTextOption("There should be no red - symbol under flags for", "")
-		AddTextOption("your SexLab Framework install in Mod Organizer.", "")
+	if !SexLab || !SystemAlias || !Config || !ActorLib || !ThreadLib || !ThreadSlots || !AnimSlots || !CreatureSlots || !VoiceSlots || !ExpressionSlots 
+		AddTextOptionST("InstallError", "CRITICAL ERROR: File Integrity", "README")
+		SetInfoText("CRITICAL ERROR: File Integrity Framework quest / files overwritten...\nUnable to resolve needed variables. Install unable continue as result.\nUsually caused by incompatible SexLab addons. Disable other SexLab addons (NOT SexLab.esm) one by one and trying again until this message goes away. Alternatively, with TES5Edit after the background loader finishes check for any mods overriding SexLab.esm's Quest records. ScocLB.esm & SexlabScocLB.esp are the most common cause of this problem.\nIf using Mod Organizer, check that no mods are overwriting any of SexLab Frameworks files. There should be no red - symbol under flags for your SexLab Framework install in Mod Organizer.")
 		return
 	endIf
 
@@ -626,7 +613,10 @@ function InstallMenu()
 	if AliasState == "Updating" || AliasState == "Installing"
 		opt = OPTION_FLAG_DISABLED
 	endIf
-	AddTextOptionST("InstallSystem","$SSL_InstallUpdateSexLab{"+GetStringVer()+"}", "$SSL_ClickHere", opt)
+	
+	AddTextOptionST("InstallSystem","","$SSL_InstallUpdateSexLab{"+GetStringVer()+"}", opt)
+	AddTextOptionST("InstallSystem","","$SSL_ClickHere", opt)
+
 	if AliasState == "Updating"
 		AddTextOption("$SSL_CurrentlyUpdating", "!")
 	elseIf AliasState == "Installing"
@@ -645,15 +635,9 @@ function SystemCheckOptions()
 	AddTextOptionST("CheckFNISCreaturePack", "FNIS Creature Pack (5.2+)", StringIfElse(Config.CheckSystemPart("FNISCreaturePack"), "ok", "?"), OPTION_FLAG_DISABLED)
 	AddTextOptionST("CheckFNISSexLabCreature", "FNIS SexLab Creature Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabCreature"), "ok", "?"), OPTION_FLAG_DISABLED)
 	; Show soft error warning if relevant
-	if !Config.CheckSystemPart("FNISGenerated") || Config.CheckSystemPart("FNISSexLabFramework") || Config.CheckSystemPart("FNISCreaturePack") || Config.CheckSystemPart("FNISSexLabCreature")
-		AddEmptyOption()
-		AddTextOption("If you're getting a ? on any checks", "")
-		AddTextOption("try scrolling in and out of 3rd person mode", "")
-		AddTextOption("then checking again. These ? errors are", "")
-		AddTextOption("soft errors and can usually be ignored safely.", "")
-		AddTextOption("If scrolling in and out doesn't work and characters", "")
-		AddTextOption("stand frozen in place during animation than these", "")
-		AddTextOption("are the most likely causes. Fix your FNIS install.", "")
+	if !Config.CheckSystemPart("FNISGenerated") || !Config.CheckSystemPart("FNISSexLabFramework") || !Config.CheckSystemPart("FNISCreaturePack") || !Config.CheckSystemPart("FNISSexLabCreature")
+		AddTextOptionST("FNISWarning", "INFO: On '?' Warning", "README")
+		SetInfoText("Important FNIS Check:\nIf you're getting a '?' on any checks try scrolling in and out of 3rd person mode then checking again while still in 3rd. These '?' are just soft warnings and can usually be ignored safely.\nIf scrolling in and out doesn't work and characters stand frozen in place during animation than these are the most likely causes. Fix your FNIS install.")
 	endIf
 endFunction
 
@@ -667,6 +651,18 @@ state InstallSystem
 		SetTextOptionValueST("$SSL_ClickHere")
 		SetOptionFlagsST(OPTION_FLAG_NONE)
 		ForcePageReset()
+	endEvent
+endState
+
+state InstallError
+	event OnHighlightST()
+		SetInfoText("CRITICAL ERROR: File Integrity Framework quest / files overwritten...\nUnable to resolve needed variables. Install unable continue as result.\nUsually caused by incompatible SexLab addons. Disable other SexLab addons (NOT SexLab.esm) one by one and trying again until this message goes away. Alternatively, with TES5Edit after the background loader finishes check for any mods overriding SexLab.esm's Quest records. ScocLB.esm & SexlabScocLB.esp are the most common cause of this problem.\nIf using Mod Organizer, check that no mods are overwriting any of SexLab Frameworks files. There should be no red - symbol under flags for your SexLab Framework install in Mod Organizer.")
+	endEvent
+endState
+
+state FNISWarning
+	event OnHighlightST()
+		SetInfoText("Important FNIS Check:\nIf you're getting a '?' on any checks try scrolling in and out of 3rd person mode then checking again while still in 3rd. These '?' are just soft warnings and can usually be ignored safely.\nIf scrolling in and out doesn't work and characters stand frozen in place during animation than these are the most likely causes. Fix your FNIS install.")
 	endEvent
 endState
 
