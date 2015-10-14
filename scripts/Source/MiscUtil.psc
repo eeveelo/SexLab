@@ -1,5 +1,16 @@
 scriptname MiscUtil Hidden
 
+
+Actor[] function ScanCellActors(ObjectReference CenterOn, float radius = 5000.0, Keyword HasKeyword = none) global native
+ObjectReference[] function ScanCellObjects(int formType, ObjectReference CenterOn, float radius = 5000.0, Keyword HasKeyword = none) global native
+
+
+; Get an array of files in a given parent directory that have the given extension.
+; directory is relative to the root Skyrim folder (where skyrim.exe is) and is non-recursive.
+; extension=".nif" to get all .nif mesh files.
+; (default) extension="*" to get all files
+string[] function FilesInFolder(string directory, string extension="*") global native
+
 ;/
 	Camera functions
 /;

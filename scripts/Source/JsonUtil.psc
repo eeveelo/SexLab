@@ -35,6 +35,8 @@ bool function Save(string FileName, bool minify = false) global native
 function ClearAll(string FileName) global native
 
 
+string[] function JsonInFolder(string folderPath) global native
+
 ; See StorageUtil.psc for equivalent function usage instructions
 
 int function SetIntValue(string FileName, string KeyName, int value) global native

@@ -4,20 +4,6 @@ import SexLabUtil
 
 function PreBenchmarkSetup()
 	Setup()
-	Animation = AnimSlots.GetByRegistrar("zjAnal")
-	List1 = new string[3]
-	List1[0] = "FM"
-	List1[1] = "BedOnly"
-	List1[2] = "Oral"
-	List2 = new string[5]
-	List2[0] = "BedOnly"
-	List2[1] = "FF"
-	List2[2] = "Oral"
-	List2[3] = "dfgsdg"
-	List2[4] = "dsgd"
-	List3 = new string[1]
-	List3[0] = "Cowgirl"
-
 endFunction
 
 sslBaseAnimation Animation
@@ -27,11 +13,11 @@ string[] List3
 
 state Test1
 	string function Label()
-		return "HasOneTag - Papyrus"
+		return ""
 	endFunction
 
 	string function Proof()
-		return Animation.HasOneTag(List1)+" - "+Animation.HasOneTag(List2)+" - "+Animation.HasOneTag(List3)
+		return ""
 	endFunction
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
@@ -41,64 +27,13 @@ state Test1
 		while nth
 			nth -= 1
 			; START code to benchmark
-			Animation.HasOneTag(List1)
-			Animation.HasOneTag(List2)
-			Animation.HasOneTag(List3)
+
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline
 	endFunction
 endState
 
-state Test2
-	string function Label()
-		return "HasOneTag2 - Papyrus"
-	endFunction
-
-	string function Proof()
-		return Animation.HasOneTag2(List1)+" - "+Animation.HasOneTag2(List2)+" - "+Animation.HasOneTag2(List3)
-	endFunction
-
-	float function RunTest(int nth = 5000, float baseline = 0.0)
- 		; START any variable preparions needed
-		; END any variable preparions needed
-		baseline += Utility.GetCurrentRealTime()
-		while nth
-			nth -= 1
-			; START code to benchmark
-			Animation.HasOneTag2(List1)
-			Animation.HasOneTag2(List2)
-			Animation.HasOneTag2(List3)
-			; END code to benchmark
-		endWhile
-		return Utility.GetCurrentRealTime() - baseline
-	endFunction
-endState
-
-state Test3
-	string function Label()
-		return "HasOneOf - Native"
-	endFunction
-
-	string function Proof()
-		return Animation.HasOneOf(List1)+" - "+Animation.HasOneOf(List2)+" - "+Animation.HasOneOf(List3)
-	endFunction
-
-	float function RunTest(int nth = 5000, float baseline = 0.0)
- 		; START any variable preparions needed
-		; END any variable preparions needed
-		baseline += Utility.GetCurrentRealTime()
-		while nth
-			nth -= 1
-			; START code to benchmark
-			Animation.HasOneOf(List1)
-			Animation.HasOneOf(List2)
-			Animation.HasOneOf(List3)
-			; END code to benchmark
-		endWhile
-		return Utility.GetCurrentRealTime() - baseline
-	endFunction
-endState
 
 function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10, bool UseBaseLoop = false)
 	PreBenchmarkSetup()
