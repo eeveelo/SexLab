@@ -350,18 +350,6 @@ state Ready
 				ActorRef.EvaluatePackage()
 			endIf
 		endIf
-		;/ ObjectReference CenterRef = Thread.CenterRef
-		Log("CenterRef: "+CenterRef)
-		if !IsPlayer && CenterRef && SexLabUtil.IsActor(CenterRef) && ActorRef != (CenterRef as Actor) && ActorRef.GetDistance(CenterRef) < 2000.0 && ActorRef.GetDistance(CenterRef) > 100.0
-			ActorRef.KeepOffsetFromActor(CenterRef as Actor, Offsets[0], Offsets[1], 30.0, 0.0, 0.0, 180.0, 500.0, 100.0)
-			float Distance = ActorRef.GetDistance(CenterRef)
-			float Failsafe = Utility.GetCurrentRealTime() + 10.0
-			while Distance > 100.0 && Utility.GetCurrentRealTime() < Failsafe
-				Distance = ActorRef.GetDistance(CenterRef)				
-				Log("Distance From Center: "+Distance)
-				Utility.Wait(0.5)
-			endWhile
-		endIf /;
 	endFunction
 endState
 
@@ -833,6 +821,7 @@ function SetVictim(bool Victimize)
 	if Victimize && (!Victims || Victims.Find(ActorRef) == -1)
 		Victims = PapyrusUtil.PushActor(Victims, ActorRef)
 		Thread.Victims = Victims
+		Thread.IsAggressive = true
 	; Was victim but now isn't, update thread
 	elseIf IsVictim && !Victimize
 		Victims = PapyrusUtil.RemoveActor(Victims, ActorRef)
