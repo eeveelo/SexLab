@@ -22,20 +22,35 @@ endFunction
 
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
-	; Benchmark(3, 7500, 10, false)
+	Benchmark(1, 50, 5, false)
 
-	string[] FileList = JsonUtil.JsonInFolder("../SexLab/")
-	Log("FileList: "+FileList)
-	string[] EsmList = MiscUtil.FilesInFolder("data", ".esm")
-	Log("EsmList: "+EsmList)
-	string[] TxtList = MiscUtil.FilesInFolder("data/", "txt")
-	Log("TxtList: "+TxtList)
-	string[] RootList1 = MiscUtil.FilesInFolder("./", ".ini")
-	Log("RootList1: "+RootList1)
-	string[] RootList2 = MiscUtil.FilesInFolder("/", ".ini")
-	Log("RootList2: "+RootList2)
-	string[] SKSEList = MiscUtil.FilesInFolder("data/SKSE/plugins/")
-	Log("SKSEList: "+SKSEList)
+	;/ if TargetRef == CasterRef
+		string[] FileList = JsonUtil.JsonInFolder("../SexLab/")
+		Log("FileList: "+FileList)
+		string[] EsmList = MiscUtil.FilesInFolder("data", ".esm")
+		Log("EsmList: "+EsmList)
+		string[] TxtList = MiscUtil.FilesInFolder("data/", "txt")
+		Log("TxtList: "+TxtList)
+		string[] RootList1 = MiscUtil.FilesInFolder("./", ".ini")
+		Log("RootList1: "+RootList1)
+		string[] RootList2 = MiscUtil.FilesInFolder("/", ".ini")
+		Log("RootList2: "+RootList2)
+		string[] SKSEList = MiscUtil.FilesInFolder("data/SKSE/plugins/")
+		Log("SKSEList: "+SKSEList)
+	else
+		sslThreadModel Thread = SexLab.NewThread()
+		Thread.AddActor(CasterRef)
+		Thread.AddActor(TargetRef, true)
+		sslBaseAnimation[] Anims = new sslBaseAnimation[1]
+		Anims[0] = SexLab.GetAnimationByRegistry("ArrokRape")
+		Thread.SetAnimations(Anims)
+		Thread.DisableLeadIn(true)
+		Thread.StartThread()
+		Utility.Wait(1.0)
+		Log("IsAggressive: "+Thread.IsAggressive)
+		Log("VictimRef: "+Thread.VictimRef)
+		Log("Victims: "+Thread.Victims)
+	endIf /;
 
 	Dispel()
 endEvent

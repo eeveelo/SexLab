@@ -2147,18 +2147,18 @@ function LeitoCunnilingus(int id)
 	Base.SoundFX = Sucking
 
 	int a1 = Base.AddPosition(Female)
-	Base.AddPositionStage(a1, "Leito_Cunnilingus_A1_S1", 0)
-	Base.AddPositionStage(a1, "Leito_Cunnilingus_A1_S2", 0)
-	Base.AddPositionStage(a1, "Leito_Cunnilingus_A1_S3", 0)
-	Base.AddPositionStage(a1, "Leito_Cunnilingus_A1_S4", 0)
-	Base.AddPositionStage(a1, "Leito_Cunnilingus_A1_S5", 0)
+	Base.AddPositionStage(a1, "Leito_Cunnilingus_A1_S1", -50.0)
+	Base.AddPositionStage(a1, "Leito_Cunnilingus_A1_S2", -50.0)
+	Base.AddPositionStage(a1, "Leito_Cunnilingus_A1_S3", -50.0)
+	Base.AddPositionStage(a1, "Leito_Cunnilingus_A1_S4", -50.0)
+	Base.AddPositionStage(a1, "Leito_Cunnilingus_A1_S5", -50.0)
 
 	int a2 = Base.AddPosition(Male)
-	Base.AddPositionStage(a2, "Leito_Cunnilingus_A2_S1", 0, sos = 3)
-	Base.AddPositionStage(a2, "Leito_Cunnilingus_A2_S2", 0, silent = true, sos = 3)
-	Base.AddPositionStage(a2, "Leito_Cunnilingus_A2_S3", 0, silent = true, sos = 3)
-	Base.AddPositionStage(a2, "Leito_Cunnilingus_A2_S4", 0, silent = true, sos = 3)
-	Base.AddPositionStage(a2, "Leito_Cunnilingus_A2_S5", 0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Cunnilingus_A2_S1", -50.0, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Cunnilingus_A2_S2", -50.0, silent = true, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Cunnilingus_A2_S3", -50.0, silent = true, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Cunnilingus_A2_S4", -50.0, silent = true, sos = 3)
+	Base.AddPositionStage(a2, "Leito_Cunnilingus_A2_S5", -50.0, sos = 3)
 
 	Base.SetStageTimer(5, 7.0)
 

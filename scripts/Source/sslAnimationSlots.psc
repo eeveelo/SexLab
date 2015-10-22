@@ -185,7 +185,7 @@ sslBaseAnimation[] function GetList(bool[] Valid)
 			endIf
 		endWhile
 		; Only bother with logging the selected animation names if debug mode enabled.
-		string List = "Found Animations("+Output.Length+")"
+		;/ string List = "Found Animations("+Output.Length+")"
 		if Config.DebugMode
 			List +=  " "
 			i = Output.Length
@@ -194,9 +194,9 @@ sslBaseAnimation[] function GetList(bool[] Valid)
 				List += "["+Output[i].Name+"]"
 			endWhile
 		endIf
-		Log(List)
+		Log(List) /;
 	else
-		Log("No Animations Found")
+		; Log("No Animations Found")
 	endIf
 	return Output
 endFunction

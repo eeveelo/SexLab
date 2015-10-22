@@ -15,6 +15,7 @@ bool function HasCreatureType(Actor ActorRef) global native
 bool function HasRaceType(Race RaceRef) global native
 string[] function GetAllRaceKeys(Race RaceRef = none) global native
 string[] function GetAllRaceIDs(string RaceKey) global native
+Race[] function GetAllRaces(string RaceKey) global native
 
 import PapyrusUtil
 

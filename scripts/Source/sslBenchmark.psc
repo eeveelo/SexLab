@@ -13,27 +13,31 @@ string[] List3
 
 state Test1
 	string function Label()
-		return ""
+		return "Tag Searching - Papyrus"
 	endFunction
 
 	string function Proof()
-		return ""
+		sslBaseAnimation[] Anims1 = AnimSlots.GetByTags(2, "Cowgirl", "", false)
+		sslBaseAnimation[] Anims2 = AnimSlots.GetByTags(2, "MF,Standing", "Aggressive", true)
+		return "Found("+Anims1.Length+") - "+Anims1+" --- Found("+Anims2.Length+") - "+Anims2
 	endFunction
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
  		; START any variable preparions needed
+ 		sslBaseAnimation[] Anims1
+ 		sslBaseAnimation[] Anims2
 		; END any variable preparions needed
 		baseline += Utility.GetCurrentRealTime()
 		while nth
 			nth -= 1
 			; START code to benchmark
-
+			Anims1 = AnimSlots.GetByTags(2, "Cowgirl", "", false)
+			Anims2 = AnimSlots.GetByTags(2, "MF,Standing", "Aggressive", true)
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline
 	endFunction
 endState
-
 
 function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10, bool UseBaseLoop = false)
 	PreBenchmarkSetup()
