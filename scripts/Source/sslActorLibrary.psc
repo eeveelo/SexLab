@@ -160,7 +160,7 @@ Form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 	; Strip weapons
 	; Right hand
 	ItemRef = ActorRef.GetEquippedObject(1)
-	if ContinueStrip(ItemRef, Strip[33])
+	if ContinueStrip(ItemRef, Strip[32])
 		Stripped[33] = ItemRef
 		ActorRef.UnequipItemEX(ItemRef, 1, false)
 		SetIntValue(ItemRef, "Hand", 1)
@@ -249,11 +249,15 @@ int function ValidateActor(Actor ActorRef)
 	elseIf ActorRef.IsOnMount()
 		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are currently mounted.")
 		return -16
-	elseIf FormListFind(Config, "ValidActors", ActorRef) != -1 && !ActorRef.IsInFaction(ForbiddenFaction)
+	elseIf ActorRef.IsInFaction(ForbiddenFaction)
+		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are flagged as forbidden from animating.")
+		return -11
+	elseIf FormListFind(Config, "ValidActors", ActorRef) != -1
 		Log("ValidateActor("+BaseRef.GetName()+") -- TRUE -- HIT")
 		return 1
 	elseIf !CanAnimate(ActorRef)
-		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are forbidden from animating")
+		ActorRef.AddToFaction(ForbiddenFaction)
+		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They are not supported for animation.")
 		return -11
 	elseIf ActorRef != PlayerRef && !ActorRef.HasKeyword(ActorTypeNPC)
 		if !Config.AllowCreatures
@@ -275,7 +279,7 @@ endFunction
 bool function CanAnimate(Actor ActorRef)
 	Race ActorRace  = ActorRef.GetLeveledActorBase().GetRace()
 	string RaceName = ActorRace.GetName()+MiscUtil.GetRaceEditorID(ActorRace)
-	return !(ActorRef.IsInFaction(ForbiddenFaction) || ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Child") != -1  || StringUtil.Find(RaceName, "Little") != -1 || StringUtil.Find(RaceName, "117") != -1 || StringUtil.Find(RaceName, "Enfant") != -1 || (StringUtil.Find(RaceName, "Elin") != -1 && ActorRef.GetScale() < 0.92) ||  (StringUtil.Find(RaceName, "Monli") != -1 && ActorRef.GetScale() < 0.92))
+	return !(ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Child") != -1  || StringUtil.Find(RaceName, "Little") != -1 || StringUtil.Find(RaceName, "117") != -1 || StringUtil.Find(RaceName, "Enfant") != -1 || (StringUtil.Find(RaceName, "Elin") != -1 && ActorRef.GetScale() < 0.92) ||  (StringUtil.Find(RaceName, "Monli") != -1 && ActorRef.GetScale() < 0.92))
 endFunction
 
 bool function IsValidActor(Actor ActorRef)
