@@ -229,6 +229,8 @@ function CleanActorStorage()
 	int Count = FormListCount(none, "SexLab.ActorStorage")
 	if Count != ActorStorage.Length
 		Log(ActorStorage.Length+" -> "+Count, "CleanActorStorage")
+	else
+		Log("Done - "+Count, "CleanActorStorage")
 	endIf
 	debug_Cleanup()
 endFunction
@@ -397,6 +399,8 @@ state PreloadStorage
 		int Count = FormListCount(none, "SexLab.ActorStorage")
 		if Count != PreCount
 			Log(PreCount+" -> "+Count, "PreloadSavedStorage")
+		else
+			Log("Done - "+Count, "PreloadSavedStorage")
 		endIf
 		; Preload finished, now clean it.
 		CleanActorStorage()
