@@ -481,16 +481,40 @@ function SetStrip(Actor ActorRef, bool[] StripSlots)
 	endIf
 endFunction
 
-function DisableUndressAnimation(Actor ActorRef, bool disabling = true)
-	ActorAlias(ActorRef).DoUndress = !disabling
+function DisableUndressAnimation(Actor ActorRef = none, bool disabling = true)
+	if ActorRef && Positions.Find(ActorRef) != -1
+		ActorAlias(ActorRef).DoUndress = !disabling
+	else
+		ActorAlias[0].DoUndress = !disabling
+		ActorAlias[1].DoUndress = !disabling
+		ActorAlias[2].DoUndress = !disabling
+		ActorAlias[3].DoUndress = !disabling
+		ActorAlias[4].DoUndress = !disabling
+	endIf
 endFunction
 
-function DisableRedress(Actor ActorRef, bool disabling = true)
-	ActorAlias(ActorRef).DoRedress = !disabling
+function DisableRedress(Actor ActorRef = none, bool disabling = true)
+	if ActorRef && Positions.Find(ActorRef) != -1
+		ActorAlias(ActorRef).DoRedress = !disabling
+	else
+		ActorAlias[0].DoRedress = !disabling
+		ActorAlias[1].DoRedress = !disabling
+		ActorAlias[2].DoRedress = !disabling
+		ActorAlias[3].DoRedress = !disabling
+		ActorAlias[4].DoRedress = !disabling
+	endIf
 endFunction
 
-function DisableRagdollEnd(Actor ActorRef, bool disabling = true)
-	ActorAlias(ActorRef).DoRagdoll = !disabling
+function DisableRagdollEnd(Actor ActorRef = none, bool disabling = true)
+	if ActorRef && Positions.Find(ActorRef) != -1
+		ActorAlias(ActorRef).DoRagdoll = !disabling
+	else
+		ActorAlias[0].DoRagdoll = !disabling
+		ActorAlias[1].DoRagdoll = !disabling
+		ActorAlias[2].DoRagdoll = !disabling
+		ActorAlias[3].DoRagdoll = !disabling
+		ActorAlias[4].DoRagdoll = !disabling
+	endIf
 endFunction
 
 function DisablePathToCenter(Actor ActorRef = none, bool disabling = true)
