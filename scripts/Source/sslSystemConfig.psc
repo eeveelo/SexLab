@@ -143,7 +143,7 @@ bool property RestrictSameSex auto hidden
 bool property SeparateOrgasms auto hidden
 bool property RemoveHeelEffect auto hidden
 bool property AdjustTargetStage auto hidden
-bool property PathToCenter auto hidden
+bool property DisableTeleport auto hidden
 
 ; Integers
 int property AnimProfile auto hidden
@@ -597,7 +597,7 @@ bool function CheckSystem()
 endFunction
 
 function Reload()
-	; DebugMode = true
+	DebugMode = true
 	LoadLibs(false)
 	SexLab = SexLabUtil.GetAPI()
 
@@ -652,6 +652,8 @@ function Setup()
 endFunction
 
 function SetDefaults()
+	DebugMode = true
+
 	; Booleans
 	RestrictAggressive = true
 	; AllowCreatures     = false
@@ -680,7 +682,7 @@ function SetDefaults()
 	SeparateOrgasms    = false
 	RemoveHeelEffect   = HasHDTHeels
 	AdjustTargetStage  = false
-	PathToCenter       = true
+	DisableTeleport    = true
 	
 	; Integers
 	AnimProfile        = 1
@@ -890,7 +892,7 @@ function ExportSettings()
 	ExportBool("SeparateOrgasms", SeparateOrgasms)
 	ExportBool("RemoveHeelEffect", RemoveHeelEffect)
 	ExportBool("AdjustTargetStage", AdjustTargetStage)
-	ExportBool("PathToCenter", PathToCenter)
+	ExportBool("DisableTeleport", DisableTeleport)
 
 	; Integers
 	ExportInt("AnimProfile", AnimProfile)
@@ -977,7 +979,7 @@ function ImportSettings()
 	SeparateOrgasms    = ImportBool("SeparateOrgasms", SeparateOrgasms)
 	RemoveHeelEffect   = ImportBool("RemoveHeelEffect", RemoveHeelEffect)
 	AdjustTargetStage  = ImportBool("AdjustTargetStage", AdjustTargetStage)
-	PathToCenter       = ImportBool("PathToCenter", PathToCenter)
+	DisableTeleport    = ImportBool("DisableTeleport", DisableTeleport)
 
 	; Integers
 	AnimProfile        = ImportInt("AnimProfile", AnimProfile)

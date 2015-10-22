@@ -682,7 +682,7 @@ function AnimationSettings()
 	AddTextOptionST("PlayerGender","$SSL_PlayerGender", SexLabUtil.StringIfElse(ActorLib.GetGender(PlayerRef) == 0, "$SSL_Male", "$SSL_Female"))
 
 	AddHeaderOption("$SSL_ExtraEffects")
-	AddToggleOptionST("PathToCenter","$SSL_PathToCenter", Config.PathToCenter)
+	AddToggleOptionST("DisableTeleport","$SSL_DisableTeleport", Config.DisableTeleport)
 	AddToggleOptionST("UseExpressions","$SSL_UseExpressions", Config.UseExpressions)
 	AddToggleOptionST("UseLipSync", "$SSL_UseLipSync", Config.UseLipSync)
 	AddToggleOptionST("OrgasmEffects","$SSL_OrgasmEffects", Config.OrgasmEffects)
@@ -739,13 +739,13 @@ state AnimationProfile
 	endEvent
 endState
 
-state PathToCenter
+state DisableTeleport
 	event OnSelectST()
-		Config.PathToCenter = !Config.PathToCenter
-		SetToggleOptionValueST(Config.PathToCenter)
+		Config.DisableTeleport = !Config.DisableTeleport
+		SetToggleOptionValueST(Config.DisableTeleport)
 	endEvent
 	event OnHighlightST()
-		SetInfoText("$SSL_InfoPathToCenter")
+		SetInfoText("$SSL_InfoDisableTeleport")
 	endEvent
 endState
 

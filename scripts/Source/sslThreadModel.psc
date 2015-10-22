@@ -493,6 +493,30 @@ function DisableRagdollEnd(Actor ActorRef, bool disabling = true)
 	ActorAlias(ActorRef).DoRagdoll = !disabling
 endFunction
 
+function DisablePathToCenter(Actor ActorRef = none, bool disabling = true)
+	if ActorRef && Positions.Find(ActorRef) != -1
+		ActorAlias(ActorRef).DisablePathToCenter(disabling)
+	else
+		ActorAlias[0].DisablePathToCenter(disabling)
+		ActorAlias[1].DisablePathToCenter(disabling)
+		ActorAlias[2].DisablePathToCenter(disabling)
+		ActorAlias[3].DisablePathToCenter(disabling)
+		ActorAlias[4].DisablePathToCenter(disabling)
+	endIf
+endFunction
+
+function ForcePathToCenter(Actor ActorRef = none, bool forced = true)
+	if ActorRef && Positions.Find(ActorRef) != -1
+		ActorAlias(ActorRef).ForcePathToCenter(forced)
+	else
+		ActorAlias[0].ForcePathToCenter(forced)
+		ActorAlias[1].ForcePathToCenter(forced)
+		ActorAlias[2].ForcePathToCenter(forced)
+		ActorAlias[3].ForcePathToCenter(forced)
+		ActorAlias[4].ForcePathToCenter(forced)
+	endIf
+endFunction
+
 function SetStartAnimationEvent(Actor ActorRef, string EventName = "IdleForceDefaultState", float PlayTime = 0.1)
 	ActorAlias(ActorRef).SetStartAnimationEvent(EventName, PlayTime)
 endFunction
@@ -712,6 +736,24 @@ function AddAnimation(sslBaseAnimation AddAnimation, bool ForceTo = false)
 		PrimaryAnimations = sslUtility.MergeAnimationLists(PrimaryAnimations, Adding)
 	endIf
 endFunction
+
+;/ int StartFID
+int property kStartFID hidden
+	int function get()
+		return StartFID
+	endFunction
+endProperty
+int StartAID
+int property kStartAID hidden
+	int function get()
+		return StartAID
+	endFunction
+endProperty
+bool function SetFirstForeplayAnimation(sslBaseAnimation FirstAnimation)
+endFunction
+sslBaseAnimation function SetFirstAnimationByIndex(int aid)
+
+endFunction /;
 
 ; ------------------------------------------------------- ;
 ; --- Thread Settings                                 --- ;
@@ -1245,6 +1287,7 @@ function Initialize()
 	; Integers
 	Stage          = 1
 	ActorCount     = 0
+	; StartAID       = -1
 	; Storage Data
 	Genders           = new int[4]
 	Victims           = PapyrusUtil.ActorArray(0)

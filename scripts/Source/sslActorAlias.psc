@@ -231,6 +231,11 @@ state Ready
 	function PrepareActor()
 		; Remove any unwanted combat effects
 		ClearEffects()
+		if IsPlayer
+			Game.SetPlayerAIDriven()
+		endIf
+		ActorRef.SetFactionRank(AnimatingFaction, 1)
+		ActorRef.EvaluatePackage()
 		; Starting Information
 		LoadShares()
 		GetPositionInfo()
@@ -247,7 +252,7 @@ state Ready
 		endIf
 		string LogInfo = "Scales["+display+"/"+base+"/"+AnimScale+"] "
 		; Stop other movements
-		if Config.PathToCenter
+		if DoPathToCenter
 			PathToCenter()
 		endIf
 		LockActor()
@@ -332,22 +337,29 @@ state Ready
 
 	function PathToCenter()
 		ObjectReference CenterRef = Thread.CenterAlias.GetReference()
-		if CenterRef && ActorRef && CenterRef != ActorRef
-			float Distance = ActorRef.GetDistance(CenterRef)
-			if Distance < 5000.0
-				if IsPlayer
-					Game.SetPlayerAIDriven()
+		if CenterRef && ActorRef && (Thread.ActorCount > 1 || CenterRef != ActorRef)
+			ObjectReference WaitRef = CenterRef
+			if CenterRef == ActorRef
+				WaitRef = Thread.Positions[IntIfElse(Position != 0, 0, 1)]
+			endIf
+			float Distance = ActorRef.GetDistance(WaitRef)
+			if WaitRef && Distance < 8000.0 && Distance > 100.0
+				if CenterRef != ActorRef
+					ActorRef.SetFactionRank(AnimatingFaction, 2)
+					ActorRef.EvaluatePackage()
 				endIf
-				ActorRef.SetFactionRank(AnimatingFaction, 2)
-				ActorRef.EvaluatePackage()
+				ActorRef.SetLookAt(WaitRef, true)
 				float Failsafe = Utility.GetCurrentRealTime() + 15.0
 				while Distance > 100.0 && Utility.GetCurrentRealTime() < Failsafe
 					Utility.Wait(0.5)
-					Distance = ActorRef.GetDistance(CenterRef)
-					Log("Distance From Center: "+Distance)
+					Distance = ActorRef.GetDistance(WaitRef)
+					Log("Distance From WaitRef["+WaitRef+"]: "+Distance)
 				endWhile
-				ActorRef.SetFactionRank(AnimatingFaction, 1)
-				ActorRef.EvaluatePackage()
+				ActorRef.ClearLookAt()
+				if CenterRef != ActorRef
+					ActorRef.SetFactionRank(AnimatingFaction, 1)
+					ActorRef.EvaluatePackage()
+				endIf
 			endIf
 		endIf
 	endFunction
@@ -386,13 +398,16 @@ state Animating
 		; Reenter SA - On stage 1 while animation hasn't changed since last call
 		if Stage == 1 && PlayingSA == CurrentSA
 			Debug.SendAnimationEvent(ActorRef, AnimEvents[Position] + "_REENTER")
+			Log(AnimEvents[Position] + "_REENTER")
 		else
 			; Enter a new SA - Not necessary on stage 1 since both events would be the same
 			if Stage != 1 && PlayingSA != CurrentSA
 				Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
+				Log(Animation.FetchPositionStage(Position, 1))
 			endIf
 			; Play the primary animation
 		 	Debug.SendAnimationEvent(ActorRef, AnimEvents[Position])
+		 	Log(AnimEvents[Position])
 		endIf
 		; Save id of last SA played
 		PlayingSA = Animation.Registry
@@ -404,6 +419,7 @@ state Animating
 		OffsetCoords(Loc, Center, Offsets)
 		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
+		Utility.Wait(0.1)
 		ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		AttachMarker()
@@ -421,7 +437,7 @@ state Animating
 		StartedAt  = RealTime[0]
 		LastOrgasm = RealTime[0] + 10.0
 		SyncAll(true)
-		; Start update loop		
+		; Start update loop
 		UnregisterForModEvent(Thread.Key("Start"))
 		RegisterForSingleUpdate(Utility.RandomFloat(1.0, 3.0))
 	endFunction
@@ -583,7 +599,7 @@ state Animating
 		int i = Thread.ActorCount
 		if i > 1 && Config.UseCum && (MalePosition || IsCreature) && (IsMale || IsCreature || (Config.AllowFFCum && IsFemale))
 			if i == 2
-				Thread.PositionAlias(SexLabUtil.IntIfElse(Position == 1, 0, 1)).ApplyCum()
+				Thread.PositionAlias(IntIfElse(Position == 1, 0, 1)).ApplyCum()
 			else
 				while i > 0
 					i -= 1
@@ -1115,6 +1131,19 @@ bool property DoRedress hidden
 	endFunction
 endProperty
 
+int PathingFlag
+function ForcePathToCenter(bool forced)
+	PathingFlag = (forced as int)
+endFunction
+function DisablePathToCenter(bool disabling)
+	PathingFlag = IntIfElse(disabling, -1, (PathingFlag == 1) as int)
+endFunction
+bool property DoPathToCenter
+	bool function get()
+		return (PathingFlag == 0 && Config.DisableTeleport) || PathingFlag == 1
+	endFunction
+endProperty
+
 function RefreshExpression()
 	if !ActorRef || IsCreature
 		; Do nothing
@@ -1224,6 +1253,7 @@ function Initialize()
 	BestRelation   = 0
 	BaseEnjoyment  = 0
 	Enjoyment      = 0
+	PathingFlag    = 0
 	; Floats
 	LastOrgasm     = 0.0
 	ActorScale     = 0.0
@@ -1317,6 +1347,13 @@ endEvent
 function OffsetCoords(float[] Output, float[] CenterCoords, float[] OffsetBy) global native
 bool function IsInPosition(Actor CheckActor, ObjectReference CheckMarker, float maxdistance = 30.0) global native
 int function CalcEnjoyment(float[] XP, float[] SkillsAmounts, bool IsLeadin, bool IsFemaleActor, float Timer, int OnStage, int MaxStage) global native
+
+int function IntIfElse(bool check, int isTrue, int isFalse)
+	if check
+		return isTrue
+	endIf
+	return isFalse
+endfunction
 
 ; function AdjustCoords(float[] Output, float[] CenterCoords, ) global native
 ; function AdjustOffset(int i, float amount, bool backwards, bool adjustStage)
