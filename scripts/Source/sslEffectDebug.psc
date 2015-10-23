@@ -22,7 +22,18 @@ endFunction
 
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
-	Benchmark(1, 50, 5, false)
+	sslBaseVoice Voice = SexLab.PickVoice(TargetRef)
+	Utility.Wait(2.0)
+	Voice.AnimatedMoan(TargetRef, 30)
+	Utility.Wait(2.0)
+	Voice.AnimatedMoan(TargetRef, 50)
+	Utility.Wait(2.0)
+	Voice.AnimatedMoan(TargetRef, 100)
+	Utility.Wait(2.0)
+	Voice.AnimatedMoan(TargetRef, 100)
+	Utility.Wait(2.0)
+	Voice.AnimatedMoan(TargetRef, 100)
+	; Benchmark(1, 50, 5, false)
 
 	;/ if TargetRef == CasterRef
 		string[] FileList = JsonUtil.JsonInFolder("../SexLab/")
@@ -65,7 +76,7 @@ event OnEffectFinish(Actor TargetRef, Actor CasterRef)
 		MarkerRef.Delete()
 		MarkerRef = none
 	endIf
-	Log("---- FINISHED ----")
+	; Log("---- FINISHED ----")
 endEvent
 
 

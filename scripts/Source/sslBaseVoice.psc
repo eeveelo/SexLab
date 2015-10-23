@@ -1,8 +1,12 @@
 scriptname sslBaseVoice extends sslBaseObject
 
+Sound property Hot auto
 Sound property Mild auto
 Sound property Medium auto
-Sound property Hot auto
+
+; Sound[] property HotPack
+; Sound[] property MildPack
+; Sound[] property VictimPack
 
 Topic property LipSync auto hidden
 
@@ -22,11 +26,22 @@ function Moan(Actor ActorRef, int Strength = 30, bool IsVictim = false)
 	if Strength < 1
 		Strength = 1
 	endIf
-	Sound SoundRef = GetSound(Strength, IsVictim)
+	;/ Sound SoundRef = GetSound(Strength, IsVictim)
 	if SoundRef
 		LipSync(ActorRef, Strength)
 		SoundRef.Play(ActorRef)
-		Utility.Wait(0.8)
+		Utility.WaitMenuMode(0.8)
+	endIf /;
+
+	Sound SoundRef = GetSound(Strength, IsVictim)
+	if SoundRef
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 20)
+		Utility.WaitMenuMode(0.1)
+		SoundRef.Play(ActorRef)
+		TransitUp(ActorRef, 20, 50)
+		Utility.WaitMenuMode(0.2)
+		TransitDown(ActorRef, 50, 20)
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 0)
 	endIf
 endFunction
 
@@ -37,6 +52,31 @@ function MoanNoWait(Actor ActorRef, int Strength = 30, bool IsVictim = false, fl
 			LipSync(ActorRef, Strength)
 			Sound.SetInstanceVolume(SoundRef.Play(ActorRef), Volume)
 		endIf
+	endIf
+endFunction
+
+function TransitUp(Actor ActorRef, int from, int to)
+	while from < to
+		from += 2
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from)
+	endWhile
+endFunction
+function TransitDown(Actor ActorRef, int from, int to)
+	while from > to
+		from -= 2
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from)
+	endWhile
+endFunction
+function AnimatedMoan(Actor ActorRef, int Strength = 30, bool IsVictim = false, float Volume = 1.0)
+	Sound SoundRef = GetSound(Strength, IsVictim)
+	if SoundRef
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 20)
+		Utility.WaitMenuMode(0.1)
+		Sound.SetInstanceVolume(SoundRef.Play(ActorRef), Volume)
+		TransitUp(ActorRef, 20, 50)
+		Utility.WaitMenuMode(0.2)
+		TransitDown(ActorRef, 50, 20)
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 0)
 	endIf
 endFunction
 
@@ -75,42 +115,3 @@ function Initialize()
 	LipSync = Config.LipSync
 endFunction
 
-; ------------------------------------------------------- ;
-; --- Tagging System                                  --- ;
-; ------------------------------------------------------- ;
-
-; bool function AddTag(string Tag) native
-; bool function HasTag(string Tag) native
-; bool function RemoveTag(string Tag) native
-; bool function ToggleTag(string Tag) native
-; bool function AddTagConditional(string Tag, bool AddTag) native
-; bool function ParseTags(string[] TagList, bool RequireAll = true) native
-; bool function CheckTags(string[] CheckTags, bool RequireAll = true, bool Suppress = false) native
-; bool function HasOneTag(string[] TagList) native
-; bool function HasAllTag(string[] TagList) native
-
-; function AddTags(string[] TagList)
-; 	int i = TagList.Length
-; 	while i
-; 		i -= 1
-; 		AddTag(TagList[i])
-; 	endWhile
-; endFunction
-
-; int function TagCount() native
-; string function GetNthTag(int i) native
-; function TagSlice(string[] Ouput) native
-
-; string[] function GetTags()
-; 	int i = TagCount()
-; 	Log(Registry+" - TagCount: "+i)
-; 	if i < 1
-; 		return sslUtility.StringArray(0)
-; 	endIf
-; 	string[] Output = sslUtility.StringArray(i)
-; 	TagSlice(Output)
-; 	Log(Registry+" - SKSE Tags: "+Output)
-; 	return Output
-; endFunction
-
-; function RevertTags() native
