@@ -20,6 +20,7 @@ bool IsAggressor
 bool IsPlayer
 bool IsTracked
 bool IsSkilled
+bool LipSync
 Faction AnimatingFaction
 
 ; Current Thread state
@@ -205,7 +206,7 @@ sslBaseAnimation Animation
 
 function LoadShares()
 	DebugMode  = Config.DebugMode
-	AnimatingFaction = Config.AnimatingFaction ; TEMP
+	LipSync    = Config.LipSync
 
 	Center     = Thread.CenterLocation
 	BedStatus  = Thread.BedStatus
@@ -215,6 +216,8 @@ function LoadShares()
 	IsType     = Thread.IsType
 	LeadIn     = Thread.LeadIn
 	AnimEvents = Thread.AnimEvents
+
+	AnimatingFaction = Config.AnimatingFaction ; TEMP
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -430,12 +433,13 @@ state Animating
 		Config.CheckBardAudience(ActorRef, true)
 		; If enabled, start Auto TFC for player
 		if IsPlayer && Config.AutoTFC
-			SexLabUtil.EnableFreeCamera(true, Config.AutoSUCSM)
+			MiscUtil.SetFreeCameraState(true)
+			MiscUtil.SetFreeCameraSpeed(Config.AutoSUCSM)
 		endIf
 		; Prepare for loop
 		TrackedEvent("Start")
 		StartedAt  = RealTime[0]
-		LastOrgasm = RealTime[0] + 10.0
+		LastOrgasm = RealTime[0]
 		SyncAll(true)
 		; Start update loop
 		UnregisterForModEvent(Thread.Key("Start"))
@@ -565,7 +569,8 @@ state Animating
 	endEvent
 
 	function OrgasmEffect()
-		if (RealTime[0] - LastOrgasm) < 10.0
+		if (Utility.GetCurrentRealTime() - LastOrgasm) < 3.0
+			Log("PREMATURE EJACULATION")
 			return
 		endIf
 		UnregisterForUpdate()
@@ -587,8 +592,8 @@ state Animating
 		TrackedEvent("Orgasm")
 		Log("Orgasms["+Orgasms+"] Enjoyment ["+Enjoyment+"] BaseEnjoyment["+BaseEnjoyment+"] FullEnjoyment["+FullEnjoyment+"]")
 		; Shake camera for player
-		if IsPlayer && Config.OrgasmEffects && Game.GetCameraState() != 3
-			Game.ShakeCamera(none, 1.00, 2.0)
+		if IsPlayer && Config.OrgasmEffects && Game.GetCameraState() >= 8
+			; Game.ShakeCamera(none, 1.00, 2.0)
 		endIf
 		; Play SFX/Voice
 		if !IsSilent
@@ -618,6 +623,10 @@ state Animating
 		ClearEvents()
 		GoToState("Resetting")
 		Log("Resetting!")
+		; Clear TFC
+		if IsPlayer
+			MiscUtil.SetFreeCameraState(false)
+		endIf
 		; Update stats
 		if IsSkilled
 			Actor VictimRef = Thread.VictimRef
@@ -631,10 +640,6 @@ state Animating
 		int CumID = Animation.GetCum(Position)
 		if CumID > 0 && !Thread.FastEnd && Config.UseCum && (Thread.Males > 0 || Config.AllowFFCum || Thread.HasCreature)
 			ActorLib.ApplyCum(ActorRef, CumID)
-		endIf
-		; Clear TFC
-		if IsPlayer && Game.GetCameraState() == 3
-			MiscUtil.ToggleFreeCamera()
 		endIf
 		; Tracked events
 		TrackedEvent("End")
@@ -682,8 +687,8 @@ function StopAnimating(bool Quick = false, string ResetAnim = "IdleForceDefaultS
 		return
 	endIf
 	; Disable free camera, if in it
-	if IsPlayer && Game.GetCameraState() == 3
-		Config.ToggleFreeCamera()
+	if IsPlayer
+		MiscUtil.SetFreeCameraState(false)
 	endIf
 	; Clear possibly troublesome effects
 	ActorRef.StopTranslation()
@@ -773,11 +778,8 @@ function UnlockActor()
 	ActorRef.EvaluatePackage()
 	; Enable movement
 	if IsPlayer
-		; Disable free camera, if in it
-		if Game.GetCameraState() == 3
-			Config.ToggleFreeCamera()
-		endIf
 		Thread.DisableHotkeys()
+		MiscUtil.SetFreeCameraState(false)
 		Game.EnablePlayerControls(true, true, false, false, false, false, false, false, 0)
 		Game.SetPlayerAIDriven(false)
 	else
@@ -1170,6 +1172,12 @@ function TrackedEvent(string EventName)
 endFunction
 
 function ClearEffects()
+	if IsPlayer
+		MiscUtil.SetFreeCameraState(false)
+		if Game.GetCameraState() == 0
+			Game.ForceThirdPerson()
+		endIf
+	endIf
 	if ActorRef.IsInCombat()
 		ActorRef.StopCombat()
 	endIf

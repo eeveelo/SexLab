@@ -1,6 +1,8 @@
 scriptname sslThreadController extends sslThreadModel
 { Animation Thread Controller: Runs manipulation logic of thread based on information from model. Access only through functions; NEVER create a property directly to this. }
 
+; TODO: SetFirstAnimation() - allow custom defined starter anims instead of random
+
 import PapyrusUtil
 
 ; Animation
@@ -573,9 +575,15 @@ endFunction
 
 function EndAnimation(bool Quickly = false)
 	UnregisterForUpdate()
-	Utility.WaitMenuMode(0.2)
-	FastEnd = Quickly
 	Stage   = StageCount
+	FastEnd = Quickly
+	if HasPlayer
+		MiscUtil.SetFreeCameraState(false)
+		if Game.GetCameraState() == 0
+			Game.ForceThirdPerson()
+		endIf
+	endIf
+	Utility.WaitMenuMode(0.5)
 	GoToState("Ending")
 endFunction
 
@@ -586,7 +594,7 @@ state Ending
 		RecordSkills()
 		DisableHotkeys()
 		Config.DisableThreadControl(self)
-		SyncEvent(kResetActor, 45.0)
+		SyncEvent(kResetActor, 30.0)
 	endEvent
 	event OnUpdate()
 		ResetDone()
