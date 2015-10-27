@@ -147,6 +147,7 @@ bool property DisableTeleport auto hidden
 
 ; Integers
 int property AnimProfile auto hidden
+int property AskBed auto hidden
 int property NPCBed auto hidden
 
 int property Backwards auto hidden
@@ -686,6 +687,7 @@ function SetDefaults()
 	
 	; Integers
 	AnimProfile        = 1
+	AskBed             = 1
 	NPCBed             = 0
 
 	Backwards          = 54 ; Right Shift
@@ -896,6 +898,7 @@ function ExportSettings()
 
 	; Integers
 	ExportInt("AnimProfile", AnimProfile)
+	ExportInt("AskBed", AskBed)
 	ExportInt("NPCBed", NPCBed)
 
 	ExportInt("Backwards", Backwards)
@@ -983,6 +986,7 @@ function ImportSettings()
 
 	; Integers
 	AnimProfile        = ImportInt("AnimProfile", AnimProfile)
+	AskBed             = ImportInt("AskBed", AskBed)
 	NPCBed             = ImportInt("NPCBed", NPCBed)
 
 	Backwards          = ImportInt("Backwards", Backwards)

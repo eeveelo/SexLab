@@ -240,6 +240,12 @@ event OnConfigOpen()
 		Chances[1] = "$SSL_Sometimes"
 		Chances[2] = "$SSL_Always"
 	endIf
+	if BedOpt.Length != 3 || BedOpt.Find("") != -1
+		BedOpt = new string[3]
+		BedOpt[0] = "$SSL_Never"
+		BedOpt[1] = "$SSL_Always"
+		BedOpt[2] = "$SSL_NotVictim"
+	endIf
 
 	; Expression Editor
 	if Phases.Length != 5 || Phases.Find("") != -1
@@ -671,6 +677,7 @@ endState
 ; ------------------------------------------------------- ;
 
 string[] Chances
+string[] BedOpt
 
 function AnimationSettings()
 	SetCursorFillMode(TOP_TO_BOTTOM)
@@ -691,6 +698,7 @@ function AnimationSettings()
 	AddToggleOptionST("AllowFemaleFemaleCum","$SSL_AllowFemaleFemaleCum", Config.AllowFFCum)
 	AddSliderOptionST("CumEffectTimer","$SSL_CumEffectTimer", Config.CumTimer, "$SSL_Seconds")
 	AddToggleOptionST("LimitedStrip","$SSL_LimitedStrip", Config.LimitedStrip)
+	AddTextOptionST("AskBed","$SSL_AskBed", BedOpt[ClampInt(Config.AskBed, 0, 2)])
 	AddTextOptionST("NPCBed","$SSL_NPCsUseBeds", Chances[ClampInt(Config.NPCBed, 0, 2)])
 
 	SetCursorPosition(1)
@@ -2687,6 +2695,19 @@ state UseCreatureGender
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoUseCreatureGender")
+	endEvent
+endState
+state AskBed
+	event OnSelectST()
+		Config.AskBed = sslUtility.IndexTravel(Config.AskBed, 3)
+		SetTextOptionValueST(BedOpt[Config.AskBed])
+	endEvent
+	event OnDefaultST()
+		Config.AskBed = 1
+		SetTextOptionValueST(BedOpt[Config.AskBed])
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoAskBed")
 	endEvent
 endState
 state NPCBed

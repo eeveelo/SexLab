@@ -197,6 +197,12 @@ bool property UsingDoubleBed hidden
 		return BedStatus[1] == 3
 	endFunction
 endProperty
+bool property DoAskBed hidden
+	bool function get()
+		int AskBed = Config.AskBed
+		return (HasPlayer && (AskBed == 1 || (AskBed == 2 && Victims && Victims.Find(PlayerRef) != -1)))
+	endFunction
+endProperty
 
 ; Genders
 int[] property Genders auto hidden
@@ -335,7 +341,7 @@ state Making
 		endIf
 		; Search for nearby bed
 		if !CenterRef && BedStatus[0] != -1
-			CenterOnBed(HasPlayer, 750.0)
+			CenterOnBed(DoAskBed, 750.0)
 		endIf
 		; Center on fallback choices
 		if !CenterRef
