@@ -144,6 +144,7 @@ bool property SeparateOrgasms auto hidden
 bool property RemoveHeelEffect auto hidden
 bool property AdjustTargetStage auto hidden
 bool property DisableTeleport auto hidden
+bool property SeedNPCStats auto hidden
 
 ; Integers
 int property AnimProfile auto hidden
@@ -684,6 +685,7 @@ function SetDefaults()
 	RemoveHeelEffect   = HasHDTHeels
 	AdjustTargetStage  = false
 	DisableTeleport    = true
+	SeedNPCStats       = true
 	
 	; Integers
 	AnimProfile        = 1
@@ -895,6 +897,7 @@ function ExportSettings()
 	ExportBool("RemoveHeelEffect", RemoveHeelEffect)
 	ExportBool("AdjustTargetStage", AdjustTargetStage)
 	ExportBool("DisableTeleport", DisableTeleport)
+	ExportBool("SeedNPCStats", SeedNPCStats)
 
 	; Integers
 	ExportInt("AnimProfile", AnimProfile)
@@ -983,6 +986,7 @@ function ImportSettings()
 	RemoveHeelEffect   = ImportBool("RemoveHeelEffect", RemoveHeelEffect)
 	AdjustTargetStage  = ImportBool("AdjustTargetStage", AdjustTargetStage)
 	DisableTeleport    = ImportBool("DisableTeleport", DisableTeleport)
+	SeedNPCStats       = ImportBool("SeedNPCStats", SeedNPCStats)
 
 	; Integers
 	AnimProfile        = ImportInt("AnimProfile", AnimProfile)

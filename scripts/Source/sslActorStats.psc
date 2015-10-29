@@ -6,6 +6,9 @@ import PapyrusUtil
 import Utility
 import Math
 
+Keyword ActorTypeNPC
+Faction GenderFaction
+
 ; Titles
 string[] StatTitles
 string[] PureTitlesMale
@@ -186,9 +189,14 @@ Actor[] function GetAllSkilledActors() global native
 function _SeedActor(Actor ActorRef, float RealTime, float GameTime) global native
 ; function _SeedActor2(Actor ActorRef, float RealTime, float GameTime) global native
 function SeedActor(Actor ActorRef)
-	if ActorRef != PlayerRef && !IsSkilled(ActorRef) && ActorRef.HasKeyword(Config.ActorTypeNPC)
-		_SeedActor(ActorRef, Utility.GetCurrentRealTime(), Utility.GetCurrentGameTime())
-		Log(ActorRef.GetLeveledActorBase().GetName()+" Seeded: "+GetSkills(ActorRef))
+	if ActorRef && ActorRef != PlayerRef && !IsSkilled(ActorRef)
+		if Config.SeedNPCStats && ActorRef.HasKeyword(ActorTypeNPC)
+			_SeedActor(ActorRef, Utility.GetCurrentRealTime(), Utility.GetCurrentGameTime())
+			Log(ActorRef.GetLeveledActorBase().GetName()+" Seeded Stats: "+GetSkills(ActorRef))
+		else
+			EmptyStats(ActorRef)
+			Log(ActorRef.GetLeveledActorBase().GetName()+" Init Empty Stats")
+		endIf
 		sslSystemConfig.StoreActor(ActorRef)
 	endIf
 endFunction
@@ -720,16 +728,19 @@ function ResetStats(Actor ActorRef)
 	FloatListClear(ActorRef, "SexLabSkills")
 endFunction
 
-function _EmptyStats(Actor ActorRef) global native
+; function _EmptyStats(Actor ActorRef) global native
 function EmptyStats(Actor ActorRef)
 	if ActorRef
 		ResetStats(ActorRef)
-		_SetSkill(ActorRef, kSexuality, 60)
+		_SetSkill(ActorRef, kSexuality, 65)
 	endIf
 endFunction
 
 function Setup()
 	parent.Setup()
+
+	ActorTypeNPC  = Config.ActorTypeNPC
+	GenderFaction = Config.GenderFaction
 
 	StatTitles = new string[7]
 	StatTitles[0] = "$SSL_Unskilled"
@@ -803,6 +814,11 @@ function Setup()
 		ClearLegacyStats(FormListGet(none, "SexLab.SeededActors", i))		
 	endWhile
 	FormListClear(none, "SexLab.SeededActors")
+
+	; Give player empty stats if not yet set
+	if !IsSkilled(PlayerRef)
+		EmptyStats(PlayerRef)
+	endIf
 endFunction
 
 function ClearCustomStats(Form FormRef)
@@ -881,8 +897,8 @@ int function GetGender(Actor ActorRef)
 	ActorBase BaseRef = ActorRef.GetLeveledActorBase()
 	if SexLabUtil.HasRace(BaseRef.GetRace())
 		return 2 ; Creature
-	elseIf ActorRef.IsInFaction(config.GenderFaction)
-		return ActorRef.GetFactionRank(config.GenderFaction) ; Override
+	elseIf ActorRef.IsInFaction(GenderFaction)
+		return ActorRef.GetFactionRank(GenderFaction) ; Override
 	endIf
 	return BaseRef.GetSex() ; Default
 endFunction
@@ -983,6 +999,11 @@ endProperty
 int property kLastGameTime hidden
 	int function get()
 		return 17
+	endFunction
+endProperty
+int property kStatCount hidden
+	int function get()
+		return 18
 	endFunction
 endProperty
 
@@ -1130,7 +1151,7 @@ state Testing
 		int i = 500
 		while i
 			i -= 1
-			Debug.Trace("ACTORSTATSb Lock Spin: "+i)
+			Debug.Trace("ACTORSTATS Lock Spin: "+i)
 			Utility.WaitMenuMode(0.5)
 		endWhile
 

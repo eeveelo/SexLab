@@ -707,6 +707,7 @@ function AnimationSettings()
 	AddToggleOptionST("UseCreatureGender","$SSL_UseCreatureGender", Config.UseCreatureGender)
 	AddHeaderOption("$SSL_AnimationHandling")
 	AddToggleOptionST("RaceAdjustments","$SSL_RaceAdjustments", Config.RaceAdjustments)
+	AddToggleOptionST("SeedNPCStats","$SSL_SeedNPCStats", Config.SeedNPCStats)
 	AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", Config.ScaleActors)
 	AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", Config.ForeplayStage)
 	AddToggleOptionST("RestrictAggressive","$SSL_RestrictAggressive", Config.RestrictAggressive)
@@ -747,6 +748,16 @@ state AnimationProfile
 	endEvent
 endState
 
+state RaceAdjustments
+	event OnSelectST()
+		Config.RaceAdjustments = !Config.RaceAdjustments
+		SetToggleOptionValueST(Config.RaceAdjustments)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoRaceAdjustments")
+	endEvent
+endState
+
 state DisableTeleport
 	event OnSelectST()
 		Config.DisableTeleport = !Config.DisableTeleport
@@ -757,13 +768,13 @@ state DisableTeleport
 	endEvent
 endState
 
-state RaceAdjustments
+state SeedNPCStats
 	event OnSelectST()
-		Config.RaceAdjustments = !Config.RaceAdjustments
-		SetToggleOptionValueST(Config.RaceAdjustments)
+		Config.SeedNPCStats = !Config.SeedNPCStats
+		SetToggleOptionValueST(Config.SeedNPCStats)
 	endEvent
 	event OnHighlightST()
-		SetInfoText("$SSL_InfoRaceAdjustments")
+		SetInfoText("$SSL_InfoSeedNPCStats")
 	endEvent
 endState
 
