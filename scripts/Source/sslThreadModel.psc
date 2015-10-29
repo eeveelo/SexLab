@@ -197,10 +197,10 @@ bool property UsingDoubleBed hidden
 		return BedStatus[1] == 3
 	endFunction
 endProperty
-bool property DoAskBed hidden
+bool property UseNPCBed hidden
 	bool function get()
-		int AskBed = Config.AskBed
-		return (HasPlayer && (AskBed == 1 || (AskBed == 2 && Victims && Victims.Find(PlayerRef) != -1)))
+		int NPCBed = Config.NPCBed
+		return NPCBed == 2 || (NPCBed == 1 && (Utility.RandomInt(0, 1) as bool))
 	endFunction
 endProperty
 
@@ -341,7 +341,7 @@ state Making
 		endIf
 		; Search for nearby bed
 		if !CenterRef && BedStatus[0] != -1
-			CenterOnBed(DoAskBed, 750.0)
+			CenterOnBed(HasPlayer, 750.0)
 		endIf
 		; Center on fallback choices
 		if !CenterRef
@@ -866,13 +866,17 @@ function CenterOnCoords(float LocX = 0.0, float LocY = 0.0, float LocZ = 0.0, fl
 	CenterLocation[5] = RotZ
 endFunction
 
- bool function CenterOnBed(bool AskPlayer = true, float Radius = 750.0)
+bool function CenterOnBed(bool AskPlayer = true, float Radius = 750.0)
+	bool InStart = GetState() == "Starting" || GetState() == "Making"
+	int AskBed = Config.AskBed
+	if BedStatus[0] == -1 || (InStart && (!HasPlayer && Config.NPCBed == 0) || (HasPlayer && AskBed == 0))
+		return false ; Beds forbidden by flag or starting bed check/prompt disabled
+	endIf
  	ObjectReference FoundBed
-	if BedStatus[0] == -1
-		return false ; Beds forbidden by flag
-	elseIf HasPlayer
-		FoundBed = ThreadLib.FindBed(PlayerRef, Radius) ; Check within radius of player
-	elseIf Config.NPCBed == 2 || (Config.NPCBed == 1 && (Utility.RandomInt(0, 1) as bool))
+	if HasPlayer && (!InStart || AskBed == 1 || (AskBed == 2 && (!IsVictim(PlayerRef) || UseNPCBed)))
+		FoundBed  = ThreadLib.FindBed(PlayerRef, Radius) ; Check within radius of player
+		AskPlayer = AskPlayer && (!InStart || !(AskBed == 2 && IsVictim(PlayerRef))) ; Disable prompt if bed found but shouldn't ask
+	elseIf !HasPlayer && UseNPCBed
 		FoundBed = ThreadLib.FindBed(Positions[0], Radius) ; Check within radius of first position, if NPC beds are allowed
 	endIf
 	; Found a bed AND EITHER forced use OR don't care about players choice OR or player approved
