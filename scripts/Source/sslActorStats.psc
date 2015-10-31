@@ -184,7 +184,6 @@ endFunction
 ; ------------------------------------------------------- ;
 
 bool function IsSkilled(Actor ActorRef) global native
-Actor[] function GetAllSkilledActors() global native
 
 function _SeedActor(Actor ActorRef, float RealTime, float GameTime) global native
 ; function _SeedActor2(Actor ActorRef, float RealTime, float GameTime) global native
@@ -447,45 +446,67 @@ bool function WasAggressorTo(Actor AggressorRef, Actor VictimRef)
 	return AggressorRef && VictimRef && (FormListHas(AggressorRef, "WasAggressorTo", VictimRef) || FormListHas(VictimRef, "WasVictimOf", AggressorRef))
 endFunction
 
-Actor function LastActorInList(Actor ActorRef, string List)
+Form[] function CleanActorList(Actor ActorRef, string List)
 	FormListRemove(ActorRef, List, none, true)
 	Form[] ActorList = FormListToArray(ActorRef, List)
-	int[] Types = new int[3]
-	Types[0] = 43 ; kNPC
-	Types[1] = 44 ; kLeveledCharacter
-	Types[2] = 62 ; kCharacter
-	int i = ActorList.Length
-	while i > 0
-		i -= 1
-		if ActorList[i] && Types.Find(ActorList[i].GetType()) != -1
-			return ActorList[i] as Actor
-		else
-			FormListRemoveAt(ActorRef, List, i)
+	if ActorList && ActorList.Length > 0
+		bool cleaned = false
+		int[] Types  = new int[3]
+		Types[0] = 43 ; kNPC
+		Types[1] = 44 ; kLeveledCharacter
+		Types[2] = 62 ; kCharacter
+		int i = ActorList.Length
+		while i > 0
+			i -= 1
+			if !ActorList[i] || Types.Find(ActorList[i].GetType()) == -1
+				FormListRemoveAt(ActorRef, List, i)
+				cleaned = true
+			endIf
+		endWhile
+		if cleaned
+			return FormListToArray(ActorRef, List)
 		endIf
-	endWhile
+	endIf
+	return ActorList
+endfunction
+
+Actor function LastActorInList(Actor ActorRef, string List)
+	if ActorRef
+		Form[] ActorList = CleanActorList(ActorRef, List)
+		if ActorList
+			return ActorList[(ActorList.Length - 1)] as Actor
+		endIf
+	endIf
 	return none
 endFunction
 
 Actor function MostUsedPlayerSexPartner()
-	FormListRemove(PlayerRef, "SexPartners", none, true)
-	Form[] SexPartners = FormListToArray(PlayerRef, "SexPartners")
+	Form[] SexPartners = CleanActorList(PlayerRef, "SexPartners")
 	Actor PartnerRef
 	int PartnerNum
-	int[] Types = new int[3]
-	Types[0] = 43 ; kNPC
-	Types[1] = 44 ; kLeveledCharacter
-	Types[2] = 62 ; kCharacter
 	int i = SexPartners.Length
 	while i > 0
 		i -= 1
-		if SexPartners[i] && Types.Find(SexPartners[i].GetType()) != -1
-			int Num = PlayerSexCount(SexPartners[i] as Actor)
-			if Num > PartnerNum
-				PartnerRef = SexPartners[i] as Actor
-				PartnerNum = Num
-			endIf
-		else
-			FormListRemoveAt(PlayerRef, "SexPartners", i)
+		int Num = PlayerSexCount(SexPartners[i] as Actor)
+		if Num > PartnerNum
+			PartnerRef = SexPartners[i] as Actor
+			PartnerNum = Num
+		endIf
+	endWhile
+	return PartnerRef
+endFunction
+
+Actor function MostUsedPlayerSexPartner2()
+	Form[] SexPartners = CleanActorList(PlayerRef, "SexPartners")
+	Actor PartnerRef
+	int PartnerNum
+	int i = SexPartners.Length
+	while i > 0
+		i -= 1
+		int Num = PlayerSexCount(SexPartners[i] as Actor)
+		if Num > PartnerNum
+			PartnerRef = SexPartners[i] as Actor
+			PartnerNum = Num
 		endIf
 	endWhile
 	return PartnerRef
@@ -734,6 +755,22 @@ function EmptyStats(Actor ActorRef)
 		ResetStats(ActorRef)
 		_SetSkill(ActorRef, kSexuality, 65)
 	endIf
+endFunction
+
+Actor[] function GetAllSkilledActors() global native
+function ClearNPCSexSkills()
+	Actor[] List = GetAllSkilledActors()
+	Log("ClearNPCSexSkills("+List.Length+") "+List)
+	int max = List.Length
+	int i = List.Length
+	while i > 0
+		i -= 1
+		if List[i] && List[i] != PlayerRef
+			Log("ClearNPCSexSkills("+(i + 1)+"/"+max+") "+List[i].GetLeveledActorBase().GetName())
+			ResetStats(List[i])
+		endIf
+	endWhile
+	Log("ClearNPCSexSkills - DONE")
 endFunction
 
 function Setup()

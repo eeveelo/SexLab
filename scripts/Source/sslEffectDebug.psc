@@ -22,17 +22,7 @@ endFunction
 
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
-	sslBaseVoice Voice = SexLab.PickVoice(TargetRef)
-	Utility.Wait(2.0)
-	Voice.AnimatedMoan(TargetRef, 30)
-	Utility.Wait(2.0)
-	Voice.AnimatedMoan(TargetRef, 50)
-	Utility.Wait(2.0)
-	Voice.AnimatedMoan(TargetRef, 100)
-	Utility.Wait(2.0)
-	Voice.AnimatedMoan(TargetRef, 100)
-	Utility.Wait(2.0)
-	Voice.AnimatedMoan(TargetRef, 100)
+
 	; Benchmark(1, 50, 5, false)
 
 	;/ if TargetRef == CasterRef
