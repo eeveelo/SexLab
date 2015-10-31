@@ -6,6 +6,9 @@ sslVoiceSlots property Slots auto hidden
 int property Male = 0 autoreadonly hidden
 int property Female = 1 autoreadonly hidden
 int property MaleFemale = -1 autoreadonly hidden
+int property Creature = 2 autoreadonly hidden
+int property CreatureMale = 2 autoreadonly hidden
+int property CreatureFemale = 3 autoreadonly hidden
 
 ; ------------------------------------------------------- ;
 ; --- Registering Voices                              --- ;

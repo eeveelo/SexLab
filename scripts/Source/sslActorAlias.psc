@@ -110,7 +110,7 @@ bool function SetActor(Actor ProspectRef)
 	ActorRef   = ProspectRef
 	BaseRef    = ActorRef.GetLeveledActorBase()
 	ActorName  = BaseRef.GetName()
-	ActorVoice = BaseRef.GetVoiceType()
+	; ActorVoice = BaseRef.GetVoiceType()
 	BaseSex    = BaseRef.GetSex()
 	Gender     = ActorLib.GetGender(ActorRef)
 	IsMale     = Gender == 0
@@ -257,6 +257,17 @@ state Ready
 			PathToCenter()
 		endIf
 		LockActor()
+		; Pick a voice if needed
+		if !Voice && !IsForcedSilent
+			if IsCreature
+				SetVoice(Config.VoiceSlots.PickByRaceKey(sslCreatureAnimationSlots.GetRaceKey(BaseRef.GetRace())), IsForcedSilent)
+			else
+				SetVoice(Config.VoiceSlots.PickVoice(ActorRef), IsForcedSilent)
+			endIf
+		endIf
+		if Voice
+			LogInfo += "Voice["+Voice.Name+"] "
+		endIf
 		; Extras for non creatures
 		if !IsCreature
 			; Decide on strapon for female, default to worn, otherwise pick random.
@@ -278,13 +289,6 @@ state Ready
 					Log(HDTHeelSpell, "HDTHeelSpell")
 					ActorRef.RemoveSpell(HDTHeelSpell)
 				endIf
-			endIf
-			; Pick a voice if needed
-			if !Voice && !IsForcedSilent
-				SetVoice(Config.VoiceSlots.PickVoice(ActorRef), IsForcedSilent)
-			endIf
-			if Voice
-				LogInfo += "Voice["+Voice.Name+"] "
 			endIf
 			; Pick an expression if needed
 			if !Expression && Config.UseExpressions
@@ -344,14 +348,14 @@ state Ready
 				WaitRef = Thread.Positions[IntIfElse(Position != 0, 0, 1)]
 			endIf
 			float Distance = ActorRef.GetDistance(WaitRef)
-			if WaitRef && Distance < 8000.0 && Distance > 100.0
+			if WaitRef && Distance < 8000.0 && Distance > 120.0
 				if CenterRef != ActorRef
 					ActorRef.SetFactionRank(AnimatingFaction, 2)
 					ActorRef.EvaluatePackage()
 				endIf
 				ActorRef.SetLookAt(WaitRef, true)
 				float Failsafe = Utility.GetCurrentRealTime() + 15.0
-				while Distance > 100.0 && Utility.GetCurrentRealTime() < Failsafe
+				while Distance > 120.0 && Utility.GetCurrentRealTime() < Failsafe
 					Utility.Wait(0.5)
 					Distance = ActorRef.GetDistance(WaitRef)
 					Log("Distance From WaitRef["+WaitRef+"]: "+Distance)
@@ -800,9 +804,9 @@ function RestoreActorDefaults()
 	endIf
 	if !IsCreature
 		; Reset voicetype
-		if ActorVoice && ActorVoice != BaseRef.GetVoiceType()
-			BaseRef.SetVoiceType(ActorVoice)
-		endIf
+		; if ActorVoice && ActorVoice != BaseRef.GetVoiceType()
+		; 	BaseRef.SetVoiceType(ActorVoice)
+		; endIf
 		; Remove strapon
 		if Strapon && Strapon != HadStrapon
 			ActorRef.RemoveItem(Strapon, 1, true)
@@ -913,20 +917,20 @@ int function GetPain()
 endFunction
 
 function SetVoice(sslBaseVoice ToVoice = none, bool ForceSilence = false)
-	if IsCreature
+	if !ToVoice || (IsCreature && !ToVoice.Creature)
 		return
 	endIf
 	IsForcedSilent = ForceSilence
 	if ToVoice
 		Voice = ToVoice
 		; Set voicetype if unreconized
-		if Config.UseLipSync && !Config.SexLabVoices.HasForm(ActorVoice)
+		;/ if Config.UseLipSync && !Config.SexLabVoices.HasForm(ActorVoice)
 			if BaseSex == 1
 				BaseRef.SetVoiceType(Config.SexLabVoiceF)
 			else
 				BaseRef.SetVoiceType(Config.SexLabVoiceM)
 			endIf
-		endIf
+		endIf /;
 	endIf
 endFunction
 

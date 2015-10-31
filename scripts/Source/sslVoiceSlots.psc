@@ -27,7 +27,7 @@ sslBaseVoice[] function GetAllGender(int Gender)
 	while i
 		i -= 1
 		sslBaseVoice Slot = GetBySlot(i)
-		Valid[i] = Slot.Enabled && (Gender == Slot.Gender || Slot.Gender == -1)
+		Valid[i] = Slot.Enabled && !Slot.Creature && (Gender == Slot.Gender || Slot.Gender == -1)
 	endwhile
 	return GetList(Valid)
 endFunction
@@ -39,7 +39,7 @@ sslBaseVoice function PickGender(int Gender = 1)
 	while i
 		i -= 1
 		sslBaseVoice Slot = GetBySlot(i)
-		Valid[i] = Slot.Enabled && (Gender == Slot.Gender || Slot.Gender == -1)
+		Valid[i] = Slot.Enabled && !Slot.Creature && (Gender == Slot.Gender || Slot.Gender == -1)
 	endwhile
 	; Select a random true in the list
 	i = Utility.RandomInt(0, (Slotted - 1))
@@ -77,11 +77,33 @@ sslBaseVoice function GetByTags(string Tags, string TagsSuppressed = "", bool Re
 	while i
 		i -= 1
 		sslBaseVoice Slot = GetBySlot(i)
-		Valid[i] = Slot.Enabled && (TagsSuppressed == "" || Slot.CheckTags(Suppress, false, true)) && Slot.CheckTags(Search, RequireAll)
+		Valid[i] = Slot.Enabled && !Slot.Creature && (TagsSuppressed == "" || Slot.CheckTags(Suppress, false, true)) && Slot.CheckTags(Search, RequireAll)
 	endWhile
 	sslBaseVoice[] Found = GetList(Valid)
-	int r = Utility.RandomInt(0, (Found.Length - 1))
-	return Found[r]
+	if Found && Found.Length > 0
+		return Found[(Utility.RandomInt(0, (Found.Length - 1)))]
+	endIf
+	return none
+endFunction
+
+sslBaseVoice function PickByRaceKey(string RaceKey)
+	if !RaceKey
+		Log("Empty RaceKey!")
+		return none
+	endIf
+	Log("PickByRaceKey("+RaceKey+")")
+	bool[] Valid = Utility.CreateBoolArray(Slotted)
+	int i = Slotted
+	while i
+		i -= 1
+		sslBaseVoice Slot = GetBySlot(i)
+		Valid[i] = Slot.Enabled && Slot.Creature && Slot.RaceKeys.Find(RaceKey) != -1
+	endWhile
+	sslBaseVoice[] Found = GetList(Valid)
+	if Found && Found.Length > 0
+		return Found[(Utility.RandomInt(0, (Found.Length - 1)))]
+	endIf
+	return none
 endFunction
 
 int function FindSaved(Actor ActorRef)
@@ -365,6 +387,13 @@ function Setup()
 	RegisterSlots()
 	; RegisterCreatureVoices()
 	GoToState("")
+endFunction
+
+function Log(string msg)
+	if Config.DebugMode
+		MiscUtil.PrintConsole(msg)
+	endIf
+	Debug.Trace("SEXLAB - "+msg)
 endFunction
 
 state Locked

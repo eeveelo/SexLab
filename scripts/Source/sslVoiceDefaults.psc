@@ -17,6 +17,8 @@ function LoadVoices()
 	RegisterVoice("MaleCalm")
 	RegisterVoice("MaleRough")
 	RegisterVoice("MaleAverage")
+	; Wolves
+	RegisterVoice("WolvesVoice01")
 endFunction
 
 function FemaleClassic(int id)
@@ -196,6 +198,31 @@ function MaleAverage(int id)
 	Base.Hot    = Game.GetFormFromFile(0x67567, "SexLab.esm") as Sound
 
 	Base.SetTags("Male,Average,Normal,Quiet")
+
+	Base.Save(id)
+endFunction
+
+
+
+
+function LoadCreatureVoices()
+	; Prepare factory resources
+	PrepareFactory()
+	; Wolves
+	RegisterVoice("WolvesVoice01")
+endFunction
+function WolvesVoice01(int id)
+	sslBaseVoice Base = Create(id)
+
+	Base.Name    = "Wolf 01 (Creature)"
+	Base.Gender  = Creature
+	
+	Base.Mild    = Game.GetFormFromFile(0x8B5BB, "SexLab.esm") as Sound
+	Base.Medium  = Game.GetFormFromFile(0x8B5BB, "SexLab.esm") as Sound
+	Base.Hot     = Game.GetFormFromFile(0x8B5BB, "SexLab.esm") as Sound
+
+	Base.SetRaceKeys("Wolves,Wolfpanic")
+	Base.SetTags("Wolf,Wolves")
 
 	Base.Save(id)
 endFunction

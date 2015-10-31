@@ -10,6 +10,8 @@ Sound property Medium auto
 
 Topic property LipSync auto hidden
 
+string[] property RaceKeys auto hidden
+
 int property Gender auto hidden
 bool property Male hidden
 	bool function get()
@@ -19,6 +21,11 @@ endProperty
 bool property Female hidden
 	bool function get()
 		return (Gender == 1 || Gender == -1)
+	endFunction
+endProperty
+bool property Creature hidden
+	bool function get()
+		return RaceKeys && RaceKeys.Length > 0
 	endFunction
 endProperty
 
@@ -79,21 +86,27 @@ function TransitDown(Actor ActorRef, int from, int to)
 endFunction
 
 bool function CheckGender(int CheckGender)
-	return Gender == CheckGender || (Gender == -1 && (CheckGender == 1 || CheckGender == 0))
+	return Gender == CheckGender || (Gender == -1 && (CheckGender == 1 || CheckGender == 0)) || (CheckGender >= 2 && Gender >= 2)
+endFunction
+
+function SetRaceKeys(string RaceList)
+	RaceKeys = PapyrusUtil.StringSplit(RaceList)
 endFunction
 
 function Save(int id = -1)
 	parent.Save(id)
 	AddTagConditional("Male",   (Gender == 0 || Gender == -1))
 	AddTagConditional("Female", (Gender == 1 || Gender == -1))
+	AddTagConditional("Creature", (Gender == 2 || Gender == 3))
 	Log(Name, "Voices["+id+"]")
 endFunction
 
 function Initialize()
-	Gender = -1
-	Mild   = none
-	Medium = none
-	Hot    = none
+	Gender  = -1
+	Mild    = none
+	Medium  = none
+	Hot     = none
+	RaceKeys = Utility.CreateStringArray(0)
 	parent.Initialize()
 	LipSync = Config.LipSync
 endFunction
