@@ -20,7 +20,6 @@ bool IsAggressor
 bool IsPlayer
 bool IsTracked
 bool IsSkilled
-bool LipSync
 Faction AnimatingFaction
 
 ; Current Thread state
@@ -206,7 +205,6 @@ sslBaseAnimation Animation
 
 function LoadShares()
 	DebugMode  = Config.DebugMode
-	LipSync    = Config.LipSync
 
 	Center     = Thread.CenterLocation
 	BedStatus  = Thread.BedStatus

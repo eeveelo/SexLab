@@ -23,25 +23,20 @@ bool property Female hidden
 endProperty
 
 function Moan(Actor ActorRef, int Strength = 30, bool IsVictim = false)
-	if Strength < 1
-		Strength = 1
-	endIf
-	;/ Sound SoundRef = GetSound(Strength, IsVictim)
-	if SoundRef
-		LipSync(ActorRef, Strength)
-		SoundRef.Play(ActorRef)
-		Utility.WaitMenuMode(0.8)
-	endIf /;
-
 	Sound SoundRef = GetSound(Strength, IsVictim)
 	if SoundRef
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 20)
-		Utility.WaitMenuMode(0.1)
-		SoundRef.Play(ActorRef)
-		TransitUp(ActorRef, 20, 50)
-		Utility.WaitMenuMode(0.2)
-		TransitDown(ActorRef, 50, 20)
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 0)
+		if !Config.UseLipSync
+			SoundRef.Play(ActorRef)
+			Utility.WaitMenuMode(0.8)
+		else
+			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 20)
+			Utility.WaitMenuMode(0.1)
+			SoundRef.Play(ActorRef)
+			TransitUp(ActorRef, 20, 50)
+			Utility.WaitMenuMode(0.2)
+			TransitDown(ActorRef, 50, 20)
+			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 0)
+		endIf
 	endIf
 endFunction
 
@@ -52,31 +47,6 @@ function MoanNoWait(Actor ActorRef, int Strength = 30, bool IsVictim = false, fl
 			LipSync(ActorRef, Strength)
 			Sound.SetInstanceVolume(SoundRef.Play(ActorRef), Volume)
 		endIf
-	endIf
-endFunction
-
-function TransitUp(Actor ActorRef, int from, int to)
-	while from < to
-		from += 2
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from)
-	endWhile
-endFunction
-function TransitDown(Actor ActorRef, int from, int to)
-	while from > to
-		from -= 2
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from)
-	endWhile
-endFunction
-function AnimatedMoan(Actor ActorRef, int Strength = 30, bool IsVictim = false, float Volume = 1.0)
-	Sound SoundRef = GetSound(Strength, IsVictim)
-	if SoundRef
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 20)
-		Utility.WaitMenuMode(0.1)
-		Sound.SetInstanceVolume(SoundRef.Play(ActorRef), Volume)
-		TransitUp(ActorRef, 20, 50)
-		Utility.WaitMenuMode(0.2)
-		TransitDown(ActorRef, 50, 20)
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 0)
 	endIf
 endFunction
 
@@ -93,6 +63,19 @@ function LipSync(Actor ActorRef, int Strength, bool ForceUse = false)
 	if (ForceUse || Config.UseLipSync) && Game.GetCameraState() != 3
 		ActorRef.Say(LipSync)
 	endIf
+endFunction
+
+function TransitUp(Actor ActorRef, int from, int to)
+	while from < to
+		from += 2
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from)
+	endWhile
+endFunction
+function TransitDown(Actor ActorRef, int from, int to)
+	while from > to
+		from -= 2
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from)
+	endWhile
 endFunction
 
 bool function CheckGender(int CheckGender)
