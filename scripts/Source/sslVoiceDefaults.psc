@@ -22,12 +22,12 @@ endFunction
 function FemaleClassic(int id)
 	sslBaseVoice Base = Create(id)
 
-	Base.Name = "Classic (Female)"
+	Base.Name   = "Classic (Female)"
 	Base.Gender = Female
 
-	Base.Mild = Game.GetFormFromFile(0x67548, "SexLab.esm") as Sound
+	Base.Mild   = Game.GetFormFromFile(0x67548, "SexLab.esm") as Sound
 	Base.Medium = Game.GetFormFromFile(0x67547, "SexLab.esm") as Sound
-	Base.Hot = Game.GetFormFromFile(0x67546, "SexLab.esm") as Sound
+	Base.Hot    = Game.GetFormFromFile(0x67546, "SexLab.esm") as Sound
 
 	Base.SetTags("Female,Classic,Normal")
 
@@ -37,12 +37,12 @@ endFunction
 function FemaleBreathy(int id)
 	sslBaseVoice Base = Create(id)
 
-	Base.Name = "Breathy (Female)"
+	Base.Name   = "Breathy (Female)"
 	Base.Gender = Female
 
-	Base.Mild = Game.GetFormFromFile(0x6754B, "SexLab.esm") as Sound
+	Base.Mild   = Game.GetFormFromFile(0x6754B, "SexLab.esm") as Sound
 	Base.Medium = Game.GetFormFromFile(0x6754A, "SexLab.esm") as Sound
-	Base.Hot = Game.GetFormFromFile(0x67549, "SexLab.esm") as Sound
+	Base.Hot    = Game.GetFormFromFile(0x67549, "SexLab.esm") as Sound
 
 	Base.SetTags("Female,Breathy,Loud,Rough")
 
@@ -52,12 +52,12 @@ endFunction
 function FemaleYoung(int id)
 	sslBaseVoice Base = Create(id)
 
-	Base.Name = "Young (Female)"
+	Base.Name   = "Young (Female)"
 	Base.Gender = Female
 
-	Base.Mild = Game.GetFormFromFile(0x6754E, "SexLab.esm") as Sound
+	Base.Mild   = Game.GetFormFromFile(0x6754E, "SexLab.esm") as Sound
 	Base.Medium = Game.GetFormFromFile(0x6754D, "SexLab.esm") as Sound
-	Base.Hot = Game.GetFormFromFile(0x6754C, "SexLab.esm") as Sound
+	Base.Hot    = Game.GetFormFromFile(0x6754C, "SexLab.esm") as Sound
 
 	Base.SetTags("Female,Young,Loud")
 
@@ -67,12 +67,12 @@ endFunction
 function FemaleStimulated(int id)
 	sslBaseVoice Base = Create(id)
 
-	Base.Name = "Stimulated (Female)"
+	Base.Name   = "Stimulated (Female)"
 	Base.Gender = Female
 
-	Base.Mild = Game.GetFormFromFile(0x67551, "SexLab.esm") as Sound
+	Base.Mild   = Game.GetFormFromFile(0x67551, "SexLab.esm") as Sound
 	Base.Medium = Game.GetFormFromFile(0x67550, "SexLab.esm") as Sound
-	Base.Hot = Game.GetFormFromFile(0x6754F, "SexLab.esm") as Sound
+	Base.Hot    = Game.GetFormFromFile(0x6754F, "SexLab.esm") as Sound
 
 	Base.SetTags("Female,Stimulated,Loud,Excited")
 
@@ -82,12 +82,12 @@ endFunction
 function FemaleQuiet(int id)
 	sslBaseVoice Base = Create(id)
 
-	Base.Name = "Quiet (Female)"
+	Base.Name   = "Quiet (Female)"
 	Base.Gender = Female
 
-	Base.Mild = Game.GetFormFromFile(0x67554, "SexLab.esm") as Sound
+	Base.Mild   = Game.GetFormFromFile(0x67554, "SexLab.esm") as Sound
 	Base.Medium = Game.GetFormFromFile(0x67553, "SexLab.esm") as Sound
-	Base.Hot = Game.GetFormFromFile(0x67552, "SexLab.esm") as Sound
+	Base.Hot    = Game.GetFormFromFile(0x67552, "SexLab.esm") as Sound
 
 	Base.SetTags("Female,Quiet,Timid")
 
@@ -97,12 +97,12 @@ endFunction
 function FemaleExcitable(int id)
 	sslBaseVoice Base = Create(id)
 
-	Base.Name = "Excitable (Female)"
+	Base.Name   = "Excitable (Female)"
 	Base.Gender = Female
 
-	Base.Mild = Game.GetFormFromFile(0x67557, "SexLab.esm") as Sound
+	Base.Mild   = Game.GetFormFromFile(0x67557, "SexLab.esm") as Sound
 	Base.Medium = Game.GetFormFromFile(0x67556, "SexLab.esm") as Sound
-	Base.Hot = Game.GetFormFromFile(0x67555, "SexLab.esm") as Sound
+	Base.Hot    = Game.GetFormFromFile(0x67555, "SexLab.esm") as Sound
 
 
 	Base.SetTags("Female,Excitable,Excited,Loud")
@@ -113,12 +113,12 @@ endFunction
 function FemaleAverage(int id)
 	sslBaseVoice Base = Create(id)
 
-	Base.Name = "Average (Female)"
+	Base.Name   = "Average (Female)"
 	Base.Gender = Female
 
-	Base.Mild = Game.GetFormFromFile(0x6755A, "SexLab.esm") as Sound
+	Base.Mild   = Game.GetFormFromFile(0x6755A, "SexLab.esm") as Sound
 	Base.Medium = Game.GetFormFromFile(0x67559, "SexLab.esm") as Sound
-	Base.Hot = Game.GetFormFromFile(0x67558, "SexLab.esm") as Sound
+	Base.Hot    = Game.GetFormFromFile(0x67558, "SexLab.esm") as Sound
 
 	Base.SetTags("Female,Average,Normal,Harsh")
 
@@ -128,12 +128,12 @@ endFunction
 function FemaleMature(int id)
 	sslBaseVoice Base = Create(id)
 
-	Base.Name = "Mature (Female)"
+	Base.Name   = "Mature (Female)"
 	Base.Gender = Female
 
-	Base.Mild = Game.GetFormFromFile(0x6755D, "SexLab.esm") as Sound
+	Base.Mild   = Game.GetFormFromFile(0x6755D, "SexLab.esm") as Sound
 	Base.Medium = Game.GetFormFromFile(0x6755C, "SexLab.esm") as Sound
-	Base.Hot = Game.GetFormFromFile(0x6755B, "SexLab.esm") as Sound
+	Base.Hot    = Game.GetFormFromFile(0x6755B, "SexLab.esm") as Sound
 
 	Base.SetTags("Female,Mature,Old,Harsh,Rough")
 
@@ -142,13 +142,13 @@ endFunction
 
 function MaleNeutral(int id)
 	sslBaseVoice Base = Create(id)
-
+	
 	Base.Name = "Neutral (Male)"
 	Base.Gender = Male
 
-	Base.Mild = Game.GetFormFromFile(0x67560, "SexLab.esm") as Sound
+	Base.Mild   = Game.GetFormFromFile(0x67560, "SexLab.esm") as Sound
 	Base.Medium = Game.GetFormFromFile(0x6755F, "SexLab.esm") as Sound
-	Base.Hot = Game.GetFormFromFile(0x6755E, "SexLab.esm") as Sound
+	Base.Hot    = Game.GetFormFromFile(0x6755E, "SexLab.esm") as Sound
 
 	Base.SetTags("Male,Neutral,Quiet,Normal")
 
@@ -158,12 +158,12 @@ endFunction
 function MaleCalm(int id)
 	sslBaseVoice Base = Create(id)
 
-	Base.Name = "Calm (Male)"
+	Base.Name   = "Calm (Male)"
 	Base.Gender = Male
 
-	Base.Mild = Game.GetFormFromFile(0x67563, "SexLab.esm") as Sound
+	Base.Mild   = Game.GetFormFromFile(0x67563, "SexLab.esm") as Sound
 	Base.Medium = Game.GetFormFromFile(0x67562, "SexLab.esm") as Sound
-	Base.Hot = Game.GetFormFromFile(0x67561, "SexLab.esm") as Sound
+	Base.Hot    = Game.GetFormFromFile(0x67561, "SexLab.esm") as Sound
 
 	Base.SetTags("Male,Calm,Quiet")
 
@@ -173,12 +173,12 @@ endFunction
 function MaleRough(int id)
 	sslBaseVoice Base = Create(id)
 
-	Base.Name = "Rough (Male)"
+	Base.Name   = "Rough (Male)"
 	Base.Gender = Male
 
-	Base.Mild = Game.GetFormFromFile(0x67566, "SexLab.esm") as Sound
+	Base.Mild   = Game.GetFormFromFile(0x67566, "SexLab.esm") as Sound
 	Base.Medium = Game.GetFormFromFile(0x67565, "SexLab.esm") as Sound
-	Base.Hot = Game.GetFormFromFile(0x67564, "SexLab.esm") as Sound
+	Base.Hot    = Game.GetFormFromFile(0x67564, "SexLab.esm") as Sound
 
 	Base.SetTags("Male,Rough,Harsh,Loud,Old")
 
@@ -187,13 +187,13 @@ endFunction
 
 function MaleAverage(int id)
 	sslBaseVoice Base = Create(id)
-
-	Base.Name = "Average (Male)"
+	
+	Base.Name   = "Average (Male)"
 	Base.Gender = Male
-
-	Base.Mild = Game.GetFormFromFile(0x67569, "SexLab.esm") as Sound
+	
+	Base.Mild   = Game.GetFormFromFile(0x67569, "SexLab.esm") as Sound
 	Base.Medium = Game.GetFormFromFile(0x67568, "SexLab.esm") as Sound
-	Base.Hot = Game.GetFormFromFile(0x67567, "SexLab.esm") as Sound
+	Base.Hot    = Game.GetFormFromFile(0x67567, "SexLab.esm") as Sound
 
 	Base.SetTags("Male,Average,Normal,Quiet")
 
