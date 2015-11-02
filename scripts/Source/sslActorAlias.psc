@@ -348,14 +348,14 @@ state Ready
 				WaitRef = Thread.Positions[IntIfElse(Position != 0, 0, 1)]
 			endIf
 			float Distance = ActorRef.GetDistance(WaitRef)
-			if WaitRef && Distance < 8000.0 && Distance > 120.0
+			if WaitRef && Distance < 8000.0 && Distance > 135.0
 				if CenterRef != ActorRef
 					ActorRef.SetFactionRank(AnimatingFaction, 2)
 					ActorRef.EvaluatePackage()
 				endIf
 				ActorRef.SetLookAt(WaitRef, true)
 				float Failsafe = Utility.GetCurrentRealTime() + 15.0
-				while Distance > 120.0 && Utility.GetCurrentRealTime() < Failsafe
+				while Distance > 135.0 && Utility.GetCurrentRealTime() < Failsafe
 					Utility.Wait(0.5)
 					Distance = ActorRef.GetDistance(WaitRef)
 					Log("Distance From WaitRef["+WaitRef+"]: "+Distance)
