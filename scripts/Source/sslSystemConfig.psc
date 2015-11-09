@@ -630,6 +630,9 @@ function Reload()
 	; Clean valid actors list
 	StorageUtil.FormListRemove(self, "ValidActors", PlayerRef, true)
 	StorageUtil.FormListRemove(self, "ValidActors", none, true)
+	if Game.GetModByName("Dawnguard.esm") != 255
+		StorageUtil.FormListAdd(self, "ValidActors", Game.GetFormFromFile(0x2B6C, "Dawnguard.esm"), false)
+	endIf
 
 	; Remove gender override if player's gender matches normally
 	if PlayerRef.GetFactionRank(GenderFaction) == PlayerRef.GetLeveledActorBase().GetSex()
