@@ -29,12 +29,12 @@ bool property Creature hidden
 	endFunction
 endProperty
 
-function Moan(Actor ActorRef, int Strength = 30, bool IsVictim = false)
+function PlayMoan(Actor ActorRef, int Strength = 30, bool IsVictim = false, bool UseLipSync = false)
 	Sound SoundRef = GetSound(Strength, IsVictim)
 	if SoundRef
-		if !Config.UseLipSync
+		if !UseLipSync
 			SoundRef.Play(ActorRef)
-			Utility.WaitMenuMode(0.8)
+			Utility.WaitMenuMode(0.4)
 		else
 			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 20)
 			Utility.WaitMenuMode(0.1)
@@ -45,6 +45,10 @@ function Moan(Actor ActorRef, int Strength = 30, bool IsVictim = false)
 			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 0)
 		endIf
 	endIf
+endFunction
+
+function Moan(Actor ActorRef, int Strength = 30, bool IsVictim = false)
+	PlayMoan(ActorRef, Strength, Isvictim, Config.UseLipSync)
 endFunction
 
 function MoanNoWait(Actor ActorRef, int Strength = 30, bool IsVictim = false, float Volume = 1.0)

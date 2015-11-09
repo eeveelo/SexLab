@@ -35,9 +35,10 @@ string ActorKey
 ; Voice
 sslBaseVoice Voice
 VoiceType ActorVoice
-bool IsForcedSilent
 float BaseDelay
 float VoiceDelay
+bool IsForcedSilent
+bool UseLipSync
 
 ; Expression
 sslBaseExpression Expression
@@ -205,6 +206,7 @@ sslBaseAnimation Animation
 
 function LoadShares()
 	DebugMode  = Config.DebugMode
+	UseLipSync = Config.UseLipSync && !IsCreature
 
 	Center     = Thread.CenterLocation
 	BedStatus  = Thread.BedStatus
@@ -466,7 +468,7 @@ state Animating
 			LoopDelay = 0.0
 			RefreshExpression()
 			if !IsSilent
-				Voice.Moan(ActorRef, Enjoyment, IsVictim)
+				Voice.PlayMoan(ActorRef, Enjoyment, IsVictim, UseLipSync)
 			endIf
 		endIf
 		; Loop
@@ -593,15 +595,17 @@ state Animating
 		ModEvent.Send(eid)
 		TrackedEvent("Orgasm")
 		Log("Orgasms["+Orgasms+"] Enjoyment ["+Enjoyment+"] BaseEnjoyment["+BaseEnjoyment+"] FullEnjoyment["+FullEnjoyment+"]")
-		; Shake camera for player
-		if IsPlayer && Config.OrgasmEffects && Game.GetCameraState() >= 8
-			; Game.ShakeCamera(none, 1.00, 2.0)
+		if Config.OrgasmEffects
+			; Shake camera for player
+			if IsPlayer && Game.GetCameraState() >= 8
+				; Game.ShakeCamera(none, 1.00, 2.0)
+			endIf
+			; Play SFX/Voice
+			if !IsSilent
+				PlayLouder(Voice.GetSound(100, false), ActorRef, Config.VoiceVolume)
+			endIf
+			PlayLouder(OrgasmFX, MarkerRef, Config.SFXVolume)
 		endIf
-		; Play SFX/Voice
-		if !IsSilent
-			PlayLouder(Voice.GetSound(100, false), ActorRef, Config.VoiceVolume)
-		endIf
-		PlayLouder(OrgasmFX, MarkerRef, Config.SFXVolume)
 		; Apply cum to female positions from male position orgasm
 		int i = Thread.ActorCount
 		if i > 1 && Config.UseCum && (MalePosition || IsCreature) && (IsMale || IsCreature || (Config.AllowFFCum && IsFemale))
@@ -1154,9 +1158,11 @@ function RefreshExpression()
 	elseIf OpenMouth
 		sslBaseExpression.OpenMouth(ActorRef)
 	else
-		sslBaseExpression.CloseMouth(ActorRef)
 		if Expression
+			sslBaseExpression.CloseMouth(ActorRef)
 			Expression.Apply(ActorRef, Enjoyment, BaseSex)
+		elseIf sslBaseExpression.IsMouthOpen(ActorRef)
+			sslBaseExpression.CloseMouth(ActorRef)			
 		endIf
 	endIf
 endFunction
