@@ -334,14 +334,6 @@ state Ready
 		RegisterForSingleUpdate(StartWait)
 	endFunction
 
-	event OnUpdate()
-		; Enter animatable state
-		GoToState("Animating")
-		if Thread.GetState() == "Prepare"
-			Thread.SyncEventDone(kPrepareActor)
-		endIf
-	endEvent
-
 	function PathToCenter()
 		ObjectReference CenterRef = Thread.CenterAlias.GetReference()
 		if CenterRef && ActorRef && (Thread.ActorCount > 1 || CenterRef != ActorRef)
@@ -370,6 +362,14 @@ state Ready
 			endIf
 		endIf
 	endFunction
+
+	event OnUpdate()
+		; Enter animatable state
+		GoToState("Animating")
+		if Thread.GetState() == "Prepare"
+			Thread.SyncEventDone(kPrepareActor)
+		endIf
+	endEvent
 endState
 
 ; ------------------------------------------------------- ;
@@ -404,23 +404,24 @@ state Animating
 	function SendAnimation()
 		; Reenter SA - On stage 1 while animation hasn't changed since last call
 		if Stage == 1 && PlayingSA == CurrentSA
-			Debug.SendAnimationEvent(ActorRef, AnimEvents[Position] + "_REENTER")
-			Log(AnimEvents[Position] + "_REENTER")
+			Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1)+"_REENTER")
 		else
 			; Enter a new SA - Not necessary on stage 1 since both events would be the same
 			if Stage != 1 && PlayingSA != CurrentSA
 				Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
-				Log(Animation.FetchPositionStage(Position, 1))
+				; Log("NEW SA - "+Animation.FetchPositionStage(Position, 1))
 			endIf
 			; Play the primary animation
 		 	Debug.SendAnimationEvent(ActorRef, AnimEvents[Position])
-		 	Log(AnimEvents[Position])
+		 	; Log(AnimEvents[Position])
 		endIf
 		; Save id of last SA played
 		PlayingSA = Animation.Registry
 	endFunction
 
 	function StartAnimating()
+		; Remove from bard audience if in one
+		Config.CheckBardAudience(ActorRef, true)
 		; Starting position
 		GetPositionInfo()
 		OffsetCoords(Loc, Center, Offsets)
@@ -432,9 +433,15 @@ state Animating
 		AttachMarker()
 		ClearEffects()
 		Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
+		; Init starting SA
+		PlayingSA = "SexLabSequenceExit1"
+		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1")
+		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1_REENTER")
+		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
+		Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
+		PlayingSA = Animation.Registry
+		CurrentSA = Animation.Registry
 		; TODO: Add a light source option here. (possibly with frostfall benefit?)
-		; Remove from bard audience if in one
-		Config.CheckBardAudience(ActorRef, true)
 		; If enabled, start Auto TFC for player
 		if IsPlayer && Config.AutoTFC
 			MiscUtil.SetFreeCameraState(true)
@@ -516,15 +523,7 @@ state Animating
 		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1_REENTER")
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 		PlayingSA = "SexLabSequenceExit1"
-		Utility.WaitMenuMode(0.2)
-		SendAnimation()
 		Utility.WaitMenuMode(0.5)
-		if Stage == 1
-			Debug.SendAnimationEvent(ActorRef, AnimEvents[Position]+"_REENTER")
-		else
-			Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
-			Debug.SendAnimationEvent(ActorRef, AnimEvents[Position])
-		endIf
 		SendAnimation()
 		RegisterForSingleUpdate(1.0)
 		Thread.SyncEventDone(kRefreshActor)
@@ -542,7 +541,7 @@ state Animating
 		; Avoid forcibly setting on player coords if avoidable - causes annoying graphical flickering
 		if Force && IsPlayer && IsInPosition(ActorRef, MarkerRef, 40.0)
 			AttachMarker()
-			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 10000, 0)
+			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 50000, 0)
 			return ; OnTranslationComplete() will take over when in place
 		elseIf Force
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
@@ -560,7 +559,7 @@ state Animating
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			AttachMarker()
 		elseIf distance > 0.5
-			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 20000, 0)
+			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 50000, 0)
 			return ; OnTranslationComplete() will take over when in place
 		endIf 
 		; Begin very slowly rotating a smallamount to hold position
@@ -569,7 +568,7 @@ state Animating
 
 	event OnTranslationComplete()
 		; Log("OnTranslationComplete")
-		SyncLocation()
+		Snap()
 	endEvent
 
 	function OrgasmEffect()
