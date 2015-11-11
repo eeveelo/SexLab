@@ -94,7 +94,39 @@ bool function CheckGender(int CheckGender)
 endFunction
 
 function SetRaceKeys(string RaceList)
-	RaceKeys = PapyrusUtil.StringSplit(RaceList)
+	string[] KeyList = PapyrusUtil.StringSplit(RaceList)
+	int i = KeyList.Length
+	while i
+		i -= 1
+		if KeyList[i]
+			AddRaceKey(KeyList[i])
+		endIf
+	endWhile
+endFunction
+function AddRaceKey(string RaceKey)
+	if !RaceKey
+		; Do nothing
+	elseIf !RaceKeys || !RaceKeys.Length
+		RaceKeys = new string[1]
+		RaceKeys[0] = RaceKey
+	elseIf RaceKeys.Find(RaceKey) == -1
+		RaceKeys = PapyrusUtil.PushString(RaceKeys, RaceKey)
+	endIf
+endFunction
+bool function HasRaceKey(string RaceKey)
+	return RaceKey && RaceKeys && RaceKeys.Find(RaceKey) != -1
+endFunction
+bool function HasRaceKeyMatch(string[] RaceList)
+	if RaceList && RaceKeys
+		int i = RaceList.Length
+		while i
+			i -= 1
+			if RaceKeys.Find(RaceList[i]) != -1
+				return true
+			endIf
+		endWhile
+	endIf
+	return false
 endFunction
 
 function Save(int id = -1)

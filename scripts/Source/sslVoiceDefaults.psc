@@ -17,8 +17,6 @@ function LoadVoices()
 	RegisterVoice("MaleCalm")
 	RegisterVoice("MaleRough")
 	RegisterVoice("MaleAverage")
-	; Wolves
-	RegisterVoice("WolvesVoice01")
 endFunction
 
 function FemaleClassic(int id)
@@ -204,25 +202,175 @@ endFunction
 
 
 
-
 function LoadCreatureVoices()
 	; Prepare factory resources
 	PrepareFactory()
-	; Wolves
-	RegisterVoice("WolvesVoice01")
+	; Register creature voices
+	RegisterVoice("ChaurusVoice01")
+	RegisterVoice("DogVoice01")
+	RegisterVoice("DraugrVoice01")
+	RegisterVoice("FalmerVoice01")
+	RegisterVoice("GiantVoice01")
+	RegisterVoice("HorseVoice01")
+	RegisterVoice("SprigganVoice01")
+	RegisterVoice("TrollVoice01")
+	RegisterVoice("WerewolfVoice01")
+	RegisterVoice("WolfVoice01")
 endFunction
-function WolvesVoice01(int id)
+
+function ChaurusVoice01(int id)
 	sslBaseVoice Base = Create(id)
 
-	Base.Name    = "Wolf 01 (Creature)"
+	Base.Name    = "Chaurus 1 (Creature)"
+	Base.Gender  = Creature
+	
+	Base.Mild    = Game.GetFormFromFile(0x8C090, "SexLab.esm") as Sound
+	Base.Medium  = Game.GetFormFromFile(0x8C090, "SexLab.esm") as Sound
+	Base.Hot     = Game.GetFormFromFile(0x8C090, "SexLab.esm") as Sound
+
+	Base.AddRaceKey("Chaurus")
+	Base.AddRaceKey("Chaurusflyers")
+
+	Base.Save(id)
+endFunction
+
+function DogVoice01(int id)
+	sslBaseVoice Base = Create(id)
+
+	Base.Name    = "Dog 1 (Creature)"
+	Base.Gender  = Creature
+	
+	Base.Mild    = Game.GetFormFromFile(0x8C091, "SexLab.esm") as Sound
+	Base.Medium  = Game.GetFormFromFile(0x8C091, "SexLab.esm") as Sound
+	Base.Hot     = Game.GetFormFromFile(0x8C091, "SexLab.esm") as Sound
+
+	Base.AddRaceKey("Dogs")
+	Base.AddRaceKey("Dogpanic")
+
+	Base.Save(id)
+endFunction
+
+function DraugrVoice01(int id)
+	sslBaseVoice Base = Create(id)
+
+	Base.Name    = "Draugr 1 (Creature)"
+	Base.Gender  = Creature
+	
+	Base.Mild    = Game.GetFormFromFile(0x8C08C, "SexLab.esm") as Sound
+	Base.Medium  = Game.GetFormFromFile(0x8C08C, "SexLab.esm") as Sound
+	Base.Hot     = Game.GetFormFromFile(0x8C08C, "SexLab.esm") as Sound
+
+	Base.AddRaceKey("Draugrs")
+
+	Base.Save(id)
+endFunction
+
+function FalmerVoice01(int id)
+	sslBaseVoice Base = Create(id)
+
+	Base.Name    = "Falmer 1 (Creature)"
+	Base.Gender  = Creature
+	
+	Base.Mild    = Game.GetFormFromFile(0x8C08F, "SexLab.esm") as Sound
+	Base.Medium  = Game.GetFormFromFile(0x8C08F, "SexLab.esm") as Sound
+	Base.Hot     = Game.GetFormFromFile(0x8C08F, "SexLab.esm") as Sound
+
+	Base.AddRaceKey("Falmers")
+
+	Base.Save(id)
+endFunction
+
+function GiantVoice01(int id)
+	sslBaseVoice Base = Create(id)
+
+	Base.Name    = "Giant 1 (Creature)"
+	Base.Gender  = Creature
+	
+	Base.Mild    = Game.GetFormFromFile(0x8C08E, "SexLab.esm") as Sound
+	Base.Medium  = Game.GetFormFromFile(0x8C08E, "SexLab.esm") as Sound
+	Base.Hot     = Game.GetFormFromFile(0x8C08E, "SexLab.esm") as Sound
+
+	Base.AddRaceKey("Giants")
+
+	Base.Save(id)
+endFunction
+
+function HorseVoice01(int id)
+	sslBaseVoice Base = Create(id)
+
+	Base.Name    = "Horse 1 (Creature)"
+	Base.Gender  = Creature
+	
+	Base.Mild    = Game.GetFormFromFile(0x8C08D, "SexLab.esm") as Sound
+	Base.Medium  = Game.GetFormFromFile(0x8C08D, "SexLab.esm") as Sound
+	Base.Hot     = Game.GetFormFromFile(0x8C08D, "SexLab.esm") as Sound
+
+	Base.AddRaceKey("Horses")
+	Base.AddRaceKey("Horseses")
+
+	Base.Save(id)
+endFunction
+
+function SprigganVoice01(int id)
+	sslBaseVoice Base = Create(id)
+
+	Base.Name    = "Spriggan 1 (Creature)"
+	Base.Gender  = Creature
+	
+	Base.Mild    = Game.GetFormFromFile(0x8C08B, "SexLab.esm") as Sound
+	Base.Medium  = Game.GetFormFromFile(0x8C08B, "SexLab.esm") as Sound
+	Base.Hot     = Game.GetFormFromFile(0x8C08B, "SexLab.esm") as Sound
+
+	Base.AddRaceKey("Spriggans")
+	Base.AddRaceKey("SprigganXan")
+
+	Base.Save(id)
+endFunction
+
+function TrollVoice01(int id)
+	sslBaseVoice Base = Create(id)
+
+	Base.Name    = "Troll 1 (Creature)"
+	Base.Gender  = Creature
+	
+	Base.Mild    = Game.GetFormFromFile(0x8C089, "SexLab.esm") as Sound
+	Base.Medium  = Game.GetFormFromFile(0x8C089, "SexLab.esm") as Sound
+	Base.Hot     = Game.GetFormFromFile(0x8C089, "SexLab.esm") as Sound
+
+	Base.AddRaceKey("Trolls")
+
+	Base.Save(id)
+endFunction
+
+function WerewolfVoice01(int id)
+	sslBaseVoice Base = Create(id)
+
+	Base.Name    = "Werewolf 1 (Creature)"
+	Base.Gender  = Creature
+	
+	Base.Mild    = Game.GetFormFromFile(0x8C08A, "SexLab.esm") as Sound
+	Base.Medium  = Game.GetFormFromFile(0x8C08A, "SexLab.esm") as Sound
+	Base.Hot     = Game.GetFormFromFile(0x8C08A, "SexLab.esm") as Sound
+
+	Base.AddRaceKey("Werewolves")
+	Base.AddRaceKey("Werewolfgal")
+	Base.AddRaceKey("Werewolfpanic")
+
+	Base.Save(id)
+endFunction
+
+function WolfVoice01(int id)
+	sslBaseVoice Base = Create(id)
+
+	Base.Name    = "Wolf 1 (Creature)"
 	Base.Gender  = Creature
 	
 	Base.Mild    = Game.GetFormFromFile(0x8B5BB, "SexLab.esm") as Sound
 	Base.Medium  = Game.GetFormFromFile(0x8B5BB, "SexLab.esm") as Sound
 	Base.Hot     = Game.GetFormFromFile(0x8B5BB, "SexLab.esm") as Sound
 
-	Base.SetRaceKeys("Wolves,Wolfpanic")
-	Base.SetTags("Wolf,Wolves")
+	Base.AddRaceKey("Wolves")
+	Base.AddRaceKey("Wolfpanic")
 
 	Base.Save(id)
 endFunction
