@@ -224,8 +224,13 @@ int function ValidateActor(Actor ActorRef)
 	if !ActorRef
 		Log("ValidateActor(NONE) -- FALSE -- Because they don't exist.")
 		return -1
-	endIf
+	; Remove actors stuck in animating faction
+	elseIf ActorRef.IsInFaction(AnimatingFaction) && Config.ThreadSlots.FindActorController(ActorRef) == -1
+		ActorRef.RemoveFromFaction(AnimatingFaction)
+		Log("ValidateActor("+BaseRef.GetName()+") -- WARN -- Was in AnimatingFaction but not in a thread")
+	endIf	
 	ActorBase BaseRef = ActorRef.GetLeveledActorBase()
+	; Primary checks
 	if ActorRef.IsInFaction(AnimatingFaction)
 		Log("ValidateActor("+BaseRef.GetName()+") -- FALSE -- They appear to already be animating")
 		return -10

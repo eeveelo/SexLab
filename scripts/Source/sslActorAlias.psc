@@ -819,7 +819,7 @@ function RestoreActorDefaults()
 		MfgConsoleFunc.SetPhonemeModifier(ActorRef, -1, 0, 0)
 	endIf
 	; Clear from animating faction
-	ActorRef.SetFactionRank(AnimatingFaction, 0)
+	ActorRef.SetFactionRank(AnimatingFaction, -1)
 	ActorRef.RemoveFromFaction(AnimatingFaction)
 	ActorUtil.RemovePackageOverride(ActorRef, Config.DoNothing)
 	ActorRef.EvaluatePackage()
