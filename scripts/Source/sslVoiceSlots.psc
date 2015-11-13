@@ -297,6 +297,37 @@ sslBaseVoice[] function GetSlots(int page = 1, int perpage = 125)
 	return PageSlots
 endFunction
 
+string[] function GetNormalSlotNames(bool WithRandom = false)
+	string[] Output = Utility.CreateStringArray(GetCount(1) + (WithRandom as int))
+	int n = Output.Length
+	int i = Slotted
+	while i
+		i -= 1
+		sslBaseVoice Voice = GetBySlot(i)
+		if Voice && !Voice.Creature
+			n -= 1
+			Output[n] = Voice.Name
+		endIf
+	endWhile
+	if WithRandom
+		Output[0] = "$SSL_Random"
+	endIf
+	return Output
+endFunction
+
+int function GetCount(int flag = 0) ; 0 = all, 1 = normal, -1 = creatures
+	if flag == 0
+		return Slotted
+	endIf
+	int count
+	int i = Slotted
+	while i
+		i -= 1
+		count += (GetBySlot(i).Creature == (flag == -1)) as int
+	endWhile
+	return count
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Object Registration                                 ;
 ; ------------------------------------------------------- ;

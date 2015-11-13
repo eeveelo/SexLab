@@ -2879,23 +2879,21 @@ state NudeSuitFemales
 		SetInfoText("$SSL_InfoFemaleNudeSuit")
 	endEvent
 endState
+string[] VoiceNames
 state PlayerVoice
 	event OnMenuOpenST()
-		string[] VoiceNames = new string[1]
-		VoiceNames[0] = "$SSL_Random"
-		VoiceNames = PapyrusUtil.MergeStringArray(VoiceNames, VoiceSlots.GetSlotNames(1, 127))
+		VoiceNames = VoiceSlots.GetNormalSlotNames(true)
 		SetMenuDialogOptions(VoiceNames)
-		SetMenuDialogStartIndex(VoiceSlots.FindSaved(PlayerRef) + 1)
+		SetMenuDialogStartIndex(VoiceNames.Find(VoiceSlots.GetSavedName(PlayerRef)))
 		SetMenuDialogDefaultIndex(0)
 	endEvent
 	event OnMenuAcceptST(int i)
-		i -= 1
-		if i < 0
+		if i < 1
 			VoiceSlots.ForgetVoice(PlayerRef)
 			SetMenuOptionValueST("$SSL_Random")
 		else
-			VoiceSlots.SaveVoice(PlayerRef, VoiceSlots.GetBySlot(i))
-			SetMenuOptionValueST(VoiceSlots.GetBySlot(i).Name)
+			VoiceSlots.SaveVoice(PlayerRef, VoiceSlots.GetByName(VoiceNames[i]))
+			SetMenuOptionValueST(VoiceNames[i])
 		endIf
 	endEvent
 	event OnDefaultST()
@@ -2908,7 +2906,7 @@ state PlayerVoice
 endState
 state TargetVoice
 	event OnMenuOpenST()
-		string[] VoiceNames = new string[1]
+		VoiceNames = new string[1]
 		VoiceNames[0] = "$SSL_Random"
 		VoiceNames = PapyrusUtil.MergeStringArray(VoiceNames, VoiceSlots.GetSlotNames(1, 127))
 		SetMenuDialogOptions(VoiceNames)
