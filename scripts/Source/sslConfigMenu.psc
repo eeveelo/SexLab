@@ -687,6 +687,9 @@ function AnimationSettings()
 	AddToggleOptionST("AutomaticTFC","$SSL_AutomaticTFC", Config.AutoTFC)
 	AddSliderOptionST("AutomaticSUCSM","$SSL_AutomaticSUCSM", Config.AutoSUCSM, "{0}")
 	AddTextOptionST("PlayerGender","$SSL_PlayerGender", SexLabUtil.StringIfElse(ActorLib.GetGender(PlayerRef) == 0, "$SSL_Male", "$SSL_Female"))
+	if TargetRef
+		AddTextOptionST("TargetGender","$SSL_{"+TargetName+"}sGender", SexLabUtil.StringIfElse(ActorLib.GetGender(TargetRef) == 0, "$SSL_Male", "$SSL_Female"))
+	endIf
 
 	AddHeaderOption("$SSL_ExtraEffects")
 	AddToggleOptionST("UseExpressions","$SSL_UseExpressions", Config.UseExpressions)
@@ -2532,6 +2535,17 @@ state PlayerGender
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoPlayerGender")
+	endEvent
+endState
+state TargetGender
+	event OnSelectST()
+		int Gender = ActorLib.GetGender(TargetRef)
+		ActorLib.TreatAsGender(TargetRef, Gender == 0)
+		SetTextOptionValueST(SexLabUtil.StringIfElse(Gender == 1, "$SSL_Male", "$SSL_Female"))
+	endEvent
+	event OnDefaultST()
+		ActorLib.ClearForcedGender(TargetRef)
+		SetTextOptionValueST(SexLabUtil.StringIfElse(ActorLib.GetGender(TargetRef) == 1, "$SSL_Male", "$SSL_Female"))
 	endEvent
 endState
 state UseExpressions
