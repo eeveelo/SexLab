@@ -23,6 +23,21 @@ endFunction
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
+	Spell SelectedActor = Game.GetFormFromFile(0x8C5F6, "SexLab.esm") as Spell
+	Utility.WaitMenuMode(8.0)
+	Log(SelectedActor)
+	Log("Cast 1")
+	SelectedActor.Cast(TargetRef, TargetRef)
+	Utility.WaitMenuMode(8.0)
+	Log("Added")
+	TargetRef.AddSpell(SelectedActor)
+	Utility.WaitMenuMode(8.0)
+	Log("Cast 2")
+	SelectedActor.Cast(TargetRef, TargetRef)
+
+	; Log(CasterRef+" BEFORE: "+SexLabUtil.HasKeywordSub(CasterRef, "Crafting"))
+	; Utility.WaitMenuMode(20.0)
+	; Log(CasterRef+" AFTER: "+SexLabUtil.HasKeywordSub(CasterRef, "Crafting"))
 	; Benchmark(1, 50, 5, false)
 
 	;/ if TargetRef == CasterRef

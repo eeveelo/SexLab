@@ -59,6 +59,8 @@ Spell property CumVaginalSpell auto
 Spell property CumOralSpell auto
 Spell property CumAnalSpell auto
 
+Spell property SelectedSpell auto
+
 Keyword property CumOralKeyword auto
 Keyword property CumAnalKeyword auto
 Keyword property CumVaginalKeyword auto
@@ -378,6 +380,7 @@ endEvent
 function SetTargetActor()
 	if CrosshairRef
 		TargetRef = CrosshairRef
+		SelectedSpell.Cast(TargetRef, TargetRef)
 		Debug.Notification("SexLab Target Selected: "+TargetRef.GetLeveledActorBase().GetName())
 		; Give them stats if they need it
 		Stats.SeedActor(TargetRef)

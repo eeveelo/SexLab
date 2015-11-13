@@ -320,8 +320,10 @@ state Animating
 		if ActorCount > 1
 			AdjustPos = sslUtility.IndexTravel(Positions.Find(AdjustAlias.ActorRef), ActorCount, backwards)
 			AdjustAlias = ActorAlias(Positions[AdjustPos])
+			Actor AdjustActor = AdjustAlias.ActorRef
+			Config.SelectedSpell.Cast(AdjustActor, AdjustActor)
 			PlayHotkeyFX(0, !backwards)
-			Debug.Notification("Adjusting Position For: "+AdjustAlias.ActorRef.GetLeveledActorBase().GetName())
+			Debug.Notification("Adjusting Position For: "+AdjustActor.GetLeveledActorBase().GetName())
 		endIf
 		RegisterForSingleUpdate(0.2)
 	endFunction
