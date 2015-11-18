@@ -51,6 +51,8 @@ Armor property NudeSuit auto
 Armor property CalypsStrapon auto
 Form[] property Strapons auto hidden
 
+Spell property SelectedSpell auto
+
 Spell property CumVaginalOralAnalSpell auto
 Spell property CumOralAnalSpell auto
 Spell property CumVaginalOralSpell auto
@@ -59,11 +61,40 @@ Spell property CumVaginalSpell auto
 Spell property CumOralSpell auto
 Spell property CumAnalSpell auto
 
-Spell property SelectedSpell auto
+Spell property Vaginal1Oral1Anal1 auto
+Spell property Vaginal2Oral1Anal1 auto
+Spell property Vaginal2Oral2Anal1 auto
+Spell property Vaginal2Oral1Anal2 auto
+Spell property Vaginal1Oral2Anal1 auto
+Spell property Vaginal1Oral2Anal2 auto
+Spell property Vaginal1Oral1Anal2 auto
+Spell property Vaginal2Oral2Anal2 auto
+Spell property Oral1Anal1 auto
+Spell property Oral2Anal1 auto
+Spell property Oral1Anal2 auto
+Spell property Oral2Anal2 auto
+Spell property Vaginal1Oral1 auto
+Spell property Vaginal2Oral1 auto
+Spell property Vaginal1Oral2 auto
+Spell property Vaginal2Oral2 auto
+Spell property Vaginal1Anal1 auto
+Spell property Vaginal2Anal1 auto
+Spell property Vaginal1Anal2 auto
+Spell property Vaginal2Anal2 auto
+Spell property Vaginal1 auto
+Spell property Vaginal2 auto
+Spell property Oral1 auto
+Spell property Oral2 auto
+Spell property Anal1 auto
+Spell property Anal2 auto
 
 Keyword property CumOralKeyword auto
 Keyword property CumAnalKeyword auto
 Keyword property CumVaginalKeyword auto
+Keyword property CumOralStackedKeyword auto
+Keyword property CumAnalStackedKeyword auto
+Keyword property CumVaginalStackedKeyword auto
+
 Keyword property ActorTypeNPC auto
 Keyword property SexLabActive auto
 Keyword property FurnitureBedRoll auto

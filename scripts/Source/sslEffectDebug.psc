@@ -23,7 +23,13 @@ endFunction
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	Spell SelectedActor = Game.GetFormFromFile(0x8C5F6, "SexLab.esm") as Spell
+	bool Vaginal = Utility.RandomInt(0, 2) == 2
+	bool Oral = Utility.RandomInt(0, 2) == 2
+	bool Anal = Utility.RandomInt(0, 2) == 2
+	; Log("Applying: Vaginal/"+Vaginal+" - Oral/"+Oral+" - Anal/"+Anal)
+	SexLab.AddCum(TargetRef, Vaginal, Oral, Anal)
+
+	;/ Spell SelectedActor = Game.GetFormFromFile(0x8C5F6, "SexLab.esm") as Spell
 	Utility.WaitMenuMode(8.0)
 	Log(SelectedActor)
 	Log("Cast 1")
@@ -33,7 +39,7 @@ event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	TargetRef.AddSpell(SelectedActor)
 	Utility.WaitMenuMode(8.0)
 	Log("Cast 2")
-	SelectedActor.Cast(TargetRef, TargetRef)
+	SelectedActor.Cast(TargetRef, TargetRef) /;
 
 	; Log(CasterRef+" BEFORE: "+SexLabUtil.HasKeywordSub(CasterRef, "Crafting"))
 	; Utility.WaitMenuMode(20.0)

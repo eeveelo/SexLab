@@ -17,9 +17,40 @@ Spell property CumVaginalSpell auto hidden
 Spell property CumOralSpell auto hidden
 Spell property CumAnalSpell auto hidden
 
+Spell property Vaginal1Oral1Anal1 auto hidden
+Spell property Vaginal2Oral1Anal1 auto hidden
+Spell property Vaginal2Oral2Anal1 auto hidden
+Spell property Vaginal2Oral1Anal2 auto hidden
+Spell property Vaginal1Oral2Anal1 auto hidden
+Spell property Vaginal1Oral2Anal2 auto hidden
+Spell property Vaginal1Oral1Anal2 auto hidden
+Spell property Vaginal2Oral2Anal2 auto hidden
+Spell property Oral1Anal1 auto hidden
+Spell property Oral2Anal1 auto hidden
+Spell property Oral1Anal2 auto hidden
+Spell property Oral2Anal2 auto hidden
+Spell property Vaginal1Oral1 auto hidden
+Spell property Vaginal2Oral1 auto hidden
+Spell property Vaginal1Oral2 auto hidden
+Spell property Vaginal2Oral2 auto hidden
+Spell property Vaginal1Anal1 auto hidden
+Spell property Vaginal2Anal1 auto hidden
+Spell property Vaginal1Anal2 auto hidden
+Spell property Vaginal2Anal2 auto hidden
+Spell property Vaginal1 auto hidden
+Spell property Vaginal2 auto hidden
+Spell property Oral1 auto hidden
+Spell property Oral2 auto hidden
+Spell property Anal1 auto hidden
+Spell property Anal2 auto hidden
+
 Keyword property CumOralKeyword auto hidden
 Keyword property CumAnalKeyword auto hidden
 Keyword property CumVaginalKeyword auto hidden
+Keyword property CumOralStackedKeyword auto hidden
+Keyword property CumAnalStackedKeyword auto hidden
+Keyword property CumVaginalStackedKeyword auto hidden
+
 Keyword property ActorTypeNPC auto hidden
 
 Furniture property BaseMarker auto hidden
@@ -33,7 +64,7 @@ function ApplyCum(Actor ActorRef, int CumID)
 	AddCum(ActorRef, (cumID == 1 || cumID == 4 || cumID == 5 || cumID == 7), (cumID == 2 || cumID == 4 || cumID == 6 || cumID == 7), (cumID == 3 || cumID == 5 || cumID == 6 || cumID == 7))
 endFunction
 
-function AddCum(Actor ActorRef, bool Vaginal = true, bool Oral = true, bool Anal = true)
+function AddCum2(Actor ActorRef, bool Vaginal = true, bool Oral = true, bool Anal = true)
 	if !Vaginal && !Oral && !Anal
 		return ; Nothing to do
 	endIf
@@ -65,6 +96,97 @@ function ClearCum(Actor ActorRef)
 	ActorRef.DispelSpell(CumVaginalAnalSpell)
 	ActorRef.DispelSpell(CumOralAnalSpell)
 	ActorRef.DispelSpell(CumVaginalOralAnalSpell)
+	ActorRef.DispelSpell(Vaginal1Oral1Anal1)
+	ActorRef.DispelSpell(Vaginal2Oral1Anal1)
+	ActorRef.DispelSpell(Vaginal2Oral2Anal1)
+	ActorRef.DispelSpell(Vaginal2Oral1Anal2)
+	ActorRef.DispelSpell(Vaginal1Oral2Anal1)
+	ActorRef.DispelSpell(Vaginal1Oral2Anal2)
+	ActorRef.DispelSpell(Vaginal1Oral1Anal2)
+	ActorRef.DispelSpell(Vaginal2Oral2Anal2)
+	ActorRef.DispelSpell(Oral1Anal1)
+	ActorRef.DispelSpell(Oral2Anal1)
+	ActorRef.DispelSpell(Oral1Anal2)
+	ActorRef.DispelSpell(Oral2Anal2)
+	ActorRef.DispelSpell(Vaginal1Oral1)
+	ActorRef.DispelSpell(Vaginal2Oral1)
+	ActorRef.DispelSpell(Vaginal1Oral2)
+	ActorRef.DispelSpell(Vaginal2Oral2)
+	ActorRef.DispelSpell(Vaginal1Anal1)
+	ActorRef.DispelSpell(Vaginal2Anal1)
+	ActorRef.DispelSpell(Vaginal1Anal2)
+	ActorRef.DispelSpell(Vaginal2Anal2)
+	ActorRef.DispelSpell(Vaginal1)
+	ActorRef.DispelSpell(Vaginal2)
+	ActorRef.DispelSpell(Oral1)
+	ActorRef.DispelSpell(Oral2)
+	ActorRef.DispelSpell(Anal1)
+	ActorRef.DispelSpell(Anal2)
+endFunction
+
+function AddCum(Actor ActorRef, bool Vaginal = true, bool Oral = true, bool Anal = true)
+	if !Vaginal && !Oral && !Anal
+		return ; Nothing to do
+	endIf
+
+	int kVaginal = ((Vaginal || ActorRef.HasMagicEffectWithKeyword(CumVaginalStackedKeyword)) as int) + (ActorRef.HasMagicEffectWithKeyword(CumVaginalKeyword) as int)
+	int kOral    = ((Oral || ActorRef.HasMagicEffectWithKeyword(CumOralStackedKeyword)) as int)       + (ActorRef.HasMagicEffectWithKeyword(CumOralKeyword) as int)
+	int kAnal    = ((Anal || ActorRef.HasMagicEffectWithKeyword(CumAnalStackedKeyword)) as int)       + (ActorRef.HasMagicEffectWithKeyword(CumAnalKeyword) as int)
+	Log("Vaginal:"+Vaginal+"-"+kVaginal+" Oral:"+Oral+"-"+kOral+" Anal:"+Anal+"-"+kAnal)
+
+	if kVaginal == 1 && kOral == 1 && kAnal == 1
+		Vaginal1Oral1Anal1.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 2 && kOral == 1 && kAnal == 1
+		Vaginal2Oral1Anal1.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 2 && kOral == 2 && kAnal == 1
+		Vaginal2Oral2Anal1.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 2 && kOral == 1 && kAnal == 2
+		Vaginal2Oral1Anal2.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 1 && kOral == 2 && kAnal == 1
+		Vaginal1Oral2Anal1.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 1 && kOral == 2 && kAnal == 2
+		Vaginal1Oral2Anal2.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 1 && kOral == 1 && kAnal == 2
+		Vaginal1Oral1Anal2.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 2 && kOral == 2 && kAnal == 2
+		Vaginal2Oral2Anal2.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 0 && kOral == 1 && kAnal == 1
+		Oral1Anal1.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 0 && kOral == 2 && kAnal == 1
+		Oral2Anal1.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 0 && kOral == 1 && kAnal == 2
+		Oral1Anal2.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 0 && kOral == 2 && kAnal == 2
+		Oral2Anal2.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 1 && kOral == 1 && kAnal == 0
+		Vaginal1Oral1.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 2 && kOral == 1 && kAnal == 0
+		Vaginal2Oral1.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 1 && kOral == 2 && kAnal == 0
+		Vaginal1Oral2.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 2 && kOral == 2 && kAnal == 0
+		Vaginal2Oral2.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 1 && kOral == 0 && kAnal == 1
+		Vaginal1Anal1.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 2 && kOral == 0 && kAnal == 1
+		Vaginal2Anal1.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 1 && kOral == 0 && kAnal == 2
+		Vaginal1Anal2.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 2 && kOral == 0 && kAnal == 2
+		Vaginal2Anal2.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 1 && kOral == 0 && kAnal == 0
+		Vaginal1.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 2 && kOral == 0 && kAnal == 0
+		Vaginal2.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 0 && kOral == 1 && kAnal == 0
+		Oral1.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 0 && kOral == 2 && kAnal == 0
+		Oral2.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 0 && kOral == 0 && kAnal == 1
+		Anal1.Cast(ActorRef, ActorRef)
+	elseif kVaginal == 0 && kOral == 0 && kAnal == 2
+		Anal2.Cast(ActorRef, ActorRef)
+	endIf
 endFunction
 
 ;/-----------------------------------------------\;
@@ -422,11 +544,49 @@ function Setup()
 	FormListClear(Config, "StripList")
 	FormListClear(Config, "NoStripList")
 	; Load object data
-	AnimatingFaction        = Config.AnimatingFaction
-	GenderFaction           = Config.GenderFaction
-	ForbiddenFaction        = Config.ForbiddenFaction
-	DummyWeapon             = Config.DummyWeapon
-	NudeSuit                = Config.NudeSuit
+	AnimatingFaction = Config.AnimatingFaction
+	GenderFaction    = Config.GenderFaction
+	ForbiddenFaction = Config.ForbiddenFaction
+	DummyWeapon      = Config.DummyWeapon
+	NudeSuit         = Config.NudeSuit
+	ActorTypeNPC     = Config.ActorTypeNPC
+	BaseMarker       = Config.BaseMarker
+	DoNothing        = Config.DoNothing
+	; cum keywords
+	CumOralKeyword           = Config.CumOralKeyword
+	CumAnalKeyword           = Config.CumAnalKeyword
+	CumVaginalKeyword        = Config.CumVaginalKeyword
+	CumVaginalStackedKeyword = Config.CumVaginalStackedKeyword
+	CumOralStackedKeyword    = Config.CumOralStackedKeyword
+	CumAnalStackedKeyword    = Config.CumAnalStackedKeyword
+	; cum spells
+	Vaginal1Oral1Anal1 = Config.Vaginal1Oral1Anal1
+	Vaginal2Oral1Anal1 = Config.Vaginal2Oral1Anal1
+	Vaginal2Oral2Anal1 = Config.Vaginal2Oral2Anal1
+	Vaginal2Oral1Anal2 = Config.Vaginal2Oral1Anal2
+	Vaginal1Oral2Anal1 = Config.Vaginal1Oral2Anal1
+	Vaginal1Oral2Anal2 = Config.Vaginal1Oral2Anal2
+	Vaginal1Oral1Anal2 = Config.Vaginal1Oral1Anal2
+	Vaginal2Oral2Anal2 = Config.Vaginal2Oral2Anal2
+	Oral1Anal1         = Config.Oral1Anal1
+	Oral2Anal1         = Config.Oral2Anal1
+	Oral1Anal2         = Config.Oral1Anal2
+	Oral2Anal2         = Config.Oral2Anal2
+	Vaginal1Oral1      = Config.Vaginal1Oral1
+	Vaginal2Oral1      = Config.Vaginal2Oral1
+	Vaginal1Oral2      = Config.Vaginal1Oral2
+	Vaginal2Oral2      = Config.Vaginal2Oral2
+	Vaginal1Anal1      = Config.Vaginal1Anal1
+	Vaginal2Anal1      = Config.Vaginal2Anal1
+	Vaginal1Anal2      = Config.Vaginal1Anal2
+	Vaginal2Anal2      = Config.Vaginal2Anal2
+	Vaginal1           = Config.Vaginal1
+	Vaginal2           = Config.Vaginal2
+	Oral1              = Config.Oral1
+	Oral2              = Config.Oral2
+	Anal1              = Config.Anal1
+	Anal2              = Config.Anal2
+	; < 1.61 legacy cum spells
 	CumVaginalOralAnalSpell = Config.CumVaginalOralAnalSpell
 	CumOralAnalSpell        = Config.CumOralAnalSpell
 	CumVaginalOralSpell     = Config.CumVaginalOralSpell
@@ -434,12 +594,6 @@ function Setup()
 	CumVaginalSpell         = Config.CumVaginalSpell
 	CumOralSpell            = Config.CumOralSpell
 	CumAnalSpell            = Config.CumAnalSpell
-	CumOralKeyword          = Config.CumOralKeyword
-	CumAnalKeyword          = Config.CumAnalKeyword
-	CumVaginalKeyword       = Config.CumVaginalKeyword
-	ActorTypeNPC            = Config.ActorTypeNPC
-	BaseMarker              = Config.BaseMarker
-	DoNothing               = Config.DoNothing
 endFunction
 
 ; ------------------------------------------------------- ;
