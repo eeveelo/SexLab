@@ -292,7 +292,7 @@ endFunction
 * Applies the cum effect to an actor for the given locations
 * 
 * @param  Actor ActorRef - The actor to apply the cum effectshader to
-* @param  bool Vaginal/Oral/Anal - Each location set to TRUE will have it's effect stacked.
+* @param  bool Vaginal/Oral/Anal - Each location set to TRUE will have it's effect added or stacked.
 **/;
 function AddCum(Actor ActorRef, bool Vaginal = true, bool Oral = true, bool Anal = true)
 	ActorLib.AddCum(ActorRef, Vaginal, Oral, Anal)
@@ -318,6 +318,25 @@ endFunction
 **/;
 Form[] function StripActor(Actor ActorRef, Actor VictimRef = none, bool DoAnimate = true, bool LeadIn = false)
 	return ActorLib.StripActor(ActorRef, VictimRef, DoAnimate, LeadIn)
+endFunction
+
+;/**
+* Checks how many stacks of cum an actor currently has in the given areas
+* 
+* @param  Actor ActorRef - The actor to check for cum effectshader stacks
+* @param  bool Vaginal/Oral/Anal - Each location set to TRUE add to the returned count of stacks.
+**/;
+int function CountCum(Actor ActorRef, bool Vaginal = true, bool Oral = true, bool Anal = true)
+	return ActorLib.CountCum(ActorRef, Vaginal, Oral, Anal)
+endFunction
+int function CountCumVaginal(Actor ActorRef)
+	return ActorLib.CountCum(ActorRef, true, false, false)
+endFunction
+int function CountCumOral(Actor ActorRef)
+	return ActorLib.CountCum(ActorRef, false, true, false)
+endFunction
+int function CountCumAnal(Actor ActorRef)
+	return ActorLib.CountCum(ActorRef, false, false, true)
 endFunction
 
 ;/**

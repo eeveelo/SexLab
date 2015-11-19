@@ -64,30 +64,6 @@ function ApplyCum(Actor ActorRef, int CumID)
 	AddCum(ActorRef, (cumID == 1 || cumID == 4 || cumID == 5 || cumID == 7), (cumID == 2 || cumID == 4 || cumID == 6 || cumID == 7), (cumID == 3 || cumID == 5 || cumID == 6 || cumID == 7))
 endFunction
 
-function AddCum2(Actor ActorRef, bool Vaginal = true, bool Oral = true, bool Anal = true)
-	if !Vaginal && !Oral && !Anal
-		return ; Nothing to do
-	endIf
-	Vaginal = Vaginal || ActorRef.HasMagicEffectWithKeyword(CumVaginalKeyword)
-	Oral = Oral || ActorRef.HasMagicEffectWithKeyword(CumOralKeyword)
-	Anal = Anal || ActorRef.HasMagicEffectWithKeyword(CumAnalKeyword)
-	if Vaginal && !Oral && !Anal
-		CumVaginalSpell.Cast(ActorRef, ActorRef)
-	elseIf Oral && !Vaginal && !Anal
-		CumOralSpell.Cast(ActorRef, ActorRef)
-	elseIf Anal && !Vaginal && !Oral
-		CumAnalSpell.Cast(ActorRef, ActorRef)
-	elseIf Vaginal && Oral && !Anal
-		CumVaginalOralSpell.Cast(ActorRef, ActorRef)
-	elseIf Vaginal && Anal && !Oral
-		CumVaginalAnalSpell.Cast(ActorRef, ActorRef)
-	elseIf Oral && Anal && !Vaginal
-		CumOralAnalSpell.Cast(ActorRef, ActorRef)
-	else
-		CumVaginalOralAnalSpell.Cast(ActorRef, ActorRef)
-	endIf
-endFunction
-
 function ClearCum(Actor ActorRef)
 	ActorRef.DispelSpell(CumVaginalSpell)
 	ActorRef.DispelSpell(CumOralSpell)
@@ -186,6 +162,47 @@ function AddCum(Actor ActorRef, bool Vaginal = true, bool Oral = true, bool Anal
 		Anal1.Cast(ActorRef, ActorRef)
 	elseif kVaginal == 0 && kOral == 0 && kAnal == 2
 		Anal2.Cast(ActorRef, ActorRef)
+	endIf
+endFunction
+
+int function CountCum(Actor ActorRef, bool Vaginal = true, bool Oral = true, bool Anal = true)
+	int Amount
+	if Vaginal
+		Amount += ActorRef.HasMagicEffectWithKeyword(CumVaginalKeyword) as int
+		Amount += ActorRef.HasMagicEffectWithKeyword(CumVaginalStackedKeyword) as int
+	endIf
+	if Oral
+		Amount += ActorRef.HasMagicEffectWithKeyword(CumOralKeyword) as int
+		Amount += ActorRef.HasMagicEffectWithKeyword(CumOralStackedKeyword) as int
+	endIf
+	if Anal
+		Amount += ActorRef.HasMagicEffectWithKeyword(CumAnalKeyword) as int
+		Amount += ActorRef.HasMagicEffectWithKeyword(CumAnalStackedKeyword) as int
+	endIf
+	return Amount
+endFunction
+
+function legacy_AddCum(Actor ActorRef, bool Vaginal = true, bool Oral = true, bool Anal = true)
+	if !Vaginal && !Oral && !Anal
+		return ; Nothing to do
+	endIf
+	Vaginal = Vaginal || ActorRef.HasMagicEffectWithKeyword(CumVaginalKeyword)
+	Oral = Oral || ActorRef.HasMagicEffectWithKeyword(CumOralKeyword)
+	Anal = Anal || ActorRef.HasMagicEffectWithKeyword(CumAnalKeyword)
+	if Vaginal && !Oral && !Anal
+		CumVaginalSpell.Cast(ActorRef, ActorRef)
+	elseIf Oral && !Vaginal && !Anal
+		CumOralSpell.Cast(ActorRef, ActorRef)
+	elseIf Anal && !Vaginal && !Oral
+		CumAnalSpell.Cast(ActorRef, ActorRef)
+	elseIf Vaginal && Oral && !Anal
+		CumVaginalOralSpell.Cast(ActorRef, ActorRef)
+	elseIf Vaginal && Anal && !Oral
+		CumVaginalAnalSpell.Cast(ActorRef, ActorRef)
+	elseIf Oral && Anal && !Vaginal
+		CumOralAnalSpell.Cast(ActorRef, ActorRef)
+	else
+		CumVaginalOralAnalSpell.Cast(ActorRef, ActorRef)
 	endIf
 endFunction
 
