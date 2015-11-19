@@ -40,7 +40,12 @@ state Prepare
 		endIf
 		; Set important vars needed for actor prep
 		UpdateAdjustKey()
-		SetAnimation()
+		if StartingAnimation && Animations.Find(StartingAnimation) != -1
+			SetAnimation(Animations.Find(StartingAnimation))
+		else
+			SetAnimation()
+			StartingAnimation = none
+		endIf
 		Log(AdjustKey, "Adjustment Profile")
 		; Begin actor prep
 		SyncEvent(kPrepareActor, 30.0)

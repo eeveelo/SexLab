@@ -48,6 +48,7 @@ string property AdjustKey auto hidden
 string[] property AnimEvents auto hidden
 
 sslBaseAnimation property Animation auto hidden
+sslBaseAnimation property StartingAnimation auto hidden
 sslBaseAnimation[] CustomAnimations
 sslBaseAnimation[] PrimaryAnimations
 sslBaseAnimation[] LeadAnimations
@@ -767,23 +768,9 @@ function AddAnimation(sslBaseAnimation AddAnimation, bool ForceTo = false)
 	endIf
 endFunction
 
-;/ int StartFID
-int property kStartFID hidden
-	int function get()
-		return StartFID
-	endFunction
-endProperty
-int StartAID
-int property kStartAID hidden
-	int function get()
-		return StartAID
-	endFunction
-endProperty
-bool function SetFirstForeplayAnimation(sslBaseAnimation FirstAnimation)
+function SetStartingAnimation(sslBaseAnimation FirstAnimation)
+	StartingAnimation = FirstAnimation
 endFunction
-sslBaseAnimation function SetFirstAnimationByIndex(int aid)
-
-endFunction /;
 
 ; ------------------------------------------------------- ;
 ; --- Thread Settings                                 --- ;
@@ -1307,6 +1294,7 @@ function Initialize()
 	CenterRef      = none
 	SoundFX        = none
 	BedRef         = none
+	StartingAnimation = none
 	; Boolean
 	AutoAdvance    = true
 	HasPlayer      = false
