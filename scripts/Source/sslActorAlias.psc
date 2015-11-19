@@ -283,7 +283,7 @@ state Ready
 			; Strip actor
 			Strip()
 			ResolveStrapon()
-			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
+			; Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 			; Find HDT High Heels
 			if Config.RemoveHeelEffect
 				HDTHeelSpell = Config.GetHDTSpell(ActorRef)
@@ -432,15 +432,15 @@ state Animating
 		ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		AttachMarker()
 		ClearEffects()
-		Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
-		; Init starting SA
-		PlayingSA = "SexLabSequenceExit1"
+		; Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1")
-		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1_REENTER")
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
+		PlayingSA = "SexLabSequenceExit1"
+		; Init starting SA
+		;/ Utility.WaitMenuMode(0.5)
 		Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
 		PlayingSA = Animation.Registry
-		CurrentSA = Animation.Registry
+		CurrentSA = Animation.Registry /;
 		; TODO: Add a light source option here. (possibly with frostfall benefit?)
 		; If enabled, start Auto TFC for player
 		if IsPlayer && Config.AutoTFC
@@ -519,11 +519,16 @@ state Animating
 		UnregisterForUpdate()
 		SyncThread()
 		SyncLocation(true)
+		StopAnimating(true)
 		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1")
-		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1_REENTER")
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
-		PlayingSA = "SexLabSequenceExit1"
 		Utility.WaitMenuMode(0.5)
+		Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
+		PlayingSA = "SexLabSequenceExit1"
+		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1")
+		Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
+		PlayingSA = Animation.Registry
+		CurrentSA = Animation.Registry
 		SendAnimation()
 		RegisterForSingleUpdate(1.0)
 		Thread.SyncEventDone(kRefreshActor)
