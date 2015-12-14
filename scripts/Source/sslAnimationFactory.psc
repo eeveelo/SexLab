@@ -32,6 +32,10 @@ Sound property Squirting auto hidden
 
 ; Prepare the factory for use with the default animation slots
 function PrepareFactory()
+	sslAnimationSlots AnimSlots = Game.GetFormFromFile(0x639DF, "SexLab.esm") as sslAnimationSlots
+	if !Slots || Slots != AnimSlots
+		Slots = AnimSlots
+	endIf
 	if !Squishing
 		Squishing = Game.GetFormFromFile(0x65A31, "SexLab.esm") as Sound
 	endIf
@@ -43,14 +47,15 @@ function PrepareFactory()
 	endIf
 	if !Squirting
 		Squirting = Game.GetFormFromFile(0x65A34, "SexLab.esm") as Sound
-	endIf
-	if !Slots
-		Slots     = Game.GetFormFromFile(0x639DF, "SexLab.esm") as sslAnimationSlots
 	endIf
 endFunction
 
 ; Prepare the factory for use with the default creature animation slots
 function PrepareFactoryCreatures()
+	sslCreatureAnimationSlots AnimSlots = Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslCreatureAnimationSlots
+	if !Slots || Slots != AnimSlots
+		Slots = AnimSlots
+	endIf
 	if !Squishing
 		Squishing = Game.GetFormFromFile(0x65A31, "SexLab.esm") as Sound
 	endIf
@@ -62,9 +67,6 @@ function PrepareFactoryCreatures()
 	endIf
 	if !Squirting
 		Squirting = Game.GetFormFromFile(0x65A34, "SexLab.esm") as Sound
-	endIf
-	if !Slots
-		Slots     = Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslCreatureAnimationSlots
 	endIf
 endFunction
 
