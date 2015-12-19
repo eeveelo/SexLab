@@ -284,11 +284,22 @@ state Ready
 			Strip()
 			ResolveStrapon()
 			; Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
-			; Find HDT High Heels
-			if Config.RemoveHeelEffect
+			; Suppress High Heels
+			if Config.RemoveHeelEffect && ActorRef.GetWornForm(0x00000080)
+				; Remove NiOverride High Heels
+				if Config.HasNiOverride && NiOverride.HasNodeTransformPosition(ActorRef, false, IsFemale, "NPC", "internal")
+					float[] pos = NiOverride.GetNodeTransformPosition(ActorRef, false, IsFemale, "NPC", "internal")
+					Log(pos, "RemoveHeelEffect (NiOverride)")
+					pos[0] = -pos[0]
+					pos[1] = -pos[1]
+					pos[2] = -pos[2]
+					NiOverride.AddNodeTransformPosition(ActorRef, false, IsFemale, "NPC", "SexLab.esm", pos)
+					NiOverride.UpdateNodeTransform(ActorRef, false, IsFemale, "NPC")
+				endIf
+				; Remove HDT High Heels
 				HDTHeelSpell = Config.GetHDTSpell(ActorRef)
 				if HDTHeelSpell
-					Log(HDTHeelSpell, "HDTHeelSpell")
+					Log(HDTHeelSpell, "RemoveHeelEffect (HDTHeelSpell)")
 					ActorRef.RemoveSpell(HDTHeelSpell)
 				endIf
 			endIf
@@ -313,14 +324,21 @@ state Ready
 			; Get sex skills of partner/player
 			Skills       = Stats.GetSkillLevels(SkilledActor)
 			BestRelation = Thread.GetHighestPresentRelationshipRank(ActorRef)
-			if !IsVictim
-				BaseEnjoyment = Utility.RandomInt(BestRelation, ((Skills[Stats.kLewd]*1.5) as int) + (BestRelation + 1))
+			if IsVictim
+				BaseEnjoyment = Utility.RandomFloat(BestRelation, ((Skills[Stats.kLewd]*1.1) as int)) as int
+			elseIf IsAggressor
+				float OwnLewd = Stats.GetSkillLevel(ActorRef, Stats.kLewd)
+				BaseEnjoyment = Utility.RandomFloat(OwnLewd, ((Skills[Stats.kLewd]*1.3) as int) + (OwnLewd*1.7)) as int
+			else
+				BaseEnjoyment = Utility.RandomFloat(BestRelation, ((Skills[Stats.kLewd]*1.5) as int) + (BestRelation*1.5)) as int
+			endIf
+			if BaseEnjoyment < 0
+				BaseEnjoyment = 0
+			elseIf BaseEnjoyment > 25
+				BaseEnjoyment = 25
 			endIf
 		else
 			BaseEnjoyment = Utility.RandomInt(0, 10)
-		endIf
-		if BaseEnjoyment < 0
-			BaseEnjoyment = 0
 		endIf
 		LogInfo += "BaseEnjoyment["+BaseEnjoyment+"]"
 		Log(LogInfo)
@@ -331,6 +349,7 @@ state Ready
 		if StartWait < 0.1
 			StartWait = 0.1
 		endIf
+		GoToState("Prepare")
 		RegisterForSingleUpdate(StartWait)
 	endFunction
 
@@ -363,13 +382,55 @@ state Ready
 		endIf
 	endFunction
 
+endState
+
+state Prepare
 	event OnUpdate()
-		; Enter animatable state
-		GoToState("Animating")
+		ClearEffects()
+		GetPositionInfo()
+		; Starting position
+		OffsetCoords(Loc, Center, Offsets)
+		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
+		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
+		ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
+		ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
+		AttachMarker()
+		Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
+		; Notify thread prep is done
 		if Thread.GetState() == "Prepare"
 			Thread.SyncEventDone(kPrepareActor)
+		else
+			StartAnimating()
 		endIf
 	endEvent
+
+	function StartAnimating()
+		; Remove from bard audience if in one
+		Config.CheckBardAudience(ActorRef, true)
+		; TODO: Add a light source option here. (possibly with frostfall benefit?)
+		; If enabled, start Auto TFC for player
+		if IsPlayer && Config.AutoTFC
+			MiscUtil.SetFreeCameraState(true)
+			MiscUtil.SetFreeCameraSpeed(Config.AutoSUCSM)
+		endIf
+		; Prepare for loop
+		StopAnimating(true)
+		StartedAt  = Utility.GetCurrentRealTime()
+		LastOrgasm = StartedAt
+		GoToState("Animating")
+		SyncAll(true)
+		PlayingSA = Animation.Registry
+		CurrentSA = Animation.Registry
+		Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
+		; Start update loop
+		TrackedEvent("Start")
+		if Thread.GetState() == "Prepare"
+			Thread.SyncEventDone(kStartup)
+		else
+			SendAnimation()
+		endIf
+		RegisterForSingleUpdate(Utility.RandomFloat(1.0, 3.0))
+	endFunction
 endState
 
 ; ------------------------------------------------------- ;
@@ -404,11 +465,15 @@ state Animating
 	function SendAnimation()
 		; Reenter SA - On stage 1 while animation hasn't changed since last call
 		if Stage == 1 && PlayingSA == CurrentSA
-			Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1)+"_REENTER")
+			Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
+			Utility.WaitMenuMode(0.2)
+			Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
+			; Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1)+"_REENTER")
 		else
 			; Enter a new SA - Not necessary on stage 1 since both events would be the same
 			if Stage != 1 && PlayingSA != CurrentSA
 				Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
+				Utility.WaitMenuMode(0.2)
 				; Log("NEW SA - "+Animation.FetchPositionStage(Position, 1))
 			endIf
 			; Play the primary animation
@@ -417,44 +482,6 @@ state Animating
 		endIf
 		; Save id of last SA played
 		PlayingSA = Animation.Registry
-	endFunction
-
-	function StartAnimating()
-		; Remove from bard audience if in one
-		Config.CheckBardAudience(ActorRef, true)
-		; Starting position
-		GetPositionInfo()
-		OffsetCoords(Loc, Center, Offsets)
-		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
-		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
-		Utility.Wait(0.1)
-		ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
-		ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
-		AttachMarker()
-		ClearEffects()
-		; Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
-		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1")
-		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
-		PlayingSA = "SexLabSequenceExit1"
-		; Init starting SA
-		;/ Utility.WaitMenuMode(0.5)
-		Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
-		PlayingSA = Animation.Registry
-		CurrentSA = Animation.Registry /;
-		; TODO: Add a light source option here. (possibly with frostfall benefit?)
-		; If enabled, start Auto TFC for player
-		if IsPlayer && Config.AutoTFC
-			MiscUtil.SetFreeCameraState(true)
-			MiscUtil.SetFreeCameraSpeed(Config.AutoSUCSM)
-		endIf
-		; Prepare for loop
-		TrackedEvent("Start")
-		StartedAt  = RealTime[0]
-		LastOrgasm = RealTime[0]
-		SyncAll(true)
-		; Start update loop
-		UnregisterForModEvent(Thread.Key("Start"))
-		RegisterForSingleUpdate(Utility.RandomFloat(1.0, 3.0))
 	endFunction
 
 	event OnUpdate()
@@ -522,7 +549,7 @@ state Animating
 		StopAnimating(true)
 		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1")
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
-		Utility.WaitMenuMode(0.5)
+		Utility.WaitMenuMode(0.2)
 		Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
 		PlayingSA = "SexLabSequenceExit1"
 		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1")
@@ -562,27 +589,28 @@ state Animating
 		if distance > 125.0 || !IsInPosition(ActorRef, MarkerRef, 75.0)
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
-			AttachMarker()
 		elseIf distance > 0.5
 			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 50000, 0)
 			return ; OnTranslationComplete() will take over when in place
-		endIf 
+		endIf
+		AttachMarker()
 		; Begin very slowly rotating a smallamount to hold position
 		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.001, 20.0, 500, 0.00001)
 	endFunction
 
 	event OnTranslationComplete()
 		; Log("OnTranslationComplete")
+		AttachMarker()
 		Snap()
 	endEvent
 
 	function OrgasmEffect()
-		if (Utility.GetCurrentRealTime() - LastOrgasm) < 3.0
+		if Math.Abs(Utility.GetCurrentRealTime() - LastOrgasm) < 5.0
 			Log("PREMATURE EJACULATION")
 			return
 		endIf
 		UnregisterForUpdate()
-		LastOrgasm = RealTime[0]
+		LastOrgasm = StartedAt
 		Orgasms   += 1
 		; Reset enjoyment build up, if using multiple orgasms
 		int FullEnjoyment = Enjoyment
@@ -659,13 +687,15 @@ state Animating
 		; Unstrip items in storage, if any
 		if !IsCreature && !ActorRef.IsDead()
 			Unstrip()
-			; Reapply HDT High Heel if they had it and need it again.
-			if HDTHeelSpell && ActorRef.GetWornForm(Armor.GetMaskForSlot(37))
-				if ActorRef.HasSpell(HDTHeelSpell)
-					Log(HDTHeelSpell+" -> "+Config.GetHDTSpell(ActorRef), "HDTHighHeels")
-				else
-					Log(HDTHeelSpell+" re-applying", "HDTHighHeels")
+			; Add back high heel effects
+			if Config.RemoveHeelEffect
+				; HDT High Heel
+				if HDTHeelSpell && ActorRef.GetWornForm(0x00000080) && !ActorRef.HasSpell(HDTHeelSpell)
 					ActorRef.AddSpell(HDTHeelSpell)
+				endIf
+				; NiOverride High Heels
+				if Config.HasNiOverride && NiOverride.RemoveNodeTransformPosition(ActorRef, false, IsFemale, "NPC", "SexLab.esm")
+					NiOverride.UpdateNodeTransform(ActorRef, false, IsFemale, "NPC")
 				endIf
 			endIf
 		endIf
@@ -725,6 +755,7 @@ function StopAnimating(bool Quick = false, string ResetAnim = "IdleForceDefaultS
 			ActorRef.PushActorAway(ActorRef, 0.1)
 		endIf
 	endIf
+	PlayingSA = "SexLabSequenceExit1"
 endFunction
 
 function AttachMarker()
@@ -766,7 +797,14 @@ function LockActor()
 	; Attach positioning marker
 	if !MarkerRef
 		MarkerRef = ActorRef.PlaceAtMe(Config.BaseMarker)
-		Utility.Wait(0.1)
+		int cycle
+		while !MarkerRef.Is3DLoaded() && cycle < 50
+			Utility.Wait(0.1)
+			cycle += 1
+		endWhile
+		if cycle
+			Log("Waited ["+cycle+"] cycles for MarkerRef["+MarkerRef+"]")
+		endIf
 	endIf
 	MarkerRef.Enable()
 	ActorRef.StopTranslation()
@@ -816,7 +854,7 @@ function RestoreActorDefaults()
 		; 	BaseRef.SetVoiceType(ActorVoice)
 		; endIf
 		; Remove strapon
-		if Strapon && Strapon != HadStrapon
+		if Strapon && !HadStrapon; && Strapon != HadStrapon
 			ActorRef.RemoveItem(Strapon, 1, true)
 		endIf
 		; Reset expression
@@ -1172,7 +1210,6 @@ function RefreshExpression()
 endFunction
 
 
-
 ; ------------------------------------------------------- ;
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
@@ -1206,11 +1243,11 @@ int property kPrepareActor = 0 autoreadonly hidden
 int property kSyncActor    = 1 autoreadonly hidden
 int property kResetActor   = 2 autoreadonly hidden
 int property kRefreshActor = 3 autoreadonly hidden
+int property kStartup      = 4 autoreadonly hidden
 
 function RegisterEvents()
 	string e = Thread.Key("")
 	; Quick Events
-	RegisterForModEvent(e+"Start", "StartAnimating")
 	RegisterForModEvent(e+"Animate", "SendAnimation")
 	RegisterForModEvent(e+"Orgasm", "OrgasmEffect")
 	RegisterForModEvent(e+"Strip", "Strip")
@@ -1219,13 +1256,13 @@ function RegisterEvents()
 	RegisterForModEvent(e+"Sync", "SyncActor")
 	RegisterForModEvent(e+"Reset", "ResetActor")
 	RegisterForModEvent(e+"Refresh", "RefreshActor")
+	RegisterForModEvent(e+"Startup", "StartAnimating")
 endFunction
 
 function ClearEvents()
 	UnregisterForUpdate()
 	string e = Thread.Key("")
 	; Quick Events
-	UnregisterForModEvent(e+"Start")
 	UnregisterForModEvent(e+"Animate")
 	UnregisterForModEvent(e+"Orgasm")
 	UnregisterForModEvent(e+"Strip")
@@ -1234,6 +1271,7 @@ function ClearEvents()
 	UnregisterForModEvent(e+"Sync")
 	UnregisterForModEvent(e+"Reset")
 	UnregisterForModEvent(e+"Refresh")
+	UnregisterForModEvent(e+"Startup")
 endFunction
 
 function Initialize()
@@ -1314,6 +1352,7 @@ function Log(string msg, string src = "")
 	Debug.Trace("SEXLAB - " + msg)
 	if DebugMode
 		SexLabUtil.PrintConsole(msg)
+		Debug.TraceUser("SexLabDebug", msg)
 	endIf
 endFunction
 

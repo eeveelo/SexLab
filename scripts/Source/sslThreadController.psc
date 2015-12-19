@@ -28,8 +28,10 @@ bool hkReady
 ; --- Thread Starter                                  --- ;
 ; ------------------------------------------------------- ;
 
+bool Prepared
 state Prepare
 	function FireAction()
+		Prepared = false
 		; Ensure center is set
 		if !CenterRef
 			CenterOnObject(Positions[0], false)
@@ -55,37 +57,47 @@ state Prepare
 		RegisterForSingleUpdate(0.1)
 	endFunction
 
+	function StartupDone()
+		RegisterForSingleUpdate(0.1)
+	endFunction
+
 	event OnUpdate()
-		; Reset loc, incase actor type center has moved during prep
-		if SexLabUtil.IsActor(CenterRef) && Positions.Find(CenterRef as Actor) != -1
-			CenterLocation[0] = CenterRef.GetPositionX()
-			CenterLocation[1] = CenterRef.GetPositionY()
-			CenterLocation[2] = CenterRef.GetPositionZ()
-			CenterLocation[3] = CenterRef.GetAngleX()
-			CenterLocation[4] = CenterRef.GetAngleY()
-			CenterLocation[5] = CenterRef.GetAngleZ()
+		if !Prepared
+			Prepared = true
+			; Reset loc, incase actor type center has moved during prep
+			if SexLabUtil.IsActor(CenterRef) && Positions.Find(CenterRef as Actor) != -1
+				CenterLocation[0] = CenterRef.GetPositionX()
+				CenterLocation[1] = CenterRef.GetPositionY()
+				CenterLocation[2] = CenterRef.GetPositionZ()
+				CenterLocation[3] = CenterRef.GetAngleX()
+				CenterLocation[4] = CenterRef.GetAngleY()
+				CenterLocation[5] = CenterRef.GetAngleZ()
+			endIf
+			; Set starting adjusted actor
+			AdjustPos   = (ActorCount > 1) as int
+			AdjustAlias = PositionAlias(AdjustPos)
+			; Get localized config options
+			BaseDelay = Config.SFXDelay
+			; Send starter events
+			SendThreadEvent("AnimationStart")
+			if LeadIn
+				SendThreadEvent("LeadInStart")
+			endIf
+			; Start time trackers
+			RealTime[0] = Utility.GetCurrentRealTime()
+			SkillTime = RealTime[0]
+			StartedAt = RealTime[0]
+			; Start actor loops
+			SyncEvent(kStartup, 10.0)
+		else
+			; Start animating
+			Action("Advancing")
 		endIf
-		; Set starting adjusted actor
-		AdjustPos   = (ActorCount > 1) as int
-		AdjustAlias = PositionAlias(AdjustPos)
-		; Get localized config options
-		BaseDelay = Config.SFXDelay
-		; Send starter events
-		SendThreadEvent("AnimationStart")
-		if LeadIn
-			SendThreadEvent("LeadInStart")
-		endIf
-		; Start time trackers
-		RealTime[0] = Utility.GetCurrentRealTime()
-		SkillTime = RealTime[0]
-		StartedAt = RealTime[0]
-		; Start actor loops
-		QuickEvent("Start")
-		; Begin animating loop
-		Action("Advancing")
 	endEvent
 
 	function PlayStageAnimations()
+	endFunction
+	function ResetPositions()
 	endFunction
 	function RecordSkills()
 	endFunction
@@ -521,13 +533,17 @@ function SetAnimation(int aid = -1)
 		GoToStage((StageCount - 1))
 	else
 		TimedStage = Animation.HasTimer(Stage)
-		ActorAlias[0].SyncAll(true)
-		ActorAlias[1].SyncAll(true)
-		ActorAlias[2].SyncAll(true)
-		ActorAlias[3].SyncAll(true)
-		ActorAlias[4].SyncAll(true)
-		Utility.WaitMenuMode(0.2)
-		PlayStageAnimations()
+		if Stage == 1
+			ResetPositions()
+		else
+			ActorAlias[0].SyncAll(true)
+			ActorAlias[1].SyncAll(true)
+			ActorAlias[2].SyncAll(true)
+			ActorAlias[3].SyncAll(true)
+			ActorAlias[4].SyncAll(true)
+			Utility.WaitMenuMode(0.2)
+			PlayStageAnimations()
+		endIf
 	endIf
 endFunction
 

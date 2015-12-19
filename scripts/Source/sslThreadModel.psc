@@ -263,6 +263,7 @@ state Making
 		RegisterForModEvent(Key(EventTypes[1]+"Done"), EventTypes[1]+"Done")
 		RegisterForModEvent(Key(EventTypes[2]+"Done"), EventTypes[2]+"Done")
 		RegisterForModEvent(Key(EventTypes[3]+"Done"), EventTypes[3]+"Done")
+		RegisterForModEvent(Key(EventTypes[4]+"Done"), EventTypes[4]+"Done")
 	endEvent
 
 	int function AddActor(Actor ActorRef, bool IsVictim = false, sslBaseVoice Voice = none, bool ForceSilent = false)
@@ -1046,6 +1047,7 @@ int property kPrepareActor = 0 autoreadonly hidden
 int property kSyncActor    = 1 autoreadonly hidden
 int property kResetActor   = 2 autoreadonly hidden
 int property kRefreshActor = 3 autoreadonly hidden
+int property kStartup      = 4 autoreadonly hidden
 
 string function Key(string Callback)
 	return "SSL_"+thread_id+"_"+Callback
@@ -1138,6 +1140,7 @@ function Log(string msg, string src = "")
 	Debug.Trace("SEXLAB - " + msg)
 	if DebugMode
 		SexLabUtil.PrintConsole(msg)
+		Debug.TraceUser("SexLabDebug", msg)
 	endIf
 endFunction
 
@@ -1146,6 +1149,7 @@ function Fatal(string msg, string src = "", bool halt = true)
 	Debug.TraceStack("SEXLAB - " + msg)
 	if DebugMode
 		SexLabUtil.PrintConsole(msg)
+		Debug.TraceUser("SexLabDebug", msg)
 	endIf
 	if halt
 		Initialize()
@@ -1229,11 +1233,12 @@ function SetTID(int id)
 
 	
 	; Init thread info
-	EventTypes = new string[4]
+	EventTypes = new string[5]
 	EventTypes[0] = "Prepare"
 	EventTypes[1] = "Sync"
 	EventTypes[2] = "Reset"
 	EventTypes[3] = "Refresh"
+	EventTypes[4] = "Startup"
 
 	CenterAlias = GetNthAlias(5) as ReferenceAlias
 
@@ -1259,18 +1264,19 @@ function InitShares()
 	AnimEvents     = new string[5]
 	IsType         = new bool[6]
 	BedStatus      = new int[2]
-	AliasDone      = new int[4]
+	AliasDone      = new int[6]
 	RealTime       = new float[1]
 	AliasTimer     = new float[6]
 	SkillXP        = new float[6]
 	SkillBonus     = new float[6]
 	CenterLocation = new float[6]
-	if EventTypes.Length != 4 || EventTypes.Find("") != -1
+	if EventTypes.Length != 5 || EventTypes.Find("") != -1
 		EventTypes = new string[5]
 		EventTypes[0] = "Prepare"
 		EventTypes[1] = "Sync"
 		EventTypes[2] = "Reset"
 		EventTypes[3] = "Refresh"
+		EventTypes[4] = "Startup"
 	endIf
 	if !CenterAlias
 		CenterAlias = GetAliasByName("CenterAlias") as ReferenceAlias
@@ -1375,6 +1381,8 @@ endFunction
 function StripDone()
 endFunction
 function OrgasmDone()
+endFunction
+function StartupDone()
 endFunction
 function SetAnimation(int aid = -1)
 endFunction
