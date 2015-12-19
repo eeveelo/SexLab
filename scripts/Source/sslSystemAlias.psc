@@ -45,6 +45,12 @@ event OnPlayerLoadGame()
 	endIf
 endEvent
 
+event OnInit()
+	GoToState("")
+	Version = 0
+	LoadLibs(false)
+endEvent
+
 ; ------------------------------------------------------- ;
 ; --- System Install/Update                           --- ;
 ; ------------------------------------------------------- ;
@@ -76,12 +82,6 @@ bool property PreloadDone hidden
 		SetIntValue(Config, "PreloadDone", value as int)
 	endFunction
 endProperty
-
-event OnInit()
-	GoToState("")
-	LoadLibs(false)
-	Version = 0
-endEvent
 
 bool function SetupSystem()
 	Version = SexLabUtil.GetVersion()
