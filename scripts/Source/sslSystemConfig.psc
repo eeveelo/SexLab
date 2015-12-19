@@ -227,6 +227,7 @@ float[] property BedOffset auto hidden
 
 ; Compatibility checks
 bool property HasHDTHeels auto hidden
+bool property HasNiOverride auto hidden
 bool property HasFrostfall auto hidden
 bool property HasSchlongs auto hidden
 
@@ -654,9 +655,11 @@ function Reload()
 	; Load json animation profile
 	ImportProfile(PapyrusUtil.ClampInt(AnimProfile, 1, 5))
 
-	HasSchlongs  = Game.GetModByName("Schlongs of Skyrim - Core.esm") != 255 || Game.GetModByName("SAM - Shape Atlas for Men.esp") != 255
-	HasFrostfall = Game.GetModByName("Chesko_Frostfall.esp") != 255
-	HasHDTHeels  = Game.GetModByName("hdtHighHeel.esm") != 255
+	; Mod compatability checks
+	HasNiOverride = SKSE.GetPluginVersion("NiOverride") >= 6 && NiOverride.GetScriptVersion() >= 6
+	HasSchlongs   = Game.GetModByName("Schlongs of Skyrim - Core.esm") != 255 || Game.GetModByName("SAM - Shape Atlas for Men.esp") != 255
+	HasFrostfall  = Game.GetModByName("Chesko_Frostfall.esp") != 255 || Game.GetModByName("Frostfall.esp") != 255
+	HasHDTHeels   = Game.GetModByName("hdtHighHeel.esm") != 255
 	if HasHDTHeels && !HDTHeelEffect
 		HDTHeelEffect = Game.GetFormFromFile(0x800, "hdtHighHeel.esm") as MagicEffect
 	endIf
