@@ -131,9 +131,9 @@ event UpdateSystem(int OldVersion, int NewVersion)
 		Config.ExportSettings()
 
 		; Perform update functions
-		if OldVersion > 1600 && OldVersion < 16003
-			; Get new cum spells
-			ActorLib.Setup()
+		if OldVersion > 1600 && NewVersion >= 16020
+			ActorLib.Setup()    ; New cum spells
+			ThreadSlots.Setup() ; New alias event arrays
 			; Install creature voices, if needed.
 			if Config.AllowCreatures
 				(Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslVoiceDefaults).LoadCreatureVoices()
