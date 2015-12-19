@@ -291,6 +291,34 @@ bool function HasCreatureInstall()
 	return FNIS.GetMajor(true) > 0 && (Game.GetCameraState() < 8 || PlayerRef.GetAnimationVariableInt("SexLabCreature") > 0)
 endFunction
 
+;/ function SetActorNoScale(Actor ActorRef, bool NoScale = true)
+	if !ActorRef
+		Log("Invalid Actor", "SetActorNoScale("+ActorRef+", "+NoScale+")")
+	elseIf NoScale
+		StorageUtil.FormListAdd(self, "NoScale", ActorRef.GetLeveledActorBase(), false)
+	else
+		StorageUtil.FormListRemove(self, "NoScale", ActorRef.GetLeveledActorBase(), true)
+	endIf
+endFunction
+
+function SetRaceNoScale(Race RaceRef, bool NoScale = true)
+	if !RaceRef
+		Log("Invalid Race", "SetRaceNoScale("+RaceRef+", "+NoScale+")")
+	elseIf NoScale
+		StorageUtil.FormListAdd(self, "NoScale", RaceRef, false)
+	else
+		StorageUtil.FormListRemove(self, "NoScale", RaceRef, true)
+	endIf
+endFunction
+
+bool function ActorIsNoScale(Actor ActorRef)
+	if ActorRef
+		ActorBase BaseRef = ActorRef.GetLeveledActorBase()
+		return StorageUtil.FormListHas(self, "NoScale", BaseRef) || StorageUtil.FormListHas(self, "NoScale", BaseRef.GetRace())
+	endIf
+	return false
+endFunction /;
+
 ; ------------------------------------------------------- ;
 ; --- Strapon Functions                               --- ;
 ; ------------------------------------------------------- ;
@@ -628,7 +656,7 @@ bool function CheckSystem()
 		return false
 	; Check PapyrusUtil install - depends on passing SKSE check passing
 	elseIf !CheckSystemPart("PapyrusUtil")
-		CheckPapyrusUtil.Show(2.8)
+		CheckPapyrusUtil.Show(3.0)
 		return false
 	; Check FNIS generation - soft fail
 	; elseIf CheckSystemPart("FNISSexLabFramework")
