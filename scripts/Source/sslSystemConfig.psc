@@ -28,10 +28,15 @@ bool property DebugMode hidden
 	function set(bool value)
 		InDebugMode = value
 		if InDebugMode
+			Debug.OpenUserLog("SexLabDebug")
+			Debug.TraceUser("SexLabDebug", "SexLab Debug/Development Mode Deactivated")
 			MiscUtil.PrintConsole("SexLab Debug/Development Mode Activated")
 			PlayerRef.AddSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
 			PlayerRef.AddSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
 		else
+			if Debug.TraceUser("SexLabDebug", "SexLab Debug/Development Mode Deactivated")
+				Debug.CloseUserLog("SexLabDebug")
+			endIf
 			MiscUtil.PrintConsole("SexLab Debug/Development Mode Deactivated")
 			PlayerRef.RemoveSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
 			PlayerRef.RemoveSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
@@ -521,7 +526,7 @@ Spell function GetHDTSpell(Actor ActorRef)
 	while i
 		i -= 1
 		Spell SpellRef = ActorRef.GetNthSpell(i)
-		if StringUtil.Find(SpellRef.GetName(), "High Heel") != -1
+		if SpellRef && StringUtil.Find(SpellRef.GetName(), "High Heel") != -1
 			return SpellRef
 		endIf
 		int n = SpellRef.GetNumEffects()
@@ -635,6 +640,11 @@ endFunction
 
 function Reload()
 	DebugMode = true
+	if DebugMode
+		Debug.OpenUserLog("SexLabDebug")
+		Debug.TraceUser("SexLabDebug", "Config Reloading...")
+	endIf
+
 	LoadLibs(false)
 	SexLab = SexLabUtil.GetAPI()
 
@@ -658,11 +668,27 @@ function Reload()
 	; Mod compatability checks
 	HasNiOverride = SKSE.GetPluginVersion("NiOverride") >= 6 && NiOverride.GetScriptVersion() >= 6
 	HasSchlongs   = Game.GetModByName("Schlongs of Skyrim - Core.esm") != 255 || Game.GetModByName("SAM - Shape Atlas for Men.esp") != 255
-	HasFrostfall  = Game.GetModByName("Chesko_Frostfall.esp") != 255 || Game.GetModByName("Frostfall.esp") != 255
+	HasFrostfall  = Game.GetModByName("Frostfall.esp") != 255 && Game.GetModByName("Campfire.esm") != 255; || Game.GetModByName("Chesko_Frostfall.esp") != 255
 	HasHDTHeels   = Game.GetModByName("hdtHighHeel.esm") != 255
 	if HasHDTHeels && !HDTHeelEffect
 		HDTHeelEffect = Game.GetFormFromFile(0x800, "hdtHighHeel.esm") as MagicEffect
 	endIf
+	; FIXME: Causes some minor bugs with frostfalls hand warming 1animation.
+	; if HasFrostfall
+	; 	_Frost_HeatSourceSystem Heat = FrostUtil.GetHeatSourceSystem()
+	; 	if Heat
+	; 		FormList OtherHeat = Heat._Camp_HeatSources_Other
+	; 		if OtherHeat && !OtherHeat.HasForm(BaseMarker) ; Game.GetFormFromFile(0x28F05, "Campfire.esm") as FormList
+	; 			OtherHeat.AddForm(BaseMarker)
+	; 			Log("Adding BaseMarker to _Camp_HeatSources_Other["+OtherHeat+"]")
+	; 		endIf
+	; 		FormList AllHeat = Heat._Camp_HeatSources_All
+	; 		if AllHeat && !AllHeat.HasForm(BaseMarker) ; Game.GetFormFromFile(0x28F06, "Campfire.esm") as FormList
+	; 			AllHeat.AddForm(BaseMarker)
+	; 			Log("Adding BaseMarker to _Camp_HeatSources_All["+AllHeat+"]")
+	; 		endIf
+	; 	endIf
+	; endIf
 
 	; Clean valid actors list
 	StorageUtil.FormListRemove(self, "ValidActors", PlayerRef, true)
