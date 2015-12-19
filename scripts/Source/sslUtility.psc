@@ -127,6 +127,36 @@ sslBaseAnimation[] function AnimationArrayIfElse(bool isTrue, sslBaseAnimation[]
 	return returnFalse
 endfunction
 
+sslBaseAnimation[] function ShuffleAnimations(sslBaseAnimation[] Anims) global
+	if !Anims || Anims.Length < 3
+		return Anims
+	endIf
+	sslBaseAnimation[] Output = AnimationArray(Anims.Length)
+	int n = Anims.Length
+	int max = n - 1
+	while n > 0
+		n -= 1
+		int i = Utility.RandomInt(0, max)
+		if Output[i]
+			if i != max
+				i = Output.Find(none, i)
+				if i == -1
+					i = Output.Find(none)
+				endIf
+			else
+				i = Output.RFind(none)
+			endIf
+		endIf
+		if i == -1 || Output[i] != none
+			debug.trace("SHUFFLE ANIMATIONS GOT -1 "+Output)
+			debug.traceuser("SexLabDebug", "SHUFFLE ANIMATIONS GOT -1 "+Output)
+			i = Output.Find(none)
+		endIf
+		Output[i] = Anims[n]
+	endWhile
+	return Output
+endFunction
+
 ; TODO
 sslBaseAnimation[] function RemoveDupesFromList(sslBaseAnimation[] List, sslBaseAnimation[] Removing, bool PreventAll = true) global
 	if !Removing || Removing.Length < 1 || !List || List.Length < 1
@@ -161,7 +191,11 @@ string[] function GetAnimationNames(sslBaseAnimation[] List) global
 	string[] Names = Utility.CreateStringArray(i)
 	while i
 		i -= 1
-		Names[i] = List[i].Name
+		if List[i]
+			Names[i] = List[i].Name
+		else
+			Names[i] = "<empty>"
+		endIf
 	endWhile
 	return Names
 endFunction

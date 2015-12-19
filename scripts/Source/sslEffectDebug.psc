@@ -23,11 +23,43 @@ endFunction
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	bool Vaginal = Utility.RandomInt(0, 2) == 2
+	sslBaseAnimation[] Anims = SexLab.AnimSlots.GetByTags(2, "Cowgirl")
+	string[] Names = sslUtility.GetAnimationNames(Anims)
+	Log(Anims)
+	Log("Unshuffled("+Anims.Length+"): "+Names)
+	Log("FIND NONE: "+Anims.Find(none))
+
+	Log("----------- Shuffle 1 -----------")
+
+	sslBaseAnimation[] Anims1 = sslUtility.ShuffleAnimations(Anims)
+	string[] Names1 = sslUtility.GetAnimationNames(Anims1)
+	Log("Names1: "+Names1)
+	Log("shuffled NONE: "+Anims1.Find(none))
+	Log("original NONE: "+Anims.Find(none))
+
+	sslBaseAnimation[] Anims2 = sslUtility.ShuffleAnimations(Anims)
+	string[] Names2 = sslUtility.GetAnimationNames(Anims2)
+	Log("Names2: "+Names2)
+	Log("shuffled NONE: "+Anims2.Find(none))
+	Log("original NONE: "+Anims.Find(none))
+
+	sslBaseAnimation[] Anims3 = sslUtility.ShuffleAnimations(Anims)
+	string[] Names3 = sslUtility.GetAnimationNames(Anims3)
+	Log("Names3: "+Names3)
+	Log("shuffled NONE: "+Anims3.Find(none))
+	Log("original NONE: "+Anims.Find(none))
+
+	sslBaseAnimation[] Anims4 = sslUtility.ShuffleAnimations(Anims)
+	string[] Names4 = sslUtility.GetAnimationNames(Anims4)
+	Log("Names4: "+Names4)
+	Log("shuffled NONE: "+Anims4.Find(none))
+	Log("original NONE: "+Anims.Find(none))
+
+	;/ bool Vaginal = Utility.RandomInt(0, 2) == 2
 	bool Oral = Utility.RandomInt(0, 2) == 2
-	bool Anal = Utility.RandomInt(0, 2) == 2
+	bool Anal = Utility.RandomInt(0, 2) == 2 /;
 	; Log("Applying: Vaginal/"+Vaginal+" - Oral/"+Oral+" - Anal/"+Anal)
-	SexLab.AddCum(TargetRef, Vaginal, Oral, Anal)
+	; SexLab.AddCum(TargetRef, Vaginal, Oral, Anal)
 
 	;/ Spell SelectedActor = Game.GetFormFromFile(0x8C5F6, "SexLab.esm") as Spell
 	Utility.WaitMenuMode(8.0)
@@ -97,12 +129,9 @@ endEvent
 ;\-----------------------------------------------/;
 
 function Log(string log)
-	Debug.Notification(log)
-	MiscUtil.PrintConsole(log)
-	Debug.OpenUserLog("SexLabDebug")
-	Debug.TraceUser("SexLabDebug", log)
 	Debug.Trace(log)
-	; MiscUtil.PrintConsole(ActorName+"\n"+log)
+	Debug.TraceUser("SexLabDebug", log)
+	SexLabUtil.PrintConsole(log)
 endfunction
 
 string function GetActorNames(Actor[] Actors)
