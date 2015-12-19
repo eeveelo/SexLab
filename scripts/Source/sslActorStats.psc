@@ -252,7 +252,7 @@ endFunction /;
 float[] function GetSkillLevels(Actor ActorRef)
 	float[] Output = new float[6]
 	float[] Skills = GetSkills(ActorRef)
-	if Skills
+	if Skills && Skills.Length >= 6
 		Output[0] = CalcLevelFloat(Skills[0], 0.85)
 		Output[1] = CalcLevelFloat(Skills[1], 0.85)
 		Output[2] = CalcLevelFloat(Skills[2], 0.85)
