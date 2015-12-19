@@ -76,6 +76,7 @@ function Log(string Log, string Type = "NOTICE")
 	Log = Type+": "+Log
 	if InDebugMode
 		SexLabUtil.PrintConsole(Log)
+		Debug.TraceUser("SexLabDebug", Log)
 	endIf
 	if Type == "FATAL"
 		Debug.TraceStack("SEXLAB - "+Log)
