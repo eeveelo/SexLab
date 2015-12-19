@@ -95,7 +95,7 @@ sslBaseAnimation[] function GetByDefault(int Males, int Females, bool IsAggressi
 			string[] Tags = Slot.GetRawTags()
 			int[] Genders = Slot.Genders
 			; Suppress standing animations if on a bed
-			Valid[i] = Valid[i] && (!UsingBed || (UsingBed && BedRemoveStanding && Tags.Find("Standing") == -1))
+			Valid[i] = Valid[i] && ((!UsingBed && Tags.Find("BedOnly") == -1) || (UsingBed && Tags.Find("Furniture") == -1 && (!BedRemoveStanding || Tags.Find("Standing") == -1)))
 			; Suppress or ignore aggressive animation tags
 			Valid[i] = Valid[i] && (!RestrictAggressive || IsAggressive == (Tags.Find("Aggressive") != -1))
 			; Get SameSex + Non-SameSex
