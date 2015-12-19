@@ -350,10 +350,10 @@ function ArrokMaleMasturbation(int id)
 	Base.Name    = "Arrok Male Masturbation"
 
 	int a1 = Base.AddPosition(Male)
-	Base.AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S1", 0, sos = 3)
-	Base.AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S2", 0, sos = 3)
-	Base.AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S3", 0, sos = 3)
-	Base.AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S4", 0, sos = 3)
+	Base.AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S1", -55.0, sos = 3)
+	Base.AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S2", -55.0, sos = 3)
+	Base.AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S3", -55.0, sos = 3)
+	Base.AddPositionStage(a1, "Arrok_MaleMasturbation_A1_S4", -55.0, sos = 3)
 
 	Base.SetTags("Arrok,Sex,Solo,Penis,Hands,Masturbation,Standing,AirCum,Dirty")
 
@@ -962,11 +962,11 @@ function BleaghFemaleSolo(int id)
 	Base.SoundFX = Squishing
 
 	int a1 = Base.AddPosition(Female)
-	Base.AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S1", 0)
-	Base.AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S2", 0)
-	Base.AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S3", 0)
-	Base.AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S4", 0)
-	Base.AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S5", 0)
+	Base.AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S1", -55.0)
+	Base.AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S2", -55.0)
+	Base.AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S3", -55.0)
+	Base.AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S4", -55.0)
+	Base.AddPositionStage(a1, "Bleagh_FemaleSolo_A1_S5", -55.0)
 
 	Base.SetTags("Bleagh,Sex,Solo,Pussy,Hands,Laying,Beds,Masturbation,Dirty")
 
@@ -1115,12 +1115,12 @@ function APFemaleSolo(int id)
 	Base.SoundFX = Squishing
 
 	int a1 = Base.AddPosition(Female)
-	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S1", 0)
-	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S2", 0)
-	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S3", 0)
-	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S4", 0)
-	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S5", 0)
-	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S6", 0)
+	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S1", -55.0)
+	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S2", -55.0)
+	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S3", -55.0)
+	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S4", -55.0)
+	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S5", -55.0)
+	Base.AddPositionStage(a1, "AP_FemaleSolo_A1_S6", -55.0)
 
 	Base.SetTags("AP,Sex,Solo,Pussy,Hands,Masturbation,Laying,Beds,Dirty")
 
@@ -2254,11 +2254,11 @@ function LeitoFemaleSolo(int id)
 	Base.SoundFX = Squishing
 
 	int a1 = Base.AddPosition(Female)
-	Base.AddPositionStage(a1, "Leito_FemaleSolo_A1_S1", 0)
-	Base.AddPositionStage(a1, "Leito_FemaleSolo_A1_S2", 0)
-	Base.AddPositionStage(a1, "Leito_FemaleSolo_A1_S3", 0)
-	Base.AddPositionStage(a1, "Leito_FemaleSolo_A1_S4", 0)
-	Base.AddPositionStage(a1, "Leito_FemaleSolo_A1_S5", 0)
+	Base.AddPositionStage(a1, "Leito_FemaleSolo_A1_S1", -55.0)
+	Base.AddPositionStage(a1, "Leito_FemaleSolo_A1_S2", -55.0)
+	Base.AddPositionStage(a1, "Leito_FemaleSolo_A1_S3", -55.0)
+	Base.AddPositionStage(a1, "Leito_FemaleSolo_A1_S4", -55.0)
+	Base.AddPositionStage(a1, "Leito_FemaleSolo_A1_S5", -55.0)
 
 	Base.SetStageTimer(5, 8.2)
 	
@@ -2509,20 +2509,22 @@ function fdBedMissionary(int id)
 	Base.SoundFX = Squishing
 
 	int a1 = Base.AddPosition(Female, addCum=Vaginal)
-	Base.AddPositionStage(a1, "4D_BedMissionary_A1_S1", 0, silent=true, openMouth = true)
-	Base.AddPositionStage(a1, "4D_BedMissionary_A1_S2", 0)
-	Base.AddPositionStage(a1, "4D_BedMissionary_A1_S3", 0)
-	Base.AddPositionStage(a1, "4D_BedMissionary_A1_S4", 0)
-	Base.AddPositionStage(a1, "4D_BedMissionary_A1_S5", 0)
-	Base.AddPositionStage(a1, "4D_BedMissionary_A1_S6", 0)
+	Base.AddPositionStage(a1, "4D_BedMissionary_A1_S1", -60.0, silent=true, openMouth = true)
+	Base.AddPositionStage(a1, "4D_BedMissionary_A1_S2", -60.0)
+	Base.AddPositionStage(a1, "4D_BedMissionary_A1_S3", -60.0)
+	Base.AddPositionStage(a1, "4D_BedMissionary_A1_S4", -60.0)
+	Base.AddPositionStage(a1, "4D_BedMissionary_A1_S5", -60.0)
+	Base.AddPositionStage(a1, "4D_BedMissionary_A1_S6", -60.0)
 
 	int a2 = Base.AddPosition(Male)
-	Base.AddPositionStage(a2, "4D_BedMissionary_A2_S1", rotate = 180, sos = 5)
-	Base.AddPositionStage(a2, "4D_BedMissionary_A2_S2", rotate = 180, sos = 3)
-	Base.AddPositionStage(a2, "4D_BedMissionary_A2_S3", rotate = 180, sos = 3)
-	Base.AddPositionStage(a2, "4D_BedMissionary_A2_S4", rotate = 180, sos = 3)
-	Base.AddPositionStage(a2, "4D_BedMissionary_A2_S4", rotate = 180, sos = 3)
-	Base.AddPositionStage(a2, "4D_BedMissionary_A2_S4", rotate = 180, sos = 3)
+	Base.AddPositionStage(a2, "4D_BedMissionary_A2_S1", -60.0, rotate = 180, sos = 5)
+	Base.AddPositionStage(a2, "4D_BedMissionary_A2_S2", -60.0, rotate = 180, sos = 3)
+	Base.AddPositionStage(a2, "4D_BedMissionary_A2_S3", -60.0, rotate = 180, sos = 3)
+	Base.AddPositionStage(a2, "4D_BedMissionary_A2_S4", -60.0, rotate = 180, sos = 3)
+	Base.AddPositionStage(a2, "4D_BedMissionary_A2_S4", -60.0, rotate = 180, sos = 3)
+	Base.AddPositionStage(a2, "4D_BedMissionary_A2_S4", -60.0, rotate = 180, sos = 3)
+
+	Base.SetStageCumID(a1, 1, Oral)
 
 	Base.SetTags("4D,4uDIK,Sex,Straight,Penis,Oral,Vaginal,Laying,Lying,OnBack,Beds,Missionary,Creampie")
 
@@ -2536,20 +2538,20 @@ function fdCowgirl(int id)
 	Base.SoundFX = Squishing
 
 	int a1 = Base.AddPosition(Female, addCum=Vaginal)
-	Base.AddPositionStage(a1, "4D_Cowgirl_A1_S1", 0, silent=true, openMouth = true)
-	Base.AddPositionStage(a1, "4D_Cowgirl_A1_S2", 0)
-	Base.AddPositionStage(a1, "4D_Cowgirl_A1_S3", 0)
-	Base.AddPositionStage(a1, "4D_Cowgirl_A1_S4", 0)
-	Base.AddPositionStage(a1, "4D_Cowgirl_A1_S5", 0)
-	Base.AddPositionStage(a1, "4D_Cowgirl_A1_S6", 0)
+	Base.AddPositionStage(a1, "4D_Cowgirl_A1_S1", -180.0, silent=true, openMouth = true)
+	Base.AddPositionStage(a1, "4D_Cowgirl_A1_S2", -180.0)
+	Base.AddPositionStage(a1, "4D_Cowgirl_A1_S3", -180.0)
+	Base.AddPositionStage(a1, "4D_Cowgirl_A1_S4", -180.0)
+	Base.AddPositionStage(a1, "4D_Cowgirl_A1_S5", -180.0)
+	Base.AddPositionStage(a1, "4D_Cowgirl_A1_S6", -180.0)
 
 	int a2 = Base.AddPosition(Male)
-	Base.AddPositionStage(a2, "4D_Cowgirl_A2_S1", 0, rotate = 180, sos = 1)
-	Base.AddPositionStage(a2, "4D_Cowgirl_A2_S2", 0, rotate = 180, sos = 1)
-	Base.AddPositionStage(a2, "4D_Cowgirl_A2_S2", 0, rotate = 180, sos = 1)
-	Base.AddPositionStage(a2, "4D_Cowgirl_A2_S3", 0, rotate = 180, sos = 1)
-	Base.AddPositionStage(a2, "4D_Cowgirl_A2_S4", 0, rotate = 180, sos = 2)
-	Base.AddPositionStage(a2, "4D_Cowgirl_A2_S4", 0, rotate = 180, sos = 2)
+	Base.AddPositionStage(a2, "4D_Cowgirl_A2_S1", -180.0, rotate = 180, sos = 1)
+	Base.AddPositionStage(a2, "4D_Cowgirl_A2_S2", -180.0, rotate = 180, sos = 1)
+	Base.AddPositionStage(a2, "4D_Cowgirl_A2_S2", -180.0, rotate = 180, sos = 1)
+	Base.AddPositionStage(a2, "4D_Cowgirl_A2_S3", -180.0, rotate = 180, sos = 1)
+	Base.AddPositionStage(a2, "4D_Cowgirl_A2_S4", -180.0, rotate = 180, sos = 2)
+	Base.AddPositionStage(a2, "4D_Cowgirl_A2_S4", -180.0, rotate = 180, sos = 2)
 
 	Base.SetTags("4D,4uDIK,Sex,Straight,Penis,Oral,Vaginal,Laying,Beds,Cowgirl,Creampie")
 
@@ -2587,10 +2589,10 @@ function fdFMasturbation(int id)
 	Base.Name = "4uDIK Female Masturbation"
 
 	int a1 = Base.AddPosition(Female)
-	Base.AddPositionStage(a1, "4D_FemaleSolo_A1_S1", 0)
-	Base.AddPositionStage(a1, "4D_FemaleSolo_A1_S2", 0)
-	Base.AddPositionStage(a1, "4D_FemaleSolo_A1_S3", 0)
-	Base.AddPositionStage(a1, "4D_FemaleSolo_A1_S4", 0)
+	Base.AddPositionStage(a1, "4D_FemaleSolo_A1_S1", -55.0)
+	Base.AddPositionStage(a1, "4D_FemaleSolo_A1_S2", -55.0)
+	Base.AddPositionStage(a1, "4D_FemaleSolo_A1_S3", -55.0)
+	Base.AddPositionStage(a1, "4D_FemaleSolo_A1_S4", -55.0)
 
 	Base.SetTags("4D,4uDIK,Sex,Solo,Hands,Pussy,Masturbation,Beds,Laying,Lying,OnBack,Dirty")
 
@@ -2628,10 +2630,10 @@ function fdMMasturbation(int id)
 	Base.Name = "4uDIK Male Masturbation"
 
 	int a1 = Base.AddPosition(Male, addCum=Vaginal)
-	Base.AddPositionStage(a1, "4D_MaleSolo_A1_S1", 0, sos = 3)
-	Base.AddPositionStage(a1, "4D_MaleSolo_A1_S2", 0, sos = 3)
-	Base.AddPositionStage(a1, "4D_MaleSolo_A1_S3", 0, sos = 3)
-	Base.AddPositionStage(a1, "4D_MaleSolo_A1_S4", 0, sos = 3)
+	Base.AddPositionStage(a1, "4D_MaleSolo_A1_S1", -55.0, sos = 3)
+	Base.AddPositionStage(a1, "4D_MaleSolo_A1_S2", -55.0, sos = 3)
+	Base.AddPositionStage(a1, "4D_MaleSolo_A1_S3", -55.0, sos = 3)
+	Base.AddPositionStage(a1, "4D_MaleSolo_A1_S4", -55.0, sos = 3)
 
 	Base.SetTags("4D,4uDIK,Sex,Solo,Hands,Penis,Masturbation,Beds,Laying,Lying,OnBack,AirCum,Dirty")
 
@@ -2927,11 +2929,11 @@ function FBFMasturbation(int id)
 	Base.Name = "FB2 Female Masturbation"
 
 	int a1 = Base.AddPosition(Female)
-	Base.AddPositionStage(a1, "FB_FemaleSolo_A1_S1", 0)
-	Base.AddPositionStage(a1, "FB_FemaleSolo_A1_S2", 0)
-	Base.AddPositionStage(a1, "FB_FemaleSolo_A1_S3", 0)
-	Base.AddPositionStage(a1, "FB_FemaleSolo_A1_S4", 0)
-	Base.AddPositionStage(a1, "FB_FemaleSolo_A1_S5", 0)
+	Base.AddPositionStage(a1, "FB_FemaleSolo_A1_S1", -55.0)
+	Base.AddPositionStage(a1, "FB_FemaleSolo_A1_S2", -55.0)
+	Base.AddPositionStage(a1, "FB_FemaleSolo_A1_S3", -55.0)
+	Base.AddPositionStage(a1, "FB_FemaleSolo_A1_S4", -55.0)
+	Base.AddPositionStage(a1, "FB_FemaleSolo_A1_S5", -55.0)
 
 	Base.SetStageTimer(5, 7.0)
 
