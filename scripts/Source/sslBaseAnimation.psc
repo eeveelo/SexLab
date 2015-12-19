@@ -839,8 +839,8 @@ function Initialize()
 	RaceType  = ""
 	GenderedCreatures = false
 
-	Genders   = new int[4]
-	Positions = new int[5]
+	Genders      = new int[4]
+	Positions    = new int[5]
 	StageSoundFX = new Form[1]
 
 	; Only init if needed to keep between registry resets.
