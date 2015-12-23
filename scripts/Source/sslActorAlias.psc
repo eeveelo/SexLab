@@ -630,7 +630,7 @@ state Animating
 		if Config.OrgasmEffects
 			; Shake camera for player
 			if IsPlayer && Game.GetCameraState() >= 8
-				; Game.ShakeCamera(none, 1.00, 2.0)
+				Game.ShakeCamera(none, 1.00, 2.0)
 			endIf
 			; Play SFX/Voice
 			if !IsSilent
