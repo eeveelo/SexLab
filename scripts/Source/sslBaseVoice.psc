@@ -1,5 +1,7 @@
 scriptname sslBaseVoice extends sslBaseObject
 
+import MfgConsoleFunc
+
 Sound property Hot auto
 Sound property Mild auto
 Sound property Medium auto
@@ -36,13 +38,18 @@ function PlayMoan(Actor ActorRef, int Strength = 30, bool IsVictim = false, bool
 			SoundRef.Play(ActorRef)
 			Utility.WaitMenuMode(0.4)
 		else
-			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 20)
+			; int Saved = SetPhonemeModifier(ActorRef, 0, 1)
+			SetPhonemeModifier(ActorRef, 0, 1, 20)
 			Utility.WaitMenuMode(0.1)
 			SoundRef.Play(ActorRef)
 			TransitUp(ActorRef, 20, 50)
 			Utility.WaitMenuMode(0.2)
 			TransitDown(ActorRef, 50, 20)
-			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 0)
+			SetPhonemeModifier(ActorRef, 0, 1, 0)
+			; if Saved > 0
+			; 	Utility.WaitMenuMode(0.1)
+			; 	SetPhonemeModifier(ActorRef, 0, 1, Saved)
+			; endIf
 		endIf
 	endIf
 endFunction
@@ -79,13 +86,13 @@ endFunction
 function TransitUp(Actor ActorRef, int from, int to)
 	while from < to
 		from += 2
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from)
+		SetPhonemeModifier(ActorRef, 0, 1, from)
 	endWhile
 endFunction
 function TransitDown(Actor ActorRef, int from, int to)
 	while from > to
 		from -= 2
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from)
+		SetPhonemeModifier(ActorRef, 0, 1, from)
 	endWhile
 endFunction
 
