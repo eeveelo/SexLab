@@ -405,14 +405,9 @@ state Prepare
 	endEvent
 
 	function StartAnimating()
+		TrackedEvent("Start")
 		; Remove from bard audience if in one
 		Config.CheckBardAudience(ActorRef, true)
-		; TODO: Add a light source option here. (possibly with frostfall benefit?)
-		; If enabled, start Auto TFC for player
-		if IsPlayer && Config.AutoTFC
-			MiscUtil.SetFreeCameraState(true)
-			MiscUtil.SetFreeCameraSpeed(Config.AutoSUCSM)
-		endIf
 		; Prepare for loop
 		StopAnimating(true)
 		StartedAt  = Utility.GetCurrentRealTime()
@@ -422,8 +417,13 @@ state Prepare
 		PlayingSA = Animation.Registry
 		CurrentSA = Animation.Registry
 		Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
+		; TODO: Add a light source option here. (possibly with frostfall benefit?)
+		; If enabled, start Auto TFC for player
+		if IsPlayer && Config.AutoTFC
+			MiscUtil.SetFreeCameraState(true)
+			MiscUtil.SetFreeCameraSpeed(Config.AutoSUCSM)
+		endIf
 		; Start update loop
-		TrackedEvent("Start")
 		if Thread.GetState() == "Prepare"
 			Thread.SyncEventDone(kStartup)
 		else
