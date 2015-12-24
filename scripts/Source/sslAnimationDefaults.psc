@@ -5,6 +5,40 @@ function RegisterCategory(string Type)
 	Utility.WaitMenuMode(0.4)
 endFunction
 
+;/ 
+TODO: Possibly add a JSON loader method for pluginless animnation packs.
+
+example:
+{
+	"name": "Arrok Cowgirl",
+	"category": "Cowgirl",
+	"soundfx": "Squishing",
+	"tags" : ["Arrok","BBP","Sex","Penis","Vaginal","Cowgirl","Facing","Loving","Creampie"],
+	"positions": [
+		{
+			"gender": "female",
+			"stages": [
+				{ "event": "Arrok_Cowgirl_A1_S1", "cum": "VaginalAnal" },
+				{ "event": "Arrok_Cowgirl_A1_S2", "cum": "VaginalAnal" },
+				{ "event": "Arrok_Cowgirl_A1_S3", "cum": "VaginalAnal" },
+				{ "event": "Arrok_Cowgirl_A1_S4", "cum": "VaginalAnal" }
+			]
+		},
+		{
+			"gender": "male",
+			"stages": [
+				{ "event": "Arrok_Cowgirl_A2_S1", "offset": [-100, 0, 0, 0], "sos": -2 },
+				{ "event": "Arrok_Cowgirl_A2_S2", "offset": [-100, 0, 0, 0], "sos": -2 },
+				{ "event": "Arrok_Cowgirl_A2_S3", "offset": [-100, 0, 0, 0], "sos": -2 },
+				{ "event": "Arrok_Cowgirl_A2_S4", "offset": [-100, 0, 0, 0], "sos": -2 }
+			]
+		},
+	]
+}
+
+
+/;
+
 function LoadAnimations()
 	; Prepare factory resources (as non creature)
 	PrepareFactory()
