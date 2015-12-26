@@ -236,6 +236,7 @@ bool property HasNiOverride auto hidden
 bool property HasFrostfall auto hidden
 bool property HasSchlongs auto hidden
 
+FormList property FrostExceptions auto hidden
 MagicEffect HDTHeelEffect
 
 ; Data
@@ -690,33 +691,20 @@ function Reload()
 	RegisterForKey(ToggleFreeCamera)
 	RegisterForKey(TargetActor)
 
-	; Load json animation profile
-	ImportProfile(PapyrusUtil.ClampInt(AnimProfile, 1, 5))
-
 	; Mod compatability checks
+	; - HDT/NiO High Heels
 	HasNiOverride = SKSE.GetPluginVersion("NiOverride") >= 6 && NiOverride.GetScriptVersion() >= 6
-	HasSchlongs   = Game.GetModByName("Schlongs of Skyrim - Core.esm") != 255 || Game.GetModByName("SAM - Shape Atlas for Men.esp") != 255
-	HasFrostfall  = Game.GetModByName("Frostfall.esp") != 255 && Game.GetModByName("Campfire.esm") != 255; || Game.GetModByName("Chesko_Frostfall.esp") != 255
 	HasHDTHeels   = Game.GetModByName("hdtHighHeel.esm") != 255
 	if HasHDTHeels && !HDTHeelEffect
 		HDTHeelEffect = Game.GetFormFromFile(0x800, "hdtHighHeel.esm") as MagicEffect
 	endIf
-	; FIXME: Causes some minor bugs with frostfalls hand warming 1animation.
-	; if HasFrostfall
-	; 	_Frost_HeatSourceSystem Heat = FrostUtil.GetHeatSourceSystem()
-	; 	if Heat
-	; 		FormList OtherHeat = Heat._Camp_HeatSources_Other
-	; 		if OtherHeat && !OtherHeat.HasForm(BaseMarker) ; Game.GetFormFromFile(0x28F05, "Campfire.esm") as FormList
-	; 			OtherHeat.AddForm(BaseMarker)
-	; 			Log("Adding BaseMarker to _Camp_HeatSources_Other["+OtherHeat+"]")
-	; 		endIf
-	; 		FormList AllHeat = Heat._Camp_HeatSources_All
-	; 		if AllHeat && !AllHeat.HasForm(BaseMarker) ; Game.GetFormFromFile(0x28F06, "Campfire.esm") as FormList
-	; 			AllHeat.AddForm(BaseMarker)
-	; 			Log("Adding BaseMarker to _Camp_HeatSources_All["+AllHeat+"]")
-	; 		endIf
-	; 	endIf
-	; endIf
+	; - Frostfall exposure pausing
+	HasFrostfall = Game.GetModByName("Frostfall.esp") != 255; && Game.GetModByName("Campfire.esm") != 255; || Game.GetModByName("Chesko_Frostfall.esp") != 255
+	if HasFrostfall && !FrostExceptions
+		FrostExceptions = FrostUtil.GetExposureSystem()._Frost_ExposureExceptions
+	endIf
+	; - SOS/SAM Schlongs (currently unused)
+	HasSchlongs = Game.GetModByName("Schlongs of Skyrim - Core.esm") != 255 || Game.GetModByName("SAM - Shape Atlas for Men.esp") != 255
 
 	; Clean valid actors list
 	StorageUtil.FormListRemove(self, "ValidActors", PlayerRef, true)
@@ -740,6 +728,9 @@ function Reload()
 
 	; Remove any NPC thread control player has
 	DisableThreadControl(Control)
+
+	; Load json animation profile
+	ImportProfile(PapyrusUtil.ClampInt(AnimProfile, 1, 5))
 endFunction
 
 function Setup()

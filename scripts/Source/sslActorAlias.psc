@@ -270,6 +270,13 @@ state Ready
 		if Voice
 			LogInfo += "Voice["+Voice.Name+"] "
 		endIf
+		; Player specific actions
+		if IsPlayer
+			FormList FrostExceptions = Config.FrostExceptions
+			if FrostExceptions
+				FrostExceptions.AddForm(Config.BaseMarker)
+			endIf
+		endIf
 		; Extras for non creatures
 		if !IsCreature
 			; Decide on strapon for female, default to worn, otherwise pick random.
@@ -416,8 +423,8 @@ state Prepare
 		SyncAll(true)
 		PlayingSA = Animation.Registry
 		CurrentSA = Animation.Registry
-		Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
-		; TODO: Add a light source option here. (possibly with frostfall benefit?)
+		; Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
+		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 		; If enabled, start Auto TFC for player
 		if IsPlayer && Config.AutoTFC
 			MiscUtil.SetFreeCameraState(true)
@@ -860,6 +867,14 @@ function RestoreActorDefaults()
 		; Reset expression
 		ActorRef.ClearExpressionOverride()
 		MfgConsoleFunc.SetPhonemeModifier(ActorRef, -1, 0, 0)
+	endIf
+	; Player specific actions
+	if IsPlayer
+		; Remove player from frostfall exposure exception
+		FormList FrostExceptions = Config.FrostExceptions
+		if FrostExceptions
+			FrostExceptions.RemoveAddedForm(Config.BaseMarker)
+		endIf
 	endIf
 	; Clear from animating faction
 	ActorRef.SetFactionRank(AnimatingFaction, -1)
