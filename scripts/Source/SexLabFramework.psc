@@ -95,7 +95,7 @@ endFunction
 * Gets an actors "SexLab gender" which may differ from their vanilla ActorBase.GetSex() if their gender has been overridden.
 * 
 * @param  Actor ActorRef - The actor to get the SexLab gender for.
-* @return int - 0 for male, 1 for female, 3 for creature, 4 for female creature if creature genders are enabled and they are female - otherwise female creatures will default to 3 along with males.
+* @return int - 0 for male, 1 for female, 2 for creature, 3 for female creature if creature genders are enabled and they are female - otherwise female creatures will default to 2 along with males.
 **/;
 int function GetGender(Actor ActorRef)
 	return ActorLib.GetGender(ActorRef)
