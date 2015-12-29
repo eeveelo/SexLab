@@ -935,14 +935,39 @@ sslBaseAnimation function GetCreatureAnimationByRegistry(string Registry)
 endFunction
 
 ;/**
+* (DEPRECATED) Use HasCreatureRaceAnimation or HasCreatureRaceKeyAnimation
 * Checks if a given creature race has any usable animations currently registered.
 * 
 * @param  Race CreatureRace - The race of the creature you want to check for valid creature animations to use.
 * @param  int Gender - Any optional parameter to have it check if a specific creature gender has an animation. -1 (default) to ignore, 2 for Male, 3 for Female.
-* @return bool - 
+* @return bool - TRUE if the given CreatureRace has any valid and enabled animations.
 **/;
 bool function HasCreatureAnimation(Race CreatureRace, int Gender = -1)
-	return CreatureSlots.HasAnimation(CreatureRace, Gender)
+	return CreatureSlots.RaceHasAnimation(CreatureRace, -1, Gender)
+endFunction
+
+;/**
+* Checks if a given creature race has any usable animations currently registered for any valid race key's it is registered under.
+* 
+* @param  Race CreatureRace - The race of the creature you want to check for valid creature animations to use.
+* @param  int ActorCount - Any optional parameter to have it check for a specific number of actor positions in the potential animations. -1 (default) to ignore number of positions.
+* @param  int Gender - Any optional parameter to have it check if a specific creature gender has an animation. -1 (default) to ignore, 2 for Male, 3 for Female.
+* @return bool - TRUE if the given CreatureRace has any valid and enabled animations for ActorCount positions.
+**/;
+bool function HasCreatureRaceAnimation(Race CreatureRace, int ActorCount = -1, int Gender = -1)
+	return CreatureSlots.RaceHasAnimation(CreatureRace, ActorCount, Gender)
+endFunction
+
+;/**
+* Checks if a specific race key has any usable animations currently registered.
+* 
+* @param  string RaceKey - The creature race sexlab identifier used to identify animations meant for this race.
+* @param  int ActorCount - Any optional parameter to have it check for a specific number of actor positions in the potential animations. -1 (default) to ignore number of positions.
+* @param  int Gender - Any optional parameter to have it check if a specific creature gender has an animation. -1 (default) to ignore, 2 for Male, 3 for Female.
+* @return bool - TRUE if the given CreatureRace has any valid and enabled animations for ActorCount positions.
+**/;
+bool function HasCreatureRaceKeyAnimation(string RaceKey, int ActorCount = -1, int Gender = -1)
+	return CreatureSlots.RaceKeyHasAnimation(RaceKey, ActorCount, Gender)
 endFunction
 
 ;/**

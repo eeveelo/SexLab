@@ -133,7 +133,7 @@ sslBaseAnimation[] function FilterCreatureGenders(sslBaseAnimation[] Anims, int 
 	return Output
 endFunction
 
-bool function HasAnimation(Race RaceRef, int Gender = -1)
+bool function RaceHasAnimation(Race RaceRef, int ActorCount = -1, int Gender = -1)
 	string[] RaceTypes = GetAllRaceKeys(RaceRef)
 	if RaceTypes
 		bool UseGender = Gender != -1 && Config.UseCreatureGender
@@ -141,7 +141,22 @@ bool function HasAnimation(Race RaceRef, int Gender = -1)
 		while i
 			i -= 1
 			sslBaseAnimation Slot = GetBySlot(i)
-			if Slot && Slot.Enabled && RaceTypes.Find(Slot.RaceType) != -1 && ((!UseGender || !Slot.GenderedCreatures) || Slot.Genders[Gender] > 0)
+			if Slot && Slot.Enabled && RaceTypes.Find(Slot.RaceType) != -1 && (ActorCount == -1 || ActorCount == Slot.PositionCount) && ((!UseGender || !Slot.GenderedCreatures) || Slot.Genders[Gender] > 0)
+				return true
+			endIf
+		endWhile
+	endIf
+	return false
+endFunction
+
+bool function RaceKeyHasAnimation(string RaceKey, int ActorCount = -1, int Gender = -1)
+	if HasRaceKey(RaceKey)
+		bool UseGender = Gender != -1 && Config.UseCreatureGender
+		int i = Slotted
+		while i
+			i -= 1
+			sslBaseAnimation Slot = GetBySlot(i)
+			if Slot && Slot.Enabled && RaceKey == Slot.RaceType && (ActorCount == -1 || ActorCount == Slot.PositionCount) && ((!UseGender || !Slot.GenderedCreatures) || Slot.Genders[Gender] > 0)
 				return true
 			endIf
 		endWhile
@@ -163,6 +178,11 @@ endFunction
 
 bool function AllowedCreatureCombination(Race RaceRef1, Race RaceRef2)
 	return Config.AllowCreatures && sslCreatureAnimationSlots.GetRaceKey(RaceRef1) == sslCreatureAnimationSlots.GetRaceKey(RaceRef2)
+endFunction
+
+; Deprecated
+bool function HasAnimation(Race RaceRef, int Gender = -1)
+	return RaceHasAnimation(RaceRef, -1, Gender)
 endFunction
 
 ; ------------------------------------------------------- ;
