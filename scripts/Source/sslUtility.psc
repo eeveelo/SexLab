@@ -200,6 +200,22 @@ string[] function GetAnimationNames(sslBaseAnimation[] List) global
 	return Names
 endFunction
 
+string[] function GetAllAnimationTagsInArray(sslBaseAnimation[] List) global
+	string[] Output
+	if !List
+		return Output
+	endIf
+	int i = List.Length
+	while i
+		i -= 1
+		if List[i]
+			Output = PapyrusUtil.MergeStringArray(Output, List[i].GetRawTags(), true)
+		endIf
+	endwhile
+	PapyrusUtil.SortStringArray(Output)
+	return PapyrusUtil.RemoveString(Output, "")
+endFunction
+
 ;/-----------------------------------------------\;
 ;|	Utility Functions
 ;\-----------------------------------------------/;

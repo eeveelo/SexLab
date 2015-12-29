@@ -804,6 +804,29 @@ int function CountTag(sslBaseAnimation[] Anims, string Tags)
 	return AnimSlots.CountTag(Anims, Tags)
 endFunction
 
+;/**
+* Get a list of all unique tags contained in a set of registerd animations.
+* see also: GetAllCreatureAnimationTags, GetAllBothAnimationTags, GetAllAnimationTagsInArray
+* 
+* @param  int ActorCount - The number of actors the animations checked should be intended for. -1 to check all animations regardless of the number of positions.
+* @param  bool IgnoreDisabled - Whether to ignore tags from animations that have been disabled by the user or not. Default value of TRUE will ignore disabled animations.
+* @return string[] - An alphabetically sorted string array of all unique tags found in the matching animations. 
+**/;
+string[] function GetAllAnimationTags(int ActorCount = -1, bool IgnoreDisabled = true)
+	return AnimSlots.GetAllTags(ActorCount, IgnoreDisabled)
+endFunction
+
+
+;/**
+* Get a list of all unique tags contained in an arbitrary list of provided animations. alias to sslUtility.
+* see also: GetAllAnimationTags, GetAllCreatureAnimationTags, GetAllBothAnimationTags
+* 
+* @param  sslBaseAnimation[] - The array of animation objects you want a list of tags for.
+* @return string[] - An alphabetically sorted string array of all unique tags found in the provided animations. 
+**/;
+string[] function GetAllAnimationTagsInArray(sslBaseAnimation[] List)
+	return sslUtility.GetAllAnimationTagsInArray(List)
+endFunction
 
 ;#---------------------------#
 ;#  END ANIMATION FUNCTIONS  #
@@ -942,6 +965,33 @@ endFunction
 bool function AllowedCreatureCombination(Race CreatureRace, Race CreatureRace2)
 	return CreatureSlots.AllowedCreatureCombination(CreatureRace, CreatureRace2)
 endFunction
+
+;/**
+* Get a list of all unique tags contained in a set of registered creature animations.
+* see also: GetAllAnimationTags, GetAllBothAnimationTags, GetAllAnimationTagsInArray
+* 
+* @param  int ActorCount - The number of actors the animations checked should be intended for. -1 to check all animations regardless of the number of positions.
+* @param  bool IgnoreDisabled - Whether to ignore tags from animations that have been disabled by the user or not. Default value of TRUE will ignore disabled animations.
+* @return string[] - An alphabetically sorted string array of all unique tags found in the matching animations. 
+**/;
+string[] function GetAllCreatureAnimationTags(int ActorCount = -1, bool IgnoreDisabled = true)
+	return CreatureSlots.GetAllTags(ActorCount, IgnoreDisabled)
+endFunction
+
+;/**
+* Combines the results of both GetAllAnimationTags() and GetAllCreatureAnimationTags(). 
+* see also: GetAllAnimationTags, GetAllCreatureAnimationTags, GetAllAnimationTagsInArray
+* 
+* @param  int ActorCount - The number of actors the animations checked should be intended for. -1 to check all animations regardless of the number of positions.
+* @param  bool IgnoreDisabled - Whether to ignore tags from animations that have been disabled by the user or not. Default value of TRUE will ignore disabled animations.
+* @return string[] - An alphabetically sorted string array of all unique tags found in the matching animations. 
+**/;
+string[] function GetAllBothAnimationTags(int ActorCount = -1, bool IgnoreDisabled = true)
+	string[] Output = PapyrusUtil.MergeStringArray(AnimSlots.GetAllTags(ActorCount, IgnoreDisabled), CreatureSlots.GetAllTags(ActorCount, IgnoreDisabled))
+	PapyrusUtil.SortStringArray(Output)
+	return Output
+endFunction
+
 
 ;#---------------------------#
 ;#  END CREATURES FUNCTIONS  #

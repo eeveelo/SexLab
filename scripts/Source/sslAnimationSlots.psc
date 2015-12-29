@@ -249,6 +249,23 @@ int function GetCount(bool IgnoreDisabled = true)
 	return Count
 endFunction
 
+string[] function GetAllTags(int ActorCount = -1, bool IgnoreDisabled = true)
+	IgnoreDisabled = !IgnoreDisabled
+	string[] Output
+	int i = Slotted
+	while i
+		i -= 1
+		if Objects[i]
+			sslBaseAnimation Anim = Objects[i] as sslBaseAnimation
+			if Anim && (IgnoreDisabled || Anim.Enabled) && (ActorCount == -1 || Anim.PositionCount == ActorCount)
+				Output = PapyrusUtil.MergeStringArray(Output, Anim.GetRawTags(), true)
+			endif
+		endIf
+	endwhile
+	PapyrusUtil.SortStringArray(Output)
+	return PapyrusUtil.RemoveString(Output, "")
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Object MCM Pagination                               ;
 ; ------------------------------------------------------- ;

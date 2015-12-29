@@ -23,7 +23,119 @@ endFunction
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
-	sslBaseAnimation[] Anims = SexLab.AnimSlots.GetByTags(2, "Cowgirl")
+
+	; float time = Utility.GetCurrentRealTime()
+	; Log("AllTags: "+SexLab.GetAllAnimationTags())
+	; Log("Time: "+(Utility.GetCurrentRealTime() - time))
+	; time = Utility.GetCurrentRealTime()
+	; Log("AllTags2: "+SexLab.GetAllAnimationTags2())
+	; Log("Time2: "+(Utility.GetCurrentRealTime() - time))
+
+
+	; (Game.GetFormFromFile(0x639DF, "SexLab.esm") as sslAnimationDefaults).RegisterAutoLoads()
+
+	;/ Log("\n--- Basic string test ---")
+	Log(".test = "+JsonUtil.GetPathStringValue("ResolveTest", ".test", "empty"))
+	Log("nested.name2 = "+JsonUtil.GetPathStringValue("ResolveTest", "nested.name2", "empty"))
+	Log(".form.sexlab set = "+JsonUtil.GetPathStringValue("ResolveTest", ".form.sexlab set", "empty"))
+	Log(".nested.arr[1] = "+JsonUtil.GetPathStringValue("ResolveTest", ".nested.arr[1]", "empty"))
+
+	Log("\n--- Basic float test ---")
+	Log(".floater TRUE = "+JsonUtil.IsPathNumber("ResolveTest", ".floater"))
+	Log(".whole = "+JsonUtil.GetPathFloatValue("ResolveTest", ".whole", -1.1))
+	Log(".floater = "+JsonUtil.GetPathFloatValue("ResolveTest", ".floater", -1.1))
+	Log(".nested.nested2.name3 = "+JsonUtil.GetPathFloatValue("ResolveTest", ".nested.nested2.name3", -1.1))
+
+	Log("\n--- Basic int test ---")
+	Log(".number TRUE = "+JsonUtil.IsPathNumber("ResolveTest", ".number"))
+	Log(".number = "+JsonUtil.GetPathIntValue("ResolveTest", ".number", -1))
+	Log(".nested.arr[2] = "+JsonUtil.GetPathIntValue("ResolveTest", ".nested.arr[2]", -1))
+
+	Log("\n--- Basic form test ---")
+	Log(".number = "+JsonUtil.GetPathFormValue("ResolveTest", ".sexlab", CasterRef))
+	Log(".number = "+JsonUtil.GetPathFormValue("ResolveTest", ".form.sexlab 1", CasterRef))
+	
+	Log("\n--- Basic cast test ---")
+	Log("maybe = "+JsonUtil.GetPathStringValue("ResolveTest", "maybe", "empty"))
+	Log(".ornot = "+JsonUtil.GetPathStringValue("ResolveTest", ".ornot", "empty"))
+	Log(".number = "+JsonUtil.GetPathStringValue("ResolveTest", ".number", "empty"))
+	Log(".whole = "+JsonUtil.GetPathStringValue("ResolveTest", ".whole", "empty"))
+	Log(".sexlab = "+JsonUtil.GetPathStringValue("ResolveTest", ".sexlab", "empty"))
+	Log(".maybe = "+JsonUtil.GetPathIntValue("ResolveTest", ".maybe", -1))
+	Log(".ornot = "+JsonUtil.GetPathIntValue("ResolveTest", ".ornot", -1))
+	Log(".maybe = "+JsonUtil.GetPathFloatValue("ResolveTest", ".maybe", -1.1))
+	Log(".ornot = "+JsonUtil.GetPathFloatValue("ResolveTest", ".ornot", -1.1))
+	Log(".number = "+JsonUtil.GetPathFloatValue("ResolveTest", ".number", -1.1))
+	Log(".number = "+JsonUtil.GetPathFloatValue("ResolveTest", ".number", -1.1))
+	Log(".test = "+JsonUtil.GetPathIntValue("ResolveTest", ".test", -1))
+	Log(".test = "+JsonUtil.GetPathFormValue("ResolveTest", ".test", CasterRef))
+	Log(".number = "+JsonUtil.GetPathFormValue("ResolveTest", ".number", CasterRef))
+	Log(".maybe = "+JsonUtil.GetPathFormValue("ResolveTest", ".maybe", CasterRef))
+	Log(".nested = "+JsonUtil.GetPathIntValue("ResolveTest", ".nested", -1))
+	Log(".nested = "+JsonUtil.GetPathStringValue("ResolveTest", ".nested", "empty"))
+	Log(".nested.arr = "+JsonUtil.GetPathIntValue("ResolveTest", ".nested.arr", -1))
+	Log(".nested.arr = "+JsonUtil.GetPathStringValue("ResolveTest", ".nested.arr", "empty"))
+
+	Log("\n--- Array/Object Test ---")
+	Log(".nested TRUE = "+JsonUtil.CanResolvePath("ResolveTest", ".nested"))
+	Log(".nested TRUE  = "+JsonUtil.IsPathObject("ResolveTest", ".nested"))
+	Log(".nested FALSE = "+JsonUtil.IsPathArray("ResolveTest", ".nested"))
+	Log(".nested.arr FALSE = "+JsonUtil.IsPathObject("ResolveTest", ".nested.arr"))
+	Log(".nested.arr TRUE = "+JsonUtil.IsPathArray("ResolveTest", ".nested.arr"))
+	Log(".nested FALSE = "+JsonUtil.IsPathString("ResolveTest", ".nested"))
+	Log(".nested.arr FALSE = "+JsonUtil.IsPathNumber("ResolveTest", ".nested.arr"))
+	Log(". TRUE = "+JsonUtil.CanResolvePath("ResolveTest", "."))
+	Log(". TRUE  = "+JsonUtil.IsPathObject("ResolveTest", "."))
+	Log(". FALSE = "+JsonUtil.IsPathArray("ResolveTest", "."))
+
+
+	Log(". = "+JsonUtil.PathCount("ResolveTest", "."))
+	Log(".nested = "+JsonUtil.PathCount("ResolveTest", ".nested"))
+	Log(". = "+JsonUtil.PathMembers("ResolveTest", "."))
+	Log(".nested = "+JsonUtil.PathMembers("ResolveTest", ".nested"))
+
+	Log(".nested.arr = "+JsonUtil.PathCount("ResolveTest", ".nested.arr"))
+	Log(".nested.arr = "+JsonUtil.PathStringElements("ResolveTest", ".nested.arr", "invalid"))
+	Log(".nested.arr = "+JsonUtil.PathIntElements("ResolveTest", ".nested.arr", -10))
+	Log(".nested.arr = "+JsonUtil.PathFloatElements("ResolveTest", ".nested.arr", -42.42)) /;
+
+	; Log(".NESTED.name2 = "+JsonUtil.GetPathStringValue("ResolveTest", ".NESTED.name2", "empty"))
+	; Log(".nested.nested2.name3 = "+JsonUtil.GetPathFloatValue("ResolveTest", ".nested.nested2.name3", -1.0))
+	; Log(".nested.arr[0] = "+JsonUtil.GetPathStringValue("ResolveTest", ".nested.arr[0]", "empty"))
+	; Log(".nested.arr[2] = "+JsonUtil.GetPathIntValue("ResolveTest", ".nested.arr[2]", -1))
+	; Log("nested.arr[2] = "+JsonUtil.GetPathFloatValue("ResolveTest", "nested.arr[2]", -1.0))
+
+	; Log(".number = "+JsonUtil.GetPathIntValue("ResolveTest", ".number", -1))
+	; Log(".number = "+JsonUtil.GetPathStringValue("ResolveTest", ".number", "empty"))
+	; Log(".test = "+JsonUtil.GetPathIntValue("ResolveTest", ".test", -1))
+
+	; Log("\n--- Set tests ---")
+
+	; JsonUtil.SetPathStringValue("ResolveTest", ".nested.setting.blah", "oppai")
+	; Log(".nested.setting.blah oppai = "+JsonUtil.GetPathStringValue("ResolveTest", ".nested.setting.blah", "empty"))
+	; JsonUtil.Save("ResolveTest")
+
+	; JsonUtil.SetPathStringValue("ResolveTest", ".nested.setting.arr2[0]", "var1")
+	; Log(".nested.setting.arr2[0] var1 = "+JsonUtil.GetPathStringValue("ResolveTest", ".nested.setting.arr2[0]", "empty"))
+	; JsonUtil.Save("ResolveTest")
+
+	;/ JsonUtil.SetPathStringValue("ResolveTest", ".nested.setting.arr2[4]", "var4")
+	Log(".nested.setting.arr2[4] var4 = "+JsonUtil.GetPathStringValue("ResolveTest", ".nested.setting.arr2[4]", "empty"))
+	JsonUtil.Save("ResolveTest")
+
+	JsonUtil.SetPathStringValue("ResolveTest", ".nested.testarr[4]", "var1")
+	Log(".nested.testarr[4] var1 = "+JsonUtil.GetPathStringValue("ResolveTest", ".nested.testarr[4]", "empty"))
+	JsonUtil.Save("ResolveTest")
+ /;
+
+	;/ Log("\n--- Form types ---")
+	JsonUtil.SetFormValue("ResolveTest", "SexLab set", SexLab)
+	Log("SexLab 1 = "+JsonUtil.GetFormValue("ResolveTest", "SexLab 1"))
+	; Log("SexLab 2 = "+JsonUtil.GetFormValue("ResolveTest", "SexLab 2"))
+	JsonUtil.Save("ResolveTest") /;
+
+
+	;/ sslBaseAnimation[] Anims = SexLab.AnimSlots.GetByTags(2, "Cowgirl")
 	string[] Names = sslUtility.GetAnimationNames(Anims)
 	Log(Anims)
 	Log("Unshuffled("+Anims.Length+"): "+Names)
@@ -53,7 +165,7 @@ event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	string[] Names4 = sslUtility.GetAnimationNames(Anims4)
 	Log("Names4: "+Names4)
 	Log("shuffled NONE: "+Anims4.Find(none))
-	Log("original NONE: "+Anims.Find(none))
+	Log("original NONE: "+Anims.Find(none)) /;
 
 	;/ bool Vaginal = Utility.RandomInt(0, 2) == 2
 	bool Oral = Utility.RandomInt(0, 2) == 2
