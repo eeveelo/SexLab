@@ -100,3 +100,38 @@ endFunction
 function Initialize()
 	PrepareFactory()
 endfunction
+
+;/function RegisterAutoLoads(bool RegisterCreatures = false)
+	
+	; string[] TMP = JsonUtil.JsonInFolder("../SexLab/Creatures")
+	; Log("TEMP CHECK: "+TMP) 
+	; string[] TMP2 = JsonUtil.JsonInFolder("../SexLab/Creatures/Missing")
+	; Log("TEMP CHECK 2: "+TMP2) 
+	; string[] TMP3 = JsonUtil.JsonInFolder("../SexLab")
+	; Log("TEMP CHECK 3: "+TMP3) 
+
+	string[] Files = JsonUtil.JsonInFolder("../SexLab/Animations")
+	if !Files || Files.Length < 1
+		return
+	endIf
+	int i = Files.Length
+	Log("JSON Animation Files("+i+"): "+Files)
+	while i
+		i -= 1
+		string File = "../SexLab/Animations/"+Files[i]
+		string Registrar = StringUtil.Substring(Files[i], 0, (StringUtil.GetLength(Files[i]) - 5))
+		Log("Checking: "+Registrar+" / "+File)
+
+
+
+	endWhile
+
+endFunction
+
+
+function Log(string Log, string Type = "NOTICE")
+	Log = Type+": "+Log
+	SexLabUtil.PrintConsole(Log)
+	Debug.TraceUser("SexLabDebug", Log)
+	Debug.Trace("SEXLAB - "+Log)
+endFunction/;
