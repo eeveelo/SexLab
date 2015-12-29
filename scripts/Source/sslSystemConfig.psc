@@ -614,10 +614,10 @@ bool function CheckSystemPart(string CheckSystem)
 		return Quest.GetQuest("SKI_ConfigManagerInstance") != none
 
 	elseIf CheckSystem == "SexLabUtil"
-		return SexLabUtil.GetPluginVersion() >= 16000
+		return SexLabUtil.GetPluginVersion() >= 16100
 
 	elseIf CheckSystem == "PapyrusUtil"
-		return PapyrusUtil.GetVersion() >= 30
+		return PapyrusUtil.GetVersion() >= 32
 
 	elseIf CheckSystem == "FNIS"
 		return FNIS.VersionCompare(5, 4, 2) >= 0
@@ -657,7 +657,7 @@ bool function CheckSystem()
 		return false
 	; Check PapyrusUtil install - depends on passing SKSE check passing
 	elseIf !CheckSystemPart("PapyrusUtil")
-		CheckPapyrusUtil.Show(3.0)
+		CheckPapyrusUtil.Show(3.2)
 		return false
 	; Check FNIS generation - soft fail
 	; elseIf CheckSystemPart("FNISSexLabFramework")
