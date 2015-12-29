@@ -32,10 +32,40 @@ scriptname JsonUtil Hidden
 
 bool function Load(string FileName) global native
 bool function Save(string FileName, bool minify = false) global native
-function ClearAll(string FileName) global native
 
+bool function UnloadFile(string FileName, bool saveChanges = true, bool minify = false) global native
+bool function IsPendingSave(string FileName) global native
 
 string[] function JsonInFolder(string folderPath) global native
+
+function SetPathIntValue(string FileName, string Path, int value) global native
+function SetPathFloatValue(string FileName, string Path, float value) global native
+function SetPathStringValue(string FileName, string Path, string value) global native
+function SetPathFormValue(string FileName, string Path, form value) global native
+
+int function GetPathIntValue(string FileName, string Path, int missing = 0) global native
+float function GetPathFloatValue(string FileName, string Path, float missing = 0.0) global native
+string function GetPathStringValue(string FileName, string Path, string missing = "") global native
+form function GetPathFormValue(string FileName, string Path, form missing = none) global native
+bool function GetPathBoolValue(string FileName, string Path, bool missing = false) global
+	return GetPathIntValue(FileName, Path, (missing as int)) != 0
+endFunction
+
+int[] function PathIntElements(string FileName, string Path, int invalidType = 0) global native
+float[] function PathFloatElements(string FileName, string Path, float invalidType = 0.0) global native
+string[] function PathStringElements(string FileName, string Path, string invalidType = "") global native
+form[] function PathFormElements(string FileName, string Path, form invalidType = none) global native
+
+int function PathCount(string FileName, string Path) global native
+string[] function PathMembers(string FileName, string Path) global native
+
+bool function CanResolvePath(string FileName, string Path) global native
+bool function IsPathString(string FileName, string Path) global native
+bool function IsPathNumber(string FileName, string Path) global native
+bool function IsPathForm(string FileName, string Path) global native
+bool function IsPathBool(string FileName, string Path) global native
+bool function IsPathArray(string FileName, string Path) global native
+bool function IsPathObject(string FileName, string Path) global native
 
 ; See StorageUtil.psc for equivalent function usage instructions
 
@@ -150,3 +180,7 @@ int function CountStringListPrefix(string FileName, string PrefixKey) global nat
 int function CountFormListPrefix(string FileName, string PrefixKey) global native
 
 int function CountAllPrefix(string FileName, string PrefixKey) global native
+
+
+; Debug use
+function ClearAll(string FileName) global native

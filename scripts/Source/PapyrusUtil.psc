@@ -66,6 +66,11 @@ Alias[] function SliceAliasArray(Alias[] ArrayValues, int StartIndex, int EndInd
 Actor[] function SliceActorArray(Actor[] ArrayValues, int StartIndex, int EndIndex = -1) global native
 ObjectReference[] function SliceObjRefArray(ObjectReference[] ArrayValues, int StartIndex, int EndIndex = -1) global native
 
+
+function SortIntArray(int[] ArrayValues, bool descending = false) global native
+function SortFloatArray(float[] ArrayValues, bool descending = false) global native
+function SortStringArray(string[] ArrayValues, bool descending = false) global native
+
 ; ##
 ; ## Shortcuts for common usage
 ; ##
