@@ -28,8 +28,10 @@ sslBaseAnimation[] function GetByTags(int ActorCount, string Tags, string TagsSu
 	int i = Slotted
 	while i
 		i -= 1
-		sslBaseAnimation Slot = Objects[i] as sslBaseAnimation
-		Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount && Slot.TagSearch(Search, Suppress, RequireAll)
+		if Objects[i]
+			sslBaseAnimation Slot = Objects[i] as sslBaseAnimation
+			Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount && Slot.TagSearch(Search, Suppress, RequireAll)
+		endIF
 	endWhile
 	return GetList(valid)
 endFunction
@@ -42,9 +44,11 @@ sslBaseAnimation[] function GetByType(int ActorCount, int Males = -1, int Female
 	int i = Slotted
 	while i
 		i -= 1
-		sslBaseAnimation Slot = Objects[i] as sslBaseAnimation
-		Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount && (!RestrictAggressive || Aggressive == Slot.HasTag("Aggressive")) \
-		&& (Males == -1 || Males == Slot.Males) && (Females == -1 || Females == Slot.Females) && (StageCount == -1 || StageCount == Slot.StageCount)
+		if Objects[i]
+			sslBaseAnimation Slot = Objects[i] as sslBaseAnimation
+			Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount && (!RestrictAggressive || Aggressive == Slot.HasTag("Aggressive")) \
+			&& (Males == -1 || Males == Slot.Males) && (Females == -1 || Females == Slot.Females) && (StageCount == -1 || StageCount == Slot.StageCount)
+		endIf
 	endWhile
 	return GetList(Valid)
 endFunction
@@ -88,22 +92,24 @@ sslBaseAnimation[] function GetByDefault(int Males, int Females, bool IsAggressi
 	int i = Slotted
 	while i
 		i -= 1
-		sslBaseAnimation Slot = Objects[i] as sslBaseAnimation
-		; Check for appropiate enabled aniamtion
-		Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount
-		if Valid[i]
-			string[] Tags = Slot.GetRawTags()
-			int[] Genders = Slot.Genders
-			; Suppress standing animations if on a bed
-			Valid[i] = Valid[i] && ((!UsingBed && Tags.Find("BedOnly") == -1) || (UsingBed && Tags.Find("Furniture") == -1 && (!BedRemoveStanding || Tags.Find("Standing") == -1)))
-			; Suppress or ignore aggressive animation tags
-			Valid[i] = Valid[i] && (!RestrictAggressive || IsAggressive == (Tags.Find("Aggressive") != -1))
-			; Get SameSex + Non-SameSex
-			if SameSex
-				Valid[i] = Valid[i] && (Tags.Find("FM") != -1 || (Males == Genders[0] && Females == Genders[1]))
-			; Ignore genders for 3P+
-			elseIf ActorCount < 3
-				Valid[i] = Valid[i] && Males == Genders[0] && Females == Genders[1]
+		if Objects[i]
+			sslBaseAnimation Slot = Objects[i] as sslBaseAnimation
+			; Check for appropiate enabled aniamtion
+			Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount
+			if Valid[i]
+				string[] Tags = Slot.GetRawTags()
+				int[] Genders = Slot.Genders
+				; Suppress standing animations if on a bed
+				Valid[i] = Valid[i] && ((!UsingBed && Tags.Find("BedOnly") == -1) || (UsingBed && Tags.Find("Furniture") == -1 && (!BedRemoveStanding || Tags.Find("Standing") == -1)))
+				; Suppress or ignore aggressive animation tags
+				Valid[i] = Valid[i] && (!RestrictAggressive || IsAggressive == (Tags.Find("Aggressive") != -1))
+				; Get SameSex + Non-SameSex
+				if SameSex
+					Valid[i] = Valid[i] && (Tags.Find("FM") != -1 || (Males == Genders[0] && Females == Genders[1]))
+				; Ignore genders for 3P+
+				elseIf ActorCount < 3
+					Valid[i] = Valid[i] && Males == Genders[0] && Females == Genders[1]
+				endIf
 			endIf
 		endIf
 	endWhile
@@ -115,7 +121,7 @@ endFunction
 ; ------------------------------------------------------- ;
 
 sslBaseAnimation function GetBySlot(int index)
-	if index >= 0 && index < Slotted
+	if index >= 0 && index < Slotted && Objects[index]
 		return Objects[index] as sslBaseAnimation
 	endIf
 	return none
