@@ -1,8 +1,8 @@
-Version V1.60
+Version V1.61
 
-AnimVar SexLabFramework INT32 16000
+AnimVar SexLabFramework INT32 16100
 
-b SexLab_Test_16000 AggrMissionary_A1_S3.hkx
+b SexLab_Test_16100 AggrMissionary_A1_S3.hkx
 
 s SexLabSequenceExit1 AP_Standing_A2_S1.hkx
 + SexLabSequenceExit2 AP_Standing_A2_S1.hkx

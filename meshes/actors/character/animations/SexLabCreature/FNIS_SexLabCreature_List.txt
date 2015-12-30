@@ -1,8 +1,8 @@
-Version V1.60
+Version V1.61
 
-AnimVar SexLabCreature INT32 16000
+AnimVar SexLabCreature INT32 16100
 
-b SexLab_CreatureTest_15800 Falmer_Missionary_A1_S3.hkx
+b SexLab_CreatureTest_16100 Falmer_Missionary_A1_S3.hkx
 
 s Bear_Doggystyle_A1_S1 Bear_Doggystyle_A1_S1.hkx
 + Bear_Doggystyle_A1_S2 Bear_Doggystyle_A1_S2.hkx
