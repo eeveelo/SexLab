@@ -701,7 +701,7 @@ function Reload()
 	; - Frostfall exposure pausing
 	HasFrostfall = Game.GetModByName("Frostfall.esp") != 255; && Game.GetModByName("Campfire.esm") != 255; || Game.GetModByName("Chesko_Frostfall.esp") != 255
 	if HasFrostfall && !FrostExceptions
-		FrostExceptions = FrostUtil.GetExposureSystem()._Frost_ExposureExceptions
+		FrostExceptions = Game.GetFormFromFile(0x6E7E6, "Frostfall.esp") as FormList
 	endIf
 	; - SOS/SAM Schlongs (currently unused)
 	HasSchlongs = Game.GetModByName("Schlongs of Skyrim - Core.esm") != 255 || Game.GetModByName("SAM - Shape Atlas for Men.esp") != 255
