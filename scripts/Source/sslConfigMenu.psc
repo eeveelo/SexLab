@@ -371,6 +371,14 @@ endEvent
 
 event OnConfigClose()
 	ModEvent.Send(ModEvent.Create("SexLabConfigClose"))
+	; Realign actors if an adjustment in editor was just made
+	if AutoRealign
+		AutoRealign = false
+		sslThreadController Thread = ThreadSlots.GetActorController(PlayerRef)
+		if Thread
+			Thread.RealignActors()
+		endIf
+	endIf
 endEvent
 
 ; ------------------------------------------------------- ;
@@ -494,6 +502,7 @@ event OnSliderAcceptST(float value)
 		else
 			SetSliderOptionValueST(value, "{2}")
 		endIf
+		AutoRealign = PlayerRef.IsInFaction(Config.AnimatingFaction) && ThreadSlots.FindActorController(PlayerRef) != -1
 
 	; Expression Editor
 	elseIf Options[0] == "Expression"
@@ -1185,6 +1194,7 @@ sslBaseAnimation Animation
 sslAnimationSlots AnimationSlots
 bool PreventOverwrite
 bool IsCreatureEditor
+bool AutoRealign
 string AdjustKey
 int Position
 int AnimEditPage
