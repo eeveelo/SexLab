@@ -72,15 +72,15 @@ event SetDebugMode(bool ToMode)
 	; Debug.Trace("SEXLABTEST: "+self+ "SET DEBUG MODE ["+ToMode+"]")
 endEvent
 
-function Log(string Log, string Type = "NOTICE")
-	Log = Type+": "+Log
+function Log(string msg, string Type = "NOTICE")
+	msg = Type+": "+msg
 	if InDebugMode
-		SexLabUtil.PrintConsole(Log)
-		Debug.TraceUser("SexLabDebug", Log)
+		SexLabUtil.PrintConsole(msg)
+		Debug.TraceUser("SexLabDebug", msg)
 	endIf
 	if Type == "FATAL"
-		Debug.TraceStack("SEXLAB - "+Log)
+		Debug.TraceStack("SEXLAB - "+msg)
 	else
-		Debug.Trace("SEXLAB - "+Log)
+		Debug.Trace("SEXLAB - "+msg)
 	endIf
 endFunction

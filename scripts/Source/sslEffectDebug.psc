@@ -24,6 +24,33 @@ endFunction
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 
 
+	; sslBenchmark Bench = (Quest.GetQuest("SexLabDev") as sslBenchmark)
+	; Bench.StartBenchmark(3, 10000, 10, (Config.BackwardsPressed() || Config.AdjustStagePressed()))
+
+	;/ sslAnimationDefaults AnimDefaults = (Game.GetFormFromFile(0x639DF, "SexLab.esm") as sslAnimationDefaults)
+	AnimDefaults.CacheAutoLoaders("../SexLab/Animations/")
+	AnimDefaults.LoadCategory("Cowgirl")
+	Utility.WaitMenuMode(2.0)
+	AnimDefaults.LoadCategory("Cowgirl") /;
+
+	;/ Log("Pre Count: "+StorageUtil.CountAllObjPrefix(SexLab, "objtest.")+"/"+StorageUtil.CountAllPrefix("objtest."))
+	StorageUtil.SetIntValue(SexLab, "objtest.test", 1)
+	StorageUtil.SetStringValue(SexLab, "objtest.test", "var")
+	StorageUtil.SetStringValue(SexLab, "objtest.1", "var")
+	StorageUtil.SetStringValue(SexLab, "obj.test.2", "var")
+	StorageUtil.SetStringValue(none, "objtest.3", "var")
+	Log("Set Count: "+StorageUtil.CountObjStringValuePrefix(SexLab, "objtest.")+"/"+StorageUtil.CountAllPrefix("objtest."))
+	StorageUtil.ClearObjStringListPrefix(SexLab, "objtest.")
+	Log("Integer Count: "+StorageUtil.CountObjIntValuePrefix(SexLab, "objtest.")+"/"+StorageUtil.CountIntValuePrefix("objtest."))
+	Log("String Count: "+StorageUtil.CountObjStringValuePrefix(SexLab, "objtest.")+"/"+StorageUtil.CountStringValuePrefix("objtest."))
+	StorageUtil.ClearAllObjPrefix(SexLab, "objtest.")
+	Log("Integer Count: "+StorageUtil.CountObjIntValuePrefix(SexLab, "objtest.")+"/"+StorageUtil.CountIntValuePrefix("objtest."))
+	Log("String Count: "+StorageUtil.CountObjStringValuePrefix(SexLab, "objtest.")+"/"+StorageUtil.CountStringValuePrefix("objtest."))
+	StorageUtil.ClearAllObjPrefix(SexLab, "objtest.")
+	StorageUtil.ClearAllObjPrefix(SexLab, "obj.test.")
+	Log("Integer Count: "+StorageUtil.CountObjIntValuePrefix(SexLab, "objtest.")+"/"+StorageUtil.CountIntValuePrefix("objtest."))
+	Log("String Count: "+StorageUtil.CountObjStringValuePrefix(SexLab, "objtest.")+"/"+StorageUtil.CountStringValuePrefix("objtest.")) /;
+
 	; float time = Utility.GetCurrentRealTime()
 	; Log("AllTags: "+SexLab.GetAllAnimationTags())
 	; Log("Time: "+(Utility.GetCurrentRealTime() - time))
