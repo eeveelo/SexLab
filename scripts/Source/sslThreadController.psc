@@ -340,7 +340,9 @@ state Animating
 			Actor AdjustActor = AdjustAlias.ActorRef
 			Config.SelectedSpell.Cast(AdjustActor, AdjustActor)
 			PlayHotkeyFX(0, !backwards)
-			Debug.Notification("Adjusting Position For: "+AdjustActor.GetLeveledActorBase().GetName())
+			string msg = "Adjusting Position For: "+AdjustActor.GetLeveledActorBase().GetName()
+			Debug.Notification(msg)
+			SexLabUtil.PrintConsole(msg)
 		endIf
 		RegisterForSingleUpdate(0.2)
 	endFunction
@@ -516,7 +518,9 @@ function SetAnimation(int aid = -1)
 	Animation = Animations[aid]
 	; Inform player of animation being played now
 	if HasPlayer
-		SexLabUtil.PrintConsole("Playing Animation: " + Animation.Name)
+		string msg = "Playing Animation: " + Animation.Name
+		Debug.Notification(msg)
+		SexLabUtil.PrintConsole(msg)
 	endIf
 	; Update animation info
 	RecordSkills()
