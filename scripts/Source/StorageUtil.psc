@@ -403,6 +403,25 @@ int function CountFormListPrefix(string PrefixKey) global native
 ; Peforms all of the above prefix counts in one go.
 int function CountAllPrefix(string PrefixKey) global native
 
+;/ Counts each type of of any KeyName that starts with a given string prefix on all objects.
+
+   ObjKey: form to perform the prefix count on.
+   PrefixKey: The string a KeyName must start with to be counted. Cannot be empty.
+/;
+int function CountObjIntValuePrefix(Form ObjKey, string PrefixKey) global native
+int function CountObjFloatValuePrefix(Form ObjKey, string PrefixKey) global native
+int function CountObjStringValuePrefix(Form ObjKey, string PrefixKey) global native
+int function CountObjFormValuePrefix(Form ObjKey, string PrefixKey) global native
+
+int function CountObjIntListPrefix(Form ObjKey, string PrefixKey) global native
+int function CountObjFloatListPrefix(Form ObjKey, string PrefixKey) global native
+int function CountObjStringListPrefix(Form ObjKey, string PrefixKey) global native
+int function CountObjFormListPrefix(Form ObjKey, string PrefixKey) global native
+
+; Peforms all of the above prefix counts in one go.
+int function CountAllObjPrefix(Form ObjKey, string PrefixKey) global native
+
+
 ;/ Clears each type of of any KeyName that starts with a given string prefix on all objects.
    Returns the number of values/lists that were unset.
 
@@ -420,6 +439,26 @@ int function ClearFormListPrefix(string PrefixKey) global native
 
 ; Peforms all of the above prefix clears in one go.
 int function ClearAllPrefix(string PrefixKey) global native
+
+
+;/ Clears each type of of any KeyName that starts with a given string prefix on specifc objects.
+   Returns the number of values/lists that were unset.
+
+   ObjKey: form to perform the prefix clear on.
+   PrefixKey: The string a KeyName must start with to be cleared. Cannot be empty.
+/;
+int function ClearObjIntValuePrefix(Form ObjKey, string PrefixKey) global native
+int function ClearObjFloatValuePrefix(Form ObjKey, string PrefixKey) global native
+int function ClearObjStringValuePrefix(Form ObjKey, string PrefixKey) global native
+int function ClearObjFormValuePrefix(Form ObjKey, string PrefixKey) global native
+
+int function ClearObjIntListPrefix(Form ObjKey, string PrefixKey) global native
+int function ClearObjFloatListPrefix(Form ObjKey, string PrefixKey) global native
+int function ClearObjStringListPrefix(Form ObjKey, string PrefixKey) global native
+int function ClearObjFormListPrefix(Form ObjKey, string PrefixKey) global native
+
+; Peforms all of the above prefix clears in one go.
+int function ClearAllObjPrefix(Form ObjKey, string PrefixKey) global native
 
 ;/
 	Debug functions - can be helpful to find problems or for development.
