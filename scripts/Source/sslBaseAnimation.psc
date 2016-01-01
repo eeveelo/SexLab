@@ -245,14 +245,12 @@ float[] function PositionOffsets(float[] Output, string AdjustKey, int Position,
 	Output[1] = Offsets[(i + 1)] ; Side
 	Output[2] = Offsets[(i + 2)] ; Up
 	Output[3] = Offsets[(i + 3)] ; Rot - no offset
-	if BedTypeID > 0
-		if BedOffset.Length == 4
-			Output[0] = Output[0] + BedOffset[0]
-			Output[1] = Output[1] + BedOffset[1]
-			Output[3] = Output[3] + BedOffset[3]
-			if BedTypeID == 1
-				Output[2] = Output[2] + BedOffset[2] ; Only on non-bedrolls
-			endIf
+	if BedTypeID > 0 && BedOffset.Length == 4
+		Output[0] = Output[0] + BedOffset[0]
+		Output[1] = Output[1] + BedOffset[1]
+		Output[3] = Output[3] + BedOffset[3]
+		if BedTypeID == 1
+			Output[2] = Output[2] + BedOffset[2] ; Only on non-bedrolls
 		endIf
 	endIf
 	_PositionOffsets(Registry, AdjustKey+"."+Position, LastKeys[Position], Stage, Output)
@@ -271,10 +269,10 @@ endFunction
 
 function SetBedOffsets(float forward, float sideward, float upward, float rotate)
 	; Reverse defaults if setting to 0
-	if forward == 0
+	if forward == 0.0
 		forward -= Config.BedOffset[0]
 	endIf
-	if upward == 0
+	if upward == 0.0
 		upward  -= Config.BedOffset[2]
 	endIf
 
