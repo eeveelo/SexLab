@@ -476,7 +476,9 @@ state Animating
 
 	function TriggerOrgasm()
 		UnregisterForUpdate()
-		SoundFX.Play(CenterRef)
+		if SoundFX && CenterRef && CenterRef.Is3DLoaded()
+			SoundFX.Play(CenterRef)
+		endIf
 		QuickEvent("Orgasm")
 		RegisterForSingleUpdate(0.5)
 	endFunction
