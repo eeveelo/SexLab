@@ -377,10 +377,11 @@ state Animating
 		sslActorAlias Slot = ActorAlias(PlayerRef)
 		Slot.UnlockActor()
 		Slot.StopAnimating(true)
+		PlayerRef.StopTranslation()
 		; Debug.SendAnimationEvent(PlayerRef, "IdleForceDefaultState")
 		; Lock hotkeys and wait 7 seconds
 		Debug.Notification("Player movement unlocked - repositioning scene in 7 seconds...")
-		Utility.Wait(7.0)
+		Utility.Wait(10.0)
 		; Disable Controls
 		Slot.LockActor()
 		; Give player time to settle incase airborne

@@ -63,6 +63,7 @@ int BestRelation
 int BaseEnjoyment
 int Enjoyment
 int Orgasms
+int NthTranslation
 
 Form Strapon
 Form HadStrapon
@@ -192,7 +193,7 @@ endFunction
 
 ; Thread/alias shares
 bool DebugMode
-
+bool SeparateOrgasms
 int[] BedStatus
 float[] RealTime
 float[] SkillBonus
@@ -217,6 +218,7 @@ function LoadShares()
 	LeadIn     = Thread.LeadIn
 	AnimEvents = Thread.AnimEvents
 
+	SeparateOrgasms = Config.SeparateOrgasms
 	AnimatingFaction = Config.AnimatingFaction ; TEMP
 endFunction
 
@@ -376,7 +378,7 @@ state Ready
 				ActorRef.SetLookAt(WaitRef, true)
 				float Failsafe = Utility.GetCurrentRealTime() + 15.0
 				while Distance > 135.0 && Utility.GetCurrentRealTime() < Failsafe
-					Utility.Wait(0.5)
+					Utility.Wait(1.0)
 					Distance = ActorRef.GetDistance(WaitRef)
 					Log("Distance From WaitRef["+WaitRef+"]: "+Distance)
 				endWhile
@@ -503,14 +505,18 @@ state Animating
 			Thread.EndAnimation(true)
 			return
 		endIf
-		; Sync enjoyment level and expression
+		; Trigger orgasm
 		GetEnjoyment()
+		if Enjoyment >= 100 && Stage < StageCount && SeparateOrgasms && (RealTime[0] - LastOrgasm) > 10.0
+			OrgasmEffect()
+		endIf
+		; Lip sync and refresh expression
 		if LoopDelay >= VoiceDelay
 			LoopDelay = 0.0
-			RefreshExpression()
 			if !IsSilent
 				Voice.PlayMoan(ActorRef, Enjoyment, IsVictim, UseLipSync)
 			endIf
+			RefreshExpression()
 		endIf
 		; Loop
 		LoopDelay += (VoiceDelay * 0.35)
@@ -552,17 +558,18 @@ state Animating
 	function RefreshActor()
 		UnregisterForUpdate()
 		SyncThread()
-		SyncLocation(true)
 		StopAnimating(true)
+		SyncLocation(true)
 		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1")
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
-		Utility.WaitMenuMode(0.2)
+		Utility.WaitMenuMode(0.1)
 		Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
 		PlayingSA = "SexLabSequenceExit1"
 		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1")
 		Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
 		PlayingSA = Animation.Registry
 		CurrentSA = Animation.Registry
+		SyncLocation(true)
 		SendAnimation()
 		RegisterForSingleUpdate(1.0)
 		Thread.SyncEventDone(kRefreshActor)
@@ -596,24 +603,28 @@ state Animating
 		if distance > 125.0 || !IsInPosition(ActorRef, MarkerRef, 75.0)
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
-		elseIf distance > 0.5
-			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 50000, 0)
+		elseIf distance > 2.0
+			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 50000, 0.0)
 			return ; OnTranslationComplete() will take over when in place
 		endIf
 		AttachMarker()
-		; Begin very slowly rotating a smallamount to hold position
-		ActorRef.SplineTranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.001, 20.0, 500, 0.00001)
+		; Begin very slowly rotating a small amount to hold position
+		ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.01, 500.0, 0.001)
 	endFunction
 
 	event OnTranslationComplete()
 		; Log("OnTranslationComplete")
-		AttachMarker()
-		Snap()
+		SyncLocation(true)
+	endEvent
+
+	event OnTranslationFailed()
+		; Log("OnTranslationFailed")
+		SyncLocation(true)
 	endEvent
 
 	function OrgasmEffect()
 		if Math.Abs(Utility.GetCurrentRealTime() - LastOrgasm) < 5.0
-			Log("PREMATURE EJACULATION")
+			Log("Excessive OrgasmEffect Triggered")
 			return
 		endIf
 		UnregisterForUpdate()
@@ -659,7 +670,7 @@ state Animating
 				endWhile
 			endIf
 		endIf
-		Utility.WaitMenuMode(0.4)
+		Utility.WaitMenuMode(0.2)
 		; VoiceDelay = 0.8
 		RegisterForSingleUpdate(0.8)
 	endFunction
@@ -682,10 +693,10 @@ state Animating
 			Stats.AddPartners(ActorRef, Thread.Positions, Thread.Victims)
 		endIf
 		; Apply cum
-		int CumID = Animation.GetCum(Position)
+		;/ int CumID = Animation.GetCum(Position)
 		if CumID > 0 && !Thread.FastEnd && Config.UseCum && (Thread.Males > 0 || Config.AllowFFCum || Thread.HasCreature)
 			ActorLib.ApplyCum(ActorRef, CumID)
-		endIf
+		endIf /;
 		; Tracked events
 		TrackedEvent("End")
 		StopAnimating(Thread.FastEnd, EndAnimEvent)
@@ -942,13 +953,10 @@ int function GetEnjoyment()
 		Enjoyment = BaseEnjoyment + CalcEnjoyment(SkillBonus, Skills, LeadIn, IsFemale, (RealTime[0] - StartedAt), Stage, StageCount)
 		if Enjoyment < 0
 			Enjoyment = 0
-		elseIf Enjoyment >= 100
-			if Config.SeparateOrgasms && Stage != StageCount && (RealTime[0] - LastOrgasm) > 10.0
-				OrgasmEffect()
-			else
-				Enjoyment = 100
-			endIf
+		elseIf Enjoyment > 100
+			Enjoyment = 100
 		endIf
+		; Log("Enjoyment["+Enjoyment+"] / BaseEnjoyment["+BaseEnjoyment+"] / FullEnjoyment["+(Enjoyment - BaseEnjoyment)+"]")
 	endIf
 	return Enjoyment - BaseEnjoyment
 endFunction
