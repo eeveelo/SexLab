@@ -4,7 +4,7 @@
 Skryim SexLab Framework
   By Ashal of Loverslab.com
 
-    Version 1.60 hotfix 2, released 2015/09/01
+    Version 1.61, released 2015/01/04
 
 -- Description --------------------------------------------------------------
 
@@ -50,6 +50,7 @@ Skryim SexLab Framework
      oli3d - Bukkake Shaders - http://www.loverslab.com/topic/12678-bukkake
      4uDIK1 - Male Nudesuit - http://skyrim.nexusmods.com/mods/6667
      Dimon99 - Female Nudesuit - http://skyrim.nexusmods.com/mods/6709
+     Vacaliga - Stacking cum textures
 
     SKSE Plugins:
      h38fh2mf
