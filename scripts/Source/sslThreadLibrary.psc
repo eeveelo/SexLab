@@ -212,18 +212,30 @@ bool function CheckBed(ObjectReference BedRef, bool IgnoreUsed = true)
 	return BedRef && BedRef.IsEnabled() && BedRef.Is3DLoaded() && (!IgnoreUsed || (IgnoreUsed && IsBedAvailable(BedRef)))
 endFunction
 
+bool function SameFloor(ObjectReference BedRef, float Z, float Tolerance = 5.0)
+	return Math.Abs(Z - BedRef.GetPositionZ()) <= Tolerance
+endFunction
+
 ObjectReference function FindBed(ObjectReference CenterRef, float Radius = 1000.0, bool IgnoreUsed = true, ObjectReference IgnoreRef1 = none, ObjectReference IgnoreRef2 = none)
 	if !CenterRef || Radius < 1.0
 		return none ; Invalid args
 	endIf
-	; Search for a nearby bed first before looking for random
-	ObjectReference NearRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius * 0.4)
-	if !NearRef
-		NearRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
+	; Current elevation to determine bed being on same floor
+	float Z = CenterRef.GetPositionZ()
+	; Search a couple times for a nearby bed on the same elevation first before looking for random
+	ObjectReference NearRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
+	if !NearRef || (NearRef != IgnoreRef1 && NearRef != IgnoreRef2 && SameFloor(NearRef, Z) && CheckBed(NearRef, IgnoreUsed))
+		return NearRef
 	endIf
-	if !NearRef || (NearRef != IgnoreRef1 && NearRef != IgnoreRef2 && CheckBed(NearRef, IgnoreUsed))
-		return NearRef ; Use the nearby bed if found, if none than give up now and just return none
+	NearRef = Game.FindRandomReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
+	if !NearRef || (NearRef != IgnoreRef1 && NearRef != IgnoreRef2 && SameFloor(NearRef, Z) && CheckBed(NearRef, IgnoreUsed))
+		return NearRef
 	endIf
+	NearRef = Game.FindRandomReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
+	if !NearRef || (NearRef != IgnoreRef1 && NearRef != IgnoreRef2 && SameFloor(NearRef, Z) && CheckBed(NearRef, IgnoreUsed))
+		return NearRef
+	endIf
+	; Failover to any random useable bed
 	form[] Suppressed = new Form[10]
 	Suppressed[9] = NearRef
 	Suppressed[8] = IgnoreRef1
