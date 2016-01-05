@@ -614,12 +614,12 @@ state Animating
 
 	event OnTranslationComplete()
 		; Log("OnTranslationComplete")
-		SyncLocation(true)
+		SyncLocation(false)
 	endEvent
 
 	event OnTranslationFailed()
 		; Log("OnTranslationFailed")
-		SyncLocation(true)
+		SyncLocation(false)
 	endEvent
 
 	function OrgasmEffect()

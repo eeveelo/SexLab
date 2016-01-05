@@ -28,7 +28,7 @@ Actor PlayerRef
 
 event OnPlayerLoadGame()
 	LoadLibs()
-	Config.DebugMode = true
+	; Config.DebugMode = true
 	Log("Version "+CurrentVersion+" / "+SexLabUtil.GetVersion(), "LOADED")
 	; Check for install
 	if CurrentVersion > 0 && Config.CheckSystem()

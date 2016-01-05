@@ -1,13 +1,7 @@
 scriptname sslBenchmark extends sslSystemLibrary
 
-import SexLabUtil
-
 function PreBenchmarkSetup()
-	Setup()
-	; JsonUtil.SetIntValue("BenchmarkTest.json", "var1", 13)
-	; JsonUtil.Save("BenchmarkTest.json")
-	; JsonUtil.SetIntValue2("BenchmarkTest_2.json", "var1", 13)
-	; JsonUtil.Save("BenchmarkTest_2.json")
+	; // Prepare whatever is needed before benchmarking
 endFunction
 
 
@@ -22,6 +16,7 @@ state Test1
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
  		; START any variable preparions needed
+ 		
 		; END any variable preparions needed
 		baseline += Utility.GetCurrentRealTime()
 		while nth
@@ -33,101 +28,9 @@ state Test1
 		return Utility.GetCurrentRealTime() - baseline
 	endFunction
 endState
-
-;/ state Test3
-	string function Label()
-		return "New - Wait"
-	endFunction
-
-	string function Proof()
-		JsonUtil.SetIntValue2NoWait("BenchmarkTest_2.json", "var1", 42)
-		Debug.Trace("["+JsonUtil.GetIntValue2("BenchmarkTest_2.json", "var1", -1) + "] is equal to " + JsonUtil.GetIntValue2("BenchmarkTest_2.json", "var1", -1) == 42)
-		JsonUtil.SetIntValue2NoWait("BenchmarkTest_2.json", "var1", 13)
-		Debug.Trace("["+JsonUtil.GetIntValue2("BenchmarkTest_2.json", "var1", -1) + "] is equal to " + JsonUtil.GetIntValue2("BenchmarkTest_2.json", "var1", -1) == 13)
-		return "--"
-	endFunction
-
-	float function RunTest(int nth = 5000, float baseline = 0.0)
- 		; START any variable preparions needed
- 		JsonUtil.SetIntValue2("BenchmarkTest_2.json", "var1", 0)
- 		JsonUtil.SetStringValue2("BenchmarkTest_2.json", "str", "empty")
-		; END any variable preparions needed
-		baseline += Utility.GetCurrentRealTime()
-		while nth
-			nth -= 1
-			; START code to benchmark
-			JsonUtil.SetIntValue2("BenchmarkTest_2.json", "var1", (JsonUtil.GetIntValue2("BenchmarkTest_2.json", "var1", -2) + 1))
-			JsonUtil.SetStringValue2("BenchmarkTest_2.json", "nth", "nth:"+nth)
-			; END code to benchmark
-		endWhile
-		return Utility.GetCurrentRealTime() - baseline
-	endFunction
-endState
-
-
-state Test2
-	string function Label()
-		return "Orig - NoWait"
-	endFunction
-
-	string function Proof()
-		JsonUtil.SetIntValueNoWait("BenchmarkTest.json", "var1", 42)
-		Debug.Trace("["+JsonUtil.GetIntValue("BenchmarkTest.json", "var1", -1) + "] is equal to " + JsonUtil.GetIntValue("BenchmarkTest.json", "var1", -1) == 42)
-		JsonUtil.SetIntValueNoWait("BenchmarkTest.json", "var1", 13)
-		Debug.Trace("["+JsonUtil.GetIntValue("BenchmarkTest.json", "var1", -1) + "] is equal to " + JsonUtil.GetIntValue("BenchmarkTest.json", "var1", -1) == 13)
-		return "--"
-	endFunction
-
-	float function RunTest(int nth = 5000, float baseline = 0.0)
- 		; START any variable preparions needed
- 		JsonUtil.SetIntValueNoWait("BenchmarkTest.json", "var1", 0)
- 		JsonUtil.SetStringValueNoWait("BenchmarkTest.json", "str", "empty")
-		; END any variable preparions needed
-		baseline += Utility.GetCurrentRealTime()
-		while nth
-			nth -= 1
-			; START code to benchmark
-			
-			JsonUtil.SetIntValueNoWait("BenchmarkTest.json", "var1", (JsonUtil.GetIntValue("BenchmarkTest.json", "var1", -2) + 1))
-			JsonUtil.SetStringValueNoWait("BenchmarkTest.json", "nth", "nth:"+nth)
-			; END code to benchmark
-		endWhile
-		return Utility.GetCurrentRealTime() - baseline
-	endFunction
-endState
-
-
-state Test1
-	string function Label()
-		return "New - NoWait"
-	endFunction
-
-	string function Proof()
-		JsonUtil.SetIntValue2NoWait("BenchmarkTest_2.json", "var1", 42)
-		Debug.Trace("["+JsonUtil.GetIntValue2("BenchmarkTest_2.json", "var1", -1) + "] is equal to " + JsonUtil.GetIntValue2("BenchmarkTest_2.json", "var1", -1) == 42)
-		JsonUtil.SetIntValue2NoWait("BenchmarkTest_2.json", "var1", 13)
-		Debug.Trace("["+JsonUtil.GetIntValue2("BenchmarkTest_2.json", "var1", -1) + "] is equal to " + JsonUtil.GetIntValue2("BenchmarkTest_2.json", "var1", -1) == 13)
-		return "--"
-	endFunction
-
-	float function RunTest(int nth = 5000, float baseline = 0.0)
- 		; START any variable preparions needed
- 		JsonUtil.SetIntValue2NoWait("BenchmarkTest_2.json", "var1", 0)
- 		JsonUtil.SetStringValue2NoWait("BenchmarkTest_2.json", "str", "empty")
-		; END any variable preparions needed
-		baseline += Utility.GetCurrentRealTime()
-		while nth
-			nth -= 1
-			; START code to benchmark
-			JsonUtil.SetIntValue2NoWait("BenchmarkTest_2.json", "var1", (JsonUtil.GetIntValue2("BenchmarkTest_2.json", "var1", -2) + 1))
-			JsonUtil.SetStringValue2NoWait("BenchmarkTest_2.json", "nth", "nth:"+nth)
-			; END code to benchmark
-		endWhile
-		return Utility.GetCurrentRealTime() - baseline
-	endFunction
-endState /;
 
 function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10, bool UseBaseLoop = false)
+	Setup()
 	PreBenchmarkSetup()
 
 	Debug.Notification("Starting benchmark...")

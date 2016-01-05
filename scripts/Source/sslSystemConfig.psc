@@ -668,7 +668,7 @@ bool function CheckSystem()
 endFunction
 
 function Reload()
-	DebugMode = true
+	; DebugMode = true
 	if DebugMode
 		Debug.OpenUserLog("SexLabDebug")
 		Debug.TraceUser("SexLabDebug", "Config Reloading...")
