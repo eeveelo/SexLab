@@ -164,7 +164,11 @@ Actor[] function SortCreatures(actor[] Positions, sslBaseAnimation Animation)
 endFunction
 
 bool function IsBedRoll(ObjectReference BedRef)
-	return BedRef && (BedRollsList.HasForm(BedRef.GetBaseObject()) || BedRef.HasKeyword(FurnitureBedRoll))
+	if BedRef 
+		return BedRef.HasKeyword(FurnitureBedRoll) || BedRollsList.HasForm(BedRef.GetBaseObject()) \
+			|| StringUtil.Find(BedRef.GetDisplayName(), "roll") != -1 || StringUtil.Find(BedRef.GetDisplayName(), "pile") != -1
+	endIf
+	return false
 endFunction
 
 bool function IsDoubleBed(ObjectReference BedRef)
