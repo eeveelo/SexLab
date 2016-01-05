@@ -25,6 +25,8 @@ Sound property Squishing auto hidden
 Sound property Sucking auto hidden
 Sound property SexMix auto hidden
 Sound property Squirting auto hidden
+; System Use
+bool property IsCreatureFactory auto hidden
 
 ; ------------------------------------------------------- ;
 ; --- Registering Animations                          --- ;
@@ -48,6 +50,8 @@ function PrepareFactory()
 	if !Squirting
 		Squirting = Game.GetFormFromFile(0x65A34, "SexLab.esm") as Sound
 	endIf
+	IsCreatureFactory = false
+	; CacheAutoLoaders("../SexLab/Animations")
 endFunction
 
 ; Prepare the factory for use with the default creature animation slots
@@ -68,6 +72,8 @@ function PrepareFactoryCreatures()
 	if !Squirting
 		Squirting = Game.GetFormFromFile(0x65A34, "SexLab.esm") as Sound
 	endIf
+	IsCreatureFactory = true
+	; CacheAutoLoaders("../SexLab/Creatures")
 endFunction
 
 ; Send callback event to start registration
@@ -101,37 +107,218 @@ function Initialize()
 	PrepareFactory()
 endfunction
 
-;/function RegisterAutoLoads(bool RegisterCreatures = false)
-	
-	; string[] TMP = JsonUtil.JsonInFolder("../SexLab/Creatures")
-	; Log("TEMP CHECK: "+TMP) 
-	; string[] TMP2 = JsonUtil.JsonInFolder("../SexLab/Creatures/Missing")
-	; Log("TEMP CHECK 2: "+TMP2) 
-	; string[] TMP3 = JsonUtil.JsonInFolder("../SexLab")
-	; Log("TEMP CHECK 3: "+TMP3) 
+; TODO: Finish.
+;
+; import JsonUtil
 
-	string[] Files = JsonUtil.JsonInFolder("../SexLab/Animations")
-	if !Files || Files.Length < 1
-		return
-	endIf
-	int i = Files.Length
-	Log("JSON Animation Files("+i+"): "+Files)
-	while i
-		i -= 1
-		string File = "../SexLab/Animations/"+Files[i]
-		string Registrar = StringUtil.Substring(Files[i], 0, (StringUtil.GetLength(Files[i]) - 5))
-		Log("Checking: "+Registrar+" / "+File)
+; string Dir
+; bool function DoAutoLoad(string File)
+; 	return JsonUtil.GetPathBoolValue(File, ".autoload")
+; endFunction
+
+; function CacheAutoLoaders(string Path)
+; 	Dir = Path
+; 	string[] Files = JsonUtil.JsonInFolder(Path)
+; 	if !Files || Files.Length < 1
+; 		return
+; 	endIf
+; 	int i = Files.Length
+; 	_Log("JSON Animation Files("+i+"): "+Files)
+; 	while i
+; 		i -= 1
+; 		string File = Path + "/" + Files[i]
+; 		if DoAutoLoad(File) || Path != ""
+; 			string Registrar = StringUtil.Substring(Files[i], 0, (StringUtil.GetLength(Files[i]) - 5))
+; 			string Category  = JsonUtil.GetPathStringValue(File, ".category", "none")
+; 			StorageUtil.StringListAdd(self, "categories.autoload", Category, false)
+; 			StorageUtil.StringListAdd(self, "autoload."+Category, Registrar, false)
+; 			_Log("Added "+Category+": "+Registrar+" / "+File, "CacheAutoLoaders")
+; 		else
+; 			JsonUtil.Unload(File)
+; 		endIf
+; 	endWhile
+
+; endFunction
+
+; ;/ function RunAutoLoaders()
+; 	string[] Categories = StorageUtil.StringListToArray(self, "categories.autoload")
+; 	if Categories
+; 		int i = Categories.Length
+; 		while i
+; 			i -= 1
+			
+; 			int n = StorageUtil.StringListCount(self, "autoload."+Category)
+; 		endWhile
+; 	endIf	
+; endFunction /;
+
+; function LoadCategory(string Category)
+; 	_Log("LoadCategory("+Category+"): "+StorageUtil.StringListCount(self, "autoload."+Category))
+; 	while StorageUtil.StringListCount(self, "autoload."+Category) > 0
+; 		StorageUtil.StringListRemove(self, "autoload."+Category, RegisterLoader(StorageUtil.StringListPluck(self, "autoload."+Category, 0, "")), true)
+; 	endWhile
+; 	StorageUtil.StringListClear(self, "autoload."+Category)
+; endFunction
+
+; string function RegisterLoader(string Registrar)
+; 	string File = Dir + "/" + Registrar + ".json"
+; 	_Log("RegisterLoader("+Registrar+") "+File)
+; 	; Check if loader syntax is valid
+; 	if !ValidateLoader(File)
+; 		return Registrar
+; 	endIf
+; 	; Get free Animation slot
+; 	int id = Slots.Register(Registrar)
+; 	sslBaseAnimation Slot = Slots.GetBySlot(id)
+; 	if !Slot
+; 		return Registrar
+; 	endIf
+; 	; Init slot	
+; 	Slot.Initialize()
+; 	Slot.Registry = Registrar
+; 	Slot.Enabled  = GetPathBoolValue(File, ".enabled", true)
+; 	Slot.Name     = GetPathStringValue(File, ".name", Registrar)
+; 	; Global SFX
+; 	Slot.SoundFX  = GetLoaderSFX(File, ".soundfx")
+; 	; Set racekey for Creature animations
+; 	string RaceKey
+; 	if IsCreatureFactory
+; 		RaceKey = GetPathStringValue(File, ".racekey", "")
+; 	endIf
+; 	; Positions and Stages
+; 	int Positions = PathCount(File, ".positions")
+; 	int Stages    = PathCount(File, ".positions[0].stages")
+; 	int a = 0
+; 	while a < Positions
+; 		string pos = ".positions["+a+"]"
+; 		int Gender = GetPathIntValue(File, pos+".gender")
+; 		if IsCreatureFactory && Gender > 1
+; 			Slot.AddCreaturePosition(GetPathStringValue(File, pos+".racekey", RaceKey), Gender)
+; 		else
+; 			Slot.AddPosition(Gender, GetLoaderCum(File, pos+".stages[0].cum"))
+; 		endIf
+; 		int Stage = 0
+; 		while Stage < Stages
+
+; 			;AddPositionStage(int Position, string AnimationEvent, float forward = 0.0, float side = 0.0, float up = 0.0, float rotate = 0.0, bool silent = false, bool openmouth = false, bool strapon = true, int sos = 0)
+; 			string AnimationEvent =  GetPathStringValue(File, pos+".stages["+Stage+"].event")
+; 			bool Silent           =  GetPathBoolValue(File, pos+".stages["+Stage+"].silent", false)
+; 			bool OpenMouth        =  GetPathBoolValue(File, pos+".stages["+Stage+"].openmouth", false)
+; 			bool Strapon          =  GetPathBoolValue(File, pos+".stages["+Stage+"].strapon", true)
+; 			int SOS               =  GetPathIntValue(File, pos+".stages["+Stage+"].sos", 0)
+; 			int CumID             =  GetLoaderCum(File, pos+".stages["+Stage+"].cum")
+
+; 			float[] Offsets
+; 			if IsPathArray(File, pos+".stages["+Stage+"].offsets")
+; 				Offsets = PathFloatElements(File, pos+".stages["+Stage+"].offsets")
+; 			endIf
+; 			if !Offsets || Offsets.Length != 4
+; 				Offsets = new float[4]
+; 			endIf
+; 			_Log(pos+".stages["+Stage+"].offsets = "+Offsets)
+; 			; Add Stage
+; 			Slot.AddPositionStage(a, AnimationEvent, Offsets[0], Offsets[1], Offsets[2], Offsets[3], Silent, OpenMouth, Strapon, SOS)
+; 			; Stage specific cum type
+; 			if CumID > 0
+; 				Slot.SetStageCumID(a, Stage, CumID)
+; 			endIf
+
+; 			Stage += 1
+; 		endWhile
+; 		a += 1
+; 	endWhile
 
 
+; 	; Tags
+; 	Slot.SetTags(GetPathStringValue(File, ".tags", Registrar))
 
-	endWhile
+; 	; Finalize
+; 	Slot.Save(id)
+; 	JsonUtil.Unload(File)
+; 	return Registrar
+; endFunction
 
-endFunction
+; Sound function GetLoaderSFX(string File, string Path)
+; 	if CanResolvePath(File, Path)
+; 		string stringfx = GetPathStringValue(File, Path)
+; 		if stringfx == "Squishing"
+; 			return Squishing
+; 		elseIf stringfx == "Sucking"
+; 			return Sucking
+; 		elseIf stringfx == "SexMix"
+; 			return SexMix
+; 		elseIf stringfx == "Squirting"
+; 			return Squirting
+; 		elseif stringfx != "" && IsPathForm(File, Path)
+; 			return GetPathFormValue(File, Path) as Sound
+; 		endIf
+; 	endIf
+; 	return none
+; endFunction
+
+; int function GetLoaderCum(string File, string Path)
+; 	if CanResolvePath(File, Path)
+; 		string cum = GetPathStringValue(File, Path)
+; 		if cum == "Vaginal"
+; 			return Vaginal
+; 		elseIf cum == "Oral"
+; 			return Oral
+; 		elseIf cum == "Anal"
+; 			return Anal
+; 		elseIf cum == "VaginalOral"
+; 			return VaginalOral
+; 		elseIf cum == "VaginalAnal"
+; 			return VaginalAnal
+; 		elseIf cum == "OralAnal"
+; 			return OralAnal
+; 		elseIf cum == "VaginalOralAnal"
+; 			return VaginalOralAnal
+; 		endIf
+; 	endIf
+; 	return -1
+; endFunction
+
+; bool function ValidateLoader(string File)
+; 	; Check basic settings
+; 	if !JsonUtil.Load(File) || !JsonUtil.IsGood(File)
+; 		_Log("ValidateLoader("+File+") - FAILED - Could not load file.")
+; 		return false
+; 	elseIf JsonUtil.GetPathStringValue(File, ".name", "") == ""
+; 		_Log("ValidateLoader("+File+") - FAILED - Invalid or missing name property")
+; 		return false
+; 	elseIf !JsonUtil.IsPathString(File, ".tags")
+; 		_Log("ValidateLoader("+File+") - FAILED - Invalid or missing tags property")
+; 		return false
+; 	elseIf IsCreatureFactory && !JsonUtil.IsPathString(File, ".racekey")
+; 		_Log("ValidateLoader("+File+") - FAILED - Invalid or missing racekey property")
+; 		return false
+; 	endIf
+; 	; Check for positions array
+; 	int Positions = JsonUtil.PathCount(File, ".positions")
+; 	if Positions < 1 || Positions > 5
+; 		_Log("ValidateLoader("+File+") - FAILED - Invalid or missing positions array")
+; 		return false
+; 	endIf
+; 	; Check number of stages
+; 	int Stages = JsonUtil.PathCount(File, ".positions[0].stages")
+; 	if Stages < 1
+; 		_Log("ValidateLoader("+File+") - FAILED - Unable to determine number of stages")
+; 		return false
+; 	elseIf (Positions > 1 && JsonUtil.PathCount(File, ".positions[1].stages") != Stages) \
+; 		|| (Positions > 2 && JsonUtil.PathCount(File, ".positions[2].stages") != Stages) \
+; 		|| (Positions > 3 && JsonUtil.PathCount(File, ".positions[3].stages") != Stages) \
+; 		|| (Positions > 4 && JsonUtil.PathCount(File, ".positions[4].stages") != Stages)
+; 		_Log("ValidateLoader("+File+") - FAILED - Number of stages not equal between all positions")
+; 		return false
+; 	endIf
+; 	;TODO: might need additional checks
+; 	return true ; Loader is most likely valid
+; endFunction
 
 
-function Log(string Log, string Type = "NOTICE")
-	Log = Type+": "+Log
-	SexLabUtil.PrintConsole(Log)
-	Debug.TraceUser("SexLabDebug", Log)
-	Debug.Trace("SEXLAB - "+Log)
-endFunction/;
+; function _Log(string Log, string Type = "NOTICE")
+; 	Log = Type+": "+Log
+; 	SexLabUtil.PrintConsole(Log)
+; 	Debug.TraceUser("SexLabDebug", Log)
+; 	Debug.Trace("SEXLAB - "+Log)
+; endFunction
