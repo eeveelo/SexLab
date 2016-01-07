@@ -184,7 +184,7 @@ int function GetBedType(ObjectReference BedRef)
 		Form BaseRef = BedRef.GetBaseObject()
 		if !BedsList.HasForm(BaseRef)
 			return 0
-		elseIf BedRollsList.HasForm(BedRef.GetBaseObject()) || BedRef.HasKeyword(FurnitureBedRoll)
+		elseIf IsBedRoll(Bedref);BedRollsList.HasForm(BedRef.GetBaseObject()) || BedRef.HasKeyword(FurnitureBedRoll)
 			return 1
 		elseIf DoubleBedsList.HasForm(BaseRef)
 			return 3
@@ -201,9 +201,10 @@ bool function IsBedAvailable(ObjectReference BedRef)
 		return false
 	endIf
 	; Check if used by a current thread
+	sslThreadController[] Threads = ThreadSlots.Threads
 	int i
 	while i < 15
-		if ThreadSlots.Threads[i].BedRef == BedRef
+		if Threads[i].BedRef == BedRef
 			return false
 		endIf
 		i += 1

@@ -249,7 +249,7 @@ float[] function PositionOffsets(float[] Output, string AdjustKey, int Position,
 		Output[0] = Output[0] + BedOffset[0]
 		Output[1] = Output[1] + BedOffset[1]
 		Output[3] = Output[3] + BedOffset[3]
-		if BedTypeID == 1
+		if BedTypeID > 1
 			Output[2] = Output[2] + BedOffset[2] ; Only on non-bedrolls
 		endIf
 	endIf
