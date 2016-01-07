@@ -603,24 +603,24 @@ state Animating
 		if distance > 125.0 || !IsInPosition(ActorRef, MarkerRef, 75.0)
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
+			AttachMarker()
 		elseIf distance > 2.0
 			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 50000, 0.0)
 			return ; OnTranslationComplete() will take over when in place
 		endIf
-		AttachMarker()
 		; Begin very slowly rotating a small amount to hold position
-		ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.01, 500.0, 0.001)
+		ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5]+0.01, 500.0, 0.0001)
 	endFunction
 
 	event OnTranslationComplete()
 		; Log("OnTranslationComplete")
-		SyncLocation(false)
+		Snap()
 	endEvent
 
-	event OnTranslationFailed()
-		; Log("OnTranslationFailed")
-		SyncLocation(false)
-	endEvent
+	;/ event OnTranslationFailed()
+		Log("OnTranslationFailed")
+		; SyncLocation(false)
+	endEvent /;
 
 	function OrgasmEffect()
 		if Math.Abs(Utility.GetCurrentRealTime() - LastOrgasm) < 5.0
@@ -1244,7 +1244,7 @@ function TrackedEvent(string EventName)
 endFunction
 
 function ClearEffects()
-	if IsPlayer
+	if IsPlayer && GetState() != "Animating"
 		MiscUtil.SetFreeCameraState(false)
 		if Game.GetCameraState() == 0
 			Game.ForceThirdPerson()
