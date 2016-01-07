@@ -775,7 +775,7 @@ endFunction
 * * 
 * * 
 * * Event WeReceivedTheCustomEvent(Form FormRef, int tid)
-* *   Debug.MessageBox("The Actor " + (FormRef as Actor).getDisplayname() just received the event ThisIsATest and the value is " + tid)
+* *   Debug.MessageBox("The Actor "+(FormRef as Actor).GetDisplayname()+" just received the event ThisIsATest and the value is " + tid)
 * *   ; The message displayed will be "The Actor <xxx> just received the event ThisIsATest and the value is 123"
 * * EndEvent   
 * * 
