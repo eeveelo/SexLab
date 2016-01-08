@@ -1035,6 +1035,27 @@ function ExportSettings()
 	ExportExpressions()
 	ExportVoices()
 
+	; Export striplist items
+	StorageUtil.FormListRemove(none, "AlwaysStrip", none, true)
+	Form[] AlwaysStrip = StorageUtil.FormListToArray(none, "AlwaysStrip")
+	int i = AlwaysStrip.Length
+	while i
+		i -= 1
+		if AlwaysStrip[i]
+			JsonUtil.FormListAdd(File, "AlwaysStrip", AlwaysStrip[i], false)
+		endIf
+	endWhile
+	
+	StorageUtil.FormListRemove(none, "NoStrip", none, true)
+	Form[] NoStrip = StorageUtil.FormListToArray(none, "NoStrip")
+	i = NoStrip.Length
+	while i
+		i -= 1
+		if NoStrip[i]
+			JsonUtil.FormListAdd(File, "NoStrip", NoStrip[i], false)
+		endIf
+	endWhile
+
 	; Save to JSON file
 	JsonUtil.Save(File, true)
 endFunction
@@ -1118,11 +1139,32 @@ function ImportSettings()
 	StageTimerLeadIn   = ImportFloatList("StageTimerLeadIn", StageTimerLeadIn, 5)
 	StageTimerAggr     = ImportFloatList("StageTimerAggr", StageTimerAggr, 5)
 
-	; Export object registry
+	; Import object registry
 	ImportAnimations()
 	ImportCreatures()
 	ImportExpressions()
 	ImportVoices()
+
+	; Import striplist items
+	Form[] AlwaysStrip = JsonUtil.FormListToArray(File, "AlwaysStrip")
+	int i = AlwaysStrip.Length
+	while i
+		i -= 1
+		if AlwaysStrip[i]
+			ActorLib.MakeAlwaysStrip(NoStrip[i])
+		endIf
+	endWhile
+	StorageUtil.FormListRemove(none, "AlwaysStrip", none, true)
+
+	Form[] NoStrip = JsonUtil.FormListToArray(File, "NoStrip")
+	i = NoStrip.Length
+	while i
+		i -= 1
+		if NoStrip[i]
+			ActorLib.MakeNoStrip(NoStrip[i])
+		endIf
+	endWhile
+	StorageUtil.FormListRemove(none, "NoStrip", none, true)
 
 	; Reload settings with imported values
 	Reload()
