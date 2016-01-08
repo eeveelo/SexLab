@@ -131,7 +131,10 @@ event UpdateSystem(int OldVersion, int NewVersion)
 		Config.ExportSettings()
 
 		; Perform update functions
-		if OldVersion > 1600 && NewVersion >= 16020
+		if OldVersion == 16100 && NewVersion >= 16101
+			; No update required
+			
+		elseif OldVersion > 1600 && NewVersion >= 16020
 			ActorLib.Setup()    ; New cum spells
 			ThreadSlots.Setup() ; New alias event arrays
 			; Install creature voices, if needed.
