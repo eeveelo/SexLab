@@ -65,14 +65,14 @@ state Prepare
 		if !Prepared
 			Prepared = true
 			; Reset loc, incase actor type center has moved during prep
-			if SexLabUtil.IsActor(CenterRef) && Positions.Find(CenterRef as Actor) != -1
+			;/ if CenterRef && CenterRef.Is3DLoaded() && SexLabUtil.IsActor(CenterRef) && Positions.Find(CenterRef as Actor) != -1
 				CenterLocation[0] = CenterRef.GetPositionX()
 				CenterLocation[1] = CenterRef.GetPositionY()
-				CenterLocation[2] = CenterRef.GetPositionZ()
+				; CenterLocation[2] = CenterRef.GetPositionZ()
 				CenterLocation[3] = CenterRef.GetAngleX()
 				CenterLocation[4] = CenterRef.GetAngleY()
 				CenterLocation[5] = CenterRef.GetAngleZ()
-			endIf
+			endIf /;
 			; Set starting adjusted actor
 			AdjustPos   = (ActorCount > 1) as int
 			AdjustAlias = PositionAlias(AdjustPos)
