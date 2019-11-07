@@ -266,7 +266,7 @@ int function GetCount(bool IgnoreDisabled = true)
 	endIf
 	int Count
 	int i = Slotted
-	while i < Slotted
+	while i
 		i -= 1
 		Count += (GetBySlot(i).Enabled as int)
 	endWhile
