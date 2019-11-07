@@ -683,7 +683,7 @@ bool function CheckSystemPart(string CheckSystem)
 		return (StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float) >= 1.5
 
 	elseIf CheckSystem == "SKSE"
-		return SKSE.GetScriptVersionRelease() >= 61
+		return SKSE.GetScriptVersionRelease() >= 63
 
 	elseIf CheckSystem == "SkyUI"
 		return Quest.GetQuest("SKI_ConfigManagerInstance") != none
@@ -720,7 +720,7 @@ bool function CheckSystem()
 		return false
 	; Check SKSE install
 	elseIf !CheckSystemPart("SKSE")
-		CheckSKSE.Show(2.15)
+		CheckSKSE.Show(2.16)
 		return false
 	; Check SkyUI install - depends on passing SKSE check passing
 	elseIf !CheckSystemPart("SkyUI")

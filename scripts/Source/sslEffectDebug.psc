@@ -20,16 +20,52 @@ sslBenchmark function Benchmark(int Tests = 1, int Iterations = 5000, int Loops 
 endFunction
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
-	; MiscUtil.ToggleFreeCamera()
+	SexLab.QuickStart(CasterRef, TargetRef)
+
+	; Spell LightForm = Game.GetFormFromFile(0x88E, "ccqdrsse001-survivalmode.esl") as Spell
+
+	; if Config.BackwardsPressed() || Config.AdjustStagePressed()
+	; 	StorageUtil.UnsetFormValue(TargetRef, "Test.LightForm")
+	; 	StorageUtil.UnsetFormValue(TargetRef, "Test.SexLab")
+	; 	StorageUtil.UnsetFormValue(LightForm, "Test.OnForm")
+	; 	Log("---ITEMS CLEARED---\n")
+	; endIf
+
+	; Log("Items To Test:")
+	; Log("\tLightForm("+LightForm.GetType()+"): "+LightForm)
+	; Log("\tSexLab("+SexLab.GetType()+"): "+SexLab)
+	; ; Log("\n")
+
+	; Log("StorageUtil (GET 1/2):")
+	; Log("\tLightForm("+LightForm.GetType()+"): "+(StorageUtil.GetFormValue(TargetRef, "Test.LightForm") as Spell))
+	; Log("\tSexLab("+SexLab.GetType()+"): "+StorageUtil.GetFormValue(TargetRef, "Test.SexLab"))
+	; Log("\tOnForm: "+StorageUtil.GetFormValue(LightForm, "Test.OnForm"))
+	; ; Log("\n")
+
+	; Log("Setting...")
+	; StorageUtil.SetFormValue(TargetRef, "Test.LightForm", LightForm)
+	; StorageUtil.SetFormValue(TargetRef, "Test.SexLab", SexLab)
+
+	; Log("StorageUtil (GET 2/2):")
+	; Log("\tLightForm("+LightForm.GetType()+"): "+(StorageUtil.GetFormValue(TargetRef, "Test.LightForm") as Spell))
+	; Log("\tSexLab("+SexLab.GetType()+"): "+StorageUtil.GetFormValue(TargetRef, "Test.SexLab"))
+	; ; Log("\n")
+
+
+	; Log("Store on ESL:")
+	; StorageUtil.SetFormValue(LightForm, "Test.OnForm", SexLab)
+	; Log("\tOnForm: "+StorageUtil.GetFormValue(LightForm, "Test.OnForm"))
 
 
 
-	Log("data/skse/plugins: "+MiscUtil.FoldersInFolder("data/skse"))
-	Log("data/skse/plugins: "+MiscUtil.FoldersInFolder("data/skse/plugins"))
-	Log("data/skse/plugins: "+MiscUtil.FilesInFolder("data/skse/plugins"))
-	Log("data/skse/plugins: "+MiscUtil.FilesInFolder("data/skse/plugins",".dll"))
-	Log("data/skse/plugins/sexlab: "+MiscUtil.FilesInFolder("data/skse/plugins/sexlab"))
-	Log("data/skse/plugins/sexlab: "+MiscUtil.FilesInFolder("data/skse/plugins/sexlab", ".json"))
+
+
+	; Log("data/skse/plugins: "+MiscUtil.FoldersInFolder("data/skse"))
+	; Log("data/skse/plugins: "+MiscUtil.FoldersInFolder("data/skse/plugins"))
+	; Log("data/skse/plugins: "+MiscUtil.FilesInFolder("data/skse/plugins"))
+	; Log("data/skse/plugins: "+MiscUtil.FilesInFolder("data/skse/plugins",".dll"))
+	; Log("data/skse/plugins/sexlab: "+MiscUtil.FilesInFolder("data/skse/plugins/sexlab"))
+	; Log("data/skse/plugins/sexlab: "+MiscUtil.FilesInFolder("data/skse/plugins/sexlab", ".json"))
 
 
 	; Form ItemRef = Game.GetFormFromFile(0xD64, "Dragon Lilly.esp")
@@ -333,7 +369,7 @@ endEvent
 ;\-----------------------------------------------/;
 
 function Log(string log)
-	Debug.Notification(log)
+	; Debug.Notification(log)
 	Debug.Trace(log)
 	Debug.TraceUser("SexLabDebug", log)
 	SexLabUtil.PrintConsole(log)

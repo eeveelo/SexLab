@@ -210,8 +210,29 @@ state Animating
 	endFunction
 
 	function ChangeAnimation(bool backwards = false)
+		if Animations.Length < 2
+			return ; Nothing to change
+		endIf
 		UnregisterForUpdate()
-		SetAnimation(sslUtility.IndexTravel(Animations.Find(Animation), Animations.Length, backwards))
+		
+		if !Config.AdjustStagePressed()
+			; Forward/Backward
+			SetAnimation(sslUtility.IndexTravel(Animations.Find(Animation), Animations.Length, backwards))
+		else
+			; Random
+			int current = Animations.Find(Animation)
+			int r = Utility.RandomInt(0, (Animations.Length - 1))
+			; Try to get something other than the current animation
+			if r == current
+				int tries = 10
+				while r == current && tries > 0
+					tries -= 1
+					r = Utility.RandomInt(0, (Animations.Length - 1))
+				endWhile
+			endIf
+			SetAnimation(r)
+		endIf
+
 		SendThreadEvent("AnimationChange")
 		RegisterForSingleUpdate(0.2)
 	endFunction

@@ -1,5 +1,20 @@
 scriptname sslBaseAnimation extends sslBaseObject
 
+; TODO: ADD CUSTOM ORGASM STAGE SETTINGS
+; [4:36 PM] Ashal: I could add custom orgasm stage settings in the next update
+; [4:36 PM] Ashal: it's not a bad idea
+; [4:36 PM] Seijin: That'd be awesome
+; [4:36 PM] Seijin: Maybe a tag system that says when the O should actually happen?
+; [4:37 PM] Seijin: for instance: "EarlyO1" meaning one stage before the end, "EarlyO2" for 2, etc.
+; [4:37 PM] Seijin: (Just spitballing)
+; [4:37 PM] Ashal: Something like Anim.AddOrgasmStage(3) when settings up an animation. Would allow for multiple stages to be set for it as well
+; [4:37 PM] Ashal: and if animation setup never calls that function, just default to using the last stage for orgasm like normal
+; [4:41 PM] Ashal: I could add an option for it in the animation editor
+; [4:41 PM] Ashal: the page where you can edit alignment settings
+; [4:41 PM] Seijin: I'm comfortable with any option you would provide, just having flashbacks of a couple years ago when I knew fuck-all about scripting and couldn't understand how to make anything work.
+; [4:41 PM] Seijin: That would work perfectly!
+; [4:41 PM] Ashal: just a toggle box for whether the stage being edited is orgasm or not
+
 ; import sslUtility
 ; import PapyrusUtil
 ; import Utility
