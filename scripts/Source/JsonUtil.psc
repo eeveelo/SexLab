@@ -40,8 +40,17 @@ bool function IsPendingSave(string FileName) global native
 bool function IsGood(string FileName) global native
 ; Get a formatted error string of any json parser errors on a file, returns as empty string if no errors.
 string function GetErrors(string FileName) global native
-; Rerturns a list of all filenames in a given folder that end in .json
+; Returns a list of all filenames in a given folder that end in .json
 string[] function JsonInFolder(string folderPath) global native
+; Check if a json file exists or not
+bool function JsonExists(string FileName) global
+	if !FileName
+		return false
+	elseIf StringUtil.Find(FileName, ".json") == -1
+		FileName += ".json"
+	endIf
+	return MiscUtil.FileExists("data/skse/plugins/StorageUtilData/"+FileName)
+endFunction
 
 ; See StorageUtil.psc for equivalent function usage instructions
 int function SetIntValue(string FileName, string KeyName, int value) global native
@@ -156,10 +165,22 @@ int function CountFormListPrefix(string FileName, string PrefixKey) global nativ
 
 int function CountAllPrefix(string FileName, string PrefixKey) global native
 
+
+
+; Experimental custom json formatting handlers. Paths are resolved using typical json syntax.
+; The path will be created as necessary when setting data and the path does not yet exists.
+; examples:
+; 	JSON File: { "foo": { "bar": [3, 10, 7] } }
+;   Function: GetPathIntValue("filename.json", ".foo.bar[1]")
+;   Return: 10
+
+
 function SetPathIntValue(string FileName, string Path, int value) global native
 function SetPathFloatValue(string FileName, string Path, float value) global native
 function SetPathStringValue(string FileName, string Path, string value) global native
 function SetPathFormValue(string FileName, string Path, form value) global native
+
+bool function SetRawPathValue(string FileName, string Path, string RawJSON) global native
 
 int function GetPathIntValue(string FileName, string Path, int missing = 0) global native
 float function GetPathFloatValue(string FileName, string Path, float missing = 0.0) global native
@@ -174,6 +195,11 @@ float[] function PathFloatElements(string FileName, string Path, float invalidTy
 string[] function PathStringElements(string FileName, string Path, string invalidType = "") global native
 form[] function PathFormElements(string FileName, string Path, form invalidType = none) global native
 
+int function FindPathIntElement(string FileName, string Path, int toFind) global native
+int function FindPathFloatElement(string FileName, string Path, float toFind) global native
+int function FindPathStringElement(string FileName, string Path, string toFind) global native
+int function FindPathFormElement(string FileName, string Path, form toFind) global native
+
 int function PathCount(string FileName, string Path) global native
 string[] function PathMembers(string FileName, string Path) global native
 
@@ -184,6 +210,13 @@ bool function IsPathForm(string FileName, string Path) global native
 bool function IsPathBool(string FileName, string Path) global native
 bool function IsPathArray(string FileName, string Path) global native
 bool function IsPathObject(string FileName, string Path) global native
+
+function SetPathIntArray(string FileName, string Path, int[] arr, bool append = false) global native
+function SetPathFloatArray(string FileName, string Path, float[] arr, bool append = false) global native
+function SetPathStringArray(string FileName, string Path, string[] arr, bool append = false) global native
+function SetPathFormArray(string FileName, string Path, form[] arr, bool append = false) global native
+
+function ClearPath(string FileName, string Path) global native
 
 ; Debug use
 function ClearAll(string FileName) global native

@@ -1,6 +1,9 @@
 scriptname sslBaseVoice extends sslBaseObject
 
-import MfgConsoleFunc
+; import MfgConsoleFunc ; OLDRIM
+; TODO: switch back to mfgconsolefunc: https://www.nexusmods.com/skyrimspecialedition/mods/11669?tab=description
+;  - NVM, not updated for current SKSE64, and buggy accoring to comments.
+;  - Maybe https://www.nexusmods.com/skyrimspecialedition/mods/12919
 
 Sound property Hot auto
 Sound property Mild auto
@@ -38,18 +41,17 @@ function PlayMoan(Actor ActorRef, int Strength = 30, bool IsVictim = false, bool
 			SoundRef.Play(ActorRef)
 			Utility.WaitMenuMode(0.4)
 		else
-			; int Saved = SetPhonemeModifier(ActorRef, 0, 1)
-			SetPhonemeModifier(ActorRef, 0, 1, 20)
+			float SavedP = sslBaseExpression.GetPhoneme(ActorRef, 1)
+			; MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 20)
+			ActorRef.SetExpressionPhoneme(1, 0.2)
 			Utility.WaitMenuMode(0.1)
 			SoundRef.Play(ActorRef)
 			TransitUp(ActorRef, 20, 50)
 			Utility.WaitMenuMode(0.2)
 			TransitDown(ActorRef, 50, 20)
-			SetPhonemeModifier(ActorRef, 0, 1, 0)
-			; if Saved > 0
-			; 	Utility.WaitMenuMode(0.1)
-			; 	SetPhonemeModifier(ActorRef, 0, 1, Saved)
-			; endIf
+			Utility.WaitMenuMode(0.1)
+			; MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, (SavedP*100) as int) ; OLDRIM
+			ActorRef.SetExpressionPhoneme(1, Saved as float) ; SKYRIM SE
 		endIf
 	endIf
 endFunction
@@ -86,13 +88,15 @@ endFunction
 function TransitUp(Actor ActorRef, int from, int to)
 	while from < to
 		from += 2
-		SetPhonemeModifier(ActorRef, 0, 1, from)
+		; MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from) ; OLDRIM
+		ActorRef.SetExpressionPhoneme(1, (from as float / 100.0)) ; SKYRIM SE
 	endWhile
 endFunction
 function TransitDown(Actor ActorRef, int from, int to)
 	while from > to
 		from -= 2
-		SetPhonemeModifier(ActorRef, 0, 1, from)
+		; MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from) ; OLDRIM
+		ActorRef.SetExpressionPhoneme(1, (from as float / 100.0)) ; SKYRIM SE
 	endWhile
 endFunction
 
@@ -137,11 +141,11 @@ bool function HasRaceKeyMatch(string[] RaceList)
 endFunction
 
 function Save(int id = -1)
-	parent.Save(id)
 	AddTagConditional("Male",   (Gender == 0 || Gender == -1))
 	AddTagConditional("Female", (Gender == 1 || Gender == -1))
 	AddTagConditional("Creature", (Gender == 2 || Gender == 3))
 	Log(Name, "Voices["+id+"]")
+	parent.Save(id)
 endFunction
 
 function Initialize()

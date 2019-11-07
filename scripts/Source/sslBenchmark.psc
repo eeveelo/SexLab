@@ -2,32 +2,142 @@ scriptname sslBenchmark extends sslSystemLibrary
 
 function PreBenchmarkSetup()
 	; // Prepare whatever is needed before benchmarking
+	; JsonUtil.SetIntValue("Benchmark.json", "test", 1)
+	; JsonUtil.SetFormValue("Benchmark.json", "test", self)
+	; JsonUtil.Save("Benchmark.json")
+
+	; Anim = AnimSlots.GetbyRegistrar("LeitoCowgirl")
 endFunction
+sslBaseAnimation[] arr1
+sslBaseAnimation[] arr2
 
-
-state Test1
+state Test2
 	string function Label()
-		return ""
+		return "CACHED"
 	endFunction
 
 	string function Proof()
-		return ""
+		arr1 = AnimSlots.GetByTags(2, "MF,Cowgirl,Arrok")
+		arr2 = AnimSlots.GetByType(2,1,1)
+		return arr1+" / "+arr2
 	endFunction
 
 	float function RunTest(int nth = 5000, float baseline = 0.0)
  		; START any variable preparions needed
- 		
+ 		int i = -1
 		; END any variable preparions needed
 		baseline += Utility.GetCurrentRealTime()
 		while nth
 			nth -= 1
 			; START code to benchmark
-
+			arr1 = AnimSlots.GetByTags(2, "MF,Cowgirl,Arrok")
+			arr2 = AnimSlots.GetByType(2,1,1)
 			; END code to benchmark
 		endWhile
 		return Utility.GetCurrentRealTime() - baseline
 	endFunction
 endState
+
+state Test1
+	string function Label()
+		return "RAW"
+	endFunction
+
+	string function Proof()
+		; arr1 = AnimSlots.GetByTags2(2, "MF,Cowgirl,Arrok")
+		; arr2 = AnimSlots.GetByType2(2,1,1)
+		return arr1+" / "+arr2
+	endFunction
+
+	float function RunTest(int nth = 5000, float baseline = 0.0)
+ 		; START any variable preparions needed
+ 		int i = -1
+		; END any variable preparions needed
+		baseline += Utility.GetCurrentRealTime()
+		while nth
+			nth -= 1
+			; START code to benchmark
+			; arr1 = AnimSlots.GetByTags2(2, "MF,Cowgirl,Arrok")
+			; arr2 = AnimSlots.GetByType2(2,1,1)
+			; END code to benchmark
+		endWhile
+		return Utility.GetCurrentRealTime() - baseline
+	endFunction
+endState
+
+
+
+;/ 
+state Test1
+	string function Label()
+		return "JsonUtil"
+	endFunction
+
+	string function Proof()
+		string Output
+		JsonUtil.SetIntValue("Benchmark.json", "test", 1)
+		JsonUtil.SetFormValue("Benchmark.json", "test", self)
+
+		Output += " Int["+JsonUtil.GetIntValue("Benchmark.json", "test", -1)+"]"
+		Output += " Form["+JsonUtil.GetFormValue("Benchmark.json", "test", none)+"]"
+
+		return Output
+	endFunction
+
+	float function RunTest(int nth = 5000, float baseline = 0.0)
+ 		; START any variable preparions needed
+ 		int var1
+ 		form var2
+		; END any variable preparions needed
+		baseline += Utility.GetCurrentRealTime()
+		while nth
+			nth -= 1
+			; START code to benchmark
+			JsonUtil.SetIntValue("Benchmark.json", "test", nth)
+			JsonUtil.SetFormValue("Benchmark.json", "test", self)
+			var1 = JsonUtil.GetIntValue("Benchmark.json", "test", nth)
+			var2 = JsonUtil.GetFormValue("Benchmark.json", "test", self)
+			; END code to benchmark
+		endWhile
+		return Utility.GetCurrentRealTime() - baseline
+	endFunction
+endState
+
+state Test2
+	string function Label()
+		return "StorageUtil"
+	endFunction
+
+	string function Proof()
+		string Output
+		StorageUtil.SetIntValue(Config, "test", 1)
+		StorageUtil.SetFormValue(Config, "test", self)
+
+		Output += " Int["+StorageUtil.GetIntValue(Config, "test", -1)+"]"
+		Output += " Form["+StorageUtil.GetFormValue(Config, "test", none)+"]"
+
+		return Output
+	endFunction
+
+	float function RunTest(int nth = 5000, float baseline = 0.0)
+ 		; START any variable preparions needed
+ 		int var1
+ 		form var2
+		; END any variable preparions needed
+		baseline += Utility.GetCurrentRealTime()
+		while nth
+			nth -= 1
+			; START code to benchmark
+			StorageUtil.SetIntValue(Config, "test", nth)
+			StorageUtil.SetFormValue(Config, "test", self)
+			var1 = StorageUtil.GetIntValue(Config, "test", nth)
+			var2 = StorageUtil.GetFormValue(Config, "test", self)
+			; END code to benchmark
+		endWhile
+		return Utility.GetCurrentRealTime() - baseline
+	endFunction
+endState
+/;
 
 function StartBenchmark(int Tests = 1, int Iterations = 5000, int Loops = 10, bool UseBaseLoop = false)
 	Setup()

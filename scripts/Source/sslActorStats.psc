@@ -1,4 +1,19 @@
 scriptname sslActorStats extends sslSystemLibrary
+;TODO: clean up some stat lookup stuff in sslActorAlias.
+	; [10:49 PM] ak86: hi, there is an error in sslActorAlias, script calls 
+	; float OwnLewd = Stats.GetSkillLevel(ActorRef, Stats.kLewd)
+	; that always return 0, should be
+	; float OwnLewd = Stats.GetSkillLevel(ActorRef, "Lewd")
+	; [10:54 PM] Jeffl: should be float OwnLewd = Stats._GetSkill(ActorRef, Stats.kLewd) actually, I think(edited)
+	; [10:55 PM] Jeffl: would have to double check, but yeah, it should be one or the other for sure. Thanks
+	; [10:57 PM] Jeffl: no nvm, you're right
+	; [10:58 PM] Jeffl: fixed in dev build now
+	; [10:59 PM] Jeffl: what lead you to finding that out of curiosity? Seems like an obscure bug to have come across by normal means
+	; [11:01 PM] ak86: was reported in my SexLab Separate Orgasm thread that Stats.GetSkillLevel﻿(ActorRef, Stats﻿.kLewd) is broken
+	; [11:02 PM] ak86: probably would never be found otherwise
+	; [11:03 PM] ak86: as its effects can only be seen in my mod
+	; [11:03 PM] Jeffl: bleh, you've made me look at the stat code for the first time in awhile
+	; [11:04 PM] Jeffl: seems like a mess, might be one of the major causes of start slowness happening right now. Going to add cleaning it up to the todo list x.x
 
 
 import StorageUtil

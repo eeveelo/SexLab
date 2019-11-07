@@ -1,5 +1,9 @@
 scriptname sslSystemConfig extends sslSystemLibrary
 
+; // TODO: Add a 3rd person mod detection when determining FNIS sensitive variables.
+; // Disable it when no longer relevant.
+
+
 ; ------------------------------------------------------- ;
 ; --- System Resources                                --- ;
 ; ------------------------------------------------------- ;
@@ -183,6 +187,7 @@ bool property RemoveHeelEffect auto hidden
 bool property AdjustTargetStage auto hidden
 bool property DisableTeleport auto hidden
 bool property SeedNPCStats auto hidden
+bool property DisableScale auto hidden
 
 ; Integers
 int property AnimProfile auto hidden
@@ -240,8 +245,12 @@ FormList property FrostExceptions auto hidden
 MagicEffect HDTHeelEffect
 
 ; Data
-Actor property TargetRef auto hidden
 Actor CrosshairRef
+Actor property TargetRef auto hidden
+Actor[] property TargetRefs auto hidden
+
+int nthHook
+sslThreadHook[] ThreadHooks
 
 ; ------------------------------------------------------- ;
 ; --- Config Accessors                                --- ;
@@ -292,33 +301,46 @@ bool function HasCreatureInstall()
 	return FNIS.GetMajor(true) > 0 && (Game.GetCameraState() < 8 || PlayerRef.GetAnimationVariableInt("SexLabCreature") > 0)
 endFunction
 
-;/ function SetActorNoScale(Actor ActorRef, bool NoScale = true)
-	if !ActorRef
-		Log("Invalid Actor", "SetActorNoScale("+ActorRef+", "+NoScale+")")
-	elseIf NoScale
-		StorageUtil.FormListAdd(self, "NoScale", ActorRef.GetLeveledActorBase(), false)
-	else
-		StorageUtil.FormListRemove(self, "NoScale", ActorRef.GetLeveledActorBase(), true)
+bool function AddCustomBed(Form BaseBed, int BedType = 0)
+	if !BaseBed
+		return false
+	elseIf !BedsList.HasForm(BaseBed)
+		BedsList.AddForm(BaseBed)
 	endIf
+	if BedType == 1 && !BedRollsList.HasForm(BaseBed)
+		BedRollsList.AddForm(BaseBed)
+	elseIf BedType == 2 && !DoubleBedsList.HasForm(BaseBed)
+		DoubleBedsList.AddForm(BaseBed)
+	endIf
+	return true
 endFunction
 
-function SetRaceNoScale(Race RaceRef, bool NoScale = true)
-	if !RaceRef
-		Log("Invalid Race", "SetRaceNoScale("+RaceRef+", "+NoScale+")")
-	elseIf NoScale
-		StorageUtil.FormListAdd(self, "NoScale", RaceRef, false)
-	else
-		StorageUtil.FormListRemove(self, "NoScale", RaceRef, true)
+bool function SetCustomBedOffset(Form BaseBed, float Forward = 30.0, float Sideward = 0.0, float Upward = 37.0, float Rotation = 0.0)
+	if !BaseBed || !BedsList.HasForm(BaseBed)
+		Log("Invalid form or bed does not exist currently in bed list.", "SetBedOffset("+BaseBed+")")
+		return false
 	endIf
+	float[] off = new float[4]
+	off[0] = Forward
+	off[1] = Sideward
+	off[2] = Upward
+	off[3] = PapyrusUtil.ClampFloat(Rotation, -360.0, 360.0)
+	StorageUtil.FloatListCopy(BaseBed, "SexLab.BedOffset", off)
+	return true
 endFunction
 
-bool function ActorIsNoScale(Actor ActorRef)
-	if ActorRef
-		ActorBase BaseRef = ActorRef.GetLeveledActorBase()
-		return StorageUtil.FormListHas(self, "NoScale", BaseRef) || StorageUtil.FormListHas(self, "NoScale", BaseRef.GetRace())
+bool function ClearCustomBedOffset(Form BaseBed)
+	return StorageUtil.FloatListClear(BaseBed, "SexLab.BedOffset") > 0
+endFunction
+
+float[] function GetBedOffsets(Form BaseBed)
+	if StorageUtil.FloatListCount(BaseBed, "SexLab.BedOffset") == 4
+		float[] Offsets = new float[4]
+		StorageUtil.FloatListSlice(BaseBed, "SexLab.BedOffset", Offsets)
+		return Offsets
 	endIf
-	return false
-endFunction /;
+	return BedOffset
+endFunction
 
 ; ------------------------------------------------------- ;
 ; --- Strapon Functions                               --- ;
@@ -432,6 +454,8 @@ event OnKeyDown(int keyCode)
 			else
 				SetTargetActor()
 			endIf
+		elseIf keyCode == EndAnimation && BackwardsPressed()
+			ThreadSlots.StopAll()
 		endIf
 	endIf
 endEvent
@@ -453,10 +477,60 @@ function SetTargetActor()
 		; Attempt to grab control of their animation?
 		sslThreadController TargetThread = ThreadSlots.GetActorController(TargetRef)
 		if TargetThread && !TargetThread.HasPlayer && !ThreadSlots.GetActorController(PlayerRef) && TakeThreadControl.Show()
-			GetThreadControl(TargetThread)
+			GetThreadControl(TargetThread) 
 		endIf
 	endif
 endFunction
+
+function AddTargetActor(Actor ActorRef)
+	if ActorRef
+		if TargetRefs.Find(ActorRef) != -1
+			TargetRefs[TargetRefs.Find(ActorRef)] = none
+		endIf
+		TargetRefs[4] = TargetRefs[3]
+		TargetRefs[3] = TargetRefs[2]
+		TargetRefs[2] = TargetRefs[1]
+		TargetRefs[1] = TargetRefs[0]
+		TargetRefs[0] = ActorRef
+	endIf
+endFunction
+
+; Actor function GetNthValidTargetActor(int i)
+; 	Form FormRef = StorageUtil.FormListGet(self, "TargetActors", i)
+; 	if SexLabUtil.IsActor(FormRef)
+; 		return FormRef as Actor
+; 	endIf
+; 	return none
+; endFunction
+
+; Actor[] function GetTargetActors()
+; 	StorageUtil.FormListRemove(self, "TargetActors", TargetRef, true)
+
+; 	Actor[] Target
+; 	int i = StorageUtil.FormListFilterByTypes(self, "TargetActors")
+; 	while i
+
+; 	endWhile
+
+; 	Form[] All = new Form[5]
+; 	StorageUtil.FormListSlice(self, "TargetActors", All)
+
+; 	int i = 5
+; 	while i
+; 		i -= 1
+; 		if All[i]
+; 			if !SexLabUtil.IsActor(FormRef)
+; 				StorageUtil.FormLis7tRemove(self, "TargetActors", All[i])
+; 			else
+
+; 			endIf
+; 		endIf
+
+; 	endWhile
+
+
+
+; endFunction
 
 function GetThreadControl(sslThreadController TargetThread)
 	if Control || !(TargetThread.GetState() == "Animating" || TargetThread.GetState() == "Advancing")
@@ -548,14 +622,15 @@ bool function SaveAdjustmentProfile() global native
 ; ------------------------------------------------------- ;
 
 Spell function GetHDTSpell(Actor ActorRef)
-	if !HasHDTHeels || !HDTHeelEffect || !ActorRef || !ActorRef.GetWornForm(Armor.GetMaskForSlot(37))
+	if !HasHDTHeels || !HDTHeelEffect || !ActorRef; || !ActorRef.GetWornForm(Armor.GetMaskForSlot(37))
 		return none
 	endIf
 	int i = ActorRef.GetSpellCount()
 	while i
 		i -= 1
 		Spell SpellRef = ActorRef.GetNthSpell(i)
-		if SpellRef && StringUtil.Find(SpellRef.GetName(), "High Heel") != -1
+		Log(SpellRef.GetName(), "Checking("+SpellRef+")")
+		if SpellRef && StringUtil.Find(SpellRef.GetName(), "Heel") != -1
 			return SpellRef
 		endIf
 		int n = SpellRef.GetNumEffects()
@@ -605,28 +680,28 @@ endFunction
 
 bool function CheckSystemPart(string CheckSystem)
 	if CheckSystem == "Skyrim"
-		return (StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float) >= 1.9
+		return (StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float) >= 1.5
 
 	elseIf CheckSystem == "SKSE"
-		return SKSE.GetScriptVersionRelease() >= 48
+		return SKSE.GetScriptVersionRelease() >= 60
 
 	elseIf CheckSystem == "SkyUI"
 		return Quest.GetQuest("SKI_ConfigManagerInstance") != none
 
 	elseIf CheckSystem == "SexLabUtil"
-		return SexLabUtil.GetPluginVersion() >= 16100
+		return SexLabUtil.GetPluginVersion() >= 16300
 
 	elseIf CheckSystem == "PapyrusUtil"
-		return PapyrusUtil.GetVersion() >= 32
+		return PapyrusUtil.GetVersion() >= 36
 
 	elseIf CheckSystem == "FNIS"
-		return FNIS.VersionCompare(5, 4, 2) >= 0
+		return FNIS.VersionCompare(7, 0, 0) >= 0
 
 	elseIf CheckSystem == "FNISGenerated"
 		return FNIS.IsGenerated()
 
 	elseIf CheckSystem == "FNISCreaturePack"
-		return FNIS.VersionCompare(5, 1, 0, true) >= 0
+		return FNIS.VersionCompare(7, 0, 0, true) >= 0
 
 	elseIf CheckSystem == "FNISSexLabFramework" && PlayerRef.Is3DLoaded() && Game.GetCameraState() > 3
 		return PlayerRef.GetAnimationVariableInt("SexLabFramework") >= 16000
@@ -645,11 +720,11 @@ bool function CheckSystem()
 		return false
 	; Check SKSE install
 	elseIf !CheckSystemPart("SKSE")
-		CheckSKSE.Show(1.73)
+		CheckSKSE.Show(2.11)
 		return false
 	; Check SkyUI install - depends on passing SKSE check passing
 	elseIf !CheckSystemPart("SkyUI")
-		CheckSkyUI.Show(5.0)
+		CheckSkyUI.Show(5.2)
 		return false
 	; Check SexLabUtil install - this should never happen if they have properly updated
 	elseIf !CheckSystemPart("SexLabUtil")
@@ -657,7 +732,7 @@ bool function CheckSystem()
 		return false
 	; Check PapyrusUtil install - depends on passing SKSE check passing
 	elseIf !CheckSystemPart("PapyrusUtil")
-		CheckPapyrusUtil.Show(3.2)
+		CheckPapyrusUtil.Show(3.6)
 		return false
 	; Check FNIS generation - soft fail
 	; elseIf CheckSystemPart("FNISSexLabFramework")
@@ -677,6 +752,9 @@ function Reload()
 	LoadLibs(false)
 	SexLab = SexLabUtil.GetAPI()
 
+	; SetVehicle Scaling Fix
+	SexLabUtil.VehicleFixMode((DisableScale as int))
+
 	; Configure SFX & Voice volumes
 	AudioVoice.SetVolume(VoiceVolume)
 	AudioSFX.SetVolume(SFXVolume)
@@ -690,10 +768,12 @@ function Reload()
 	UnregisterForAllKeys()
 	RegisterForKey(ToggleFreeCamera)
 	RegisterForKey(TargetActor)
+	RegisterForKey(EndAnimation)
 
 	; Mod compatability checks
 	; - HDT/NiO High Heels
-	HasNiOverride = SKSE.GetPluginVersion("NiOverride") >= 6 && NiOverride.GetScriptVersion() >= 6
+	; HasNiOverride = false ; SKYRIM SE DISABLED
+	HasNiOverride = SKSE.GetPluginVersion("NiOverride") >= 6 || NiOverride.GetScriptVersion() >= 6
 	HasHDTHeels   = Game.GetModByName("hdtHighHeel.esm") != 255
 	if HasHDTHeels && !HDTHeelEffect
 		HDTHeelEffect = Game.GetFormFromFile(0x800, "hdtHighHeel.esm") as MagicEffect
@@ -709,8 +789,78 @@ function Reload()
 	; Clean valid actors list
 	StorageUtil.FormListRemove(self, "ValidActors", PlayerRef, true)
 	StorageUtil.FormListRemove(self, "ValidActors", none, true)
+
+
+	; TODO: confirm forms are the same in SSE
+	; Dawnguard additions
 	if Game.GetModByName("Dawnguard.esm") != 255
+		; Serana doesn't have ActorTypeNPC, force validate.
 		StorageUtil.FormListAdd(self, "ValidActors", Game.GetFormFromFile(0x2B6C, "Dawnguard.esm"), false)
+		; Bedroll
+		Form DLC1BedrollGroundF = Game.GetFormFromFile(0xC651, "Dawnguard.esm")
+		if DLC1BedrollGroundF && !BedsList.HasForm(DLC1BedrollGroundF)
+			BedsList.AddForm(DLC1BedrollGroundF)
+			BedRollsList.AddForm(DLC1BedrollGroundF)
+		endIf
+	endIf
+
+	; Dragonborn additions
+	if Game.GetModByName("Dragonborn.esm") != 255 && !BedsList.HasForm(Game.GetFormFromFile(0x21749, "Dragonborn.esm"))
+		Log("Adding Dragonborn beds to formlist...")
+		; Single Bed
+		Form DLC2DarkElfBed01             = Game.GetFormFromFile(0x21749, "Dragonborn.esm")
+		Form DLC2DarkElfBed01R            = Game.GetFormFromFile(0x35037, "Dragonborn.esm")
+		Form DLC2DarkElfBed01L            = Game.GetFormFromFile(0x35038, "Dragonborn.esm")
+		BedsList.AddForm(DLC2DarkElfBed01)
+		BedsList.AddForm(DLC2DarkElfBed01R)
+		BedsList.AddForm(DLC2DarkElfBed01L)
+		; Double Bed
+		Form DLC2DarkElfBedDouble01       = Game.GetFormFromFile(0x32802, "Dragonborn.esm")
+		Form DLC2DarkElfBedDouble01R      = Game.GetFormFromFile(0x36796, "Dragonborn.esm")
+		Form DLC2DarkElfBedDouble01L      = Game.GetFormFromFile(0x36797, "Dragonborn.esm")
+		BedsList.AddForm(DLC2DarkElfBedDouble01)
+		BedsList.AddForm(DLC2DarkElfBedDouble01R)
+		BedsList.AddForm(DLC2DarkElfBedDouble01L)
+		DoubleBedsList.AddForm(DLC2DarkElfBedDouble01)
+		DoubleBedsList.AddForm(DLC2DarkElfBedDouble01R)
+		DoubleBedsList.AddForm(DLC2DarkElfBedDouble01L)
+		; Bedroll
+		Form BedRollHay01LDirtSnowPath01F = Game.GetFormFromFile(0x18617, "Dragonborn.esm")
+		Form BedRollHay01LDirtSnowPath01R = Game.GetFormFromFile(0x18618, "Dragonborn.esm")
+		Form BedRollHay01LDirtSnowPath    = Game.GetFormFromFile(0x1EE28, "Dragonborn.esm")
+		Form BedrollHay01IceL             = Game.GetFormFromFile(0x25E51, "Dragonborn.esm")
+		Form BedrollHay01IceR             = Game.GetFormFromFile(0x25E52, "Dragonborn.esm")
+		Form BedrollHay01R_Ash            = Game.GetFormFromFile(0x28A68, "Dragonborn.esm")
+		Form BedrollHay01L_Ash            = Game.GetFormFromFile(0x28AA9, "Dragonborn.esm")
+		Form BedrollHay01LDirtPath01L     = Game.GetFormFromFile(0x2C0B2, "Dragonborn.esm")
+		Form BedrollHay01LDirtPath01F     = Game.GetFormFromFile(0x2C0B3, "Dragonborn.esm")
+		Form BedrollHay01LDirtPath01R     = Game.GetFormFromFile(0x2C0B4, "Dragonborn.esm")
+		Form BedrollHay01GlacierL         = Game.GetFormFromFile(0x3D131, "Dragonborn.esm")
+		Form BedrollHay01GlacierR         = Game.GetFormFromFile(0x3D132, "Dragonborn.esm")
+		BedsList.AddForm(BedRollHay01LDirtSnowPath01F)
+		BedsList.AddForm(BedRollHay01LDirtSnowPath01R)
+		BedsList.AddForm(BedRollHay01LDirtSnowPath)
+		BedsList.AddForm(BedrollHay01IceL)
+		BedsList.AddForm(BedrollHay01IceR)
+		BedsList.AddForm(BedrollHay01R_Ash)
+		BedsList.AddForm(BedrollHay01L_Ash)
+		BedsList.AddForm(BedrollHay01LDirtPath01L)
+		BedsList.AddForm(BedrollHay01LDirtPath01F)
+		BedsList.AddForm(BedrollHay01LDirtPath01R)
+		BedsList.AddForm(BedrollHay01GlacierL)
+		BedsList.AddForm(BedrollHay01GlacierR)
+		BedRollsList.AddForm(BedRollHay01LDirtSnowPath01F)
+		BedRollsList.AddForm(BedRollHay01LDirtSnowPath01R)
+		BedRollsList.AddForm(BedRollHay01LDirtSnowPath)
+		BedRollsList.AddForm(BedrollHay01IceL)
+		BedRollsList.AddForm(BedrollHay01IceR)
+		BedRollsList.AddForm(BedrollHay01R_Ash)
+		BedRollsList.AddForm(BedrollHay01L_Ash)
+		BedRollsList.AddForm(BedrollHay01LDirtPath01L)
+		BedRollsList.AddForm(BedrollHay01LDirtPath01F)
+		BedRollsList.AddForm(BedrollHay01LDirtPath01R)
+		BedRollsList.AddForm(BedrollHay01GlacierL)
+		BedRollsList.AddForm(BedrollHay01GlacierR)
 	endIf
 
 	; Remove gender override if player's gender matches normally
@@ -731,6 +881,28 @@ function Reload()
 
 	; Load json animation profile
 	ImportProfile(PapyrusUtil.ClampInt(AnimProfile, 1, 5))
+endFunction
+
+int function RegisterThreadHook(sslThreadHook Hook)
+	if !Hook
+		Log("RegisterThreadHook("+Hook+") - INVALID HOOK")
+		return -1
+	elseIf !ThreadHooks
+		ThreadHooks = new sslThreadHook[64]
+	elseIf ThreadHooks.Find(Hook) != -1
+		Log("RegisterThreadHook("+Hook+") - ALREADY INSTALLED ["+ThreadHooks.Find(Hook)+"]")
+		return ThreadHooks.Find(Hook)
+	endIf
+
+	;TODO: proper indexing
+	;/ int i = nthHook
+	nthHook += 1 /;
+	ThreadHooks[ThreadHooks.Find(none)] = Hook
+	return ThreadHooks.Find(Hook)
+endFunction
+
+sslThreadHook[] function GetThreadHooks()
+	return ThreadHooks
 endFunction
 
 function Setup()
@@ -771,6 +943,7 @@ function SetDefaults()
 	AdjustTargetStage  = false
 	DisableTeleport    = true
 	SeedNPCStats       = true
+	DisableScale       = true ; TMP: enabled by default for testing
 	
 	; Integers
 	AnimProfile        = 1
@@ -983,6 +1156,7 @@ function ExportSettings()
 	ExportBool("AdjustTargetStage", AdjustTargetStage)
 	ExportBool("DisableTeleport", DisableTeleport)
 	ExportBool("SeedNPCStats", SeedNPCStats)
+	ExportBool("DisableScale", DisableScale)
 
 	; Integers
 	ExportInt("AnimProfile", AnimProfile)
@@ -1093,6 +1267,7 @@ function ImportSettings()
 	AdjustTargetStage  = ImportBool("AdjustTargetStage", AdjustTargetStage)
 	DisableTeleport    = ImportBool("DisableTeleport", DisableTeleport)
 	SeedNPCStats       = ImportBool("SeedNPCStats", SeedNPCStats)
+	DisableScale       = ImportBool("DisableScale", DisableScale)
 
 	; Integers
 	AnimProfile        = ImportInt("AnimProfile", AnimProfile)
@@ -1151,7 +1326,7 @@ function ImportSettings()
 	while i
 		i -= 1
 		if AlwaysStrip[i]
-			ActorLib.MakeAlwaysStrip(NoStrip[i])
+			ActorLib.MakeAlwaysStrip(AlwaysStrip[i])
 		endIf
 	endWhile
 	StorageUtil.FormListRemove(none, "AlwaysStrip", none, true)

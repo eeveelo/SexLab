@@ -53,6 +53,20 @@ int property ActiveAnimations hidden
 	endFunction
 endProperty
 
+;/* Check if current user has enabled creature animations or not. */;
+bool property AllowCreatures hidden
+	bool function get()
+		return Config.AllowCreatures
+	endFunction
+endProperty
+
+;/* Check if current user has enabled gender checking for creature animations */;
+bool property CreatureGenders hidden
+	bool function get()
+		return Config.UseCreatureGender
+	endFunction
+endProperty
+
 ;#-----------------------------------------------------------------------------------------------------------------------------------------#
 ;#                                                                                                                                         #
 ;#                                                          API RELATED FUNCTIONS                                                          #
@@ -273,7 +287,7 @@ endFunction
 * * @return: True if the actor is being animated by SexLab, and False if it is not.
 */;
 bool function IsActorActive(Actor ActorRef)
-	return ActorRef.IsInFaction(Config.AnimatingFaction)
+	return ActorRef.IsInFaction(Config.AnimatingFaction) ; TODO: add alias check: https://www.loverslab.com/topic/16623-skyrim-sexlab-sex-animation-framework-v162-updated-jun-3rd-2016/?page=484&tab=comments#comment-2122926
 endFunction
 
 ;/* ForbidActor
@@ -596,6 +610,51 @@ endFunction
 */;
 bool function IsBedAvailable(ObjectReference BedRef)
 	return ThreadLib.IsBedAvailable(BedRef)
+endFunction
+
+;/* AddCustomBed
+* * Adds a new bed to the list of beds SexLab will search for when starting an animation.
+* * 
+* * @param: Form BaseBed - The base object of the bed you wish to add.
+* * @param: int BedType - Defines what kind of bed it is. 0 = normal bed, 1 = bedroll, 2 = double bed.
+* * @return: bool - TRUE if bed was successfully added to the bed list. 
+*/;
+bool function AddCustomBed(Form BaseBed, int BedType = 0)
+	return Config.AddCustomBed(BaseBed, BedType)
+endFunction
+
+;/* SetCustomBedOffset
+* * Override the default bed offsets used by SexLab [30, 0, 37, 0] for a given base bed object during animation.
+* * 
+* * @param: Form BaseBed - The base object of the bed you wish to add custom offsets.
+* * @param: float Forward - The amount the actor(s) should be pushed forward on the bed when playing an animation.
+* * @param: float Sideward - The amount the actor(s) should be pushed sideward on the bed when playing an animation.
+* * @param: float Upward - The amount the actor(s) should be pushed upward on the bed when playing an animation. (NOTE: Ignored for bedrolls)
+* * @param: float Rotation - The amount the actor(s) should be rotated on the bed when playing an animation.
+* * @return: bool - TRUE if BedRef if the bed succesfully had it's default offsets overriden.
+*/;
+bool function SetCustomBedOffset(Form BaseBed, float Forward = 30.0, float Sideward = 0.0, float Upward = 37.0, float Rotation = 0.0)
+	return Config.SetCustomBedOffset(BaseBed, Forward, Sideward, Upward, Rotation)
+endFunction
+
+;/* ClearCustomBedOffset
+* * Removes any bed offset overrides set by the SetCustomBedOffset() function. Reverting it's offsets to the SexLab default.
+* * 
+* * @param: Form BaseBed - The base object of the bed you wish to remove custom offsets from.
+* * @return: bool - TRUE if BedRef if the bed succesfully had it's default offsets restored. FALSE if it didn't have any to begin with.
+*/;
+bool function ClearCustomBedOffset(Form BaseBed)
+	return Config.ClearCustomBedOffset(BaseBed)
+endFunction
+
+;/* GetBedOffsets
+* * Get an array of offsets that would be used by the given bed. 
+ the 
+* * @param: ObjectReference BedRef - The bed object you want to get offsets for.
+* * @return: float[] - The array of offsets organized as [Forward, Sideward, Upward, Rotation]. If no customs defined, the default is returned.
+*/;
+float[] function GetBedOffsets(Form BaseBed)
+	return Config.GetBedOffsets(BaseBed)
 endFunction
 
 ;#-----------------------------------------------------------------------------------------------------------------------------------------#

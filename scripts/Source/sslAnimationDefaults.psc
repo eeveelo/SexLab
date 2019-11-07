@@ -1,47 +1,17 @@
 scriptname sslAnimationDefaults extends sslAnimationFactory
 
-function RegisterCategory(string Type)
-	ModEvent.Send(ModEvent.Create("SexLabSlotAnimations_"+Type))
-	Utility.WaitMenuMode(0.4)
-endFunction
 
 ;/ 
-TODO: Possibly add a JSON loader method for pluginless animnation packs.
 
-example:
-{
-	"name": "Arrok Cowgirl",
-	"category": "Cowgirl",
-	"soundfx": "Squishing",
-	"tags" : ["Arrok","BBP","Sex","Penis","Vaginal","Cowgirl","Facing","Loving","Creampie"],
-	"positions": [
-		{
-			"gender": "female",
-			"stages": [
-				{ "event": "Arrok_Cowgirl_A1_S1", "cum": "VaginalAnal" },
-				{ "event": "Arrok_Cowgirl_A1_S2", "cum": "VaginalAnal" },
-				{ "event": "Arrok_Cowgirl_A1_S3", "cum": "VaginalAnal" },
-				{ "event": "Arrok_Cowgirl_A1_S4", "cum": "VaginalAnal" }
-			]
-		},
-		{
-			"gender": "male",
-			"stages": [
-				{ "event": "Arrok_Cowgirl_A2_S1", "offset": [-100, 0, 0, 0], "sos": -2 },
-				{ "event": "Arrok_Cowgirl_A2_S2", "offset": [-100, 0, 0, 0], "sos": -2 },
-				{ "event": "Arrok_Cowgirl_A2_S3", "offset": [-100, 0, 0, 0], "sos": -2 },
-				{ "event": "Arrok_Cowgirl_A2_S4", "offset": [-100, 0, 0, 0], "sos": -2 }
-			]
-		},
-	]
-}
-
+For JSON loading animation instructions, see /data/SKSE/Plugins/SexLab/Animations/_README_.txt
 
 /;
 
 function LoadAnimations()
 	; Prepare factory resources (as non creature)
 	PrepareFactory()
+
+	bool APPack = Game.GetPlayer().GetAnimationVariableInt("SexLabAPAnimations") >= 16300
 
 	; Missionary
 	RegisterAnimation("SexLabMissionary")
@@ -56,9 +26,11 @@ function LoadAnimations()
 	RegisterAnimation("LeitoMissionaryVar")
 	RegisterAnimation("fdBedMissionary")
 	RegisterAnimation("fdLegUp")
-	RegisterAnimation("APBedMissionary")
-	RegisterAnimation("APHoldLegUp")
-	RegisterAnimation("APLegUp")
+	if APPack
+		RegisterAnimation("APBedMissionary")
+		RegisterAnimation("APHoldLegUp")
+		RegisterAnimation("APLegUp")
+	endIf
 	RegisterCategory("Missionary")
 
 	; DoggyStyle
@@ -73,7 +45,9 @@ function LoadAnimations()
 	RegisterAnimation("zjDomination")
 	RegisterAnimation("LeitoDoggy")
 	RegisterAnimation("fdDoggyStyle")
-	RegisterAnimation("APDoggyStyle")
+	if APPack
+		RegisterAnimation("APDoggyStyle")
+	endIf
 	RegisterCategory("DoggyStyle")
 
 	; Cowgirl
@@ -86,13 +60,17 @@ function LoadAnimations()
 	RegisterAnimation("fdCowgirl")
 	RegisterAnimation("fdRCowgirl")
 	RegisterAnimation("MitosReverseCowgirl")
-	RegisterAnimation("APCowgirl")
+	if APPack
+		RegisterAnimation("APCowgirl")
+	endIf
 	RegisterCategory("Cowgirl")
 
 	; Sideways
 	RegisterAnimation("SexLabSideways")
 	RegisterAnimation("ArrokSideways")
-	RegisterAnimation("APShoulder")
+	if APPack
+		RegisterAnimation("APShoulder")
+	endIf
 	RegisterCategory("Sideways")
 	
 	; Standing
@@ -107,7 +85,9 @@ function LoadAnimations()
 	RegisterAnimation("zjHolding")
 	RegisterAnimation("LeitoStanding")
 	RegisterAnimation("MitosStanding")
-	RegisterAnimation("APStanding")
+	if APPack
+		RegisterAnimation("APStanding")
+	endIf
 	RegisterCategory("Standing")
 	
 	; Anal
@@ -115,8 +95,10 @@ function LoadAnimations()
 	RegisterAnimation("zjAnal")
 	RegisterAnimation("LeitoDoggyAnal")
 	RegisterAnimation("MitosHugBehind")
-	RegisterAnimation("APAnal")
-	RegisterAnimation("APFaceDown")
+	if APPack
+		RegisterAnimation("APAnal")
+		RegisterAnimation("APFaceDown")
+	endIf
 	RegisterCategory("Anal")
 	
 	; Oral
@@ -127,17 +109,21 @@ function LoadAnimations()
 	RegisterAnimation("LeitoBlowjob")
 	RegisterAnimation("LeitoCunnilingus")
 	RegisterAnimation("MitosFaceFemdom")
-	RegisterAnimation("APBlowjob")
-	RegisterAnimation("APKneelBlowjob")
-	RegisterAnimation("APStandBlowjob")
-	RegisterAnimation("APHandjob")
-	RegisterAnimation("APSkullFuck")
+	if APPack
+		RegisterAnimation("APBlowjob")
+		RegisterAnimation("APKneelBlowjob")
+		RegisterAnimation("APStandBlowjob")
+		RegisterAnimation("APHandjob")
+		RegisterAnimation("APSkullFuck")
+	endIf
 	RegisterCategory("Oral")
 	
 	; Boobjob
 	RegisterAnimation("SexLabBoobjob")
 	RegisterAnimation("ArrokBoobjob")
-	RegisterAnimation("APBoobjob")
+	if APPack
+		RegisterAnimation("APBoobjob")
+	endIf
 	RegisterCategory("Boobjob")
 	
 	; Foreplay
@@ -171,7 +157,9 @@ function LoadAnimations()
 	RegisterAnimation("MitosLapLove")
 	RegisterAnimation("MitosReachAround")
 	RegisterAnimation("fdFisting")
-	RegisterAnimation("APFisting")
+	if APPack
+		RegisterAnimation("APFisting")
+	endIf
 	RegisterCategory("Misc")
 
 	; Solo
@@ -179,9 +167,11 @@ function LoadAnimations()
 	RegisterAnimation("LeitoFemaleSolo")
 	RegisterAnimation("fdFMasturbation")
 	RegisterAnimation("FBFMasturbation")
-	RegisterAnimation("APFemaleSolo")
 	RegisterAnimation("ArrokMaleMasturbation")
 	RegisterAnimation("fdMMasturbation")
+	if APPack
+		RegisterAnimation("APFemaleSolo")
+	endIf
 	RegisterCategory("Solo")
 	
 	; 3P+
@@ -194,6 +184,9 @@ function LoadAnimations()
 	RegisterAnimation("ZynFemdom")
 	RegisterAnimation("ZynFourWay")
 	RegisterCategory("Orgy")
+
+	; Register any remaining custom categories from json loaders
+	RegisterOtherCategories()
 endFunction
 
 function ArrokBlowjob(int id)
@@ -1010,7 +1003,7 @@ endFunction
 function APAnal(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Enabled = false
+	Base.Enabled = true
 	Base.Name    = "AP Anal"
 	Base.SoundFX = Squishing
 
@@ -1036,7 +1029,7 @@ endFunction
 function APBedMissionary(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Enabled = false
+	Base.Enabled = true
 	Base.Name    = "AP Bed Missionary"
 	Base.SoundFX = Squishing
 
@@ -1064,7 +1057,7 @@ endFunction
 function APBlowjob(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Enabled = false
+	Base.Enabled = true
 	Base.Name    = "AP Blowjob"
 	Base.SoundFX = Sucking
 
@@ -1090,7 +1083,7 @@ endFunction
 function APBoobjob(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Enabled = false
+	Base.Enabled = true
 	Base.Name    = "AP Boobjob"
 
 
@@ -1116,7 +1109,7 @@ endFunction
 function APCowgirl(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Enabled = false
+	Base.Enabled = true
 	Base.Name    = "AP Cowgirl"
 	Base.SoundFX = Squishing
 
@@ -1144,7 +1137,7 @@ endFunction
 function APFemaleSolo(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Enabled = false
+	Base.Enabled = true
 	Base.Name    = "AP Female Masturbation"
 	Base.SoundFX = Squishing
 
@@ -1164,7 +1157,7 @@ endFunction
 function APFisting(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Enabled = false
+	Base.Enabled = true
 	Base.Name    = "AP Fisting"
 	Base.SoundFX = Squishing
 
@@ -1190,7 +1183,7 @@ endFunction
 function APHandjob(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Enabled = false
+	Base.Enabled = true
 	Base.Name    = "AP Handjob"
 
 
@@ -1216,7 +1209,7 @@ endFunction
 function APKneelBlowjob(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Enabled = false
+	Base.Enabled = true
 	Base.Name    = "AP Kneeling Blowjob"
 	Base.SoundFX = Sucking
 
@@ -1242,7 +1235,7 @@ endFunction
 function APLegUp(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Enabled = false
+	Base.Enabled = true
 	Base.Name    = "AP Leg Up Fuck"
 	Base.SoundFX = Squishing
 
@@ -1268,7 +1261,7 @@ endFunction
 function APShoulder(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Enabled = false
+	Base.Enabled = true
 	Base.Name    = "AP Shoulder"
 	Base.SoundFX = Squishing
 
@@ -1294,7 +1287,7 @@ endFunction
 function APStandBlowjob(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Enabled = false
+	Base.Enabled = true
 	Base.Name    = "AP Standing Blowjob"
 	Base.SoundFX = Sucking
 
@@ -1320,7 +1313,7 @@ endFunction
 function APStanding(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Enabled = false
+	Base.Enabled = true
 	Base.Name    = "AP Standing"
 	Base.SoundFX = Squishing
 
@@ -1346,7 +1339,7 @@ endFunction
 function APDoggyStyle(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Enabled = false
+	Base.Enabled = true
 	Base.Name    = "AP DoggyStyle"
 	Base.SoundFX = Squishing
 
@@ -1372,7 +1365,7 @@ endFunction
 function APHoldLegUp(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Enabled = false
+	Base.Enabled = true
 	Base.Name    = "AP Holding Leg Up"
 	Base.SoundFX = Squishing
 
@@ -1398,7 +1391,7 @@ endFunction
 function APFaceDown(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Enabled = false
+	Base.Enabled = true
 	Base.Name    = "AP Face Down Anal"
 	Base.SoundFX = Squishing
 
@@ -1424,7 +1417,7 @@ endFunction
 function APSkullFuck(int id)
 	sslBaseAnimation Base = Create(id)
 
-	Base.Enabled = false
+	Base.Enabled = true
 	Base.Name    = "AP Skull Fuck"
 	Base.SoundFX = Sucking
 

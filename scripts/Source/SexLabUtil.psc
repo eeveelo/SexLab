@@ -5,11 +5,11 @@ scriptname SexLabUtil hidden
 ; ------------------------------------------------------- ;
 
 int function GetVersion() global
-	return 16101
+	return 16205
 endFunction
 
 string function GetStringVer() global
-	return "1.61b"
+	return "1.63 SE dev 5"
 endFunction
 
 bool function SexLabIsActive() global
@@ -151,8 +151,9 @@ endFunction
 
 int function GetPluginVersion() global native
 bool function HasKeywordSub(form ObjRef, string LookFor) global native
-string function RemoveSubString(string Input, string RemoveString) global native
+string function RemoveSubString(string InputString, string RemoveString) global native
 function PrintConsole(string output) global native
+function VehicleFixMode(int mode) global native
 
 ; Inline true/false return - pseudo papyrus ternary
 float function FloatIfElse(bool isTrue, float returnTrue, float returnFalse = 0.0) global native
@@ -163,6 +164,12 @@ Actor function ActorIfElse(bool isTrue, Actor returnTrue, Actor returnFalse = no
 ObjectReference function ObjectIfElse(bool isTrue, ObjectReference returnTrue, ObjectReference returnFalse = none) global native
 ReferenceAlias function AliasIfElse(bool isTrue, ReferenceAlias returnTrue, ReferenceAlias returnFalse = none) global native
 Actor[] function MakeActorArray(Actor Actor1 = none, Actor Actor2 = none, Actor Actor3 = none, Actor Actor4 = none, Actor Actor5 = none) global native
+
+int function IntMinMaxValue(int[] searchArray, bool findHighestValue = true) global native
+int function IntMinMaxIndex(int[] searchArray, bool findHighestValue = true) global native
+
+float function FloatMinMaxValue(float[] searchArray, bool findHighestValue = true) global native
+int function FloatMinMaxIndex(float[] searchArray, bool findHighestValue = true) global native
 
 function Wait(float seconds) global
 	float timer = Utility.GetCurrentRealTime() + seconds

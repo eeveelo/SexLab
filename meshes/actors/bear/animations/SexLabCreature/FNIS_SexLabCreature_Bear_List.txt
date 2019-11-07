@@ -1,4 +1,4 @@
-Version V1.60
+Version V1.63
 
 s Bear_Doggystyle_A2_S1 Bear_Doggystyle_A2_S1.hkx
 + Bear_Doggystyle_A2_S2 Bear_Doggystyle_A2_S2.hkx

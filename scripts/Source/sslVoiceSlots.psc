@@ -54,7 +54,7 @@ sslBaseVoice function PickVoice(Actor ActorRef)
 	bool IsPlayer = ActorRef == PlayerRef
 	; Find if a saved voice exists and in what slot
 	sslBaseVoice Saved = GetSaved(ActorRef)
-	if Saved && (IsPlayer || Config.NPCSaveVoice)
+	if Saved && (IsPlayer || Config.NPCSaveVoice || HasCustomVoice(ActorRef))
 		return Saved ; Use saved voice
 	endIf
 	; Pick a random voice based on gender
@@ -335,15 +335,29 @@ endFunction
 function RegisterSlots()
 	; Register default voices
 	(Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslVoiceDefaults).LoadVoices()
+	; Install creature voices, if needed.
+	if Config.AllowCreatures
+		(Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslVoiceDefaults).LoadCreatureVoices()
+	endIf
 	; Send mod event for 3rd party voices
 	ModEvent.Send(ModEvent.Create("SexLabSlotVoices"))
 	Debug.Notification("$SSL_NotifyVoiceInstall")
 endFunction
 
+bool RegisterLock
 int function Register(string Registrar)
-	if Registry.Find(Registrar) != -1 || Slotted >= 375
+	if Registrar == "" || Registry.Find(Registrar) != -1 || Slotted >= 375
 		return -1
 	endIf
+	
+	; Thread lock registration
+	float failsafe = Utility.GetCurrentRealTime() + 6.0
+	while RegisterLock && failsafe < Utility.GetCurrentRealTime()
+		Utility.WaitMenuMode(0.5)
+		Log("Register("+Registrar+") - Lock wait...")
+	endWhile
+	RegisterLock = true
+
 	int i = Slotted
 	Slotted += 1
 	if i >= Registry.Length
@@ -364,6 +378,9 @@ int function Register(string Registrar)
 	endIf
 	Registry[i] = Registrar
 	Objects[i]  = GetNthAlias(i)
+
+	; Release lock
+	RegisterLock = false
 	return i
 endFunction
 
@@ -415,6 +432,7 @@ function Setup()
 		endIf
 	endIf
 	; Init defaults
+	RegisterLock = false
 	RegisterSlots()
 	; RegisterCreatureVoices()
 	GoToState("")

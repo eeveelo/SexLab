@@ -168,6 +168,8 @@ Actor property VictimRef hidden
 	endFunction
 endProperty
 
+bool property DisableOrgasms auto hidden
+
 ; Beds
 int[] property BedStatus auto hidden
 ; BedStatus[0] = -1 forbid, 0 allow, 1 force
@@ -319,6 +321,9 @@ state Making
 		GoToState("Starting")
 		UnregisterForUpdate()
 		int i
+
+		HookAnimationStarting()
+		SendThreadEvent("AnimationStarting")
 
 		; ------------------------- ;
 		; --   Validate Thread   -- ;
@@ -482,10 +487,18 @@ endFunction
 
 ; Actor Overrides
 function SetStrip(Actor ActorRef, bool[] StripSlots)
-	if StripSlots.Length == 33
+	if StripSlots && StripSlots.Length == 33
 		ActorAlias(ActorRef).OverrideStrip(StripSlots)
 	else
 		Log("Malformed StripSlots bool[] passed, must be 33 length bool array, "+StripSlots.Length+" given", "ERROR")
+	endIf
+endFunction
+
+function SetNoStripping(Actor ActorRef)
+	if ActorRef
+		bool[] StripSlots = new bool[33]
+		ActorAlias(ActorRef).OverrideStrip(StripSlots)
+		ActorAlias(ActorRef).DoUndress = false
 	endIf
 endFunction
 
@@ -557,6 +570,31 @@ function SetEndAnimationEvent(Actor ActorRef, string EventName = "IdleForceDefau
 	ActorAlias(ActorRef).SetEndAnimationEvent(EventName)
 endFunction
 
+; Orgasms
+function DisableAllOrgasms(bool OrgasmsDisabled = true)
+	DisableOrgasms = OrgasmsDisabled
+endFunction
+
+function DisableOrgasm(Actor ActorRef, bool OrgasmDisabled = true)
+	if ActorRef
+		ActorAlias(ActorRef).DisableOrgasm(OrgasmDisabled)
+	endIf
+endFunction
+
+bool function IsOrgasmAllowed(Actor ActorRef)
+	return ActorAlias(ActorRef).IsOrgasmAllowed()
+endFunction
+
+bool function NeedsOrgasm(Actor ActorRef)
+	return ActorAlias(ActorRef).NeedsOrgasm()
+endFunction
+
+function ForceOrgasm(Actor ActorRef)
+	if ActorRef
+		ActorAlias(ActorRef).DoOrgasm(true)
+	endIf
+endFunction
+
 ; Voice
 function SetVoice(Actor ActorRef, sslBaseVoice Voice, bool ForceSilent = false)
 	ActorAlias(ActorRef).SetVoice(Voice, ForceSilent)
@@ -584,7 +622,7 @@ function SetStrapon(Actor ActorRef, Form ToStrapon)
 endfunction
 
 Form function GetStrapon(Actor ActorRef)
-	ActorAlias(ActorRef).GetStrapon()
+	return ActorAlias(ActorRef).GetStrapon()
 endfunction
 
 ; Expressions
@@ -745,17 +783,19 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function SetForcedAnimations(sslBaseAnimation[] AnimationList)
-	CustomAnimations = AnimationList
+	if AnimationList && AnimationList.Length > 0
+		CustomAnimations = AnimationList
+	endIf
 endFunction
 
 function SetAnimations(sslBaseAnimation[] AnimationList)
-	if AnimationList.Length != 0
+	if AnimationList && AnimationList.Length > 0
 		PrimaryAnimations = AnimationList
 	endIf
 endFunction
 
 function SetLeadAnimations(sslBaseAnimation[] AnimationList)
-	if AnimationList.Length != 0
+	if AnimationList && AnimationList.Length > 0
 		LeadIn = true
 		LeadAnimations = AnimationList
 	endIf
@@ -828,7 +868,7 @@ function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 		BedStatus[1] = ThreadLib.GetBedType(CenterOn)
 		if BedStatus[1] > 0
 			BedRef = CenterOn
-			float[] BedOffset = Config.BedOffset
+			float[] BedOffset = Config.GetBedOffsets(BedRef.GetBaseObject())
 			CenterLocation[0] = CenterLocation[0] + (BedOffset[0] * Math.sin(CenterLocation[5]))
 			CenterLocation[1] = CenterLocation[1] + (BedOffset[0] * Math.cos(CenterLocation[5]))
 			Log("Using Bed Type: "+BedStatus[1])
@@ -1031,6 +1071,86 @@ function SetupThreadEvent(string HookEvent)
 		; Log("Thread Hook Sent: "+HookEvent)
 	endIf
 	SendModEvent(HookEvent, thread_id)
+endFunction
+
+function HookAnimationStarting()
+	sslThreadHook[] ThreadHooks = Config.GetThreadHooks()
+	Log("HookAnimationStarting() - "+ThreadHooks)
+	int i
+	while i < ThreadHooks.Length
+		if ThreadHooks[i] && ThreadHooks[i].CanRunHook(Positions, Tags) && ThreadHooks[i].AnimationStarting(self)
+			Log("Global Hook AnimationStarting("+self+") - "+ThreadHooks[i])
+		else
+			Log("HookAnimationStarting() - Skipping["+i+"]: "+ThreadHooks[i])
+		endIf
+		i += 1
+	endWhile
+endFunction
+
+function HookAnimationPrepare()
+	sslThreadHook[] ThreadHooks = Config.GetThreadHooks()
+	Log("HookAnimationPrepare() - "+ThreadHooks)
+	int i
+	while i < ThreadHooks.Length
+		if ThreadHooks[i] && ThreadHooks[i].CanRunHook(Positions, Tags) && ThreadHooks[i].AnimationPrepare(self as sslThreadController)
+			Log("Global Hook AnimationPrepare("+self+") - "+ThreadHooks[i])
+		else
+			Log("HookAnimationPrepare() - Skipping["+i+"]: "+ThreadHooks[i])
+		endIf
+		i += 1
+	endWhile
+endFunction
+
+function HookStageStart()
+	sslThreadHook[] ThreadHooks = Config.GetThreadHooks()
+	int i
+	while i < ThreadHooks.Length
+		if ThreadHooks[i] && ThreadHooks[i].CanRunHook(Positions, Tags) && ThreadHooks[i].StageStart(self as sslThreadController)
+			Log("Global Hook StageStart("+self+") - "+ThreadHooks[i])
+		else
+			Log("HookStageStart() - Skipping["+i+"]: "+ThreadHooks[i])
+		endIf
+		i += 1
+	endWhile
+endFunction
+
+function HookStageEnd()
+	sslThreadHook[] ThreadHooks = Config.GetThreadHooks()
+	int i
+	while i < ThreadHooks.Length
+		if ThreadHooks[i] && ThreadHooks[i].CanRunHook(Positions, Tags) && ThreadHooks[i].StageEnd(self as sslThreadController)
+			Log("Global Hook StageEnd("+self+") - "+ThreadHooks[i])
+		else
+			Log("HookStageEnd() - Skipping["+i+"]: "+ThreadHooks[i])
+		endIf
+		i += 1
+	endWhile
+endFunction
+
+function HookAnimationEnding()
+	sslThreadHook[] ThreadHooks = Config.GetThreadHooks()
+	int i
+	while i < ThreadHooks.Length
+		if ThreadHooks[i] && ThreadHooks[i].CanRunHook(Positions, Tags) && ThreadHooks[i].AnimationEnding(self as sslThreadController)
+			Log("Global Hook AnimationEnding("+self+") - "+ThreadHooks[i])
+		else
+			Log("HookAnimationEnding() - Skipping["+i+"]: "+ThreadHooks[i])
+		endIf
+		i += 1
+	endWhile
+endFunction
+
+function HookAnimationEnd()
+	sslThreadHook[] ThreadHooks = Config.GetThreadHooks()
+	int i
+	while i < ThreadHooks.Length
+		if ThreadHooks[i] && ThreadHooks[i].CanRunHook(Positions, Tags) && ThreadHooks[i].AnimationEnd(self as sslThreadController)
+			Log("Global Hook AnimationEnding("+self+") - "+ThreadHooks[i])
+		else
+			Log("HookAnimationEnd() - Skipping["+i+"]: "+ThreadHooks[i])
+		endIf
+		i += 1
+	endWhile
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -1308,6 +1428,7 @@ function Initialize()
 	NoLeadIn       = false
 	FastEnd        = false
 	UseCustomTimers= false
+	DisableOrgasms = false
 	; Floats
 	SyncTimer      = 0.0
 	StartedAt      = 0.0

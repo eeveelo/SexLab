@@ -344,7 +344,7 @@ function FormListSlice(Form ObjKey, string KeyName, Form[] slice, int startIndex
 
 
 ;/ Sizes the given list to a set number of elements. If the list exists already it will be truncated
-   when given fewer elements, or resized to the appropiate length with the filler argument being used as
+   when given fewer elements, or resized to the appropriate length with the filler argument being used as
    the default values
 
    Returns the number of elements truncated (signed) or added (unsigned) onto the list.
@@ -386,6 +386,23 @@ float[] function FloatListToArray(Form ObjKey, string KeyName) global native
 string[] function StringListToArray(Form ObjKey, string KeyName) global native
 Form[] function FormListToArray(Form ObjKey, string KeyName) global native
 
+;/ Returns array of forms from list that have (or optionally don't have) the specified form types.
+   For valid list of form types, see FormType.psc or http://www.creationkit.com/GetType_-_Form
+
+   ObjKey: form to find value on. Set none to find global list value.
+   KeyName: name of list.
+   FormTypeIDs[]: The int papyrus array with all the form types you wish to filter for
+   [optional] ReturnMatching: By default, TRUE, the output Form[] array will contain forms from list that match the form types
+                              If set to FALSE, inverts the resulting array with forms that have a type that DO NOT match.
+/;
+Form[] function FormListFilterByTypes(Form ObjKey, string KeyName, int[] FormTypeIDs, bool ReturnMatching = true) global native
+; Convenience version of FormListFilterByTypes() for when only getting a single type.
+Form[] function FormListFilterByType(Form ObjKey, string KeyName, int FormTypeID, bool ReturnMatching = true) global
+   int[] FormTypeIDs = new int[1]
+   FormTypeIDs[0] = FormTypeID
+   return FormListFilterByTypes(ObjKey, KeyName, FormTypeIDs, ReturnMatching)
+endFunction
+
 ;/ Counts each type of of any KeyName that starts with a given string prefix on all objects.
 
    PrefixKey: The string a KeyName must start with to be counted. Cannot be empty.
@@ -400,7 +417,7 @@ int function CountFloatListPrefix(string PrefixKey) global native
 int function CountStringListPrefix(string PrefixKey) global native
 int function CountFormListPrefix(string PrefixKey) global native
 
-; Peforms all of the above prefix counts in one go.
+; Performs all of the above prefix counts in one go.
 int function CountAllPrefix(string PrefixKey) global native
 
 ;/ Counts each type of of any KeyName that starts with a given string prefix on all objects.
@@ -418,7 +435,7 @@ int function CountObjFloatListPrefix(Form ObjKey, string PrefixKey) global nativ
 int function CountObjStringListPrefix(Form ObjKey, string PrefixKey) global native
 int function CountObjFormListPrefix(Form ObjKey, string PrefixKey) global native
 
-; Peforms all of the above prefix counts in one go.
+; Performs all of the above prefix counts in one go.
 int function CountAllObjPrefix(Form ObjKey, string PrefixKey) global native
 
 
@@ -437,11 +454,11 @@ int function ClearFloatListPrefix(string PrefixKey) global native
 int function ClearStringListPrefix(string PrefixKey) global native
 int function ClearFormListPrefix(string PrefixKey) global native
 
-; Peforms all of the above prefix clears in one go.
+; Performs all of the above prefix clears in one go.
 int function ClearAllPrefix(string PrefixKey) global native
 
 
-;/ Clears each type of of any KeyName that starts with a given string prefix on specifc objects.
+;/ Clears each type of of any KeyName that starts with a given string prefix on specific objects.
    Returns the number of values/lists that were unset.
 
    ObjKey: form to perform the prefix clear on.
@@ -457,7 +474,7 @@ int function ClearObjFloatListPrefix(Form ObjKey, string PrefixKey) global nativ
 int function ClearObjStringListPrefix(Form ObjKey, string PrefixKey) global native
 int function ClearObjFormListPrefix(Form ObjKey, string PrefixKey) global native
 
-; Peforms all of the above prefix clears in one go.
+; Performs all of the above prefix clears in one go.
 int function ClearAllObjPrefix(Form ObjKey, string PrefixKey) global native
 
 ;/

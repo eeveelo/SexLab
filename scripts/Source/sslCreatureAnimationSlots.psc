@@ -25,6 +25,13 @@ sslBaseAnimation[] function GetByRace(int ActorCount, Race RaceRef)
 	if RaceTypes.Length < 1
 		return sslUtility.AnimationArray(0)
 	endIf
+	; Check Cache
+	string CacheName = ActorCount+":"+PapyrusUtil.StringJoin(RaceTypes, "|")
+	sslBaseAnimation[] Output = CheckCache(CacheName)
+	if Output
+		return Output
+	endIf
+	; Search
 	bool[] Valid  = Utility.CreateBoolArray(Slotted)
 	int i = Slotted
 	while i
@@ -41,6 +48,13 @@ sslBaseAnimation[] function GetByRaceTags(int ActorCount, Race RaceRef, string T
 	if RaceTypes.Length < 1
 		return sslUtility.AnimationArray(0)
 	endIf
+	; Check Cache
+	string CacheName = ActorCount+":"+Tags+":"+TagsSuppressed+":"+RequireAll+":"+PapyrusUtil.StringJoin(RaceTypes, "|")
+	sslBaseAnimation[] Output = CheckCache(CacheName)
+	if Output
+		return Output
+	endIf
+	; Search
 	bool[] Valid      = Utility.CreateBoolArray(Slotted)
 	string[] Suppress = StringSplit(TagsSuppressed)
 	string[] Search   = StringSplit(Tags)
@@ -58,6 +72,13 @@ sslBaseAnimation[] function GetByRaceKey(int ActorCount, string RaceKey)
 	if !HasRaceKey(RaceKey)
 		return sslUtility.AnimationArray(0)
 	endIf
+	; Check Cache
+	string CacheName = ActorCount+":"+RaceKey
+	sslBaseAnimation[] Output = CheckCache(CacheName)
+	if Output
+		return Output
+	endIf
+	; Search
 	bool[] Valid  = Utility.CreateBoolArray(Slotted)
 	int i = Slotted
 	while i
@@ -73,6 +94,13 @@ sslBaseAnimation[] function GetByRaceKeyTags(int ActorCount, string RaceKey, str
 	if !HasRaceKey(RaceKey)
 		return sslUtility.AnimationArray(0)
 	endIf
+	; Check Cache
+	string CacheName = ActorCount+":"+RaceKey+":"+Tags+":"+TagsSuppressed+":"+RequireAll
+	sslBaseAnimation[] Output = CheckCache(CacheName)
+	if Output
+		return Output
+	endIf
+	; Search
 	bool[] Valid      = Utility.CreateBoolArray(Slotted)
 	string[] Suppress = StringSplit(TagsSuppressed)
 	string[] Search   = StringSplit(Tags)
@@ -177,7 +205,40 @@ bool function AllowedCreature(Race RaceRef)
 endFunction
 
 bool function AllowedCreatureCombination(Race RaceRef1, Race RaceRef2)
-	return Config.AllowCreatures && sslCreatureAnimationSlots.GetRaceKey(RaceRef1) == sslCreatureAnimationSlots.GetRaceKey(RaceRef2)
+	if !Config.AllowCreatures || !RaceRef1 || !RaceRef2
+		return false ; No creatures or missing RaceRef
+	elseIf RaceRef1 == RaceRef2
+		return true ; No need to check same races
+	endIf
+
+	string[] Keys1 = GetAllRaceKeys(RaceRef1)
+	string[] Keys2 = GetAllRaceKeys(RaceRef2)
+	if !Keys1 || !Keys2
+		return false ; Invalid race found
+	endIf
+
+	int k1 = Keys1.Length
+	int k2 = Keys2.Length
+	if k1 < 1 || k2 < 1
+		return false ; a probably unnecessary error check
+
+	elseIf k1 == 1 && k2 == 1 && Keys1[0] != Keys2[0] 
+		return false ; Simple single key mismatch
+
+	elseIf (k1 == 1 && k2 > 1 && Keys2.Find(Keys1[0]) != -1) || \
+	       (k2 == 1 && k1 > 1 && Keys1.Find(Keys2[0]) != -1)
+	   return true ; Matched single key to multikey
+
+	endIf
+	
+	while k1
+		k1 -= 1
+		if Keys2.Find(Keys1[k1]) != -1
+			return true ; Matched between multikey arrays
+		endIf
+	endWhile
+
+	return false ; No matches found
 endFunction
 
 ; Deprecated
@@ -192,21 +253,40 @@ endFunction
 function Setup()
 	RegisterRaces()
 	parent.Setup()
+	CacheID = "SexLab.CreatureTags"
 endfunction
 
 function RegisterSlots()
-	if !Config.AllowCreatures
-		Config.Log("Creatures not enabled, skipping registration.", "RegisterSlots() Creature")
-	elseIf !Config.HasCreatureInstall()
-		Config.Log("No FNIS Creature Pack or SexLab creature behaviors detected, skipping registration.", "RegisterSlots() Creature")
-	else
+	CacheID = "SexLab.CreatureTags"
+	if Config.AllowCreatures
 		; Register the creature animations and voices
+		; PreloadCategoryLoaders()
 		(Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslCreatureAnimationDefaults).LoadCreatureAnimations()
 		(Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslVoiceDefaults).LoadCreatureVoices()
 		ModEvent.Send(ModEvent.Create("SexLabSlotCreatureAnimations"))
 		Debug.Notification("$SSL_NotifyCreatureAnimationInstall")
+	else
+		Config.Log("Creatures not enabled, skipping registration.", "RegisterSlots() Creature")
 	endIf
 endFunction
+
+; string[] function GetTagCache()
+; 	return StorageUtil.StringListToArray(Config, "SexLab.CreatureTags")
+; endFunction
+
+; function CacheTags()
+; 	DoCache("SexLab.CreatureTags")
+; endFunction
+
+; event OnUpdate()
+; 	CacheTags()
+; endEvent
+
+; int function Register(string Registrar)
+; 	int i = parent.Register(Registrar)
+; 	RegisterForSingleUpdate(7.0)
+; 	return i
+; endFunction
 
 function RegisterRaces()
 	ClearRaceKey("Bears")

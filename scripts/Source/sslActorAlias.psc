@@ -1,5 +1,21 @@
 scriptname sslActorAlias extends ReferenceAlias
 
+;TODO: clean up some stat lookup stuff in sslActorAlias.
+	; [10:49 PM] ak86: hi, there is an error in sslActorAlias, script calls 
+	; float OwnLewd = Stats.GetSkillLevel(ActorRef, Stats.kLewd)
+	; that always return 0, should be
+	; float OwnLewd = Stats.GetSkillLevel(ActorRef, "Lewd")
+	; [10:54 PM] Jeffl: should be float OwnLewd = Stats._GetSkill(ActorRef, Stats.kLewd) actually, I think(edited)
+	; [10:55 PM] Jeffl: would have to double check, but yeah, it should be one or the other for sure. Thanks
+	; [10:57 PM] Jeffl: no nvm, you're right
+	; [10:58 PM] Jeffl: fixed in dev build now
+	; [10:59 PM] Jeffl: what lead you to finding that out of curiosity? Seems like an obscure bug to have come across by normal means
+	; [11:01 PM] ak86: was reported in my SexLab Separate Orgasm thread that Stats.GetSkillLevel﻿(ActorRef, Stats﻿.kLewd) is broken
+	; [11:02 PM] ak86: probably would never be found otherwise
+	; [11:03 PM] ak86: as its effects can only be seen in my mod
+	; [11:03 PM] Jeffl: bleh, you've made me look at the stat code for the first time in awhile
+	; [11:04 PM] Jeffl: seems like a mess, might be one of the major causes of start slowness happening right now. Going to add cleaning it up to the todo list x.x
+
 ; Framework access
 sslSystemConfig Config
 sslActorLibrary ActorLib
@@ -31,6 +47,7 @@ float StartWait
 string StartAnimEvent
 string EndAnimEvent
 string ActorKey
+bool NoOrgasm
 
 ; Voice
 sslBaseVoice Voice
@@ -55,6 +72,7 @@ Form[] Equipment
 bool[] StripOverride
 float[] Skills
 
+bool UseScale
 float StartedAt
 float ActorScale
 float AnimScale
@@ -121,12 +139,13 @@ bool function SetActor(Actor ProspectRef)
 	IsTracked  = Config.ThreadLib.IsActorTracked(ActorRef)
 	IsPlayer   = ActorRef == PlayerRef
 	; Player and creature specific
+	if IsPlayer
+		Thread.HasPlayer = true
+	endIf
 	if IsCreature
 		Thread.CreatureRef = BaseRef.GetRace()
 	elseIf !IsPlayer
 		Stats.SeedActor(ActorRef)
-	else
-		Thread.HasPlayer = true
 	endIf
 	; Actor's Adjustment Key
 	ActorKey = MiscUtil.GetRaceEditorID(BaseRef.GetRace())
@@ -190,7 +209,6 @@ function ClearAlias()
 	GoToState("")
 endFunction
 
-
 ; Thread/alias shares
 bool DebugMode
 bool SeparateOrgasms
@@ -208,6 +226,7 @@ sslBaseAnimation Animation
 function LoadShares()
 	DebugMode  = Config.DebugMode
 	UseLipSync = Config.UseLipSync && !IsCreature
+	UseScale   = !Config.DisableScale
 
 	Center     = Thread.CenterLocation
 	BedStatus  = Thread.BedStatus
@@ -245,22 +264,57 @@ state Ready
 		LoadShares()
 		GetPositionInfo()
 		IsAggressor = Thread.VictimRef && Thread.Victims.Find(ActorRef) == -1
+		string LogInfo
 		; Calculate scales
-		float display = ActorRef.GetScale()
-		ActorRef.SetScale(1.0)
-		float base = ActorRef.GetScale()
-		ActorScale = ( display / base )
-		AnimScale  = ActorScale
-		ActorRef.SetScale(ActorScale)
-		if Thread.ActorCount > 1 && Config.ScaleActors ; FIXME: || IsCreature?
-			AnimScale = (1.0 / base)
+		if UseScale
+			float display = ActorRef.GetScale()
+			ActorRef.SetScale(1.0)
+			float base = ActorRef.GetScale()
+			ActorScale = ( display / base )
+			AnimScale  = ActorScale
+			ActorRef.SetScale(ActorScale)
+			if Thread.ActorCount > 1 && Config.ScaleActors ; FIXME: || IsCreature?
+				AnimScale = (1.0 / base)
+			endIf
+			LogInfo = "Scales["+display+"/"+base+"/"+AnimScale+"] "
+		else
+			AnimScale = 1.0
+			LogInfo = "Scales["+ActorRef.GetScale()+"/ DISABLED] "
 		endIf
-		string LogInfo = "Scales["+display+"/"+base+"/"+AnimScale+"] "
 		; Stop other movements
 		if DoPathToCenter
 			PathToCenter()
 		endIf
 		LockActor()
+		; pre-move to starting position near other actors
+		Offsets[0] = 0.0
+		Offsets[1] = 0.0
+		Offsets[2] = 5.0 ; hopefully prevents some users underground/teleport to giant camp problem?
+		Offsets[3] = 0.0
+		; Starting position
+		if Position == 1
+			Offsets[0] = 25.0
+			Offsets[3] = 180.0
+
+		elseif Position == 2
+			Offsets[1] = -25.0
+			Offsets[3] = 90.0
+
+		elseif Position == 3
+			Offsets[1] = 25.0
+			Offsets[3] = -90.0
+
+		elseif Position == 4
+			Offsets[0] = -25.0
+
+		endIf
+		OffsetCoords(Loc, Center, Offsets)
+		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
+		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
+		ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
+		ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
+		AttachMarker()
+		; Utility.Wait(1.0) ; DEV TMP
 		; Pick a voice if needed
 		if !Voice && !IsForcedSilent
 			if IsCreature
@@ -294,7 +348,7 @@ state Ready
 			ResolveStrapon()
 			; Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 			; Suppress High Heels
-			if Config.RemoveHeelEffect && ActorRef.GetWornForm(0x00000080)
+			if IsFemale && Config.RemoveHeelEffect && ActorRef.GetWornForm(0x00000080)
 				; Remove NiOverride High Heels
 				if Config.HasNiOverride && NiOverride.HasNodeTransformPosition(ActorRef, false, IsFemale, "NPC", "internal")
 					float[] pos = NiOverride.GetNodeTransformPosition(ActorRef, false, IsFemale, "NPC", "internal")
@@ -336,7 +390,7 @@ state Ready
 			if IsVictim
 				BaseEnjoyment = Utility.RandomFloat(BestRelation, ((Skills[Stats.kLewd]*1.1) as int)) as int
 			elseIf IsAggressor
-				float OwnLewd = Stats.GetSkillLevel(ActorRef, Stats.kLewd)
+				float OwnLewd = Stats.GetSkillLevel(ActorRef, "Lewd")
 				BaseEnjoyment = Utility.RandomFloat(OwnLewd, ((Skills[Stats.kLewd]*1.3) as int) + (OwnLewd*1.7)) as int
 			else
 				BaseEnjoyment = Utility.RandomFloat(BestRelation, ((Skills[Stats.kLewd]*1.5) as int) + (BestRelation*1.5)) as int
@@ -376,12 +430,27 @@ state Ready
 					ActorRef.EvaluatePackage()
 				endIf
 				ActorRef.SetLookAt(WaitRef, true)
-				float Failsafe = Utility.GetCurrentRealTime() + 15.0
-				while Distance > 135.0 && Utility.GetCurrentRealTime() < Failsafe
+
+				; Start wait loop for actor pathing.
+				int StuckCheck  = 0
+				float Failsafe  = Utility.GetCurrentRealTime() + 15.0
+				while Distance > 80.0 && Utility.GetCurrentRealTime() < Failsafe
 					Utility.Wait(1.0)
+					float Previous = Distance
 					Distance = ActorRef.GetDistance(WaitRef)
-					Log("Distance From WaitRef["+WaitRef+"]: "+Distance)
+					Log("Current Distance From WaitRef["+WaitRef+"]: "+Distance+" // Moved: "+(Previous - Distance))
+					; Check if same distance as last time.
+					if Math.Abs(Previous - Distance) < 1.0
+						if StuckCheck > 2 ; Stuck for 2nd time, end loop.
+							Distance = 0.0
+						endIf
+						StuckCheck += 1 ; End loop on next iteration if still stuck.
+						Log("StuckCheck("+StuckCheck+") No progress while waiting for ["+WaitRef+"]")
+					else
+						StuckCheck -= 1 ; Reset stuckcheck if progress was made.
+					endIf
 				endWhile
+
 				ActorRef.ClearLookAt()
 				if CenterRef != ActorRef
 					ActorRef.SetFactionRank(AnimatingFaction, 1)
@@ -395,6 +464,8 @@ endState
 
 state Prepare
 	event OnUpdate()
+		; Utility.Wait(5.0) ; DEV TMP
+
 		ClearEffects()
 		GetPositionInfo()
 		; Starting position
@@ -507,7 +578,7 @@ state Animating
 		endIf
 		; Trigger orgasm
 		GetEnjoyment()
-		if Enjoyment >= 100 && Stage < StageCount && SeparateOrgasms && (RealTime[0] - LastOrgasm) > 10.0
+		if !NoOrgasm && Enjoyment >= 100 && Stage < StageCount && SeparateOrgasms && (RealTime[0] - LastOrgasm) > 10.0
 			OrgasmEffect()
 		endIf
 		; Lip sync and refresh expression
@@ -623,7 +694,14 @@ state Animating
 	endEvent /;
 
 	function OrgasmEffect()
-		if Math.Abs(Utility.GetCurrentRealTime() - LastOrgasm) < 5.0
+		DoOrgasm()
+	endFunction
+
+	function DoOrgasm(bool Forced = false)
+		if !Forced && (NoOrgasm || Thread.DisableOrgasms)
+			; Orgasm Disabled for actor or whole thread
+			return 
+		elseIf Math.Abs(Utility.GetCurrentRealTime() - LastOrgasm) < 5.0
 			Log("Excessive OrgasmEffect Triggered")
 			return
 		endIf
@@ -655,19 +733,19 @@ state Animating
 				PlayLouder(Voice.GetSound(100, false), ActorRef, Config.VoiceVolume)
 			endIf
 			PlayLouder(OrgasmFX, MarkerRef, Config.SFXVolume)
-		endIf
-		; Apply cum to female positions from male position orgasm
-		int i = Thread.ActorCount
-		if i > 1 && Config.UseCum && (MalePosition || IsCreature) && (IsMale || IsCreature || (Config.AllowFFCum && IsFemale))
-			if i == 2
-				Thread.PositionAlias(IntIfElse(Position == 1, 0, 1)).ApplyCum()
-			else
-				while i > 0
-					i -= 1
-					if Position != i && Animation.IsCumSource(Position, i, Stage)
-						Thread.PositionAlias(i).ApplyCum()
-					endIf
-				endWhile
+			; Apply cum to female positions from male position orgasm
+			int i = Thread.ActorCount
+			if i > 1 && Config.UseCum && (MalePosition || IsCreature) && (IsMale || IsCreature || (Config.AllowFFCum && IsFemale))
+				if i == 2
+					Thread.PositionAlias(IntIfElse(Position == 1, 0, 1)).ApplyCum()
+				else
+					while i > 0
+						i -= 1
+						if Position != i && Animation.IsCumSource(Position, i, Stage)
+							Thread.PositionAlias(i).ApplyCum()
+						endIf
+					endWhile
+				endIf
 			endIf
 		endIf
 		Utility.WaitMenuMode(0.2)
@@ -745,9 +823,9 @@ function StopAnimating(bool Quick = false, string ResetAnim = "IdleForceDefaultS
 		return
 	endIf
 	; Disable free camera, if in it
-	if IsPlayer
-		MiscUtil.SetFreeCameraState(false)
-	endIf
+	; if IsPlayer
+	; 	MiscUtil.SetFreeCameraState(false)
+	; endIf
 	; Clear possibly troublesome effects
 	ActorRef.StopTranslation()
 	ActorRef.SetVehicle(none)
@@ -778,7 +856,9 @@ endFunction
 
 function AttachMarker()
 	ActorRef.SetVehicle(MarkerRef)
-	ActorRef.SetScale(AnimScale)
+	if UseScale
+		ActorRef.SetScale(AnimScale)
+	endIf
 endFunction
 
 function LockActor()
@@ -863,7 +943,7 @@ function RestoreActorDefaults()
 		endIf
 	endIf	
 	; Reset to starting scale
-	if ActorScale != 0.0
+	if UseScale && ActorScale > 0.0
 		ActorRef.SetScale(ActorScale)
 	endIf
 	if !IsCreature
@@ -877,7 +957,7 @@ function RestoreActorDefaults()
 		endIf
 		; Reset expression
 		ActorRef.ClearExpressionOverride()
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, -1, 0, 0)
+		sslBaseExpression.ClearMFG(ActorRef)
 	endIf
 	; Player specific actions
 	if IsPlayer
@@ -970,6 +1050,20 @@ function ApplyCum()
 	endIf
 endFunction
 
+function DisableOrgasm(bool bNoOrgasm)
+	if ActorRef
+		NoOrgasm = bNoOrgasm
+	endIf
+endFunction
+
+bool function IsOrgasmAllowed()
+	return !NoOrgasm && !Thread.DisableOrgasms
+endFunction
+
+bool function NeedsOrgasm()
+	return GetEnjoyment() >= 100 && Enjoyment >= 100
+endFunction
+
 int function GetPain()
 	if !ActorRef
 		return 0
@@ -986,20 +1080,9 @@ int function GetPain()
 endFunction
 
 function SetVoice(sslBaseVoice ToVoice = none, bool ForceSilence = false)
-	if !ToVoice || (IsCreature && !ToVoice.Creature)
-		return
-	endIf
 	IsForcedSilent = ForceSilence
-	if ToVoice
+	if ToVoice && IsCreature == ToVoice.Creature
 		Voice = ToVoice
-		; Set voicetype if unreconized
-		;/ if Config.UseLipSync && !Config.SexLabVoices.HasForm(ActorVoice)
-			if BaseSex == 1
-				BaseRef.SetVoiceType(Config.SexLabVoiceF)
-			else
-				BaseRef.SetVoiceType(Config.SexLabVoiceM)
-			endIf
-		endIf /;
 	endIf
 endFunction
 
@@ -1100,7 +1183,7 @@ function Strip()
 	else
 		Strip = Config.GetStrip(IsFemale, Thread.UseLimitedStrip(), IsType[0], IsVictim)
 	endIf
-	Log("Strip: "+Strip)
+	; Log("Strip: "+Strip)
 	; Stripped storage
 	Form ItemRef
 	Form[] Stripped = new Form[34]
@@ -1245,7 +1328,7 @@ endFunction
 
 function ClearEffects()
 	if IsPlayer && GetState() != "Animating"
-		MiscUtil.SetFreeCameraState(false)
+		; MiscUtil.SetFreeCameraState(false)
 		if Game.GetCameraState() == 0
 			Game.ForceThirdPerson()
 		endIf
@@ -1302,7 +1385,7 @@ function Initialize()
 	if ActorRef
 		; Stop events
 		ClearEvents()
-		RestoreActorDefaults()
+		; RestoreActorDefaults()
 		; Remove nudesuit if present
 		if ActorRef.GetItemCount(Config.NudeSuit) > 0
 			ActorRef.RemoveItem(Config.NudeSuit, ActorRef.GetItemCount(Config.NudeSuit), true)
@@ -1329,6 +1412,7 @@ function Initialize()
 	NoRagdoll      = false
 	NoUndress      = false
 	NoRedress      = false
+	NoOrgasm       = false
 	; Integers
 	Orgasms        = 0
 	BestRelation   = 0
@@ -1414,6 +1498,8 @@ endFunction
 event OnTranslationComplete()
 endEvent
 function OrgasmEffect()
+endFunction
+function DoOrgasm(bool Forced = false)
 endFunction
 event ResetActor()
 endEvent

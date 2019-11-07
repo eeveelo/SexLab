@@ -42,6 +42,13 @@ event OnPlayerLoadGame()
 		CleanTrackedActors()
 		; Send game loaded event
 		ModEvent.Send(ModEvent.Create("SexLabGameLoaded"))
+	elseIf !IsInstalled && !ForcedOnce && GetState() == "" && Config.CheckSystem()
+		Utility.Wait(0.1)
+		RegisterForSingleUpdate(30.0)
+	elseIf Version == 0 && GetState() == "Ready" && Config.CheckSystem()
+		Utility.Wait(0.1)
+		Log("SexLab somehow failed to install but things it did, not sure how this happened and it never should, attempting to fix it automatically now... ")
+		InstallSystem()
 	endIf
 endEvent
 
@@ -49,6 +56,7 @@ event OnInit()
 	GoToState("")
 	Version = 0
 	LoadLibs(false)
+	ForcedOnce = false
 endEvent
 
 ; ------------------------------------------------------- ;
@@ -62,6 +70,7 @@ int property CurrentVersion hidden
 	endFunction
 endProperty
 
+bool ForcedOnce = false
 bool property IsInstalled hidden
 	bool function get()
 		return Version > 0 && GetState() == "Ready"
@@ -131,12 +140,13 @@ event UpdateSystem(int OldVersion, int NewVersion)
 		Config.ExportSettings()
 
 		; Perform update functions
-		if OldVersion == 16100 && NewVersion >= 16101
-			; No update required
-			
-		elseif OldVersion > 1600 && NewVersion >= 16020
+		if OldVersion >= 16000 && NewVersion >= 16200 ; 1.62
+			AnimSlots.Setup()
+			CreatureSlots.Setup()
+
 			ActorLib.Setup()    ; New cum spells
 			ThreadSlots.Setup() ; New alias event arrays
+			
 			; Install creature voices, if needed.
 			if Config.AllowCreatures
 				(Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslVoiceDefaults).LoadCreatureVoices()
@@ -173,6 +183,7 @@ event UpdateSystem(int OldVersion, int NewVersion)
 endEvent
 
 event InstallSystem()
+	ForcedOnce = true
 	; Begin installation
 	LogAll("SexLab v"+SexLabUtil.GetStringVer()+" - Installing...")
 	; Init system
@@ -180,6 +191,7 @@ event InstallSystem()
 		SendVersionEvent("SexLabInstalled")
 	else
 		Debug.TraceAndBox("SexLab v"+SexLabUtil.GetStringVer()+" - INSTALL ERROR, CHECK YOUR PAPYRUS LOGS!")
+		ForcedOnce = false
 	endIf
 endEvent
 
@@ -418,5 +430,11 @@ state PreloadStorage
 	endEvent
 endState
 
+; Check if we should force install system, because user hasn't done it manually yet for some reason. Or it failed somehow.
 event OnUpdate()
+	if !IsInstalled && !ForcedOnce && GetState() == ""
+		ForcedOnce = true
+		LogAll("Automatically Installing SexLab v"+SexLabUtil.GetStringVer())
+		InstallSystem()
+	endIf
 endEvent

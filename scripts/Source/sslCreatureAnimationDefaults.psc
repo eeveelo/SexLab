@@ -1,10 +1,5 @@
 scriptname sslCreatureAnimationDefaults extends sslAnimationFactory
 
-function RegisterCategory(string Type)
-	ModEvent.Send(ModEvent.Create("SexLabSlotCreatureAnimations_"+Type))
-	Utility.WaitMenuMode(0.4)
-endFunction
-
 function LoadCreatureAnimations()
 	; Prepare factory resources (as creature)
 	PrepareFactoryCreatures()
@@ -111,7 +106,9 @@ function LoadCreatureAnimations()
 	RegisterAnimation("VampireLordHolding")
 	RegisterAnimation("VampireLordMissionary")
 	RegisterCategory("VampireLord")
-	
+
+	; Register any remaining custom categories from json loaders
+	RegisterOtherCategories()
 endFunction
 
 function BearDoggystyle(int id)

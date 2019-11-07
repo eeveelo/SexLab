@@ -6,7 +6,7 @@ float Timer
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	ActorRef = TargetRef
 	Timer    = (Game.GetFormFromFile(0xD62, "SexLab.esm") as sslSystemConfig).CumTimer
-	RegisterForSingleUpdate(1.0)
+	RegisterForSingleUpdate(3.0)
 endEvent
 event OnUpdate()
 	if ActorRef.IsSwimming() || GetTimeElapsed() > Timer

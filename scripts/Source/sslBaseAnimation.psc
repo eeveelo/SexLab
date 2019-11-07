@@ -103,12 +103,17 @@ string function FetchPositionStage(int Position, int Stage)
 	return Animations[StageIndex(Position, Stage)]
 endFunction
 
+function SetPositionStage(int Position, int Stage, string AnimationEvent)
+	Animations[StageIndex(Position, Stage)] = AnimationEvent
+endFunction
+
+
 ; ------------------------------------------------------- ;
 ; --- Stage Timer                                     --- ;
 ; ------------------------------------------------------- ;
 
 bool function HasTimer(int Stage)
-	return Stage > 0 && Stage <= Timers.Length && Timers[(Stage - 1)] != 0.0
+	return Timers && Stage > 0 && Stage <= Timers.Length && Timers[(Stage - 1)] != 0.0
 endFunction
 
 float function GetTimer(int Stage)
@@ -637,6 +642,7 @@ endFunction
 int aid
 int oid
 int fid
+string[] GenderTags
 
 bool Locked
 int function AddPosition(int Gender = 0, int AddCum = -1)
@@ -658,9 +664,9 @@ int function AddPosition(int Gender = 0, int AddCum = -1)
 	InitArrays(Actors)
 	FlagsArray(Actors)[kCumID] = AddCum
 
-	string[] TagList = GetRawTags()
-	TagList[0] = TagList[0]+GetGenderString(Gender)
-	TagList[1] = GetGenderString(Gender)+TagList[1]
+	string GenderString = GetGenderString(Gender)
+	GenderTags[0] = GenderTags[0]+GenderString
+	GenderTags[1] = GenderString+GenderTags[1]
 
 	Actors += 1
 	Locked = false
@@ -741,7 +747,17 @@ function AddPositionStage(int Position, string AnimationEvent, float forward = 0
 endFunction
 
 function Save(int id = -1)
-	parent.Save(id)	
+	; Add gender tags
+	AddTag(GenderTags[0])
+	if GenderTags[0] != GenderTags[1]
+		AddTag(GenderTags[1])
+	endIf
+	; Compensate for custom 3P+ animations that mix gender order, such as FMF
+	if PositionCount > 2
+		AddTag(GetGenderTag(false))
+		AddTag(GetGenderTag(true))
+	endIf
+
 	; Finalize config data
 	Flags0     = Utility.ResizeIntArray(Flags0, (Stages * kFlagEnd))
 	Offsets0   = Utility.ResizeFloatArray(Offsets0, (Stages * kOffsetEnd))
@@ -757,11 +773,6 @@ function Save(int id = -1)
 			Stage -= 1
 		endWhile
 	endIf
-	; Remove duplicate gender tags
-	string[] TagList = GetRawTags()
-	if TagList[0] == TagList[1]
-		TagList[1] = ""
-	endIf
 	; Reset saved keys if they no longer match
 	if LastKeyReg != Registry
 		LastKeys = new string[5]
@@ -774,6 +785,8 @@ function Save(int id = -1)
 	else
 		Log(Name, "Animations["+id+"]")
 	endIf
+	; Finalize tags and registry slot id
+	parent.Save(id)
 endFunction
 
 float function CalcCenterAdjuster(int Stage)
@@ -819,6 +832,13 @@ string function GetGenderString(int Gender)
 	return ""
 endFunction
 
+string function GetGenderTag(bool Reverse = false)
+	if Reverse
+		return GenderTag(Creatures, "C")+GenderTag(Males, "M")+GenderTag(Females, "F")
+	endIf
+	return GenderTag(Females, "F")+GenderTag(Males, "M")+GenderTag(Creatures, "C")
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
@@ -835,6 +855,7 @@ function Initialize()
 	Genders      = new int[4]
 	Positions    = new int[5]
 	StageSoundFX = new Form[1]
+	GenderTags   = new string[2]
 
 	; Only init if needed to keep between registry resets.
 	if LastKeys.Length != 5
@@ -1086,4 +1107,70 @@ function InitArrays(int Position)
 		Flags4   = Utility.CreateIntArray((Stages * kFlagEnd))
 		Offsets4 = Utility.CreateFloatArray((Stages * kOffsetEnd))
 	endIf
+endFunction
+
+function ExportJSON()
+	string Folder = "../SexLab/Animations/"
+	if IsCreature
+		Folder += "Creatures/"
+	endIf
+	string Filename = Folder+Registry+".json"
+
+	JsonUtil.ClearAll(Filename)
+
+	JsonUtil.SetPathStringValue(Filename, ".name", Name)
+	JsonUtil.SetPathIntValue(Filename, ".enabled", Enabled as int)
+	JsonUtil.SetPathStringArray(Filename, ".tags", GetTags())
+
+	; JsonUtil.SetRawPathValue(Filename, ".tags", "[\""+PapyrusUtil.StringJoin(GetTags(), "\",\"")+"\"]")
+	if StageSoundFX
+		JsonUtil.SetPathFormArray(Filename, ".sfx", StageSoundFX)
+	endIf
+	if Timers
+		JsonUtil.SetPathFloatArray(Filename, ".timers", Timers)
+	endIf
+	; if IsCreature
+	; 	JsonUtil.SetPathStringArray(Filename, ".racetypes", Utility.ResizeStringArray(RaceTypes, PositionCount))
+	; endIf
+
+	int Position
+	while Position < PositionCount
+
+		int stg = 0
+		while stg < StageCount
+			string Path = ".positions["+Position+"]"
+			int Stage = stg + 1
+
+			JsonUtil.SetPathStringValue(Filename, Path+".animation["+stg+"]", Animations[StageIndex(Position, Stage)])
+			JsonUtil.SetPathFloatArray(Filename, Path+".offset["+stg+"]", GetRawOffsets(Position, Stage))
+
+			int[] Flags = FlagsArray(Position)
+			int fi = FlagIndex(Stage, 0)
+
+			JsonUtil.SetPathIntValue(Filename, Path+".flag.schlong["+stg+"]", Flags[(fi + 3)])
+			JsonUtil.SetPathIntValue(Filename, Path+".flag.cum["+stg+"]", Flags[(fi + 4)])
+			JsonUtil.SetPathIntValue(Filename, Path+".flag.cumsrc["+stg+"]", Flags[(fi + 5)])
+			JsonUtil.SetPathIntValue(Filename, Path+".flag.openmouth["+stg+"]", Flags[(fi + 1)])
+			JsonUtil.SetPathIntValue(Filename, Path+".flag.silent["+stg+"]", Flags[(fi + 0)])
+			JsonUtil.SetPathIntValue(Filename, Path+".flag.strapon["+stg+"]", Flags[(fi + 2)])
+
+			stg += 1
+		endWhile
+
+		JsonUtil.SetPathIntValue(Filename, ".positions["+Position+"].gender", GetGender(Position))
+
+		if IsCreature && CreaturePosition(Position)
+			if RaceTypes[Position] == ""
+				JsonUtil.SetPathStringValue(Filename, ".positions["+Position+"].creature", RaceType)
+			else
+				JsonUtil.SetPathStringValue(Filename, ".positions["+Position+"].creature", RaceTypes[Position])
+			endIf
+		endIf
+
+		Position += 1
+
+	endWhile
+
+	JsonUtil.Save(Filename)
+	JsonUtil.Unload(Filename)
 endFunction

@@ -21,7 +21,14 @@ sslThreadLibrary property ThreadLib auto
 ; ------------------------------------------------------- ;
 
 sslBaseAnimation[] function GetByTags(int ActorCount, string Tags, string TagsSuppressed = "", bool RequireAll = true)
-	Log("GetByTags(ActorCount="+ActorCount+", Tags="+Tags+", TagsSuppressed="+TagsSuppressed+", RequireAll="+RequireAll+")")
+	; Log("GetByTags(ActorCount="+ActorCount+", Tags="+Tags+", TagsSuppressed="+TagsSuppressed+", RequireAll="+RequireAll+")")
+	; Check Cache
+	string CacheName = ActorCount+":"+Tags+":"+TagsSuppressed+":"+RequireAll
+	sslBaseAnimation[] Output = CheckCache(CacheName)
+	if Output
+		return Output
+	endIf
+	; Search
 	bool[] Valid      = Utility.CreateBoolArray(Slotted)
 	string[] Suppress = StringSplit(TagsSuppressed)
 	string[] Search   = StringSplit(Tags)
@@ -31,13 +38,21 @@ sslBaseAnimation[] function GetByTags(int ActorCount, string Tags, string TagsSu
 		if Objects[i]
 			sslBaseAnimation Slot = Objects[i] as sslBaseAnimation
 			Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount && Slot.TagSearch(Search, Suppress, RequireAll)
-		endIF
+		endIf
 	endWhile
-	return GetList(valid)
+	Output = GetList(valid)
+	CacheAnims(CacheName, Output)
+	return Output
 endFunction
 
 sslBaseAnimation[] function GetByType(int ActorCount, int Males = -1, int Females = -1, int StageCount = -1, bool Aggressive = false, bool Sexual = true)
-	Log("GetByType(ActorCount="+ActorCount+", Males="+Males+", Females="+Females+", StageCount="+StageCount+", Aggressive="+Aggressive+")")
+	; Log("GetByType(ActorCount="+ActorCount+", Males="+Males+", Females="+Females+", StageCount="+StageCount+", Aggressive="+Aggressive+")")
+	; Check Cache
+	string CacheName = ActorCount+":"+Males+":"+Females+":"+StageCount+":"+Aggressive
+	sslBaseAnimation[] Output = CheckCache(CacheName)
+	if Output
+		return Output
+	endIf
 	; Search
 	bool[] Valid = Utility.CreateBoolArray(Slotted)
 	bool RestrictAggressive = Config.RestrictAggressive
@@ -50,7 +65,9 @@ sslBaseAnimation[] function GetByType(int ActorCount, int Males = -1, int Female
 			&& (Males == -1 || Males == Slot.Males) && (Females == -1 || Females == Slot.Females) && (StageCount == -1 || StageCount == Slot.StageCount)
 		endIf
 	endWhile
-	return GetList(Valid)
+	Output = GetList(valid)
+	CacheAnims(CacheName, Output)
+	return Output
 endFunction
 
 sslBaseAnimation[] function PickByActors(Actor[] Positions, int Limit = 64, bool Aggressive = false)
@@ -86,7 +103,12 @@ sslBaseAnimation[] function GetByDefault(int Males, int Females, bool IsAggressi
 	int ActorCount = (Males + Females)
 	bool SameSex = (Females == 2 && Males == 0) || (Males == 2 && Females == 0)
 	bool BedRemoveStanding = Config.BedRemoveStanding
-
+	; Check Cache
+	string CacheName = Males+":"+Females+":"+IsAggressive+":"+UsingBed+":"+BedRemoveStanding+":"+RestrictAggressive
+	sslBaseAnimation[] Output = CheckCache(CacheName)
+	if Output
+		return Output
+	endIf
 	; Search
 	bool[] Valid = Utility.CreateBoolArray(Slotted)
 	int i = Slotted
@@ -113,7 +135,9 @@ sslBaseAnimation[] function GetByDefault(int Males, int Females, bool IsAggressi
 			endIf
 		endIf
 	endWhile
-	return GetList(Valid)
+	Output = GetList(valid)
+	CacheAnims(CacheName, Output)
+	return Output
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -267,6 +291,256 @@ string[] function GetAllTags(int ActorCount = -1, bool IgnoreDisabled = true)
 endFunction
 
 ; ------------------------------------------------------- ;
+; --- Cached Tag Search
+; ------------------------------------------------------- ;
+
+
+int SlottedCache
+string[] FilterCache
+float[] CacheTimes
+sslBaseAnimation[] AnimCache0
+sslBaseAnimation[] AnimCache1
+sslBaseAnimation[] AnimCache2
+sslBaseAnimation[] AnimCache3
+sslBaseAnimation[] AnimCache4
+sslBaseAnimation[] AnimCache5
+sslBaseAnimation[] AnimCache6
+sslBaseAnimation[] AnimCache7
+sslBaseAnimation[] AnimCache8
+sslBaseAnimation[] AnimCache9
+sslBaseAnimation[] AnimCache10
+sslBaseAnimation[] AnimCache11
+sslBaseAnimation[] AnimCache12
+sslBaseAnimation[] AnimCache13
+sslBaseAnimation[] AnimCache14
+sslBaseAnimation[] AnimCache15
+sslBaseAnimation[] AnimCache16
+sslBaseAnimation[] AnimCache17
+sslBaseAnimation[] AnimCache18
+sslBaseAnimation[] AnimCache19
+
+function ClearAnimCache()
+	SlottedCache = Slotted
+	FilterCache = new string[20]
+	CacheTimes = new float[20]
+	AnimCache0 = sslUtility.EmptyAnimationArray()
+	AnimCache1 = sslUtility.EmptyAnimationArray()
+	AnimCache2 = sslUtility.EmptyAnimationArray()
+	AnimCache3 = sslUtility.EmptyAnimationArray()
+	AnimCache4 = sslUtility.EmptyAnimationArray()
+	AnimCache5 = sslUtility.EmptyAnimationArray()
+	AnimCache6 = sslUtility.EmptyAnimationArray()
+	AnimCache7 = sslUtility.EmptyAnimationArray()
+	AnimCache8 = sslUtility.EmptyAnimationArray()
+	AnimCache9 = sslUtility.EmptyAnimationArray()
+	AnimCache10 = sslUtility.EmptyAnimationArray()
+	AnimCache11 = sslUtility.EmptyAnimationArray()
+	AnimCache12 = sslUtility.EmptyAnimationArray()
+	AnimCache13 = sslUtility.EmptyAnimationArray()
+	AnimCache14 = sslUtility.EmptyAnimationArray()
+	AnimCache15 = sslUtility.EmptyAnimationArray()
+	AnimCache16 = sslUtility.EmptyAnimationArray()
+	AnimCache17 = sslUtility.EmptyAnimationArray()
+	AnimCache18 = sslUtility.EmptyAnimationArray()
+	AnimCache19 = sslUtility.EmptyAnimationArray()
+	Log("AnimCache: Cleared!")
+endFunction
+
+bool function ValidateCache()
+	if SlottedCache != Slotted
+		Log("AnimCache: INVALIDATED! "+SlottedCache+" -> "+Slotted)
+		ClearAnimCache()
+		return false
+	endIf
+	; SlottedCache = Slotted
+	return true
+endFunction
+
+bool function IsCached(string CacheName)
+	return ValidateCache() && FilterCache.Find(CacheName) != -1
+endFunction
+
+sslBaseAnimation[] function CheckCache(string CacheName)
+	sslBaseAnimation[] Output
+	if ValidateCache() && CacheName
+		int i = FilterCache.Find(CacheName)
+		if i != -1
+			Log("AnimCache: HIT["+i+"] -- "+CacheName)
+			CacheTimes[i] = Utility.GetCurrentGameTime()
+			Output = GetCacheSlot(i)
+		else
+			Log("AnimCache: MISS -- "+CacheName)
+		endIf
+	endIf
+	return Output
+endFunction
+
+function CacheAnims(string CacheName, sslBaseAnimation[] Anims)
+	if !CacheName || !Anims
+		return
+	endIf
+	; Pick cache slot
+	int i = FilterCache.Find(CacheName)
+	if i != -1
+		Log("AnimCache: Refreshing slot: "+i)
+	else
+		i = FilterCache.Find("")
+		if i != -1
+			Log("AnimCache: Using slot: "+i)
+		else
+			i = OldestCache()
+			Log("AnimCache: Replacing oldest slot: "+i)
+		endIf
+	endIf
+	; Set cache slot
+	if i <= 9 && i != -1
+		if i == 0
+			AnimCache0 = Anims
+		elseIf i == 1
+			AnimCache1 = Anims
+		elseIf i == 2
+			AnimCache2 = Anims
+		elseIf i == 3
+			AnimCache3 = Anims
+		elseIf i == 4
+			AnimCache4 = Anims
+		elseIf i == 5
+			AnimCache5 = Anims
+		elseIf i == 6
+			AnimCache6 = Anims
+		elseIf i == 7
+			AnimCache7 = Anims
+		elseIf i == 8
+			AnimCache8 = Anims
+		elseIf i == 9
+			AnimCache9 = Anims
+		endIf
+	elseIf i <= 19
+		if i == 10
+			AnimCache10 = Anims
+		elseIf i == 11
+			AnimCache11 = Anims
+		elseIf i == 12
+			AnimCache12 = Anims
+		elseIf i == 13
+			AnimCache13 = Anims
+		elseIf i == 14
+			AnimCache14 = Anims
+		elseIf i == 15
+			AnimCache15 = Anims
+		elseIf i == 16
+			AnimCache16 = Anims
+		elseIf i == 17
+			AnimCache17 = Anims
+		elseIf i == 18
+			AnimCache18 = Anims
+		elseIf i == 19
+			AnimCache19 = Anims
+		endIf
+	else
+		Log("AnimCache: Invalid cache slot. This shouldn't be possible!")
+		return
+	endIf
+	FilterCache[i] = CacheName
+	CacheTimes[i] = Utility.GetCurrentGameTime()
+endFunction
+
+sslBaseAnimation[] function GetCacheSlot(int i)
+	if i <= 9 && i >= 0
+		if i == 0
+			return AnimCache0
+		elseIf i == 1
+			return AnimCache1
+		elseIf i == 2
+			return AnimCache2
+		elseIf i == 3
+			return AnimCache3
+		elseIf i == 4
+			return AnimCache4
+		elseIf i == 5
+			return AnimCache5
+		elseIf i == 6
+			return AnimCache6
+		elseIf i == 7
+			return AnimCache7
+		elseIf i == 8
+			return AnimCache8
+		elseIf i == 9
+			return AnimCache9
+		endIf
+	elseIf i <= 19
+		if i == 10
+			return AnimCache10
+		elseIf i == 11
+			return AnimCache11
+		elseIf i == 12
+			return AnimCache12
+		elseIf i == 13
+			return AnimCache13
+		elseIf i == 14
+			return AnimCache14
+		elseIf i == 15
+			return AnimCache15
+		elseIf i == 16
+			return AnimCache16
+		elseIf i == 17
+			return AnimCache17
+		elseIf i == 18
+			return AnimCache18
+		elseIf i == 19
+			return AnimCache19
+		endIf
+	endIf
+	Log("AnimCache: GetCacheSlot("+i+") - INVALID CACHE SLOT")
+	return sslUtility.EmptyAnimationArray()
+endFunction
+
+int function OldestCache()
+	float var = CacheTimes[0]
+	int index = 0
+	int i = 1
+	while i < 20
+		if CacheTimes[i] < var
+			var = CacheTimes[i]
+			index = i
+		endIf
+		i += 1
+	endWhile
+	return index
+endFunction
+
+function InvalidateByAnimation(sslBaseAnimation removing)
+	int i = 0
+	while i < 20
+		sslBaseAnimation[] arr = GetCacheSlot(i)
+		if arr && FilterCache[i] != "" && arr.Find(removing) != -1
+			Log("InvalidateByAnimation: Found invalid animation in slot["+i+"]: "+FilterCache[i])
+			InvalidateBySlot(i)
+		endIf
+		i += 1
+	endWhile
+endFunction
+
+function InvalidateBySlot(int i)
+	FilterCache[i] = ""
+	CacheTimes[i] = 0.0
+endFunction
+
+string function CacheInfo(int i)
+	sslBaseAnimation[] arr = GetCacheSlot(i)
+	return "["+i+"] -- Name: "+FilterCache[i]+" -- Timestamp: "+CacheTimes[i]+" -- Count: "+arr.Length
+endfunction
+
+function OutputCacheLog()
+	int i = 0
+	while i < 20
+		Log(CacheInfo(i))
+		i += 1
+	endWhile
+endFunction
+
+
+; ------------------------------------------------------- ;
 ; --- Object MCM Pagination                               ;
 ; ------------------------------------------------------- ;
 
@@ -316,23 +590,38 @@ endFunction
 ; ------------------------------------------------------- ;
 
 function RegisterSlots()
+	ClearAnimCache()
 	; Register default animation
+	; PreloadCategoryLoaders()
 	(Game.GetFormFromFile(0x639DF, "SexLab.esm") as sslAnimationDefaults).LoadAnimations()
 	; Send mod event for 3rd party animation
 	ModEvent.Send(ModEvent.Create("SexLabSlotAnimations"))
 	Debug.Notification("$SSL_NotifyAnimationInstall")
 endFunction
 
+bool RegisterLock
 int function Register(string Registrar)
-	if Registry.Find(Registrar) != -1 || Slotted >= 375
+	if Registrar == "" || Registry.Find(Registrar) != -1 || Slotted >= 750
+		return -1
+	elseIf IsSuppressed(Registrar)
+		Log("SKIPPING -- "+Registrar)
 		return -1
 	endIf
+
+	; Thread lock registration
+	float failsafe = Utility.GetCurrentRealTime() + 6.0
+	while RegisterLock && failsafe < Utility.GetCurrentRealTime()
+		Utility.WaitMenuMode(0.5)
+		Log("Register("+Registrar+") - Lock wait...")
+	endWhile
+	RegisterLock = true
+
 	int i = Slotted
 	Slotted += 1
 	if i >= Registry.Length
 		int n = Registry.Length + 32
-		if n > 375
-			n = 375
+		if n > 750
+			n = 750
 		endIf
 		Log("Resizing animation registry slots: "+Registry.Length+" -> "+n)
 		Registry = Utility.ResizeStringArray(Registry, n)
@@ -347,6 +636,9 @@ int function Register(string Registrar)
 	endIf
 	Registry[i] = Registrar
 	Objects[i]  = GetNthAlias(i)
+
+	; Release lock
+	RegisterLock = false
 	return i
 endFunction
 
@@ -379,22 +671,119 @@ bool function UnregisterAnimation(string Registrar)
 	return false
 endFunction
 
+bool function IsSuppressed(string Registrar)
+	return JsonUtil.StringListHas("../SexLab/SuppressedAnimations.json", "suppress", Registrar)
+endFunction
+
+function NeverRegister(string Registrar)
+	if !IsSuppressed(Registrar)
+		JsonUtil.StringListAdd("../SexLab/SuppressedAnimations.json", "suppress", Registrar, false)
+		JsonUtil.Save("../SexLab/SuppressedAnimations.json", true)
+	endIf
+endFunction
+
+function AllowRegister(string Registrar)
+	if IsSuppressed(Registrar)
+		JsonUtil.StringListRemove("../SexLab/SuppressedAnimations.json", "suppress", Registrar, true)
+		JsonUtil.Save("../SexLab/SuppressedAnimations.json", true)
+	endIf
+endFunction
+
+int function ClearSuppressed()
+	int i = JsonUtil.StringListClear("../SexLab/SuppressedAnimations.json", "suppress")
+	JsonUtil.Save("../SexLab/SuppressedAnimations.json", true)
+	return i
+endFunction
+
+int function GetDisabledCount()
+	int count
+	int i = Slotted
+	while i
+		i -= 1
+		if Objects[i]
+			sslBaseAnimation Slot = Objects[i] as sslBaseAnimation
+			if Slot.Registered && !Slot.Enabled
+				count += 1
+			endIf
+		endIf
+	endWhile
+	return count
+endFunction
+
+int function GetSuppressedCount()
+	return JsonUtil.StringListCount("../SexLab/SuppressedAnimations.json", "suppress")
+endFunction
+
+int function SuppressDisabled()
+	int count
+	int i = Slotted
+	while i
+		i -= 1
+		if Objects[i]
+			sslBaseAnimation Slot = Objects[i] as sslBaseAnimation
+			if Slot.Registered && !Slot.Enabled
+				NeverRegister(Slot.Registry)
+				count += 1
+			endIf
+		endIf
+	endWhile
+	return count
+endFunction
+
+string[] function GetSuppressedList()
+	return JsonUtil.StringListToArray("../SexLab/SuppressedAnimations.json", "suppress")
+endFunction
+
+function PreloadCategoryLoaders()
+	string[] Files = JsonUtil.JsonInFolder(JLoaders)
+	if !Files
+		return ; No JSON Animation Loaders
+	endIf
+
+	; Clear existing lists
+	StorageUtil.StringListClear(self, "categories")
+	StorageUtil.ClearObjStringListPrefix(self, "cat.")
+
+	; Load files into categories
+	int i = Files.Length
+	while i
+		i -= 1
+		; Ignore the 2 example files.
+		if Files[i] != "ArrokReverseCowgirl.json" && Files[i] != "TrollGrabbing.json"
+			string Category = JsonUtil.GetPathStringValue(JLoaders+Files[i], ".category", "Misc")
+			StorageUtil.StringListAdd(self, "categories", Category, false)
+			StorageUtil.StringListAdd(self, "cat."+Category, Files[i], false)
+		endIf
+	endWhile
+endFunction
+
+;/ function RegisterJSONFolder()
+	string[] Files = JsonUtil.JsonInFolder(JLoaders)
+	if !Files
+		Log("No JSON Animations Found: "+JLoaders)
+		return
+	endIf
+	Log("JSON Files: "+Files)
+	; int fl = StringUtil.GetLength(Folder) - 1
+	int i = Files.Length
+	while i
+		i -= 1
+		string Registrar = StringUtil.Substring(Files[i], 0, StringUtil.GetLength(Files[i]) - 5)
+		RegisterJSON(JLoaders+Files[i], Registrar)
+	endWhile
+endFunction /;
+
 ; ------------------------------------------------------- ;
 ; --- System Use Only                                 --- ;
 ; ------------------------------------------------------- ;
+
+string property JLoaders auto hidden
 
 function Setup()
 	GoToState("Locked")
 	Slotted  = 0
 	Registry = new string[128] ; Utility.CreateStringArray(164)
 	Objects  = new Alias[128] ; Utility.CreateAliasArray(164, GetNthAlias(0))
-	; DEVTEMP: SKSE Beta workaround - clear used dummy aliases
-	;/ int i = Objects.Length
-	while i
-		i -= 1
-		Objects[i] = none
-	endWhile /;
-	; /DEVTEMP
 	PlayerRef = Game.GetPlayer()
 	if !Config || !ActorLib || !ThreadLib
 		Form SexLabQuestFramework = Game.GetFormFromFile(0xD62, "SexLab.esm")
@@ -404,15 +793,99 @@ function Setup()
 			ActorLib  = SexLabQuestFramework as sslActorLibrary
 		endIf
 	endIf
+
+	JLoaders = "../SexLab/Animations/"
+	if self == Config.CreatureSlots
+		JLoaders += "Creatures/"
+	endIf
+
+	CacheID = "SexLab.AnimationTags"
+
+	RegisterLock = false
 	RegisterSlots()
 	GoToState("")
 endFunction
 
-function Log(string msg)
-	if Config.DebugMode
-		MiscUtil.PrintConsole(msg)
+string property CacheID auto hidden
+string[] function GetTagCache(bool IgnoreCache = false)
+	if IgnoreCache || ((Utility.GetCurrentRealTime() as int) - StorageUtil.GetIntValue(Config, CacheID, 0)) > 60
+		DoCache()
 	endIf
+	return StorageUtil.StringListToArray(Config, CacheID)
+endFunction
+
+function ClearTagCache()
+	StorageUtil.StringListClear(Config, CacheID)
+	StorageUtil.UnsetIntValue(Config, CacheID)
+endFunction
+
+; function CacheTags()
+; 	DoCache()
+; endFunction
+
+; event OnUpdate()
+; 	if ((Utility.GetCurrentRealTime() as int) - StorageUtil.GetIntValue(Config, CacheID, 0)) > 60
+; 		CacheTags()
+; 	endIf
+; endEvent
+
+function DoCache()
+	if !CacheID
+		Log("FAILED TO CACHE TAGS, CACHEID NOT SET")
+		return
+	endIf
+
+	float time = Utility.GetCurrentRealTime()
+
+	; Tags to ignore and will be pushed to front of list later.
+	string[] Override = new string[9]
+	Override[0] = "Vaginal"
+	Override[1] = "Anal"
+	Override[2] = "Oral"
+	Override[3] = "Cowgirl"
+	Override[4] = "Laying"
+	Override[5] = "Missionary"
+	Override[6] = "Standing"
+	Override[7] = "Dirty"
+	Override[8] = "Loving"
+
+	; Find unique tags
+	StorageUtil.StringListClear(Config, CacheID)
+	int Slot
+	while Slot < Slotted
+		if Objects[Slot]
+			string[] Tags = (Objects[Slot] as sslBaseAnimation).GetRawTags()
+			int t = Tags.Length
+			while t > 0
+				t -= 1
+				if Tags[t] != "" && Override.Find(Tags[t]) == -1
+					StorageUtil.StringListAdd(Config, CacheID, Tags[t], false)
+				endIf
+			endWhile
+		endIf
+		Slot += 1
+	endWhile
+	StorageUtil.StringListSort(Config, CacheID)
+	
+	; Push common/important tags to front
+	int i = Override.Length
+	while i
+		i -= 1
+		StorageUtil.StringListInsert(Config, CacheID, 0, Override[i])
+	endWhile
+
+	StorageUtil.SetIntValue(Config, CacheID, Utility.GetCurrentRealTime() as int)
+	Log(CacheID+" finished caching ("+StorageUtil.StringListCount(Config, CacheID)+") tags in ("+(Utility.GetCurrentRealTime() - time)+") seconds -- ");+StorageUtil.StringListToArray(Config, CacheID))
+endFunction
+
+function Log(string msg)
+	MiscUtil.PrintConsole(msg)
+	Debug.TraceUser("SexLabDebug", msg)
 	Debug.Trace("SEXLAB - "+msg)
+	; if Config.DebugMode
+	; 	MiscUtil.PrintConsole(msg)
+	; endIf
+	; Debug.Trace("SEXLAB - "+msg)
 endFunction
 
 state Locked

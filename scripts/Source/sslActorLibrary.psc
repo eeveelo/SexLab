@@ -366,7 +366,7 @@ int function ValidateActor(Actor ActorRef)
 	; Remove actors stuck in animating faction
 	elseIf ActorRef.IsInFaction(AnimatingFaction) && Config.ThreadSlots.FindActorController(ActorRef) == -1
 		ActorRef.RemoveFromFaction(AnimatingFaction)
-		Log("ValidateActor("+BaseRef.GetName()+") -- WARN -- Was in AnimatingFaction but not in a thread")
+		Log("ValidateActor("+ActorRef.GetLeveledActorBase().GetName()+") -- WARN -- Was in AnimatingFaction but not in a thread")
 	endIf	
 	ActorBase BaseRef = ActorRef.GetLeveledActorBase()
 	; Primary checks
@@ -423,7 +423,7 @@ endFunction
 bool function CanAnimate(Actor ActorRef)
 	Race ActorRace  = ActorRef.GetLeveledActorBase().GetRace()
 	string RaceName = ActorRace.GetName()+MiscUtil.GetRaceEditorID(ActorRace)
-	return !(ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Child") != -1  || StringUtil.Find(RaceName, "Little") != -1 || StringUtil.Find(RaceName, "117") != -1 || StringUtil.Find(RaceName, "Enfant") != -1 || (StringUtil.Find(RaceName, "Elin") != -1 && ActorRef.GetScale() < 0.92) ||  (StringUtil.Find(RaceName, "Monli") != -1 && ActorRef.GetScale() < 0.92))
+	return !(ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Moli") != -1 || StringUtil.Find(RaceName, "Child") != -1  || StringUtil.Find(RaceName, "Little") != -1 || StringUtil.Find(RaceName, "117") != -1 || StringUtil.Find(RaceName, "Enfant") != -1 || (StringUtil.Find(RaceName, "Elin") != -1 && ActorRef.GetScale() < 0.92) ||  (StringUtil.Find(RaceName, "Monli") != -1 && ActorRef.GetScale() < 0.92))
 endFunction
 
 bool function IsValidActor(Actor ActorRef)
@@ -457,6 +457,12 @@ endFunction
 
 function ClearForcedGender(Actor ActorRef)
 	ActorRef.RemoveFromFaction(GenderFaction)
+	int eid = ModEvent.Create("SexLabActorGenderChange")
+	if eid
+		ModEvent.PushForm(eid, ActorRef)
+		ModEvent.PushInt(eid, ActorRef.GetLeveledActorBase().GetSex())
+		ModEvent.Send(eid)
+	endIf
 endFunction
 
 function TreatAsGender(Actor ActorRef, bool AsFemale)
@@ -464,6 +470,13 @@ function TreatAsGender(Actor ActorRef, bool AsFemale)
 	int sex = ActorRef.GetLeveledActorBase().GetSex()
 	if (sex != 0 && !AsFemale) || (sex != 1 && AsFemale) 
 		ActorRef.SetFactionRank(GenderFaction, AsFemale as int)
+	endIf
+	; Send event for whenever an actor's gender is altered
+	int eid = ModEvent.Create("SexLabActorGenderChange")
+	if eid
+		ModEvent.PushForm(eid, ActorRef)
+		ModEvent.PushInt(eid, AsFemale as int)
+		ModEvent.Send(eid)
 	endIf
 endFunction
 
@@ -473,6 +486,8 @@ int function GetGender(Actor ActorRef)
 		if sslCreatureAnimationSlots.HasRaceType(BaseRef.GetRace())
 			if !Config.UseCreatureGender
 				return 2 ; Creature - All Male
+			elseIf ActorRef.IsInFaction(GenderFaction)
+				return 2 + ActorRef.GetFactionRank(GenderFaction) ; CreatureGender + Override
 			else
 				return 2 + BaseRef.GetSex() ; CreatureGenders: 2+
 			endIf

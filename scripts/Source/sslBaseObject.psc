@@ -153,7 +153,14 @@ function Log(string Log, string Type = "NOTICE")
 	Debug.Trace("SEXLAB - "+Log)
 endFunction
 
+bool bSaved = false
+bool property Saved hidden
+	bool function get()
+		return bSaved
+	endFunction
+endProperty
 function Save(int id = -1)
+	bSaved = true
 	SlotID = id
 	; Trim tags
 	int i = Tags.Find("")
@@ -170,6 +177,7 @@ function Initialize()
 	Registry = ""
 	SlotID   = -1
 	Enabled  = false
+	bSaved   = false
 	Storage  = none
 	Tags     = new string[18]
 endFunction

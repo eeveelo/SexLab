@@ -1,7 +1,6 @@
 Scriptname sslEffectDebug extends ActiveMagicEffect
 
 import PapyrusUtil
-import JsonUtil
 
 SexLabFramework property SexLab auto
 sslSystemConfig property Config auto
@@ -20,9 +19,257 @@ sslBenchmark function Benchmark(int Tests = 1, int Iterations = 5000, int Loops 
 	return (Quest.GetQuest("SexLabDev") as sslBenchmark).StartBenchmark(Tests, Iterations, Loops, UseBaseLoop)
 endFunction
 
-
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
+	; Benchmark(2, 10, 5)
 	SexLab.QuickStart(CasterRef, TargetRef)
+
+	; CasterRef.SetFactionRank(SexLab.AnimatingFaction, 1)
+
+	; Log("Searching for formtype kNPC, 43...")
+	; ObjectReference[] npcs = MiscUtil.ScanCellObjects(43, CasterRef, 0.0)
+	; Log("\t kNPC: "+npcs+"\nNames: "+GetActorNames(ObjsToActors(npcs)))
+	; Utility.Wait(0.1)
+
+	; Actor[] actors = MiscUtil.ScanCellNPCs(CasterRef, 0)
+	; Log("All Actors: "+actors+"\nNames: "+GetActorNames(actors))
+	; Utility.Wait(0.1)
+
+	; actors = MiscUtil.ScanCellNPCs(CasterRef, 30.0)
+	; Log("Close Actors(30): "+actors+"\nNames: "+GetActorNames(actors))
+	; Utility.Wait(0.1)
+
+	; actors = MiscUtil.ScanCellNPCs(CasterRef, 100.0)
+	; Log("Close Actors(100): "+actors+"\nNames: "+GetActorNames(actors))
+	; Utility.Wait(0.1)
+
+	; actors = MiscUtil.ScanCellNPCs(CasterRef, 500.0)
+	; Log("Close Actors(500): "+actors+"\nNames: "+GetActorNames(actors))
+	; Utility.Wait(0.1)
+
+	; actors = MiscUtil.ScanCellNPCs(CasterRef, 1000.0)
+	; Log("Close Actors(1000): "+actors+"\nNames: "+GetActorNames(actors))
+	; Utility.Wait(0.1)
+
+	; actors = MiscUtil.ScanCellNPCs(CasterRef, 5000.0)
+	; Log("Close Actors(5000): "+actors+"\nNames: "+GetActorNames(actors))
+	; Utility.Wait(0.1)
+
+	; actors = MiscUtil.ScanCellNPCs(CasterRef, 20000.0)
+	; Log("Close Actors(20000): "+actors+"\nNames: "+GetActorNames(actors))
+	; Utility.Wait(0.1)
+
+	; actors = MiscUtil.ScanCellNPCs(CasterRef, 100000.0)
+	; Log("Close Actors(100000): "+actors+"\nNames: "+GetActorNames(actors))
+	; Utility.Wait(0.1)
+
+	; actors = MiscUtil.ScanCellNPCs(CasterRef, 0, none, false)
+	; Log("All Actors (including dead): "+actors+"\nNames: "+GetActorNames(actors))
+	; Utility.Wait(0.1)
+
+	; Log("Keyword: "+Config.ActorTypeNPC+" Has: "+TargetRef.HasKeyword(Keyword.GetKeyword("ActorTypeNPC")))
+
+
+	; actors = MiscUtil.ScanCellNPCs(CasterRef, 0, Config.ActorTypeNPC)
+	; Log("All Actors (ActorTypeNPC): "+actors+"\nNames: "+GetActorNames(actors))
+	; Utility.Wait(0.1)
+
+	; actors = MiscUtil.ScanCellNPCs(CasterRef, 0, Keyword.GetKeyword("ActorTypeNPC"))
+	; Log("All Actors (ActorTypeNPC2): "+actors+"\nNames: "+GetActorNames(actors))
+	; Utility.Wait(0.1)
+
+	; actors = MiscUtil.ScanCellNPCs(CasterRef, 0, Keyword.GetKeyword("TestDemoQuestgiver"))
+	; Log("All Actors (TestDemoQuestgiver): "+actors+"\nNames: "+GetActorNames(actors))
+	; Utility.Wait(0.1)
+
+	; actors = MiscUtil.ScanCellNPCs(CasterRef, 0, Keyword.GetKeyword("PLAYERKEYWORD"))
+	; Log("All Actors (PLAYERKEYWORD): "+actors+"\nNames: "+GetActorNames(actors))
+	; Utility.Wait(0.1)
+
+
+
+	; if TargetRef != CasterRef
+	; 	TargetRef.SetFactionRank(SexLab.AnimatingFaction, 5)
+	; 	actors = MiscUtil.ScanCellNPCsByFaction(SexLab.AnimatingFaction, CasterRef, 0.0)
+	; 	Log("All Faction Actors: "+actors+"\nNames: "+GetActorNames(actors))
+	; 	Utility.Wait(0.1)
+
+	; 	actors = MiscUtil.ScanCellNPCsByFaction(SexLab.AnimatingFaction, CasterRef, 0.0, 1)
+	; 	Log("Faction Actors(min: 1): "+actors+"\nNames: "+GetActorNames(actors))
+	; 	Utility.Wait(0.1)
+
+	; 	actors = MiscUtil.ScanCellNPCsByFaction(SexLab.AnimatingFaction, CasterRef, 0.0, 6)
+	; 	Log("Faction Actors(min: 6): "+actors+"\nNames: "+GetActorNames(actors))
+	; 	Utility.Wait(0.1)
+
+	; 	actors = MiscUtil.ScanCellNPCsByFaction(SexLab.AnimatingFaction, CasterRef, 0.0, 0, 1)
+	; 	Log("Faction Actors(max: 1): "+actors+"\nNames: "+GetActorNames(actors))
+	; 	Utility.Wait(0.1)
+
+	; 	actors = MiscUtil.ScanCellNPCsByFaction(SexLab.AnimatingFaction, CasterRef, 0.0, 0, 6)
+	; 	Log("Faction Actors(max: 6): "+actors+"\nNames: "+GetActorNames(actors))
+	; 	Utility.Wait(0.1)
+
+	; 	actors = MiscUtil.ScanCellNPCsByFaction(SexLab.AnimatingFaction, CasterRef, 0.0, 1, 4)
+	; 	Log("Faction Actors(min: 1, max: 4): "+actors+"\nNames: "+GetActorNames(actors))
+	; 	Utility.Wait(0.1)
+
+	; 	actors = MiscUtil.ScanCellNPCsByFaction(SexLab.AnimatingFaction, CasterRef, 0.0, 6, 10)
+	; 	Log("Faction Actors(min: 6, max: 10): "+actors+"\nNames: "+GetActorNames(actors))
+	; 	Utility.Wait(0.1)
+
+	; 	actors = MiscUtil.ScanCellNPCsByFaction(SexLab.AnimatingFaction, CasterRef, 0.0, 6, 1)
+	; 	Log("Faction Actors(min: 6, max: 1): "+actors+"\nNames: "+GetActorNames(actors))
+	; 	Utility.Wait(0.1)
+
+	; 	actors = MiscUtil.ScanCellNPCsByFaction(SexLab.AnimatingFaction, CasterRef, 0.0, 5, 1)
+	; 	Log("Faction Actors(min: 5, max: 1): "+actors+"\nNames: "+GetActorNames(actors))
+	; 	Utility.Wait(0.1)
+
+	; 	actors = MiscUtil.ScanCellNPCsByFaction(SexLab.AnimatingFaction, CasterRef, 0.0, 5, 5)
+	; 	Log("Faction Actors(min: 5, max: 5): "+actors+"\nNames: "+GetActorNames(actors))
+	; 	Utility.Wait(0.1)
+	; endIf
+
+
+
+
+;/ 	SpawnMarker(TargetRef)
+	LockActor(TargetRef)
+
+	Log("VehicleFixMode(1)")
+	SexLabUtil.VehicleFixMode(1)
+	TargetRef.SetVehicle(MarkerRef)
+	Utility.Wait(6.0)
+
+
+	Log("VehicleFixMode(0)")
+	SexLabUtil.VehicleFixMode(0)
+	TargetRef.SetVehicle(MarkerRef)
+	Utility.Wait(6.0)
+
+	UnlockActor(TargetRef)
+	SexLabUtil.VehicleFixMode((Config.DisableScale as int))
+
+ /;
+
+;/ 	if TargetRef != PlayerRef
+		if StorageUtil.GetIntValue(TargetRef, "DoNothingTest") != 10
+			StorageUtil.SetIntValue(TargetRef,"DoNothingTest", 10)
+
+			Log("Adding DoNothing package override to: "+TargetRef)
+			ActorUtil.AddPackageOverride(TargetRef, SexLab.ActorLib.DoNothing, 100)
+			TargetRef.SetFactionRank(SexLab.AnimatingFaction, 1)
+			TargetRef.EvaluatePackage()
+		else
+			StorageUtil.UnsetIntValue(TargetRef,"DoNothingTest")
+
+			Log("Removing DoNothing package override from: "+TargetRef)
+			ActorUtil.RemovePackageOverride(TargetRef, SexLab.ActorLib.DoNothing)
+			TargetRef.RemoveFromFaction(SexLab.AnimatingFaction)
+			TargetRef.EvaluatePackage()
+		endIf
+	else
+		Utility.Wait(3.0)
+		Log("Testing ToggleFreeCamera")
+		MiscUtil.ToggleFreeCamera()
+		Utility.Wait(5.0)
+		MiscUtil.ToggleFreeCamera()
+	endIf /;
+
+
+;/ 	sslAnimationSlots AnimSlots = SexLab.AnimSlots
+
+	AnimSlots.OutputCacheLog()
+	AnimSlots.GetByTags(2, "Vaginal")
+	AnimSlots.GetByTags(2, "Standing,Default")
+	AnimSlots.GetByTags(2, "Anal")
+	AnimSlots.GetByTags(2, "MF,Standing")
+	AnimSlots.GetByTags(2, "Doggystyle")
+	AnimSlots.GetByTags(2, "Aggressive")
+	AnimSlots.GetByType(3,2,1)
+	AnimSlots.GetByTags(2, "Anal,Standing")
+	AnimSlots.GetByTags(2, "Arrok")
+	AnimSlots.GetByTags(2, "Vaginal")
+	AnimSlots.GetByType(1)
+	AnimSlots.GetByTags(2, "Vaginal,Standing")
+	AnimSlots.GetByTags(1, "F")
+	AnimSlots.GetByTags(2, "Vaginal,Standing")
+	AnimSlots.GetByTags(2, "Doggystyle")
+	AnimSlots.GetByTags(2, "Aggressive,Standing", "Arrok")
+	AnimSlots.GetByTags(2, "Foreplay")
+	AnimSlots.GetByTags(2, "Sideways","Aggressive")
+	AnimSlots.GetByTags(1, "AP")
+	AnimSlots.GetByTags(1, "M")
+	AnimSlots.GetByTags(2, "AP")
+	AnimSlots.GetByType(5)
+	AnimSlots.GetByTags(2, "Standing","Foreplay")
+	AnimSlots.GetByTags(2, "Sideways","Aggressive")
+	AnimSlots.GetByTags(2, "Anal,MF")
+	AnimSlots.GetByTags(2, "Vaginal,Standing")
+	AnimSlots.GetByTags(2, "MF,Standing,Arrok")
+	AnimSlots.GetByTags(2, "Vaginal,Standing")
+	AnimSlots.GetByTags(1, "Solo")
+	AnimSlots.GetByTags(2, "Standing","Foreplay")
+	AnimSlots.GetByTags(2, "MF,Cowgirl")
+	AnimSlots.GetByType(2,1,1)
+	AnimSlots.GetByTags(2, "Anal")
+	AnimSlots.GetByTags(2, "Aggressive,Standing")
+	AnimSlots.GetByType(2,1,1)
+	AnimSlots.GetByTags(2, "MF,Cowgirl,Arrok")
+	AnimSlots.GetByTags(2, "MF,Cowgirl,Arrok")
+	AnimSlots.GetByTags(2, "MF,Standing")
+	AnimSlots.GetByTags(2, "MF,Cowgirl")
+	AnimSlots.GetByTags(2, "Aggressive,Standing", "Arrok")
+	AnimSlots.GetByTags(2, "MF,Cowgirl,Arrok")
+	AnimSlots.GetByTags(2, "Standing,Default")
+	AnimSlots.GetByTags(2, "Standing","Foreplay")
+	AnimSlots.GetByType(3)
+	AnimSlots.GetByType(5)
+	AnimSlots.GetByTags(2, "Vaginal,Doggystyle")
+	AnimSlots.GetByTags(2, "MF,Standing,Arrok")
+	AnimSlots.GetByType(3,2,1)
+	AnimSlots.GetByTags(2, "MF,Cowgirl,Arrok")
+	AnimSlots.OutputCacheLog()
+ /;
+
+;/ 	int[] Arr1 = new int[10]
+	int i = 0
+	while i < 10
+		Arr1[i] = Utility.RandomInt(-100, 100)
+		i += 1
+	endWhile
+
+	float[] Arr2 = new float[10]
+	i = 0
+	while i < 10
+		Arr2[i] = Utility.RandomFloat(-100.0, 100.0)
+		i += 1
+	endWhile
+
+	Log("Int Array: "+Arr1)
+	Log("Highest Int: "+SexLabUtil.IntMinMaxValue(Arr1))
+	Log("Highest Int Index: "+SexLabUtil.IntMinMaxIndex(Arr1)+" == "+(SexLabUtil.IntMinMaxValue(Arr1) == Arr1[SexLabUtil.IntMinMaxIndex(Arr1)]))
+
+	Log("Lowest Int: "+SexLabUtil.IntMinMaxValue(Arr1, false))
+	Log("Lowest Int Index: "+SexLabUtil.IntMinMaxIndex(Arr1, false)+" == "+(SexLabUtil.IntMinMaxValue(Arr1, false) == Arr1[SexLabUtil.IntMinMaxIndex(Arr1, false)]))
+	Log("------")
+	Log("Float Array: "+Arr2)
+	Log("Highest Float: "+SexLabUtil.FloatMinMaxValue(Arr2))
+	Log("Highest Float Index: "+SexLabUtil.FloatMinMaxIndex(Arr2)+" == "+(SexLabUtil.FloatMinMaxValue(Arr2) == Arr2[SexLabUtil.FloatMinMaxIndex(Arr2)]))
+
+	Log("Lowest Float: "+SexLabUtil.FloatMinMaxValue(Arr2, false))
+	Log("Lowest Float Index: "+SexLabUtil.FloatMinMaxIndex(Arr2, false)+" == "+(SexLabUtil.FloatMinMaxValue(Arr2, false) == Arr2[SexLabUtil.FloatMinMaxIndex(Arr2, false)]))
+
+	Log("------")
+
+	int[] empty1
+	Log("Empty Int Array: "+SexLabUtil.IntMinMaxValue(empty1))
+	Log("Empty Int Array Index: "+SexLabUtil.IntMinMaxIndex(empty1))
+	
+	float[] empty2
+	Log("Empty Int Array: "+SexLabUtil.FloatMinMaxValue(empty2))
+	Log("Empty Int Array Index: "+SexLabUtil.FloatMinMaxIndex(empty2))
+ /;
 	Dispel()
 endEvent
 
@@ -36,16 +283,15 @@ event OnEffectFinish(Actor TargetRef, Actor CasterRef)
 		MarkerRef.Delete()
 		MarkerRef = none
 	endIf
-	; Log("---- FINISHED ----")
+	SexLabUtil.PrintConsole("---- DEBUG EFFECT FINISHED ----")
 endEvent
-
-
 
 ;/-----------------------------------------------\;
 ;|	Debug Utility Functions                      |;
 ;\-----------------------------------------------/;
 
 function Log(string log)
+	Debug.Notification(log)
 	Debug.Trace(log)
 	Debug.TraceUser("SexLabDebug", log)
 	SexLabUtil.PrintConsole(log)
@@ -69,6 +315,16 @@ string function GetObjNames(ObjectReference[] Objects)
 		names += "["+Objects[i].GetName()+"]"
 	endWhile
 	return names
+endFunction
+
+Actor[] function ObjsToActors(ObjectReference[] Objects)
+	int i = Objects.Length
+	Actor[] output = PapyrusUtil.ActorArray(i)
+	while i
+		i -= 1
+		output[i] = Objects[i] as Actor
+	endWhile
+	return output
 endFunction
 
 float[] function GetCoords(Actor ActorRef)
@@ -140,4 +396,17 @@ function UnlockActor(actor ActorRef)
 	; Detach positioning marker
 	ActorRef.StopTranslation()
 	ActorRef.SetVehicle(none)
+endFunction
+
+function SpawnMarker(Actor TargetRef)
+	if !MarkerRef
+		MarkerRef = TargetRef.PlaceAtMe(Config.BaseMarker)
+		int cycle
+		while !MarkerRef.Is3DLoaded() && cycle < 50
+			Utility.Wait(0.1)
+			cycle += 1
+		endWhile
+	endIf
+	MarkerRef.Enable()
+	MarkerRef.MoveTo(TargetRef)
 endFunction

@@ -229,6 +229,8 @@ event OnConfigOpen()
 	; ToggleAnimations
 	TogglePage = 1
 	ta = 0
+	EditTags = false
+	TagFilter = ""
 
 	; Stripping/Timers toggles
 	ts = 0
@@ -371,6 +373,9 @@ endEvent
 
 event OnConfigClose()
 	ModEvent.Send(ModEvent.Create("SexLabConfigClose"))
+	; Clear animation tag cache
+	AnimationSlots.ClearTagCache()
+	CreatureSlots.ClearTagCache()
 	; Realign actors if an adjustment in editor was just made
 	if AutoRealign
 		AutoRealign = false
@@ -572,8 +577,17 @@ event OnSelectST()
 			Slot.ToggleTag("LeadIn")
 		elseIf ta == 2
 			Slot.ToggleTag("Aggressive")
+		elseIf EditTags
+			Slot.ToggleTag(TagFilter)
 		else
 			Slot.Enabled = !Slot.Enabled
+			if Slot.Enabled
+				; Invalite all cache so it can now include this one
+				AnimationSlots.ClearAnimCache()
+			else
+				; Invalidate cache containing animation
+				AnimationSlots.InvalidateByAnimation(Slot)
+			endIf
 		endIf
 
 		SetToggleOptionValueST(GetToggle(Slot))
@@ -641,14 +655,14 @@ function InstallMenu()
 endFunction
 
 function SystemCheckOptions()
-	AddTextOptionST("CheckSKSE", "Skyrim Script Extender (1.7.3+)", StringIfElse(Config.CheckSystemPart("SKSE"), "ok", "X"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckSexLabUtil", "SexLabUtil.dll SKSE Plugin  (1.6+)", StringIfElse(Config.CheckSystemPart("SexLabUtil"), "ok", "X"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckPapyrusUtil", "StorageUtil.dll SKSE Plugin  (3.0+)", StringIfElse(Config.CheckSystemPart("PapyrusUtil"), "ok", "X"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckFNIS", "FNIS - Fores New Idles in Skyrim (5.4+)", StringIfElse(Config.CheckSystemPart("FNIS"), "ok", "X"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckFNISGenerated", "FNIS For Users Behaviors Generated", StringIfElse(Config.CheckSystemPart("FNISGenerated"), "ok", "?"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckFNISSexLabFramework", "FNIS SexLab Framework Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabFramework"), "ok", "?"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckFNISCreaturePack", "FNIS Creature Pack (5.2+)", StringIfElse(Config.CheckSystemPart("FNISCreaturePack"), "ok", "?"), OPTION_FLAG_DISABLED)
-	AddTextOptionST("CheckFNISSexLabCreature", "FNIS SexLab Creature Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabCreature"), "ok", "?"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckSKSE", "Skyrim Script Extender (2.0.9)", StringIfElse(Config.CheckSystemPart("SKSE"), "<font color='#00FF00'>ok</font>", "<font color='#FF0000'>X</font>"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckSexLabUtil", "SexLabUtil.dll SKSE Plugin  (1.6+)", StringIfElse(Config.CheckSystemPart("SexLabUtil"), "<font color='#00FF00'>ok</font>", "<font color='#FF0000'>X</font>"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckPapyrusUtil", "PapyrusUtil.dll SKSE Plugin  (3.6+)", StringIfElse(Config.CheckSystemPart("PapyrusUtil"), "<font color='#00FF00'>ok</font>", "<font color='#FF0000'>X</font>"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNIS", "FNIS - Fores New Idles in Skyrim (7.0+)", StringIfElse(Config.CheckSystemPart("FNIS"), "<font color='#00FF00'>ok</font>", "<font color='#FF0000'>X</font>"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNISGenerated", "FNIS For Users Behaviors Generated", StringIfElse(Config.CheckSystemPart("FNISGenerated"), "<font color='#00FF00'>ok</font>", "<font color='#0000FF'>?</font>"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNISSexLabFramework", "FNIS SexLab Framework Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabFramework"), "<font color='#00FF00'>ok</font>", "<font color='#0000FF'>?</font>"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNISCreaturePack", "FNIS Creature Pack (7.0+)", StringIfElse(Config.CheckSystemPart("FNISCreaturePack"), "<font color='#00FF00'>ok</font>", "<font color='#0000FF'>?</font>"), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CheckFNISSexLabCreature", "FNIS SexLab Creature Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabCreature"), "<font color='#00FF00'>ok</font>", "<font color='#0000FF'>?</font>"), OPTION_FLAG_DISABLED)
 	; Show soft error warning if relevant
 	if !Config.CheckSystemPart("FNISGenerated") || !Config.CheckSystemPart("FNISSexLabFramework") || !Config.CheckSystemPart("FNISCreaturePack") || !Config.CheckSystemPart("FNISSexLabCreature")
 		AddTextOptionST("FNISWarning", "INFO: On '?' Warning", "README")
@@ -714,20 +728,21 @@ function AnimationSettings()
 
 	SetCursorPosition(1)
 	AddMenuOptionST("AnimationProfile", "$SSL_AnimationProfile", "Profile #"+Config.AnimProfile)
-	AddToggleOptionST("AllowCreatures","$SSL_AllowCreatures", Config.AllowCreatures, Math.LogicalAnd(OPTION_FLAG_NONE, (!Config.HasCreatureInstall() && !Config.AllowCreatures) as int))
+	AddToggleOptionST("AllowCreatures","$SSL_AllowCreatures", Config.AllowCreatures)
 	AddToggleOptionST("UseCreatureGender","$SSL_UseCreatureGender", Config.UseCreatureGender)
 	AddHeaderOption("$SSL_AnimationHandling")
 	AddToggleOptionST("RaceAdjustments","$SSL_RaceAdjustments", Config.RaceAdjustments)
 	AddToggleOptionST("DisableTeleport","$SSL_DisableTeleport", Config.DisableTeleport)
 	AddToggleOptionST("SeedNPCStats","$SSL_SeedNPCStats", Config.SeedNPCStats)
-	AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", Config.ScaleActors)
+	AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", Config.ScaleActors, SexLabUtil.IntIfElse(Config.DisableScale, OPTION_FLAG_DISABLED, OPTION_FLAG_NONE))
+	AddToggleOptionST("DisableScale","$SSL_DisableScale", Config.DisableScale)
 	AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", Config.ForeplayStage)
 	AddToggleOptionST("RestrictAggressive","$SSL_RestrictAggressive", Config.RestrictAggressive)
 	AddToggleOptionST("RestrictSameSex","$SSL_RestrictSameSex", Config.RestrictSameSex)
 	AddToggleOptionST("UndressAnimation","$SSL_UndressAnimation", Config.UndressAnimation)
 	AddToggleOptionST("RedressVictim","$SSL_VictimsRedress", Config.RedressVictim)
 	AddToggleOptionST("StraponsFemale","$SSL_FemalesUseStrapons", Config.UseStrapons)
-	AddToggleOptionST("RemoveHeelEffect","$SSL_RemoveHeelEffect", Config.RemoveHeelEffect)
+	AddToggleOptionST("RemoveHeelEffect","$SSL_RemoveHeelEffect", Config.RemoveHeelEffect) ; OLDRIM
 	AddToggleOptionST("BedRemoveStanding","$SSL_BedRemoveStanding", Config.BedRemoveStanding)
 	AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", Config.RagdollEnd)
 	AddToggleOptionST("NudeSuitMales","$SSL_UseNudeSuitMales", Config.UseMaleNudeSuit)
@@ -1239,17 +1254,18 @@ function AnimationEditor()
 	; Show editor options
 	SetTitleText(Animation.Name)
 	AddMenuOptionST("AnimationSelect", "$SSL_Animation", Animation.Name)
-	if Animation.PositionCount == 1 || (TargetRef && Animation.PositionCount == 2 && (!IsCreatureEditor || (IsCreatureEditor && Animation.HasActorRace(TargetRef))))
-		AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere")
-	else
-		AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere", OPTION_FLAG_DISABLED)
-	endIf
+	AddToggleOptionST("AnimationEnabled", "$SSL_Enabled", Animation.Enabled)
 
 	AddMenuOptionST("AnimationAdjustKey", "$SSL_AdjustmentProfile", AdjustKey)
 	AddMenuOptionST("AnimationPosition", "$SSL_Position", "$SSL_{"+GenderLabel(Animation.GetGender(Position))+"}Gender{"+(Position + 1)+"}Position")
 
 	AddMenuOptionST("AnimationAdjustCopy", "$SSL_CopyFromProfile", "$SSL_Select")
-	AddEmptyOption()
+
+	if Animation.PositionCount == 1 || (TargetRef && Animation.PositionCount == 2 && (!IsCreatureEditor || (IsCreatureEditor && Animation.HasActorRace(TargetRef))))
+		AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere")
+	else
+		AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere", OPTION_FLAG_DISABLED)
+	endIf
 
 	string Profile
 	if AdjustKey != "Global"
@@ -1296,6 +1312,16 @@ endFunction
 string[] PageOptions
 string[] MenuOptions
 string[] AdjustKeys
+
+state AnimationEnabled
+	event OnSelectST()
+		Animation.Enabled = !Animation.Enabled
+		SetToggleOptionValueST(Animation.Enabled)
+	endEvent
+	event OnDefaultST()
+		Animation.Enabled = true
+	endEvent
+endState
 
 state AnimationSelect
 
@@ -1471,24 +1497,41 @@ endState
 
 sslBaseAnimation[] AnimToggles
 string[] TAModes
+string[] TagCache
+string TagFilter
+bool EditTags
 int TogglePage
 int ta
 
 function ToggleAnimations()
 	SetCursorFillMode(LEFT_TO_RIGHT)
 
-	PerPage  = 124
+	; Allow tag toggling only on main animation toggle and creature
+	bool AllowTagToggle = (ta == 0 || ta == 3)
+
+	if !AllowTagToggle
+		TagFilter = ""
+		EditTags = false
+	endIf
+
+	; Setup pagination
+	PerPage  = 122
 	LastPage = AnimationSlots.PageCount(PerPage)
 	if TogglePage > LastPage || TogglePage < 1
 		TogglePage = 1
 	endIf
 
+	; Get relevant slot registry
 	AnimationSlots = AnimSlots
 	if ta == 3
 		AnimationSlots = CreatureSlots		
 	endIf
-	AnimToggles = AnimationSlots.GetSlots(TogglePage, PerPage)
 
+	; Get animations to be toggled
+	AnimToggles = AnimationSlots.GetSlots(TogglePage, PerPage)
+	int Slotted = AnimationSlots.Slotted
+
+	; Mode select
 	if Config.AllowCreatures
 		TAModes = new string[4]
 		TAModes[0] = "$SSL_ToggleAnimations"
@@ -1505,11 +1548,13 @@ function ToggleAnimations()
 	SetTitleText(TAModes[ta])
 	AddMenuOptionST("TAModeSelect", "$SSL_View", TAModes[ta])
 
-	int Slotted = AnimationSlots.Slotted
-	if Slotted > PerPage
-		AddTextOptionST("AnimationTogglePage", "Toggle Page #", TogglePage)
-	else
-		AddEmptyOption()
+	; Page select
+	AddTextOptionST("AnimationTogglePage", "Page #", TogglePage+" / "+LastPage, DoDisable(Slotted <= PerPage))
+
+
+	if AllowTagToggle
+		AddMenuOptionST("FilterByTag", "Filter By Tag:", StringIfElse(!TagFilter, "---", TagFilter), DoDisable(!AllowTagToggle))
+		AddTextOptionST("ToggleAction", "Toggle Action:", StringIfElse(EditTags && TagFilter, "Has \""+TagFilter+"\"", "Enable/Disable"), DoDisable(!TagFilter))
 	endIf
 
 	AddHeaderOption("")
@@ -1517,7 +1562,7 @@ function ToggleAnimations()
 
 	int i
 	while i < AnimToggles.Length
-		if AnimToggles[i] && AnimToggles[i].Registered
+		if AnimToggles[i] && AnimToggles[i].Registered && (!TagFilter || EditTags || AnimToggles[i].HasTag(TagFilter))
 			AddToggleOptionST("Animation_"+i, AnimToggles[i].Name, GetToggle(AnimToggles[i]))
 		endIf
 		i += 1
@@ -1529,6 +1574,8 @@ bool function GetToggle(sslBaseAnimation Anim)
 		return Anim.HasTag("LeadIn")
 	elseIf ta == 2
 		return Anim.HasTag("Aggressive")
+	elseIf EditTags
+		return Anim.HasTag(TagFilter)
 	else
 		return Anim.Enabled
 	endIf
@@ -1571,6 +1618,50 @@ state AnimationTogglePage
 		SetInfoText("")
 	endEvent
 endState
+
+state FilterByTag
+	event OnMenuOpenST()
+		TagCache    = new string[1]
+		TagCache[0] = "( NONE )"
+		TagCache = PapyrusUtil.MergeStringArray(TagCache, AnimationSlots.GetTagCache())
+		if TagFilter && TagCache.Find(TagFilter) != -1
+			SetMenuDialogStartIndex(TagCache.Find(TagFilter))
+		else
+			SetMenuDialogStartIndex(0)
+		endIf
+		SetMenuDialogDefaultIndex(0)
+		SetMenuDialogOptions(TagCache)
+	endEvent
+	event OnMenuAcceptST(int i)
+		TagFilter = StringIfElse(i < 1, "", TagCache[i])
+		TagCache = Utility.CreateStringArray(0)
+		TogglePage = 1
+		SetMenuOptionValueST(TagFilter)
+		ForcePageReset()
+	endEvent
+	event OnDefaultST()
+		TagFilter = ""
+		TogglePage = 1
+		SetMenuOptionValueST(TAModes[ta])
+		ForcePageReset()
+	endEvent
+endState
+
+state ToggleAction
+	event OnSelectST()
+		EditTags = !EditTags
+		ForcePageReset()
+	endEvent
+	event OnDefaultST()
+		EditTags = false
+		SetTextOptionValueST("Enable/Disable")
+		ForcePageReset()
+	endEvent
+	event OnHighlightST()
+		SetInfoText("")
+	endEvent
+endState
+
 
 
 ; ------------------------------------------------------- ;
@@ -2437,7 +2528,7 @@ function RebuildClean()
 	AddTextOptionST("CleanSystem","$SSL_CleanSystem", "$SSL_ClickHere")
 
 	; AddHeaderOption("$SSL_UpgradeUninstallReinstall")
-	
+
 	AddHeaderOption("$SSL_Maintenance")
 	AddTextOptionST("StopCurrentAnimations","$SSL_StopCurrentAnimations", "$SSL_ClickHere")
 	AddTextOptionST("RestoreDefaultSettings","$SSL_RestoreDefaultSettings", "$SSL_ClickHere")
@@ -2466,6 +2557,26 @@ function RebuildClean()
 
 	AddTextOptionST("ExportSettings","$SSL_ExportSettings", "$SSL_ClickHere")
 	AddTextOptionST("ImportSettings","$SSL_ImportSettings", "$SSL_ClickHere")
+
+	AddHeaderOption("Registry Info")
+
+
+	if AnimSlots.GetDisabledCount() > 0
+		AddTextOptionST("NeverRegisterDisabled","$SSL_NeverRegisterDisabled", "$SSL_ClickHere")
+	else
+		AddTextOptionST("NeverRegisterDisabled","$SSL_NeverRegisterDisabled", "--", OPTION_FLAG_DISABLED)
+	endIf
+	if AnimSlots.GetSuppressedCount() > 0
+		AddTextOptionST("ResetNeverRegisters","$SSL_ResetNeverRegisters", "$SSL_ClickHere")
+	else
+		AddTextOptionST("ResetNeverRegisters","$SSL_ResetNeverRegisters", "--", OPTION_FLAG_DISABLED)
+	endIf
+
+	AddTextOptionST("AnimCount", "Animations (Character)", AnimSlots.Slotted+" / "+AnimSlots.GetNumAliases(), OPTION_FLAG_DISABLED)
+	AddTextOptionST("CreatureCount", "Animations (Creature)", CreatureSlots.Slotted+" / "+CreatureSlots.GetNumAliases(), OPTION_FLAG_DISABLED)
+	AddTextOptionST("VoiceCount", "Voices", VoiceSlots.Slotted+" / 375", OPTION_FLAG_DISABLED)
+	AddTextOptionST("ExpressionCount", "Expressions", ExpressionSlots.Slotted+" / 375", OPTION_FLAG_DISABLED)
+
 
 	AddHeaderOption("System Requirements")
 	SystemCheckOptions()	
@@ -2697,12 +2808,7 @@ endState
 
 state AllowCreatures
 	event OnSelectST()
-		if !Config.AllowCreatures && !Config.HasCreatureInstall()
-			Config.AllowCreatures = false
-			ShowMessage("Could not enable, FNIS Creature Pack or SexLab Creature files not detected.")
-		else
-			Config.AllowCreatures = !Config.AllowCreatures
-		endIf
+		Config.AllowCreatures = !Config.AllowCreatures
 		SetToggleOptionValueST(Config.AllowCreatures)
 		; Register creature animations if needed
 		if !Config.AllowCreatures && CreatureSlots.Slotted > 0
@@ -2789,13 +2895,37 @@ state ScaleActors
 	event OnSelectST()
 		Config.ScaleActors = !Config.ScaleActors
 		SetToggleOptionValueST(Config.ScaleActors)
+		if Config.ScaleActors && Config.DisableScale
+			Config.DisableScale = false
+			SexLabUtil.VehicleFixMode(0)
+		endIf
+		ForcePageReset()
 	endEvent
 	event OnDefaultST()
-		Config.ScaleActors = true
+		Config.ScaleActors = false
 		SetToggleOptionValueST(Config.ScaleActors)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoScaleActors")
+	endEvent
+endState
+state DisableScale
+	event OnSelectST()
+		Config.DisableScale = !Config.DisableScale
+		SetToggleOptionValueST(Config.DisableScale)
+		SexLabUtil.VehicleFixMode((Config.DisableScale as int))
+		if Config.DisableScale && Config.ScaleActors
+			Config.ScaleActors = false
+		endIf
+		ForcePageReset()
+	endEvent
+	event OnDefaultST()
+		Config.DisableScale = false
+		SexLabUtil.VehicleFixMode(0)
+		SetToggleOptionValueST(Config.DisableScale)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoDisableScale")
 	endEvent
 endState
 state RestrictAggressive
@@ -2902,8 +3032,13 @@ state PlayerVoice
 			VoiceSlots.ForgetVoice(PlayerRef)
 			SetMenuOptionValueST("$SSL_Random")
 		else
-			VoiceSlots.SaveVoice(PlayerRef, VoiceSlots.GetByName(VoiceNames[i]))
+			sslBaseVoice Voice = VoiceSlots.GetByName(VoiceNames[i])
+			VoiceSlots.SaveVoice(PlayerRef, Voice)
 			SetMenuOptionValueST(VoiceNames[i])
+			sslThreadController Thread = ThreadSlots.GetActorController(PlayerRef)
+			if Thread
+				Thread.SetVoice(PlayerRef, Voice)
+			endIf
 		endIf
 	endEvent
 	event OnDefaultST()
@@ -2926,8 +3061,13 @@ state TargetVoice
 			VoiceSlots.ForgetVoice(TargetRef)
 			SetMenuOptionValueST("$SSL_Random")
 		else
-			VoiceSlots.SaveVoice(TargetRef, VoiceSlots.GetByName(VoiceNames[i]))
+			sslBaseVoice Voice = VoiceSlots.GetByName(VoiceNames[i])
+			VoiceSlots.SaveVoice(TargetRef, Voice)
 			SetMenuOptionValueST(VoiceNames[i])
+			sslThreadController Thread = ThreadSlots.GetActorController(TargetRef)
+			if Thread
+				Thread.SetVoice(TargetRef, Voice)
+			endIf
 		endIf
 	endEvent
 	event OnDefaultST()
@@ -3089,6 +3229,7 @@ state ResetAnimationRegistry
 		Debug.Notification("$SSL_RunRebuildAnimations")
 		SetTextOptionValueST("$SSL_ClickHere")
 		SetOptionFlagsST(OPTION_FLAG_NONE)
+		ForcePageReset()
 	endEvent
 endState
 state ResetVoiceRegistry
@@ -3100,6 +3241,7 @@ state ResetVoiceRegistry
 		Debug.Notification("$SSL_RunRebuildVoices")
 		SetTextOptionValueST("$SSL_ClickHere")
 		SetOptionFlagsST(OPTION_FLAG_NONE)
+		ForcePageReset()
 	endEvent
 endState
 state ResetExpressionRegistry
@@ -3111,6 +3253,7 @@ state ResetExpressionRegistry
 		Debug.Notification("$SSL_RunRebuildExpressions")
 		SetTextOptionValueST("$SSL_ClickHere")
 		SetOptionFlagsST(OPTION_FLAG_NONE)
+		ForcePageReset()
 	endEvent
 endState
 state ResetStripOverrides
@@ -3201,6 +3344,54 @@ state ImportSettings
 	endEvent
 endState
 
+state NeverRegisterDisabled
+	event OnSelectST()
+		if ShowMessage("$SSL_MessageNeverRegisterDisabled{"+AnimSlots.GetDisabledCount()+"}")
+
+			SetOptionFlagsST(OPTION_FLAG_DISABLED)
+			SetTextOptionValueST("$SSL_Resetting")		
+
+			AnimSlots.SuppressDisabled()
+			CreatureSlots.SuppressDisabled()
+
+			ThreadSlots.StopAll()
+			AnimSlots.Setup()
+			CreatureSlots.Setup()
+			ShowMessage("$SSL_RunRebuildAnimations", false)
+			Debug.Notification("$SSL_RunRebuildAnimations")
+			SetTextOptionValueST("$SSL_ClickHere")
+			SetOptionFlagsST(OPTION_FLAG_NONE)
+		
+			ForcePageReset()
+		endIf
+	endEvent
+endState
+
+state ResetNeverRegisters
+	event OnSelectST()
+		SetOptionFlagsST(OPTION_FLAG_DISABLED)
+		SetTextOptionValueST("$SSL_Resetting")		
+
+		AnimSlots.ClearSuppressed()
+
+		ThreadSlots.StopAll()
+		AnimSlots.Setup()
+		CreatureSlots.Setup()
+		ShowMessage("$SSL_RunRebuildAnimations", false)
+		Debug.Notification("$SSL_RunRebuildAnimations")
+		SetTextOptionValueST("$SSL_ClickHere")
+		SetOptionFlagsST(OPTION_FLAG_NONE)
+
+		ForcePageReset()
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoResetNeverRegisters{"+AnimSlots.GetSuppressedCount()+"}_{"+PapyrusUtil.StringJoin(AnimSlots.GetSuppressedList(), ", ")+"}")
+	endEvent
+endState
+
+
+
+
 ; ------------------------------------------------------- ;
 ; --- Misc Utilities                                  --- ;
 ; ------------------------------------------------------- ;
@@ -3249,6 +3440,13 @@ function ResetQuest(Quest QuestRef)
 	else
 		Log("Invalid quest!", "ResetQuest("+QuestRef+")")
 	endIf
+endFunction
+
+int function DoDisable(bool check)
+	if check
+		return OPTION_FLAG_DISABLED
+	endIf
+	return OPTION_FLAG_NONE
 endFunction
 
 function DEPRECATED()

@@ -207,10 +207,20 @@ function RegisterSlots()
 	Debug.Notification("$SSL_NotifyExpressionInstall")
 endFunction
 
+bool RegisterLock
 int function Register(string Registrar)
-	if Registry.Find(Registrar) != -1 || Slotted >= 375
+	if Registrar == "" || Registry.Find(Registrar) != -1 || Slotted >= 375
 		return -1
 	endIf
+
+	; Thread lock registration
+	float failsafe = Utility.GetCurrentRealTime() + 6.0
+	while RegisterLock && failsafe < Utility.GetCurrentRealTime()
+		Utility.WaitMenuMode(0.5)
+		Log("Register("+Registrar+") - Lock wait...")
+	endWhile
+	RegisterLock = true
+
 	int i = Slotted
 	Slotted += 1
 	if i >= Registry.Length
@@ -231,6 +241,9 @@ int function Register(string Registrar)
 	endIf
 	Registry[i] = Registrar
 	Objects[i]  = GetNthAlias(i)
+
+	; Release lock
+	RegisterLock = false
 	return i
 endFunction
 
@@ -274,8 +287,16 @@ function Setup()
 	Registry = new string[32]
 	Objects  = new Alias[32]
 	; Init defaults
+	RegisterLock = false
 	RegisterSlots()
 	GoToState("Locked")
+endFunction
+
+function Log(string msg)
+	if Config.DebugMode
+		MiscUtil.PrintConsole(msg)
+	endIf
+	Debug.Trace("SEXLAB - "+msg)
 endFunction
 
 state Locked

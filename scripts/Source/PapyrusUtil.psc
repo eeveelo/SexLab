@@ -1,7 +1,12 @@
 scriptname PapyrusUtil Hidden
 
-; Get version of papyrus library. For version 3.0 will return 30.
+; Get version of papyrus DLL library. Version 3.6 will return 36.
 int function GetVersion() global native
+
+; Get version of compiled papyrus scripts which should match return from GetVersion()
+int function GetScriptVersion() global
+	return 36
+endFunction
 
 ; ##
 ; ## Array manipulation utilities
