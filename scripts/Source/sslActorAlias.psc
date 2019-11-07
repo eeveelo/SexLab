@@ -390,7 +390,7 @@ state Ready
 			if IsVictim
 				BaseEnjoyment = Utility.RandomFloat(BestRelation, ((Skills[Stats.kLewd]*1.1) as int)) as int
 			elseIf IsAggressor
-				float OwnLewd = Stats.GetSkillLevel(ActorRef, "Lewd")
+				float OwnLewd = Stats.GetSkillLevel(ActorRef, "Lewd", 0.3)
 				BaseEnjoyment = Utility.RandomFloat(OwnLewd, ((Skills[Stats.kLewd]*1.3) as int) + (OwnLewd*1.7)) as int
 			else
 				BaseEnjoyment = Utility.RandomFloat(BestRelation, ((Skills[Stats.kLewd]*1.5) as int) + (BestRelation*1.5)) as int

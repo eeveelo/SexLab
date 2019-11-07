@@ -1024,6 +1024,20 @@ int function CountTag(sslBaseAnimation[] Anims, string Tags)
 	return AnimSlots.CountTag(Anims, Tags)
 endFunction
 
+;/* CountTagUsage
+* * Counts the number of animations in the registry that contain one of provided animation tags.
+* * 
+* * @param: string Tags - A comma separated list of animation tags.
+* * @return: int - The number of animations from Anims that contain one of the tags provided.
+*/;
+int function CountTagUsage(string Tags, bool IgnoreDisabled = true)
+	return AnimSlots.CountTagUsage(Tags, IgnoreDisabled)
+endFunction
+
+int function CountCreatureTagUsage(string Tags, bool IgnoreDisabled = true)
+	return CreatureSlots.CountTagUsage(Tags, IgnoreDisabled)
+endFunction
+
 ;/* GetAllAnimationTags
 * * Get a list of all unique tags contained in a set of registered animations.
 * * see also: GetAllCreatureAnimationTags, GetAllBothAnimationTags, GetAllAnimationTagsInArray

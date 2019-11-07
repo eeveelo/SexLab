@@ -273,6 +273,17 @@ int function GetCount(bool IgnoreDisabled = true)
 	return Count
 endFunction
 
+; TODO
+int function CountTagUsage(string Tags, bool IgnoreDisabled = true)
+	string[] Checking = StringSplit(Tags)
+	if Tags == "" || Checking.Length == 0
+		return 0
+	endIf
+	int count
+	; TODO
+	return count
+endfunction
+
 string[] function GetAllTags(int ActorCount = -1, bool IgnoreDisabled = true)
 	IgnoreDisabled = !IgnoreDisabled
 	string[] Output

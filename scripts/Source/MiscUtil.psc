@@ -40,9 +40,15 @@ function SetFreeCameraState(bool enable, float speed = 10.0) global native
 
 ; Get an array of files in a given parent directory that have the given extension.
 ; directory is relative to the root Skyrim folder (where skyrim.exe is) and is non-recursive.
-; extension=".nif" to get all .nif mesh files.
+; directory = "." to get all files in root Skyrim folder
+; directory = "data/meshes" to get all files in the <root>/data/meshes folder
+; extension = ".nif" to get all .nif mesh files.
 ; (default) extension="*" to get all files
 string[] function FilesInFolder(string directory, string extension="*") global native
+
+; Get an array of folders in a given parent directory
+; Same rules and examples as above FilesInFolder apply to the directory rule here.
+string[] function FoldersInFolder(string directory) global native
 
 ; Check if a given file exists relative to root Skyrim directory. Example: FileExists("data/meshes/example.nif")
 bool function FileExists(string fileName) global native

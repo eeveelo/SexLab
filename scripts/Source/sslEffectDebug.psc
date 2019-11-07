@@ -20,8 +20,50 @@ sslBenchmark function Benchmark(int Tests = 1, int Iterations = 5000, int Loops 
 endFunction
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
+	; MiscUtil.ToggleFreeCamera()
+
+
+
+	Log("data/skse/plugins: "+MiscUtil.FoldersInFolder("data/skse"))
+	Log("data/skse/plugins: "+MiscUtil.FoldersInFolder("data/skse/plugins"))
+	Log("data/skse/plugins: "+MiscUtil.FilesInFolder("data/skse/plugins"))
+	Log("data/skse/plugins: "+MiscUtil.FilesInFolder("data/skse/plugins",".dll"))
+	Log("data/skse/plugins/sexlab: "+MiscUtil.FilesInFolder("data/skse/plugins/sexlab"))
+	Log("data/skse/plugins/sexlab: "+MiscUtil.FilesInFolder("data/skse/plugins/sexlab", ".json"))
+
+
+	; Form ItemRef = Game.GetFormFromFile(0xD64, "Dragon Lilly.esp")
+	; Log("ItemRef: "+ItemRef)
+
+	; Log("\nGET TEST: ")
+	; Log("Form String: "+StorageUtil.GetStringValue(ItemRef, "formtest", "FAIL"))
+	; Log("Global form: "+StorageUtil.GetFormValue(none, "globaltest"))
+	; Log("Player form: "+StorageUtil.GetFormValue(PlayerRef, "playertest"))
+
+	; Log("\nSET TEST:")
+	; StorageUtil.SetStringValue(ItemRef, "formtest", "SUCCESS")
+	; StorageUtil.SetFormValue(none, "globaltest", ItemRef)
+	; StorageUtil.SetFormValue(PlayerRef, "playertest", ItemRef)
+
+
+	; Log("\nJSON GET TEST: ")
+	; Log("Form String: "+JsonUtil.GetStringValue("formtest.json", "formtest", "FAIL"))
+	; Log("Global form: "+JsonUtil.GetFormValue("formtest.json", "globaltest"))
+	; Log("Player form: "+JsonUtil.GetFormValue("formtest.json", "playertest"))
+
+	; Log("\nJSON SET TEST:")
+	; JsonUtil.SetStringValue("formtest.json", "formtest", "SUCCESS")
+	; JsonUtil.SetFormValue("formtest.json", "globaltest", ItemRef)
+	; JsonUtil.SetFormValue("formtest.json", "playertest", PlayerRef)
+
+	; Utility.WaitMenuMode(3.0)
+	; MiscUtil.ToggleFreeCamera()
+
+
+
+
 	; Benchmark(2, 10, 5)
-	SexLab.QuickStart(CasterRef, TargetRef)
+	; SexLab.QuickStart(CasterRef, TargetRef)
 
 	; CasterRef.SetFactionRank(SexLab.AnimatingFaction, 1)
 

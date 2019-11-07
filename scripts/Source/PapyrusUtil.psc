@@ -5,7 +5,7 @@ int function GetVersion() global native
 
 ; Get version of compiled papyrus scripts which should match return from GetVersion()
 int function GetScriptVersion() global
-	return 36
+	return 37
 endFunction
 
 ; ##

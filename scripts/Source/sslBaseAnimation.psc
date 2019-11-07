@@ -594,6 +594,16 @@ bool function HasPostionRace(int Position, string[] RaceKeys)
 	return RaceTypes && RaceKeys.Find(RaceTypes[Position]) != -1
 endFunction
 
+string[] function GetRaceTypes()
+	int i = RaceTypes.Length
+	string[] out = Utility.CreateStringArray(i)
+	while i
+		i -= 1
+		out[i] = RaceTypes[i]
+	endWhile
+	return out
+endFunction
+
 function AddRaceID(string RaceID)
 	if !HasRaceID(RaceID)
 		sslCreatureAnimationSlots.AddRaceID(RaceType, RaceID)
