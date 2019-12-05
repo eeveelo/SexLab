@@ -1514,17 +1514,17 @@ function ToggleAnimations()
 		EditTags = false
 	endIf
 
+	; Get relevant slot registry
+	AnimationSlots = AnimSlots
+	if ta == 3
+		AnimationSlots = CreatureSlots		
+	endIf
+
 	; Setup pagination
 	PerPage  = 122
 	LastPage = AnimationSlots.PageCount(PerPage)
 	if TogglePage > LastPage || TogglePage < 1
 		TogglePage = 1
-	endIf
-
-	; Get relevant slot registry
-	AnimationSlots = AnimSlots
-	if ta == 3
-		AnimationSlots = CreatureSlots		
 	endIf
 
 	; Get animations to be toggled
