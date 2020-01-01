@@ -433,7 +433,7 @@ state Ready
 
 				; Start wait loop for actor pathing.
 				int StuckCheck  = 0
-				float Failsafe  = Utility.GetCurrentRealTime() + 15.0
+				float Failsafe  = Utility.GetCurrentRealTime() + 30.0
 				while Distance > 80.0 && Utility.GetCurrentRealTime() < Failsafe
 					Utility.Wait(1.0)
 					float Previous = Distance
