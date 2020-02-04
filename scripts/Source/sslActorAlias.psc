@@ -834,6 +834,7 @@ function StopAnimating(bool Quick = false, string ResetAnim = "IdleForceDefaultS
 		; Reset creature idle
 		Debug.SendAnimationEvent(ActorRef, "Reset")
 		Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
+		Debug.SendAnimationEvent(ActorRef, "ReturnDefaultState")
 		Debug.SendAnimationEvent(ActorRef, "FNISDefault")
 		Debug.SendAnimationEvent(ActorRef, "IdleReturnToDefault")
 		Debug.SendAnimationEvent(ActorRef, "ForceFurnExit")
