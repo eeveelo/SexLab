@@ -240,6 +240,7 @@ bool property HasHDTHeels auto hidden
 bool property HasNiOverride auto hidden
 bool property HasFrostfall auto hidden
 bool property HasSchlongs auto hidden
+bool property HasMFGFix auto hidden
 
 FormList property FrostExceptions auto hidden
 MagicEffect HDTHeelEffect
@@ -785,6 +786,9 @@ function Reload()
 	endIf
 	; - SOS/SAM Schlongs (currently unused)
 	HasSchlongs = Game.GetModByName("Schlongs of Skyrim - Core.esm") != 255 || Game.GetModByName("SAM - Shape Atlas for Men.esp") != 255
+
+	; - MFG Fix check
+	HasMFGFix = MfgConsoleFunc.ResetPhonemeModifier(PlayerRef) ; TODO: May need to check another way, some players might get upset that their mfg is reset on load
 
 	; Clean valid actors list
 	StorageUtil.FormListRemove(self, "ValidActors", PlayerRef, true)

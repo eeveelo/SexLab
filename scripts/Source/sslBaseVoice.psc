@@ -1,10 +1,5 @@
 scriptname sslBaseVoice extends sslBaseObject
 
-; import MfgConsoleFunc ; OLDRIM
-; TODO: switch back to mfgconsolefunc: https://www.nexusmods.com/skyrimspecialedition/mods/11669?tab=description
-;  - NVM, not updated for current SKSE64, and buggy accoring to comments.
-;  - Maybe https://www.nexusmods.com/skyrimspecialedition/mods/12919
-
 Sound property Hot auto
 Sound property Mild auto
 Sound property Medium auto
@@ -41,17 +36,25 @@ function PlayMoan(Actor ActorRef, int Strength = 30, bool IsVictim = false, bool
 			SoundRef.Play(ActorRef)
 			Utility.WaitMenuMode(0.4)
 		else
+			bool HasMFG = Config.HasMFGFix
 			float SavedP = sslBaseExpression.GetPhoneme(ActorRef, 1)
-			; MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 20)
-			ActorRef.SetExpressionPhoneme(1, 0.2)
+			if HasMFG
+				MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 20)
+			else
+				ActorRef.SetExpressionPhoneme(1, 0.2)
+			endIf
 			Utility.WaitMenuMode(0.1)
 			SoundRef.Play(ActorRef)
 			TransitUp(ActorRef, 20, 50)
 			Utility.WaitMenuMode(0.2)
 			TransitDown(ActorRef, 50, 20)
 			Utility.WaitMenuMode(0.1)
-			; MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, (SavedP*100) as int) ; OLDRIM
-			ActorRef.SetExpressionPhoneme(1, Saved as float) ; SKYRIM SE
+			if HasMFG
+				MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, (SavedP*100) as int)
+			else
+				ActorRef.SetExpressionPhoneme(1, Saved as float)
+			endIf
+
 		endIf
 	endIf
 endFunction
@@ -86,18 +89,31 @@ function LipSync(Actor ActorRef, int Strength, bool ForceUse = false)
 endFunction
 
 function TransitUp(Actor ActorRef, int from, int to)
-	while from < to
-		from += 2
-		; MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from) ; OLDRIM
-		ActorRef.SetExpressionPhoneme(1, (from as float / 100.0)) ; SKYRIM SE
-	endWhile
+	if Config.HasMFGFix
+		while from < to
+			from += 2
+			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from) ; OLDRIM
+		endWhile
+	else
+		while from < to
+			from += 2
+			ActorRef.SetExpressionPhoneme(1, (from as float / 100.0))
+		endWhile
+	endIf
 endFunction
+
 function TransitDown(Actor ActorRef, int from, int to)
-	while from > to
-		from -= 2
-		; MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from) ; OLDRIM
-		ActorRef.SetExpressionPhoneme(1, (from as float / 100.0)) ; SKYRIM SE
-	endWhile
+	if Config.HasMFGFix
+		while from > to
+			from -= 2
+			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from) ; OLDRIM
+		endWhile
+	else
+		while from > to
+			from -= 2
+			ActorRef.SetExpressionPhoneme(1, (from as float / 100.0)) ; SKYRIM SE
+		endWhile
+	endIf	
 endFunction
 
 bool function CheckGender(int CheckGender)

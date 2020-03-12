@@ -2,10 +2,6 @@ scriptname sslBaseExpression extends sslBaseObject
 
 import PapyrusUtil
 
-; TODO: switch back to mfgconsolefunc: https://www.nexusmods.com/skyrimspecialedition/mods/11669?tab=description
-;  - NVM, not updated for current SKSE64, and buggy accoring to comments.
-;  - Maybe https://www.nexusmods.com/skyrimspecialedition/mods/12919
-
 ; Gender Types
 int property Male       = 0 autoreadonly
 int property Female     = 1 autoreadonly
@@ -90,32 +86,53 @@ float function GetPhoneme(Actor ActorRef, int id) global native
 float function GetExpression(Actor ActorRef, bool getId) global native
 
 function ClearPhoneme(Actor ActorRef) global
+	bool HasMFG = SexLabUtil.GetConfig().HasMFGFix
 	int i
-	while i <= 15
-		ActorRef.SetExpressionPhoneme(i, 0.0) ; Skyrim SE
-		; MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, i, 0) ; Oldrim
-		i += 1
-	endWhile
+	if HasMFG
+		while i <= 15
+			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, i, 0)
+			i += 1
+		endWhile
+	else
+		while i <= 15
+			ActorRef.SetExpressionPhoneme(i, 0.0)
+			i += 1
+		endWhile
+	endIf
 endFunction
 function ClearModifier(Actor ActorRef) global
+	bool HasMFG = SexLabUtil.GetConfig().HasMFGFix
 	int i
-	while i <= 13
-		ActorRef.SetExpressionModifier(i, 0.0) ; Skyrim SE
-		; MfgConsoleFunc.SetPhonemeModifier(ActorRef, 1, i, 0) ; Oldrim
-		i += 1
-	endWhile
+
+	if HasMFG
+		while i <= 13
+			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 1, i, 0)
+			i += 1
+		endWhile
+	else
+		while i <= 13
+			ActorRef.SetExpressionModifier(i, 0.0)
+			i += 1
+		endWhile
+	endIf
 endFunction
 
 function OpenMouth(Actor ActorRef) global
 	; ClearPhoneme(ActorRef)
-	ActorRef.SetExpressionOverride(16, 80)  ; Skyrim SE
-	; MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 60) ; Oldrim
+	if SexLabUtil.GetConfig().HasMFGFix
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 80) 
+	else
+		ActorRef.SetExpressionOverride(16, 80)
+	endIf
 	Utility.WaitMenuMode(0.1)
 endFunction
 
 function CloseMouth(Actor ActorRef) global
-	ActorRef.SetExpressionOverride(7, 50) ; Skyrim SE
-	; MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 0) ; Oldrim
+	if SexLabUtil.GetConfig().HasMFGFix
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 0)
+	else
+		ActorRef.SetExpressionOverride(7, 50)
+	endIf
 	Utility.WaitMenuMode(0.1)
 endFunction
 
@@ -125,29 +142,47 @@ endFunction
 
 function ClearMFG(Actor ActorRef) global
 	ActorRef.ClearExpressionOverride()
-	; MfgConsoleFunc.SetPhonemeModifier(ActorRef, -1, 0, 0) ; Oldrim
-	ClearPhoneme(ActorRef) ; Skyrim SE
-	ClearModifier(ActorRef) ; Skyrim SE
+	if SexLabUtil.GetConfig().HasMFGFix
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, -1, 0, 0)
+	else
+		ClearPhoneme(ActorRef)
+		ClearModifier(ActorRef)
+	endIf
 endFunction
 
 function ApplyPresetFloats(Actor ActorRef, float[] Preset) global 
 	int i
-	; Set Phoneme
 	int p
-	while p <= 15
-		ActorRef.SetExpressionPhoneme(p, Preset[i]) ; Skyrim SE
-		; MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, (Preset[i] * 100.0) as int) ; Oldrim
-		i += 1
-		p += 1
-	endWhile
-	; Set Modifers
 	int m
-	while m <= 13
-		ActorRef.SetExpressionModifier(m, Preset[i]) ; Skyrim SE
-		; MfgConsoleFunc.SetPhonemeModifier(ActorRef, 1, m, (Preset[i] * 100.0) as int) ; Oldrim
-		i += 1
-		m += 1
-	endWhile
+	; MFG
+	if SexLabUtil.GetConfig().HasMFGFix
+		; Set Phoneme
+		while p <= 15
+			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, (Preset[i] * 100.0) as int) ; Oldrim
+			i += 1
+			p += 1
+		endWhile
+		; Set Modifers
+		while m <= 13
+			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 1, m, (Preset[i] * 100.0) as int) ; Oldrim
+			i += 1
+			m += 1
+		endWhile
+	; SKSE
+	else
+		; Set Phoneme
+		while p <= 15
+			ActorRef.SetExpressionPhoneme(p, (Preset[i] as float / 100.0))
+			i += 1
+			p += 1
+		endWhile
+		; Set Modifers
+		while m <= 13
+			ActorRef.SetExpressionModifier(m, (Preset[i] as float / 100.0))
+			i += 1
+			m += 1
+		endWhile
+	endIf
 	; Set expression
 	ActorRef.SetExpressionOverride(Preset[30] as int, (Preset[31] * 100.0) as int)
 endFunction
