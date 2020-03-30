@@ -612,7 +612,7 @@ endFunction
 
 bool RegisterLock
 int function Register(string Registrar)
-	if Registrar == "" || Registry.Find(Registrar) != -1 || Slotted >= 750
+	if Registrar == "" || Registry.Find(Registrar) != -1 || Slotted >= 1000
 		return -1
 	elseIf IsSuppressed(Registrar)
 		Log("SKIPPING -- "+Registrar)
@@ -631,8 +631,8 @@ int function Register(string Registrar)
 	Slotted += 1
 	if i >= Registry.Length
 		int n = Registry.Length + 32
-		if n > 750
-			n = 750
+		if n > 1000
+			n = 1000
 		endIf
 		Log("Resizing animation registry slots: "+Registry.Length+" -> "+n)
 		Registry = Utility.ResizeStringArray(Registry, n)
