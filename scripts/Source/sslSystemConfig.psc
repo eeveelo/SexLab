@@ -2,7 +2,7 @@ scriptname sslSystemConfig extends sslSystemLibrary
 
 ; // TODO: Add a 3rd person mod detection when determining FNIS sensitive variables.
 ; // Disable it when no longer relevant.
-
+; // Split camera shake and cum effects into 2 seperate options
 
 ; ------------------------------------------------------- ;
 ; --- System Resources                                --- ;

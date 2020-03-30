@@ -19,8 +19,22 @@ sslBenchmark function Benchmark(int Tests = 1, int Iterations = 5000, int Loops 
 	return (Quest.GetQuest("SexLabDev") as sslBenchmark).StartBenchmark(Tests, Iterations, Loops, UseBaseLoop)
 endFunction
 
+
+
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	SexLab.QuickStart(CasterRef, TargetRef)
+
+
+	; Log("CheckFriend(TargetRef) 1: "+CheckFriend(TargetRef))
+	; Log("CheckFriend(CasterRef) 1: "+CheckFriend(CasterRef))
+	; ; Utility.Wait(1.0)
+	; SetFriend(TargetRef, CasterRef)
+	; SetFriend(CasterRef, TargetRef)
+	; Log("SetFriend")
+	; ; Utility.Wait(1.0)
+	; Log("CheckFriend(TargetRef) 2: "+CheckFriend(TargetRef))
+	; Log("CheckFriend(CasterRef) 2: "+CheckFriend(CasterRef))
+
 
 	; Spell LightForm = Game.GetFormFromFile(0x88E, "ccqdrsse001-survivalmode.esl") as Spell
 
