@@ -9,3 +9,8 @@ meta.ini
 *.sublime-workspace
 /staging/*
 *.bsa
+SKSE/Plugins/SexLabUtil.exp
+SKSE/Plugins/SexLabUtil.iobj
+SKSE/Plugins/SexLabUtil.ipdb
+SKSE/Plugins/SexLabUtil.lib
+SKSE/Plugins/SexLabUtil.pdb
