@@ -1,0 +1,111 @@
+{
+	// Set to 1 to have this animation default to being enabled after it's installed. 0 for disabled.
+	"enabled" : 1,
+	
+	// When SexLab is registering the default animations, it does them in categories to help order the MCM's toggle page.
+	// The category set here will define when in the registration process this animation gets registration.
+	// See README file in this directory for list of default categories. Custom categories are also valid.
+	// If no category is defined, "Misc" will be used as the default.
+	"category": "cowgirl",
+
+	// The name of the animation as it will be displayed in the MCM
+	"name" : "Arrok Reverse Cowgirl",
+
+	// A list of soundfx to use for each stage of the animation.
+	// If only one is defined (such as here) all stages will default to the same.
+	// For silence/no sfx on a specific stage, simply put "" for that stage in the array.
+	// Valid options: "Squishing", "Sucking", "SexMix", "Squirting"
+	// Can also be forms in the format such as "416305|SexLab.esm" to define the base form ID (converted from HEX to DEC) and the mod it is located in.
+	"sfx" : [ "squishing" ],
+
+	// The search tags that will be used for this animations to help other mods search for and use appropriate animations.
+	"tags" : [ "Dirty", "Creampie", "ReverseCowgirl", "Reverse", "Cowgirl", "Vaginal", "Penis", "sex", "BBP", "Arrok", "FM", "MF" ],
+
+	// The array of actor positions in this animation. 
+	// The typical sexlab convention is to list the female actors first, followed by males, and then creatures (if any).
+	"positions" : 
+	[
+		// THE 1ST POSITION IN THIS ANIMATION (index 0)
+		{
+			// The expected gender of this position
+			// 0 = male, 1 = female, 2 = creature/creaturemale, 3 = creaturefemale
+			"gender" : 1,
+
+			// The females animation events, in stage order.
+			"animation" : [ "Arrok_ReverseCowgirl_A1_S1", "Arrok_ReverseCowgirl_A1_S2", "Arrok_ReverseCowgirl_A1_S3", "Arrok_ReverseCowgirl_A1_S4" ],
+			
+			// The positioning offsets for each of the 4 stages
+			"offset" : 
+			[
+				// Each line is a different stage.
+				// Order of numbers in a line follows as:
+				// Forward, Upward, Sideward, Rotation
+				[ 0, 0, 0, 0 ],
+				[ 0, 0, 0, 0 ],
+				[ 0, 0, 0, 0 ],
+				[ 0, 0, 0, 0 ]
+			],
+
+			// Each flag setting is separated into the same number of stages.
+			"flag" : 
+			{
+				// The cum id (0-7) that will be applied to this character on a given stage during orgasm
+				// Vaginal = 1, Oral = 2, Anal = 3
+				// VaginalOral = 4, VaginalAnal = 5
+				// OralAnal = 6, VaginalOralAnal = 7
+				// NONE = -1
+				"cum" : [ 5, 5, 5, 5 ],
+
+				// A position index that indicates the "source" of the cum, only applicable when there is more than 2 actors.
+				// Tells it to apply the cum effect when the corresponding actor orgasms.
+				"cumsrc" : [ -1, -1, -1, -1 ],
+
+				// Set to 1 to have actor open their mouth for that stage. For use with oral animations.
+				"openmouth" : [ 0, 0, 0, 0 ],
+
+				// The SOS bend to give a schlong equipped actor while in this stage.
+				// Ranges -9 to 9 with 0 being straight forward and negative numbers increasingly downward.
+				// See male position below for better example of use.
+				"schlong" : [ 0, 0, 0, 0 ],
+
+				// Set to 1 to disable this actors ability to play a moan sound while in this stage.
+				"silent" : [ 0, 0, 0, 0 ],
+
+				// Set to 1 to ALLOW the actor to equip a strapon if needed. 
+				// In most cases "needed" just means if they are a female in a male position.
+				"strapon" : [ 1, 1, 1, 1 ]
+			}
+		},
+		// THE 2ND POSITION IN THIS ANIMATION (index 1)
+		// (see above position for explanation of each setting)
+		{
+			// Male (0)
+			"gender" : 0,
+
+			// The males animation events, in stage order.
+			"animation" : [ "Arrok_ReverseCowgirl_A2_S1", "Arrok_ReverseCowgirl_A2_S2", "Arrok_ReverseCowgirl_A2_S3", "Arrok_ReverseCowgirl_A2_S4" ],
+			
+			"offset" : 
+			[
+				// Unlike the female positions offsets, the male has -105 for the forward offset in each stage.
+				// This will align the male actor 105 units backward from the central point of the animation.
+				[ -105, 0, 0, 0 ],
+				[ -105, 0, 0, 0 ],
+				[ -105, 0, 0, 0 ],
+				[ -105, 0, 0, 0 ]
+			],
+			"flag" : 
+			{
+				"cum" : [ -1, -1, -1, -1 ],
+				"cumsrc" : [ -1, -1, -1, -1 ],
+				"openmouth" : [ 0, 0, 0, 0 ],
+
+				// This is a male position, so the schlong settings can actually matter here for getting better alignment.
+				"schlong" : [ 5, 5, 8, 8 ],
+
+				"silent" : [ 0, 0, 0, 0 ],
+				"strapon" : [ 1, 1, 1, 1 ]
+			}
+		}
+	]
+}

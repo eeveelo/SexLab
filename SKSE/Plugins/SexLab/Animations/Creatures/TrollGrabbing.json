@@ -1,0 +1,50 @@
+{
+	"enabled" : 1,
+	"category": "troll",
+	"name" : "(Troll) Grabbing",
+	"sfx" : [ "416305|SexLab.esm" ],
+	"tags" : [ "Vaginal", "Troll", "DoggyStyle", "Dirty", "Bestiality", "Creature", "Panicforever", "FC", "CF" ],
+	"positions" : 
+	[
+		{
+			"gender" : 1,
+			"animation" : [ "Troll_Grabbing_A1_S1", "Troll_Grabbing_A1_S2", "Troll_Grabbing_A1_S3" ],
+			"offset" : 
+			[
+				[ 0, 0, 0, 0 ],
+				[ 0, 0, 0, 0 ],
+				[ 0, 0, 0, 0 ]
+			],
+			"flag" : 
+			{
+				"cum" : [ 5, 5, 5 ],
+				"cumsrc" : [ -1, -1, -1 ],
+				"openmouth" : [ 0, 0, 0 ],
+				"schlong" : [ 0, 0, 0 ],
+				"silent" : [ 0, 0, 0 ],
+				"strapon" : [ 1, 1, 1 ]
+			}
+
+		},
+		{
+			"gender" : 2,
+			"creature" : "Trolls",
+			"animation" : [ "Troll_Grabbing_A2_S1", "Troll_Grabbing_A2_S2", "Troll_Grabbing_A2_S3" ],
+			"offset" : 
+			[
+				[ 0, 0, 0, 0 ],
+				[ 0, 0, 0, 0 ],
+				[ 0, 0, 0, 0 ]
+			],
+			"flag" : 
+			{
+				"cum" : [ -1, -1, -1 ],
+				"cumsrc" : [ -1, -1, -1 ],
+				"openmouth" : [ 0, 0, 0 ],
+				"schlong" : [ 0, 0, 0 ],
+				"silent" : [ 0, 0, 0 ],
+				"strapon" : [ 1, 1, 1 ]
+			}
+		}
+	]
+}
