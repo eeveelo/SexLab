@@ -711,7 +711,7 @@ function AnimationSettings()
 	AddSliderOptionST("AutomaticSUCSM","$SSL_AutomaticSUCSM", Config.AutoSUCSM, "{0}")
 	AddTextOptionST("PlayerGender","$SSL_PlayerGender", SexLabUtil.StringIfElse(ActorLib.GetGender(PlayerRef) == 0, "$SSL_Male", "$SSL_Female"))
 	if TargetRef
-		AddTextOptionST("TargetGender","$SSL_{"+TargetName+"}sGender", SexLabUtil.StringIfElse(ActorLib.GetGender(TargetRef) == 0, "$SSL_Male", "$SSL_Female"))
+		AddTextOptionST("TargetGender","$SSL_{"+TargetName+"}sGender", SexLabUtil.StringIfElse(ActorLib.GetGender(TargetRef) % 2 == 0, "$SSL_Male", "$SSL_Female"))
 	endIf
 
 	AddHeaderOption("$SSL_ExtraEffects")
@@ -2662,12 +2662,12 @@ endState
 state TargetGender
 	event OnSelectST()
 		int Gender = ActorLib.GetGender(TargetRef)
-		ActorLib.TreatAsGender(TargetRef, Gender == 0)
-		SetTextOptionValueST(SexLabUtil.StringIfElse(Gender == 1, "$SSL_Male", "$SSL_Female"))
+		ActorLib.TreatAsGender(TargetRef, Gender % 2 == 0)
+		SetTextOptionValueST(SexLabUtil.StringIfElse(ActorLib.GetGender(TargetRef) % 2 == 0, "$SSL_Male", "$SSL_Female"))
 	endEvent
 	event OnDefaultST()
 		ActorLib.ClearForcedGender(TargetRef)
-		SetTextOptionValueST(SexLabUtil.StringIfElse(ActorLib.GetGender(TargetRef) == 1, "$SSL_Male", "$SSL_Female"))
+		SetTextOptionValueST(SexLabUtil.StringIfElse(ActorLib.GetGender(TargetRef) % 2 == 0, "$SSL_Male", "$SSL_Female"))
 	endEvent
 endState
 state UseExpressions
