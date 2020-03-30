@@ -1,6 +1,7 @@
 Version V1.63
 
 AnimVar SexLabFramework INT32 16300
+AnimVar SexLabDefault INT32 16300
 
 ' b SexLab_Test_16300 AggrMissionary_A1_S3.hkx
 

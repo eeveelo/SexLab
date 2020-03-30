@@ -4,107 +4,143 @@ function LoadCreatureAnimations()
 	; Prepare factory resources (as creature)
 	PrepareFactoryCreatures()
 	
-	; Bear
-	RegisterAnimation("BearDoggystyle")
-	RegisterCategory("Bear")
+	bool SexLabCreature = Game.GetPlayer().GetAnimationVariableInt("SexLabCreature") >= 16300
 
+	; Bear
+	if SexLabCreature
+		RegisterAnimation("BearDoggystyle")
+	endIf
+	RegisterCategory("Bear")
+	
 	; Dog
-	RegisterAnimation("CanineDoggystyle")
-	RegisterAnimation("CanineDoggystyle2")
-	RegisterAnimation("CanineMissionary")
+	if SexLabCreature
+		RegisterAnimation("CanineDoggystyle")
+		RegisterAnimation("CanineDoggystyle2")
+		RegisterAnimation("CanineMissionary")
+	endIf
 	RegisterCategory("Dog")
-	
+
 	; Chaurus
-	RegisterAnimation("ChaurusForward")
-	RegisterAnimation("ChaurusReverse")
+	if SexLabCreature
+		RegisterAnimation("ChaurusForward")
+		RegisterAnimation("ChaurusReverse")
+	endIf
 	RegisterCategory("Chaurus")
-	
+
 	; Dragon
-	RegisterAnimation("DragonPenetration")
-	RegisterAnimation("DragonTongue")
+	if SexLabCreature
+		RegisterAnimation("DragonPenetration")
+		RegisterAnimation("DragonTongue")
+	endIf
 	RegisterCategory("Dragon")
-	
+
 	; Draugr
-	RegisterAnimation("DraugrDoggystyle")
-	RegisterAnimation("DraugrHolding")
-	RegisterAnimation("DraugrMissionary")
-	RegisterAnimation("DraugrGangbang3P")
-	RegisterAnimation("DraugrGangbang4P")
-	RegisterAnimation("DraugrGangbang5P")
+	if SexLabCreature
+		RegisterAnimation("DraugrDoggystyle")
+		RegisterAnimation("DraugrHolding")
+		RegisterAnimation("DraugrMissionary")
+		RegisterAnimation("DraugrGangbang3P")
+		RegisterAnimation("DraugrGangbang4P")
+		RegisterAnimation("DraugrGangbang5P")
+	endIf
 	RegisterCategory("Draugr")
-	
+
 	; Falmer
-	RegisterAnimation("FalmerDoggystyle")
-	RegisterAnimation("FalmerHolding")
-	RegisterAnimation("FalmerMissionary")
-	RegisterAnimation("FalmerGangbang3P")
-	RegisterAnimation("FalmerGangbang4P")
-	RegisterAnimation("FalmerGangbang5P")
+	if SexLabCreature
+		RegisterAnimation("FalmerDoggystyle")
+		RegisterAnimation("FalmerHolding")
+		RegisterAnimation("FalmerMissionary")
+		RegisterAnimation("FalmerGangbang3P")
+		RegisterAnimation("FalmerGangbang4P")
+		RegisterAnimation("FalmerGangbang5P")
+	endIf
 	RegisterCategory("Falmer")
-	
+
 	; Dawguard Gargoyle
-	RegisterAnimation("GargoyleDoggystyle")
-	RegisterAnimation("GargoyleHolding")
-	RegisterAnimation("GargoyleMissionary")
+	if SexLabCreature
+		RegisterAnimation("GargoyleDoggystyle")
+		RegisterAnimation("GargoyleHolding")
+		RegisterAnimation("GargoyleMissionary")
+	endIf
 	RegisterCategory("Gargoyle")
-	
+
 	; Giant
-	RegisterAnimation("GiantPenetration")
-	RegisterAnimation("GiantHarrassment")
-	RegisterAnimation("GiantHolding")
+	if SexLabCreature
+		RegisterAnimation("GiantPenetration")
+		RegisterAnimation("GiantHarrassment")
+		RegisterAnimation("GiantHolding")
+	endIf
 	RegisterCategory("Giant")
-	
+
 	; Horse
-	RegisterAnimation("HorseDoggystyle")
-	RegisterAnimation("HorsePanicDoggystyle")
-	RegisterAnimation("HorseGroping")
+	if SexLabCreature
+		RegisterAnimation("HorseDoggystyle")
+		RegisterAnimation("HorsePanicDoggystyle")
+		RegisterAnimation("HorseGroping")
+	endIf
 	RegisterCategory("Horse")
-	
+
 	; Riekling
-	RegisterAnimation("RieklingMissionary")
-	RegisterAnimation("RieklingThreeWay")
+	if SexLabCreature
+		RegisterAnimation("RieklingMissionary")
+		RegisterAnimation("RieklingThreeWay")
+	endIf
 	RegisterCategory("Riekling")
-	
+
 	; SabreCat
-	RegisterAnimation("CatDoggystyle")
+	if SexLabCreature
+		RegisterAnimation("CatDoggystyle")
+	endIf
 	RegisterCategory("SabreCat")
-	
+
 	; Dragonborn Daedra Seeker
-	RegisterAnimation("DaedraHugging")
+	if SexLabCreature
+		RegisterAnimation("DaedraHugging")
+	endIf
 	RegisterCategory("Seeker")
-	
+
 	; Spider
-	RegisterAnimation("SpiderDouble")
-	RegisterAnimation("SpiderPenetration")
-	RegisterAnimation("BigSpiderPenetration")
+	if SexLabCreature
+		RegisterAnimation("SpiderDouble")
+		RegisterAnimation("SpiderPenetration")
+		RegisterAnimation("BigSpiderPenetration")
+	endIf
 	RegisterCategory("Spider")
-	
+
 	; Troll
-	RegisterAnimation("TrollDoggystyle")
-	RegisterAnimation("TrollHolding")
-	RegisterAnimation("TrollMissionary")
-	RegisterAnimation("TrollDominate")
-	RegisterAnimation("TrollGrabbing")
+	if SexLabCreature
+		RegisterAnimation("TrollDoggystyle")
+		RegisterAnimation("TrollHolding")
+		RegisterAnimation("TrollMissionary")
+		RegisterAnimation("TrollDominate")
+		RegisterAnimation("TrollGrabbing")
+	endIf
 	RegisterCategory("Troll")
-	
+
 	; Werewolf
-	RegisterAnimation("WerewolfAggrDoggystyle")
-	RegisterAnimation("WerewolfDoggystyle")
-	RegisterAnimation("WerewolfHolding")
-	RegisterAnimation("WerewolfMissionary")
-	; RegisterAnimation("WerewolfMissionaryFemale")
+	if SexLabCreature
+		RegisterAnimation("WerewolfAggrDoggystyle")
+		RegisterAnimation("WerewolfDoggystyle")
+		RegisterAnimation("WerewolfHolding")
+		RegisterAnimation("WerewolfMissionary")
+		; RegisterAnimation("WerewolfMissionaryFemale")
+	endIf
 	RegisterCategory("Werewolf")
-	
+
 	; Wolf
-	RegisterAnimation("WolfDoggystyle")
-	RegisterAnimation("WolfDoggystyle2")
-	RegisterAnimation("WolfMissionary")
+	if SexLabCreature
+		RegisterAnimation("WolfDoggystyle")
+		RegisterAnimation("WolfDoggystyle2")
+		RegisterAnimation("WolfMissionary")
+	endIf
 	RegisterCategory("Wolf")
-	
+
 	; Dawnguard Vampire Lord
-	RegisterAnimation("VampireLordDoggystyle")
-	RegisterAnimation("VampireLordHolding")
-	RegisterAnimation("VampireLordMissionary")
+	if SexLabCreature
+		RegisterAnimation("VampireLordDoggystyle")
+		RegisterAnimation("VampireLordHolding")
+		RegisterAnimation("VampireLordMissionary")
+	endIf
 	RegisterCategory("VampireLord")
 
 	; Register any remaining custom categories from json loaders

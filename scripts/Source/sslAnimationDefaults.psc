@@ -11,21 +11,24 @@ function LoadAnimations()
 	; Prepare factory resources (as non creature)
 	PrepareFactory()
 
+	bool SexLabDefault = Game.GetPlayer().GetAnimationVariableInt("SexLabDefault") >= 16300
 	bool APPack = Game.GetPlayer().GetAnimationVariableInt("SexLabAPAnimations") >= 16300
 
 	; Missionary
-	RegisterAnimation("SexLabMissionary")
-	RegisterAnimation("SexLabAggrMissionary")
-	RegisterAnimation("ArrokMissionary")
-	RegisterAnimation("ArrokLegUp")
-	RegisterAnimation("ZynMissionary")
-	RegisterAnimation("zjMissionary")
-	RegisterAnimation("zjLaying")
-	RegisterAnimation("zjLyingVar")
-	RegisterAnimation("LeitoMissionary")
-	RegisterAnimation("LeitoMissionaryVar")
-	RegisterAnimation("fdBedMissionary")
-	RegisterAnimation("fdLegUp")
+	if SexLabDefault
+		RegisterAnimation("SexLabMissionary")
+		RegisterAnimation("SexLabAggrMissionary")
+		RegisterAnimation("ArrokMissionary")
+		RegisterAnimation("ArrokLegUp")
+		RegisterAnimation("ZynMissionary")
+		RegisterAnimation("zjMissionary")
+		RegisterAnimation("zjLaying")
+		RegisterAnimation("zjLyingVar")
+		RegisterAnimation("LeitoMissionary")
+		RegisterAnimation("LeitoMissionaryVar")
+		RegisterAnimation("fdBedMissionary")
+		RegisterAnimation("fdLegUp")
+	endIf
 	if APPack
 		RegisterAnimation("APBedMissionary")
 		RegisterAnimation("APHoldLegUp")
@@ -34,67 +37,77 @@ function LoadAnimations()
 	RegisterCategory("Missionary")
 
 	; DoggyStyle
-	RegisterAnimation("SexLabDoggyStyle")
-	RegisterAnimation("SexLabAggrBehind")
-	RegisterAnimation("SexLabAggrDoggyStyle")
-	RegisterAnimation("ArrokDoggyStyle")
-	RegisterAnimation("ArrokRape")
-	RegisterAnimation("ZynDoggystyle")
-	RegisterAnimation("DarkInvestigationsDoggystyle")
-	RegisterAnimation("zjDoggy")
-	RegisterAnimation("zjDomination")
-	RegisterAnimation("LeitoDoggy")
-	RegisterAnimation("fdDoggyStyle")
+	if SexLabDefault
+		RegisterAnimation("SexLabDoggyStyle")
+		RegisterAnimation("SexLabAggrBehind")
+		RegisterAnimation("SexLabAggrDoggyStyle")
+		RegisterAnimation("ArrokDoggyStyle")
+		RegisterAnimation("ArrokRape")
+		RegisterAnimation("ZynDoggystyle")
+		RegisterAnimation("DarkInvestigationsDoggystyle")
+		RegisterAnimation("zjDoggy")
+		RegisterAnimation("zjDomination")
+		RegisterAnimation("LeitoDoggy")
+		RegisterAnimation("fdDoggyStyle")
+	endIf
 	if APPack
 		RegisterAnimation("APDoggyStyle")
 	endIf
 	RegisterCategory("DoggyStyle")
 
 	; Cowgirl
-	RegisterAnimation("SexLabReverseCowgirl")
-	RegisterAnimation("ArrokCowgirl")
-	RegisterAnimation("ArrokReverseCowgirl")
-	RegisterAnimation("zjCowgirl")
-	RegisterAnimation("LeitoCowgirl")
-	RegisterAnimation("LeitoRCowgirl")
-	RegisterAnimation("fdCowgirl")
-	RegisterAnimation("fdRCowgirl")
-	RegisterAnimation("MitosReverseCowgirl")
+	if SexLabDefault
+		RegisterAnimation("SexLabReverseCowgirl")
+		RegisterAnimation("ArrokCowgirl")
+		RegisterAnimation("ArrokReverseCowgirl")
+		RegisterAnimation("zjCowgirl")
+		RegisterAnimation("LeitoCowgirl")
+		RegisterAnimation("LeitoRCowgirl")
+		RegisterAnimation("fdCowgirl")
+		RegisterAnimation("fdRCowgirl")
+		RegisterAnimation("MitosReverseCowgirl")
+	endIf
 	if APPack
 		RegisterAnimation("APCowgirl")
 	endIf
 	RegisterCategory("Cowgirl")
 
 	; Sideways
-	RegisterAnimation("SexLabSideways")
-	RegisterAnimation("ArrokSideways")
+	if SexLabDefault
+		RegisterAnimation("SexLabSideways")
+		RegisterAnimation("ArrokSideways")
+	endIf
 	if APPack
 		RegisterAnimation("APShoulder")
 	endIf
 	RegisterCategory("Sideways")
 	
 	; Standing
-	RegisterAnimation("SexLabHuggingSex")
-	RegisterAnimation("SexLabStanding")
-	RegisterAnimation("ArrokHugFuck")
-	RegisterAnimation("ArrokStanding")
-	RegisterAnimation("ZynRoughStanding")
-	RegisterAnimation("ZynStanding")
-	RegisterAnimation("zjStanding")
-	RegisterAnimation("zjStandingVar")
-	RegisterAnimation("zjHolding")
-	RegisterAnimation("LeitoStanding")
-	RegisterAnimation("MitosStanding")
+	if SexLabDefault
+		RegisterAnimation("SexLabHuggingSex")
+		RegisterAnimation("SexLabStanding")
+		RegisterAnimation("ArrokHugFuck")
+		RegisterAnimation("ArrokStanding")
+		RegisterAnimation("ZynRoughStanding")
+		RegisterAnimation("ZynStanding")
+		RegisterAnimation("zjStanding")
+		RegisterAnimation("zjStandingVar")
+		RegisterAnimation("zjHolding")
+		RegisterAnimation("LeitoStanding")
+		RegisterAnimation("MitosStanding")
+	endIf
 	if APPack
 		RegisterAnimation("APStanding")
 	endIf
 	RegisterCategory("Standing")
 	
 	; Anal
-	RegisterAnimation("ArrokAnal")
-	RegisterAnimation("zjAnal")
-	RegisterAnimation("LeitoDoggyAnal")
-	RegisterAnimation("MitosHugBehind")
+	if SexLabDefault
+		RegisterAnimation("ArrokAnal")
+		RegisterAnimation("zjAnal")
+		RegisterAnimation("LeitoDoggyAnal")
+		RegisterAnimation("MitosHugBehind")
+	endIf
 	if APPack
 		RegisterAnimation("APAnal")
 		RegisterAnimation("APFaceDown")
@@ -102,13 +115,15 @@ function LoadAnimations()
 	RegisterCategory("Anal")
 	
 	; Oral
-	RegisterAnimation("ArrokBlowjob")
-	RegisterAnimation("ArrokOral")
-	RegisterAnimation("ArrokLedgeBlowjob")
-	RegisterAnimation("DarkInvestigationsBlowjob")
-	RegisterAnimation("LeitoBlowjob")
-	RegisterAnimation("LeitoCunnilingus")
-	RegisterAnimation("MitosFaceFemdom")
+	if SexLabDefault
+		RegisterAnimation("ArrokBlowjob")
+		RegisterAnimation("ArrokOral")
+		RegisterAnimation("ArrokLedgeBlowjob")
+		RegisterAnimation("DarkInvestigationsBlowjob")
+		RegisterAnimation("LeitoBlowjob")
+		RegisterAnimation("LeitoCunnilingus")
+		RegisterAnimation("MitosFaceFemdom")
+	endIf
 	if APPack
 		RegisterAnimation("APBlowjob")
 		RegisterAnimation("APKneelBlowjob")
@@ -119,70 +134,85 @@ function LoadAnimations()
 	RegisterCategory("Oral")
 	
 	; Boobjob
-	RegisterAnimation("SexLabBoobjob")
-	RegisterAnimation("ArrokBoobjob")
+	if SexLabDefault
+		RegisterAnimation("SexLabBoobjob")
+		RegisterAnimation("ArrokBoobjob")
+	endIf
 	if APPack
 		RegisterAnimation("APBoobjob")
 	endIf
 	RegisterCategory("Boobjob")
-	
+
 	; Foreplay
-	RegisterAnimation("ArrokForeplay")
-	RegisterAnimation("ArrokSittingForeplay")
-	RegisterAnimation("ArrokStandingForeplay")
-	RegisterAnimation("zjEroMassage")
-	RegisterAnimation("zjBreastFeeding")
-	RegisterAnimation("zjBreastFeedingVar")
-	RegisterAnimation("LeitoKissing")
-	RegisterAnimation("LeitoSpoon")
+	if SexLabDefault
+		RegisterAnimation("ArrokForeplay")
+		RegisterAnimation("ArrokSittingForeplay")
+		RegisterAnimation("ArrokStandingForeplay")
+		RegisterAnimation("zjEroMassage")
+		RegisterAnimation("zjBreastFeeding")
+		RegisterAnimation("zjBreastFeedingVar")
+		RegisterAnimation("LeitoKissing")
+		RegisterAnimation("LeitoSpoon")
+	endIf
 	RegisterCategory("Foreplay")
 
-	; Gay/Lesbian
-	RegisterAnimation("SexLabTribadism")
-	RegisterAnimation("ArrokLesbian")
-	RegisterAnimation("ZynLesbian")
-	RegisterAnimation("ZynLicking")
+	; Lesbian/Gay
+	if SexLabDefault
+		RegisterAnimation("SexLabTribadism")
+		RegisterAnimation("ArrokLesbian")
+		RegisterAnimation("ZynLesbian")
+		RegisterAnimation("ZynLicking")
+	endIf
 	RegisterCategory("Lesbian")
+	RegisterCategory("Gay")
 
 	; Footjob
-	RegisterAnimation("BleaghFootJob")
-	RegisterAnimation("LeitoFeet")
-	RegisterAnimation("LeitoFeet2")
-	RegisterAnimation("LeitoFeet3")
-	RegisterAnimation("MitosFootjob")
-	RegisterAnimation("MitosTease")
+	if SexLabDefault
+		RegisterAnimation("BleaghFootJob")
+		RegisterAnimation("LeitoFeet")
+		RegisterAnimation("LeitoFeet2")
+		RegisterAnimation("LeitoFeet3")
+		RegisterAnimation("MitosFootjob")
+		RegisterAnimation("MitosTease")
+	endIf
 	RegisterCategory("Footjob")
-	
+
 	; Misc
-	RegisterAnimation("MitosLapLove")
-	RegisterAnimation("MitosReachAround")
-	RegisterAnimation("fdFisting")
+	if SexLabDefault
+		RegisterAnimation("MitosLapLove")
+		RegisterAnimation("MitosReachAround")
+		RegisterAnimation("fdFisting")
+	endIf
 	if APPack
 		RegisterAnimation("APFisting")
 	endIf
 	RegisterCategory("Misc")
 
 	; Solo
-	RegisterAnimation("BleaghFemaleSolo")
-	RegisterAnimation("LeitoFemaleSolo")
-	RegisterAnimation("fdFMasturbation")
-	RegisterAnimation("FBFMasturbation")
-	RegisterAnimation("ArrokMaleMasturbation")
-	RegisterAnimation("fdMMasturbation")
+	if SexLabDefault
+		RegisterAnimation("BleaghFemaleSolo")
+		RegisterAnimation("LeitoFemaleSolo")
+		RegisterAnimation("fdFMasturbation")
+		RegisterAnimation("FBFMasturbation")
+		RegisterAnimation("ArrokMaleMasturbation")
+		RegisterAnimation("fdMMasturbation")
+	endIf
 	if APPack
 		RegisterAnimation("APFemaleSolo")
 	endIf
 	RegisterCategory("Solo")
-	
+
 	; 3P+
-	RegisterAnimation("ArrokDevilsThreeway")
-	RegisterAnimation("ArrokTricycle")
-	RegisterAnimation("zjThreesome")
-	RegisterAnimation("fdThreesome")
-	RegisterAnimation("DarkInvestigationsThreesome")
-	RegisterAnimation("ZynDoublePenetration")
-	RegisterAnimation("ZynFemdom")
-	RegisterAnimation("ZynFourWay")
+	if SexLabDefault
+		RegisterAnimation("ArrokDevilsThreeway")
+		RegisterAnimation("ArrokTricycle")
+		RegisterAnimation("zjThreesome")
+		RegisterAnimation("fdThreesome")
+		RegisterAnimation("DarkInvestigationsThreesome")
+		RegisterAnimation("ZynDoublePenetration")
+		RegisterAnimation("ZynFemdom")
+		RegisterAnimation("ZynFourWay")
+	endIf
 	RegisterCategory("Orgy")
 
 	; Register any remaining custom categories from json loaders
