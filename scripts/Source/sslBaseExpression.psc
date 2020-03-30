@@ -120,9 +120,9 @@ endFunction
 function OpenMouth(Actor ActorRef) global
 	; ClearPhoneme(ActorRef)
 	if SexLabUtil.GetConfig().HasMFGFix
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 80) 
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, SexLabUtil.GetConfig().OpenMouthSize) 
 	else
-		ActorRef.SetExpressionOverride(16, 80)
+		ActorRef.SetExpressionOverride(16, SexLabUtil.GetConfig().OpenMouthSize)
 	endIf
 	Utility.WaitMenuMode(0.1)
 endFunction

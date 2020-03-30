@@ -193,6 +193,7 @@ bool property DisableScale auto hidden
 int property AnimProfile auto hidden
 int property AskBed auto hidden
 int property NPCBed auto hidden
+int property OpenMouthSize auto hidden
 
 int property Backwards auto hidden
 int property AdjustStage auto hidden
@@ -953,6 +954,7 @@ function SetDefaults()
 	AnimProfile        = 1
 	AskBed             = 1
 	NPCBed             = 0
+	OpenMouthSize      = 80
 
 	Backwards          = 54 ; Right Shift
 	AdjustStage        = 157; Right Ctrl
@@ -1166,6 +1168,7 @@ function ExportSettings()
 	ExportInt("AnimProfile", AnimProfile)
 	ExportInt("AskBed", AskBed)
 	ExportInt("NPCBed", NPCBed)
+	ExportInt("OpenMouthSize", OpenMouthSize)
 
 	ExportInt("Backwards", Backwards)
 	ExportInt("AdjustStage", AdjustStage)
@@ -1277,6 +1280,7 @@ function ImportSettings()
 	AnimProfile        = ImportInt("AnimProfile", AnimProfile)
 	AskBed             = ImportInt("AskBed", AskBed)
 	NPCBed             = ImportInt("NPCBed", NPCBed)
+	OpenMouthSize      = ImportInt("OpenMouthSize", OpenMouthSize)
 
 	Backwards          = ImportInt("Backwards", Backwards)
 	AdjustStage        = ImportInt("AdjustStage", AdjustStage)

@@ -736,6 +736,7 @@ function AnimationSettings()
 	AddToggleOptionST("SeedNPCStats","$SSL_SeedNPCStats", Config.SeedNPCStats)
 	AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", Config.ScaleActors, SexLabUtil.IntIfElse(Config.DisableScale, OPTION_FLAG_DISABLED, OPTION_FLAG_NONE))
 	AddToggleOptionST("DisableScale","$SSL_DisableScale", Config.DisableScale)
+	AddSliderOptionST("OpenMouthSize","$SSL_OpenMouthSize", Config.OpenMouthSize, "{0}%")
 	AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", Config.ForeplayStage)
 	AddToggleOptionST("RestrictAggressive","$SSL_RestrictAggressive", Config.RestrictAggressive)
 	AddToggleOptionST("RestrictSameSex","$SSL_RestrictSameSex", Config.RestrictSameSex)
@@ -2760,12 +2761,34 @@ state CumEffectTimer
 	endEvent
 	event OnDefaultST()
 		Config.CumTimer = 120.0
-		SetToggleOptionValueST(Config.CumTimer, "$SSL_Seconds")
+		SetSliderOptionValueST(Config.CumTimer, "$SSL_Seconds")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoCumTimer")
 	endEvent
 endState
+
+
+state OpenMouthSize
+	event OnSliderOpenST()
+		SetSliderDialogStartValue(Config.OpenMouthSize)
+		SetSliderDialogDefaultValue(0)
+		SetSliderDialogRange(0, 100)
+		SetSliderDialogInterval(1)
+	endEvent
+	event OnSliderAcceptST(float value)
+		Config.OpenMouthSize = value as int
+		SetSliderOptionValueST(Config.OpenMouthSize, "{0}%")
+	endEvent
+	event OnDefaultST()
+		Config.OpenMouthSize = 80
+		SetSliderOptionValueST(Config.OpenMouthSize, "{0}%")
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoOpenMouthSize")
+	endEvent
+endState
+
 state OrgasmEffects
 	event OnSelectST()
 		Config.OrgasmEffects = !Config.OrgasmEffects
