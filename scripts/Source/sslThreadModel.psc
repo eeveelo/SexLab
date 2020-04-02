@@ -322,7 +322,7 @@ state Making
 		UnregisterForUpdate()
 		int i
 
-		HookAnimationStarting()
+		; HookAnimationStarting()
 		SendThreadEvent("AnimationStarting")
 
 		; ------------------------- ;
@@ -1073,6 +1073,7 @@ function SetupThreadEvent(string HookEvent)
 	SendModEvent(HookEvent, thread_id)
 endFunction
 
+;/
 function HookAnimationStarting()
 	sslThreadHook[] ThreadHooks = Config.GetThreadHooks()
 	Log("HookAnimationStarting() - "+ThreadHooks)
@@ -1152,6 +1153,7 @@ function HookAnimationEnd()
 		i += 1
 	endWhile
 endFunction
+/;
 
 ; ------------------------------------------------------- ;
 ; --- Alias Events - SYSTEM USE ONLY                  --- ;
