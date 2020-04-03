@@ -425,7 +425,7 @@ state Making
 
 		; Filter animations based on user settings and scene
 		if !CustomAnimations || CustomAnimations.Length < 1
-			string[] Filters = new string[3]
+			string[] Filters = new string[4]
 			sslBaseAnimation[] FilteredPrimary
 			sslBaseAnimation[] FilteredLead
 			; Filter tags for same sex restrictions
@@ -435,8 +435,9 @@ state Making
 			; Filter tags for non-bed friendly animations
 			if BedRef
 				Filters[1] = "Furniture"
+				Filters[2] = "NoBed"
 				if Config.BedRemoveStanding
-					Filters[2] = "Standing"
+					Filters[3] = "Standing"
 				endIf
 			else
 				Filters[1] = "BedOnly"
