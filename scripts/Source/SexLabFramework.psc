@@ -289,7 +289,7 @@ endFunction
 * * @return: True if the actor is being animated by SexLab, and False if it is not.
 */;
 bool function IsActorActive(Actor ActorRef)
-	return ActorRef.IsInFaction(Config.AnimatingFaction) ; TODO: add alias check: https://www.loverslab.com/topic/16623-skyrim-sexlab-sex-animation-framework-v162-updated-jun-3rd-2016/?page=484&tab=comments#comment-2122926
+	return ActorRef.IsInFaction(Config.AnimatingFaction) || ThreadSlots.FindActorController(ActorRef) != -1
 endFunction
 
 ;/* ForbidActor
