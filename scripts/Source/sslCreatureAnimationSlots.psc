@@ -39,7 +39,9 @@ sslBaseAnimation[] function GetByRace(int ActorCount, Race RaceRef)
 		sslBaseAnimation Slot = GetBySlot(i)
 		Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount && RaceTypes.Find(Slot.RaceType) != -1
 	endWhile
-	return GetList(Valid)
+	Output = GetList(valid)
+	CacheAnims(CacheName, Output)
+	return Output
 endFunction
 
 sslBaseAnimation[] function GetByRaceTags(int ActorCount, Race RaceRef, string Tags, string TagsSuppressed = "", bool RequireAll = true)
@@ -64,7 +66,9 @@ sslBaseAnimation[] function GetByRaceTags(int ActorCount, Race RaceRef, string T
 		sslBaseAnimation Slot = GetBySlot(i)
 		Valid[i] = Slot && Slot.Enabled && RaceTypes.Find(Slot.RaceType) != -1 && ActorCount == Slot.PositionCount && Slot.TagSearch(Search, Suppress, RequireAll)
 	endWhile
-	return GetList(Valid)
+	Output = GetList(valid)
+	CacheAnims(CacheName, Output)
+	return Output
 endFunction
 
 sslBaseAnimation[] function GetByRaceKey(int ActorCount, string RaceKey)
@@ -86,7 +90,9 @@ sslBaseAnimation[] function GetByRaceKey(int ActorCount, string RaceKey)
 		sslBaseAnimation Slot = GetBySlot(i)
 		Valid[i] = Slot && Slot.RaceType == RaceKey && Slot.Enabled && ActorCount == Slot.PositionCount
 	endWhile
-	return GetList(Valid)
+	Output = GetList(valid)
+	CacheAnims(CacheName, Output)
+	return Output
 endFunction
 
 sslBaseAnimation[] function GetByRaceKeyTags(int ActorCount, string RaceKey, string Tags, string TagsSuppressed = "", bool RequireAll = true)
@@ -110,7 +116,9 @@ sslBaseAnimation[] function GetByRaceKeyTags(int ActorCount, string RaceKey, str
 		sslBaseAnimation Slot = GetBySlot(i)
 		Valid[i] = Slot && Slot.RaceType == RaceKey && Slot.Enabled && ActorCount == Slot.PositionCount && Slot.TagSearch(Search, Suppress, RequireAll)
 	endWhile
-	return GetList(Valid)
+	Output = GetList(valid)
+	CacheAnims(CacheName, Output)
+	return Output
 endFunction
 
 sslBaseAnimation[] function GetByRaceGenders(int ActorCount, Race RaceRef, int MaleCreatures = 0, int FemaleCreatures = 0, bool ForceUse = false)
@@ -122,6 +130,14 @@ sslBaseAnimation[] function GetByRaceGenders(int ActorCount, Race RaceRef, int M
 	if RaceTypes.Length < 1
 		return sslUtility.AnimationArray(0)
 	endIf
+
+	; Check Cache
+	string CacheName = ActorCount+":Male-"+MaleCreatures+":Female-"+FemaleCreatures+":"+PapyrusUtil.StringJoin(RaceTypes, "|")
+	sslBaseAnimation[] Output = CheckCache(CacheName)
+	if Output
+		return Output
+	endIf
+
 	bool[] Valid  = Utility.CreateBoolArray(Slotted)
 	int i = Slotted
 	while i
@@ -129,7 +145,10 @@ sslBaseAnimation[] function GetByRaceGenders(int ActorCount, Race RaceRef, int M
 		sslBaseAnimation Slot = GetBySlot(i)
 		Valid[i] = Slot && Slot.Enabled && RaceTypes.Find(Slot.RaceType) != -1 && ActorCount == Slot.PositionCount && (!Slot.GenderedCreatures || (MaleCreatures == Slot.MaleCreatures && FemaleCreatures == Slot.FemaleCreatures))
 	endWhile
-	return GetList(Valid)
+	
+	Output = GetList(valid)
+	CacheAnims(CacheName, Output)
+	return Output
 endFunction
 
 sslBaseAnimation[] function FilterCreatureGenders(sslBaseAnimation[] Anims, int MaleCreatures = 0, int FemaleCreatures = 0)
