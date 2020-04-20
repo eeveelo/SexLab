@@ -217,6 +217,7 @@ function SetPathStringArray(string FileName, string Path, string[] arr, bool app
 function SetPathFormArray(string FileName, string Path, form[] arr, bool append = false) global native
 
 function ClearPath(string FileName, string Path) global native
+function ClearPathIndex(string FileName, string Path, int Index) global native
 
 ; Debug use
 function ClearAll(string FileName) global native
