@@ -329,11 +329,21 @@ sslBaseAnimation[] AnimCache16
 sslBaseAnimation[] AnimCache17
 sslBaseAnimation[] AnimCache18
 sslBaseAnimation[] AnimCache19
+sslBaseAnimation[] AnimCache20
+sslBaseAnimation[] AnimCache21
+sslBaseAnimation[] AnimCache22
+sslBaseAnimation[] AnimCache23
+sslBaseAnimation[] AnimCache24
+sslBaseAnimation[] AnimCache25
+sslBaseAnimation[] AnimCache26
+sslBaseAnimation[] AnimCache27
+sslBaseAnimation[] AnimCache28
+sslBaseAnimation[] AnimCache29
 
 function ClearAnimCache()
 	SlottedCache = Slotted
-	FilterCache = new string[20]
-	CacheTimes = new float[20]
+	FilterCache = new string[30]
+	CacheTimes = new float[30]
 	AnimCache0 = sslUtility.EmptyAnimationArray()
 	AnimCache1 = sslUtility.EmptyAnimationArray()
 	AnimCache2 = sslUtility.EmptyAnimationArray()
@@ -354,6 +364,16 @@ function ClearAnimCache()
 	AnimCache17 = sslUtility.EmptyAnimationArray()
 	AnimCache18 = sslUtility.EmptyAnimationArray()
 	AnimCache19 = sslUtility.EmptyAnimationArray()
+	AnimCache20 = sslUtility.EmptyAnimationArray()
+	AnimCache21 = sslUtility.EmptyAnimationArray()
+	AnimCache22 = sslUtility.EmptyAnimationArray()
+	AnimCache23 = sslUtility.EmptyAnimationArray()
+	AnimCache24 = sslUtility.EmptyAnimationArray()
+	AnimCache25 = sslUtility.EmptyAnimationArray()
+	AnimCache26 = sslUtility.EmptyAnimationArray()
+	AnimCache27 = sslUtility.EmptyAnimationArray()
+	AnimCache28 = sslUtility.EmptyAnimationArray()
+	AnimCache29 = sslUtility.EmptyAnimationArray()
 	Log("AnimCache: Cleared!")
 endFunction
 
@@ -448,6 +468,28 @@ function CacheAnims(string CacheName, sslBaseAnimation[] Anims)
 		elseIf i == 19
 			AnimCache19 = Anims
 		endIf
+	elseIf i <= 29
+		if i == 20
+			AnimCache20 = Anims
+		elseIf i == 21
+			AnimCache21 = Anims
+		elseIf i == 22
+			AnimCache22 = Anims
+		elseIf i == 23
+			AnimCache23 = Anims
+		elseIf i == 24
+			AnimCache24 = Anims
+		elseIf i == 25
+			AnimCache25 = Anims
+		elseIf i == 26
+			AnimCache26 = Anims
+		elseIf i == 27
+			AnimCache27 = Anims
+		elseIf i == 28
+			AnimCache28 = Anims
+		elseIf i == 29
+			AnimCache29 = Anims
+		endIf
 	else
 		Log("AnimCache: Invalid cache slot. This shouldn't be possible!")
 		return
@@ -501,6 +543,28 @@ sslBaseAnimation[] function GetCacheSlot(int i)
 		elseIf i == 19
 			return AnimCache19
 		endIf
+	elseIf i <= 29
+		if i == 20
+			return AnimCache20
+		elseIf i == 21
+			return AnimCache21
+		elseIf i == 22
+			return AnimCache22
+		elseIf i == 23
+			return AnimCache23
+		elseIf i == 24
+			return AnimCache24
+		elseIf i == 25
+			return AnimCache25
+		elseIf i == 26
+			return AnimCache26
+		elseIf i == 27
+			return AnimCache27
+		elseIf i == 28
+			return AnimCache28
+		elseIf i == 29
+			return AnimCache29
+		endIf
 	endIf
 	Log("AnimCache: GetCacheSlot("+i+") - INVALID CACHE SLOT")
 	return sslUtility.EmptyAnimationArray()
@@ -510,7 +574,7 @@ int function OldestCache()
 	float var = CacheTimes[0]
 	int index = 0
 	int i = 1
-	while i < 20
+	while i < 30
 		if CacheTimes[i] < var
 			var = CacheTimes[i]
 			index = i
@@ -522,7 +586,7 @@ endFunction
 
 function InvalidateByAnimation(sslBaseAnimation removing)
 	int i = 0
-	while i < 20
+	while i < 30
 		sslBaseAnimation[] arr = GetCacheSlot(i)
 		if arr && FilterCache[i] != "" && arr.Find(removing) != -1
 			Log("InvalidateByAnimation: Found invalid animation in slot["+i+"]: "+FilterCache[i])
@@ -544,7 +608,7 @@ endfunction
 
 function OutputCacheLog()
 	int i = 0
-	while i < 20
+	while i < 30
 		Log(CacheInfo(i))
 		i += 1
 	endWhile
