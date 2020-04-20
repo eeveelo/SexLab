@@ -37,6 +37,8 @@ bool property DebugMode hidden
 			MiscUtil.PrintConsole("SexLab Debug/Development Mode Activated")
 			PlayerRef.AddSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
 			PlayerRef.AddSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
+			AnimSlots.OutputCacheLog()
+			CreatureSlots.OutputCacheLog()
 		else
 			if Debug.TraceUser("SexLabDebug", "SexLab Debug/Development Mode Deactivated")
 				Debug.CloseUserLog("SexLabDebug")
