@@ -1092,9 +1092,7 @@ sslBaseVoice function GetVoice()
 endFunction
 
 function SetExpression(sslBaseExpression ToExpression)
-	if ToExpression
-		Expression = ToExpression
-	endIf
+	Expression = ToExpression
 endFunction
 
 sslBaseExpression function GetExpression()
