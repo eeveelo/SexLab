@@ -238,7 +238,7 @@ function LoadShares()
 	AnimEvents = Thread.AnimEvents
 
 	SeparateOrgasms = Config.SeparateOrgasms
-	AnimatingFaction = Config.AnimatingFaction ; TEMP
+	; AnimatingFaction = Config.AnimatingFaction ; TEMP
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -434,7 +434,7 @@ state Ready
 				; Start wait loop for actor pathing.
 				int StuckCheck  = 0
 				float Failsafe  = Utility.GetCurrentRealTime() + 30.0
-				while Distance > 80.0 && Utility.GetCurrentRealTime() < Failsafe
+				while Distance > 100.0 && Utility.GetCurrentRealTime() < Failsafe
 					Utility.Wait(1.0)
 					float Previous = Distance
 					Distance = ActorRef.GetDistance(WaitRef)
