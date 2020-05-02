@@ -644,7 +644,7 @@ function InstallMenu()
 	endIf
 	
 	AddTextOptionST("InstallSystem","","$SSL_InstallUpdateSexLab{"+GetStringVer()+"}", opt)
-	AddTextOptionST("InstallSystem","","$SSL_ClickHere", opt)
+	AddTextOptionST("InstallSystem2","","$SSL_ClickHere", opt)
 
 	if AliasState == "Updating"
 		AddTextOption("$SSL_CurrentlyUpdating", "!")
@@ -671,6 +671,18 @@ function SystemCheckOptions()
 endFunction
 
 state InstallSystem
+	event OnSelectST()
+		SetOptionFlagsST(OPTION_FLAG_DISABLED)
+		SetTextOptionValueST("Working")
+
+		SystemAlias.InstallSystem()
+
+		SetTextOptionValueST("$SSL_ClickHere")
+		SetOptionFlagsST(OPTION_FLAG_NONE)
+		ForcePageReset()
+	endEvent
+endState
+state InstallSystem2
 	event OnSelectST()
 		SetOptionFlagsST(OPTION_FLAG_DISABLED)
 		SetTextOptionValueST("Working")
