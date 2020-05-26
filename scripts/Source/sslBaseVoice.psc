@@ -52,7 +52,7 @@ function PlayMoan(Actor ActorRef, int Strength = 30, bool IsVictim = false, bool
 			if HasMFG
 				MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, (SavedP*100) as int)
 			else
-				ActorRef.SetExpressionPhoneme(1, Saved as float)
+				ActorRef.SetExpressionPhoneme(1, SavedP as float)
 			endIf
 
 		endIf
