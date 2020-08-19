@@ -87,7 +87,7 @@ endFunction
 
 string function MakeGenderTag(Actor[] Positions) global
 	int[] Genders = GetAPI().ActorLib.GenderCount(Positions)
-	return GetGenderTag(Genders[1], Genders[0], Genders[2])
+	return GetGenderTag(Genders[1], Genders[0], Genders[2] + Genders[3])
 endFunction
 
 string function GetGenderTag(int Females = 0, int Males = 0, int Creatures = 0) global
