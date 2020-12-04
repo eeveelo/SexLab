@@ -259,25 +259,43 @@ endFunction
 
 function _PositionOffsets(string Registrar, string AdjustKey, string LastKey, int Stage, float[] RawOffsets) global native
 float[] function PositionOffsets(float[] Output, string AdjustKey, int Position, int Stage, int BedTypeID = 0)
+	if !Output || Output.Length < 4
+		Output = new float[4]
+	endIf
 	int i = OffsetIndex(Stage, 0)
 	float[] Offsets = OffsetsArray(Position)
 	Output[0] = Offsets[i] + CenterAdjust[(Stage - 1)] ; Forward
 	Output[1] = Offsets[(i + 1)] ; Side
 	Output[2] = Offsets[(i + 2)] ; Up
 	Output[3] = Offsets[(i + 3)] ; Rot - no offset
+	
+	_PositionOffsets(Registry, AdjustKey+"."+Position, LastKeys[Position], Stage, Output)
+	
+	float Forward = Output[0]
+	float Side = Output[1]
 	if BedTypeID > 0 && BedOffset.Length == 4
+		Output[0] = ((Forward * Math.cos(BedOffset[3])) - (Side * Math.sin(BedOffset[3])))
+		Output[1] = ((Forward * Math.sin(BedOffset[3])) + (Side * Math.cos(BedOffset[3])))
+
 		Output[0] = Output[0] + BedOffset[0]
 		Output[1] = Output[1] + BedOffset[1]
+		Output[2] = Output[2] + BedOffset[2]
 		Output[3] = Output[3] + BedOffset[3]
-		if BedTypeID > 1
-			Output[2] = Output[2] + BedOffset[2] ; Only on non-bedrolls
-		endIf
 	endIf
-	_PositionOffsets(Registry, AdjustKey+"."+Position, LastKeys[Position], Stage, Output)
+	if Output[3] >= 360.0
+		Output[3] = Output[3] - 360.0
+	elseIf Output[3] < 0.0
+		Output[3] = Output[3] + 360.0
+	endIf
+	
+	Log("PositionOffsets()[Forward:"+Output[0]+",Sideward:"+Output[1]+",Upward:"+Output[2]+",Rotation:"+Output[3]+"]")
 	return Output
 endFunction
 
 float[] function RawOffsets(float[] Output, int Position, int Stage)
+	if !Output || Output.Length < 4
+		Output = new float[4]
+	endIf
 	int i = OffsetIndex(Stage, 0)
 	float[] Offsets = OffsetsArray(Position)
 	Output[0] = Offsets[i] ; Forward
@@ -288,13 +306,13 @@ float[] function RawOffsets(float[] Output, int Position, int Stage)
 endFunction
 
 function SetBedOffsets(float forward, float sideward, float upward, float rotate)
-	; Reverse defaults if setting to 0
-	if forward == 0.0
-		forward -= Config.BedOffset[0]
-	endIf
-	if upward == 0.0
-		upward  -= Config.BedOffset[2]
-	endIf
+	; Reverse defaults if setting to 0 have nothing to do with the Config.BedOffset
+	;if forward == 0.0
+	;	forward -= Config.BedOffset[0]
+	;endIf
+	;if upward == 0.0
+	;	upward  -= Config.BedOffset[2]
+	;endIf
 
 	BedOffset = new float[4]
 	BedOffset[0] = forward
@@ -307,7 +325,7 @@ float[] function GetBedOffsets()
 	if BedOffset.Length > 0
 		return BedOffset
 	endIf
-	return Config.BedOffset
+	return Utility.CreateFloatArray(4)
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -461,6 +479,9 @@ int[] function GetPositionFlags(string AdjustKey, int Position, int Stage)
 endFunction
 
 int[] function PositionFlags(int[] Output, string AdjustKey, int Position, int Stage)
+	if !Output || Output.Length < 5
+		Output = new int[5]
+	endIf
 	int i = FlagIndex(Stage, 0)
 	int[] Flags = FlagsArray(Position)
 	Output[0] = Flags[i]
@@ -599,6 +620,18 @@ bool function HasValidRaceKey(string[] RaceKeys)
 		endIf
 	endWhile
 	return false
+endFunction
+
+int function CountValidRaceKey(string[] RaceKeys)
+	int i = RaceKeys.Length
+	int out = 0
+	while i
+		i -= 1
+		if RaceKeys[i] != "" && RaceTypes.Find(RaceKeys[i]) != -1
+			out += PapyrusUtil.CountString(RaceTypes, RaceKeys[i])
+		endIf
+	endWhile
+	return out
 endFunction
 
 bool function IsPositionRace(int Position, string RaceKey)
@@ -798,6 +831,8 @@ function Save(int id = -1)
 			Stage -= 1
 		endWhile
 	endIf
+	; Import Offsets
+	ImportOffsets("BedOffset")
 	; Reset saved keys if they no longer match
 	if LastKeyReg != Registry
 		LastKeys = new string[5]
@@ -1131,6 +1166,58 @@ function InitArrays(int Position)
 	elseIf Position == 4
 		Flags4   = Utility.CreateIntArray((Stages * kFlagEnd))
 		Offsets4 = Utility.CreateFloatArray((Stages * kOffsetEnd))
+	endIf
+endFunction
+
+;Animation Offsets
+function ExportOffsets(string Type = "BedOffset")
+	float[] Values
+	if Type == "BedOffset"
+		Values = GetBedOffsets()
+	elseIf Type == "FurnitureOffset"
+		Values = GetFurnitureOffsets()
+	else
+		return
+	endIf
+	string File = "../SexLab/SexlabOffsets.json"
+
+	; Set label of export
+	JsonUtil.SetStringValue(File, "ExportLabel", Utility.GameTimeToString(Utility.GetCurrentRealTime()))
+
+	JsonUtil.FloatListClear(File, Registry+"."+Type)
+	if PapyrusUtil.CountFloat(Values, 0.0) != Values.Length
+		JsonUtil.FloatListCopy(File, Registry+"."+Type, Values)
+	endIf
+
+	; Save to JSON file
+	JsonUtil.Save(File, true)
+endFunction
+
+function ImportOffsets(string Type = "BedOffset")
+	float[] Values
+	if Type == "BedOffset"
+		Values = GetBedOffsets()
+	elseIf Type == "FurnitureOffset"
+		Values = GetFurnitureOffsets()
+	else
+		return
+	endIf
+	string File = "../SexLab/SexlabOffsets.json"
+	int len = 4
+	if JsonUtil.FloatListCount(File, Registry+"."+Type) == len
+		if Values.Length != len
+			Values = Utility.CreateFloatArray(len)
+		endIf
+		int i
+		while i < len
+			Values[i] = JsonUtil.FloatListGet(File, Registry+"."+Type, i)
+			i += 1
+		endWhile
+		if Type == "BedOffset"
+			BedOffset = Values
+		else
+			FurnitureOffset = Values
+		endIf
 	endIf
 endFunction
 
