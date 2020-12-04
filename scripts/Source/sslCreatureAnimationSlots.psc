@@ -51,7 +51,7 @@ sslBaseAnimation[] function GetByRaceTags(int ActorCount, Race RaceRef, string T
 		return sslUtility.AnimationArray(0)
 	endIf
 	; Check Cache
-	string CacheName = ActorCount+":"+Tags+":"+TagsSuppressed+":"+RequireAll+":"+PapyrusUtil.StringJoin(RaceTypes, "|")
+	string CacheName = ActorCount+":"+PapyrusUtil.StringJoin(RaceTypes, "|")+":"+Tags+":"+TagsSuppressed+":"+RequireAll+":"+PapyrusUtil.StringJoin(RaceTypes, "|")
 	sslBaseAnimation[] Output = CheckCache(CacheName)
 	if Output
 		return Output
@@ -121,6 +121,289 @@ sslBaseAnimation[] function GetByRaceKeyTags(int ActorCount, string RaceKey, str
 	return Output
 endFunction
 
+sslBaseAnimation[] function GetByCreatureActors(int ActorCount, Actor[] Positions)
+	Log("GetByCreatureActors(ActorCount="+ActorCount+", Positions="+Positions+")")
+	if !Positions || Positions.Length < 1 || Positions.Length > ActorCount
+		return sslUtility.AnimationArray(0)
+	endIf
+	if ActorCount == 1
+		return GetByRace(ActorCount, Positions[0].GetLeveledActorBase().GetRace())
+	endIf
+	
+	string[] RaceTypesTemp
+	string[] RaceTypes0
+	string[] RaceTypes1
+	string[] RaceTypes2
+	string[] RaceTypes3
+	string[] RaceTypes4
+	Race CreatureRef
+	
+	int[] RaceCount = new int[5]
+	
+	int i = Positions.Length
+	while i > 0
+		i -= 1
+		RaceTypesTemp = GetAllRaceKeys(Positions[i].GetLeveledActorBase().GetRace())
+		if RaceTypesTemp && RaceTypesTemp.Length > 0
+			if !RaceTypes0 || RaceTypes0.Length < 1
+				RaceTypes0 = RaceTypesTemp
+				RaceCount[0] = 1
+				CreatureRef = Positions[i].GetLeveledActorBase().GetRace()
+			else
+				if AllowedRaceKeyCombination(RaceTypes0, RaceTypesTemp)
+					RaceTypes0 = PapyrusUtil.MergeStringArray(RaceTypes0, RaceTypesTemp, True)
+					RaceCount[0] = RaceCount[0] + 1
+				else
+					if !RaceTypes1 || RaceTypes1.Length < 1
+						RaceTypes1 = RaceTypesTemp
+						RaceCount[1] = 1
+					else
+						if AllowedRaceKeyCombination(RaceTypes1, RaceTypesTemp)
+							RaceTypes1 = PapyrusUtil.MergeStringArray(RaceTypes1, RaceTypesTemp, True)
+							RaceCount[1] = RaceCount[1] + 1
+						else
+							if !RaceTypes2 || RaceTypes2.Length < 1
+								RaceTypes2 = RaceTypesTemp
+								RaceCount[2] = 1
+							else
+								if AllowedRaceKeyCombination(RaceTypes2, RaceTypesTemp)
+									RaceTypes2 = PapyrusUtil.MergeStringArray(RaceTypes2, RaceTypesTemp, True)
+									RaceCount[2] = RaceCount[2] + 1
+								else
+									if !RaceTypes3 || RaceTypes3.Length < 1
+										RaceTypes3 = RaceTypesTemp
+										RaceCount[3] = 1
+									else
+										if AllowedRaceKeyCombination(RaceTypes3, RaceTypesTemp)
+											RaceTypes3 = PapyrusUtil.MergeStringArray(RaceTypes3, RaceTypesTemp, True)
+											RaceCount[3] = RaceCount[3] + 1
+										else
+											if !RaceTypes4 || RaceTypes4.Length < 1
+												RaceTypes4 = RaceTypesTemp
+												RaceCount[4] = 1
+											else
+												if AllowedRaceKeyCombination(RaceTypes4, RaceTypesTemp)
+													RaceTypes4 = PapyrusUtil.MergeStringArray(RaceTypes4, RaceTypesTemp, True)
+													RaceCount[4] = RaceCount[4] + 1
+												else
+													Log("FATAL - GetByCreatureActors() - Failed to count RaceType or limit reached")
+												endIf
+											endIf
+										endIf
+									endIf
+								endIf
+							endIf
+						endIf
+					endIf
+				endIf
+			endIf
+		endIf
+	endWhile
+	Log("GetByCreatureActors() - RaceCount:"+RaceCount+" RaceTypes0:"+RaceTypes0+" RaceTypes1:"+RaceTypes1+" RaceTypes2:"+RaceTypes2+" RaceTypes3:"+RaceTypes3+" RaceTypes4:"+RaceTypes4)
+
+	if !RaceTypes0 || RaceTypes0.Length < 1
+		return sslUtility.AnimationArray(0)
+	elseIf !RaceTypes1 || RaceTypes1.Length < 1
+		int[] Genders = ActorLib.GenderCount(Positions)
+		if (Genders[2] + Genders[3]) == 1
+			return GetByRaceGenders(ActorCount, CreatureRef, Genders[2], Genders[3])
+		endIf
+	endIf
+
+	; Check Cache
+	string CacheName = ActorCount+":"+RaceCount+":"+PapyrusUtil.StringJoin(RaceTypes0, "|")+":"+PapyrusUtil.StringJoin(RaceTypes1, "|")+":"+PapyrusUtil.StringJoin(RaceTypes2, "|")+":"+PapyrusUtil.StringJoin(RaceTypes3, "|")+":"+PapyrusUtil.StringJoin(RaceTypes4, "|")
+	sslBaseAnimation[] Output = CheckCache(CacheName)
+	if Output
+		return Output
+	endIf
+
+	bool[] Valid  = Utility.CreateBoolArray(Slotted)
+	i = Slotted
+	while i
+		i -= 1
+		sslBaseAnimation Slot = GetBySlot(i)
+		bool HasAllRaces = True
+		if Slot && Slot.Enabled && ActorCount == Slot.PositionCount
+			if Slot.CountValidRaceKey(RaceTypes0) == RaceCount[0]
+				if Slot.CountValidRaceKey(RaceTypes1) == RaceCount[1]
+					if RaceTypes2 && RaceTypes2.Length > 0 
+						if Slot.CountValidRaceKey(RaceTypes2) == RaceCount[2]
+							if RaceTypes3 && RaceTypes3.Length > 0 
+								if Slot.CountValidRaceKey(RaceTypes3) == RaceCount[3]
+									if RaceTypes4 && RaceTypes4.Length > 0 
+										if Slot.CountValidRaceKey(RaceTypes4) == RaceCount[4]
+											HasAllRaces = True ; Not need
+										else
+											HasAllRaces = False
+										endIf
+									endIf
+								else
+									HasAllRaces = False
+								endIf
+							endIf
+						else
+							HasAllRaces = False
+						endIf
+					endIf
+				else
+					HasAllRaces = False
+				endIf
+			else
+				HasAllRaces = False
+			endIf
+			Valid[i] = HasAllRaces
+		else
+			Valid[i] = False
+		endIf
+	endWhile
+	Output = GetList(Valid)
+	CacheAnims(CacheName, Output)
+	return Output
+endFunction
+
+sslBaseAnimation[] function GetByCreatureActorsTags(int ActorCount, Actor[] Positions, string Tags, string TagsSuppressed = "", bool RequireAll = true)
+	Log("GetByCreatureActorsTags(ActorCount="+ActorCount+", Positions="+Positions+", Tags="+Tags+", TagsSuppressed="+TagsSuppressed+", RequireAll="+RequireAll+")")
+	if !Positions || Positions.Length < 1 || Positions.Length > ActorCount
+		return sslUtility.AnimationArray(0)
+	endIf
+	if ActorCount == 1
+		return GetByRaceTags(ActorCount, Positions[0].GetLeveledActorBase().GetRace(), Tags, TagsSuppressed, RequireAll)
+	endIf
+	
+	string[] RaceTypesTemp
+	string[] RaceTypes0
+	string[] RaceTypes1
+	string[] RaceTypes2
+	string[] RaceTypes3
+	string[] RaceTypes4
+	Race CreatureRef
+	
+	int[] RaceCount = new int[5]
+	
+	int i = Positions.Length
+	while i > 0
+		i -= 1
+		RaceTypesTemp = GetAllRaceKeys(Positions[i].GetLeveledActorBase().GetRace())
+		if RaceTypesTemp && RaceTypesTemp.Length > 0
+			if !RaceTypes0 || RaceTypes0.Length < 1
+				RaceTypes0 = RaceTypesTemp
+				RaceCount[0] = 1
+				CreatureRef = Positions[i].GetLeveledActorBase().GetRace()
+			else
+				if AllowedRaceKeyCombination(RaceTypes0, RaceTypesTemp)
+					RaceTypes0 = PapyrusUtil.MergeStringArray(RaceTypes0, RaceTypesTemp, True)
+					RaceCount[0] = RaceCount[0] + 1
+				else
+					if !RaceTypes1 || RaceTypes1.Length < 1
+						RaceTypes1 = RaceTypesTemp
+						RaceCount[1] = 1
+					else
+						if AllowedRaceKeyCombination(RaceTypes1, RaceTypesTemp)
+							RaceTypes1 = PapyrusUtil.MergeStringArray(RaceTypes1, RaceTypesTemp, True)
+							RaceCount[1] = RaceCount[1] + 1
+						else
+							if !RaceTypes2 || RaceTypes2.Length < 1
+								RaceTypes2 = RaceTypesTemp
+								RaceCount[2] = 1
+							else
+								if AllowedRaceKeyCombination(RaceTypes2, RaceTypesTemp)
+									RaceTypes2 = PapyrusUtil.MergeStringArray(RaceTypes2, RaceTypesTemp, True)
+									RaceCount[2] = RaceCount[2] + 1
+								else
+									if !RaceTypes3 || RaceTypes3.Length < 1
+										RaceTypes3 = RaceTypesTemp
+										RaceCount[3] = 1
+									else
+										if AllowedRaceKeyCombination(RaceTypes3, RaceTypesTemp)
+											RaceTypes3 = PapyrusUtil.MergeStringArray(RaceTypes3, RaceTypesTemp, True)
+											RaceCount[3] = RaceCount[3] + 1
+										else
+											if !RaceTypes4 || RaceTypes4.Length < 1
+												RaceTypes4 = RaceTypesTemp
+												RaceCount[4] = 1
+											else
+												if AllowedRaceKeyCombination(RaceTypes4, RaceTypesTemp)
+													RaceTypes4 = PapyrusUtil.MergeStringArray(RaceTypes4, RaceTypesTemp, True)
+													RaceCount[4] = RaceCount[4] + 1
+												else
+													Log("FATAL - GetByCreatureActorsTags() - Failed to count RaceType or limit reached")
+												endIf
+											endIf
+										endIf
+									endIf
+								endIf
+							endIf
+						endIf
+					endIf
+				endIf
+			endIf
+		endIf
+	endWhile
+	Log("GetByCreatureActorsTags() - RaceCount:"+RaceCount+" RaceTypes0:"+RaceTypes0+" RaceTypes1:"+RaceTypes1+" RaceTypes2:"+RaceTypes2+" RaceTypes3:"+RaceTypes3+" RaceTypes4:"+RaceTypes4)
+
+	if !RaceTypes0 || RaceTypes0.Length < 1
+		return sslUtility.AnimationArray(0)
+	elseIf !RaceTypes1 || RaceTypes1.Length < 1
+		int[] Genders = ActorLib.GenderCount(Positions)
+		if ActorCount > (Genders[2] + Genders[3])
+			return GetByRaceTags(ActorCount, CreatureRef, Tags, "Interspecies,"+TagsSuppressed, RequireAll)
+		endIf
+	endIf
+	
+	; Check Cache
+	string CacheName = ActorCount+":"+RaceCount+":"+PapyrusUtil.StringJoin(RaceTypes0, "|")+":"+PapyrusUtil.StringJoin(RaceTypes1, "|")+":"+PapyrusUtil.StringJoin(RaceTypes2, "|")+":"+PapyrusUtil.StringJoin(RaceTypes3, "|")+":"+PapyrusUtil.StringJoin(RaceTypes4, "|")+":"+Tags+":"+TagsSuppressed+":"+RequireAll
+	sslBaseAnimation[] Output = CheckCache(CacheName)
+	if Output
+		return Output
+	endIf
+
+	bool[] Valid      = Utility.CreateBoolArray(Slotted)
+	string[] Suppress = StringSplit(TagsSuppressed)
+	string[] Search   = StringSplit(Tags)
+	i = Slotted
+	while i
+		i -= 1
+		sslBaseAnimation Slot = GetBySlot(i)
+		bool HasAllRaces = True
+		string[] SlotRaceTypes = PapyrusUtil.RemoveString(Slot.GetRaceTypes(), "") 
+		if Slot && Slot.Enabled && ActorCount == Slot.PositionCount && Slot.TagSearch(Search, Suppress, RequireAll)
+			if Slot.CountValidRaceKey(RaceTypes0) == RaceCount[0]
+				if Slot.CountValidRaceKey(RaceTypes1) == RaceCount[1]
+					if RaceTypes2 && RaceTypes2.Length > 0 
+						if Slot.CountValidRaceKey(RaceTypes2) == RaceCount[2]
+							if RaceTypes3 && RaceTypes3.Length > 0 
+								if Slot.CountValidRaceKey(RaceTypes3) == RaceCount[3]
+									if RaceTypes4 && RaceTypes4.Length > 0 
+										if Slot.CountValidRaceKey(RaceTypes4) == RaceCount[4]
+											HasAllRaces = True ; Not need
+										else
+											HasAllRaces = False
+										endIf
+									endIf
+								else
+									HasAllRaces = False
+								endIf
+							endIf
+						else
+							HasAllRaces = False
+						endIf
+					endIf
+				else
+					HasAllRaces = False
+				endIf
+			else
+				HasAllRaces = False
+			endIf
+			Valid[i] = HasAllRaces
+		else
+			Valid[i] = False
+		endIf
+	endWhile
+	Output = GetList(Valid)
+	CacheAnims(CacheName, Output)
+	return Output
+endFunction
+
 sslBaseAnimation[] function GetByRaceGenders(int ActorCount, Race RaceRef, int MaleCreatures = 0, int FemaleCreatures = 0, bool ForceUse = false)
 	Log("GetByRaceGenders(ActorCount="+ActorCount+", RaceRef="+RaceRef+", MaleCreatures="+MaleCreatures+", FemaleCreatures="+FemaleCreatures+", ForceUse="+ForceUse+")")
 	if !Config.UseCreatureGender && !ForceUse
@@ -132,7 +415,7 @@ sslBaseAnimation[] function GetByRaceGenders(int ActorCount, Race RaceRef, int M
 	endIf
 
 	; Check Cache
-	string CacheName = ActorCount+":Male-"+MaleCreatures+":Female-"+FemaleCreatures+":"+PapyrusUtil.StringJoin(RaceTypes, "|")
+	string CacheName = ActorCount+":"+PapyrusUtil.StringJoin(RaceTypes, "|")+":"+MaleCreatures+":"+FemaleCreatures+":"+ForceUse
 	sslBaseAnimation[] Output = CheckCache(CacheName)
 	if Output
 		return Output
@@ -248,6 +531,38 @@ bool function AllowedCreatureCombination(Race RaceRef1, Race RaceRef2)
 	       (k2 == 1 && k1 > 1 && Keys1.Find(Keys2[0]) != -1)
 	   return true ; Matched single key to multikey
 
+	endIf
+	
+	while k1
+		k1 -= 1
+		if Keys2.Find(Keys1[k1]) != -1
+			return true ; Matched between multikey arrays
+		endIf
+	endWhile
+
+	return false ; No matches found
+endFunction
+
+bool function AllowedRaceKeyCombination(string[] Keys1, string[] Keys2)
+	if !Config.AllowCreatures || !Keys1 || !Keys2
+		return false ; No creatures or missing RaceRef
+	endIf
+	
+	int k1 = Keys1.Length
+	int k2 = Keys2.Length
+	if k1 < 1 || k2 < 1
+		return false ; a probably unnecessary error check
+	endIf
+	
+	if Keys1 == Keys2
+		return true ; No need to check same races
+	endIf
+	
+	if k1 == 1 && k2 == 1 && Keys1[0] != Keys2[0] 
+		return false ; Simple single key mismatch
+	elseIf (k1 == 1 && k2 > 1 && Keys2.Find(Keys1[0]) != -1) || \
+	       (k2 == 1 && k1 > 1 && Keys1.Find(Keys2[0]) != -1)
+	   return true ; Matched single key to multikey
 	endIf
 	
 	while k1
