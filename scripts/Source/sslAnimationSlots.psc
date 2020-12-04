@@ -40,15 +40,15 @@ sslBaseAnimation[] function GetByTags(int ActorCount, string Tags, string TagsSu
 			Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount && Slot.TagSearch(Search, Suppress, RequireAll)
 		endIf
 	endWhile
-	Output = GetList(valid)
+	Output = GetList(Valid)
 	CacheAnims(CacheName, Output)
 	return Output
 endFunction
 
 sslBaseAnimation[] function GetByType(int ActorCount, int Males = -1, int Females = -1, int StageCount = -1, bool Aggressive = false, bool Sexual = true)
-	; Log("GetByType(ActorCount="+ActorCount+", Males="+Males+", Females="+Females+", StageCount="+StageCount+", Aggressive="+Aggressive+")")
+	; Log("GetByType(ActorCount="+ActorCount+", Males="+Males+", Females="+Females+", StageCount="+StageCount+", Aggressive="+Aggressive+", Sexual="+Sexual+")")
 	; Check Cache
-	string CacheName = ActorCount+":"+Males+":"+Females+":"+StageCount+":"+Aggressive
+	string CacheName = ActorCount+":"+Males+":"+Females+":"+StageCount+":"+Aggressive+":"+Sexual
 	sslBaseAnimation[] Output = CheckCache(CacheName)
 	if Output
 		return Output
@@ -56,16 +56,18 @@ sslBaseAnimation[] function GetByType(int ActorCount, int Males = -1, int Female
 	; Search
 	bool[] Valid = Utility.CreateBoolArray(Slotted)
 	bool RestrictAggressive = Config.RestrictAggressive
+	string GenderTag = ActorLib.GetGenderTag(Females, Males)
 	int i = Slotted
 	while i
 		i -= 1
 		if Objects[i]
 			sslBaseAnimation Slot = Objects[i] as sslBaseAnimation
 			Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount && (!RestrictAggressive || Aggressive == Slot.HasTag("Aggressive")) \
-			&& (Males == -1 || Males == Slot.Males) && (Females == -1 || Females == Slot.Females) && (StageCount == -1 || StageCount == Slot.StageCount)
+			&& (((Males == -1 || Males == Slot.Males) && (Females == -1 || Females == Slot.Females)) || Slot.HasTag(GenderTag)) && (StageCount == -1 || StageCount == Slot.StageCount) \
+			&& Sexual != Slot.HasTag("LeadIn")
 		endIf
 	endWhile
-	Output = GetList(valid)
+	Output = GetList(Valid)
 	CacheAnims(CacheName, Output)
 	return Output
 endFunction
@@ -111,6 +113,7 @@ sslBaseAnimation[] function GetByDefault(int Males, int Females, bool IsAggressi
 	endIf
 	; Search
 	bool[] Valid = Utility.CreateBoolArray(Slotted)
+	string GenderTag = ActorLib.GetGenderTag(Females, Males)
 	int i = Slotted
 	while i
 		i -= 1
@@ -127,10 +130,10 @@ sslBaseAnimation[] function GetByDefault(int Males, int Females, bool IsAggressi
 				Valid[i] = Valid[i] && (!RestrictAggressive || IsAggressive == (Tags.Find("Aggressive") != -1))
 				; Get SameSex + Non-SameSex
 				if SameSex
-					Valid[i] = Valid[i] && (Tags.Find("FM") != -1 || (Males == Genders[0] && Females == Genders[1]))
+					Valid[i] = Valid[i] && (Tags.Find("FM") != -1 || (((Males == -1 || Males == Genders[0]) && (Females == -1 || Females == Genders[1])) || Slot.HasTag(GenderTag)))
 				; Ignore genders for 3P+
 				elseIf ActorCount < 3
-					Valid[i] = Valid[i] && Males == Genders[0] && Females == Genders[1]
+					Valid[i] = Valid[i] && (((Males == -1 || Males == Genders[0]) && (Females == -1 || Females == Genders[1])) || Slot.HasTag(GenderTag))
 				endIf
 			endIf
 		endIf
@@ -199,6 +202,11 @@ sslBaseAnimation[] function GetList(bool[] Valid)
 				if rand != -1 && Valid[rand]
 					Valid[rand] = false
 					i -= 1
+				endIf
+				if i == 126 ; To be sure only 125 stay
+					i = CountBool(Valid, true)
+					n = Valid.Find(true)
+					end = Valid.RFind(true) - 1
 				endIf
 			endWhile
 		endIf
@@ -273,14 +281,20 @@ int function GetCount(bool IgnoreDisabled = true)
 	return Count
 endFunction
 
-; TODO
 int function CountTagUsage(string Tags, bool IgnoreDisabled = true)
 	string[] Checking = StringSplit(Tags)
 	if Tags == "" || Checking.Length == 0
 		return 0
 	endIf
 	int count
-	; TODO
+	int i = Slotted
+	while i
+		i -= 1
+		if Objects[i]
+			sslBaseAnimation Slot = Objects[i] as sslBaseAnimation
+			count += ((Slot.Enabled || !IgnoreDisabled) && Slot.HasAllTag(Checking)) as int
+		endIf
+	endWhile
 	return count
 endfunction
 
@@ -396,9 +410,13 @@ sslBaseAnimation[] function CheckCache(string CacheName)
 	if ValidateCache() && CacheName
 		int i = FilterCache.Find(CacheName)
 		if i != -1
-			Log("AnimCache: HIT["+i+"] -- "+CacheName)
-			CacheTimes[i] = Utility.GetCurrentGameTime()
 			Output = GetCacheSlot(i)
+			Log("AnimCache: HIT["+i+"] -- "+CacheName+" -- Count["+Output.Length+"]")
+			if Output.Length >= 125 ; To use prevent the same list be used more than 2 times if have more animations avalible
+				InvalidateBySlot(i)
+			else
+				CacheTimes[i] = Utility.GetCurrentGameTime()
+			endIf
 		else
 			Log("AnimCache: MISS -- "+CacheName)
 		endIf
@@ -666,6 +684,7 @@ endFunction
 
 function RegisterSlots()
 	ClearAnimCache()
+	ClearTagCache()
 	; Register default animation
 	; PreloadCategoryLoaders()
 	(Game.GetFormFromFile(0x639DF, "SexLab.esm") as sslAnimationDefaults).LoadAnimations()
@@ -676,7 +695,9 @@ endFunction
 
 bool RegisterLock
 int function Register(string Registrar)
-	if Registrar == "" || Registry.Find(Registrar) != -1 || Slotted >= 1000
+	if Registrar == "" || !Registry || Registry.Length < 1
+		return -1
+	elseIf Registry.Find(Registrar) != -1 || Slotted >= GetNumAliases()
 		return -1
 	elseIf IsSuppressed(Registrar)
 		Log("SKIPPING -- "+Registrar)
@@ -691,12 +712,15 @@ int function Register(string Registrar)
 	endWhile
 	RegisterLock = true
 
+	ClearAnimCache()
+	ClearTagCache()
+
 	int i = Slotted
 	Slotted += 1
 	if i >= Registry.Length
 		int n = Registry.Length + 32
-		if n > 1000
-			n = 1000
+		if n > GetNumAliases()
+			n = GetNumAliases()
 		endIf
 		Log("Resizing animation registry slots: "+Registry.Length+" -> "+n)
 		Registry = Utility.ResizeStringArray(Registry, n)
@@ -736,6 +760,8 @@ endFunction
 
 bool function UnregisterAnimation(string Registrar)
 	if Registrar != "" && Registry.Find(Registrar) != -1
+		ClearAnimCache()
+		ClearTagCache()
 		int Slot = Registry.Find(Registrar)
 		(Objects[Slot] as sslBaseAnimation).Initialize()
 		Objects[Slot] = none
@@ -883,10 +909,20 @@ endFunction
 
 string property CacheID auto hidden
 string[] function GetTagCache(bool IgnoreCache = false)
-	if IgnoreCache || ((Utility.GetCurrentRealTime() as int) - StorageUtil.GetIntValue(Config, CacheID, 0)) > 60
+	if IgnoreCache || !StorageUtil.StringListHas(Config, CacheID, "Vaginal") || ((Utility.GetCurrentRealTime() as int) - StorageUtil.GetIntValue(Config, CacheID, 0)) > 360
 		DoCache()
 	endIf
 	return StorageUtil.StringListToArray(Config, CacheID)
+endFunction
+
+bool function HasTagCache(string Tag ,bool IgnoreCache = false)
+	if !Tag || Tag == ""
+		return False
+	endIf
+	if IgnoreCache || !StorageUtil.StringListHas(Config, CacheID, "Vaginal") || ((Utility.GetCurrentRealTime() as int) - StorageUtil.GetIntValue(Config, CacheID, 0)) > 360
+		DoCache()
+	endIf
+	return StorageUtil.StringListHas(Config, CacheID, Tag)
 endFunction
 
 function ClearTagCache()
