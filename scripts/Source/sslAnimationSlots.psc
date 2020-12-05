@@ -143,6 +143,55 @@ sslBaseAnimation[] function GetByDefault(int Males, int Females, bool IsAggressi
 	return Output
 endFunction
 
+sslBaseAnimation[] function GetByDefaultTags(int Males, int Females, bool IsAggressive = false, bool UsingBed = false, bool RestrictAggressive = true, string Tags, string TagsSuppressed = "", bool RequireAll = true)
+	Log("GetByDefaultTags(Males="+Males+", Females="+Females+", IsAggressive="+IsAggressive+", UsingBed="+UsingBed+", RestrictAggressive="+RestrictAggressive+", Tags="+Tags+", TagsSuppressed="+TagsSuppressed+", RequireAll="+RequireAll+")")
+	if Males == 0 && Females == 0
+		return none ; No actors passed or creatures present
+	endIf
+	; Info
+	int ActorCount = (Males + Females)
+	bool SameSex = (Females == 2 && Males == 0) || (Males == 2 && Females == 0)
+	bool BedRemoveStanding = Config.BedRemoveStanding
+	; Check Cache
+	string CacheName = Males+":"+Females+":"+IsAggressive+":"+UsingBed+":"+BedRemoveStanding+":"+RestrictAggressive+":"+Tags+":"+TagsSuppressed+":"+RequireAll
+	sslBaseAnimation[] Output = CheckCache(CacheName)
+	if Output
+		return Output
+	endIf
+	; Search
+	bool[] Valid = Utility.CreateBoolArray(Slotted)
+	string GenderTag = ActorLib.GetGenderTag(Females, Males)
+	string[] Suppress = StringSplit(TagsSuppressed)
+	string[] Search   = StringSplit(Tags)
+	int i = Slotted
+	while i
+		i -= 1
+		if Objects[i]
+			sslBaseAnimation Slot = Objects[i] as sslBaseAnimation
+			; Check for appropiate enabled aniamtion
+			Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount
+			if Valid[i]
+				string[] RawTags = Slot.GetRawTags()
+				int[] Genders = Slot.Genders
+				; Suppress standing animations if on a bed
+				Valid[i] = Valid[i] && ((!UsingBed && RawTags.Find("BedOnly") == -1) || (UsingBed && RawTags.Find("Furniture") == -1 && (!BedRemoveStanding || RawTags.Find("Standing") == -1)))
+				; Suppress or ignore animation tags
+				Valid[i] = Valid[i] && Slot.TagSearch(Search, Suppress, RequireAll) && (!RestrictAggressive || IsAggressive == (RawTags.Find("Aggressive") != -1))
+				; Get SameSex + Non-SameSex
+				if SameSex
+					Valid[i] = Valid[i] && (RawTags.Find("FM") != -1 || (((Males == -1 || Males == Genders[0]) && (Females == -1 || Females == Genders[1])) || Slot.HasTag(GenderTag)))
+				; Ignore genders for 3P+
+				elseIf ActorCount < 3
+					Valid[i] = Valid[i] && (((Males == -1 || Males == Genders[0]) && (Females == -1 || Females == Genders[1])) || Slot.HasTag(GenderTag))
+				endIf
+			endIf
+		endIf
+	endWhile
+	Output = GetList(Valid)
+	CacheAnims(CacheName, Output)
+	return Output
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Registry Access                                     ;
 ; ------------------------------------------------------- ;
