@@ -38,6 +38,18 @@ sslBaseExpression function PickByStatus(Actor ActorRef, bool IsVictim = false, b
 	return RandomByTag(Tag, ActorRef.GetLeveledActorBase().GetSex() == 1)
 endFunction
 
+sslBaseExpression[] function GetByStatus(Actor ActorRef, bool IsVictim = false, bool IsAggressor = false)
+	string Tag
+	if IsVictim
+		Tag = "Victim"
+	elseIf IsAggressor
+		Tag = "Aggressor"
+	else
+		Tag = "Normal"
+	endIf
+	return GetByTag(Tag, ActorRef.GetLeveledActorBase().GetSex() == 1)
+endFunction
+
 sslBaseExpression function RandomByTag(string Tag, bool ForFemale = true)
 	bool[] Valid = Utility.CreateBoolArray(Slotted)
 	int i = Slotted
@@ -47,6 +59,17 @@ sslBaseExpression function RandomByTag(string Tag, bool ForFemale = true)
 		Valid[i] = Slot.Enabled && Slot.HasTag(Tag) && ((ForFemale && Slot.PhasesFemale > 0) || (!ForFemale && Slot.PhasesMale > 0))
 	endWhile
 	return SelectRandom(Valid)
+endFunction
+
+sslBaseExpression[] function GetByTag(string Tag, bool ForFemale = true)
+	bool[] Valid = Utility.CreateBoolArray(Slotted)
+	int i = Slotted
+	while i
+		i -= 1
+		sslBaseExpression Slot = Objects[i] as sslBaseExpression
+		Valid[i] = Slot.Enabled && Slot.HasTag(Tag) && ((ForFemale && Slot.PhasesFemale > 0) || (!ForFemale && Slot.PhasesMale > 0))
+	endWhile
+	return GetList(Valid)
 endFunction
 
 sslBaseExpression function SelectRandom(bool[] Valid)
@@ -64,7 +87,7 @@ endFunction
 
 sslBaseExpression[] function GetList(bool[] Valid)
 	sslBaseExpression[] Output
-	if Valid.Length > 0 && Valid.Find(true) != -1
+	if Valid && Valid.Length > 0 && Valid.Find(true) != -1
 		int n = Valid.Find(true)
 		int i = CountBool(Valid, true)
 		; Trim over 100 to random selection
@@ -76,11 +99,16 @@ sslBaseExpression[] function GetList(bool[] Valid)
 					Valid[rand] = false
 					i -= 1
 				endIf
+				if i == 101 ; To be sure only 100 stay
+					i = CountBool(Valid, true)
+					n = Valid.Find(true)
+					end = Valid.RFind(true) - 1
+				endIf
 			endWhile
 		endIf
 		; Get list
 		Output = sslUtility.ExpressionArray(i)
-		while n != -1
+		while n != -1 && i > 0
 			i -= 1
 			Output[i] = Objects[n] as sslBaseExpression
 			n += 1
