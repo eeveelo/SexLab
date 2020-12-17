@@ -1277,6 +1277,26 @@ float function GetStageTimer(int maxstage)
 	return Timers[(last - 1)]
 endfunction
 
+int function AreUsingFurniture(Actor[] ActorList)
+	if !ActorList || ActorList.Length < 1
+		return -1
+	endIf
+	
+	int i = ActorList.Length
+	ObjectReference TempFurnitureRef
+	while i > 0
+		i -= 1
+		TempFurnitureRef = ActorList[i].GetFurnitureReference()
+		if TempFurnitureRef && TempFurnitureRef != none
+			int FurnitureType = ThreadLib.GetBedType(TempFurnitureRef)
+			if FurnitureType > 0
+				return FurnitureType
+			endIf
+		endIf
+	endWhile
+	return -1
+endFunction
+
 function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 	if CenterOn
 		CenterRef = CenterOn

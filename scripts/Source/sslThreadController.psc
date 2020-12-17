@@ -413,28 +413,101 @@ state Animating
 	function MoveScene()
 		; Stop animation loop
 		UnregisterForUpdate()
+		; Processing Furnitures
+		int PreFurnitureStatus = BedTypeID
 		if UsingBed && CenterRef.IsActivationBlocked()
 			SetFurnitureIgnored(false)
 		endIf
 		; Enable Controls
 		sslActorAlias Slot = ActorAlias(PlayerRef)
-		Slot.UnlockActor()
-		Slot.StopAnimating(true)
-		PlayerRef.StopTranslation()
-		; Debug.SendAnimationEvent(PlayerRef, "IdleForceDefaultState")
-		; Lock hotkeys and wait 7 seconds
-		Debug.Notification("Player movement unlocked - repositioning scene in 7 seconds...")
-		Utility.Wait(10.0)
-		; Disable Controls
-		Slot.LockActor()
-		; Give player time to settle incase airborne
-		Utility.Wait(1.0)
-		; Recenter on coords to avoid stager + resync animations
-		if !CenterOnBed(true, 300.0)
-			CenterOnObject(PlayerRef, true)
+		if Config.GetThreadControlled() == self || PlayerRef.IsInFaction(Config.AnimatingFaction) && PlayerRef.GetFactionRank(Config.AnimatingFaction) != 0
+			if Slot && Slot != none
+				Slot.UnlockActor()
+				Slot.StopAnimating(true)
+				PlayerRef.StopTranslation()
+			else
+				Config.DisableThreadControl(self)
+				PlayerRef.SetFactionRank(Config.AnimatingFaction, 0)
+			endIf
+			Debug.Notification("Player movement unlocked - repositioning scene in 12 seconds...")
+			UnregisterForUpdate()
+			int i
+			while i < ActorCount
+				sslActorAlias ActorSlot = ActorAlias[i]
+				if ActorSlot != none && ActorSlot != Slot
+					ActorSlot.UnlockActor()
+					ActorSlot.StopAnimating(true)
+					ActorSlot.ActorRef.SetFactionRank(Config.AnimatingFaction, 2)
+				endIf
+				i += 1
+			endWhile
+			
+			CenterAlias.TryToClear()
+			CenterAlias.ForceRefTo(PlayerRef) ; Make them follow me
+
+			UnregisterForUpdate()
+			
+			; Lock hotkeys and wait 12 seconds
+			Utility.WaitMenuMode(1.0)
+			RegisterForKey(Hotkeys[kMoveScene])
+			; Ready
+			hkReady = true
+			i = 10 ; Time to wait
+			while i
+				i -= 1
+				Utility.Wait(1.0)
+				if !PlayerRef.IsInFaction(Config.AnimatingFaction)
+					PlayerRef.SetFactionRank(Config.AnimatingFaction, 0) ; In case some mod call ValidateActor function.
+				endIf
+			endWhile
 		endIf
-		; Return to animation loop
-		ResetPositions()
+		if PlayerRef.GetFactionRank(Config.AnimatingFaction) == 0
+			Debug.Notification("Player movement locked - repositioning scene...")
+			if PlayerRef.GetFurnitureReference() == none
+				Debug.SendAnimationEvent(PlayerRef, "IdleForceDefaultState") ; Seems like the CenterRef don't change if PlayerRef is running
+			endIf
+			; Disable Controls
+			if Slot != none
+				Slot.LockActor()
+			else
+				Config.GetThreadControl(self)
+			endIf
+			int i
+			while i < ActorCount
+				sslActorAlias ActorSlot = ActorAlias[i]
+				if ActorSlot != none && ActorSlot != Slot
+					ActorSlot.LockActor()
+				endIf
+				i += 1
+			endWhile
+			; Clear CenterAlias to avoid player repositioning to previous position
+			if CenterAlias.GetReference() != none
+				CenterAlias.TryToClear()
+			endIf
+			UnregisterForUpdate()
+			; Give player time to settle incase airborne
+			Utility.Wait(1.0)
+			; Recenter on coords to avoid stager + resync animations
+			if AreUsingFurniture(Positions) > 0
+				CenterOnBed(false, 300.0)
+			endIf
+			Log("PreFurnitureStatus:"+PreFurnitureStatus+" BedTypeID:"+BedTypeID)
+			if PreFurnitureStatus != BedTypeID || (PreFurnitureStatus > 0 && CenterAlias.GetReference() == none)
+				ClearAnimations()
+				if CenterAlias.GetReference() == none ;Is not longer using Furniture
+					CenterOnObject(PlayerRef, false)
+				endIf
+				ChangeActors(Positions)
+				SendThreadEvent("ActorsRelocated")
+			elseIf CenterAlias.GetReference() != none ;Is using Furniture
+				RealignActors()
+				SendThreadEvent("ActorsRelocated")
+			else
+				CenterOnObject(PlayerRef, true)
+			endIf
+			; Return to animation loop
+			ResetPositions()
+		endIf
 	endFunction
 
 	event OnKeyDown(int KeyCode)
