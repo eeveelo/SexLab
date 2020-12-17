@@ -527,6 +527,35 @@ Actor function MostUsedPlayerSexPartner2()
 	return PartnerRef
 endFunction
 
+Actor[] function MostUsedPlayerSexPartners(int MaxActors = 5) ; Based on Stats.MostUsedPlayerSexPartner()
+	Form[] SexPartners = Stats.CleanActorList(PlayerRef, "SexPartners")
+	Actor[] PartnerRef = PapyrusUtil.ActorArray(MaxActors)
+	int[] PartnerNum = PapyrusUtil.IntArray(MaxActors)
+	int i = SexPartners.Length
+	int r
+	int[] Num = new int[2]
+	Actor[] Ref = new Actor[2]
+
+	while i > 0
+		i -= 1
+		r = 0
+		Ref[0] = SexPartners[i] as Actor
+		Num[0] = Stats.PlayerSexCount(Ref[0])
+		while r < MaxActors && Num[0] > 0
+			if Num[0] >= PartnerNum[r]
+				Ref[1] = PartnerRef[r]
+				Num[1] = PartnerNum[r]
+				PartnerRef[r] = Ref[0]
+				PartnerNum[r] = Num[0]
+				Ref[0] = Ref[1]
+				Num[0] = Num[1]
+			endIf
+			r += 1
+		endWhile
+	endWhile
+	return PartnerRef
+endFunction
+
 ; ------------------------------------------------------- ;
 ; --- Sexuality Stats                                 --- ;
 ; ------------------------------------------------------- ;
