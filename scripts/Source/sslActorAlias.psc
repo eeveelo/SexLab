@@ -248,7 +248,7 @@ function ClearAlias()
 		endWhile
 	endIf
 	; Make sure actor is reset
-	if GetReference()
+	if GetReference() && GetReference() as Actor != none
 		; Init variables needed for reset
 		ActorRef   = GetReference() as Actor
 		BaseRef    = ActorRef.GetLeveledActorBase()
@@ -320,7 +320,6 @@ state Ready
 		if StartWait < 0.1
 			StartWait = 0.1
 		endIf
-	; Check if still among the living and able.
 		string CurrentState = Thread.GetState()
 		if CurrentState == "Ready"
 			Log("WARNING: OnUpdate Event ON State:'Ready' FOR State:'"+CurrentState+"'")
@@ -364,7 +363,7 @@ state Ready
 				ActorRef.SetScale(ActorScale)
 			endIf
 			float FixNioScale = 1.0
-			if (Thread.ActorCount > 1 || BedStatus[1] >= 4) && Config.ScaleActors ; FIXME: || IsCreature?
+			if (Thread.ActorCount > 1 || BedStatus[1] >= 4) && Config.ScaleActors
 				if Config.HasNiOverride && !IsCreature && NioScale > 0.0 && NioScale != 1.0
 					Bool isRealFemale = (BaseSex == 1)
 					FixNioScale = (FixNioScale / NioScale)
@@ -732,7 +731,7 @@ state Animating
 			StartedAt += 1.2
 		endWhile
 		; Check if still among the living and able.
-		if !ActorRef || !ActorRef.Is3DLoaded() || ActorRef.IsDisabled() || ActorRef.IsDead()
+		if !ActorRef || !ActorRef.Is3DLoaded() || ActorRef.IsDisabled() || (ActorRef.IsDead() && ActorRef.GetActorValue("Health") < 1.0)
 			Log("Actor is out of cell, disabled, or has no health - Unable to continue animating")
 			Thread.EndAnimation(true)
 		;	return don't work on events
@@ -820,7 +819,7 @@ state Animating
 		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		; Avoid forcibly setting on player coords if avoidable - causes annoying graphical flickering
-		if Force && IsPlayer && IsInPosition(ActorRef, MarkerRef, 40.0)
+		if Force && !IsCreature && IsPlayer && IsInPosition(ActorRef, MarkerRef, 40.0)
 			AttachMarker()
 			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 50000, 0)
 			return ; OnTranslationComplete() will take over when in place
@@ -893,7 +892,6 @@ state Animating
 		ModEvent.PushInt(eid, Orgasms)
 		ModEvent.Send(eid)
 		TrackedEvent("Orgasm")
-		Log("Orgasms["+Orgasms+"] Enjoyment ["+Enjoyment+"] BaseEnjoyment["+BaseEnjoyment+"] FullEnjoyment["+FullEnjoyment+"]")
 		Log(ActorName + ": Orgasms["+Orgasms+"] Enjoyment ["+Enjoyment+"] BaseEnjoyment["+BaseEnjoyment+"] FullEnjoyment["+FullEnjoyment+"]")
 		if Config.OrgasmEffects
 			; Shake camera for player
@@ -905,19 +903,19 @@ state Animating
 				PlayLouder(Voice.GetSound(100, false), ActorRef, Config.VoiceVolume)
 			endIf
 			PlayLouder(OrgasmFX, ActorRef, Config.SFXVolume)
-			; Apply cum to female positions from male position orgasm
-			int i = Thread.ActorCount
-			if i > 1 && Config.UseCum && (MalePosition || IsCreature) && (IsMale || IsCreature || (Config.AllowFFCum && IsFemale))
-				if i == 2
-					Thread.PositionAlias(IntIfElse(Position == 1, 0, 1)).ApplyCum()
-				else
-					while i > 0
-						i -= 1
-						if Position != i && Position < Animation.PositionCount && Animation.IsCumSource(Position, i, Stage)
-							Thread.PositionAlias(i).ApplyCum()
-						endIf
-					endWhile
-				endIf
+		endIf
+		; Apply cum to female positions from male position orgasm
+		int i = Thread.ActorCount
+		if i > 1 && Config.UseCum && (MalePosition || IsCreature) && (IsMale || IsCreature || (Config.AllowFFCum && IsFemale))
+			if i == 2
+				Thread.PositionAlias(IntIfElse(Position == 1, 0, 1)).ApplyCum()
+			else
+				while i > 0
+					i -= 1
+					if Position != i && Position < Animation.PositionCount && Animation.IsCumSource(Position, i, Stage)
+						Thread.PositionAlias(i).ApplyCum()
+					endIf
+				endWhile
 			endIf
 		endIf
 		Utility.WaitMenuMode(0.2)
@@ -953,7 +951,7 @@ state Animating
 		; Tracked events
 		TrackedEvent("End")
 		; Unstrip items in storage, if any
-		if !IsCreature && !ActorRef.IsDead()
+		if !IsCreature && !ActorRef.IsDead() || ActorRef.IsUnconscious() || ActorRef.GetActorValue("Health") < 1.0
 			Unstrip()
 			; Add back high heel effects
 			if Config.RemoveHeelEffect
@@ -1022,8 +1020,10 @@ function StopAnimating(bool Quick = false, string ResetAnim = "IdleForceDefaultS
 		float PositionY = ActorRef.GetPositionY()
 		float AngleZ = ActorRef.GetAngleZ()
 		float Rotate = AngleZ
-	;	String Node = "MagicEffectsNode"
 		String Node = "NPC Root [Root]"
+		if !IsCreature
+			Node = "MagicEffectsNode"
+		endIf
 		if NetImmerse.HasNode(ActorRef, Node, False)
 			PositionX = NetImmerse.GetNodeWorldPositionX(ActorRef, Node, False)
 			PositionY = NetImmerse.GetNodeWorldPositionY(ActorRef, Node, False)
@@ -1055,11 +1055,14 @@ function StopAnimating(bool Quick = false, string ResetAnim = "IdleForceDefaultS
 	if IsCreature
 		; Reset creature idle
 		SendDefaultAnimEvent()
-		if !Quick && (ActorRaceKey == "Spiders" || ActorRaceKey == "LargeSpiders" || ActorRaceKey == "GiantSpiders" || ActorRaceKey == "Rabbits")
-			ActorRef.PushActorAway(ActorRef, 0.001) ; Temporal Fix TODO:
-		endIf
-		if ResetAnim != "IdleForceDefaultState" && ResetAnim != ""
+		if ResetAnim != "IdleForceDefaultState" && ResetAnim != "" && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
 			ActorRef.PushActorAway(ActorRef, 0.001)
+		elseIf !Quick && ResetAnim == "IdleForceDefaultState" && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
+			if ActorRef.IsDead() || ActorRef.IsUnconscious() || ActorRef.GetActorValue("Health") < 1.0
+				Debug.SendAnimationEvent(ActorRef, "DeathAnimation")
+			elseIf (ActorRaceKey == "Spiders" || ActorRaceKey == "LargeSpiders" || ActorRaceKey == "GiantSpiders")
+				ActorRef.PushActorAway(ActorRef, 0.001) ; Temporal Fix TODO:
+			endIf
 		endIf
 	else
 		; Reset NPC/PC Idle Quickly
@@ -1073,6 +1076,7 @@ function StopAnimating(bool Quick = false, string ResetAnim = "IdleForceDefaultS
 		elseIf Quick
 			Debug.SendAnimationEvent(ActorRef, ResetAnim)
 		elseIf !Quick && ResetAnim == "IdleForceDefaultState" && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
+			;TODO: Detect the real actor position based on Node property intead of the Animation Tags
 			if ActorRef.IsDead() || ActorRef.IsUnconscious() || ActorRef.GetActorValue("Health") < 1.0
 				Debug.SendAnimationEvent(ActorRef, "IdleSoupDeath")
 			elseIf Animation && (Animation.HasTag("Furniture") || (Animation.HasTag("Standing") && !IsType[0]))
@@ -1095,9 +1099,9 @@ function SendDefaultAnimEvent()
 	if !IsCreature
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
 	else
+		Debug.SendAnimationEvent(ActorRef, "ReturnDefaultState") ; for chicken, hare and slaughterfish before the "ReturnToDefault"
 		Debug.SendAnimationEvent(ActorRef, "ReturnToDefault") ; the rest creature-animal
 		Debug.SendAnimationEvent(ActorRef, "IdleReturnToDefault") ; for Werewolves and VampirwLords
-		Debug.SendAnimationEvent(ActorRef, "ReturnDefaultState") ; for Rabbits afther the "ReturnToDefault" and chicken, hare and slaughterfish
 		Debug.SendAnimationEvent(ActorRef, "Reset") ; for Hagravens afther the "ReturnToDefault" and Dragons
 		Debug.SendAnimationEvent(ActorRef, "ForceFurnExit") ; for Trolls afther the "ReturnToDefault" and draugr, daedras and all dwarven exept spiders
 		Debug.SendAnimationEvent(ActorRef, "FNISDefault") ; for dwarvenspider and chaurus
@@ -1322,8 +1326,7 @@ function ApplyCum()
 	if ActorRef && ActorRef.Is3DLoaded()
 		Cell ParentCell = ActorRef.GetParentCell()
 		int CumID = Animation.GetCumID(Position, Stage)
-	;	location akLocation = ActorRef.GetCurrentLocation()
-		if CumID > 0 && ParentCell && ParentCell.IsAttached() ;&& ((akLocation != none && akLocation.IsLoaded()) || (akLocation == none && PlayerRef.GetDistance(ActorRef) > 0))
+		if CumID > 0 && ParentCell && ParentCell.IsAttached() ; Error treatment for Spells out of Cell
 			ActorLib.ApplyCum(ActorRef, CumID)
 		endIf
 	endIf
