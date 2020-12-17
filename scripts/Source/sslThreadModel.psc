@@ -452,7 +452,7 @@ state Making
 		endIf
 		; leadin animations
 		i = LeadAnimations.Length
-		if i
+		if i && LeadIn
 			bool[] Valid = Utility.CreateBoolArray(i)
 			while i
 				i -= 1
@@ -480,7 +480,7 @@ state Making
 				LeadAnimations = Output
 			endIf
 		endIf
-
+		
 		; Get default foreplay if none and enabled
 		if Config.ForeplayStage && !NoLeadIn && LeadAnimations.Length == 0 && ActorCount > 1 ; && !IsAggressive 
 			if !HasCreature
@@ -489,12 +489,12 @@ state Making
 				SetLeadAnimations(CreatureSlots.GetByCreatureActorsTags(ActorCount, Positions, SexLabUtil.StringIfElse(IsAggressive,"Aggressive,LeadIn","LeadIn")))
 			endIf
 		endIf
-
+		
 		; Filter animations based on user settings and scene
 		if FilterAnimations() < 0
 			return none
 		endIf
-		
+
 		; ------------------------- ;
 		; --  Start Controller   -- ;
 		; ------------------------- ;
@@ -775,18 +775,37 @@ function ChangeActors(Actor[] NewPositions)
 		endIf
 	endWhile
 	int aid = -1
-	; Save new positions information
-	Genders    = NewGenders
-	Positions  = NewPositions
-	ActorCount = NewPositions.Length
-	HasPlayer  = NewPositions.Find(PlayerRef) != -1
-	ActorAlias[0].GetPositionInfo()
-	ActorAlias[1].GetPositionInfo()
-	ActorAlias[2].GetPositionInfo()
-	ActorAlias[3].GetPositionInfo()
-	ActorAlias[4].GetPositionInfo()
 	; Select new animations for changed actor count
-	if !PrimaryAnimations || PrimaryAnimations.Length < 1 || PrimaryAnimations[0].PositionCount != NewPositions.Length
+	if CustomAnimations && CustomAnimations.Length > 0
+		if CustomAnimations[0].PositionCount != NewPositions.Length
+			Log("ChangeActors("+NewPositions+") -- Failed to force valid animation for the actors and now is trying to revert the changes if possible", "ERROR")
+			NewPositions = Positions
+			NewGenders = ActorLib.GenderCount(NewPositions)
+			NewCreatures = NewGenders[2] + NewGenders[3]
+		else
+			Actor[] OldPositions = Positions
+			int[] OldGenders = Genders
+			if Positions != NewPositions ; Temporaly changin the values to help FilterAnimations()
+				Positions  = NewPositions
+				ActorCount = Positions.Length
+				Genders    = NewGenders
+				HasPlayer  = Positions.Find(PlayerRef) != -1
+			endIf
+			if Positions != OldPositions ; Temporaly changin the values to help FilterAnimations()
+				Positions  = OldPositions
+				ActorCount = Positions.Length
+				Genders    = OldGenders
+				HasPlayer  = Positions.Find(PlayerRef) != -1
+			endIf
+			aid = Utility.RandomInt(0, (CustomAnimations.Length - 1))
+			Animation = CustomAnimations[aid]
+			if NewCreatures > 0
+				NewPositions = ThreadLib.SortCreatures(NewPositions, Animation)
+			else
+				NewPositions = ThreadLib.SortActorsByAnimation(NewPositions, Animation)
+			endIf
+		endIf
+	elseIf !PrimaryAnimations || PrimaryAnimations.Length < 1 || PrimaryAnimations[0].PositionCount != NewPositions.Length
 		if PrimaryAnimations.Length > 0
 			PrimaryAnimations[0].PositionCount
 		endIf
