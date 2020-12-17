@@ -54,13 +54,17 @@ sslThreadController function GetController(int tid)
 endfunction
 
 int function FindActorController(Actor ActorRef)
+	if !ActorRef
+		return -1
+	endIf
 	int i
 	while i < Slots.Length
-		if Slots[i].Positions.Find(ActorRef) != -1
+		if Slots[i].FindSlot(ActorRef) != -1
 			return i
 		endIf
 		i += 1
-	endWhile
+	endwhile
+
 	return -1
 endFunction
 
