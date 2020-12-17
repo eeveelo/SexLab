@@ -400,8 +400,12 @@ endEvent
 event OnConfigClose()
 	ModEvent.Send(ModEvent.Create("SexLabConfigClose"))
 	; Clear animation tag cache
-	AnimationSlots.ClearTagCache()
-	CreatureSlots.ClearTagCache()
+	if AnimationSlots
+		AnimationSlots.ClearTagCache()
+	endIf
+	if CreatureSlots
+		CreatureSlots.ClearTagCache()
+	endIf
 	; Realign actors if an adjustment in editor was just made
 	if AutoRealign
 		AutoRealign = false
@@ -506,6 +510,12 @@ event OnHighlightST()
 			InfoText += "\nWeapon"
 		endIf
 		SetInfoText(InfoText)
+
+	elseIf Options[0] == "InstallError"
+		SetInfoText("CRITICAL ERROR: File Integrity Framework quest / files overwritten...\nUnable to resolve needed variables. Install unable continue as result.\nUsually caused by incompatible SexLab addons. Disable other SexLab addons (NOT SexLab.esm) one by one and trying again until this message goes away. Alternatively, with TES5Edit after the background loader finishes check for any mods overriding SexLab.esm's Quest records. ScocLB.esm & SexlabScocLB.esp are the most common cause of this problem.\nIf using Mod Organizer, check that no mods are overwriting any of SexLab Frameworks files. There should be no red - symbol under flags for your SexLab Framework install in Mod Organizer.")
+
+	elseIf Options[0] == "FNISWarning"
+		SetInfoText("Important FNIS Check:\nIf you're getting a '?' on any checks try scrolling in and out of 3rd person mode then checking again while still in 3rd. These '?' are just soft warnings and can usually be ignored safely.\nIf scrolling in and out doesn't work and characters stand frozen in place during animation than these are the most likely causes. Fix your FNIS install.")
 	endIf
 endEvent
 
@@ -729,6 +739,16 @@ event OnSelectST()
 		endWhile
 		Config.Strapons = Output
 		ForcePageReset()
+
+	elseIf Options[0] == "InstallSystem"
+		SetOptionFlagsST(OPTION_FLAG_DISABLED)
+		SetTextOptionValueST("Working")
+
+		SystemAlias.InstallSystem()
+
+		SetTextOptionValueST("$SSL_ClickHere")
+		SetOptionFlagsST(OPTION_FLAG_NONE)
+		ForcePageReset()
 	endIf
 endEvent
 
@@ -760,8 +780,8 @@ function InstallMenu()
 		opt = OPTION_FLAG_DISABLED
 	endIf
 	
-	AddTextOptionST("InstallSystem","","$SSL_InstallUpdateSexLab{"+GetStringVer()+"}", opt)
-	AddTextOptionST("InstallSystem2","","$SSL_ClickHere", opt)
+	AddTextOptionST("InstallSystem_0","","$SSL_InstallUpdateSexLab{"+GetStringVer()+"}", opt)
+	AddTextOptionST("InstallSystem_1","","$SSL_ClickHere", opt)
 
 	if AliasState == "Updating"
 		AddTextOption("$SSL_CurrentlyUpdating", "!")
@@ -787,43 +807,6 @@ function SystemCheckOptions()
 	endIf
 endFunction
 
-state InstallSystem
-	event OnSelectST()
-		SetOptionFlagsST(OPTION_FLAG_DISABLED)
-		SetTextOptionValueST("Working")
-
-		SystemAlias.InstallSystem()
-
-		SetTextOptionValueST("$SSL_ClickHere")
-		SetOptionFlagsST(OPTION_FLAG_NONE)
-		ForcePageReset()
-	endEvent
-endState
-state InstallSystem2
-	event OnSelectST()
-		SetOptionFlagsST(OPTION_FLAG_DISABLED)
-		SetTextOptionValueST("Working")
-
-		SystemAlias.InstallSystem()
-
-		SetTextOptionValueST("$SSL_ClickHere")
-		SetOptionFlagsST(OPTION_FLAG_NONE)
-		ForcePageReset()
-	endEvent
-endState
-
-state InstallError
-	event OnHighlightST()
-		SetInfoText("CRITICAL ERROR: File Integrity Framework quest / files overwritten...\nUnable to resolve needed variables. Install unable continue as result.\nUsually caused by incompatible SexLab addons. Disable other SexLab addons (NOT SexLab.esm) one by one and trying again until this message goes away. Alternatively, with TES5Edit after the background loader finishes check for any mods overriding SexLab.esm's Quest records. ScocLB.esm & SexlabScocLB.esp are the most common cause of this problem.\nIf using Mod Organizer, check that no mods are overwriting any of SexLab Frameworks files. There should be no red - symbol under flags for your SexLab Framework install in Mod Organizer.")
-	endEvent
-endState
-
-state FNISWarning
-	event OnHighlightST()
-		SetInfoText("Important FNIS Check:\nIf you're getting a '?' on any checks try scrolling in and out of 3rd person mode then checking again while still in 3rd. These '?' are just soft warnings and can usually be ignored safely.\nIf scrolling in and out doesn't work and characters stand frozen in place during animation than these are the most likely causes. Fix your FNIS install.")
-	endEvent
-endState
-
 ; ------------------------------------------------------- ;
 ; --- Animation Settings                              --- ;
 ; ------------------------------------------------------- ;
@@ -847,10 +830,10 @@ function AnimationSettings()
 	AddToggleOptionST("UseExpressions","$SSL_UseExpressions", Config.UseExpressions)
 	AddToggleOptionST("RefreshExpressions","$SSL_RefreshExpressions", Config.RefreshExpressions)
 	AddToggleOptionST("UseLipSync", "$SSL_UseLipSync", Config.UseLipSync)
-	AddToggleOptionST("OrgasmEffects","$SSL_OrgasmEffects", Config.OrgasmEffects)
 	AddToggleOptionST("SeparateOrgasms","$SSL_SeparateOrgasms", Config.SeparateOrgasms)
+	AddToggleOptionST("OrgasmEffects","$SSL_OrgasmEffects", Config.OrgasmEffects)
 	AddToggleOptionST("UseCum","$SSL_ApplyCumEffects", Config.UseCum)
-	AddToggleOptionST("AllowFemaleFemaleCum","$SSL_AllowFemaleFemaleCum", Config.AllowFFCum)
+	AddToggleOptionST("AllowFemaleFemaleCum","$SSL_AllowFemaleFemaleCum", Config.AllowFFCum, SexLabUtil.IntIfElse((!Config.UseCum), OPTION_FLAG_DISABLED, OPTION_FLAG_NONE))
 	AddSliderOptionST("CumEffectTimer","$SSL_CumEffectTimer", Config.CumTimer, "$SSL_Seconds")
 	AddToggleOptionST("LimitedStrip","$SSL_LimitedStrip", Config.LimitedStrip)
 	AddToggleOptionST("ShowInMap","$SSL_ShowInMap", Config.ShowInMap)
@@ -875,7 +858,7 @@ function AnimationSettings()
 	AddToggleOptionST("UndressAnimation","$SSL_UndressAnimation", Config.UndressAnimation)
 	AddToggleOptionST("RedressVictim","$SSL_VictimsRedress", Config.RedressVictim)
 	AddToggleOptionST("StraponsFemale","$SSL_FemalesUseStrapons", Config.UseStrapons)
-	AddToggleOptionST("RemoveHeelEffect","$SSL_RemoveHeelEffect", Config.RemoveHeelEffect) ; OLDRIM
+	AddToggleOptionST("RemoveHeelEffect","$SSL_RemoveHeelEffect", Config.RemoveHeelEffect)
 	AddToggleOptionST("BedRemoveStanding","$SSL_BedRemoveStanding", Config.BedRemoveStanding)
 	AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", Config.RagdollEnd)
 	AddToggleOptionST("NudeSuitMales","$SSL_UseNudeSuitMales", Config.UseMaleNudeSuit)
@@ -2494,10 +2477,14 @@ function SexDiary()
 
 	Actor ActorRef
 	if StatRef == PlayerRef
-		ActorRef = Stats.MostUsedPlayerSexPartner()
-		if ActorRef
-			AddTextOption("$SSL_MostActivePartner", ActorRef.GetLeveledActorBase().GetName()+" ("+Stats.PlayerSexCount(ActorRef)+")")
-		endIf
+		Actor[] Partners = Stats.MostUsedPlayerSexPartners(3)
+		int i = 0
+		while i < Partners.Length
+			if Partners[i] != none
+				AddTextOption("$SSL_MostActivePartner", Partners[i].GetLeveledActorBase().GetName()+" ("+Stats.PlayerSexCount(Partners[i])+")")
+			endIf
+			i += 1
+		endWhile
 	else
 		ActorRef = Stats.LastSexPartner(StatRef)
 		if ActorRef
@@ -3129,10 +3116,12 @@ state UseCum
 	event OnSelectST()
 		Config.UseCum = !Config.UseCum
 		SetToggleOptionValueST(Config.UseCum)
+		ForcePageReset()
 	endEvent
 	event OnDefaultST()
 		Config.UseCum = true
 		SetToggleOptionValueST(Config.UseCum)
+		ForcePageReset()
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoUseCum")
