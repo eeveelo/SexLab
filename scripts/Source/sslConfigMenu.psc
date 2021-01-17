@@ -3065,7 +3065,7 @@ state UseFade
 		Config.UseFade = i
 		SetMenuOptionValueST(FadeOpt[Config.UseFade])
 		if Config.UseFade > 0
-			if ShowMessage("The 'Fade' configuration has change, do you want test the new fade. The test need you to close all menus to continue... \nDo you wish to continue with the test?", true, "$Yes", "$No")
+			if ShowMessage("$SSL_UseFadeTest", true, "$Yes", "$No")
 				Utility.Wait(0.1)
 				Config.ApplyFade(true)
 				Config.RemoveFade(true)
