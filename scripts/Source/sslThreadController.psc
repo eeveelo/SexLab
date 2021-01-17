@@ -2,7 +2,6 @@ scriptname sslThreadController extends sslThreadModel
 { Animation Thread Controller: Runs manipulation logic of thread based on information from model. Access only through functions; NEVER create a property directly to this. }
 
 ; TODO: SetFirstAnimation() - allow custom defined starter anims instead of random
-; TODO: ctrl+shift+u - 180 degree rotation
 
 import PapyrusUtil
 
@@ -175,7 +174,7 @@ state Animating
 		endIf
 		; Play SFX
 		if SoundFX && SFXTimer < RealTime[0]
-			SoundFX.Play(CenterRef)
+			SoundFX.Play(GetCenterFX())
 			SFXTimer = RealTime[0] + SFXDelay
 		endIf
 		; Loop
@@ -184,7 +183,7 @@ state Animating
 
 	function EndAction()
 		; HookStageEnd()
-		if !LeadIn && Stage > StageCount && !DisableOrgasms
+		if !LeadIn && Stage >= StageCount && !DisableOrgasms
 			SendThreadEvent("OrgasmEnd")
 		else
 			SendThreadEvent("StageEnd")
@@ -205,7 +204,11 @@ state Animating
 		if !backwards
 			GoToStage((Stage + 1))
 		elseIf backwards && Stage > 1
-			GoToStage((Stage - 1))
+			if Config.IsAdjustStagePressed()
+				GoToStage(1)
+			else
+				GoToStage((Stage - 1))
+			endIf
 		endIf
 	endFunction
 
@@ -316,7 +319,11 @@ state Animating
 
 	function RotateScene(bool backwards = false)
 		UnregisterForUpdate()
-		float Amount = SignFloat(backwards, 15.0)
+		float Amount = 15.0
+		if Config.IsAdjustStagePressed()
+			Amount = 180.0
+		endIf
+		Amount = SignFloat(backwards, Amount)
 		PlayHotkeyFX(1, !backwards)
 		CenterLocation[5] = CenterLocation[5] + Amount
 		if CenterLocation[5] >= 360.0
@@ -332,6 +339,12 @@ state Animating
 		int k = Config.RotateScene
 		while Input.IsKeyPressed(k)
 			PlayHotkeyFX(1, !backwards)
+			if Config.IsAdjustStagePressed()
+				Amount = 180.0
+			else
+				Amount = 15.0
+			endIf
+			Amount = SignFloat(backwards, Amount)
 			CenterLocation[5] = CenterLocation[5] + Amount
 			if CenterLocation[5] >= 360.0
 				CenterLocation[5] = CenterLocation[5] - 360.0
@@ -400,25 +413,101 @@ state Animating
 	function MoveScene()
 		; Stop animation loop
 		UnregisterForUpdate()
+		; Processing Furnitures
+		int PreFurnitureStatus = BedTypeID
+		if UsingBed && CenterRef.IsActivationBlocked()
+			SetFurnitureIgnored(false)
+		endIf
 		; Enable Controls
 		sslActorAlias Slot = ActorAlias(PlayerRef)
-		Slot.UnlockActor()
-		Slot.StopAnimating(true)
-		PlayerRef.StopTranslation()
-		; Debug.SendAnimationEvent(PlayerRef, "IdleForceDefaultState")
-		; Lock hotkeys and wait 7 seconds
-		Debug.Notification("Player movement unlocked - repositioning scene in 7 seconds...")
-		Utility.Wait(10.0)
-		; Disable Controls
-		Slot.LockActor()
-		; Give player time to settle incase airborne
-		Utility.Wait(1.0)
-		; Recenter on coords to avoid stager + resync animations
-		if !CenterOnBed(true, 300.0)
-			CenterOnObject(PlayerRef, true)
+		if Config.GetThreadControlled() == self || PlayerRef.IsInFaction(Config.AnimatingFaction) && PlayerRef.GetFactionRank(Config.AnimatingFaction) != 0
+			if Slot && Slot != none
+				Slot.UnlockActor()
+				Slot.StopAnimating(true)
+				PlayerRef.StopTranslation()
+			else
+				Config.DisableThreadControl(self)
+				PlayerRef.SetFactionRank(Config.AnimatingFaction, 0)
+			endIf
+			Debug.Notification("Player movement unlocked - repositioning scene in 12 seconds...")
+			UnregisterForUpdate()
+			int i
+			while i < ActorCount
+				sslActorAlias ActorSlot = ActorAlias[i]
+				if ActorSlot != none && ActorSlot != Slot
+					ActorSlot.UnlockActor()
+					ActorSlot.StopAnimating(true)
+					ActorSlot.ActorRef.SetFactionRank(Config.AnimatingFaction, 2)
+				endIf
+				i += 1
+			endWhile
+			
+			CenterAlias.TryToClear()
+			CenterAlias.ForceRefTo(PlayerRef) ; Make them follow me
+
+			UnregisterForUpdate()
+			
+			; Lock hotkeys and wait 12 seconds
+			Utility.WaitMenuMode(1.0)
+			RegisterForKey(Hotkeys[kMoveScene])
+			; Ready
+			hkReady = true
+			i = 10 ; Time to wait
+			while i
+				i -= 1
+				Utility.Wait(1.0)
+				if !PlayerRef.IsInFaction(Config.AnimatingFaction)
+					PlayerRef.SetFactionRank(Config.AnimatingFaction, 0) ; In case some mod call ValidateActor function.
+				endIf
+			endWhile
 		endIf
-		; Return to animation loop
-		ResetPositions()
+		if PlayerRef.GetFactionRank(Config.AnimatingFaction) == 0
+			Debug.Notification("Player movement locked - repositioning scene...")
+			if PlayerRef.GetFurnitureReference() == none
+				Debug.SendAnimationEvent(PlayerRef, "IdleForceDefaultState") ; Seems like the CenterRef don't change if PlayerRef is running
+			endIf
+			; Disable Controls
+			if Slot != none
+				Slot.LockActor()
+			else
+				Config.GetThreadControl(self)
+			endIf
+			int i
+			while i < ActorCount
+				sslActorAlias ActorSlot = ActorAlias[i]
+				if ActorSlot != none && ActorSlot != Slot
+					ActorSlot.LockActor()
+				endIf
+				i += 1
+			endWhile
+			; Clear CenterAlias to avoid player repositioning to previous position
+			if CenterAlias.GetReference() != none
+				CenterAlias.TryToClear()
+			endIf
+			UnregisterForUpdate()
+			; Give player time to settle incase airborne
+			Utility.Wait(1.0)
+			; Recenter on coords to avoid stager + resync animations
+			if AreUsingFurniture(Positions) > 0
+				CenterOnBed(false, 300.0)
+			endIf
+			Log("PreFurnitureStatus:"+PreFurnitureStatus+" BedTypeID:"+BedTypeID)
+			if PreFurnitureStatus != BedTypeID || (PreFurnitureStatus > 0 && CenterAlias.GetReference() == none)
+				ClearAnimations()
+				if CenterAlias.GetReference() == none ;Is not longer using Furniture
+					CenterOnObject(PlayerRef, false)
+				endIf
+				ChangeActors(Positions)
+				SendThreadEvent("ActorsRelocated")
+			elseIf CenterAlias.GetReference() != none ;Is using Furniture
+				RealignActors()
+				SendThreadEvent("ActorsRelocated")
+			else
+				CenterOnObject(PlayerRef, true)
+			endIf
+			; Return to animation loop
+			ResetPositions()
+		endIf
 	endFunction
 
 	event OnKeyDown(int KeyCode)
@@ -512,8 +601,8 @@ state Animating
 
 	function TriggerOrgasm()
 		UnregisterForUpdate()
-		if SoundFX && CenterRef && CenterRef.Is3DLoaded()
-			SoundFX.Play(CenterRef)
+		if SoundFX
+			SoundFX.Play(GetCenterFX())
 		endIf
 		QuickEvent("Orgasm")
 		RegisterForSingleUpdate(0.5)
@@ -550,6 +639,11 @@ function SetAnimation(int aid = -1)
 	endIf
 	; Set active animation
 	Animation = Animations[aid]
+	; Sort actors positions if needed
+	Positions = ThreadLib.SortActorsByAnimation(Positions, Animation)
+	UpdateAdjustKey()
+	int i = ActorCount
+	
 	; Inform player of animation being played now
 	if HasPlayer
 		string msg = "Playing Animation: " + Animation.Name
@@ -586,6 +680,20 @@ function SetAnimation(int aid = -1)
 			Utility.WaitMenuMode(0.2)
 			PlayStageAnimations()
 		endIf
+	endIf
+endFunction
+
+ObjectReference function GetCenterFX()
+	if CenterRef != none && CenterRef.Is3DLoaded()
+		return CenterRef
+	else
+		int i = 0
+		while i < ActorCount
+			if Positions[i] != none && Positions[i].Is3DLoaded()
+				return Positions[i]
+			endIf
+			i += 1
+		endWhile
 	endIf
 endFunction
 
@@ -655,8 +763,12 @@ endFunction
 state Ending
 	event OnBeginState()
 		UnregisterForUpdate()
+		if UsingBed && CenterRef.IsActivationBlocked()
+			SetFurnitureIgnored(false)
+		endIf
 		; HookAnimationEnding()
 		SendThreadEvent("AnimationEnding")
+		SetObjectiveDisplayed(0, False)
 		RecordSkills()
 		DisableHotkeys()
 		Config.DisableThreadControl(self)
@@ -783,6 +895,7 @@ function Initialize()
 	SkillTime   = 0.0
 	TimedStage  = false
 	Adjusted    = false
+	Prepared    = false
 	AdjustPos   = 0
 	AdjustAlias = ActorAlias[0]
 	parent.Initialize()

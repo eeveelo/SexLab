@@ -267,7 +267,19 @@ bool function IsStrippable(Form ItemRef)
 endFunction
 
 bool function ContinueStrip(Form ItemRef, bool DoStrip = true)
-	return ItemRef && (IsAlwaysStrip(ItemRef) || (DoStrip && !IsNoStrip(ItemRef))) 
+	if !ItemRef
+		return False
+	endIf
+	if StorageUtil.FormListHas(none, "AlwaysStrip", ItemRef) || SexLabUtil.HasKeywordSub(ItemRef, "AlwaysStrip")
+		if StorageUtil.GetIntValue(ItemRef, "SometimesStrip", 100) < 100
+			if !DoStrip
+				return (StorageUtil.GetIntValue(ItemRef, "SometimesStrip", 100) >= Utility.RandomInt(76, 100))
+			endIf
+			return (StorageUtil.GetIntValue(ItemRef, "SometimesStrip", 100) >= Utility.RandomInt(1, 100))
+		endIf
+		return True
+	endIf
+	return (DoStrip && !(StorageUtil.FormListHas(none, "NoStrip", ItemRef) || SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")))
 endFunction
 
 Form function StripSlot(Actor ActorRef, int SlotMask)
@@ -285,18 +297,21 @@ Form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 	endIf
 	int Gender = ActorRef.GetLeveledActorBase().GetSex()
 	; Start stripping animation
-	if DoAnimate
-		Debug.SendAnimationEvent(ActorRef, "Arrok_Undress_G"+Gender)
-	endIf
+	;if DoAnimate
+	;	Debug.SendAnimationEvent(ActorRef, "Arrok_Undress_G"+Gender)
+	;endIf
 	; Get Nudesuit
 	bool UseNudeSuit = Strip[2] && ((Gender == 0 && Config.UseMaleNudeSuit) || (Gender == 1 && Config.UseFemaleNudeSuit))
 	if UseNudeSuit && ActorRef.GetItemCount(Config.NudeSuit) < 1
 		ActorRef.AddItem(Config.NudeSuit, 1, true)
 	endIf
 	; Stripped storage
-	Form[] Stripped = new Form[34]
 	Form ItemRef
+	Form[] Stripped = new Form[34]
 	; Strip weapons
+	if ActorRef.IsWeaponDrawn() || ActorRef == PlayerRef
+		ActorRef.SheatheWeapon() ; To prevent issues with the animation if the player is stocked on the weapon drawn idle. For some reason hapen more than expected
+	endIf
 	; Right hand
 	ItemRef = ActorRef.GetEquippedObject(1)
 	if ContinueStrip(ItemRef, Strip[32])
@@ -312,11 +327,17 @@ Form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 		SetIntValue(ItemRef, "Hand", 2) 
 	endIf
 	; Strip armors
+	Form BodyRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(32))
 	int i = 31
 	while i >= 0
 		; Grab item in slot
 		ItemRef = ActorRef.GetWornForm(Armor.GetMaskForSlot(i + 30))
 		if ContinueStrip(ItemRef, Strip[i])
+			; Start stripping animation
+			if DoAnimate && ItemRef == BodyRef ;Body
+				Debug.SendAnimationEvent(ActorRef, "Arrok_Undress_G"+Gender)
+				Utility.Wait(1.0)
+			endIf
 			ActorRef.UnequipItem(ItemRef, false, true)
 			Stripped[i] = ItemRef
 		endIf
@@ -364,7 +385,7 @@ int function ValidateActor(Actor ActorRef)
 		Log("ValidateActor(NONE) -- FALSE -- Because they don't exist.")
 		return -1
 	; Remove actors stuck in animating faction
-	elseIf ActorRef.IsInFaction(AnimatingFaction) && Config.ThreadSlots.FindActorController(ActorRef) == -1
+	elseIf ActorRef.IsInFaction(AnimatingFaction) && (ActorRef != PlayerRef || Config.GetThreadControlled() == none) && Config.ThreadSlots.FindActorController(ActorRef) == -1
 		ActorRef.RemoveFromFaction(AnimatingFaction)
 		Log("ValidateActor("+ActorRef.GetLeveledActorBase().GetName()+") -- WARN -- Was in AnimatingFaction but not in a thread")
 	endIf	
@@ -478,6 +499,40 @@ function TreatAsGender(Actor ActorRef, bool AsFemale)
 		ModEvent.PushInt(eid, AsFemale as int)
 		ModEvent.Send(eid)
 	endIf
+endFunction
+
+int function GetTrans(Actor ActorRef)
+	if ActorRef && ActorRef != none && ActorRef.IsInFaction(Config.GenderFaction)
+		if sslCreatureAnimationSlots.HasRaceType(ActorRef.GetLeveledActorBase().GetRace())
+			return 2 + ActorRef.GetFactionRank(Config.GenderFaction)
+		else
+			return ActorRef.GetFactionRank(Config.GenderFaction)
+		endIf
+	endIf
+	return -1
+endFunction
+
+int[] function GetTransAll(Actor[] Positions)
+	int i = Positions.Length
+	int[] Trans = Utility.CreateIntArray(i)
+	while i > 0
+		i -= 1
+		Trans[i] = GetTrans(Positions[i])
+	endWhile
+	return Trans
+endFunction
+
+int[] function TransCount(Actor[] Positions)
+	int[] Trans = new int[4]
+	int i = Positions.Length
+	while i > 0
+		i -= 1
+		int g = GetTrans(Positions[i])
+		if g >= 0 && g < 4
+			Trans[g] = Trans[g] + 1
+		endIf
+	endWhile
+	return Trans
 endFunction
 
 int function GetGender(Actor ActorRef)

@@ -173,7 +173,7 @@ bool property DisableOrgasms auto hidden
 ; Beds
 int[] property BedStatus auto hidden
 ; BedStatus[0] = -1 forbid, 0 allow, 1 force
-; BedStatus[1] = -1 none, 0 bedroll, 1 single, 2 double
+; BedStatus[1] = 0 none, 1 bedroll, 2 single, 3 double
 ObjectReference property BedRef auto hidden
 int property BedTypeID hidden
 	int function get()
@@ -329,7 +329,14 @@ state Making
 		; --   Validate Thread   -- ;
 		; ------------------------- ;
 
-		if ActorCount < 1 || Positions.Length == 0
+		if Positions.Find(none) != -1 || ActorCount != Positions.Length
+			Positions  = PapyrusUtil.RemoveActor(Positions, none)
+			ActorCount = Positions.Length
+			Genders    = ActorLib.GenderCount(Positions)
+			HasPlayer  = Positions.Find(PlayerRef) != -1
+		endIf
+
+		if ActorCount < 1 || Positions.Length < 1
 			Fatal("No valid actors available for animation")
 			return none
 		endIf
@@ -352,122 +359,142 @@ state Making
 		endIf
 		; Center on fallback choices
 		if !CenterRef
-			if IsAggressive
+			if IsAggressive && !(VictimRef.GetFurnitureReference() || VictimRef.IsSwimming() || VictimRef.IsFlying())
 				CenterOnObject(VictimRef)
-			elseIf HasPlayer
+			elseIf HasPlayer && !(PlayerRef.GetFurnitureReference() || PlayerRef.IsSwimming() || PlayerRef.IsFlying())
 				CenterOnObject(PlayerRef)
 			else
-				CenterOnObject(Positions[0])
+				i = 0
+				while i < ActorCount
+					if !(Positions[i].GetFurnitureReference() || Positions[i].IsSwimming() || Positions[i].IsFlying())
+						CenterOnObject(Positions[i])
+						i = ActorCount
+					endIf
+					i += 1
+				endWhile
 			endIf
+		endIf
+		
+		; Center on first actor as last choice
+		if !CenterRef
+			CenterOnObject(Positions[0])
+		endIf
+		
+		if HasCreature
+			Log("CreatureRef: "+CreatureRef)
+		endIf
+		
+		if Config.ShowInMap && !HasPlayer && PlayerRef.GetDistance(CenterRef) > 750
+			SetObjectiveDisplayed(0, True)
 		endIf
 
 		; ------------------------- ;
 		; -- Validate Animations -- ;
 		; ------------------------- ;
 
-		; Validate and grab creature animations
-		if HasCreature
-			Log("CreatureRef: "+CreatureRef)
-			; primary creature animations
-			i = PrimaryAnimations.Length
+		; custom animations
+		i = CustomAnimations.Length
+		if i
+			bool[] Valid = Utility.CreateBoolArray(i)
 			while i
 				i -= 1
-				if !PrimaryAnimations[i].HasRace(CreatureRef) || PrimaryAnimations[i].PositionCount != ActorCount
-					Log("Invalid creature animation added - "+PrimaryAnimations[i].Name)
-					PrimaryAnimations = sslUtility.AnimationArray(0)
-					i = 0
-				endIf
+				Valid[i] = CustomAnimations[i] && CustomAnimations[i].PositionCount == ActorCount && (!HasCreature || (CustomAnimations[i].HasRace(CreatureRef) && CustomAnimations[i].Creatures == Creatures))
 			endWhile
-			; leadin creature animations
-			i = LeadAnimations.Length
+			; Check results
+			if Valid.Find(true) == -1
+				Log("Invalid custom animation list")
+				CustomAnimations = sslUtility.AnimationArray(0) ; No valid animations
+			elseIf Valid.Find(false) >= 0
+				; Filter output
+				i = CustomAnimations.Length
+				int n = PapyrusUtil.CountBool(Valid, true)
+				sslBaseAnimation[] Output = sslUtility.AnimationArray(n)
+				while i && n
+					i -= 1
+					if Valid[i]
+						n -= 1
+						Output[n] = CustomAnimations[i]
+					else
+						Log("Invalid custom animation added - "+CustomAnimations[i])
+					endIf
+				endWhile
+				CustomAnimations = Output
+			endIf
+		endIf
+		; primary animations
+		i = PrimaryAnimations.Length
+		if i
+			bool[] Valid = Utility.CreateBoolArray(i)
 			while i
 				i -= 1
-				if !LeadAnimations[i].HasRace(CreatureRef) || LeadAnimations[i].PositionCount != ActorCount
-					Log("Invalid creature lead in animation added - "+LeadAnimations[i].Name)
-
-					LeadAnimations = sslUtility.AnimationArray(0)
-					LeadIn = false
-					i = 0
-				endIf
+				Valid[i] = PrimaryAnimations[i] && PrimaryAnimations[i].PositionCount == ActorCount && (!HasCreature || (PrimaryAnimations[i].HasRace(CreatureRef) && PrimaryAnimations[i].Creatures == Creatures))
 			endWhile
-			if Config.UseCreatureGender
-				PrimaryAnimations = CreatureSlots.FilterCreatureGenders(PrimaryAnimations, Genders[2], Genders[3])
-			endIf
-			; Pick default creature animations if currently empty (none or failed above check)
-			if PrimaryAnimations.Length == 0
-				Log("Selecting new creature animations - "+PrimaryAnimations)
-				; sslBaseAnimation[] CreatureAnimations = CreatureSlots.GetByRace(ActorCount, CreatureRef)
-				; CreatureSlots.FilterCreatureGenders(CreatureAnimations, Genders[2], Genders[3])
-				Log("Creature Genders: "+Genders)
-				sslBaseAnimation[] CreatureAnimations = CreatureSlots.GetByRaceGenders(ActorCount, CreatureRef, Genders[2], Genders[3])
-				SetAnimations(CreatureAnimations)
-				if PrimaryAnimations.Length == 0
-					Fatal("Failed to find valid creature animations.")
-					return none
-				endIf
-			endIf
-			; Sort the actors to creature order
-			Positions = ThreadLib.SortCreatures(Positions, PrimaryAnimations[0])
-
-		; Get default primary animations if none
-		elseIf PrimaryAnimations.Length == 0
-			SetAnimations(AnimSlots.GetByDefault(Males, Females, IsAggressive, (BedRef != none), Config.RestrictAggressive))
-			if PrimaryAnimations.Length == 0
-				Fatal("Unable to find valid default animations")
-				return none
+			; Check results
+			if Valid.Find(true) == -1
+				Log("Invalid animation list")
+				PrimaryAnimations = sslUtility.AnimationArray(0) ; No valid animations
+			elseIf Valid.Find(false) >= 0
+				; Filter output
+				i = PrimaryAnimations.Length
+				int n = PapyrusUtil.CountBool(Valid, true)
+				sslBaseAnimation[] Output = sslUtility.AnimationArray(n)
+				while i && n
+					i -= 1
+					if Valid[i]
+						n -= 1
+						Output[n] = PrimaryAnimations[i]
+					else
+						Log("Invalid animation added - "+PrimaryAnimations[i])
+					endIf
+				endWhile
+				PrimaryAnimations = Output
 			endIf
 		endIf
-
-		; Get default foreplay if none and enabled
-		if !HasCreature && !IsAggressive && ActorCount == 2 && !NoLeadIn && LeadAnimations.Length == 0 && Config.ForeplayStage
-			SetLeadAnimations(AnimSlots.GetByTags(2, "LeadIn"))
-		endIf
-
-		; Filter animations based on user settings and scene
-		if !CustomAnimations || CustomAnimations.Length < 1
-			string[] Filters = new string[4]
-			sslBaseAnimation[] FilteredPrimary
-			sslBaseAnimation[] FilteredLead
-			; Filter tags for same sex restrictions
-			if ActorCount == 2 && Creatures == 0 && (Males == 0 || Females == 0) && Config.RestrictSameSex
-				Filters[0] = SexLabUtil.StringIfElse(Females == 2, "FM", "Breast")
-			endIf
-			; Filter tags for non-bed friendly animations
-			if BedRef
-				Filters[1] = "Furniture"
-				Filters[2] = "NoBed"
-				if Config.BedRemoveStanding
-					Filters[3] = "Standing"
-				endIf
-			else
-				Filters[1] = "BedOnly"
-			endIf
-			; Remove any animations with filtered tags
-			Filters = PapyrusUtil.RemoveString(Filters, "")
-			; Remove filtered tags from primary
-			FilteredPrimary = sslUtility.FilterTaggedAnimations(PrimaryAnimations, Filters, false)
-			if FilteredPrimary.Length > 0 && PrimaryAnimations.Length > FilteredPrimary.Length
-				Log("Filtered out '"+(PrimaryAnimations.Length - FilteredPrimary.Length)+"' primary animations with tags: "+Filters)
-				PrimaryAnimations = FilteredPrimary
-			endIf
-			; Remove filtered tags from lead in
-			if LeadAnimations && LeadAnimations.Length > 0
-				FilteredLead = sslUtility.FilterTaggedAnimations(LeadAnimations, Filters, false)
-				if LeadAnimations.Length > FilteredLead.Length
-					Log("Filtered out '"+(LeadAnimations.Length - FilteredLead.Length)+"' lead in animations with tags: "+Filters)
-					LeadAnimations = FilteredLead
-				endIf
-			endIf
-			; Make sure we are still good to start after all the filters
-			if !LeadAnimations || LeadAnimations.Length < 1
+		; leadin animations
+		i = LeadAnimations.Length
+		if i && LeadIn
+			bool[] Valid = Utility.CreateBoolArray(i)
+			while i
+				i -= 1
+				Valid[i] = LeadAnimations[i] && LeadAnimations[i].PositionCount == ActorCount && (!HasCreature || (LeadAnimations[i].HasRace(CreatureRef) && LeadAnimations[i].Creatures == Creatures))
+			endWhile
+			; Check results
+			if Valid.Find(true) == -1
+				Log("Invalid lead in animation list")
+				LeadAnimations = sslUtility.AnimationArray(0) ; No valid animations
 				LeadIn = false
-			endIf
-			if !PrimaryAnimations || PrimaryAnimations.Length < 1
-				Fatal("Empty primary animations after filters")
-				return none
+			elseIf Valid.Find(false) >= 0
+				; Filter output
+				i = LeadAnimations.Length
+				int n = PapyrusUtil.CountBool(Valid, true)
+				sslBaseAnimation[] Output = sslUtility.AnimationArray(n)
+				while i && n
+					i -= 1
+					if Valid[i]
+						n -= 1
+						Output[n] = LeadAnimations[i]
+					else
+						Log("Invalid lead in animation added - "+LeadAnimations[i])
+					endIf
+				endWhile
+				LeadAnimations = Output
 			endIf
 		endIf
 		
+		; Get default foreplay if none and enabled
+		if Config.ForeplayStage && !NoLeadIn && LeadAnimations.Length == 0 && ActorCount > 1 ; && !IsAggressive 
+			if !HasCreature
+				SetLeadAnimations(AnimSlots.GetByType(ActorCount, Males, Females, -1, IsAggressive, False))
+			else
+				SetLeadAnimations(CreatureSlots.GetByCreatureActorsTags(ActorCount, Positions, SexLabUtil.StringIfElse(IsAggressive,"Aggressive,LeadIn","LeadIn")))
+			endIf
+		endIf
+		
+		; Filter animations based on user settings and scene
+		if FilterAnimations() < 0
+			return none
+		endIf
+
 		; ------------------------- ;
 		; --  Start Controller   -- ;
 		; ------------------------- ;
@@ -483,7 +510,7 @@ endState
 ; ------------------------------------------------------- ;
 
 bool function UseLimitedStrip()
-	return LeadIn || (Config.LimitedStrip && AnimSlots.CountTag(Animations, "Oral,Foreplay,LimitedStrip") == Animations.Length)
+	return LeadIn || (Config.LimitedStrip && AnimSlots.CountTag(Animations, "Kissing,Foreplay,LimitedStrip") == Animations.Length)
 endFunction
 
 ; Actor Overrides
@@ -498,8 +525,11 @@ endFunction
 function SetNoStripping(Actor ActorRef)
 	if ActorRef
 		bool[] StripSlots = new bool[33]
-		ActorAlias(ActorRef).OverrideStrip(StripSlots)
-		ActorAlias(ActorRef).DoUndress = false
+		sslActorAlias Slot = ActorAlias(ActorRef)
+		if Slot
+			Slot.OverrideStrip(StripSlots)
+			Slot.DoUndress = false
+		endIf
 	endIf
 endFunction
 
@@ -718,63 +748,207 @@ int function GetLowestPresentRelationshipRank(Actor ActorRef)
 endFunction
 
 function ChangeActors(Actor[] NewPositions)
-	int[] NewGenders = ActorLib.GenderCount(NewPositions)
-	if HasCreature || NewGenders[2] > 0 || PapyrusUtil.AddIntValues(NewGenders) == 0
+	NewPositions = PapyrusUtil.RemoveActor(NewPositions, none)
+	if NewPositions.Length < 1 || NewPositions.Length > 5 || GetState() == "Ending" || GetState() == "Frozen" ; || Positions == NewPositions
 		return
 	endIf
+	int[] NewGenders = ActorLib.GenderCount(NewPositions)
+	if PapyrusUtil.AddIntValues(NewGenders) == 0 ; || HasCreature || NewGenders[2] > 0
+		return
+	endIf
+	int NewCreatures = NewGenders[2] + NewGenders[3]
 	; Enter making state for alterations
 	SendThreadEvent("ActorChangeStart")
 	UnregisterforUpdate()
 	; Remove actors no longer present
 	int i = ActorCount
-	while i
+	while i > 0
 		i -= 1
-		if NewPositions.Find(Positions[i]) == -1
-			ActorAlias(Positions[i]).ClearAlias()
+		sslActorAlias Slot = ActorAlias(Positions[i])
+		if Slot
+			if NewPositions.Find(Positions[i]) == -1
+				Slot.ClearAlias()
+			else
+				Slot.UnlockActor()
+				Slot.StopAnimating(true)
+			endIf
+		endIf
+	endWhile
+	int aid = -1
+	; Select new animations for changed actor count
+	if CustomAnimations && CustomAnimations.Length > 0
+		if CustomAnimations[0].PositionCount != NewPositions.Length
+			Log("ChangeActors("+NewPositions+") -- Failed to force valid animation for the actors and now is trying to revert the changes if possible", "ERROR")
+			NewPositions = Positions
+			NewGenders = ActorLib.GenderCount(NewPositions)
+			NewCreatures = NewGenders[2] + NewGenders[3]
 		else
-			ActorAlias(Positions[i]).StopAnimating(true)
+			Actor[] OldPositions = Positions
+			int[] OldGenders = Genders
+			if Positions != NewPositions ; Temporaly changin the values to help FilterAnimations()
+				Positions  = NewPositions
+				ActorCount = Positions.Length
+				Genders    = NewGenders
+				HasPlayer  = Positions.Find(PlayerRef) != -1
+			endIf
+			if Positions != OldPositions ; Temporaly changin the values to help FilterAnimations()
+				Positions  = OldPositions
+				ActorCount = Positions.Length
+				Genders    = OldGenders
+				HasPlayer  = Positions.Find(PlayerRef) != -1
+			endIf
+			aid = Utility.RandomInt(0, (CustomAnimations.Length - 1))
+			Animation = CustomAnimations[aid]
+			if NewCreatures > 0
+				NewPositions = ThreadLib.SortCreatures(NewPositions, Animation)
+			else
+				NewPositions = ThreadLib.SortActorsByAnimation(NewPositions, Animation)
+			endIf
+		endIf
+	elseIf !PrimaryAnimations || PrimaryAnimations.Length < 1 || PrimaryAnimations[0].PositionCount != NewPositions.Length
+		if PrimaryAnimations.Length > 0
+			PrimaryAnimations[0].PositionCount
+		endIf
+		if NewCreatures > 0
+			SetAnimations(CreatureSlots.GetByCreatureActors(NewPositions.Length, NewPositions))
+		else
+			SetAnimations(AnimSlots.GetByDefault(NewGenders[0], NewGenders[1], IsAggressive, (BedRef != none), Config.RestrictAggressive))
+		endIf
+		if !PrimaryAnimations || PrimaryAnimations.Length < 1
+			Log("ChangeActors("+NewPositions+") -- Failed to find valid animation for the actors", "FATAL")
+			Stage   = Animation.StageCount
+			FastEnd = true
+			if HasPlayer
+				MiscUtil.SetFreeCameraState(false)
+				if Game.GetCameraState() == 0
+					Game.ForceThirdPerson()
+				endIf
+			endIf
+			Utility.WaitMenuMode(0.5)
+			GoToState("Ending")
+			return
+		elseIf PrimaryAnimations[0].PositionCount != NewPositions.Length
+			Log("ChangeActors("+NewPositions+") -- Failed to find valid animation for the actors and now is trying to revert the changes if possible", "ERROR")
+			NewPositions = Positions
+			NewGenders = ActorLib.GenderCount(NewPositions)
+			NewCreatures = NewGenders[2] + NewGenders[3]
+		else
+			Actor[] OldPositions = Positions
+			int[] OldGenders = Genders
+			if Positions != NewPositions ; Temporaly changin the values to help FilterAnimations()
+				Positions  = NewPositions
+				ActorCount = Positions.Length
+				Genders    = NewGenders
+				HasPlayer  = Positions.Find(PlayerRef) != -1
+			endIf
+			if FilterAnimations() < 0
+				Log("ChangeActors("+NewPositions+") -- Failed to filter the animations for the actors", "ERROR")
+				if Positions != OldPositions
+					Positions  = OldPositions
+					ActorCount = Positions.Length
+					Genders    = OldGenders
+					HasPlayer  = Positions.Find(PlayerRef) != -1
+					if FilterAnimations() < 0
+						Log("ChangeActors("+NewPositions+") -- Failed to revert the changes", "FATAL")
+						FastEnd = true
+						if HasPlayer
+							MiscUtil.SetFreeCameraState(false)
+							if Game.GetCameraState() == 0
+								Game.ForceThirdPerson()
+							endIf
+						endIf
+						Utility.WaitMenuMode(0.5)
+						GoToState("Ending")
+						return
+					else
+						NewPositions  = OldPositions
+						NewGenders    = OldGenders
+					endIf
+				endIf
+			endIf
+			if Positions != OldPositions ; Temporaly changin the values to help FilterAnimations()
+				Positions  = OldPositions
+				ActorCount = Positions.Length
+				Genders    = OldGenders
+				HasPlayer  = Positions.Find(PlayerRef) != -1
+			endIf
+			aid = Utility.RandomInt(0, (PrimaryAnimations.Length - 1))
+			Animation = PrimaryAnimations[aid]
+			if NewCreatures > 0
+				NewPositions = ThreadLib.SortCreatures(NewPositions, Animation)
+			else
+				NewPositions = ThreadLib.SortActorsByAnimation(NewPositions, Animation)
+			endIf
+		endIf
+	endIf
+	; Prepare actors who weren't present before
+	i = NewPositions.Length
+	while i > 0
+		i -= 1
+		int SlotID = FindSlot(NewPositions[i])
+		if SlotID == -1
+			if ActorLib.ValidateActor(NewPositions[i]) < 0
+				Log("ChangeActors("+NewPositions+") -- Failed to add new actor '"+NewPositions[i].GetLeveledActorBase().GetName()+"' -- The actor is not valid", "ERROR")
+				NewPositions = PapyrusUtil.RemoveActor(NewPositions, NewPositions[i])
+				int g      = ActorLib.GetGender(NewPositions[i])
+				NewGenders[g] = NewGenders[g] - 1
+			else
+				; Slot into alias
+				sslActorAlias Slot = PickAlias(NewPositions[i])
+				if !Slot || !Slot.SetActor(NewPositions[i])
+					Log("ChangeActors("+NewPositions+") -- Failed to add new actor '"+NewPositions[i].GetLeveledActorBase().GetName()+"' -- They were unable to fill an actor alias", "ERROR")
+					NewPositions = PapyrusUtil.RemoveActor(NewPositions, NewPositions[i])
+					int g      = Slot.GetGender()
+					NewGenders[g] = NewGenders[g] - 1
+				else
+					; Update position info
+					Positions  = PapyrusUtil.PushActor(Positions, NewPositions[i])
+					ActorCount = Positions.Length
+					; Update gender counts
+					int g      = Slot.GetGender()
+					Genders[g] = Genders[g] + 1
+					; Flag as victim
+					Slot.SetVictim(False)
+					Slot.DoUndress = false
+					Slot.PrepareActor()
+				;	Slot.StartAnimating()
+				endIf
+			endIf
+		else
+			sslActorAlias Slot = ActorAlias[SlotID]
+			if Slot
+				Slot.LockActor()
+			endIf
 		endIf
 	endWhile
 	; Save new positions information
-	Genders    = NewGenders
 	Positions  = NewPositions
-	ActorCount = NewPositions.Length
-	HasPlayer  = NewPositions.Find(PlayerRef) != -1
-	ActorAlias[0].GetPositionInfo()
-	ActorAlias[1].GetPositionInfo()
-	ActorAlias[2].GetPositionInfo()
-	ActorAlias[3].GetPositionInfo()
-	ActorAlias[4].GetPositionInfo()
-	; Select new animations for changed actor count
-	if PrimaryAnimations[0].PositionCount != ActorCount
-		SetAnimations(AnimSlots.GetByDefault(NewGenders[0], NewGenders[1], IsAggressive, (BedRef != none), Config.RestrictAggressive))
-		SetAnimation()
-	endIf
-	; End lead in if thread was in it and can't be now
-	if LeadIn && NewPositions.Length != 2
-		Stage  = 1
-		LeadIn = false
-		QuickEvent("Strip")
-		SendThreadEvent("LeadInEnd")
-	endIf
-	; Prepare actors who weren't present before
-	i = ActorCount
-	while i
-		i -= 1
-		if FindSlot(Positions[i]) == -1
-			; Slot into alias
-			sslActorAlias Slot = PickAlias(Positions[i])
-			if !Slot || !Slot.SetActor(Positions[i])
-				Log("ChangeActors("+NewPositions+") -- Failed to add new actor '"+Positions[i].GetLeveledActorBase().GetName()+"' -- They were unable to fill an actor alias", "FATAL")
-				return
-			endIf
-			Slot.DoUndress = false
-			Slot.PrepareActor()
-			Slot.StartAnimating()
+	ActorCount = Positions.Length
+	Genders    = NewGenders
+	HasPlayer  = Positions.Find(PlayerRef) != -1
+	UpdateAdjustKey()
+	Log(AdjustKey, "Adjustment Profile")
+	; Reset the animation for changed actor count
+	if aid >= 0
+		; End lead in if thread was in it and can't be now
+		if LeadIn && Positions.Length != 2
+			UnregisterForUpdate()
+			Stage  = 1
+			LeadIn = false
+			QuickEvent("Strip")
+			StorageUtil.SetFloatValue(Config,"SexLab.LastLeadInEnd", Utility.GetCurrentRealTime())
+			SendThreadEvent("LeadInEnd")
+			SetAnimation(aid)
+		;	Action("Advancing")
+		else
+			Stage  = 1
+			SetAnimation(aid)
+		;	Action("Advancing")
 		endIf
-	endWhile
+	else
 	; Reposition actors
-	RealignActors()
+		RealignActors()
+	endIf
 	RegisterForSingleUpdate(0.1)
 	SendThreadEvent("ActorChangeEnd")
 endFunction
@@ -789,10 +963,18 @@ function SetForcedAnimations(sslBaseAnimation[] AnimationList)
 	endIf
 endFunction
 
+function ClearForcedAnimations()
+	CustomAnimations = sslUtility.AnimationArray(0)
+endFunction
+
 function SetAnimations(sslBaseAnimation[] AnimationList)
 	if AnimationList && AnimationList.Length > 0
 		PrimaryAnimations = AnimationList
 	endIf
+endFunction
+
+function ClearAnimations()
+	PrimaryAnimations = sslUtility.AnimationArray(0)
 endFunction
 
 function SetLeadAnimations(sslBaseAnimation[] AnimationList)
@@ -800,6 +982,10 @@ function SetLeadAnimations(sslBaseAnimation[] AnimationList)
 		LeadIn = true
 		LeadAnimations = AnimationList
 	endIf
+endFunction
+
+function ClearLeadAnimations()
+	LeadAnimations = sslUtility.AnimationArray(0)
 endFunction
 
 function AddAnimation(sslBaseAnimation AddAnimation, bool ForceTo = false)
@@ -812,6 +998,232 @@ endFunction
 
 function SetStartingAnimation(sslBaseAnimation FirstAnimation)
 	StartingAnimation = FirstAnimation
+endFunction
+
+int function FilterAnimations()
+	; Filter animations based on user settings and scene
+	if !CustomAnimations || CustomAnimations.Length < 1
+		Log("FilterAnimations() BEGIN - LeadAnimations="+LeadAnimations.Length+", PrimaryAnimations="+PrimaryAnimations.Length)
+		string[] Filters
+		string[] BasicFilters
+		string[] BedFilters
+		sslBaseAnimation[] FilteredPrimary
+		sslBaseAnimation[] FilteredLead
+		int i
+
+		; Filter tags for Male Vaginal restrictions
+		if (!Config.UseCreatureGender && ActorCount == Males) || (Config.UseCreatureGender && ActorCount == (Males + MaleCreatures))
+			BasicFilters = AddString(BasicFilters, "Vaginal")
+		elseIf (HasTag("Vaginal") || HasTag("Pussy") || HasTag("Cunnilingus")) && Males >= 1 
+			Positions = ThreadLib.SortActorsByAnimation(Positions)
+		endIf
+
+		; Filter tags for Devices friendly animations
+		int RestrictedCount = 0
+		int RestrictedPosition = 0
+		if (Config.ManageZadFilter || Config.ManageZazFilter) && ActorCount != Creatures
+			i = ActorCount
+			while i
+				i -= 1
+				sslActorAlias Slot = ActorAlias(Positions[i])
+				if Slot && Slot.GetRestricted()
+					RequiredTags = PapyrusUtil.MergeStringArray(RequiredTags, Slot.GetRequiredTags(), true)
+					RestrictedPosition = i
+					RestrictedCount +=1
+				endIf
+				if i == 0
+					BasicFilters = PapyrusUtil.MergeStringArray(BasicFilters, Slot.GetForbiddenTags(), true)
+				endIf
+			endWhile
+		endIf
+		if BasicFilters.Find("Breast") >= 0
+			Filters = AddString(Filters, "Boobjob")
+		endIf
+		if IsAggressive
+			if !(Females > 0 && ActorLib.GetGender(VictimRef) == 0)
+				Filters = AddString(Filters, "FemDom")
+			endIf
+		endIf
+		
+		; Filter tags for same sex restrictions
+		if ActorCount == 2 && Creatures == 0 && (Males == 0 || Females == 0) && Config.RestrictSameSex
+			BasicFilters = AddString(BasicFilters, SexLabUtil.StringIfElse(Females == 2, "FM", "Breast"))
+		endIf
+
+		;Remove filtered basic tags from primary
+		FilteredPrimary = sslUtility.FilterTaggedAnimations(PrimaryAnimations, BasicFilters, false)
+		if PrimaryAnimations.Length > FilteredPrimary.Length
+			Log("Filtered out '"+(PrimaryAnimations.Length - FilteredPrimary.Length)+"' primary animations with tags: "+BasicFilters)
+			PrimaryAnimations = FilteredPrimary
+		endIf
+
+		; Filter tags for non-bed friendly animations
+		if BedRef
+			BedFilters = AddString(BedFilters, "Furniture")
+			BedFilters = AddString(BedFilters, "NoBed")
+			if Config.BedRemoveStanding
+				BedFilters = AddString(BedFilters, "Standing")
+			endIf
+			if UsingBedRoll
+				BedFilters = AddString(BedFilters, "BedOnly")
+			elseIf UsingSingleBed
+				BedFilters = AddString(BedFilters, "DoubleBed") ; For bed animations made specific for DoubleBed or requiring too mush space to use single beds
+			elseIf UsingDoubleBed
+				BedFilters = AddString(BedFilters, "SingleBed") ; For bed animations made specific for SingleBed
+			endIf
+		else
+			BedFilters = AddString(BedFilters, "BedOnly")
+		endIf
+
+		; Remove any animations with filtered tags
+		Filters = PapyrusUtil.RemoveString(Filters, "")
+		BasicFilters = PapyrusUtil.RemoveString(BasicFilters, "")
+		BedFilters = PapyrusUtil.RemoveString(BedFilters, "")
+		
+		; Get default creature animations if none
+		if HasCreature
+			if Config.UseCreatureGender
+				if ActorCount != Creatures 
+					PrimaryAnimations = CreatureSlots.FilterCreatureGenders(PrimaryAnimations, Genders[2], Genders[3])
+				else
+					;TODO: Find bether solution instead of Exclude CC animations from filter  
+				endIf
+			endIf
+			; Pick default creature animations if currently empty (none or failed above check)
+			if PrimaryAnimations.Length == 0 ; || (BasicFilters.Length > 1 && PrimaryAnimations[0].CheckTags(BasicFilters, False))
+				Log("Selecting new creature animations - "+PrimaryAnimations)
+				Log("Creature Genders: "+Genders)
+				SetAnimations(CreatureSlots.GetByCreatureActorsTags(ActorCount, Positions, "", PapyrusUtil.StringJoin(BasicFilters, ",")))
+				if PrimaryAnimations.Length == 0
+					SetAnimations(CreatureSlots.GetByCreatureActors(ActorCount, Positions))
+					if PrimaryAnimations.Length == 0
+						Fatal("Failed to find valid creature animations.")
+						return -1
+					endIf
+				endIf
+			endIf
+			; Sort the actors to creature order
+			Positions = ThreadLib.SortCreatures(Positions, Animations[0])
+
+		; Get default primary animations if none
+		elseIf PrimaryAnimations.Length == 0 ; || (BasicFilters.Length > 1 && PrimaryAnimations[0].CheckTags(BasicFilters, False))
+			SetAnimations(AnimSlots.GetByDefaultTags(Males, Females, IsAggressive, (BedRef != none), Config.RestrictAggressive, "", PapyrusUtil.StringJoin(BasicFilters, ",")))
+			if PrimaryAnimations.Length == 0
+				SetAnimations(AnimSlots.GetByDefault(Males, Females, IsAggressive, (BedRef != none), Config.RestrictAggressive))
+				if PrimaryAnimations.Length == 0
+					Fatal("Unable to find valid default animations")
+					return -1
+				endIf
+			endIf
+		endIf
+
+		; Remove any animations without filtered gender tags
+		if Config.RestrictGenderTag
+			string DefGenderTag = ""
+			i = ActorCount
+			int[] GendersAll = ActorLib.GetGendersAll(Positions)
+			int[] Futas = ThreadLib.TransCount(Positions)
+			int[] FutasAll = ThreadLib.GetTransAll(Positions)
+			while i ;Make Position Gender Tag
+				i -= 1
+				if GendersAll[i] == 0
+					DefGenderTag = "M" + DefGenderTag
+				elseIf GendersAll[i] == 1
+					DefGenderTag = "F" + DefGenderTag
+				elseIf GendersAll[i] >= 2
+					DefGenderTag = "C" + DefGenderTag
+				endIf
+			endWhile
+			if DefGenderTag != ""
+				string[] GenderTag = Utility.CreateStringArray(1, DefGenderTag)
+				;Filtering Futa animations
+				if (Futas[0] + Futas[1]) < 1
+					BasicFilters = AddString(BasicFilters, "Futa")
+				elseIf (Futas[0] + Futas[1]) != (Genders[0] + Genders[1])
+					Filters = AddString(Filters, "AllFuta")
+				endIf
+				;Make Extra Position Gender Tag if actor is Futanari or female use strapon
+				i = ActorCount
+				while i
+					i -= 1
+					if (Config.UseStrapons && GendersAll[i] == 1) || (FutasAll[i] == 1)
+						if StringUtil.GetNthChar(DefGenderTag, ActorCount - i) == "F"
+							GenderTag = AddString(GenderTag, StringUtil.Substring(DefGenderTag, 0, ActorCount - i) + "M" + StringUtil.Substring(DefGenderTag, (ActorCount - i) + 1))
+						endIf
+					elseIf (FutasAll[i] == 0)
+						if StringUtil.GetNthChar(DefGenderTag, ActorCount - i) == "M"
+							GenderTag = AddString(GenderTag, StringUtil.Substring(DefGenderTag, 0, ActorCount - i) + "F" + StringUtil.Substring(DefGenderTag, (ActorCount - i) + 1))
+						endIf
+					endIf
+				endWhile
+				if Config.UseStrapons
+					DefGenderTag = ActorLib.GetGenderTag(0, Males + Females, Creatures)
+					GenderTag = AddString(GenderTag, DefGenderTag)
+				endIf
+				DefGenderTag = ActorLib.GetGenderTag(Females, Males, Creatures)
+				GenderTag = AddString(GenderTag, DefGenderTag)
+				
+				DefGenderTag = ActorLib.GetGenderTag(Females + Futas[0] - Futas[1], Males - Futas[0] + Futas[1], Creatures)
+				GenderTag = AddString(GenderTag, DefGenderTag)
+				; Remove filtered gender tags from primary
+				FilteredPrimary = sslUtility.FilterTaggedAnimations(PrimaryAnimations, GenderTag, true)
+				if FilteredPrimary.Length > 0 && PrimaryAnimations.Length > FilteredPrimary.Length
+					Log("Filtered out '"+(PrimaryAnimations.Length - FilteredPrimary.Length)+"' primary animations without tags: "+GenderTag)
+					PrimaryAnimations = FilteredPrimary
+				endIf
+				; Remove filtered gender tags from lead in
+				if LeadAnimations && LeadAnimations.Length > 0
+					FilteredLead = sslUtility.FilterTaggedAnimations(LeadAnimations, GenderTag, true)
+					if LeadAnimations.Length > FilteredLead.Length
+						Log("Filtered out '"+(LeadAnimations.Length - FilteredLead.Length)+"' lead in animations without tags: "+GenderTag)
+						LeadAnimations = FilteredLead
+					endIf
+				endIf
+			endIf
+		endIf
+		
+		; Remove filtered tags from primary step by step
+		FilteredPrimary = sslUtility.FilterTaggedAnimations(PrimaryAnimations, BedFilters, false)
+		if FilteredPrimary.Length > 0 && PrimaryAnimations.Length > FilteredPrimary.Length
+			Log("Filtered out '"+(PrimaryAnimations.Length - FilteredPrimary.Length)+"' primary animations with tags: "+BedFilters)
+			PrimaryAnimations = FilteredPrimary
+		endIf
+		FilteredPrimary = sslUtility.FilterTaggedAnimations(PrimaryAnimations, BasicFilters, false)
+		if FilteredPrimary.Length > 0 && PrimaryAnimations.Length > FilteredPrimary.Length
+			Log("Filtered out '"+(PrimaryAnimations.Length - FilteredPrimary.Length)+"' primary animations with tags: "+BasicFilters)
+			PrimaryAnimations = FilteredPrimary
+		endIf
+		FilteredPrimary = sslUtility.FilterTaggedAnimations(PrimaryAnimations, Filters, false)
+		if FilteredPrimary.Length > 0 && PrimaryAnimations.Length > FilteredPrimary.Length
+			Log("Filtered out '"+(PrimaryAnimations.Length - FilteredPrimary.Length)+"' primary animations with tags: "+Filters)
+			PrimaryAnimations = FilteredPrimary
+		endIf
+		; Remove filtered tags from lead in
+		if LeadAnimations && LeadAnimations.Length > 0
+			Filters = PapyrusUtil.MergeStringArray(Filters, BasicFilters, true)
+			Filters = PapyrusUtil.MergeStringArray(Filters, BedFilters, true)
+			FilteredLead = sslUtility.FilterTaggedAnimations(LeadAnimations, Filters, false)
+			if LeadAnimations.Length > FilteredLead.Length
+				Log("Filtered out '"+(LeadAnimations.Length - FilteredLead.Length)+"' lead in animations with tags: "+Filters)
+				LeadAnimations = FilteredLead
+			endIf
+		endIf
+		; Remove Dupes
+		if LeadAnimations && PrimaryAnimations && PrimaryAnimations.Length > LeadAnimations.Length
+			PrimaryAnimations = sslUtility.RemoveDupesFromList(PrimaryAnimations, LeadAnimations)
+		endIf
+		; Make sure we are still good to start after all the filters
+		if !LeadAnimations || LeadAnimations.Length < 1
+			LeadIn = false
+		endIf
+		if !PrimaryAnimations || PrimaryAnimations.Length < 1
+			Fatal("Empty primary animations after filters")
+			return -1
+		endIf
+		Log("FilterAnimations() END - LeadAnimations="+LeadAnimations.Length+", PrimaryAnimations="+PrimaryAnimations.Length)
+		return 1
+	endIf
+	return 0
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -836,6 +1248,16 @@ function SetBedFlag(int flag = 0)
 	BedStatus[0] = flag
 endFunction
 
+function SetFurnitureIgnored(bool disabling = true)
+	if !CenterRef || CenterRef == none
+		return
+	endIf
+	CenterRef.SetDestroyed(disabling)
+;	CenterRef.ClearDestruction()
+	CenterRef.BlockActivation(disabling)
+	CenterRef.SetNoFavorAllowed(disabling)
+endFunction
+
 function SetTimers(float[] SetTimers)
 	if !SetTimers || SetTimers.Length < 1
 		Log("SetTimers() - Empty timers given.", "ERROR")
@@ -855,6 +1277,26 @@ float function GetStageTimer(int maxstage)
 	return Timers[(last - 1)]
 endfunction
 
+int function AreUsingFurniture(Actor[] ActorList)
+	if !ActorList || ActorList.Length < 1
+		return -1
+	endIf
+	
+	int i = ActorList.Length
+	ObjectReference TempFurnitureRef
+	while i > 0
+		i -= 1
+		TempFurnitureRef = ActorList[i].GetFurnitureReference()
+		if TempFurnitureRef && TempFurnitureRef != none
+			int FurnitureType = ThreadLib.GetBedType(TempFurnitureRef)
+			if FurnitureType > 0
+				return FurnitureType
+			endIf
+		endIf
+	endWhile
+	return -1
+endFunction
+
 function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 	if CenterOn
 		CenterRef = CenterOn
@@ -866,18 +1308,43 @@ function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 		CenterLocation[5] = CenterOn.GetAngleZ()
 		; Check if it's a bed
 		BedRef  = none
-		BedStatus[1] = ThreadLib.GetBedType(CenterOn)
+		BedStatus[1] = 0
+		int Pos = Positions.Find(CenterOn as Actor)
+		if Pos >= 0
+			ActorAlias(Positions[Pos]).LockActor()
+			if CenterOn == VictimRef as ObjectReference
+				Log("CenterRef == VictimRef: "+VictimRef)
+			elseIf CenterOn == PlayerRef as ObjectReference
+				Log("CenterRef == PlayerRef: "+PlayerRef)
+			else
+				Log("CenterRef == Positions["+Pos+"]: "+CenterRef)
+			endIf
+		elseIf CenterOn.GetBaseObject() != Config.LocationMarker
+			BedStatus[1] = ThreadLib.GetBedType(CenterOn)
+		endIf
 		if BedStatus[1] > 0
 			BedRef = CenterOn
-			float[] BedOffset = Config.GetBedOffsets(BedRef.GetBaseObject())
-			CenterLocation[0] = CenterLocation[0] + (BedOffset[0] * Math.sin(CenterLocation[5]))
-			CenterLocation[1] = CenterLocation[1] + (BedOffset[0] * Math.cos(CenterLocation[5]))
-			Log("Using Bed Type: "+BedStatus[1])
-			if BedStatus[1] > 1
-				CenterLocation[2] = CenterLocation[2] + BedOffset[2]
-			else
-				CenterLocation[2] = CenterLocation[2] + 0.0 ; TODO: find ideal value
+			float[] BedOffsets = Config.GetBedOffsets(BedRef.GetBaseObject())
+			if BedStatus[1] == 1 && BedOffsets == Config.BedOffset
+				BedOffsets[2] = 7.5 ; Most common BedRolls Up offset
+				BedOffsets[3] = 180 ; Most BedRolls meshes are rotated
 			endIf
+			Log("Using Bed Type: "+BedStatus[1])
+			Log("Bed Location[PosX:"+CenterLocation[0]+",PosY:"+CenterLocation[1]+",PosZ:"+CenterLocation[2]+",AngX:"+CenterLocation[3]+",AngY:"+CenterLocation[4]+",AngZ:"+CenterLocation[5]+"]")
+			Log("Bed Offset[Forward:"+BedOffsets[0]+",Sideward:"+BedOffsets[1]+",Upward:"+BedOffsets[2]+",Rotation:"+BedOffsets[3]+"]")
+			float Scale = CenterOn.GetScale()
+			if Scale != 1.0
+				BedOffsets[0] = BedOffsets[0] * Scale ; (((2-Scale)*((Math.ABS(BedOffsets[0])-BedOffsets[0])/(2*Math.ABS(BedOffsets[0]))))+(Scale*((BedOffsets[0]+Math.ABS(BedOffsets[0]))/(2*BedOffsets[0]))))
+				BedOffsets[1] = BedOffsets[1] * Scale ; (((2-Scale)*((Math.ABS(BedOffsets[1])-BedOffsets[1])/(2*Math.ABS(BedOffsets[1]))))+(Scale*((BedOffsets[1]+Math.ABS(BedOffsets[1]))/(2*BedOffsets[1]))))
+				BedOffsets[2] = BedOffsets[2] * (((2-Scale)*((Math.ABS(BedOffsets[2])-BedOffsets[2])/(2*Math.ABS(BedOffsets[2]))))+(Scale*((BedOffsets[2]+Math.ABS(BedOffsets[2]))/(2*BedOffsets[2]))))
+				BedOffsets[3] = BedOffsets[3]
+				Log("Scaled Bed Offset[Forward:"+BedOffsets[0]+",Sideward:"+BedOffsets[1]+",Upward:"+BedOffsets[2]+",Rotation:"+BedOffsets[3]+"]")
+			endIf
+			CenterLocation[0] = CenterLocation[0] + ((BedOffsets[0] * Math.sin(CenterLocation[5])) + (BedOffsets[1] * Math.cos(CenterLocation[5])))
+			CenterLocation[1] = CenterLocation[1] + ((BedOffsets[0] * Math.cos(CenterLocation[5])) - (BedOffsets[1] * Math.sin(CenterLocation[5])))
+			CenterLocation[2] = CenterLocation[2] + BedOffsets[2]
+			CenterLocation[5] = CenterLocation[5] + BedOffsets[3]
+			SetFurnitureIgnored(true)
 		endIf
 		if CenterAlias.GetReference() != CenterRef
 			CenterAlias.TryToClear()
@@ -902,6 +1369,18 @@ bool function CenterOnBed(bool AskPlayer = true, float Radius = 750.0)
 		return false ; Beds forbidden by flag or starting bed check/prompt disabled
 	endIf
  	ObjectReference FoundBed
+	int i = ActorCount
+	while i > 0
+		i -= 1
+		FoundBed = Positions[i].GetFurnitureReference()
+		if FoundBed
+			int BedType = ThreadLib.GetBedType(FoundBed)
+			if BedType > 0 && (ActorCount < 4 || BedType != 2)
+				CenterOnObject(FoundBed)
+				return true ; Bed found and approved for use
+			endIf
+		endIf
+	endWhile
 	if HasPlayer && (!InStart || AskBed == 1 || (AskBed == 2 && (!IsVictim(PlayerRef) || UseNPCBed)))
 		FoundBed  = ThreadLib.FindBed(PlayerRef, Radius) ; Check within radius of player
 		AskPlayer = AskPlayer && (!InStart || !(AskBed == 2 && IsVictim(PlayerRef))) ; Disable prompt if bed found but shouldn't ask
@@ -994,6 +1473,25 @@ bool function AddTagConditional(string Tag, bool AddTag)
 	return AddTag
 endFunction
 
+; Because PapyrusUtil don't Remove Dupes from the Array
+string[] function AddString(string[] ArrayValues, string ToAdd, bool RemoveDupes = true)
+	if ToAdd != ""
+		string[] Output = ArrayValues
+		if !RemoveDupes || Output.length < 1
+			return PapyrusUtil.PushString(Output, ToAdd)
+		elseIf Output.Find(ToAdd) == -1
+			int i = Output.Find("")
+			if i != -1
+				Output[i] = ToAdd
+			else
+				Output = PapyrusUtil.PushString(Output, ToAdd)
+			endIf
+		endIf
+		return Output
+	endIf
+	return ArrayValues
+endFunction
+
 bool function CheckTags(string[] CheckTags, bool RequireAll = true, bool Suppress = false)
 	int i = CheckTags.Length
 	while i
@@ -1020,6 +1518,9 @@ endFunction
 ; ------------------------------------------------------- ;
 
 int function FindSlot(Actor ActorRef)
+	if !ActorRef
+		return -1
+	endIf
 	int i
 	while i < 5
 		if ActorAlias[i].ActorRef == ActorRef
@@ -1031,10 +1532,17 @@ int function FindSlot(Actor ActorRef)
 endFunction
 
 sslActorAlias function ActorAlias(Actor ActorRef)
-	return ActorAlias[FindSlot(ActorRef)]
+	int SlotID = FindSlot(ActorRef)
+	if SlotID != -1
+		return ActorAlias[SlotID]
+	endIf
+	return none
 endFunction
 
 sslActorAlias function PositionAlias(int Position)
+	if Position < 0 || !(Position < Positions.Length)
+		return none
+	endIf
 	return ActorAlias[FindSlot(Positions[Position])]
 endFunction
 
@@ -1280,7 +1788,7 @@ function Fatal(string msg, string src = "", bool halt = true)
 endFunction
 
 function UpdateAdjustKey()
-	if !Config.RaceAdjustments
+	if !Config.RaceAdjustments && Config.ScaleActors
 		AdjustKey = "Global"
 	else
 		int i
@@ -1416,6 +1924,7 @@ function Initialize()
 	ActorAlias[3].ClearAlias()
 	ActorAlias[4].ClearAlias()
 	if CenterAlias
+		SetObjectiveDisplayed(0, False)
 		CenterAlias.Clear()
 	endIf
 	; Forms
@@ -1435,8 +1944,8 @@ function Initialize()
 	; Floats
 	SyncTimer      = 0.0
 	StartedAt      = 0.0
-	SyncDone       = 0
 	; Integers
+	SyncDone       = 0
 	Stage          = 1
 	ActorCount     = 0
 	; StartAID       = -1

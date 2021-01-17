@@ -35,17 +35,19 @@ bool property DebugMode hidden
 			Debug.OpenUserLog("SexLabDebug")
 			Debug.TraceUser("SexLabDebug", "SexLab Debug/Development Mode Deactivated")
 			MiscUtil.PrintConsole("SexLab Debug/Development Mode Activated")
-			PlayerRef.AddSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
-			PlayerRef.AddSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
-			AnimSlots.OutputCacheLog()
-			CreatureSlots.OutputCacheLog()
+			if PlayerRef
+				PlayerRef.AddSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
+				PlayerRef.AddSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
+			endIf				
 		else
 			if Debug.TraceUser("SexLabDebug", "SexLab Debug/Development Mode Deactivated")
 				Debug.CloseUserLog("SexLabDebug")
 			endIf
 			MiscUtil.PrintConsole("SexLab Debug/Development Mode Deactivated")
-			PlayerRef.RemoveSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
-			PlayerRef.RemoveSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
+			if PlayerRef
+				PlayerRef.RemoveSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
+				PlayerRef.RemoveSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
+			endIf				
 		endIf
 		int eid = ModEvent.Create("SexLabDebugMode")
 		ModEvent.PushBool(eid, value)
@@ -171,6 +173,7 @@ bool property UseFemaleNudeSuit auto hidden
 bool property UndressAnimation auto hidden
 bool property UseLipSync auto hidden
 bool property UseExpressions auto hidden
+bool property RefreshExpressions auto hidden
 bool property ScaleActors auto hidden
 bool property UseCum auto hidden
 bool property AllowFFCum auto hidden
@@ -184,9 +187,11 @@ bool property BedRemoveStanding auto hidden
 bool property UseCreatureGender auto hidden
 bool property LimitedStrip auto hidden
 bool property RestrictSameSex auto hidden
+bool property RestrictGenderTag auto hidden
 bool property SeparateOrgasms auto hidden
 bool property RemoveHeelEffect auto hidden
 bool property AdjustTargetStage auto hidden
+bool property ShowInMap auto hidden
 bool property DisableTeleport auto hidden
 bool property SeedNPCStats auto hidden
 bool property DisableScale auto hidden
@@ -319,7 +324,7 @@ bool function AddCustomBed(Form BaseBed, int BedType = 0)
 	return true
 endFunction
 
-bool function SetCustomBedOffset(Form BaseBed, float Forward = 30.0, float Sideward = 0.0, float Upward = 37.0, float Rotation = 0.0)
+bool function SetCustomBedOffset(Form BaseBed, float Forward = 0.0, float Sideward = 0.0, float Upward = 37.0, float Rotation = 0.0)
 	if !BaseBed || !BedsList.HasForm(BaseBed)
 		Log("Invalid form or bed does not exist currently in bed list.", "SetBedOffset("+BaseBed+")")
 		return false
@@ -338,12 +343,18 @@ bool function ClearCustomBedOffset(Form BaseBed)
 endFunction
 
 float[] function GetBedOffsets(Form BaseBed)
+	float[] Offsets = new float[4]
 	if StorageUtil.FloatListCount(BaseBed, "SexLab.BedOffset") == 4
-		float[] Offsets = new float[4]
 		StorageUtil.FloatListSlice(BaseBed, "SexLab.BedOffset", Offsets)
 		return Offsets
 	endIf
-	return BedOffset
+	int i = BedOffset.Length
+	; For some reason with the old function if you change the value of the variable with the returned BedOffset Array the value also change on the original BedOffset
+	while i > 0
+		i -= 1
+		Offsets[i] = BedOffset[i]
+	endWhile
+	return Offsets
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -524,7 +535,7 @@ endFunction
 ; 		i -= 1
 ; 		if All[i]
 ; 			if !SexLabUtil.IsActor(FormRef)
-; 				StorageUtil.FormLis7tRemove(self, "TargetActors", All[i])
+; 				StorageUtil.FormListRemove(self, "TargetActors", All[i])
 ; 			else
 
 ; 			endIf
@@ -536,6 +547,10 @@ endFunction
 
 ; endFunction
 
+sslThreadController function GetThreadControlled()
+	return Control
+endFunction
+
 function GetThreadControl(sslThreadController TargetThread)
 	if Control || !(TargetThread.GetState() == "Animating" || TargetThread.GetState() == "Advancing")
 		Log("Failed to control thread "+TargetThread)
@@ -543,6 +558,10 @@ function GetThreadControl(sslThreadController TargetThread)
 	endIf
 	; Set active controlled thread
 	Control = TargetThread
+	if !Control
+		Log("Failed to control thread "+TargetThread)
+		return ; Control not available
+	endIf
 	; Lock players movement
 	PlayerRef.StopCombat()
 	if PlayerRef.IsWeaponDrawn()
@@ -552,6 +571,7 @@ function GetThreadControl(sslThreadController TargetThread)
 	ActorUtil.AddPackageOverride(PlayerRef, DoNothing, 100, 1)
 	PlayerRef.EvaluatePackage()
 	Game.SetPlayerAIDriven()
+	Game.DisablePlayerControls(true, true, false, false, false, false, false, false, 0)
 	; Give player control
 	Control.AutoAdvance = false
 	Control.EnableHotkeys(true)
@@ -561,6 +581,10 @@ endFunction
 function DisableThreadControl(sslThreadController TargetThread)
 	if Control && Control == TargetThread
 		; Release players thread control
+		MiscUtil.SetFreeCameraState(false)
+		if Game.GetCameraState() == 0
+			Game.ForceThirdPerson()
+		endIf
 		Control.DisableHotkeys()
 		Control.AutoAdvance = true
 		Control = none
@@ -587,6 +611,10 @@ endFunction
 bool function AdjustStagePressed()
 	return (!AdjustTargetStage && Input.GetNumKeysPressed() > 1 && MirrorPress(AdjustStage)) \
 		|| (AdjustTargetStage && !(Input.GetNumKeysPressed() > 1 && MirrorPress(AdjustStage)))
+endFunction
+
+bool function IsAdjustStagePressed()
+	return Input.GetNumKeysPressed() > 1 && MirrorPress(AdjustStage)
 endFunction
 
 bool function MirrorPress(int mirrorkey)
@@ -799,6 +827,13 @@ function Reload()
 
 
 	; TODO: confirm forms are the same in SSE
+	if GetBedOffsets(Game.GetFormFromFile(0xB8371, "Skyrim.esm"))[3] != 180.0
+		SetCustomBedOffset(Game.GetFormFromFile(0xB8371, "Skyrim.esm"), 0.0, 0.0, 0.0, 180.0) 	; BedRoll Ground
+	endIf
+	Form CivilWarCot01L = Game.GetFormFromFile(0xE2826, "Skyrim.esm")
+	if CivilWarCot01L && !BedsList.HasForm(CivilWarCot01L)
+		BedsList.AddForm(CivilWarCot01L)
+	endIf
 	; Dawnguard additions
 	if Game.GetModByName("Dawnguard.esm") != 255
 		; Serana doesn't have ActorTypeNPC, force validate.
@@ -808,6 +843,7 @@ function Reload()
 		if DLC1BedrollGroundF && !BedsList.HasForm(DLC1BedrollGroundF)
 			BedsList.AddForm(DLC1BedrollGroundF)
 			BedRollsList.AddForm(DLC1BedrollGroundF)
+			SetCustomBedOffset(DLC1BedrollGroundF, 0.0, 0.0, 0.0, 180.0)
 		endIf
 	endIf
 
@@ -932,6 +968,7 @@ function SetDefaults()
 	UndressAnimation   = false
 	UseLipSync         = false
 	UseExpressions     = false
+	RefreshExpressions = true
 	ScaleActors        = false
 	UseCum             = true
 	AllowFFCum         = false
@@ -945,9 +982,11 @@ function SetDefaults()
 	UseCreatureGender  = false
 	LimitedStrip       = false
 	RestrictSameSex    = false
+	RestrictGenderTag  = true
 	SeparateOrgasms    = false
 	RemoveHeelEffect   = HasHDTHeels
 	AdjustTargetStage  = false
+	ShowInMap          = false
 	DisableTeleport    = true
 	SeedNPCStats       = true
 	DisableScale       = true ; TMP: enabled by default for testing
@@ -1090,7 +1129,7 @@ function SetDefaults()
 	StageTimerAggr[4] = 4.0
 
 	BedOffset = new float[4]
-	BedOffset[0] = 30.0
+	BedOffset[0] = 0.0
 	BedOffset[2] = 37.0
 
 	; Valid actor types refrence
@@ -1119,8 +1158,10 @@ function SetDefaults()
 	endIf
 
 	; Rest some player configurations
-	Stats.SetSkill(PlayerRef, "Sexuality", 75)
-	VoiceSlots.ForgetVoice(PlayerRef)
+	if PlayerRef
+		Stats.SetSkill(PlayerRef, "Sexuality", 75)
+		VoiceSlots.ForgetVoice(PlayerRef)
+	endIf
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -1146,6 +1187,7 @@ function ExportSettings()
 	ExportBool("UndressAnimation", UndressAnimation)
 	ExportBool("UseLipSync", UseLipSync)
 	ExportBool("UseExpressions", UseExpressions)
+	ExportBool("RefreshExpressions", RefreshExpressions)
 	ExportBool("ScaleActors", ScaleActors)
 	ExportBool("UseCum", UseCum)
 	ExportBool("AllowFFCum", AllowFFCum)
@@ -1159,9 +1201,11 @@ function ExportSettings()
 	ExportBool("UseCreatureGender", UseCreatureGender)
 	ExportBool("LimitedStrip", LimitedStrip)
 	ExportBool("RestrictSameSex", RestrictSameSex)
+	ExportBool("RestrictGenderTag", RestrictGenderTag)
 	ExportBool("SeparateOrgasms", SeparateOrgasms)
 	ExportBool("RemoveHeelEffect", RemoveHeelEffect)
 	ExportBool("AdjustTargetStage", AdjustTargetStage)
+	ExportBool("ShowInMap", ShowInMap)
 	ExportBool("DisableTeleport", DisableTeleport)
 	ExportBool("SeedNPCStats", SeedNPCStats)
 	ExportBool("DisableScale", DisableScale)
@@ -1229,6 +1273,19 @@ function ExportSettings()
 		endIf
 	endWhile
 	
+	StorageUtil.IntListRemove(none, "SometimesStrip", 0, true)
+	StorageUtil.IntListRemove(none, "SometimesStrip", 100, true)
+	Form[] SometimesStrip = StorageUtil.FormListToArray(none, "SometimesStrip")
+	int[] SometimesStripVal = StorageUtil.IntListToArray(none, "SometimesStrip")
+	i = SometimesStrip.Length
+	while i
+		i -= 1
+		if SometimesStrip[i]
+			JsonUtil.FormListAdd(File, "SometimesStrip", SometimesStrip[i], false)
+			JsonUtil.IntListAdd(File, "SometimesStripVal", SometimesStripVal[i], false)
+		endIf
+	endWhile
+	
 	StorageUtil.FormListRemove(none, "NoStrip", none, true)
 	Form[] NoStrip = StorageUtil.FormListToArray(none, "NoStrip")
 	i = NoStrip.Length
@@ -1258,6 +1315,7 @@ function ImportSettings()
 	UndressAnimation   = ImportBool("UndressAnimation", UndressAnimation)
 	UseLipSync         = ImportBool("UseLipSync", UseLipSync)
 	UseExpressions     = ImportBool("UseExpressions", UseExpressions)
+	RefreshExpressions = ImportBool("RefreshExpressions", RefreshExpressions)
 	ScaleActors        = ImportBool("ScaleActors", ScaleActors)
 	UseCum             = ImportBool("UseCum", UseCum)
 	AllowFFCum         = ImportBool("AllowFFCum", AllowFFCum)
@@ -1271,9 +1329,11 @@ function ImportSettings()
 	UseCreatureGender  = ImportBool("UseCreatureGender", UseCreatureGender)
 	LimitedStrip       = ImportBool("LimitedStrip", LimitedStrip)
 	RestrictSameSex    = ImportBool("RestrictSameSex", RestrictSameSex)
+	RestrictGenderTag  = ImportBool("RestrictGenderTag", RestrictGenderTag)
 	SeparateOrgasms    = ImportBool("SeparateOrgasms", SeparateOrgasms)
 	RemoveHeelEffect   = ImportBool("RemoveHeelEffect", RemoveHeelEffect)
 	AdjustTargetStage  = ImportBool("AdjustTargetStage", AdjustTargetStage)
+	ShowInMap          = ImportBool("ShowInMap", ShowInMap)
 	DisableTeleport    = ImportBool("DisableTeleport", DisableTeleport)
 	SeedNPCStats       = ImportBool("SeedNPCStats", SeedNPCStats)
 	DisableScale       = ImportBool("DisableScale", DisableScale)
@@ -1340,7 +1400,19 @@ function ImportSettings()
 		endIf
 	endWhile
 	StorageUtil.FormListRemove(none, "AlwaysStrip", none, true)
-
+	
+	Form[] SometimesStrip = JsonUtil.FormListToArray(File, "SometimesStrip")
+	int[] SometimesStripVal = JsonUtil.IntListToArray(File, "SometimesStripVal")
+	i = SometimesStrip.Length
+	while i
+		i -= 1
+		if SometimesStrip[i]
+			StorageUtil.SetIntValue(SometimesStrip[i], "SometimesStrip", SometimesStripVal[i])
+		endIf
+	endWhile
+	StorageUtil.IntListRemove(none, "SometimesStrip", 0, true)
+	StorageUtil.IntListRemove(none, "SometimesStrip", 100, true)
+	
 	Form[] NoStrip = JsonUtil.FormListToArray(File, "NoStrip")
 	i = NoStrip.Length
 	while i
