@@ -58,6 +58,7 @@ Skryim SexLab Framework
 
     Scripting:
      Ashal
+     osmelmc
 
 -- Permissions --------------------------------------------------------------
 
