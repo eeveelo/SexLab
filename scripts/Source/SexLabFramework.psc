@@ -750,7 +750,7 @@ endFunction
 ;#                                                                                                                                         #
 ;#  Actor myActor = ...                              <-- you get your actor in any way you want                                            #
 ;#  SexLab.TrackActor(ActorRef, "MyHook")            <-- here you start to track the actor, and the hook that will be used is MyHook       #
-;#  RegisterForMyEvent("MyHook_End", "DoSomething")                                                                                        #
+;#  RegisterForModEvent("MyHook_End", "DoSomething")                                                                                        #
 ;#                                                                                                                                         #
 ;#  Event DoSomething(Form FormRef, int tid)                                                                                               #
 ;#    Debug.MessageBox("The Actor " + myActor.getDisplayname() just ended an animation.")                                                  #
