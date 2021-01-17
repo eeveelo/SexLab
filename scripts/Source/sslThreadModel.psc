@@ -1020,24 +1020,7 @@ int function FilterAnimations()
 			Positions = ThreadLib.SortActorsByAnimation(Positions)
 		endIf
 
-		; Filter tags for Devices friendly animations
-		int RestrictedCount = 0
-		int RestrictedPosition = 0
-		if (Config.ManageZadFilter || Config.ManageZazFilter) && ActorCount != Creatures
-			i = ActorCount
-			while i
-				i -= 1
-				sslActorAlias Slot = ActorAlias(Positions[i])
-				if Slot && Slot.GetRestricted()
-					RequiredTags = PapyrusUtil.MergeStringArray(RequiredTags, Slot.GetRequiredTags(), true)
-					RestrictedPosition = i
-					RestrictedCount +=1
-				endIf
-				if i == 0
-					BasicFilters = PapyrusUtil.MergeStringArray(BasicFilters, Slot.GetForbiddenTags(), true)
-				endIf
-			endWhile
-		endIf
+		; Basic filter additions
 		if BasicFilters.Find("Breast") >= 0
 			Filters = AddString(Filters, "Boobjob")
 		endIf
