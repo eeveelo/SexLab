@@ -201,6 +201,7 @@ int property AnimProfile auto hidden
 int property AskBed auto hidden
 int property NPCBed auto hidden
 int property OpenMouthSize auto hidden
+int property UseFade auto hidden
 
 int property Backwards auto hidden
 int property AdjustStage auto hidden
@@ -996,6 +997,7 @@ function SetDefaults()
 	AskBed             = 1
 	NPCBed             = 0
 	OpenMouthSize      = 80
+	UseFade            = 0
 
 	Backwards          = 54 ; Right Shift
 	AdjustStage        = 157; Right Ctrl
@@ -1215,6 +1217,7 @@ function ExportSettings()
 	ExportInt("AskBed", AskBed)
 	ExportInt("NPCBed", NPCBed)
 	ExportInt("OpenMouthSize", OpenMouthSize)
+	ExportInt("UseFade", UseFade)
 
 	ExportInt("Backwards", Backwards)
 	ExportInt("AdjustStage", AdjustStage)
@@ -1343,6 +1346,7 @@ function ImportSettings()
 	AskBed             = ImportInt("AskBed", AskBed)
 	NPCBed             = ImportInt("NPCBed", NPCBed)
 	OpenMouthSize      = ImportInt("OpenMouthSize", OpenMouthSize)
+	UseFade            = ImportInt("UseFade", UseFade)
 
 	Backwards          = ImportInt("Backwards", Backwards)
 	AdjustStage        = ImportInt("AdjustStage", AdjustStage)
@@ -1591,6 +1595,68 @@ endFunction
 function StoreActor(Form FormRef) global
 	if FormRef
 		StorageUtil.FormListAdd(none, "SexLab.ActorStorage", FormRef, false)
+	endIf
+endFunction
+
+ImageSpaceModifier FadeEffect
+ImageSpaceModifier FadeEffectBlack
+ImageSpaceModifier FadeEffectBlur
+function RemoveFade(bool forceTest = false)
+	if !forceTest && UseFade < 1
+		return
+	endIf
+	if FadeEffect && FadeEffect != none
+		bool Black = UseFade % 2 != 0
+		If UseFade < 3
+			if forceTest
+				Utility.WaitMenuMode(5.0)
+				FadeEffect.Remove()
+			else
+				ImageSpaceModifier.RemoveCrossFade(2.5)
+			endIf
+		else
+			Game.FadeOutGame(false, Black, 0.5, 1.5)
+		endIf
+		FadeEffect = none
+	endIf
+endFunction
+
+function ApplyFade(bool forceTest = false)
+	if !forceTest && UseFade < 1
+		return
+	endIf
+	if FadeEffect && FadeEffect != none
+		FadeEffect.Remove()
+	endIf
+	FadeEffect = none
+	bool Black
+	if UseFade % 2 != 0
+		if !FadeEffectBlack || FadeEffectBlack == none
+			FadeEffectBlack = Game.GetFormFromFile(0xF756E, "Skyrim.esm") as ImageSpaceModifier ;0xF756D **0xF756E 0x10100C** 0xF756F 0xFDC57 0xFDC58 0x 0x 0x
+		endIf
+		if FadeEffectBlack && FadeEffectBlack != none
+			FadeEffect = FadeEffectBlack
+			Black = True
+		endIf
+	else
+		if !FadeEffectBlur || FadeEffectBlur == none
+			FadeEffectBlur = Game.GetFormFromFile(0x44F3B, "Skyrim.esm") as ImageSpaceModifier ;0x201D3 0x44F3B **0xFD809 0x1037E2 0x1037E3 0x1037E4 0x1037E5 0x1037E6** 0x
+		endIf
+		if FadeEffectBlur && FadeEffectBlur != none
+			FadeEffect = FadeEffectBlur
+			Black = False
+		endIf
+	endIf
+	if FadeEffect && FadeEffect != none
+		If UseFade < 3
+			if forceTest
+				FadeEffect.Apply(1.0)
+			else
+				FadeEffect.ApplyCrossFade(1.0)
+			endIf
+		else
+			Game.FadeOutGame(true, Black, 0.5, 3.0)
+		endIf
 	endIf
 endFunction
 

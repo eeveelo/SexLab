@@ -463,6 +463,7 @@ state Animating
 		endIf
 		if PlayerRef.GetFactionRank(Config.AnimatingFaction) == 0
 			Debug.Notification("Player movement locked - repositioning scene...")
+			ApplyFade()
 			if PlayerRef.GetFurnitureReference() == none
 				Debug.SendAnimationEvent(PlayerRef, "IdleForceDefaultState") ; Seems like the CenterRef don't change if PlayerRef is running
 			endIf
@@ -610,6 +611,7 @@ state Animating
 
 	function ResetPositions()
 		UnregisterForUpdate()
+		ApplyFade()
 		GoToState("Refresh")
 		SyncEvent(kRefreshActor, 10.0)
 	endFunction

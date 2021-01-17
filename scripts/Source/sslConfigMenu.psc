@@ -274,6 +274,14 @@ event OnConfigOpen()
 		BedOpt[1] = "$SSL_Always"
 		BedOpt[2] = "$SSL_NotVictim"
 	endIf
+	if FadeOpt.Length != 5 || FadeOpt.Find("") != -1
+		FadeOpt = new string[5]
+		FadeOpt[0] = "$SSL_Never"
+		FadeOpt[1] = "$SSL_UseBlack"
+		FadeOpt[2] = "$SSL_UseBlur"
+		FadeOpt[3] = "$SSL_SolidBlack"
+		FadeOpt[4] = "$SSL_SolidWhite"
+	endIf
 
 	; Expression Editor
 	if Phases.Length != 5 || Phases.Find("") != -1
@@ -813,6 +821,7 @@ endFunction
 
 string[] Chances
 string[] BedOpt
+string[] FadeOpt
 
 function AnimationSettings()
 	SetCursorFillMode(TOP_TO_BOTTOM)
@@ -827,6 +836,7 @@ function AnimationSettings()
 	endIf
 
 	AddHeaderOption("$SSL_ExtraEffects")
+	AddMenuOptionST("UseFade","$SSL_UseFade", FadeOpt[ClampInt(Config.UseFade, 0, 4)])
 	AddToggleOptionST("UseExpressions","$SSL_UseExpressions", Config.UseExpressions)
 	AddToggleOptionST("RefreshExpressions","$SSL_RefreshExpressions", Config.RefreshExpressions)
 	AddToggleOptionST("UseLipSync", "$SSL_UseLipSync", Config.UseLipSync)
@@ -1330,6 +1340,7 @@ bool AutoRealign
 string AdjustKey
 int Position
 int AnimEditPage
+int FurnitureType
 float[] AnimOffsets ; = forward, side, up, rotate
 
 function AnimationEditor()
@@ -1344,6 +1355,7 @@ function AnimationEditor()
 				Position  = Thread.GetAdjustPos()
 				Animation = Thread.Animation
 				ControlledAnimation = Thread.Animation
+				FurnitureType = Thread.FurnitureTypeID
 				AdjustKey = Thread.AdjustKey
 			endIf
 		elseIf TargetRef && TargetRef != none && TargetRef.IsInFaction(Config.AnimatingFaction) && ThreadSlots.FindActorController(TargetRef) != -1
@@ -1353,6 +1365,7 @@ function AnimationEditor()
 				Position  = Thread.GetAdjustPos()
 				Animation = Thread.Animation
 				ControlledAnimation = Thread.Animation
+				FurnitureType = Thread.FurnitureTypeID
 				AdjustKey = Thread.AdjustKey
 			endIf
 		endIf
@@ -1391,7 +1404,12 @@ function AnimationEditor()
 	AddMenuOptionST("AnimationAdjustKey", "$SSL_AdjustmentProfile", AdjustKey)
 	if AdjustKey == "Animation"
 		string Type = "Bed"
-		AnimOffsets = Animation.GetBedOffsets()
+		if (ControlledAnimation == Animation && FurnitureType >= 4) || Animation.HasTag("Furniture")
+			Type = "Furniture"
+			AnimOffsets = Animation.GetFurnitureOffsets()
+		else
+			Type = "Bed"
+			AnimOffsets = Animation.GetBedOffsets()
 		endIf
 		if Animation.PositionCount == 1 || (TargetRef && Animation.PositionCount == 2 && (!IsCreatureEditor || (IsCreatureEditor && Animation.HasActorRace(TargetRef))))
 			AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere")
@@ -3032,6 +3050,34 @@ state TargetGender
 	event OnDefaultST()
 		ActorLib.ClearForcedGender(TargetRef)
 		SetTextOptionValueST(SexLabUtil.StringIfElse(ActorLib.GetGender(TargetRef) % 2 == 0, "$SSL_Male", "$SSL_Female"))
+	endEvent
+endState
+state UseFade
+	event OnMenuOpenST()
+		SetMenuDialogStartIndex(Config.UseFade)
+		SetMenuDialogDefaultIndex(2)
+		SetMenuDialogOptions(FadeOpt)
+	endEvent
+	event OnMenuAcceptST(int i)
+		if i < 0
+			i = Config.UseFade
+		endIf
+		Config.UseFade = i
+		SetMenuOptionValueST(FadeOpt[Config.UseFade])
+		if Config.UseFade > 0
+			if ShowMessage("The 'Fade' configuration has change, do you want test the new fade. The test need you to close all menus to continue... \nDo you wish to continue with the test?", true, "$Yes", "$No")
+				Utility.Wait(0.1)
+				Config.ApplyFade(true)
+				Config.RemoveFade(true)
+			endIf
+		endIf
+	endEvent
+	event OnDefaultST()
+		Config.UseFade = 2
+		SetMenuOptionValueST(FadeOpt[Config.UseFade])
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_UseFadeInfo")
 	endEvent
 endState
 state UseExpressions

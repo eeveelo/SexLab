@@ -760,6 +760,8 @@ function ChangeActors(Actor[] NewPositions)
 	; Enter making state for alterations
 	SendThreadEvent("ActorChangeStart")
 	UnregisterforUpdate()
+	ApplyFade()
+
 	; Remove actors no longer present
 	int i = ActorCount
 	while i > 0
@@ -1718,6 +1720,9 @@ function SyncEventDone(int id)
 			AliasDone[id]  = 0
 			AliasTimer[id] = 0.0
 			ModEvent.Send(ModEvent.Create(Key(EventTypes[id]+"Done")))
+			if id >= kSyncActor && id <= kRefreshActor
+				RemoveFade()
+			endIf
 		endIf
 	else
 		Log("WARNING: SyncEventDone("+id+") OUT OF TURN")
@@ -1807,6 +1812,18 @@ function UpdateAdjustKey()
 	ActorAlias[2].SetAdjustKey(AdjustKey)
 	ActorAlias[3].SetAdjustKey(AdjustKey)
 	ActorAlias[4].SetAdjustKey(AdjustKey)
+endFunction
+
+function RemoveFade()
+	if HasPlayer
+		Config.RemoveFade()
+	endIf
+endFunction
+
+function ApplyFade()
+	if HasPlayer
+		Config.ApplyFade()
+	endIf
 endFunction
 
 sslActorAlias function PickAlias(Actor ActorRef)
