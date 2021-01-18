@@ -406,7 +406,6 @@ function UnequipStrapon(Actor ActorRef)
 	while i
 		i -= 1
 		if ActorRef.IsEquipped(Strapons[i])
-			ActorRef.UnequipItem(Strapons[i], false, true)
 			ActorRef.RemoveItem(Strapons[i], 1, true)
 		endIf
 	endWhile
@@ -484,7 +483,7 @@ event OnCrosshairRefChange(ObjectReference ActorRef)
 endEvent
 
 function SetTargetActor()
-	if CrosshairRef
+	if CrosshairRef && CrosshairRef != none
 		TargetRef = CrosshairRef
 		SelectedSpell.Cast(TargetRef, TargetRef)
 		Debug.Notification("SexLab Target Selected: "+TargetRef.GetLeveledActorBase().GetName())
@@ -492,8 +491,14 @@ function SetTargetActor()
 		Stats.SeedActor(TargetRef)
 		; Attempt to grab control of their animation?
 		sslThreadController TargetThread = ThreadSlots.GetActorController(TargetRef)
-		if TargetThread && !TargetThread.HasPlayer && !ThreadSlots.GetActorController(PlayerRef) && TakeThreadControl.Show()
-			GetThreadControl(TargetThread) 
+		if TargetThread && !TargetThread.HasPlayer && (TargetThread.GetState() == "Animating" || TargetThread.GetState() == "Advancing")
+			sslThreadController PlayerThread = ThreadSlots.GetActorController(PlayerRef)
+			if (!PlayerThread || !(PlayerThread.GetState() == "Animating" || PlayerThread.GetState() == "Advancing")) && TakeThreadControl.Show()
+				if PlayerThread != none ; 
+					ThreadSlots.StopThread(PlayerThread)
+				endIf
+				GetThreadControl(TargetThread) 
+			endIf
 		endIf
 	endif
 endFunction
@@ -559,7 +564,7 @@ function GetThreadControl(sslThreadController TargetThread)
 	endIf
 	; Set active controlled thread
 	Control = TargetThread
-	if !Control
+	if !Control || Control == none
 		Log("Failed to control thread "+TargetThread)
 		return ; Control not available
 	endIf
@@ -571,8 +576,8 @@ function GetThreadControl(sslThreadController TargetThread)
 	PlayerRef.SetFactionRank(AnimatingFaction, 1)
 	ActorUtil.AddPackageOverride(PlayerRef, DoNothing, 100, 1)
 	PlayerRef.EvaluatePackage()
-	Game.SetPlayerAIDriven()
 	Game.DisablePlayerControls(true, true, false, false, false, false, false, false, 0)
+	Game.SetPlayerAIDriven()
 	; Give player control
 	Control.AutoAdvance = false
 	Control.EnableHotkeys(true)
@@ -727,6 +732,9 @@ bool function CheckSystemPart(string CheckSystem)
 	elseIf CheckSystem == "PapyrusUtil"
 		return PapyrusUtil.GetVersion() >= 38
 
+	elseIf CheckSystem == "NiOverride"
+		return SKSE.GetPluginVersion("SKEE64") >= 7 || NiOverride.GetScriptVersion() >= 7 ;SSE
+
 	elseIf CheckSystem == "FNIS"
 		return FNIS.VersionCompare(7, 0, 0) >= 0
 
@@ -805,8 +813,7 @@ function Reload()
 
 	; Mod compatability checks
 	; - HDT/NiO High Heels
-	; HasNiOverride = false ; SKYRIM SE DISABLED
-	HasNiOverride = SKSE.GetPluginVersion("NiOverride") >= 6 || NiOverride.GetScriptVersion() >= 6
+	HasNiOverride = Config.CheckSystemPart("NiOverride")
 	HasHDTHeels   = Game.GetModByName("hdtHighHeel.esm") != 255
 	if HasHDTHeels && !HDTHeelEffect
 		HDTHeelEffect = Game.GetFormFromFile(0x800, "hdtHighHeel.esm") as MagicEffect
@@ -831,10 +838,25 @@ function Reload()
 	if GetBedOffsets(Game.GetFormFromFile(0xB8371, "Skyrim.esm"))[3] != 180.0
 		SetCustomBedOffset(Game.GetFormFromFile(0xB8371, "Skyrim.esm"), 0.0, 0.0, 0.0, 180.0) 	; BedRoll Ground
 	endIf
+	Form DA02Altar = Game.GetFormFromFile(0x5ED79, "Skyrim.esm")
+	if DA02Altar && !BedsList.HasForm(DA02Altar)
+		BedsList.AddForm(DA02Altar)
+		BedRollsList.AddForm(DA02Altar)
+	endIf
 	Form CivilWarCot01L = Game.GetFormFromFile(0xE2826, "Skyrim.esm")
 	if CivilWarCot01L && !BedsList.HasForm(CivilWarCot01L)
 		BedsList.AddForm(CivilWarCot01L)
 	endIf
+	Form WRTempleHealingAltar01 = Game.GetFormFromFile(0xD4848, "Skyrim.esm")
+	if WRTempleHealingAltar01 && !BedsList.HasForm(WRTempleHealingAltar01)
+		BedsList.AddForm(WRTempleHealingAltar01)
+		SetCustomBedOffset(WRTempleHealingAltar01, 0.0, 0.0, 39.0, 90.0)
+	endIf
+	Form HHFurnitureBedSingle01 = Game.GetFormFromFile(0x2FBC7, "Skyrim.esm")
+	if HHFurnitureBedSingle01 && !BedsList.HasForm(HHFurnitureBedSingle01)
+		BedsList.AddForm(HHFurnitureBedSingle01)
+	endIf
+	
 	; Dawnguard additions
 	if Game.GetModByName("Dawnguard.esm") != 255
 		; Serana doesn't have ActorTypeNPC, force validate.
@@ -1160,7 +1182,7 @@ function SetDefaults()
 	endIf
 
 	; Rest some player configurations
-	if PlayerRef
+	if PlayerRef && PlayerRef != none
 		Stats.SetSkill(PlayerRef, "Sexuality", 75)
 		VoiceSlots.ForgetVoice(PlayerRef)
 	endIf
@@ -1404,7 +1426,7 @@ function ImportSettings()
 		endIf
 	endWhile
 	StorageUtil.FormListRemove(none, "AlwaysStrip", none, true)
-	
+
 	Form[] SometimesStrip = JsonUtil.FormListToArray(File, "SometimesStrip")
 	int[] SometimesStripVal = JsonUtil.IntListToArray(File, "SometimesStripVal")
 	i = SometimesStrip.Length
@@ -1416,7 +1438,7 @@ function ImportSettings()
 	endWhile
 	StorageUtil.IntListRemove(none, "SometimesStrip", 0, true)
 	StorageUtil.IntListRemove(none, "SometimesStrip", 100, true)
-	
+
 	Form[] NoStrip = JsonUtil.FormListToArray(File, "NoStrip")
 	i = NoStrip.Length
 	while i

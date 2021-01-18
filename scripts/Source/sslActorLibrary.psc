@@ -285,7 +285,7 @@ endFunction
 Form function StripSlot(Actor ActorRef, int SlotMask)
 	Form ItemRef = ActorRef.GetWornForm(SlotMask)
 	if IsStrippable(ItemRef)
-		ActorRef.UnequipItem(ItemRef, false, true)
+		ActorRef.UnequipItemEX(ItemRef, 0, false)
 		return ItemRef
 	endIf
 	return none
@@ -338,7 +338,7 @@ Form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false,
 				Debug.SendAnimationEvent(ActorRef, "Arrok_Undress_G"+Gender)
 				Utility.Wait(1.0)
 			endIf
-			ActorRef.UnequipItem(ItemRef, false, true)
+			ActorRef.UnequipItemEX(ItemRef, 0, false)
 			Stripped[i] = ItemRef
 		endIf
 		i -= 1
@@ -356,7 +356,6 @@ function UnstripActor(Actor ActorRef, Form[] Stripped, bool IsVictim = false)
 	; Remove nudesuits
 	int n = ActorRef.GetItemCount(NudeSuit)
 	if n > 0
-		ActorRef.UnequipItem(NudeSuit, true, true)
 		ActorRef.RemoveItem(NudeSuit, n, true)
 	endIf
 	; Actor is victim, don't redress

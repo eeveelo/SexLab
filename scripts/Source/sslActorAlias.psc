@@ -14,6 +14,7 @@ string RaceEditorID
 String ActorRaceKey
 int BaseSex
 int Gender
+bool isRealFemale
 bool IsMale
 bool IsFemale
 bool IsCreature
@@ -81,9 +82,10 @@ Spell HDTHeelSpell
 Form HadBoots
 
 ; Animation Position/Stage flags
+bool property ForceOpenMouth auto hidden
 bool property OpenMouth hidden
 	bool function get()
-		return Flags[1] == 1
+		return Flags[1] == 1 || ForceOpenMouth == true ; This is for compatibility reasons because mods like DDi realy need it.
 	endFunction
 endProperty
 bool property IsSilent hidden
@@ -121,6 +123,7 @@ bool function SetActor(Actor ProspectRef)
 	ActorName  = BaseRef.GetName()
 	; ActorVoice = BaseRef.GetVoiceType()
 	BaseSex    = BaseRef.GetSex()
+	isRealFemale = BaseSex == 1
 	Gender     = ActorLib.GetGender(ActorRef)
 	IsMale     = Gender == 0
 	IsFemale   = Gender == 1
@@ -157,32 +160,32 @@ bool function SetActor(Actor ProspectRef)
 		ActorKey += "C"
 	endIf
 	if !IsCreature || Config.UseCreatureGender
-		If BaseSex % 2 != 0
+		If isRealFemale
 			ActorKey += "F"
 		else
 			ActorKey += "M"
 		endIf
 	endIf
+	float TempScale
+	String Node = "NPC"
+	if NetImmerse.HasNode(ActorRef, Node, False)
+		TempScale = NetImmerse.GetNodeScale(ActorRef, Node, False)
+		if TempScale > 0
+			NioScale = NioScale * TempScale
+		endIf
+	endIf
+	Node = "NPC Root [Root]"
+	if NetImmerse.HasNode(ActorRef, Node, False)
+		TempScale = NetImmerse.GetNodeScale(ActorRef, Node, False)
+		if TempScale > 0
+			NioScale = NioScale * TempScale
+		endIf
+	endIf
+	
 	if Config.HasNiOverride && !IsCreature
 		NioScale = 1.0
-		float TempScale
-		Bool isRealFemale = (BaseSex == 1)
 		string[] MOD_OVERRIDE_KEY = NiOverride.GetNodeTransformKeys(ActorRef, False, isRealFemale, "NPC")
 		int idx = 0
-		String Node = "NPC"
-		if NetImmerse.HasNode(ActorRef, Node, False)
-			TempScale = NetImmerse.GetNodeScale(ActorRef, Node, False)
-			if TempScale > 0
-				NioScale = NioScale * TempScale
-			endIf
-		endIf
-		Node = "NPC Root [Root]"
-		if NetImmerse.HasNode(ActorRef, Node, False)
-			TempScale = NetImmerse.GetNodeScale(ActorRef, Node, False)
-			if TempScale > 0
-				NioScale = NioScale * TempScale
-			endIf
-		endIf
 		While idx < MOD_OVERRIDE_KEY.Length
 			if MOD_OVERRIDE_KEY[idx] != "SexLab.esm"
 				TempScale = NiOverride.GetNodeTransformScale(ActorRef, False, isRealFemale, "NPC", MOD_OVERRIDE_KEY[idx])
@@ -254,6 +257,7 @@ function ClearAlias()
 		BaseRef    = ActorRef.GetLeveledActorBase()
 		ActorName  = BaseRef.GetName()
 		BaseSex    = BaseRef.GetSex()
+		isRealFemale = BaseSex == 1
 		Gender     = ActorLib.GetGender(ActorRef)
 		IsMale     = Gender == 0
 		IsFemale   = Gender == 1
@@ -354,6 +358,7 @@ state Ready
 		string LogInfo
 		; Calculate scales
 		if UseScale
+			Thread.ApplyFade()
 			float display = ActorRef.GetScale()
 			ActorRef.SetScale(1.0)
 			float base = ActorRef.GetScale()
@@ -365,7 +370,6 @@ state Ready
 			float FixNioScale = 1.0
 			if (Thread.ActorCount > 1 || BedStatus[1] >= 4) && Config.ScaleActors
 				if Config.HasNiOverride && !IsCreature && NioScale > 0.0 && NioScale != 1.0
-					Bool isRealFemale = (BaseSex == 1)
 					FixNioScale = (FixNioScale / NioScale)
 					NiOverride.AddNodeTransformScale(ActorRef, False, isRealFemale, "NPC", "SexLab.esm",FixNioScale)
 					NiOverride.UpdateNodeTransform(ActorRef, False, isRealFemale, "NPC")
@@ -377,6 +381,7 @@ state Ready
 			AnimScale = 1.0
 			LogInfo = "Scales["+ActorRef.GetScale()+"/DISABLED/DISABLED/DISABLED/DISABLED/"+NioScale+"] "
 		endIf
+		Thread.RemoveFade()
 		; Stop other movements
 		if DoPathToCenter
 			PathToCenter()
@@ -444,20 +449,8 @@ state Ready
 			Strip()
 			ResolveStrapon()
 			; Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
-			; Suppress High Heels
-			Bool isRealFemale = (BaseSex == 1)
+			; Remove HDT High Heels
 			if Config.RemoveHeelEffect && ActorRef.GetWornForm(0x00000080)
-				; Remove NiOverride High Heels
-				if Config.HasNiOverride && NiOverride.HasNodeTransformPosition(ActorRef, false, isRealFemale, "NPC", "internal")
-					float[] pos = NiOverride.GetNodeTransformPosition(ActorRef, false, isRealFemale, "NPC", "internal")
-					Log(pos, "RemoveHeelEffect (NiOverride)")
-					pos[0] = -pos[0]
-					pos[1] = -pos[1]
-					pos[2] = -pos[2]
-					NiOverride.AddNodeTransformPosition(ActorRef, false, isRealFemale, "NPC", "SexLab.esm", pos)
-					NiOverride.UpdateNodeTransform(ActorRef, false, isRealFemale, "NPC")
-				endIf
-				; Remove HDT High Heels
 				HDTHeelSpell = Config.GetHDTSpell(ActorRef)
 				if HDTHeelSpell
 					Log(HDTHeelSpell, "RemoveHeelEffect (HDTHeelSpell)")
@@ -568,7 +561,7 @@ endState
 state Prepare
 	event OnUpdate()
 		; Check if still among the living and able.
-		if !ActorRef || ActorRef.IsDisabled() || (ActorRef.IsDead() && ActorRef.GetActorValue("Health") < 1.0)
+		if !ActorRef || ActorRef == none || ActorRef.IsDisabled() || (ActorRef.IsDead() && ActorRef.GetActorValue("Health") < 1.0)
 			Log("Actor is undefined, disabled, or has no health - Unable to continue animating")
 			Thread.EndAnimation(true)
 		else
@@ -604,12 +597,15 @@ state Prepare
 		GoToState("Animating")
 		SyncAll(true)
 		PlayingSA = Animation.Registry
-		CurrentSA = Animation.Registry
+	;	if Stage == 1
+	;		CurrentSA = PlayingSA
+	;	endIf
 		if ActorRef.GetActorValue("Paralysis") != 0.0
 			Debug.SendAnimationEvent(ActorRef, "Ragdoll")
 			Utility.WaitMenuMode(0.2)
 			SendDefaultAnimEvent()
 			ActorRef.SetActorValue("Paralysis", 0.0)
+			Utility.WaitMenuMode(0.2)
 		endIf
 		SendDefaultAnimEvent()
 		; If enabled, start Auto TFC for player
@@ -619,7 +615,7 @@ state Prepare
 		endIf
 		; Start update loop
 		if Thread.GetState() == "Prepare"
-			Thread.SyncEventDone(kStartup)
+			Thread.SyncEventDone(kStartUp)
 		else
 			SendAnimation()
 		endIf
@@ -652,7 +648,6 @@ state Prepare
 				; NiOverride High Heels move out to prevent isues and add NiOverride Scale for race menu compatibility
 			endIf
 			if Config.HasNiOverride
-				Bool isRealFemale = (BaseSex == 1)
 				bool UpdateNiOPosition = NiOverride.RemoveNodeTransformPosition(ActorRef, false, isRealFemale, "NPC", "SexLab.esm")
 				bool UpdateNiOScale = NiOverride.RemoveNodeTransformScale(ActorRef, false, isRealFemale, "NPC", "SexLab.esm")
 				if UpdateNiOPosition || UpdateNiOScale ; I make the variables because not sure if execute both funtion in OR condition.
@@ -677,7 +672,7 @@ endFunction
 
 function GetPositionInfo()
 	if ActorRef
-		if !AdjustKey || AdjustKey != Thread.AdjustKey
+		if AdjustKey != Thread.AdjustKey
 			SetAdjustKey(Thread.AdjustKey)
 		endIf
 		LeadIn     = Thread.LeadIn
@@ -687,6 +682,7 @@ function GetPositionInfo()
 		if Stage > StageCount
 			return
 		endIf
+	;	Log("Animation:"+Animation.Name+" AdjustKey:"+AdjustKey+" Position:"+Position+" Stage:"+Stage)
 		Flags      = Animation.PositionFlags(Flags, AdjustKey, Position, Stage)
 		Offsets    = Animation.PositionOffsets(Offsets, AdjustKey, Position, Stage, BedStatus[1])
 		CurrentSA  = Animation.Registry
@@ -696,32 +692,35 @@ endFunction
 
 string PlayingSA
 string CurrentSA
+string PlayingAE
+string CurrentAE
 float LoopDelay
 state Animating
 
 	function SendAnimation()
+		CurrentAE = AnimEvents[Position]
 		; Reenter SA - On stage 1 while animation hasn't changed since last call
-		if Stage == 1 && PlayingSA == CurrentSA
+		if Stage == 1 && (PlayingAE != CurrentAE || PlayingSA == CurrentSA)
 			SendDefaultAnimEvent()
 			Utility.WaitMenuMode(0.2)
 			Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
 			; Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1)+"_REENTER")
 		else
 			; Enter a new SA - Not necessary on stage 1 since both events would be the same
-			if PlayingSA != CurrentSA
-				Debug.SendAnimationEvent(ActorRef, "AnimObjectUnequip")
-				if Stage != 1
-					Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
-					; Log("NEW SA - "+Animation.FetchPositionStage(Position, 1))
-				endIf
+			if Stage != 1 && PlayingSA != CurrentSA
+				SendDefaultAnimEvent() ; To unequip the AnimObject TODO: Find better solution
+				Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
 				Utility.WaitMenuMode(0.2)
+				; Log("NEW SA - "+Animation.FetchPositionStage(Position, 1))
 			endIf
 			; Play the primary animation
-		 	Debug.SendAnimationEvent(ActorRef, AnimEvents[Position])
-		 	; Log(AnimEvents[Position])
+		 	Debug.SendAnimationEvent(ActorRef, CurrentAE)
+		 	; Log(CurrentAE)
 		endIf
 		; Save id of last SA played
 		PlayingSA = Animation.Registry
+		; Save id of last AE played
+		PlayingAE  = CurrentAE
 	endFunction
 
 	event OnUpdate()
@@ -731,7 +730,7 @@ state Animating
 			StartedAt += 1.2
 		endWhile
 		; Check if still among the living and able.
-		if !ActorRef || !ActorRef.Is3DLoaded() || ActorRef.IsDisabled() || (ActorRef.IsDead() && ActorRef.GetActorValue("Health") < 1.0)
+		if !ActorRef || ActorRef == none || !ActorRef.Is3DLoaded() || ActorRef.IsDisabled() || (ActorRef.IsDead() && ActorRef.GetActorValue("Health") < 1.0)
 			Log("Actor is out of cell, disabled, or has no health - Unable to continue animating")
 			Thread.EndAnimation(true)
 		;	return don't work on events
@@ -747,9 +746,11 @@ state Animating
 				if !IsSilent
 					Voice.PlayMoan(ActorRef, Enjoyment, IsVictim, UseLipSync)
 				endIf
-				if Config.RefreshExpressions && Expressions && Expressions.Length > 0
-					Expression = Expressions[Utility.RandomInt(0, (Expressions.Length - 1))]
-					Log("Expression["+Expression.Name+"] ")
+				if Expressions && Expressions.Length > 0
+					if Config.RefreshExpressions
+						Expression = Expressions[Utility.RandomInt(0, (Expressions.Length - 1))]
+						Log("Expression["+Expression.Name+"] ")
+					endIf
 					RefreshExpression()
 				endIf
 			endIf
@@ -796,13 +797,16 @@ state Animating
 		SyncThread()
 		StopAnimating(true)
 		SyncLocation(false)
-		PlayingSA = "SexLabSequenceExit1"
-		Debug.SendAnimationEvent(ActorRef, "SexLabSequenceExit1")
+		CurrentSA = "SexLabSequenceExit1"
+		CurrentAE = PlayingSA
+		Debug.SendAnimationEvent(ActorRef, CurrentAE)
 		SendDefaultAnimEvent()
-		Utility.WaitMenuMode(0.1)
-		Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
-		PlayingSA = Animation.Registry
+		Utility.WaitMenuMode(0.2)
 		CurrentSA = Animation.Registry
+		CurrentAE = Animation.FetchPositionStage(Position, 1)
+		Debug.SendAnimationEvent(ActorRef, CurrentAE)
+		PlayingSA = CurrentSA
+		PlayingAE = CurrentAE
 		SyncLocation(true)
 		SendAnimation()
 		RegisterForSingleUpdate(1.0)
@@ -819,7 +823,7 @@ state Animating
 		MarkerRef.SetPosition(Loc[0], Loc[1], Loc[2])
 		MarkerRef.SetAngle(Loc[3], Loc[4], Loc[5])
 		; Avoid forcibly setting on player coords if avoidable - causes annoying graphical flickering
-		if Force && !IsCreature && IsPlayer && IsInPosition(ActorRef, MarkerRef, 40.0)
+		if Force && IsPlayer && IsInPosition(ActorRef, MarkerRef, 40.0)
 			AttachMarker()
 			ActorRef.TranslateTo(Loc[0], Loc[1], Loc[2], Loc[3], Loc[4], Loc[5], 50000, 0)
 			return ; OnTranslationComplete() will take over when in place
@@ -924,6 +928,7 @@ state Animating
 	endFunction
 
 	event ResetActor()
+		Thread.ApplyFade()
 		ClearEvents()
 		GoToState("Resetting")
 		Log("Resetting!")
@@ -945,13 +950,20 @@ state Animating
 		if CumID > 0 && !Thread.FastEnd && Config.UseCum && (Thread.Males > 0 || Config.AllowFFCum || Thread.HasCreature)
 			ActorLib.ApplyCum(ActorRef, CumID)
 		endIf /;
+		; Make sure of play the last animation stage to prevet AnimObject issues
+		CurrentAE = Animation.FetchPositionStage(Position, StageCount)
+		if PlayingAE != CurrentAE
+			Debug.SendAnimationEvent(ActorRef, CurrentAE)
+			Utility.WaitMenuMode(0.2)
+			PlayingAE = CurrentAE
+		endIf
 		StopAnimating(Thread.FastEnd, EndAnimEvent)
 		UnlockActor()
 		RestoreActorDefaults()
 		; Tracked events
 		TrackedEvent("End")
 		; Unstrip items in storage, if any
-		if !IsCreature && !ActorRef.IsDead() || ActorRef.IsUnconscious() || ActorRef.GetActorValue("Health") < 1.0
+		if !IsCreature && !ActorRef.IsDead()
 			Unstrip()
 			; Add back high heel effects
 			if Config.RemoveHeelEffect
@@ -962,7 +974,6 @@ state Animating
 				; NiOverride High Heels move out to prevent isues and add NiOverride Scale for race menu compatibility
 			endIf
 			if Config.HasNiOverride
-				Bool isRealFemale = (BaseSex == 1)
 				bool UpdateNiOPosition = NiOverride.RemoveNodeTransformPosition(ActorRef, false, isRealFemale, "NPC", "SexLab.esm")
 				bool UpdateNiOScale = NiOverride.RemoveNodeTransformScale(ActorRef, false, isRealFemale, "NPC", "SexLab.esm")
 				if UpdateNiOPosition || UpdateNiOScale ; I make the variables because not sure if execute both funtion in OR condition.
@@ -1003,7 +1014,9 @@ function StopAnimating(bool Quick = false, string ResetAnim = "IdleForceDefaultS
 	; 	MiscUtil.SetFreeCameraState(false)
 	; endIf
 	; Clear possibly troublesome effects
-	if GetState() == "Resetting" || !Quick
+	ActorRef.StopTranslation()
+	bool Resetting = GetState() == "Resetting" || !Quick
+	if Resetting
 		int StageOffset = Stage
 		if StageOffset > StageCount
 			StageOffset = StageCount
@@ -1038,27 +1051,25 @@ function StopAnimating(bool Quick = false, string ResetAnim = "IdleForceDefaultS
 				Log(Node +" Rotation:"+Rotation+" AngleZ:"+AngleZ+" Rotate:"+Rotate)
 			endIf
 		endIf
-		Debug.SendAnimationEvent(ActorRef, "AnimObjectUnequip")
-		ActorRef.StopTranslation()
 		ActorRef.SetVehicle(none)
-		ActorRef.SetPosition(PositionX, PositionY, Loc[2])
 		if AngleZ != Rotate
 			ActorRef.SetAngle(Loc[3], Loc[4], Rotate)
 		endIf
+		ActorRef.SetPosition(PositionX, PositionY, Loc[2])
 	;	Utility.WaitMenuMode(0.1)
+		Thread.RemoveFade()
 	else
-		Debug.SendAnimationEvent(ActorRef, "AnimObjectUnequip")
-		ActorRef.StopTranslation()
 		ActorRef.SetVehicle(none)
 	endIf
 	; Stop animevent
 	if IsCreature
 		; Reset creature idle
-		SendDefaultAnimEvent()
+		SendDefaultAnimEvent(Resetting)
+		Utility.Wait(0.1)
 		if ResetAnim != "IdleForceDefaultState" && ResetAnim != "" && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
 			ActorRef.PushActorAway(ActorRef, 0.001)
 		elseIf !Quick && ResetAnim == "IdleForceDefaultState" && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
-			if ActorRef.IsDead() || ActorRef.IsUnconscious() || ActorRef.GetActorValue("Health") < 1.0
+			if ActorRef.IsDead() || ActorRef.IsUnconscious() || ActorRef.GetActorValuePercentage("Health") < 0.1
 				Debug.SendAnimationEvent(ActorRef, "DeathAnimation")
 			elseIf (ActorRaceKey == "Spiders" || ActorRaceKey == "LargeSpiders" || ActorRaceKey == "GiantSpiders")
 				ActorRef.PushActorAway(ActorRef, 0.001) ; Temporal Fix TODO:
@@ -1077,7 +1088,7 @@ function StopAnimating(bool Quick = false, string ResetAnim = "IdleForceDefaultS
 			Debug.SendAnimationEvent(ActorRef, ResetAnim)
 		elseIf !Quick && ResetAnim == "IdleForceDefaultState" && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
 			;TODO: Detect the real actor position based on Node property intead of the Animation Tags
-			if ActorRef.IsDead() || ActorRef.IsUnconscious() || ActorRef.GetActorValue("Health") < 1.0
+			if ActorRef.IsDead() || ActorRef.IsUnconscious() || ActorRef.GetActorValuePercentage("Health") < 0.1
 				Debug.SendAnimationEvent(ActorRef, "IdleSoupDeath")
 			elseIf Animation && (Animation.HasTag("Furniture") || (Animation.HasTag("Standing") && !IsType[0]))
 				Debug.SendAnimationEvent(ActorRef, ResetAnim)
@@ -1091,21 +1102,66 @@ function StopAnimating(bool Quick = false, string ResetAnim = "IdleForceDefaultS
 			Debug.SendAnimationEvent(ActorRef, ResetAnim)
 		endIf
 	endIf
+;	Log(ActorName +"- Angle:[X:"+ActorRef.GetAngleX()+"Y:"+ActorRef.GetAngleY()+"Z:"+ActorRef.GetAngleZ()+"] Position:[X:"+ActorRef.GetPositionX()+"Y:"+ActorRef.GetPositionY()+"Z:"+ActorRef.GetPositionZ()+"]", "StopAnimating("+Quick+")")
 	PlayingSA = "SexLabSequenceExit1"
+	PlayingAE = "SexLabSequenceExit1"
 endFunction
 
-function SendDefaultAnimEvent()
+function SendDefaultAnimEvent(bool Exit = False)
 	Debug.SendAnimationEvent(ActorRef, "AnimObjectUnequip")
 	if !IsCreature
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
-	else
+	elseIf ActorRaceKey != ""
+		if ActorRaceKey == "Dragons"
+			Debug.SendAnimationEvent(ActorRef, "FlyStopDefault") ; for Dragons only
+			Utility.WaitMenuMode(0.1)
+			Debug.SendAnimationEvent(ActorRef, "Reset") ; for Dragons only
+		elseIf ActorRaceKey == "Hagravens"
+			Debug.SendAnimationEvent(ActorRef, "ReturnToDefault") ; for Dragons only
+			if Exit
+				Utility.WaitMenuMode(0.1)
+				Debug.SendAnimationEvent(ActorRef, "Reset") ; for Dragons only
+			endIf
+		elseIf ActorRaceKey == "Chaurus" || ActorRaceKey == "ChaurusReapers"
+			Debug.SendAnimationEvent(ActorRef, "FNISDefault") ; for dwarvenspider and chaurus without time bettwen.
+			if Exit
+		;		Utility.WaitMenuMode(0.1)
+		;		Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
+			endIf
+		elseIf ActorRaceKey == "DwarvenSpiders"
+			Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
+			if Exit
+		;		Utility.WaitMenuMode(0.1)
+		;		Debug.SendAnimationEvent(ActorRef, "FNISDefault") ; for dwarvenspider and chaurus
+			endIf
+		elseIf ActorRaceKey == "Draugrs" || ActorRaceKey == "Seekers" || ActorRaceKey == "DwarvenBallistas" || ActorRaceKey == "DwarvenSpheres" || ActorRaceKey == "DwarvenCenturions"
+			Debug.SendAnimationEvent(ActorRef, "ForceFurnExit") ; for draugr, trolls daedras and all dwarven exept spiders
+		elseIf ActorRaceKey == "Trolls"
+			Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
+			if Exit
+				Utility.WaitMenuMode(0.1)
+				Debug.SendAnimationEvent(ActorRef, "ForceFurnExit") ; the troll need this afther "ReturnToDefault" to allow the attack idles
+			endIf
+		elseIf ActorRaceKey == "Chickens" || ActorRaceKey == "Rabbits" || ActorRaceKey == "Slaughterfishes"
+			Debug.SendAnimationEvent(ActorRef, "ReturnDefaultState") ; for chicken, hare and slaughterfish
+			if Exit
+				Utility.WaitMenuMode(0.1)
+				Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
+			endIf
+		elseIf ActorRaceKey == "Werewolves" || ActorRaceKey == "VampireLords"
+			Debug.SendAnimationEvent(ActorRef, "IdleReturnToDefault") ; for Werewolves and VampirwLords
+		else
+			Debug.SendAnimationEvent(ActorRef, "ReturnToDefault") ; the rest creature-animal
+		endIf
+	elseIf Exit
 		Debug.SendAnimationEvent(ActorRef, "ReturnDefaultState") ; for chicken, hare and slaughterfish before the "ReturnToDefault"
 		Debug.SendAnimationEvent(ActorRef, "ReturnToDefault") ; the rest creature-animal
-		Debug.SendAnimationEvent(ActorRef, "IdleReturnToDefault") ; for Werewolves and VampirwLords
-		Debug.SendAnimationEvent(ActorRef, "Reset") ; for Hagravens afther the "ReturnToDefault" and Dragons
-		Debug.SendAnimationEvent(ActorRef, "ForceFurnExit") ; for Trolls afther the "ReturnToDefault" and draugr, daedras and all dwarven exept spiders
 		Debug.SendAnimationEvent(ActorRef, "FNISDefault") ; for dwarvenspider and chaurus
+		Debug.SendAnimationEvent(ActorRef, "IdleReturnToDefault") ; for Werewolves and VampirwLords
+		Debug.SendAnimationEvent(ActorRef, "ForceFurnExit") ; for Trolls afther the "ReturnToDefault" and draugr, daedras and all dwarven exept spiders
+		Debug.SendAnimationEvent(ActorRef, "Reset") ; for Hagravens afther the "ReturnToDefault" and Dragons
 	endIf
+	Utility.WaitMenuMode(0.1)
 endFunction
 
 function AttachMarker()
@@ -1122,7 +1178,7 @@ function LockActor()
 	endIf
 	; Move if actor out of cell
 	ObjectReference CenterRef = Thread.CenterAlias.GetReference()
-	if CenterRef && CenterRef != none && ActorRef.GetDistance(CenterRef) > 3000
+	if CenterRef && CenterRef != none && CenterRef != ActorRef as ObjectReference && ActorRef.GetDistance(CenterRef) > 3000
 		ActorRef.MoveTo(CenterRef)
 	endIf
 	; Remove any unwanted combat effects
@@ -1166,6 +1222,7 @@ function LockActor()
 		endIf
 	endIf
 	MarkerRef.Enable()
+	ActorRef.StopTranslation()
 	MarkerRef.MoveTo(ActorRef)
 	AttachMarker()
 endFunction
@@ -1178,6 +1235,7 @@ function UnlockActor()
 	; Detach positioning marker
 	ActorRef.StopTranslation()
 	ActorRef.SetVehicle(none)
+	Thread.RemoveFade()
 	; Remove from animation faction
 	ActorRef.RemoveFromFaction(AnimatingFaction)
 	ActorUtil.RemovePackageOverride(ActorRef, Config.DoNothing)
@@ -1193,6 +1251,7 @@ function UnlockActor()
 		ActorRef.SetRestrained(false)
 		ActorRef.SetDontMove(false)
 	endIf
+;	Log(ActorName +"- Angle:[X:"+ActorRef.GetAngleX()+"Y:"+ActorRef.GetAngleY()+"Z:"+ActorRef.GetAngleZ()+"] Position:[X:"+ActorRef.GetPositionX()+"Y:"+ActorRef.GetPositionY()+"Z:"+ActorRef.GetPositionZ()+"]", "UnlockActor()")
 endFunction
 
 function RestoreActorDefaults()
@@ -1237,7 +1296,7 @@ function RestoreActorDefaults()
 			FrostExceptions.RemoveAddedForm(Config.BaseMarker)
 		endIf
 	endIf
-	Debug.SendAnimationEvent(ActorRef, "AnimObjectUnequip")
+	Thread.RemoveFade()
 	; Remove SOS erection
 	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
 	; Clear from animating faction
@@ -1245,6 +1304,7 @@ function RestoreActorDefaults()
 	ActorRef.RemoveFromFaction(AnimatingFaction)
 	ActorUtil.RemovePackageOverride(ActorRef, Config.DoNothing)
 	ActorRef.EvaluatePackage()
+;	Log(ActorName +"- Angle:[X:"+ActorRef.GetAngleX()+"Y:"+ActorRef.GetAngleY()+"Z:"+ActorRef.GetAngleZ()+"] Position:[X:"+ActorRef.GetPositionX()+"Y:"+ActorRef.GetPositionY()+"Z:"+ActorRef.GetPositionZ()+"]", "RestoreActorDefaults()")
 endFunction
 
 function RefreshActor()
@@ -1306,12 +1366,7 @@ int function GetEnjoyment()
 		; Log("Enjoyment["+Enjoyment+"] / BaseEnjoyment["+BaseEnjoyment+"] / FullEnjoyment["+(Enjoyment - BaseEnjoyment)+"]")
 	endIf
 	
-	int out = Enjoyment - BaseEnjoyment
-	if out < 0
-		out = 0
-	elseIf out > 100
-		out = 100
-	endIf
+	int FullEnjoyment = Enjoyment - BaseEnjoyment
 	
 	if Enjoyment < 0
 		Enjoyment = 0
@@ -1319,7 +1374,7 @@ int function GetEnjoyment()
 		Enjoyment = 100
 	endIf
 	
-	return out
+	return FullEnjoyment
 endFunction
 
 function ApplyCum()
@@ -1524,6 +1579,25 @@ function Strip()
 	; Store stripped items
 	Equipment = PapyrusUtil.MergeFormArray(Equipment, PapyrusUtil.ClearNone(Stripped), true)
 	Log("Equipment: "+Equipment)
+	; Suppress NiOverride High Heels
+	if Config.RemoveHeelEffect && ActorRef.GetWornForm(0x00000080)
+		if Config.HasNiOverride
+			; Remove NiOverride SexLab High Heels
+			bool UpdateNiOPosition = NiOverride.RemoveNodeTransformPosition(ActorRef, false, isRealFemale, "NPC", "SexLab.esm")
+			; Remove NiOverride High Heels
+			if NiOverride.HasNodeTransformPosition(ActorRef, false, isRealFemale, "NPC", "internal")
+				float[] pos = NiOverride.GetNodeTransformPosition(ActorRef, false, isRealFemale, "NPC", "internal")
+				Log(pos, "RemoveHeelEffect (NiOverride)")
+				pos[0] = -pos[0]
+				pos[1] = -pos[1]
+				pos[2] = -pos[2]
+				NiOverride.AddNodeTransformPosition(ActorRef, false, isRealFemale, "NPC", "SexLab.esm", pos)
+				NiOverride.UpdateNodeTransform(ActorRef, false, isRealFemale, "NPC")
+			elseIf UpdateNiOPosition
+				NiOverride.UpdateNodeTransform(ActorRef, false, isRealFemale, "NPC")
+			endIf
+		endIf
+	endIf
 endFunction
 
 function UnStrip()
@@ -1531,8 +1605,9 @@ function UnStrip()
  		return
  	endIf
 	; Remove nudesuit if present
-	if ActorRef.GetItemCount(Config.NudeSuit) > 0
-		ActorRef.RemoveItem(Config.NudeSuit, ActorRef.GetItemCount(Config.NudeSuit), true)
+	int n = ActorRef.GetItemCount(Config.NudeSuit)
+	if n > 0
+		ActorRef.RemoveItem(Config.NudeSuit, n, true)
 	endIf
 	; Continue with undress, or am I disabled?
  	if !DoRedress
@@ -1610,7 +1685,7 @@ function RefreshExpression()
 	elseIf OpenMouth
 		sslBaseExpression.OpenMouth(ActorRef)
 	else
-		if Expression && !ActorRef.IsDead() && !ActorRef.IsUnconscious()
+		if Expression && Expression != none && !ActorRef.IsDead() && !ActorRef.IsUnconscious()
 			sslBaseExpression.CloseMouth(ActorRef)
 			Expression.Apply(ActorRef, Enjoyment, BaseSex)
 		elseIf sslBaseExpression.IsMouthOpen(ActorRef)
@@ -1691,8 +1766,9 @@ function Initialize()
 		ClearEvents()
 		; RestoreActorDefaults()
 		; Remove nudesuit if present
-		if ActorRef.GetItemCount(Config.NudeSuit) > 0
-			ActorRef.RemoveItem(Config.NudeSuit, ActorRef.GetItemCount(Config.NudeSuit), true)
+		int n = ActorRef.GetItemCount(Config.NudeSuit)
+		if n > 0
+			ActorRef.RemoveItem(Config.NudeSuit, n, true)
 		endIf
 	endIf
 	; Delete positioning marker
@@ -1718,6 +1794,7 @@ function Initialize()
 	NoUndress      = false
 	NoRedress      = false
 	NoOrgasm       = false
+	ForceOpenMouth = false
 	; Integers
 	Orgasms        = 0
 	BestRelation   = 0
@@ -1736,6 +1813,8 @@ function Initialize()
 	ActorKey       = ""
 	PlayingSA      = ""
 	CurrentSA      = ""
+	PlayingAE      = ""
+	CurrentAE      = ""
 	; Storage
 	StripOverride  = Utility.CreateBoolArray(0)
 	Equipment      = Utility.CreateFormArray(0)
