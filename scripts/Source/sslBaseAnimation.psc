@@ -424,12 +424,48 @@ string function GetLastKey(int Position)
 endFunction
 
 string function InitAdjustments(string AdjustKey, int Position)
+	if !AdjustKey || Position >= Actors || Position < 0
+		Log("Unknown Position, '"+Position+"' given", "InitAdjustments")
+		return LastKeys[Position]
+	endIf
+	
 	AdjustKey += "."+Position
 	if !_HasAdjustments(Registry, AdjustKey, Stages)
 		; Pick key to copy from
 		string CopyKey = LastKeys[Position]
-		if CopyKey == "" || CopyKey == "Global."+Position || !_HasAdjustments(Registry, CopyKey, Stages)
+		if AdjustKey == "Global."+Position || CopyKey == "" || CopyKey == "Global."+Position || !_HasAdjustments(Registry, CopyKey, Stages)
 			CopyKey = "Global."+Position
+		endIf
+		if CopyKey != "Global."+Position
+			string[] RaceIDs = PapyrusUtil.StringSplit(AdjustKey, ".")
+			string[] LastRaceIDs = PapyrusUtil.StringSplit(LastKeys[Position], ".")
+			if RaceIDs && RaceIDs.length > Position && (!LastRaceIDs || LastRaceIDs.length < Actors || RaceIDs[Position] != LastRaceIDs[Position])
+				string id = RaceIDs[Position]
+				Race RaceRef = Race.GetRace(id)
+				string Gender = ""
+				if !(RaceRef || id == "Humanoid" || sslCreatureAnimationSlots.HasRaceKey(id))
+					int i = 0
+					while i < 6
+						i += 1
+						id = StringUtil.Substring(RaceIDs[Position], 0, (StringUtil.GetLength(RaceIDs[Position]) - i))
+						RaceRef = Race.GetRace(id)
+						if RaceRef || id == "Humanoid" || sslCreatureAnimationSlots.HasRaceKey(id)
+							Gender = StringUtil.GetNthChar(RaceIDs[Position], (StringUtil.GetLength(RaceIDs[Position]) - i))
+							i = 6
+						endIf
+					endWhile
+				endIf
+				if Gender && (Gender != "M") && (Gender != "F") && (Gender != "C")
+					Gender = ""
+				endIf
+				if id+Gender == RaceIDs[Position] || id+Gender+"M" == RaceIDs[Position] || id+Gender+"F" == RaceIDs[Position]
+					CopyKey = "Global."+Position
+				endIf
+			endIf
+		endIf
+		if AdjustKey != "Global."+Position && CopyKey == "Global."+Position && !_HasAdjustments(Registry, CopyKey, Stages)
+			; Initialize Global profile
+			_CopyAdjustments(Registry, "Global."+Position, GetEmptyAdjustments(Position))
 		endIf
 		; Get adjustments from lastkey or default global
 		float[] List = _GetAllAdjustments(Registry, CopyKey)
@@ -1174,8 +1210,8 @@ function ExportOffsets(string Type = "BedOffset")
 	float[] Values
 	if Type == "BedOffset"
 		Values = GetBedOffsets()
-	elseIf Type == "FurnitureOffset"
-		Values = GetFurnitureOffsets()
+;	elseIf Type == "FurnitureOffset"
+;		Values = GetFurnitureOffsets()
 	else
 		return
 	endIf
@@ -1197,8 +1233,8 @@ function ImportOffsets(string Type = "BedOffset")
 	float[] Values
 	if Type == "BedOffset"
 		Values = GetBedOffsets()
-	elseIf Type == "FurnitureOffset"
-		Values = GetFurnitureOffsets()
+;	elseIf Type == "FurnitureOffset"
+;		Values = GetFurnitureOffsets()
 	else
 		return
 	endIf
@@ -1215,8 +1251,8 @@ function ImportOffsets(string Type = "BedOffset")
 		endWhile
 		if Type == "BedOffset"
 			BedOffset = Values
-		else
-			FurnitureOffset = Values
+	;	else
+	;		FurnitureOffset = Values
 		endIf
 	endIf
 endFunction

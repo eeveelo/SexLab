@@ -382,6 +382,9 @@ state Making
 		
 		if HasCreature
 			Log("CreatureRef: "+CreatureRef)
+			if ActorCount != Creatures
+				Positions = ThreadLib.SortCreatures(Positions)
+			endIf
 		endIf
 		
 		if Config.ShowInMap && !HasPlayer && PlayerRef.GetDistance(CenterRef) > 750
@@ -392,42 +395,40 @@ state Making
 		; -- Validate Animations -- ;
 		; ------------------------- ;
 
-		; custom animations
-		i = CustomAnimations.Length
-		if i
-			bool[] Valid = Utility.CreateBoolArray(i)
-			while i
-				i -= 1
-				Valid[i] = CustomAnimations[i] && CustomAnimations[i].PositionCount == ActorCount && (!HasCreature || (CustomAnimations[i].HasRace(CreatureRef) && CustomAnimations[i].Creatures == Creatures))
-			endWhile
-			; Check results
-			if Valid.Find(true) == -1
-				Log("Invalid custom animation list")
-				CustomAnimations = sslUtility.AnimationArray(0) ; No valid animations
-			elseIf Valid.Find(false) >= 0
-				; Filter output
-				i = CustomAnimations.Length
-				int n = PapyrusUtil.CountBool(Valid, true)
-				sslBaseAnimation[] Output = sslUtility.AnimationArray(n)
-				while i && n
-					i -= 1
-					if Valid[i]
-						n -= 1
-						Output[n] = CustomAnimations[i]
-					else
-						Log("Invalid custom animation added - "+CustomAnimations[i])
-					endIf
-				endWhile
-				CustomAnimations = Output
-			endIf
-		endIf
+		; Define common tags
+		string[] CommonTag = new String[7]
+		CommonTag[0] = "Aggressive"
+		CommonTag[1] = "Oral"
+		CommonTag[2] = "Anal"
+		CommonTag[3] = "Vaginal"
+		CommonTag[4] = "Pussy"
+		CommonTag[5] = "Cunnilingus"
+		CommonTag[6] = "Furniture"
+
 		; primary animations
 		i = PrimaryAnimations.Length
 		if i
+			; Add the most commond tags to the thread to check for it on the animation list
+			int tagid = 0
+			while tagid < CommonTag.length
+				AddTag(CommonTag[tagid])
+				tagid += 1
+			endWhile
+			;validate animations
 			bool[] Valid = Utility.CreateBoolArray(i)
 			while i
 				i -= 1
 				Valid[i] = PrimaryAnimations[i] && PrimaryAnimations[i].PositionCount == ActorCount && (!HasCreature || (PrimaryAnimations[i].HasRace(CreatureRef) && PrimaryAnimations[i].Creatures == Creatures))
+				; update the thread tags
+				if Valid[i]
+					tagid = 0
+					while tagid < CommonTag.length
+						if HasTag(CommonTag[tagid]) && !PrimaryAnimations[i].HasTag(CommonTag[tagid])
+							RemoveTag(CommonTag[tagid])
+						endIf
+						tagid += 1
+					endWhile
+				endIf
 			endWhile
 			; Check results
 			if Valid.Find(true) == -1
@@ -450,6 +451,62 @@ state Making
 				PrimaryAnimations = Output
 			endIf
 		endIf
+		; custom animations
+		i = CustomAnimations.Length
+		if i
+			; Add the most commond tags to the thread to check for it on the animation list
+			int tagid = 0
+			while tagid < CommonTag.length
+				AddTag(CommonTag[tagid])
+				tagid += 1
+			endWhile
+			;validate animations
+			bool[] Valid = Utility.CreateBoolArray(i)
+			while i
+				i -= 1
+				Valid[i] = CustomAnimations[i] && CustomAnimations[i].PositionCount == ActorCount && (!HasCreature || (CustomAnimations[i].HasRace(CreatureRef) && CustomAnimations[i].Creatures == Creatures))
+				; update the thread tags
+				if Valid[i]
+					tagid = 0
+					while tagid < CommonTag.length
+						if HasTag(CommonTag[tagid]) && !PrimaryAnimations[i].HasTag(CommonTag[tagid])
+							RemoveTag(CommonTag[tagid])
+						endIf
+						tagid += 1
+					endWhile
+				endIf
+			endWhile
+			; Check results
+			if Valid.Find(true) == -1
+				Log("Invalid custom animation list")
+				CustomAnimations = sslUtility.AnimationArray(0) ; No valid animations
+			elseIf Valid.Find(false) >= 0
+				; Filter output
+				i = CustomAnimations.Length
+				int n = PapyrusUtil.CountBool(Valid, true)
+				sslBaseAnimation[] Output = sslUtility.AnimationArray(n)
+				while i && n
+					i -= 1
+					if Valid[i]
+						n -= 1
+						Output[n] = CustomAnimations[i]
+					else
+						Log("Invalid custom animation added - "+CustomAnimations[i])
+					endIf
+				endWhile
+				CustomAnimations = Output
+			endIf
+		endIf
+
+		; Check if LeadIn is allowed to prevent compatibility issues
+		if CustomAnimations.Length
+			NoLeadIn = true
+			if LeadIn
+				Log("WARNING: LeadIn detected on Forced Animations. Disabling LeadIn")
+				LeadIn = false
+			endIf
+		endIf
+		
 		; leadin animations
 		i = LeadAnimations.Length
 		if i && LeadIn
@@ -761,7 +818,7 @@ function ChangeActors(Actor[] NewPositions)
 	SendThreadEvent("ActorChangeStart")
 	UnregisterforUpdate()
 	ApplyFade()
-
+	
 	; Remove actors no longer present
 	int i = ActorCount
 	while i > 0
@@ -852,6 +909,7 @@ function ChangeActors(Actor[] NewPositions)
 					HasPlayer  = Positions.Find(PlayerRef) != -1
 					if FilterAnimations() < 0
 						Log("ChangeActors("+NewPositions+") -- Failed to revert the changes", "FATAL")
+						Stage   = Animation.StageCount
 						FastEnd = true
 						if HasPlayer
 							MiscUtil.SetFreeCameraState(false)
@@ -951,7 +1009,7 @@ function ChangeActors(Actor[] NewPositions)
 	; Reposition actors
 		RealignActors()
 	endIf
-	RegisterForSingleUpdate(0.1)
+;	RegisterForSingleUpdate(0.1)
 	SendThreadEvent("ActorChangeEnd")
 endFunction
 
@@ -1016,23 +1074,29 @@ int function FilterAnimations()
 		; Filter tags for Male Vaginal restrictions
 		if (!Config.UseCreatureGender && ActorCount == Males) || (Config.UseCreatureGender && ActorCount == (Males + MaleCreatures))
 			BasicFilters = AddString(BasicFilters, "Vaginal")
-		elseIf (HasTag("Vaginal") || HasTag("Pussy") || HasTag("Cunnilingus")) && Males >= 1 
-			Positions = ThreadLib.SortActorsByAnimation(Positions)
+		elseIf (HasTag("Vaginal") || HasTag("Pussy") || HasTag("Cunnilingus"))
+		;	if Males > 0 && !Config.UseStrapons
+		;		Positions = ThreadLib.SortActorsByAnimation(Positions)
+		;	endIf
+			if FemaleCreatures <= 0
+				Filters = AddString(Filters, "CreatureSub")
+			endIf
 		endIf
 
-		; Basic filter additions
-		if BasicFilters.Find("Breast") >= 0
-			Filters = AddString(Filters, "Boobjob")
-		endIf
 		if IsAggressive
-			if !(Females > 0 && ActorLib.GetGender(VictimRef) == 0)
-				Filters = AddString(Filters, "FemDom")
+			if Males > 0 && ActorLib.GetGender(VictimRef) == 1
+					Filters = AddString(Filters, "FemDom")
+			elseIf Creatures > 0 && !ActorLib.IsCreature(VictimRef) && Males <= 0 && (!Config.UseCreatureGender || (Males + MaleCreatures) <= 0)
+				Filters = AddString(Filters, "CreatureSub")
 			endIf
 		endIf
 		
 		; Filter tags for same sex restrictions
 		if ActorCount == 2 && Creatures == 0 && (Males == 0 || Females == 0) && Config.RestrictSameSex
 			BasicFilters = AddString(BasicFilters, SexLabUtil.StringIfElse(Females == 2, "FM", "Breast"))
+		endIf
+		if BasicFilters.Find("Breast") >= 0
+			Filters = AddString(Filters, "Boobjob")
 		endIf
 
 		;Remove filtered basic tags from primary
@@ -1256,7 +1320,7 @@ float function GetStageTimer(int maxstage)
 	int last = ( Timers.Length - 1 )
 	if stage == maxstage
 		return Timers[last]
-	elseif stage < last
+	elseIf stage < last
 		return Timers[(stage - 1)]
 	endIf
 	return Timers[(last - 1)]
@@ -1485,7 +1549,7 @@ bool function CheckTags(string[] CheckTags, bool RequireAll = true, bool Suppres
 			bool Check = Tags.Find(CheckTags[i]) != -1
 			if (Suppress && Check) || (!Suppress && RequireAll && !Check)
 				return false ; Stop if we need all and don't have it, or are supressing the found tag
-			elseif !Suppress && !RequireAll && Check
+			elseIf !Suppress && !RequireAll && Check
 				return true ; Stop if we don't need all and have one
 			endIf
 		endIf
@@ -1690,7 +1754,7 @@ function SyncEventDone(int id)
 	while SyncLock
 		Log("SyncLock("+id+")")
 		Utility.WaitMenuMode(0.01)
-	endwhile
+	endWhile
 	SyncLock = true
 	float TimeNow = Utility.GetCurrentRealTime()
 	if AliasTimer[id] != 0.0 || AliasTimer[id] < TimeNow

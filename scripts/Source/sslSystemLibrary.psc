@@ -47,7 +47,7 @@ function LoadLibs(bool Forced = false)
 		endIf
 	endIf
 	; Sync data
-	if Forced || !PlayerRef
+	if Forced || !PlayerRef || PlayerRef == none
 		PlayerRef = Game.GetPlayer()
 	endIf
 	; Watch for SexLabDebugMode event

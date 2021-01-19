@@ -107,7 +107,7 @@ event OnPageReset(string page)
 
 	; Logo Splash
 	elseif page == ""
-		if !PreventOverwrite && PlayerRef.IsInFaction(Config.AnimatingFaction) && ThreadSlots.FindActorController(PlayerRef) != -1
+		if !PreventOverwrite && PlayerRef.IsInFaction(Config.AnimatingFaction) && (Config.GetThreadControlled() != none || ThreadSlots.FindActorController(PlayerRef) != -1)
 			UnloadCustomContent()
 			AnimationEditor()
 			PreventOverwrite = true
@@ -204,8 +204,12 @@ event OnConfigOpen()
 	PlayerName = PlayerRef.GetLeveledActorBase().GetName()
 
 	; Target actor
-	StatRef = PlayerRef
 	TargetRef = Config.TargetRef
+	if TargetRef
+		StatRef = TargetRef
+	else
+		StatRef = PlayerRef
+	endIf
 	EmptyStatToggle = false
 	if TargetRef && TargetRef.Is3DLoaded()
 		TargetName = TargetRef.GetLeveledActorBase().GetName()
@@ -395,7 +399,7 @@ event OnConfigOpen()
 		Biped[29] = "$SSL_ArmsRightArmOutergarnments"
 		Biped[30] = "$SSL_MiscSlot60"
 		Biped[31] = "$SSL_MiscSlot61"
-		Biped[32] = "$SSL_Weapons"		
+		Biped[32] = "$SSL_Weapons"
 	endIf
 
 	; Strip Editor
@@ -407,6 +411,10 @@ endEvent
 
 event OnConfigClose()
 	ModEvent.Send(ModEvent.Create("SexLabConfigClose"))
+	; Clear Player Partners array
+	if PlayerPartners
+		PlayerPartners = PapyrusUtil.ActorArray(0)
+	endIf
 	; Clear animation tag cache
 	if AnimationSlots
 		AnimationSlots.ClearTagCache()
@@ -471,14 +479,18 @@ event OnHighlightST()
 
 	; Timers & Stripping - Stripping
 	elseIf Options[0] == "Stripping"
-		string InfoText = PlayerRef.GetLeveledActorBase().GetName()+" Slot "+((Options[2] as int) + 30)+": "
-		InfoText += GetItemName(PlayerRef.GetWornForm(Armor.GetMaskForSlot((Options[2] as int) + 30)))
-		if TargetRef
-			InfoText += "\n"+TargetRef.GetLeveledActorBase().GetName()+" Slot "+((Options[2] as int) + 30)+": "
-			InfoText += GetItemName(TargetRef.GetWornForm(Armor.GetMaskForSlot((Options[2] as int) + 30)))
+		if Options[2] as int < 32
+			string InfoText = PlayerRef.GetLeveledActorBase().GetName()+" Slot "+((Options[2] as int) + 30)+": "
+			InfoText += GetItemName(PlayerRef.GetWornForm(Armor.GetMaskForSlot((Options[2] as int) + 30)))
+			if TargetRef
+				InfoText += "\n"+TargetRef.GetLeveledActorBase().GetName()+" Slot "+((Options[2] as int) + 30)+": "
+				InfoText += GetItemName(TargetRef.GetWornForm(Armor.GetMaskForSlot((Options[2] as int) + 30)))
+			endIf
+			SetInfoText(InfoText)
+		else
+			SetInfoText("")
 		endIf
-		SetInfoText(InfoText)
-		
+
 	; Strip Editor
 	elseIf Options[0] == "StripEditor"
 		Form ItemRef
@@ -698,7 +710,7 @@ event OnSelectST()
 			Animation = Slot
 			AdjustKey = "Global"
 			PreventOverwrite = true
-			AnimationEditor()
+		;	AnimationEditor()
 		else
 			; if ta == 3
 			; 	; Slot = CreatureSlots.GetBySlot(Options[1] as int)
@@ -709,18 +721,44 @@ event OnSelectST()
 			; Toggle action
 			if ta == 1
 				Slot.ToggleTag("LeadIn")
+				; Invalite all cache so it can now include this one
+				if Slot.IsCreature
+					CreatureSlots.ClearAnimCache()
+				else
+					AnimationSlots.ClearAnimCache()
+				endIf
 			elseIf ta == 2
 				Slot.ToggleTag("Aggressive")
+				; Invalite all cache so it can now include this one
+				if Slot.IsCreature
+					CreatureSlots.ClearAnimCache()
+				else
+					AnimationSlots.ClearAnimCache()
+				endIf
 			elseIf EditTags
 				Slot.ToggleTag(TagFilter)
+				; Invalite all cache so it can now include this one
+				if Slot.IsCreature
+					CreatureSlots.ClearAnimCache()
+				else
+					AnimationSlots.ClearAnimCache()
+				endIf
 			else
 				Slot.Enabled = !Slot.Enabled
 				if Slot.Enabled
 					; Invalite all cache so it can now include this one
-					AnimationSlots.ClearAnimCache()
+					if Slot.IsCreature
+						CreatureSlots.ClearAnimCache()
+					else
+						AnimationSlots.ClearAnimCache()
+					endIf
 				else
 					; Invalidate cache containing animation
-					AnimationSlots.InvalidateByAnimation(Slot)
+					if Slot.IsCreature
+						CreatureSlots.InvalidateByAnimation(Slot)
+					else
+						AnimationSlots.InvalidateByAnimation(Slot)
+					endIf
 				endIf
 			endIf
 
@@ -803,13 +841,14 @@ function SystemCheckOptions()
 	AddTextOption("Skyrim Script Extender (2.0.9)", StringIfElse(Config.CheckSystemPart("SKSE"), "<font color='#00FF00'>ok</font>", "<font color='#FF0000'>X</font>"), OPTION_FLAG_DISABLED)
 	AddTextOption("SexLabUtil.dll SKSE Plugin  (1.6+)", StringIfElse(Config.CheckSystemPart("SexLabUtil"), "<font color='#00FF00'>ok</font>", "<font color='#FF0000'>X</font>"), OPTION_FLAG_DISABLED)
 	AddTextOption("PapyrusUtil.dll SKSE Plugin  (3.6+)", StringIfElse(Config.CheckSystemPart("PapyrusUtil"), "<font color='#00FF00'>ok</font>", "<font color='#FF0000'>X</font>"), OPTION_FLAG_DISABLED)
+	AddTextOption("SKEE64.dll SKSE Plugin  (3.4+)", StringIfElse(Config.CheckSystemPart("NiOverride"), "<font color='#00FF00'>ok</font>", "<font color='#0000FF'>?</font>"), OPTION_FLAG_DISABLED)
 	AddTextOption("FNIS - Fores New Idles in Skyrim (7.0+)", StringIfElse(Config.CheckSystemPart("FNIS"), "<font color='#00FF00'>ok</font>", "<font color='#FF0000'>X</font>"), OPTION_FLAG_DISABLED)
 	AddTextOption("FNIS For Users Behaviors Generated", StringIfElse(Config.CheckSystemPart("FNISGenerated"), "<font color='#00FF00'>ok</font>", "<font color='#0000FF'>?</font>"), OPTION_FLAG_DISABLED)
 	AddTextOption("FNIS SexLab Framework Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabFramework"), "<font color='#00FF00'>ok</font>", "<font color='#0000FF'>?</font>"), OPTION_FLAG_DISABLED)
 	AddTextOption("FNIS Creature Pack (7.0+)", StringIfElse(Config.CheckSystemPart("FNISCreaturePack"), "<font color='#00FF00'>ok</font>", "<font color='#0000FF'>?</font>"), OPTION_FLAG_DISABLED)
 	AddTextOption("FNIS SexLab Creature Idles", StringIfElse(Config.CheckSystemPart("FNISSexLabCreature"), "<font color='#00FF00'>ok</font>", "<font color='#0000FF'>?</font>"), OPTION_FLAG_DISABLED)
 	; Show soft error warning if relevant
-	if !Config.CheckSystemPart("FNISGenerated") || !Config.CheckSystemPart("FNISSexLabFramework") || !Config.CheckSystemPart("FNISCreaturePack") || !Config.CheckSystemPart("FNISSexLabCreature")
+	if !Config.CheckSystemPart("NiOverride") || !Config.CheckSystemPart("FNISGenerated") || !Config.CheckSystemPart("FNISSexLabFramework") || !Config.CheckSystemPart("FNISCreaturePack") || !Config.CheckSystemPart("FNISSexLabCreature")
 		AddTextOptionST("FNISWarning", "INFO: On '?' Warning", "README")
 		SetInfoText("Important FNIS Check:\nIf you're getting a '?' on any checks try scrolling in and out of 3rd person mode then checking again while still in 3rd. These '?' are just soft warnings and can usually be ignored safely.\nIf scrolling in and out doesn't work and characters stand frozen in place during animation than these are the most likely causes. Fix your FNIS install.")
 	endIf
@@ -1340,7 +1379,6 @@ bool AutoRealign
 string AdjustKey
 int Position
 int AnimEditPage
-int FurnitureType
 float[] AnimOffsets ; = forward, side, up, rotate
 
 function AnimationEditor()
@@ -1348,26 +1386,19 @@ function AnimationEditor()
 
 	; Auto select players animation if they are animating right now
 	if !PreventOverwrite 
-		if PlayerRef.IsInFaction(Config.AnimatingFaction) && ThreadSlots.FindActorController(PlayerRef) != -1
-			sslThreadController Thread = ThreadSlots.GetActorController(PlayerRef)
-			if Thread.GetState() == "Animating"
-				PreventOverwrite = true
-				Position  = Thread.GetAdjustPos()
-				Animation = Thread.Animation
-				ControlledAnimation = Thread.Animation
-				FurnitureType = Thread.FurnitureTypeID
-				AdjustKey = Thread.AdjustKey
-			endIf
-		elseIf TargetRef && TargetRef != none && TargetRef.IsInFaction(Config.AnimatingFaction) && ThreadSlots.FindActorController(TargetRef) != -1
-			sslThreadController Thread = ThreadSlots.GetActorController(TargetRef)
-			if Thread.GetState() == "Animating"
-				PreventOverwrite = true
-				Position  = Thread.GetAdjustPos()
-				Animation = Thread.Animation
-				ControlledAnimation = Thread.Animation
-				FurnitureType = Thread.FurnitureTypeID
-				AdjustKey = Thread.AdjustKey
-			endIf
+		sslThreadController Thread = Config.GetThreadControlled()
+		if (!Thread || Thread.GetState() != "Animating") && TargetRef && TargetRef != none && TargetRef.IsInFaction(Config.AnimatingFaction)
+			Thread = ThreadSlots.GetActorController(TargetRef)
+		endIf
+		if (!Thread || Thread.GetState() != "Animating") && PlayerRef.IsInFaction(Config.AnimatingFaction)
+			Thread = ThreadSlots.GetActorController(PlayerRef)
+		endIf
+		if Thread && Thread != none && Thread.GetState() == "Animating"
+			PreventOverwrite = true
+			Position  = Thread.GetAdjustPos()
+			Animation = Thread.Animation
+			ControlledAnimation = Thread.Animation
+			AdjustKey = Thread.AdjustKey
 		endIf
 	endIf
 
@@ -1404,13 +1435,8 @@ function AnimationEditor()
 	AddMenuOptionST("AnimationAdjustKey", "$SSL_AdjustmentProfile", AdjustKey)
 	if AdjustKey == "Animation"
 		string Type = "Bed"
-		if (ControlledAnimation == Animation && FurnitureType >= 4) || Animation.HasTag("Furniture")
-			Type = "Furniture"
-			AnimOffsets = Animation.GetFurnitureOffsets()
-		else
-			Type = "Bed"
-			AnimOffsets = Animation.GetBedOffsets()
-		endIf
+		Type = "Bed"
+		AnimOffsets = Animation.GetBedOffsets()
 		if Animation.PositionCount == 1 || (TargetRef && Animation.PositionCount == 2 && (!IsCreatureEditor || (IsCreatureEditor && Animation.HasActorRace(TargetRef))))
 			AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere")
 		else
@@ -1434,26 +1460,26 @@ function AnimationEditor()
 		else
 			AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere", OPTION_FLAG_DISABLED)
 		endIf
+
 		string Profile
-		if AdjustKey != "Global"
+		if AdjustKey && AdjustKey != "Global"
 			string[] RaceIDs = StringSplit(AdjustKey, ".")
-			string id = StringUtil.Substring(RaceIDs[Position], 0, (StringUtil.GetLength(RaceIDs[Position]) - 1))
+			string id = RaceIDs[Position]
 			Race RaceRef = Race.GetRace(id)
-			string Gender = StringUtil.GetNthChar(RaceIDs[Position], (StringUtil.GetLength(RaceIDs[Position]) - 1))
-			int i = 2
-			while i < 6 && !RaceRef && id != "Humanoid"
-				id = StringUtil.Substring(RaceIDs[Position], 0, (StringUtil.GetLength(RaceIDs[Position]) - i))
-				RaceRef = Race.GetRace(id)
-				if id == "Humanoid" || sslCreatureAnimationSlots.HasRaceKey(id)
-					Gender = StringUtil.GetNthChar(RaceIDs[Position], (StringUtil.GetLength(RaceIDs[Position]) - i))
-				endIf
-				if RaceRef
-					id = RaceRef.GetName()
-					Gender = StringUtil.GetNthChar(RaceIDs[Position], (StringUtil.GetLength(RaceIDs[Position]) - i))
-				endIf
-				i += 1
-			endWhile
-			if Gender && (Gender != "M") && (Gender != "F")
+			string Gender = ""
+			if !(RaceRef || id == "Humanoid" || sslCreatureAnimationSlots.HasRaceKey(id))
+				int i = 0
+				while i < 6
+					i += 1
+					id = StringUtil.Substring(RaceIDs[Position], 0, (StringUtil.GetLength(RaceIDs[Position]) - i))
+					RaceRef = Race.GetRace(id)
+					if RaceRef || id == "Humanoid" || sslCreatureAnimationSlots.HasRaceKey(id)
+						Gender = StringUtil.GetNthChar(RaceIDs[Position], (StringUtil.GetLength(RaceIDs[Position]) - i))
+						i = 6
+					endIf
+				endWhile
+			endIf
+			if Gender && (Gender != "M") && (Gender != "F") && (Gender != "C")
 				Gender = ""
 			endIf
 			if RaceRef
@@ -1504,9 +1530,20 @@ state AnimationEnabled
 	event OnSelectST()
 		Animation.Enabled = !Animation.Enabled
 		SetToggleOptionValueST(Animation.Enabled)
+		if Animation.IsCreature
+			CreatureSlots.ClearAnimCache()
+		else
+			AnimationSlots.ClearAnimCache()
+		endIf
 	endEvent
 	event OnDefaultST()
 		Animation.Enabled = true
+		SetToggleOptionValueST(Animation.Enabled)
+		if Animation.IsCreature
+			CreatureSlots.ClearAnimCache()
+		else
+			AnimationSlots.ClearAnimCache()
+		endIf
 	endEvent
 endState
 
@@ -2341,6 +2378,7 @@ state ExpressionEnabled
 	endEvent
 	event OnDefaultST()
 		Expression.Enabled = Expression.HasTag("Normal") && Expression.HasTag("Victim") && Expression.HasTag("Aggressor")
+		SetToggleOptionValueST(Expression.Enabled)
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoExpressionEnabled")
@@ -2473,7 +2511,7 @@ endState
 ; ------------------------------------------------------- ;
 
 Actor StatRef
-
+Actor[] PlayerPartners
 function SexDiary()
 	SetCursorFillMode(TOP_TO_BOTTOM)
 
@@ -2495,11 +2533,13 @@ function SexDiary()
 
 	Actor ActorRef
 	if StatRef == PlayerRef
-		Actor[] Partners = Stats.MostUsedPlayerSexPartners(3)
+		if !PlayerPartners || PlayerPartners.Length < 1
+			PlayerPartners = Stats.MostUsedPlayerSexPartners(3)
+		endIf
 		int i = 0
-		while i < Partners.Length
-			if Partners[i] != none
-				AddTextOption("$SSL_MostActivePartner", Partners[i].GetLeveledActorBase().GetName()+" ("+Stats.PlayerSexCount(Partners[i])+")")
+		while i < PlayerPartners.Length
+			if PlayerPartners[i] != none
+				AddTextOption("$SSL_MostActivePartner", PlayerPartners[i].GetLeveledActorBase().GetName()+" ("+Stats.PlayerSexCount(PlayerPartners[i])+")")
 			endIf
 			i += 1
 		endWhile
@@ -2541,6 +2581,8 @@ function SexDiary()
 			i -= 1
 			AddTextOption(Stats.GetNthStat(i), Stats.GetStatFull(StatRef, Stats.GetNthStat(i)))
 		endWhile
+	else
+		AddTextOption("$SSL_TimesWithPlayer", Stats.PlayerSexCount(StatRef))
 	endIf
 endFunction
 
@@ -2946,7 +2988,7 @@ function RebuildClean()
 	AddHeaderOption("Registry Info")
 
 
-	if AnimSlots.GetDisabledCount() > 0
+	if AnimSlots.GetDisabledCount() > 0 || CreatureSlots.GetDisabledCount() > 0
 		AddTextOptionST("NeverRegisterDisabled","$SSL_NeverRegisterDisabled", "$SSL_ClickHere")
 	else
 		AddTextOptionST("NeverRegisterDisabled","$SSL_NeverRegisterDisabled", "--", OPTION_FLAG_DISABLED)
@@ -3231,10 +3273,12 @@ state OrgasmEffects
 	event OnSelectST()
 		Config.OrgasmEffects = !Config.OrgasmEffects
 		SetToggleOptionValueST(Config.OrgasmEffects)
+		ForcePageReset()
 	endEvent
 	event OnDefaultST()
 		Config.OrgasmEffects = true
 		SetToggleOptionValueST(Config.OrgasmEffects)
+		ForcePageReset()
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoOrgasmEffects")
@@ -3290,9 +3334,13 @@ endState
 state UseCreatureGender
 	event OnSelectST()
 		Config.UseCreatureGender = !Config.UseCreatureGender
+		CreatureSlots.ClearAnimCache()
 		SetToggleOptionValueST(Config.UseCreatureGender)
 	endEvent
 	event OnDefaultST()
+		if Config.UseCreatureGender
+			CreatureSlots.ClearAnimCache()
+		endIf
 		Config.UseCreatureGender = false
 		SetToggleOptionValueST(Config.UseCreatureGender)
 	endEvent
@@ -3343,10 +3391,12 @@ state ForeplayStage
 	event OnSelectST()
 		Config.ForeplayStage = !Config.ForeplayStage
 		SetToggleOptionValueST(Config.ForeplayStage)
+		ForcePageReset()
 	endEvent
 	event OnDefaultST()
 		Config.ForeplayStage = true
 		SetToggleOptionValueST(Config.ForeplayStage)
+		ForcePageReset()
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoForeplayStage")

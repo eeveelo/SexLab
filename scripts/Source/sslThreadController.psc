@@ -77,7 +77,13 @@ state Prepare
 				CenterLocation[5] = CenterRef.GetAngleZ()
 			endIf /;
 			; Set starting adjusted actor
-			AdjustPos   = (ActorCount > 1) as int
+			AdjustPos   = FindSlot(Config.TargetRef)
+			if AdjustPos == -1
+				AdjustPos   = (ActorCount > 1) as int
+				if FindSlot(PlayerRef) >= 0 && Positions[AdjustPos] != PlayerRef
+					Config.TargetRef = Positions[AdjustPos]
+				endIf
+			endIf
 			AdjustAlias = PositionAlias(AdjustPos)
 			; Get localized config options
 			BaseDelay = Config.SFXDelay
@@ -251,7 +257,7 @@ state Animating
 		Actor AdjustActor = Positions[AdjustPos]
 		Actor MovedActor  = Positions[NewPos]
 		if MovedActor == AdjustActor
-			Log("MovedActor["+NewPos+"] == AdjustActor["+AdjustPos+"] -- "+Positions, "ChangePositions() Errror")
+			Log("MovedActor["+NewPos+"] == AdjustActor["+AdjustPos+"] -- "+Positions, "ChangePositions() Error")
 			RegisterForSingleUpdate(0.2)
 			return
 		endIf
@@ -378,6 +384,9 @@ state Animating
 			AdjustPos = sslUtility.IndexTravel(Positions.Find(AdjustAlias.ActorRef), ActorCount, backwards)
 			AdjustAlias = ActorAlias(Positions[AdjustPos])
 			Actor AdjustActor = AdjustAlias.ActorRef
+			if AdjustActor != PlayerRef
+				Config.TargetRef = AdjustActor
+			endIf
 			Config.SelectedSpell.Cast(AdjustActor, AdjustActor)
 			PlayHotkeyFX(0, !backwards)
 			string msg = "Adjusting Position For: "+AdjustActor.GetLeveledActorBase().GetName()
@@ -419,11 +428,11 @@ state Animating
 			SetFurnitureIgnored(false)
 		endIf
 		; Enable Controls
-		sslActorAlias Slot = ActorAlias(PlayerRef)
+		sslActorAlias PlayerSlot = ActorAlias(PlayerRef)
 		if Config.GetThreadControlled() == self || PlayerRef.IsInFaction(Config.AnimatingFaction) && PlayerRef.GetFactionRank(Config.AnimatingFaction) != 0
-			if Slot && Slot != none
-				Slot.UnlockActor()
-				Slot.StopAnimating(true)
+			if PlayerSlot && PlayerSlot != none
+				PlayerSlot.UnlockActor()
+				PlayerSlot.StopAnimating(true)
 				PlayerRef.StopTranslation()
 			else
 				Config.DisableThreadControl(self)
@@ -434,7 +443,7 @@ state Animating
 			int i
 			while i < ActorCount
 				sslActorAlias ActorSlot = ActorAlias[i]
-				if ActorSlot != none && ActorSlot != Slot
+				if ActorSlot != none && ActorSlot != PlayerSlot
 					ActorSlot.UnlockActor()
 					ActorSlot.StopAnimating(true)
 					ActorSlot.ActorRef.SetFactionRank(Config.AnimatingFaction, 2)
@@ -465,18 +474,18 @@ state Animating
 			Debug.Notification("Player movement locked - repositioning scene...")
 			ApplyFade()
 			if PlayerRef.GetFurnitureReference() == none
-				Debug.SendAnimationEvent(PlayerRef, "IdleForceDefaultState") ; Seems like the CenterRef don't change if PlayerRef is running
+				PlayerSlot.SendDefaultAnimEvent() ; Seems like the CenterRef don't change if PlayerRef is running
 			endIf
 			; Disable Controls
-			if Slot != none
-				Slot.LockActor()
+			if PlayerSlot != none
+				PlayerSlot.LockActor()
 			else
 				Config.GetThreadControl(self)
 			endIf
 			int i
 			while i < ActorCount
 				sslActorAlias ActorSlot = ActorAlias[i]
-				if ActorSlot != none && ActorSlot != Slot
+				if ActorSlot != none && ActorSlot != PlayerSlot
 					ActorSlot.LockActor()
 				endIf
 				i += 1
@@ -642,6 +651,18 @@ function SetAnimation(int aid = -1)
 	; Set active animation
 	Animation = Animations[aid]
 	; Sort actors positions if needed
+	int VictimPos = Positions.Find(VictimRef)
+	if IsAggressive && ActorCount > 1 && VictimPos >= 0
+		if Animation.HasTag("FemDom") && VictimPos == 0
+			; Shuffle actor positions
+			Positions[VictimPos] = Positions[1]
+			Positions[1] = VictimRef
+		elseIf !Animation.HasTag("FemDom") && VictimPos != 0
+			; Shuffle actor positions
+			Positions[VictimPos] = Positions[0]
+			Positions[0] = VictimRef
+		endIf
+	endIf
 	Positions = ThreadLib.SortActorsByAnimation(Positions, Animation)
 	UpdateAdjustKey()
 	int i = ActorCount
