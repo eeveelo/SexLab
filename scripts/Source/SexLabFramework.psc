@@ -289,7 +289,7 @@ endFunction
 * * @return: True if the actor is being animated by SexLab, and False if it is not.
 */;
 bool function IsActorActive(Actor ActorRef)
-	return ActorRef.IsInFaction(Config.AnimatingFaction) || ThreadSlots.FindActorController(ActorRef) != -1
+	return ActorRef.IsInFaction(Config.AnimatingFaction)
 endFunction
 
 ;/* ForbidActor
