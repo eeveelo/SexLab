@@ -166,6 +166,7 @@ bool property RestrictAggressive auto hidden
 bool property AllowCreatures auto hidden
 bool property NPCSaveVoice auto hidden
 bool property UseStrapons auto hidden
+bool property RestrictStrapons auto hidden
 bool property RedressVictim auto hidden
 bool property RagdollEnd auto hidden
 bool property UseMaleNudeSuit auto hidden
@@ -828,8 +829,17 @@ function Reload()
 	; - SOS/SAM Schlongs (currently unused)
 	HasSchlongs = Game.GetModByName("Schlongs of Skyrim - Core.esm") != 255 || Game.GetModByName("SAM - Shape Atlas for Men.esp") != 255
 
+	if !FadeToBlackHoldImod || FadeToBlackHoldImod == none
+		FadeToBlackHoldImod = Game.GetFormFromFile(0xF756E, "Skyrim.esm") as ImageSpaceModifier ;0xF756D **0xF756E 0x10100C** 0xF756F 0xFDC57 0xFDC58 0x 0x 0x
+	endIf
+	if !FadeToBlurHoldImod || FadeToBlurHoldImod == none
+		FadeToBlurHoldImod = Game.GetFormFromFile(0x44F3B, "Skyrim.esm") as ImageSpaceModifier ;0x201D3 0x44F3B **0xFD809 0x1037E2 0x1037E3 0x1037E4 0x1037E5 0x1037E6** 0x
+	endIf
 	if !ForceBlackVFX || ForceBlackVFX == none
-;		ForceBlackVFX = Game.GetFormFromFile(0x82B, "SexLab.esm") as VisualEffect
+		ForceBlackVFX = Game.GetFormFromFile(0x8FC39, "SexLab.esm") as VisualEffect ;0x44F3A 
+	endIf
+	if !ForceBlurVFX || ForceBlurVFX == none
+		ForceBlurVFX = Game.GetFormFromFile(0x8FC3A, "SexLab.esm") as VisualEffect ;0x101967
 	endIf
 
 	; - MFG Fix check
@@ -990,6 +1000,7 @@ function SetDefaults()
 	; AllowCreatures     = false
 	NPCSaveVoice       = false
 	UseStrapons        = true
+	RestrictStrapons   = false
 	RedressVictim      = true
 	RagdollEnd         = false
 	UseMaleNudeSuit    = false
@@ -1212,6 +1223,7 @@ function ExportSettings()
 	ExportBool("AllowCreatures", AllowCreatures)
 	ExportBool("NPCSaveVoice", NPCSaveVoice)
 	ExportBool("UseStrapons", UseStrapons)
+	ExportBool("RestrictStrapons", RestrictStrapons)
 	ExportBool("RedressVictim", RedressVictim)
 	ExportBool("RagdollEnd", RagdollEnd)
 	ExportBool("UseMaleNudeSuit", UseMaleNudeSuit)
@@ -1343,6 +1355,7 @@ function ImportSettings()
 	AllowCreatures     = ImportBool("AllowCreatures", AllowCreatures)
 	NPCSaveVoice       = ImportBool("NPCSaveVoice", NPCSaveVoice)
 	UseStrapons        = ImportBool("UseStrapons", UseStrapons)
+	RestrictStrapons   = ImportBool("RestrictStrapons", RestrictStrapons)
 	RedressVictim      = ImportBool("RedressVictim", RedressVictim)
 	RagdollEnd         = ImportBool("RagdollEnd", RagdollEnd)
 	UseMaleNudeSuit    = ImportBool("UseMaleNudeSuit", UseMaleNudeSuit)
@@ -1633,7 +1646,9 @@ function StoreActor(Form FormRef) global
 endFunction
 
 ImageSpaceModifier FadeEffect
+VisualEffect ForceVFX
 VisualEffect ForceBlackVFX
+VisualEffect ForceBlurVFX
 ImageSpaceModifier FadeToBlackHoldImod
 ImageSpaceModifier FadeToBlurHoldImod
 function RemoveFade(bool forceTest = false)
@@ -1650,8 +1665,8 @@ function RemoveFade(bool forceTest = false)
 				endIf
 				FadeEffect.Remove()
 			else
-				if Black && ForceBlackVFX
-					ForceBlackVFX.Stop(PlayerRef)
+				if ForceVFX
+					ForceVFX.Stop(PlayerRef)
 				endIf
 				ImageSpaceModifier.RemoveCrossFade()
 			endIf
@@ -1672,17 +1687,11 @@ function ApplyFade(bool forceTest = false)
 	FadeEffect = none
 	bool Black
 	if UseFade % 2 != 0
-		if !FadeToBlackHoldImod || FadeToBlackHoldImod == none
-			FadeToBlackHoldImod = Game.GetFormFromFile(0xF756E, "Skyrim.esm") as ImageSpaceModifier ;0xF756D **0xF756E 0x10100C** 0xF756F 0xFDC57 0xFDC58 0x 0x 0x
-		endIf
 		if FadeToBlackHoldImod && FadeToBlackHoldImod != none
 			FadeEffect = FadeToBlackHoldImod
 			Black = True
 		endIf
 	else
-		if !FadeToBlurHoldImod || FadeToBlurHoldImod == none
-			FadeToBlurHoldImod = Game.GetFormFromFile(0x44F3B, "Skyrim.esm") as ImageSpaceModifier ;0x201D3 0x44F3B **0xFD809 0x1037E2 0x1037E3 0x1037E4 0x1037E5 0x1037E6** 0x
-		endIf
 		if FadeToBlurHoldImod && FadeToBlurHoldImod != none
 			FadeEffect = FadeToBlurHoldImod
 			Black = False
@@ -1696,7 +1705,12 @@ function ApplyFade(bool forceTest = false)
 				FadeEffect.ApplyCrossFade()
 			endIf
 			if Black && ForceBlackVFX
-				ForceBlackVFX.Play(PlayerRef)
+				ForceVFX = ForceBlackVFX
+			elseIf !Black && ForceBlurVFX
+				ForceVFX = ForceBlurVFX
+			endIf
+			if ForceVFX
+				ForceVFX.Play(PlayerRef)
 			endIf
 		else
 			Game.FadeOutGame(true, Black, 0.5, 3.0)

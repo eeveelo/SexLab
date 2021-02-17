@@ -1105,6 +1105,9 @@ int function FilterAnimations()
 		if ActorCount == 2 && Creatures == 0 && (Males == 0 || Females == 0) && Config.RestrictSameSex
 			BasicFilters = AddString(BasicFilters, SexLabUtil.StringIfElse(Females == 2, "FM", "Breast"))
 		endIf
+		if Config.UseStrapons && Config.RestrictStrapons && (ActorCount - Creatures) == Females && Females > 0
+			Filters = AddString(Filters, "Straight")
+		endIf
 		if BasicFilters.Find("Breast") >= 0
 			Filters = AddString(Filters, "Boobjob")
 		endIf
