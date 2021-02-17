@@ -115,6 +115,7 @@ endProperty
 
 bool function SetActor(Actor ProspectRef)
 	if !ProspectRef || ProspectRef != GetReference()
+		Log("ERROR: SetActor("+ProspectRef+") on State:'Ready' is not allowed")
 		return false ; Failed to set prospective actor into alias
 	endIf
 	; Init actor alias information
@@ -271,6 +272,7 @@ function ClearAlias()
 		IsPlayer   = ActorRef == PlayerRef
 		Log("Actor present during alias clear! This is usually harmless as the alias and actor will correct itself, but is usually a sign that a thread did not close cleanly.", "ClearAlias("+ActorRef+" / "+self+")")
 		; Reset actor back to default
+		ClearEvents()
 		ClearEffects()
 		StopAnimating(true)
 		UnlockActor()
@@ -336,6 +338,7 @@ state Ready
 	endEvent
 
 	bool function SetActor(Actor ProspectRef)
+		Log("ERROR: SetActor("+ActorRef.GetLeveledActorBase().GetName()+") on State:'Ready' is not allowed")
 		return false
 	endFunction
 
@@ -381,7 +384,6 @@ state Ready
 			AnimScale = 1.0
 			LogInfo = "Scales["+ActorRef.GetScale()+"/DISABLED/DISABLED/DISABLED/DISABLED/"+NioScale+"] "
 		endIf
-		Thread.RemoveFade()
 		; Stop other movements
 		if DoPathToCenter
 			PathToCenter()
@@ -417,6 +419,16 @@ state Ready
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			AttachMarker()
 		endIf
+
+		; Player specific actions
+		if IsPlayer
+			Thread.RemoveFade()
+			FormList FrostExceptions = Config.FrostExceptions
+			if FrostExceptions
+				FrostExceptions.AddForm(Config.BaseMarker)
+			endIf
+		endIf
+
 		; Pick a voice if needed
 		if !Voice && !IsForcedSilent
 			if IsCreature
@@ -427,13 +439,6 @@ state Ready
 		endIf
 		if Voice
 			LogInfo += "Voice["+Voice.Name+"] "
-		endIf
-		; Player specific actions
-		if IsPlayer
-			FormList FrostExceptions = Config.FrostExceptions
-			if FrostExceptions
-				FrostExceptions.AddForm(Config.BaseMarker)
-			endIf
 		endIf
 		; Extras for non creatures
 		if !IsCreature
@@ -526,7 +531,10 @@ state Ready
 					ActorRef.EvaluatePackage()
 				endIf
 				ActorRef.SetLookAt(WaitRef, false)
-
+				if IsPlayer
+					Thread.RemoveFade()
+				endIf
+				
 				; Start wait loop for actor pathing.
 				int StuckCheck  = 0
 				float Failsafe  = Utility.GetCurrentRealTime() + 30.0
@@ -558,6 +566,8 @@ state Ready
 
 endState
 
+bool Prepared ; TODO: Find better Solution
+bool StartedUp ; TODO: Find better Solution
 state Prepare
 	event OnUpdate()
 		; Check if still among the living and able.
@@ -566,7 +576,9 @@ state Prepare
 			Thread.EndAnimation(true)
 		else
 			ClearEffects()
-			Thread.ApplyFade()
+			if IsPlayer
+				Thread.ApplyFade()
+			endIf
 			Offsets = new float[4]
 			GetPositionInfo()
 			; Starting position
@@ -579,7 +591,10 @@ state Prepare
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 			; Notify thread prep is done
 			if Thread.GetState() == "Prepare"
-				Thread.SyncEventDone(kPrepareActor)
+				if !Prepared
+					Prepared = True
+					Thread.SyncEventDone(kPrepareActor)
+				endIf
 			else
 				StartAnimating()
 			endIf
@@ -602,7 +617,7 @@ state Prepare
 	;	endIf
 		if ActorRef.GetActorValue("Paralysis") != 0.0
 			Debug.SendAnimationEvent(ActorRef, "Ragdoll")
-			Utility.WaitMenuMode(0.2)
+			Utility.Wait(0.1)
 			SendDefaultAnimEvent()
 			ActorRef.SetActorValue("Paralysis", 0.0)
 			Utility.WaitMenuMode(0.2)
@@ -615,7 +630,10 @@ state Prepare
 		endIf
 		; Start update loop
 		if Thread.GetState() == "Prepare"
-			Thread.SyncEventDone(kStartUp)
+			if !StartedUp
+				StartedUp = True
+				Thread.SyncEventDone(kStartUp)
+			endIf
 		else
 			SendAnimation()
 		endIf
@@ -623,12 +641,12 @@ state Prepare
 	endFunction
 	
 	event ResetActor()
-		Thread.ApplyFade()
 		ClearEvents()
 		GoToState("Resetting")
 		Log("Resetting!")
 		; Clear TFC
 		if IsPlayer
+			Thread.ApplyFade()
 			MiscUtil.SetFreeCameraState(false)
 		endIf
 		StopAnimating(true)
@@ -702,7 +720,7 @@ state Animating
 		; Reenter SA - On stage 1 while animation hasn't changed since last call
 		if Stage == 1 && (PlayingAE != CurrentAE || PlayingSA == CurrentSA)
 			SendDefaultAnimEvent()
-			Utility.WaitMenuMode(0.2)
+		;	Utility.WaitMenuMode(0.2)
 			Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
 			; Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1)+"_REENTER")
 		else
@@ -710,7 +728,7 @@ state Animating
 			if Stage != 1 && PlayingSA != CurrentSA
 				SendDefaultAnimEvent() ; To unequip the AnimObject TODO: Find better solution
 				Debug.SendAnimationEvent(ActorRef, Animation.FetchPositionStage(Position, 1))
-				Utility.WaitMenuMode(0.2)
+				Utility.Wait(0.2)
 				; Log("NEW SA - "+Animation.FetchPositionStage(Position, 1))
 			endIf
 			; Play the primary animation
@@ -747,7 +765,7 @@ state Animating
 					Voice.PlayMoan(ActorRef, Enjoyment, IsVictim, UseLipSync)
 				endIf
 				if Expressions && Expressions.Length > 0
-					if Config.RefreshExpressions
+					if Config.RefreshExpressions && !OpenMouth
 						Expression = Expressions[Utility.RandomInt(0, (Expressions.Length - 1))]
 						Log("Expression["+Expression.Name+"] ")
 					endIf
@@ -836,6 +854,9 @@ state Animating
 	endFunction
 
 	function Snap()
+		if !(ActorRef && ActorRef.Is3DLoaded())
+			return
+		endIf
 		; Quickly move into place and angle if actor is off by a lot
 		float distance = ActorRef.GetDistance(MarkerRef)
 		if distance > 125.0 || !IsInPosition(ActorRef, MarkerRef, 75.0)
@@ -928,12 +949,12 @@ state Animating
 	endFunction
 
 	event ResetActor()
-		Thread.ApplyFade()
 		ClearEvents()
 		GoToState("Resetting")
 		Log("Resetting!")
 		; Clear TFC
 		if IsPlayer
+			Thread.ApplyFade()
 			MiscUtil.SetFreeCameraState(false)
 		endIf
 		; Update stats
@@ -954,7 +975,7 @@ state Animating
 		CurrentAE = Animation.FetchPositionStage(Position, StageCount)
 		if PlayingAE != CurrentAE
 			Debug.SendAnimationEvent(ActorRef, CurrentAE)
-			Utility.WaitMenuMode(0.2)
+		;	Utility.WaitMenuMode(0.2)
 			PlayingAE = CurrentAE
 		endIf
 		StopAnimating(Thread.FastEnd, EndAnimEvent)
@@ -1057,7 +1078,6 @@ function StopAnimating(bool Quick = false, string ResetAnim = "IdleForceDefaultS
 		endIf
 		ActorRef.SetPosition(PositionX, PositionY, Loc[2])
 	;	Utility.WaitMenuMode(0.1)
-		Thread.RemoveFade()
 	else
 		ActorRef.SetVehicle(none)
 	endIf
@@ -1069,8 +1089,10 @@ function StopAnimating(bool Quick = false, string ResetAnim = "IdleForceDefaultS
 		if ResetAnim != "IdleForceDefaultState" && ResetAnim != "" && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
 			ActorRef.PushActorAway(ActorRef, 0.001)
 		elseIf !Quick && ResetAnim == "IdleForceDefaultState" && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
-			if ActorRef.IsDead() || ActorRef.IsUnconscious() || ActorRef.GetActorValuePercentage("Health") < 0.1
+			if ActorRef.IsDead() || ActorRef.IsUnconscious()
 				Debug.SendAnimationEvent(ActorRef, "DeathAnimation")
+			elseIf ActorRef.GetActorValuePercentage("Health") < 0.1
+				ActorRef.KillSilent()
 			elseIf (ActorRaceKey == "Spiders" || ActorRaceKey == "LargeSpiders" || ActorRaceKey == "GiantSpiders")
 				ActorRef.PushActorAway(ActorRef, 0.001) ; Temporal Fix TODO:
 			endIf
@@ -1088,8 +1110,12 @@ function StopAnimating(bool Quick = false, string ResetAnim = "IdleForceDefaultS
 			Debug.SendAnimationEvent(ActorRef, ResetAnim)
 		elseIf !Quick && ResetAnim == "IdleForceDefaultState" && DoRagdoll && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3))
 			;TODO: Detect the real actor position based on Node property intead of the Animation Tags
-			if ActorRef.IsDead() || ActorRef.IsUnconscious() || ActorRef.GetActorValuePercentage("Health") < 0.1
+			if ActorRef.IsDead() || ActorRef.IsUnconscious()
+				Debug.SendAnimationEvent(ActorRef, ResetAnim)
+				Utility.Wait(0.1)
 				Debug.SendAnimationEvent(ActorRef, "IdleSoupDeath")
+			elseIf ActorRef.GetActorValuePercentage("Health") < 0.1
+				ActorRef.KillSilent()
 			elseIf Animation && (Animation.HasTag("Furniture") || (Animation.HasTag("Standing") && !IsType[0]))
 				Debug.SendAnimationEvent(ActorRef, ResetAnim)
 			elseIf IsType[0] && IsVictim && Animation && Animation.HasTag("Rape") && !Animation.HasTag("Standing") && (!IsPlayer || (IsPlayer && Game.GetCameraState() != 3)) \
@@ -1114,24 +1140,24 @@ function SendDefaultAnimEvent(bool Exit = False)
 	elseIf ActorRaceKey != ""
 		if ActorRaceKey == "Dragons"
 			Debug.SendAnimationEvent(ActorRef, "FlyStopDefault") ; for Dragons only
-			Utility.WaitMenuMode(0.1)
+			Utility.Wait(0.1)
 			Debug.SendAnimationEvent(ActorRef, "Reset") ; for Dragons only
 		elseIf ActorRaceKey == "Hagravens"
 			Debug.SendAnimationEvent(ActorRef, "ReturnToDefault") ; for Dragons only
 			if Exit
-				Utility.WaitMenuMode(0.1)
+				Utility.Wait(0.1)
 				Debug.SendAnimationEvent(ActorRef, "Reset") ; for Dragons only
 			endIf
 		elseIf ActorRaceKey == "Chaurus" || ActorRaceKey == "ChaurusReapers"
 			Debug.SendAnimationEvent(ActorRef, "FNISDefault") ; for dwarvenspider and chaurus without time bettwen.
 			if Exit
-		;		Utility.WaitMenuMode(0.1)
+		;		Utility.Wait(0.1)
 		;		Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
 			endIf
 		elseIf ActorRaceKey == "DwarvenSpiders"
 			Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
 			if Exit
-		;		Utility.WaitMenuMode(0.1)
+		;		Utility.Wait(0.1)
 		;		Debug.SendAnimationEvent(ActorRef, "FNISDefault") ; for dwarvenspider and chaurus
 			endIf
 		elseIf ActorRaceKey == "Draugrs" || ActorRaceKey == "Seekers" || ActorRaceKey == "DwarvenBallistas" || ActorRaceKey == "DwarvenSpheres" || ActorRaceKey == "DwarvenCenturions"
@@ -1139,13 +1165,13 @@ function SendDefaultAnimEvent(bool Exit = False)
 		elseIf ActorRaceKey == "Trolls"
 			Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
 			if Exit
-				Utility.WaitMenuMode(0.1)
+				Utility.Wait(0.1)
 				Debug.SendAnimationEvent(ActorRef, "ForceFurnExit") ; the troll need this afther "ReturnToDefault" to allow the attack idles
 			endIf
 		elseIf ActorRaceKey == "Chickens" || ActorRaceKey == "Rabbits" || ActorRaceKey == "Slaughterfishes"
 			Debug.SendAnimationEvent(ActorRef, "ReturnDefaultState") ; for chicken, hare and slaughterfish
 			if Exit
-				Utility.WaitMenuMode(0.1)
+				Utility.Wait(0.1)
 				Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
 			endIf
 		elseIf ActorRaceKey == "Werewolves" || ActorRaceKey == "VampireLords"
@@ -1161,7 +1187,7 @@ function SendDefaultAnimEvent(bool Exit = False)
 		Debug.SendAnimationEvent(ActorRef, "ForceFurnExit") ; for Trolls afther the "ReturnToDefault" and draugr, daedras and all dwarven exept spiders
 		Debug.SendAnimationEvent(ActorRef, "Reset") ; for Hagravens afther the "ReturnToDefault" and Dragons
 	endIf
-	Utility.WaitMenuMode(0.1)
+	Utility.Wait(0.2)
 endFunction
 
 function AttachMarker()
@@ -1235,7 +1261,6 @@ function UnlockActor()
 	; Detach positioning marker
 	ActorRef.StopTranslation()
 	ActorRef.SetVehicle(none)
-	Thread.RemoveFade()
 	; Remove from animation faction
 	ActorRef.RemoveFromFaction(AnimatingFaction)
 	ActorUtil.RemovePackageOverride(ActorRef, Config.DoNothing)
@@ -1243,6 +1268,7 @@ function UnlockActor()
 	ActorRef.EvaluatePackage()
 	; Enable movement
 	if IsPlayer
+		Thread.RemoveFade()
 		Thread.DisableHotkeys()
 		MiscUtil.SetFreeCameraState(false)
 		Game.EnablePlayerControls(true, true, false, false, false, false, false, false, 0)
@@ -1295,8 +1321,8 @@ function RestoreActorDefaults()
 		if FrostExceptions
 			FrostExceptions.RemoveAddedForm(Config.BaseMarker)
 		endIf
+		Thread.RemoveFade()
 	endIf
-	Thread.RemoveFade()
 	; Remove SOS erection
 	Debug.SendAnimationEvent(ActorRef, "SOSFlaccid")
 	; Clear from animating faction
@@ -1694,7 +1720,6 @@ function RefreshExpression()
 	endIf
 endFunction
 
-
 ; ------------------------------------------------------- ;
 ; --- System Use                                      --- ;
 ; ------------------------------------------------------- ;
@@ -1795,6 +1820,8 @@ function Initialize()
 	NoRedress      = false
 	NoOrgasm       = false
 	ForceOpenMouth = false
+	Prepared       = false
+	StartedUp      = false
 	; Integers
 	Orgasms        = 0
 	BestRelation   = 0

@@ -35,7 +35,7 @@ bool property DebugMode hidden
 			Debug.OpenUserLog("SexLabDebug")
 			Debug.TraceUser("SexLabDebug", "SexLab Debug/Development Mode Deactivated")
 			MiscUtil.PrintConsole("SexLab Debug/Development Mode Activated")
-			if PlayerRef
+			if PlayerRef && PlayerRef != none
 				PlayerRef.AddSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
 				PlayerRef.AddSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
 			endIf				
@@ -44,7 +44,7 @@ bool property DebugMode hidden
 				Debug.CloseUserLog("SexLabDebug")
 			endIf
 			MiscUtil.PrintConsole("SexLab Debug/Development Mode Deactivated")
-			if PlayerRef
+			if PlayerRef && PlayerRef != none
 				PlayerRef.RemoveSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
 				PlayerRef.RemoveSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
 			endIf				
@@ -195,6 +195,7 @@ bool property ShowInMap auto hidden
 bool property DisableTeleport auto hidden
 bool property SeedNPCStats auto hidden
 bool property DisableScale auto hidden
+bool property FixVictimPos auto hidden
 
 ; Integers
 int property AnimProfile auto hidden
@@ -229,6 +230,7 @@ float property FemaleVoiceDelay auto hidden
 float property VoiceVolume auto hidden
 float property SFXDelay auto hidden
 float property SFXVolume auto hidden
+float property LeadInCoolDown auto hidden
 
 ; Boolean Arrays
 bool[] property StripMale auto hidden
@@ -494,7 +496,7 @@ function SetTargetActor()
 		if TargetThread && !TargetThread.HasPlayer && (TargetThread.GetState() == "Animating" || TargetThread.GetState() == "Advancing")
 			sslThreadController PlayerThread = ThreadSlots.GetActorController(PlayerRef)
 			if (!PlayerThread || !(PlayerThread.GetState() == "Animating" || PlayerThread.GetState() == "Advancing")) && TakeThreadControl.Show()
-				if PlayerThread != none ; 
+				if PlayerThread != none
 					ThreadSlots.StopThread(PlayerThread)
 				endIf
 				GetThreadControl(TargetThread) 
@@ -667,7 +669,7 @@ Spell function GetHDTSpell(Actor ActorRef)
 	while i
 		i -= 1
 		Spell SpellRef = ActorRef.GetNthSpell(i)
-		Log(SpellRef.GetName(), "Checking("+SpellRef+")")
+		Log(SpellRef.GetName(), "Checking("+SpellRef+") for HDT HighHeels")
 		if SpellRef && StringUtil.Find(SpellRef.GetName(), "Heel") != -1
 			return SpellRef
 		endIf
@@ -825,6 +827,10 @@ function Reload()
 	endIf
 	; - SOS/SAM Schlongs (currently unused)
 	HasSchlongs = Game.GetModByName("Schlongs of Skyrim - Core.esm") != 255 || Game.GetModByName("SAM - Shape Atlas for Men.esp") != 255
+
+	if !ForceBlackVFX || ForceBlackVFX == none
+;		ForceBlackVFX = Game.GetFormFromFile(0x82B, "SexLab.esm") as VisualEffect
+	endIf
 
 	; - MFG Fix check
 	HasMFGFix = MfgConsoleFunc.ResetPhonemeModifier(PlayerRef) ; TODO: May need to check another way, some players might get upset that their mfg is reset on load
@@ -1013,7 +1019,8 @@ function SetDefaults()
 	DisableTeleport    = true
 	SeedNPCStats       = true
 	DisableScale       = true ; TMP: enabled by default for testing
-	
+	FixVictimPos       = false
+
 	; Integers
 	AnimProfile        = 1
 	AskBed             = 1
@@ -1047,6 +1054,7 @@ function SetDefaults()
 	VoiceVolume        = 1.0
 	SFXDelay           = 3.0
 	SFXVolume          = 1.0
+	LeadInCoolDown     = 0.0
 
 	; Boolean strip arrays
 	StripMale = new bool[33]
@@ -1233,6 +1241,7 @@ function ExportSettings()
 	ExportBool("DisableTeleport", DisableTeleport)
 	ExportBool("SeedNPCStats", SeedNPCStats)
 	ExportBool("DisableScale", DisableScale)
+	ExportBool("FixVictimPos", FixVictimPos)
 
 	; Integers
 	ExportInt("AnimProfile", AnimProfile)
@@ -1267,6 +1276,7 @@ function ExportSettings()
 	ExportFloat("VoiceVolume", VoiceVolume)
 	ExportFloat("SFXDelay", SFXDelay)
 	ExportFloat("SFXVolume", SFXVolume)
+	ExportFloat("LeadInCoolDown", LeadInCoolDown)
 
 	; Boolean Arrays
 	ExportBoolList("StripMale", StripMale, 33)
@@ -1362,6 +1372,7 @@ function ImportSettings()
 	DisableTeleport    = ImportBool("DisableTeleport", DisableTeleport)
 	SeedNPCStats       = ImportBool("SeedNPCStats", SeedNPCStats)
 	DisableScale       = ImportBool("DisableScale", DisableScale)
+	FixVictimPos       = ImportBool("FixVictimPos", FixVictimPos)
 
 	; Integers
 	AnimProfile        = ImportInt("AnimProfile", AnimProfile)
@@ -1396,6 +1407,7 @@ function ImportSettings()
 	VoiceVolume        = ImportFloat("VoiceVolume", VoiceVolume)
 	SFXDelay           = ImportFloat("SFXDelay", SFXDelay)
 	SFXVolume          = ImportFloat("SFXVolume", SFXVolume)
+	LeadInCoolDown     = ImportFloat("LeadInCoolDown", LeadInCoolDown)
 
 	; Boolean Arrays
 	StripMale          = ImportBoolList("StripMale", StripMale, 33)
@@ -1621,8 +1633,9 @@ function StoreActor(Form FormRef) global
 endFunction
 
 ImageSpaceModifier FadeEffect
-ImageSpaceModifier FadeEffectBlack
-ImageSpaceModifier FadeEffectBlur
+VisualEffect ForceBlackVFX
+ImageSpaceModifier FadeToBlackHoldImod
+ImageSpaceModifier FadeToBlurHoldImod
 function RemoveFade(bool forceTest = false)
 	if !forceTest && UseFade < 1
 		return
@@ -1632,9 +1645,15 @@ function RemoveFade(bool forceTest = false)
 		If UseFade < 3
 			if forceTest
 				Utility.WaitMenuMode(5.0)
+				if Black && ForceBlackVFX
+					ForceBlackVFX.Stop(PlayerRef)
+				endIf
 				FadeEffect.Remove()
 			else
-				ImageSpaceModifier.RemoveCrossFade(2.5)
+				if Black && ForceBlackVFX
+					ForceBlackVFX.Stop(PlayerRef)
+				endIf
+				ImageSpaceModifier.RemoveCrossFade()
 			endIf
 		else
 			Game.FadeOutGame(false, Black, 0.5, 1.5)
@@ -1653,28 +1672,31 @@ function ApplyFade(bool forceTest = false)
 	FadeEffect = none
 	bool Black
 	if UseFade % 2 != 0
-		if !FadeEffectBlack || FadeEffectBlack == none
-			FadeEffectBlack = Game.GetFormFromFile(0xF756E, "Skyrim.esm") as ImageSpaceModifier ;0xF756D **0xF756E 0x10100C** 0xF756F 0xFDC57 0xFDC58 0x 0x 0x
+		if !FadeToBlackHoldImod || FadeToBlackHoldImod == none
+			FadeToBlackHoldImod = Game.GetFormFromFile(0xF756E, "Skyrim.esm") as ImageSpaceModifier ;0xF756D **0xF756E 0x10100C** 0xF756F 0xFDC57 0xFDC58 0x 0x 0x
 		endIf
-		if FadeEffectBlack && FadeEffectBlack != none
-			FadeEffect = FadeEffectBlack
+		if FadeToBlackHoldImod && FadeToBlackHoldImod != none
+			FadeEffect = FadeToBlackHoldImod
 			Black = True
 		endIf
 	else
-		if !FadeEffectBlur || FadeEffectBlur == none
-			FadeEffectBlur = Game.GetFormFromFile(0x44F3B, "Skyrim.esm") as ImageSpaceModifier ;0x201D3 0x44F3B **0xFD809 0x1037E2 0x1037E3 0x1037E4 0x1037E5 0x1037E6** 0x
+		if !FadeToBlurHoldImod || FadeToBlurHoldImod == none
+			FadeToBlurHoldImod = Game.GetFormFromFile(0x44F3B, "Skyrim.esm") as ImageSpaceModifier ;0x201D3 0x44F3B **0xFD809 0x1037E2 0x1037E3 0x1037E4 0x1037E5 0x1037E6** 0x
 		endIf
-		if FadeEffectBlur && FadeEffectBlur != none
-			FadeEffect = FadeEffectBlur
+		if FadeToBlurHoldImod && FadeToBlurHoldImod != none
+			FadeEffect = FadeToBlurHoldImod
 			Black = False
 		endIf
 	endIf
 	if FadeEffect && FadeEffect != none
 		If UseFade < 3
 			if forceTest
-				FadeEffect.Apply(1.0)
+				FadeEffect.Apply()
 			else
-				FadeEffect.ApplyCrossFade(1.0)
+				FadeEffect.ApplyCrossFade()
+			endIf
+			if Black && ForceBlackVFX
+				ForceBlackVFX.Play(PlayerRef)
 			endIf
 		else
 			Game.FadeOutGame(true, Black, 0.5, 3.0)

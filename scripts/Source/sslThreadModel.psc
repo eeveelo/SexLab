@@ -469,7 +469,7 @@ state Making
 				if Valid[i]
 					tagid = 0
 					while tagid < CommonTag.length
-						if HasTag(CommonTag[tagid]) && !PrimaryAnimations[i].HasTag(CommonTag[tagid])
+						if HasTag(CommonTag[tagid]) && !CustomAnimations[i].HasTag(CommonTag[tagid])
 							RemoveTag(CommonTag[tagid])
 						endIf
 						tagid += 1
@@ -498,13 +498,17 @@ state Making
 			endIf
 		endIf
 
-		; Check if LeadIn is allowed to prevent compatibility issues
+		; Check LeadIn CoolDown and if LeadIn is allowed to prevent compatibility issues
+		float LeadInCoolDown = Math.Abs(Utility.GetCurrentRealTime() - StorageUtil.GetFloatValue(Config,"SexLab.LastLeadInEnd",0))
 		if CustomAnimations.Length
 			NoLeadIn = true
 			if LeadIn
 				Log("WARNING: LeadIn detected on Forced Animations. Disabling LeadIn")
 				LeadIn = false
 			endIf
+		elseIf LeadInCoolDown < Config.LeadInCoolDown
+			Log("LeadIn CoolDown "+LeadInCoolDown+"::"+Config.LeadInCoolDown)
+			DisableLeadIn(True)
 		endIf
 		
 		; leadin animations
@@ -817,7 +821,6 @@ function ChangeActors(Actor[] NewPositions)
 	; Enter making state for alterations
 	SendThreadEvent("ActorChangeStart")
 	UnregisterforUpdate()
-	ApplyFade()
 	
 	; Remove actors no longer present
 	int i = ActorCount
@@ -826,7 +829,11 @@ function ChangeActors(Actor[] NewPositions)
 		sslActorAlias Slot = ActorAlias(Positions[i])
 		if Slot
 			if NewPositions.Find(Positions[i]) == -1
-				Slot.ClearAlias()
+				if Slot.GetState() == "Prepare" || Slot.GetState() == "Animating"
+					Slot.ResetActor()
+				else
+					Slot.ClearAlias()
+				endIf
 			else
 				Slot.UnlockActor()
 				Slot.StopAnimating(true)
@@ -1083,9 +1090,12 @@ int function FilterAnimations()
 			endIf
 		endIf
 
-		if IsAggressive
+		if IsAggressive && Config.FixVictimPos
+			if VictimRef == Positions[0] && ActorLib.GetGender(VictimRef) == 0
+				BasicFilters = AddString(BasicFilters, "Vaginal")
+			endIf
 			if Males > 0 && ActorLib.GetGender(VictimRef) == 1
-					Filters = AddString(Filters, "FemDom")
+				Filters = AddString(Filters, "FemDom")
 			elseIf Creatures > 0 && !ActorLib.IsCreature(VictimRef) && Males <= 0 && (!Config.UseCreatureGender || (Males + MaleCreatures) <= 0)
 				Filters = AddString(Filters, "CreatureSub")
 			endIf
@@ -1349,12 +1359,6 @@ endFunction
 function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 	if CenterOn
 		CenterRef = CenterOn
-		CenterLocation[0] = CenterOn.GetPositionX()
-		CenterLocation[1] = CenterOn.GetPositionY()
-		CenterLocation[2] = CenterOn.GetPositionZ()
-		CenterLocation[3] = CenterOn.GetAngleX()
-		CenterLocation[4] = CenterOn.GetAngleY()
-		CenterLocation[5] = CenterOn.GetAngleZ()
 		; Check if it's a bed
 		BedRef  = none
 		BedStatus[1] = 0
@@ -1371,8 +1375,16 @@ function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 		elseIf CenterOn.GetBaseObject() != Config.LocationMarker
 			BedStatus[1] = ThreadLib.GetBedType(CenterOn)
 		endIf
+		; Get Position after Lock the Actor to aviod unwanted teleport.
+		CenterLocation[0] = CenterOn.GetPositionX()
+		CenterLocation[1] = CenterOn.GetPositionY()
+		CenterLocation[2] = CenterOn.GetPositionZ()
+		CenterLocation[3] = CenterOn.GetAngleX()
+		CenterLocation[4] = CenterOn.GetAngleY()
+		CenterLocation[5] = CenterOn.GetAngleZ()
 		if BedStatus[1] > 0
 			BedRef = CenterOn
+			Log("CenterRef == BedRef: "+BedRef)
 			float[] BedOffsets = Config.GetBedOffsets(BedRef.GetBaseObject())
 			if BedStatus[1] == 1 && BedOffsets == Config.BedOffset
 				BedOffsets[2] = 7.5 ; Most common BedRolls Up offset
