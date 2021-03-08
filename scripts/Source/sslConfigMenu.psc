@@ -472,6 +472,10 @@ event OnHighlightST()
 		sslBaseAnimation Slot = AnimToggles[(Options[1] as int)]
 		SetInfoText(Slot.Name+" Tags:\n"+StringJoin(Slot.GetTags(), ", "))
 
+	; Restrict Strapons
+	elseIf Options[0] == "RestrictStrapons"
+		SetInfoText("$SSL_InfoRestrictStrapons")
+
 	; Fix Victim Position
 	elseIf Options[0] == "FixVictimPos"
 		SetInfoText("$SSL_InfoFixVictimPos")
@@ -683,6 +687,11 @@ event OnSelectST()
 		Stripping[i] = !Stripping[i]
 		SetToggleOptionValueST(Stripping[i])
 
+	; Restrict Strapons
+	elseIf Options[0] == "RestrictStrapons"
+		Config.RestrictStrapons = !Config.RestrictStrapons
+		SetToggleOptionValueST(Config.RestrictStrapons)
+		
 	; Fix Victim Position
 	elseIf Options[0] == "FixVictimPos"
 		Config.FixVictimPos = !Config.FixVictimPos
@@ -813,6 +822,11 @@ event OnDefaultST()
 	; Comment
 	if Options[0] == ""
 	
+	; Restrict Strapons
+	elseIf Options[0] == "RestrictStrapons"
+		Config.RestrictStrapons = False
+		SetTextOptionValueST(Config.RestrictStrapons)
+	
 	; Fix Victim Position
 	elseIf Options[0] == "FixVictimPos"
 		Config.FixVictimPos = True
@@ -932,6 +946,7 @@ function AnimationSettings()
 	AddToggleOptionST("UndressAnimation","$SSL_UndressAnimation", Config.UndressAnimation)
 	AddToggleOptionST("RedressVictim","$SSL_VictimsRedress", Config.RedressVictim)
 	AddToggleOptionST("StraponsFemale","$SSL_FemalesUseStrapons", Config.UseStrapons)
+	AddToggleOptionST("RestrictStrapons","$SSL_RestrictStrapons", Config.RestrictStrapons)
 	AddToggleOptionST("RemoveHeelEffect","$SSL_RemoveHeelEffect", Config.RemoveHeelEffect)
 	AddToggleOptionST("BedRemoveStanding","$SSL_BedRemoveStanding", Config.BedRemoveStanding)
 	AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", Config.RagdollEnd)
@@ -3919,6 +3934,7 @@ endState
 state CleanSystem
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnCleanSystem")
+			ThreadSlots.StopAll()
 			ShowMessage("$SSL_RunCleanSystem", false)
 			Utility.Wait(0.1)
 
