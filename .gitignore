@@ -1,5 +1,6 @@
 SexLab.esp
 meta.ini
+*.rar
 *.zip
 *.7z
 *sla*psc
@@ -14,5 +15,3 @@ SKSE/Plugins/SexLabUtil.iobj
 SKSE/Plugins/SexLabUtil.ipdb
 SKSE/Plugins/SexLabUtil.lib
 SKSE/Plugins/SexLabUtil.pdb
-*.pex
-*.rar
