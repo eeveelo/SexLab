@@ -168,6 +168,14 @@ event UpdateSystem(int OldVersion, int NewVersion)
 			AnimSlots.Setup()
 			CreatureSlots.Setup()
 			ThreadSlots.Setup()
+
+		elseIf OldVersion < 16209
+			; Some system setup for < 1.63 SE dev beta 9
+			bool AllowCreatures = Config.AllowCreatures
+			Config.Setup()
+			Config.AllowCreatures = AllowCreatures
+			AnimSlots.Setup()
+			CreatureSlots.Setup()
 		endIf
 
 		Config.ImportSettings()

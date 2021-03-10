@@ -103,69 +103,67 @@ event OnPageReset(string page)
 	if !SystemAlias.IsInstalled
 		UnloadCustomContent()
 		InstallMenu()
-		return
 
 	; Logo Splash
-	elseif page == ""
-		if !PreventOverwrite && PlayerRef.IsInFaction(Config.AnimatingFaction) && (Config.GetThreadControlled() != none || ThreadSlots.FindActorController(PlayerRef) != -1)
+	elseif page != ""
+		UnloadCustomContent()
+
+		; General Animation Settings
+		if page == "$SSL_AnimationSettings"
+			AnimationSettings()
+
+		; Toggle Voices + SFX Settings
+		elseIf page == "$SSL_SoundSettings"
+			SoundSettings()
+
+		; Hotkey selection & config
+		elseIf page == "$SSL_PlayerHotkeys"
+			PlayerHotkeys()
+
+		; Timers & stripping
+		elseIf page == "$SSL_TimersStripping"
+			TimersStripping()
+
+		elseIf page == "$SSL_StripEditor"
+			StripEditor()
+
+		; Toggle animations on/off
+		elseIf page == "$SSL_ToggleAnimations"
+			ToggleAnimations()
+
+		; Animation Editor
+		elseIf page == "$SSL_AnimationEditor"
+			AnimationEditor()
+
+		; Toggle expressions
+		; elseIf page == "$SSL_ExpressionSelection"
+		; 	ToggleExpressions()
+
+		; Toggle/Edit Expressions
+		elseIf page == "$SSL_ExpressionEditor"
+			ExpressionEditor()
+
+		; Player Diary/Journal
+		elseIf page == "$SSL_SexDiary" || page == "$SSL_SexJournal"
+			SexDiary()
+
+		; Player Diary/Journal
+		; elseIf page == "Troubleshoot"
+		; 	Troubleshoot()
+
+		; System rebuild & clean
+		elseIf page == "$SSL_RebuildClean"
+			RebuildClean()
+
+		endIf
+	else
+		if PlayerRef.IsInFaction(Config.AnimatingFaction) && (Config.GetThreadControlled() != none || ThreadSlots.FindActorController(PlayerRef) != -1)
 			UnloadCustomContent()
 			AnimationEditor()
 			PreventOverwrite = true
-			return
 		else
 			LoadCustomContent("SexLab/logo.dds", 184, 31)
-			return
 		endIf
-	endIf
-	UnloadCustomContent()
-
-	; General Animation Settings
-	if page == "$SSL_AnimationSettings"
-		AnimationSettings()
-
-	; Toggle Voices + SFX Settings
-	elseIf page == "$SSL_SoundSettings"
-		SoundSettings()
-
-	; Hotkey selection & config
-	elseIf page == "$SSL_PlayerHotkeys"
-		PlayerHotkeys()
-
-	; Timers & stripping
-	elseIf page == "$SSL_TimersStripping"
-		TimersStripping()
-
-	elseIf page == "$SSL_StripEditor"
-		StripEditor()
-
-	; Toggle animations on/off
-	elseIf page == "$SSL_ToggleAnimations"
-		ToggleAnimations()
-
-	; Animation Editor
-	elseIf page == "$SSL_AnimationEditor"
-		AnimationEditor()
-
-	; Toggle expressions
-	; elseIf page == "$SSL_ExpressionSelection"
-	; 	ToggleExpressions()
-
-	; Toggle/Edit Expressions
-	elseIf page == "$SSL_ExpressionEditor"
-		ExpressionEditor()
-
-	; Player Diary/Journal
-	elseIf page == "$SSL_SexDiary" || page == "$SSL_SexJournal"
-		SexDiary()
-
-	; Player Diary/Journal
-	; elseIf page == "Troubleshoot"
-	; 	Troubleshoot()
-
-	; System rebuild & clean
-	elseIf page == "$SSL_RebuildClean"
-		RebuildClean()
-
 	endIf
 
 endEvent
@@ -411,6 +409,8 @@ endEvent
 
 event OnConfigClose()
 	ModEvent.Send(ModEvent.Create("SexLabConfigClose"))
+	; Reset animation editor auto selector
+	PreventOverwrite = false
 	; Clear Player Partners array
 	if PlayerPartners
 		PlayerPartners = PapyrusUtil.ActorArray(0)
@@ -471,6 +471,14 @@ event OnHighlightST()
 	if Options[0] == "Animation"
 		sslBaseAnimation Slot = AnimToggles[(Options[1] as int)]
 		SetInfoText(Slot.Name+" Tags:\n"+StringJoin(Slot.GetTags(), ", "))
+
+	; Restrict Strapons
+	elseIf Options[0] == "RestrictStrapons"
+		SetInfoText("$SSL_InfoRestrictStrapons")
+
+	; Fix Victim Position
+	elseIf Options[0] == "FixVictimPos"
+		SetInfoText("$SSL_InfoFixVictimPos")
 
 	; Voice Toggle
 	elseIf Options[0] == "Voice"
@@ -679,6 +687,16 @@ event OnSelectST()
 		Stripping[i] = !Stripping[i]
 		SetToggleOptionValueST(Stripping[i])
 
+	; Restrict Strapons
+	elseIf Options[0] == "RestrictStrapons"
+		Config.RestrictStrapons = !Config.RestrictStrapons
+		SetToggleOptionValueST(Config.RestrictStrapons)
+		
+	; Fix Victim Position
+	elseIf Options[0] == "FixVictimPos"
+		Config.FixVictimPos = !Config.FixVictimPos
+		SetToggleOptionValueST(Config.FixVictimPos)
+		
 	; Strip Editor
 	elseIf Options[0] == "StripEditor"
 		Form ItemRef
@@ -798,6 +816,25 @@ event OnSelectST()
 	endIf
 endEvent
 
+event OnDefaultST()
+	string[] Options = MapOptions()
+
+	; Comment
+	if Options[0] == ""
+	
+	; Restrict Strapons
+	elseIf Options[0] == "RestrictStrapons"
+		Config.RestrictStrapons = False
+		SetTextOptionValueST(Config.RestrictStrapons)
+	
+	; Fix Victim Position
+	elseIf Options[0] == "FixVictimPos"
+		Config.FixVictimPos = True
+		SetTextOptionValueST(Config.FixVictimPos)
+	
+	endIf
+endEvent
+
 ; ------------------------------------------------------- ;
 ; --- Install Menu                                    --- ;
 ; ------------------------------------------------------- ;
@@ -901,12 +938,15 @@ function AnimationSettings()
 	AddToggleOptionST("DisableScale","$SSL_DisableScale", Config.DisableScale)
 	AddSliderOptionST("OpenMouthSize","$SSL_OpenMouthSize", Config.OpenMouthSize, "{0}%")
 	AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", Config.ForeplayStage)
+	AddSliderOptionST("LeadInCoolDown","$SSL_LeadInCoolDown", Config.LeadInCoolDown, "$SSL_Seconds", SexLabUtil.IntIfElse(Config.ForeplayStage, OPTION_FLAG_NONE, OPTION_FLAG_DISABLED))
+	AddToggleOptionST("FixVictimPos","$SSL_FixVictimPos", Config.FixVictimPos)
 	AddToggleOptionST("RestrictAggressive","$SSL_RestrictAggressive", Config.RestrictAggressive)
 	AddToggleOptionST("RestrictSameSex","$SSL_RestrictSameSex", Config.RestrictSameSex)
 	AddToggleOptionST("RestrictGenderTag","$SSL_RestrictGenderTag", Config.RestrictGenderTag)
 	AddToggleOptionST("UndressAnimation","$SSL_UndressAnimation", Config.UndressAnimation)
 	AddToggleOptionST("RedressVictim","$SSL_VictimsRedress", Config.RedressVictim)
 	AddToggleOptionST("StraponsFemale","$SSL_FemalesUseStrapons", Config.UseStrapons)
+	AddToggleOptionST("RestrictStrapons","$SSL_RestrictStrapons", Config.RestrictStrapons)
 	AddToggleOptionST("RemoveHeelEffect","$SSL_RemoveHeelEffect", Config.RemoveHeelEffect)
 	AddToggleOptionST("BedRemoveStanding","$SSL_BedRemoveStanding", Config.BedRemoveStanding)
 	AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", Config.RagdollEnd)
@@ -1019,7 +1059,10 @@ endFunction
 
 state AdjustStage
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.AdjustStage = newKeyCode
 			SetKeyMapOptionValueST(Config.AdjustStage)
 		endIf
@@ -1034,7 +1077,10 @@ state AdjustStage
 endState
 state AdjustChange
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.AdjustChange = newKeyCode
 			SetKeyMapOptionValueST(Config.AdjustChange)
 		endIf
@@ -1049,7 +1095,10 @@ state AdjustChange
 endState
 state AdjustForward
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.AdjustForward = newKeyCode
 			SetKeyMapOptionValueST(Config.AdjustForward)
 		endIf
@@ -1064,7 +1113,10 @@ state AdjustForward
 endState
 state AdjustUpward
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.AdjustUpward = newKeyCode
 			SetKeyMapOptionValueST(Config.AdjustUpward)
 		endIf
@@ -1079,7 +1131,10 @@ state AdjustUpward
 endState
 state AdjustSideways
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.AdjustSideways = newKeyCode
 			SetKeyMapOptionValueST(Config.AdjustSideways)
 		endIf
@@ -1094,7 +1149,10 @@ state AdjustSideways
 endState
 state AdjustSchlong
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.AdjustSchlong = newKeyCode
 			SetKeyMapOptionValueST(Config.AdjustSchlong)
 		endIf
@@ -1109,7 +1167,10 @@ state AdjustSchlong
 endState
 state RotateScene
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.RotateScene = newKeyCode
 			SetKeyMapOptionValueST(Config.RotateScene)
 		endIf
@@ -1124,7 +1185,10 @@ state RotateScene
 endState
 state RestoreOffsets
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.RestoreOffsets = newKeyCode
 			SetKeyMapOptionValueST(Config.RestoreOffsets)
 		endIf
@@ -1140,7 +1204,10 @@ endState
 
 state RealignActors
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.RealignActors = newKeyCode
 			SetKeyMapOptionValueST(Config.RealignActors)
 		endIf
@@ -1155,7 +1222,10 @@ state RealignActors
 endState
 state AdvanceAnimation
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.AdvanceAnimation = newKeyCode
 			SetKeyMapOptionValueST(Config.AdvanceAnimation)
 		endIf
@@ -1170,7 +1240,10 @@ state AdvanceAnimation
 endState
 state ChangeAnimation
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.ChangeAnimation = newKeyCode
 			SetKeyMapOptionValueST(Config.ChangeAnimation)
 		endIf
@@ -1185,7 +1258,10 @@ state ChangeAnimation
 endState
 state ChangePositions
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.ChangePositions = newKeyCode
 			SetKeyMapOptionValueST(Config.ChangePositions)
 		endIf
@@ -1200,7 +1276,10 @@ state ChangePositions
 endState
 state MoveSceneLocation
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.MoveScene = newKeyCode
 			SetKeyMapOptionValueST(Config.MoveScene)
 		endIf
@@ -1215,7 +1294,10 @@ state MoveSceneLocation
 endState
 state BackwardsModifier
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.Backwards = newKeyCode
 			SetKeyMapOptionValueST(Config.Backwards)
 		endIf
@@ -1230,7 +1312,10 @@ state BackwardsModifier
 endState
 state EndAnimation
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.EndAnimation = newKeyCode
 			SetKeyMapOptionValueST(Config.EndAnimation)
 		endIf
@@ -1245,7 +1330,10 @@ state EndAnimation
 endState
 state TargetActor
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.UnregisterForKey(Config.TargetActor)
 			Config.TargetActor = newKeyCode
 			Config.RegisterForKey(Config.TargetActor)
@@ -1264,7 +1352,10 @@ state TargetActor
 endState
 state ToggleFreeCamera
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.UnregisterForKey(Config.ToggleFreeCamera)
 			Config.ToggleFreeCamera = newKeyCode
 			Config.RegisterForKey(Config.ToggleFreeCamera)
@@ -1577,9 +1668,6 @@ state AnimationSelect
 					IsCreatureEditor = true
 					Animation = CreatureSlots.GetBySlot(0)
 				endIf
-				SetMenuOptionValueST(Animation.Name)
-				ForcePageReset()
-				return
 			elseIf MenuOptions[i] == "$SSL_PrevPage"
 				Animation = AnimationSlots.GetBySlot(((AnimEditPage - 2) * PerPage))
 			elseIf MenuOptions[i] == "$SSL_NextPage"
@@ -1632,10 +1720,12 @@ state AnimationPosition
 		endIf
 	endEvent
 	event OnDefaultST()
-		Position = 0
-		SetMenuOptionValueST(Position)
-		PreventOverwrite = true
-		ForcePageReset()
+		if Position != 0
+			Position = 0
+			SetMenuOptionValueST(Position)
+			PreventOverwrite = true
+			ForcePageReset()
+		endIf
 	endEvent
 endState
 
@@ -1660,10 +1750,12 @@ state AnimationAdjustKey
 		ForcePageReset()
 	endEvent
 	event OnDefaultST()
-		AdjustKey = "Global"
-		SetMenuOptionValueST(AdjustKey)
-		PreventOverwrite = true
-		ForcePageReset()
+		if AdjustKey != "Global"
+			AdjustKey = "Global"
+			SetMenuOptionValueST(AdjustKey)
+			PreventOverwrite = true
+			ForcePageReset()
+		endIf
 	endEvent
 endState
 
@@ -1700,42 +1792,43 @@ endState
 
 state AnimationTest
 	event OnSelectST()
-		if !ShowMessage("About to player test animation "+Animation.Name+" for preview purposes.\n\nDo you wish to continue?", true, "$Yes", "$No")
-			return
-		endIf
+		if ShowMessage("About to player test animation "+Animation.Name+" for preview purposes.\n\nDo you wish to continue?", true, "$Yes", "$No")
 
-		sslThreadModel Thread = SexLab.NewThread()
-		if Thread
-			; Add single animation to thread
-			sslBaseAnimation[] Anims = new sslBaseAnimation[1]
-			Anims[0] = Animation
-			Thread.SetForcedAnimations(Anims)
-			; Disable extra effects, this is a test - keep it simple
-			Thread.DisableBedUse(true)
-			Thread.DisableLeadIn(true)
-			; select a solo actor
-			if Animation.PositionCount < 2
-				if TargetRef && TargetRef.Is3DLoaded() && ShowMessage("Which actor would you like to play the solo animation "+Animation.Name+" with?", true, TargetName, PlayerName)
-					Thread.AddActor(TargetRef)
-				else
-					Thread.AddActor(PlayerRef)
+			sslThreadModel Thread = SexLab.NewThread()
+			if Thread
+				; Add single animation to thread
+				sslBaseAnimation[] Anims = new sslBaseAnimation[1]
+				Anims[0] = Animation
+				Thread.SetForcedAnimations(Anims)
+				; Disable extra effects, this is a test - keep it simple
+				Thread.DisableBedUse(true)
+				Thread.DisableLeadIn(true)
+				; select a solo actor
+				if Animation.PositionCount < 2
+					if TargetRef && TargetRef.Is3DLoaded() && ShowMessage("Which actor would you like to play the solo animation "+Animation.Name+" with?", true, TargetName, PlayerName)
+						Thread.AddActor(TargetRef)
+					else
+						Thread.AddActor(PlayerRef)
+					endIf
+				; Add player and target
+				elseIf Animation.PositionCount == 2 && TargetRef
+					Actor[] Positions = sslUtility.MakeActorArray(PlayerRef, TargetRef)
+					Positions = ThreadLib.SortActorsByAnimation(Positions, Animation)
+					Thread.AddActor(Positions[0])
+					Thread.AddActor(Positions[1])
 				endIf
-			; Add player and target
-			elseIf Animation.PositionCount == 2 && TargetRef
-				Actor[] Positions = sslUtility.MakeActorArray(PlayerRef, TargetRef)
-				Positions = ThreadLib.SortActorsByAnimation(Positions, Animation)
-				Thread.AddActor(Positions[0])
-				Thread.AddActor(Positions[1])
+				if Animation.PositionCount != Thread.ActorCount
+					ShowMessage("Failed to start test animation.\n  Animation.PositionCount["+Animation.PositionCount+"] and ActorCount["+Thread.ActorCount+"] don't match", false)
+				else
+					ShowMessage("Starting animation "+Animation.Name+".\n\nClose all menus and return to the game to continue...", false)
+					Utility.Wait(0.5)
+					if !Thread.StartThread()
+						ShowMessage("Failed to start test animation.", false)
+					endIf
+				endIf
+			else
+				ShowMessage("Failed to start test animation.", false)
 			endIf
-			if Animation.PositionCount != Thread.ActorCount
-				ShowMessage("Failed to start test animation.\n  Animation.PositionCount["+Animation.PositionCount+"] and ActorCount["+Thread.ActorCount+"] don't match", false)
-				return
-			endIf
-			ShowMessage("Starting animation "+Animation.Name+".\n\nClose all menus and return to the game to continue...", false)
-			Utility.Wait(0.5)
-		endIf
-		if !Thread || !Thread.StartThread()
-			ShowMessage("Failed to start test animation.", false)
 		endIf
 	endEvent
 endState
@@ -3402,6 +3495,25 @@ state ForeplayStage
 		SetInfoText("$SSL_InfoForeplayStage")
 	endEvent
 endState
+state LeadInCoolDown
+	event OnSliderOpenST()
+		SetSliderDialogStartValue(Config.LeadInCoolDown)
+		SetSliderDialogDefaultValue(0)
+		SetSliderDialogRange(0, 3600)
+		SetSliderDialogInterval(30)
+	endEvent
+	event OnSliderAcceptST(float value)
+		Config.LeadInCoolDown = value
+		SetSliderOptionValueST(Config.LeadInCoolDown, "$SSL_Seconds")
+	endEvent
+	event OnDefaultST()
+		Config.LeadInCoolDown = 0.0
+		SetToggleOptionValueST(Config.LeadInCoolDown, "$SSL_Seconds")
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoLeadInCoolDown")
+	endEvent
+endState
 state ScaleActors
 	event OnSelectST()
 		Config.ScaleActors = !Config.ScaleActors
@@ -3822,6 +3934,7 @@ endState
 state CleanSystem
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnCleanSystem")
+			ThreadSlots.StopAll()
 			ShowMessage("$SSL_RunCleanSystem", false)
 			Utility.Wait(0.1)
 

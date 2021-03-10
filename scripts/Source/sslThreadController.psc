@@ -505,6 +505,21 @@ state Animating
 			if PreFurnitureStatus != BedTypeID || (PreFurnitureStatus > 0 && CenterAlias.GetReference() == none)
 				ClearAnimations()
 				if CenterAlias.GetReference() == none ;Is not longer using Furniture
+					; Center on fallback choices
+					if HasPlayer && !(PlayerRef.GetFurnitureReference() || PlayerRef.IsSwimming() || PlayerRef.IsFlying())
+						CenterOnObject(PlayerRef, false)
+					elseIf IsAggressive && !(VictimRef.GetFurnitureReference() || VictimRef.IsSwimming() || VictimRef.IsFlying())
+						CenterOnObject(VictimRef, false)
+					else
+						i = 0
+						while i < ActorCount
+							if !(Positions[i].GetFurnitureReference() || Positions[i].IsSwimming() || Positions[i].IsFlying())
+								CenterOnObject(Positions[i], false)
+								i = ActorCount
+							endIf
+							i += 1
+						endWhile
+					endIf
 					CenterOnObject(PlayerRef, false)
 				endIf
 				ChangeActors(Positions)
@@ -652,7 +667,7 @@ function SetAnimation(int aid = -1)
 	Animation = Animations[aid]
 	; Sort actors positions if needed
 	int VictimPos = Positions.Find(VictimRef)
-	if IsAggressive && ActorCount > 1 && VictimPos >= 0
+	if Config.FixVictimPos && IsAggressive && ActorCount > 1 && VictimPos >= 0
 		if Animation.HasTag("FemDom") && VictimPos == 0
 			; Shuffle actor positions
 			Positions[VictimPos] = Positions[1]
@@ -764,6 +779,7 @@ function EndLeadIn()
 		; Restrip with new strip options
 		QuickEvent("Strip")
 		; Start primary animations at stage 1
+		StorageUtil.SetFloatValue(Config,"SexLab.LastLeadInEnd", Utility.GetCurrentRealTime())
 		SendThreadEvent("LeadInEnd")
 		Action("Advancing")
 	endIf

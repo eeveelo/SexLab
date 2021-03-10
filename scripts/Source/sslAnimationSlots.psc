@@ -247,7 +247,7 @@ int function FindByName(string FindName)
 	int i = Slotted
 	while i
 		i -= 1
-		if GetBySlot(i).Name == FindName
+		if GetBySlot(i) && GetBySlot(i).Name == FindName
 			return i
 		endIf
 	endWhile
@@ -351,7 +351,7 @@ int function GetCount(bool IgnoreDisabled = true)
 	int i = Slotted
 	while i
 		i -= 1
-		Count += (GetBySlot(i).Enabled as int)
+		Count += ((GetBySlot(i) && GetBySlot(i).Enabled) as int)
 	endWhile
 	return Count
 endFunction
