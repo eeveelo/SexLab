@@ -718,6 +718,26 @@ function InvalidateByAnimation(sslBaseAnimation removing)
 	endWhile
 endFunction
 
+function InvalidateByTags(string Tags)
+	string[] Search   = StringSplit(Tags)
+	Search = ClearEmpty(Search)
+	if Tags == "" || Search.Length == 0
+		return
+	endIf
+	int i = 0
+	int n = 0
+	while n < Search.Length
+		while i < FilterCache.Length
+			if FilterCache[i] != "" && StringUtil.Find(FilterCache[i], "\""+Search[n]+"\"") >= 0
+				Log("InvalidateByTags: Found invalid tag in slot["+i+"]: "+FilterCache[i])
+				InvalidateBySlot(i)
+			endIf
+			i += 1
+		endWhile
+		n += 1
+	endWhile
+endFunction
+
 function InvalidateBySlot(int i)
 	FilterCache[i] = ""
 	CacheTimes[i] = 0.0
@@ -735,7 +755,6 @@ function OutputCacheLog()
 		i += 1
 	endWhile
 endFunction
-
 
 ; ------------------------------------------------------- ;
 ; --- Object MCM Pagination                               ;

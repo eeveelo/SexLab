@@ -389,6 +389,7 @@ state Ready
 			PathToCenter()
 		endIf
 		LockActor()
+		
 		if BedStatus[1] <= 1
 			; pre-move to starting position near other actors
 			Offsets[0] = 0.0
@@ -1500,7 +1501,7 @@ function UnequipStrapon()
 endFunction
 
 function SetStrapon(Form ToStrapon)
-	if Strapon && !HadStrapon
+	if Strapon && !HadStrapon && Strapon != ToStrapon
 		ActorRef.RemoveItem(Strapon, 1, true)
 	endIf
 	Strapon = ToStrapon

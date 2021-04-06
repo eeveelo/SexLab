@@ -760,7 +760,7 @@ endFunction
 bool function CheckSystem()
 	; Check Skyrim Version
 	if !CheckSystemPart("Skyrim")
-		CheckSkyrim.Show()
+		CheckSkyrim.Show(1.5)
 		return false
 	; Check SKSE install
 	elseIf !CheckSystemPart("SKSE")

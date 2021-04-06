@@ -86,7 +86,7 @@ Actor function FindAvailableActorInFaction(Faction FactionRef, ObjectReference C
 	return none
 endFunction
 
-Actor function FindAvailableActorWornForm(int slotMask, ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none, bool AvoidNoStripKeyword = True, bool HasWornForm = True, string RaceKey = "")
+Actor function FindAvailableActorWornForm(int slotMask, ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none, bool AvoidNoStripKeyword = True, bool HasWornForm = True, string RaceKey = "", bool JustSameFloor = False)
 	if !CenterRef || slotMask < 1 || FindGender > 3 || FindGender < -1 || Radius < 0.1
 		return none ; Invalid args
 	endIf
@@ -106,6 +106,7 @@ Actor function FindAvailableActorWornForm(int slotMask, ObjectReference CenterRe
 	Suppressed[11] = IgnoreRef3
 	Suppressed[10] = IgnoreRef4
 	; Attempt 20 times before giving up.
+	float Z = CenterRef.GetPositionZ()
 	int i = Suppressed.Length - 5
 	while i > 0
 		i -= 1
@@ -113,7 +114,8 @@ Actor function FindAvailableActorWornForm(int slotMask, ObjectReference CenterRe
 		if !FoundRef || FoundRef == none
 			return FoundRef ; None means no actor in radius, give up now
 		endIf
-		if (Suppressed.Find(FoundRef) == -1 && CheckActor(FoundRef, FindGender) && (RaceKey == "" || sslCreatureAnimationSlots.GetAllRaceKeys(FoundRef.GetLeveledActorBase().GetRace()).Find(RaceKey) != -1))
+		if (Suppressed.Find(FoundRef) == -1 && (!JustSameFloor || SameFloor(FoundRef, Z, 200)) && CheckActor(FoundRef, FindGender) && (RaceKey == "" || sslCreatureAnimationSlots.GetAllRaceKeys(FoundRef.GetLeveledActorBase().GetRace()).Find(RaceKey) != -1))
+			
 			Form ItemRef = FoundRef.GetWornForm(slotMask)
 			if ((ItemRef && ItemRef != none) == HasWornForm) && (!AvoidNoStripKeyword || !(StorageUtil.FormListHas(none, "NoStrip", ItemRef) || SexLabUtil.HasKeywordSub(ItemRef, "NoStrip")))
 				return FoundRef ; None means no actor in radius, give up now
@@ -223,7 +225,7 @@ Actor[] function SortActorsByAnimation(actor[] Positions, sslBaseAnimation Anima
 		if (Futas[0] + Futas[1]) < 1 && (Genders[0] == ActorCount || Genders[1] == ActorCount)
 			return Positions ; Nothing to sort
 		elseIf Animation && Animation != none && !Animation.HasTag("Futa")
-			if Animation.Males == Animation.PositionCount || Animation.Females == Animation.PositionCount || Genders == Animation.Genders
+			if Animation.Males == Animation.PositionCount || Animation.Females == Animation.PositionCount ;|| Genders == Animation.Genders
 				return Positions ; Nothing to sort
 			endIf
 		endIf
