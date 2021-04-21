@@ -1,6 +1,6 @@
 scriptname sslBaseExpression extends sslBaseObject
 
-import PapyrusUtil
+;import PapyrusUtil
 
 ; Gender Types
 int property Male       = 0 autoreadonly
@@ -68,7 +68,7 @@ function ApplyPhase(Actor ActorRef, int Phase, int Gender)
 endFunction
 
 int function PickPhase(int Strength, int Gender)
-	return ClampInt(((ClampInt(Strength, 1, 100) * Phases[Gender]) / 100), 1, Phases[Gender])
+	return PapyrusUtil.ClampInt(((PapyrusUtil.ClampInt(Strength, 1, 100) * Phases[Gender]) / 100), 1, Phases[Gender])
 endFunction
 
 float[] function SelectPhase(int Strength, int Gender)
@@ -137,7 +137,8 @@ function CloseMouth(Actor ActorRef) global
 endFunction
 
 bool function IsMouthOpen(Actor ActorRef) global
-	return GetPhoneme(ActorRef, 1) >= 0.4 || (GetExpression(ActorRef, true) == 16.0 && GetExpression(ActorRef, false) >= 0.7)
+	float MinMouthSize = (SexLabUtil.GetConfig().OpenMouthSize * 0.01) - 0.1
+	return GetPhoneme(ActorRef, 1) >= MinMouthSize || (GetExpression(ActorRef, true) == 16.0 && GetExpression(ActorRef, false) >= MinMouthSize)
 endFunction
 
 function ClearMFG(Actor ActorRef) global
@@ -157,11 +158,15 @@ function ApplyPresetFloats(Actor ActorRef, float[] Preset) global
 	; MFG
 	if SexLabUtil.GetConfig().HasMFGFix
 		; Set Phoneme
-		while p <= 15
-			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, (Preset[i] * 100.0) as int) ; Oldrim
-			i += 1
-			p += 1
-		endWhile
+		if IsMouthOpen(ActorRef)
+			i = 16 ; escape the Phoneme to prevent override the MouthOpen
+		else
+			while p <= 15
+				MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, (Preset[i] * 100.0) as int) ; Oldrim
+				i += 1
+				p += 1
+			endWhile
+		endIf
 		; Set Modifers
 		while m <= 13
 			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 1, m, (Preset[i] * 100.0) as int) ; Oldrim
@@ -171,14 +176,20 @@ function ApplyPresetFloats(Actor ActorRef, float[] Preset) global
 	; SKSE
 	else
 		; Set Phoneme
-		while p <= 15
-			ActorRef.SetExpressionPhoneme(p, (Preset[i] as float / 100.0))
-			i += 1
-			p += 1
-		endWhile
+		if IsMouthOpen(ActorRef)
+			i = 16 ; escape the Phoneme to prevent override the MouthOpen
+		else
+			while p <= 15
+			;	ActorRef.SetExpressionPhoneme(p, (Preset[i] as float / 100.0))
+				ActorRef.SetExpressionPhoneme(p, Preset[i]) ; is supouse to be / 100.0 already thanks SetIndex function
+				i += 1
+				p += 1
+			endWhile
+		endIf
 		; Set Modifers
 		while m <= 13
-			ActorRef.SetExpressionModifier(m, (Preset[i] as float / 100.0))
+		;	ActorRef.SetExpressionModifier(m, (Preset[i] as float / 100.0))
+			ActorRef.SetExpressionModifier(m, Preset[i]) ; is supouse to be / 100.0 already thanks SetIndex function
 			i += 1
 			m += 1
 		endWhile
@@ -272,7 +283,7 @@ endFunction
 function EmptyPhase(int Phase, int Gender)
 	float[] Preset = new float[32]
 	SetPhase(Phase, Gender, Preset)
-	Phases[Gender] = ClampInt((Phases[Gender] - 1), 0, 5)
+	Phases[Gender] = PapyrusUtil.ClampInt((Phases[Gender] - 1), 0, 5)
 	CountPhases()
 	if Phases[0] == 0 && Phases[1] == 0
 		Enabled = false
@@ -286,7 +297,7 @@ function AddPhase(int Phase, int Gender)
 		Preset[31] = 0.5
 	endIf
 	SetPhase(Phase, Gender, Preset)
-	Phases[Gender] = ClampInt((Phases[Gender] + 1), 0, 5)
+	Phases[Gender] = PapyrusUtil.ClampInt((Phases[Gender] + 1), 0, 5)
 	Enabled = true
 endFunction
 
@@ -419,7 +430,11 @@ int[] function ToIntArray(float[] FloatArray)
 	int i = FloatArray.Length
 	while i
 		i -= 1
-		Output[i] = (FloatArray[i] * 100.0) as int
+		if i == 30
+			Output[i] = FloatArray[i] as int
+		else
+			Output[i] = (FloatArray[i] * 100.0) as int
+		endIf
 	endWhile
 	return Output
 endFunction
@@ -429,7 +444,11 @@ float[] function ToFloatArray(int[] IntArray)
 	int i = IntArray.Length
 	while i
 		i -= 1
-		Output[i] = (IntArray[i] as float) / 100.0
+		if i == 30
+			Output[i] = IntArray[i] as float
+		else
+			Output[i] = (IntArray[i] as float) / 100.0
+		endIf
 	endWhile
 	return Output
 endFunction
@@ -470,13 +489,12 @@ function CountPhases()
 endFunction
 
 function Save(int id = -1)
-	parent.Save(id)
 	CountPhases()
 	Log(Name, "Expressions["+id+"]")
+	parent.Save(id)
 endFunction
 
 function Initialize()
-	parent.Initialize()
 	; Gender phase counts
 	Phases = new int[2]
 	; Extra phase equips
@@ -493,6 +511,7 @@ function Initialize()
 	Female3 = Utility.CreateFloatArray(0)
 	Female4 = Utility.CreateFloatArray(0)
 	Female5 = Utility.CreateFloatArray(0)
+	parent.Initialize()
 endFunction
 
 bool function ExportJson()

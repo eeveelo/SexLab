@@ -576,12 +576,12 @@ event OnSliderOpenST()
 			SetSliderDialogStartValue(Animation.GetSchlong(AdjustKey, Position, Options[1] as int))
 			SetSliderDialogRange(-9, 9)
 			SetSliderDialogInterval(1)
-			SetSliderDialogDefaultValue(0)
+			SetSliderDialogDefaultValue(Animation.GetSchlong("Global", Position, Options[1] as int))
 		else ; Alignments
 			SetSliderDialogStartValue(Animation.GetAdjustment(AdjustKey, Position, Options[1] as int, Options[2] as int))
 			SetSliderDialogRange(-100.0, 100.0)
 			SetSliderDialogInterval(0.50)
-			SetSliderDialogDefaultValue(0.0)
+			SetSliderDialogDefaultValue(Animation.GetAdjustment("Global", Position, Options[1] as int, Options[2] as int))
 		endIf
 	; Animation Editor (Animation Offsets)
 	elseIf Options[0] == "AnimationOffset"
@@ -957,6 +957,7 @@ function AnimationSettings()
 	AddMenuOptionST("UseFade","$SSL_UseFade", FadeOpt[ClampInt(Config.UseFade, 0, 4)])
 	AddToggleOptionST("UseExpressions","$SSL_UseExpressions", Config.UseExpressions)
 	AddToggleOptionST("RefreshExpressions","$SSL_RefreshExpressions", Config.RefreshExpressions)
+	AddSliderOptionST("ExpressionDelay","$SSL_ExpressionDelay", Config.ExpressionDelay, "{1}x")
 	AddToggleOptionST("UseLipSync", "$SSL_UseLipSync", Config.UseLipSync)
 	AddToggleOptionST("SeparateOrgasms","$SSL_SeparateOrgasms", Config.SeparateOrgasms)
 	AddToggleOptionST("OrgasmEffects","$SSL_OrgasmEffects", Config.OrgasmEffects)
@@ -2492,7 +2493,7 @@ endState
 
 state ExpressionTestTarget
 	event OnSelectST()
-		if TargetRef
+		if TargetRef && TargetRef.Is3DLoaded()
 			TestApply(TargetRef)
 		endIf
 	endEvent
@@ -2500,16 +2501,16 @@ endState
 
 function TestApply(Actor ActorRef)
 	string ActorName = ActorRef.GetLeveledActorBase().GetName()
-	sslBaseExpression Exp = Expression
-	if ShowMessage("$SSL_WarnTestExpression{"+ActorName+"}", true, "$Yes", "$No")
-		ShowMessage("$SSL_StartTestExpression{"+Exp.Name+"}_{"+phase+"}", false)
+	if Expression && ShowMessage("$SSL_WarnTestExpression{"+ActorName+"}", true, "$Yes", "$No")
+		ShowMessage("$SSL_StartTestExpression{"+Expression.Name+"}_{"+phase+"}", false)
 		Utility.Wait(0.1)
 		Game.ForceThirdPerson()
-		Exp.ApplyPhase(ActorRef, Phase, ActorRef.GetLeveledActorBase().GetSex())
+		Expression.ApplyPhase(ActorRef, Phase, ActorRef.GetLeveledActorBase().GetSex())
 		Debug.Notification("$SSL_AppliedTestExpression")
 		Utility.WaitMenuMode(15.0)
-		PlayerRef.ResetExpressionOverrides()
-		PlayerRef.ClearExpressionOverride()
+		ActorRef.ResetExpressionOverrides()
+		ActorRef.ClearExpressionOverride()
+		sslBaseExpression.ClearMFG(ActorRef)
 	endIf
 endFunction
 
@@ -2557,12 +2558,32 @@ endState
 state ExpressionAddPhaseFemale
 	event OnSelectST()
 		Expression.AddPhase(Phase, Female)
+		if Phase > 1 && ShowMessage("Do you wish to copy the previous Phase?", true, "$Yes", "$No")
+			float[] PeviousPhase = Expression.GenderPhase((Phase - 1), Female)
+			float[] NewValues = new float[32]
+			int i = PeviousPhase.Length
+			while i
+				i -= 1
+				NewValues[i] = PeviousPhase[i]
+			endWhile
+			Expression.SetPhase(Phase, Female, NewValues)
+		endIf
 		ForcePageReset()
 	endEvent
 endState
 state ExpressionAddPhaseMale
 	event OnSelectST()
 		Expression.AddPhase(Phase, Male)
+		if Phase > 1 && ShowMessage("Do you wish to copy the previous Phase?", true, "$Yes", "$No")
+			float[] PeviousPhase = Expression.GenderPhase((Phase - 1), Male)
+			float[] NewValues = new float[32]
+			int i = PeviousPhase.Length
+			while i
+				i -= 1
+				NewValues[i] = PeviousPhase[i]
+			endWhile
+			Expression.SetPhase(Phase, Male, NewValues)
+		endIf
 		ForcePageReset()
 	endEvent
 endState
@@ -3197,7 +3218,7 @@ endState
 state AutomaticSUCSM
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(Config.AutoSUCSM)
-		SetSliderDialogDefaultValue(3)
+		SetSliderDialogDefaultValue(5)
 		SetSliderDialogRange(1, 20)
 		SetSliderDialogInterval(1)
 	endEvent
@@ -3394,8 +3415,8 @@ endState
 state OpenMouthSize
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(Config.OpenMouthSize)
-		SetSliderDialogDefaultValue(0)
-		SetSliderDialogRange(0, 100)
+		SetSliderDialogDefaultValue(80)
+		SetSliderDialogRange(10, 100)
 		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
@@ -3871,6 +3892,25 @@ state FemaleVoiceDelay
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoFemaleVoiceDelay")
+	endEvent
+endState
+state ExpressionDelay
+	event OnSliderOpenST()
+		SetSliderDialogStartValue(Config.ExpressionDelay)
+		SetSliderDialogDefaultValue(2)
+		SetSliderDialogRange(0.5, 5)
+		SetSliderDialogInterval(0.5)
+	endEvent
+	event OnSliderAcceptST(float value)
+		Config.ExpressionDelay = value
+		SetSliderOptionValueST(Config.ExpressionDelay, "{1}x")
+	endEvent
+	event OnDefaultST()
+		Config.ExpressionDelay = 2.0
+		SetSliderOptionValueST(Config.ExpressionDelay, "{1}x")
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoExpressionDelay")
 	endEvent
 endState
 

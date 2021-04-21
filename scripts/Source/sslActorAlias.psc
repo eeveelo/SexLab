@@ -41,6 +41,7 @@ sslBaseVoice Voice
 VoiceType ActorVoice
 float BaseDelay
 float VoiceDelay
+float ExpressionDelay
 bool IsForcedSilent
 bool UseLipSync
 
@@ -231,6 +232,7 @@ bool function SetActor(Actor ProspectRef)
 		BaseDelay  = Config.MaleVoiceDelay
 	endIf
 	VoiceDelay = BaseDelay
+	ExpressionDelay = Config.ExpressionDelay * VoiceDelay
 	; Init some needed arrays
 	Flags   = new int[5]
 	Offsets = new float[4]
@@ -714,6 +716,7 @@ string CurrentSA
 string PlayingAE
 string CurrentAE
 float LoopDelay
+float LoopExpressionDelay
 state Animating
 
 	function SendAnimation()
@@ -760,13 +763,18 @@ state Animating
 				OrgasmEffect()
 			endIf
 			; Lip sync and refresh expression
-			if LoopDelay >= VoiceDelay && GetState() == "Animating"
-				LoopDelay = 0.0
-				if !IsSilent
-					Voice.PlayMoan(ActorRef, Enjoyment, IsVictim, UseLipSync)
+			if GetState() == "Animating"
+				if LoopDelay >= VoiceDelay
+					LoopDelay = 0.0
+					if !IsSilent
+						Voice.PlayMoan(ActorRef, Enjoyment, IsVictim, UseLipSync)
+					elseIf Voice && Flags[1] == 1
+						Voice.MoveLips(ActorRef)
+					endIf
 				endIf
 				if Expressions && Expressions.Length > 0
-					if Config.RefreshExpressions && !OpenMouth
+					if LoopExpressionDelay >= ExpressionDelay && Config.RefreshExpressions ;&& !OpenMouth
+						LoopExpressionDelay = 0.0
 						Expression = Expressions[Utility.RandomInt(0, (Expressions.Length - 1))]
 						Log("Expression["+Expression.Name+"] ")
 					endIf
@@ -775,6 +783,7 @@ state Animating
 			endIf
 			; Loop
 			LoopDelay += (VoiceDelay * 0.35)
+			LoopExpressionDelay += (ExpressionDelay * 0.35)
 			RegisterForSingleUpdate(VoiceDelay * 0.35)
 		endIf
 	endEvent
@@ -788,6 +797,10 @@ state Animating
 		endIf
 		if VoiceDelay < 0.8
 			VoiceDelay = Utility.RandomFloat(0.8, 1.4) ; Can't have delay shorter than animation update loop
+		endIf
+		ExpressionDelay = Config.ExpressionDelay * VoiceDelay
+		if ExpressionDelay < 0.5
+			ExpressionDelay = 2 * VoiceDelay
 		endIf
 		; Update alias info
 		GetEnjoyment()
@@ -1711,6 +1724,9 @@ function RefreshExpression()
 		; Do nothing
 	elseIf OpenMouth
 		sslBaseExpression.OpenMouth(ActorRef)
+		if Config.RefreshExpressions && Expression && Expression != none && !ActorRef.IsDead() && !ActorRef.IsUnconscious()
+			Expression.Apply(ActorRef, Enjoyment, BaseSex)
+		endIf
 	else
 		if Expression && Expression != none && !ActorRef.IsDead() && !ActorRef.IsUnconscious()
 			sslBaseExpression.CloseMouth(ActorRef)
@@ -1787,7 +1803,7 @@ endFunction
 
 function Initialize()
 	; Clear actor
-	if ActorRef
+	if ActorRef && ActorRef != none
 		; Stop events
 		ClearEvents()
 		; RestoreActorDefaults()

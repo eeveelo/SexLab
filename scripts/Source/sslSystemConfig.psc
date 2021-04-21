@@ -228,6 +228,7 @@ float property CumTimer auto hidden
 float property AutoSUCSM auto hidden
 float property MaleVoiceDelay auto hidden
 float property FemaleVoiceDelay auto hidden
+float property ExpressionDelay auto hidden
 float property VoiceVolume auto hidden
 float property SFXDelay auto hidden
 float property SFXVolume auto hidden
@@ -829,6 +830,9 @@ function Reload()
 	; - SOS/SAM Schlongs (currently unused)
 	HasSchlongs = Game.GetModByName("Schlongs of Skyrim - Core.esm") != 255 || Game.GetModByName("SAM - Shape Atlas for Men.esp") != 255
 
+	; - MFG Fix check
+	HasMFGFix = MfgConsoleFunc.ResetPhonemeModifier(PlayerRef) ; TODO: May need to check another way, some players might get upset that their mfg is reset on load
+
 	if !FadeToBlackHoldImod || FadeToBlackHoldImod == none
 		FadeToBlackHoldImod = Game.GetFormFromFile(0xF756E, "Skyrim.esm") as ImageSpaceModifier ;0xF756D **0xF756E 0x10100C** 0xF756F 0xFDC57 0xFDC58 0x 0x 0x
 	endIf
@@ -841,9 +845,6 @@ function Reload()
 	if !ForceBlurVFX || ForceBlurVFX == none
 		ForceBlurVFX = Game.GetFormFromFile(0x8FC3A, "SexLab.esm") as VisualEffect ;0x101967
 	endIf
-
-	; - MFG Fix check
-	HasMFGFix = MfgConsoleFunc.ResetPhonemeModifier(PlayerRef) ; TODO: May need to check another way, some players might get upset that their mfg is reset on load
 
 	; Clean valid actors list
 	StorageUtil.FormListRemove(self, "ValidActors", PlayerRef, true)
@@ -1062,6 +1063,7 @@ function SetDefaults()
 	AutoSUCSM          = 5.0
 	MaleVoiceDelay     = 5.0
 	FemaleVoiceDelay   = 4.0
+	ExpressionDelay    = 2.0
 	VoiceVolume        = 1.0
 	SFXDelay           = 3.0
 	SFXVolume          = 1.0
@@ -1285,6 +1287,7 @@ function ExportSettings()
 	ExportFloat("AutoSUCSM", AutoSUCSM)
 	ExportFloat("MaleVoiceDelay", MaleVoiceDelay)
 	ExportFloat("FemaleVoiceDelay", FemaleVoiceDelay)
+	ExportFloat("ExpressionDelay", ExpressionDelay)
 	ExportFloat("VoiceVolume", VoiceVolume)
 	ExportFloat("SFXDelay", SFXDelay)
 	ExportFloat("SFXVolume", SFXVolume)
@@ -1417,6 +1420,7 @@ function ImportSettings()
 	AutoSUCSM          = ImportFloat("AutoSUCSM", AutoSUCSM)
 	MaleVoiceDelay     = ImportFloat("MaleVoiceDelay", MaleVoiceDelay)
 	FemaleVoiceDelay   = ImportFloat("FemaleVoiceDelay", FemaleVoiceDelay)
+	ExpressionDelay    = ImportFloat("ExpressionDelay", ExpressionDelay)
 	VoiceVolume        = ImportFloat("VoiceVolume", VoiceVolume)
 	SFXDelay           = ImportFloat("SFXDelay", SFXDelay)
 	SFXVolume          = ImportFloat("SFXVolume", SFXVolume)
