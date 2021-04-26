@@ -760,7 +760,7 @@ endFunction
 bool function CheckSystem()
 	; Check Skyrim Version
 	if !CheckSystemPart("Skyrim")
-		CheckSkyrim.Show()
+		CheckSkyrim.Show(1.5)
 		return false
 	; Check SKSE install
 	elseIf !CheckSystemPart("SKSE")
@@ -1660,8 +1660,8 @@ function RemoveFade(bool forceTest = false)
 		If UseFade < 3
 			if forceTest
 				Utility.WaitMenuMode(5.0)
-				if Black && ForceBlackVFX
-					ForceBlackVFX.Stop(PlayerRef)
+				if ForceVFX
+					ForceVFX.Stop(PlayerRef)
 				endIf
 				FadeEffect.Remove()
 			else

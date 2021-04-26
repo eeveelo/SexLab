@@ -55,6 +55,7 @@ endEvent
 event OnGameReload()
 	Debug.Trace("SexLab MCM Loaded CurrentVerison: "+CurrentVersion+" / "+SexLabUtil.GetVersion())
 	MiscUtil.PrintConsole("SexLab MCM Loaded CurrentVerison: "+CurrentVersion+" / "+SexLabUtil.GetVersion())
+	RegisterForModEvent("SKICP_pageSelected", "OnPageSelected")
 	parent.OnGameReload()
 endEvent
 
@@ -103,6 +104,10 @@ event OnPageReset(string page)
 	if !SystemAlias.IsInstalled
 		UnloadCustomContent()
 		InstallMenu()
+
+	; Animation Editor
+	elseIf ShowAnimationEditor
+		AnimationEditor()
 
 	; Logo Splash
 	elseif page != ""
@@ -166,6 +171,14 @@ event OnPageReset(string page)
 		endIf
 	endIf
 
+endEvent
+
+bool ShowAnimationEditor = false
+event OnPageSelected(String a_eventName, String a_strArg, Float a_numArg, Form a_sender)
+	if ShowAnimationEditor && (a_numArg as int) != Pages.Find("$SSL_ToggleAnimations")
+		Log("Page:"+ a_numArg+" ToggleAnimationsPages:"+Pages.Find("$SSL_ToggleAnimations"),"OnPageSelected")
+		ShowAnimationEditor = false
+	endIf
 endEvent
 
 ; ------------------------------------------------------- ;
@@ -425,9 +438,12 @@ event OnConfigClose()
 	; Realign actors if an adjustment in editor was just made
 	if AutoRealign
 		AutoRealign = false
-		sslThreadController Thread = ThreadSlots.GetActorController(PlayerRef)
+		sslThreadController Thread = Config.GetThreadControlled()
+		if !Thread
+			Thread = ThreadSlots.GetActorController(PlayerRef)
+		endIf
 		if Thread
-			Thread.RealignActors()
+			ModEvent.Send(ModEvent.Create(Thread.Key("RealignActors"))) ; Instead the function because don't allow reopen the Config until the all Menu be fully closed
 		endIf
 	endIf
 endEvent
@@ -470,8 +486,11 @@ event OnHighlightST()
 	; Animation Toggle
 	if Options[0] == "Animation"
 		sslBaseAnimation Slot = AnimToggles[(Options[1] as int)]
-		SetInfoText(Slot.Name+" Tags:\n"+StringJoin(Slot.GetTags(), ", "))
-
+		if Config.MirrorPress(Config.AdjustStage)
+			SetInfoText("$SSL_AnimationEditor") ;ToDo
+		else
+			SetInfoText(Slot.Name+" Tags:\n"+StringJoin(Slot.GetTags(), ", "))
+		endIf
 	; Restrict Strapons
 	elseIf Options[0] == "RestrictStrapons"
 		SetInfoText("$SSL_InfoRestrictStrapons")
@@ -489,10 +508,10 @@ event OnHighlightST()
 	elseIf Options[0] == "Stripping"
 		if Options[2] as int < 32
 			string InfoText = PlayerRef.GetLeveledActorBase().GetName()+" Slot "+((Options[2] as int) + 30)+": "
-			InfoText += GetItemName(PlayerRef.GetWornForm(Armor.GetMaskForSlot((Options[2] as int) + 30)))
+			InfoText += GetItemName(PlayerRef.GetWornForm(Armor.GetMaskForSlot((Options[2] as int) + 30)), "?")
 			if TargetRef
 				InfoText += "\n"+TargetRef.GetLeveledActorBase().GetName()+" Slot "+((Options[2] as int) + 30)+": "
-				InfoText += GetItemName(TargetRef.GetWornForm(Armor.GetMaskForSlot((Options[2] as int) + 30)))
+				InfoText += GetItemName(TargetRef.GetWornForm(Armor.GetMaskForSlot((Options[2] as int) + 30)), "?")
 			endIf
 			SetInfoText(InfoText)
 		else
@@ -507,7 +526,7 @@ event OnHighlightST()
 		else
 			ItemRef = ItemsTarget[(Options[2] as int)]
 		endIf
-		string InfoText = GetItemName(ItemRef)
+		string InfoText = GetItemName(ItemRef, "?")
 		Armor ArmorRef = ItemRef as Armor
 		if ArmorRef
 			int[] SlotMasks = GetAllMaskSlots(ArmorRef.GetSlotMask())
@@ -527,7 +546,7 @@ event OnHighlightST()
 		else
 			ItemRef = ItemsTarget[(Options[2] as int)]
 		endIf
-		string InfoText = GetItemName(ItemRef)
+		string InfoText = GetItemName(ItemRef, "?")
 		Armor ArmorRef = ItemRef as Armor
 		if ArmorRef
 			int[] SlotMasks = GetAllMaskSlots(ArmorRef.GetSlotMask())
@@ -616,14 +635,24 @@ event OnSliderAcceptST(float value)
 	; Animation Editor
 	if Options[0] == "Adjust"
 		; Stage, Slot
-		Animation.SetAdjustment(AdjustKey, Position, Options[1] as int, Options[2] as int, value)
-		Config.ExportProfile(Config.AnimProfile)
-		if Options[2] == "3" ; SOS
-			SetSliderOptionValueST(value, "{0}")
+		if Config.MirrorPress(Config.AdjustStage) && ShowMessage("$SSL_WarnApplyAllStages", true, "$Yes", "$No")
+			int Stage = 1
+			while Stage <= Animation.StageCount
+				Animation.SetAdjustment(AdjustKey, Position, Stage, Options[2] as int, value)
+				Stage += 1
+			endWhile
+			Config.ExportProfile(Config.AnimProfile)
+			ForcePageReset()
 		else
-			SetSliderOptionValueST(value, "{2}")
+			Animation.SetAdjustment(AdjustKey, Position, Options[1] as int, Options[2] as int, value)
+			Config.ExportProfile(Config.AnimProfile)
+			if Options[2] == "3" ; SOS
+				SetSliderOptionValueST(value, "{0}")
+			else
+				SetSliderOptionValueST(value, "{2}")
+			endIf
 		endIf
-		AutoRealign = PlayerRef.IsInFaction(Config.AnimatingFaction) && ThreadSlots.FindActorController(PlayerRef) != -1
+		AutoRealign = PlayerRef.IsInFaction(Config.AnimatingFaction) && (Config.GetThreadControlled() != none || ThreadSlots.FindActorController(PlayerRef) != -1)
 
 	; Animation Editor (Animation Offsets)
 	elseIf Options[0] == "AnimationOffset"
@@ -666,7 +695,11 @@ event OnSliderAcceptST(float value)
 		endIf
 		
 		SetSliderOptionValueST(value as int, "{0}%")
-		ForcePageReset()
+		
+		string StripEditorST = "StripEditor_"+Options[1]+"_"+Options[2]
+		SetTextOptionValueST(GetStripState(ItemRef), false, StripEditorST)
+
+	;	ForcePageReset()
 	endIf
 
 endEvent
@@ -715,7 +748,12 @@ event OnSelectST()
 			ActorLib.MakeNoStrip(ItemRef)
 		endIf
 		SetTextOptionValueST(GetStripState(ItemRef))
-		ForcePageReset()
+	
+		string StripEditorPossibilityST = "StripEditorPossibility_"+Options[1]+"_"+Options[2]
+		SetSliderOptionValueST(StorageUtil.GetIntValue(ItemRef, "SometimesStrip", 100), "{0}%", false, StripEditorPossibilityST)
+		SetOptionFlagsST(SexLabUtil.IntIfElse(ActorLib.IsAlwaysStrip(ItemRef), OPTION_FLAG_NONE, OPTION_FLAG_DISABLED), false, StripEditorPossibilityST)
+		
+	;	ForcePageReset()
 		
 	; Animation Toggle
 	elseIf Options[0] == "Animation"
@@ -728,6 +766,8 @@ event OnSelectST()
 			Animation = Slot
 			AdjustKey = "Global"
 			PreventOverwrite = true
+			ShowAnimationEditor = true
+			ForcePageReset()
 		;	AnimationEditor()
 		else
 			; if ta == 3
@@ -740,6 +780,7 @@ event OnSelectST()
 			if ta == 1
 				Slot.ToggleTag("LeadIn")
 				; Invalite all cache so it can now include this one
+				; LeadIn, Aggressive and Bed animations are not goods for the InvalidateByTags() funtion
 				if Slot.IsCreature
 					CreatureSlots.ClearAnimCache()
 				else
@@ -748,6 +789,7 @@ event OnSelectST()
 			elseIf ta == 2
 				Slot.ToggleTag("Aggressive")
 				; Invalite all cache so it can now include this one
+				; LeadIn, Aggressive and Bed animations are not goods for the InvalidateByTags() funtion
 				if Slot.IsCreature
 					CreatureSlots.ClearAnimCache()
 				else
@@ -757,18 +799,18 @@ event OnSelectST()
 				Slot.ToggleTag(TagFilter)
 				; Invalite all cache so it can now include this one
 				if Slot.IsCreature
-					CreatureSlots.ClearAnimCache()
+					CreatureSlots.InvalidateByTags(TagFilter)
 				else
-					AnimationSlots.ClearAnimCache()
+					AnimationSlots.InvalidateByTags(TagFilter)
 				endIf
 			else
 				Slot.Enabled = !Slot.Enabled
 				if Slot.Enabled
-					; Invalite all cache so it can now include this one
+					; Invalite cache by tags so it can now include this one
 					if Slot.IsCreature
-						CreatureSlots.ClearAnimCache()
+						CreatureSlots.InvalidateByTags(PapyrusUtil.StringJoin(Slot.GetRawTags()))
 					else
-						AnimationSlots.ClearAnimCache()
+						AnimationSlots.InvalidateByTags(PapyrusUtil.StringJoin(Slot.GetRawTags()))
 					endIf
 				else
 					; Invalidate cache containing animation
@@ -1621,19 +1663,27 @@ state AnimationEnabled
 	event OnSelectST()
 		Animation.Enabled = !Animation.Enabled
 		SetToggleOptionValueST(Animation.Enabled)
-		if Animation.IsCreature
-			CreatureSlots.ClearAnimCache()
+		if Animation.Enabled
+			if Animation.IsCreature
+				CreatureSlots.InvalidateByTags(PapyrusUtil.StringJoin(Animation.GetRawTags()))
+			else
+				AnimationSlots.InvalidateByTags(PapyrusUtil.StringJoin(Animation.GetRawTags()))
+			endIf
 		else
-			AnimationSlots.ClearAnimCache()
+			if Animation.IsCreature
+				CreatureSlots.InvalidateByAnimation(Animation)
+			else
+				AnimationSlots.InvalidateByAnimation(Animation)
+			endIf
 		endIf
 	endEvent
 	event OnDefaultST()
 		Animation.Enabled = true
 		SetToggleOptionValueST(Animation.Enabled)
 		if Animation.IsCreature
-			CreatureSlots.ClearAnimCache()
+			CreatureSlots.InvalidateByTags(PapyrusUtil.StringJoin(Animation.GetRawTags()))
 		else
-			AnimationSlots.ClearAnimCache()
+			AnimationSlots.InvalidateByTags(PapyrusUtil.StringJoin(Animation.GetRawTags()))
 		endIf
 	endEvent
 endState
@@ -1737,10 +1787,9 @@ state AnimationAdjustKey
 	endEvent
 	event OnMenuAcceptST(int i)
 		AdjustKey = "Global"
-		if i >= 0
+		if i >= 0 && i < AdjustKeys.Length
 			AdjustKey = AdjustKeys[i]
 		endIf
-		AdjustKey  = AdjustKeys[i]
 		if Config.MirrorPress(Config.AdjustStage) && AdjustKey != "Global" && AdjustKey != "Animation" && ShowMessage("$SSL_WarnProfileRemove{"+AdjustKey+"}", true, "$Yes", "$No")
 			Animation.RestoreOffsets(AdjustKey)
 			AdjustKey = "Global"
@@ -1813,7 +1862,7 @@ state AnimationTest
 				; Add player and target
 				elseIf Animation.PositionCount == 2 && TargetRef
 					Actor[] Positions = sslUtility.MakeActorArray(PlayerRef, TargetRef)
-					Positions = ThreadLib.SortActorsByAnimation(Positions, Animation)
+				;	Positions = ThreadLib.SortActorsByAnimation(Positions, Animation)
 					Thread.AddActor(Positions[0])
 					Thread.AddActor(Positions[1])
 				endIf
@@ -2928,13 +2977,13 @@ Form[] function GetItems(Actor ActorRef, bool FullInventory = false)
 	endIf
 endFunction
 
-string function GetItemName(Form ItemRef)
+string function GetItemName(Form ItemRef, string AltName = "$SSL_Unknown")
 	if ItemRef
 		string Name = ItemRef.GetName()
 		if Name != "" && Name != " "
 			return Name
 		else 
-			return "$SSL_Unknown"
+			return AltName
 		endIf
 	endIf
 	return "none"

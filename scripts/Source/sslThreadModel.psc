@@ -261,6 +261,7 @@ state Making
 	event OnBeginState()
 		Log("Entering Making State")
 		; Action Events
+		RegisterForModEvent(Key("RealignActors"), "RealignActors") ; To be used by the ConfigMenu without the CloseConfig issue
 		RegisterForModEvent(Key(EventTypes[0]+"Done"), EventTypes[0]+"Done")
 		RegisterForModEvent(Key(EventTypes[1]+"Done"), EventTypes[1]+"Done")
 		RegisterForModEvent(Key(EventTypes[2]+"Done"), EventTypes[2]+"Done")
@@ -339,56 +340,6 @@ state Making
 		if ActorCount < 1 || Positions.Length < 1
 			Fatal("No valid actors available for animation")
 			return none
-		endIf
-
-		; ------------------------- ;
-		; --    Locate Center    -- ;
-		; ------------------------- ;
-
-		; Search location marker near player or first position
-		if !CenterRef
-			if HasPlayer
-				CenterOnObject(Game.FindClosestReferenceOfTypeFromRef(Config.LocationMarker, PlayerRef, 750.0))
-			else
-				CenterOnObject(Game.FindClosestReferenceOfTypeFromRef(Config.LocationMarker, Positions[0], 750.0))
-			endIf
-		endIf
-		; Search for nearby bed
-		if !CenterRef && BedStatus[0] != -1
-			CenterOnBed(HasPlayer, 750.0)
-		endIf
-		; Center on fallback choices
-		if !CenterRef
-			if IsAggressive && !(VictimRef.GetFurnitureReference() || VictimRef.IsSwimming() || VictimRef.IsFlying())
-				CenterOnObject(VictimRef)
-			elseIf HasPlayer && !(PlayerRef.GetFurnitureReference() || PlayerRef.IsSwimming() || PlayerRef.IsFlying())
-				CenterOnObject(PlayerRef)
-			else
-				i = 0
-				while i < ActorCount
-					if !(Positions[i].GetFurnitureReference() || Positions[i].IsSwimming() || Positions[i].IsFlying())
-						CenterOnObject(Positions[i])
-						i = ActorCount
-					endIf
-					i += 1
-				endWhile
-			endIf
-		endIf
-		
-		; Center on first actor as last choice
-		if !CenterRef
-			CenterOnObject(Positions[0])
-		endIf
-		
-		if HasCreature
-			Log("CreatureRef: "+CreatureRef)
-			if ActorCount != Creatures
-				Positions = ThreadLib.SortCreatures(Positions)
-			endIf
-		endIf
-		
-		if Config.ShowInMap && !HasPlayer && PlayerRef.GetDistance(CenterRef) > 750
-			SetObjectiveDisplayed(0, True)
 		endIf
 
 		; ------------------------- ;
@@ -542,6 +493,56 @@ state Making
 			endIf
 		endIf
 		
+		; ------------------------- ;
+		; --    Locate Center    -- ;
+		; ------------------------- ;
+
+		; Search location marker near player or first position
+		if !CenterRef
+			if HasPlayer
+				CenterOnObject(Game.FindClosestReferenceOfTypeFromRef(Config.LocationMarker, PlayerRef, 750.0))
+			else
+				CenterOnObject(Game.FindClosestReferenceOfTypeFromRef(Config.LocationMarker, Positions[0], 750.0))
+			endIf
+		endIf
+		; Search for nearby bed
+		if !CenterRef && BedStatus[0] != -1 && ActorCount != Creatures
+			CenterOnBed(HasPlayer, 750.0)
+		endIf
+		; Center on fallback choices
+		if !CenterRef
+			if IsAggressive && !(VictimRef.GetFurnitureReference() || VictimRef.IsSwimming() || VictimRef.IsFlying())
+				CenterOnObject(VictimRef)
+			elseIf HasPlayer && !(PlayerRef.GetFurnitureReference() || PlayerRef.IsSwimming() || PlayerRef.IsFlying())
+				CenterOnObject(PlayerRef)
+			else
+				i = 0
+				while i < ActorCount
+					if !(Positions[i].GetFurnitureReference() || Positions[i].IsSwimming() || Positions[i].IsFlying())
+						CenterOnObject(Positions[i])
+						i = ActorCount
+					endIf
+					i += 1
+				endWhile
+			endIf
+		endIf
+		
+		; Center on first actor as last choice
+		if !CenterRef
+			CenterOnObject(Positions[0])
+		endIf
+		
+		if HasCreature
+			Log("CreatureRef: "+CreatureRef)
+			if ActorCount != Creatures
+				Positions = ThreadLib.SortCreatures(Positions)
+			endIf
+		endIf
+		
+		if Config.ShowInMap && !HasPlayer && PlayerRef.GetDistance(CenterRef) > 750
+			SetObjectiveDisplayed(0, True)
+		endIf
+
 		; Get default foreplay if none and enabled
 		if Config.ForeplayStage && !NoLeadIn && LeadAnimations.Length == 0 && ActorCount > 1 ; && !IsAggressive 
 			if !HasCreature
@@ -819,8 +820,9 @@ function ChangeActors(Actor[] NewPositions)
 	endIf
 	int NewCreatures = NewGenders[2] + NewGenders[3]
 	; Enter making state for alterations
-	SendThreadEvent("ActorChangeStart")
 	UnregisterforUpdate()
+	GoToState("Frozen")
+	SendThreadEvent("ActorChangeStart")
 	
 	; Remove actors no longer present
 	int i = ActorCount
@@ -835,9 +837,10 @@ function ChangeActors(Actor[] NewPositions)
 					Slot.ClearAlias()
 				endIf
 			else
-				Slot.UnlockActor()
 				Slot.StopAnimating(true)
+				Slot.UnlockActor()
 			endIf
+			UnregisterforUpdate()
 		endIf
 	endWhile
 	int aid = -1
@@ -866,9 +869,9 @@ function ChangeActors(Actor[] NewPositions)
 			aid = Utility.RandomInt(0, (CustomAnimations.Length - 1))
 			Animation = CustomAnimations[aid]
 			if NewCreatures > 0
-				NewPositions = ThreadLib.SortCreatures(NewPositions, Animation)
-			else
-				NewPositions = ThreadLib.SortActorsByAnimation(NewPositions, Animation)
+				NewPositions = ThreadLib.SortCreatures(NewPositions) ; required even if is already on the SetAnimation fuction but just the general one
+		;	else ; not longer needed since is already on the SetAnimation fuction
+		;		NewPositions = ThreadLib.SortActorsByAnimation(NewPositions, Animation)
 			endIf
 		endIf
 	elseIf !PrimaryAnimations || PrimaryAnimations.Length < 1 || PrimaryAnimations[0].PositionCount != NewPositions.Length
@@ -942,9 +945,9 @@ function ChangeActors(Actor[] NewPositions)
 			aid = Utility.RandomInt(0, (PrimaryAnimations.Length - 1))
 			Animation = PrimaryAnimations[aid]
 			if NewCreatures > 0
-				NewPositions = ThreadLib.SortCreatures(NewPositions, Animation)
-			else
-				NewPositions = ThreadLib.SortActorsByAnimation(NewPositions, Animation)
+				NewPositions = ThreadLib.SortCreatures(NewPositions) ; required even if is already on the SetAnimation fuction but just the general one
+		;	else ; not longer needed since is already on the SetAnimation fuction
+		;		NewPositions = ThreadLib.SortActorsByAnimation(NewPositions, Animation)
 			endIf
 		endIf
 	endIf
@@ -978,6 +981,7 @@ function ChangeActors(Actor[] NewPositions)
 					Slot.SetVictim(False)
 					Slot.DoUndress = false
 					Slot.PrepareActor()
+					UnregisterforUpdate()
 				;	Slot.StartAnimating()
 				endIf
 			endIf
@@ -996,6 +1000,7 @@ function ChangeActors(Actor[] NewPositions)
 	UpdateAdjustKey()
 	Log(AdjustKey, "Adjustment Profile")
 	; Reset the animation for changed actor count
+	GoToState("Animating")
 	if aid >= 0
 		; End lead in if thread was in it and can't be now
 		if LeadIn && Positions.Length != 2
@@ -1013,7 +1018,7 @@ function ChangeActors(Actor[] NewPositions)
 		;	Action("Advancing")
 		endIf
 	else
-	; Reposition actors
+		; Reposition actors
 		RealignActors()
 	endIf
 ;	RegisterForSingleUpdate(0.1)
@@ -1082,9 +1087,6 @@ int function FilterAnimations()
 		if (!Config.UseCreatureGender && ActorCount == Males) || (Config.UseCreatureGender && ActorCount == (Males + MaleCreatures))
 			BasicFilters = AddString(BasicFilters, "Vaginal")
 		elseIf (HasTag("Vaginal") || HasTag("Pussy") || HasTag("Cunnilingus"))
-		;	if Males > 0 && !Config.UseStrapons
-		;		Positions = ThreadLib.SortActorsByAnimation(Positions)
-		;	endIf
 			if FemaleCreatures <= 0
 				Filters = AddString(Filters, "CreatureSub")
 			endIf
@@ -1107,6 +1109,7 @@ int function FilterAnimations()
 		endIf
 		if Config.UseStrapons && Config.RestrictStrapons && (ActorCount - Creatures) == Females && Females > 0
 			Filters = AddString(Filters, "Straight")
+			Filters = AddString(Filters, "Gay")
 		endIf
 		if BasicFilters.Find("Breast") >= 0
 			Filters = AddString(Filters, "Boobjob")
@@ -1165,7 +1168,7 @@ int function FilterAnimations()
 				endIf
 			endIf
 			; Sort the actors to creature order
-			Positions = ThreadLib.SortCreatures(Positions, Animations[0])
+		;	Positions = ThreadLib.SortCreatures(Positions, Animations[0]) ; not longer needed since is already on the SetAnimation fuction
 
 		; Get default primary animations if none
 		elseIf PrimaryAnimations.Length == 0 ; || (BasicFilters.Length > 1 && PrimaryAnimations[0].CheckTags(BasicFilters, False))
@@ -1367,7 +1370,10 @@ function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 		BedStatus[1] = 0
 		int Pos = Positions.Find(CenterOn as Actor)
 		if Pos >= 0
-			ActorAlias(Positions[Pos]).LockActor()
+			int SlotID = FindSlot(Positions[Pos])
+			if SlotID != -1
+				ActorAlias[SlotID].LockActor()
+			endIf
 			if CenterOn == VictimRef as ObjectReference
 				Log("CenterRef == VictimRef: "+VictimRef)
 			elseIf CenterOn == PlayerRef as ObjectReference
@@ -1781,10 +1787,10 @@ function SyncEventDone(int id)
 			endIf
 			AliasDone[id]  = 0
 			AliasTimer[id] = 0.0
-			ModEvent.Send(ModEvent.Create(Key(EventTypes[id]+"Done")))
 			if id >= kSyncActor && id <= kRefreshActor
 				RemoveFade()
 			endIf
+			ModEvent.Send(ModEvent.Create(Key(EventTypes[id]+"Done")))
 		endIf
 	else
 		Log("WARNING: SyncEventDone("+id+") OUT OF TURN")
