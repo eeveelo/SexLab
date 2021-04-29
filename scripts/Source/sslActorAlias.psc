@@ -1683,7 +1683,7 @@ endProperty
 bool NoUndress
 bool property DoUndress hidden
 	bool function get()
-		if NoUndress
+		if NoUndress || GetState() == "Animating"
 			return false
 		endIf
 		return Config.UndressAnimation

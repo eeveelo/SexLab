@@ -558,6 +558,11 @@ event OnHighlightST()
 		endIf
 		SetInfoText(InfoText)
 
+	; Clean CACHE
+	elseIf Options[0] == "CleanCACHE"
+		SetInfoText("$SSL_InfoCleanCACHE")
+
+	; Error & Warning
 	elseIf Options[0] == "InstallError"
 		SetInfoText("CRITICAL ERROR: File Integrity Framework quest / files overwritten...\nUnable to resolve needed variables. Install unable continue as result.\nUsually caused by incompatible SexLab addons. Disable other SexLab addons (NOT SexLab.esm) one by one and trying again until this message goes away. Alternatively, with TES5Edit after the background loader finishes check for any mods overriding SexLab.esm's Quest records. ScocLB.esm & SexlabScocLB.esp are the most common cause of this problem.\nIf using Mod Organizer, check that no mods are overwriting any of SexLab Frameworks files. There should be no red - symbol under flags for your SexLab Framework install in Mod Organizer.")
 
@@ -846,6 +851,18 @@ event OnSelectST()
 		Config.Strapons = Output
 		ForcePageReset()
 
+	; Clean CACHE
+	elseIf Options[0] == "CleanCACHE"
+		SetOptionFlagsST(OPTION_FLAG_DISABLED)
+		SetTextOptionValueST("Working")
+
+		CreatureSlots.ClearAnimCache()
+		AnimationSlots.ClearAnimCache()
+
+		SetTextOptionValueST("$Done")
+		SetOptionFlagsST(OPTION_FLAG_NONE)
+
+	; Install System
 	elseIf Options[0] == "InstallSystem"
 		SetOptionFlagsST(OPTION_FLAG_DISABLED)
 		SetTextOptionValueST("Working")
@@ -3121,6 +3138,7 @@ function RebuildClean()
 
 	AddHeaderOption("$SSL_Maintenance")
 	AddTextOptionST("StopCurrentAnimations","$SSL_StopCurrentAnimations", "$SSL_ClickHere")
+	AddTextOptionST("CleanCACHE","$SSL_CleanCACHE", "$SSL_ClickHere")
 	AddTextOptionST("RestoreDefaultSettings","$SSL_RestoreDefaultSettings", "$SSL_ClickHere")
 	AddTextOptionST("ResetAnimationRegistry","$SSL_ResetAnimationRegistry", "$SSL_ClickHere")
 	AddTextOptionST("ResetVoiceRegistry","$SSL_ResetVoiceRegistry", "$SSL_ClickHere")
