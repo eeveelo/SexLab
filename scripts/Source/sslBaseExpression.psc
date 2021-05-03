@@ -622,25 +622,7 @@ int function CalcPhase(int Strength, bool IsFemale)
 endFunction
 
 function ApplyPreset(Actor ActorRef, int[] Preset) global
-	int i
-	; Set Phoneme
-	int p
-	while p <= 15
-		ActorRef.SetExpressionPhoneme(p, Preset[i]) ; Skyrim SE
-		; MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, Preset[i]) ; Oldrim
-		i += 1
-		p += 1
-	endWhile
-	; Set Modifers
-	int m
-	while m <= 13
-		ActorRef.SetExpressionModifier(m, Preset[i]) ; Skyrim SE
-		; MfgConsoleFunc.SetPhonemeModifier(ActorRef, 1, m, Preset[i]) ; Oldrim
-		i += 1
-		m += 1
-	endWhile
-	; Set expression
-	ActorRef.SetExpressionOverride(Preset[30], Preset[31])
+	ApplyPresetFloats(ActorRef, ToFloatArray(Preset))
 endFunction
 
 ; ------------------------------------------------------- ;
