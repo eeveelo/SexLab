@@ -2,8 +2,6 @@ scriptname sslSystemConfig extends sslSystemLibrary
 
 ; // TODO: Add a 3rd person mod detection when determining FNIS sensitive variables.
 ; // Disable it when no longer relevant.
-; // Split camera shake and cum effects into 2 seperate options
-
 ; ------------------------------------------------------- ;
 ; --- System Resources                                --- ;
 ; ------------------------------------------------------- ;
@@ -225,6 +223,7 @@ int property AdjustSchlong auto hidden
 
 ; Floats
 float property CumTimer auto hidden
+float property ShakeStrength auto hidden
 float property AutoSUCSM auto hidden
 float property MaleVoiceDelay auto hidden
 float property FemaleVoiceDelay auto hidden
@@ -1104,6 +1103,7 @@ function SetDefaults()
 
 	; Floats
 	CumTimer           = 120.0
+	ShakeStrength      = 0.7
 	AutoSUCSM          = 5.0
 	MaleVoiceDelay     = 5.0
 	FemaleVoiceDelay   = 4.0
@@ -1334,6 +1334,7 @@ function ExportSettings()
 
 	; Floats
 	ExportFloat("CumTimer", CumTimer)
+	ExportFloat("ShakeStrength", ShakeStrength)
 	ExportFloat("AutoSUCSM", AutoSUCSM)
 	ExportFloat("MaleVoiceDelay", MaleVoiceDelay)
 	ExportFloat("FemaleVoiceDelay", FemaleVoiceDelay)
@@ -1469,6 +1470,7 @@ function ImportSettings()
 
 	; Floats
 	CumTimer           = ImportFloat("CumTimer", CumTimer)
+	ShakeStrength      = ImportFloat("ShakeStrength", ShakeStrength)
 	AutoSUCSM          = ImportFloat("AutoSUCSM", AutoSUCSM)
 	MaleVoiceDelay     = ImportFloat("MaleVoiceDelay", MaleVoiceDelay)
 	FemaleVoiceDelay   = ImportFloat("FemaleVoiceDelay", FemaleVoiceDelay)

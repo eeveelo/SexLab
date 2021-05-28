@@ -1011,6 +1011,7 @@ function AnimationSettings()
 	AddToggleOptionST("UseLipSync", "$SSL_UseLipSync", Config.UseLipSync)
 	AddToggleOptionST("SeparateOrgasms","$SSL_SeparateOrgasms", Config.SeparateOrgasms)
 	AddToggleOptionST("OrgasmEffects","$SSL_OrgasmEffects", Config.OrgasmEffects)
+	AddSliderOptionST("ShakeStrength","$SSL_ShakeStrength", (Config.ShakeStrength * 100), "{0}%")
 	AddToggleOptionST("UseCum","$SSL_ApplyCumEffects", Config.UseCum)
 	AddToggleOptionST("AllowFemaleFemaleCum","$SSL_AllowFemaleFemaleCum", Config.AllowFFCum, SexLabUtil.IntIfElse((!Config.UseCum), OPTION_FLAG_DISABLED, OPTION_FLAG_NONE))
 	AddSliderOptionST("CumEffectTimer","$SSL_CumEffectTimer", Config.CumTimer, "$SSL_Seconds")
@@ -4021,6 +4022,25 @@ state ExpressionDelay
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoExpressionDelay")
+	endEvent
+endState
+state ShakeStrength
+	event OnSliderOpenST()
+		SetSliderDialogStartValue(Config.ShakeStrength * 100)
+		SetSliderDialogDefaultValue(70)
+		SetSliderDialogRange(0, 100)
+		SetSliderDialogInterval(5)
+	endEvent
+	event OnSliderAcceptST(float value)
+		Config.ShakeStrength = (value / 100.0)
+		SetSliderOptionValueST(value, "{0}%")
+	endEvent
+	event OnDefaultST()
+		Config.ShakeStrength = 0.7
+		SetSliderOptionValueST((Config.ShakeStrength * 100), "{0}%")
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoShakeStrength")
 	endEvent
 endState
 
