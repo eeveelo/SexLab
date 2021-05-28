@@ -178,6 +178,8 @@ event OnPageSelected(String a_eventName, String a_strArg, Float a_numArg, Form a
 	if ShowAnimationEditor && (a_numArg as int) != Pages.Find("$SSL_ToggleAnimations")
 		Log("Page:"+ a_numArg+" ToggleAnimationsPages:"+Pages.Find("$SSL_ToggleAnimations"),"OnPageSelected")
 		ShowAnimationEditor = false
+	elseIf EditOpenMouth && (a_numArg as int) != Pages.Find("$SSL_ExpressionEditor")
+		EditOpenMouth = false
 	endIf
 endEvent
 
@@ -558,6 +560,10 @@ event OnHighlightST()
 		endIf
 		SetInfoText(InfoText)
 
+	; Advanced OpenMouth Expression
+	elseIf Options[0] == "AdvancedOpenMouth"
+		SetInfoText("$SSL_InfoAdvancedOpenMouth")
+
 	; Clean CACHE
 	elseIf Options[0] == "CleanCACHE"
 		SetInfoText("$SSL_InfoCleanCACHE")
@@ -600,6 +606,22 @@ event OnSliderOpenST()
 			SetSliderDialogInterval(0.50)
 		endIf
 		SetSliderDialogDefaultValue(0.0)
+
+	; Expression OpenMouth Editor
+	elseIf Options[0] == "OpenMouth"
+		; Gender, ID
+		SetSliderDialogStartValue(Config.GetOpenMouthPhonemes(Options[1] as bool)[Options[2] as int] * 100)
+		SetSliderDialogRange(0, 100)
+		SetSliderDialogInterval(1)
+		if Options[2] == "1"
+			if Options[1] as bool
+				SetSliderDialogDefaultValue(100)
+			else
+				SetSliderDialogDefaultValue(80)
+			endIf
+		else
+			SetSliderDialogDefaultValue(0)
+		endIf
 
 	; Expression Editor
 	elseIf Options[0] == "Expression"
@@ -670,6 +692,12 @@ event OnSliderAcceptST(float value)
 			SetSliderOptionValueST(value, "{2}")
 		endIf
 		AutoRealign = PlayerRef.IsInFaction(Config.AnimatingFaction) && ThreadSlots.FindActorController(PlayerRef) != -1
+
+	; Expression OpenMouth Editor
+	elseIf Options[0] == "OpenMouth"
+		; Gender, ID, Value
+		Config.SetOpenMouthPhoneme(Options[1] as bool, Options[2] as int, value / 100.0)
+		SetSliderOptionValueST(value as int)
 
 	; Expression Editor
 	elseIf Options[0] == "Expression"
@@ -836,6 +864,11 @@ event OnSelectST()
 		Slot.ToggleTag(Options[1])
 		SetToggleOptionValueST(Slot.HasTag(Options[1]))
 
+	; Advanced OpenMouth Expressions
+	elseIf Options[0] == "AdvancedOpenMouth"
+		EditOpenMouth = !EditOpenMouth
+		ForcePageReset()
+
 	; Toggle Strapons
 	elseIf Options[0] == "Strapon"
 		int i = Options[1] as int
@@ -996,7 +1029,6 @@ function AnimationSettings()
 	AddToggleOptionST("SeedNPCStats","$SSL_SeedNPCStats", Config.SeedNPCStats)
 	AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", Config.ScaleActors, SexLabUtil.IntIfElse(Config.DisableScale, OPTION_FLAG_DISABLED, OPTION_FLAG_NONE))
 	AddToggleOptionST("DisableScale","$SSL_DisableScale", Config.DisableScale)
-	AddSliderOptionST("OpenMouthSize","$SSL_OpenMouthSize", Config.OpenMouthSize, "{0}%")
 	AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", Config.ForeplayStage)
 	AddSliderOptionST("LeadInCoolDown","$SSL_LeadInCoolDown", Config.LeadInCoolDown, "$SSL_Seconds", SexLabUtil.IntIfElse(Config.ForeplayStage, OPTION_FLAG_NONE, OPTION_FLAG_DISABLED))
 	AddToggleOptionST("FixVictimPos","$SSL_FixVictimPos", Config.FixVictimPos)
@@ -2275,6 +2307,7 @@ endFunction
 
 ; Current edit target
 sslBaseExpression Expression
+bool EditOpenMouth
 int Phase
 ; Type flags
 int property Male = 0 autoreadonly
@@ -2305,9 +2338,8 @@ function ExpressionEditor()
 		FlagM = OPTION_FLAG_DISABLED
 	endIf
 
-	SetTitleText(Expression.Name)
-
 	; Left
+	; 0. OpenMouth Config
 	; 1. Name
 	; 2. Normal Tag
 	; 3. Victim Tag
@@ -2315,13 +2347,51 @@ function ExpressionEditor()
 	; 5. Phase Select
 
 	; Right
+	; 0. OpenMouth Config
 	; 1. <empty>
 	; 2. Export Expression
 	; 3. Import Expression
 	; 4. Player Test
 	; 5. Target Test
 
+	; 0
+	if EditOpenMouth
+		SetTitleText("$SSL_OpenMouthConfig")
+
+		AddSliderOptionST("OpenMouthSize","$SSL_OpenMouthSize", Config.OpenMouthSize, "{0}%")
+
+		AddTextOptionST("AdvancedOpenMouth", "$SSL_EditExpression", "$SSL_ClickHere")
+
+		AddTextOptionST("ExpressionTestPlayer", "$SSL_TestOnPlayer", "$SSL_Apply")
+		AddTextOptionST("ExpressionTestTarget", "$SSL_TestOn{"+TargetName+"}", "$SSL_Apply", Math.LogicalAnd(OPTION_FLAG_NONE, (TargetRef == none) as int))
+
+		; OpenMouth Phoneme settings
+		AddHeaderOption("$SSL_{$SSL_Female}-{$SSL_Phoneme}")
+		AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Phoneme}")
+		int i = 0
+		while i <= 15
+			AddSliderOptionST("OpenMouth_1_"+i, Phonemes[i], Config.OpenMouthFemale[i] * 100, "{0}")
+			AddSliderOptionST("OpenMouth_0_"+i, Phonemes[i], Config.OpenMouthMale[i] * 100, "{0}")
+			i += 1
+		endWhile
+
+		return ; to hide the rest of the options
+
+	else
+		SetTitleText(Expression.Name)
+
+		AddHeaderOption("$SSL_OpenMouthConfig")
+		AddHeaderOption("")
+
+		AddSliderOptionST("OpenMouthSize","$SSL_OpenMouthSize", Config.OpenMouthSize, "{0}%")
+		AddTextOptionST("AdvancedOpenMouth", "$SSL_EditOpenMouth", "$SSL_ClickHere")
+
+	endIf
+
 	; 1
+	AddHeaderOption("$SSL_EditingExpression{"+Expression.Name+"}")
+	AddHeaderOption("")
+
 	AddMenuOptionST("ExpressionSelect", "$SSL_ModifyingExpression", Expression.Name)
 	AddToggleOptionST("ExpressionEnabled", "$SSL_Enabled", Expression.Enabled)
 
@@ -2502,32 +2572,54 @@ endState
 
 state ExpressionTestPlayer
 	event OnSelectST()
-		if PlayerRef.Is3DLoaded()
-			TestApply(PlayerRef)
-		endIf
+		TestApply(PlayerRef)
 	endEvent
 endState
 
 state ExpressionTestTarget
 	event OnSelectST()
-		if TargetRef && TargetRef.Is3DLoaded()
-			TestApply(TargetRef)
-		endIf
+		TestApply(TargetRef)
 	endEvent
 endState
 
 function TestApply(Actor ActorRef)
+	if !ActorRef || !ActorRef.Is3DLoaded()
+		return
+	endIf
 	string ActorName = ActorRef.GetLeveledActorBase().GetName()
-	if Expression && ShowMessage("$SSL_WarnTestExpression{"+ActorName+"}", true, "$Yes", "$No")
+	if EditOpenMouth
+		if ShowMessage("$SSL_WarnTestExpression{"+ActorName+"}", true, "$Yes", "$No")
+			ShowMessage("$SSL_StartTestOpenMouth", false)
+			Utility.Wait(0.1)
+			Game.ForceThirdPerson()
+			sslBaseExpression.OpenMouth(ActorRef)
+			Utility.Wait(0.1)
+			Debug.Notification("$SSL_AppliedTestExpression")
+			Utility.WaitMenuMode(15.0)
+			sslBaseExpression.CloseMouth(ActorRef)
+			ActorRef.ClearExpressionOverride()
+			Debug.Notification("$SSL_RestoredTestExpression")
+		endIf
+	elseIf Expression && ShowMessage("$SSL_WarnTestExpression{"+ActorName+"}", true, "$Yes", "$No")
+		bool testOpenMouth = false
+		if ShowMessage("$SSL_WarnTestExpressionWithOpenMouth", true, "$Yes", "$No")
+			testOpenMouth = true
+		endIf
 		ShowMessage("$SSL_StartTestExpression{"+Expression.Name+"}_{"+phase+"}", false)
 		Utility.Wait(0.1)
 		Game.ForceThirdPerson()
+		if testOpenMouth
+			sslBaseExpression.OpenMouth(ActorRef)
+			Utility.Wait(1.0)
+		endIf
 		Expression.ApplyPhase(ActorRef, Phase, ActorRef.GetLeveledActorBase().GetSex())
+		Utility.Wait(0.1)
 		Debug.Notification("$SSL_AppliedTestExpression")
 		Utility.WaitMenuMode(15.0)
+		sslBaseExpression.ClearMFG(ActorRef)
 		ActorRef.ResetExpressionOverrides()
 		ActorRef.ClearExpressionOverride()
-		sslBaseExpression.ClearMFG(ActorRef)
+		Debug.Notification("$SSL_RestoredTestExpression")
 	endIf
 endFunction
 
@@ -3434,7 +3526,7 @@ state OpenMouthSize
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(Config.OpenMouthSize)
 		SetSliderDialogDefaultValue(80)
-		SetSliderDialogRange(10, 100)
+		SetSliderDialogRange(20, 100)
 		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
@@ -3829,7 +3921,7 @@ state SFXVolume
 	endEvent
 	event OnDefaultST()
 		Config.SFXVolume = 1.0
-		SetSliderOptionValueST(Config.SFXVolume, "{0}%")
+		SetSliderOptionValueST((Config.SFXVolume * 100), "{0}%")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoSFXVolume")
@@ -3849,7 +3941,7 @@ state VoiceVolume
 	endEvent
 	event OnDefaultST()
 		Config.VoiceVolume = 1.0
-		SetSliderOptionValueST(Config.VoiceVolume, "{0}%")
+		SetSliderOptionValueST((Config.VoiceVolume * 100), "{0}%")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoVoiceVolume")

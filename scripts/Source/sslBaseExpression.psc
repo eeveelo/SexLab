@@ -118,27 +118,50 @@ function ClearModifier(Actor ActorRef) global
 endFunction
 
 function OpenMouth(Actor ActorRef) global
-	; ClearPhoneme(ActorRef)
-	if SexLabUtil.GetConfig().HasMFGFix
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, SexLabUtil.GetConfig().OpenMouthSize) 
-	else
-		ActorRef.SetExpressionOverride(16, SexLabUtil.GetConfig().OpenMouthSize)
-	endIf
+;	ClearPhoneme(ActorRef)
+;	if SexLabUtil.GetConfig().HasMFGFix
+;		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, SexLabUtil.GetConfig().OpenMouthSize) 
+;	else
+;		ActorRef.SetExpressionPhoneme(1, (SexLabUtil.GetConfig().OpenMouthSize as float / 100.0))
+;	endIf
+	bool isRealFemale = ActorRef.GetLeveledActorBase().GetSex() == 1
+	int OpenMouthSize = SexLabUtil.GetConfig().OpenMouthSize
+	float[] Phonemes = SexLabUtil.GetConfig().GetOpenMouthPhonemes(isRealFemale)											 
+	Int i = 0
+	while i < Phonemes.length
+		if SexLabUtil.GetConfig().HasMFGFix
+			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, i, PapyrusUtil.ClampInt((OpenMouthSize * Phonemes[i]) as int, 0, 100))
+		else
+			ActorRef.SetExpressionPhoneme(i, PapyrusUtil.ClampInt((OpenMouthSize * Phonemes[i]) as int, 0, 100) as float / 100.0)
+		endIf
+		i += 1
+	endWhile
+	ActorRef.SetExpressionOverride(16, OpenMouthSize)
 	Utility.WaitMenuMode(0.1)
 endFunction
 
 function CloseMouth(Actor ActorRef) global
-	if SexLabUtil.GetConfig().HasMFGFix
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 0)
-	else
-		ActorRef.SetExpressionOverride(7, 50)
-	endIf
+	ClearPhoneme(ActorRef)
+	ActorRef.SetExpressionOverride(7, 50)
 	Utility.WaitMenuMode(0.1)
 endFunction
 
 bool function IsMouthOpen(Actor ActorRef) global
 	float MinMouthSize = (SexLabUtil.GetConfig().OpenMouthSize * 0.01) - 0.1
-	return GetPhoneme(ActorRef, 1) >= MinMouthSize || (GetExpression(ActorRef, true) == 16.0 && GetExpression(ActorRef, false) >= MinMouthSize)
+;	return GetPhoneme(ActorRef, 1) >= MinMouthSize && (GetExpression(ActorRef, true) as Int == 16 && GetExpression(ActorRef, false) >= MinMouthSize)
+	if GetExpression(ActorRef, true) as Int == 16 && GetExpression(ActorRef, false) >= MinMouthSize
+		return true
+	endIf
+	bool isRealFemale = ActorRef.GetLeveledActorBase().GetSex() == 1
+	float[] Phonemes = SexLabUtil.GetConfig().GetOpenMouthPhonemes(isRealFemale)											 
+	Int i = 0
+	while i < Phonemes.length
+		if (GetPhoneme(ActorRef, i) < (MinMouthSize * Phonemes[i]))
+			return false
+		endIf
+		i += 1
+	endWhile
+	return true
 endFunction
 
 function ClearMFG(Actor ActorRef) global
@@ -152,13 +175,18 @@ function ClearMFG(Actor ActorRef) global
 endFunction
 
 function ApplyPresetFloats(Actor ActorRef, float[] Preset) global 
+	if !ActorRef || Preset.Length < 32
+		return
+	endIf
+
 	int i
 	int p
 	int m
 	; MFG
+	bool IsMouthOpen = IsMouthOpen(ActorRef)
 	if SexLabUtil.GetConfig().HasMFGFix
 		; Set Phoneme
-		if IsMouthOpen(ActorRef)
+		if IsMouthOpen
 			i = 16 ; escape the Phoneme to prevent override the MouthOpen
 		else
 			while p <= 15
@@ -176,7 +204,7 @@ function ApplyPresetFloats(Actor ActorRef, float[] Preset) global
 	; SKSE
 	else
 		; Set Phoneme
-		if IsMouthOpen(ActorRef)
+		if IsMouthOpen
 			i = 16 ; escape the Phoneme to prevent override the MouthOpen
 		else
 			while p <= 15
@@ -195,7 +223,9 @@ function ApplyPresetFloats(Actor ActorRef, float[] Preset) global
 		endWhile
 	endIf
 	; Set expression
-	ActorRef.SetExpressionOverride(Preset[30] as int, (Preset[31] * 100.0) as int)
+	if !IsMouthOpen
+		ActorRef.SetExpressionOverride(Preset[30] as int, (Preset[31] * 100.0) as int)
+	endIf
 endFunction
 
 
@@ -425,7 +455,7 @@ int function ValidatePreset(float[] Preset)
 	return 0
 endFunction
 
-int[] function ToIntArray(float[] FloatArray)
+int[] function ToIntArray(float[] FloatArray) global
 	int[] Output = new int[32]
 	int i = FloatArray.Length
 	while i
@@ -439,7 +469,7 @@ int[] function ToIntArray(float[] FloatArray)
 	return Output
 endFunction
 
-float[] function ToFloatArray(int[] IntArray)
+float[] function ToFloatArray(int[] IntArray) global
 	float[] Output = new float[32]
 	int i = IntArray.Length
 	while i

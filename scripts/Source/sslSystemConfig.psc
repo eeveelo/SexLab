@@ -246,6 +246,8 @@ bool[] property StripAggressor auto hidden
 float[] property StageTimer auto hidden
 float[] property StageTimerLeadIn auto hidden
 float[] property StageTimerAggr auto hidden
+float[] property OpenMouthMale auto hidden
+float[] property OpenMouthFemale auto hidden
 float[] property BedOffset auto hidden
 
 ; Compatibility checks
@@ -313,6 +315,48 @@ endFunction
 
 bool function HasCreatureInstall()
 	return FNIS.GetMajor(true) > 0 && (Game.GetCameraState() < 8 || PlayerRef.GetAnimationVariableInt("SexLabCreature") > 0)
+endFunction
+
+float[] function GetOpenMouthPhonemes(bool isFemale)
+	float[] Phonemes = new float[16]
+	int i = 16
+	while i > 0
+		i -= 1
+		if isFemale
+			Phonemes[i] = OpenMouthFemale[i]
+		else
+			Phonemes[i] = OpenMouthMale[i]
+		endIf
+	endWhile
+	return Phonemes
+endFunction
+
+bool function SetOpenMouthPhonemes(bool isFemale, float[] Phonemes)
+	if Phonemes.Length < 16
+		return false
+	endIf
+	int i = 16
+	while i > 0
+		i -= 1
+		if isFemale
+			OpenMouthFemale[i] = PapyrusUtil.ClampFloat(Phonemes[i], 0.0, 1.0)
+		else
+			OpenMouthMale[i] = PapyrusUtil.ClampFloat(Phonemes[i], 0.0, 1.0)
+		endIf
+	endWhile
+	return true
+endFunction
+
+bool function SetOpenMouthPhoneme(bool isFemale, int id, float value)
+	if id < 0 || id > 15 
+		return false
+	endIf
+	if isFemale
+		OpenMouthFemale[id] = PapyrusUtil.ClampFloat(value, 0.0, 1.0)
+	else
+		OpenMouthMale[id] = PapyrusUtil.ClampFloat(value, 0.0, 1.0)
+	endIf
+	return true
 endFunction
 
 bool function AddCustomBed(Form BaseBed, int BedType = 0)
@@ -1173,6 +1217,12 @@ function SetDefaults()
 	StageTimerAggr[3] = 10.0
 	StageTimerAggr[4] = 4.0
 
+	OpenMouthMale = new float[16]
+	OpenMouthMale[1] = 0.8
+
+	OpenMouthFemale = new float[16]
+	OpenMouthFemale[1] = 1.0
+
 	BedOffset = new float[4]
 	BedOffset[0] = 0.0
 	BedOffset[2] = 37.0
@@ -1305,6 +1355,8 @@ function ExportSettings()
 	ExportFloatList("StageTimer", StageTimer, 5)
 	ExportFloatList("StageTimerLeadIn", StageTimerLeadIn, 5)
 	ExportFloatList("StageTimerAggr", StageTimerAggr, 5)
+	ExportFloatList("OpenMouthMale", OpenMouthMale, 16)
+	ExportFloatList("OpenMouthFemale", OpenMouthFemale, 16)
 
 	; Export object registry
 	ExportAnimations()
@@ -1438,6 +1490,8 @@ function ImportSettings()
 	StageTimer         = ImportFloatList("StageTimer", StageTimer, 5)
 	StageTimerLeadIn   = ImportFloatList("StageTimerLeadIn", StageTimerLeadIn, 5)
 	StageTimerAggr     = ImportFloatList("StageTimerAggr", StageTimerAggr, 5)
+	OpenMouthMale      = ImportFloatList("OpenMouthMale", OpenMouthMale, 16)
+	OpenMouthFemale    = ImportFloatList("OpenMouthFemale", OpenMouthFemale, 16)
 
 	; Import object registry
 	ImportAnimations()
