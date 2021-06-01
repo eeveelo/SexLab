@@ -4,7 +4,6 @@ import PapyrusUtil
 
 SexLabFramework property SexLab auto
 sslSystemConfig property Config auto
-sslSystemAlias property SystemAlias auto
 Actor property PlayerRef auto
 
 Actor Ref1
@@ -23,15 +22,7 @@ endFunction
 
 
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
-	if !SystemAlias
-		SystemAlias = SexLab.GetNthAlias(0) as sslSystemAlias
-	endIf
-	if SystemAlias.RegisterDebugActor(TargetRef)
-		Debug.Notification(TargetRef.GetLeveledActorBase().GetName() + " has an irresistible aura about them")
-	else
-		Debug.Notification("The spell fizzles and fails to affect " + TargetRef.GetLeveledActorBase().GetName())
-	endIf
-	;SexLab.QuickStart(CasterRef, TargetRef)
+	SexLab.QuickStart(CasterRef, TargetRef)
 
 
 	; Log("CheckFriend(TargetRef) 1: "+CheckFriend(TargetRef))
