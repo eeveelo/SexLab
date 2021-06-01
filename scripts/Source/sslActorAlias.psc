@@ -938,7 +938,7 @@ state Animating
 		Log(ActorName + ": Orgasms["+Orgasms+"] FullEnjoyment ["+FullEnjoyment+"] BaseEnjoyment["+BaseEnjoyment+"] Enjoyment["+Enjoyment+"]")
 		if Config.OrgasmEffects
 			; Shake camera for player
-			if IsPlayer && Config.ShakeStrength > 0 && Game.GetCameraState() >= 8
+			if IsPlayer && Config.ShakeStrength > 0.0 && Game.GetCameraState() >= 8
 				Game.ShakeCamera(none, Config.ShakeStrength, Config.ShakeStrength + 1.0)
 			endIf
 			; Play SFX/Voice
