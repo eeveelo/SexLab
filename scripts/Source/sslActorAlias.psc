@@ -41,6 +41,7 @@ sslBaseVoice Voice
 VoiceType ActorVoice
 float BaseDelay
 float VoiceDelay
+float ExpressionDelay
 bool IsForcedSilent
 bool UseLipSync
 
@@ -69,7 +70,7 @@ float NioScale
 float LastOrgasm
 int BestRelation
 int BaseEnjoyment
-int Enjoyment
+int FullEnjoyment
 int Orgasms
 int NthTranslation
 
@@ -231,6 +232,7 @@ bool function SetActor(Actor ProspectRef)
 		BaseDelay  = Config.MaleVoiceDelay
 	endIf
 	VoiceDelay = BaseDelay
+	ExpressionDelay = Config.ExpressionDelay * VoiceDelay
 	; Init some needed arrays
 	Flags   = new int[5]
 	Offsets = new float[4]
@@ -487,23 +489,30 @@ state Ready
 			; Get sex skills of partner/player
 			Skills       = Stats.GetSkillLevels(SkilledActor)
 			OwnSkills    = Stats.GetSkillLevels(ActorRef)
-			BestRelation = Thread.GetHighestPresentRelationshipRank(ActorRef)
+			BaseEnjoyment -= CalcEnjoyment(SkillBonus, Skills, LeadIn, IsFemale, Thread.Timers[0], 1, StageCount)
 			if IsVictim
 				BestRelation = Thread.GetLowestPresentRelationshipRank(ActorRef)
-				BaseEnjoyment = Utility.RandomFloat(BestRelation, BestRelation + ((OwnSkills[Stats.kLewd]*0.5) as int)) as int
-			elseIf IsAggressor
-				float OwnLewd = Stats.GetSkillLevel(ActorRef, "Lewd", 0.3)
-				BaseEnjoyment = Utility.RandomFloat(OwnLewd, ((Skills[Stats.kLewd]*1.3) as int) + (OwnLewd*1.7)) as int
+				BaseEnjoyment += ((BestRelation - 3) + PapyrusUtil.ClampInt((OwnSkills[Stats.kLewd]-OwnSkills[Stats.kPure]) as int,-6,6)) * Utility.RandomInt(1, 10)
 			else
-				BaseEnjoyment = Utility.RandomFloat(BestRelation, ((Skills[Stats.kLewd]*1.5) as int) + (BestRelation*1.5)) as int
-			endIf
-			if BaseEnjoyment < 0
-				BaseEnjoyment = 0
-			elseIf BaseEnjoyment > 25
-				BaseEnjoyment = 25
+				BestRelation = Thread.GetHighestPresentRelationshipRank(ActorRef)
+				if IsAggressor
+					BaseEnjoyment += (-1*((BestRelation - 4) + PapyrusUtil.ClampInt(((Skills[Stats.kLewd]-Skills[Stats.kPure])-(OwnSkills[Stats.kLewd]-OwnSkills[Stats.kPure])) as int,-6,6))) * Utility.RandomInt(1, 10)
+				else
+					BaseEnjoyment += (BestRelation + PapyrusUtil.ClampInt((((Skills[Stats.kLewd]+OwnSkills[Stats.kLewd])*0.5)-((Skills[Stats.kPure]+OwnSkills[Stats.kPure])*0.5)) as int,0,6)) * Utility.RandomInt(1, 10)
+				endIf
 			endIf
 		else
-			BaseEnjoyment = Utility.RandomInt(0, 10)
+			if IsVictim
+				BestRelation = Thread.GetLowestPresentRelationshipRank(ActorRef)
+				BaseEnjoyment += (BestRelation - 3) * Utility.RandomInt(1, 10)
+			else
+				BestRelation = Thread.GetHighestPresentRelationshipRank(ActorRef)
+				if IsAggressor
+					BaseEnjoyment += (-1*(BestRelation - 4)) * Utility.RandomInt(1, 10)
+				else
+					BaseEnjoyment += (BestRelation + 3) * Utility.RandomInt(1, 10)
+				endIf
+			endIf
 		endIf
 		LogInfo += "BaseEnjoyment["+BaseEnjoyment+"]"
 		Log(LogInfo)
@@ -714,6 +723,7 @@ string CurrentSA
 string PlayingAE
 string CurrentAE
 float LoopDelay
+float LoopExpressionDelay
 state Animating
 
 	function SendAnimation()
@@ -754,27 +764,37 @@ state Animating
 			Thread.EndAnimation(true)
 		;	return don't work on events
 		else ; Else instead of return becouse return don't work on Events (at less in LE)
-			; Trigger orgasm
-			GetEnjoyment()
-			if !NoOrgasm && Enjoyment >= 100 && Stage < StageCount && SeparateOrgasms && (RealTime[0] - LastOrgasm) > 10.0
-				OrgasmEffect()
-			endIf
 			; Lip sync and refresh expression
-			if LoopDelay >= VoiceDelay && GetState() == "Animating"
-				LoopDelay = 0.0
-				if !IsSilent
-					Voice.PlayMoan(ActorRef, Enjoyment, IsVictim, UseLipSync)
+			if GetState() == "Animating"
+				int Enjoyment = GetEnjoyment()
+				int Strength = Enjoyment
+				if FullEnjoyment < 0 && IsVictim
+					Strength = Math.Abs(PapyrusUtil.ClampInt(FullEnjoyment, -100, 0)) as int
 				endIf
 				if Expressions && Expressions.Length > 0
-					if Config.RefreshExpressions && !OpenMouth
+					if LoopExpressionDelay >= ExpressionDelay && Config.RefreshExpressions ;&& !OpenMouth
+						LoopExpressionDelay = 0.0
 						Expression = Expressions[Utility.RandomInt(0, (Expressions.Length - 1))]
 						Log("Expression["+Expression.Name+"] ")
 					endIf
 					RefreshExpression()
 				endIf
+				if LoopDelay >= VoiceDelay
+					LoopDelay = 0.0
+					if !IsSilent
+						Voice.PlayMoan(ActorRef, Strength, IsVictim, UseLipSync)
+					elseIf Voice && Flags[1] == 1
+						Voice.MoveLips(ActorRef)
+					endIf
+				endIf
+			; Trigger orgasm
+			if !NoOrgasm && SeparateOrgasms && Enjoyment >= 100 && Stage < StageCount && (RealTime[0] - LastOrgasm) > (((IsMale as int)+(IsCreature as int)+1)* 10.0)
+				OrgasmEffect()
+			endIf
 			endIf
 			; Loop
 			LoopDelay += (VoiceDelay * 0.35)
+			LoopExpressionDelay += (ExpressionDelay * 0.35)
 			RegisterForSingleUpdate(VoiceDelay * 0.35)
 		endIf
 	endEvent
@@ -788,6 +808,10 @@ state Animating
 		endIf
 		if VoiceDelay < 0.8
 			VoiceDelay = Utility.RandomFloat(0.8, 1.4) ; Can't have delay shorter than animation update loop
+		endIf
+		ExpressionDelay = Config.ExpressionDelay * VoiceDelay
+		if ExpressionDelay < 0.5
+			ExpressionDelay = 2 * VoiceDelay
 		endIf
 		; Update alias info
 		GetEnjoyment()
@@ -890,9 +914,13 @@ state Animating
 		if !ActorRef
 			return
 		endIf
+		int Enjoyment = GetEnjoyment()
 		if !Forced && (NoOrgasm || Thread.DisableOrgasms)
 			; Orgasm Disabled for actor or whole thread
 			return 
+		elseIf !Forced && Enjoyment < 100
+			; Someone need to do better job to make you happy
+			return
 		elseIf Math.Abs(Utility.GetCurrentRealTime() - LastOrgasm) < 5.0
 			Log("Excessive OrgasmEffect Triggered")
 			return
@@ -900,17 +928,6 @@ state Animating
 		UnregisterForUpdate()
 		LastOrgasm = StartedAt
 		Orgasms   += 1
-		; Reset enjoyment build up, if using multiple orgasms
-		int FullEnjoyment = Enjoyment
-		if Config.SeparateOrgasms
-			BaseEnjoyment -= Enjoyment
-			if IsSkilled
-				BaseEnjoyment += Utility.RandomInt((BestRelation + 10), PapyrusUtil.ClampInt(((Skills[Stats.kLewd]*1.5) as int) + (BestRelation + 10), 10, 35))
-			else
-				BaseEnjoyment += Utility.RandomInt(5, 35)
-			endIf
-			FullEnjoyment  = GetEnjoyment()
-		endIf
 		; Send an orgasm event hook with actor and orgasm count
 		int eid = ModEvent.Create("SexLabOrgasm")
 		ModEvent.PushForm(eid, ActorRef)
@@ -918,11 +935,11 @@ state Animating
 		ModEvent.PushInt(eid, Orgasms)
 		ModEvent.Send(eid)
 		TrackedEvent("Orgasm")
-		Log(ActorName + ": Orgasms["+Orgasms+"] Enjoyment ["+Enjoyment+"] BaseEnjoyment["+BaseEnjoyment+"] FullEnjoyment["+FullEnjoyment+"]")
+		Log(ActorName + ": Orgasms["+Orgasms+"] FullEnjoyment ["+FullEnjoyment+"] BaseEnjoyment["+BaseEnjoyment+"] Enjoyment["+Enjoyment+"]")
 		if Config.OrgasmEffects
 			; Shake camera for player
-			if IsPlayer && Game.GetCameraState() >= 8
-				Game.ShakeCamera(none, 0.70, 2.0)
+			if IsPlayer && Config.ShakeStrength > 0.0 && Game.GetCameraState() >= 8
+				Game.ShakeCamera(none, Config.ShakeStrength, Config.ShakeStrength + 1.0)
 			endIf
 			; Play SFX/Voice
 			if !IsSilent
@@ -945,6 +962,31 @@ state Animating
 			endIf
 		endIf
 		Utility.WaitMenuMode(0.2)
+		; Reset enjoyment build up, if using multiple orgasms
+		if Config.SeparateOrgasms
+			if IsSkilled
+				if IsVictim
+					BaseEnjoyment += ((BestRelation - 3) + PapyrusUtil.ClampInt((OwnSkills[Stats.kLewd]-OwnSkills[Stats.kPure]) as int,-6,6)) * Utility.RandomInt(5, 10)
+				else
+					if IsAggressor
+						BaseEnjoyment += (-1*((BestRelation - 4) + PapyrusUtil.ClampInt(((Skills[Stats.kLewd]-Skills[Stats.kPure])-(OwnSkills[Stats.kLewd]-OwnSkills[Stats.kPure])) as int,-6,6))) * Utility.RandomInt(5, 10)
+					else
+						BaseEnjoyment += (BestRelation + PapyrusUtil.ClampInt((((Skills[Stats.kLewd]+OwnSkills[Stats.kLewd])*0.5)-((Skills[Stats.kPure]+OwnSkills[Stats.kPure])*0.5)) as int,0,6)) * Utility.RandomInt(5, 10)
+					endIf
+				endIf
+			else
+				if IsVictim
+					BaseEnjoyment += (BestRelation - 3) * Utility.RandomInt(5, 10)
+				else
+					if IsAggressor
+						BaseEnjoyment += (-1*(BestRelation - 4)) * Utility.RandomInt(5, 10)
+					else
+						BaseEnjoyment += (BestRelation + 3) * Utility.RandomInt(5, 10)
+					endIf
+				endIf
+			endIf
+		;	Enjoyment = GetEnjoyment()
+		endIf
 		; VoiceDelay = 0.8
 		RegisterForSingleUpdate(0.8)
 	endFunction
@@ -1380,28 +1422,30 @@ endfunction
 
 int function GetEnjoyment()
 	if !ActorRef
-		Enjoyment = 0
+		Log(ActorName +"- WARNING: ActorRef if Missing or Invalid", "GetEnjoyment()")
+		FullEnjoyment = 0
 		return 0
 	elseif !IsSkilled
-		Enjoyment = (PapyrusUtil.ClampFloat(((RealTime[0] - StartedAt) + 1.0) / 5.0, 0.0, 40.0) + ((Stage as float / StageCount as float) * 60.0)) as int
+			FullEnjoyment = BaseEnjoyment + (PapyrusUtil.ClampFloat(((RealTime[0] - StartedAt) + 1.0) / 5.0, 0.0, 40.0) + ((Stage as float / StageCount as float) * 60.0)) as int
 	else
 		if Position == 0
 			Thread.RecordSkills()
 			Thread.SetBonuses()
 		endIf
-		Enjoyment = BaseEnjoyment + CalcEnjoyment(SkillBonus, Skills, LeadIn, IsFemale, (RealTime[0] - StartedAt), Stage, StageCount)
-		; Log("Enjoyment["+Enjoyment+"] / BaseEnjoyment["+BaseEnjoyment+"] / FullEnjoyment["+(Enjoyment - BaseEnjoyment)+"]")
+		FullEnjoyment = BaseEnjoyment + CalcEnjoyment(SkillBonus, Skills, LeadIn, IsFemale, (RealTime[0] - StartedAt), Stage, StageCount)
+		; Log("FullEnjoyment["+FullEnjoyment+"] / BaseEnjoyment["+BaseEnjoyment+"] / Enjoyment["+(FullEnjoyment - BaseEnjoyment)+"]")
 	endIf
-	
-	int FullEnjoyment = Enjoyment - BaseEnjoyment
-	
-	if Enjoyment < 0
-		Enjoyment = 0
-	elseIf Enjoyment > 100
-		Enjoyment = 100
+
+	return PapyrusUtil.ClampInt(FullEnjoyment - (Orgasms * 100), 0, 100)
+endFunction
+
+int function GetPain()
+	if !ActorRef
+		Log(ActorName +"- WARNING: ActorRef if Missing or Invalid", "GetPain()")
+		return 0
 	endIf
-	
-	return FullEnjoyment
+	GetEnjoyment()
+	return Math.Abs(PapyrusUtil.ClampInt(FullEnjoyment, -100, 0)) as int
 endFunction
 
 function ApplyCum()
@@ -1425,23 +1469,7 @@ bool function IsOrgasmAllowed()
 endFunction
 
 bool function NeedsOrgasm()
-	return GetEnjoyment() >= 100 && Enjoyment >= 100
-endFunction
-
-int function GetPain()
-	if !ActorRef
-		Log(ActorName +"- WARNING: ActorRef if Missing or Invalid", "GetPain()")
-		return 0
-	endIf
-	float Pain = Math.Abs(100.0 - PapyrusUtil.ClampFloat(GetEnjoyment() as float, 1.0, 99.0))
-	if IsVictim
-		Pain *= 1.5
-	elseIf Animation.HasTag("Aggressive") || Animation.HasTag("Rough")
-		Pain *= 0.8
-	else
-		Pain *= 0.3
-	endIf
-	return PapyrusUtil.ClampInt(Pain as int, 0, 100)
+	return GetEnjoyment() >= 100 && FullEnjoyment >= 100
 endFunction
 
 function SetVoice(sslBaseVoice ToVoice = none, bool ForceSilence = false)
@@ -1670,7 +1698,7 @@ endProperty
 bool NoUndress
 bool property DoUndress hidden
 	bool function get()
-		if NoUndress
+		if NoUndress || GetState() == "Animating"
 			return false
 		endIf
 		return Config.UndressAnimation
@@ -1711,10 +1739,24 @@ function RefreshExpression()
 		; Do nothing
 	elseIf OpenMouth
 		sslBaseExpression.OpenMouth(ActorRef)
+		Utility.Wait(1.0)
+		if Config.RefreshExpressions && Expression && Expression != none && !ActorRef.IsDead() && !ActorRef.IsUnconscious()
+			int Strength
+			Strength = GetEnjoyment()
+			if FullEnjoyment < 0 && IsVictim
+				Strength = Math.Abs(PapyrusUtil.ClampInt(FullEnjoyment, -100, 0)) as int
+			endIf
+			Expression.Apply(ActorRef, Strength, BaseSex)
+		endIf
 	else
 		if Expression && Expression != none && !ActorRef.IsDead() && !ActorRef.IsUnconscious()
+			int Strength
+			Strength = GetEnjoyment()
+			if FullEnjoyment < 0 && IsVictim
+				Strength = Math.Abs(PapyrusUtil.ClampInt(FullEnjoyment, -100, 0)) as int
+			endIf
 			sslBaseExpression.CloseMouth(ActorRef)
-			Expression.Apply(ActorRef, Enjoyment, BaseSex)
+			Expression.Apply(ActorRef, Strength, BaseSex)
 		elseIf sslBaseExpression.IsMouthOpen(ActorRef)
 			sslBaseExpression.CloseMouth(ActorRef)			
 		endIf
@@ -1787,7 +1829,7 @@ endFunction
 
 function Initialize()
 	; Clear actor
-	if ActorRef
+	if ActorRef && ActorRef != none
 		; Stop events
 		ClearEvents()
 		; RestoreActorDefaults()
@@ -1827,7 +1869,7 @@ function Initialize()
 	Orgasms        = 0
 	BestRelation   = 0
 	BaseEnjoyment  = 0
-	Enjoyment      = 0
+	FullEnjoyment  = 0
 	PathingFlag    = 0
 	; Floats
 	LastOrgasm     = 0.0

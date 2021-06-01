@@ -29,32 +29,53 @@ bool property Creature hidden
 	endFunction
 endProperty
 
+function MoveLips(Actor ActorRef, Sound SoundRef = none)
+	if !ActorRef
+		return
+	endIf
+	
+	bool HasMFG = Config.HasMFGFix
+	float SavedP = sslBaseExpression.GetPhoneme(ActorRef, 1)
+	float ReferenceP = SavedP
+	if ReferenceP > 0.8
+		ReferenceP = 0.8
+	elseIf ReferenceP < 0.3
+		ReferenceP = 0.3
+	endIf
+	int MinP = ((ReferenceP - 0.1)*100) as int
+	int MaxP = ((ReferenceP + 0.2)*100) as int
+	if HasMFG
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, (ReferenceP*100) as int)
+	else
+		ActorRef.SetExpressionPhoneme(1, ((MinP as float)*0.01))
+	endIf
+	Utility.WaitMenuMode(0.1)
+	if SoundRef != none
+		SoundRef.Play(ActorRef)
+	endIf
+	TransitUp(ActorRef, MinP, MaxP)
+	Utility.WaitMenuMode(0.2)
+	TransitDown(ActorRef, MaxP, MinP)
+	Utility.WaitMenuMode(0.1)
+	if HasMFG
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, (SavedP*100) as int)
+	else
+		ActorRef.SetExpressionPhoneme(1, SavedP as float)
+	endIf
+endFunction
+
 function PlayMoan(Actor ActorRef, int Strength = 30, bool IsVictim = false, bool UseLipSync = false)
+	if !ActorRef
+		return
+	endIf
+	
 	Sound SoundRef = GetSound(Strength, IsVictim)
 	if SoundRef
 		if !UseLipSync
 			SoundRef.Play(ActorRef)
 			Utility.WaitMenuMode(0.4)
 		else
-			bool HasMFG = Config.HasMFGFix
-			float SavedP = sslBaseExpression.GetPhoneme(ActorRef, 1)
-			if HasMFG
-				MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, 20)
-			else
-				ActorRef.SetExpressionPhoneme(1, 0.2)
-			endIf
-			Utility.WaitMenuMode(0.1)
-			SoundRef.Play(ActorRef)
-			TransitUp(ActorRef, 20, 50)
-			Utility.WaitMenuMode(0.2)
-			TransitDown(ActorRef, 50, 20)
-			Utility.WaitMenuMode(0.1)
-			if HasMFG
-				MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, (SavedP*100) as int)
-			else
-				ActorRef.SetExpressionPhoneme(1, SavedP as float)
-			endIf
-
+			MoveLips(ActorRef, SoundRef)
 		endIf
 	endIf
 endFunction
@@ -64,6 +85,10 @@ function Moan(Actor ActorRef, int Strength = 30, bool IsVictim = false)
 endFunction
 
 function MoanNoWait(Actor ActorRef, int Strength = 30, bool IsVictim = false, float Volume = 1.0)
+	if !ActorRef
+		return
+	endIf
+	
 	if Volume > 0.0
 		Sound SoundRef = GetSound(Strength, IsVictim)
 		if SoundRef
@@ -83,12 +108,20 @@ Sound function GetSound(int Strength, bool IsVictim = false)
 endFunction
 
 function LipSync(Actor ActorRef, int Strength, bool ForceUse = false)
+	if !ActorRef
+		return
+	endIf
+	
 	if (ForceUse || Config.UseLipSync) && Game.GetCameraState() != 3
 		ActorRef.Say(LipSync)
 	endIf
 endFunction
 
 function TransitUp(Actor ActorRef, int from, int to)
+	if !ActorRef
+		return
+	endIf
+	
 	if Config.HasMFGFix
 		while from < to
 			from += 2
@@ -103,6 +136,10 @@ function TransitUp(Actor ActorRef, int from, int to)
 endFunction
 
 function TransitDown(Actor ActorRef, int from, int to)
+	if !ActorRef
+		return
+	endIf
+	
 	if Config.HasMFGFix
 		while from > to
 			from -= 2

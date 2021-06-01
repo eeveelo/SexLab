@@ -506,7 +506,7 @@ state Making
 			endIf
 		endIf
 		; Search for nearby bed
-		if !CenterRef && BedStatus[0] != -1 && ActorCount != Creatures
+		if !CenterRef && BedStatus[0] != -1 && ActorCount != Creatures && !HasTag("Furniture")
 			CenterOnBed(HasPlayer, 750.0)
 		endIf
 		; Center on fallback choices
