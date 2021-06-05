@@ -55,6 +55,7 @@ endEvent
 event OnGameReload()
 	Debug.Trace("SexLab MCM Loaded CurrentVerison: "+CurrentVersion+" / "+SexLabUtil.GetVersion())
 	MiscUtil.PrintConsole("SexLab MCM Loaded CurrentVerison: "+CurrentVersion+" / "+SexLabUtil.GetVersion())
+	RegisterForModEvent("SKICP_pageSelected", "OnPageSelected")
 	parent.OnGameReload()
 endEvent
 
@@ -103,71 +104,83 @@ event OnPageReset(string page)
 	if !SystemAlias.IsInstalled
 		UnloadCustomContent()
 		InstallMenu()
-		return
+
+	; Animation Editor
+	elseIf ShowAnimationEditor
+		AnimationEditor()
 
 	; Logo Splash
-	elseif page == ""
-		if !PreventOverwrite && PlayerRef.IsInFaction(Config.AnimatingFaction) && (Config.GetThreadControlled() != none || ThreadSlots.FindActorController(PlayerRef) != -1)
+	elseif page != ""
+		UnloadCustomContent()
+
+		; General Animation Settings
+		if page == "$SSL_AnimationSettings"
+			AnimationSettings()
+
+		; Toggle Voices + SFX Settings
+		elseIf page == "$SSL_SoundSettings"
+			SoundSettings()
+
+		; Hotkey selection & config
+		elseIf page == "$SSL_PlayerHotkeys"
+			PlayerHotkeys()
+
+		; Timers & stripping
+		elseIf page == "$SSL_TimersStripping"
+			TimersStripping()
+
+		elseIf page == "$SSL_StripEditor"
+			StripEditor()
+
+		; Toggle animations on/off
+		elseIf page == "$SSL_ToggleAnimations"
+			ToggleAnimations()
+
+		; Animation Editor
+		elseIf page == "$SSL_AnimationEditor"
+			AnimationEditor()
+
+		; Toggle expressions
+		; elseIf page == "$SSL_ExpressionSelection"
+		; 	ToggleExpressions()
+
+		; Toggle/Edit Expressions
+		elseIf page == "$SSL_ExpressionEditor"
+			ExpressionEditor()
+
+		; Player Diary/Journal
+		elseIf page == "$SSL_SexDiary" || page == "$SSL_SexJournal"
+			SexDiary()
+
+		; Player Diary/Journal
+		; elseIf page == "Troubleshoot"
+		; 	Troubleshoot()
+
+		; System rebuild & clean
+		elseIf page == "$SSL_RebuildClean"
+			RebuildClean()
+
+		endIf
+	else
+		if PlayerRef.IsInFaction(Config.AnimatingFaction) && (Config.GetThreadControlled() != none || ThreadSlots.FindActorController(PlayerRef) != -1)
 			UnloadCustomContent()
 			AnimationEditor()
 			PreventOverwrite = true
-			return
 		else
 			LoadCustomContent("SexLab/logo.dds", 184, 31)
-			return
 		endIf
 	endIf
-	UnloadCustomContent()
 
-	; General Animation Settings
-	if page == "$SSL_AnimationSettings"
-		AnimationSettings()
+endEvent
 
-	; Toggle Voices + SFX Settings
-	elseIf page == "$SSL_SoundSettings"
-		SoundSettings()
-
-	; Hotkey selection & config
-	elseIf page == "$SSL_PlayerHotkeys"
-		PlayerHotkeys()
-
-	; Timers & stripping
-	elseIf page == "$SSL_TimersStripping"
-		TimersStripping()
-
-	elseIf page == "$SSL_StripEditor"
-		StripEditor()
-
-	; Toggle animations on/off
-	elseIf page == "$SSL_ToggleAnimations"
-		ToggleAnimations()
-
-	; Animation Editor
-	elseIf page == "$SSL_AnimationEditor"
-		AnimationEditor()
-
-	; Toggle expressions
-	; elseIf page == "$SSL_ExpressionSelection"
-	; 	ToggleExpressions()
-
-	; Toggle/Edit Expressions
-	elseIf page == "$SSL_ExpressionEditor"
-		ExpressionEditor()
-
-	; Player Diary/Journal
-	elseIf page == "$SSL_SexDiary" || page == "$SSL_SexJournal"
-		SexDiary()
-
-	; Player Diary/Journal
-	; elseIf page == "Troubleshoot"
-	; 	Troubleshoot()
-
-	; System rebuild & clean
-	elseIf page == "$SSL_RebuildClean"
-		RebuildClean()
-
+bool ShowAnimationEditor = false
+event OnPageSelected(String a_eventName, String a_strArg, Float a_numArg, Form a_sender)
+	if ShowAnimationEditor && (a_numArg as int) != Pages.Find("$SSL_ToggleAnimations")
+		Log("Page:"+ a_numArg+" ToggleAnimationsPages:"+Pages.Find("$SSL_ToggleAnimations"),"OnPageSelected")
+		ShowAnimationEditor = false
+	elseIf EditOpenMouth && (a_numArg as int) != Pages.Find("$SSL_ExpressionEditor")
+		EditOpenMouth = false
 	endIf
-
 endEvent
 
 ; ------------------------------------------------------- ;
@@ -411,6 +424,8 @@ endEvent
 
 event OnConfigClose()
 	ModEvent.Send(ModEvent.Create("SexLabConfigClose"))
+	; Reset animation editor auto selector
+	PreventOverwrite = false
 	; Clear Player Partners array
 	if PlayerPartners
 		PlayerPartners = PapyrusUtil.ActorArray(0)
@@ -425,9 +440,12 @@ event OnConfigClose()
 	; Realign actors if an adjustment in editor was just made
 	if AutoRealign
 		AutoRealign = false
-		sslThreadController Thread = ThreadSlots.GetActorController(PlayerRef)
+		sslThreadController Thread = Config.GetThreadControlled()
+		if !Thread
+			Thread = ThreadSlots.GetActorController(PlayerRef)
+		endIf
 		if Thread
-			Thread.RealignActors()
+			ModEvent.Send(ModEvent.Create(Thread.Key("RealignActors"))) ; Instead the function because don't allow reopen the Config until the all Menu be fully closed
 		endIf
 	endIf
 endEvent
@@ -470,7 +488,18 @@ event OnHighlightST()
 	; Animation Toggle
 	if Options[0] == "Animation"
 		sslBaseAnimation Slot = AnimToggles[(Options[1] as int)]
-		SetInfoText(Slot.Name+" Tags:\n"+StringJoin(Slot.GetTags(), ", "))
+		if Config.MirrorPress(Config.AdjustStage)
+			SetInfoText("$SSL_AnimationEditor") ;ToDo
+		else
+			SetInfoText(Slot.Name+" Tags:\n"+StringJoin(Slot.GetTags(), ", "))
+		endIf
+	; Restrict Strapons
+	elseIf Options[0] == "RestrictStrapons"
+		SetInfoText("$SSL_InfoRestrictStrapons")
+
+	; Fix Victim Position
+	elseIf Options[0] == "FixVictimPos"
+		SetInfoText("$SSL_InfoFixVictimPos")
 
 	; Voice Toggle
 	elseIf Options[0] == "Voice"
@@ -481,10 +510,10 @@ event OnHighlightST()
 	elseIf Options[0] == "Stripping"
 		if Options[2] as int < 32
 			string InfoText = PlayerRef.GetLeveledActorBase().GetName()+" Slot "+((Options[2] as int) + 30)+": "
-			InfoText += GetItemName(PlayerRef.GetWornForm(Armor.GetMaskForSlot((Options[2] as int) + 30)))
+			InfoText += GetItemName(PlayerRef.GetWornForm(Armor.GetMaskForSlot((Options[2] as int) + 30)), "?")
 			if TargetRef
 				InfoText += "\n"+TargetRef.GetLeveledActorBase().GetName()+" Slot "+((Options[2] as int) + 30)+": "
-				InfoText += GetItemName(TargetRef.GetWornForm(Armor.GetMaskForSlot((Options[2] as int) + 30)))
+				InfoText += GetItemName(TargetRef.GetWornForm(Armor.GetMaskForSlot((Options[2] as int) + 30)), "?")
 			endIf
 			SetInfoText(InfoText)
 		else
@@ -499,7 +528,7 @@ event OnHighlightST()
 		else
 			ItemRef = ItemsTarget[(Options[2] as int)]
 		endIf
-		string InfoText = GetItemName(ItemRef)
+		string InfoText = GetItemName(ItemRef, "?")
 		Armor ArmorRef = ItemRef as Armor
 		if ArmorRef
 			int[] SlotMasks = GetAllMaskSlots(ArmorRef.GetSlotMask())
@@ -519,7 +548,7 @@ event OnHighlightST()
 		else
 			ItemRef = ItemsTarget[(Options[2] as int)]
 		endIf
-		string InfoText = GetItemName(ItemRef)
+		string InfoText = GetItemName(ItemRef, "?")
 		Armor ArmorRef = ItemRef as Armor
 		if ArmorRef
 			int[] SlotMasks = GetAllMaskSlots(ArmorRef.GetSlotMask())
@@ -531,6 +560,15 @@ event OnHighlightST()
 		endIf
 		SetInfoText(InfoText)
 
+	; Advanced OpenMouth Expression
+	elseIf Options[0] == "AdvancedOpenMouth"
+		SetInfoText("$SSL_InfoAdvancedOpenMouth")
+
+	; Clean CACHE
+	elseIf Options[0] == "CleanCACHE"
+		SetInfoText("$SSL_InfoCleanCACHE")
+
+	; Error & Warning
 	elseIf Options[0] == "InstallError"
 		SetInfoText("CRITICAL ERROR: File Integrity Framework quest / files overwritten...\nUnable to resolve needed variables. Install unable continue as result.\nUsually caused by incompatible SexLab addons. Disable other SexLab addons (NOT SexLab.esm) one by one and trying again until this message goes away. Alternatively, with TES5Edit after the background loader finishes check for any mods overriding SexLab.esm's Quest records. ScocLB.esm & SexlabScocLB.esp are the most common cause of this problem.\nIf using Mod Organizer, check that no mods are overwriting any of SexLab Frameworks files. There should be no red - symbol under flags for your SexLab Framework install in Mod Organizer.")
 
@@ -549,12 +587,12 @@ event OnSliderOpenST()
 			SetSliderDialogStartValue(Animation.GetSchlong(AdjustKey, Position, Options[1] as int))
 			SetSliderDialogRange(-9, 9)
 			SetSliderDialogInterval(1)
-			SetSliderDialogDefaultValue(0)
+			SetSliderDialogDefaultValue(Animation.GetSchlong("Global", Position, Options[1] as int))
 		else ; Alignments
 			SetSliderDialogStartValue(Animation.GetAdjustment(AdjustKey, Position, Options[1] as int, Options[2] as int))
 			SetSliderDialogRange(-100.0, 100.0)
 			SetSliderDialogInterval(0.50)
-			SetSliderDialogDefaultValue(0.0)
+			SetSliderDialogDefaultValue(Animation.GetAdjustment("Global", Position, Options[1] as int, Options[2] as int))
 		endIf
 	; Animation Editor (Animation Offsets)
 	elseIf Options[0] == "AnimationOffset"
@@ -568,6 +606,22 @@ event OnSliderOpenST()
 			SetSliderDialogInterval(0.50)
 		endIf
 		SetSliderDialogDefaultValue(0.0)
+
+	; Expression OpenMouth Editor
+	elseIf Options[0] == "OpenMouth"
+		; Gender, ID
+		SetSliderDialogStartValue(Config.GetOpenMouthPhonemes(Options[1] as bool)[Options[2] as int] * 100)
+		SetSliderDialogRange(0, 100)
+		SetSliderDialogInterval(1)
+		if Options[2] == "1"
+			if Options[1] as bool
+				SetSliderDialogDefaultValue(100)
+			else
+				SetSliderDialogDefaultValue(80)
+			endIf
+		else
+			SetSliderDialogDefaultValue(0)
+		endIf
 
 	; Expression Editor
 	elseIf Options[0] == "Expression"
@@ -608,14 +662,24 @@ event OnSliderAcceptST(float value)
 	; Animation Editor
 	if Options[0] == "Adjust"
 		; Stage, Slot
-		Animation.SetAdjustment(AdjustKey, Position, Options[1] as int, Options[2] as int, value)
-		Config.ExportProfile(Config.AnimProfile)
-		if Options[2] == "3" ; SOS
-			SetSliderOptionValueST(value, "{0}")
+		if Config.MirrorPress(Config.AdjustStage) && ShowMessage("$SSL_WarnApplyAllStages", true, "$Yes", "$No")
+			int Stage = 1
+			while Stage <= Animation.StageCount
+				Animation.SetAdjustment(AdjustKey, Position, Stage, Options[2] as int, value)
+				Stage += 1
+			endWhile
+			Config.ExportProfile(Config.AnimProfile)
+			ForcePageReset()
 		else
-			SetSliderOptionValueST(value, "{2}")
+			Animation.SetAdjustment(AdjustKey, Position, Options[1] as int, Options[2] as int, value)
+			Config.ExportProfile(Config.AnimProfile)
+			if Options[2] == "3" ; SOS
+				SetSliderOptionValueST(value, "{0}")
+			else
+				SetSliderOptionValueST(value, "{2}")
+			endIf
 		endIf
-		AutoRealign = PlayerRef.IsInFaction(Config.AnimatingFaction) && ThreadSlots.FindActorController(PlayerRef) != -1
+		AutoRealign = PlayerRef.IsInFaction(Config.AnimatingFaction) && (Config.GetThreadControlled() != none || ThreadSlots.FindActorController(PlayerRef) != -1)
 
 	; Animation Editor (Animation Offsets)
 	elseIf Options[0] == "AnimationOffset"
@@ -628,6 +692,12 @@ event OnSliderAcceptST(float value)
 			SetSliderOptionValueST(value, "{2}")
 		endIf
 		AutoRealign = PlayerRef.IsInFaction(Config.AnimatingFaction) && ThreadSlots.FindActorController(PlayerRef) != -1
+
+	; Expression OpenMouth Editor
+	elseIf Options[0] == "OpenMouth"
+		; Gender, ID, Value
+		Config.SetOpenMouthPhoneme(Options[1] as bool, Options[2] as int, value / 100.0)
+		SetSliderOptionValueST(value as int)
 
 	; Expression Editor
 	elseIf Options[0] == "Expression"
@@ -658,7 +728,11 @@ event OnSliderAcceptST(float value)
 		endIf
 		
 		SetSliderOptionValueST(value as int, "{0}%")
-		ForcePageReset()
+		
+		string StripEditorST = "StripEditor_"+Options[1]+"_"+Options[2]
+		SetTextOptionValueST(GetStripState(ItemRef), false, StripEditorST)
+
+	;	ForcePageReset()
 	endIf
 
 endEvent
@@ -679,6 +753,16 @@ event OnSelectST()
 		Stripping[i] = !Stripping[i]
 		SetToggleOptionValueST(Stripping[i])
 
+	; Restrict Strapons
+	elseIf Options[0] == "RestrictStrapons"
+		Config.RestrictStrapons = !Config.RestrictStrapons
+		SetToggleOptionValueST(Config.RestrictStrapons)
+		
+	; Fix Victim Position
+	elseIf Options[0] == "FixVictimPos"
+		Config.FixVictimPos = !Config.FixVictimPos
+		SetToggleOptionValueST(Config.FixVictimPos)
+		
 	; Strip Editor
 	elseIf Options[0] == "StripEditor"
 		Form ItemRef
@@ -697,7 +781,12 @@ event OnSelectST()
 			ActorLib.MakeNoStrip(ItemRef)
 		endIf
 		SetTextOptionValueST(GetStripState(ItemRef))
-		ForcePageReset()
+	
+		string StripEditorPossibilityST = "StripEditorPossibility_"+Options[1]+"_"+Options[2]
+		SetSliderOptionValueST(StorageUtil.GetIntValue(ItemRef, "SometimesStrip", 100), "{0}%", false, StripEditorPossibilityST)
+		SetOptionFlagsST(SexLabUtil.IntIfElse(ActorLib.IsAlwaysStrip(ItemRef), OPTION_FLAG_NONE, OPTION_FLAG_DISABLED), false, StripEditorPossibilityST)
+		
+	;	ForcePageReset()
 		
 	; Animation Toggle
 	elseIf Options[0] == "Animation"
@@ -710,6 +799,8 @@ event OnSelectST()
 			Animation = Slot
 			AdjustKey = "Global"
 			PreventOverwrite = true
+			ShowAnimationEditor = true
+			ForcePageReset()
 		;	AnimationEditor()
 		else
 			; if ta == 3
@@ -722,6 +813,7 @@ event OnSelectST()
 			if ta == 1
 				Slot.ToggleTag("LeadIn")
 				; Invalite all cache so it can now include this one
+				; LeadIn, Aggressive and Bed animations are not goods for the InvalidateByTags() funtion
 				if Slot.IsCreature
 					CreatureSlots.ClearAnimCache()
 				else
@@ -730,6 +822,7 @@ event OnSelectST()
 			elseIf ta == 2
 				Slot.ToggleTag("Aggressive")
 				; Invalite all cache so it can now include this one
+				; LeadIn, Aggressive and Bed animations are not goods for the InvalidateByTags() funtion
 				if Slot.IsCreature
 					CreatureSlots.ClearAnimCache()
 				else
@@ -739,18 +832,18 @@ event OnSelectST()
 				Slot.ToggleTag(TagFilter)
 				; Invalite all cache so it can now include this one
 				if Slot.IsCreature
-					CreatureSlots.ClearAnimCache()
+					CreatureSlots.InvalidateByTags(TagFilter)
 				else
-					AnimationSlots.ClearAnimCache()
+					AnimationSlots.InvalidateByTags(TagFilter)
 				endIf
 			else
 				Slot.Enabled = !Slot.Enabled
 				if Slot.Enabled
-					; Invalite all cache so it can now include this one
+					; Invalite cache by tags so it can now include this one
 					if Slot.IsCreature
-						CreatureSlots.ClearAnimCache()
+						CreatureSlots.InvalidateByTags(PapyrusUtil.StringJoin(Slot.GetRawTags()))
 					else
-						AnimationSlots.ClearAnimCache()
+						AnimationSlots.InvalidateByTags(PapyrusUtil.StringJoin(Slot.GetRawTags()))
 					endIf
 				else
 					; Invalidate cache containing animation
@@ -771,6 +864,11 @@ event OnSelectST()
 		Slot.ToggleTag(Options[1])
 		SetToggleOptionValueST(Slot.HasTag(Options[1]))
 
+	; Advanced OpenMouth Expressions
+	elseIf Options[0] == "AdvancedOpenMouth"
+		EditOpenMouth = !EditOpenMouth
+		ForcePageReset()
+
 	; Toggle Strapons
 	elseIf Options[0] == "Strapon"
 		int i = Options[1] as int
@@ -786,6 +884,18 @@ event OnSelectST()
 		Config.Strapons = Output
 		ForcePageReset()
 
+	; Clean CACHE
+	elseIf Options[0] == "CleanCACHE"
+		SetOptionFlagsST(OPTION_FLAG_DISABLED)
+		SetTextOptionValueST("Working")
+
+		CreatureSlots.ClearAnimCache()
+		AnimationSlots.ClearAnimCache()
+
+		SetTextOptionValueST("$Done")
+		SetOptionFlagsST(OPTION_FLAG_NONE)
+
+	; Install System
 	elseIf Options[0] == "InstallSystem"
 		SetOptionFlagsST(OPTION_FLAG_DISABLED)
 		SetTextOptionValueST("Working")
@@ -795,6 +905,25 @@ event OnSelectST()
 		SetTextOptionValueST("$SSL_ClickHere")
 		SetOptionFlagsST(OPTION_FLAG_NONE)
 		ForcePageReset()
+	endIf
+endEvent
+
+event OnDefaultST()
+	string[] Options = MapOptions()
+
+	; Comment
+	if Options[0] == ""
+	
+	; Restrict Strapons
+	elseIf Options[0] == "RestrictStrapons"
+		Config.RestrictStrapons = False
+		SetTextOptionValueST(Config.RestrictStrapons)
+	
+	; Fix Victim Position
+	elseIf Options[0] == "FixVictimPos"
+		Config.FixVictimPos = True
+		SetTextOptionValueST(Config.FixVictimPos)
+	
 	endIf
 endEvent
 
@@ -878,9 +1007,11 @@ function AnimationSettings()
 	AddMenuOptionST("UseFade","$SSL_UseFade", FadeOpt[ClampInt(Config.UseFade, 0, 4)])
 	AddToggleOptionST("UseExpressions","$SSL_UseExpressions", Config.UseExpressions)
 	AddToggleOptionST("RefreshExpressions","$SSL_RefreshExpressions", Config.RefreshExpressions)
+	AddSliderOptionST("ExpressionDelay","$SSL_ExpressionDelay", Config.ExpressionDelay, "{1}x")
 	AddToggleOptionST("UseLipSync", "$SSL_UseLipSync", Config.UseLipSync)
 	AddToggleOptionST("SeparateOrgasms","$SSL_SeparateOrgasms", Config.SeparateOrgasms)
 	AddToggleOptionST("OrgasmEffects","$SSL_OrgasmEffects", Config.OrgasmEffects)
+	AddSliderOptionST("ShakeStrength","$SSL_ShakeStrength", (Config.ShakeStrength * 100), "{0}%")
 	AddToggleOptionST("UseCum","$SSL_ApplyCumEffects", Config.UseCum)
 	AddToggleOptionST("AllowFemaleFemaleCum","$SSL_AllowFemaleFemaleCum", Config.AllowFFCum, SexLabUtil.IntIfElse((!Config.UseCum), OPTION_FLAG_DISABLED, OPTION_FLAG_NONE))
 	AddSliderOptionST("CumEffectTimer","$SSL_CumEffectTimer", Config.CumTimer, "$SSL_Seconds")
@@ -899,14 +1030,16 @@ function AnimationSettings()
 	AddToggleOptionST("SeedNPCStats","$SSL_SeedNPCStats", Config.SeedNPCStats)
 	AddToggleOptionST("ScaleActors","$SSL_EvenActorsHeight", Config.ScaleActors, SexLabUtil.IntIfElse(Config.DisableScale, OPTION_FLAG_DISABLED, OPTION_FLAG_NONE))
 	AddToggleOptionST("DisableScale","$SSL_DisableScale", Config.DisableScale)
-	AddSliderOptionST("OpenMouthSize","$SSL_OpenMouthSize", Config.OpenMouthSize, "{0}%")
 	AddToggleOptionST("ForeplayStage","$SSL_PreSexForeplay", Config.ForeplayStage)
+	AddSliderOptionST("LeadInCoolDown","$SSL_LeadInCoolDown", Config.LeadInCoolDown, "$SSL_Seconds", SexLabUtil.IntIfElse(Config.ForeplayStage, OPTION_FLAG_NONE, OPTION_FLAG_DISABLED))
+	AddToggleOptionST("FixVictimPos","$SSL_FixVictimPos", Config.FixVictimPos)
 	AddToggleOptionST("RestrictAggressive","$SSL_RestrictAggressive", Config.RestrictAggressive)
 	AddToggleOptionST("RestrictSameSex","$SSL_RestrictSameSex", Config.RestrictSameSex)
 	AddToggleOptionST("RestrictGenderTag","$SSL_RestrictGenderTag", Config.RestrictGenderTag)
 	AddToggleOptionST("UndressAnimation","$SSL_UndressAnimation", Config.UndressAnimation)
 	AddToggleOptionST("RedressVictim","$SSL_VictimsRedress", Config.RedressVictim)
 	AddToggleOptionST("StraponsFemale","$SSL_FemalesUseStrapons", Config.UseStrapons)
+	AddToggleOptionST("RestrictStrapons","$SSL_RestrictStrapons", Config.RestrictStrapons)
 	AddToggleOptionST("RemoveHeelEffect","$SSL_RemoveHeelEffect", Config.RemoveHeelEffect)
 	AddToggleOptionST("BedRemoveStanding","$SSL_BedRemoveStanding", Config.BedRemoveStanding)
 	AddToggleOptionST("RagdollEnd","$SSL_RagdollEnding", Config.RagdollEnd)
@@ -1019,7 +1152,10 @@ endFunction
 
 state AdjustStage
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.AdjustStage = newKeyCode
 			SetKeyMapOptionValueST(Config.AdjustStage)
 		endIf
@@ -1034,7 +1170,10 @@ state AdjustStage
 endState
 state AdjustChange
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.AdjustChange = newKeyCode
 			SetKeyMapOptionValueST(Config.AdjustChange)
 		endIf
@@ -1049,7 +1188,10 @@ state AdjustChange
 endState
 state AdjustForward
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.AdjustForward = newKeyCode
 			SetKeyMapOptionValueST(Config.AdjustForward)
 		endIf
@@ -1064,7 +1206,10 @@ state AdjustForward
 endState
 state AdjustUpward
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.AdjustUpward = newKeyCode
 			SetKeyMapOptionValueST(Config.AdjustUpward)
 		endIf
@@ -1079,7 +1224,10 @@ state AdjustUpward
 endState
 state AdjustSideways
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.AdjustSideways = newKeyCode
 			SetKeyMapOptionValueST(Config.AdjustSideways)
 		endIf
@@ -1094,7 +1242,10 @@ state AdjustSideways
 endState
 state AdjustSchlong
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.AdjustSchlong = newKeyCode
 			SetKeyMapOptionValueST(Config.AdjustSchlong)
 		endIf
@@ -1109,7 +1260,10 @@ state AdjustSchlong
 endState
 state RotateScene
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.RotateScene = newKeyCode
 			SetKeyMapOptionValueST(Config.RotateScene)
 		endIf
@@ -1124,7 +1278,10 @@ state RotateScene
 endState
 state RestoreOffsets
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.RestoreOffsets = newKeyCode
 			SetKeyMapOptionValueST(Config.RestoreOffsets)
 		endIf
@@ -1140,7 +1297,10 @@ endState
 
 state RealignActors
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.RealignActors = newKeyCode
 			SetKeyMapOptionValueST(Config.RealignActors)
 		endIf
@@ -1155,7 +1315,10 @@ state RealignActors
 endState
 state AdvanceAnimation
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.AdvanceAnimation = newKeyCode
 			SetKeyMapOptionValueST(Config.AdvanceAnimation)
 		endIf
@@ -1170,7 +1333,10 @@ state AdvanceAnimation
 endState
 state ChangeAnimation
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.ChangeAnimation = newKeyCode
 			SetKeyMapOptionValueST(Config.ChangeAnimation)
 		endIf
@@ -1185,7 +1351,10 @@ state ChangeAnimation
 endState
 state ChangePositions
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.ChangePositions = newKeyCode
 			SetKeyMapOptionValueST(Config.ChangePositions)
 		endIf
@@ -1200,7 +1369,10 @@ state ChangePositions
 endState
 state MoveSceneLocation
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.MoveScene = newKeyCode
 			SetKeyMapOptionValueST(Config.MoveScene)
 		endIf
@@ -1215,7 +1387,10 @@ state MoveSceneLocation
 endState
 state BackwardsModifier
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.Backwards = newKeyCode
 			SetKeyMapOptionValueST(Config.Backwards)
 		endIf
@@ -1230,7 +1405,10 @@ state BackwardsModifier
 endState
 state EndAnimation
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.EndAnimation = newKeyCode
 			SetKeyMapOptionValueST(Config.EndAnimation)
 		endIf
@@ -1245,7 +1423,10 @@ state EndAnimation
 endState
 state TargetActor
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.UnregisterForKey(Config.TargetActor)
 			Config.TargetActor = newKeyCode
 			Config.RegisterForKey(Config.TargetActor)
@@ -1264,7 +1445,10 @@ state TargetActor
 endState
 state ToggleFreeCamera
 	event OnKeyMapChangeST(int newKeyCode, string conflictControl, string conflictName)
-		if !KeyConflict(newKeyCode, conflictControl, conflictName)
+		if newKeyCode == 1 || !KeyConflict(newKeyCode, conflictControl, conflictName)
+			if newKeyCode == 1
+				newKeyCode = -1
+			endIf
 			Config.UnregisterForKey(Config.ToggleFreeCamera)
 			Config.ToggleFreeCamera = newKeyCode
 			Config.RegisterForKey(Config.ToggleFreeCamera)
@@ -1530,19 +1714,27 @@ state AnimationEnabled
 	event OnSelectST()
 		Animation.Enabled = !Animation.Enabled
 		SetToggleOptionValueST(Animation.Enabled)
-		if Animation.IsCreature
-			CreatureSlots.ClearAnimCache()
+		if Animation.Enabled
+			if Animation.IsCreature
+				CreatureSlots.InvalidateByTags(PapyrusUtil.StringJoin(Animation.GetRawTags()))
+			else
+				AnimationSlots.InvalidateByTags(PapyrusUtil.StringJoin(Animation.GetRawTags()))
+			endIf
 		else
-			AnimationSlots.ClearAnimCache()
+			if Animation.IsCreature
+				CreatureSlots.InvalidateByAnimation(Animation)
+			else
+				AnimationSlots.InvalidateByAnimation(Animation)
+			endIf
 		endIf
 	endEvent
 	event OnDefaultST()
 		Animation.Enabled = true
 		SetToggleOptionValueST(Animation.Enabled)
 		if Animation.IsCreature
-			CreatureSlots.ClearAnimCache()
+			CreatureSlots.InvalidateByTags(PapyrusUtil.StringJoin(Animation.GetRawTags()))
 		else
-			AnimationSlots.ClearAnimCache()
+			AnimationSlots.InvalidateByTags(PapyrusUtil.StringJoin(Animation.GetRawTags()))
 		endIf
 	endEvent
 endState
@@ -1577,9 +1769,6 @@ state AnimationSelect
 					IsCreatureEditor = true
 					Animation = CreatureSlots.GetBySlot(0)
 				endIf
-				SetMenuOptionValueST(Animation.Name)
-				ForcePageReset()
-				return
 			elseIf MenuOptions[i] == "$SSL_PrevPage"
 				Animation = AnimationSlots.GetBySlot(((AnimEditPage - 2) * PerPage))
 			elseIf MenuOptions[i] == "$SSL_NextPage"
@@ -1632,10 +1821,12 @@ state AnimationPosition
 		endIf
 	endEvent
 	event OnDefaultST()
-		Position = 0
-		SetMenuOptionValueST(Position)
-		PreventOverwrite = true
-		ForcePageReset()
+		if Position != 0
+			Position = 0
+			SetMenuOptionValueST(Position)
+			PreventOverwrite = true
+			ForcePageReset()
+		endIf
 	endEvent
 endState
 
@@ -1647,10 +1838,9 @@ state AnimationAdjustKey
 	endEvent
 	event OnMenuAcceptST(int i)
 		AdjustKey = "Global"
-		if i >= 0
+		if i >= 0 && i < AdjustKeys.Length
 			AdjustKey = AdjustKeys[i]
 		endIf
-		AdjustKey  = AdjustKeys[i]
 		if Config.MirrorPress(Config.AdjustStage) && AdjustKey != "Global" && AdjustKey != "Animation" && ShowMessage("$SSL_WarnProfileRemove{"+AdjustKey+"}", true, "$Yes", "$No")
 			Animation.RestoreOffsets(AdjustKey)
 			AdjustKey = "Global"
@@ -1660,10 +1850,12 @@ state AnimationAdjustKey
 		ForcePageReset()
 	endEvent
 	event OnDefaultST()
-		AdjustKey = "Global"
-		SetMenuOptionValueST(AdjustKey)
-		PreventOverwrite = true
-		ForcePageReset()
+		if AdjustKey != "Global"
+			AdjustKey = "Global"
+			SetMenuOptionValueST(AdjustKey)
+			PreventOverwrite = true
+			ForcePageReset()
+		endIf
 	endEvent
 endState
 
@@ -1700,42 +1892,43 @@ endState
 
 state AnimationTest
 	event OnSelectST()
-		if !ShowMessage("About to player test animation "+Animation.Name+" for preview purposes.\n\nDo you wish to continue?", true, "$Yes", "$No")
-			return
-		endIf
+		if ShowMessage("About to player test animation "+Animation.Name+" for preview purposes.\n\nDo you wish to continue?", true, "$Yes", "$No")
 
-		sslThreadModel Thread = SexLab.NewThread()
-		if Thread
-			; Add single animation to thread
-			sslBaseAnimation[] Anims = new sslBaseAnimation[1]
-			Anims[0] = Animation
-			Thread.SetForcedAnimations(Anims)
-			; Disable extra effects, this is a test - keep it simple
-			Thread.DisableBedUse(true)
-			Thread.DisableLeadIn(true)
-			; select a solo actor
-			if Animation.PositionCount < 2
-				if TargetRef && TargetRef.Is3DLoaded() && ShowMessage("Which actor would you like to play the solo animation "+Animation.Name+" with?", true, TargetName, PlayerName)
-					Thread.AddActor(TargetRef)
-				else
-					Thread.AddActor(PlayerRef)
+			sslThreadModel Thread = SexLab.NewThread()
+			if Thread
+				; Add single animation to thread
+				sslBaseAnimation[] Anims = new sslBaseAnimation[1]
+				Anims[0] = Animation
+				Thread.SetForcedAnimations(Anims)
+				; Disable extra effects, this is a test - keep it simple
+				Thread.DisableBedUse(true)
+				Thread.DisableLeadIn(true)
+				; select a solo actor
+				if Animation.PositionCount < 2
+					if TargetRef && TargetRef.Is3DLoaded() && ShowMessage("Which actor would you like to play the solo animation "+Animation.Name+" with?", true, TargetName, PlayerName)
+						Thread.AddActor(TargetRef)
+					else
+						Thread.AddActor(PlayerRef)
+					endIf
+				; Add player and target
+				elseIf Animation.PositionCount == 2 && TargetRef
+					Actor[] Positions = sslUtility.MakeActorArray(PlayerRef, TargetRef)
+				;	Positions = ThreadLib.SortActorsByAnimation(Positions, Animation)
+					Thread.AddActor(Positions[0])
+					Thread.AddActor(Positions[1])
 				endIf
-			; Add player and target
-			elseIf Animation.PositionCount == 2 && TargetRef
-				Actor[] Positions = sslUtility.MakeActorArray(PlayerRef, TargetRef)
-				Positions = ThreadLib.SortActorsByAnimation(Positions, Animation)
-				Thread.AddActor(Positions[0])
-				Thread.AddActor(Positions[1])
+				if Animation.PositionCount != Thread.ActorCount
+					ShowMessage("Failed to start test animation.\n  Animation.PositionCount["+Animation.PositionCount+"] and ActorCount["+Thread.ActorCount+"] don't match", false)
+				else
+					ShowMessage("Starting animation "+Animation.Name+".\n\nClose all menus and return to the game to continue...", false)
+					Utility.Wait(0.5)
+					if !Thread.StartThread()
+						ShowMessage("Failed to start test animation.", false)
+					endIf
+				endIf
+			else
+				ShowMessage("Failed to start test animation.", false)
 			endIf
-			if Animation.PositionCount != Thread.ActorCount
-				ShowMessage("Failed to start test animation.\n  Animation.PositionCount["+Animation.PositionCount+"] and ActorCount["+Thread.ActorCount+"] don't match", false)
-				return
-			endIf
-			ShowMessage("Starting animation "+Animation.Name+".\n\nClose all menus and return to the game to continue...", false)
-			Utility.Wait(0.5)
-		endIf
-		if !Thread || !Thread.StartThread()
-			ShowMessage("Failed to start test animation.", false)
 		endIf
 	endEvent
 endState
@@ -2115,6 +2308,7 @@ endFunction
 
 ; Current edit target
 sslBaseExpression Expression
+bool EditOpenMouth
 int Phase
 ; Type flags
 int property Male = 0 autoreadonly
@@ -2145,9 +2339,8 @@ function ExpressionEditor()
 		FlagM = OPTION_FLAG_DISABLED
 	endIf
 
-	SetTitleText(Expression.Name)
-
 	; Left
+	; 0. OpenMouth Config
 	; 1. Name
 	; 2. Normal Tag
 	; 3. Victim Tag
@@ -2155,13 +2348,51 @@ function ExpressionEditor()
 	; 5. Phase Select
 
 	; Right
+	; 0. OpenMouth Config
 	; 1. <empty>
 	; 2. Export Expression
 	; 3. Import Expression
 	; 4. Player Test
 	; 5. Target Test
 
+	; 0
+	if EditOpenMouth
+		SetTitleText("$SSL_OpenMouthConfig")
+
+		AddSliderOptionST("OpenMouthSize","$SSL_OpenMouthSize", Config.OpenMouthSize, "{0}%")
+
+		AddTextOptionST("AdvancedOpenMouth", "$SSL_EditExpression", "$SSL_ClickHere")
+
+		AddTextOptionST("ExpressionTestPlayer", "$SSL_TestOnPlayer", "$SSL_Apply")
+		AddTextOptionST("ExpressionTestTarget", "$SSL_TestOn{"+TargetName+"}", "$SSL_Apply", Math.LogicalAnd(OPTION_FLAG_NONE, (TargetRef == none) as int))
+
+		; OpenMouth Phoneme settings
+		AddHeaderOption("$SSL_{$SSL_Female}-{$SSL_Phoneme}")
+		AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Phoneme}")
+		int i = 0
+		while i <= 15
+			AddSliderOptionST("OpenMouth_1_"+i, Phonemes[i], Config.OpenMouthFemale[i] * 100, "{0}")
+			AddSliderOptionST("OpenMouth_0_"+i, Phonemes[i], Config.OpenMouthMale[i] * 100, "{0}")
+			i += 1
+		endWhile
+
+		return ; to hide the rest of the options
+
+	else
+		SetTitleText(Expression.Name)
+
+		AddHeaderOption("$SSL_OpenMouthConfig")
+		AddHeaderOption("")
+
+		AddSliderOptionST("OpenMouthSize","$SSL_OpenMouthSize", Config.OpenMouthSize, "{0}%")
+		AddTextOptionST("AdvancedOpenMouth", "$SSL_EditOpenMouth", "$SSL_ClickHere")
+
+	endIf
+
 	; 1
+	AddHeaderOption("$SSL_EditingExpression{"+Expression.Name+"}")
+	AddHeaderOption("")
+
 	AddMenuOptionST("ExpressionSelect", "$SSL_ModifyingExpression", Expression.Name)
 	AddToggleOptionST("ExpressionEnabled", "$SSL_Enabled", Expression.Enabled)
 
@@ -2342,32 +2573,54 @@ endState
 
 state ExpressionTestPlayer
 	event OnSelectST()
-		if PlayerRef.Is3DLoaded()
-			TestApply(PlayerRef)
-		endIf
+		TestApply(PlayerRef)
 	endEvent
 endState
 
 state ExpressionTestTarget
 	event OnSelectST()
-		if TargetRef
-			TestApply(TargetRef)
-		endIf
+		TestApply(TargetRef)
 	endEvent
 endState
 
 function TestApply(Actor ActorRef)
+	if !ActorRef || !ActorRef.Is3DLoaded()
+		return
+	endIf
 	string ActorName = ActorRef.GetLeveledActorBase().GetName()
-	sslBaseExpression Exp = Expression
-	if ShowMessage("$SSL_WarnTestExpression{"+ActorName+"}", true, "$Yes", "$No")
-		ShowMessage("$SSL_StartTestExpression{"+Exp.Name+"}_{"+phase+"}", false)
+	if EditOpenMouth
+		if ShowMessage("$SSL_WarnTestExpression{"+ActorName+"}", true, "$Yes", "$No")
+			ShowMessage("$SSL_StartTestOpenMouth", false)
+			Utility.Wait(0.1)
+			Game.ForceThirdPerson()
+			sslBaseExpression.OpenMouth(ActorRef)
+			Utility.Wait(0.1)
+			Debug.Notification("$SSL_AppliedTestExpression")
+			Utility.WaitMenuMode(15.0)
+			sslBaseExpression.CloseMouth(ActorRef)
+			ActorRef.ClearExpressionOverride()
+			Debug.Notification("$SSL_RestoredTestExpression")
+		endIf
+	elseIf Expression && ShowMessage("$SSL_WarnTestExpression{"+ActorName+"}", true, "$Yes", "$No")
+		bool testOpenMouth = false
+		if ShowMessage("$SSL_WarnTestExpressionWithOpenMouth", true, "$Yes", "$No")
+			testOpenMouth = true
+		endIf
+		ShowMessage("$SSL_StartTestExpression{"+Expression.Name+"}_{"+phase+"}", false)
 		Utility.Wait(0.1)
 		Game.ForceThirdPerson()
-		Exp.ApplyPhase(ActorRef, Phase, ActorRef.GetLeveledActorBase().GetSex())
+		if testOpenMouth
+			sslBaseExpression.OpenMouth(ActorRef)
+			Utility.Wait(1.0)
+		endIf
+		Expression.ApplyPhase(ActorRef, Phase, ActorRef.GetLeveledActorBase().GetSex())
+		Utility.Wait(0.1)
 		Debug.Notification("$SSL_AppliedTestExpression")
 		Utility.WaitMenuMode(15.0)
-		PlayerRef.ResetExpressionOverrides()
-		PlayerRef.ClearExpressionOverride()
+		sslBaseExpression.ClearMFG(ActorRef)
+		ActorRef.ResetExpressionOverrides()
+		ActorRef.ClearExpressionOverride()
+		Debug.Notification("$SSL_RestoredTestExpression")
 	endIf
 endFunction
 
@@ -2415,12 +2668,32 @@ endState
 state ExpressionAddPhaseFemale
 	event OnSelectST()
 		Expression.AddPhase(Phase, Female)
+		if Phase > 1 && ShowMessage("Do you wish to copy the previous Phase?", true, "$Yes", "$No")
+			float[] PeviousPhase = Expression.GenderPhase((Phase - 1), Female)
+			float[] NewValues = new float[32]
+			int i = PeviousPhase.Length
+			while i
+				i -= 1
+				NewValues[i] = PeviousPhase[i]
+			endWhile
+			Expression.SetPhase(Phase, Female, NewValues)
+		endIf
 		ForcePageReset()
 	endEvent
 endState
 state ExpressionAddPhaseMale
 	event OnSelectST()
 		Expression.AddPhase(Phase, Male)
+		if Phase > 1 && ShowMessage("Do you wish to copy the previous Phase?", true, "$Yes", "$No")
+			float[] PeviousPhase = Expression.GenderPhase((Phase - 1), Male)
+			float[] NewValues = new float[32]
+			int i = PeviousPhase.Length
+			while i
+				i -= 1
+				NewValues[i] = PeviousPhase[i]
+			endWhile
+			Expression.SetPhase(Phase, Male, NewValues)
+		endIf
 		ForcePageReset()
 	endEvent
 endState
@@ -2835,13 +3108,13 @@ Form[] function GetItems(Actor ActorRef, bool FullInventory = false)
 	endIf
 endFunction
 
-string function GetItemName(Form ItemRef)
+string function GetItemName(Form ItemRef, string AltName = "$SSL_Unknown")
 	if ItemRef
 		string Name = ItemRef.GetName()
 		if Name != "" && Name != " "
 			return Name
 		else 
-			return "$SSL_Unknown"
+			return AltName
 		endIf
 	endIf
 	return "none"
@@ -2958,6 +3231,7 @@ function RebuildClean()
 
 	AddHeaderOption("$SSL_Maintenance")
 	AddTextOptionST("StopCurrentAnimations","$SSL_StopCurrentAnimations", "$SSL_ClickHere")
+	AddTextOptionST("CleanCACHE","$SSL_CleanCACHE", "$SSL_ClickHere")
 	AddTextOptionST("RestoreDefaultSettings","$SSL_RestoreDefaultSettings", "$SSL_ClickHere")
 	AddTextOptionST("ResetAnimationRegistry","$SSL_ResetAnimationRegistry", "$SSL_ClickHere")
 	AddTextOptionST("ResetVoiceRegistry","$SSL_ResetVoiceRegistry", "$SSL_ClickHere")
@@ -3055,7 +3329,7 @@ endState
 state AutomaticSUCSM
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(Config.AutoSUCSM)
-		SetSliderDialogDefaultValue(3)
+		SetSliderDialogDefaultValue(5)
 		SetSliderDialogRange(1, 20)
 		SetSliderDialogInterval(1)
 	endEvent
@@ -3252,8 +3526,8 @@ endState
 state OpenMouthSize
 	event OnSliderOpenST()
 		SetSliderDialogStartValue(Config.OpenMouthSize)
-		SetSliderDialogDefaultValue(0)
-		SetSliderDialogRange(0, 100)
+		SetSliderDialogDefaultValue(80)
+		SetSliderDialogRange(20, 100)
 		SetSliderDialogInterval(1)
 	endEvent
 	event OnSliderAcceptST(float value)
@@ -3400,6 +3674,25 @@ state ForeplayStage
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoForeplayStage")
+	endEvent
+endState
+state LeadInCoolDown
+	event OnSliderOpenST()
+		SetSliderDialogStartValue(Config.LeadInCoolDown)
+		SetSliderDialogDefaultValue(0)
+		SetSliderDialogRange(0, 3600)
+		SetSliderDialogInterval(30)
+	endEvent
+	event OnSliderAcceptST(float value)
+		Config.LeadInCoolDown = value
+		SetSliderOptionValueST(Config.LeadInCoolDown, "$SSL_Seconds")
+	endEvent
+	event OnDefaultST()
+		Config.LeadInCoolDown = 0.0
+		SetToggleOptionValueST(Config.LeadInCoolDown, "$SSL_Seconds")
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoLeadInCoolDown")
 	endEvent
 endState
 state ScaleActors
@@ -3629,7 +3922,7 @@ state SFXVolume
 	endEvent
 	event OnDefaultST()
 		Config.SFXVolume = 1.0
-		SetSliderOptionValueST(Config.SFXVolume, "{0}%")
+		SetSliderOptionValueST((Config.SFXVolume * 100), "{0}%")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoSFXVolume")
@@ -3649,7 +3942,7 @@ state VoiceVolume
 	endEvent
 	event OnDefaultST()
 		Config.VoiceVolume = 1.0
-		SetSliderOptionValueST(Config.VoiceVolume, "{0}%")
+		SetSliderOptionValueST((Config.VoiceVolume * 100), "{0}%")
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoVoiceVolume")
@@ -3710,6 +4003,44 @@ state FemaleVoiceDelay
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoFemaleVoiceDelay")
+	endEvent
+endState
+state ExpressionDelay
+	event OnSliderOpenST()
+		SetSliderDialogStartValue(Config.ExpressionDelay)
+		SetSliderDialogDefaultValue(2)
+		SetSliderDialogRange(0.5, 5)
+		SetSliderDialogInterval(0.5)
+	endEvent
+	event OnSliderAcceptST(float value)
+		Config.ExpressionDelay = value
+		SetSliderOptionValueST(Config.ExpressionDelay, "{1}x")
+	endEvent
+	event OnDefaultST()
+		Config.ExpressionDelay = 2.0
+		SetSliderOptionValueST(Config.ExpressionDelay, "{1}x")
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoExpressionDelay")
+	endEvent
+endState
+state ShakeStrength
+	event OnSliderOpenST()
+		SetSliderDialogStartValue(Config.ShakeStrength * 100)
+		SetSliderDialogDefaultValue(70)
+		SetSliderDialogRange(0, 100)
+		SetSliderDialogInterval(5)
+	endEvent
+	event OnSliderAcceptST(float value)
+		Config.ShakeStrength = (value / 100.0)
+		SetSliderOptionValueST(value, "{0}%")
+	endEvent
+	event OnDefaultST()
+		Config.ShakeStrength = 0.7
+		SetSliderOptionValueST((Config.ShakeStrength * 100), "{0}%")
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoShakeStrength")
 	endEvent
 endState
 
@@ -3822,6 +4153,7 @@ endState
 state CleanSystem
 	event OnSelectST()
 		if ShowMessage("$SSL_WarnCleanSystem")
+			ThreadSlots.StopAll()
 			ShowMessage("$SSL_RunCleanSystem", false)
 			Utility.Wait(0.1)
 

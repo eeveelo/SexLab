@@ -53,7 +53,7 @@ state Prepare
 		endIf
 		Log(AdjustKey, "Adjustment Profile")
 		; Begin actor prep
-		SyncEvent(kPrepareActor, 30.0)
+		SyncEvent(kPrepareActor, 40.0)
 	endFunction
 
 	function PrepareDone()
@@ -131,7 +131,7 @@ state Advancing
 			endIf
 			return
 		endIf
-		SyncEvent(kSyncActor, 10.0)
+		SyncEvent(kSyncActor, 15.0)
 	endFunction
 	function SyncDone()
 		RegisterForSingleUpdate(0.1)
@@ -473,11 +473,11 @@ state Animating
 		if PlayerRef.GetFactionRank(Config.AnimatingFaction) == 0
 			Debug.Notification("Player movement locked - repositioning scene...")
 			ApplyFade()
-			if PlayerRef.GetFurnitureReference() == none
-				PlayerSlot.SendDefaultAnimEvent() ; Seems like the CenterRef don't change if PlayerRef is running
-			endIf
 			; Disable Controls
 			if PlayerSlot != none
+				if PlayerRef.GetFurnitureReference() == none
+					PlayerSlot.SendDefaultAnimEvent() ; Seems like the CenterRef don't change if PlayerRef is running
+				endIf
 				PlayerSlot.LockActor()
 			else
 				Config.GetThreadControl(self)
@@ -505,6 +505,21 @@ state Animating
 			if PreFurnitureStatus != BedTypeID || (PreFurnitureStatus > 0 && CenterAlias.GetReference() == none)
 				ClearAnimations()
 				if CenterAlias.GetReference() == none ;Is not longer using Furniture
+					; Center on fallback choices
+					if HasPlayer && !(PlayerRef.GetFurnitureReference() || PlayerRef.IsSwimming() || PlayerRef.IsFlying())
+						CenterOnObject(PlayerRef, false)
+					elseIf IsAggressive && !(VictimRef.GetFurnitureReference() || VictimRef.IsSwimming() || VictimRef.IsFlying())
+						CenterOnObject(VictimRef, false)
+					else
+						i = 0
+						while i < ActorCount
+							if !(Positions[i].GetFurnitureReference() || Positions[i].IsSwimming() || Positions[i].IsFlying())
+								CenterOnObject(Positions[i], false)
+								i = ActorCount
+							endIf
+							i += 1
+						endWhile
+					endIf
 					CenterOnObject(PlayerRef, false)
 				endIf
 				ChangeActors(Positions)
@@ -622,7 +637,7 @@ state Animating
 		UnregisterForUpdate()
 		ApplyFade()
 		GoToState("Refresh")
-		SyncEvent(kRefreshActor, 10.0)
+		SyncEvent(kRefreshActor, 15.0)
 	endFunction
 endState
 
@@ -652,7 +667,7 @@ function SetAnimation(int aid = -1)
 	Animation = Animations[aid]
 	; Sort actors positions if needed
 	int VictimPos = Positions.Find(VictimRef)
-	if IsAggressive && ActorCount > 1 && VictimPos >= 0
+	if Config.FixVictimPos && IsAggressive && ActorCount > 1 && VictimPos >= 0
 		if Animation.HasTag("FemDom") && VictimPos == 0
 			; Shuffle actor positions
 			Positions[VictimPos] = Positions[1]
@@ -764,6 +779,7 @@ function EndLeadIn()
 		; Restrip with new strip options
 		QuickEvent("Strip")
 		; Start primary animations at stage 1
+		StorageUtil.SetFloatValue(Config,"SexLab.LastLeadInEnd", Utility.GetCurrentRealTime())
 		SendThreadEvent("LeadInEnd")
 		Action("Advancing")
 	endIf
@@ -795,7 +811,7 @@ state Ending
 		RecordSkills()
 		DisableHotkeys()
 		Config.DisableThreadControl(self)
-		SyncEvent(kResetActor, 30.0)
+		SyncEvent(kResetActor, 15.0)
 	endEvent
 	event OnUpdate()
 		ResetDone()

@@ -2,8 +2,6 @@ scriptname sslSystemConfig extends sslSystemLibrary
 
 ; // TODO: Add a 3rd person mod detection when determining FNIS sensitive variables.
 ; // Disable it when no longer relevant.
-; // Split camera shake and cum effects into 2 seperate options
-
 ; ------------------------------------------------------- ;
 ; --- System Resources                                --- ;
 ; ------------------------------------------------------- ;
@@ -35,7 +33,7 @@ bool property DebugMode hidden
 			Debug.OpenUserLog("SexLabDebug")
 			Debug.TraceUser("SexLabDebug", "SexLab Debug/Development Mode Deactivated")
 			MiscUtil.PrintConsole("SexLab Debug/Development Mode Activated")
-			if PlayerRef
+			if PlayerRef && PlayerRef != none
 				PlayerRef.AddSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
 				PlayerRef.AddSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
 			endIf				
@@ -44,7 +42,7 @@ bool property DebugMode hidden
 				Debug.CloseUserLog("SexLabDebug")
 			endIf
 			MiscUtil.PrintConsole("SexLab Debug/Development Mode Deactivated")
-			if PlayerRef
+			if PlayerRef && PlayerRef != none
 				PlayerRef.RemoveSpell((Game.GetFormFromFile(0x073CC, "SexLab.esm") as Spell))
 				PlayerRef.RemoveSpell((Game.GetFormFromFile(0x5FE9B, "SexLab.esm") as Spell))
 			endIf				
@@ -166,6 +164,7 @@ bool property RestrictAggressive auto hidden
 bool property AllowCreatures auto hidden
 bool property NPCSaveVoice auto hidden
 bool property UseStrapons auto hidden
+bool property RestrictStrapons auto hidden
 bool property RedressVictim auto hidden
 bool property RagdollEnd auto hidden
 bool property UseMaleNudeSuit auto hidden
@@ -195,6 +194,7 @@ bool property ShowInMap auto hidden
 bool property DisableTeleport auto hidden
 bool property SeedNPCStats auto hidden
 bool property DisableScale auto hidden
+bool property FixVictimPos auto hidden
 
 ; Integers
 int property AnimProfile auto hidden
@@ -223,12 +223,15 @@ int property AdjustSchlong auto hidden
 
 ; Floats
 float property CumTimer auto hidden
+float property ShakeStrength auto hidden
 float property AutoSUCSM auto hidden
 float property MaleVoiceDelay auto hidden
 float property FemaleVoiceDelay auto hidden
+float property ExpressionDelay auto hidden
 float property VoiceVolume auto hidden
 float property SFXDelay auto hidden
 float property SFXVolume auto hidden
+float property LeadInCoolDown auto hidden
 
 ; Boolean Arrays
 bool[] property StripMale auto hidden
@@ -242,6 +245,8 @@ bool[] property StripAggressor auto hidden
 float[] property StageTimer auto hidden
 float[] property StageTimerLeadIn auto hidden
 float[] property StageTimerAggr auto hidden
+float[] property OpenMouthMale auto hidden
+float[] property OpenMouthFemale auto hidden
 float[] property BedOffset auto hidden
 
 ; Compatibility checks
@@ -309,6 +314,48 @@ endFunction
 
 bool function HasCreatureInstall()
 	return FNIS.GetMajor(true) > 0 && (Game.GetCameraState() < 8 || PlayerRef.GetAnimationVariableInt("SexLabCreature") > 0)
+endFunction
+
+float[] function GetOpenMouthPhonemes(bool isFemale)
+	float[] Phonemes = new float[16]
+	int i = 16
+	while i > 0
+		i -= 1
+		if isFemale
+			Phonemes[i] = OpenMouthFemale[i]
+		else
+			Phonemes[i] = OpenMouthMale[i]
+		endIf
+	endWhile
+	return Phonemes
+endFunction
+
+bool function SetOpenMouthPhonemes(bool isFemale, float[] Phonemes)
+	if Phonemes.Length < 16
+		return false
+	endIf
+	int i = 16
+	while i > 0
+		i -= 1
+		if isFemale
+			OpenMouthFemale[i] = PapyrusUtil.ClampFloat(Phonemes[i], 0.0, 1.0)
+		else
+			OpenMouthMale[i] = PapyrusUtil.ClampFloat(Phonemes[i], 0.0, 1.0)
+		endIf
+	endWhile
+	return true
+endFunction
+
+bool function SetOpenMouthPhoneme(bool isFemale, int id, float value)
+	if id < 0 || id > 15 
+		return false
+	endIf
+	if isFemale
+		OpenMouthFemale[id] = PapyrusUtil.ClampFloat(value, 0.0, 1.0)
+	else
+		OpenMouthMale[id] = PapyrusUtil.ClampFloat(value, 0.0, 1.0)
+	endIf
+	return true
 endFunction
 
 bool function AddCustomBed(Form BaseBed, int BedType = 0)
@@ -494,7 +541,7 @@ function SetTargetActor()
 		if TargetThread && !TargetThread.HasPlayer && (TargetThread.GetState() == "Animating" || TargetThread.GetState() == "Advancing")
 			sslThreadController PlayerThread = ThreadSlots.GetActorController(PlayerRef)
 			if (!PlayerThread || !(PlayerThread.GetState() == "Animating" || PlayerThread.GetState() == "Advancing")) && TakeThreadControl.Show()
-				if PlayerThread != none ; 
+				if PlayerThread != none
 					ThreadSlots.StopThread(PlayerThread)
 				endIf
 				GetThreadControl(TargetThread) 
@@ -667,7 +714,7 @@ Spell function GetHDTSpell(Actor ActorRef)
 	while i
 		i -= 1
 		Spell SpellRef = ActorRef.GetNthSpell(i)
-		Log(SpellRef.GetName(), "Checking("+SpellRef+")")
+		Log(SpellRef.GetName(), "Checking("+SpellRef+") for HDT HighHeels")
 		if SpellRef && StringUtil.Find(SpellRef.GetName(), "Heel") != -1
 			return SpellRef
 		endIf
@@ -757,7 +804,7 @@ endFunction
 bool function CheckSystem()
 	; Check Skyrim Version
 	if !CheckSystemPart("Skyrim")
-		CheckSkyrim.Show()
+		CheckSkyrim.Show(1.5)
 		return false
 	; Check SKSE install
 	elseIf !CheckSystemPart("SKSE")
@@ -828,6 +875,19 @@ function Reload()
 
 	; - MFG Fix check
 	HasMFGFix = MfgConsoleFunc.ResetPhonemeModifier(PlayerRef) ; TODO: May need to check another way, some players might get upset that their mfg is reset on load
+
+	if !FadeToBlackHoldImod || FadeToBlackHoldImod == none
+		FadeToBlackHoldImod = Game.GetFormFromFile(0xF756E, "Skyrim.esm") as ImageSpaceModifier ;0xF756D **0xF756E 0x10100C** 0xF756F 0xFDC57 0xFDC58 0x 0x 0x
+	endIf
+	if !FadeToBlurHoldImod || FadeToBlurHoldImod == none
+		FadeToBlurHoldImod = Game.GetFormFromFile(0x44F3B, "Skyrim.esm") as ImageSpaceModifier ;0x201D3 0x44F3B **0xFD809 0x1037E2 0x1037E3 0x1037E4 0x1037E5 0x1037E6** 0x
+	endIf
+	if !ForceBlackVFX || ForceBlackVFX == none
+		ForceBlackVFX = Game.GetFormFromFile(0x8FC39, "SexLab.esm") as VisualEffect ;0x44F3A 
+	endIf
+	if !ForceBlurVFX || ForceBlurVFX == none
+		ForceBlurVFX = Game.GetFormFromFile(0x8FC3A, "SexLab.esm") as VisualEffect ;0x101967
+	endIf
 
 	; Clean valid actors list
 	StorageUtil.FormListRemove(self, "ValidActors", PlayerRef, true)
@@ -984,6 +1044,7 @@ function SetDefaults()
 	; AllowCreatures     = false
 	NPCSaveVoice       = false
 	UseStrapons        = true
+	RestrictStrapons   = false
 	RedressVictim      = true
 	RagdollEnd         = false
 	UseMaleNudeSuit    = false
@@ -1013,7 +1074,8 @@ function SetDefaults()
 	DisableTeleport    = true
 	SeedNPCStats       = true
 	DisableScale       = true ; TMP: enabled by default for testing
-	
+	FixVictimPos       = false
+
 	; Integers
 	AnimProfile        = 1
 	AskBed             = 1
@@ -1041,12 +1103,15 @@ function SetDefaults()
 
 	; Floats
 	CumTimer           = 120.0
+	ShakeStrength      = 0.7
 	AutoSUCSM          = 5.0
 	MaleVoiceDelay     = 5.0
 	FemaleVoiceDelay   = 4.0
+	ExpressionDelay    = 2.0
 	VoiceVolume        = 1.0
 	SFXDelay           = 3.0
 	SFXVolume          = 1.0
+	LeadInCoolDown     = 0.0
 
 	; Boolean strip arrays
 	StripMale = new bool[33]
@@ -1152,6 +1217,12 @@ function SetDefaults()
 	StageTimerAggr[3] = 10.0
 	StageTimerAggr[4] = 4.0
 
+	OpenMouthMale = new float[16]
+	OpenMouthMale[1] = 0.8
+
+	OpenMouthFemale = new float[16]
+	OpenMouthFemale[1] = 1.0
+
 	BedOffset = new float[4]
 	BedOffset[0] = 0.0
 	BedOffset[2] = 37.0
@@ -1204,6 +1275,7 @@ function ExportSettings()
 	ExportBool("AllowCreatures", AllowCreatures)
 	ExportBool("NPCSaveVoice", NPCSaveVoice)
 	ExportBool("UseStrapons", UseStrapons)
+	ExportBool("RestrictStrapons", RestrictStrapons)
 	ExportBool("RedressVictim", RedressVictim)
 	ExportBool("RagdollEnd", RagdollEnd)
 	ExportBool("UseMaleNudeSuit", UseMaleNudeSuit)
@@ -1233,6 +1305,7 @@ function ExportSettings()
 	ExportBool("DisableTeleport", DisableTeleport)
 	ExportBool("SeedNPCStats", SeedNPCStats)
 	ExportBool("DisableScale", DisableScale)
+	ExportBool("FixVictimPos", FixVictimPos)
 
 	; Integers
 	ExportInt("AnimProfile", AnimProfile)
@@ -1261,12 +1334,15 @@ function ExportSettings()
 
 	; Floats
 	ExportFloat("CumTimer", CumTimer)
+	ExportFloat("ShakeStrength", ShakeStrength)
 	ExportFloat("AutoSUCSM", AutoSUCSM)
 	ExportFloat("MaleVoiceDelay", MaleVoiceDelay)
 	ExportFloat("FemaleVoiceDelay", FemaleVoiceDelay)
+	ExportFloat("ExpressionDelay", ExpressionDelay)
 	ExportFloat("VoiceVolume", VoiceVolume)
 	ExportFloat("SFXDelay", SFXDelay)
 	ExportFloat("SFXVolume", SFXVolume)
+	ExportFloat("LeadInCoolDown", LeadInCoolDown)
 
 	; Boolean Arrays
 	ExportBoolList("StripMale", StripMale, 33)
@@ -1280,6 +1356,8 @@ function ExportSettings()
 	ExportFloatList("StageTimer", StageTimer, 5)
 	ExportFloatList("StageTimerLeadIn", StageTimerLeadIn, 5)
 	ExportFloatList("StageTimerAggr", StageTimerAggr, 5)
+	ExportFloatList("OpenMouthMale", OpenMouthMale, 16)
+	ExportFloatList("OpenMouthFemale", OpenMouthFemale, 16)
 
 	; Export object registry
 	ExportAnimations()
@@ -1333,6 +1411,7 @@ function ImportSettings()
 	AllowCreatures     = ImportBool("AllowCreatures", AllowCreatures)
 	NPCSaveVoice       = ImportBool("NPCSaveVoice", NPCSaveVoice)
 	UseStrapons        = ImportBool("UseStrapons", UseStrapons)
+	RestrictStrapons   = ImportBool("RestrictStrapons", RestrictStrapons)
 	RedressVictim      = ImportBool("RedressVictim", RedressVictim)
 	RagdollEnd         = ImportBool("RagdollEnd", RagdollEnd)
 	UseMaleNudeSuit    = ImportBool("UseMaleNudeSuit", UseMaleNudeSuit)
@@ -1362,6 +1441,7 @@ function ImportSettings()
 	DisableTeleport    = ImportBool("DisableTeleport", DisableTeleport)
 	SeedNPCStats       = ImportBool("SeedNPCStats", SeedNPCStats)
 	DisableScale       = ImportBool("DisableScale", DisableScale)
+	FixVictimPos       = ImportBool("FixVictimPos", FixVictimPos)
 
 	; Integers
 	AnimProfile        = ImportInt("AnimProfile", AnimProfile)
@@ -1390,12 +1470,15 @@ function ImportSettings()
 
 	; Floats
 	CumTimer           = ImportFloat("CumTimer", CumTimer)
+	ShakeStrength      = ImportFloat("ShakeStrength", ShakeStrength)
 	AutoSUCSM          = ImportFloat("AutoSUCSM", AutoSUCSM)
 	MaleVoiceDelay     = ImportFloat("MaleVoiceDelay", MaleVoiceDelay)
 	FemaleVoiceDelay   = ImportFloat("FemaleVoiceDelay", FemaleVoiceDelay)
+	ExpressionDelay    = ImportFloat("ExpressionDelay", ExpressionDelay)
 	VoiceVolume        = ImportFloat("VoiceVolume", VoiceVolume)
 	SFXDelay           = ImportFloat("SFXDelay", SFXDelay)
 	SFXVolume          = ImportFloat("SFXVolume", SFXVolume)
+	LeadInCoolDown     = ImportFloat("LeadInCoolDown", LeadInCoolDown)
 
 	; Boolean Arrays
 	StripMale          = ImportBoolList("StripMale", StripMale, 33)
@@ -1409,6 +1492,8 @@ function ImportSettings()
 	StageTimer         = ImportFloatList("StageTimer", StageTimer, 5)
 	StageTimerLeadIn   = ImportFloatList("StageTimerLeadIn", StageTimerLeadIn, 5)
 	StageTimerAggr     = ImportFloatList("StageTimerAggr", StageTimerAggr, 5)
+	OpenMouthMale      = ImportFloatList("OpenMouthMale", OpenMouthMale, 16)
+	OpenMouthFemale    = ImportFloatList("OpenMouthFemale", OpenMouthFemale, 16)
 
 	; Import object registry
 	ImportAnimations()
@@ -1621,8 +1706,11 @@ function StoreActor(Form FormRef) global
 endFunction
 
 ImageSpaceModifier FadeEffect
-ImageSpaceModifier FadeEffectBlack
-ImageSpaceModifier FadeEffectBlur
+VisualEffect ForceVFX
+VisualEffect ForceBlackVFX
+VisualEffect ForceBlurVFX
+ImageSpaceModifier FadeToBlackHoldImod
+ImageSpaceModifier FadeToBlurHoldImod
 function RemoveFade(bool forceTest = false)
 	if !forceTest && UseFade < 1
 		return
@@ -1632,9 +1720,15 @@ function RemoveFade(bool forceTest = false)
 		If UseFade < 3
 			if forceTest
 				Utility.WaitMenuMode(5.0)
+				if ForceVFX
+					ForceVFX.Stop(PlayerRef)
+				endIf
 				FadeEffect.Remove()
 			else
-				ImageSpaceModifier.RemoveCrossFade(2.5)
+				if ForceVFX
+					ForceVFX.Stop(PlayerRef)
+				endIf
+				ImageSpaceModifier.RemoveCrossFade()
 			endIf
 		else
 			Game.FadeOutGame(false, Black, 0.5, 1.5)
@@ -1653,28 +1747,30 @@ function ApplyFade(bool forceTest = false)
 	FadeEffect = none
 	bool Black
 	if UseFade % 2 != 0
-		if !FadeEffectBlack || FadeEffectBlack == none
-			FadeEffectBlack = Game.GetFormFromFile(0xF756E, "Skyrim.esm") as ImageSpaceModifier ;0xF756D **0xF756E 0x10100C** 0xF756F 0xFDC57 0xFDC58 0x 0x 0x
-		endIf
-		if FadeEffectBlack && FadeEffectBlack != none
-			FadeEffect = FadeEffectBlack
+		if FadeToBlackHoldImod && FadeToBlackHoldImod != none
+			FadeEffect = FadeToBlackHoldImod
 			Black = True
 		endIf
 	else
-		if !FadeEffectBlur || FadeEffectBlur == none
-			FadeEffectBlur = Game.GetFormFromFile(0x44F3B, "Skyrim.esm") as ImageSpaceModifier ;0x201D3 0x44F3B **0xFD809 0x1037E2 0x1037E3 0x1037E4 0x1037E5 0x1037E6** 0x
-		endIf
-		if FadeEffectBlur && FadeEffectBlur != none
-			FadeEffect = FadeEffectBlur
+		if FadeToBlurHoldImod && FadeToBlurHoldImod != none
+			FadeEffect = FadeToBlurHoldImod
 			Black = False
 		endIf
 	endIf
 	if FadeEffect && FadeEffect != none
 		If UseFade < 3
 			if forceTest
-				FadeEffect.Apply(1.0)
+				FadeEffect.Apply()
 			else
-				FadeEffect.ApplyCrossFade(1.0)
+				FadeEffect.ApplyCrossFade()
+			endIf
+			if Black && ForceBlackVFX
+				ForceVFX = ForceBlackVFX
+			elseIf !Black && ForceBlurVFX
+				ForceVFX = ForceBlurVFX
+			endIf
+			if ForceVFX
+				ForceVFX.Play(PlayerRef)
 			endIf
 		else
 			Game.FadeOutGame(true, Black, 0.5, 3.0)
