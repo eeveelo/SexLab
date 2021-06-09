@@ -125,6 +125,7 @@ function OpenMouth(Actor ActorRef) global
 ;		ActorRef.SetExpressionPhoneme(1, (SexLabUtil.GetConfig().OpenMouthSize as float / 100.0))
 ;	endIf
 	bool isRealFemale = ActorRef.GetLeveledActorBase().GetSex() == 1
+	int OpenMouthExpression = SexLabUtil.GetConfig().GetOpenMouthExpression(isRealFemale)
 	int OpenMouthSize = SexLabUtil.GetConfig().OpenMouthSize
 	float[] Phonemes = SexLabUtil.GetConfig().GetOpenMouthPhonemes(isRealFemale)											 
 	Int i = 0
@@ -136,7 +137,7 @@ function OpenMouth(Actor ActorRef) global
 		endIf
 		i += 1
 	endWhile
-	ActorRef.SetExpressionOverride(16, OpenMouthSize)
+	ActorRef.SetExpressionOverride(OpenMouthExpression, OpenMouthSize)
 	Utility.WaitMenuMode(0.1)
 endFunction
 
@@ -147,12 +148,13 @@ function CloseMouth(Actor ActorRef) global
 endFunction
 
 bool function IsMouthOpen(Actor ActorRef) global
+	bool isRealFemale = ActorRef.GetLeveledActorBase().GetSex() == 1
+	int OpenMouthExpression = SexLabUtil.GetConfig().GetOpenMouthExpression(isRealFemale)
 	float MinMouthSize = (SexLabUtil.GetConfig().OpenMouthSize * 0.01) - 0.1
-;	return GetPhoneme(ActorRef, 1) >= MinMouthSize && (GetExpression(ActorRef, true) as Int == 16 && GetExpression(ActorRef, false) >= MinMouthSize)
-	if GetExpression(ActorRef, true) as Int == 16 && GetExpression(ActorRef, false) >= MinMouthSize
+;	return GetPhoneme(ActorRef, 1) >= MinMouthSize && (GetExpression(ActorRef, true) as Int == OpenMouthExpression && GetExpression(ActorRef, false) >= MinMouthSize)
+	if GetExpression(ActorRef, true) as Int == OpenMouthExpression && GetExpression(ActorRef, false) >= MinMouthSize
 		return true
 	endIf
-	bool isRealFemale = ActorRef.GetLeveledActorBase().GetSex() == 1
 	float[] Phonemes = SexLabUtil.GetConfig().GetOpenMouthPhonemes(isRealFemale)											 
 	Int i = 0
 	while i < Phonemes.length

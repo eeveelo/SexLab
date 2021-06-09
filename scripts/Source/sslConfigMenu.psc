@@ -564,6 +564,10 @@ event OnHighlightST()
 	elseIf Options[0] == "AdvancedOpenMouth"
 		SetInfoText("$SSL_InfoAdvancedOpenMouth")
 
+	; Alt OpenMouth Expression
+	elseIf Options[0] == "OpenMouthExpression"
+		SetInfoText("$SSL_InfoOpenMouthExpression")
+
 	; Clean CACHE
 	elseIf Options[0] == "CleanCACHE"
 		SetInfoText("$SSL_InfoCleanCACHE")
@@ -610,11 +614,11 @@ event OnSliderOpenST()
 	; Expression OpenMouth Editor
 	elseIf Options[0] == "OpenMouth"
 		; Gender, ID
-		SetSliderDialogStartValue(Config.GetOpenMouthPhonemes(Options[1] as bool)[Options[2] as int] * 100)
+		SetSliderDialogStartValue(Config.GetOpenMouthPhonemes(Options[1] == "1")[Options[2] as int] * 100)
 		SetSliderDialogRange(0, 100)
 		SetSliderDialogInterval(1)
 		if Options[2] == "1"
-			if Options[1] as bool
+			if Options[1] == "1"
 				SetSliderDialogDefaultValue(100)
 			else
 				SetSliderDialogDefaultValue(80)
@@ -696,7 +700,7 @@ event OnSliderAcceptST(float value)
 	; Expression OpenMouth Editor
 	elseIf Options[0] == "OpenMouth"
 		; Gender, ID, Value
-		Config.SetOpenMouthPhoneme(Options[1] as bool, Options[2] as int, value / 100.0)
+		Config.SetOpenMouthPhoneme(Options[1] == "1", Options[2] as int, value / 100.0)
 		SetSliderOptionValueST(value as int)
 
 	; Expression Editor
@@ -868,6 +872,13 @@ event OnSelectST()
 	elseIf Options[0] == "AdvancedOpenMouth"
 		EditOpenMouth = !EditOpenMouth
 		ForcePageReset()
+
+	; Alt OpenMouth Expression
+	elseIf Options[0] == "OpenMouthExpression"
+		if Config.GetOpenMouthExpression(Options[1] == "1") == 16
+			Config.SetOpenMouthExpression(Options[1] == "1", 15)
+		endIf
+		SetToggleOptionValueST(Config.GetOpenMouthExpression(Options[1] == "1") == 15)
 
 	; Toggle Strapons
 	elseIf Options[0] == "Strapon"
@@ -2363,12 +2374,16 @@ function ExpressionEditor()
 
 		AddTextOptionST("AdvancedOpenMouth", "$SSL_EditExpression", "$SSL_ClickHere")
 
+		AddToggleOptionST("OpenMouthExpression_1", "Use Alt Female Expression", Config.GetOpenMouthExpression(True) == 15)
+		AddToggleOptionST("OpenMouthExpression_0", "Use Alt Male Expression", Config.GetOpenMouthExpression(False) == 15)
+
 		AddTextOptionST("ExpressionTestPlayer", "$SSL_TestOnPlayer", "$SSL_Apply")
 		AddTextOptionST("ExpressionTestTarget", "$SSL_TestOn{"+TargetName+"}", "$SSL_Apply", Math.LogicalAnd(OPTION_FLAG_NONE, (TargetRef == none) as int))
 
 		; OpenMouth Phoneme settings
 		AddHeaderOption("$SSL_{$SSL_Female}-{$SSL_Phoneme}")
 		AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Phoneme}")
+
 		int i = 0
 		while i <= 15
 			AddSliderOptionST("OpenMouth_1_"+i, Phonemes[i], Config.OpenMouthFemale[i] * 100, "{0}")
@@ -2390,7 +2405,7 @@ function ExpressionEditor()
 	endIf
 
 	; 1
-	AddHeaderOption("$SSL_EditingExpression{"+Expression.Name+"}")
+	AddHeaderOption("$SSL_ExpressionEditor")
 	AddHeaderOption("")
 
 	AddMenuOptionST("ExpressionSelect", "$SSL_ModifyingExpression", Expression.Name)
@@ -2614,6 +2629,7 @@ function TestApply(Actor ActorRef)
 			Utility.Wait(1.0)
 		endIf
 		Expression.ApplyPhase(ActorRef, Phase, ActorRef.GetLeveledActorBase().GetSex())
+		Log("Expression.Applied("+Expression.Name+") Strength:"+100+"; OpenMouth:"+testOpenMouth)
 		Utility.Wait(0.1)
 		Debug.Notification("$SSL_AppliedTestExpression")
 		Utility.WaitMenuMode(15.0)

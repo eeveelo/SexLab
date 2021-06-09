@@ -358,6 +358,34 @@ bool function SetOpenMouthPhoneme(bool isFemale, int id, float value)
 	return true
 endFunction
 
+int function GetOpenMouthExpression(bool isFemale)
+	if isFemale
+		if OpenMouthFemale.Length >= 17 && OpenMouthFemale[16] >= 0.0 && OpenMouthFemale[16] <= 16.0
+			return OpenMouthFemale[16] as int
+		endIf
+	else
+		if OpenMouthMale.Length >= 17 && OpenMouthMale[16] >= 0.0 && OpenMouthMale[16] <= 16.0
+			return OpenMouthMale[16] as int
+		endIf
+	endIf
+	return 16
+endFunction
+
+bool function SetOpenMouthExpression(bool isFemale, int value)
+	if isFemale
+		if OpenMouthFemale.Length >= 17
+			OpenMouthFemale[16] = PapyrusUtil.ClampInt(value, 0, 16) as Float
+			return true
+		endIf
+	else
+		if OpenMouthMale.Length >= 17
+			OpenMouthMale[16] = PapyrusUtil.ClampInt(value, 0, 16) as Float
+			return true
+		endIf
+	endIf
+	return false
+endFunction
+
 bool function AddCustomBed(Form BaseBed, int BedType = 0)
 	if !BaseBed
 		return false
@@ -1217,11 +1245,13 @@ function SetDefaults()
 	StageTimerAggr[3] = 10.0
 	StageTimerAggr[4] = 4.0
 
-	OpenMouthMale = new float[16]
+	OpenMouthMale = new float[17]
 	OpenMouthMale[1] = 0.8
+	OpenMouthMale[16] = 16.0
 
-	OpenMouthFemale = new float[16]
+	OpenMouthFemale = new float[17]
 	OpenMouthFemale[1] = 1.0
+	OpenMouthFemale[16] = 16.0
 
 	BedOffset = new float[4]
 	BedOffset[0] = 0.0
@@ -1356,8 +1386,8 @@ function ExportSettings()
 	ExportFloatList("StageTimer", StageTimer, 5)
 	ExportFloatList("StageTimerLeadIn", StageTimerLeadIn, 5)
 	ExportFloatList("StageTimerAggr", StageTimerAggr, 5)
-	ExportFloatList("OpenMouthMale", OpenMouthMale, 16)
-	ExportFloatList("OpenMouthFemale", OpenMouthFemale, 16)
+	ExportFloatList("OpenMouthMale", OpenMouthMale, 17)
+	ExportFloatList("OpenMouthFemale", OpenMouthFemale, 17)
 
 	; Export object registry
 	ExportAnimations()
@@ -1492,8 +1522,8 @@ function ImportSettings()
 	StageTimer         = ImportFloatList("StageTimer", StageTimer, 5)
 	StageTimerLeadIn   = ImportFloatList("StageTimerLeadIn", StageTimerLeadIn, 5)
 	StageTimerAggr     = ImportFloatList("StageTimerAggr", StageTimerAggr, 5)
-	OpenMouthMale      = ImportFloatList("OpenMouthMale", OpenMouthMale, 16)
-	OpenMouthFemale    = ImportFloatList("OpenMouthFemale", OpenMouthFemale, 16)
+	OpenMouthMale      = ImportFloatList("OpenMouthMale", OpenMouthMale, 17)
+	OpenMouthFemale    = ImportFloatList("OpenMouthFemale", OpenMouthFemale, 17)
 
 	; Import object registry
 	ImportAnimations()
