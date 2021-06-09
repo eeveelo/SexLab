@@ -781,10 +781,12 @@ state Animating
 				endIf
 				if LoopDelay >= VoiceDelay
 					LoopDelay = 0.0
-					if !IsSilent
+					if OpenMouth && UseLipSync
+						sslBaseVoice.MoveLips(ActorRef, none, 0.5)
+						Log("PlayMoan:False; UseLipSync:"+UseLipSync+"; OpenMouth:"+OpenMouth)
+					elseIf !IsSilent
 						Voice.PlayMoan(ActorRef, Strength, IsVictim, UseLipSync)
-					elseIf Voice && Flags[1] == 1
-						Voice.MoveLips(ActorRef)
+						Log("PlayMoan:True; UseLipSync:"+UseLipSync+"; OpenMouth:"+OpenMouth)
 					endIf
 				endIf
 			; Trigger orgasm
@@ -938,7 +940,7 @@ state Animating
 		Log(ActorName + ": Orgasms["+Orgasms+"] FullEnjoyment ["+FullEnjoyment+"] BaseEnjoyment["+BaseEnjoyment+"] Enjoyment["+Enjoyment+"]")
 		if Config.OrgasmEffects
 			; Shake camera for player
-			if IsPlayer && Config.ShakeStrength > 0.0 && Game.GetCameraState() >= 8
+			if IsPlayer && Config.ShakeStrength > 0 && Game.GetCameraState() >= 8
 				Game.ShakeCamera(none, Config.ShakeStrength, Config.ShakeStrength + 1.0)
 			endIf
 			; Play SFX/Voice

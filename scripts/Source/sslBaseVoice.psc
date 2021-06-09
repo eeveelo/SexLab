@@ -29,21 +29,25 @@ bool property Creature hidden
 	endFunction
 endProperty
 
-function MoveLips(Actor ActorRef, Sound SoundRef = none)
+function MoveLips(Actor ActorRef, Sound SoundRef = none, float Strength = 1.0) global
 	if !ActorRef
 		return
 	endIf
 	
-	bool HasMFG = Config.HasMFGFix
+	bool HasMFG = SexLabUtil.GetConfig().HasMFGFix
 	float SavedP = sslBaseExpression.GetPhoneme(ActorRef, 1)
 	float ReferenceP = SavedP
-	if ReferenceP > 0.8
-		ReferenceP = 0.8
-	elseIf ReferenceP < 0.3
-		ReferenceP = 0.3
+	if ReferenceP > (1.0 - (0.2 * Strength))
+		ReferenceP = (1.0 - (0.2 * Strength))
 	endIf
-	int MinP = ((ReferenceP - 0.1)*100) as int
-	int MaxP = ((ReferenceP + 0.2)*100) as int
+	int MinP = ((ReferenceP - (0.1 * Strength))*100) as int
+	int MaxP = ((ReferenceP + (0.2 * Strength))*100) as int
+	if MinP < 0
+		MinP = 0
+	endIf
+	if (MaxP - MinP) < 2
+		MaxP = MinP + 2
+	endIf
 	if HasMFG
 		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, (ReferenceP*100) as int)
 	else
@@ -75,7 +79,7 @@ function PlayMoan(Actor ActorRef, int Strength = 30, bool IsVictim = false, bool
 			SoundRef.Play(ActorRef)
 			Utility.WaitMenuMode(0.4)
 		else
-			MoveLips(ActorRef, SoundRef)
+			MoveLips(ActorRef, SoundRef, (Strength as float / 100.0))
 		endIf
 	endIf
 endFunction
@@ -117,12 +121,13 @@ function LipSync(Actor ActorRef, int Strength, bool ForceUse = false)
 	endIf
 endFunction
 
-function TransitUp(Actor ActorRef, int from, int to)
+function TransitUp(Actor ActorRef, int from, int to) global
 	if !ActorRef
 		return
 	endIf
 	
-	if Config.HasMFGFix
+	bool HasMFG = SexLabUtil.GetConfig().HasMFGFix
+	if HasMFG
 		while from < to
 			from += 2
 			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from) ; OLDRIM
@@ -135,12 +140,13 @@ function TransitUp(Actor ActorRef, int from, int to)
 	endIf
 endFunction
 
-function TransitDown(Actor ActorRef, int from, int to)
+function TransitDown(Actor ActorRef, int from, int to) global
 	if !ActorRef
 		return
 	endIf
 	
-	if Config.HasMFGFix
+	bool HasMFG = SexLabUtil.GetConfig().HasMFGFix
+	if HasMFG
 		while from > to
 			from -= 2
 			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from) ; OLDRIM
