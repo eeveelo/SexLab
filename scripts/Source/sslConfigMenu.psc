@@ -218,11 +218,6 @@ event OnConfigOpen()
 
 	; Target actor
 	TargetRef = Config.TargetRef
-	if TargetRef
-		StatRef = TargetRef
-	else
-		StatRef = PlayerRef
-	endIf
 	EmptyStatToggle = false
 	if TargetRef && TargetRef.Is3DLoaded()
 		TargetName = TargetRef.GetLeveledActorBase().GetName()
@@ -232,6 +227,11 @@ event OnConfigOpen()
 		TargetName = "$SSL_NoTarget"
 		TargetFlag = OPTION_FLAG_DISABLED
 		Config.TargetRef = none
+	endIf
+	if TargetRef
+		StatRef = TargetRef
+	else
+		StatRef = PlayerRef
 	endIf
 
 	; Reset animation editor auto selector
@@ -1582,13 +1582,17 @@ function AnimationEditor()
 	; Auto select players animation if they are animating right now
 	if !PreventOverwrite 
 		sslThreadController Thread = Config.GetThreadControlled()
-		if (!Thread || Thread.GetState() != "Animating") && TargetRef && TargetRef != none && TargetRef.IsInFaction(Config.AnimatingFaction)
-			Thread = ThreadSlots.GetActorController(TargetRef)
+		if !(Thread && (Thread.GetState() == "Animating" || Thread.GetState() == "Advancing"))
+			if TargetRef && TargetRef != none && TargetRef.IsInFaction(Config.AnimatingFaction)
+				Thread = ThreadSlots.GetActorController(TargetRef)
+			endIf
+			if !(Thread && (Thread.GetState() == "Animating" || Thread.GetState() == "Advancing"))
+				if PlayerRef.IsInFaction(Config.AnimatingFaction)
+					Thread = ThreadSlots.GetActorController(PlayerRef)
+				endIf
+			endIf
 		endIf
-		if (!Thread || Thread.GetState() != "Animating") && PlayerRef.IsInFaction(Config.AnimatingFaction)
-			Thread = ThreadSlots.GetActorController(PlayerRef)
-		endIf
-		if Thread && Thread != none && Thread.GetState() == "Animating"
+		if Thread && Thread.Animation
 			PreventOverwrite = true
 			Position  = Thread.GetAdjustPos()
 			Animation = Thread.Animation
