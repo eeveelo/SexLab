@@ -1035,6 +1035,16 @@ function SetForcedAnimations(sslBaseAnimation[] AnimationList)
 	endIf
 endFunction
 
+sslBaseAnimation[] function GetForcedAnimations()
+	sslBaseAnimation[] Output = sslUtility.AnimationArray(CustomAnimations.Length)
+	int i = CustomAnimations.Length
+	while i > 0
+		i -= 1
+		Output[i] = CustomAnimations[i]
+	endWhile
+	return Output
+endFunction
+
 function ClearForcedAnimations()
 	CustomAnimations = sslUtility.AnimationArray(0)
 endFunction
@@ -1043,6 +1053,16 @@ function SetAnimations(sslBaseAnimation[] AnimationList)
 	if AnimationList && AnimationList.Length > 0
 		PrimaryAnimations = AnimationList
 	endIf
+endFunction
+
+sslBaseAnimation[] function GetAnimations()
+	sslBaseAnimation[] Output = sslUtility.AnimationArray(PrimaryAnimations.Length)
+	int i = PrimaryAnimations.Length
+	while i > 0
+		i -= 1
+		Output[i] = PrimaryAnimations[i]
+	endWhile
+	return Output
 endFunction
 
 function ClearAnimations()
@@ -1054,6 +1074,16 @@ function SetLeadAnimations(sslBaseAnimation[] AnimationList)
 		LeadIn = true
 		LeadAnimations = AnimationList
 	endIf
+endFunction
+
+sslBaseAnimation[] function GetLeadAnimations()
+	sslBaseAnimation[] Output = sslUtility.AnimationArray(LeadAnimations.Length)
+	int i = LeadAnimations.Length
+	while i > 0
+		i -= 1
+		Output[i] = LeadAnimations[i]
+	endWhile
+	return Output
 endFunction
 
 function ClearLeadAnimations()
