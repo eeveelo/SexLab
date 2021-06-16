@@ -921,17 +921,27 @@ state Animating
 			Log("Excessive OrgasmEffect Triggered")
 			return
 		endIf
+		bool CanOrgasm = Forced || (Animation.HasTag("Lesbian") && Thread.ActorCount == Thread.Females && !Stats.IsStraight(ActorRef)) ; Lesbians have special treatment because the Lesbian Animations usually don't have CumId assigned.
+		int i = Thread.ActorCount
+		while !CanOrgasm && i > 0
+			i -= 1
+			CanOrgasm = Animation.GetCumID(i, Stage) > 0 || Animation.GetCum(i) > 0
+		endWhile
+		if !CanOrgasm
+			; Orgasm Disabled for the animation
+			return
+		endIf
 		if !Forced && Config.SeparateOrgasms
 			bool IsCumSource = False
-			int i = Thread.ActorCount
+			i = Thread.ActorCount
 			while !IsCumSource && i > 0
 				i -= 1
 				IsCumSource = Animation.GetCumSource(i, Stage) == Position
 			endWhile
 			if !IsCumSource
-				if IsMale && !(Animation.HasTag("Anal") || Animation.HasTag("Vaginal") || Animation.HasTag("Handjob") || Animation.HasTag("Penis"))
+				if IsMale && !(Animation.HasTag("Anal") || Animation.HasTag("Vaginal") || Animation.HasTag("Handjob") || Animation.HasTag("Blowjob") || Animation.HasTag("Boobjob") || Animation.HasTag("Footjob") || Animation.HasTag("Penis"))
 					return
-				elseIf IsFemale && !(Animation.HasTag("Anal") || Animation.HasTag("Vaginal") || Animation.HasTag("Pussy") || Animation.HasTag("Cunnilingus") || Animation.HasTag("Breast"))
+				elseIf IsFemale && !(Animation.HasTag("Anal") || Animation.HasTag("Vaginal") || Animation.HasTag("Pussy") || Animation.HasTag("Cunnilingus") || Animation.HasTag("Fisting") || Animation.HasTag("Breast"))
 					return
 				endIf
 			endIf
@@ -959,7 +969,7 @@ state Animating
 			PlayLouder(OrgasmFX, ActorRef, Config.SFXVolume)
 		endIf
 		; Apply cum to female positions from male position orgasm
-		int i = Thread.ActorCount
+		i = Thread.ActorCount
 		if i > 1 && Config.UseCum && (MalePosition || IsCreature) && (IsMale || IsCreature || (Config.AllowFFCum && IsFemale))
 			if i == 2
 				Thread.PositionAlias(IntIfElse(Position == 1, 0, 1)).ApplyCum()
