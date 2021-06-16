@@ -779,9 +779,9 @@ int function GetHighestPresentRelationshipRank(Actor ActorRef)
 	endIf
 	int out = -4 ; lowest possible
 	int i = ActorCount
-	while i > 0
+	while i > 0 && out < 4
 		i -= 1
-		if Positions[i] != ActorRef && out < 4
+		if Positions[i] != ActorRef
 			int rank = ActorRef.GetRelationshipRank(Positions[i])
 			if rank > out
 				out = rank
@@ -795,11 +795,11 @@ int function GetLowestPresentRelationshipRank(Actor ActorRef)
 	if ActorCount == 1
 		return SexLabUtil.IntIfElse(ActorRef == Positions[0], 0, ActorRef.GetRelationshipRank(Positions[0]))
 	endIf
-	int out = 4 ; lowest possible
+	int out = 4 ; highest possible
 	int i = ActorCount
-	while i > 0
+	while i > 0 && out > -4
 		i -= 1
-		if Positions[i] != ActorRef && out > -4
+		if Positions[i] != ActorRef
 			int rank = ActorRef.GetRelationshipRank(Positions[i])
 			if rank < out
 				out = rank
