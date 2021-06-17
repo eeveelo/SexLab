@@ -68,7 +68,7 @@ endProperty
 float[] property SkillBonus auto hidden ; [0] Foreplay, [1] Vaginal, [2] Anal, [3] Oral, [4] Pure, [5] Lewd
 float[] property SkillXP auto hidden    ; [0] Foreplay, [1] Vaginal, [2] Anal, [3] Oral, [4] Pure, [5] Lewd
 
-bool[] property IsType auto hidden ; [0] IsAggressive, [1] IsVaginal, [2] IsAnal, [3] IsOral, [4] IsLoving, [5] IsDirty
+bool[] property IsType auto hidden ; [0] IsAggressive, [1] IsVaginal, [2] IsAnal, [3] IsOral, [4] IsLoving, [5] IsDirty, [6] HadVaginal, [7] HadAnal, [8] HadOral
 bool property IsAggressive hidden
 	bool function get()
 		return IsType[0]
@@ -2008,7 +2008,7 @@ endFunction
 function InitShares()
 	DebugMode      = Config.DebugMode
 	AnimEvents     = new string[5]
-	IsType         = new bool[6]
+	IsType         = new bool[9]
 	BedStatus      = new int[2]
 	AliasDone      = new int[6]
 	RealTime       = new float[1]

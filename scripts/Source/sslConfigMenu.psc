@@ -2866,6 +2866,9 @@ function SexDiary()
 	AddTextOption("$SSL_TimesMasturbated", Stats.GetSkill(StatRef, "Masturbation"))
 	AddTextOption("$SSL_TimesAggressive", Stats.GetSkill(StatRef, "Aggressor"))
 	AddTextOption("$SSL_TimesVictim", Stats.GetSkill(StatRef, "Victim"))
+	AddTextOption("$SSL_TimesVaginal", Stats.GetSkill(StatRef, "VaginalCount"))
+	AddTextOption("$SSL_TimesAnal", Stats.GetSkill(StatRef, "AnalCount"))
+	AddTextOption("$SSL_TimesOral", Stats.GetSkill(StatRef, "OralCount"))
 
 	; Custom stats set by other mods
 	if StatRef == PlayerRef

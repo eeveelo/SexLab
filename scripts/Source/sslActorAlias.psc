@@ -1027,6 +1027,15 @@ state Animating
 			endIf
 			sslActorStats.RecordThread(ActorRef, Gender, BestRelation, StartedAt, Utility.GetCurrentRealTime(), Utility.GetCurrentGameTime(), Thread.HasPlayer, VictimRef, Thread.Genders, Thread.SkillXP)
 			Stats.AddPartners(ActorRef, Thread.Positions, Thread.Victims)
+			if IsType[6]
+				Stats.AdjustSkill(ActorRef, "VaginalCount", 1)
+			endIf
+			if IsType[7]
+				Stats.AdjustSkill(ActorRef, "AnalCount", 1)
+			endIf
+			if IsType[8]
+				Stats.AdjustSkill(ActorRef, "OralCount", 1)
+			endIf
 		endIf
 		; Apply cum
 		;/ int CumID = Animation.GetCum(Position)
