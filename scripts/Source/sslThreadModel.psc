@@ -1217,8 +1217,8 @@ int function FilterAnimations()
 			string DefGenderTag = ""
 			i = ActorCount
 			int[] GendersAll = ActorLib.GetGendersAll(Positions)
-			int[] Futas = ThreadLib.TransCount(Positions)
-			int[] FutasAll = ThreadLib.GetTransAll(Positions)
+			int[] Futas = ActorLib.TransCount(Positions)
+			int[] FutasAll = ActorLib.GetTransAll(Positions)
 			while i ;Make Position Gender Tag
 				i -= 1
 				if GendersAll[i] == 0
