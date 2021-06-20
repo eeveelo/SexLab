@@ -2688,7 +2688,7 @@ endState
 state ExpressionAddPhaseFemale
 	event OnSelectST()
 		Expression.AddPhase(Phase, Female)
-		if Phase > 1 && ShowMessage("Do you wish to copy the previous Phase?", true, "$Yes", "$No")
+		if Phase > 1 && ShowMessage("$SSL_WarnCopyPreviousPhase", true, "$Yes", "$No")
 			float[] PeviousPhase = Expression.GenderPhase((Phase - 1), Female)
 			float[] NewValues = new float[32]
 			int i = PeviousPhase.Length
@@ -2704,7 +2704,7 @@ endState
 state ExpressionAddPhaseMale
 	event OnSelectST()
 		Expression.AddPhase(Phase, Male)
-		if Phase > 1 && ShowMessage("Do you wish to copy the previous Phase?", true, "$Yes", "$No")
+		if Phase > 1 && ShowMessage("$SSL_WarnCopyPreviousPhase", true, "$Yes", "$No")
 			float[] PeviousPhase = Expression.GenderPhase((Phase - 1), Male)
 			float[] NewValues = new float[32]
 			int i = PeviousPhase.Length
@@ -2738,7 +2738,11 @@ state MoodTypeFemale
 		SetMenuDialogOptions(Moods)
 	endEvent
 	event OnMenuAcceptST(int i)
-		if i >= 0
+		if i > 14
+			ShowMessage("$SSL_WarnMoodForbidden{"+Moods[i]+"}")
+			Expression.SetIndex(Phase, Female, Mood, 0, 0)
+			SetMenuOptionValueST(Moods[0])
+		elseIf i >= 0
 			Expression.SetIndex(Phase, Female, Mood, 0, i)
 			SetMenuOptionValueST(Moods[i])
 		endIf
@@ -2772,7 +2776,11 @@ state MoodTypeMale
 		SetMenuDialogOptions(Moods)
 	endEvent
 	event OnMenuAcceptST(int i)
-		if i >= 0
+		if i > 14
+			ShowMessage("$SSL_WarnMoodForbidden{"+Moods[i]+"}")
+			Expression.SetIndex(Phase, Male, Mood, 0, 0)
+			SetMenuOptionValueST(Moods[0])
+		elseIf i >= 0
 			Expression.SetIndex(Phase, Male, Mood, 0, i)
 			SetMenuOptionValueST(Moods[i])
 		endIf

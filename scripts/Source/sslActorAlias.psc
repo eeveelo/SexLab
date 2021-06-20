@@ -768,14 +768,6 @@ state Animating
 			; Lip sync and refresh expression
 			if GetState() == "Animating"
 				int Strength = CalcReaction()
-				if Expressions && Expressions.Length > 0
-					if LoopExpressionDelay >= ExpressionDelay && Config.RefreshExpressions
-						Expression = Expressions[Utility.RandomInt(0, (Expressions.Length - 1))]
-						Log("Expression["+Expression.Name+"] BaseVoiceDelay["+BaseDelay+"] ExpressionDelay["+ExpressionDelay+"] LoopExpressionDelay["+LoopExpressionDelay+"] ")
-						LoopExpressionDelay = 0.0
-					endIf
-					RefreshExpression()
-				endIf
 				if LoopDelay >= VoiceDelay
 					LoopDelay = 0.0
 					if OpenMouth && UseLipSync
@@ -786,6 +778,20 @@ state Animating
 						Log("PlayMoan:True; UseLipSync:"+UseLipSync+"; OpenMouth:"+OpenMouth)
 					endIf
 				endIf
+				if Expressions && Expressions.Length > 0
+					if LoopExpressionDelay >= ExpressionDelay && Config.RefreshExpressions
+						sslBaseExpression oldExpression = Expression
+						Expression = Expressions[Utility.RandomInt(0, (Expressions.Length - 1))]
+						Log("Expression["+Expression.Name+"] BaseVoiceDelay["+BaseDelay+"] ExpressionDelay["+ExpressionDelay+"] LoopExpressionDelay["+LoopExpressionDelay+"] ")
+						if oldExpression != Expression
+							RefreshExpression()
+						endIf
+						LoopExpressionDelay = 0.0
+					endIf
+				endIf
+				if RefreshExpressionDelay > 8.0
+					RefreshExpression()
+				endIf
 				; Trigger orgasm
 				if !NoOrgasm && SeparateOrgasms && Strength >= 100 && Stage < StageCount && (RealTime[0] - LastOrgasm) > (((IsMale as int) + (IsCreature as int) + 1) * 10.0)
 					OrgasmEffect()
@@ -794,6 +800,7 @@ state Animating
 			; Loop
 			LoopDelay += (VoiceDelay * 0.35)
 			LoopExpressionDelay += (VoiceDelay * 0.35)
+			RefreshExpressionDelay += (VoiceDelay * 0.35)
 			RegisterForSingleUpdate(VoiceDelay * 0.35)
 		endIf
 	endEvent
@@ -1782,19 +1789,20 @@ bool property DoPathToCenter
 	endFunction
 endProperty
 
+float RefreshExpressionDelay
 function RefreshExpression()
 	if !ActorRef || IsCreature || !ActorRef.Is3DLoaded() || ActorRef.IsDisabled()
 		; Do nothing
 	elseIf OpenMouth
 		sslBaseExpression.OpenMouth(ActorRef)
 		Utility.Wait(1.0)
-		if Config.RefreshExpressions && Expression && Expression != none && !ActorRef.IsDead() && !ActorRef.IsUnconscious()
+		if Config.RefreshExpressions && Expression && Expression != none && !ActorRef.IsDead() && !ActorRef.IsUnconscious() && ActorRef.GetActorValue("Health") > 1.0
 			int Strength = CalcReaction()
 			Expression.Apply(ActorRef, Strength, BaseSex)
 			Log("Expression.Applied("+Expression.Name+") Strength:"+Strength+"; OpenMouth:"+OpenMouth)
 		endIf
 	else
-		if Expression && Expression != none && !ActorRef.IsDead() && !ActorRef.IsUnconscious()
+		if Expression && Expression != none && !ActorRef.IsDead() && !ActorRef.IsUnconscious() && ActorRef.GetActorValue("Health") > 1.0
 			int Strength = CalcReaction()
 			sslBaseExpression.CloseMouth(ActorRef)
 			Expression.Apply(ActorRef, Strength, BaseSex)
@@ -1803,6 +1811,7 @@ function RefreshExpression()
 			sslBaseExpression.CloseMouth(ActorRef)			
 		endIf
 	endIf
+	RefreshExpressionDelay = 0.0
 endFunction
 
 ; ------------------------------------------------------- ;
