@@ -73,6 +73,7 @@ Actor function FindAvailableActorInFaction(Faction FactionRef, ObjectReference C
 	Suppressed[11] = IgnoreRef3
 	Suppressed[10] = IgnoreRef4
 	; Attempt 20 times before giving up.
+	float Z = CenterRef.GetPositionZ()
 	int i = Suppressed.Length - 5
 	while i > 0
 		i -= 1
@@ -176,6 +177,58 @@ Actor[] function FindAvailablePartners(actor[] Positions, int total, int males =
 	endWhile
 	; Output whatever we have at this point
 	return ActorsRef
+endFunction
+
+Actor[] function FindAnimationPartners(sslBaseAnimation Animation, ObjectReference CenterRef, float Radius = 5000.0, Actor IncludedRef1 = none, Actor IncludedRef2 = none, Actor IncludedRef3 = none, Actor IncludedRef4 = none)
+	if !Animation || !CenterRef
+		return PapyrusUtil.ActorArray(0)
+	endIf
+	
+	Actor[] IncludedActors = sslUtility.MakeActorArray(IncludedRef1, IncludedRef2, IncludedRef3, IncludedRef4)
+	Actor[] Positions = PapyrusUtil.ActorArray(Animation.PositionCount)
+	int i
+	while i < Positions.Length
+		; Determine needed gender and race
+		string RaceKey = ""
+		int FindGender = Animation.GetGender(i)
+		if FindGender > 1
+			RaceKey = Animation.GetRaceTypes()[i]
+		elseif FindGender > 0 && !(Animation.HasTag("Vaginal") || Animation.HasTag("Pussy") || Animation.HasTag("Cunnilingus") || Animation.HasTag("Futa"))
+			FindGender = -1
+		elseif FindGender == 0 && Config.UseStrapons && Animation.UseStrapon(i, 1)
+			FindGender = -1
+		endIf
+
+		; Locate the actor between the included actors
+		int a = IncludedActors.Length
+		while a > 0 
+			a -= 1
+			if CheckActor(IncludedActors[a], FindGender) && (RaceKey == "" || sslCreatureAnimationSlots.GetAllRaceKeys(IncludedActors[a].GetLeveledActorBase().GetRace()).Find(RaceKey) != -1)
+				Positions[i] = IncludedActors[a]
+				IncludedActors = PapyrusUtil.RemoveActor(IncludedActors, IncludedActors[a])
+				a = 0
+			endIf
+		endWhile
+		
+		; Find the nearby actor
+		if !Positions[i] || Positions[i] == none
+			Positions[i] = FindAvailableActor(CenterRef, Radius, FindGender, Positions[1], Positions[2], Positions[3], Positions[4], RaceKey)
+			; One more time just in case
+			if !Positions[i] || Positions[i] == none
+				Positions[i] = FindAvailableActor(CenterRef, Radius, FindGender, Positions[1], Positions[2], Positions[3], Positions[4], RaceKey)
+			endIf
+		endIf
+		
+		
+		if !Positions[i] || Positions[i] == none
+			return PapyrusUtil.RemoveActor(Positions, none)
+		elseIf IncludedActors.Length > 0
+			IncludedActors = PapyrusUtil.RemoveActor(IncludedActors, Positions[i])
+		endIf
+		i += 1
+	endWhile
+	; Output whatever we have at this point
+	return PapyrusUtil.RemoveActor(Positions, none)
 endFunction
 
 Actor[] function SortActors(Actor[] Positions, bool FemaleFirst = true)

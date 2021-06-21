@@ -1636,7 +1636,7 @@ function AnimationEditor()
 		string Type = "Bed"
 		Type = "Bed"
 		AnimOffsets = Animation.GetBedOffsets()
-		if Animation.PositionCount == 1 || (TargetRef && Animation.PositionCount == 2 && (!IsCreatureEditor || (IsCreatureEditor && Animation.HasActorRace(TargetRef))))
+		if (Animation.PositionCount == 1 && (!IsCreatureEditor || (Animation.HasActorRace(PlayerRef) || (TargetRef && Animation.HasActorRace(PlayerRef))))) || (Animation.PositionCount >= 2 && TargetRef && (!IsCreatureEditor || (Animation.HasActorRace(PlayerRef) || Animation.HasActorRace(TargetRef))))
 			AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere")
 		else
 			AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere", OPTION_FLAG_DISABLED)
@@ -1654,7 +1654,7 @@ function AnimationEditor()
 
 		AddMenuOptionST("AnimationAdjustCopy", "$SSL_CopyFromProfile", "$SSL_Select")
 
-		if Animation.PositionCount == 1 || (TargetRef && Animation.PositionCount == 2 && (!IsCreatureEditor || (IsCreatureEditor && Animation.HasActorRace(TargetRef))))
+		if (Animation.PositionCount == 1 && (!IsCreatureEditor || (Animation.HasActorRace(PlayerRef) || (TargetRef && Animation.HasActorRace(PlayerRef))))) || (Animation.PositionCount >= 2 && TargetRef && (!IsCreatureEditor || (Animation.HasActorRace(PlayerRef) || Animation.HasActorRace(TargetRef))))
 			AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere")
 		else
 			AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere", OPTION_FLAG_DISABLED)
@@ -1919,18 +1919,35 @@ state AnimationTest
 				Thread.DisableBedUse(true)
 				Thread.DisableLeadIn(true)
 				; select a solo actor
-				if Animation.PositionCount < 2
-					if TargetRef && TargetRef.Is3DLoaded() && ShowMessage("Which actor would you like to play the solo animation "+Animation.Name+" with?", true, TargetName, PlayerName)
-						Thread.AddActor(TargetRef)
-					else
-						Thread.AddActor(PlayerRef)
+				if Animation.PositionCount == 1
+					string RaceKey = ""
+					int FindGender = Animation.GetGender(0)
+					if FindGender > 1
+						RaceKey = Animation.RaceType
+					elseif FindGender > 0 && !(Animation.HasTag("Vaginal") || Animation.HasTag("Pussy") || Animation.HasTag("Cunnilingus") || Animation.HasTag("Futa"))
+						FindGender = -1
+					elseif FindGender == 0 && Config.UseStrapons && Animation.UseStrapon(0, 1)
+						FindGender = -1
 					endIf
-				; Add player and target
-				elseIf Animation.PositionCount == 2 && TargetRef
-					Actor[] Positions = sslUtility.MakeActorArray(PlayerRef, TargetRef)
-				;	Positions = ThreadLib.SortActorsByAnimation(Positions, Animation)
-					Thread.AddActor(Positions[0])
-					Thread.AddActor(Positions[1])
+
+					bool ValidPlayer = ThreadLib.CheckActor(TargetRef, FindGender) && (RaceKey == "" || sslCreatureAnimationSlots.GetAllRaceKeys(TargetRef.GetLeveledActorBase().GetRace()).Find(RaceKey) != -1)
+					bool ValidTarget = ThreadLib.CheckActor(TargetRef, FindGender) && (RaceKey == "" || sslCreatureAnimationSlots.GetAllRaceKeys(TargetRef.GetLeveledActorBase().GetRace()).Find(RaceKey) != -1)
+					if ValidPlayer && ValidTarget
+						if ShowMessage("Which actor would you like to play the solo animation "+Animation.Name+" with?", true, TargetName, PlayerName)
+							Thread.AddActor(TargetRef)
+						else
+							Thread.AddActor(PlayerRef)
+						endIf
+					elseIf ValidTarget
+						Thread.AddActor(TargetRef)
+					elseIf ValidPlayer
+						Thread.AddActor(PlayerRef)
+					else
+						ShowMessage("Failed to start test animation.\n  None valid actor selected", false)
+					endIf
+				; Add actors
+				elseIf Animation.PositionCount >= 2
+					Thread.AddActors(ThreadLib.FindAnimationPartners(Animation, PlayerRef, 1500, PlayerRef, TargetRef))
 				endIf
 				if Animation.PositionCount != Thread.ActorCount
 					ShowMessage("Failed to start test animation.\n  Animation.PositionCount["+Animation.PositionCount+"] and ActorCount["+Thread.ActorCount+"] don't match", false)
