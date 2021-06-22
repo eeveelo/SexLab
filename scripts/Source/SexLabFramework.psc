@@ -144,7 +144,7 @@ sslThreadController function QuickStart(Actor Actor1, Actor Actor2 = none, Actor
 		if (Genders[2] + Genders[3]) < 1
 			Anims = AnimSlots.GetByTags(Positions.Length, AnimationTags, "", false)
 		else
-			Anims = AnimSlots.GetByCreatureActorsTags(Positions.Length, Positions, AnimationTags, "", false)
+			Anims = CreatureSlots.GetByCreatureActorsTags(Positions.Length, Positions, AnimationTags, "", false)
 		endIf
 	endIf
 	return ThreadSlots.GetController(StartSex(Positions, Anims, Victim, none, true, Hook))
@@ -420,7 +420,7 @@ endFunction
 * * @param: ObjectReference CenterRef - The object to use as the center point in the search. 
 * * @param: float Radius [OPTIONAL] - The distance from the center point to search.
 * * @param: int FindGender [OPTIONAL] - The desired gender id to look for, 2 for male/no gender, 3 for female.
-* * @param: Actor IgnoreRef1/2/3/4 [OPTIONAL] - An creature you know for certain you do not want returned by this function.
+* * @param: Actor IgnoreRef1/2/3/4 [OPTIONAL] - A creature you know for certain you do not want returned by this function.
 * * @return: Actor - A valid creature found, if any. Returns none if no valid creature found.
 **/;
 Actor function FindAvailableCreature(string RaceKey, ObjectReference CenterRef, float Radius = 5000.0, int FindGender = 2, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none)
@@ -435,7 +435,7 @@ endFunction
 * * @param: ObjectReference CenterRef - The object to use as the center point in the search. 
 * * @param: float Radius [OPTIONAL] - The distance from the center point to search.
 * * @param: int FindGender [OPTIONAL] - The desired gender id to look for, -1 for any, 0 for male, 1 for female.
-* * @param: Actor IgnoreRef1/2/3/4 [OPTIONAL] - An creature you know for certain you do not want returned by this function.
+* * @param: Actor IgnoreRef1/2/3/4 [OPTIONAL] - A creature you know for certain you do not want returned by this function.
 * * @param: bool HasFaction [OPTIONAL true by default] - If False the returned creature won't be part of the given faction, if True the returned creature most be part of the given faction.
 * * @return: Actor - A valid creature found, if any. None if no valid creature found.
 */;
@@ -451,7 +451,7 @@ endFunction
 * * @param: ObjectReference CenterRef - The object to use as the center point in the search. 
 * * @param: float Radius [OPTIONAL] - The distance from the center point to search.
 * * @param: int FindGender [OPTIONAL] - The desired gender id to look for, -1 for any, 0 for male, 1 for female.
-* * @param: Actor IgnoreRef1/2/3/4 [OPTIONAL] - An creature you know for certain you do not want returned by this function.
+* * @param: Actor IgnoreRef1/2/3/4 [OPTIONAL] - A creature you know for certain you do not want returned by this function.
 * * @param: bool AvoidNoStripKeyword [OPTIONAL true by default] - If False the search won't check the equipped slotMask is treated as "NoStrip" (naked), if True the equipped slotMask treated as "NoStrip" (naked) will be considered unequipped.
 * * @param: bool HasFaction [OPTIONAL true by default] - If False the returned creature won't have the given slotMask unequipped or empty, if True the returned creature most have the given slotMask equipped.
 * * @return: Actor - A valid creature found, if any. None if no valid creature found.
@@ -491,7 +491,7 @@ endFunction
 * * This is a most general propoused function that fully cover standard and creature actors.
 * * 
 * * @param: Actor[] Positions - The list of humanoid and/or creature actors to sort
-* * @param: sslBaseAnimation Animation [OPTIONAL] - Is the animation used as referece to sort the actors. In case the animations be empty, not valid, or the number of the actors expected by the animation is not equal to the number of actors in the Positions array, then for the Position array without creatures the SortActors function will be executed instead.
+* * @param: sslBaseAnimation Animation [OPTIONAL] - Is the animation used as referece to sort the actors. In case the animation is none, not valid, or the number of the actors expected by the animation is not equal to the number of actors in the Positions array, then for the Position array without creatures the SortActors function will be executed instead.
 * * @return: Actor[] - The final sorted list of actors.
 */;
 Actor[] function SortActorsByAnimation(Actor[] Positions, sslBaseAnimation Animation = none)
@@ -503,7 +503,7 @@ endFunction
 * * This is a creature oriented function that can handle "creature only animations", "humanoid & creature animations" and "multiple creature races on the same animation".
 * * 
 * * @param: Actor[] Positions - The list of creature and humanoid actors to sort
-* * @param: sslBaseAnimation Animation [OPTIONAL] - Is the animation used as referece to sort the actors. In case the animations be empty, not valid, or the number of the actors or races expected by the animation is not equal to the number of actors or races in the Positions array, then for the Position array with creatures the humanoid actors will be listed first in a scene.
+* * @param: sslBaseAnimation Animation [OPTIONAL] - Is the animation used as referece to sort the actors. In case the animation is none, not valid, or the number of the actors or races expected by the animation is not equal to the number of actors or races in the Positions array, then for the Position array with creatures the humanoid actors will be listed first in a scene.
 * * @return: Actor[] - The final sorted list of actors.
 */;
 Actor[] function SortCreatures(Actor[] Positions, sslBaseAnimation Animation = none)
@@ -964,7 +964,7 @@ endFunction
 * * 
 * * @param: Actor ActorRef - The actor you want to send a custom tracked event for.
 * * @param: string Hook - The event type you want to send, used in place of the default Added, Start, End, Orgasm hook types as "<Hook>_<Callback>"
-* * @param: int id [OPTIONAL] - A id number to send with your custom tracked event. This is normally the associated animation thread id number, but can be anything you want.
+* * @param: int id [OPTIONAL] - An id number to send with your custom tracked event. This is normally the associated animation thread id number, but can be anything you want.
 * * 
 * * EXAMPLE:
 * * Actor myActor = ...                                                                     <-- get you actor in some way
@@ -1308,7 +1308,7 @@ endFunction
 * * @return: sslBaseAnimation[] - An array of animations that fit the provided search arguments.
 */;
 sslBaseAnimation[] function GetCreatureAnimationsByRaceGendersTags(int ActorCount, Race RaceRef, int MaleCreatures = 0, int FemaleCreatures = 0, string Tags, string TagSuppress = "", bool RequireAll = true)
-	return CreatureSlots.GetByRaceGendersTags(ActorCount, RaceRef, MaleCreatures, FemaleCreatures, ForceUse)
+	return CreatureSlots.GetByRaceGendersTags(ActorCount, RaceRef, MaleCreatures, FemaleCreatures, Tags, TagSuppress, RequireAll)
 endFunction
 
 ;/* GetCreatureAnimationsByRaceKey
@@ -1535,7 +1535,7 @@ endFunction
 * * @param: int Gender - The gender number to get a random voice for. 0 = male 1 = female.
 * * @return: sslBaseVoice[] - An array of suitable voices for the given actor gender.
 */;
-sslBaseVoice function GetVoicesByGender(int Gender)
+sslBaseVoice[] function GetVoicesByGender(int Gender)
 	return VoiceSlots.GetAllGender(Gender)
 endFunction
 
