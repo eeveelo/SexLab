@@ -868,7 +868,7 @@ function Setup()
 	LewdTitlesFemale[5] = "$SSL_Debaucherous"
 	LewdTitlesFemale[6] = "$SSL_Nymphomaniac"
 
-	SkillNames = new string[18]
+	SkillNames = new string[21]
 	SkillNames[0] = "Foreplay"
 	SkillNames[1] = "Vaginal"
 	SkillNames[2] = "Anal"
@@ -887,6 +887,9 @@ function Setup()
 	SkillNames[15] = "TimeSpent"
 	SkillNames[16] = "LastSex.RealTime"
 	SkillNames[17] = "LastSex.GameTime"
+	SkillNames[18] = "VaginalCount"
+	SkillNames[19] = "AnalCount"
+	SkillNames[20] = "OralCount"
 
 	; v1.59b - Converted stats to use float lists instead of individual values
 	int i = FormListCount(none, "SexLab.SeededActors")
@@ -919,24 +922,11 @@ function UpgradeLegacyStats(Form FormRef, bool IsImportant)
 		Log(SexLabUtil.StringIfElse(SexLabUtil.IsActor(FormRef), (FormRef as Actor).GetLeveledActorBase().GetName(), "None"), "Skills Removed")
 	elseIf !IsSkilled(FormRef as Actor)
 		Actor ActorRef = FormRef as Actor
-		_SetSkill(ActorRef, 0, FloatListGet(ActorRef, "SexLabSkills", 0))
-		_SetSkill(ActorRef, 1, FloatListGet(ActorRef, "SexLabSkills", 1))
-		_SetSkill(ActorRef, 2, FloatListGet(ActorRef, "SexLabSkills", 2))
-		_SetSkill(ActorRef, 3, FloatListGet(ActorRef, "SexLabSkills", 3))
-		_SetSkill(ActorRef, 4, FloatListGet(ActorRef, "SexLabSkills", 4))
-		_SetSkill(ActorRef, 5, FloatListGet(ActorRef, "SexLabSkills", 5))
-		_SetSkill(ActorRef, 6, FloatListGet(ActorRef, "SexLabSkills", 6))
-		_SetSkill(ActorRef, 7, FloatListGet(ActorRef, "SexLabSkills", 7))
-		_SetSkill(ActorRef, 8, FloatListGet(ActorRef, "SexLabSkills", 8))
-		_SetSkill(ActorRef, 9, FloatListGet(ActorRef, "SexLabSkills", 9))
-		_SetSkill(ActorRef, 10, FloatListGet(ActorRef, "SexLabSkills", 10))
-		_SetSkill(ActorRef, 11, FloatListGet(ActorRef, "SexLabSkills", 11))
-		_SetSkill(ActorRef, 12, FloatListGet(ActorRef, "SexLabSkills", 12))
-		_SetSkill(ActorRef, 13, FloatListGet(ActorRef, "SexLabSkills", 13))
-		_SetSkill(ActorRef, 14, FloatListGet(ActorRef, "SexLabSkills", 14))
-		_SetSkill(ActorRef, 15, FloatListGet(ActorRef, "SexLabSkills", 15))
-		_SetSkill(ActorRef, 16, FloatListGet(ActorRef, "SexLabSkills", 16))
-		_SetSkill(ActorRef, 17, FloatListGet(ActorRef, "SexLabSkills", 17))
+		int i = FloatListCount(ActorRef, "SexLabSkills")
+		while i
+			i -= 1
+			_SetSkill(ActorRef, i, FloatListGet(ActorRef, "SexLabSkills", i))
+		endWhile
 		ClearLegacyStats(ActorRef)
 		sslSystemConfig.StoreActor(ActorRef)
 		Log("UpgradeLegacyStats: ", ActorRef.GetLeveledActorBase().GetName()+" - "+GetSkills(ActorRef))
@@ -1082,9 +1072,24 @@ int property kLastGameTime hidden
 		return 17
 	endFunction
 endProperty
-int property kStatCount hidden
+int property kVaginalCount hidden
 	int function get()
 		return 18
+	endFunction
+endProperty
+int property kAnalCount hidden
+	int function get()
+		return 19
+	endFunction
+endProperty
+int property kOralCount hidden
+	int function get()
+		return 20
+	endFunction
+endProperty
+int property kStatCount hidden
+	int function get()
+		return 21
 	endFunction
 endProperty
 
@@ -1095,8 +1100,11 @@ string function PrintSkills(Actor ActorRef)
 	Output += " -- "+ActorRef.GetLeveledActorBase().GetName()+" -- \n"
 	Output += "\tForeplay: "+Skills[kForeplay] + "\n"
 	Output += "\tVaginal: "+Skills[kVaginal] + "\n"
+	Output += "\tVaginalCount: "+Skills[kVaginalCount] + "\n"
 	Output += "\tAnal: "+Skills[kAnal] + "\n"
+	Output += "\tAnalCount: "+Skills[kAnalCount] + "\n"
 	Output += "\tOral: "+Skills[kOral] + "\n"
+	Output += "\tOralCount: "+Skills[kOralCount] + "\n"
 	Output += "\tPure: "+Skills[kPure] + "\n"
 	Output += "\tLewd: "+Skills[kLewd] + "\n"
 	Output += "\tMales: "+Skills[kMales] + "\n"

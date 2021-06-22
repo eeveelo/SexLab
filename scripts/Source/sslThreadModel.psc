@@ -68,7 +68,7 @@ endProperty
 float[] property SkillBonus auto hidden ; [0] Foreplay, [1] Vaginal, [2] Anal, [3] Oral, [4] Pure, [5] Lewd
 float[] property SkillXP auto hidden    ; [0] Foreplay, [1] Vaginal, [2] Anal, [3] Oral, [4] Pure, [5] Lewd
 
-bool[] property IsType auto hidden ; [0] IsAggressive, [1] IsVaginal, [2] IsAnal, [3] IsOral, [4] IsLoving, [5] IsDirty
+bool[] property IsType auto hidden ; [0] IsAggressive, [1] IsVaginal, [2] IsAnal, [3] IsOral, [4] IsLoving, [5] IsDirty, [6] HadVaginal, [7] HadAnal, [8] HadOral
 bool property IsAggressive hidden
 	bool function get()
 		return IsType[0]
@@ -779,9 +779,9 @@ int function GetHighestPresentRelationshipRank(Actor ActorRef)
 	endIf
 	int out = -4 ; lowest possible
 	int i = ActorCount
-	while i > 0
+	while i > 0 && out < 4
 		i -= 1
-		if Positions[i] != ActorRef && out < 4
+		if Positions[i] != ActorRef
 			int rank = ActorRef.GetRelationshipRank(Positions[i])
 			if rank > out
 				out = rank
@@ -795,11 +795,11 @@ int function GetLowestPresentRelationshipRank(Actor ActorRef)
 	if ActorCount == 1
 		return SexLabUtil.IntIfElse(ActorRef == Positions[0], 0, ActorRef.GetRelationshipRank(Positions[0]))
 	endIf
-	int out = 4 ; lowest possible
+	int out = 4 ; highest possible
 	int i = ActorCount
-	while i > 0
+	while i > 0 && out > -4
 		i -= 1
-		if Positions[i] != ActorRef && out > -4
+		if Positions[i] != ActorRef
 			int rank = ActorRef.GetRelationshipRank(Positions[i])
 			if rank < out
 				out = rank
@@ -1035,6 +1035,16 @@ function SetForcedAnimations(sslBaseAnimation[] AnimationList)
 	endIf
 endFunction
 
+sslBaseAnimation[] function GetForcedAnimations()
+	sslBaseAnimation[] Output = sslUtility.AnimationArray(CustomAnimations.Length)
+	int i = CustomAnimations.Length
+	while i > 0
+		i -= 1
+		Output[i] = CustomAnimations[i]
+	endWhile
+	return Output
+endFunction
+
 function ClearForcedAnimations()
 	CustomAnimations = sslUtility.AnimationArray(0)
 endFunction
@@ -1043,6 +1053,16 @@ function SetAnimations(sslBaseAnimation[] AnimationList)
 	if AnimationList && AnimationList.Length > 0
 		PrimaryAnimations = AnimationList
 	endIf
+endFunction
+
+sslBaseAnimation[] function GetAnimations()
+	sslBaseAnimation[] Output = sslUtility.AnimationArray(PrimaryAnimations.Length)
+	int i = PrimaryAnimations.Length
+	while i > 0
+		i -= 1
+		Output[i] = PrimaryAnimations[i]
+	endWhile
+	return Output
 endFunction
 
 function ClearAnimations()
@@ -1054,6 +1074,16 @@ function SetLeadAnimations(sslBaseAnimation[] AnimationList)
 		LeadIn = true
 		LeadAnimations = AnimationList
 	endIf
+endFunction
+
+sslBaseAnimation[] function GetLeadAnimations()
+	sslBaseAnimation[] Output = sslUtility.AnimationArray(LeadAnimations.Length)
+	int i = LeadAnimations.Length
+	while i > 0
+		i -= 1
+		Output[i] = LeadAnimations[i]
+	endWhile
+	return Output
 endFunction
 
 function ClearLeadAnimations()
@@ -1187,8 +1217,8 @@ int function FilterAnimations()
 			string DefGenderTag = ""
 			i = ActorCount
 			int[] GendersAll = ActorLib.GetGendersAll(Positions)
-			int[] Futas = ThreadLib.TransCount(Positions)
-			int[] FutasAll = ThreadLib.GetTransAll(Positions)
+			int[] Futas = ActorLib.TransCount(Positions)
+			int[] FutasAll = ActorLib.GetTransAll(Positions)
 			while i ;Make Position Gender Tag
 				i -= 1
 				if GendersAll[i] == 0
@@ -1978,7 +2008,7 @@ endFunction
 function InitShares()
 	DebugMode      = Config.DebugMode
 	AnimEvents     = new string[5]
-	IsType         = new bool[6]
+	IsType         = new bool[9]
 	BedStatus      = new int[2]
 	AliasDone      = new int[6]
 	RealTime       = new float[1]

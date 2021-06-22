@@ -53,7 +53,7 @@ Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000
 	return none
 endFunction
 
-Actor function FindAvailableActorInFaction(Faction FactionRef, ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none, bool HasFaction = True, string RaceKey = "")
+Actor function FindAvailableActorInFaction(Faction FactionRef, ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none, bool HasFaction = True, string RaceKey = "", bool JustSameFloor = False)
 	if !CenterRef || !FactionRef || FindGender > 3 || FindGender < -1 || Radius < 0.1
 		return none ; Invalid args
 	endIf
@@ -73,11 +73,12 @@ Actor function FindAvailableActorInFaction(Faction FactionRef, ObjectReference C
 	Suppressed[11] = IgnoreRef3
 	Suppressed[10] = IgnoreRef4
 	; Attempt 20 times before giving up.
+	float Z = CenterRef.GetPositionZ()
 	int i = Suppressed.Length - 5
 	while i > 0
 		i -= 1
 		Actor FoundRef = Game.FindRandomActorFromRef(CenterRef, Radius)
-		if !FoundRef || (Suppressed.Find(FoundRef) == -1 && CheckActor(FoundRef, FindGender) && FoundRef.IsInFaction(FactionRef) == HasFaction && (RaceKey == "" || sslCreatureAnimationSlots.GetAllRaceKeys(FoundRef.GetLeveledActorBase().GetRace()).Find(RaceKey) != -1))
+		if !FoundRef || (Suppressed.Find(FoundRef) == -1 && (!JustSameFloor || SameFloor(FoundRef, Z, 200)) && CheckActor(FoundRef, FindGender) && FoundRef.IsInFaction(FactionRef) == HasFaction && (RaceKey == "" || sslCreatureAnimationSlots.GetAllRaceKeys(FoundRef.GetLeveledActorBase().GetRace()).Find(RaceKey) != -1))
 			return FoundRef ; None means no actor in radius, give up now
 		endIf
 		Suppressed[i] = FoundRef
@@ -178,6 +179,58 @@ Actor[] function FindAvailablePartners(actor[] Positions, int total, int males =
 	return ActorsRef
 endFunction
 
+Actor[] function FindAnimationPartners(sslBaseAnimation Animation, ObjectReference CenterRef, float Radius = 5000.0, Actor IncludedRef1 = none, Actor IncludedRef2 = none, Actor IncludedRef3 = none, Actor IncludedRef4 = none)
+	if !Animation || !CenterRef
+		return PapyrusUtil.ActorArray(0)
+	endIf
+	
+	Actor[] IncludedActors = sslUtility.MakeActorArray(IncludedRef1, IncludedRef2, IncludedRef3, IncludedRef4)
+	Actor[] Positions = PapyrusUtil.ActorArray(Animation.PositionCount)
+	int i
+	while i < Positions.Length
+		; Determine needed gender and race
+		string RaceKey = ""
+		int FindGender = Animation.GetGender(i)
+		if FindGender > 1
+			RaceKey = Animation.GetRaceTypes()[i]
+		elseif FindGender > 0 && !(Animation.HasTag("Vaginal") || Animation.HasTag("Pussy") || Animation.HasTag("Cunnilingus") || Animation.HasTag("Futa"))
+			FindGender = -1
+		elseif FindGender == 0 && Config.UseStrapons && Animation.UseStrapon(i, 1)
+			FindGender = -1
+		endIf
+
+		; Locate the actor between the included actors
+		int a = IncludedActors.Length
+		while a > 0 
+			a -= 1
+			if CheckActor(IncludedActors[a], FindGender) && (RaceKey == "" || sslCreatureAnimationSlots.GetAllRaceKeys(IncludedActors[a].GetLeveledActorBase().GetRace()).Find(RaceKey) != -1)
+				Positions[i] = IncludedActors[a]
+				IncludedActors = PapyrusUtil.RemoveActor(IncludedActors, IncludedActors[a])
+				a = 0
+			endIf
+		endWhile
+		
+		; Find the nearby actor
+		if !Positions[i] || Positions[i] == none
+			Positions[i] = FindAvailableActor(CenterRef, Radius, FindGender, Positions[1], Positions[2], Positions[3], Positions[4], RaceKey)
+			; One more time just in case
+			if !Positions[i] || Positions[i] == none
+				Positions[i] = FindAvailableActor(CenterRef, Radius, FindGender, Positions[1], Positions[2], Positions[3], Positions[4], RaceKey)
+			endIf
+		endIf
+		
+		
+		if !Positions[i] || Positions[i] == none
+			return PapyrusUtil.RemoveActor(Positions, none)
+		elseIf IncludedActors.Length > 0
+			IncludedActors = PapyrusUtil.RemoveActor(IncludedActors, Positions[i])
+		endIf
+		i += 1
+	endWhile
+	; Output whatever we have at this point
+	return PapyrusUtil.RemoveActor(Positions, none)
+endFunction
+
 Actor[] function SortActors(Actor[] Positions, bool FemaleFirst = true)
 	int ActorCount = Positions.Length
 	int Priority   = FemaleFirst as int
@@ -219,7 +272,7 @@ Actor[] function SortActorsByAnimation(actor[] Positions, sslBaseAnimation Anima
 		return Positions ; Nothing to sort
 	endIf
 	int[] Genders = ActorLib.GenderCount(Positions)
-	int[] Futas = TransCount(Positions)
+	int[] Futas = ActorLib.TransCount(Positions)
 	int Creatures = Genders[2] + Genders[3]
 	if Creatures < 1
 		if (Futas[0] + Futas[1]) < 1 && (Genders[0] == ActorCount || Genders[1] == ActorCount)
@@ -253,7 +306,7 @@ Actor[] function SortActorsByAnimation(actor[] Positions, sslBaseAnimation Anima
 		endWhile
 	else
 		int[] GendersAll = ActorLib.GetGendersAll(Positions)
-		int[] FutasAll = GetTransAll(Positions)
+		int[] FutasAll = ActorLib.GetTransAll(Positions)
 		
 		i = 0
 		while i < Animation.PositionCount
@@ -321,41 +374,6 @@ Actor[] function SortActorsByAnimation(actor[] Positions, sslBaseAnimation Anima
 	endIf
 endFunction
 
-; TODO: Move the Trans functions to the sslActorLibrary
-int function GetTrans(Actor ActorRef)
-	if ActorRef && ActorRef != none && ActorRef.IsInFaction(Config.GenderFaction)
-		if sslCreatureAnimationSlots.HasRaceType(ActorRef.GetLeveledActorBase().GetRace())
-			return 2 + ActorRef.GetFactionRank(Config.GenderFaction)
-		else
-			return ActorRef.GetFactionRank(Config.GenderFaction)
-		endIf
-	endIf
-	return -1
-endFunction
-
-int[] function GetTransAll(Actor[] Positions)
-	int i = Positions.Length
-	int[] Trans = Utility.CreateIntArray(i)
-	while i > 0
-		i -= 1
-		Trans[i] = GetTrans(Positions[i])
-	endWhile
-	return Trans
-endFunction
-
-int[] function TransCount(Actor[] Positions)
-	int[] Trans = new int[4]
-	int i = Positions.Length
-	while i > 0
-		i -= 1
-		int g = GetTrans(Positions[i])
-		if g >= 0 && g < 4
-			Trans[g] = Trans[g] + 1
-		endIf
-	endWhile
-	return Trans
-endFunction
-
 int function FindNext(Actor[] Positions, sslBaseAnimation Animation, int offset, bool FindCreature)
 	while offset
 		offset -= 1
@@ -414,8 +432,8 @@ Actor[] function SortCreatures(actor[] Positions, sslBaseAnimation Animation = n
 		endWhile
 	else
 		int[] GendersAll = ActorLib.GetGendersAll(Positions)
-		int[] Futas = TransCount(Positions)
-		int[] FutasAll = GetTransAll(Positions)
+		int[] Futas = ActorLib.TransCount(Positions)
+		int[] FutasAll = ActorLib.GetTransAll(Positions)
 
 		i = Animation.PositionCount
 		while i > 0

@@ -29,39 +29,68 @@ bool property Creature hidden
 	endFunction
 endProperty
 
-function MoveLips(Actor ActorRef, Sound SoundRef = none)
+function MoveLips(Actor ActorRef, Sound SoundRef = none, float Strength = 1.0) global
 	if !ActorRef
 		return
 	endIf
 	
-	bool HasMFG = Config.HasMFGFix
-	float SavedP = sslBaseExpression.GetPhoneme(ActorRef, 1)
+	bool HasMFG = SexLabUtil.GetConfig().HasMFGFix
+	int p
+	float[] Phoneme = new float[32]
+	int i
+	; Get Phoneme
+	while i <= 15
+		Phoneme[i] = sslBaseExpression.GetPhoneme(ActorRef, i) ; 0.0 - 1.0
+		if Phoneme[i] >= Phoneme[p] ; seems to be required to prevet issues
+			p = i
+		endIf
+		i += 1
+	endWhile
+	float SavedP = Phoneme[p] ;sslBaseExpression.GetPhoneme(ActorRef, p)
 	float ReferenceP = SavedP
-	if ReferenceP > 0.8
-		ReferenceP = 0.8
-	elseIf ReferenceP < 0.3
-		ReferenceP = 0.3
+	if ReferenceP > (1.0 - (0.2 * Strength))
+		ReferenceP = (1.0 - (0.2 * Strength))
 	endIf
-	int MinP = ((ReferenceP - 0.1)*100) as int
-	int MaxP = ((ReferenceP + 0.2)*100) as int
+	int MinP = ((ReferenceP - (0.04 * Strength))*100) as int
+	int MaxP = ((ReferenceP + (0.16 * Strength))*100) as int
+	if MinP < 0
+		MinP = 0
+	elseIf MinP > 98
+		MinP = 98
+	endIf
+	if (MaxP - MinP) < 2
+		MaxP = MinP + 2
+	endIf
+;	if ((SavedP * 100) - MinP) > 2
+;		TransitDown(ActorRef, (SavedP * 100) as int, MinP)
+;	endIf
 	if HasMFG
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, (ReferenceP*100) as int)
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, MinP)
 	else
-		ActorRef.SetExpressionPhoneme(1, ((MinP as float)*0.01))
+		ActorRef.SetExpressionPhoneme(p, (MinP as float)*0.01)
 	endIf
-	Utility.WaitMenuMode(0.1)
+	Utility.Wait(0.4)
 	if SoundRef != none
 		SoundRef.Play(ActorRef)
 	endIf
-	TransitUp(ActorRef, MinP, MaxP)
-	Utility.WaitMenuMode(0.2)
-	TransitDown(ActorRef, MaxP, MinP)
-	Utility.WaitMenuMode(0.1)
+;	TransitUp(ActorRef, MinP, MaxP)
 	if HasMFG
-		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, (SavedP*100) as int)
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, MaxP)
 	else
-		ActorRef.SetExpressionPhoneme(1, SavedP as float)
+		ActorRef.SetExpressionPhoneme(p, (MaxP as float)*0.01)
 	endIf
+	Utility.Wait(1.2)
+;	if (MaxP - (SavedP * 100)) > 2
+;		TransitDown(ActorRef, MaxP, (SavedP * 100) as int)
+;	endIf
+;	Utility.Wait(0.1)
+	if HasMFG
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, (SavedP*100) as int)
+	else
+		ActorRef.SetExpressionPhoneme(p, SavedP as float)
+	endIf
+	Utility.Wait(0.2)
+	;Debug.Trace("SEXLAB - MoveLips("+ActorRef+", "+SoundRef+", "+Strength+") -- SavedP:"+SavedP+", MinP:"+MinP+", MaxP:"+MaxP)
 endFunction
 
 function PlayMoan(Actor ActorRef, int Strength = 30, bool IsVictim = false, bool UseLipSync = false)
@@ -75,7 +104,7 @@ function PlayMoan(Actor ActorRef, int Strength = 30, bool IsVictim = false, bool
 			SoundRef.Play(ActorRef)
 			Utility.WaitMenuMode(0.4)
 		else
-			MoveLips(ActorRef, SoundRef)
+			MoveLips(ActorRef, SoundRef, (Strength as float / 100.0))
 		endIf
 	endIf
 endFunction
@@ -117,39 +146,59 @@ function LipSync(Actor ActorRef, int Strength, bool ForceUse = false)
 	endIf
 endFunction
 
-function TransitUp(Actor ActorRef, int from, int to)
+function TransitUp(Actor ActorRef, int from, int to) global
 	if !ActorRef
 		return
 	endIf
-	
-	if Config.HasMFGFix
-		while from < to
-			from += 2
+
+	int value = from
+	bool HasMFG = SexLabUtil.GetConfig().HasMFGFix
+	if HasMFG
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from) ; OLDRIM
+		Utility.Wait(0.1)
+		while value < (to + 2)
+			value += 2
 			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from) ; OLDRIM
+			Utility.Wait(0.02)
 		endWhile
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, to) ; OLDRIM
 	else
-		while from < to
-			from += 2
-			ActorRef.SetExpressionPhoneme(1, (from as float / 100.0))
+		ActorRef.SetExpressionPhoneme(1, (from as float / 100.0))
+		Utility.Wait(0.1)
+		while value < (to + 2)
+			value += 2
+			ActorRef.SetExpressionPhoneme(1, (value as float / 100.0))
+			Utility.Wait(0.02)
 		endWhile
+		ActorRef.SetExpressionPhoneme(1, (to as float / 100.0))
 	endIf
 endFunction
 
-function TransitDown(Actor ActorRef, int from, int to)
+function TransitDown(Actor ActorRef, int from, int to) global
 	if !ActorRef
 		return
 	endIf
-	
-	if Config.HasMFGFix
-		while from > to
-			from -= 2
-			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from) ; OLDRIM
+
+	int value = from
+	bool HasMFG = SexLabUtil.GetConfig().HasMFGFix
+	if HasMFG
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from) ; OLDRIM
+		Utility.Wait(0.1)
+		while value > (to - 2)
+			value -= 2
+			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, value) ; OLDRIM
+			Utility.Wait(0.02)
 		endWhile
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, to) ; OLDRIM
 	else
-		while from > to
-			from -= 2
-			ActorRef.SetExpressionPhoneme(1, (from as float / 100.0)) ; SKYRIM SE
+		ActorRef.SetExpressionPhoneme(1, (from as float / 100.0)) ; SKYRIM SE
+		Utility.Wait(0.1)
+		while value > (to - 2)
+			value -= 2
+			ActorRef.SetExpressionPhoneme(1, (value as float / 100.0)) ; SKYRIM SE
+			Utility.Wait(0.02)
 		endWhile
+		ActorRef.SetExpressionPhoneme(1, (to as float / 100.0)) ; SKYRIM SE
 	endIf	
 endFunction
 
