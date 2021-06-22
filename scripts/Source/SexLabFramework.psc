@@ -128,11 +128,11 @@ endFunction
 * * The difference between StartSex and QuickStart is that StartSex requires a list of animations (at least one), while QuickStart grabs the animations using animation Tags\
 * * This function is actually a wrapper around StartSex, that gets the animations by tags and then delegates StartSex to do the job.
 * * 
-* * @param: Actor1, is the first position of the animation, and it is mandatory
-* * @param: Actor2 ... Actor5 [OPTIONAL], are the other actors involved in the animation.
-* * @param: Victim [OPTIONAL], if this Actor specified, then the specified actor (that should be one of the list of actors) will be considered as a victim.
-* * @param: Hook, you can specify a Hook for the animation, to register for the animation events (AnimationStart, AnimationEnd, OrgasmStart, etc.) See the Hooks section for further description
-* * @param: AnimationTags is the list of tags the animation has to have. You can add more than one tag by separating them by commas (,), the animations will be collected if they have at least one of the specified tags.
+* * @param: Actor Actor1, is the first position of the animation, and it is mandatory
+* * @param: Actor Actor2 ... Actor5 [OPTIONAL], are the other actors involved in the animation.
+* * @param: Actor Victim [OPTIONAL], if this Actor specified, then the specified actor (that should be one of the list of actors) will be considered as a victim.
+* * @param: string Hook [OPTIONAL], you can specify a Hook for the animation, to register for the animation events (AnimationStart, AnimationEnd, OrgasmStart, etc.) See the Hooks section for further description
+* * @param: string AnimationTags [OPTIONAL], is the list of tags the animation has to have. You can add more than one tag by separating them by commas "," (Example: "Oral, Aggressive, FemDom"), the animations will be collected if they have at least one of the specified tags.
 * *
 * * @return: the thread instance that is allocated by the function. NONE if something went wrong and the animation will not start.
 */;
@@ -140,7 +140,12 @@ sslThreadController function QuickStart(Actor Actor1, Actor Actor2 = none, Actor
 	Actor[] Positions = SexLabUtil.MakeActorArray(Actor1, Actor2, Actor3, Actor4, Actor5)
 	sslBaseAnimation[] Anims
 	if AnimationTags != ""
-		Anims = AnimSlots.GetByTags(Positions.Length, AnimationTags, "", false)
+		int[] Genders = ActorLib.GenderCount(Positions)
+		if (Genders[2] + Genders[3]) < 1
+			Anims = AnimSlots.GetByTags(Positions.Length, AnimationTags, "", false)
+		else
+			Anims = CreatureSlots.GetByCreatureActorsTags(Positions.Length, Positions, AnimationTags, "", false)
+		endIf
 	endIf
 	return ThreadSlots.GetController(StartSex(Positions, Anims, Victim, none, true, Hook))
 endFunction
@@ -210,7 +215,7 @@ endFunction
 * * Produces an array of integers with the number of different genders in the 4 items of the array.
 * * 
 * * @param: Positions, is an array of actors to be used for the genders calculation.
-* * @return: an int[] with 4 items inside;
+* * @return: int[] - An int array of Length 4 with the amount of actor of each gender;
 * *   [0] is the number of (Human, not creature) Males
 * *   [1] is the number of (Human, not creature) Females
 * *   [2] is the number of Male Creatures (or all the creatures if Creature Genders are disabled)
@@ -218,6 +223,20 @@ endFunction
 */;
 int[] function GenderCount(Actor[] Positions)
 	return ActorLib.GenderCount(Positions)
+endFunction
+
+;/* TransGenderCount
+* * Produces an array of integers with the number of different genders trans in the 4 items of the array.
+* * 
+* * @param: Positions, is an array of actors to be used for the transgender calculation.
+* * @return: int[] - An int array of Length 4 with the amount of actor of each gender that is Transgender/Futa;
+* *   [0] is the number of Transgender Humanoid actors treated as Males
+* *   [1] is the number of Transgender Humanoid actors treated as Females
+* *   [2] is the number of Transgender Creatures actors treated as Male Creatures (or all the creatures if the "Creature Genders" option is disabled)
+* *   [3] is the number of Transgender Creatures actors treated as Females Creatures (is always zero if the "Creature Genders" option is disabled)
+*/;
+int[] function TransGenderCount(Actor[] Positions)
+	return ActorLib.TransCount(Positions)
 endFunction
 
 ;/* MaleCount
@@ -248,6 +267,37 @@ endFunction
 */;
 int function CreatureCount(Actor[] Positions)
 	return ActorLib.CreatureCount(Positions)
+endFunction
+
+;/* TransMaleCount
+* * Counts the number of Transgender Humanoid actors treated as Males in the array, considering the SexLab Genders.
+* * 
+* * @param: Positions, is an array of actors to be used for the genders calculation.
+* * @return: an int with the number of Transgender actors treated as Males
+*/;
+int function TransMaleCount(Actor[] Positions)
+	return ActorLib.TransCount(Positions)[0]
+endFunction
+
+;/* TransFemaleCount
+* * Counts the number of Transgender Humanoid actors treated as Females in the array, considering the SexLab Genders.
+* * 
+* * @param: Positions, is an array of actors to be used for the genders calculation.
+* * @return: an int with the number of Transgender actors treated as Females
+*/;
+int function TransFemaleCount(Actor[] Positions)
+	return ActorLib.TransCount(Positions)[1]
+endFunction
+
+;/* TransCreatureCount
+* * Counts the number of Transgender creatures actors in the array
+* * 
+* * @param: Positions, is an array of actors to be used for the genders calculation.
+* * @return: an int with the number of transgender creatures (creature sex is not considered, use TransGenderCount() if you need to distinguish between male and female creatures.)
+*/;
+int function TransCreatureCount(Actor[] Positions)
+	int[] TransCount = ActorLib.TransCount(Positions)
+	return TransCount[2] + TransCount[3]
 endFunction
 
 ;/* ValidateActor
@@ -323,13 +373,44 @@ endFunction
 * * Searches within a given area for a SexLab valid actor
 * * 
 * * @param: ObjectReference CenterRef - The object to use as the center point in the search. 
-* * @param: float Radius - The distance from the center point to search.
-* * @param: int FindGender - The desired gender id to look for, -1 for any, 0 for male, 1 for female.
-* * @param: Actor IgnoreRef1/2/3/4 - An actor you know for certain you do not want returned by this function.
+* * @param: float Radius [OPTIONAL] - The distance from the center point to search.
+* * @param: int FindGender [OPTIONAL] - The desired gender id to look for, -1 for any, 0 for male, 1 for female.
+* * @param: Actor IgnoreRef1/2/3/4 [OPTIONAL] - An actor you know for certain you do not want returned by this function.
 * * @return: Actor - A valid actor found, if any. None if no valid actor found.
 */;
 Actor function FindAvailableActor(ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none)
 	return ThreadLib.FindAvailableActor(CenterRef, Radius, FindGender, IgnoreRef1, IgnoreRef2, IgnoreRef3, IgnoreRef4)
+endFunction
+
+;/* FindAvailableActorByFaction
+* * Searches within a given area for a SexLab valid actor with or without the specified faction
+* * 
+* * @param: Faction FactionRef - The faction that will be checked on the actor search. 
+* * @param: ObjectReference CenterRef - The object to use as the center point in the search. 
+* * @param: float Radius [OPTIONAL] - The distance from the center point to search.
+* * @param: int FindGender [OPTIONAL] - The desired gender id to look for, -1 for any, 0 for male, 1 for female.
+* * @param: Actor IgnoreRef1/2/3/4 [OPTIONAL] - An actor you know for certain you do not want returned by this function.
+* * @param: bool HasFaction [OPTIONAL true by default] - If False the returned actor won't be part of the given faction, if True the returned actor most be part of the given faction.
+* * @return: Actor - A valid actor found, if any. None if no valid actor found.
+*/;
+Actor function FindAvailableActorByFaction(Faction FactionRef, ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none, bool HasFaction = True)
+	return ThreadLib.FindAvailableActorInFaction(FactionRef, CenterRef, Radius, FindGender, IgnoreRef1, IgnoreRef2, IgnoreRef3, IgnoreRef4, HasFaction)
+endFunction
+
+;/* FindAvailableActorWornForm
+* * Searches within a given area for a SexLab valid actor with or without the specified faction
+* * 
+* * @param: int slotMask - The slotMask that will be checked on the actor search. 
+* * @param: ObjectReference CenterRef - The object to use as the center point in the search. 
+* * @param: float Radius [OPTIONAL] - The distance from the center point to search.
+* * @param: int FindGender [OPTIONAL] - The desired gender id to look for, -1 for any, 0 for male, 1 for female.
+* * @param: Actor IgnoreRef1/2/3/4 [OPTIONAL] - An actor you know for certain you do not want returned by this function.
+* * @param: bool AvoidNoStripKeyword [OPTIONAL true by default] - If False the search won't check the equipped slotMask is treated as "NoStrip" (naked), if True the equipped slotMask treated as "NoStrip" (naked) will be considered unequipped.
+* * @param: bool HasFaction [OPTIONAL true by default] - If False the returned actor won't have the given slotMask unequipped or empty, if True the returned actor most have the given slotMask equipped.
+* * @return: Actor - A valid actor found, if any. None if no valid actor found.
+*/;
+Actor function FindAvailableActorWornForm(int slotMask, ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none, bool AvoidNoStripKeyword = True, bool HasWornForm = True)
+	return ThreadLib.FindAvailableActorWornForm(slotMask, CenterRef, Radius, FindGender, IgnoreRef1, IgnoreRef2, IgnoreRef3, IgnoreRef4, AvoidNoStripKeyword, HasWornForm)
 endFunction
 
 ;/* FindAvailableCreature
@@ -337,13 +418,46 @@ endFunction
 * * 
 * * @param: string RaceKey - The SexLab RaceKey to find a creature whose race belongs to
 * * @param: ObjectReference CenterRef - The object to use as the center point in the search. 
-* * @param: float Radius - The distance from the center point to search.
-* * @param: int FindGender - The desired gender id to look for, 2 for male/no gender, 3 for female.
-* * @param: Actor IgnoreRef1/2/3/4 - An actor you know for certain you do not want returned by this function.
-* * @return: Actor - A valid actor found, if any. Returns none if no valid actor found.
+* * @param: float Radius [OPTIONAL] - The distance from the center point to search.
+* * @param: int FindGender [OPTIONAL] - The desired gender id to look for, 2 for male/no gender, 3 for female.
+* * @param: Actor IgnoreRef1/2/3/4 [OPTIONAL] - A creature you know for certain you do not want returned by this function.
+* * @return: Actor - A valid creature found, if any. Returns none if no valid creature found.
 **/;
 Actor function FindAvailableCreature(string RaceKey, ObjectReference CenterRef, float Radius = 5000.0, int FindGender = 2, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none)
 	return ThreadLib.FindAvailableActor(CenterRef, Radius, FindGender, IgnoreRef1, IgnoreRef2, IgnoreRef3, IgnoreRef4, RaceKey)
+endFunction
+
+;/* FindAvailableCreatureByFaction
+* * Searches within a given area for a SexLab valid creature with or without the specified faction
+* * 
+* * @param: string RaceKey - The SexLab RaceKey to find a creature whose race belongs to
+* * @param: Faction FactionRef - The faction that most have or don't have the creature searched. 
+* * @param: ObjectReference CenterRef - The object to use as the center point in the search. 
+* * @param: float Radius [OPTIONAL] - The distance from the center point to search.
+* * @param: int FindGender [OPTIONAL] - The desired gender id to look for, -1 for any, 0 for male, 1 for female.
+* * @param: Actor IgnoreRef1/2/3/4 [OPTIONAL] - A creature you know for certain you do not want returned by this function.
+* * @param: bool HasFaction [OPTIONAL true by default] - If False the returned creature won't be part of the given faction, if True the returned creature most be part of the given faction.
+* * @return: Actor - A valid creature found, if any. None if no valid creature found.
+*/;
+Actor function FindAvailableCreatureByFaction(string RaceKey, Faction FactionRef, ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none, bool HasFaction = True)
+	return ThreadLib.FindAvailableActorInFaction(FactionRef, CenterRef, Radius, FindGender, IgnoreRef1, IgnoreRef2, IgnoreRef3, IgnoreRef4, HasFaction, RaceKey)
+endFunction
+
+;/* FindAvailableCreatureWornForm
+* * Searches within a given area for a SexLab valid creature with or without the specified faction
+* * 
+* * @param: string RaceKey - The SexLab RaceKey to find a creature whose race belongs to
+* * @param: int slotMask - The slotMask that will be checked on the creature search. 
+* * @param: ObjectReference CenterRef - The object to use as the center point in the search. 
+* * @param: float Radius [OPTIONAL] - The distance from the center point to search.
+* * @param: int FindGender [OPTIONAL] - The desired gender id to look for, -1 for any, 0 for male, 1 for female.
+* * @param: Actor IgnoreRef1/2/3/4 [OPTIONAL] - A creature you know for certain you do not want returned by this function.
+* * @param: bool AvoidNoStripKeyword [OPTIONAL true by default] - If False the search won't check the equipped slotMask is treated as "NoStrip" (naked), if True the equipped slotMask treated as "NoStrip" (naked) will be considered unequipped.
+* * @param: bool HasFaction [OPTIONAL true by default] - If False the returned creature won't have the given slotMask unequipped or empty, if True the returned creature most have the given slotMask equipped.
+* * @return: Actor - A valid creature found, if any. None if no valid creature found.
+*/;
+Actor function FindAvailableCreatureWornForm(string RaceKey, int slotMask, ObjectReference CenterRef, float Radius = 5000.0, int FindGender = -1, Actor IgnoreRef1 = none, Actor IgnoreRef2 = none, Actor IgnoreRef3 = none, Actor IgnoreRef4 = none, bool AvoidNoStripKeyword = True, bool HasWornForm = True)
+	return ThreadLib.FindAvailableActorWornForm(slotMask, CenterRef, Radius, FindGender, IgnoreRef1, IgnoreRef2, IgnoreRef3, IgnoreRef4, AvoidNoStripKeyword, HasWornForm, RaceKey)
 endFunction
 
 ;/* FindAvailablePartners
@@ -351,9 +465,9 @@ endFunction
 * * 
 * * @param: Actor[] Positions - A list of actors, where at least one is specified (the other items can be set to None)
 * * @param: int TotalActors - The desired total number of actors you want in the return array.
-* * @param: int Males - From the TotalActors amount, you want at least this many males.
-* * @param: int Females - From the TotalActors amount, you want at least this many females.
-* * @param: float Radius - The distance from the center point to search.
+* * @param: int Males [OPTIONAL] - From the TotalActors amount, you want at least this many males.
+* * @param: int Females [OPTIONAL] - From the TotalActors amount, you want at least this many females.
+* * @param: float Radius [OPTIONAL] - The distance from the center point to search.
 * * @return: Actor[] - A list of valid actors, the length of the list is the same as the Positions parameter, then number of valid actors can be less than this value.
 */;
 Actor[] function FindAvailablePartners(Actor[] Positions, int TotalActors, int Males = -1, int Females = -1, float Radius = 10000.0)
@@ -371,6 +485,31 @@ endFunction
 Actor[] function SortActors(Actor[] Positions, bool FemaleFirst = true)
 	return ThreadLib.SortActors(Positions, FemaleFirst)
 endFunction
+
+;/* SortActorsByAnimation
+* * Sorts a list of actors to include either female, male or creature actors in the valid position based on the animation gender and race definition.
+* * This is a most general propoused function that fully cover standard and creature actors.
+* * 
+* * @param: Actor[] Positions - The list of humanoid and/or creature actors to sort
+* * @param: sslBaseAnimation Animation [OPTIONAL] - Is the animation used as referece to sort the actors. In case the animation is none, not valid, or the number of the actors expected by the animation is not equal to the number of actors in the Positions array, then for the Position array without creatures the SortActors function will be executed instead.
+* * @return: Actor[] - The final sorted list of actors.
+*/;
+Actor[] function SortActorsByAnimation(Actor[] Positions, sslBaseAnimation Animation = none)
+	return ThreadLib.SortActorsByAnimation(Positions, Animation)
+endFunction
+
+;/* SortCreatures
+* * Sorts a list of creature actors to include either female or male standard actors in the valid position based on the animation gender and race definition.
+* * This is a creature oriented function that can handle "creature only animations", "humanoid & creature animations" and "multiple creature races on the same animation".
+* * 
+* * @param: Actor[] Positions - The list of creature and humanoid actors to sort
+* * @param: sslBaseAnimation Animation [OPTIONAL] - Is the animation used as referece to sort the actors. In case the animation is none, not valid, or the number of the actors or races expected by the animation is not equal to the number of actors or races in the Positions array, then for the Position array with creatures the humanoid actors will be listed first in a scene.
+* * @return: Actor[] - The final sorted list of actors.
+*/;
+Actor[] function SortCreatures(Actor[] Positions, sslBaseAnimation Animation = none)
+	return ThreadLib.SortCreatures(Positions, Animation)
+endFunction
+
 
 ;/* AddCum
 * * Applies the cum effect to an actor for the given locations
@@ -418,8 +557,8 @@ endFunction
 * * 
 * * @param: Actor ActorRef - The actor whose equipment shall be unequipped.
 * * @param: Actor VictimRef [OPTIONAL] - If ActorRef matches VictimRef victim strip settings are used. If VictimRef is set but doesn't match, aggressor settings are used.
-* * @param: bool DoAnimate - Whether or not to play the actor stripping animation during the strip
-* * @param: bool LeadIn - If TRUE and VictimRef == none, Foreplay strip settings will be used.
+* * @param: bool DoAnimate [OPTIONAL true by default] - Whether or not to play the actor stripping animations during the strip
+* * @param: bool LeadIn [OPTIONAL false by default] - If TRUE and VictimRef == none, Foreplay strip settings will be used.
 * * @return: Form[] - An array of all equipment stripped from ActorRef
 */;
 Form[] function StripActor(Actor ActorRef, Actor VictimRef = none, bool DoAnimate = true, bool LeadIn = false)
@@ -825,7 +964,7 @@ endFunction
 * * 
 * * @param: Actor ActorRef - The actor you want to send a custom tracked event for.
 * * @param: string Hook - The event type you want to send, used in place of the default Added, Start, End, Orgasm hook types as "<Hook>_<Callback>"
-* * @param: int id - An optional id number to send with your custom tracked event. This is normally the associated animation thread id number, but can be anything you want.
+* * @param: int id [OPTIONAL] - An id number to send with your custom tracked event. This is normally the associated animation thread id number, but can be anything you want.
 * * 
 * * EXAMPLE:
 * * Actor myActor = ...                                                                     <-- get you actor in some way
@@ -888,7 +1027,7 @@ endFunction
 * * @param: int Females [OPTIONAL] - The total number of females the returned animations should be intended for. Set to -1 for any amount.
 * * @param: int StageCount [OPTIONAL] - The total number of stages the returned animations should contain. Set to -1 for any amount.
 * * @param: bool Aggressive [OPTIONAL false by default] - TRUE if you want the animations returned to include ones tagged as aggressive.
-* * @param: bool Sexual - No longer used. It is kept for compatibility purposes.
+* * @param: bool Sexual [OPTIONAL true by default] - FALSE if you want the animations returned to be LeadIn/Foreplay type tagged.
 * * @return: sslBaseAnimation[] - An array of animations that fit the provided search arguments.
 */;
 sslBaseAnimation[] function GetAnimationsByType(int ActorCount, int Males = -1, int Females = -1, int StageCount = -1, bool Aggressive = false, bool Sexual = true)
@@ -926,6 +1065,28 @@ sslBaseAnimation[] function GetAnimationsByDefault(int Males, int Females, bool 
 	return AnimSlots.GetByDefault(Males, Females, IsAggressive, UsingBed, RestrictAggressive)
 endFunction
 
+;/* GetAnimationsByDefaultTags
+* * Get an array of animations that fit the given number of males and females using SexLab's default selection criteria.
+* *  
+* * @param: int Males - The total number of males the returned animations should be intended for. Set to -1 for any amount.
+* * @param: int Females - The total number of females the returned animations should be intended for. Set to -1 for any amount.
+* * @param: bool IsAggressive - TRUE if the animations to be played are considered aggressive.
+* * @param: bool UsingBed - TRUE if the animation is going to be played on a bed, which will filter out standing animations and allow BedOnly tagged animations.
+* * @param: bool RestrictAggressive - If TRUE, only return aggressive animations if IsAggressive=true and none if IsAggressive=false.
+* * @param: string Tags - A comma separated list of animation tags you want to use as a filter for the returned animations. (E.g. "Leito,Vaginal,Missionary", to get the animation from Leito, in missionary position, where the mouth has some importance. All or just one of the tags? Depends on the value of the parameter RequireAll). WARNING! To prevent issues don't add gender tags or the "Aggressive" tag to this parameter.
+* * @param: string TagSuppress [OPTIONAL] - A comma separated list of animation tags you DO NOT want present on any of the returned animations. (E.g. "LeadIn" will filter out all the animations that have the tag "LeadIn"). WARNING! To prevent issues don't add the "Aggressive" tag to this parameter.
+* * @param: bool RequireAll [OPTIONAL True by default] - If TRUE, all tags in the provided "string Tags" list must be present in an animation to be returned. When FALSE only one tag in the list is needed. (E.g. If the tags are "oral,Vaginal" and RequireAll is set to TRUE, then the animations found will have BOTH Oral and Vaginal tags; if RequireAll is set to FALSE, then the animation swill have just one of the two tags, and also both together will be returned in the list.)
+* * @return: sslBaseAnimation[] - An array of animations that fit the provided search arguments.
+* * Note about the parameters "IsAggressive" and "RestrictAggressive", they work together and the logic is the following one:
+* *  IsAggressive=True, RestrictAggressive=False  --> ONLY aggressive animations are used
+* *  IsAggressive=True, RestrictAggressive=True  --> Only animations that are NOT aggressive are used
+* *  IsAggressive=False, RestrictAggressive=False  --> Both aggressive and not aggressive animations are used
+* *  IsAggressive=False, RestrictAggressive=True  --> Only animations that are NOT aggressive are used
+*/;
+sslBaseAnimation[] function GetAnimationsByDefaultTags(int Males, int Females, bool IsAggressive = false, bool UsingBed = false, bool RestrictAggressive = true, string Tags, string TagsSuppressed = "", bool RequireAll = true)
+	return AnimSlots.GetByDefaultTags(Males, Females, IsAggressive, UsingBed, RestrictAggressive, Tags, TagsSuppressed, RequireAll)
+endFunction
+
 ;/* GetAnimationByName
 * * Get a single animation by name. Ignores if a user has the animation enabled or not.
 * * The animation will NOT include creatures. Use GetCreatureAnimationByName() if you want an animation that is including Creatures.
@@ -961,7 +1122,7 @@ endFunction
 ;/* GetAnimationCount
 * * Get the number of registered animations.
 * * 
-* * @param: bool IgnoreDisabled {OPTIONAL true by default] - If TRUE, only count animations that are enabled in the SexLab MCM, otherwise count all.
+* * @param: bool IgnoreDisabled [OPTIONAL true by default] - If TRUE, only count animations that are enabled in the SexLab MCM, otherwise count all.
 * * @return: int - The total number of animations.
 */;
 int function GetAnimationCount(bool IgnoreDisabled = true)
@@ -1106,31 +1267,6 @@ sslBaseAnimation[] function GetCreatureAnimationsByRace(int ActorCount, Race Rac
 	return CreatureSlots.GetByRace(ActorCount, RaceRef)
 endFunction
 
-;/* GetByRaceKey
-* * Gets an array of creature animations that require a specific number of actors and race type.
-* * 
-* * @param: int ActorCount - The total number of actors, between 1 and 5 the returned animations should be intended for.
-* * @param: string RaceKey - The creature race sexlab identifier used to identify animations meant for this race.
-* * @return: sslBaseAnimation[] - An array of animations that fit the provided search arguments.
-*/;
-sslBaseAnimation[] function GetCreatureAnimationsByRaceKey(int ActorCount, string RaceKey)
-	return CreatureSlots.GetByRaceKey(ActorCount, RaceKey)
-endFunction
-
-;/* GetCreatureAnimationsByRaceGenders
-* * Gets an array of creature animations for a specific number of actors, creature race, and optionally gender.
-* * 
-* * @param: int ActorCount - The total number of actors, between 1 and 5 the returned animations should be intended for.
-* * @param: Race RaceRef - The race the returned animations should be usable by.
-* * @param: int MaleCreatures - The number of male creatures the animation should use. Ignored if user does not have creature genders enabled or ForceUse is set to TRUE.
-* * @param: int FemaleCreatures - The number of female creatures the animation should use. Ignored if user does not have creature genders enabled or ForceUse is set to TRUE.
-* * @param: bool ForceUse - If left as the default value of FALSE, the MaleCreatures and FemaleCreatures argument will be ignored when creature genders aren't enabled by user.
-* * @return: sslBaseAnimation[] - An array of animations that fit the provided search arguments.
-*/;
-sslBaseAnimation[] function GetCreatureAnimationsByRaceGenders(int ActorCount, Race RaceRef, int MaleCreatures = 0, int FemaleCreatures = 0, bool ForceUse = false)
-	return CreatureSlots.GetByRaceGenders(ActorCount, RaceRef, MaleCreatures, FemaleCreatures, ForceUse)
-endFunction
-
 ;/* GetCreatureAnimationsByRaceTags
 * * Gets an array of creature animations that have a specified set of tags AND are valid for a specific creatures race.
 * *
@@ -1143,6 +1279,47 @@ endFunction
 */;
 sslBaseAnimation[] function GetCreatureAnimationsByRaceTags(int ActorCount, Race RaceRef, string Tags, string TagSuppress = "", bool RequireAll = true)
 	return CreatureSlots.GetByRaceTags(ActorCount, RaceRef, Tags, TagSuppress, RequireAll)
+endFunction
+
+;/* GetCreatureAnimationsByRaceGenders
+* * Gets an array of creature animations for a specific number of actors, creature race, and optionally gender.
+* * 
+* * @param: int ActorCount - The total number of actors, between 1 and 5 the returned animations should be intended for.
+* * @param: Race RaceRef - The race the returned animations should be usable by.
+* * @param: int MaleCreatures [OPTIONAL] - The number of male creatures the animation should use. Ignored if user does not have creature genders enabled or ForceUse is set to TRUE.
+* * @param: int FemaleCreatures [OPTIONAL] - The number of female creatures the animation should use. Ignored if user does not have creature genders enabled or ForceUse is set to TRUE.
+* * @param: bool ForceUse [OPTIONAL false by default] - If left as the default value of FALSE, the MaleCreatures and FemaleCreatures argument will be ignored when creature genders aren't enabled by user.
+* * @return: sslBaseAnimation[] - An array of animations that fit the provided search arguments.
+*/;
+sslBaseAnimation[] function GetCreatureAnimationsByRaceGenders(int ActorCount, Race RaceRef, int MaleCreatures = 0, int FemaleCreatures = 0, bool ForceUse = false)
+	return CreatureSlots.GetByRaceGenders(ActorCount, RaceRef, MaleCreatures, FemaleCreatures, ForceUse)
+endFunction
+
+;/* GetCreatureAnimationsByRaceGendersTags
+* * Gets an array of creature animations for a specific number of actors, creature race, and optionally gender.
+* * 
+* * @param: int ActorCount - The total number of actors, between 1 and 5 the returned animations should be intended for.
+* * @param: Race RaceRef - The race the returned animations should be usable by.
+* * @param: int MaleCreatures [OPTIONAL] - The number of male creatures the animation should use. Ignored if user does not have creature genders enabled or ForceUse is set to TRUE.
+* * @param: int FemaleCreatures [OPTIONAL] - The number of female creatures the animation should use. Ignored if user does not have creature genders enabled or ForceUse is set to TRUE.
+* * @param: string Tags - A comma separated list of animation tags you want to use as a filter for the returned animations. WARNING! To prevent issues don't add gender tags to this parameter.
+* * @param: string TagSuppress - A comma separated list of animation tags you DO NOT want present on any of the returned animations.
+* * @param: bool RequireAll - If TRUE, all tags in the provided "string Tags" list must be present in an animation to be returned. When FALSE only one tag in the list is needed.
+* * @return: sslBaseAnimation[] - An array of animations that fit the provided search arguments.
+*/;
+sslBaseAnimation[] function GetCreatureAnimationsByRaceGendersTags(int ActorCount, Race RaceRef, int MaleCreatures = 0, int FemaleCreatures = 0, string Tags, string TagSuppress = "", bool RequireAll = true)
+	return CreatureSlots.GetByRaceGendersTags(ActorCount, RaceRef, MaleCreatures, FemaleCreatures, Tags, TagSuppress, RequireAll)
+endFunction
+
+;/* GetCreatureAnimationsByRaceKey
+* * Gets an array of creature animations that require a specific number of actors and race type.
+* * 
+* * @param: int ActorCount - The total number of actors, between 1 and 5 the returned animations should be intended for.
+* * @param: string RaceKey - The creature race sexlab identifier used to identify animations meant for this race.
+* * @return: sslBaseAnimation[] - An array of animations that fit the provided search arguments.
+*/;
+sslBaseAnimation[] function GetCreatureAnimationsByRaceKey(int ActorCount, string RaceKey)
+	return CreatureSlots.GetByRaceKey(ActorCount, RaceKey)
 endFunction
 
 ;/* GetCreatureAnimationsByRaceKeyTags
@@ -1159,18 +1336,31 @@ sslBaseAnimation[] function GetCreatureAnimationsByRaceKeyTags(int ActorCount, s
 	return CreatureSlots.GetByRaceKeyTags(ActorCount, RaceKey, Tags, TagSuppress, RequireAll)
 endFunction
 
-;/* GetCreatureAnimationsByTags
-* * Gets an array of creature animations that have a specified set of tags.
-* * This will be a mix of different creature type animations, you likely want to use GetCreatureAnimationsByRaceTags() or GetCreatureAnimationsByRaceKeyTags() instead.
+;/* GetCreatureAnimationsByRaceKey
+* * Gets an array of creature animations that require a specific number of actors and race type.
+* * Can handle multiple creature races on the same animation
 * * 
+* * @param: int ActorCount - The total number of actors, between 1 and 5 the returned animations should be intended for.
+* * @param: Actor[] Positions - An array of 1 to 5 actors you intend to use the resulting animations with. At least one of the actor on the array must be creature type 
+* * @return: sslBaseAnimation[] - An array of animations that fit the provided search arguments.
+*/;
+sslBaseAnimation[] function GetCreatureAnimationsByActors(int ActorCount, Actor[] Positions)
+	return CreatureSlots.GetByCreatureActors(ActorCount, Positions)
+endFunction
+
+;/* GetCreatureAnimationsByRaceKeyTags
+** Gets an array of creature animations that have a specified set of tags AND are valid for the specific actors in the Position parameter.
+* * Can handle multiple creature races on the same animation
+* *
 * * @param: int ActorCount - The total number of actors, between 1-5 the returned animations should be intended for.
-* * @param: string Tags - A comma separated list of animation tags you want to use as a filter for the returned animations.
+* * @param: Actor[] Positions - An array of 1 to 5 actors you intend to use the resulting animations with. At least one of the actor on the array must be creature type 
+* * @param: string Tags - A comma separated list of animation tags you want to use as a filter for the returned animations. WARNING! To prevent issues don't add Race tags to this parameter.
 * * @param: string TagSuppress - A comma separated list of animation tags you DO NOT want present on any of the returned animations.
 * * @param: bool RequireAll - If TRUE, all tags in the provided "string Tags" list must be present in an animation to be returned. When FALSE only one tag in the list is needed.
 * * @return: sslBaseAnimation[] - An array of animations that fit the provided search arguments.
 */;
-sslBaseAnimation[] function GetCreatureAnimationsByTags(int ActorCount, string Tags, string TagSuppress = "", bool RequireAll = true)
-	return CreatureSlots.GetByTags(ActorCount, Tags, TagSuppress, RequireAll)
+sslBaseAnimation[] function GetCreatureAnimationsByActorsTags(int ActorCount, Actor[] Positions, string Tags, string TagSuppress = "", bool RequireAll = true)
+	return CreatureSlots.GetByCreatureActorsTags(ActorCount, Positions, Tags, TagSuppress, RequireAll)
 endFunction
 
 ;/* GetCreatureAnimationByName
@@ -1197,8 +1387,8 @@ endFunction
 * * Checks if a given creature Race has any usable animations currently registered for any valid race key's it is registered under.
 * * 
 * * @param: Race CreatureRace - The race of the creature you want to check for valid creature animations to use.
-* * @param: int ActorCount - Any optional parameter to have it check for a specific number of actor positions in the potential animations. -1 (default) to ignore number of positions.
-* * @param: int Gender - Any optional parameter to have it check if a specific creature gender has an animation. -1 (default) to ignore, 2 for Male, 3 for Female.
+* * @param: int ActorCount [OPTIONAL] - Any optional parameter to have it check for a specific number of actor positions in the potential animations. -1 (default) to ignore number of positions.
+* * @param: int Gender [OPTIONAL] - Any optional parameter to have it check if a specific creature gender has an animation. -1 (default) to ignore, 2 for Male, 3 for Female.
 * * @return: bool - TRUE if the given CreatureRace has any valid and enabled animations for ActorCount positions.
 */;
 bool function HasCreatureRaceAnimation(Race CreatureRace, int ActorCount = -1, int Gender = -1)
@@ -1209,8 +1399,8 @@ endFunction
 * * Checks if a specific RaceKey has any usable animations currently registered.
 * * 
 * * @param: string RaceKey - The creature race sexlab identifier used to identify animations meant for this race.
-* * @param: int ActorCount - Any optional parameter to have it check for a specific number of actor positions in the potential animations. -1 (default) to ignore number of positions.
-* * @param: int Gender - Any optional parameter to have it check if a specific creature gender has an animation. -1 (default) to ignore, 2 for Male, 3 for Female.
+* * @param: int ActorCount [OPTIONAL] - Any optional parameter to have it check for a specific number of actor positions in the potential animations. -1 (default) to ignore number of positions.
+* * @param: int Gender [OPTIONAL] - Any optional parameter to have it check if a specific creature gender has an animation. -1 (default) to ignore, 2 for Male Creature, 3 for Female Creature.
 * * @return: bool - TRUE if the given CreatureRace has any valid and enabled animations for ActorCount positions.
 */;
 bool function HasCreatureRaceKeyAnimation(string RaceKey, int ActorCount = -1, int Gender = -1)
@@ -1333,10 +1523,20 @@ endFunction
 * * Get a random voice for a given gender.
 * * 
 * * @param: int Gender - The gender number to get a random voice for. 0 = male 1 = female.
-* * @return: sslBaseVoice - A suitable voice object for the actor to use.
+* * @return: sslBaseVoice - A suitable voice object for the given actor gender.
 */;
 sslBaseVoice function GetVoiceByGender(int Gender)
 	return VoiceSlots.PickGender(Gender)
+endFunction
+
+;/* GetVoicesByGender
+* * Get an array of voices for a given gender.
+* * 
+* * @param: int Gender - The gender number to get a random voice for. 0 = male 1 = female.
+* * @return: sslBaseVoice[] - An array of suitable voices for the given actor gender.
+*/;
+sslBaseVoice[] function GetVoicesByGender(int Gender)
+	return VoiceSlots.GetAllGender(Gender)
 endFunction
 
 ;/* GetVoiceByName
@@ -1381,6 +1581,18 @@ sslBaseVoice function GetVoiceByTags(string Tags, string TagSuppress = "", bool 
 	return VoiceSlots.GetByTags(Tags, TagSuppress, RequireAll)
 endFunction
 
+;/* GetVoicesByTags
+* * Selects a single voice from a set of given tag options.
+* * 
+* * @param: string Tags - A comma separated list of voice tags you want to use as a filter.
+* * @param: string TagSuppress - A comma separated list of voice tags you DO NOT want present on the returned voice.
+* * @param: bool RequireAll - If TRUE, all tags in the provided "string Tags" list must be present in an voice to be returned. When FALSE only one tag in the list is needed.
+* * @return: sslBaseVoice[] - An array of voices that match the provided search arguments.
+*/;
+sslBaseVoice[] function GetVoicesByTags(string Tags, string TagSuppress = "", bool RequireAll = true)
+	return VoiceSlots.GetAllByTags(Tags, TagSuppress, RequireAll)
+endFunction
+
 ;#-----------------------------------------------------------------------------------------------------------------------------------------#
 ;#                                                                                                                                         #
 ;#  ^^^                                                      END VOICE FUNCTIONS                                                      ^^^  #
@@ -1392,6 +1604,17 @@ endFunction
 ;#                                                        BEGIN EXPRESSION FUNCTION                                                        #
 ;#                                                                                                                                         #
 ;#-----------------------------------------------------------------------------------------------------------------------------------------#
+
+;/* PickExpression
+* * Selects a random expression that fits the provided criteria. A slightly different method of having the expression compared to PickExpressionByStatus.
+* * 
+* * @param: Actor ActorRef - The actor who will be using this expression.
+* * @param: Actor VictimRef - The actor considered a victim in an aggressive scene.
+* * @return: sslBaseExpression - A randomly selected expression object among any that meet the needed criteria.
+*/;
+sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none)
+	return ExpressionSlots.PickByStatus(ActorRef, (VictimRef && VictimRef == ActorRef), (VictimRef && VictimRef != ActorRef))
+endFunction
 
 ;/* PickExpressionByStatus
 * * Selects a random expression that fits the provided criteria.
@@ -1405,25 +1628,42 @@ sslBaseExpression function PickExpressionByStatus(Actor ActorRef, bool IsVictim 
 	return ExpressionSlots.PickByStatus(ActorRef, IsVictim, IsAggressor)
 endFunction
 
-;/* PickExpression
-* * Selects a random expression that fits the provided criteria. A slightly different method of having the expression compared to PickExpressionByStatus.
+;/* GetExpressionsByStatus
+* * Selects a random expression that fits the provided criteria.
 * * 
-* * @param: Actor ActorRef - The actor who will be using this expression.
-* * @param: Actor VictimRef - The actor considered a victim in an aggressive scene.
-* * @return: sslBaseExpression - A randomly selected expression object among any that meet the needed criteria.
+* * @param: Actor ActorRef - The actor who will be using this expression and the following conditions apply to.
+* * @param: bool IsVictim - Set to TRUE if the actor is considered the victim in an aggressive scene.
+* * @param: bool IsAggressor - Set to TRUE if the actor is considered the aggressor in an aggressive scene.
+* * @return: sslBaseExpression[] - An array of expressions that meet the needed criteria.
 */;
-sslBaseExpression function PickExpression(Actor ActorRef, Actor VictimRef = none)
-	return ExpressionSlots.PickByStatus(ActorRef, (VictimRef && VictimRef == ActorRef), (VictimRef && VictimRef != ActorRef))
+sslBaseExpression[] function GetExpressionsByStatus(Actor ActorRef, bool IsVictim = false, bool IsAggressor = false)
+	return ExpressionSlots.GetByStatus(ActorRef, IsVictim, IsAggressor)
 endFunction
 
-;/* RandomExpressionByTag
+;/* PickExpressionByTag
 * * Selects a single expression from based on a single tag.
 * * 
+* * @param: Actor ActorRef - The actor who will be using this expression and the following conditions apply to.
 * * @param: string Tags - A single expression tag to use as the filter when picking randomly. Warning, it is not possible to use a comma separated list of tags.
 * * @return: sslBaseExpression - A randomly selected expression object among any that have the provided tag.
 */;
-sslBaseExpression function RandomExpressionByTag(string Tag)
-	return ExpressionSlots.RandomByTag(Tag)
+sslBaseExpression function PickExpressionsByTag(Actor ActorRef, string Tag)
+	sslBaseExpression[] Found =  ExpressionSlots.GetByTag(Tag, ActorRef.GetLeveledActorBase().GetSex() == 1)
+	if Found && Found.Length > 0
+		return Found[(Utility.RandomInt(0, (Found.Length - 1)))]
+	endIf
+	return none
+endFunction
+
+;/* GetExpressionsByTag
+* * Selects a single expression from based on a single tag.
+* * 
+* * @param: Actor ActorRef - The actor who will be using this expression and the following conditions apply to.
+* * @param: string Tags - A single expression tag to use as the filter when picking randomly. Warning, it is not possible to use a comma separated list of tags.
+* * @return: sslBaseExpression[] - An array of expressions that have the provided tag.
+*/;
+sslBaseExpression[] function GetExpressionsByTag(Actor ActorRef, string Tag)
+	return ExpressionSlots.GetByTag(Tag, ActorRef.GetLeveledActorBase().GetSex() == 1)
 endFunction
 
 ;/* GetExpressionByName
@@ -1467,7 +1707,17 @@ endFunction
 * * @param: Actor ActorRef - The actors whose mouth should open.
 */;
 function OpenMouth(Actor ActorRef)
-	sslBaseExpression.OpenMouth(ActorRef)
+	if ActorRef
+		int i
+		while i < ThreadSlots.Threads.Length
+			int ActorSlot = Threads[i].FindSlot(ActorRef)
+			if ActorSlot != -1
+				Threads[i].ActorAlias[ActorSlot].ForceOpenMouth = True
+			endIf
+			i += 1
+		endwhile
+		sslBaseExpression.OpenMouth(ActorRef)
+	endIf
 endFunction
 
 ;/* CloseMouth
@@ -1477,7 +1727,17 @@ endFunction
 * * @param: Actor ActorRef - The actors whose mouth should open.
 */;
 function CloseMouth(Actor ActorRef)
-	sslBaseExpression.CloseMouth(ActorRef)
+	if ActorRef
+		int i
+		while i < ThreadSlots.Threads.Length
+			int ActorSlot = Threads[i].FindSlot(ActorRef)
+			if ActorSlot != -1
+				Threads[i].ActorAlias[ActorSlot].ForceOpenMouth = False
+			endIf
+			i += 1
+		endwhile
+		sslBaseExpression.CloseMouth(ActorRef)
+	endIf
 endFunction
 
 ;/* IsMouthOpen
@@ -1489,6 +1749,17 @@ endFunction
 */;
 bool function IsMouthOpen(Actor ActorRef)
 	return sslBaseExpression.IsMouthOpen(ActorRef)
+endFunction
+
+;/* GetCurrentMFG
+* * Get an array with the mood, phonemes, and modifiers currently applied to the actor.
+* * Mirrored function of a global in sslBaseExpressions. Is advised to use, in your scripts, the global one instead of this one.
+* *
+* * @param: Actor ActorRef - The actors whose expression values should be returned.
+* * @return: float[] - An float array of Length 32 that match the format and structure of the Preset parameter in the ApplyPresetFloats function.
+*/;
+float[] function GetCurrentMFG(Actor ActorRef)
+	return sslBaseExpression.GetCurrentMFG(ActorRef)
 endFunction
 
 ;/* ClearMFG
@@ -1535,21 +1806,6 @@ endFunction
 function ApplyPresetFloats(Actor ActorRef, float[] Preset)
 	sslBaseExpression.ApplyPresetFloats(ActorRef, Preset)
 endfunction
-
-;/* ApplyPreset
-* * Applies an array of values to an actor, automatically setting their phonemes, modifiers, and mood.
-* * Mirrored function of a global in sslBaseExpressions. Is advised to use, in your scripts, the global one instead of this one.
-* *
-* * @param: Actor ActorRef - The actors to apply the preset to.
-* * @param: int[] Preset - Must be a 32 length array. Each index corresponds to an MFG id. Values range from 0 to 100, with the exception of mood type.
-* *                        Phonemes   0-15 = Preset[0]  to Preset[15]
-* *                        Modifiers  0-13 = Preset[16] to Preset[29]
-* *                        Mood Type       = Preset[30]
-* *                        Mood Value      = Preset[31]
-*/;
-function ApplyPreset(Actor ActorRef, int[] Preset)
-	sslBaseExpression.ApplyPreset(ActorRef, Preset)
-endFunction
 
 ;#-----------------------------------------------------------------------------------------------------------------------------------------#
 ;#                                                                                                                                         #
@@ -1632,7 +1888,8 @@ endFunction
 ;#  There are other events that are sent by SexLab, but they are NOT related to Hooks.                                                     # 
 ;#   SexLabDisabled - Sent when SexLab is Disabled                                                                                         # 
 ;#   SexLabEnabled - Sent when SexLab is Enabled                                                                                           # 
-;#   SexLabOrgasm - Sent when an actor has an orgasm. The parameters of the event are: the actor, the enjoyment, and the num of orgasms    # 
+;#   SexLabOrgasm - Sent when an actor has an orgasm:                                                                                      # 
+;#    The parameters of the event are: the actor, the Full Enjoyment, and the total amount of orgasms for the current scene                # 
 ;#   SexLabSlotAnimations_<category> - Sent when a specific category of animations is registered:                                          # 
 ;#    Categories: Missionary, DoggyStyle, Cowgirl, Sideways, Standing, Anal, Oral, Boobjob, Foreplay, Lesbian, Footjob, Misc, Solo, Orgy   # 
 ;#   SexLabSlotAnimations - Sent when the animations require to be re-loaded and re-registered                                             # 
@@ -1651,12 +1908,12 @@ endFunction
 ;#-----------------------------------------------------------------------------------------------------------------------------------------#
 
 ;/* GetEnjoyment
-* * Given a thread ID and an Actor, gives the enjoyment level for the actor
-* * NOTE: overkill?
+* * Given a thread ID and an Actor, gives the enjoyment level for the actor between orgasms
+* * NOTE: overkill? Don't use too much!
 * *
 * * @param: int tid - The thread id
 * * @param: Actor ActorRef - The actors to look for the enjoyment
-* * @return: int - the total enjoyment calculated for the specific actor
+* * @return: int - the enjoyment calculated for the specific actor between orgasms when separated orgasms is enabled or the total enjoyment when separated orgasms is disabled
 */;
 int function GetEnjoyment(int tid, Actor ActorRef)
 	return ThreadSlots.GetController(tid).GetEnjoyment(ActorRef)
@@ -1896,10 +2153,20 @@ endFunction
 ;/* MostUsedPlayerSexPartner
 * * Find which actor had more sex intercourse with the player
 * *
-* @return: an Actor that is the partner of the player which had most intercourses with the player
+* * @return: an Actor that is the partner of the player which had most intercourses with the player
 */;
 Actor function MostUsedPlayerSexPartner()
 	return Stats.MostUsedPlayerSexPartner()
+endFunction
+
+;/* MostUsedPlayerSexPartners
+* * Find which actors had more sex intercourse with the player. 
+* *
+* * @param: int MaxActors [OPTIONAL] - The Max amount actor to add to the returned array 
+* * @return: Actor[] - An intercourse sorted Actor array with the partners of the player which had most intercourses with the player
+*/;
+Actor[] function MostUsedPlayerSexPartners(int MaxActors = 5)
+	return Stats.MostUsedPlayerSexPartners(MaxActors)
 endFunction
 
 ;/* LastSexPartner
@@ -2163,7 +2430,7 @@ endFunction
 * * Checks if an actor ever had sex before
 * *
 * * @param: Actor ActorRef, is the actor to check
-* * @return: true if the actor participated in at least one intercouse
+* * @return: true if the actor participated in at least one intercourse
 */;
 bool function HadSex(Actor ActorRef)
 	return Stats.HadSex(ActorRef)
@@ -2852,6 +3119,12 @@ sslBaseAnimation[] function GetAnimationsByTag(int ActorCount, string Tag1, stri
 	return AnimSlots.GetByTags(ActorCount, sslUtility.MakeArgs(",", Tag1, Tag2, Tag3), TagSuppress, RequireAll)
 endFunction
 
+;/* GetCreatureAnimationsByTags DEPRECATED!
+* * (DEPRECATED) Use GetCreatureAnimationsByActorsTags, GetCreatureAnimationsByRaceTags or GetCreatureAnimationsByRaceKeyTags
+*/;
+sslBaseAnimation[] function GetCreatureAnimationsByTags(int ActorCount, string Tags, string TagSuppress = "", bool RequireAll = true)
+	return CreatureSlots.GetByTags(ActorCount, Tags, TagSuppress, RequireAll)
+endFunction
 ;/* GetVoiceByTag DEPRECATED!
 * * (DEPRECATED) Use GetVoiceByTags
 */;
@@ -2859,7 +3132,7 @@ sslBaseVoice function GetVoiceByTag(string Tag1, string Tag2 = "", string TagSup
 	return VoiceSlots.GetByTags(sslUtility.MakeArgs(",", Tag1, Tag2), TagSuppress, RequireAll)
 endFunction
 
-;/* GetVoiceByTag DEPRECATED!
+;/* ApplyCum DEPRECATED!
 * * (DEPRECATED) Use AddCum
 */;
 function ApplyCum(Actor ActorRef, int CumID)
@@ -2900,6 +3173,20 @@ sslBaseExpression[] property Expressions hidden
 		return ExpressionSlots.Expressions
 	endFunction
 endProperty
+
+;/* RandomExpressionByTag DEPRECATED!
+* * (DEPRECATED) Use PickExpressionsByTag
+*/;
+sslBaseExpression function RandomExpressionByTag(string Tag)
+	return ExpressionSlots.RandomByTag(Tag)
+endFunction
+
+;/* ApplyPreset DEPRECATED!
+* * (DEPRECATED) Use ApplyPresetFloats
+*/;
+function ApplyPreset(Actor ActorRef, int[] Preset)
+	sslBaseExpression.ApplyPreset(ActorRef, Preset)
+endFunction
 
 ;/* DEPRECATED! *** Do not access this property directly, or you may get wrong results, use the APIs to get the value */;
 sslThreadController[] property Threads hidden

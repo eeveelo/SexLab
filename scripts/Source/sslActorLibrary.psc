@@ -65,6 +65,9 @@ function ApplyCum(Actor ActorRef, int CumID)
 endFunction
 
 function ClearCum(Actor ActorRef)
+	if !ActorRef
+		return ; Nothing to do
+	endIf
 	ActorRef.DispelSpell(CumVaginalSpell)
 	ActorRef.DispelSpell(CumOralSpell)
 	ActorRef.DispelSpell(CumAnalSpell)
@@ -101,7 +104,7 @@ function ClearCum(Actor ActorRef)
 endFunction
 
 function AddCum(Actor ActorRef, bool Vaginal = true, bool Oral = true, bool Anal = true)
-	if !Vaginal && !Oral && !Anal
+	if !ActorRef && !Vaginal && !Oral && !Anal
 		return ; Nothing to do
 	endIf
 
@@ -166,6 +169,9 @@ function AddCum(Actor ActorRef, bool Vaginal = true, bool Oral = true, bool Anal
 endFunction
 
 int function CountCum(Actor ActorRef, bool Vaginal = true, bool Oral = true, bool Anal = true)
+	if !ActorRef && !Vaginal && !Oral && !Anal
+		return -1; Nothing to do
+	endIf
 	int Amount
 	if Vaginal
 		Amount += ActorRef.HasMagicEffectWithKeyword(CumVaginalKeyword) as int
@@ -183,7 +189,7 @@ int function CountCum(Actor ActorRef, bool Vaginal = true, bool Oral = true, boo
 endFunction
 
 function legacy_AddCum(Actor ActorRef, bool Vaginal = true, bool Oral = true, bool Anal = true)
-	if !Vaginal && !Oral && !Anal
+	if !ActorRef && !Vaginal && !Oral && !Anal
 		return ; Nothing to do
 	endIf
 	Vaginal = Vaginal || ActorRef.HasMagicEffectWithKeyword(CumVaginalKeyword)
@@ -283,6 +289,9 @@ bool function ContinueStrip(Form ItemRef, bool DoStrip = true)
 endFunction
 
 Form function StripSlot(Actor ActorRef, int SlotMask)
+	if !ActorRef
+		return none
+	endIf
 	Form ItemRef = ActorRef.GetWornForm(SlotMask)
 	if IsStrippable(ItemRef)
 		ActorRef.UnequipItemEX(ItemRef, 0, false)
@@ -292,8 +301,8 @@ Form function StripSlot(Actor ActorRef, int SlotMask)
 endFunction
 
 Form[] function StripSlots(Actor ActorRef, bool[] Strip, bool DoAnimate = false, bool AllowNudesuit = true)
-	if Strip.Length != 33
-		return none
+	if !ActorRef || Strip.Length < 33
+		return Utility.CreateFormArray(0)
 	endIf
 	int Gender = ActorRef.GetLeveledActorBase().GetSex()
 	; Start stripping animation
@@ -441,6 +450,9 @@ int function ValidateActor(Actor ActorRef)
 endFunction
 
 bool function CanAnimate(Actor ActorRef)
+	if !ActorRef
+		return false
+	endIf
 	Race ActorRace  = ActorRef.GetLeveledActorBase().GetRace()
 	string RaceName = ActorRace.GetName()+MiscUtil.GetRaceEditorID(ActorRace)
 	return !(ActorRace.IsRaceFlagSet(0x00000004) || StringUtil.Find(RaceName, "Moli") != -1 || StringUtil.Find(RaceName, "Child") != -1  || StringUtil.Find(RaceName, "Little") != -1 || StringUtil.Find(RaceName, "117") != -1 || StringUtil.Find(RaceName, "Enfant") != -1 || StringUtil.Find(RaceName, "Teen") != -1 || (StringUtil.Find(RaceName, "Elin") != -1 && ActorRef.GetScale() < 0.92) ||  (StringUtil.Find(RaceName, "Monli") != -1 && ActorRef.GetScale() < 0.92))
@@ -452,15 +464,19 @@ endFunction
 
 function ForbidActor(Actor ActorRef)
 	FormListRemove(Config, "ValidActors", ActorRef, true)
-	ActorRef.AddToFaction(ForbiddenFaction)
+	if ActorRef
+		ActorRef.AddToFaction(ForbiddenFaction)
+	endIf
 endFunction
 
 function AllowActor(Actor ActorRef)
-	ActorRef.RemoveFromFaction(ForbiddenFaction)
+	if ActorRef
+		ActorRef.RemoveFromFaction(ForbiddenFaction)
+	endIf
 endFunction
 
 bool function IsForbidden(Actor ActorRef)
-	return ActorRef.IsInFaction(ForbiddenFaction) ;|| ActorRef.HasKeyWordString("SexLabForbid")
+	return ActorRef && ActorRef.IsInFaction(ForbiddenFaction) ;|| ActorRef.HasKeyWordString("SexLabForbid")
 endFunction
 
 ; ------------------------------------------------------- ;
@@ -476,6 +492,9 @@ function TreatAsFemale(Actor ActorRef)
 endFunction
 
 function ClearForcedGender(Actor ActorRef)
+	if !ActorRef
+		return
+	endIf
 	ActorRef.RemoveFromFaction(GenderFaction)
 	int eid = ModEvent.Create("SexLabActorGenderChange")
 	if eid
@@ -486,6 +505,9 @@ function ClearForcedGender(Actor ActorRef)
 endFunction
 
 function TreatAsGender(Actor ActorRef, bool AsFemale)
+	if !ActorRef
+		return
+	endIf
 	ActorRef.RemoveFromFaction(GenderFaction)
 	int sex = ActorRef.GetLeveledActorBase().GetSex()
 	if (sex != 0 && !AsFemale) || (sex != 1 && AsFemale) 
@@ -576,7 +598,7 @@ int[] function GenderCount(Actor[] Positions)
 endFunction
 
 bool function IsCreature(Actor ActorRef)
-	return CreatureSlots.AllowedCreature(ActorRef.GetLeveledActorBase().GetRace())
+	return ActorRef && CreatureSlots.AllowedCreature(ActorRef.GetLeveledActorBase().GetRace())
 endFunction
 
 int function MaleCount(Actor[] Positions)

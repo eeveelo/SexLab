@@ -134,6 +134,12 @@ state Advancing
 		SyncEvent(kSyncActor, 15.0)
 	endFunction
 	function SyncDone()
+		if Stage > 1 && Stage > (StageCount * 0.5)
+			string[] Tags = Animation.GetRawTags()
+			IsType[6]  = IsType[6] || Females > 0 && Tags.Find("Vaginal") != -1
+			IsType[7]  = IsType[7] || Tags.Find("Anal")   != -1 || (Females == 0 && Tags.Find("Vaginal") != -1)
+			IsType[8]  = IsType[8] || Tags.Find("Oral")   != -1
+		endIf
 		RegisterForSingleUpdate(0.1)
 	endFunction
 	event OnUpdate()
@@ -693,7 +699,7 @@ function SetAnimation(int aid = -1)
 	; Update animation info
 	RecordSkills()
 	string[] Tags = Animation.GetRawTags()
-	; IsType = [1] IsVaginal, [2] IsAnal, [3] IsOral, [4] IsLoving, [5] IsDirty
+	; IsType = [1] IsVaginal, [2] IsAnal, [3] IsOral, [4] IsLoving, [5] IsDirty, [6] HadVaginal, [7] HadAnal, [8] HadOral
 	IsType[1]  = Females > 0 && (Tags.Find("Vaginal") != -1 || Tags.Find("Pussy") != -1)
 	IsType[2]  = Tags.Find("Anal")   != -1 || (Females == 0 && Tags.Find("Vaginal") != -1)
 	IsType[3]  = Tags.Find("Oral")   != -1

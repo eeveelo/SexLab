@@ -218,11 +218,6 @@ event OnConfigOpen()
 
 	; Target actor
 	TargetRef = Config.TargetRef
-	if TargetRef
-		StatRef = TargetRef
-	else
-		StatRef = PlayerRef
-	endIf
 	EmptyStatToggle = false
 	if TargetRef && TargetRef.Is3DLoaded()
 		TargetName = TargetRef.GetLeveledActorBase().GetName()
@@ -232,6 +227,11 @@ event OnConfigOpen()
 		TargetName = "$SSL_NoTarget"
 		TargetFlag = OPTION_FLAG_DISABLED
 		Config.TargetRef = none
+	endIf
+	if TargetRef
+		StatRef = TargetRef
+	else
+		StatRef = PlayerRef
 	endIf
 
 	; Reset animation editor auto selector
@@ -564,6 +564,10 @@ event OnHighlightST()
 	elseIf Options[0] == "AdvancedOpenMouth"
 		SetInfoText("$SSL_InfoAdvancedOpenMouth")
 
+	; Alt OpenMouth Expression
+	elseIf Options[0] == "OpenMouthExpression"
+		SetInfoText("$SSL_InfoOpenMouthExpression")
+
 	; Clean CACHE
 	elseIf Options[0] == "CleanCACHE"
 		SetInfoText("$SSL_InfoCleanCACHE")
@@ -610,11 +614,11 @@ event OnSliderOpenST()
 	; Expression OpenMouth Editor
 	elseIf Options[0] == "OpenMouth"
 		; Gender, ID
-		SetSliderDialogStartValue(Config.GetOpenMouthPhonemes(Options[1] as bool)[Options[2] as int] * 100)
+		SetSliderDialogStartValue(Config.GetOpenMouthPhonemes(Options[1] == "1")[Options[2] as int] * 100)
 		SetSliderDialogRange(0, 100)
 		SetSliderDialogInterval(1)
 		if Options[2] == "1"
-			if Options[1] as bool
+			if Options[1] == "1"
 				SetSliderDialogDefaultValue(100)
 			else
 				SetSliderDialogDefaultValue(80)
@@ -696,7 +700,7 @@ event OnSliderAcceptST(float value)
 	; Expression OpenMouth Editor
 	elseIf Options[0] == "OpenMouth"
 		; Gender, ID, Value
-		Config.SetOpenMouthPhoneme(Options[1] as bool, Options[2] as int, value / 100.0)
+		Config.SetOpenMouthPhoneme(Options[1] == "1", Options[2] as int, value / 100.0)
 		SetSliderOptionValueST(value as int)
 
 	; Expression Editor
@@ -868,6 +872,13 @@ event OnSelectST()
 	elseIf Options[0] == "AdvancedOpenMouth"
 		EditOpenMouth = !EditOpenMouth
 		ForcePageReset()
+
+	; Alt OpenMouth Expression
+	elseIf Options[0] == "OpenMouthExpression"
+		if Config.GetOpenMouthExpression(Options[1] == "1") == 16
+			Config.SetOpenMouthExpression(Options[1] == "1", 15)
+		endIf
+		SetToggleOptionValueST(Config.GetOpenMouthExpression(Options[1] == "1") == 15)
 
 	; Toggle Strapons
 	elseIf Options[0] == "Strapon"
@@ -1571,13 +1582,17 @@ function AnimationEditor()
 	; Auto select players animation if they are animating right now
 	if !PreventOverwrite 
 		sslThreadController Thread = Config.GetThreadControlled()
-		if (!Thread || Thread.GetState() != "Animating") && TargetRef && TargetRef != none && TargetRef.IsInFaction(Config.AnimatingFaction)
-			Thread = ThreadSlots.GetActorController(TargetRef)
+		if !(Thread && (Thread.GetState() == "Animating" || Thread.GetState() == "Advancing"))
+			if TargetRef && TargetRef != none && TargetRef.IsInFaction(Config.AnimatingFaction)
+				Thread = ThreadSlots.GetActorController(TargetRef)
+			endIf
+			if !(Thread && (Thread.GetState() == "Animating" || Thread.GetState() == "Advancing"))
+				if PlayerRef.IsInFaction(Config.AnimatingFaction)
+					Thread = ThreadSlots.GetActorController(PlayerRef)
+				endIf
+			endIf
 		endIf
-		if (!Thread || Thread.GetState() != "Animating") && PlayerRef.IsInFaction(Config.AnimatingFaction)
-			Thread = ThreadSlots.GetActorController(PlayerRef)
-		endIf
-		if Thread && Thread != none && Thread.GetState() == "Animating"
+		if Thread && Thread.Animation
 			PreventOverwrite = true
 			Position  = Thread.GetAdjustPos()
 			Animation = Thread.Animation
@@ -1621,7 +1636,7 @@ function AnimationEditor()
 		string Type = "Bed"
 		Type = "Bed"
 		AnimOffsets = Animation.GetBedOffsets()
-		if Animation.PositionCount == 1 || (TargetRef && Animation.PositionCount == 2 && (!IsCreatureEditor || (IsCreatureEditor && Animation.HasActorRace(TargetRef))))
+		if (Animation.PositionCount == 1 && (!IsCreatureEditor || (Animation.HasActorRace(PlayerRef) || (TargetRef && Animation.HasActorRace(PlayerRef))))) || (Animation.PositionCount >= 2 && TargetRef && (!IsCreatureEditor || (Animation.HasActorRace(PlayerRef) || Animation.HasActorRace(TargetRef))))
 			AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere")
 		else
 			AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere", OPTION_FLAG_DISABLED)
@@ -1639,7 +1654,7 @@ function AnimationEditor()
 
 		AddMenuOptionST("AnimationAdjustCopy", "$SSL_CopyFromProfile", "$SSL_Select")
 
-		if Animation.PositionCount == 1 || (TargetRef && Animation.PositionCount == 2 && (!IsCreatureEditor || (IsCreatureEditor && Animation.HasActorRace(TargetRef))))
+		if (Animation.PositionCount == 1 && (!IsCreatureEditor || (Animation.HasActorRace(PlayerRef) || (TargetRef && Animation.HasActorRace(PlayerRef))))) || (Animation.PositionCount >= 2 && TargetRef && (!IsCreatureEditor || (Animation.HasActorRace(PlayerRef) || Animation.HasActorRace(TargetRef))))
 			AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere")
 		else
 			AddTextOptionST("AnimationTest", "$SSL_PlayAnimation", "$SSL_ClickHere", OPTION_FLAG_DISABLED)
@@ -1904,18 +1919,35 @@ state AnimationTest
 				Thread.DisableBedUse(true)
 				Thread.DisableLeadIn(true)
 				; select a solo actor
-				if Animation.PositionCount < 2
-					if TargetRef && TargetRef.Is3DLoaded() && ShowMessage("Which actor would you like to play the solo animation "+Animation.Name+" with?", true, TargetName, PlayerName)
-						Thread.AddActor(TargetRef)
-					else
-						Thread.AddActor(PlayerRef)
+				if Animation.PositionCount == 1
+					string RaceKey = ""
+					int FindGender = Animation.GetGender(0)
+					if FindGender > 1
+						RaceKey = Animation.RaceType
+					elseif FindGender > 0 && !(Animation.HasTag("Vaginal") || Animation.HasTag("Pussy") || Animation.HasTag("Cunnilingus") || Animation.HasTag("Futa"))
+						FindGender = -1
+					elseif FindGender == 0 && Config.UseStrapons && Animation.UseStrapon(0, 1)
+						FindGender = -1
 					endIf
-				; Add player and target
-				elseIf Animation.PositionCount == 2 && TargetRef
-					Actor[] Positions = sslUtility.MakeActorArray(PlayerRef, TargetRef)
-				;	Positions = ThreadLib.SortActorsByAnimation(Positions, Animation)
-					Thread.AddActor(Positions[0])
-					Thread.AddActor(Positions[1])
+
+					bool ValidPlayer = ThreadLib.CheckActor(TargetRef, FindGender) && (RaceKey == "" || sslCreatureAnimationSlots.GetAllRaceKeys(TargetRef.GetLeveledActorBase().GetRace()).Find(RaceKey) != -1)
+					bool ValidTarget = ThreadLib.CheckActor(TargetRef, FindGender) && (RaceKey == "" || sslCreatureAnimationSlots.GetAllRaceKeys(TargetRef.GetLeveledActorBase().GetRace()).Find(RaceKey) != -1)
+					if ValidPlayer && ValidTarget
+						if ShowMessage("Which actor would you like to play the solo animation "+Animation.Name+" with?", true, TargetName, PlayerName)
+							Thread.AddActor(TargetRef)
+						else
+							Thread.AddActor(PlayerRef)
+						endIf
+					elseIf ValidTarget
+						Thread.AddActor(TargetRef)
+					elseIf ValidPlayer
+						Thread.AddActor(PlayerRef)
+					else
+						ShowMessage("Failed to start test animation.\n  None valid actor selected", false)
+					endIf
+				; Add actors
+				elseIf Animation.PositionCount >= 2
+					Thread.AddActors(ThreadLib.FindAnimationPartners(Animation, PlayerRef, 1500, PlayerRef, TargetRef))
 				endIf
 				if Animation.PositionCount != Thread.ActorCount
 					ShowMessage("Failed to start test animation.\n  Animation.PositionCount["+Animation.PositionCount+"] and ActorCount["+Thread.ActorCount+"] don't match", false)
@@ -2363,12 +2395,16 @@ function ExpressionEditor()
 
 		AddTextOptionST("AdvancedOpenMouth", "$SSL_EditExpression", "$SSL_ClickHere")
 
+		AddToggleOptionST("OpenMouthExpression_1", "Use Alt Female Expression", Config.GetOpenMouthExpression(True) == 15)
+		AddToggleOptionST("OpenMouthExpression_0", "Use Alt Male Expression", Config.GetOpenMouthExpression(False) == 15)
+
 		AddTextOptionST("ExpressionTestPlayer", "$SSL_TestOnPlayer", "$SSL_Apply")
 		AddTextOptionST("ExpressionTestTarget", "$SSL_TestOn{"+TargetName+"}", "$SSL_Apply", Math.LogicalAnd(OPTION_FLAG_NONE, (TargetRef == none) as int))
 
 		; OpenMouth Phoneme settings
 		AddHeaderOption("$SSL_{$SSL_Female}-{$SSL_Phoneme}")
 		AddHeaderOption("$SSL_{$SSL_Male}-{$SSL_Phoneme}")
+
 		int i = 0
 		while i <= 15
 			AddSliderOptionST("OpenMouth_1_"+i, Phonemes[i], Config.OpenMouthFemale[i] * 100, "{0}")
@@ -2390,7 +2426,7 @@ function ExpressionEditor()
 	endIf
 
 	; 1
-	AddHeaderOption("$SSL_EditingExpression{"+Expression.Name+"}")
+	AddHeaderOption("$SSL_ExpressionEditor")
 	AddHeaderOption("")
 
 	AddMenuOptionST("ExpressionSelect", "$SSL_ModifyingExpression", Expression.Name)
@@ -2614,6 +2650,7 @@ function TestApply(Actor ActorRef)
 			Utility.Wait(1.0)
 		endIf
 		Expression.ApplyPhase(ActorRef, Phase, ActorRef.GetLeveledActorBase().GetSex())
+		Log("Expression.Applied("+Expression.Name+") Strength:"+100+"; OpenMouth:"+testOpenMouth)
 		Utility.Wait(0.1)
 		Debug.Notification("$SSL_AppliedTestExpression")
 		Utility.WaitMenuMode(15.0)
@@ -2668,7 +2705,7 @@ endState
 state ExpressionAddPhaseFemale
 	event OnSelectST()
 		Expression.AddPhase(Phase, Female)
-		if Phase > 1 && ShowMessage("Do you wish to copy the previous Phase?", true, "$Yes", "$No")
+		if Phase > 1 && ShowMessage("$SSL_WarnCopyPreviousPhase", true, "$Yes", "$No")
 			float[] PeviousPhase = Expression.GenderPhase((Phase - 1), Female)
 			float[] NewValues = new float[32]
 			int i = PeviousPhase.Length
@@ -2684,7 +2721,7 @@ endState
 state ExpressionAddPhaseMale
 	event OnSelectST()
 		Expression.AddPhase(Phase, Male)
-		if Phase > 1 && ShowMessage("Do you wish to copy the previous Phase?", true, "$Yes", "$No")
+		if Phase > 1 && ShowMessage("$SSL_WarnCopyPreviousPhase", true, "$Yes", "$No")
 			float[] PeviousPhase = Expression.GenderPhase((Phase - 1), Male)
 			float[] NewValues = new float[32]
 			int i = PeviousPhase.Length
@@ -2718,7 +2755,11 @@ state MoodTypeFemale
 		SetMenuDialogOptions(Moods)
 	endEvent
 	event OnMenuAcceptST(int i)
-		if i >= 0
+		if i > 14
+			ShowMessage("$SSL_WarnMoodForbidden{"+Moods[i]+"}")
+			Expression.SetIndex(Phase, Female, Mood, 0, 0)
+			SetMenuOptionValueST(Moods[0])
+		elseIf i >= 0
 			Expression.SetIndex(Phase, Female, Mood, 0, i)
 			SetMenuOptionValueST(Moods[i])
 		endIf
@@ -2752,7 +2793,11 @@ state MoodTypeMale
 		SetMenuDialogOptions(Moods)
 	endEvent
 	event OnMenuAcceptST(int i)
-		if i >= 0
+		if i > 14
+			ShowMessage("$SSL_WarnMoodForbidden{"+Moods[i]+"}")
+			Expression.SetIndex(Phase, Male, Mood, 0, 0)
+			SetMenuOptionValueST(Moods[0])
+		elseIf i >= 0
 			Expression.SetIndex(Phase, Male, Mood, 0, i)
 			SetMenuOptionValueST(Moods[i])
 		endIf
@@ -2846,6 +2891,9 @@ function SexDiary()
 	AddTextOption("$SSL_TimesMasturbated", Stats.GetSkill(StatRef, "Masturbation"))
 	AddTextOption("$SSL_TimesAggressive", Stats.GetSkill(StatRef, "Aggressor"))
 	AddTextOption("$SSL_TimesVictim", Stats.GetSkill(StatRef, "Victim"))
+	AddTextOption("$SSL_TimesVaginal", Stats.GetSkill(StatRef, "VaginalCount"))
+	AddTextOption("$SSL_TimesAnal", Stats.GetSkill(StatRef, "AnalCount"))
+	AddTextOption("$SSL_TimesOral", Stats.GetSkill(StatRef, "OralCount"))
 
 	; Custom stats set by other mods
 	if StatRef == PlayerRef

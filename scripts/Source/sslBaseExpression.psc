@@ -63,6 +63,7 @@ endFunction
 
 function ApplyPhase(Actor ActorRef, int Phase, int Gender)
 	if Phase <= Phases[Gender]
+	;	TransitPresetFloats(ActorRef, GetCurrentMFG(ActorRef), GenderPhase(Phase, Gender)) 
 		ApplyPresetFloats(ActorRef, GenderPhase(Phase, Gender))
 	endIf
 endFunction
@@ -125,18 +126,24 @@ function OpenMouth(Actor ActorRef) global
 ;		ActorRef.SetExpressionPhoneme(1, (SexLabUtil.GetConfig().OpenMouthSize as float / 100.0))
 ;	endIf
 	bool isRealFemale = ActorRef.GetLeveledActorBase().GetSex() == 1
+	int OpenMouthExpression = SexLabUtil.GetConfig().GetOpenMouthExpression(isRealFemale)
 	int OpenMouthSize = SexLabUtil.GetConfig().OpenMouthSize
 	float[] Phonemes = SexLabUtil.GetConfig().GetOpenMouthPhonemes(isRealFemale)											 
 	Int i = 0
+	bool HasMFG = SexLabUtil.GetConfig().HasMFGFix
 	while i < Phonemes.length
-		if SexLabUtil.GetConfig().HasMFGFix
-			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, i, PapyrusUtil.ClampInt((OpenMouthSize * Phonemes[i]) as int, 0, 100))
-		else
-			ActorRef.SetExpressionPhoneme(i, PapyrusUtil.ClampInt((OpenMouthSize * Phonemes[i]) as int, 0, 100) as float / 100.0)
+		if (GetPhoneme(ActorRef, i) != Phonemes[i])
+			if HasMFG
+				MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, i, PapyrusUtil.ClampInt((OpenMouthSize * Phonemes[i]) as int, 0, 100))
+			else
+				ActorRef.SetExpressionPhoneme(i, PapyrusUtil.ClampInt((OpenMouthSize * Phonemes[i]) as int, 0, 100) as float / 100.0)
+			endIf
 		endIf
 		i += 1
 	endWhile
-	ActorRef.SetExpressionOverride(16, OpenMouthSize)
+	if (GetExpression(ActorRef, true) as int == OpenMouthExpression || GetExpression(ActorRef, false) != OpenMouthSize as float / 100.0)
+		ActorRef.SetExpressionOverride(OpenMouthExpression, OpenMouthSize)
+	endIf
 	Utility.WaitMenuMode(0.1)
 endFunction
 
@@ -147,12 +154,13 @@ function CloseMouth(Actor ActorRef) global
 endFunction
 
 bool function IsMouthOpen(Actor ActorRef) global
+	bool isRealFemale = ActorRef.GetLeveledActorBase().GetSex() == 1
+	int OpenMouthExpression = SexLabUtil.GetConfig().GetOpenMouthExpression(isRealFemale)
 	float MinMouthSize = (SexLabUtil.GetConfig().OpenMouthSize * 0.01) - 0.1
-;	return GetPhoneme(ActorRef, 1) >= MinMouthSize && (GetExpression(ActorRef, true) as Int == 16 && GetExpression(ActorRef, false) >= MinMouthSize)
-	if GetExpression(ActorRef, true) as Int == 16 && GetExpression(ActorRef, false) >= MinMouthSize
+;	return GetPhoneme(ActorRef, 1) >= MinMouthSize && (GetExpression(ActorRef, true) as Int == OpenMouthExpression && GetExpression(ActorRef, false) >= MinMouthSize)
+	if GetExpression(ActorRef, true) as Int == OpenMouthExpression && GetExpression(ActorRef, false) >= MinMouthSize
 		return true
 	endIf
-	bool isRealFemale = ActorRef.GetLeveledActorBase().GetSex() == 1
 	float[] Phonemes = SexLabUtil.GetConfig().GetOpenMouthPhonemes(isRealFemale)											 
 	Int i = 0
 	while i < Phonemes.length
@@ -174,6 +182,34 @@ function ClearMFG(Actor ActorRef) global
 	endIf
 endFunction
 
+function TransitPresetFloats(Actor ActorRef, float[] FromPreset, float[] ToPreset, float Speed = 1.0, float Time = 1.0) global 
+	if !ActorRef || FromPreset.Length < 32 || ToPreset.Length < 32
+		return
+	endIf
+	if Speed < 0.1
+		ApplyPresetFloats(ActorRef, ToPreset)
+		return
+	endIf
+	int n = (10 * Speed) as int
+	int p
+	while p < n
+		float[] Preset = new float[32]
+		int i = Preset.Length
+		while i > 0
+			i -= 1
+			if i > 29
+				Preset[i] = ToPreset[i]
+			else
+				Preset[i] = ((ToPreset[i] - FromPreset[i]) / n) * p + FromPreset[i]
+			endIf
+		endWhile
+		ApplyPresetFloats(ActorRef, Preset)
+		Utility.Wait((Time / 10) / Speed)
+		p += 1
+	endWhile
+	ApplyPresetFloats(ActorRef, ToPreset)
+endFunction
+
 function ApplyPresetFloats(Actor ActorRef, float[] Preset) global 
 	if !ActorRef || Preset.Length < 32
 		return
@@ -184,46 +220,47 @@ function ApplyPresetFloats(Actor ActorRef, float[] Preset) global
 	int m
 	; MFG
 	bool IsMouthOpen = IsMouthOpen(ActorRef)
-	if SexLabUtil.GetConfig().HasMFGFix
-		; Set Phoneme
-		if IsMouthOpen
-			i = 16 ; escape the Phoneme to prevent override the MouthOpen
-		else
-			while p <= 15
-				MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, (Preset[i] * 100.0) as int) ; Oldrim
-				i += 1
-				p += 1
-			endWhile
-		endIf
-		; Set Modifers
-		while m <= 13
-			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 1, m, (Preset[i] * 100.0) as int) ; Oldrim
-			i += 1
-			m += 1
-		endWhile
-	; SKSE
+	bool HasMFG = SexLabUtil.GetConfig().HasMFGFix
+	; Set Phoneme
+	if IsMouthOpen
+		i = 16 ; escape the Phoneme to prevent override the MouthOpen
 	else
-		; Set Phoneme
-		if IsMouthOpen
-			i = 16 ; escape the Phoneme to prevent override the MouthOpen
-		else
-			while p <= 15
-			;	ActorRef.SetExpressionPhoneme(p, (Preset[i] as float / 100.0))
-				ActorRef.SetExpressionPhoneme(p, Preset[i]) ; is supouse to be / 100.0 already thanks SetIndex function
-				i += 1
-				p += 1
-			endWhile
-		endIf
-		; Set Modifers
-		while m <= 13
-		;	ActorRef.SetExpressionModifier(m, (Preset[i] as float / 100.0))
-			ActorRef.SetExpressionModifier(m, Preset[i]) ; is supouse to be / 100.0 already thanks SetIndex function
+		int s
+		while p <= 15
+			if GetPhoneme(ActorRef, p) != Preset[i]
+				if HasMFG
+					MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, (Preset[i] * 100.0) as int) ; Oldrim
+				else
+					ActorRef.SetExpressionPhoneme(p, Preset[i]) ; is supouse to be / 100.0 already thanks SetIndex function
+				endIf
+			endIf
+			if Preset[p] >= Preset[s] ; seems to be required to prevet issues
+				s = p
+			endIf
 			i += 1
-			m += 1
+			p += 1
 		endWhile
+		if HasMFG
+			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, s, (Preset[s] * 100.0) as int) ; Oldrim
+		else
+			ActorRef.SetExpressionPhoneme(s, Preset[s]) ; is supouse to be / 100.0 already thanks SetIndex function
+		endIf
+		
 	endIf
+	; Set Modifers
+	while m <= 13
+		if GetModifier(ActorRef, m) != Preset[i]
+			if HasMFG
+				MfgConsoleFunc.SetPhonemeModifier(ActorRef, 1, m, (Preset[i] * 100.0) as int) ; Oldrim
+			else
+				ActorRef.SetExpressionModifier(m, Preset[i]) ; is supouse to be / 100.0 already thanks SetIndex function
+			endIf
+		endIf
+		i += 1
+		m += 1
+	endWhile
 	; Set expression
-	if !IsMouthOpen
+	if (GetExpression(ActorRef, true) == Preset[30] || GetExpression(ActorRef, false) != Preset[31]) && !IsMouthOpen
 		ActorRef.SetExpressionOverride(Preset[30] as int, (Preset[31] * 100.0) as int)
 	endIf
 endFunction
@@ -584,43 +621,73 @@ bool function ImportJson()
 	if JsonUtil.FloatListCount(File, "Male1") == 32
 		Male1 = new float[32]
 		JsonUtil.FloatListSlice(File, "Male1", Male1)
+		if Male1[30] > 14 ; Prevent issues with OpenMouth
+			Male1[30] = 0
+		endIf
 	endIf
 	if JsonUtil.FloatListCount(File, "Male2") == 32
 		Male2 = new float[32]
 		JsonUtil.FloatListSlice(File, "Male2", Male2)
+		if Male2[30] > 14 ; Prevent issues with OpenMouth
+			Male2[30] = 0
+		endIf
 	endIf
 	if JsonUtil.FloatListCount(File, "Male3") == 32
 		Male3 = new float[32]
 		JsonUtil.FloatListSlice(File, "Male3", Male3)
+		if Male3[30] > 14 ; Prevent issues with OpenMouth
+			Male3[30] = 0
+		endIf
 	endIf
 	if JsonUtil.FloatListCount(File, "Male4") == 32
 		Male4 = new float[32]
 		JsonUtil.FloatListSlice(File, "Male4", Male4)
+		if Male4[30] > 14 ; Prevent issues with OpenMouth
+			Male4[30] = 0
+		endIf
 	endIf
 	if JsonUtil.FloatListCount(File, "Male5") == 32
 		Male5 = new float[32]
 		JsonUtil.FloatListSlice(File, "Male5", Male5)
+		if Male5[30] > 14 ; Prevent issues with OpenMouth
+			Male5[30] = 0
+		endIf
 	endIf
 
 	if JsonUtil.FloatListCount(File, "Female1") == 32
 		Female1 = new float[32]
 		JsonUtil.FloatListSlice(File, "Female1", Female1)
+		if Female1[30] > 14 ; Prevent issues with OpenMouth
+			Female1[30] = 0
+		endIf
 	endIf
 	if JsonUtil.FloatListCount(File, "Female2") == 32
 		Female2 = new float[32]
 		JsonUtil.FloatListSlice(File, "Female2", Female2)
+		if Female2[30] > 14 ; Prevent issues with OpenMouth
+			Female2[30] = 0
+		endIf
 	endIf
 	if JsonUtil.FloatListCount(File, "Female3") == 32
 		Female3 = new float[32]
 		JsonUtil.FloatListSlice(File, "Female3", Female3)
+		if Female3[30] > 14 ; Prevent issues with OpenMouth
+			Female3[30] = 0
+		endIf
 	endIf
 	if JsonUtil.FloatListCount(File, "Female4") == 32
 		Female4 = new float[32]
 		JsonUtil.FloatListSlice(File, "Female4", Female4)
+		if Female4[30] > 14 ; Prevent issues with OpenMouth
+			Female4[30] = 0
+		endIf
 	endIf
 	if JsonUtil.FloatListCount(File, "Female5") == 32
 		Female5 = new float[32]
 		JsonUtil.FloatListSlice(File, "Female5", Female5)
+		if Female5[30] > 14 ; Prevent issues with OpenMouth
+			Female5[30] = 0
+		endIf
 	endIf
 
 	CountPhases()

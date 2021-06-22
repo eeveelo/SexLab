@@ -21,6 +21,41 @@ Actor property PlayerRef auto
 ; --- Voice Filtering                                 --- ;
 ; ------------------------------------------------------- ;
 
+sslBaseVoice[] function FilterTaggedVoices(sslBaseVoice[] VoiceList, string[] Tags, bool HasTag = true) global
+	if !VoiceList || VoiceList.Length < 1
+		return VoiceList
+	elseIf !Tags || Tags.Length < 1
+		if HasTag
+			return sslUtility.VoiceArray(0)
+		endIf
+		return VoiceList
+	endIf
+	int i = VoiceList.Length
+	bool[] Valid = Utility.CreateBoolArray(i)
+	while i
+		i -= 1
+		Valid[i] = VoiceList[i].HasOneTag(Tags) == HasTag
+	endWhile
+	; Check results
+	if Valid.Find(true) == -1
+		return sslUtility.VoiceArray(0) ; No valid animations
+	elseIf Valid.Find(false) == -1
+		return VoiceList ; All valid animations
+	endIf
+	; Filter output
+	i = VoiceList.Length
+	int n = PapyrusUtil.CountBool(Valid, true)
+	sslBaseVoice[] Output = sslUtility.VoiceArray(n)
+	while i && n
+		i -= 1
+		if Valid[i]
+			n -= 1
+			Output[n] = VoiceList[i]
+		endIf
+	endWhile
+	return Output
+endFunction
+
 sslBaseVoice[] function GetAllGender(int Gender)
 	bool[] Valid = Utility.CreateBoolArray(Slotted)
 	int i = Slotted
@@ -57,8 +92,58 @@ sslBaseVoice function PickVoice(Actor ActorRef)
 	if Saved && (IsPlayer || Config.NPCSaveVoice || HasCustomVoice(ActorRef))
 		return Saved ; Use saved voice
 	endIf
+	; Pick a taged voice based on gender and scale
+	ActorBase BaseRef = ActorRef.GetLeveledActorBase()
+	float ActorScale = ActorRef.GetScale()
+	string Tags = "Male"
+	string SuppressTags = ""
+	string[] Filters
+	VoiceType ActorVoice = BaseRef.GetVoiceType()
+	string ActorVoiceString = ""
+	if ActorVoice
+		ActorVoiceString = ActorVoice as String
+		Log(ActorVoiceString)
+		if StringUtil.Find(ActorVoiceString, "Orc") >= 0 || StringUtil.Find(ActorVoiceString, "Brute") >= 0
+			Filters = PapyrusUtil.PushString(Filters, "Rough")
+		endIf
+		if StringUtil.Find(ActorVoiceString, "Toned") >= 0 || StringUtil.Find(ActorVoiceString, "Shrill") >= 0
+			Filters = PapyrusUtil.PushString(Filters, "Loud")
+		endIf
+		if StringUtil.Find(ActorVoiceString, "Sultry") >= 0
+			Filters = PapyrusUtil.PushString(Filters, "Excited")
+		endIf
+		if StringUtil.Find(ActorVoiceString, "Coward") >= 0
+			Filters = PapyrusUtil.PushString(Filters, "Quiet")
+		endIf
+	endIf
+	if BaseRef.GetSex() == 1
+		Tags = "Female"
+	endIf
+	if StringUtil.Find(ActorVoiceString, "Old") >= 0 || StringUtil.Find(ActorVoiceString, "Druk") >= 0 || StringUtil.Find(ActorVoiceString, "Khajiit") >= 0 || StringUtil.Find(ActorVoiceString, "Argonian") >= 0
+		SuppressTags = "Young"
+		Filters = PapyrusUtil.PushString(Filters, "Old")
+	elseIf StringUtil.Find(ActorVoiceString, "Young") >= 0 || ActorScale < 0.95
+		SuppressTags = "Old"
+		Filters = PapyrusUtil.PushString(Filters, "Young")
+	else
+		SuppressTags += ",Young,Old"
+	endif
+	sslBaseVoice[] VoiceList = GetAllByTags(Tags,SuppressTags)
+	
+	sslBaseVoice[] Filtered = FilterTaggedVoices(VoiceList, Filters, true)
+	if Filtered.Length > 0 && VoiceList.Length > Filtered.Length
+		Log("Filtered out '"+(VoiceList.Length - Filtered.Length)+"' voices without the tags: "+Filters)
+		VoiceList = Filtered
+	endIf
+	if VoiceList && VoiceList.Length > 0
+		int i = (Utility.RandomInt(0, (VoiceList.Length - 1)))
+		if !IsPlayer && Config.NPCSaveVoice
+			SaveVoice(ActorRef, VoiceList[i])
+		endIf
+		return VoiceList[i]
+	endIf
 	; Pick a random voice based on gender
-	sslBaseVoice Picked = PickGender(ActorRef.GetLeveledActorBase().GetSex())
+	sslBaseVoice Picked = PickGender(BaseRef.GetSex())
 	; Save the voice to NPC for reuse, if enabled
 	if Picked && !IsPlayer && Config.NPCSaveVoice
 		SaveVoice(ActorRef, Picked)
@@ -67,6 +152,14 @@ sslBaseVoice function PickVoice(Actor ActorRef)
 endFunction
 
 sslBaseVoice function GetByTags(string Tags, string TagsSuppressed = "", bool RequireAll = true)
+	sslBaseVoice[] Found = GetAllByTags(Tags, TagsSuppressed, RequireAll)
+	if Found && Found.Length > 0
+		return Found[(Utility.RandomInt(0, (Found.Length - 1)))]
+	endIf
+	return none
+endFunction
+
+sslBaseVoice[] function GetAllByTags(string Tags, string TagsSuppressed = "", bool RequireAll = true)
 	string[] Search = StringSplit(Tags)
 	if Search.Length == 0
 		return none
@@ -79,11 +172,7 @@ sslBaseVoice function GetByTags(string Tags, string TagsSuppressed = "", bool Re
 		sslBaseVoice Slot = GetBySlot(i)
 		Valid[i] = Slot.Enabled && !Slot.Creature && (TagsSuppressed == "" || Slot.CheckTags(Suppress, false, true)) && Slot.CheckTags(Search, RequireAll)
 	endWhile
-	sslBaseVoice[] Found = GetList(Valid)
-	if Found && Found.Length > 0
-		return Found[(Utility.RandomInt(0, (Found.Length - 1)))]
-	endIf
-	return none
+	return GetList(Valid)
 endFunction
 
 sslBaseVoice function PickByRaceKey(string RaceKey)
@@ -178,11 +267,16 @@ sslBaseVoice[] function GetList(bool[] Valid)
 					Valid[rand] = false
 					i -= 1
 				endIf
+				if i == 101 ; To be sure only 100 stay
+					i = CountBool(Valid, true)
+					n = Valid.Find(true)
+					end = Valid.RFind(true) - 1
+				endIf
 			endWhile
 		endIf
 		; Get list
 		Output = sslUtility.VoiceArray(i)
-		while n != -1
+		while n != -1 && i > 0
 			i -= 1
 			Output[i] = Objects[n] as sslBaseVoice
 			n += 1
@@ -192,6 +286,8 @@ sslBaseVoice[] function GetList(bool[] Valid)
 				n = -1
 			endIf
 		endWhile
+	else
+		; Log("No Voices Found")
 	endIf
 	return Output
 endFunction
