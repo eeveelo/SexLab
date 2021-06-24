@@ -877,6 +877,8 @@ event OnSelectST()
 	elseIf Options[0] == "OpenMouthExpression"
 		if Config.GetOpenMouthExpression(Options[1] == "1") == 16
 			Config.SetOpenMouthExpression(Options[1] == "1", 15)
+		else
+			Config.SetOpenMouthExpression(Options[1] == "1", 16)
 		endIf
 		SetToggleOptionValueST(Config.GetOpenMouthExpression(Options[1] == "1") == 15)
 

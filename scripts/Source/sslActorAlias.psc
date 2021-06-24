@@ -768,7 +768,7 @@ state Animating
 			; Lip sync and refresh expression
 			if GetState() == "Animating"
 				int Strength = CalcReaction()
-				if LoopDelay >= VoiceDelay
+				if LoopDelay >= VoiceDelay && Strength > 30
 					LoopDelay = 0.0
 					if OpenMouth && UseLipSync
 						sslBaseVoice.MoveLips(ActorRef, none, 0.5)

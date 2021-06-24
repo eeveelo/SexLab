@@ -51,8 +51,8 @@ function MoveLips(Actor ActorRef, Sound SoundRef = none, float Strength = 1.0) g
 	if ReferenceP > (1.0 - (0.2 * Strength))
 		ReferenceP = (1.0 - (0.2 * Strength))
 	endIf
-	int MinP = ((ReferenceP - (0.04 * Strength))*100) as int
-	int MaxP = ((ReferenceP + (0.16 * Strength))*100) as int
+	int MinP = ((ReferenceP - (0.1 * Strength))*100) as int
+	int MaxP = ((ReferenceP + (0.2 * Strength))*100) as int
 	if MinP < 0
 		MinP = 0
 	elseIf MinP > 98
