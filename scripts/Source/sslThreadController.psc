@@ -758,9 +758,13 @@ endFunction
 
 function ResolveTimers()
 	parent.ResolveTimers()
-	TimedStage = Animation.HasTimer(Stage)
-	if TimedStage
-		Log("Stage has timer: "+Animation.GetTimer(Stage))
+	if Animation
+		TimedStage = Animation.HasTimer(Stage)
+		if TimedStage
+			Log("Stage has timer: "+Animation.GetTimer(Stage))
+		endIf
+	else
+		TimedStage = false
 	endIf
 endFunction
 
@@ -813,7 +817,9 @@ state Ending
 		endIf
 		; HookAnimationEnding()
 		SendThreadEvent("AnimationEnding")
-		SetObjectiveDisplayed(0, False)
+		if IsObjectiveDisplayed(0)
+			SetObjectiveDisplayed(0, False)
+		endIf
 		RecordSkills()
 		DisableHotkeys()
 		Config.DisableThreadControl(self)

@@ -131,11 +131,17 @@ float[] property Timers hidden
 		return ConfigTimers
 	endFunction
 	function set(float[] value)
-		if UseCustomTimers
-			CustomTimers = value
-		else
-			ConfigTimers = value
-		endIf
+	;	if UseCustomTimers
+	;		CustomTimers = value
+	;	else
+	;		ConfigTimers = value
+	;	endIf
+	if !value || value.Length < 1
+		Log("Set() - Empty timers given for property Timers.", "ERROR")
+	else
+		CustomTimers    = value
+		UseCustomTimers = true
+	endIf
 	endFunction
 endProperty
 
@@ -2039,7 +2045,7 @@ function Initialize()
 	ActorAlias[3].ClearAlias()
 	ActorAlias[4].ClearAlias()
 	if CenterAlias
-		SetObjectiveDisplayed(0, False)
+	;	SetObjectiveDisplayed(0, False)
 		CenterAlias.Clear()
 	endIf
 	; Forms

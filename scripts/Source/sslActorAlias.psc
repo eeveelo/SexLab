@@ -490,7 +490,17 @@ state Ready
 			; Get sex skills of partner/player
 			Skills       = Stats.GetSkillLevels(SkilledActor)
 			OwnSkills    = Stats.GetSkillLevels(ActorRef)
-			BaseEnjoyment -= CalcEnjoyment(SkillBonus, Skills, LeadIn, IsFemale, Thread.Timers[0], 1, StageCount)
+			; Try to prevent orgasms on fist stage resting enjoyment
+			float FirsStageTime
+			if LeadIn
+				FirsStageTime = Config.StageTimerLeadIn[0]
+			elseIf IsType[0]
+				FirsStageTime = Config.StageTimerAggr[0]
+			else
+				FirsStageTime = Config.StageTimer[0]
+			endIf
+			BaseEnjoyment -= Math.Abs(CalcEnjoyment(SkillBonus, Skills, LeadIn, IsFemale, FirsStageTime, 1, StageCount)) as int
+			; Add Bonus Enjoyment
 			if IsVictim
 				BestRelation = Thread.GetLowestPresentRelationshipRank(ActorRef)
 				BaseEnjoyment += ((BestRelation - 3) + PapyrusUtil.ClampInt((OwnSkills[Stats.kLewd]-OwnSkills[Stats.kPure]) as int,-6,6)) * Utility.RandomInt(1, 10)
@@ -921,7 +931,7 @@ state Animating
 		if !Forced && (NoOrgasm || Thread.DisableOrgasms)
 			; Orgasm Disabled for actor or whole thread
 			return 
-		elseIf !Forced && Enjoyment < 100
+		elseIf !Forced && Config.SeparateOrgasms && Enjoyment < 100
 			; Someone need to do better job to make you happy
 			return
 		elseIf Math.Abs(Utility.GetCurrentRealTime() - LastOrgasm) < 5.0
