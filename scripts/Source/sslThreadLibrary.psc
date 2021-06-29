@@ -636,32 +636,51 @@ ObjectReference function FindBed(ObjectReference CenterRef, float Radius = 1000.
 	; Current elevation to determine bed being on same floor
 	float Z = CenterRef.GetPositionZ()
 	; Search a couple times for a nearby bed on the same elevation first before looking for random
-	ObjectReference NearRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
-	if !NearRef || (NearRef != IgnoreRef1 && NearRef != IgnoreRef2 && SameFloor(NearRef, Z) && LeveledAngle(NearRef) && CheckBed(NearRef, IgnoreUsed))
-		return NearRef
+	ObjectReference BedRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
+	if !BedRef || (BedRef != IgnoreRef1 && BedRef != IgnoreRef2 && SameFloor(BedRef, Z) && LeveledAngle(BedRef) && CheckBed(BedRef, IgnoreUsed))
+		return BedRef
 	endIf
-	NearRef = Game.FindRandomReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
-	if !NearRef || (NearRef != IgnoreRef1 && NearRef != IgnoreRef2 && SameFloor(NearRef, Z) && LeveledAngle(NearRef) && CheckBed(NearRef, IgnoreUsed))
-		return NearRef
-	endIf
-	NearRef = Game.FindRandomReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
-	if !NearRef || (NearRef != IgnoreRef1 && NearRef != IgnoreRef2 && SameFloor(NearRef, Z) && LeveledAngle(NearRef) && CheckBed(NearRef, IgnoreUsed))
-		return NearRef
-	endIf
-	NearRef = Game.FindClosestReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
-	if !NearRef || (NearRef != IgnoreRef1 && NearRef != IgnoreRef2 && SameFloor(NearRef, Z, Radius * 0.5) && LeveledAngle(NearRef) && CheckBed(NearRef, IgnoreUsed))
-		return NearRef
-	endIf
-	; Failover to any random useable bed
-	form[] Suppressed = new Form[10]
-	Suppressed[9] = NearRef
+	ObjectReference NearRef
+	Form[] Suppressed = new Form[10]
+	Suppressed[9] = BedRef
 	Suppressed[8] = IgnoreRef1
 	Suppressed[7] = IgnoreRef2
-	int i = 7
+	int LastNull = Suppressed.RFind(none)
+	int i = BedsList.GetSize()
 	while i
 		i -= 1
-		ObjectReference BedRef = Game.FindRandomReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
-		if !BedRef || (Suppressed.Find(BedRef) == -1 && SameFloor(NearRef, Z, Radius * 0.5) && LeveledAngle(BedRef) && CheckBed(BedRef, IgnoreUsed))
+		Form BedType = BedsList.GetAt(i)
+		if BedType
+			BedRef = Game.FindClosestReferenceOfTypeFromRef(BedType, CenterRef, Radius)
+			if BedRef && Suppressed.Find(BedRef) == -1
+				if SameFloor(BedRef, Z, 200) && LeveledAngle(BedRef) && CheckBed(BedRef, IgnoreUsed)
+					if (!NearRef || BedRef.GetDistance(CenterRef) < NearRef.GetDistance(CenterRef))
+						NearRef = BedRef
+					endIf
+				elseIf LastNull >= 0
+					Suppressed[LastNull]
+					LastNull = Suppressed.RFind(none)
+				endIf
+			endIf
+		endIf
+	endWhile
+	if NearRef && NearRef != none
+		return NearRef
+	endIf
+;	BedRef = Game.FindRandomReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
+;	if !BedRef || (BedRef != IgnoreRef1 && BedRef != IgnoreRef2 && SameFloor(BedRef, Z) && LeveledAngle(BedRef) && CheckBed(BedRef, IgnoreUsed))
+;		return BedRef
+;	endIf
+;	BedRef = Game.FindRandomReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
+;	if !BedRef || (BedRef != IgnoreRef1 && BedRef != IgnoreRef2 && SameFloor(BedRef, Z) && LeveledAngle(BedRef) && CheckBed(BedRef, IgnoreUsed))
+;		return BedRef
+;	endIf
+	; Failover to any random useable bed
+	i = LastNull + 1
+	while i
+		i -= 1
+		BedRef = Game.FindRandomReferenceOfAnyTypeInListFromRef(BedsList, CenterRef, Radius)
+		if !BedRef || (Suppressed.Find(BedRef) == -1 && SameFloor(BedRef, Z, Radius * 0.5) && LeveledAngle(BedRef) && CheckBed(BedRef, IgnoreUsed))
 			return BedRef ; Found valid bed or none nearby and we should give up
 		else
 			Suppressed[i] = BedRef ; Add to suppression list
