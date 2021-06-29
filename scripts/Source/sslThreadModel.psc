@@ -578,7 +578,8 @@ endState
 ; ------------------------------------------------------- ;
 
 bool function UseLimitedStrip()
-	return LeadIn || (Config.LimitedStrip && AnimSlots.CountTag(Animations, "Kissing,Foreplay,LimitedStrip") == Animations.Length)
+	bool LeadInNoBody = !(Config.StripLeadInMale[2] || Config.StripLeadInFemale[2])
+	return (LeadIn && (!LeadInNoBody || AnimSlots.CountTag(Animations, "LimitedStrip") == Animations.Length)) || (Config.LimitedStrip && ((!LeadInNoBody && AnimSlots.CountTag(Animations, "Kissing,Foreplay,LeadIn,LimitedStrip") == Animations.Length) || (LeadInNoBody && AnimSlots.CountTag(Animations, "LimitedStrip") == Animations.Length)))
 endFunction
 
 ; Actor Overrides
