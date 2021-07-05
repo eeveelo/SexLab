@@ -778,10 +778,10 @@ state Animating
 			; Lip sync and refresh expression
 			if GetState() == "Animating"
 				int Strength = CalcReaction()
-				if LoopDelay >= VoiceDelay && Strength > 30
+				if LoopDelay >= VoiceDelay && Strength > 15
 					LoopDelay = 0.0
 					if OpenMouth && UseLipSync
-						sslBaseVoice.MoveLips(ActorRef, none, 0.5)
+						sslBaseVoice.MoveLips(ActorRef, none, 0.3)
 						Log("PlayMoan:False; UseLipSync:"+UseLipSync+"; OpenMouth:"+OpenMouth)
 					elseIf !IsSilent
 						Voice.PlayMoan(ActorRef, Strength, IsVictim, UseLipSync)
@@ -931,7 +931,7 @@ state Animating
 		if !Forced && (NoOrgasm || Thread.DisableOrgasms)
 			; Orgasm Disabled for actor or whole thread
 			return 
-		elseIf !Forced && Config.SeparateOrgasms && Enjoyment < 100
+		elseIf !Forced && Config.SeparateOrgasms && Enjoyment < 100 && (Enjoyment < 1 || Stage < StageCount || Orgasms > 0)
 			; Someone need to do better job to make you happy
 			return
 		elseIf Math.Abs(Utility.GetCurrentRealTime() - LastOrgasm) < 5.0

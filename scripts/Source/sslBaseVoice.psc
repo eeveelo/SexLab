@@ -52,7 +52,7 @@ function MoveLips(Actor ActorRef, Sound SoundRef = none, float Strength = 1.0) g
 		ReferenceP = (1.0 - (0.2 * Strength))
 	endIf
 	int MinP = ((ReferenceP - (0.1 * Strength))*100) as int
-	int MaxP = ((ReferenceP + (0.2 * Strength))*100) as int
+	int MaxP = ((ReferenceP + (0.3 * Strength))*100) as int
 	if MinP < 0
 		MinP = 0
 	elseIf MinP > 98
@@ -64,15 +64,15 @@ function MoveLips(Actor ActorRef, Sound SoundRef = none, float Strength = 1.0) g
 ;	if ((SavedP * 100) - MinP) > 2
 ;		TransitDown(ActorRef, (SavedP * 100) as int, MinP)
 ;	endIf
+	if SoundRef != none
+		SoundRef.Play(ActorRef)
+	endIf
 	if HasMFG
 		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, MinP)
 	else
 		ActorRef.SetExpressionPhoneme(p, (MinP as float)*0.01)
 	endIf
 	Utility.Wait(0.4)
-	if SoundRef != none
-		SoundRef.Play(ActorRef)
-	endIf
 ;	TransitUp(ActorRef, MinP, MaxP)
 	if HasMFG
 		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, MaxP)
