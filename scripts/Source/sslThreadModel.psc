@@ -329,7 +329,8 @@ state Making
 		UnregisterForUpdate()
 		int i
 
-		; HookAnimationStarting()
+		ThreadHooks = Config.GetThreadHooks()
+		HookAnimationStarting()
 		SendThreadEvent("AnimationStarting")
 
 		; ------------------------- ;
@@ -1689,87 +1690,81 @@ function SetupThreadEvent(string HookEvent)
 	SendModEvent(HookEvent, thread_id)
 endFunction
 
-;/
+sslThreadHook[] ThreadHooks
 function HookAnimationStarting()
-	sslThreadHook[] ThreadHooks = Config.GetThreadHooks()
-	Log("HookAnimationStarting() - "+ThreadHooks)
-	int i
-	while i < ThreadHooks.Length
+	; Log("HookAnimationStarting() - "+ThreadHooks)
+	int i = Config.GetThreadHookCount()
+	while i > 0
+		i -= 1
 		if ThreadHooks[i] && ThreadHooks[i].CanRunHook(Positions, Tags) && ThreadHooks[i].AnimationStarting(self)
 			Log("Global Hook AnimationStarting("+self+") - "+ThreadHooks[i])
-		else
-			Log("HookAnimationStarting() - Skipping["+i+"]: "+ThreadHooks[i])
+		; else
+		; 	Log("HookAnimationStarting() - Skipping["+i+"]: "+ThreadHooks[i])
 		endIf
-		i += 1
 	endWhile
 endFunction
 
 function HookAnimationPrepare()
-	sslThreadHook[] ThreadHooks = Config.GetThreadHooks()
-	Log("HookAnimationPrepare() - "+ThreadHooks)
-	int i
-	while i < ThreadHooks.Length
+	; Log("HookAnimationPrepare() - "+ThreadHooks)
+	int i = Config.GetThreadHookCount()
+	while i > 0
+		i -= 1
 		if ThreadHooks[i] && ThreadHooks[i].CanRunHook(Positions, Tags) && ThreadHooks[i].AnimationPrepare(self as sslThreadController)
 			Log("Global Hook AnimationPrepare("+self+") - "+ThreadHooks[i])
-		else
-			Log("HookAnimationPrepare() - Skipping["+i+"]: "+ThreadHooks[i])
+		; else
+		; 	Log("HookAnimationPrepare() - Skipping["+i+"]: "+ThreadHooks[i])
 		endIf
-		i += 1
 	endWhile
 endFunction
 
 function HookStageStart()
-	sslThreadHook[] ThreadHooks = Config.GetThreadHooks()
-	int i
-	while i < ThreadHooks.Length
+	int i = Config.GetThreadHookCount()
+	while i > 0
+		i -= 1
 		if ThreadHooks[i] && ThreadHooks[i].CanRunHook(Positions, Tags) && ThreadHooks[i].StageStart(self as sslThreadController)
 			Log("Global Hook StageStart("+self+") - "+ThreadHooks[i])
-		else
-			Log("HookStageStart() - Skipping["+i+"]: "+ThreadHooks[i])
+		; else
+		; 	Log("HookStageStart() - Skipping["+i+"]: "+ThreadHooks[i])
 		endIf
-		i += 1
 	endWhile
 endFunction
 
 function HookStageEnd()
-	sslThreadHook[] ThreadHooks = Config.GetThreadHooks()
-	int i
-	while i < ThreadHooks.Length
+	int i = Config.GetThreadHookCount()
+	while i > 0
+		i -= 1
 		if ThreadHooks[i] && ThreadHooks[i].CanRunHook(Positions, Tags) && ThreadHooks[i].StageEnd(self as sslThreadController)
 			Log("Global Hook StageEnd("+self+") - "+ThreadHooks[i])
-		else
-			Log("HookStageEnd() - Skipping["+i+"]: "+ThreadHooks[i])
+		; else
+		; 	Log("HookStageEnd() - Skipping["+i+"]: "+ThreadHooks[i])
 		endIf
-		i += 1
 	endWhile
 endFunction
 
 function HookAnimationEnding()
-	sslThreadHook[] ThreadHooks = Config.GetThreadHooks()
-	int i
-	while i < ThreadHooks.Length
+	int i = Config.GetThreadHookCount()
+	while i > 0
+		i -= 1
 		if ThreadHooks[i] && ThreadHooks[i].CanRunHook(Positions, Tags) && ThreadHooks[i].AnimationEnding(self as sslThreadController)
 			Log("Global Hook AnimationEnding("+self+") - "+ThreadHooks[i])
-		else
-			Log("HookAnimationEnding() - Skipping["+i+"]: "+ThreadHooks[i])
+		; else
+		; 	Log("HookAnimationEnding() - Skipping["+i+"]: "+ThreadHooks[i])
 		endIf
-		i += 1
 	endWhile
 endFunction
 
 function HookAnimationEnd()
-	sslThreadHook[] ThreadHooks = Config.GetThreadHooks()
-	int i
-	while i < ThreadHooks.Length
+	int i = Config.GetThreadHookCount()
+	while i > 0
+		i -= 1
 		if ThreadHooks[i] && ThreadHooks[i].CanRunHook(Positions, Tags) && ThreadHooks[i].AnimationEnd(self as sslThreadController)
-			Log("Global Hook AnimationEnding("+self+") - "+ThreadHooks[i])
-		else
-			Log("HookAnimationEnd() - Skipping["+i+"]: "+ThreadHooks[i])
+			Log("Global Hook AnimationEnd("+self+") - "+ThreadHooks[i])
+		; else
+		; 	Log("HookAnimationEnd() - Skipping["+i+"]: "+ThreadHooks[i])
 		endIf
-		i += 1
 	endWhile
 endFunction
-/;
+
 
 ; ------------------------------------------------------- ;
 ; --- Alias Events - SYSTEM USE ONLY                  --- ;

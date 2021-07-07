@@ -264,7 +264,8 @@ Actor CrosshairRef
 Actor property TargetRef auto hidden
 Actor[] property TargetRefs auto hidden
 
-int nthHook
+int HookCount
+bool HooksInit
 sslThreadHook[] ThreadHooks
 
 ; ------------------------------------------------------- ;
@@ -1035,28 +1036,56 @@ function Reload()
 
 	; Load json animation profile
 	ImportProfile(PapyrusUtil.ClampInt(AnimProfile, 1, 5))
+
+	; Init Thread Hooks
+	if !HooksInit
+		InitThreadHooks()
+	endIf
+endFunction
+
+function InitThreadHooks()
+	HookCount = 0
+	ThreadHooks = new sslThreadHook[64]
+	HooksInit = true
 endFunction
 
 int function RegisterThreadHook(sslThreadHook Hook)
 	if !Hook
 		Log("RegisterThreadHook("+Hook+") - INVALID HOOK")
 		return -1
-	elseIf !ThreadHooks
-		ThreadHooks = new sslThreadHook[64]
-	elseIf ThreadHooks.Find(Hook) != -1
-		Log("RegisterThreadHook("+Hook+") - ALREADY INSTALLED ["+ThreadHooks.Find(Hook)+"]")
-		return ThreadHooks.Find(Hook)
+	elseIf !HooksInit
+		InitThreadHooks()
+	elseIf HookCount >= 64
+		Log("RegisterThreadHook("+Hook+") - FAILED TO REGISTER, AT CAPACITY")
+		return -1
 	endIf
 
-	;TODO: proper indexing
-	;/ int i = nthHook
-	nthHook += 1 /;
-	ThreadHooks[ThreadHooks.Find(none)] = Hook
+	; Find current index
+	int idx = ThreadHooks.Find(Hook)
+
+	; Add new hook
+	if idx == -1
+		idx = ThreadHooks.Find(none)
+		ThreadHooks[idx] = Hook
+	endIf
+
+	; Update counter if higher than current saved count
+	if (idx + 1) > HookCount
+		HookCount = (idx + 1)
+	endIf 
+
+	Log("RegisterThreadHook("+Hook+") - Registered hook at ["+idx+"/"+HookCount+"]")
+
+	; TODO: Should probably add better error handling incase count ever exceeds 64, but very unlikely.
+
 	return ThreadHooks.Find(Hook)
 endFunction
 
 sslThreadHook[] function GetThreadHooks()
 	return ThreadHooks
+endFunction
+int function GetThreadHookCount()
+	return HookCount
 endFunction
 
 function Setup()

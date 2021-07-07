@@ -33,7 +33,7 @@ state Prepare
 	function FireAction()
 		Prepared = false
 
-		; HookAnimationPrepare()
+		HookAnimationPrepare()
 
 		; Ensure center is set
 		if !CenterRef
@@ -143,7 +143,7 @@ state Advancing
 		RegisterForSingleUpdate(0.1)
 	endFunction
 	event OnUpdate()
-		; HookStageStart()
+		HookStageStart()
 		Action("Animating")
 		SendThreadEvent("StageStart")
 	endEvent
@@ -194,7 +194,7 @@ state Animating
 	endEvent
 
 	function EndAction()
-		; HookStageEnd()
+		HookStageEnd()
 		if !LeadIn && Stage >= StageCount && !DisableOrgasms
 			SendThreadEvent("OrgasmEnd")
 		else
@@ -815,7 +815,7 @@ state Ending
 		if UsingBed && CenterRef.IsActivationBlocked()
 			SetFurnitureIgnored(false)
 		endIf
-		; HookAnimationEnding()
+		HookAnimationEnding()
 		SendThreadEvent("AnimationEnding")
 		if IsObjectiveDisplayed(0)
 			SetObjectiveDisplayed(0, False)
@@ -830,7 +830,7 @@ state Ending
 	endEvent
 	function ResetDone()
 		UnregisterforUpdate()
-		; HookAnimationEnd()
+		HookAnimationEnd()
 		SendThreadEvent("AnimationEnd")
 		if Adjusted
 			Log("Auto saving adjustments...")
