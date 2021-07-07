@@ -131,11 +131,17 @@ float[] property Timers hidden
 		return ConfigTimers
 	endFunction
 	function set(float[] value)
-		if UseCustomTimers
-			CustomTimers = value
-		else
-			ConfigTimers = value
-		endIf
+	;	if UseCustomTimers
+	;		CustomTimers = value
+	;	else
+	;		ConfigTimers = value
+	;	endIf
+	if !value || value.Length < 1
+		Log("Set() - Empty timers given for property Timers.", "ERROR")
+	else
+		CustomTimers    = value
+		UseCustomTimers = true
+	endIf
 	endFunction
 endProperty
 
@@ -572,7 +578,8 @@ endState
 ; ------------------------------------------------------- ;
 
 bool function UseLimitedStrip()
-	return LeadIn || (Config.LimitedStrip && AnimSlots.CountTag(Animations, "Kissing,Foreplay,LimitedStrip") == Animations.Length)
+	bool LeadInNoBody = !(Config.StripLeadInMale[2] || Config.StripLeadInFemale[2])
+	return (LeadIn && (!LeadInNoBody || AnimSlots.CountTag(Animations, "LimitedStrip") == Animations.Length)) || (Config.LimitedStrip && ((!LeadInNoBody && AnimSlots.CountTag(Animations, "Kissing,Foreplay,LeadIn,LimitedStrip") == Animations.Length) || (LeadInNoBody && AnimSlots.CountTag(Animations, "LimitedStrip") == Animations.Length)))
 endFunction
 
 ; Actor Overrides
@@ -2039,7 +2046,7 @@ function Initialize()
 	ActorAlias[3].ClearAlias()
 	ActorAlias[4].ClearAlias()
 	if CenterAlias
-		SetObjectiveDisplayed(0, False)
+	;	SetObjectiveDisplayed(0, False)
 		CenterAlias.Clear()
 	endIf
 	; Forms

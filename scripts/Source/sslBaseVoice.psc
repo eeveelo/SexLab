@@ -51,8 +51,8 @@ function MoveLips(Actor ActorRef, Sound SoundRef = none, float Strength = 1.0) g
 	if ReferenceP > (1.0 - (0.2 * Strength))
 		ReferenceP = (1.0 - (0.2 * Strength))
 	endIf
-	int MinP = ((ReferenceP - (0.04 * Strength))*100) as int
-	int MaxP = ((ReferenceP + (0.16 * Strength))*100) as int
+	int MinP = ((ReferenceP - (0.1 * Strength))*100) as int
+	int MaxP = ((ReferenceP + (0.3 * Strength))*100) as int
 	if MinP < 0
 		MinP = 0
 	elseIf MinP > 98
@@ -69,9 +69,10 @@ function MoveLips(Actor ActorRef, Sound SoundRef = none, float Strength = 1.0) g
 	else
 		ActorRef.SetExpressionPhoneme(p, (MinP as float)*0.01)
 	endIf
-	Utility.Wait(0.4)
+	Utility.Wait(0.1)
+	int Instance = -1
 	if SoundRef != none
-		SoundRef.Play(ActorRef)
+		Instance = SoundRef.Play(ActorRef)
 	endIf
 ;	TransitUp(ActorRef, MinP, MaxP)
 	if HasMFG
@@ -79,7 +80,7 @@ function MoveLips(Actor ActorRef, Sound SoundRef = none, float Strength = 1.0) g
 	else
 		ActorRef.SetExpressionPhoneme(p, (MaxP as float)*0.01)
 	endIf
-	Utility.Wait(1.2)
+	Utility.Wait(1.8)
 ;	if (MaxP - (SavedP * 100)) > 2
 ;		TransitDown(ActorRef, MaxP, (SavedP * 100) as int)
 ;	endIf
@@ -89,6 +90,9 @@ function MoveLips(Actor ActorRef, Sound SoundRef = none, float Strength = 1.0) g
 	else
 		ActorRef.SetExpressionPhoneme(p, SavedP as float)
 	endIf
+;	if Instance != -1
+;		Sound.StopInstance(Instance)
+;	endIf
 	Utility.Wait(0.2)
 	;Debug.Trace("SEXLAB - MoveLips("+ActorRef+", "+SoundRef+", "+Strength+") -- SavedP:"+SavedP+", MinP:"+MinP+", MaxP:"+MaxP)
 endFunction

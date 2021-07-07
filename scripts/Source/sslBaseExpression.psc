@@ -130,6 +130,7 @@ function OpenMouth(Actor ActorRef) global
 	int OpenMouthSize = SexLabUtil.GetConfig().OpenMouthSize
 	float[] Phonemes = SexLabUtil.GetConfig().GetOpenMouthPhonemes(isRealFemale)											 
 	Int i = 0
+	Int s = 0
 	bool HasMFG = SexLabUtil.GetConfig().HasMFGFix
 	while i < Phonemes.length
 		if (GetPhoneme(ActorRef, i) != Phonemes[i])
@@ -139,8 +140,16 @@ function OpenMouth(Actor ActorRef) global
 				ActorRef.SetExpressionPhoneme(i, PapyrusUtil.ClampInt((OpenMouthSize * Phonemes[i]) as int, 0, 100) as float / 100.0)
 			endIf
 		endIf
+		if Phonemes[i] >= Phonemes[s] ; seems to be required to prevet issues
+			s = i
+		endIf
 		i += 1
 	endWhile
+	if HasMFG
+		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, s, (Phonemes[s] * 100.0) as int) ; Oldrim
+	else
+		ActorRef.SetExpressionPhoneme(s, Phonemes[s]) ; is supouse to be / 100.0 already thanks SetIndex function
+	endIf
 	if (GetExpression(ActorRef, true) as int == OpenMouthExpression || GetExpression(ActorRef, false) != OpenMouthSize as float / 100.0)
 		ActorRef.SetExpressionOverride(OpenMouthExpression, OpenMouthSize)
 	endIf
