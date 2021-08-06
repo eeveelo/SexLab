@@ -369,6 +369,13 @@ event OnConfigOpen()
 		Modifiers[13] = "13: SquintR"
 	endIf
 
+	if SoundTreatment.Length != 3 || SoundTreatment.Find("") != -1
+		SoundTreatment = new string[3]
+		SoundTreatment[0] = "$SSL_WaitToEnd"
+		SoundTreatment[1] = "$SSL_KeepPlaying"
+		SoundTreatment[2] = "$SSL_CutOnTime"
+	endIf
+
 	; Timers & Stripping
 	if TSModes.Length != 3 || TSModes.Find("") != -1
 		TSModes = new string[3]
@@ -568,6 +575,24 @@ event OnHighlightST()
 	elseIf Options[0] == "OpenMouthExpression"
 		SetInfoText("$SSL_InfoOpenMouthExpression")
 
+	elseIf Options[0] == "LipsPhoneme"
+		SetInfoText("$SSL_InfoLipsPhoneme")
+
+	elseIf Options[0] == "LipsFixedValue"
+		SetInfoText("$SSL_InfoLipsFixedValue")
+
+	elseIf Options[0] == "LipsMinValue"
+		SetInfoText("$SSL_InfoLipsMinValue")
+
+	elseIf Options[0] == "LipsMaxValue"
+		SetInfoText("$SSL_InfoLipsMaxValue")
+
+	elseIf Options[0] == "LipsMoveTime"
+		SetInfoText("$SSL_InfoLipsMoveTime")
+
+	elseIf Options[0] == "LipsSoundTime"
+		SetInfoText("$SSL_InfoLipsSoundTime")
+
 	; Clean CACHE
 	elseIf Options[0] == "CleanCACHE"
 		SetInfoText("$SSL_InfoCleanCACHE")
@@ -626,6 +651,24 @@ event OnSliderOpenST()
 		else
 			SetSliderDialogDefaultValue(0)
 		endIf
+
+	elseIf Options[0] == "LipsMinValue"
+		SetSliderDialogStartValue(Config.LipsMinValue)
+		SetSliderDialogRange(0, 90)
+		SetSliderDialogInterval(5)
+		SetSliderDialogDefaultValue(20)
+
+	elseIf Options[0] == "LipsMaxValue"
+		SetSliderDialogStartValue(Config.LipsMaxValue)
+		SetSliderDialogRange(10, 100)
+		SetSliderDialogInterval(5)
+		SetSliderDialogDefaultValue(50)
+
+	elseIf Options[0] == "LipsMoveTime"
+		SetSliderDialogStartValue(Config.LipsMoveTime)
+		SetSliderDialogRange(0.2, 3.8)
+		SetSliderDialogInterval(0.4)
+		SetSliderDialogDefaultValue(0.2)
 
 	; Expression Editor
 	elseIf Options[0] == "Expression"
@@ -703,6 +746,18 @@ event OnSliderAcceptST(float value)
 		Config.SetOpenMouthPhoneme(Options[1] == "1", Options[2] as int, value / 100.0)
 		SetSliderOptionValueST(value as int)
 
+	elseIf Options[0] == "LipsMinValue"
+		Config.LipsMinValue = value as int
+		SetSliderOptionValueST(Config.LipsMinValue, "{0}")
+
+	elseIf Options[0] == "LipsMaxValue"
+		Config.LipsMaxValue = value as int
+		SetSliderOptionValueST(Config.LipsMaxValue, "{0}")
+
+	elseIf Options[0] == "LipsMoveTime"
+		Config.LipsMoveTime = value
+		SetSliderOptionValueST(Config.LipsMoveTime, "$SSL_Seconds")
+
 	; Expression Editor
 	elseIf Options[0] == "Expression"
 		; Gender, Type, ID
@@ -741,6 +796,32 @@ event OnSliderAcceptST(float value)
 
 endEvent
 
+event OnMenuOpenST()
+	string[] Options = MapOptions()
+
+	; Expression OpenMouth & LipSync Editor
+	if Options[0] == "LipsPhoneme"
+		string[] LipsPhonemes = new String[1]
+		LipsPhonemes[0] = "$SSL_Automatic"
+		LipsPhonemes = MergeStringArray(LipsPhonemes, Phonemes)
+		SetMenuDialogStartIndex(Config.LipsPhoneme + 1)
+		SetMenuDialogDefaultIndex(2) ; BigAah
+		SetMenuDialogOptions(LipsPhonemes)
+	endIf
+endEvent
+
+event OnMenuAcceptST(int i)
+	string[] Options = MapOptions()
+
+	; Expression OpenMouth & LipSync Editor
+	if Options[0] == "LipsPhoneme"
+		if i >= 0
+			Config.LipsPhoneme = i - 1
+			SetMenuOptionValueST(SexLabUtil.StringIfElse(Config.LipsPhoneme >= 0, Phonemes[ClampInt(Config.LipsPhoneme, 0, 15)], "$SSL_Automatic"))
+		endIf
+	endIf
+endEvent
+
 event OnSelectST()
 	string[] Options = MapOptions()
 
@@ -766,6 +847,11 @@ event OnSelectST()
 	elseIf Options[0] == "FixVictimPos"
 		Config.FixVictimPos = !Config.FixVictimPos
 		SetToggleOptionValueST(Config.FixVictimPos)
+		
+	; Expression OpenMouth & LipSync Editor
+	elseIf Options[0] == "LipsFixedValue"
+		Config.LipsFixedValue = !Config.LipsFixedValue
+		SetToggleOptionValueST(Config.LipsFixedValue)
 		
 	; Strip Editor
 	elseIf Options[0] == "StripEditor"
@@ -882,6 +968,10 @@ event OnSelectST()
 		endIf
 		SetToggleOptionValueST(Config.GetOpenMouthExpression(Options[1] == "1") == 15)
 
+	elseIf Options[0] == "LipsSoundTime"
+		Config.LipsSoundTime = sslUtility.IndexTravel(Config.LipsSoundTime + 1, 3) - 1
+		SetTextOptionValueST(SoundTreatment[Config.LipsSoundTime + 1])
+
 	; Toggle Strapons
 	elseIf Options[0] == "Strapon"
 		int i = Options[1] as int
@@ -936,6 +1026,15 @@ event OnDefaultST()
 	elseIf Options[0] == "FixVictimPos"
 		Config.FixVictimPos = True
 		SetTextOptionValueST(Config.FixVictimPos)
+	
+	; Expression OpenMouth & LipSync Editor
+	elseIf Options[0] == "LipsPhoneme"
+		Config.LipsPhoneme = 1
+		SetMenuOptionValueST(SexLabUtil.StringIfElse(Config.LipsPhoneme >= 0, Phonemes[ClampInt(Config.LipsPhoneme, 0, 15)], "$SSL_Automatic"))
+	
+	elseIf Options[0] == "LipsFixedValue"
+		Config.LipsFixedValue = true
+		SetToggleOptionValueST(Config.LipsFixedValue)
 	
 	endIf
 endEvent
@@ -2355,6 +2454,7 @@ string[] Phases
 string[] Moods
 string[] Phonemes
 string[] Modifiers
+string[] SoundTreatment
 
 function ExpressionEditor()
 	SetCursorFillMode(LEFT_TO_RIGHT)
@@ -2391,7 +2491,10 @@ function ExpressionEditor()
 
 	; 0
 	if EditOpenMouth
-		SetTitleText("$SSL_OpenMouthConfig")
+		SetTitleText("$SSL_OpenMouthSyncLipsConfig")
+
+		AddHeaderOption("$SSL_OpenMouthConfig")
+		AddHeaderOption("")
 
 		AddSliderOptionST("OpenMouthSize","$SSL_OpenMouthSize", Config.OpenMouthSize, "{0}%")
 
@@ -2413,6 +2516,19 @@ function ExpressionEditor()
 			AddSliderOptionST("OpenMouth_0_"+i, Phonemes[i], Config.OpenMouthMale[i] * 100, "{0}")
 			i += 1
 		endWhile
+
+		AddHeaderOption("$SSL_SyncLipsConfig")
+		AddHeaderOption("")
+
+
+		AddMenuOptionST("LipsPhoneme", "$SSL_LipsPhoneme", SexLabUtil.StringIfElse(Config.LipsPhoneme >= 0, Phonemes[ClampInt(Config.LipsPhoneme, 0, 15)], "$SSL_Automatic"))
+		AddToggleOptionST("LipsFixedValue", "$SSL_LipsFixedValue", Config.LipsFixedValue)
+
+		AddSliderOptionST("LipsMinValue", "$SSL_LipsMinValue", Config.LipsMinValue, "{0}")
+		AddSliderOptionST("LipsMaxValue", "$SSL_LipsMaxValue", Config.LipsMaxValue, "{0}")
+
+		AddTextOptionST("LipsSoundTime", "$SSL_LipsSoundTime", SoundTreatment[ClampInt(Config.LipsSoundTime + 1, 0, 2)])
+		AddSliderOptionST("LipsMoveTime", "$SSL_LipsMoveTime", Config.LipsMoveTime, "$SSL_Seconds")
 
 		return ; to hide the rest of the options
 

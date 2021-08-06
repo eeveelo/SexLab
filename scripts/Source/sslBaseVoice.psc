@@ -34,32 +34,43 @@ function MoveLips(Actor ActorRef, Sound SoundRef = none, float Strength = 1.0) g
 		return
 	endIf
 	
-	bool HasMFG = SexLabUtil.GetConfig().HasMFGFix
-	int p
-	float[] Phoneme = new float[32]
-	int i
-	; Get Phoneme
-	while i <= 15
-		Phoneme[i] = sslBaseExpression.GetPhoneme(ActorRef, i) ; 0.0 - 1.0
-		if Phoneme[i] >= Phoneme[p] ; seems to be required to prevet issues
-			p = i
-		endIf
-		i += 1
-	endWhile
-	float SavedP = Phoneme[p] ;sslBaseExpression.GetPhoneme(ActorRef, p)
-	float ReferenceP = SavedP
-	if ReferenceP > (1.0 - (0.2 * Strength))
-		ReferenceP = (1.0 - (0.2 * Strength))
+	sslSystemConfig Conf = SexLabUtil.GetConfig()
+	bool HasMFG = Conf.HasMFGFix
+	float SavedP
+	int p = Conf.LipsPhoneme
+	if p < 0 || p > 15
+		p = 0
+		float[] Phoneme = new float[32]
+		int i
+		; Get Phoneme
+		while i <= 15
+			Phoneme[i] = sslBaseExpression.GetPhoneme(ActorRef, i) ; 0.0 - 1.0
+			if Phoneme[i] >= Phoneme[p] ; seems to be required to prevet issues
+				p = i
+			endIf
+			i += 1
+		endWhile
+		SavedP = Phoneme[p]
+	else
+		SavedP = sslBaseExpression.GetPhoneme(ActorRef, p)
 	endIf
-	int MinP = ((ReferenceP - (0.1 * Strength))*100) as int
-	int MaxP = ((ReferenceP + (0.3 * Strength))*100) as int
+	int MinP = Conf.LipsMinValue
+	int MaxP = Conf.LipsMaxValue
+	if !Conf.LipsFixedValue
+		float ReferenceP = SavedP
+		if ReferenceP > (1.0 - (0.2 * Strength))
+			ReferenceP = (1.0 - (0.2 * Strength))
+		endIf
+		MinP = ((ReferenceP * 100) - (MinP * Strength)) as int
+		MaxP = ((ReferenceP * 100) + (MaxP * Strength)) as int
+	endIf
 	if MinP < 0
 		MinP = 0
-	elseIf MinP > 98
-		MinP = 98
+	elseIf MinP > 90
+		MinP = 90
 	endIf
-	if (MaxP - MinP) < 2
-		MaxP = MinP + 2
+	if (MaxP - MinP) < 10
+		MaxP = MinP + 10
 	endIf
 ;	if ((SavedP * 100) - MinP) > 2
 ;		TransitDown(ActorRef, (SavedP * 100) as int, MinP)
@@ -71,7 +82,7 @@ function MoveLips(Actor ActorRef, Sound SoundRef = none, float Strength = 1.0) g
 	endIf
 	Utility.Wait(0.1)
 	int Instance = -1
-	if SoundRef != none
+	if Conf.LipsSoundTime != -1 && SoundRef != none
 		Instance = SoundRef.Play(ActorRef)
 	endIf
 ;	TransitUp(ActorRef, MinP, MaxP)
@@ -80,7 +91,11 @@ function MoveLips(Actor ActorRef, Sound SoundRef = none, float Strength = 1.0) g
 	else
 		ActorRef.SetExpressionPhoneme(p, (MaxP as float)*0.01)
 	endIf
-	Utility.Wait(1.8)
+	if Conf.LipsSoundTime == -1 && SoundRef != none
+		SoundRef.PlayAndWait(ActorRef)
+	else
+		Utility.Wait(Conf.LipsMoveTime)
+	endIf
 ;	if (MaxP - (SavedP * 100)) > 2
 ;		TransitDown(ActorRef, MaxP, (SavedP * 100) as int)
 ;	endIf
@@ -90,9 +105,9 @@ function MoveLips(Actor ActorRef, Sound SoundRef = none, float Strength = 1.0) g
 	else
 		ActorRef.SetExpressionPhoneme(p, SavedP as float)
 	endIf
-;	if Instance != -1
-;		Sound.StopInstance(Instance)
-;	endIf
+	if Conf.LipsSoundTime == 1 && Instance != -1
+		Sound.StopInstance(Instance)
+	endIf
 	Utility.Wait(0.2)
 	;Debug.Trace("SEXLAB - MoveLips("+ActorRef+", "+SoundRef+", "+Strength+") -- SavedP:"+SavedP+", MinP:"+MinP+", MaxP:"+MaxP)
 endFunction
