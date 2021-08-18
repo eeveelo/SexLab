@@ -2031,7 +2031,7 @@ state AnimationTest
 						FindGender = -1
 					endIf
 
-					bool ValidPlayer = ThreadLib.CheckActor(TargetRef, FindGender) && (RaceKey == "" || sslCreatureAnimationSlots.GetAllRaceKeys(TargetRef.GetLeveledActorBase().GetRace()).Find(RaceKey) != -1)
+					bool ValidPlayer = ThreadLib.CheckActor(PlayerRef, FindGender) && (RaceKey == "" || sslCreatureAnimationSlots.GetAllRaceKeys(PlayerRef.GetLeveledActorBase().GetRace()).Find(RaceKey) != -1)
 					bool ValidTarget = ThreadLib.CheckActor(TargetRef, FindGender) && (RaceKey == "" || sslCreatureAnimationSlots.GetAllRaceKeys(TargetRef.GetLeveledActorBase().GetRace()).Find(RaceKey) != -1)
 					if ValidPlayer && ValidTarget
 						if ShowMessage("Which actor would you like to play the solo animation "+Animation.Name+" with?", true, TargetName, PlayerName)
