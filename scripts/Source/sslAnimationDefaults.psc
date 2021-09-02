@@ -11,6 +11,13 @@ function LoadAnimations()
 	; Prepare factory resources (as non creature)
 	PrepareFactory()
 
+	if Game.GetCameraState() == 0
+		if Utility.IsInMenuMode()
+			MiscUtil.PrintConsole("WARNING! To continue with the SexLab animations setup close the console and all the menu")
+		endIf
+		Utility.Wait(0.1)
+		Game.ForceThirdPerson()
+	endIf
 	bool SexLabDefault = Game.GetPlayer().GetAnimationVariableInt("SexLabDefault") >= 16300
 	bool APPack = Game.GetPlayer().GetAnimationVariableInt("SexLabAPAnimations") >= 16300
 
