@@ -4,6 +4,13 @@ function LoadCreatureAnimations()
 	; Prepare factory resources (as creature)
 	PrepareFactoryCreatures()
 	
+	if Game.GetCameraState() == 0
+		if Utility.IsInMenuMode()
+			MiscUtil.PrintConsole("WARNING! To continue with the SexLab animations setup close the console and all the menu")
+		endIf
+		Utility.Wait(0.1)
+		Game.ForceThirdPerson()
+	endIf
 	bool SexLabCreature = Game.GetPlayer().GetAnimationVariableInt("SexLabCreature") >= 16300
 
 	; Bear

@@ -268,6 +268,13 @@ int HookCount
 bool HooksInit
 sslThreadHook[] ThreadHooks
 
+int property LipsPhoneme auto hidden
+bool property LipsFixedValue auto hidden
+int property LipsMinValue auto hidden
+int property LipsMaxValue auto hidden
+int property LipsSoundTime auto hidden
+float property LipsMoveTime auto hidden
+
 ; ------------------------------------------------------- ;
 ; --- Config Accessors                                --- ;
 ; ------------------------------------------------------- ;
@@ -335,6 +342,12 @@ bool function SetOpenMouthPhonemes(bool isFemale, float[] Phonemes)
 	if Phonemes.Length < 16
 		return false
 	endIf
+	if OpenMouthFemale.Length < 16
+		OpenMouthFemale = new float[17]
+	endIf
+	if OpenMouthMale.Length < 16
+		OpenMouthMale = new float[17]
+	endIf
 	int i = 16
 	while i > 0
 		i -= 1
@@ -352,8 +365,14 @@ bool function SetOpenMouthPhoneme(bool isFemale, int id, float value)
 		return false
 	endIf
 	if isFemale
+		if OpenMouthFemale.Length < 16
+			OpenMouthFemale = new float[17]
+		endIf
 		OpenMouthFemale[id] = PapyrusUtil.ClampFloat(value, 0.0, 1.0)
 	else
+		if OpenMouthMale.Length < 16
+			OpenMouthMale = new float[17]
+		endIf
 		OpenMouthMale[id] = PapyrusUtil.ClampFloat(value, 0.0, 1.0)
 	endIf
 	return true
@@ -374,15 +393,17 @@ endFunction
 
 bool function SetOpenMouthExpression(bool isFemale, int value)
 	if isFemale
-		if OpenMouthFemale.Length >= 17
-			OpenMouthFemale[16] = PapyrusUtil.ClampInt(value, 0, 16) as Float
-			return true
+		if OpenMouthFemale.Length < 17
+			OpenMouthFemale = new float[17]
 		endIf
+		OpenMouthFemale[16] = PapyrusUtil.ClampInt(value, 0, 16) as Float
+		return true
 	else
-		if OpenMouthMale.Length >= 17
-			OpenMouthMale[16] = PapyrusUtil.ClampInt(value, 0, 16) as Float
-			return true
+		if OpenMouthMale.Length < 17
+			OpenMouthMale = new float[17]
 		endIf
+		OpenMouthMale[16] = PapyrusUtil.ClampInt(value, 0, 16) as Float
+		return true
 	endIf
 	return false
 endFunction
@@ -1132,6 +1153,7 @@ function SetDefaults()
 	SeedNPCStats       = true
 	DisableScale       = true ; TMP: enabled by default for testing
 	FixVictimPos       = false
+	LipsFixedValue     = true
 
 	; Integers
 	AnimProfile        = 1
@@ -1157,6 +1179,11 @@ function SetDefaults()
 	EndAnimation       = 207; End
 	TargetActor        = 49 ; N
 	AdjustSchlong      = 46 ; C
+	LipsSoundTime      = 0  ; Don't Cut
+	LipsPhoneme        = 1  ; BigAah
+	LipsMinValue       = 20
+	LipsMaxValue       = 50
+
 
 	; Floats
 	CumTimer           = 120.0
@@ -1169,6 +1196,7 @@ function SetDefaults()
 	SFXDelay           = 3.0
 	SFXVolume          = 1.0
 	LeadInCoolDown     = 0.0
+	LipsMoveTime       = 0.2
 
 	; Boolean strip arrays
 	StripMale = new bool[33]
@@ -1365,6 +1393,7 @@ function ExportSettings()
 	ExportBool("SeedNPCStats", SeedNPCStats)
 	ExportBool("DisableScale", DisableScale)
 	ExportBool("FixVictimPos", FixVictimPos)
+	ExportBool("LipsFixedValue", LipsFixedValue)
 
 	; Integers
 	ExportInt("AnimProfile", AnimProfile)
@@ -1390,6 +1419,10 @@ function ExportSettings()
 	ExportInt("ToggleFreeCamera", ToggleFreeCamera)
 	ExportInt("TargetActor", TargetActor)
 	ExportInt("AdjustSchlong", AdjustSchlong)
+	ExportInt("LipsSoundTime", LipsSoundTime)
+	ExportInt("LipsPhoneme", LipsPhoneme)
+	ExportInt("LipsMinValue", LipsMinValue)
+	ExportInt("LipsMaxValue", LipsMaxValue)
 
 	; Floats
 	ExportFloat("CumTimer", CumTimer)
@@ -1402,6 +1435,7 @@ function ExportSettings()
 	ExportFloat("SFXDelay", SFXDelay)
 	ExportFloat("SFXVolume", SFXVolume)
 	ExportFloat("LeadInCoolDown", LeadInCoolDown)
+	ExportFloat("LipsMoveTime", LipsMoveTime)
 
 	; Boolean Arrays
 	ExportBoolList("StripMale", StripMale, 33)
@@ -1501,6 +1535,7 @@ function ImportSettings()
 	SeedNPCStats       = ImportBool("SeedNPCStats", SeedNPCStats)
 	DisableScale       = ImportBool("DisableScale", DisableScale)
 	FixVictimPos       = ImportBool("FixVictimPos", FixVictimPos)
+	LipsFixedValue     = ImportBool("LipsFixedValue", LipsFixedValue)
 
 	; Integers
 	AnimProfile        = ImportInt("AnimProfile", AnimProfile)
@@ -1526,6 +1561,10 @@ function ImportSettings()
 	ToggleFreeCamera   = ImportInt("ToggleFreeCamera", ToggleFreeCamera)
 	TargetActor        = ImportInt("TargetActor", TargetActor)
 	AdjustSchlong      = ImportInt("AdjustSchlong", AdjustSchlong)
+	LipsSoundTime      = ImportInt("LipsSoundTime", LipsSoundTime)
+	LipsPhoneme        = ImportInt("LipsPhoneme", LipsPhoneme)
+	LipsMinValue       = ImportInt("LipsMinValue", LipsMinValue)
+	LipsMaxValue       = ImportInt("LipsMaxValue", LipsMaxValue)
 
 	; Floats
 	CumTimer           = ImportFloat("CumTimer", CumTimer)
@@ -1538,6 +1577,7 @@ function ImportSettings()
 	SFXDelay           = ImportFloat("SFXDelay", SFXDelay)
 	SFXVolume          = ImportFloat("SFXVolume", SFXVolume)
 	LeadInCoolDown     = ImportFloat("LeadInCoolDown", LeadInCoolDown)
+	LipsMoveTime       = ImportFloat("LipsMoveTime", LipsMoveTime)
 
 	; Boolean Arrays
 	StripMale          = ImportBoolList("StripMale", StripMale, 33)

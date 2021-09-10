@@ -441,8 +441,14 @@ endState
 ; Check if we should force install system, because user hasn't done it manually yet for some reason. Or it failed somehow.
 event OnUpdate()
 	if !IsInstalled && !ForcedOnce && GetState() == ""
-		ForcedOnce = true
-		LogAll("Automatically Installing SexLab v"+SexLabUtil.GetStringVer())
-		InstallSystem()
+		Quest UnboundQ = Quest.GetQuest("MQ101")
+		if UnboundQ && UnboundQ.GetStageDone(250)
+			; Wait until the end of the opening quest(cart scene) to prevent issues related with the First Person Camera
+			RegisterForSingleUpdate(120.0)
+		else
+			ForcedOnce = true
+			LogAll("Automatically Installing SexLab v"+SexLabUtil.GetStringVer())
+			InstallSystem()
+		endIf
 	endIf
 endEvent

@@ -868,6 +868,7 @@ function Save(int id = -1)
 		endWhile
 	endIf
 	; Import Offsets
+	ImportOffsetsDefault("BedOffset")
 	ImportOffsets("BedOffset")
 	; Reset saved keys if they no longer match
 	if LastKeyReg != Registry
@@ -1274,6 +1275,30 @@ function ImportOffsets(string Type = "BedOffset")
 		return
 	endIf
 	string File = "../SexLab/SexlabOffsets.json"
+	int len = 4
+	if JsonUtil.FloatListCount(File, Registry+"."+Type) == len
+		if Values.Length != len
+			Values = Utility.CreateFloatArray(len)
+		endIf
+		int i
+		while i < len
+			Values[i] = JsonUtil.FloatListGet(File, Registry+"."+Type, i)
+			i += 1
+		endWhile
+		if Type == "BedOffset"
+			BedOffset = Values
+		endIf
+	endIf
+endFunction
+
+function ImportOffsetsDefault(string Type = "BedOffset")
+	float[] Values
+	if Type == "BedOffset"
+		Values = GetBedOffsets()
+	else
+		return
+	endIf
+	string File = "../SexLab/SexLabOffsetsDefault.json"
 	int len = 4
 	if JsonUtil.FloatListCount(File, Registry+"."+Type) == len
 		if Values.Length != len

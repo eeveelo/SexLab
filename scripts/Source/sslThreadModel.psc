@@ -464,41 +464,45 @@ state Making
 				Log("WARNING: LeadIn detected on Forced Animations. Disabling LeadIn")
 				LeadIn = false
 			endIf
+		elseIf LeadIn
+			; leadin animations
+			i = LeadAnimations.Length
+			if i
+				bool[] Valid = Utility.CreateBoolArray(i)
+				while i
+					i -= 1
+					Valid[i] = LeadAnimations[i] && LeadAnimations[i].PositionCount == ActorCount && (!HasCreature || (LeadAnimations[i].HasRace(CreatureRef) && LeadAnimations[i].Creatures == Creatures))
+				endWhile
+				; Check results
+				if Valid.Find(true) == -1
+					Log("Invalid lead in animation list")
+					LeadAnimations = sslUtility.AnimationArray(0) ; No valid animations
+					LeadIn = false
+				elseIf Valid.Find(false) >= 0
+					; Filter output
+					i = LeadAnimations.Length
+					int n = PapyrusUtil.CountBool(Valid, true)
+					sslBaseAnimation[] Output = sslUtility.AnimationArray(n)
+					while i && n
+						i -= 1
+						if Valid[i]
+							n -= 1
+							Output[n] = LeadAnimations[i]
+						else
+							Log("Invalid lead in animation added - "+LeadAnimations[i])
+						endIf
+					endWhile
+					LeadAnimations = Output
+				endIf
+			endIf
 		elseIf LeadInCoolDown < Config.LeadInCoolDown
 			Log("LeadIn CoolDown "+LeadInCoolDown+"::"+Config.LeadInCoolDown)
 			DisableLeadIn(True)
+		elseIf Config.LeadInCoolDown > 0 && PrimaryAnimations && PrimaryAnimations.Length && AnimSlots.CountTag(PrimaryAnimations, "Anal,Vaginal") < 1
+			Log("None of the PrimaryAnimations have 'Anal' or 'Vaginal' tags. Disabling LeadIn")
+			DisableLeadIn(True)
 		endIf
 		
-		; leadin animations
-		i = LeadAnimations.Length
-		if i && LeadIn
-			bool[] Valid = Utility.CreateBoolArray(i)
-			while i
-				i -= 1
-				Valid[i] = LeadAnimations[i] && LeadAnimations[i].PositionCount == ActorCount && (!HasCreature || (LeadAnimations[i].HasRace(CreatureRef) && LeadAnimations[i].Creatures == Creatures))
-			endWhile
-			; Check results
-			if Valid.Find(true) == -1
-				Log("Invalid lead in animation list")
-				LeadAnimations = sslUtility.AnimationArray(0) ; No valid animations
-				LeadIn = false
-			elseIf Valid.Find(false) >= 0
-				; Filter output
-				i = LeadAnimations.Length
-				int n = PapyrusUtil.CountBool(Valid, true)
-				sslBaseAnimation[] Output = sslUtility.AnimationArray(n)
-				while i && n
-					i -= 1
-					if Valid[i]
-						n -= 1
-						Output[n] = LeadAnimations[i]
-					else
-						Log("Invalid lead in animation added - "+LeadAnimations[i])
-					endIf
-				endWhile
-				LeadAnimations = Output
-			endIf
-		endIf
 		
 		; ------------------------- ;
 		; --    Locate Center    -- ;
@@ -1476,6 +1480,7 @@ bool function CenterOnBed(bool AskPlayer = true, float Radius = 750.0)
 	if BedStatus[0] == -1 || (InStart && (!HasPlayer && Config.NPCBed == 0) || (HasPlayer && AskBed == 0))
 		return false ; Beds forbidden by flag or starting bed check/prompt disabled
 	endIf
+	bool BedScene = BedStatus[0] == 1
  	ObjectReference FoundBed
 	int i = ActorCount
 	while i > 0
@@ -1490,10 +1495,26 @@ bool function CenterOnBed(bool AskPlayer = true, float Radius = 750.0)
 		endIf
 	endWhile
 	if HasPlayer && (!InStart || AskBed == 1 || (AskBed == 2 && (!IsVictim(PlayerRef) || UseNPCBed)))
-		FoundBed  = ThreadLib.FindBed(PlayerRef, Radius) ; Check within radius of player
+		if BedScene
+			FoundBed  = ThreadLib.FindBed(PlayerRef, Radius * 2) ; Check within radius of player
+		else
+			FoundBed  = ThreadLib.FindBed(PlayerRef, Radius) ; Check within radius of player
+			; Same Floor only
+		;	if ThreadLib.SameFloor(FoundBed, PlayerRef.GetPositionZ(), 200)
+		;		FoundBed = none
+		;	endIf
+		endIf
 		AskPlayer = AskPlayer && (!InStart || !(AskBed == 2 && IsVictim(PlayerRef))) ; Disable prompt if bed found but shouldn't ask
 	elseIf !HasPlayer && UseNPCBed
-		FoundBed = ThreadLib.FindBed(Positions[0], Radius) ; Check within radius of first position, if NPC beds are allowed
+		if BedScene
+			FoundBed = ThreadLib.FindBed(Positions[0], Radius * 2) ; Check within radius of first position, if NPC beds are allowed
+		else
+			FoundBed = ThreadLib.FindBed(Positions[0], Radius) ; Check within radius of first position, if NPC beds are allowed
+			; Same Floor only
+		;	if ThreadLib.SameFloor(FoundBed, PlayerRef.GetPositionZ(), 200)
+		;		FoundBed = none
+		;	endIf
+		endIf
 	endIf
 	; Found a bed AND EITHER forced use OR don't care about players choice OR or player approved
 	if FoundBed && (BedStatus[0] == 1 || (!AskPlayer || (AskPlayer && (Config.UseBed.Show() as bool))))
