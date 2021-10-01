@@ -1500,7 +1500,7 @@ bool function CenterOnBed(bool AskPlayer = true, float Radius = 750.0)
 		else
 			FoundBed  = ThreadLib.FindBed(PlayerRef, Radius) ; Check within radius of player
 			; Same Floor only
-		;	if ThreadLib.SameFloor(FoundBed, PlayerRef.GetPositionZ(), 200)
+		;	if !ThreadLib.SameFloor(FoundBed, PlayerRef.GetPositionZ(), 200)
 		;		FoundBed = none
 		;	endIf
 		endIf
@@ -1511,7 +1511,7 @@ bool function CenterOnBed(bool AskPlayer = true, float Radius = 750.0)
 		else
 			FoundBed = ThreadLib.FindBed(Positions[0], Radius) ; Check within radius of first position, if NPC beds are allowed
 			; Same Floor only
-		;	if ThreadLib.SameFloor(FoundBed, PlayerRef.GetPositionZ(), 200)
+		;	if !ThreadLib.SameFloor(FoundBed, PlayerRef.GetPositionZ(), 200)
 		;		FoundBed = none
 		;	endIf
 		endIf
