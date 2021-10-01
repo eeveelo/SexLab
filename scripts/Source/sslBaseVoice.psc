@@ -175,8 +175,8 @@ function TransitUp(Actor ActorRef, int from, int to) global
 	if HasMFG
 		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from) ; OLDRIM
 		Utility.Wait(0.1)
-		while value < (to + 2)
-			value += 2
+		while value < (to + 4)
+			value += 4
 			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from) ; OLDRIM
 			Utility.Wait(0.02)
 		endWhile
@@ -184,8 +184,8 @@ function TransitUp(Actor ActorRef, int from, int to) global
 	else
 		ActorRef.SetExpressionPhoneme(1, (from as float / 100.0))
 		Utility.Wait(0.1)
-		while value < (to + 2)
-			value += 2
+		while value < (to + 4)
+			value += 4
 			ActorRef.SetExpressionPhoneme(1, (value as float / 100.0))
 			Utility.Wait(0.02)
 		endWhile
@@ -203,8 +203,8 @@ function TransitDown(Actor ActorRef, int from, int to) global
 	if HasMFG
 		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, from) ; OLDRIM
 		Utility.Wait(0.1)
-		while value > (to - 2)
-			value -= 2
+		while value > (to - 4)
+			value -= 4
 			MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, 1, value) ; OLDRIM
 			Utility.Wait(0.02)
 		endWhile
@@ -212,8 +212,8 @@ function TransitDown(Actor ActorRef, int from, int to) global
 	else
 		ActorRef.SetExpressionPhoneme(1, (from as float / 100.0)) ; SKYRIM SE
 		Utility.Wait(0.1)
-		while value > (to - 2)
-			value -= 2
+		while value > (to - 4)
+			value -= 4
 			ActorRef.SetExpressionPhoneme(1, (value as float / 100.0)) ; SKYRIM SE
 			Utility.Wait(0.02)
 		endWhile
