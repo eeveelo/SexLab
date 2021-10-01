@@ -6,7 +6,7 @@ scriptname JsonUtil Hidden
 
 	These functions all work in exactly the same way as their StorageUtil.psc equivalents. See them for usage docs.
 
-	The important difference between these functions and the ones on StorageUtil.psc, is that instead of giving "Form obj"
+	The important difference between these functions and the ones on StorageUtil.psc, is that instead of giving "Form ObjKey"
 	argument for the location to save the data, you give it a "string FileName" argument, pointing to an external JSON formatted file.
 
 	These files will be saved/loaded in JSON format, and the starting location for the files to save/load from is as follows:
@@ -34,7 +34,7 @@ bool function Load(string FileName) global native
 bool function Save(string FileName, bool minify = false) global native
 bool function Unload(string FileName, bool saveChanges = true, bool minify = false) global native
 
-; Check if given file has had any changes to it that haven't yet been saved
+; Check if given file has had any changes to it they haven't yet been saved
 bool function IsPendingSave(string FileName) global native
 ; Check if the given file was succesfully loaded and has no json parser errors
 bool function IsGood(string FileName) global native

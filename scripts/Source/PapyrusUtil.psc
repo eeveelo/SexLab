@@ -40,6 +40,35 @@ Alias[] function RemoveAlias(Alias[] ArrayValues, Alias ToRemove) global native
 Actor[] function RemoveActor(Actor[] ArrayValues, Actor ToRemove) global native
 ObjectReference[] function RemoveObjRef(ObjectReference[] ArrayValues, ObjectReference ToRemove) global native
 
+; ## Removes all duplicate elements from the given array and returns the shortened array with only a single instance of all element values.
+float[] function RemoveDupeFloat(float[] ArrayValues) global native
+int[] function RemoveDupeInt(int[] ArrayValues) global native
+string[] function RemoveDupeString(string[] ArrayValues) global native
+Form[] function RemoveDupeForm(Form[] ArrayValues) global native
+Alias[] function RemoveDupeAlias(Alias[] ArrayValues) global native
+Actor[] function RemoveDupeActor(Actor[] ArrayValues) global native
+ObjectReference[] function RemoveDupeObjRef(ObjectReference[] ArrayValues) global native
+
+; ## Get an array of values from ArrayValues1 that ARE NOT among the values of ArrayValues2. Duplicates are removed by default.
+; ## Setting CompareBoth = true will change the behavior to also include the reverse comparison of ArrayValues2 values that are not present in ArrayValues1.
+; ## Setting IncludeDupes = true will allow the resulting array to include duplicate entries of the same value if they were also duplicated in the input arrays.
+float[] function GetDiffFloat(float[] ArrayValues1, float[] ArrayValues2, bool CompareBoth = false, bool IncludeDupes = false) global native
+int[] function GetDiffInt(int[] ArrayValues1, int[] ArrayValues2, bool CompareBoth = false, bool IncludeDupes = false) global native
+string[] function GetDiffString(string[] ArrayValues1, string[] ArrayValues2, bool CompareBoth = false, bool IncludeDupes = false) global native
+Form[] function GetDiffForm(Form[] ArrayValues1, Form[] ArrayValues2, bool CompareBoth = false, bool IncludeDupes = false) global native
+Alias[] function GetDiffAlias(Alias[] ArrayValues1, Alias[] ArrayValues2, bool CompareBoth = false, bool IncludeDupes = false) global native
+Actor[] function GetDiffActor(Actor[] ArrayValues1, Actor[] ArrayValues2, bool CompareBoth = false, bool IncludeDupes = false) global native
+ObjectReference[] function GetDiffObjRef(ObjectReference[] ArrayValues1, ObjectReference[] ArrayValues2, bool CompareBoth = false, bool IncludeDupes = false) global native
+
+; ## Get an array of values that are present in both ArrayValues1 and ArrayValues2.
+float[] function GetMatchingFloat(float[] ArrayValues1, float[] ArrayValues2) global native
+int[] function GetMatchingInt(int[] ArrayValues1, int[] ArrayValues2) global native
+string[] function GetMatchingString(string[] ArrayValues1, string[] ArrayValues2) global native
+Form[] function GetMatchingForm(Form[] ArrayValues1, Form[] ArrayValues2) global native
+Alias[] function GetMatchingAlias(Alias[] ArrayValues1, Alias[] ArrayValues2) global native
+Actor[] function GetMatchingActor(Actor[] ArrayValues1, Actor[] ArrayValues2) global native
+ObjectReference[] function GetMatchingObjRef(ObjectReference[] ArrayValues1, ObjectReference[] ArrayValues2) global native
+
 ; ## Returns the number of instances an array has an element equal to the given value
 int function CountFloat(float[] ArrayValues, float EqualTo) global native
 int function CountInt(int[] ArrayValues, int EqualTo) global native
@@ -72,6 +101,7 @@ Actor[] function SliceActorArray(Actor[] ArrayValues, int StartIndex, int EndInd
 ObjectReference[] function SliceObjRefArray(ObjectReference[] ArrayValues, int StartIndex, int EndIndex = -1) global native
 
 
+; ## Sorts a given array's elements alphanumerically. Sorted in ascending order by default.
 function SortIntArray(int[] ArrayValues, bool descending = false) global native
 function SortFloatArray(float[] ArrayValues, bool descending = false) global native
 function SortStringArray(string[] ArrayValues, bool descending = false) global native
@@ -110,7 +140,7 @@ string function StringJoin(string[] Values, string Delimiter = ",") global nativ
 
 ; ##
 ; ## Shortcuts for some common number actions. Mostly to help cut some basic and overly verbose checks down to a single line.
-; ## Making these native instead of normal globals is probably massive overkill...
+; ## Making these native instead of normal globals is probably massive overkill, but why not...
 ; ##
 
 ; ## Return the total sum of all values stored in the given array

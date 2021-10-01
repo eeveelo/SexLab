@@ -9,7 +9,7 @@ scriptname StorageUtil Hidden
 	other than this plugin.
 
 	Values will stay on forms or globally until they are Unset or Cleared in case of lists. If value
-	is set on a form and the object is deleted then value will be removed when saving game.
+	is set on a form and the object is deleted then THE value will be removed when saving game.
 	If you are done with using a certain variable you should use Unset or Clear function to remove them
 	but it is not required.
 
@@ -19,6 +19,7 @@ scriptname StorageUtil Hidden
 
 	Functions that start with File in the name will save values to a separate file, so that you can
 	access the same values from all savegames. This may be useful for configuration settings.
+   (FILE FUNCTIONS ARE DEPRECATED! USE JSONUTIL.PSC INSTEAD)
 
 	Saved values take very little memory - expect to use less than 500 KB of physical memory even when
 	setting thousands of values.
