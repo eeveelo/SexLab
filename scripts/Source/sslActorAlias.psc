@@ -169,6 +169,7 @@ bool function SetActor(Actor ProspectRef)
 			ActorKey += "M"
 		endIf
 	endIf
+	NioScale = 1.0
 	float TempScale
 	String Node = "NPC"
 	if NetImmerse.HasNode(ActorRef, Node, False)
@@ -186,7 +187,6 @@ bool function SetActor(Actor ProspectRef)
 	endIf
 	
 	if Config.HasNiOverride && !IsCreature
-		NioScale = 1.0
 		string[] MOD_OVERRIDE_KEY = NiOverride.GetNodeTransformKeys(ActorRef, False, isRealFemale, "NPC")
 		int idx = 0
 		While idx < MOD_OVERRIDE_KEY.Length
