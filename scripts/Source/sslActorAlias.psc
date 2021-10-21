@@ -422,6 +422,9 @@ state Ready
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			AttachMarker()
+			if !IsPlayer || Game.GetCameraState() != 10
+				ActorRef.QueueNiNodeUpdate()
+			endIf
 		endIf
 
 		; Player specific actions
@@ -500,6 +503,9 @@ state Ready
 				FirsStageTime = Config.StageTimer[0]
 			endIf
 			BaseEnjoyment -= Math.Abs(CalcEnjoyment(SkillBonus, Skills, LeadIn, IsFemale, FirsStageTime, 1, StageCount)) as int
+			if BaseEnjoyment < -5
+				BaseEnjoyment += 10
+			endIf
 			; Add Bonus Enjoyment
 			if IsVictim
 				BestRelation = Thread.GetLowestPresentRelationshipRank(ActorRef)
@@ -609,6 +615,9 @@ state Prepare
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			AttachMarker()
+			if !IsPlayer || Game.GetCameraState() != 10
+				ActorRef.QueueNiNodeUpdate()
+			endIf
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
 			; Notify thread prep is done
 			if Thread.GetState() == "Prepare"
@@ -778,9 +787,9 @@ state Animating
 			; Lip sync and refresh expression
 			if GetState() == "Animating"
 				int Strength = CalcReaction()
-				if LoopDelay >= VoiceDelay && Strength > 15
+				if LoopDelay >= VoiceDelay && (Config.LipsFixedValue || Strength > 10)
 					LoopDelay = 0.0
-					if OpenMouth && UseLipSync
+					if OpenMouth && UseLipSync && !Config.LipsFixedValue
 						sslBaseVoice.MoveLips(ActorRef, none, 0.3)
 						Log("PlayMoan:False; UseLipSync:"+UseLipSync+"; OpenMouth:"+OpenMouth)
 					elseIf !IsSilent
@@ -1466,12 +1475,13 @@ function SetAdjustKey(string KeyVar)
 endfunction
 
 int function GetEnjoyment()
+;	Log(ActorName +"- RealTime:["+Utility.GetCurrentRealTime()+"], GameTime:["+Utility.GetCurrentGameTime()+"] IsMenuMode:"+Utility.IsInMenuMode(), "GetEnjoyment()")
 	if !ActorRef
 		Log(ActorName +"- WARNING: ActorRef if Missing or Invalid", "GetEnjoyment()")
 		FullEnjoyment = 0
 		return 0
 	elseif !IsSkilled
-			FullEnjoyment = BaseEnjoyment + (PapyrusUtil.ClampFloat(((RealTime[0] - StartedAt) + 1.0) / 5.0, 0.0, 40.0) + ((Stage as float / StageCount as float) * 60.0)) as int
+		FullEnjoyment = BaseEnjoyment + (PapyrusUtil.ClampFloat(((RealTime[0] - StartedAt) + 1.0) / 5.0, 0.0, 40.0) + ((Stage as float / StageCount as float) * 60.0)) as int
 	else
 		if Position == 0
 			Thread.RecordSkills()
