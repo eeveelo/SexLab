@@ -468,7 +468,7 @@ state Animating
 			; Ready
 			hkReady = true
 			i = 10 ; Time to wait
-			while i
+			while i && hkReady
 				i -= 1
 				Utility.Wait(1.0)
 				if !PlayerRef.IsInFaction(Config.AnimatingFaction)
@@ -476,7 +476,7 @@ state Animating
 				endIf
 			endWhile
 		endIf
-		if PlayerRef.GetFactionRank(Config.AnimatingFaction) == 0
+		if GetState() == "Animating" && PlayerRef.GetFactionRank(Config.AnimatingFaction) == 0
 			Debug.Notification("Player movement locked - repositioning scene...")
 			ApplyFade()
 			; Disable Controls
