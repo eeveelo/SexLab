@@ -827,7 +827,7 @@ bool function CheckSystemPart(string CheckSystem)
 		return SexLabUtil.GetPluginVersion() >= 16300
 
 	elseIf CheckSystem == "PapyrusUtil"
-		return PapyrusUtil.GetVersion() >= 38
+		return PapyrusUtil.GetVersion() >= 39
 
 	elseIf CheckSystem == "NiOverride"
 		return SKSE.GetPluginVersion("SKEE64") >= 7 || NiOverride.GetScriptVersion() >= 7 ;SSE
@@ -870,7 +870,7 @@ bool function CheckSystem()
 		return false
 	; Check PapyrusUtil install - depends on passing SKSE check passing
 	elseIf !CheckSystemPart("PapyrusUtil")
-		CheckPapyrusUtil.Show(3.8)
+		CheckPapyrusUtil.Show(3.9)
 		return false
 	; Check FNIS generation - soft fail
 	; elseIf CheckSystemPart("FNISSexLabFramework")
