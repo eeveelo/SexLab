@@ -437,13 +437,6 @@ event OnConfigClose()
 	if PlayerPartners
 		PlayerPartners = PapyrusUtil.ActorArray(0)
 	endIf
-	; Clear animation tag cache
-	if AnimationSlots
-		AnimationSlots.ClearTagCache()
-	endIf
-	if CreatureSlots
-		CreatureSlots.ClearTagCache()
-	endIf
 	; Realign actors if an adjustment in editor was just made
 	if AutoRealign
 		AutoRealign = false
@@ -904,44 +897,24 @@ event OnSelectST()
 				Slot.ToggleTag("LeadIn")
 				; Invalite all cache so it can now include this one
 				; LeadIn, Aggressive and Bed animations are not goods for the InvalidateByTags() funtion
-				if Slot.IsCreature
-					CreatureSlots.ClearAnimCache()
-				else
-					AnimationSlots.ClearAnimCache()
-				endIf
+				AnimationSlots.ClearAnimCache()
 			elseIf ta == 2
 				Slot.ToggleTag("Aggressive")
 				; Invalite all cache so it can now include this one
 				; LeadIn, Aggressive and Bed animations are not goods for the InvalidateByTags() funtion
-				if Slot.IsCreature
-					CreatureSlots.ClearAnimCache()
-				else
-					AnimationSlots.ClearAnimCache()
-				endIf
+				AnimationSlots.ClearAnimCache()
 			elseIf EditTags
 				Slot.ToggleTag(TagFilter)
 				; Invalite all cache so it can now include this one
-				if Slot.IsCreature
-					CreatureSlots.InvalidateByTags(TagFilter)
-				else
-					AnimationSlots.InvalidateByTags(TagFilter)
-				endIf
+				AnimationSlots.InvalidateByTags(TagFilter)
 			else
 				Slot.Enabled = !Slot.Enabled
 				if Slot.Enabled
 					; Invalite cache by tags so it can now include this one
-					if Slot.IsCreature
-						CreatureSlots.InvalidateByTags(PapyrusUtil.StringJoin(Slot.GetRawTags()))
-					else
-						AnimationSlots.InvalidateByTags(PapyrusUtil.StringJoin(Slot.GetRawTags()))
-					endIf
+					AnimationSlots.InvalidateByTags(PapyrusUtil.StringJoin(Slot.GetRawTags()))
 				else
 					; Invalidate cache containing animation
-					if Slot.IsCreature
-						CreatureSlots.InvalidateByAnimation(Slot)
-					else
-						AnimationSlots.InvalidateByAnimation(Slot)
-					endIf
+					AnimationSlots.InvalidateByAnimation(Slot)
 				endIf
 			endIf
 
@@ -992,8 +965,13 @@ event OnSelectST()
 		SetOptionFlagsST(OPTION_FLAG_DISABLED)
 		SetTextOptionValueST("Working")
 
+		; Clear animation CACHE
 		CreatureSlots.ClearAnimCache()
-		AnimationSlots.ClearAnimCache()
+		AnimSlots.ClearAnimCache()
+
+		; Clear animation tag CACHE
+		CreatureSlots.ClearTagCache()
+		AnimSlots.ClearTagCache()
 
 		SetTextOptionValueST("$Done")
 		SetOptionFlagsST(OPTION_FLAG_NONE)
@@ -1079,9 +1057,9 @@ function InstallMenu()
 endFunction
 
 function SystemCheckOptions()
-	AddTextOption("Skyrim Script Extender (2.0.9)", StringIfElse(Config.CheckSystemPart("SKSE"), "<font color='#00FF00'>ok</font>", "<font color='#FF0000'>X</font>"), OPTION_FLAG_DISABLED)
+	AddTextOption("Skyrim Script Extender (2.0.17+)", StringIfElse(Config.CheckSystemPart("SKSE"), "<font color='#00FF00'>ok</font>", "<font color='#FF0000'>X</font>"), OPTION_FLAG_DISABLED)
 	AddTextOption("SexLabUtil.dll SKSE Plugin  (1.6+)", StringIfElse(Config.CheckSystemPart("SexLabUtil"), "<font color='#00FF00'>ok</font>", "<font color='#FF0000'>X</font>"), OPTION_FLAG_DISABLED)
-	AddTextOption("PapyrusUtil.dll SKSE Plugin  (3.6+)", StringIfElse(Config.CheckSystemPart("PapyrusUtil"), "<font color='#00FF00'>ok</font>", "<font color='#FF0000'>X</font>"), OPTION_FLAG_DISABLED)
+	AddTextOption("PapyrusUtil.dll SKSE Plugin  (3.9+)", StringIfElse(Config.CheckSystemPart("PapyrusUtil"), "<font color='#00FF00'>ok</font>", "<font color='#FF0000'>X</font>"), OPTION_FLAG_DISABLED)
 	AddTextOption("SKEE64.dll SKSE Plugin  (3.4+)", StringIfElse(Config.CheckSystemPart("NiOverride"), "<font color='#00FF00'>ok</font>", "<font color='#0000FF'>?</font>"), OPTION_FLAG_DISABLED)
 	AddTextOption("FNIS - Fores New Idles in Skyrim (7.0+)", StringIfElse(Config.CheckSystemPart("FNIS"), "<font color='#00FF00'>ok</font>", "<font color='#FF0000'>X</font>"), OPTION_FLAG_DISABLED)
 	AddTextOption("FNIS For Users Behaviors Generated", StringIfElse(Config.CheckSystemPart("FNISGenerated"), "<font color='#00FF00'>ok</font>", "<font color='#0000FF'>?</font>"), OPTION_FLAG_DISABLED)
