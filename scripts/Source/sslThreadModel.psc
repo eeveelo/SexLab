@@ -1006,6 +1006,16 @@ function ChangeActors(Actor[] NewPositions)
 	endWhile
 	; Save new positions information
 	Positions  = NewPositions
+	; Double Checking the Positions for actors without Slots
+	i = NewPositions.Length
+	while i > 0
+		i -= 1
+		if FindSlot(NewPositions[i]) == -1
+			Positions = PapyrusUtil.RemoveActor(Positions, NewPositions[i])
+			Log("ChangeActors("+NewPositions+") -- Failed to add new actor '"+NewPositions[i].GetLeveledActorBase().GetName()+"' -- They were unable to fill an actor alias", "WARNING")
+		endIf
+	endWhile
+	
 	ActorCount = Positions.Length
 	Genders    = NewGenders
 	HasPlayer  = Positions.Find(PlayerRef) != -1
@@ -1500,7 +1510,8 @@ bool function CenterOnBed(bool AskPlayer = true, float Radius = 750.0)
 		else
 			FoundBed  = ThreadLib.FindBed(PlayerRef, Radius) ; Check within radius of player
 			; Same Floor only
-		;	if !ThreadLib.SameFloor(FoundBed, PlayerRef.GetPositionZ(), 200)
+		;	if FoundBed && !ThreadLib.SameFloor(FoundBed, PlayerRef.GetPositionZ(), 200)
+		;		Log("FoundBed: "+FoundBed+" is not in the same floor")
 		;		FoundBed = none
 		;	endIf
 		endIf
@@ -1511,7 +1522,8 @@ bool function CenterOnBed(bool AskPlayer = true, float Radius = 750.0)
 		else
 			FoundBed = ThreadLib.FindBed(Positions[0], Radius) ; Check within radius of first position, if NPC beds are allowed
 			; Same Floor only
-		;	if !ThreadLib.SameFloor(FoundBed, PlayerRef.GetPositionZ(), 200)
+		;	if FoundBed && !ThreadLib.SameFloor(FoundBed, PlayerRef.GetPositionZ(), 200)
+		;		Log("FoundBed: "+FoundBed+" is not in the same floor")
 		;		FoundBed = none
 		;	endIf
 		endIf
