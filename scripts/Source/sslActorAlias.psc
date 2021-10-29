@@ -1474,6 +1474,10 @@ function SetAdjustKey(string KeyVar)
 	endIf
 endfunction
 
+function AdjustEnjoyment(int AdjustBy)
+	BaseEnjoyment += AdjustBy
+endfunction
+
 int function GetEnjoyment()
 ;	Log(ActorName +"- RealTime:["+Utility.GetCurrentRealTime()+"], GameTime:["+Utility.GetCurrentGameTime()+"] IsMenuMode:"+Utility.IsInMenuMode(), "GetEnjoyment()")
 	if !ActorRef
