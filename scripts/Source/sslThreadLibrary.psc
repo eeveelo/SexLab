@@ -185,9 +185,9 @@ Actor[] function FindAnimationPartners(sslBaseAnimation Animation, ObjectReferen
 	endIf
 	
 	Actor[] IncludedActors = sslUtility.MakeActorArray(IncludedRef1, IncludedRef2, IncludedRef3, IncludedRef4)
-	Actor[] Positions = PapyrusUtil.ActorArray(Animation.PositionCount)
+	Actor[] Positions = PapyrusUtil.ActorArray(5)
 	int i
-	while i < Positions.Length
+	while i < Animation.PositionCount
 		; Determine needed gender and race
 		string RaceKey = ""
 		int FindGender = Animation.GetGender(i)

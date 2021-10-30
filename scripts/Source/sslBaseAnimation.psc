@@ -1253,10 +1253,10 @@ function ExportOffsets(string Type = "BedOffset")
 	else
 		return
 	endIf
-	string File = "../SexLab/SexlabOffsets.json"
+	string File = "../SexLab/SexLabOffsets.json"
 
 	; Set label of export
-	JsonUtil.SetStringValue(File, "ExportLabel", Utility.GameTimeToString(Utility.GetCurrentRealTime()))
+	JsonUtil.SetStringValue(File, "ExportLabel", "User Defined Offsets " + Utility.GetCurrentRealTime())
 
 	JsonUtil.FloatListClear(File, Registry+"."+Type)
 	if PapyrusUtil.CountFloat(Values, 0.0) != Values.Length
@@ -1274,13 +1274,13 @@ function ImportOffsets(string Type = "BedOffset")
 	else
 		return
 	endIf
-	string File = "../SexLab/SexlabOffsets.json"
+	string File = "../SexLab/SexLabOffsets.json"
 	int len = 4
-	if JsonUtil.FloatListCount(File, Registry+"."+Type) == len
+	if JsonUtil.FloatListCount(File, Registry+"."+Type) == len || JsonUtil.IntListCount(File, Registry+"."+Type) == len
 		if Values.Length != len
 			Values = Utility.CreateFloatArray(len)
 		endIf
-		int i
+		int i = 0
 		while i < len
 			Values[i] = JsonUtil.FloatListGet(File, Registry+"."+Type, i)
 			i += 1
@@ -1300,11 +1300,11 @@ function ImportOffsetsDefault(string Type = "BedOffset")
 	endIf
 	string File = "../SexLab/SexLabOffsetsDefault.json"
 	int len = 4
-	if JsonUtil.FloatListCount(File, Registry+"."+Type) == len
+	if JsonUtil.FloatListCount(File, Registry+"."+Type) == len || JsonUtil.IntListCount(File, Registry+"."+Type) == len
 		if Values.Length != len
 			Values = Utility.CreateFloatArray(len)
 		endIf
-		int i
+		int i = 0
 		while i < len
 			Values[i] = JsonUtil.FloatListGet(File, Registry+"."+Type, i)
 			i += 1

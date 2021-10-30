@@ -47,7 +47,7 @@ event OnPlayerLoadGame()
 		RegisterForSingleUpdate(30.0)
 	elseIf Version == 0 && GetState() == "Ready" && Config.CheckSystem()
 		Utility.Wait(0.1)
-		Log("SexLab somehow failed to install but things it did, not sure how this happened and it never should, attempting to fix it automatically now... ")
+		Log("SexLab somehow failed to install things, but it did. Not sure how this happened and it never should, attempting to fix it automatically now... ")
 		InstallSystem()
 	endIf
 endEvent
@@ -140,7 +140,20 @@ event UpdateSystem(int OldVersion, int NewVersion)
 		Config.ExportSettings()
 
 		; Perform update functions
-		if OldVersion >= 16000 && NewVersion >= 16200 ; 1.62
+		if OldVersion >= 16200 && OldVersion < 16209
+			; Some system setup for < 1.63 SE dev beta 9
+			bool AllowCreatures = Config.AllowCreatures
+			Config.Setup()
+			Config.AllowCreatures = AllowCreatures
+			AnimSlots.Setup()
+			CreatureSlots.Setup()
+			
+		elseIf OldVersion >= 16000 && OldVersion < 16200 ; 1.62
+			if OldVersion == 16000
+				PreloadDone = true
+			endIf
+			SexLab.Setup()
+			Config.Setup()
 			AnimSlots.Setup()
 			CreatureSlots.Setup()
 
@@ -151,9 +164,6 @@ event UpdateSystem(int OldVersion, int NewVersion)
 			if Config.AllowCreatures
 				(Game.GetFormFromFile(0x664FB, "SexLab.esm") as sslVoiceDefaults).LoadCreatureVoices()
 			endIf
-
-		elseif OldVersion == 16000
-			PreloadDone = true
 
 		elseIf OldVersion < 16000
 			; Full system setup for < 1.60
@@ -169,13 +179,6 @@ event UpdateSystem(int OldVersion, int NewVersion)
 			CreatureSlots.Setup()
 			ThreadSlots.Setup()
 
-		elseIf OldVersion < 16209
-			; Some system setup for < 1.63 SE dev beta 9
-			bool AllowCreatures = Config.AllowCreatures
-			Config.Setup()
-			Config.AllowCreatures = AllowCreatures
-			AnimSlots.Setup()
-			CreatureSlots.Setup()
 		endIf
 
 		Config.ImportSettings()
@@ -442,7 +445,7 @@ endState
 event OnUpdate()
 	if !IsInstalled && !ForcedOnce && GetState() == ""
 		Quest UnboundQ = Quest.GetQuest("MQ101")
-		if UnboundQ && UnboundQ.GetStageDone(250)
+		if UnboundQ && !UnboundQ.GetStageDone(250)
 			; Wait until the end of the opening quest(cart scene) to prevent issues related with the First Person Camera
 			RegisterForSingleUpdate(120.0)
 		else

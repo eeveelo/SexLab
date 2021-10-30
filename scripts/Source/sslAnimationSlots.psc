@@ -50,6 +50,50 @@ sslBaseAnimation[] function GetByTags(int ActorCount, string Tags, string TagsSu
 	return Output
 endFunction
 
+sslBaseAnimation[] function GetByCommonTags(int ActorCount, string CommonTags, string Tags, string TagsSuppressed = "", bool RequireAll = true)
+	Log("GetByCommonTags(ActorCount="+ActorCount+", CommonTags="+CommonTags+", Tags="+Tags+", TagsSuppressed="+TagsSuppressed+", RequireAll="+RequireAll+")")
+	; Making the tags lists and optimize for CACHE
+	string[] SearchCommon   = StringSplit(CommonTags)
+	SearchCommon = ClearEmpty(SearchCommon)
+	SortStringArray(SearchCommon)
+	; Check if this function is really required 
+	if !SearchCommon || SearchCommon.Length < 1
+		return GetByTags(ActorCount, Tags, TagsSuppressed, RequireAll)
+	endIf
+	string[] Suppress = StringSplit(TagsSuppressed)
+	Suppress = ClearEmpty(Suppress)
+	SortStringArray(Suppress)
+	string[] Search   = StringSplit(Tags)
+	Search = ClearEmpty(Search)
+	SortStringArray(Search)
+	int i = SearchCommon.Length
+	while i
+		i -= 1
+		if Search.Length > 0
+			Search = RemoveString(Search, SearchCommon[i])
+		endIf
+	endWhile
+	; Check Cache
+	string CacheName = ActorCount+":"+SearchCommon+":"+Search+":"+Suppress+":"+RequireAll
+	sslBaseAnimation[] Output = CheckCache(CacheName)
+	if Output
+		return Output
+	endIf
+	; Search
+	bool[] Valid      = Utility.CreateBoolArray(Slotted)
+	i = Slotted
+	while i
+		i -= 1
+		if Objects[i]
+			sslBaseAnimation Slot = Objects[i] as sslBaseAnimation
+			Valid[i] = Slot.Enabled && ActorCount == Slot.PositionCount && Slot.HasAllTag(SearchCommon) && Slot.TagSearch(Search, Suppress, RequireAll)
+		endIf
+	endWhile
+	Output = GetList(Valid)
+	CacheAnims(CacheName, Output)
+	return Output
+endFunction
+
 sslBaseAnimation[] function GetByType(int ActorCount, int Males = -1, int Females = -1, int StageCount = -1, bool Aggressive = false, bool Sexual = true)
 	; Log("GetByType(ActorCount="+ActorCount+", Males="+Males+", Females="+Females+", StageCount="+StageCount+", Aggressive="+Aggressive+", Sexual="+Sexual+")")
 	; Check Cache
