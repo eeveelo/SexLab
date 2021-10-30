@@ -940,14 +940,17 @@ state Animating
 		if !Forced && (NoOrgasm || Thread.DisableOrgasms)
 			; Orgasm Disabled for actor or whole thread
 			return 
-		elseIf !Forced && Config.SeparateOrgasms && Enjoyment < 100 && (Enjoyment < 1 || Stage < StageCount || Orgasms > 0)
-			; Someone need to do better job to make you happy
+		elseIf !Forced && Enjoyment < 1
+			; Actor have the orgasm few seconds ago or is in pain and can't orgasm
 			return
 		elseIf Math.Abs(Utility.GetCurrentRealTime() - LastOrgasm) < 5.0
 			Log("Excessive OrgasmEffect Triggered")
 			return
 		endIf
-		bool CanOrgasm = Forced || (Animation.HasTag("Lesbian") && Thread.ActorCount == Thread.Females && !Stats.IsStraight(ActorRef)) ; Lesbians have special treatment because the Lesbian Animations usually don't have CumId assigned.
+
+		; Check if the animation allow Orgasm. By default all the animations with a CumID>0 are type SEX and allow orgasm 
+		; But the Lesbian Animations usually don't have CumId assigned and still the orgasm should be allowed at least for Females.
+		bool CanOrgasm = Forced || (IsFemale && (Animation.HasTag("Lesbian") || Animation.Females == Animation.PositionCount))
 		int i = Thread.ActorCount
 		while !CanOrgasm && i > 0
 			i -= 1
@@ -957,7 +960,13 @@ state Animating
 			; Orgasm Disabled for the animation
 			return
 		endIf
+
+		; Check Separate Orgasm conditions 
 		if !Forced && Config.SeparateOrgasms
+			if Enjoyment < 100 && (Stage < StageCount || Orgasms > 0)
+				; Prevent the orgasm with low enjoyment at least the last stage be reached without orgasms
+				return
+			endIf
 			bool IsCumSource = False
 			i = Thread.ActorCount
 			while !IsCumSource && i > 0
