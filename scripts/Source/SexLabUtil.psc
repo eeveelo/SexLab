@@ -171,6 +171,18 @@ int function IntMinMaxIndex(int[] searchArray, bool findHighestValue = true) glo
 float function FloatMinMaxValue(float[] searchArray, bool findHighestValue = true) global native
 int function FloatMinMaxIndex(float[] searchArray, bool findHighestValue = true) global native
 
+float function GetCurrentGameTimeHours() global
+	return Utility.GetCurrentGameTime() * 24.0
+endFunction
+
+float function GetCurrentGameTimeMinutes() global
+	return Utility.GetCurrentGameTime() * 1440.0
+endFunction
+
+float function GetCurrentGameTimeSeconds() global
+	return Utility.GetCurrentGameTime() * 86400.0
+endFunction
+
 function Wait(float seconds) global
 	float timer = Utility.GetCurrentRealTime() + seconds
 	while Utility.GetCurrentRealTime() < timer
