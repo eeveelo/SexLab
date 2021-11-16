@@ -564,8 +564,8 @@ state Ready
 				
 				; Start wait loop for actor pathing.
 				int StuckCheck  = 0
-				float Failsafe  = Utility.GetCurrentRealTime() + 30.0
-				while Distance > 100.0 && Utility.GetCurrentRealTime() < Failsafe
+				float Failsafe  = SexLabUtil.GetCurrentGameRealTime() + 30.0
+				while Distance > 100.0 && SexLabUtil.GetCurrentGameRealTime() < Failsafe
 					Utility.Wait(1.0)
 					float Previous = Distance
 					Distance = ActorRef.GetDistance(WaitRef)
@@ -637,7 +637,7 @@ state Prepare
 		Config.CheckBardAudience(ActorRef, true)
 		; Prepare for loop
 		StopAnimating(true)
-		StartedAt  = Utility.GetCurrentRealTime()
+		StartedAt  = SexLabUtil.GetCurrentGameRealTime()
 		LastOrgasm = StartedAt
 		GoToState("Animating")
 		SyncAll(true)
@@ -943,7 +943,7 @@ state Animating
 		elseIf !Forced && Enjoyment < 1
 			; Actor have the orgasm few seconds ago or is in pain and can't orgasm
 			return
-		elseIf Math.Abs(Utility.GetCurrentRealTime() - LastOrgasm) < 5.0
+		elseIf Math.Abs(RealTime[0] - LastOrgasm) < 5.0
 			Log("Excessive OrgasmEffect Triggered")
 			return
 		endIf
@@ -982,7 +982,7 @@ state Animating
 			endIf
 		endIf
 		UnregisterForUpdate()
-		LastOrgasm = StartedAt
+		LastOrgasm = RealTime[0]
 		Orgasms   += 1
 		; Send an orgasm event hook with actor and orgasm count
 		int eid = ModEvent.Create("SexLabOrgasm")
@@ -1488,7 +1488,7 @@ function AdjustEnjoyment(int AdjustBy)
 endfunction
 
 int function GetEnjoyment()
-;	Log(ActorName +"- RealTime:["+Utility.GetCurrentRealTime()+"], GameTime:["+Utility.GetCurrentGameTime()+"] IsMenuMode:"+Utility.IsInMenuMode(), "GetEnjoyment()")
+;	Log(ActorName +"- RealTime:["+Utility.GetCurrentRealTime()+"], GameTime:["+SexLabUtil.GetCurrentGameRealTime()+"] IsMenuMode:"+Utility.IsInMenuMode(), "GetEnjoyment()")
 	if !ActorRef
 		Log(ActorName +"- WARNING: ActorRef if Missing or Invalid", "GetEnjoyment()")
 		FullEnjoyment = 0
