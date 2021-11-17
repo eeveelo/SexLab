@@ -317,7 +317,7 @@ function Setup()
 	; Init defaults
 	RegisterLock = false
 	RegisterSlots()
-	GoToState("Locked")
+	GoToState("")
 endFunction
 
 function Log(string msg)
