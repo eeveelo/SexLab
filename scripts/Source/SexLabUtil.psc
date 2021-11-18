@@ -185,11 +185,16 @@ endFunction
 
 float function GetCurrentGameRealTime() global
 	Form TimeScale = Game.GetFormFromFile(0x3A, "Skyrim.esm")
+	float fTimeScale = 1
 	if TimeScale && TimeScale != none
-		return (Utility.GetCurrentGameTime() / (TimeScale as GlobalVariable).GetValue()) * 86400.0
+		fTimeScale = (TimeScale as GlobalVariable).GetValue()
 	else
-		return (Utility.GetCurrentGameTime() / 20.0) * 86400.0 ; Skyrim default TimeScale
+		fTimeScale = 20.0 ; Skyrim default TimeScale
 	endIf
+	if fTimeScale < 1
+		fTimeScale = 1.0
+	endIf
+	return (Utility.GetCurrentGameTime() / fTimeScale) * 86400.0
 endFunction
 
 function Wait(float seconds) global
