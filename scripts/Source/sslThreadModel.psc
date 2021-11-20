@@ -457,7 +457,7 @@ state Making
 		endIf
 
 		; Check LeadIn CoolDown and if LeadIn is allowed to prevent compatibility issues
-		float LeadInCoolDown = Math.Abs(Utility.GetCurrentRealTime() - StorageUtil.GetFloatValue(Config,"SexLab.LastLeadInEnd",0))
+		float LeadInCoolDown = Math.Abs(SexLabUtil.GetCurrentGameRealTime() - StorageUtil.GetFloatValue(Config,"SexLab.LastLeadInEnd",0))
 		if CustomAnimations.Length
 			NoLeadIn = true
 			if LeadIn
@@ -1030,7 +1030,7 @@ function ChangeActors(Actor[] NewPositions)
 			Stage  = 1
 			LeadIn = false
 			QuickEvent("Strip")
-			StorageUtil.SetFloatValue(Config,"SexLab.LastLeadInEnd", Utility.GetCurrentRealTime())
+			StorageUtil.SetFloatValue(Config,"SexLab.LastLeadInEnd", SexLabUtil.GetCurrentGameRealTime())
 			SendThreadEvent("LeadInEnd")
 			SetAnimation(aid)
 		;	Action("Advancing")

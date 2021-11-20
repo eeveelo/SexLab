@@ -35,28 +35,35 @@ function MoveLips(Actor ActorRef, Sound SoundRef = none, float Strength = 1.0) g
 	endIf
 	
 	sslSystemConfig Conf = SexLabUtil.GetConfig()
-	bool HasMFG = Conf.HasMFGFix
+	MoveLipsEx(ActorRef, SoundRef, Strength, Conf.LipsSoundTime, Conf.LipsMoveTime, Conf.LipsPhoneme, Conf.LipsMinValue, Conf.LipsMaxValue, Conf.LipsFixedValue, Conf.HasMFGFix)
+endFunction
+
+function MoveLipsEx(Actor ActorRef, Sound SoundRef = none, float Strength = 1.0, int SoundCut = 0, float MoveTime = 0.2, int Phoneme = 1, int MinValue = 20, int MaxValue = 50, bool IsFixedValue = false, bool UseMFG = false) global
+	if !ActorRef
+		return
+	endIf
+	
 	float SavedP
-	int p = Conf.LipsPhoneme
+	int p = Phoneme
 	if p < 0 || p > 15
 		p = 0
-		float[] Phoneme = new float[32]
+		float[] Phonemes = new float[32]
 		int i
-		; Get Phoneme
+		; Get Phonemes
 		while i <= 15
-			Phoneme[i] = sslBaseExpression.GetPhoneme(ActorRef, i) ; 0.0 - 1.0
-			if Phoneme[i] >= Phoneme[p] ; seems to be required to prevet issues
+			Phonemes[i] = sslBaseExpression.GetPhoneme(ActorRef, i) ; 0.0 - 1.0
+			if Phonemes[i] >= Phonemes[p] ; seems to be required to prevet issues
 				p = i
 			endIf
 			i += 1
 		endWhile
-		SavedP = Phoneme[p]
+		SavedP = Phonemes[p]
 	else
 		SavedP = sslBaseExpression.GetPhoneme(ActorRef, p)
 	endIf
-	int MinP = Conf.LipsMinValue
-	int MaxP = Conf.LipsMaxValue
-	if !Conf.LipsFixedValue
+	int MinP = MinValue
+	int MaxP = MaxValue
+	if !IsFixedValue
 		float ReferenceP = SavedP
 		if ReferenceP > (1.0 - (0.2 * Strength))
 			ReferenceP = (1.0 - (0.2 * Strength))
@@ -75,64 +82,75 @@ function MoveLips(Actor ActorRef, Sound SoundRef = none, float Strength = 1.0) g
 ;	if ((SavedP * 100) - MinP) > 2
 ;		TransitDown(ActorRef, (SavedP * 100) as int, MinP)
 ;	endIf
-	if HasMFG
+	if UseMFG
 		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, MinP)
 	else
 		ActorRef.SetExpressionPhoneme(p, (MinP as float)*0.01)
 	endIf
 	Utility.Wait(0.1)
 	int Instance = -1
-	if Conf.LipsSoundTime != -1 && SoundRef != none
+	if SoundCut != -1 && SoundRef != none
 		Instance = SoundRef.Play(ActorRef)
 	endIf
 ;	TransitUp(ActorRef, MinP, MaxP)
-	if HasMFG
+	if UseMFG
 		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, MaxP)
 	else
 		ActorRef.SetExpressionPhoneme(p, (MaxP as float)*0.01)
 	endIf
-	if Conf.LipsSoundTime == -1 && SoundRef != none
+	if SoundCut == -1 && SoundRef != none
 		SoundRef.PlayAndWait(ActorRef)
 	else
-		Utility.Wait(Conf.LipsMoveTime)
+		Utility.Wait(MoveTime)
 	endIf
 ;	if (MaxP - (SavedP * 100)) > 2
 ;		TransitDown(ActorRef, MaxP, (SavedP * 100) as int)
 ;	endIf
 ;	Utility.Wait(0.1)
-	if HasMFG
+	if UseMFG
 		MfgConsoleFunc.SetPhonemeModifier(ActorRef, 0, p, (SavedP*100) as int)
 	else
 		ActorRef.SetExpressionPhoneme(p, SavedP as float)
 	endIf
-	if Conf.LipsSoundTime == 1 && Instance != -1
+	if SoundCut == 1 && Instance != -1
 		Sound.StopInstance(Instance)
 	endIf
 	Utility.Wait(0.2)
-	;Debug.Trace("SEXLAB - MoveLips("+ActorRef+", "+SoundRef+", "+Strength+") -- SavedP:"+SavedP+", MinP:"+MinP+", MaxP:"+MaxP)
+;	Debug.Trace("SEXLAB - MoveLipsEx("+ActorRef+", "+SoundRef+", "+Strength+") -- SavedP:"+SavedP+", MinP:"+MinP+", MaxP:"+MaxP)
 endFunction
 
 function PlayMoan(Actor ActorRef, int Strength = 30, bool IsVictim = false, bool UseLipSync = false)
+	PlayMoanEx(ActorRef, Strength, IsVictim, UseLipSync, Config.LipsSoundTime, Config.LipsMoveTime, Config.LipsPhoneme, Config.LipsMinValue, Config.LipsMaxValue, Config.LipsFixedValue, Config.HasMFGFix)
+endFunction
+
+function PlayMoanEx(Actor ActorRef, int Strength = 30, bool IsVictim = false, bool UseLipSync = false, int SoundCut = 0, float MoveTime = 0.2, int Phoneme = 1, int MinValue = 20, int MaxValue = 50, bool IsFixedValue = false, bool UseMFG = false)
 	if !ActorRef
 		return
 	endIf
 	
 	Sound SoundRef = GetSound(Strength, IsVictim)
-	if SoundRef
-		if !UseLipSync
+	if !UseLipSync
+		if SoundRef
 			SoundRef.Play(ActorRef)
 			Utility.WaitMenuMode(0.4)
-		else
-			MoveLips(ActorRef, SoundRef, (Strength as float / 100.0))
 		endIf
+	else
+		MoveLipsEx(ActorRef, SoundRef, (Strength as float / 100.0), SoundCut, MoveTime, Phoneme, MinValue, MaxValue, IsFixedValue, UseMFG)
 	endIf
 endFunction
 
-function Moan(Actor ActorRef, int Strength = 30, bool IsVictim = false)
-	PlayMoan(ActorRef, Strength, Isvictim, Config.UseLipSync)
+function Moan(Actor ActorRef, int Strength = 30, bool IsVictim = false) ;DEPRECATED
+	if !ActorRef
+		return
+	endIf
+	
+	ActorBase BaseRef = ActorRef.GetLeveledActorBase()
+	bool UseLipSync = Config.UseLipSync && BaseRef && !sslCreatureAnimationSlots.HasRaceType(BaseRef.GetRace())
+	; Use the values of the version 1.62 for compatibility reasons
+	PlayMoanEx(ActorRef, Strength, IsVictim, UseLipSync, 0, 0.2, 1, 20, 50, false, Config.HasMFGFix)
 endFunction
 
-function MoanNoWait(Actor ActorRef, int Strength = 30, bool IsVictim = false, float Volume = 1.0)
+function MoanNoWait(Actor ActorRef, int Strength = 30, bool IsVictim = false, float Volume = 1.0) ;DEPRECATED
 	if !ActorRef
 		return
 	endIf
