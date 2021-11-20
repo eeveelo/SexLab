@@ -23,7 +23,7 @@ Actor[] function ScanCellNPCsByFaction(Faction FindFaction, ObjectReference Cent
 
 
 ;/
-	Camera functions - NOT CURRENT WORKING IN SKYRIM SPECIAL EDITION
+	Camera functions
 /;
 
 ; Toggle freefly camera.
