@@ -815,19 +815,19 @@ endFunction
 
 bool function CheckSystemPart(string CheckSystem)
 	if CheckSystem == "Skyrim"
-		return (StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float) >= 1.5
+		return (StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float) >= 1.6
 
 	elseIf CheckSystem == "SKSE"
-		return SKSE.GetScriptVersionRelease() >= 64
+		return SKSE.GetScriptVersionRelease() >= 66
 
 	elseIf CheckSystem == "SkyUI"
 		return Quest.GetQuest("SKI_ConfigManagerInstance") != none
 
 	elseIf CheckSystem == "SexLabUtil"
-		return SexLabUtil.GetPluginVersion() >= 16300
+		return SexLabUtil.GetPluginVersion() >= 16400
 
 	elseIf CheckSystem == "PapyrusUtil"
-		return PapyrusUtil.GetVersion() >= 39
+		return PapyrusUtil.GetVersion() >= 40
 
 	elseIf CheckSystem == "NiOverride"
 		return SKSE.GetPluginVersion("SKEE64") >= 7 || NiOverride.GetScriptVersion() >= 7 ;SSE
@@ -854,11 +854,11 @@ endFunction
 bool function CheckSystem()
 	; Check Skyrim Version
 	if !CheckSystemPart("Skyrim")
-		CheckSkyrim.Show(1.5)
+		CheckSkyrim.Show(1.6)
 		return false
 	; Check SKSE install
 	elseIf !CheckSystemPart("SKSE")
-		CheckSKSE.Show(2.17)
+		CheckSKSE.Show(2.12)
 		return false
 	; Check SkyUI install - depends on passing SKSE check passing
 	elseIf !CheckSystemPart("SkyUI")
@@ -870,7 +870,7 @@ bool function CheckSystem()
 		return false
 	; Check PapyrusUtil install - depends on passing SKSE check passing
 	elseIf !CheckSystemPart("PapyrusUtil")
-		CheckPapyrusUtil.Show(3.9)
+		CheckPapyrusUtil.Show(4.0)
 		return false
 	; Check FNIS generation - soft fail
 	; elseIf CheckSystemPart("FNISSexLabFramework")
@@ -1115,7 +1115,7 @@ function Setup()
 endFunction
 
 function SetDefaults()
-	DebugMode = true
+	DebugMode = false
 
 	; Booleans
 	RestrictAggressive = true

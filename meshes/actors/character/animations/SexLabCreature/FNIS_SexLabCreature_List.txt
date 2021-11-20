@@ -1,6 +1,6 @@
-Version V1.63
+Version V1.64
 
-AnimVar SexLabCreature INT32 16300
+AnimVar SexLabCreature INT32 16400
 
 ' b SexLab_CreatureTest_16300 Falmer_Missionary_A1_S3.hkx
 
