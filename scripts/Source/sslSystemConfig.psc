@@ -1115,7 +1115,7 @@ function Setup()
 endFunction
 
 function SetDefaults()
-	DebugMode = true
+	DebugMode = false
 
 	; Booleans
 	RestrictAggressive = true
