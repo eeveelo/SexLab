@@ -1,11 +1,11 @@
 scriptname PapyrusUtil Hidden
 
-; Get version of papyrus DLL library. Version 4.0 will return 40.
+; Get version of papyrus DLL library. Version 4.1 will return 41.
 int function GetVersion() global native
 
 ; Get version of compiled papyrus scripts which should match return from GetVersion()
 int function GetScriptVersion() global
-	return 40
+	return 41
 endFunction
 
 ; ##

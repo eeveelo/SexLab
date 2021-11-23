@@ -28,6 +28,8 @@ endFunction
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	SexLab.QuickStart(CasterRef, TargetRef)
 
+	; MiscUtil.ToggleFreeCamera()
+
 	; Log("Result: "+TestList2)
 
 	; TimeScale = Game.GetFormFromFile(0x3A, "Skyrim.esm") as GlobalVariable
