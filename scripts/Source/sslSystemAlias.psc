@@ -140,7 +140,12 @@ event UpdateSystem(int OldVersion, int NewVersion)
 		Config.ExportSettings()
 
 		; Perform update functions
-		if OldVersion >= 16200 && OldVersion < 16209
+		if OldVersion >= 16209 && OldVersion < 164002
+			; Some system setup for < 1.64 SE dev BETA 1
+			ExpressionSlots.GoToState("") ; Fix Loock state issue 
+			ExpressionSlots.Setup()
+			
+		elseIf OldVersion >= 16200 && OldVersion < 16209
 			; Some system setup for < 1.63 SE dev beta 9
 			bool AllowCreatures = Config.AllowCreatures
 			Config.Setup()
