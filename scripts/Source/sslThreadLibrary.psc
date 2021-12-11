@@ -274,11 +274,12 @@ Actor[] function SortActorsByAnimation(actor[] Positions, sslBaseAnimation Anima
 	int[] Genders = ActorLib.GenderCount(Positions)
 	int[] Futas = ActorLib.TransCount(Positions)
 	int Creatures = Genders[2] + Genders[3]
+	int HumanFutaCount = Futas[0] + Futas[1]
 	if Creatures < 1
-		if (Futas[0] + Futas[1]) < 1 && (Genders[0] == ActorCount || Genders[1] == ActorCount)
+		if (HumanFutaCount >= 1 && HumanFutaCount == ActorCount) || (HumanFutaCount < 1 && (Genders[0] == ActorCount || Genders[1] == ActorCount))
 			return Positions ; Nothing to sort
-		elseIf Animation && Animation != none && !Animation.HasTag("Futa")
-			if Animation.Males == Animation.PositionCount || Animation.Females == Animation.PositionCount ;|| Genders == Animation.Genders
+		elseIf Animation && Animation != none
+			if Animation.Males < 1 || Animation.Females < 1 ;|| Genders == Animation.Genders
 				return Positions ; Nothing to sort
 			endIf
 		endIf
@@ -290,73 +291,93 @@ Actor[] function SortActorsByAnimation(actor[] Positions, sslBaseAnimation Anima
 	int i
 	if !Animation || Animation == none || !Config.RestrictGenderTag
 		return SortActors(Positions)
-	elseIf !(Animation.HasTag("NoSwap") || Animation.HasTag("Vaginal") || Animation.HasTag("Pussy") || Animation.HasTag("Cunnilingus") || Animation.HasTag("Futa"))
+	elseIf ActorCount != Animation.PositionCount
 		return SortActors(Positions)
-	elseIf ActorCount != Animation.PositionCount || Creatures != Animation.Creatures
-		Sorted = Positions
-		while i < Sorted.Length
-			; Put non creatures first
-			if !Animation.HasRace(Sorted[i].GetLeveledActorBase().GetRace()) && i > pos
-				Actor moved = Sorted[pos]
-				Sorted[pos] = Sorted[i]
-				Sorted[i] = moved
-				pos += 1
-			endIf
-			i += 1
-		endWhile
+	elseIf !(Animation.HasTag("Straight") || Animation.HasTag("Vaginal") || Animation.HasTag("Pussy") || Animation.HasTag("Cunnilingus") || Animation.HasTag("Futa"))
+		return SortActors(Positions)
 	else
 		int[] GendersAll = ActorLib.GetGendersAll(Positions)
 		int[] FutasAll = ActorLib.GetTransAll(Positions)
-		
+
+		pos = Positions.Length
+		bool[] AnimStraponsPos = Utility.CreateBoolArray(pos)
+		while pos > 0
+			pos -= pos
+			AnimStraponsPos[pos] = Animation.MalePosition(pos)
+			i = Animation.StageCount
+			while i > 0 && !AnimStraponsPos[pos]
+				AnimStraponsPos[pos] = Animation.UseStrapon(pos, i)
+				i -= 1
+			endWhile
+		endWhile
+
 		i = 0
 		while i < Animation.PositionCount
 			int futa = -1
 			int better = -1
+			int alt = -1
 			int first = -1
 			pos = 0
 			while pos < ActorCount
 				if (!Sorted[i] || Sorted[i] == none) 
 					if Sorted.Find(Positions[pos]) < 0
-						if !(Animation.HasTag("Futa") && (Futas[0] + Futas[1]) >= 1) && (Animation.Females < 1 || Genders[1] < 1 || Animation.Males < 1 || Genders[0] < 1 || (Animation.Females == Genders[1] && !(Animation.HasTag("NoSwap") || !Config.RestrictGenderTag || Animation.HasTag("Vaginal") || Animation.HasTag("Pussy") || Animation.HasTag("Cunnilingus"))))
+						if HumanFutaCount < 1 && (Genders[1] < 1 || Genders[0] < 1 || (Animation.Females == Genders[1] && !(!Config.RestrictGenderTag || Animation.HasTag("Straight") || Animation.HasTag("Vaginal") || Animation.HasTag("Pussy") || Animation.HasTag("Cunnilingus"))))
 							Sorted[i] = Positions[pos]
 						else
-							if Animation.GetGender(i) == GendersAll[pos] && (Futas[0] + Futas[1]) < 1
-								Sorted[i] = Positions[pos]
-							elseIf futa < 0 && GendersAll[pos] == FutasAll[pos]
-								if (pos + 1) >= ActorCount
-									Sorted[i] = Positions[pos]
-								else
-									futa = pos
-								endIf
-							elseIf better < 0 && Animation.GetGender(i) == GendersAll[pos]
-								if (pos + 1) >= ActorCount
-									Sorted[i] = Positions[pos]
-								else
-									better = pos
-								endIf
+							if better < 0 && FutasAll[pos] == -1 && Animation.GetGender(i) == GendersAll[pos]
+								better = pos
+							elseIf futa < 0 && FutasAll[pos] != -1 ;&& (!Animation.HasTag("Futa") || GendersAll[pos] == FutasAll[pos])
+								futa = pos
+							elseIf alt < 0 && Animation.GetGender(i) == GendersAll[pos]
+								alt = pos
 							elseIf first < 0
-								if (pos + 1) >= ActorCount
-									Sorted[i] = Positions[pos]
+								first = pos
+							endIf
+							If (pos + 1) >= ActorCount
+								if Animation.HasTag("Futa") && !AnimStraponsPos[i] ; For futa animations the Futa actors are the priority
+									if futa >= 0
+										Sorted[i] = Positions[futa]
+									elseIf better >= 0
+										Sorted[i] = Positions[better]
+									elseIf alt >= 0
+										Sorted[i] = Positions[alt]
+									elseIf first >= 0
+										Sorted[i] = Positions[first]
+									endIf
 								else
-									first = pos
-								endIf
-							elseIf (pos + 1) >= ActorCount
-								if futa >= 0
-									Sorted[i] = Positions[futa]
-								elseIf better >= 0
-									Sorted[i] = Positions[better]
-								else
-									Sorted[i] = Positions[first]
+									if better >= 0
+										Sorted[i] = Positions[better]
+									elseIf futa >= 0
+										Sorted[i] = Positions[futa]
+									elseIf alt >= 0
+										Sorted[i] = Positions[alt]
+									elseIf first >= 0
+										Sorted[i] = Positions[first]
+									endIf
 								endIf
 							endIf
 						endIf
 					elseIf (pos + 1) >= ActorCount 
-						if futa >= 0
-							Sorted[i] = Positions[futa]
-						elseIf better >= 0
-							Sorted[i] = Positions[better]
-						elseIf first >= 0
-							Sorted[i] = Positions[first]
+						if Animation.HasTag("Futa") && !AnimStraponsPos[i] ; For futa animations the Futa actors are the priority
+							if futa >= 0
+								Sorted[i] = Positions[futa]
+							elseIf better >= 0
+								Sorted[i] = Positions[better]
+							elseIf alt >= 0
+								Sorted[i] = Positions[alt]
+							elseIf first >= 0
+								Sorted[i] = Positions[first]
+							endIf
+						else
+							if better >= 0
+								Sorted[i] = Positions[better]
+							elseIf futa >= 0
+								Sorted[i] = Positions[futa]
+							elseIf alt >= 0
+								Sorted[i] = Positions[alt]
+							elseIf first >= 0
+								Sorted[i] = Positions[first]
+							endIf
 						endIf
 					endIf
 				endIf
@@ -392,7 +413,7 @@ Actor[] function SortCreatures(actor[] Positions, sslBaseAnimation Animation = n
 	int[] Genders = ActorLib.GenderCount(Positions)
 	int Creatures = Genders[2] + Genders[3]
 	if Creatures < 1
-		return Positions ; Nothing to sort
+		return SortActorsByAnimation(Positions, Animation) ; Nothing to sort
 	endIf
 	Actor[] Sorted = PapyrusUtil.ActorArray(ActorCount)
 	int pos
@@ -434,12 +455,26 @@ Actor[] function SortCreatures(actor[] Positions, sslBaseAnimation Animation = n
 		int[] GendersAll = ActorLib.GetGendersAll(Positions)
 		int[] Futas = ActorLib.TransCount(Positions)
 		int[] FutasAll = ActorLib.GetTransAll(Positions)
+		int HumanFutaCount = Futas[0] + Futas[1]
+
+		pos = Positions.Length
+		bool[] AnimStraponsPos = Utility.CreateBoolArray(pos)
+		while pos > 0
+			pos -= pos
+			AnimStraponsPos[pos] = Animation.MalePosition(pos)
+			i = Animation.StageCount
+			while i > 0 && !AnimStraponsPos[pos]
+				AnimStraponsPos[pos] = Animation.UseStrapon(pos, i)
+				i -= 1
+			endWhile
+		endWhile
 
 		i = Animation.PositionCount
 		while i > 0
 			i -= 1
 			int futa = -1
 			int better = -1
+			int alt = -1
 			int first = -1
 			pos = ActorCount
 			while pos > 0
@@ -452,106 +487,168 @@ Actor[] function SortCreatures(actor[] Positions, sslBaseAnimation Animation = n
 									if !Config.UseCreatureGender
 										Sorted[i] = Positions[pos]
 									else
-										if (Futas[2] + Futas[3]) < 1 && Animation.GetGender(i) == GendersAll[pos]
-											Sorted[i] = Positions[pos]
-										elseIf futa < 0 && GendersAll[pos] == FutasAll[pos]
-											if pos < 1
-												Sorted[i] = Positions[pos]
-											else
-												futa = pos
-											endIf
-										elseIf better < 0 && Animation.GetGender(i) == GendersAll[pos]
-											if pos < 1
-												Sorted[i] = Positions[pos]
-											else
-												better = pos
-											endIf
+										if better < 0 && FutasAll[pos] == -1 && Animation.GetGender(i) == GendersAll[pos]
+											better = pos
+										elseIf futa < 0 && FutasAll[pos] != -1 ;&& (!Animation.HasTag("Futa") || GendersAll[pos] == FutasAll[pos])
+											futa = pos
+										elseIf alt < 0 && Animation.GetGender(i) == GendersAll[pos]
+											alt = pos
 										elseIf first < 0
-											if pos < 1
-												Sorted[i] = Positions[pos]
+											first = pos
+										endIf
+										if pos < 1
+											if Animation.HasTag("Futa") && !AnimStraponsPos[i] ; For futa animations the Futa actors are the priority
+												if futa >= 0
+													Sorted[i] = Positions[futa]
+												elseIf better >= 0
+													Sorted[i] = Positions[better]
+												elseIf alt >= 0
+													Sorted[i] = Positions[alt]
+												elseIf first >= 0
+													Sorted[i] = Positions[first]
+												endIf
 											else
-												first = pos
-											endIf
-										elseIf pos < 1
-											if futa >= 0
-												Sorted[i] = Positions[futa]
-											elseIf better >= 0
-												Sorted[i] = Positions[better]
-											else
-												Sorted[i] = Positions[first]
+												if better >= 0
+													Sorted[i] = Positions[better]
+												elseIf futa >= 0
+													Sorted[i] = Positions[futa]
+												elseIf alt >= 0
+													Sorted[i] = Positions[alt]
+												elseIf first >= 0
+													Sorted[i] = Positions[first]
+												endIf
 											endIf
 										endIf
 									endIf
 								elseIf pos < 1
-									if futa >= 0
-										Sorted[i] = Positions[futa]
-									elseIf better >= 0
-										Sorted[i] = Positions[better]
-									elseIf first >= 0
-										Sorted[i] = Positions[first]
-									endIf
-								endIf
-							elseIf pos < 1
-								if futa >= 0
-									Sorted[i] = Positions[futa]
-								elseIf better >= 0
-									Sorted[i] = Positions[better]
-								elseIf first >= 0
-									Sorted[i] = Positions[first]
-								endIf
-							endIf
-						else
-							if !ActorLib.IsCreature(Positions[pos])
-								if !(Animation.HasTag("Futa") && (Futas[0] + Futas[1]) >= 1) && (Animation.Females < 1 || Genders[1] < 1 || Animation.Males < 1 || Genders[0] < 1 || (Animation.Females == Genders[1] && !(Animation.HasTag("NoSwap") || !Config.RestrictGenderTag || Animation.HasTag("Vaginal") || Animation.HasTag("Pussy") || Animation.HasTag("Cunnilingus"))))
-									Sorted[i] = Positions[pos]
-								else
-									if (Futas[0] + Futas[1]) < 1 && Animation.GetGender(i) == GendersAll[pos]
-										Sorted[i] = Positions[pos]
-									elseIf futa < 0 && GendersAll[pos] == FutasAll[pos]
-										if pos < 1
-											Sorted[i] = Positions[pos]
-										else
-											futa = pos
-										endIf
-									elseIf better < 0 && Animation.GetGender(i) == GendersAll[pos]
-										if pos < 1
-											Sorted[i] = Positions[pos]
-										else
-											better = pos
-										endIf
-									elseIf first < 0
-										if pos < 1
-											Sorted[i] = Positions[pos]
-										else
-											first = pos
-										endIf
-									elseIf pos < 1
+									if Animation.HasTag("Futa") && !AnimStraponsPos[i] ; For futa animations the Futa actors are the priority
 										if futa >= 0
 											Sorted[i] = Positions[futa]
 										elseIf better >= 0
 											Sorted[i] = Positions[better]
-										else
+										elseIf alt >= 0
+											Sorted[i] = Positions[alt]
+										elseIf first >= 0
+											Sorted[i] = Positions[first]
+										endIf
+									else
+										if better >= 0
+											Sorted[i] = Positions[better]
+										elseIf futa >= 0
+											Sorted[i] = Positions[futa]
+										elseIf alt >= 0
+											Sorted[i] = Positions[alt]
+										elseIf first >= 0
 											Sorted[i] = Positions[first]
 										endIf
 									endIf
 								endIf
 							elseIf pos < 1
-								if futa >= 0
-									Sorted[i] = Positions[futa]
-								elseIf better >= 0
-									Sorted[i] = Positions[better]
-								elseIf first >= 0
-									Sorted[i] = Positions[first]
+								if Animation.HasTag("Futa") && !AnimStraponsPos[i] ; For futa animations the Futa actors are the priority
+									if futa >= 0
+										Sorted[i] = Positions[futa]
+									elseIf better >= 0
+										Sorted[i] = Positions[better]
+									elseIf alt >= 0
+										Sorted[i] = Positions[alt]
+									elseIf first >= 0
+										Sorted[i] = Positions[first]
+									endIf
+								else
+									if better >= 0
+										Sorted[i] = Positions[better]
+									elseIf futa >= 0
+										Sorted[i] = Positions[futa]
+									elseIf alt >= 0
+										Sorted[i] = Positions[alt]
+									elseIf first >= 0
+										Sorted[i] = Positions[first]
+									endIf
+								endIf
+							endIf
+						else
+							if !ActorLib.IsCreature(Positions[pos])
+								if HumanFutaCount < 1 && (Animation.Females < 1 || Genders[1] < 1 || Animation.Males < 1 || Genders[0] < 1 || (Animation.Females == Genders[1] && !(!Config.RestrictGenderTag || Animation.HasTag("Straight") || Animation.HasTag("Vaginal") || Animation.HasTag("Pussy") || Animation.HasTag("Cunnilingus"))))
+									Sorted[i] = Positions[pos]
+								else
+									if better < 0 && FutasAll[pos] == -1 && Animation.GetGender(i) == GendersAll[pos]
+										better = pos
+									elseIf futa < 0 && FutasAll[pos] != -1 ;&& (!Animation.HasTag("Futa") || GendersAll[pos] == FutasAll[pos])
+										futa = pos
+									elseIf alt < 0 && Animation.GetGender(i) == GendersAll[pos]
+										alt = pos
+									elseIf first < 0
+										first = pos
+									endIf
+									if pos < 1
+										if Animation.HasTag("Futa") && !AnimStraponsPos[i] ; For futa animations the Futa actors are the priority
+											if futa >= 0
+												Sorted[i] = Positions[futa]
+											elseIf better >= 0
+												Sorted[i] = Positions[better]
+											elseIf alt >= 0
+												Sorted[i] = Positions[alt]
+											elseIf first >= 0
+												Sorted[i] = Positions[first]
+											endIf
+										else
+											if better >= 0
+												Sorted[i] = Positions[better]
+											elseIf futa >= 0
+												Sorted[i] = Positions[futa]
+											elseIf alt >= 0
+												Sorted[i] = Positions[alt]
+											elseIf first >= 0
+												Sorted[i] = Positions[first]
+											endIf
+										endIf
+									endIf
+								endIf
+							elseIf pos < 1
+								if Animation.HasTag("Futa") && !AnimStraponsPos[i] ; For futa animations the Futa actors are the priority
+									if futa >= 0
+										Sorted[i] = Positions[futa]
+									elseIf better >= 0
+										Sorted[i] = Positions[better]
+									elseIf alt >= 0
+										Sorted[i] = Positions[alt]
+									elseIf first >= 0
+										Sorted[i] = Positions[first]
+									endIf
+								else
+									if better >= 0
+										Sorted[i] = Positions[better]
+									elseIf futa >= 0
+										Sorted[i] = Positions[futa]
+									elseIf alt >= 0
+										Sorted[i] = Positions[alt]
+									elseIf first >= 0
+										Sorted[i] = Positions[first]
+									endIf
 								endIf
 							endIf
 						endIf
 					elseIf pos < 1
-						if futa >= 0
-							Sorted[i] = Positions[futa]
-						elseIf better >= 0
-							Sorted[i] = Positions[better]
-						elseIf first >= 0
-							Sorted[i] = Positions[first]
+						if Animation.HasTag("Futa") && !AnimStraponsPos[i] ; For futa animations the Futa actors are the priority
+							if futa >= 0
+								Sorted[i] = Positions[futa]
+							elseIf better >= 0
+								Sorted[i] = Positions[better]
+							elseIf alt >= 0
+								Sorted[i] = Positions[alt]
+							elseIf first >= 0
+								Sorted[i] = Positions[first]
+							endIf
+						else
+							if better >= 0
+								Sorted[i] = Positions[better]
+							elseIf futa >= 0
+								Sorted[i] = Positions[futa]
+							elseIf alt >= 0
+								Sorted[i] = Positions[alt]
+							elseIf first >= 0
+								Sorted[i] = Positions[first]
+							endIf
 						endIf
 					endIf
 				endIf
