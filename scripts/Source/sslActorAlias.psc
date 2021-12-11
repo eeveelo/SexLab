@@ -1065,7 +1065,7 @@ state Animating
 			if IsVictim
 				VictimRef = ActorRef
 			endIf
-			sslActorStats.RecordThread(ActorRef, Gender, BestRelation, StartedAt, Utility.GetCurrentRealTime(), Utility.GetCurrentGameTime(), Thread.HasPlayer, VictimRef, Thread.Genders, Thread.SkillXP)
+			sslActorStats.RecordThread(ActorRef, Gender, BestRelation, StartedAt, RealTime[0], Utility.GetCurrentGameTime(), Thread.HasPlayer, VictimRef, Thread.Genders, Thread.SkillXP)
 			Stats.AddPartners(ActorRef, Thread.Positions, Thread.Victims)
 			if IsType[6]
 				Stats.AdjustSkill(ActorRef, "VaginalCount", 1)

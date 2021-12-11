@@ -205,7 +205,7 @@ function _SeedActor(Actor ActorRef, float RealTime, float GameTime) global nativ
 function SeedActor(Actor ActorRef)
 	if ActorRef && ActorRef != PlayerRef && !IsSkilled(ActorRef)
 		if Config.SeedNPCStats && ActorRef.HasKeyword(ActorTypeNPC)
-			_SeedActor(ActorRef, Utility.GetCurrentRealTime(), Utility.GetCurrentGameTime())
+			_SeedActor(ActorRef, SexLabUtil.GetCurrentGameRealTime(), Utility.GetCurrentGameTime())
 			Log(ActorRef.GetLeveledActorBase().GetName()+" Seeded Stats: "+GetSkills(ActorRef))
 		else
 			EmptyStats(ActorRef)
@@ -397,7 +397,7 @@ endFunction
 function AddSex(Actor ActorRef, float TimeSpent = 0.0, bool WithPlayer = false, bool IsAggressive = false, int Males = 0, int Females = 0, int Creatures = 0)
 	_AdjustSkill(ActorRef, kTimeSpent, TimeSpent)
 	_SetSkill(ActorRef, kLastGameTime, Utility.GetCurrentGameTime())
-	_SetSkill(ActorRef, kLastRealTime, Utility.GetCurrentRealTime())
+	_SetSkill(ActorRef, kLastRealTime, SexLabUtil.GetCurrentGameRealTime())
 
 	int ActorCount = (Males + Females + Creatures)
 	if ActorCount > 1
@@ -647,7 +647,7 @@ endFunction
 float function SecondsSinceLastSexRealTime(Actor ActorRef)
 	float LastSex = LastSexRealTime(ActorRef)
 	if LastSex > 0.0
-		return Utility.GetCurrentRealTime() - LastSex
+		return SexLabUtil.GetCurrentGameRealTime() - LastSex
 	endIf
 	return 0.0
 endFunction
