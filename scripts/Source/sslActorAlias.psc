@@ -18,6 +18,7 @@ bool isRealFemale
 bool IsMale
 bool IsFemale
 bool IsCreature
+bool IsFuta
 bool IsVictim
 bool IsAggressor
 bool IsPlayer
@@ -131,6 +132,7 @@ bool function SetActor(Actor ProspectRef)
 	IsMale     = Gender == 0
 	IsFemale   = Gender == 1
 	IsCreature = Gender >= 2
+	IsFuta     = ActorLib.GetTrans(ActorRef) != -1
 	IsTracked  = Config.ThreadLib.IsActorTracked(ActorRef)
 	IsPlayer   = ActorRef == PlayerRef
 	RaceEditorID = MiscUtil.GetRaceEditorID(BaseRef.GetRace())
@@ -266,6 +268,7 @@ function ClearAlias()
 		IsMale     = Gender == 0
 		IsFemale   = Gender == 1
 		IsCreature = Gender >= 2
+		IsFuta     = ActorLib.GetTrans(ActorRef) != -1
 		if !RaceEditorID || RaceEditorID == ""
 			RaceEditorID = MiscUtil.GetRaceEditorID(BaseRef.GetRace())
 		endIf
@@ -422,7 +425,7 @@ state Ready
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			AttachMarker()
-			if !IsPlayer || Game.GetCameraState() != 10
+			if !IsPlayer || !ActorRef.IsOnMount()
 				ActorRef.QueueNiNodeUpdate()
 			endIf
 		endIf
@@ -450,7 +453,7 @@ state Ready
 		; Extras for non creatures
 		if !IsCreature
 			; Decide on strapon for female, default to worn, otherwise pick random.
-			if IsFemale && Config.UseStrapons
+			if IsFemale && !IsFuta && Config.UseStrapons
 				HadStrapon = Config.WornStrapon(ActorRef)
 				Strapon    = HadStrapon
 				if !HadStrapon
@@ -615,7 +618,7 @@ state Prepare
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			AttachMarker()
-			if !IsPlayer || Game.GetCameraState() != 10
+			if !IsPlayer || !ActorRef.IsOnMount()
 				ActorRef.QueueNiNodeUpdate()
 			endIf
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
@@ -950,7 +953,7 @@ state Animating
 
 		; Check if the animation allow Orgasm. By default all the animations with a CumID>0 are type SEX and allow orgasm 
 		; But the Lesbian Animations usually don't have CumId assigned and still the orgasm should be allowed at least for Females.
-		bool CanOrgasm = Forced || (IsFemale && (Animation.HasTag("Lesbian") || Animation.Females == Animation.PositionCount))
+		bool CanOrgasm = Forced || ((IsFemale || IsFuta) && (Animation.HasTag("Lesbian") || Animation.Females == Animation.PositionCount))
 		int i = Thread.ActorCount
 		while !CanOrgasm && i > 0
 			i -= 1
@@ -974,7 +977,9 @@ state Animating
 				IsCumSource = Animation.GetCumSource(i, Stage) == Position
 			endWhile
 			if !IsCumSource
-				if IsMale && !(Animation.HasTag("Anal") || Animation.HasTag("Vaginal") || Animation.HasTag("Handjob") || Animation.HasTag("Blowjob") || Animation.HasTag("Boobjob") || Animation.HasTag("Footjob") || Animation.HasTag("Penis"))
+				if IsFuta && !(Animation.HasTag("Anal") || Animation.HasTag("Vaginal") || Animation.HasTag("Pussy") || Animation.HasTag("Cunnilingus") || Animation.HasTag("Fisting") || Animation.HasTag("Handjob") || Animation.HasTag("Blowjob") || Animation.HasTag("Boobjob") || Animation.HasTag("Footjob") || Animation.HasTag("Penis"))
+					return
+				elseIf IsMale && !(Animation.HasTag("Anal") || Animation.HasTag("Vaginal") || Animation.HasTag("Handjob") || Animation.HasTag("Blowjob") || Animation.HasTag("Boobjob") || Animation.HasTag("Footjob") || Animation.HasTag("Penis"))
 					return
 				elseIf IsFemale && !(Animation.HasTag("Anal") || Animation.HasTag("Vaginal") || Animation.HasTag("Pussy") || Animation.HasTag("Cunnilingus") || Animation.HasTag("Fisting") || Animation.HasTag("Breast"))
 					return
@@ -1005,7 +1010,7 @@ state Animating
 		endIf
 		; Apply cum to female positions from male position orgasm
 		i = Thread.ActorCount
-		if i > 1 && Config.UseCum && (MalePosition || IsCreature) && (IsMale || IsCreature || (Config.AllowFFCum && IsFemale))
+		if i > 1 && Config.UseCum && (MalePosition || IsCreature) && (IsMale || IsFuta || IsCreature || (Config.AllowFFCum && IsFemale))
 			if i == 2
 				Thread.PositionAlias(IntIfElse(Position == 1, 0, 1)).ApplyCum()
 			else
