@@ -1128,8 +1128,8 @@ function SetDefaults()
 	UseMaleNudeSuit    = false
 	UseFemaleNudeSuit  = false
 	UndressAnimation   = false
-	UseLipSync         = false
-	UseExpressions     = false
+	UseLipSync         = true
+	UseExpressions     = true
 	RefreshExpressions = true
 	ScaleActors        = false
 	UseCum             = true
@@ -1594,6 +1594,9 @@ function ImportSettings()
 	OpenMouthMale      = ImportFloatList("OpenMouthMale", OpenMouthMale, 17)
 	OpenMouthFemale    = ImportFloatList("OpenMouthFemale", OpenMouthFemale, 17)
 
+	; Register creature animations
+	CreatureSlots.RegisterSlots()
+	
 	; Import object registry
 	ImportAnimations()
 	ImportCreatures()
