@@ -1126,6 +1126,7 @@ function AnimationSettings()
 	AddToggleOptionST("RestrictAggressive","$SSL_RestrictAggressive", Config.RestrictAggressive)
 	AddToggleOptionST("RestrictSameSex","$SSL_RestrictSameSex", Config.RestrictSameSex)
 	AddToggleOptionST("RestrictGenderTag","$SSL_RestrictGenderTag", Config.RestrictGenderTag)
+	AddToggleOptionST("ForceSort","$SSL_ForceSort", Config.ForceSort)
 	AddToggleOptionST("UndressAnimation","$SSL_UndressAnimation", Config.UndressAnimation)
 	AddToggleOptionST("RedressVictim","$SSL_VictimsRedress", Config.RedressVictim)
 	AddToggleOptionST("StraponsFemale","$SSL_FemalesUseStrapons", Config.UseStrapons)
@@ -3913,6 +3914,19 @@ state RestrictGenderTag
 	endEvent
 	event OnHighlightST()
 		SetInfoText("$SSL_InfoRestrictGenderTag")
+	endEvent
+endState
+state ForceSort
+	event OnSelectST()
+		Config.ForceSort = !Config.ForceSort
+		SetToggleOptionValueST(Config.ForceSort)
+	endEvent
+	event OnDefaultST()
+		Config.ForceSort = false
+		SetToggleOptionValueST(Config.ForceSort)
+	endEvent
+	event OnHighlightST()
+		SetInfoText("$SSL_InfoForceSort")
 	endEvent
 endState
 state UndressAnimation

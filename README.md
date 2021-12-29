@@ -41,6 +41,7 @@ GitHub:
 * Fix issues with the "Play Animation" option of the "Animation Editor" page.
 * Fix issue with the detection of the Node Scales for the Humanoid Skeleton files.
 * Fix issue with the version update process.
+* Added "Forcibly Sort Positions" MCM option to force actor gender position sorting at the start of animation.
 
 BETA 9:
 * Increase the max animations count to 1000.

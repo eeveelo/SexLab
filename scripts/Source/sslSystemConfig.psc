@@ -195,6 +195,7 @@ bool property DisableTeleport auto hidden
 bool property SeedNPCStats auto hidden
 bool property DisableScale auto hidden
 bool property FixVictimPos auto hidden
+bool property ForceSort auto hidden
 
 ; Integers
 int property AnimProfile auto hidden
@@ -1154,6 +1155,7 @@ function SetDefaults()
 	DisableScale       = true ; TMP: enabled by default for testing
 	FixVictimPos       = false
 	LipsFixedValue     = true
+	ForceSort          = false
 
 	; Integers
 	AnimProfile        = 1
@@ -1394,6 +1396,7 @@ function ExportSettings()
 	ExportBool("DisableScale", DisableScale)
 	ExportBool("FixVictimPos", FixVictimPos)
 	ExportBool("LipsFixedValue", LipsFixedValue)
+	ExportBool("ForceSort", ForceSort)
 
 	; Integers
 	ExportInt("AnimProfile", AnimProfile)
@@ -1536,6 +1539,7 @@ function ImportSettings()
 	DisableScale       = ImportBool("DisableScale", DisableScale)
 	FixVictimPos       = ImportBool("FixVictimPos", FixVictimPos)
 	LipsFixedValue     = ImportBool("LipsFixedValue", LipsFixedValue)
+	ForceSort          = ImportBool("ForceSort", ForceSort)
 
 	; Integers
 	AnimProfile        = ImportInt("AnimProfile", AnimProfile)
