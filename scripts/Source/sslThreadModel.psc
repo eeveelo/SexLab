@@ -569,9 +569,9 @@ state Making
 		endIf
 
 		; Forcibly sort actors if enabled and needed
-		if ActorCount > 1 && Config.ForceSort
-			Positions = ThreadLib.SortActorsByAnimation(Positions, Animations[0])
-		endIf
+		; if ActorCount > 1 && Config.ForceSort
+		; 	Positions = ThreadLib.SortActorsByAnimation(Positions, Animations[0])
+		; endIf
 	
 		; ------------------------- ;
 		; --  Start Controller   -- ;
