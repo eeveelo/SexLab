@@ -28,6 +28,29 @@ endFunction
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	SexLab.QuickStart(CasterRef, TargetRef)
 
+
+	; Form UmbraBossQuest = Game.GetFormFromFile(0xBFC, "ccbgssse016-umbra.esm")
+	; Log("UmbraBossQuest: "+UmbraBossQuest)
+	; Form Lurker = Game.GetFormFromFile(0x817, "ccpewsse002-armsofchaos.esl")
+	; Log("Lurker: "+Lurker)
+
+	; StorageUtil.SetFormValue(UmbraBossQuest, "test1", Lurker)
+	; Log("Test 1: "+StorageUtil.GetFormValue(UmbraBossQuest, "test1"))
+
+	; StorageUtil.SetFormValue(Lurker, "test2", UmbraBossQuest)
+	; Log("Test 2: "+StorageUtil.GetFormValue(Lurker, "test2"))
+
+	; StorageUtil.FormListAdd(None, "test3", UmbraBossQuest, false)
+	; StorageUtil.FormListAdd(None, "test3", Lurker, false)
+	; StorageUtil.FormListAdd(None, "test3", SexLab, false)
+	; StorageUtil.FormListAdd(None, "test3", TargetRef, false)
+	; StorageUtil.FormListAdd(None, "test3", none, false)
+	; form[] listtest = StorageUtil.FormListToArray(None, "test3")
+	; Log("Test 3: "+listtest)
+
+	; int cleaned = StorageUtil.debug_Cleanup()
+	; Log("Cleaned: "+cleaned)
+
 	; MiscUtil.ToggleFreeCamera()
 
 	; Log("Result: "+TestList2)
