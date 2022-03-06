@@ -1248,6 +1248,7 @@ function SendDefaultAnimEvent(bool Exit = False)
 	Debug.SendAnimationEvent(ActorRef, "AnimObjectUnequip")
 	if !IsCreature
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
+		Utility.Wait(0.1)
 	elseIf ActorRaceKey != ""
 		if ActorRaceKey == "Dragons"
 			Debug.SendAnimationEvent(ActorRef, "FlyStopDefault") ; for Dragons only
@@ -1255,40 +1256,42 @@ function SendDefaultAnimEvent(bool Exit = False)
 			Debug.SendAnimationEvent(ActorRef, "Reset") ; for Dragons only
 		elseIf ActorRaceKey == "Hagravens"
 			Debug.SendAnimationEvent(ActorRef, "ReturnToDefault") ; for Dragons only
+			Utility.Wait(0.1)
 			if Exit
-				Utility.Wait(0.1)
 				Debug.SendAnimationEvent(ActorRef, "Reset") ; for Dragons only
 			endIf
 		elseIf ActorRaceKey == "Chaurus" || ActorRaceKey == "ChaurusReapers"
 			Debug.SendAnimationEvent(ActorRef, "FNISDefault") ; for dwarvenspider and chaurus without time bettwen.
+			Utility.Wait(0.1)
 			if Exit
-		;		Utility.Wait(0.1)
 		;		Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
 			endIf
 		elseIf ActorRaceKey == "DwarvenSpiders"
 			Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
+			Utility.Wait(0.1)
 			if Exit
-		;		Utility.Wait(0.1)
 		;		Debug.SendAnimationEvent(ActorRef, "FNISDefault") ; for dwarvenspider and chaurus
 			endIf
 		elseIf ActorRaceKey == "Draugrs" || ActorRaceKey == "Seekers" || ActorRaceKey == "DwarvenBallistas" || ActorRaceKey == "DwarvenSpheres" || ActorRaceKey == "DwarvenCenturions"
 			Debug.SendAnimationEvent(ActorRef, "ForceFurnExit") ; for draugr, trolls daedras and all dwarven exept spiders
 		elseIf ActorRaceKey == "Trolls"
 			Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
+			Utility.Wait(0.1)
 			if Exit
-				Utility.Wait(0.1)
 				Debug.SendAnimationEvent(ActorRef, "ForceFurnExit") ; the troll need this afther "ReturnToDefault" to allow the attack idles
 			endIf
 		elseIf ActorRaceKey == "Chickens" || ActorRaceKey == "Rabbits" || ActorRaceKey == "Slaughterfishes"
 			Debug.SendAnimationEvent(ActorRef, "ReturnDefaultState") ; for chicken, hare and slaughterfish
+			Utility.Wait(0.1)
 			if Exit
-				Utility.Wait(0.1)
 				Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
 			endIf
 		elseIf ActorRaceKey == "Werewolves" || ActorRaceKey == "VampireLords"
 			Debug.SendAnimationEvent(ActorRef, "IdleReturnToDefault") ; for Werewolves and VampirwLords
+			Utility.Wait(0.1)
 		else
 			Debug.SendAnimationEvent(ActorRef, "ReturnToDefault") ; the rest creature-animal
+			Utility.Wait(0.1)
 		endIf
 	elseIf Exit
 		Debug.SendAnimationEvent(ActorRef, "ReturnDefaultState") ; for chicken, hare and slaughterfish before the "ReturnToDefault"
@@ -1297,6 +1300,7 @@ function SendDefaultAnimEvent(bool Exit = False)
 		Debug.SendAnimationEvent(ActorRef, "IdleReturnToDefault") ; for Werewolves and VampirwLords
 		Debug.SendAnimationEvent(ActorRef, "ForceFurnExit") ; for Trolls afther the "ReturnToDefault" and draugr, daedras and all dwarven exept spiders
 		Debug.SendAnimationEvent(ActorRef, "Reset") ; for Hagravens afther the "ReturnToDefault" and Dragons
+		Utility.Wait(0.1)
 	endIf
 	Utility.Wait(0.2)
 endFunction

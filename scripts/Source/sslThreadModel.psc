@@ -1843,7 +1843,7 @@ function SyncEventDone(int id)
 	endWhile
 	SyncLock = true
 	float TimeNow = Utility.GetCurrentRealTime()
-	if AliasTimer[id] != 0.0 || AliasTimer[id] < TimeNow
+	if AliasTimer[id] > 0.0 && AliasDone[id] < ActorCount ; || AliasTimer[id] < TimeNow
 		AliasDone[id] = AliasDone[id] + 1
 		if AliasDone[id] >= ActorCount
 			UnregisterforUpdate()
