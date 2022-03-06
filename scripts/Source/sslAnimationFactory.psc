@@ -237,6 +237,12 @@ sslBaseAnimation function RegisterJSON(string Filename)
 			Slot.SetStageTimer(t, Timers[t])
 		endWhile
 	endIf
+	
+	; Set animation offsets, if any
+	float[] BedOffset = JsonUtil.PathFloatElements(Filename, ".bedoffset")
+	if BedOffset && BedOffset.Length == 4
+		Slot.SetBedOffsets(BedOffset[0], BedOffset[1], BedOffset[2], BedOffset[3])
+	endIf
 
 	Slot.Save(id)
 
