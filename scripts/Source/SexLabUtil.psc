@@ -171,6 +171,8 @@ int function IntMinMaxIndex(int[] searchArray, bool findHighestValue = true) glo
 float function FloatMinMaxValue(float[] searchArray, bool findHighestValue = true) global native
 int function FloatMinMaxIndex(float[] searchArray, bool findHighestValue = true) global native
 
+float function GetCurrentGameRealTime() global native
+
 float function GetCurrentGameTimeHours() global
 	return Utility.GetCurrentGameTime() * 24.0
 endFunction
@@ -181,20 +183,6 @@ endFunction
 
 float function GetCurrentGameTimeSeconds() global
 	return Utility.GetCurrentGameTime() * 86400.0
-endFunction
-
-float function GetCurrentGameRealTime() global
-	Form TimeScale = Game.GetFormFromFile(0x3A, "Skyrim.esm")
-	float fTimeScale = 1
-	if TimeScale && TimeScale != none
-		fTimeScale = (TimeScale as GlobalVariable).GetValue()
-		if fTimeScale < 1
-			return Utility.GetCurrentRealTime()
-		endIf
-	else
-		fTimeScale = 20.0 ; Skyrim default TimeScale
-	endIf
-	return (Utility.GetCurrentGameTime() / fTimeScale) * 86400.0
 endFunction
 
 function Wait(float seconds) global
