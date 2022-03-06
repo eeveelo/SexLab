@@ -273,7 +273,9 @@ function CleanActorStorage()
 	else
 		Log("Done - "+Count, "CleanActorStorage")
 	endIf
-	debug_Cleanup()
+	if Config.DebugMode
+		debug_Cleanup()
+	endIf
 endFunction
 
 function ClearFromActorStorage(Form FormRef)
