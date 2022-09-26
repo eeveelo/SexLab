@@ -819,16 +819,16 @@ bool function CheckSystemPart(string CheckSystem)
 		return (StringUtil.SubString(Debug.GetVersionNumber(), 0, 3) as float) >= 1.6
 
 	elseIf CheckSystem == "SKSE"
-		return SKSE.GetScriptVersionRelease() >= 66
+		return SKSE.GetScriptVersionRelease() >= 69
 
 	elseIf CheckSystem == "SkyUI"
 		return Quest.GetQuest("SKI_ConfigManagerInstance") != none
 
 	elseIf CheckSystem == "SexLabUtil"
-		return SexLabUtil.GetPluginVersion() >= 16403
+		return SexLabUtil.GetPluginVersion() >= 16500
 
 	elseIf CheckSystem == "PapyrusUtil"
-		return PapyrusUtil.GetVersion() >= 41
+		return PapyrusUtil.GetVersion() >= 44
 
 	elseIf CheckSystem == "NiOverride"
 		return SKSE.GetPluginVersion("SKEE64") >= 7 || NiOverride.GetScriptVersion() >= 7 ;SSE
