@@ -34,6 +34,10 @@ After the installation be completed is recommended save the game before try anyt
 # Change Log
 
 GitHub:
+* -
+
+Official 1.65 released for AE:
+* SKSE 2.2.2 compatibility.
 * Fix issues with Futa actors and enhance the Futa compatibility. Between other things prevent equip strapons on futa actors.
 * Allow edit some of the actor stats while SexLab is in Debug Mode. Is very basic and don't allow 0 values for tech reasons but is probably better this way.
 * Fix the problem with the "TimeSpent" stats becoming negative after sex.
