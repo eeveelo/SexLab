@@ -387,6 +387,19 @@ float[] function FloatListToArray(Form ObjKey, string KeyName) global native
 string[] function StringListToArray(Form ObjKey, string KeyName) global native
 Form[] function FormListToArray(Form ObjKey, string KeyName) global native
 
+
+;/ Outputs a randomly selected value from the given list's elements using mt19937.
+
+   Returns the random elements value. If list is empty or doesn't exist, returns default null value.
+
+   ObjKey: form to find value on. Set none to find global list value.
+   KeyName: name of list.
+/;
+int function IntListRandom(Form ObjKey, string KeyName) global native
+float function FloatListRandom(Form ObjKey, string KeyName) global native
+string function StringListRandom(Form ObjKey, string KeyName) global native
+Form function FormListRandom(Form ObjKey, string KeyName) global native
+
 ;/ Returns array of forms from list that have (or optionally don't have) the specified form types.
    For valid list of form types, see FormType.psc or http://www.creationkit.com/GetType_-_Form
 
