@@ -524,7 +524,10 @@ endFunction
 
 int function GetTrans(Actor ActorRef)
 	if ActorRef && ActorRef != none && ActorRef.IsInFaction(Config.GenderFaction)
-		if sslCreatureAnimationSlots.HasRaceType(ActorRef.GetLeveledActorBase().GetRace())
+		ActorBase BaseRef = ActorRef.GetLeveledActorBase()
+		if !BaseRef || ActorRef.GetFactionRank(GenderFaction) == BaseRef.GetSex()
+			return -1
+		elseIf sslCreatureAnimationSlots.HasRaceType(BaseRef.GetRace())
 			return 2 + ActorRef.GetFactionRank(Config.GenderFaction)
 		else
 			return ActorRef.GetFactionRank(Config.GenderFaction)

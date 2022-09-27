@@ -147,6 +147,7 @@ event UpdateSystem(int OldVersion, int NewVersion)
 			
 		elseIf OldVersion >= 16200 && OldVersion < 16209
 			; Some system setup for < 1.63 SE dev beta 9
+			ExpressionSlots.GoToState("") ; Fix Loock state issue 
 			bool AllowCreatures = Config.AllowCreatures
 			Config.Setup()
 			Config.AllowCreatures = AllowCreatures
@@ -157,6 +158,7 @@ event UpdateSystem(int OldVersion, int NewVersion)
 			if OldVersion == 16000
 				PreloadDone = true
 			endIf
+			ExpressionSlots.GoToState("") ; Fix Loock state issue 
 			SexLab.Setup()
 			Config.Setup()
 			AnimSlots.Setup()
@@ -271,7 +273,9 @@ function CleanActorStorage()
 	else
 		Log("Done - "+Count, "CleanActorStorage")
 	endIf
-	debug_Cleanup()
+	if Config.DebugMode
+		debug_Cleanup()
+	endIf
 endFunction
 
 function ClearFromActorStorage(Form FormRef)

@@ -18,6 +18,7 @@ bool isRealFemale
 bool IsMale
 bool IsFemale
 bool IsCreature
+bool IsFuta
 bool IsVictim
 bool IsAggressor
 bool IsPlayer
@@ -131,6 +132,7 @@ bool function SetActor(Actor ProspectRef)
 	IsMale     = Gender == 0
 	IsFemale   = Gender == 1
 	IsCreature = Gender >= 2
+	IsFuta     = ActorLib.GetTrans(ActorRef) != -1
 	IsTracked  = Config.ThreadLib.IsActorTracked(ActorRef)
 	IsPlayer   = ActorRef == PlayerRef
 	RaceEditorID = MiscUtil.GetRaceEditorID(BaseRef.GetRace())
@@ -266,6 +268,7 @@ function ClearAlias()
 		IsMale     = Gender == 0
 		IsFemale   = Gender == 1
 		IsCreature = Gender >= 2
+		IsFuta     = ActorLib.GetTrans(ActorRef) != -1
 		if !RaceEditorID || RaceEditorID == ""
 			RaceEditorID = MiscUtil.GetRaceEditorID(BaseRef.GetRace())
 		endIf
@@ -422,7 +425,7 @@ state Ready
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			AttachMarker()
-			if !IsPlayer || Game.GetCameraState() != 10
+			if !IsPlayer || !ActorRef.IsOnMount()
 				ActorRef.QueueNiNodeUpdate()
 			endIf
 		endIf
@@ -450,7 +453,7 @@ state Ready
 		; Extras for non creatures
 		if !IsCreature
 			; Decide on strapon for female, default to worn, otherwise pick random.
-			if IsFemale && Config.UseStrapons
+			if IsFemale && !IsFuta && Config.UseStrapons
 				HadStrapon = Config.WornStrapon(ActorRef)
 				Strapon    = HadStrapon
 				if !HadStrapon
@@ -615,7 +618,7 @@ state Prepare
 			ActorRef.SetPosition(Loc[0], Loc[1], Loc[2])
 			ActorRef.SetAngle(Loc[3], Loc[4], Loc[5])
 			AttachMarker()
-			if !IsPlayer || Game.GetCameraState() != 10
+			if !IsPlayer || !ActorRef.IsOnMount()
 				ActorRef.QueueNiNodeUpdate()
 			endIf
 			Debug.SendAnimationEvent(ActorRef, "SOSFastErect")
@@ -950,7 +953,7 @@ state Animating
 
 		; Check if the animation allow Orgasm. By default all the animations with a CumID>0 are type SEX and allow orgasm 
 		; But the Lesbian Animations usually don't have CumId assigned and still the orgasm should be allowed at least for Females.
-		bool CanOrgasm = Forced || (IsFemale && (Animation.HasTag("Lesbian") || Animation.Females == Animation.PositionCount))
+		bool CanOrgasm = Forced || ((IsFemale || IsFuta) && (Animation.HasTag("Lesbian") || Animation.Females == Animation.PositionCount))
 		int i = Thread.ActorCount
 		while !CanOrgasm && i > 0
 			i -= 1
@@ -974,7 +977,9 @@ state Animating
 				IsCumSource = Animation.GetCumSource(i, Stage) == Position
 			endWhile
 			if !IsCumSource
-				if IsMale && !(Animation.HasTag("Anal") || Animation.HasTag("Vaginal") || Animation.HasTag("Handjob") || Animation.HasTag("Blowjob") || Animation.HasTag("Boobjob") || Animation.HasTag("Footjob") || Animation.HasTag("Penis"))
+				if IsFuta && !(Animation.HasTag("Anal") || Animation.HasTag("Vaginal") || Animation.HasTag("Pussy") || Animation.HasTag("Cunnilingus") || Animation.HasTag("Fisting") || Animation.HasTag("Handjob") || Animation.HasTag("Blowjob") || Animation.HasTag("Boobjob") || Animation.HasTag("Footjob") || Animation.HasTag("Penis"))
+					return
+				elseIf IsMale && !(Animation.HasTag("Anal") || Animation.HasTag("Vaginal") || Animation.HasTag("Handjob") || Animation.HasTag("Blowjob") || Animation.HasTag("Boobjob") || Animation.HasTag("Footjob") || Animation.HasTag("Penis"))
 					return
 				elseIf IsFemale && !(Animation.HasTag("Anal") || Animation.HasTag("Vaginal") || Animation.HasTag("Pussy") || Animation.HasTag("Cunnilingus") || Animation.HasTag("Fisting") || Animation.HasTag("Breast"))
 					return
@@ -1005,7 +1010,7 @@ state Animating
 		endIf
 		; Apply cum to female positions from male position orgasm
 		i = Thread.ActorCount
-		if i > 1 && Config.UseCum && (MalePosition || IsCreature) && (IsMale || IsCreature || (Config.AllowFFCum && IsFemale))
+		if i > 1 && Config.UseCum && (MalePosition || IsCreature) && (IsMale || IsFuta || IsCreature || (Config.AllowFFCum && IsFemale))
 			if i == 2
 				Thread.PositionAlias(IntIfElse(Position == 1, 0, 1)).ApplyCum()
 			else
@@ -1060,7 +1065,7 @@ state Animating
 			if IsVictim
 				VictimRef = ActorRef
 			endIf
-			sslActorStats.RecordThread(ActorRef, Gender, BestRelation, StartedAt, Utility.GetCurrentRealTime(), Utility.GetCurrentGameTime(), Thread.HasPlayer, VictimRef, Thread.Genders, Thread.SkillXP)
+			sslActorStats.RecordThread(ActorRef, Gender, BestRelation, StartedAt, RealTime[0], Utility.GetCurrentGameTime(), Thread.HasPlayer, VictimRef, Thread.Genders, Thread.SkillXP)
 			Stats.AddPartners(ActorRef, Thread.Positions, Thread.Victims)
 			if IsType[6]
 				Stats.AdjustSkill(ActorRef, "VaginalCount", 1)
@@ -1243,6 +1248,7 @@ function SendDefaultAnimEvent(bool Exit = False)
 	Debug.SendAnimationEvent(ActorRef, "AnimObjectUnequip")
 	if !IsCreature
 		Debug.SendAnimationEvent(ActorRef, "IdleForceDefaultState")
+		Utility.Wait(0.1)
 	elseIf ActorRaceKey != ""
 		if ActorRaceKey == "Dragons"
 			Debug.SendAnimationEvent(ActorRef, "FlyStopDefault") ; for Dragons only
@@ -1250,40 +1256,42 @@ function SendDefaultAnimEvent(bool Exit = False)
 			Debug.SendAnimationEvent(ActorRef, "Reset") ; for Dragons only
 		elseIf ActorRaceKey == "Hagravens"
 			Debug.SendAnimationEvent(ActorRef, "ReturnToDefault") ; for Dragons only
+			Utility.Wait(0.1)
 			if Exit
-				Utility.Wait(0.1)
 				Debug.SendAnimationEvent(ActorRef, "Reset") ; for Dragons only
 			endIf
 		elseIf ActorRaceKey == "Chaurus" || ActorRaceKey == "ChaurusReapers"
 			Debug.SendAnimationEvent(ActorRef, "FNISDefault") ; for dwarvenspider and chaurus without time bettwen.
+			Utility.Wait(0.1)
 			if Exit
-		;		Utility.Wait(0.1)
 		;		Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
 			endIf
 		elseIf ActorRaceKey == "DwarvenSpiders"
 			Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
+			Utility.Wait(0.1)
 			if Exit
-		;		Utility.Wait(0.1)
 		;		Debug.SendAnimationEvent(ActorRef, "FNISDefault") ; for dwarvenspider and chaurus
 			endIf
 		elseIf ActorRaceKey == "Draugrs" || ActorRaceKey == "Seekers" || ActorRaceKey == "DwarvenBallistas" || ActorRaceKey == "DwarvenSpheres" || ActorRaceKey == "DwarvenCenturions"
 			Debug.SendAnimationEvent(ActorRef, "ForceFurnExit") ; for draugr, trolls daedras and all dwarven exept spiders
 		elseIf ActorRaceKey == "Trolls"
 			Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
+			Utility.Wait(0.1)
 			if Exit
-				Utility.Wait(0.1)
 				Debug.SendAnimationEvent(ActorRef, "ForceFurnExit") ; the troll need this afther "ReturnToDefault" to allow the attack idles
 			endIf
 		elseIf ActorRaceKey == "Chickens" || ActorRaceKey == "Rabbits" || ActorRaceKey == "Slaughterfishes"
 			Debug.SendAnimationEvent(ActorRef, "ReturnDefaultState") ; for chicken, hare and slaughterfish
+			Utility.Wait(0.1)
 			if Exit
-				Utility.Wait(0.1)
 				Debug.SendAnimationEvent(ActorRef, "ReturnToDefault")
 			endIf
 		elseIf ActorRaceKey == "Werewolves" || ActorRaceKey == "VampireLords"
 			Debug.SendAnimationEvent(ActorRef, "IdleReturnToDefault") ; for Werewolves and VampirwLords
+			Utility.Wait(0.1)
 		else
 			Debug.SendAnimationEvent(ActorRef, "ReturnToDefault") ; the rest creature-animal
+			Utility.Wait(0.1)
 		endIf
 	elseIf Exit
 		Debug.SendAnimationEvent(ActorRef, "ReturnDefaultState") ; for chicken, hare and slaughterfish before the "ReturnToDefault"
@@ -1292,6 +1300,7 @@ function SendDefaultAnimEvent(bool Exit = False)
 		Debug.SendAnimationEvent(ActorRef, "IdleReturnToDefault") ; for Werewolves and VampirwLords
 		Debug.SendAnimationEvent(ActorRef, "ForceFurnExit") ; for Trolls afther the "ReturnToDefault" and draugr, daedras and all dwarven exept spiders
 		Debug.SendAnimationEvent(ActorRef, "Reset") ; for Hagravens afther the "ReturnToDefault" and Dragons
+		Utility.Wait(0.1)
 	endIf
 	Utility.Wait(0.2)
 endFunction

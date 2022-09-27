@@ -34,10 +34,29 @@ After the installation be completed is recommended save the game before try anyt
 # Change Log
 
 GitHub:
+* Fix issues with Futa actors and enhance the Futa compatibility. Between other things prevent equip strapons on futa actors.
+* Allow edit some of the actor stats while SexLab is in Debug Mode. Is very basic and don't allow 0 values for tech reasons but is probably better this way.
+* Fix the problem with the "TimeSpent" stats becoming negative after sex.
+* Fix the problem with the Creature Animations don't bein automatically registered after import the configuration with the creatures allowed.
+* Fix some errors on the SexLab MCM and add new enhancements.
+
+Official 1.64b released for AE:
+* Converted SexLabUtil.dll and PapyrusUtil.dll to use the "Address Library for SKSE Plugins" as hard dependency, to avoid future uptates for SKSE version updates. You can find the "Address Library for SKSE Plugins" here: https://www.nexusmods.com/skyrimspecialedition/mods/32444
+
+Official 1.64 released for AE:
+* Updated SexLabUtil.dll and PapyrusUtil.dll to the new version of SKSE  (2.1.2)
+	* Skyrim AE, version 1.6.318  only
+
+Official 1.63 released for SE:
 * Fix issue with the Tag list of the "Filter By Tag" option in the "Toggle Animation" page taking too long to respound afther close the SexLab MCM and open it again. Still take hapend but now is only when the animations tags are changed or the "Clean Animation CACHE" option is used.
 * Include AdjustEnjoytmen function to allow the mod authors change the value of the actor enjoyment
 * Add Advanced Configuration for the Lips Sync together with the OpenMouth Advanced Configuration on the MCM.
 * Replace the file "SexlabOffsets.json" by the "SexlabOffsetsDefault.json" on the Setup to prevent override the "SexlabOffsets.json" edited by the user. And update the scripts to process both files. Now I can keep updating the Default Animation Offsets without interfere with the user adjustment.
+* Add few new Extended functions for mod authors that want more control over the moaning effects.
+* Fix compatibility issues with the deprecated Moan function. Now the Moan function will use the values of the version 1.62 again because some of the Mods using that function are made with those values in main.
+* Fix issue with the real time and the menu mode. 
+	* Add the new SexLabUtil.GetCurrentGameRealTime() function based on the Utility.GetCurrentGameTime() function to replace the use of the Utility.GetCurrentRealTime() function.
+* Fix problem that make impossible reset the expression registry without a full Clean System. (still need one more "Clean System" or a version update before be fully fixed)
 * Fix issues with the "Play Animation" option of the "Animation Editor" page.
 * Fix issue with the detection of the Node Scales for the Humanoid Skeleton files.
 * Fix issue with the version update process.

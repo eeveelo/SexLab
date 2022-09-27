@@ -1338,6 +1338,7 @@ function ExportJSON()
 	; if IsCreature
 	; 	JsonUtil.SetPathStringArray(Filename, ".racetypes", Utility.ResizeStringArray(RaceTypes, PositionCount))
 	; endIf
+	JsonUtil.SetPathFloatArray(Filename, ".bedoffset", GetBedOffsets())
 
 	int Position
 	while Position < PositionCount

@@ -1138,10 +1138,11 @@ int function FilterAnimations()
 		string[] BedFilters
 		sslBaseAnimation[] FilteredPrimary
 		sslBaseAnimation[] FilteredLead
+		int[] Futas = ActorLib.TransCount(Positions)
 		int i
 
 		; Filter tags for Male Vaginal restrictions
-		if (!Config.UseCreatureGender && ActorCount == Males) || (Config.UseCreatureGender && ActorCount == (Males + MaleCreatures))
+		if (Futas[0] + Futas[1]) < 1 && ((!Config.UseCreatureGender && ActorCount == Males) || (Config.UseCreatureGender && ActorCount == (Males + MaleCreatures)))
 			BasicFilters = AddString(BasicFilters, "Vaginal")
 		elseIf (HasTag("Vaginal") || HasTag("Pussy") || HasTag("Cunnilingus"))
 			if FemaleCreatures <= 0
@@ -1150,10 +1151,10 @@ int function FilterAnimations()
 		endIf
 
 		if IsAggressive && Config.FixVictimPos
-			if VictimRef == Positions[0] && ActorLib.GetGender(VictimRef) == 0
+			if VictimRef == Positions[0] && ActorLib.GetGender(VictimRef) == 0 && ActorLib.GetTrans(VictimRef) == -1
 				BasicFilters = AddString(BasicFilters, "Vaginal")
 			endIf
-			if Males > 0 && ActorLib.GetGender(VictimRef) == 1
+			if Males > 0 && ActorLib.GetGender(VictimRef) == 1 && ActorLib.GetTrans(VictimRef) == -1
 				Filters = AddString(Filters, "FemDom")
 			elseIf Creatures > 0 && !ActorLib.IsCreature(VictimRef) && Males <= 0 && (!Config.UseCreatureGender || (Males + MaleCreatures) <= 0)
 				Filters = AddString(Filters, "CreatureSub")
@@ -1244,7 +1245,6 @@ int function FilterAnimations()
 			string DefGenderTag = ""
 			i = ActorCount
 			int[] GendersAll = ActorLib.GetGendersAll(Positions)
-			int[] Futas = ActorLib.TransCount(Positions)
 			int[] FutasAll = ActorLib.GetTransAll(Positions)
 			while i ;Make Position Gender Tag
 				i -= 1
@@ -1848,7 +1848,7 @@ function SyncEventDone(int id)
 	endWhile
 	SyncLock = true
 	float TimeNow = Utility.GetCurrentRealTime()
-	if AliasTimer[id] != 0.0 || AliasTimer[id] < TimeNow
+	if AliasTimer[id] > 0.0 && AliasDone[id] < ActorCount ; || AliasTimer[id] < TimeNow
 		AliasDone[id] = AliasDone[id] + 1
 		if AliasDone[id] >= ActorCount
 			UnregisterforUpdate()
