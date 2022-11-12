@@ -1470,7 +1470,7 @@ function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 				Else
 					BedOffsets[2] = BedOffsets[2] * scale
 				EndIf
-				BedOffsets[3] = BedOffsets[3]
+				; BedOffsets[3] = BedOffsets[3]
 				Log("Scaled Bed Offset[Forward:"+BedOffsets[0]+",Sideward:"+BedOffsets[1]+",Upward:"+BedOffsets[2]+",Rotation:"+BedOffsets[3]+"]")
 			endIf
 			CenterLocation[0] = CenterLocation[0] + ((BedOffsets[0] * Math.sin(CenterLocation[5])) + (BedOffsets[1] * Math.cos(CenterLocation[5])))
