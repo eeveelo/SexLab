@@ -1463,7 +1463,13 @@ function CenterOnObject(ObjectReference CenterOn, bool resync = true)
 			if Scale != 1.0
 				BedOffsets[0] = BedOffsets[0] * Scale ; (((2-Scale)*((Math.ABS(BedOffsets[0])-BedOffsets[0])/(2*Math.ABS(BedOffsets[0]))))+(Scale*((BedOffsets[0]+Math.ABS(BedOffsets[0]))/(2*BedOffsets[0]))))
 				BedOffsets[1] = BedOffsets[1] * Scale ; (((2-Scale)*((Math.ABS(BedOffsets[1])-BedOffsets[1])/(2*Math.ABS(BedOffsets[1]))))+(Scale*((BedOffsets[1]+Math.ABS(BedOffsets[1]))/(2*BedOffsets[1]))))
-				BedOffsets[2] = BedOffsets[2] * (((2-Scale)*((Math.ABS(BedOffsets[2])-BedOffsets[2])/(2*Math.ABS(BedOffsets[2]))))+(Scale*((BedOffsets[2]+Math.ABS(BedOffsets[2]))/(2*BedOffsets[2]))))
+
+				; BedOffsets[2] = BedOffsets[2] * (((2-Scale)*((Math.ABS(BedOffsets[2])-BedOffsets[2])/(2*Math.ABS(BedOffsets[2]))))+(Scale*((BedOffsets[2]+Math.ABS(BedOffsets[2]))/(2*BedOffsets[2]))))
+				If(BedOffsets[2] < 0)
+					BedOffsets[2] = BedOffsets[2] * (2 - scale) ; Assming Scale will always be in [0; 2)
+				Else
+					BedOffsets[2] = BedOffsets[2] * scale
+				EndIf
 				BedOffsets[3] = BedOffsets[3]
 				Log("Scaled Bed Offset[Forward:"+BedOffsets[0]+",Sideward:"+BedOffsets[1]+",Upward:"+BedOffsets[2]+",Rotation:"+BedOffsets[3]+"]")
 			endIf
