@@ -231,25 +231,25 @@ Actor[] function FindAnimationPartners(sslBaseAnimation Animation, ObjectReferen
 	return PapyrusUtil.RemoveActor(Positions, none)
 endFunction
 
-Actor[] Function SortActors(Actor[] akPositions, bool abFemaleFirst = true)
-	Log("Sort Actors | Original Array = " + akPositions)
-	int[] genders = ActorLib.GetGendersAll(akPositions)
+Actor[] Function SortActors(Actor[] Positions, bool FemaleFirst = true)
+	Log("Sort Actors | Original Array = " + Positions)
+	int[] genders = ActorLib.GetGendersAll(Positions)
 	int i = 0
-	While(i < akPositions.Length)
-		Actor it = akPositions[i]
+	While(i < Positions.Length)
+		Actor it = Positions[i]
 		int _it = genders[i]
 		int n = i - 1
 		While(n && !IsLesserGender(genders[n], _it))
-			akPositions[n + 1] = akPositions[n]
+			Positions[n + 1] = Positions[n]
 			genders[n + 1] = genders[n]
 			n -= 1
 		EndWhile
-		akPositions[n + 1] = it
+		Positions[n + 1] = it
 		genders[n + 1] = _it
 		i += 1
 	EndWhile
-	Log("Sort Actors | Sorted Array = " + akPositions)
-	return akPositions
+	Log("Sort Actors | Sorted Array = " + Positions)
+	return Positions
 EndFunction
 bool Function IsLesserGender(int i, int n)
 	; Male < Female < M.Cr < F.Cr
