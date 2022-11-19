@@ -234,12 +234,12 @@ endFunction
 Actor[] Function SortActors(Actor[] Positions, bool FemaleFirst = true)
 	Log("Sort Actors | Original Array = " + Positions)
 	int[] genders = ActorLib.GetGendersAll(Positions)
-	int i = 0
+	int i = 1
 	While(i < Positions.Length)
 		Actor it = Positions[i]
 		int _it = genders[i]
 		int n = i - 1
-		While(n && !IsLesserGender(genders[n], _it))
+		While(n >= 0 && !IsLesserGender(genders[n], _it))
 			Positions[n + 1] = Positions[n]
 			genders[n + 1] = genders[n]
 			n -= 1
