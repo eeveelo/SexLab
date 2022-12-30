@@ -32,6 +32,7 @@ Actor property PlayerRef auto hidden
 
 ; Thread status
 ; bool[] property Status auto hidden
+bool property SortActors auto hidden
 bool property HasPlayer auto hidden
 bool property AutoAdvance auto hidden
 bool property LeadIn auto hidden
@@ -502,8 +503,8 @@ state Making
 			Log("None of the PrimaryAnimations have 'Anal' or 'Vaginal' tags. Disabling LeadIn")
 			DisableLeadIn(True)
 		endIf
-		
-		
+
+
 		; ------------------------- ;
 		; --    Locate Center    -- ;
 		; ------------------------- ;
@@ -537,32 +538,32 @@ state Making
 				endWhile
 			endIf
 		endIf
-		
+
 		; Center on first actor as last choice
 		if !CenterRef
 			CenterOnObject(Positions[0])
 		endIf
-		
+
 		if HasCreature
 			Log("CreatureRef: "+CreatureRef)
-			if ActorCount != Creatures
+			if SortActors && ActorCount != Creatures
 				Positions = ThreadLib.SortCreatures(Positions)
 			endIf
 		endIf
-		
+
 		if Config.ShowInMap && !HasPlayer && PlayerRef.GetDistance(CenterRef) > 750
 			SetObjectiveDisplayed(0, True)
 		endIf
 
 		; Get default foreplay if none and enabled
-		if Config.ForeplayStage && !NoLeadIn && LeadAnimations.Length == 0 && ActorCount > 1 ; && !IsAggressive 
+		if Config.ForeplayStage && !NoLeadIn && LeadAnimations.Length == 0 && ActorCount > 1 ; && !IsAggressive
 			if !HasCreature
 				SetLeadAnimations(AnimSlots.GetByType(ActorCount, Males, Females, -1, IsAggressive, False))
 			else
 				SetLeadAnimations(CreatureSlots.GetByCreatureActorsTags(ActorCount, Positions, SexLabUtil.StringIfElse(IsAggressive,"Aggressive,LeadIn","LeadIn")))
 			endIf
 		endIf
-		
+
 		; Filter animations based on user settings and scene
 		if FilterAnimations() < 0
 			return none
@@ -572,7 +573,7 @@ state Making
 		; if ActorCount > 1 && Config.ForceSort
 		; 	Positions = ThreadLib.SortActorsByAnimation(Positions, Animations[0])
 		; endIf
-	
+
 		; ------------------------- ;
 		; --  Start Controller   -- ;
 		; ------------------------- ;
@@ -840,7 +841,7 @@ function ChangeActors(Actor[] NewPositions)
 	UnregisterforUpdate()
 	GoToState("Frozen")
 	SendThreadEvent("ActorChangeStart")
-	
+
 	; Remove actors no longer present
 	int i = ActorCount
 	while i > 0
@@ -885,7 +886,7 @@ function ChangeActors(Actor[] NewPositions)
 			endIf
 			aid = Utility.RandomInt(0, (CustomAnimations.Length - 1))
 			Animation = CustomAnimations[aid]
-			if NewCreatures > 0
+			if SortActors && NewCreatures > 0
 				NewPositions = ThreadLib.SortCreatures(NewPositions) ; required even if is already on the SetAnimation fuction but just the general one
 		;	else ; not longer needed since is already on the SetAnimation fuction
 		;		NewPositions = ThreadLib.SortActorsByAnimation(NewPositions, Animation)
@@ -961,7 +962,7 @@ function ChangeActors(Actor[] NewPositions)
 			endIf
 			aid = Utility.RandomInt(0, (PrimaryAnimations.Length - 1))
 			Animation = PrimaryAnimations[aid]
-			if NewCreatures > 0
+			if SortActors && NewCreatures > 0
 				NewPositions = ThreadLib.SortCreatures(NewPositions) ; required even if is already on the SetAnimation fuction but just the general one
 		;	else ; not longer needed since is already on the SetAnimation fuction
 		;		NewPositions = ThreadLib.SortActorsByAnimation(NewPositions, Animation)
@@ -1020,7 +1021,7 @@ function ChangeActors(Actor[] NewPositions)
 			Log("ChangeActors("+NewPositions+") -- Failed to add new actor '"+NewPositions[i].GetLeveledActorBase().GetName()+"' -- They were unable to fill an actor alias", "WARNING")
 		endIf
 	endWhile
-	
+
 	ActorCount = Positions.Length
 	Genders    = NewGenders
 	HasPlayer  = Positions.Find(PlayerRef) != -1
@@ -1160,7 +1161,7 @@ int function FilterAnimations()
 				Filters = AddString(Filters, "CreatureSub")
 			endIf
 		endIf
-		
+
 		; Filter tags for same sex restrictions
 		if ActorCount == 2 && Creatures == 0 && (Males == 0 || Females == 0) && Config.RestrictSameSex
 			BasicFilters = AddString(BasicFilters, SexLabUtil.StringIfElse(Females == 2, "FM", "Breast"))
@@ -1202,14 +1203,14 @@ int function FilterAnimations()
 		Filters = PapyrusUtil.RemoveString(Filters, "")
 		BasicFilters = PapyrusUtil.RemoveString(BasicFilters, "")
 		BedFilters = PapyrusUtil.RemoveString(BedFilters, "")
-		
+
 		; Get default creature animations if none
 		if HasCreature
 			if Config.UseCreatureGender
-				if ActorCount != Creatures 
+				if ActorCount != Creatures
 					PrimaryAnimations = CreatureSlots.FilterCreatureGenders(PrimaryAnimations, Genders[2], Genders[3])
 				else
-					;TODO: Find bether solution instead of Exclude CC animations from filter  
+					;TODO: Find bether solution instead of Exclude CC animations from filter
 				endIf
 			endIf
 			; Pick default creature animations if currently empty (none or failed above check)
@@ -1284,7 +1285,7 @@ int function FilterAnimations()
 				endIf
 				DefGenderTag = ActorLib.GetGenderTag(Females, Males, Creatures)
 				GenderTag = AddString(GenderTag, DefGenderTag)
-				
+
 				DefGenderTag = ActorLib.GetGenderTag(Females + Futas[0] - Futas[1], Males - Futas[0] + Futas[1], Creatures)
 				GenderTag = AddString(GenderTag, DefGenderTag)
 				; Remove filtered gender tags from primary
@@ -1303,7 +1304,7 @@ int function FilterAnimations()
 				endIf
 			endIf
 		endIf
-		
+
 		; Remove filtered tags from primary step by step
 		FilteredPrimary = sslUtility.FilterTaggedAnimations(PrimaryAnimations, BedFilters, false)
 		if FilteredPrimary.Length > 0 && PrimaryAnimations.Length > FilteredPrimary.Length
@@ -1403,7 +1404,7 @@ int function AreUsingFurniture(Actor[] ActorList)
 	if !ActorList || ActorList.Length < 1
 		return -1
 	endIf
-	
+
 	int i = ActorList.Length
 	ObjectReference TempFurnitureRef
 	while i > 0
@@ -2017,7 +2018,7 @@ function SetTID(int id)
 		endIf
 	endIf
 
-	
+
 	; Init thread info
 	EventTypes = new string[5]
 	EventTypes[0] = "Prepare"
@@ -2040,7 +2041,7 @@ function SetTID(int id)
 	ActorAlias[2].Setup()
 	ActorAlias[3].Setup()
 	ActorAlias[4].Setup()
-	
+
 	InitShares()
 	Initialize()
 endFunction
@@ -2090,6 +2091,7 @@ function Initialize()
 	StartingAnimation = none
 	; Boolean
 	AutoAdvance    = true
+	SortActors     = true
 	HasPlayer      = false
 	LeadIn         = false
 	NoLeadIn       = false
