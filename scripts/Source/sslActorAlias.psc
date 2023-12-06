@@ -189,22 +189,9 @@ bool function SetActor(Actor ProspectRef)
 	endIf
 	
 	if Config.HasNiOverride && !IsCreature
-		string[] MOD_OVERRIDE_KEY = NiOverride.GetNodeTransformKeys(ActorRef, False, isRealFemale, "NPC")
-		int idx = 0
-		While idx < MOD_OVERRIDE_KEY.Length
-			if MOD_OVERRIDE_KEY[idx] != "SexLab.esm"
-				TempScale = NiOverride.GetNodeTransformScale(ActorRef, False, isRealFemale, "NPC", MOD_OVERRIDE_KEY[idx])
-				if TempScale > 0
-					NioScale = NioScale * TempScale
-				endIf
-			else ; Remove SexLab Node if present by error
-				if NiOverride.RemoveNodeTransformScale(ActorRef, False, isRealFemale, "NPC", MOD_OVERRIDE_KEY[idx])
-					NiOverride.UpdateNodeTransform(ActorRef, False, isRealFemale, "NPC")
-				endIf
-			endIf
-			idx += 1
-		endWhile
-	;	Log(self, "NioScale("+NioScale+")")
+		if NiOverride.RemoveNodeTransformScale(ActorRef, False, isRealFemale, "NPC", "SexLab.esm")
+			NiOverride.UpdateNodeTransform(ActorRef, False, isRealFemale, "NPC")
+		endIf
 	endIf
 
 	if !Config.ScaleActors
