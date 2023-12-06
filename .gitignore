@@ -1,4 +1,3 @@
-SexLab.esp
 meta.ini
 *.rar
 *.zip
@@ -15,6 +14,7 @@ SKSE/Plugins/SexLabUtil.iobj
 SKSE/Plugins/SexLabUtil.ipdb
 SKSE/Plugins/SexLabUtil.lib
 SKSE/Plugins/SexLabUtil.pdb
-sexlab.code-workspace
+*.code-workspace
 *.ppj
+/.vscode/*
 .vscode

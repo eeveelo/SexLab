@@ -228,7 +228,7 @@ state Animating
 			return ; Nothing to change
 		endIf
 		UnregisterForUpdate()
-		
+
 		if !Config.AdjustStagePressed()
 			; Forward/Backward
 			SetAnimation(sslUtility.IndexTravel(Animations.Find(Animation), Animations.Length, backwards))
@@ -465,12 +465,12 @@ state Animating
 				endIf
 				i += 1
 			endWhile
-			
+
 			CenterAlias.TryToClear()
 			CenterAlias.ForceRefTo(PlayerRef) ; Make them follow me
 
 			UnregisterForUpdate()
-			
+
 			; Lock hotkeys and wait 30 seconds
 			Utility.WaitMenuMode(1.0)
 			RegisterForKey(Hotkeys[kMoveScene])
@@ -728,22 +728,24 @@ function SetAnimation(int aid = -1)
 	; Set active animation
 	Animation = Animations[aid]
 	; Sort actors positions if needed
-	int VictimPos = Positions.Find(VictimRef)
-	if Config.FixVictimPos && IsAggressive && ActorCount > 1 && VictimPos >= 0
-		if Animation.HasTag("FemDom") && VictimPos == 0
-			; Shuffle actor positions
-			Positions[VictimPos] = Positions[1]
-			Positions[1] = VictimRef
-		elseIf !Animation.HasTag("FemDom") && VictimPos != 0
-			; Shuffle actor positions
-			Positions[VictimPos] = Positions[0]
-			Positions[0] = VictimRef
+	if SortActors
+		int VictimPos = Positions.Find(VictimRef)
+		if Config.FixVictimPos && IsAggressive && ActorCount > 1 && VictimPos >= 0
+			if Animation.HasTag("FemDom") && VictimPos == 0
+				; Shuffle actor positions
+				Positions[VictimPos] = Positions[1]
+				Positions[1] = VictimRef
+			elseIf !Animation.HasTag("FemDom") && VictimPos != 0
+				; Shuffle actor positions
+				Positions[VictimPos] = Positions[0]
+				Positions[0] = VictimRef
+			endIf
 		endIf
-	endIf
-	Positions = ThreadLib.SortActorsByAnimation(Positions, Animation)
+		Positions = ThreadLib.SortActorsByAnimation(Positions, Animation)
+	endif
 	UpdateAdjustKey()
 	int i = ActorCount
-	
+
 	; Inform player of animation being played now
 	if HasPlayer
 		string msg = "Playing Animation: " + Animation.Name
