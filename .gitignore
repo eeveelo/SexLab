@@ -17,3 +17,4 @@ SKSE/Plugins/SexLabUtil.pdb
 *.code-workspace
 *.ppj
 /.vscode/*
+.vscode
