@@ -16,3 +16,5 @@ SKSE/Plugins/SexLabUtil.ipdb
 SKSE/Plugins/SexLabUtil.lib
 SKSE/Plugins/SexLabUtil.pdb
 sexlab.code-workspace
+*.ppj
+.vscode
