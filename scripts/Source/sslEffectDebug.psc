@@ -28,7 +28,6 @@ endFunction
 event OnEffectStart(Actor TargetRef, Actor CasterRef)
 	SexLab.QuickStart(CasterRef, TargetRef)
 
-
 	; Form UmbraBossQuest = Game.GetFormFromFile(0xBFC, "ccbgssse016-umbra.esm")
 	; Log("UmbraBossQuest: "+UmbraBossQuest)
 	; Form Lurker = Game.GetFormFromFile(0x817, "ccpewsse002-armsofchaos.esl")
